@@ -445,7 +445,7 @@ namespace DataObjects
       total += (*it)->getMemorySize();
     }
 
-    total += m_run->getMemorySize();
+    total += run().getMemorySize();
 
     total += this->getMemorySizeForXAxes();
 

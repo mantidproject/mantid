@@ -266,6 +266,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h
+	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
 	AlgorithmManagerTest.h
@@ -287,8 +288,9 @@ set ( TEST_FILES
 	FilePropertyTest.h
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
-	FunctionDomainTest.h
-	FunctionFactoryTest.h
+  FunctionAttributeTest.h
+  FunctionDomainTest.h
+  FunctionFactoryTest.h
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
@@ -303,6 +305,7 @@ set ( TEST_FILES
 	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
 	LiveListenerFactoryTest.h
+        LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	MemoryManagerTest.h

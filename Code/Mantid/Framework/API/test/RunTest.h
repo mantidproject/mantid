@@ -8,13 +8,12 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::NexusTestHelper;
 
 // Helper class
 namespace
@@ -54,6 +53,11 @@ namespace
 class RunTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RunTest *createSuite() { return new RunTest(); }
+  static void destroySuite( RunTest *suite ) { delete suite; }
+
   RunTest() : m_test_energy_bins(5)
   {
     m_test_energy_bins[0] = -1.1;

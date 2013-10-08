@@ -61,7 +61,7 @@ LineViewer::LineViewer(QWidget *parent)
   m_plotLayout->addWidget(m_lineOptions, 0);
 
   // To run BinMD in the background
-  m_algoRunner = new AlgorithmRunner();
+  m_algoRunner = new AlgorithmRunner(this);
   QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(lineIntegrationComplete(bool)));
 
   // Make the splitter use the minimum size for the controls and not stretch out

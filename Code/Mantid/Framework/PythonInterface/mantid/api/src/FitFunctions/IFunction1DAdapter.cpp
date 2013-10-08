@@ -50,7 +50,7 @@ namespace Mantid
       // boost::python::objects whn using boost::python::call_method
 
       PyObject *result = PyEval_CallMethod(getSelf(), "function1D", "(O)", xvals);
-      if(PyErr_Occurred()) Environment::translateErrorToException(true);
+      if(PyErr_Occurred()) Environment::throwRuntimeError(true);
 
       PyArrayObject *nparray = (PyArrayObject *)(result);
       if(PyArray_TYPE(nparray) == NPY_DOUBLE) // dtype matches so use memcpy for speed
@@ -99,7 +99,7 @@ namespace Mantid
         // will check for each function call whether the wrapped method exists. It also avoid unnecessary construction of
         // boost::python::objects when using boost::python::call_method
         PyEval_CallMethod(getSelf(), "functionDeriv1D", "(OO)", xvals,jacobian);
-        if(PyErr_Occurred()) Environment::translateErrorToException(true);
+        if(PyErr_Occurred()) Environment::throwRuntimeError(true);
       }
       else
       {

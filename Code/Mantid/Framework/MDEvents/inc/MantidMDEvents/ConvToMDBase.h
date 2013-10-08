@@ -59,7 +59,7 @@ namespace MDEvents
      ConvToMDBase();
  
     ///method which initates all main class variables 
-    virtual size_t initialize(const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper);
+    virtual size_t initialize(const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper, bool IgnoreZeros);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
@@ -94,6 +94,8 @@ namespace MDEvents
    // On multiprocessor machine the algorithm should run and utilizes all cores (see Kernel::Threadpool), 
    // but this can be chenged setting this parameter to 0 (no multithreading) or positive number specifying the requested nymber of threads
    int m_NumThreads;
+   // Flag which indicates that data with 0 signal should be ignored
+   bool m_ignoreZeros;
    /// Any special coordinate system used.
    Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
  private:

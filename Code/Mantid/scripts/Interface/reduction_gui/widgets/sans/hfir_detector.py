@@ -47,7 +47,6 @@ class DetectorWidget(BaseWidget):
             self.set_state(state)
         else:
             m = Detector()
-            if self._settings.api2: m.PYTHON_API=2
             self.set_state(m)
     
     def initialize_content(self):
@@ -180,11 +179,11 @@ class DetectorWidget(BaseWidget):
         popup_warning = ""
         # Beam finder
         if state.x_position is not None and state.y_position is not None:
-            self._content.x_pos_edit.setText(QtCore.QString("%6.4f" % state.x_position))
-            self._content.y_pos_edit.setText(QtCore.QString("%6.4f" % state.y_position))
+            self._content.x_pos_edit.setText(str("%6.4f" % state.x_position))
+            self._content.y_pos_edit.setText(str("%6.4f" % state.y_position))
         self._content.use_beam_finder_checkbox.setChecked(state.use_finder)
-        self._content.beam_data_file_edit.setText(QtCore.QString(state.beam_file))
-        self._content.beam_radius_edit.setText(QtCore.QString(str(state.beam_radius)))
+        self._content.beam_data_file_edit.setText(state.beam_file)
+        self._content.beam_radius_edit.setText(str(state.beam_radius))
         
         if not self._settings.debug and not self._settings.advanced and not state.use_direct_beam:
             # Warn the user if we're about to set an option that is not seen!
@@ -199,13 +198,13 @@ class DetectorWidget(BaseWidget):
         self._use_beam_finder_changed(state.use_finder)
         
         # Sensitivity
-        self._content.sensitivity_file_edit.setText(QtCore.QString(state.sensitivity_data))
+        self._content.sensitivity_file_edit.setText(state.sensitivity_data)
         self._content.sensitivity_chk.setChecked(state.sensitivity_corr)
         self._sensitivity_clicked(state.sensitivity_corr)
-        self._content.min_sensitivity_edit.setText(QtCore.QString(str(state.min_sensitivity)))
-        self._content.max_sensitivity_edit.setText(QtCore.QString(str(state.max_sensitivity)))
+        self._content.min_sensitivity_edit.setText(str(state.min_sensitivity))
+        self._content.max_sensitivity_edit.setText(str(state.max_sensitivity))
         if not self._use_sample_dc:
-            self._content.sensitivity_dark_file_edit.setText(QtCore.QString(state.sensitivity_dark))
+            self._content.sensitivity_dark_file_edit.setText(state.sensitivity_dark)
         
         if not self._settings.debug and not self._settings.advanced and not state.use_sample_beam_center:
             # Warn the user if we're about to set an option that is not seen!
@@ -214,11 +213,11 @@ class DetectorWidget(BaseWidget):
             state.use_sample_beam_center = True
         
         self._content.use_sample_center_checkbox.setChecked(state.use_sample_beam_center)
-        self._content.x_pos_edit_2.setText(QtCore.QString("%6.4f" % state.flood_x_position))
-        self._content.y_pos_edit_2.setText(QtCore.QString("%6.4f" % state.flood_y_position))
+        self._content.x_pos_edit_2.setText(str("%6.4f" % state.flood_x_position))
+        self._content.y_pos_edit_2.setText(str("%6.4f" % state.flood_y_position))
         self._content.use_beam_finder_checkbox_2.setChecked(state.flood_use_finder)
-        self._content.beam_data_file_edit_2.setText(QtCore.QString(state.flood_beam_file))
-        self._content.beam_radius_edit_2.setText(QtCore.QString(str(state.flood_beam_radius)))
+        self._content.beam_data_file_edit_2.setText(state.flood_beam_file)
+        self._content.beam_radius_edit_2.setText(str(state.flood_beam_radius))
         
         self._content.direct_beam_2.setChecked(state.flood_use_direct_beam)
         self._content.scattering_data_2.setChecked(not state.flood_use_direct_beam)
@@ -235,7 +234,6 @@ class DetectorWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = Detector()
-        if self._settings.api2: m.PYTHON_API=2
         
         # Mask
         m.x_position = util._check_and_get_float_line_edit(self._content.x_pos_edit)
@@ -262,7 +260,7 @@ class DetectorWidget(BaseWidget):
         m.flood_beam_file = unicode(self._content.beam_data_file_edit_2.text())
         m.flood_use_direct_beam = self._content.direct_beam_2.isChecked()    
 
-        self._settings.emit_key_value("FLOOD_FIELD", QtCore.QString(str(self._content.sensitivity_file_edit.text())))
+        self._settings.emit_key_value("FLOOD_FIELD", str(self._content.sensitivity_file_edit.text()))
         return m
     
     def _use_sample_center_changed(self, is_checked):

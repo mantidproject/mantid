@@ -4,7 +4,7 @@ This algorithm allows instrument parameters to be specified in a separate file f
 <div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
 <source lang="xml">
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="HRPD" date="blah...">
+<parameter-file instrument="HRPD" valid-from="YYYY-MM-DD HH:MM:SS">
 
 <component-link name="bank_90degnew" >
   <parameter name="test"> <value val="50.0" /> </parameter>

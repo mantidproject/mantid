@@ -31,6 +31,25 @@ WorkspaceGroup::~WorkspaceGroup()
 }
 
 /**
+ * The format is:
+ *   ID
+ *   -- Name1
+ *   -- Name2
+ * @returns A formatted human-readable string specifying the contents of the group
+ */
+const std::string WorkspaceGroup::toString() const
+{
+  std::string descr = this->id() + "\n";
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+  {
+    descr += " -- " + (*it)->name() + "\n";
+  }
+  return descr;
+}
+
+
+/**
  * Turn on/off observing delete and rename notifications to update the group accordingly
  * It can be useful to turn them off when constructing the group.
  * @param observeADS :: If true observe the ADS notifications, otherwise disable them
@@ -111,6 +130,28 @@ bool WorkspaceGroup::contains(const std::string & wsName) const
 }
 
 /**
+ * @param workspace A pointer to a workspace
+ * @returns True if the workspace exists in the group, false otherwise
+ */
+bool WorkspaceGroup::contains(const Workspace_sptr & workspace) const
+{
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  auto iend = m_workspaces.end();
+  auto it = std::find(m_workspaces.begin(),iend, workspace);
+  return (it != iend);
+}
+
+/**
+ * Adds the current workspace members to the given list
+ * @param memberList
+ */
+void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> & memberList) const
+{
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  memberList.insert(m_workspaces.begin(), m_workspaces.end());
+}
+
+/**
  * Returns the names of workspaces that make up this group. 
  * Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
  */
@@ -123,21 +164,6 @@ std::vector<std::string> WorkspaceGroup::getNames() const
     out.push_back( (**it).name() );
   }
   return out;
-}
-
-/**
- * Create InfoNode for this workspace group and add nodes for all its members.
- * @return
- */
-Workspace::InfoNode *WorkspaceGroup::createInfoNode() const
-{
-    Poco::Mutex::ScopedLock _lock(m_mutex);
-    InfoNode *node = new InfoNode(*this);
-    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
-    {
-        (**it).addInfoNodeTo( *node );
-    }
-    return node;
 }
 
 /**
@@ -261,9 +287,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
 void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice)
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  bool isObserving = m_observingADS;
-  if ( isObserving )
-    observeADSNotifications( false );
+
   const std::string replacedName = notice->object_name();
   for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
   {
@@ -273,8 +297,6 @@ void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceN
       break;
     }
   }
-  if ( isObserving )
-    observeADSNotifications( true );
 }
 
 /**

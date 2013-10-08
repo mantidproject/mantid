@@ -165,6 +165,7 @@ namespace Mantid
       prog.report("Converting to MD Histogram Workspace");
       MDHistoWorkspace_sptr outputWS = boost::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
 
+      // cppcheck-suppress unreadVariable
       double* destinationSignals = outputWS->getSignalArray();
       double* destinationErrorsSQ = outputWS->getErrorSquaredArray();
 
@@ -174,6 +175,7 @@ namespace Mantid
         for (int64_t i = 0; i < nPoints; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
+          // cppcheck-suppress unreadVariable
           destinationSignals[i] = signals->GetValue(i);
           if(i%frequency == 0)
             prog.report();
@@ -187,6 +189,7 @@ namespace Mantid
        for (int64_t i = 0; i < nPoints; ++i)
        {
          PARALLEL_START_INTERUPT_REGION
+         // cppcheck-suppress unreadVariable
          destinationSignals[i] = signals->GetValue(i);
          destinationErrorsSQ[i] = errorsSQ->GetValue(i);
          if(i%frequency == 0)

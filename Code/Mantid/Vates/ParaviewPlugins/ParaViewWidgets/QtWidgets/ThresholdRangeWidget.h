@@ -38,6 +38,7 @@ class QLayout;
 class QLineEdit;
 class QComboBox;
 
+// cppcheck-suppress class_X_Y
 class EXPORT_OPT_MANTIDPARVIEW ThresholdRangeWidget: public QWidget
 {
 

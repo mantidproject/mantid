@@ -223,6 +223,10 @@ public slots:
   bool close();
   void hide();
   void show();
+
+  /// Focus on the window
+  void setFocus();
+
   void move(int x, int y);
   void move(const QPoint& pos);
 

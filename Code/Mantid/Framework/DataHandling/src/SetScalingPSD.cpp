@@ -123,7 +123,6 @@ namespace DataHandling
   {
     // Retrieve the filename and output workspace name from the properties
     m_filename = getPropertyValue("ScalingFilename");
-    //m_workspace = getPropertyValue("Workspace");
     m_workspace = getProperty("Workspace");
     m_scalingOption = getProperty("ScalingOption");
     std::vector<Kernel::V3D> truepos;

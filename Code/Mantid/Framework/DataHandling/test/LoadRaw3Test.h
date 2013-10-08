@@ -399,7 +399,7 @@ public:
     TS_ASSERT_EQUALS( ptrDet->getID(), 60);
 
     Mantid::Geometry::ParameterMap& pmap = output2D->instrumentParameters();
-    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 155);
+    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 157);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
 
@@ -519,6 +519,11 @@ public:
     for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
       TS_ASSERT_EQUALS(*it,pixnum++);
 
+    //Test if filename log is found in both monitor and sata workspace
+    TS_ASSERT(output2D->run().hasProperty("Filename"));
+    TS_ASSERT(monitoroutput2D->run().hasProperty("Filename"));
+    TS_ASSERT_EQUALS(loader6.getPropertyValue("Filename"),output2D->run().getProperty("Filename")->value());
+    TS_ASSERT_EQUALS(loader6.getPropertyValue("Filename"),monitoroutput2D->run().getProperty("Filename")->value());
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove(outputSpace+"_Monitors");
   }

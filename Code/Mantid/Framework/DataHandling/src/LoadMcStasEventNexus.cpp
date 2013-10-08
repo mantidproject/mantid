@@ -103,7 +103,6 @@ namespace DataHandling
     ::NeXus::File nxFile(filename);
     auto entries = nxFile.getEntries();
     auto itend = entries.end();
-    std::string prefix = getPropertyValue("OutputWorkspace");
     WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
 
 
@@ -245,7 +244,7 @@ namespace DataHandling
         double longestTOF(0.0);
 
         // populate workspace with McStas events          
-        detid2index_map* detIDtoWSindex_map =	eventWS->getDetectorIDToWorkspaceIndexMap(true); 
+        const detid2index_map detIDtoWSindex_map =	eventWS->getDetectorIDToWorkspaceIndexMap(true);
         for (size_t in = 0; in < nNeutrons; in++)
         {   
           const int detectorID = static_cast<int>(data[4+numberOfDataColumn*in]);
@@ -263,7 +262,7 @@ namespace DataHandling
               longestTOF = detector_time;
           }
 
-          size_t workspaceIndex = (*detIDtoWSindex_map)[detectorID]; 
+          const size_t workspaceIndex = detIDtoWSindex_map.find(detectorID)->second;
           int64_t pulse_time = 0;
           //eventWS->getEventList(workspaceIndex) += TofEvent(detector_time,pulse_time);
           //eventWS->getEventList(workspaceIndex) += TofEvent(detector_time);

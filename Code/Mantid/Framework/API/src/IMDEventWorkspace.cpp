@@ -57,24 +57,28 @@ namespace API
   }
 
   //-----------------------------------------------------------------------------------------------
-  /**
-   * @return :: A pointer to the created info node.
-   */
-  Workspace::InfoNode *IMDEventWorkspace::createInfoNode() const
-  {
-      auto node = IMDWorkspace::createInfoNode();
-      // Now box controller details
-      std::vector<std::string> stats = getBoxControllerStats();
-      for (size_t i=0; i < stats.size(); i++)
-      {
-          node->addLine( stats[i] );
-      }
 
-      node->addLine("Events: " + boost::lexical_cast<std::string>(getNPoints()) );
-      return node;
+  /**
+   */
+  const std::string IMDEventWorkspace::toString() const
+  {
+    std::ostringstream os;
+    os << IMDWorkspace::toString();
+
+    // Now box controller details
+    std::vector<std::string> stats = getBoxControllerStats();
+    for (size_t i=0; i < stats.size(); i++)
+    {
+      os << stats[i] << "\n";
+    }
+
+    os << MultipleExperimentInfos::toString() << "\n";
+
+    os << "Events: " << getNPoints() << "\n";
+    return os.str();
   }
 
-
+  //-----------------------------------------------------------------------------------------------
 
 }//namespace MDEvents
 

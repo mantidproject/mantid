@@ -72,14 +72,13 @@ namespace Algorithms
   {
     IAlgorithm_sptr alg = this->createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.3, true);
     alg->setPropertyValue("Filename", getPropertyValue("Filename"));
-    alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
     alg->executeAsChildAlg();
 
     MatrixWorkspace_sptr mws = alg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace", mws);
     Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(mws);
 
-    detid2index_map * detTowi = ws->getDetectorIDToWorkspaceIndexMap();
+    detid2index_map detTowi = ws->getDetectorIDToWorkspaceIndexMap();
     for (size_t i=0; i<ws->getNumberHistograms(); i++)
       ws->dataY(i)[0] = 0.0;
 
@@ -104,7 +103,7 @@ namespace Algorithms
         IDetector_const_sptr det = tracker.getDetectorResult();
         if (det)
         {
-          size_t wi = (*detTowi)[det->getID()];
+          size_t wi = detTowi[det->getID()];
           g_log.information() << "Found detector " << det->getID() << std::endl;
           ws->dataY(wi)[0] = double(int(az*57.3)*1000 + int(iz));
         }

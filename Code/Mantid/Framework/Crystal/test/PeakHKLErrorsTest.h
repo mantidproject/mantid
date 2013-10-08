@@ -55,8 +55,6 @@ public:
 
      public:
 
-      PeakHKLErrorsTest(){}
-
       void test_data()
       {
         LoadIsawPeaks alg;

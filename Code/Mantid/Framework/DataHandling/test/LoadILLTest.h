@@ -8,8 +8,13 @@
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILL;
 
-class LoadILLTest: public CxxTest::TestSuite {
+class LoadILLTest: public CxxTest::TestSuite 
+{
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadILLTest *createSuite() { return new LoadILLTest(); }
+  static void destroySuite( LoadILLTest *suite ) { delete suite; }
 
 	LoadILLTest() :
 			m_testFile("ILLIN5_104007.nxs")

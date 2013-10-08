@@ -29,6 +29,8 @@ namespace Mantid
     class XMLlogfile;
     class ParameterMap;
     class ReferenceFrame;
+    /// Convenience typedef
+    typedef std::map<std::pair<std::string,const IComponent*>, boost::shared_ptr<XMLlogfile> > InstrumentParameterCache;
 
     /**
     Base Instrument Class.
@@ -150,8 +152,8 @@ namespace Mantid
       std::vector<boost::shared_ptr<const IComponent> > getAllComponentsWithName(const std::string & cname) const;
 
       /// Get information about the parameters described in the instrument definition file and associated parameter files
-      std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return m_logfileCache;}
-      const std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() const {return m_logfileCache;}
+      InstrumentParameterCache& getLogfileCache() {return m_logfileCache;}
+      const InstrumentParameterCache& getLogfileCache() const {return m_logfileCache;}
 
       /// Get information about the units used for parameters described in the IDF and associated parameter files
       std::map<std::string, std::string>& getLogfileUnit() {return m_logfileUnit;}
@@ -256,7 +258,7 @@ namespace Mantid
       const ObjComponent* m_sampleCache;
 
       /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs, which equals logfile filename minus the run number and file extension
-      std::multimap<std::string, boost::shared_ptr<XMLlogfile> > m_logfileCache;
+      InstrumentParameterCache m_logfileCache;
 
       /// Store units used by users to specify angles in IDFs and associated parameter files.
       /// By default this one is empty meaning that the default of angle=degree etc are used

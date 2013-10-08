@@ -138,6 +138,8 @@ namespace API
     virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
     virtual std::vector<std::pair<std::string,std::string> > peakInfo(Kernel::V3D QFrame , bool labCoords) const = 0;
     virtual int peakInfoNumber(Kernel::V3D qLabFrame , bool labCoords) const =0;
+  protected:
+    virtual const std::string toString() const;
   };
 
 

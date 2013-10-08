@@ -57,6 +57,7 @@ enum Clipping{ ApplyClipping, IgnoreClipping};
 ///Type marks wheter original extents should be used over box extents.
 enum OrignalExtents{ ApplyOriginal, IgnoreOriginal};
 
+// cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkRebinningTransformOperator : public vtkUnstructuredGridAlgorithm//, public Mantid::VATES::MDRebinningView
 {
 public:

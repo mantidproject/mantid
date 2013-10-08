@@ -13,6 +13,8 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::MantidVec;
 
@@ -65,7 +67,7 @@ public:
 
   }
 
-  void testCalculation()
+  void testCalculationHist()
   {
     // setup the test workspace
     Workspace2D_sptr wksp = WorkspaceCreationHelper::Create2DWorkspaceBinned(9,16,1000,1000);
@@ -88,7 +90,6 @@ public:
     TS_ASSERT( algorithm_c.isExecuted() );
 
     MatrixWorkspace_sptr test_output_WS;
-    MatrixWorkspace_sptr gold_output_WS;
 
     TS_ASSERT_THROWS_NOTHING( test_output_WS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TestOutputWS") );
     TS_ASSERT( test_output_WS );
@@ -113,7 +114,7 @@ public:
     y_expected.push_back(3.49139);
 
     // do the final comparison
-    const MantidVec & y_actual = test_output_WS->dataY(0);
+    const MantidVec & y_actual = test_output_WS->readY(0);
     for ( size_t i = 0; i < y_expected.size(); i++ )
       TS_ASSERT_DELTA( y_actual[i], y_expected[i], 0.00001 );
 
@@ -122,6 +123,41 @@ public:
     AnalysisDataService::Instance().remove("TestOutputWS");
     AnalysisDataService::Instance().remove("SmoothedWS");
     AnalysisDataService::Instance().remove("ZeroingGoldWS");
+  }
+
+  void testCalculationEvent()
+  {
+    // setup the test workspace
+    EventWorkspace_sptr wksp = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1,1,false);
+
+    // create the algorithm
+    Mantid::Algorithms::MultipleScatteringCylinderAbsorption   algorithm;
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize() );
+    TS_ASSERT( algorithm.isInitialized() );
+
+    // execute the algorithm
+    std::string outName("MultipleScatteringCylinderAbsorptionEventOutput");
+    TS_ASSERT_THROWS_NOTHING( algorithm.setProperty("InputWorkspace",wksp));
+    TS_ASSERT_THROWS_NOTHING( algorithm.setPropertyValue("OutputWorkspace",outName));
+    TS_ASSERT_THROWS_NOTHING( algorithm.execute() );
+    TS_ASSERT( algorithm.isExecuted() );
+
+    // quick checks on the output workspace
+    MatrixWorkspace_sptr outputWS;
+    TS_ASSERT_THROWS_NOTHING(outputWS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outName));
+    TS_ASSERT( boost::dynamic_pointer_cast<EventWorkspace>(outputWS));
+
+    // do the final comparison - this is done by bounding
+    const MantidVec & y_actual = outputWS->readY(0);
+    TS_ASSERT_EQUALS(y_actual.size(), 100);
+    for (size_t i = 0; i < y_actual.size(); ++i)
+    {
+      TS_ASSERT_LESS_THAN( 2.1248,      y_actual[i]);
+      TS_ASSERT_LESS_THAN(y_actual[i], 2.1313);
+    }
+
+    // cleanup
+    AnalysisDataService::Instance().remove(outName);
   }
 
 private:

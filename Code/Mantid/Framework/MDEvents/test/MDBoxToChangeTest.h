@@ -18,7 +18,10 @@ class MDBoxToChangeTest : public CxxTest::TestSuite
 
     BoxController_sptr splitter;
     MDBoxBase<MDEvent<2>,2>* rootBox;
+
 public:
+static MDBoxToChangeTest *createSuite() { return new MDBoxToChangeTest(); }
+static void destroySuite(MDBoxToChangeTest * suite) { delete suite; }
 
 void testConstructor()
 {

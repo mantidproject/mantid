@@ -7,6 +7,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/RemoteJobManager.h"
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -22,8 +23,6 @@ namespace Poco
     class Element;
   }
 }
-
-class RemoteJobManager;
 
 namespace Mantid
 {
@@ -115,10 +114,9 @@ private:
   std::vector<InstrumentInfo> m_instruments;   ///< list of instruments of this facility
   std::string m_catalogName;                   ///< name of the catalog system of this facility
   std::string m_liveListener;                  ///< name of the default live listener
-  std::map< std::string, boost::shared_ptr<RemoteJobManager> > m_computeResources;
-    ///< list of compute resources (clusters, etc...) available at this facility
-    ///< sorted by their names
-    // Note that this is a map of pointers!  RemoteJobManager is an abstract base class.
+  typedef std::map< std::string, boost::shared_ptr<RemoteJobManager>  > ComputeResourcesMap;
+  ComputeResourcesMap m_computeResources;      ///< list of compute resources (clusters, etc...) available at this facility
+                                               // (Sorted by their names)
   static Logger& g_log;                        ///< logger
 };
 

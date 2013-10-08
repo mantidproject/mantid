@@ -4,15 +4,15 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "MantidQtImageViewer/GraphDisplay.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "DllOption.h"
 
 /**
     @class RefImageView 
   
-      This is the QMainWindow for the ImageView data viewer.  Data is
-    displayed in an ImageView, by constructing the ImageView object and
+      This is the QMainWindow for the SpectrumView data viewer.  Data is
+    displayed in an SpectrumView, by constructing the SpectrumView object and
     specifying a particular data source.
  
     @author Dennis Mikkelson 
@@ -49,19 +49,19 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
 {
   public:
 
-     /// Construct an ImageView to display data from the specified data source 
-     RefImageView( ImageView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
+     /// Construct an RefImageView to display data from the specified data source 
+     RefImageView( SpectrumView::SpectrumDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
 
     ~RefImageView();    
     
     RefIVConnections* getIVConnections();
 
   private:
-    ImageView::GraphDisplay*    h_graph;
-    ImageView::GraphDisplay*    v_graph;
+    SpectrumView::GraphDisplay*    h_graph;
+    SpectrumView::GraphDisplay*    v_graph;
                                  
     // keep void pointers to the following objects, to avoid having to 
-    // include ui_ImageView.h, which disappears by the time MantidPlot is
+    // include ui_RefImageView.h, which disappears by the time MantidPlot is
     // being built.  We need the pointers so we can delete them in the 
     // destructor.  
     void*            saved_ui;               // Ui_RefImageViewer*
@@ -72,7 +72,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
     RefIVConnections*            saved_iv_connections;   // IVConnections*
 };
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif   // REF_IMAGE_VIEW_H

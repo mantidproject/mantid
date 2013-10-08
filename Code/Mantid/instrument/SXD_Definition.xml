@@ -11,7 +11,7 @@
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
-      <handedness axis="right"/>
+      <handedness val="right"/>
     </reference-frame>
     <default-view view="spherical_z"/>
   </defaults>

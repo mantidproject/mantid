@@ -10,7 +10,7 @@ add_paraview_plugin( MantidParaViewNexusPeaksReaderSMPlugin "1.0"
 set_property( TARGET MantidParaViewNexusPeaksReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
 target_link_libraries( MantidParaViewNexusPeaksReaderSMPlugin 
-${MANTID_SUBPROJECT_LIBS} )
+${MANTID_SUBPROJECT_LIBS} ${NEXUS_C_LIBRARIES})
 
 # Put library into subfolder.
 SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewNexusPeaksReaderSMPlugin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})

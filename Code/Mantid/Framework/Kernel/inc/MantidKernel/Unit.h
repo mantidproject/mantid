@@ -233,6 +233,7 @@ public:
   const std::string label() const {return m_label; }
 
   Label();
+  Label(const std::string& caption, const std::string& label);
   void setLabel(const std::string& cpt, const std::string& lbl = "");
   virtual Unit * clone() const;
 
@@ -574,36 +575,6 @@ public:
 protected:
   double factorTo; ///< Constant factor for to conversion
   double factorFrom; ///< Constant factor for from conversion
-};
-
-//=================================================================================================
-/// Custom Unit
-class MANTID_KERNEL_DLL CustomUnit : public Unit
-{
-public:
-  const std::string unitID() const; ///< "CustomUnit"
-  const std::string caption() const { return m_Caption; }
-  const std::string label() const {return m_Label; }
-
-  virtual double singleToTOF(const double x) const;
-  virtual double singleFromTOF(const double tof) const;
-  virtual void init();
-  virtual Unit * clone() const;
-
-  /// Constructor
-  CustomUnit();
-  CustomUnit(std::string caption, std::string label);
-  /// Destructor
-  ~CustomUnit() {}
-
-protected:
-  double factorTo; ///< Constant factor for to conversion
-  double factorFrom; ///< Constant factor for from conversion
-
-private:
-  std::string m_Caption;
-  std::string m_Label;
-
 };
 
 } // namespace Units

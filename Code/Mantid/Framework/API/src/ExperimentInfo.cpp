@@ -2,12 +2,10 @@
 
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ModeratorModel.h"
 
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
@@ -16,20 +14,18 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
-
-#include <fstream>
-#include <map>
+#include <Poco/ScopedLock.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -49,8 +45,8 @@ namespace API
   :
     m_moderatorModel(),
     m_choppers(),
-    m_sample(),
-    m_run(),
+    m_sample(new Sample()),
+    m_run(new Run()),
     m_parmap(new ParameterMap()),
     sptr_instrument(new Instrument())
   {
@@ -63,6 +59,16 @@ namespace API
   {
   }
 
+  //---------------------------------------------------------------------------------------
+  /**
+   * Constructs the object from a copy if the input. This leaves the new mutex
+   * unlocked.
+   * @param source The source object from which to initialize
+   */
+  ExperimentInfo::ExperimentInfo(const ExperimentInfo & source)
+  {
+    this->copyExperimentInfoFrom(&source);
+  }
 
   //---------------------------------------------------------------------------------------
   /** Copy the experiment info data from another ExperimentInfo instance,
@@ -92,6 +98,27 @@ namespace API
     return out;
   }
 
+  //---------------------------------------------------------------------------------------
+
+  /// @returns A human-readable description of the object
+  const std::string ExperimentInfo::toString() const
+  {
+    std::ostringstream out;
+
+    Geometry::Instrument_const_sptr inst = this->getInstrument();
+    out << "Instrument: " << inst->getName() << " ("
+        << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
+        << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
+    out << "\n";
+    if (this->sample().hasOrientedLattice())
+    {
+      const Geometry::OrientedLattice & latt = this->sample().getOrientedLattice();
+      out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() <<", b " << latt.b() << ", c " << latt.c();
+      out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() <<", beta " << latt.beta() << ", gamma " << latt.gamma();
+      out << "\n";
+    }
+    return out.str();
+  }
 
   //---------------------------------------------------------------------------------------
   /** Set the instrument
@@ -130,24 +157,20 @@ namespace API
     //TODO: Here duplicates cow_ptr. Figure out if there's a better way
 
     // Use a double-check for sharing so that we only
+
     // enter the critical region if absolutely necessary
     if (!m_parmap.unique())
     {
-      PARALLEL_CRITICAL(cow_ptr_access)
+      Poco::Mutex::ScopedLock lock(m_mutex);
+      // Check again because another thread may have taken copy
+      // and dropped reference count since previous check
+      if (!m_parmap.unique())
       {
-        // Check again because another thread may have taken copy
-        // and dropped reference count since previous check
-        if (!m_parmap.unique())
-        {
-          ParameterMap_sptr oldData=m_parmap;
-          m_parmap.reset();
-          m_parmap = ParameterMap_sptr(new ParameterMap(*oldData));
-        }
+        ParameterMap_sptr oldData = m_parmap;
+        m_parmap = boost::make_shared<ParameterMap>(*oldData);
       }
     }
-
     return *m_parmap;
-    //return m_parmap.access(); //old cow_ptr thing
   }
 
 
@@ -169,27 +192,48 @@ namespace API
     return *m_parmap;
   }
 
-  /// Used for storing info about "r-position", "t-position" and "p-position" parameters
-  /// as all parameters are processed
-  struct m_PositionEntry
-  { m_PositionEntry(std::string& name, double val) : paramName(name), value(val) {}
-    std::string paramName;
-    double value; };
-
-  /** HACK -- the internal function which allows to interpret string values found in IDF parameters file as boolean 
-   *  it is hack as this funtion should be somewhere else. 
-   *
-   *@param boolType -- the string representation of the boolean value one wants to compare. 
-   *@return  True if the name within of the list of true names, and false otherwise
-  */
-  const char * TrueNames[2 ]={"True","Yes"};
-  bool convertBool(const std::string &boolType)
+  namespace
   {
-      for(int i=0;i<2;i++)
+    ///@cond
+
+    /// Used for storing info about "r-position", "t-position" and "p-position" parameters
+    /// These are translated to X,Y,Z and so must all be processed together
+    struct RTP
+    { 
+      RTP(): radius(0.0), haveRadius(false), theta(0.0), phi(0.0) {}
+      double radius;
+      bool haveRadius;
+      double theta;
+      double phi;
+    };
+   
+    struct ParameterValue
+    {
+      ParameterValue(const Geometry::XMLlogfile & paramInfo, 
+                     const API::Run & run) 
+        : info(paramInfo), runData(run) {}
+      
+      operator double()
       {
-          if(std::strcmp(boolType.c_str(),TrueNames[i])==0)return true;
+        if(info.m_logfileID.empty())
+          return boost::lexical_cast<double>(info.m_value);
+        else
+          return info.createParamValue(runData.getTimeSeriesProperty<double>(info.m_logfileID));
       }
-      return false;
+      operator int()
+      {
+        return boost::lexical_cast<int>(info.m_value);
+      }
+      operator bool()
+      {
+        if(boost::iequals(info.m_value, "true")) return true;
+        else if(boost::iequals(info.m_value, "yes")) return true;
+        else return false;
+      }
+      const Geometry::XMLlogfile & info;
+      const Run & runData;
+    };
+    ///@endcond
   }
 
   //---------------------------------------------------------------------------------------
@@ -201,170 +245,60 @@ namespace API
   {
     // Get instrument and sample
     boost::shared_ptr<const Instrument> instrument = getInstrument()->baseInstrument();
-    Instrument* inst = const_cast<Instrument*>(instrument.get());
 
-    // Get the data in the logfiles associated with the raw data
-    const std::vector<Kernel::Property*>& logfileProp = run().getLogData();
-
+    // Reference to the run
+    const auto & runData = run();
 
     // Get pointer to parameter map that we may add parameters to and information about
     // the parameters that my be specified in the instrument definition file (IDF)
     Geometry::ParameterMap& paramMap = instrumentParameters();
-    const std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& paramInfoFromIDF = inst->getLogfileCache();
+    const auto & paramInfoFromIDF = instrument->getLogfileCache();
 
+    const double deg2rad(M_PI/180.0);
+    std::map<const IComponent*, RTP> rtpParams;
 
-    // iterator to browse through the multimap: paramInfoFromIDF
-    std::multimap<std::string, boost::shared_ptr<XMLlogfile> > :: const_iterator it;
-    std::pair<std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::const_iterator,
-      std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::const_iterator> ret;
-
-    // In order to allow positions to be set with r-position, t-position and p-position parameters
-    // The idea is here to simply first check if parameters with names "r-position", "t-position"
-    // and "p-position" are encounted then at the end of this method act on this
-    std::set<const IComponent*> rtp_positionComp;
-    std::multimap<const IComponent*, m_PositionEntry > rtp_positionEntry;
-
-    // loop over all logfiles and see if any of these are associated with parameters in the
-    // IDF
-
-    size_t N = logfileProp.size();
-    for (size_t i = 0; i < N; i++)
+    auto cacheEnd = paramInfoFromIDF.end();
+    for(auto cacheItr = paramInfoFromIDF.begin(); cacheItr != cacheEnd; ++cacheItr)
     {
-      // Get the name of the timeseries property
+      const auto & nameComp = cacheItr->first;
+      const auto & paramInfo = cacheItr->second;
+      const std::string & paramN = nameComp.first;
 
-      std::string logName = logfileProp[i]->name();
-
-      // See if filenamePart matches any logfile-IDs in IDF. If this add parameter to parameter map
-
-      ret = paramInfoFromIDF.equal_range(logName);
-      for (it=ret.first; it!=ret.second; ++it)
+      try
       {
-        double value = ((*it).second)->createParamValue(static_cast<Kernel::TimeSeriesProperty<double>*>(logfileProp[i]));
-
-        // special cases of parameter names
-
-        std::string paramN = ((*it).second)->m_paramName;
-        if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
-          paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-        else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
+        // Special case for r,t,p. We need to know all three first to calculate X,Y,Z
+        if(paramN.compare(1,9,"-position") == 0)
         {
-          paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-        }
-        else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
-        {
-          rtp_positionComp.insert(((*it).second)->m_component);
-          rtp_positionEntry.insert(
-            std::pair<const IComponent*, m_PositionEntry >(
-              ((*it).second)->m_component, m_PositionEntry(paramN, value)));
+          auto & rtpValues  = rtpParams[paramInfo->m_component]; //If not found, constructs default
+          double value = ParameterValue(*paramInfo, runData);
+          if(paramN.compare(0,1,"r") == 0) 
+          {
+            rtpValues.radius = value;
+            rtpValues.haveRadius = true;
+          }
+          else if(paramN.compare(0,1,"t") == 0) rtpValues.theta = deg2rad*value;
+          else if(paramN.compare(0,1,"p") == 0) rtpValues.phi = deg2rad*value;
+          else {}
+          if(rtpValues.haveRadius) // Just overwrite x,y,z
+          {
+            // convert spherical coordinates to cartesian coordinate values
+            double x = rtpValues.radius*std::sin(rtpValues.theta)*std::cos(rtpValues.phi);
+            paramMap.addPositionCoordinate(paramInfo->m_component, "x", x);
+            double y = rtpValues.radius*std::sin(rtpValues.theta)*std::sin(rtpValues.phi);
+            paramMap.addPositionCoordinate(paramInfo->m_component, "y", y);
+            double z = rtpValues.radius*std::cos(rtpValues.theta);
+            paramMap.addPositionCoordinate(paramInfo->m_component, "z", z);
+          }
         }
         else
-          paramMap.addDouble(((*it).second)->m_component, paramN, value);
-      }
-    }
-
-    // Check if parameters have been specified using the 'value' attribute rather than the 'logfile-id' attribute
-    // All such parameters have been stored using the key = "".
-    ret = paramInfoFromIDF.equal_range("");
-    Kernel::TimeSeriesProperty<double>* dummy = NULL;
-    for (it = ret.first; it != ret.second; ++it)
-    {
-      std::string paramN = ((*it).second)->m_paramName;
-      std::string category = ((*it).second)->m_type;
-
-      bool is_int_val =  (category.compare("int") == 0);
-      bool is_string_val =  (category.compare("string") == 0);
-      bool is_bool_val  =  (category.compare("bool") == 0);
-      bool is_double_val = !(is_string_val || is_bool_val || is_int_val);
-
-      // if category is not double sting no point in trying to generate a double from parameter
-      double value = 0.0;
-      if ( is_double_val)
-        value = ((*it).second)->createParamValue(dummy);
-
-      if ( category.compare("fitting") == 0 )
-      {
-        std::ostringstream str;
-        str << value << " , " << ((*it).second)->m_fittingFunction << " , " << paramN << " , " << ((*it).second)->m_constraint[0] << " , "
-          << ((*it).second)->m_constraint[1] << " , " << ((*it).second)->m_penaltyFactor << " , "
-          << ((*it).second)->m_tie << " , " << ((*it).second)->m_formula << " , "
-          << ((*it).second)->m_formulaUnit << " , " << ((*it).second)->m_resultUnit << " , " << (*(((*it).second)->m_interpolation));
-        paramMap.add("fitting",((*it).second)->m_component, paramN, str.str());
-      }
-      else if (is_string_val)
-      {
-        paramMap.addString(((*it).second)->m_component, paramN, ((*it).second)->m_value);
-      }
-      else if (is_bool_val )
-      {
-          bool b_val = convertBool(((*it).second)->m_value);
-          paramMap.addBool(((*it).second)->m_component,paramN,b_val);
-      }
-      else if (is_int_val )
-      {
-          int i_val = boost::lexical_cast<int>(((*it).second)->m_value);
-          paramMap.addInt(((*it).second)->m_component,paramN,i_val);
-      }
-
-
-      else
-      {
-        if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
-          paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-        else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
-          paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-        else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
         {
-          rtp_positionComp.insert(((*it).second)->m_component);
-          rtp_positionEntry.insert(
-            std::pair<const IComponent*, m_PositionEntry >(
-              ((*it).second)->m_component, m_PositionEntry(paramN, value)));
-        }
-        else
-          paramMap.addDouble(((*it).second)->m_component, paramN, value);
-      }
-    }
-
-    // check if parameters with names "r-position", "t-position"
-    // and "p-position" were encounted
-    std::pair<std::multimap<const IComponent*, m_PositionEntry >::iterator,
-      std::multimap<const IComponent*, m_PositionEntry >::iterator> retComp;
-    double deg2rad = (M_PI/180.0);
-    std::set<const IComponent*>::iterator itComp;
-    std::multimap<const IComponent*, m_PositionEntry > :: const_iterator itRTP;
-    for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); ++itComp)
-    {
-      retComp = rtp_positionEntry.equal_range(*itComp);
-      bool rSet = false;
-      double rVal=0.0;
-      double tVal=0.0;
-      double pVal=0.0;
-      for (itRTP = retComp.first; itRTP!=retComp.second; ++itRTP)
-      {
-        std::string paramN = ((*itRTP).second).paramName;
-        if ( paramN.compare("r-position")==0 )
-        {
-          rSet = true;
-          rVal = ((*itRTP).second).value;
-        }
-        if ( paramN.compare("t-position")==0 )
-        {
-          tVal = deg2rad*((*itRTP).second).value;
-        }
-        if ( paramN.compare("p-position")==0 )
-        {
-          pVal = deg2rad*((*itRTP).second).value;
+          populateWithParameter(paramMap, paramN, *paramInfo, runData);
         }
       }
-      if ( rSet )
+      catch(std::exception& exc)
       {
-        // convert spherical coordinates to cartesian coordinate values
-        double x = rVal*sin(tVal)*cos(pVal);
-        double y = rVal*sin(tVal)*sin(pVal);
-        double z = rVal*cos(tVal);
-
-        paramMap.addPositionCoordinate(*itComp, "x", x);
-        paramMap.addPositionCoordinate(*itComp, "y", y);
-        paramMap.addPositionCoordinate(*itComp, "z", z);
+        g_log.information() << "Unable to add component parameter '" << nameComp.first << "'. Error: " << exc.what();
+        continue;
       }
     }
   }
@@ -505,6 +439,7 @@ namespace API
   */
   const  Sample& ExperimentInfo::sample() const
   {
+    Poco::Mutex::ScopedLock lock(m_mutex);
     return *m_sample;
   }
 
@@ -516,7 +451,20 @@ namespace API
   */
   Sample& ExperimentInfo::mutableSample()
   {
-    return m_sample.access();
+    // Use a double-check for sharing so that we only
+    // enter the critical region if absolutely necessary
+    if (!m_sample.unique())
+    {
+      Poco::Mutex::ScopedLock lock(m_mutex);
+      // Check again because another thread may have taken copy
+      // and dropped reference count since previous check
+      if (!m_sample.unique())
+      {
+        boost::shared_ptr<Sample> oldData = m_sample;
+        m_sample = boost::make_shared<Sample>(*oldData);
+      }
+    }
+    return *m_sample;
   }
 
 
@@ -526,6 +474,7 @@ namespace API
   */
   const Run& ExperimentInfo::run() const
   {
+    Poco::Mutex::ScopedLock lock(m_mutex);
     return *m_run;
   }
 
@@ -537,7 +486,20 @@ namespace API
   */
   Run& ExperimentInfo::mutableRun()
   {
-    return m_run.access();
+    // Use a double-check for sharing so that we only
+    // enter the critical region if absolutely necessary
+    if (!m_run.unique())
+    {
+      Poco::Mutex::ScopedLock lock(m_mutex);
+      // Check again because another thread may have taken copy
+      // and dropped reference count since previous check
+      if (!m_run.unique())
+      {
+        boost::shared_ptr<Run> oldData = m_run;
+        m_run = boost::make_shared<Run>(*oldData);
+      }
+    }
+    return *m_run;
   }
 
   /**
@@ -604,7 +566,8 @@ namespace API
    */
   int ExperimentInfo::getRunNumber() const
   {
-    if (!m_run->hasProperty("run_number"))
+    const Run& thisRun = run();
+    if (!thisRun.hasProperty("run_number"))
     {
       // No run_number property, default to 0
       return 0;
@@ -692,15 +655,36 @@ namespace API
       }
       else
       {
-        std::ostringstream os;
-        os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but detector has no Efixed parameter attached. ID=" << detector->getID();
-        throw std::runtime_error(os.str());
+        std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
+        if ( efixedVec.empty() )
+        {
+          int detid = detector->getID();
+          IDetector_const_sptr detectorSingle = getInstrument()->getDetector(detid);
+          efixedVec = detectorSingle->getNumberParameter("Efixed");
+        }
+        if (! efixedVec.empty() )
+        {
+          return efixedVec.at(0);
+        }
+        else
+        {
+          std::ostringstream os;
+          os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but detector has no Efixed parameter attached. ID=" << detector->getID();
+          throw std::runtime_error(os.str());
+        }
       }
     }
     else
     {
       throw std::runtime_error("ExperimentInfo::getEFixed - EFixed requested for elastic mode, don't know what to do!");
     }
+  }
+
+  void ExperimentInfo::setEFixed(const detid_t detID, const double value)
+  {
+      IDetector_const_sptr det = getInstrument()->getDetector(detID);
+      Geometry::ParameterMap& pmap = instrumentParameters();
+      pmap.addDouble(det.get(), "Efixed", value);
   }
 
   // used to terminate SAX process
@@ -776,7 +760,7 @@ namespace API
     std::string date;
     try
     {
-      date = m_run->startTime().toISO8601String();
+      date = run().startTime().toISO8601String();
     }
     catch (std::runtime_error &)
     {
@@ -872,8 +856,8 @@ namespace API
   {
     Instrument_const_sptr instrument = getInstrument();
     instrument->saveNexus( file, "instrument");
-    m_sample->saveNexus(file, "sample");
-    m_run->saveNexus(file, "logs");
+    sample().saveNexus(file, "sample");
+    run().saveNexus(file, "logs");
   }
 
   //--------------------------------------------------------------------------------------------
@@ -889,7 +873,7 @@ namespace API
     std::string instrumentFilename;
 
     // First, the sample and then the logs
-    int sampleVersion = m_sample.access().loadNexus(file, "sample");
+    int sampleVersion = mutableSample().loadNexus(file, "sample");
     if (sampleVersion == 0)
     {
       // Old-style (before Sep-9-2011) NXS processed
@@ -1046,32 +1030,60 @@ namespace API
     }
   }
 
-//  //--------------------------------------------------------------------------------------------
-//  /** Save the reference to the instrument to an open NeXus file.
-//   * @param file :: open NeXus file
-//   * @param group :: name of the group to create
-//   */
-//  void ExperimentInfo::saveInstrumentNexus(::NeXus::File * file) const
-//  {
-//    file->makeGroup("instrument", "NXinstrument", 1);
-//    file->putAttr("version", 1);
-//    file->closeGroup();
-//  }
-//
-//  //--------------------------------------------------------------------------------------------
-//  /** Load the object from an open NeXus file.
-//   * @param file :: open NeXus file
-//   * @param group :: name of the group to open
-//   */
-//  void ExperimentInfo::loadInstrumentNexus(::NeXus::File * file)
-//  {
-//    file->openGroup("instrument", "NXinstrument");
-//    file->closeGroup();
-//  }
+  //------------------------------------------------------------------------------------------------------
+  // Private members
+  //------------------------------------------------------------------------------------------------------
 
-
-
-
+  /** 
+   * Fill map with given instrument parameter
+   * @param paramMap Map to populate
+   * @param name The name of the parameter
+   * @param paramInfo A reference to the object describing this parameter
+   * @param runData A reference to the run object
+   */
+  void ExperimentInfo::populateWithParameter(Geometry::ParameterMap & paramMap,
+                                             const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                                             const Run & runData)
+  {
+    const std::string & category = paramInfo.m_type;
+    ParameterValue paramValue(paramInfo, runData); //Defines implicit conversion operator
+    
+    // Some names are special. Values should be convertible to double
+    if (name.compare("x") == 0 || name.compare("y") == 0 || name.compare("z") == 0)
+    {
+      paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
+    }
+    else if (name.compare("rot") == 0 || name.compare("rotx") == 0 || name.compare("roty") == 0 || name.compare("rotz") == 0)
+    {
+      paramMap.addRotationParam(paramInfo.m_component, name, paramValue);
+    }
+    else if(category.compare("fitting") == 0)
+    {
+      std::ostringstream str;
+      str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , " << name << " , " << paramInfo.m_constraint[0] << " , "
+          << paramInfo.m_constraint[1] << " , " << paramInfo.m_penaltyFactor << " , "
+          << paramInfo.m_tie << " , " << paramInfo.m_formula << " , "
+          << paramInfo.m_formulaUnit << " , " << paramInfo.m_resultUnit << " , " << (*(paramInfo.m_interpolation));
+      paramMap.add("fitting",paramInfo.m_component, name, str.str());
+    }
+    else if(category.compare("string") == 0)
+    {
+      paramMap.addString(paramInfo.m_component,name, paramInfo.m_value);
+    }
+    else if(category.compare("bool") == 0)
+    {
+      paramMap.addBool(paramInfo.m_component,name, paramValue);
+    }
+    else if(category.compare("int") == 0)
+    {
+      paramMap.addInt(paramInfo.m_component, name, paramValue);
+    }
+    else // assume double
+    {
+      paramMap.addDouble(paramInfo.m_component, name, paramValue);
+    }
+  }
+  
 } // namespace Mantid
 } // namespace API
 
@@ -1113,5 +1125,7 @@ namespace Mantid
       }
     }
 
-  } // namespace Kernel
+
+
+} // namespace Kernel
 } // namespace Mantid

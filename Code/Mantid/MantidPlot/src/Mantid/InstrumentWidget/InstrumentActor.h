@@ -148,6 +148,7 @@ public:
                   bool out = false
                   );
 
+  static void rotateToLookAt(const Mantid::Kernel::V3D& eye, const Mantid::Kernel::V3D& up, Mantid::Kernel::Quat &R);
 
   /* Masking */
 
@@ -184,8 +185,8 @@ protected:
   /// Flag to show the guide and other components. Loaded and saved in settings.
   bool m_showGuides;
 
-  /// Pointer to the workspace's detector ID to workspace index map
-  Mantid::detid2index_map *m_detid2index_map;
+  /// The workspace's detector ID to workspace index map
+  Mantid::detid2index_map m_detid2index_map;
 
   /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<Mantid::detid_t> m_detIDs;

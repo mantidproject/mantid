@@ -844,7 +844,8 @@ void MantidEV::findUB_slot()
                                // Now that we set a UB copy it to md_workspace.  If
                                // copy fails a log notice is output by copyLattice
    std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
-   worker->copyLattice( peaks_ws_name, md_ws_name );
+   std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+   worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
 
    if ( index_peaks )
    {
@@ -957,7 +958,8 @@ void MantidEV::chooseCell_slot()
    {                                 // Try to copy the UB to md_workspace.  If it
                                      // fails a log notice is output by copyLattice
      std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
-     worker->copyLattice( peaks_ws_name, md_ws_name );
+     std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+     worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
    }
 }
 
@@ -992,7 +994,8 @@ void MantidEV::changeHKL_slot()
                                      // Try to copy the UB to md_workspace.  If it
                                      // fails a log notice is output by copyLattice
    std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
-   worker->copyLattice( peaks_ws_name, md_ws_name );
+   std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+   worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
 }
 
 

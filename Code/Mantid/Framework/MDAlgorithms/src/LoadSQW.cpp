@@ -155,6 +155,7 @@ Parts of the code were written with the idea of generalising functionality at a 
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidMDAlgorithms/LoadSQW.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include <iostream>
 #include <cfloat>
 #include "MantidMDEvents/MDBox.h"
@@ -188,13 +189,34 @@ namespace Mantid
       }
     }
 
-    DECLARE_ALGORITHM(LoadSQW)
+    DECLARE_FILELOADER_ALGORITHM(LoadSQW);
 
     /// Constructor
     LoadSQW::LoadSQW()
     : m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100))
     {
     }
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadSQW::confidence(Kernel::FileDescriptor & descriptor) const
+    {
+
+      // only .sqw can be considered 
+      const std::string & extn = descriptor.extension();
+      if(extn.compare(".sqw") != 0) return 0;
+
+
+     if(descriptor.isAscii())
+     {
+         return 10; // Low so that others may try
+     }
+     return 80; // probably it is sqw indeed
+    }
+
+
 
     /// Destructor
     LoadSQW::~LoadSQW()
@@ -864,7 +886,7 @@ namespace LoadSQWHelper
    { // we do not need this header  at the moment -> just calculating its length; or may be we do soon?
       std::vector<char> data_buffer(8);
 
-	  // cppcheck-suppress redundantAssignment
+    // cppcheck-suppress redundantAssignment
       std::streamoff end_location = start_location;
       std::streamoff shift = start_location-dataStream.tellg();
       // move to specified location, which should be usually 0;
@@ -923,7 +945,7 @@ namespace LoadSQWHelper
       std::vector<char> data_buffer(8);
 
       // cppcheck-suppress redundantAssignment
-	  std::streamoff end_location = start_location;
+    std::streamoff end_location = start_location;
       std::streamoff shift = start_location-dataStream.tellg();
       // move to specified location, which should be usually 0;
       dataStream.seekg(shift,std::ios_base::cur);              

@@ -260,7 +260,7 @@ namespace Mantid
 
       Geometry::Instrument_const_sptr inst = m_workspace->getInstrument();
       // Throws for multiple detectors
-      boost::scoped_ptr<spec2index_map> specToIndex(m_workspace->getSpectrumToWorkspaceIndexMap());
+      const spec2index_map specToIndex(m_workspace->getSpectrumToWorkspaceIndexMap());
 
       std::ifstream datfile(filename.c_str(), std::ios_base::in);
 
@@ -284,8 +284,8 @@ namespace Mantid
         {
           if(isSpectrum)
           {
-            auto it = specToIndex->find(detOrSpec);
-            if(it != specToIndex->end())
+            auto it = specToIndex.find(detOrSpec);
+            if(it != specToIndex.end())
             {
               const size_t wsIndex = it->second;
               det = m_workspace->getDetector(wsIndex);

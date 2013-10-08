@@ -13,6 +13,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
@@ -31,6 +32,10 @@ public:
   static GeneratePeaksTest *createSuite() { return new GeneratePeaksTest(); }
   static void destroySuite( GeneratePeaksTest *suite ) { delete suite; }
 
+  GeneratePeaksTest()
+  {
+    FrameworkManager::Instance();
+  }
 
   void test_Init()
   {
@@ -102,14 +107,12 @@ public:
     TS_ASSERT_DELTA(p1_y[400], 20.0, 1.0E-4);
 
     // 7. Spectrum map
-    spec2index_map *themap = peaksws->getSpectrumToWorkspaceIndexMap();
-    size_t index0 = (*themap)[0];
-    size_t index2 = (*themap)[2];
+    spec2index_map themap = peaksws->getSpectrumToWorkspaceIndexMap();
+    size_t index0 = themap[0];
+    size_t index2 = themap[2];
     TS_ASSERT_EQUALS(index0, 0);
     TS_ASSERT_EQUALS(index2, 1)
 
-    // 8. Clean
-    delete themap;
     AnalysisDataService::Instance().remove("Test01WS");
 
     return;
@@ -165,10 +168,10 @@ public:
     TS_ASSERT_DELTA(p1_y[150], 20.0, 1.0E-4);
 
     // 7. Spectrum map
-    spec2index_map *themap = peaksws->getSpectrumToWorkspaceIndexMap();
-    TS_ASSERT_EQUALS(themap->size(), 5);
-    size_t index0 = (*themap)[0];
-    size_t index2 = (*themap)[2];
+    spec2index_map themap = peaksws->getSpectrumToWorkspaceIndexMap();
+    TS_ASSERT_EQUALS(themap.size(), 5);
+    size_t index0 = themap[0];
+    size_t index2 = themap[2];
     TS_ASSERT_EQUALS(index0, 0);
     TS_ASSERT_EQUALS(index2, 1)
 
@@ -223,9 +226,9 @@ public:
     TS_ASSERT_DELTA(p1_y[400], 24.0, 1.0E-4);
 
     // 7. Spectrum map
-    spec2index_map *themap = peaksws->getSpectrumToWorkspaceIndexMap();
-    size_t index0 = (*themap)[0];
-    size_t index2 = (*themap)[2];
+    spec2index_map themap = peaksws->getSpectrumToWorkspaceIndexMap();
+    size_t index0 = themap[0];
+    size_t index2 = themap[2];
     TS_ASSERT_EQUALS(index0, 0);
     TS_ASSERT_EQUALS(index2, 1)
 

@@ -342,6 +342,8 @@ private:
   boost::shared_ptr<MDFileObject> infile;
 
 public:
+  static ImportMDEventWorkspaceTestPerformance *createSuite() { return new ImportMDEventWorkspaceTestPerformance(); }
+  static void destroySuite( ImportMDEventWorkspaceTestPerformance *suite ) { delete suite; }
 
   ImportMDEventWorkspaceTestPerformance() : nRows(10000)
   {

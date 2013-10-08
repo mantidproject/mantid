@@ -357,7 +357,6 @@ namespace Mantid
          {
            double p;
 		   double q;
-		   double r;
 		   double s = fb / fa;
 
 		   
@@ -368,6 +367,7 @@ namespace Mantid
            }
            else
            {
+             double r;
              q = fa / fc;
              r = fb / fc;
              p = s * ( 2.0 * m * a * ( q - r ) - ( sb - sa ) * ( r - 1.0 ) );

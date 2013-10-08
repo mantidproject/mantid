@@ -54,6 +54,10 @@ public:
   MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm);
   void populateTables(const QStringList& wsList);
 
+signals:
+  /// Emitted to run some (usually simple) Python code
+  void runPythonCode(const QString& code, bool async);
+
 private slots:
   void helpResultsClicked();
   void selectAllLogs(bool);

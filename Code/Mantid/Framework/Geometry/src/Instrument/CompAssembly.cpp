@@ -301,12 +301,24 @@ boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::
   std::deque<boost::shared_ptr<const IComponent> > nodeQueue;
   // Need to be able to enter the while loop
   nodeQueue.push_back(node);
-  int nlevel = 0;
   const bool limitSearch(nlevels > 0);
   while( !nodeQueue.empty() )
   {
+    // get the next node in the queue
     node = nodeQueue.front();
     nodeQueue.pop_front();
+
+    // determine the depth
+    int depth(1);
+    if (limitSearch)
+    {
+      auto parent = node->getParent();
+      while (parent && (this->getName() != parent->getName()))
+      {
+        parent = parent->getParent();
+        depth++;
+      }
+    }
     int nchildren(0);
     boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
     if( asmb )
@@ -322,11 +334,15 @@ boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::
       }
       else
       {
-        nodeQueue.push_back(comp);
+        // only add things if max-recursion depth hasn't been reached
+        if ((!limitSearch) || (depth+1 < nlevels))
+        {
+          // don't bother adding things to the queue that aren't assemblies
+          if (bool(boost::dynamic_pointer_cast<const ICompAssembly>(comp)))
+            nodeQueue.push_back(comp);
+        }
       }
     }
-    nlevel++;
-    if( limitSearch && nlevel == nlevels) break;
   }// while-end
 
   // If we have reached here then the search failed

@@ -68,8 +68,8 @@ public:
     sample.setEnvironment(kit);
     OrientedLattice *latt = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
     sample.setOrientedLattice(latt);
-    Material *vanBlock = new Material("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
-    sample.setMaterial(*vanBlock);
+    Material vanBlock("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
+    sample.setMaterial(vanBlock);
     Object_sptr shape_sptr =
       createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     sample.setShape(*shape_sptr);

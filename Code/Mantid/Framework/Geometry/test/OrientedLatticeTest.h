@@ -4,15 +4,14 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <iomanip>
-#include <MantidKernel/Matrix.h>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Matrix;
-using Mantid::Kernel::NexusTestHelper;
 
 class OrientedLatticeTest : public CxxTest::TestSuite
 {

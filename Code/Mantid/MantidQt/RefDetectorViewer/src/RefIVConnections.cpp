@@ -4,26 +4,25 @@
 #include <qwt_plot_canvas.h>
 
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
-#include "MantidQtImageViewer/ColorMaps.h"
-#include "MantidQtImageViewer/IVUtils.h"
-#include "MantidQtImageViewer/ErrorHandler.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
+#include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 namespace MantidQt
 {
 namespace RefDetectorViewer
 {
-  using namespace ImageView;
+  using namespace SpectrumView;
 
 /**
  * Construct the object that links the GUI components to the other specifed
  * higher level objects.  This class just keeps pointers to the parameters.
  * The objects passed in must be constructed elsewhere and must be deleted
- * elsewhere, when the ImageViewer is closed.
+ * elsewhere, when the SpectrumViewer is closed.
  *
  * @param ui               The object containing the gui components for 
  *                         the ImageView viewer.
  * @param iv_main_window   The main window.
- * @param image_display    The ImageDisplay object that will dispaly the
+ * @param image_display    The SpectrumDisplay object that will dispaly the
  *                         image
  * @param h_graph_display  The GraphDisplay object that will display 
  *                         horizontal cuts through the image
@@ -594,7 +593,5 @@ void RefIVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
   delete[] rgb_data;
 }
 
-
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
-

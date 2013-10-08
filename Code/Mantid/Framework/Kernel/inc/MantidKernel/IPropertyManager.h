@@ -131,7 +131,8 @@ public:
     /// Return the property manager serialized as a string.
     virtual std::string asString(bool withDefaultValues = false, char separator=',') const = 0;
 
-    /** Give settings to a property to determine when it gets enabled/hidden
+    /** Give settings to a property to determine when it gets enabled/hidden.
+     * Passes ownership of the given IPropertySettings object to the named property
      * @param name :: property name
      * @param settings :: IPropertySettings     */
     void setPropertySettings(const std::string &name, IPropertySettings * settings)

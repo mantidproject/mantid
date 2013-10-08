@@ -185,6 +185,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/SetUpParaview.cpp				   
                    src/Mantid/UserFitFunctionDialog.cpp
+                   src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ComponentActor.cpp
@@ -214,6 +215,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
+                   src/Mantid/InstrumentWidget/RotationSurface.cpp
                    src/Mantid/InstrumentWidget/ProjectionSurface.cpp
                    src/Mantid/InstrumentWidget/Projection3D.cpp
                    src/Mantid/InstrumentWidget/PeakMarker2D.cpp
@@ -413,6 +415,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/SetUpParaview.h				   
                    src/Mantid/UserFitFunctionDialog.h
+                   src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ComponentActor.h
@@ -442,6 +445,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.h
                    src/Mantid/InstrumentWidget/UnwrappedSphere.h
                    src/Mantid/InstrumentWidget/UnwrappedSurface.h
+                   src/Mantid/InstrumentWidget/RotationSurface.h
                    src/Mantid/InstrumentWidget/PeakMarker2D.h
                    src/Mantid/InstrumentWidget/PeakOverlay.h
                    src/Mantid/InstrumentWidget/ProjectionSurface.h
@@ -728,38 +732,6 @@ qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
-
-###########################################################################
-# Files specific to the remote job submission code
-###########################################################################
-if(MAKE_REMOTE_JOBS)
-# Add the algorithms for managing remote job submission
-  LIST(APPEND MANTID_SRCS
-	src/Mantid/Remote/JobStatusDialog.cpp
-	src/Mantid/Remote/MantidRemoteCluster.cpp
-	src/Mantid/Remote/NewClusterDialog.cpp
-  )
-
-  LIST(APPEND MANTID_HDRS
-	src/Mantid/Remote/JobStatusDialog.h
-	src/Mantid/Remote/MantidRemoteCluster.h
-	src/Mantid/Remote/NewClusterDialog.h
-  )
-
-  LIST(APPEND MANTID_MOC_FILES
-	src/Mantid/Remote/JobStatusDialog.h
-	src/Mantid/Remote/MantidRemoteCluster.h
-	src/Mantid/Remote/NewClusterDialog.h
-  )
-
-  LIST(APPEND UI_FILES
-	src/Mantid/Remote/JobStatusDialog.ui
-	src/Mantid/Remote/NewClusterDialog.ui
-  )
-
-endif(MAKE_REMOTE_JOBS)
-
-
 ###########################################################################
 # Internal icon links
 ###########################################################################
@@ -808,7 +780,7 @@ include_directories ( ../QtPropertyBrowser/src )
 include_directories ( ../MantidQt/API/inc )
 include_directories ( ../MantidQt/MantidWidgets/inc )
 include_directories ( ../MantidQt/SliceViewer/inc )
-include_directories ( ../MantidQt/ImageViewer/inc )
+include_directories ( ../MantidQt/SpectrumViewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
 # ui_ files end up in these places
 include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
@@ -878,7 +850,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 target_link_libraries ( MantidPlot 
                         ${CORE_MANTIDLIBS}
                         MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
-                        MantidQtImageViewer 
+                        MantidQtSpectrumViewer 
                         QtPropertyBrowser ${QT_LIBRARIES} 
                         ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
                         ${QSCINTILLA_LIBRARIES}

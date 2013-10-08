@@ -18,6 +18,7 @@ import isis_instrument
 import os
 import math
 import copy
+import re
 
 def _issueWarning(msg):
     """
@@ -55,19 +56,17 @@ class LoadRun(object):
         self._period = int(entry)
         #set to the total number of periods in the file
         self.periods_in_file = None
-
-        self._spec_min = None
-        self._spec_max = None
         self.ext = ''
         self.shortrun_no = -1
         #the name of the loaded workspace in Mantid
         self.wksp_name = ''
         
-    def _load(self, inst = None, is_can=False):
+    def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
             Load a workspace and read the logs into the passed instrument reference
             @param inst: a reference to the current instrument
-            @param iscan: set this to True for can runs 
+            @param iscan: set this to True for can runs
+            @param extra_options: arguments to pass on to the Load Algorithm.
             @return: log values, number of periods in the workspace
         """
         if self._period > 1:
@@ -80,30 +79,21 @@ class LoadRun(object):
             period = 1
 
         if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
-            try:
-                outWs = LoadRaw(Filename=self._data_file, 
-                                OutputWorkspace=workspace, 
-                                SpectrumMin=self._spec_min, 
-                                SpectrumMax=self._spec_max)
-            except ValueError:
-                # MG - 2011-02-24: Temporary fix to load .sav or .s* files. Lets the file property
-                # work it out
-                file_hint = os.path.splitext(self._data_file)[0]
-                outWs = LoadRaw(Filename=file_hint, 
-                                OutputWorkspace=workspace, 
-                                SpectrumMin=self._spec_min, 
-                                SpectrumMax=self._spec_max)
-                
+            outWs = LoadRaw(Filename=self._data_file, 
+                            OutputWorkspace=workspace,
+                            **extra_options)
+
             alg = outWs.getHistory().lastAlgorithm()
             self._data_file = alg.getPropertyValue("Filename")
             LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
 
             workspace = self._leaveSinglePeriod(workspace, period)
         else:
+            if period != 1:
+                extra_options['EntryNumber']=period
             outWs = LoadNexus(Filename=self._data_file, 
                               OutputWorkspace=workspace,
-                SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, 
-                EntryNumber=period)
+                              **extra_options)
             alg = outWs.getHistory().lastAlgorithm()            
             self._data_file = alg.getPropertyValue("Filename")
 
@@ -205,53 +195,30 @@ class LoadRun(object):
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
         
         try:
-            data_file = self._extract_run_details(
-                self._data_file, self._is_trans, prefix=reducer.instrument.name(), 
-                run_number_width=reducer.instrument.run_number_width)
+            if reducer.instrument.name() == "":
+                raise AttributeError
         except AttributeError:
             raise AttributeError('No instrument has been assign, run SANS2D or LOQ first')
 
+        self._data_file = self._extract_run_details(self._data_file)
+
         if not self._reload:
             raise NotImplementedError('Raw workspaces must be reloaded, run with reload=True')
-            #this old code should be checked before reimplementing not reloading raw workspaces 
-            #if self._period > 1:
-            #    workspace = self._get_workspace_name(self._period)
-            #else:
-            #    workspace = self._get_workspace_name()
-            #self.periods_in_file = self._find_workspace_num_periods(workspace)
-            #if mantid.workspaceExists(workspace):
-            #    self.wksp_name = workspace
-            #    return ''
-            #period_definitely_inc = self._get_workspace_name(self._period)
-            #if mantid.workspaceExists(period_definitely_inc):
-            #    self.wksp_name = period_definitely_inc
-            #    return ''
 
-        self._data_file = os.path.join(reducer._data_path, data_file)
-        # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
-        if not os.path.exists(self._data_file):
-            self._data_file = data_file
-
+        spectrum_limits = dict()
         if self._is_trans:
-            try:
-                if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
-                    dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
-                    self._spec_min = dimension*dimension*2
-                    self._spec_max = self._spec_min + 4
-                else:
-                    self._spec_min = None
-                    self._spec_max = 8
-                self.periods_in_file, logs = self._load(reducer.instrument)
-            except RuntimeError, err:
-                sanslog.warning(str(err))
-                return '', -1
-        else:
-            try:
-                self.periods_in_file, logs = self._load(reducer.instrument)
-            except RuntimeError, details:
-                sanslog.warning(str(details))
-                self.wksp_name = ''
-                return '', -1
+            if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
+                dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
+                spec_min = dimension*dimension*2
+                spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
+
+        try:
+            # the spectrum_limits is not the default only for transmission data
+            self.periods_in_file, logs = self._load(reducer.instrument, extra_options=spectrum_limits)
+        except RuntimeError, details:
+            sanslog.warning(str(details))
+            self.wksp_name = ''
+            return '', -1
         
         return logs
 
@@ -292,56 +259,16 @@ class LoadRun(object):
                 DeleteWorkspace(inWs)
                 
 
-    def _extract_run_details(self, run_string, is_trans=False, prefix='', run_number_width=-1):
+    def _extract_run_details(self, run_string):
         """
             Takes a run number and file type and generates the filename, workspace name and log name
             @param run_string: either the name of a run file or a run number followed by a dot and then the file type, i.e. file extension
-            @param is_trans: true for transmission files, false for sample files (default is false)
-            @param prefix: expect this string to come before the run number (normally instrument name)
-            @param run_number_width: ISIS instruments often produce files with a fixed number of digits padded with zeros
         """
-        pieces = run_string.split('.')
-        if len(pieces) > 2: 
-            # this means that the foldername has '.',  so costruct the pieces to ignore foldername with '.' 
-            extension = pieces[-1]
-            body = '.'.join(pieces[:-1])
-            pieces = [body, extension]
-        if len(pieces) != 2:
-             raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
-        
-        #get a consistent format for path names, the Linux/Mac version
-        if run_string.find('\\') > -1 and run_string.find('/') == -1:
-            #means we have windows style their paths contain \ but can't contain /   
-            run_string = run_string.replace('\\', '/')
-
-        #interpret an entire file name
-        if run_string.find('/') > -1 or (prefix and run_string.find(prefix) == 0 ):
-            #assume we have a complete filename
-            filename = run_string
-            #remove the path name
-            names = run_string.split('/')
-            run_name = names[len(names)-1]
-            #remove the extension
-            file_parts = run_name.split('.')
-            run_name = file_parts[0]
-            self.ext = file_parts[len(file_parts)-1]
-            run_name = run_name.upper()
-            if run_name.endswith('-ADD'):
-                #remove the add files specifier, if it's there
-                end = len(run_name)-len('-ADD')
-                run_name = run_name[0:end]
-            names = run_name.split(prefix)
-            self.shortrun_no = names[len(names)-1]
-
-        else:#this is a run number dot extension
-            run_no = pieces[0]
-            self.ext = pieces[1]
-            fullrun_no, self.shortrun_no = _padRunNumber(run_no, run_number_width)
-            filename = prefix+fullrun_no+'.'+self.ext
-            
-        self.shortrun_no = int(self.shortrun_no)
-
-        return filename 
+        listOfFiles = FileFinder.findRuns(run_string)
+        firstFile = listOfFiles[0]
+        self.ext = firstFile[-3:]
+        self.shortrun_no = int(re.findall(r'\d+',run_string)[-1])
+        return firstFile
     
     def _find_workspace_num_periods(self, workspace): 
         """
@@ -1188,43 +1115,33 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         as a function of wavelength. The results are stored as a workspace
     """
     
-    # The different ways of doing a fit, convert the possible ways of specifying this into the stand way it's shown on the GUI 
+    # The different ways of doing a fit, convert the possible ways of specifying this (also the way it is specified in the GUI to the way it can be send to CalculateTransmission 
     TRANS_FIT_OPTIONS = {
-        'YLOG' : 'Logarithmic',
+        'YLOG' : 'Log',
         'STRAIGHT' : 'Linear',
-        'CLEAR' : 'Off',
+        'CLEAR' : 'Linear',
         # Add Mantid ones as well
-        'LOGARITHMIC' : 'Logarithmic',
-        'LOG' : 'Logarithmic',
+        'LOGARITHMIC' : 'Log',
+        'LOG' : 'Log',
         'LINEAR' : 'Linear',
         'LIN' : 'Linear',
-        'OFF' : 'Off'}
-    
-    
-    # Relate the different GUI names for doing a fit to the arguments that can be sent to CalculateTransmission 
-    CALC_TRANS_FIT_PARAMS = {
-        'Logarithmic' : 'Log',
-        'Linear' : 'Linear',
-        'Off' : 'Linear'
-    }
-
+        'OFF' : 'Linear',
+        'POLYNOMIAL':'Polynomial'}
+     
     #map to restrict the possible values of _trans_type
     CAN_SAMPLE_SUFFIXES = {
         False : 'sample',
         True : 'can'}
     
-    DEFAULT_FIT = 'Logarithmic'
+    DEFAULT_FIT = 'LOGARITHMIC'
 
     def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
         #set these variables to None, which means they haven't been set and defaults will be set further down
-        self.lambda_min = None
-        self._min_set = False
-        self.lambda_max = None
-        self._max_set = False
-        self.fit_method = None
-        self._method_set = False
-        self._use_full_range = None
+        self.fit_props = ['lambda_min', 'lambda_max', 'fit_method', 'order']
+        self.fit_settings = dict()
+        for prop in self.fit_props:
+            self.fit_settings['both::'+prop] = None
         # An optional LoadTransmissions object that contains the names of the transmission and direct workspaces for the sample
         self.samp_loader = None
         # An optional LoadTransmissions objects for the can's transmission and direct workspaces
@@ -1256,7 +1173,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             return self.samp_loader
 
 
-    def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
+    def set_trans_fit(self, fit_method, min_=None, max_=None, override=True, selector='both'):
         """
             Set how the transmission fraction fit is calculated, the range of wavelengths
             to use and the fit method
@@ -1264,31 +1181,53 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             @param max: highest wavelength to use
             @param fit_method: the fit type to pass to CalculateTransmission ('Logarithmic' or 'Linear')or 'Off'
             @param override: if set to False this call won't override the settings set by a previous call (default True)
+            @param selector: define if the given settings is valid for SAMPLE, CAN or BOTH transmissions.
         """
-        if fit_method:
-            if (not self._method_set) or override:
-                fit_method = fit_method.upper()
-                if fit_method in self.TRANS_FIT_OPTIONS.keys():
-                    self.fit_method = self.TRANS_FIT_OPTIONS[fit_method]
-                else:
-                    self.fit_method = self.DEFAULT_FIT
-                    _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
-                self._method_set = override
+        FITMETHOD = 'fit_method'
+        LAMBDAMIN = 'lambda_min'
+        LAMBDAMAX = 'lambda_max'
+        ORDER = 'order'
+        # processing the selector input
+        select = selector.lower()
+        if select not in ['both', 'can', 'sample']:
+            _issueWarning('Invalid selector option ('+selector+'). Fit to transmission skipped')
+            return
+        select += "::"
 
-        if min: min = float(min)
-        if max: max = float(max)
-        if not min is None:
-            if (not self._min_set) or override:
-                self.lambda_min = min
-                self._min_set = override
-                if self.fit_method == 'Off':
-                    _issueWarning('Transmission calculation: The minimum wavelength was set but fitting was set to off and so it will not be used')
-        if not max is None:
-            if (not self._max_set) or override:
-                self.lambda_max = max
-                self._max_set = override
-                if self.fit_method == 'Off':
-                    _issueWarning('Transmission calculation: The maximum wavelength was set but fitting was set to off and so it will not be used')
+        if not override and self.fit_settings.has_key(select + FITMETHOD) and self.fit_settings[select + FITMETHOD]:
+            #it was already configured and this request does not want to override
+            return
+        
+        if not fit_method:
+            # there is not point calling fit_method without fit_method argument
+            return
+        
+        fit_method = fit_method.upper()
+        if 'POLYNOMIAL' in fit_method:
+            order_str = fit_method[10:]
+            fit_method = 'POLYNOMIAL'
+            self.fit_settings[select+ORDER] = int(order_str)
+        if fit_method not in self.TRANS_FIT_OPTIONS.keys():
+            _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
+            fit_method = self.DEFAULT_FIT             
+
+        # get variables for this selector
+        sel_settings = dict()
+        for prop in self.fit_props:
+            sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]        
+
+        # copy fit_method
+        sel_settings[FITMETHOD] = fit_method        
+        
+        if min_: 
+            sel_settings[LAMBDAMIN] = float(min_) if fit_method not in ['OFF', 'CLEAR'] else None
+        if max_: 
+            sel_settings[LAMBDAMAX] = float(max_) if fit_method not in ['OFF', 'CLEAR'] else None
+
+        # apply the propertis to self.fit_settings
+        for prop in self.fit_props:
+            self.fit_settings[select+prop] = sel_settings[prop]
+
 
     def setup_wksp(self, inputWS, inst, wavbining, pre_monitor, post_monitor):
         """
@@ -1375,7 +1314,11 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         else:
             return loader.trans.wksp_name, loader.direct.wksp_name
 
-    def calculate(self, reducer):       
+    def calculate(self, reducer):
+        LAMBDAMIN = 'lambda_min'
+        LAMBDAMAX = 'lambda_max'
+        FITMETHOD = 'fit_method'
+        ORDER = 'order'
         #get the settings required to do the calculation
         trans_raw, direct_raw = self._get_run_wksps(reducer)
         
@@ -1384,10 +1327,12 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         if not direct_raw:
             raise RuntimeError('Attempting transmission correction with no direct file')
 
-        if self.fit_method:
-            fit_meth = self.fit_method
-        else:
-            fit_meth = self.DEFAULT_FIT
+        select = 'can::' if reducer.is_can() else 'direct::'
+
+        # get variables for this selector
+        sel_settings = dict()
+        for prop in self.fit_props:
+            sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]
 
         if self._trans_spec:
             post_sample = self._trans_spec
@@ -1396,22 +1341,19 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
 
         pre_sample = reducer.instrument.incid_mon_4_trans_calc
 
-        if self._use_full_range is None:
-            use_instrum_default_range = reducer.full_trans_wav
-        else:
-            use_instrum_default_range = self._use_full_range
+        use_instrum_default_range = reducer.full_trans_wav
 
         #there are a number of settings and defaults that determine the wavelength to use, go through each in order of increasing precedence
         if use_instrum_default_range:
             translambda_min = reducer.instrument.WAV_RANGE_MIN
             translambda_max = reducer.instrument.WAV_RANGE_MAX
         else:
-            if self.lambda_min and (fit_meth != 'Off'):
-                translambda_min = self.lambda_min
+            if sel_settings[LAMBDAMIN]:
+                translambda_min = sel_settings[LAMBDAMIN]
             else:
                 translambda_min = reducer.to_wavelen.wav_low
-            if self.lambda_max and (fit_meth != 'Off'):
-                translambda_max = self.lambda_max
+            if sel_settings[LAMBDAMAX]:
+                translambda_max = sel_settings[LAMBDAMAX]
             else:
                 translambda_max = reducer.to_wavelen.wav_high
 
@@ -1429,16 +1371,26 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                     trans_raw, translambda_min, translambda_max, reducer)
         
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
-        fit_type = self.CALC_TRANS_FIT_PARAMS[fit_meth]
-        CalculateTransmission(SampleRunWorkspace=trans_tmp_out,DirectRunWorkspace=direct_tmp_out,OutputWorkspace= fittedtransws,IncidentBeamMonitor=
-            pre_sample,TransmissionMonitor= post_sample,RebinParams= reducer.to_wavelen.get_rebin(), FitMethod=fit_type, OutputUnfittedData=True)
+        options = dict()
+        if sel_settings[FITMETHOD]:
+            options['FitMethod'] = self.TRANS_FIT_OPTIONS[sel_settings[FITMETHOD]]
+            if sel_settings[FITMETHOD] == "POLYNOMIAL":
+                options['PolynomialOrder'] = sel_settings[ORDER]
+        else:
+            options['FitMethod'] = self.TRANS_FIT_OPTIONS[self.DEFAULT_FIT]
+
+        CalculateTransmission(SampleRunWorkspace=trans_tmp_out, DirectRunWorkspace=direct_tmp_out,
+                              OutputWorkspace=fittedtransws, IncidentBeamMonitor=pre_sample,
+                              TransmissionMonitor=post_sample, 
+                              RebinParams=reducer.to_wavelen.get_rebin(), 
+                              OutputUnfittedData=True, **options) # options FitMethod, PolynomialOrder if present
 
         # Remove temporaries
         DeleteWorkspace(Workspace=trans_tmp_out)
         if direct_tmp_out != trans_tmp_out:
             DeleteWorkspace(Workspace=direct_tmp_out)
             
-        if fit_meth == 'Off':
+        if sel_settings[FITMETHOD] in ['OFF', 'CLEAR']:
             result = unfittedtransws
             DeleteWorkspace(fittedtransws)
         else:
@@ -1466,6 +1418,23 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         unfitted = fitted_name + "_unfitted"
         
         return fitted_name, unfitted
+
+    def _get_fit_property(self,selector, property_name):
+        if self.fit_settings.has_key(selector+'::' + property_name):
+            return self.fit_settings[selector+'::' + property_name]
+        else:
+            return self.fit_settings['both::'+property_name]
+        
+
+    def lambdaMin(self, selector):
+        return self._get_fit_property(selector.lower(), 'lambda_min')
+    def lambdaMax(self, selector):
+        return self._get_fit_property(selector.lower(), 'lambda_max')
+    def fitMethod(self, selector):
+        resp = self._get_fit_property(selector.lower(), 'fit_method')
+        if 'POLYNOMIAL' == resp:
+            resp += str(self._get_fit_property(selector.lower(), 'order'))
+        return resp
 
 class AbsoluteUnitsISIS(ReductionStep):
     DEFAULT_SCALING = 100.0
@@ -1861,18 +1830,30 @@ class UserFile(ReductionStep):
                 reducer.to_Q.set_gravity(False, override=False)
         
         elif upper_line.startswith('FIT/TRANS/'):
-            params = upper_line[10:].split()
-            nparams = len(params)
-            if nparams == 3 or nparams == 1:
+            #check if the selector is passed:
+            selector = 'BOTH'
+            if 'SAMPLE' in upper_line:
+                selector = 'SAMPLE'
+                params = upper_line[17:].split() # remove FIT/TRANS/SAMPLE/
+            elif 'CAN' in upper_line:
+                selector = 'CAN'
+                params = upper_line[14:].split() # remove FIT/TRANS/CAN/
+            else:
+                params = upper_line[10:].split() # remove FIT/TRANS/            
+
+            try:
+                nparams = len(params)
                 if nparams == 1:
                     fit_type = params[0]
                     lambdamin = lambdamax = None
-                else:
+                elif nparams == 3:
                     fit_type, lambdamin, lambdamax = params
-
-                reducer.transmission_calculator.set_trans_fit(min=lambdamin, 
-                    max=lambdamax, fit_method=fit_type, override=False)
-            else:
+                else:
+                    raise 1
+                reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
+                                                              fit_method=fit_type, override=False, 
+                                                              selector=selector)
+            except:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
 
         elif upper_line.startswith('FIT/MONITOR'):

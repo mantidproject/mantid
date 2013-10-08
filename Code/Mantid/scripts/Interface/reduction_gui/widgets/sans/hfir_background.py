@@ -71,7 +71,6 @@ class BackgroundWidget(BaseWidget):
             self.set_state(state)
         else:
             m = Background()
-            if self._settings.api2: m.PYTHON_API=2
             self.set_state(m)
             
         self._last_direct_state = None
@@ -131,14 +130,14 @@ class BackgroundWidget(BaseWidget):
         """
         bck_file = str(self._content.background_edit.text()).strip()
         self._content.background_chk.setChecked(state.background_corr)
-        self._content.background_edit.setText(QtCore.QString(state.background_file))
+        self._content.background_edit.setText(state.background_file)
         if state.background_file.strip() != bck_file:
             self.get_data_info()
         self._background_clicked(state.background_corr)
 
         if self.show_transmission:
-            self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission))
-            self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission_spread))
+            self._content.transmission_edit.setText(str("%6.4f" % state.bck_transmission))
+            self._content.dtransmission_edit.setText(str("%6.4f" % state.bck_transmission_spread))
             #self._content.thickness_edit.setText(QtCore.QString("%6.4f" % state.sample_thickness))
                     
             if isinstance(state.trans_calculation_method, state.DirectBeam):
@@ -150,7 +149,7 @@ class BackgroundWidget(BaseWidget):
     
             self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
             self._content.theta_dep_chk.setChecked(state.theta_dependent)
-            self._content.trans_dark_current_edit.setText(QtCore.QString(str(state.trans_dark_current)))
+            self._content.trans_dark_current_edit.setText(str(state.trans_dark_current))
             self._calculate_clicked(state.calculate_transmission)
         
         
@@ -159,7 +158,6 @@ class BackgroundWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = Background()
-        if self._settings.api2: m.PYTHON_API=2
         m.background_corr = self._content.background_chk.isChecked()
         m.background_file = str(self._content.background_edit.text())
         
@@ -254,19 +252,17 @@ class BackgroundWidget(BaseWidget):
         
         fname = str(self._content.background_edit.text())
         if len(str(fname).strip())>0:
-            api = 2 if self._settings.api2 else 1
             dataproxy = self._data_proxy(fname, "__background_raw")
             if len(dataproxy.errors)>0:
-                #QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
             
             self._settings.last_data_ws = dataproxy.data_ws
             if dataproxy.sample_detector_distance is not None:
-                self._content.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
+                self._content.sample_dist_edit.setText(str(dataproxy.sample_detector_distance))
                 util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
             if dataproxy.wavelength is not None:
-                self._content.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
+                self._content.wavelength_edit.setText(str(dataproxy.wavelength))
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
             if dataproxy.wavelength_spread is not None:
-                self._content.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
+                self._content.wavelength_spread_edit.setText(str(dataproxy.wavelength_spread))
                  

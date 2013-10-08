@@ -411,6 +411,8 @@ private:
   const int nBinsToBinTo;
 
 public:
+  static RebinByPulseTimesTestPerformance *createSuite() { return new RebinByPulseTimesTestPerformance(); }
+  static void destroySuite( RebinByPulseTimesTestPerformance *suite ) { delete suite; }
 
   RebinByPulseTimesTestPerformance() : 
     pulseTimeMin(0),

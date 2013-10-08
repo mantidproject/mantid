@@ -152,8 +152,8 @@ void PropertyHandler::init()
 class CreateAttributeProperty: public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty*>
 {
 public:
-  CreateAttributeProperty(FitPropertyBrowser* browser,const QString& name)
-    :m_browser(browser),m_name(name){}
+  CreateAttributeProperty(FitPropertyBrowser* browser, PropertyHandler *handler, const QString& name)
+      :m_browser(browser),m_handler(handler),m_name(name){}
 protected:
   /// Create string property
   QtProperty* apply(const std::string& str)const
@@ -184,8 +184,32 @@ protected:
     m_browser->m_boolManager->setValue(prop,b);
     return prop;
   }
+  /// Create vector property
+  QtProperty* apply(const std::vector<double>& b)const
+  {
+      //throw std::runtime_error("Vector attribute property not implememted.");
+      QtProperty *prop = m_browser->m_vectorManager->addProperty(m_name);
+      m_browser->m_vectorSizeManager->blockSignals(true);
+      QtProperty *sizeProp = m_browser->m_vectorSizeManager->addProperty("Size");
+      m_browser->m_vectorSizeManager->setValue(sizeProp, static_cast<int>(b.size()));
+      prop->addSubProperty(sizeProp);
+      sizeProp->setEnabled(false);
+      m_browser->m_vectorSizeManager->blockSignals(false);
+      m_browser->m_vectorDoubleManager->blockSignals(true);
+      QString dpName = "value[%1]";
+      for(size_t i = 0; i < b.size(); ++i)
+      {
+          QtProperty *dprop = m_browser->addDoubleProperty( dpName.arg(i), m_browser->m_vectorDoubleManager );
+          m_browser->m_vectorDoubleManager->setValue(dprop, b[i]);
+          prop->addSubProperty(dprop);
+          m_handler->m_vectorMembers << dprop;
+      }
+      m_browser->m_vectorDoubleManager->blockSignals(false);
+      return prop;
+  }
 private:
   FitPropertyBrowser* m_browser;
+  PropertyHandler* m_handler;
   QString m_name;
 };
 
@@ -200,11 +224,12 @@ void PropertyHandler::initAttributes()
     m_item->property()->removeSubProperty(m_attributes[i]);
   }
   m_attributes.clear();
+  m_vectorMembers.clear();
   for(size_t i=0;i<attNames.size();i++)
   {
     QString aName = QString::fromStdString(attNames[i]);
     Mantid::API::IFunction::Attribute att = function()->getAttribute(attNames[i]);
-    CreateAttributeProperty tmp(m_browser,aName);
+    CreateAttributeProperty tmp(m_browser, this, aName);
     QtProperty* prop = att.apply(tmp);
     m_item->property()->addSubProperty(prop);
     m_attributes << prop;
@@ -600,6 +625,7 @@ PropertyHandler* PropertyHandler::findHandler(QtProperty* prop)
   if (prop == m_workspaceIndex) return this;
   if (m_attributes.contains(prop)) return this;
   if (m_parameters.contains(prop)) return this;
+  if (m_vectorMembers.contains(prop)) return this;
   if (!m_ties.key(prop,"").isEmpty()) return this;
   QMap<QString,std::pair<QtProperty*,QtProperty*> >::iterator it = m_constraints.begin();
   for(;it!=m_constraints.end();++it)
@@ -703,6 +729,21 @@ protected:
   {
     b = m_browser->m_boolManager->value(m_prop);
   }
+  /// Create vector property
+  void apply(std::vector<double>& v)const
+  {
+      QList<QtProperty*> members = m_prop->subProperties();
+      if ( members.size() <= 1 )
+      {
+          v.clear();
+          return;
+      }
+      v.resize( members.size() - 1 );
+      for(int i = 1; i < members.size(); ++i)
+      {
+          v[i-1] = m_browser->m_vectorDoubleManager->value(members[i]);
+      }
+  }
 private:
   FitPropertyBrowser* m_browser;
   QtProperty* m_prop;
@@ -747,6 +788,14 @@ protected:
     m_browser->m_boolManager->setValue(m_prop,b);
     m_browser->m_changeSlotsEnabled = true;
   }
+  /// Set vector property
+  void apply(const std::vector<double>&)const
+  {
+      // this method is supposed to be called when corresponding
+      // property value changes but it doesn't have a value because
+      // it's a group property
+      throw std::runtime_error("Vector attribute not implemented.");
+  }
 private:
   FitPropertyBrowser* m_browser;
   QtProperty* m_prop;
@@ -770,6 +819,7 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
       att.apply(tmp);
       m_fun->setAttribute(attName.toStdString(),att);
       m_browser->compositeFunction()->checkFunction();
+      initAttributes();
       initParameters();
       if (this == m_browser->m_autoBackground)
       {
@@ -807,9 +857,10 @@ void PropertyHandler::setAttribute(const QString& attName, const double& attValu
       {
         if (prop->propertyName() == attName)
         {
-          m_browser->m_changeSlotsEnabled = false;
-          m_browser->m_doubleManager->setValue(prop,attValue);
-          m_browser->m_changeSlotsEnabled = true;
+            // re-insert the attribute and parameter properties as they may
+            // depend on the value of the attribute being set
+            initAttributes();
+            initParameters();
         }
       }
     }
@@ -844,8 +895,28 @@ void PropertyHandler::setAttribute(const QString& attName, const QString& attVal
         att.apply(tmp);
       }
     }
+    // re-insert the attribute and parameter properties as they may
+    // depend on the value of the attribute being set
+    initAttributes();
     initParameters();
   }
+}
+
+/**
+ * Set function vector attribute value
+ * @param prop :: A property for a member of a vector attribute.
+ */
+void PropertyHandler::setVectorAttribute(QtProperty *prop)
+{
+    foreach (QtProperty *att, m_attributes)
+    {
+        QList<QtProperty*> subProps = att->subProperties();
+        if ( subProps.contains(prop) )
+        {
+            setAttribute(att);
+            return;
+        }
+    }
 }
 
 /**
@@ -1329,8 +1400,8 @@ void PropertyHandler::removeConstraint(QtProperty* parProp)
       parProp->removeSubProperty(it.value().second);
     }
     m_fun->removeConstraint(parProp->propertyName().toStdString());
+    m_constraints.erase( it );
   }
-  m_constraints.clear();
 }
 
 /**

@@ -68,7 +68,7 @@ namespace DataHandling
     void parseBankLine(std::string line, double& cwl, int& bankid);
 
     /// Generate output workspace
-    DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<std::string, double> parammap);
+    DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<int, std::map<std::string, double> > bankparammap);
 
     /// Generate bank information workspace
     DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);

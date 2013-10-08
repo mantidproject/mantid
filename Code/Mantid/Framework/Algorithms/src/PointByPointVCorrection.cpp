@@ -42,7 +42,6 @@ void PointByPointVCorrection::initDocs()
   this->setOptionalMessage("Spectrum by spectrum division for vanadium normalisation correction.");
 }
 
-
 using namespace Kernel;
 using namespace API;
 
@@ -84,9 +83,7 @@ void PointByPointVCorrection::exec()
 		PARALLEL_START_INTERUPT_REGION
 
     const MantidVec& X=inputWS1->readX(i);
-
-    MantidVec& Xresult=outputWS->dataX(i); //Copy the Xs
-    Xresult=X;
+    outputWS->setX( i, inputWS1->refX(i) );
 
     const MantidVec& Y1=inputWS1->readY(i);
     const MantidVec& Y2=inputWS2->readY(i);
@@ -104,10 +101,9 @@ void PointByPointVCorrection::exec()
     std::transform(Y1.begin(),Y1.end(),resultY.begin(),resultY.begin(),std::multiplies<double>()); // Now resultY contains the A_i=s_i/v_i*Dlam_i
 
     // Calculate the errors squared related to A_i at this point
-    double r = 0.0;
     for (int j=0;j<size-1;j++)
     {
-      r=0;
+      double r=0.0;
       if (std::abs(Y1[j])>1e-7)
         r+=std::pow(E1[j]/Y1[j],2);
       if (std::abs(Y2[j])>1e-7)
@@ -117,7 +113,6 @@ void PointByPointVCorrection::exec()
         errors[j]=0;
     }
 
-
     // Calculate the normaliser
     double factor1=std::accumulate(Y1.begin(),Y1.end(),0.0);
     double factor2=std::accumulate(resultY.begin(),resultY.end(),0.0);
@@ -126,19 +121,25 @@ void PointByPointVCorrection::exec()
     // Now propagate the error bars due to the normaliser
     double error2_factor1=std::inner_product(E1.begin(),E1.end(),E1.begin(),0.0);
     double error2_factor2=0;
-    double test;
+
     for (int j=0;j<size-1;j++)
     {
-      test=std::abs(std::pow(resultY[j],2));
+      double test=std::abs(std::pow(resultY[j],2));
       if (test>DBL_MAX)
         test=0;
       error2_factor2+=errors[j]*test/factor2/factor2;
     }
     double error2_factor=(error2_factor1/factor1/factor1+error2_factor2);
-
-    //Calculate the normalized Y values
-    std::transform(resultY.begin(),resultY.end(),resultY.begin(),std::bind2nd(std::multiplies<double>(),factor)); // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
-
+    
+    // Calculate the normalized Y values
+    // NOTE: Previously, we had been using std::transform with std::bind2nd(std::multiplies<double>(),factor)
+    //       here, but that seemed to have strange effects in Windows Debug builds which caused the unit tests
+    //       to sometimes fail.  Maybe this is some compiler bug to do with using bind2nd within the parrallel macros.
+    for( auto rY = resultY.begin(); rY != resultY.end(); ++rY )
+    {
+      *rY *= factor; // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
+    }
+    
     //Finally get the normalized errors
     for (int j=0;j<size-1;j++)
       resultE[j]=resultY[j]*sqrt(errors[j]+error2_factor);

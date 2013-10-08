@@ -54,13 +54,13 @@ public:
 
     // Register the workspace in the data service
     this->inputSpace = "testWorkspace";
-    AnalysisDataService::Instance().add(inputSpace, space);
+    AnalysisDataService::Instance().addOrReplace(inputSpace, space);
 
     // Load the instrument data
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();
     // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "HET_Definition.xml";
+    const std::string inputFile = ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", this->inputSpace);
     loader.setProperty("RewriteSpectraMap",false);
@@ -73,12 +73,59 @@ public:
     TS_ASSERT( alg.isInitialized() );
   }
 
+  /* Test that when the units are the same between the input workspace and the target, AND the output workspace name IS the same as the input workspace name,
+   * that the input workspace and output workspace point to the same in-memory workspace.
+   */
+  void test_Exec_Input_Same_Output_And_Same_Units()
+  {
+    this->setup_WS();
+    if (!alg.isInitialized())
+      alg.initialize();
+
+    auto inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
+    // Set the properties
+    alg.setRethrows(true);
+    alg.setPropertyValue("InputWorkspace", inputSpace);
+    alg.setPropertyValue("OutputWorkspace", inputSpace); // OutputWorkspace == InputWorkspace
+    alg.setPropertyValue("Target", "TOF"); // Same as the input workspace.
+    alg.execute();
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
+    TSM_ASSERT_EQUALS("Input and Output Workspaces should be pointer identical.", inWS.get(), outWS.get());
+    AnalysisDataService::Instance().remove(inputSpace);
+  }
+
+  /* Test that when the units are the same between the input workspace and the target, AND the output workspace name IS NOT the same as the input workspace name,
+   * that the input workspace and output workspace do not point to the same in-memory workspace.
+   */
+  void test_Exec_Input_different_Output_But_Same_Units()
+  {
+    this->setup_WS();
+    if (!alg.isInitialized())
+      alg.initialize();
+
+    auto inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputSpace);
+    // Set the properties
+    alg.setRethrows(true);
+    alg.setPropertyValue("InputWorkspace", inputSpace);
+    const std::string outputWorkspaceName = "OutWSName";
+    alg.setPropertyValue("OutputWorkspace", outputWorkspaceName); // OutputWorkspace == InputWorkspace
+    alg.setPropertyValue("Target", "TOF"); // Same as the input workspace.
+    alg.execute();
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspaceName);
+    TSM_ASSERT_DIFFERS("Input and Output Workspaces be completely different objects.", inWS.get(), outWS.get());
+    AnalysisDataService::Instance().remove(outputWorkspaceName);
+    AnalysisDataService::Instance().remove(inputSpace);
+  }
+
   void testExec()
   {
     this->setup_WS();
     if ( !alg.isInitialized() ) alg.initialize();
 
     // Set the properties
+    alg.setRethrows(true);
     alg.setPropertyValue("InputWorkspace",inputSpace);
     outputSpace = "outWorkspace";
     alg.setPropertyValue("OutputWorkspace",outputSpace);
@@ -86,7 +133,7 @@ public:
     alg.setPropertyValue("AlignBins","1");
 
     TS_ASSERT_THROWS_NOTHING( alg.execute());
-    TS_ASSERT( alg.isExecuted() );
+    alg.isExecuted();
 
     // Get back the saved workspace
     Workspace_sptr output;

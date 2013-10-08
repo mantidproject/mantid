@@ -175,6 +175,8 @@ namespace Mantid
       void expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const;
       /// Calculate the time-weighted average of a property in a filtered range
       double averageValueInFilter(const TimeSplitterType& filter) const;
+      /// Calculate the time-weighted average of a property
+      double timeAverageValue() const;
 
       ///  Return the time series as a correct C++ map<DateAndTime, TYPE>. All values
       std::map<DateAndTime, TYPE> valueAsCorrectMap() const;

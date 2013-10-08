@@ -69,7 +69,7 @@ def createConvFitFun(options, par, file):
         lor_2 = 'name=Lorentzian,Amplitude='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',HWHM='+str(par[ip+5])
         lor_fun = lor_fun +';'+ lor_2 +';ties=(f0.PeakCentre=f1.PeakCentre)'
     if options[1]:
-        delta_fun = 'name=DeltaFunction,Amplitude='+str(par[2])
+        delta_fun = 'name=DeltaFunction,Height='+str(par[2])
         lor_fun = delta_fun +';' + lor_fun
     func = bgd_fun +';'+ pk_1 +';('+ lor_fun +'))'
     return func
@@ -116,6 +116,10 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
         unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
+        AddSampleLog(Workspace=fout, LogName="Fit Program", LogType="String", LogText='ConvFit')
+        AddSampleLog(Workspace=fout, LogName='Background', LogType='String', LogText=str(options[0]))
+        AddSampleLog(Workspace=fout, LogName='Delta', LogType='String', LogText=str(options[1]))
+        AddSampleLog(Workspace=fout, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
         DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
         DeleteWorkspace(fitWS+str(i)+'_Parameters')
         if i == 0:
@@ -200,6 +204,14 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startX, EndX=endX, FitType='Sequential')
     wsname = confitParsToWS(outNm, inputWS, specMin, specMax)
+
+    # Add some information about convfit to the output workspace
+    options = getConvFitOption(ftype, bgd[:-2], Verbose)
+    AddSampleLog(Workspace=wsname, LogName="Fit Program", LogType="String", LogText='ConvFit')
+    AddSampleLog(Workspace=wsname, LogName='Background', LogType='String', LogText=str(options[0]))
+    AddSampleLog(Workspace=wsname, LogName='Delta', LogType='String', LogText=str(options[1]))
+    AddSampleLog(Workspace=wsname, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
+
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
     getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose)
     if Save:
@@ -421,13 +433,13 @@ def furyPlot(inWS, spec):
     layer = graph.activeLayer()
     layer.setScale(mp.Layer.Left, 0, 1.0)
 
-def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
+def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         Plot=False): 
     StartTime('Fury')
     workdir = config['defaultsave.directory']
-    LoadNexus(Filename=sam_files[0], OutputWorkspace='__sam_tmp') # SAMPLE
-    nsam,npt = CheckHistZero('__sam_tmp')
-    Xin = mtd['__sam_tmp'].readX(0)
+    samTemp = samWorkspaces[0]
+    nsam,npt = CheckHistZero(samTemp)
+    Xin = mtd[samTemp].readX(0)
     d1 = Xin[1]-Xin[0]
     if d1 < 1e-8:
         error = 'Data energy bin is zero'
@@ -445,26 +457,19 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
     if Verbose:
         logger.notice('Reading RES file : '+res_file)
     LoadNexus(Filename=res_file, OutputWorkspace='res_data') # RES
-    CheckAnalysers('__sam_tmp','res_data',Verbose)
+    CheckAnalysers(samTemp,'res_data',Verbose)
     nres,nptr = CheckHistZero('res_data')
     if nres > 1:
-        CheckHistSame('__sam_tmp','Sample','res_data','Resolution')
-    DeleteWorkspace('__sam_tmp')
+        CheckHistSame(samTemp,'Sample','res_data','Resolution')
     Rebin(InputWorkspace='res_data', OutputWorkspace='res_data', Params=rebinParam)
     Integration(InputWorkspace='res_data', OutputWorkspace='res_int')
     ConvertToPointData(InputWorkspace='res_data', OutputWorkspace='res_data')
     ExtractFFTSpectrum(InputWorkspace='res_data', OutputWorkspace='res_fft', FFTPart=2)
     Divide(LHSWorkspace='res_fft', RHSWorkspace='res_int', OutputWorkspace='res')
-    for sam_file in sam_files:
-        (direct, filename) = os.path.split(sam_file)
+    for samWs in samWorkspaces:
+        (direct, filename) = os.path.split(samWs)
         (root, ext) = os.path.splitext(filename)
-        if (ext == '.nxs'):
-            if Verbose:
-                logger.notice('Reading sample file : '+sam_file)
-            LoadNexus(Filename=sam_file, OutputWorkspace='sam_data') # SAMPLE
-            Rebin(InputWorkspace='sam_data', OutputWorkspace='sam_data', Params=rebinParam)
-        else: #input is workspace
-            Rebin(InputWorkspace=sam_file, OutputWorkspace='sam_data', Params=rebinParam)
+        Rebin(InputWorkspace=samWs, OutputWorkspace='sam_data', Params=rebinParam)
         Integration(InputWorkspace='sam_data', OutputWorkspace='sam_int')
         ConvertToPointData(InputWorkspace='sam_data', OutputWorkspace='sam_data')
         ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
@@ -1030,8 +1035,8 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
         EMode='Indirect', EFixed=efixed)
     ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
-    CloneWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw')
-    replace_workspace_axis(CorrectedWS+'_rqw', Q, 'MomentumTransfer')
+    ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw', 
+        Target='ElasticQ', EMode='Indirect', EFixed=efixed)
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
     if canWS != '':
         DeleteWorkspace(CorrectedCanWS)
@@ -1049,10 +1054,11 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
     applyCorrections routine.'''
     StartTime('ApplyCorrections')
     workdir = config['defaultsave.directory']
-    CheckAnalysers(sample,container,Verbose)
     s_hist,sxlen = CheckHistZero(sample)
     sam_name = getWSprefix(sample)
+    efixed = getEfixed(sample)
     if container != '':
+        CheckAnalysers(sample,container,Verbose)
         CheckHistSame(sample,'Sample',container,'Container')
         (instr, can_run) = getInstrRun(container)
         if ScaleOrNotToScale:
@@ -1088,9 +1094,8 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
             if Verbose:
                 logger.notice('Subtracting '+container+' from '+sample)
             Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
-            CloneWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw')
-            theta,Q = GetThetaQ(sample)
-            replace_workspace_axis(sub_result+'_rqw', Q, 'MomentumTransfer')
+            ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
+                Target='ElasticQ', EMode='Indirect', EFixed=efixed)
             RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
             rws = mtd[sub_result+'_red']
             outNm= sub_result + '_Result_'
@@ -1132,14 +1137,6 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
             if Verbose:
                 logger.notice('Output file created : '+res_path)
     EndTime('ApplyCorrections')
-
-from mantid.api import NumericAxis      
-def replace_workspace_axis(wsName, new_values, new_unit):
-    ax1 = NumericAxis.create(len(new_values))
-    for i in range(len(new_values)):
-        ax1.setValue(i, new_values[i])
-    ax1.setUnit(new_unit)
-    mtd[wsName].replaceAxis(1, ax1)      #axis=1 is vertical
 
 def plotCorrResult(inWS,PlotResult):
     nHist = mtd[inWS].getNumberHistograms()

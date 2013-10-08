@@ -125,6 +125,27 @@ public:
     TS_ASSERT_THROWS(UnitCell(10.4165,3.4165,10.4165,30,45,80);,std::invalid_argument);
   }
 
+  void test_printing()
+  {
+    // w/o uncertainties
+    UnitCell cell(2.,3.,4.,80.,90.,100.);
+    {
+      std::stringstream msg;
+      msg << cell;
+      TS_ASSERT_EQUALS(msg.str(),
+                       "Lattice Parameters:    2.000    3.000    4.000   80.000   90.000  100.000");
+    }
+
+    // w/ uncertainties
+    cell.setError(1.,2.,3.,4.,5.,6.);
+    {
+      std::stringstream msg;
+      msg << cell;
+      TS_ASSERT_EQUALS(msg.str(),
+                       "Lattice Parameters:    2.000    3.000    4.000   80.000   90.000  100.000\nParameter Errors  :    1.000    2.000    3.000    4.000    5.000    6.000");
+    }
+  }
+
 };
 
 

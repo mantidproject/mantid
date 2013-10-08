@@ -11,7 +11,7 @@ catalog and saves investigation types lists to a mantid internal data structure.
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/ICatalog.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidICat/ErrorHandling.h"
+
 namespace Mantid
 {
   namespace ICat
@@ -59,10 +59,10 @@ namespace Mantid
       {
         catalog_sptr->listInvestigationTypes(investTypes);
       }
-      catch(SessionException& e)
+      catch(std::runtime_error& e)
       {
         setProperty("IsValid",false);
-        throw std::runtime_error(e.what());
+        throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
       }
       setProperty("InvestigationTypes",investTypes);
     }

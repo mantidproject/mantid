@@ -4,14 +4,18 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CorrectFlightPaths.h"
-#include "MantidDataHandling/LoadILL.h"
-
+#include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 
-
 using namespace Mantid::API;
+using namespace Mantid;
+using namespace Kernel;
+
 using Mantid::Algorithms::CorrectFlightPaths;
 
 class CorrectFlightPathsTest: public CxxTest::TestSuite {
@@ -26,27 +30,51 @@ public:
 	}
 
 	CorrectFlightPathsTest() :
-		// alter here if needed
-			m_testFile("ILLIN5_104007.nxs"),
-			m_l2(4){
+			// alter here if needed
+			m_l2(4) {
 	}
 
 	void testTheBasics() {
 		CorrectFlightPaths c;
-		TS_ASSERT_EQUALS( c.name(), "CorrectFlightPaths");
-		TS_ASSERT_EQUALS( c.version(), 1);
+		TS_ASSERT_EQUALS(c.name(), "CorrectFlightPaths");
+		TS_ASSERT_EQUALS(c.version(), 1);
 	}
 
 	void testExec() {
+
 		std::string inputWSName("test_input_ws");
 		std::string outputWSName("test_output_ws");
 
-		// Start by loading our NXS file
-		Mantid::API::IAlgorithm* loader = Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadILL");
-		loader->setPropertyValue("Filename", m_testFile);
-		loader->setPropertyValue("OutputWorkspace", inputWSName);
-		loader->execute();
-		TS_ASSERT( loader->isExecuted());
+		std::vector<double> L2(5, 5);
+		std::vector<double> polar(5, (30. / 180.) * 3.1415926);
+		polar[0] = 0;
+		std::vector<double> azimutal(5, 0);
+		azimutal[1] = (45. / 180.) * 3.1415936;
+		azimutal[2] = (90. / 180.) * 3.1415936;
+		azimutal[3] = (135. / 180.) * 3.1415936;
+		azimutal[4] = (180. / 180.) * 3.1415936;
+
+		int numBins = 10;
+		Mantid::API::MatrixWorkspace_sptr dataws = WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar,
+				azimutal, numBins, -1, 3, 3);
+
+		dataws->getAxis(0)->setUnit("TOF");
+		dataws->mutableRun().addProperty("wavelength",boost::lexical_cast<std::string>(5));
+
+		dataws->instrumentParameters().addString(dataws->getInstrument()->getComponentID(),"l2",boost::lexical_cast<std::string>(m_l2) );
+
+
+		API::AnalysisDataService::Instance().addOrReplace(inputWSName, dataws);
+
+		// BEFORE
+		for (int i = 0; i < 5; i++) {
+			Mantid::Geometry::IDetector_const_sptr det = dataws->getDetector(i);
+			double r, theta, phi;
+			Mantid::Kernel::V3D pos = det->getPos();
+			pos.getSpherical(r, theta, phi);
+			// Corrected distance to 4!
+			TS_ASSERT_DIFFERS(r, m_l2)
+		}
 
 		CorrectFlightPaths c;
 		if (!c.isInitialized())
@@ -55,19 +83,22 @@ public:
 		c.setPropertyValue("InputWorkspace", inputWSName);
 		c.setPropertyValue("OutputWorkspace", outputWSName);
 		c.execute();
-		TS_ASSERT( c.isExecuted());
+		TS_ASSERT(c.isExecuted());
 
 		Mantid::API::MatrixWorkspace_const_sptr output;
-		output = Mantid::API::AnalysisDataService::Instance().retrieveWS <Mantid::API::MatrixWorkspace> (outputWSName);
+		output = Mantid::API::AnalysisDataService::Instance().retrieveWS<
+				Mantid::API::MatrixWorkspace>(outputWSName);
 
+		// AFTER
 		// test the first tube to see if distance was well corrected to l2
-		for (int i = 0; i < 128; i++) {
-			Mantid::Geometry::IDetector_const_sptr det = output->getDetector(1);
+		for (int i = 0; i < 5; i++) {
+			Mantid::Geometry::IDetector_const_sptr det = output->getDetector(i);
 			double r, theta, phi;
 			Mantid::Kernel::V3D pos = det->getPos();
 			pos.getSpherical(r, theta, phi);
-			// Corrected distance to 4!
-			TS_ASSERT_EQUALS(r, m_l2)
+			// Corrected distance to l2!
+			// TS_ASSERT_EQUALS(r, m_l2)
+			TS_ASSERT_DELTA(r, m_l2,0.001)
 		}
 
 		AnalysisDataService::Instance().remove(outputWSName);
@@ -75,7 +106,6 @@ public:
 	}
 
 private:
-	std::string m_testFile;
 	int m_l2;
 
 };

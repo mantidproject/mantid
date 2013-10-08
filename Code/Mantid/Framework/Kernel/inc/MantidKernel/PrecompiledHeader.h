@@ -5,6 +5,8 @@
 
 #if _WIN32
 #define _WIN32_WINNT 0x0510
+#include <winsock2.h> // prevents a conflict caused by windows.h
+                      // trying to include winsock.h
 #include <windows.h>
 #endif
 

@@ -54,6 +54,20 @@ namespace Algorithms
   {
   }
   
+  const std::string CreateGroupingWorkspace::name() const
+  {
+    return "CreateGroupingWorkspace";
+  }
+
+  int CreateGroupingWorkspace::version() const
+  {
+    return 1;
+  }
+
+  const std::string CreateGroupingWorkspace::category() const
+  {
+    return "Utility\\Workspaces;Transforms\\Grouping";
+  }
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
@@ -93,7 +107,8 @@ namespace Algorithms
     grouping.push_back("bank");
     declareProperty("GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
         "Only used if GroupNames is empty: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks");
-
+    declareProperty("MaxRecursionDepth", 5,
+                    "Number of levels to search into the instrument (default=5)");
 
     declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputWorkspace","",Direction::Output),
         "An output GroupingWorkspace.");
@@ -106,6 +121,7 @@ namespace Algorithms
     std::string groupby("Specify Grouping");
     setPropertyGroup("GroupNames", groupby);
     setPropertyGroup("GroupDetectorsBy", groupby);
+    setPropertyGroup("MaxRecursionDepth", groupby);
 
     // output properties
     declareProperty("NumberGroupedSpectraResult", EMPTY_INT(), "The number of spectra in groups", Direction::Output);
@@ -310,7 +326,7 @@ namespace Algorithms
       inst = tempWS->getInstrument();
     }
 
-    if (GroupNames.empty())
+    if (GroupNames.empty() && OldCalFilename.empty())
     {
       if (grouping.compare("All") == 0)
       {
@@ -324,6 +340,8 @@ namespace Algorithms
       {
           sortnames = true;
           GroupNames = "";
+          int maxRecurseDepth = this->getProperty("MaxRecursionDepth");
+
           // cppcheck-suppress syntaxError
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 300; ++num)
@@ -331,7 +349,7 @@ namespace Algorithms
               PARALLEL_START_INTERUPT_REGION
               std::ostringstream mess;
               mess<< grouping<<num;
-              IComponent_const_sptr comp = inst->getComponentByName(mess.str(), 15);
+              IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
               PARALLEL_CRITICAL(GroupNames)
               if(comp) GroupNames+=mess.str()+",";
               PARALLEL_END_INTERUPT_REGION
@@ -351,9 +369,9 @@ namespace Algorithms
 
     Progress prog(this,0.2,1.0, outWS->getNumberHistograms() );
     // Make the grouping one of two ways:
-    if (GroupNames != "")
+    if (!GroupNames.empty())
       makeGroupingByNames(GroupNames, inst, detIDtoGroup, prog, sortnames);
-    else if (OldCalFilename != "")
+    else if (!OldCalFilename.empty())
       readGroupingFile(OldCalFilename, detIDtoGroup, prog);
 
     g_log.information() << detIDtoGroup.size() << " entries in the detectorID-to-group map.\n";

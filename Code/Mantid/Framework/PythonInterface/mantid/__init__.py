@@ -95,13 +95,8 @@ from kernel import plugins as _plugins
 
 _plugins_key = 'python.plugins.directories'
 _user_key = 'user.%s' % _plugins_key
-_deprecated_key = 'pythonalgorithms.directories'
 plugin_dirs = _plugins.get_plugin_paths_as_set(_plugins_key)
 plugin_dirs.update(_plugins.get_plugin_paths_as_set(_user_key))
-
-# Check the deprecated key "pythonalgorithms.directories"  and add those directories in.
-# Also merge the new directories  into the new user key & update the properties config
-plugin_dirs = _plugins.cleanup_deprecated_key(plugin_dirs, _deprecated_key, _user_key)
 
 # Load
 plugin_files = []

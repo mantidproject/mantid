@@ -3,7 +3,7 @@
 
 #include "MantidAPI/ICatalog.h"
 #include "MantidICat/CatalogSearchParam.h"
-#include "MantidICat/ErrorHandling.h"
+#include "MantidICat/ICat3/ICat3ErrorHandling.h"
 
 namespace Mantid
 {

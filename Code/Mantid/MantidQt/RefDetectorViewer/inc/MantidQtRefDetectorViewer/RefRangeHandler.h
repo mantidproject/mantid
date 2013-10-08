@@ -1,15 +1,15 @@
 #ifndef REF_RANGE_HANDLER_H
 #define REF_RANGE_HANDLER_H
 
-#include "MantidQtImageViewer/IRangeHandler.h"
+#include "MantidQtSpectrumViewer/IRangeHandler.h"
 #include "ui_RefImageView.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "DllOption.h"
 
 /**
     @class RangeHandler 
   
-      This manages the min, max and step range controls for the ImageView 
+    This manages the min, max and step range controls for the SpectrumView 
     data viewer. 
  
     @author Dennis Mikkelson 
@@ -42,7 +42,7 @@ namespace RefDetectorViewer
 {
 
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public ImageView::IRangeHandler
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public SpectrumView::IRangeHandler
 {
   public:
 
@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public ImageView::
     RefRangeHandler( Ui_RefImageViewer* iv_ui );
 
     /// Configure min, max and step controls for the specified data source
-    void ConfigureRangeControls( ImageView::ImageDataSource* data_source );
+    void ConfigureRangeControls( SpectrumView::SpectrumDataSource* data_source );
 
     /// Get the range of data to display in the image, from GUI controls
     void GetRange( double &min, double &max, double &step );
@@ -67,7 +67,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public ImageView::
     size_t         total_n_steps;
 };
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView
 
 #endif // REF_RANGE_HANDLER_H

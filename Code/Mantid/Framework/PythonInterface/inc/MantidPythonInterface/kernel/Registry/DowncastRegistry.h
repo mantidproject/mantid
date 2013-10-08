@@ -34,7 +34,7 @@ namespace Mantid
       /// Returns an downcasting converter
       DLLExport void registerIDForDowncasting(const std::string & id, const PyTypeObject * type);
       /// Get an downcasted type object for the given object
-      DLLExport const PyTypeObject * getDerivedType(boost::python::object value);
+      DLLExport const PyTypeObject * getDerivedType(const boost::python::object &value);
       /// Overload. Get an downcasted type object for the given object
       DLLExport const PyTypeObject * getDerivedType(PyObject *value);
 

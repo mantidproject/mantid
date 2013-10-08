@@ -4,6 +4,7 @@
 #include "MantidAPI/SpectraAxis.h"
 
 #include <fstream>
+#include <sstream>
 
 using Mantid::API::SpectraAxis;
 using std::set;
@@ -101,14 +102,14 @@ namespace DataObjects
   }
 
   /**
-   * @return :: A pointer to the created info node.
+   * @return A string containing the workspace description
    */
-  API::Workspace::InfoNode *SpecialWorkspace2D::createInfoNode() const
+  const std::string SpecialWorkspace2D::toString() const
   {
-      auto node = new InfoNode(*this);
-      node->addLine( "Title: " + getTitle() );
-      node->addLine( "Histograms: " + boost::lexical_cast<std::string>(getNumberHistograms()) );
-      return node;
+    std::ostringstream os;
+    os << "Title: " << getTitle() << "\n";
+    os << "Histograms: " << getNumberHistograms() << "\n";
+    return os.str();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -177,8 +178,9 @@ namespace DataObjects
   {
     std::map<detid_t,size_t>::iterator it = detID_to_WI.find(detectorID);
     if (it == detID_to_WI.end()){
-      g_log.warning() << "Input Detector ID = " << detectorID << " Is Invalid" << std::endl;
-      throw std::invalid_argument("SpecialWorkspace2D::setValue(): Invalid detectorID provided.");
+      std::stringstream msg;
+      msg << "SpecialWorkspace2D::setValue(): Input Detector ID = " << detectorID << " Is Invalid";
+      throw std::invalid_argument( msg.str() );
     }
     else
     {

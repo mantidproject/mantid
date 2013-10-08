@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
-
+#include "MantidQtCustomInterfaces/Transmission.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtCustomInterfaces/Background.h"
 
@@ -54,8 +54,8 @@ Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) :
   m_calCalR1(NULL), m_calCalR2(NULL), m_calResR1(NULL),
   m_calCalCurve(NULL), m_calResCurve(NULL),
   // Null pointers - Diagnostics Tab
-  m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL)
-
+  m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL),
+  m_tab_trans(new Transmission(m_uiForm,this))
 {
   // Constructor
 }
@@ -112,6 +112,9 @@ void Indirect::initLayout()
   connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
+
+  // "Transmission" tab
+  connect(m_tab_trans, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
 
   // create validators
   m_valInt = new QIntValidator(this);
@@ -182,6 +185,8 @@ void Indirect::helpClicked()
     url += "Diagnostics";
   else if ( tabName == "S(Q, w)" )
     url += "SofQW";
+  else if (tabName == "Transmission")
+    url += "Transmission";
   QDesktopServices::openUrl(QUrl(url));
 }
 /**
@@ -207,6 +212,10 @@ void Indirect::runClicked()
   else if ( tabName == "S(Q, w)" )
   {
     sOfQwClicked();
+  }
+  else if (tabName == "Transmission")
+  {
+    m_tab_trans->runTab();
   }
 }
 
@@ -1684,14 +1693,12 @@ void Indirect::sOfQwClicked()
         "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
         "(dir, file) = os.path.split(filename)\n"
         "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n"
-        "cleanup = True\n"; 
+        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
     }
     else
     {
       pyInput +=
-        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n"
-        "cleanup = False\n";
+        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
     }
 
     // Create output name before rebinning
@@ -1701,10 +1708,7 @@ void Indirect::sOfQwClicked()
     {
       QString eRebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
       pyInput += "Rebin(InputWorkspace=sqwInput, OutputWorkspace=sqwInput+'_r', Params='" + eRebinString + "')\n"
-        "if cleanup:\n"
-        "    DeleteWorkspace(sqwInput)\n"
-        "sqwInput += '_r'\n"
-        "cleanup = True\n";
+        "sqwInput += '_r'\n";
     }
     pyInput +=
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
@@ -1716,10 +1720,6 @@ void Indirect::sOfQwClicked()
       pyInput += "SofQW2(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
     else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped/Fractional Area (SofQW3)")
       pyInput += "SofQW3(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    
-    pyInput +=
-      "if cleanup:\n"
-      "    DeleteWorkspace(sqwInput)\n";
 
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {

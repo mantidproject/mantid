@@ -117,11 +117,6 @@ namespace CurveFitting
     /// Calculate LeBail pattern from from input peak parameters
     void execPatternCalculation();
 
-    /// Calculate diffraction pattern
-    bool calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
-                                     const MantidVec &vecX, MantidVec& vecY,
-                                     map<string, Parameter> parammap, bool recalpeakintesity);
-
     /// LeBailFit
     void execLeBailFit();
 
@@ -213,6 +208,10 @@ namespace CurveFitting
     /// Main for random walk process
     void execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter> &parammap);
 
+    /// Work on Markov chain to 'solve' LeBail function
+    void doMarkovChain(const map<string, Parameter> &parammap, const vector<double>& vecX, const vector<double> &vecPurePeak,
+                       const vector<double> &vecBkgd, size_t maxcycles, const Rfactor &startR, int randomseed);
+
     /// Set up Monte Carlo random walk strategy
     void setupBuiltInRandomWalkStrategy();
 
@@ -223,9 +222,9 @@ namespace CurveFitting
 
     /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
     bool calculateDiffractionPattern(const MantidVec &vecX, const MantidVec &vecY,
-                                       bool inputraw, bool outputwithbkgd,
-                                       MantidVec& vecBkgd,  MantidVec& values,
-                                       Rfactor& rfactor);
+                                     bool inputraw, bool outputwithbkgd,
+                                     const MantidVec& vecBkgd,  MantidVec& values,
+                                     Rfactor& rfactor);
 
     /// Calculate powder diffraction statistic Rwp
     //void calculatePowderPatternStatistic(const MantidVec &values, const vector<double> &background,
@@ -243,7 +242,7 @@ namespace CurveFitting
 
     /// Book keep the (sopposed) best MC result
     void bookKeepBestMCResult(map<string, Parameter> parammap,
-                              vector<double> &bkgddata, Rfactor rfactor, size_t istep);
+                              const vector<double> &bkgddata, Rfactor rfactor, size_t istep);
 
     /// Apply the value of parameters in the source to target
     void applyParameterValues(map<string, Parameter> &srcparammap,
@@ -292,6 +291,8 @@ namespace CurveFitting
     DataObjects::TableWorkspace_sptr reflectionWS;
 
     size_t m_wsIndex;
+
+    double m_startX, m_endX;
 
     /// Peaks about input and etc.
     //  These two are used for sorting peaks.
@@ -411,6 +412,8 @@ namespace CurveFitting
     vector<double> m_bestBkgdParams;
     int m_roundBkgd;
     vector<double> m_bkgdParameterStepVec;
+
+    double m_peakCentreTol;
 
   };
 

@@ -69,7 +69,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(det.getID(), 1)
         self.assertFalse(det.isMasked())
         self.assertAlmostEqual(2.71496516, det.getTwoTheta(V3D(0,0,11), V3D(0,0,1)))
-
+        
     def test_spectrum_retrieval(self):
         # Spectrum
         spec = self._test_ws.getSpectrum(1)
@@ -80,6 +80,13 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(len(expected), len(ids))
         for i in range(len(ids)):
             self.assertEquals(expected[i], ids[i])
+
+    def test_detector_two_theta(self):
+        det = self._test_ws.getDetector(1)
+        two_theta = self._test_ws.detectorTwoTheta(det)
+        self.assertAlmostEquals(two_theta,0.01999733,places=8)
+        signed_two_theta = self._test_ws.detectorSignedTwoTheta(det)
+        self.assertAlmostEquals(signed_two_theta,0.01999733,places=8)
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
         wsname = "MatrixWorkspaceTest_Property"

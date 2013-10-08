@@ -5,6 +5,7 @@
 #include "MantidKernel/MultiThreaded.h"
 
 class vtkImplicitFunction;
+// cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkMDHWNexusReader : public vtkUnstructuredGridAlgorithm
 {
 public:

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Logger.h"
 
 #include <boost/shared_ptr.hpp>
@@ -54,18 +54,7 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#ifdef _WIN32
-#ifdef IN_MANTID_API
-  #define Column_DllExport __declspec( dllexport )
-#else
-  #define Column_DllExport __declspec( dllimport )
-#endif
-#else
-  #define Column_DllExport
-  #define Column_DllImport
-#endif
-
-class Column_DllExport Column
+class MANTID_API_DLL Column
 {
 public:
     Column() : m_type("int"), m_plotType(-1000){};
@@ -208,7 +197,7 @@ protected:
     As TableColumn stores its data in a std::vector bool type cannot be used 
     in the same way as the other types. Class Boolean is used instead.
 */
-struct Column_DllExport Boolean
+struct MANTID_API_DLL Boolean
 {
     /// Default constructor
     Boolean():value(false){}
@@ -226,9 +215,9 @@ struct Column_DllExport Boolean
 };
 
 /// Printing Boolean to an output stream
-Column_DllExport std::ostream& operator<<(std::ostream& ,const API::Boolean& );
+MANTID_API_DLL std::ostream& operator<<(std::ostream& ,const API::Boolean& );
 /// Redaing a Boolean from an input stream
-Column_DllExport std::istream& operator>>(std::istream& istr, API::Boolean&);
+MANTID_API_DLL std::istream& operator>>(std::istream& istr, API::Boolean&);
 
 typedef boost::shared_ptr<Column> Column_sptr;
 typedef boost::shared_ptr<const Column> Column_const_sptr;

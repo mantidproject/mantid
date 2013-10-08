@@ -64,9 +64,9 @@ private:
   void fitSpectra(const int s, double TOFPeakd, double& I, double& sigI);
   /// Read in all the input parameters
   void retrieveProperties();
-  int fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan, PeaksWorkspace_sptr &Peaks);
+  int fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan,
+                    PeaksWorkspace_sptr &Peaks, const detid2index_map& pixel_to_wi);
   
-  detid2index_map * pixel_to_wi; ///< Map of pixel to workspace index
   bool IC;           ///< Ikeida Carpenter fit of TOF
 
 };

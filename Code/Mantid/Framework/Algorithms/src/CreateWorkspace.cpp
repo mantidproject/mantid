@@ -86,7 +86,8 @@ void CreateWorkspace::init()
 
   declareProperty("WorkspaceTitle", "", "Title for Workspace");
 
-  declareProperty("ParentWorkspace", "", "Name of a parent workspace.");
+  declareProperty(new WorkspaceProperty<>("ParentWorkspace", "", Direction::Input, PropertyMode::Optional),
+    "Name of a parent workspace.");
 }
 
 /// Exec function
@@ -149,21 +150,8 @@ void CreateWorkspace::exec()
     throw std::runtime_error("DataE (if provided) must be the same size as DataY");
   }
 
-  MatrixWorkspace_sptr parentWS;
-  if (!parentWorkspace.empty())
-  {
-    try
-    {
-      parentWS = boost::dynamic_pointer_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve(parentWorkspace) );
-    }
-    catch(...)
-    {
-      g_log.warning("Parent workspace not found");
-      // ignore parent workspace
-    }
-  }
-
   // Create the OutputWorkspace
+  MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
   MatrixWorkspace_sptr outputWS;
   if (parentWS)
   {
