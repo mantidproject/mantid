@@ -95,9 +95,23 @@ namespace Algorithms
    */
   void RadiusSum::exec()
   {
-    // TODO Auto-generated execute stub
+    cacheInputPropertyValues(); 
   }
 
+  void RadiusSum::cacheInputPropertyValues(){
+    g_log.debug() << "Copy the input property values" << std::endl;
+    inputWS = getProperty("InputWorkspace"); 
+    std::vector<double> centre = getProperty("Centre");
+    centre_x = centre[0]; 
+    centre_y = centre[1];
+    if (centre.size() == 3)
+      centre_z = centre[2]; 
+    min_radius = getProperty("MinRadius"); 
+    max_radius = getProperty("MaxRadius"); 
+    num_bins = getProperty("NumBins"); 
+    normalize_flag = getProperty("NormalizeByRadius"); 
+    normalization_order = getProperty("NormalizationOrder");   
+  }
 
 
 } // namespace Algorithms

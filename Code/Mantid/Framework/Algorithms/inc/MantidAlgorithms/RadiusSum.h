@@ -51,7 +51,15 @@ namespace Algorithms
     void init();
     void exec();
 
+    void cacheInputPropertyValues();
 
+
+    double centre_x, centre_y, centre_z; 
+    int num_bins; 
+    bool normalize_flag; 
+    double normalization_order;
+    API::MatrixWorkspace_sptr inputWS;
+    double min_radius, max_radius;     
   };
 
 
