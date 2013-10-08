@@ -9,8 +9,13 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** RadiusSum : TODO: DESCRIPTION
+
+  /** RadiusSum : 
+
+    Sum of all the counts inside a ring against the scattering angle for each Radius.
     
+    @author Gesner Passos, ISIS
+
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
