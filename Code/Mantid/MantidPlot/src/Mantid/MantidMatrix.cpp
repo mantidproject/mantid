@@ -44,11 +44,11 @@
 #include <limits>
 
 #include <boost/math/special_functions/fpclassify.hpp>
-
-using namespace Mantid;
+//using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
+using namespace Mantid::Geometry;
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
   : MdiSubWindow(parent, label, name, 0),
@@ -1229,10 +1229,40 @@ void MantidMatrixModel::setFormat(const QChar& f,int prec)
 }
 
 QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
-{
-  if (role != Qt::DisplayRole) return QVariant();
-  double val = data(index.row(),index.column());
-  return QVariant(m_locale.toString(val,m_format,m_prec));
+{  
+  switch (role)
+  {
+  case Qt::DisplayRole:
+    {
+      double val = data(index.row(),index.column());
+      return QVariant(m_locale.toString(val,m_format,m_prec));
+    }
+  case Qt::BackgroundRole:
+    {
+    try
+    {
+      std::cerr << "row: " << index.row() << std::endl;
+      size_t wsIndex = static_cast<size_t>(index.row());
+      std::cerr << "wsindex: " << wsIndex << std::endl;
+      IDetector_const_sptr det = m_workspace->getDetector(wsIndex);/*(index.row());*/
+      std::string out = det->isMonitor() ? "yes" : "no" ;
+      std::cerr << "ismonitor: " << out << std::endl;
+      return QVariant();
+      }
+      catch (std::exception e)
+      {
+       int probs = 6;
+      }
+    }
+  default:
+    {
+      return QVariant();
+    }
+  }
+  //cache row vlaues the first time a row is accessed
+  //if (role != Qt::DisplayRole && role != Qt::BackgroundRole) return QVariant();
+  //double val = data(index.row(),index.column());
+  //return QVariant(m_locale.toString(val,m_format,m_prec));
 }
 
 
@@ -1249,7 +1279,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
       for (int wi=0; wi < static_cast<int>(ws->getNumberHistograms()); wi++)
       {
         double local_min, local_max;
-        const MantidVec & Y = ws->readY(wi);
+        const Mantid::MantidVec & Y = ws->readY(wi);
 
         local_min = std::numeric_limits<double>::max();
         local_max = -std::numeric_limits<double>::max();
