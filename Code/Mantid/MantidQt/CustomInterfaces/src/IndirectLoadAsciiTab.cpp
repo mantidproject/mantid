@@ -28,7 +28,7 @@ namespace MantidQt
      */
     QString IndirectLoadAsciiTab::tabHelpURL()
     { 
-      return "http://www.mantidproject.org/IndirectBayes:" + help();
+      return "http://www.mantidproject.org/IndirectLoadASCII:" + help();
     }
 
     /**
