@@ -256,6 +256,7 @@ void ScriptingWindow::populateWindowMenu()
     m_windowMenu->insertSeparator();
     m_windowMenu->addAction(m_zoomIn);
     m_windowMenu->addAction(m_zoomOut);
+    m_windowMenu->addAction(m_resetZoom);
 
     m_windowMenu->insertSeparator();
     m_windowMenu->addAction(m_toggleProgress);
@@ -532,7 +533,7 @@ void ScriptingWindow::initWindowMenuActions()
   // Note that we channel the hide through the parent so that we can save the geometry state
   connect(m_hide, SIGNAL(triggered()), this, SIGNAL(hideMe()));
 
-  m_zoomIn = new QAction(("Increase font size"), this);
+  m_zoomIn = new QAction(("&Increase font size"), this);
   // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
   // Despite the Qt docs advertising the use of QKeySequence::ZoomIn as the solution to this,
   // it doesn't seem to work for me
@@ -541,10 +542,13 @@ void ScriptingWindow::initWindowMenuActions()
   connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(zoomIn()));
   connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(trackZoomIn()));
 
-  m_zoomOut = new QAction(("Decrease font size"), this);
+  m_zoomOut = new QAction(("&Decrease font size"), this);
   m_zoomOut->setShortcut(QKeySequence::ZoomOut);
   connect(m_zoomOut, SIGNAL(triggered()), m_manager, SLOT(zoomOut()));
   connect(m_zoomOut, SIGNAL(triggered()), m_manager, SLOT(trackZoomOut()));
+
+  m_resetZoom = new QAction(("&Reset font size"), this);
+  connect(m_resetZoom, SIGNAL(triggered()), m_manager, SLOT(resetZoom()));
 
   // Toggle the progress arrow
   m_toggleProgress = new QAction(tr("&Progress Reporting"), this);

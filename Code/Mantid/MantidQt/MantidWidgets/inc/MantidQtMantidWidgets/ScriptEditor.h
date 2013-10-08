@@ -175,14 +175,8 @@ public slots:
   /// Raise find replace dialog
   virtual void showFindReplaceDialog();
 
-  /// Override the zoomIn slot
-  virtual void zoomIn();
-  /// Override the zoomIn slot
-  virtual void zoomIn(int level);
-  /// Override the zoomOut slot
-  virtual void zoomOut();
-  /// Override the zoomOut slot
-  virtual void zoomOut(int level);
+  /// Override zoomTo slot
+  virtual void zoomTo(int level);
 
 signals:
   /// Inform observers that undo information is available
@@ -219,8 +213,6 @@ private:
   static QColor g_error_colour;
   /// previous key
   int m_previousKey;
-  /// How many times the zoom level is changed
-  int m_zoomLevel;
   /// A pointer to the find replace dialog
   FindReplaceDialog *m_findDialog;
   /// Name of group that the settings are stored under

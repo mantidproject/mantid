@@ -343,6 +343,19 @@ void MultiTabScriptInterpreter::zoomOutAllButCurrent()
   }
 }
 
+/**
+ * Resets to zoom on all tabs to default
+ */
+void MultiTabScriptInterpreter::resetZoom()
+{
+  m_globalZoomLevel = 0;
+  for(int i = 0; i < count(); ++i)
+  {
+    interpreterAt(i)->editor()->zoomTo(m_globalZoomLevel);
+  }
+
+}
+
 
 /**
  * Toggle the progress arrow on/off

@@ -142,7 +142,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  */
 ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, const QString & settingsGroup) :
   QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
-  m_currentExecLine(0), m_completer(NULL),m_previousKey(0),  m_zoomLevel(0),
+  m_currentExecLine(0), m_completer(NULL),m_previousKey(0),
   m_findDialog(new FindReplaceDialog(this)), m_settingsGroup(settingsGroup)
 {
   //Syntax highlighting and code completion
@@ -510,47 +510,16 @@ void ScriptEditor::showFindReplaceDialog()
 }
 
 /**
- * Override the zoomIn slot to keep a count of the level
+ * Override the zoomTo slot to make the font size larger on Mac as the defaults are tiny
+ * @param level Set the font size to this level of zoom
  */
-void ScriptEditor::zoomIn()
-{
-  ++m_zoomLevel;
-  QsciScintilla::zoomIn();
-
-}
-
-/**
- * Override the zoomIn slot to keep a count of the level
- * @param level Increase font size by this many points
- */
-void ScriptEditor::zoomIn(int level)
+void ScriptEditor::zoomTo(int level)
 {
 #ifdef __APPLE__
   // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
-  if( level == 0 ) level = 4;
+  level += 4;
 #endif
-
-  m_zoomLevel = level;
-  QsciScintilla::zoomIn(level);
-}
-
-/**
- * Override the zoomIn slot to keep a count of the level
- */
-
-void ScriptEditor::zoomOut()
-{
-  --m_zoomLevel;
-  QsciScintilla::zoomOut();
-}
-/**
- * Override the zoomIn slot to keep a count of the level
- * @param level Decrease font size by this many points
- */
-void ScriptEditor::zoomOut(int level)
-{
-  m_zoomLevel = -level;
-  QsciScintilla::zoomOut(level);
+  QsciScintilla::zoomTo(level);
 }
 
 /**

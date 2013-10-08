@@ -158,6 +158,8 @@ public slots:
   void zoomOut();
   /// Decrease font size on all tabs except that given
   void zoomOutAllButCurrent();
+  /// Resets the zoom level
+  void resetZoom();
 
   /// Toggle the progress reporting arrow
   void toggleProgressReporting(bool on);

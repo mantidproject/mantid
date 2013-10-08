@@ -143,7 +143,7 @@ private:
   /// Window menu
   QMenu *m_windowMenu;
   /// Window actions
-  QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut,
+  QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom,
     *m_toggleProgress, *m_toggleFolding;
   /// Change scripting language
   QAction *m_scripting_lang;
