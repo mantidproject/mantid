@@ -53,7 +53,7 @@ namespace LiveData
         }
         else
         {
-          g_log.error("No loader for " + m_filename + " that supports chunking");
+          g_log.error("No loader for " + m_filename + " that supports chunking. The algorithm will fail.");
         }
       }
     }
@@ -76,9 +76,15 @@ namespace LiveData
   FileEventDataListener::~FileEventDataListener()
   {
     // Don't disappear until any running job has finished or bad things happen!
-    if ( m_chunkload ) m_chunkload->wait();
+    if ( m_chunkload )
+    {
+      m_chunkload->wait();
+    }
     // Clean up the hidden workspace if necessary
-    if ( AnalysisDataService::Instance().doesExist(m_tempWSname) ) AnalysisDataService::Instance().remove(m_tempWSname);
+    if ( AnalysisDataService::Instance().doesExist(m_tempWSname) )
+    {
+      AnalysisDataService::Instance().remove(m_tempWSname);
+    }
     // Don't leak memory
     delete m_chunkload;
   }
@@ -97,11 +103,20 @@ namespace LiveData
   ILiveListener::RunStatus FileEventDataListener::runStatus()
   {
     // Say we're outside a run if this is called before start is
-    if ( m_nextChunk == 1 ) return NoRun;
+    if ( m_nextChunk == 1 )
+    {
+      return NoRun;
+    }
     // This means the first chunk is being/has just been loaded
-    else if ( m_nextChunk == 2 ) return BeginRun;
+    else if ( m_nextChunk == 2 )
+    {
+      return BeginRun;
+    }
     // This means we've read the whole file
-    else if ( m_chunkload == NULL ) return EndRun;
+    else if ( m_chunkload == NULL )
+    {
+      return EndRun;
+    }
     // Otherwise we're in the run
     else return Running;
   }
@@ -117,11 +132,17 @@ namespace LiveData
   {
     // Once the end of the file is reached, this method throws to stop the calling algorithm.
     // This is equivalent to the end of the run - which we still need to figure out how to handle.
-    if ( m_chunkload == NULL ) throw std::runtime_error("The whole file has been read!");
+    if ( m_chunkload == NULL )
+    {
+      throw std::runtime_error("The whole file has been read!");
+    }
 
     // If the loading of the chunk isn't finished, then we need to wait
     m_chunkload->wait();
-    if ( ! m_chunkload->data() ) throw std::runtime_error("LoadEventPreNexus failed for some reason.");
+    if ( ! m_chunkload->data() )
+    {
+      throw std::runtime_error("LoadEventPreNexus failed for some reason.");
+    }
     // The loading succeeded: get the workspace from the ADS.
     MatrixWorkspace_sptr chunk = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tempWSname);
     // Remove the workspace from the ADS now we've extracted it
