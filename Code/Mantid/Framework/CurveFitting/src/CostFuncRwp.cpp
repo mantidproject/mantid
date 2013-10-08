@@ -33,6 +33,7 @@ CostFuncRwp::CostFuncRwp() : CostFuncLeastSquares()
   m_includePenalty = false;
   m_value = 0.;
   m_pushed = false;
+  m_factor = 1.;
 }
 // m_log(Kernel::Logger::get("CostFuncRwp"));
 #endif
@@ -105,7 +106,7 @@ double CostFuncRwp::val() const
 //----------------------------------------------------------------------
 /**
  * Add a contribution to the cost function value from the fitting function evaluated on a particular domain.
- * @param domain :: A domain 
+ * @param domain :: A domain
  * @param values :: Values
  */
 void CostFuncRwp::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values)const
@@ -126,7 +127,7 @@ void CostFuncRwp::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sp
     retVal += val * val * inv_sigma * inv_sigma;
     denVal += obsval * obsval * inv_sigma * inv_sigma;
   }
-  
+
   PARALLEL_ATOMIC
   m_value += retVal/denVal;
 
@@ -507,7 +508,7 @@ void CostFuncRwp::getParameters(GSLVector& params) const
 
 //----------------------------------------------------------------------
 /**
-  * Calculates covariance matrix for fitting function's active parameters. 
+  * Calculates covariance matrix for fitting function's active parameters.
   * @param covar :: Output cavariance matrix.
   * @param epsrel :: Tolerance.
   */

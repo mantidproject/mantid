@@ -114,6 +114,8 @@ protected:
   friend class SeqDomain;
   friend class ParDomain;
 
+  double m_factor;
+
   Kernel::Logger & m_log;
 };
 
