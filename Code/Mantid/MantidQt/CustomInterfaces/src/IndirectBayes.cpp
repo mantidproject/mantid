@@ -19,9 +19,13 @@ namespace MantidQt
 
 using namespace MantidQt::CustomInterfaces;
 
-IndirectBayes::IndirectBayes(QWidget *parent) : UserSubWindow(parent)
+IndirectBayes::IndirectBayes(QWidget *parent) : UserSubWindow(parent),
+	m_changeObserver(*this, &IndirectBayes::handleDirectoryChange)
 {
 	m_uiForm.setupUi(this);
+
+  // Connect Poco Notification Observer
+  Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
 	//insert each tab into the interface on creation
 	m_bayesTabs.insert(std::make_pair(RES_NORM, new ResNorm(m_uiForm.indirectBayesTabs->widget(RES_NORM))));
@@ -44,12 +48,31 @@ IndirectBayes::IndirectBayes(QWidget *parent) : UserSubWindow(parent)
 	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 	connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
 	connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
-
-	
 }
 
 void IndirectBayes::initLayout()
 {
+}
+
+/**
+ * @param :: the detected close event
+ */
+void IndirectBayes::closeEvent(QCloseEvent*)
+{
+  Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
+}
+
+/**
+ * Handles a change in directory.
+ *
+ * @param pNf :: notification
+ */
+void IndirectBayes::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
+{
+  std::string key = pNf->key();
+
+  if ( key == "defaultsave.directory" )
+    loadSettings();
 }
 
 /**

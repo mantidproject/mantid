@@ -8,6 +8,9 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
+#include <Poco/NObserver.h>
+#include "MantidKernel/ConfigService.h"
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -76,12 +79,17 @@ namespace MantidQt
       void showMessageBox(const QString& message);
 
 		private:
+      /// Called upon a close event.
+      virtual void closeEvent(QCloseEvent*);
+      /// handle POCO event
+      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
       /// Load default interface settings for each tab
       void loadSettings();
 
       /// Map of tabs indexed by position on the window
 			std::map<unsigned int, IndirectBayesTab*> m_bayesTabs;
-
+      /// Change Observer for ConfigService (monitors user directories)
+      Poco::NObserver<IndirectBayes, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
       ///Main interface window
       Ui::IndirectBayes m_uiForm;
     };
