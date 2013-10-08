@@ -60,11 +60,9 @@ namespace WorkflowAlgorithms
 
     declareProperty("XMin", EMPTY_DBL(), "The minimum value of X for which an event will be counted.");
     declareProperty("XMax", EMPTY_DBL(), "The maximum value of X for which an event will be counted. Must be greater than XMin.");
-    // TODO: Restrict the choice of units?
+    // N.B. The choice of units is restricted by the upstream StepScan interface, but in fact any convertible unit will work so is allowed here
     declareProperty("RangeUnit", "TOF", boost::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
       "The units in which XMin and XMax is being given." );
-
-    // TODO: Maybe need to add a pre/post-processing flag for live
   }
 
   void StepScan::exec()

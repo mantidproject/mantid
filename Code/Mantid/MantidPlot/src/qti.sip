@@ -63,6 +63,8 @@ public:
   void show();
   void hide();
   bool close();
+  
+  void setFocus();
 
 private:
   MdiSubWindow(const MdiSubWindow&);
@@ -1144,7 +1146,9 @@ public:
 
   void setWindowName(MdiSubWindow *, const QString &);
   void setPreferences(Graph*);
+
   void selectMultiPeak(MultiLayer *, bool = true, double = 0, double = 0);
+  void disableTools();
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
   MdiSubWindow* clone(MdiSubWindow*);
@@ -1160,6 +1164,9 @@ public:
   void addUserMenuAction(const QString &, const QString &, const QString &);
 
   void setConfirmFolderClose(bool value);
+
+  void setToolbarsVisible(bool visible);
+
   //--------------
 private:
   ApplicationWindow(const ApplicationWindow&);

@@ -1,13 +1,10 @@
 #include "MantidRemoteAlgorithms/QueryRemoteJob.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-
-#include "MantidRemote/RemoteJobManager.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/RemoteJobManager.h"
 
 #include "boost/make_shared.hpp"
 
@@ -32,9 +29,6 @@ void QueryRemoteJob::init()
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string> >();
   auto nullValidator = boost::make_shared<NullValidator>();
-  auto jobStatusValidator = boost::make_shared<BoundedValidator <unsigned> >();
-  jobStatusValidator->setLower( 0);
-  jobStatusValidator->setUpper( (unsigned)RemoteJob::JOB_STATUS_UNKNOWN);
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
@@ -43,18 +37,23 @@ void QueryRemoteJob::init()
   // The ID of the job we want to query
   declareProperty( "JobID", "", requireValue, "", Direction::Input);
 
-  // TODO: Can we figure out the user name name automatically?
-  declareProperty( "UserName", "", requireValue, "", Direction::Input);
+  // Name given to the job
+  declareProperty( "JobName", "", nullValidator, "",  Direction::Output);
 
-  // Password doesn't get echoed to the screen...
-  declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "");
+  // Name of the python script that was (or will be) run
+  declareProperty( "ScriptName", "", nullValidator, "",  Direction::Output);
 
-
-  // A numeric code for the job's status
-  declareProperty( "JobStatusCode", (unsigned)RemoteJob::JOB_STATUS_UNKNOWN,  jobStatusValidator, "", Direction::Output);
-  
   // A human readable description of the job's status
   declareProperty( "JobStatusString", "", nullValidator, "",  Direction::Output);
+
+  // Transaction ID this job is associated with
+  declareProperty( "TransID", "", nullValidator, "",  Direction::Output);
+
+  // Dates and times for job submit, job start and job complete (may be empty
+  // depending on the server-side implementation)
+  declareProperty( "SubmitDate", "", nullValidator, "",  Direction::Output);
+  declareProperty( "StartDate", "", nullValidator, "",  Direction::Output);
+  declareProperty( "CompletionDate", "", nullValidator, "",  Direction::Output);
 
 }
 
@@ -70,23 +69,52 @@ void QueryRemoteJob::exec()
     throw( std::runtime_error( std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  // Set the username and password from the properties
-  jobManager->setUserName( getPropertyValue ("UserName"));
-  jobManager->setPassword( getPropertyValue( "Password"));
+  std::istream &respStream = jobManager->httpGet("/query", std::string("JobID=") + getPropertyValue("JobID"));
+  JSONObject resp;
+  initFromStream( resp, respStream);
+  if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    JSONObject status;
+    if (resp[getPropertyValue("JobID")].getType() != JSONValue::OBJECT)
+    {
+      throw( std::runtime_error( "Expected value not found in return stream.  Has the client/server protocol changed?!?"));
+    }
 
-  std::string errMsg;
-  RemoteJob::JobStatus status;
+    resp[getPropertyValue("JobID")].getValue(status);
+    std::string value;
 
-  if (jobManager->jobStatus( getPropertyValue("JobID"), status, errMsg))
-  {      
-    setProperty( "JobStatusCode", (unsigned)status);
+    status["JobStatus"].getValue( value);
+    setProperty( "JobStatusString", value);
 
-    // Create a temporary RemoteJob object just so we can call statusString() on it
-    setProperty( "JobStatusString",  RemoteJob("", NULL, status, "").statusString());
+    status["JobName"].getValue( value);
+    setProperty( "JobName", value);
+
+    status["ScriptName"].getValue( value);
+    setProperty( "ScriptName", value);
+
+    status["TransID"].getValue( value);
+    setProperty( "TransID", value);
+
+    // The time stuff is actually an optional extension.  We could check the info
+    // URL and see if the server implements it, but it's easier to just look in
+    // the output and see if the values are there...
+    if (status.find( "SubmitDate") != status.end())
+    {
+      status["SubmitDate"].getValue( value);
+      setProperty( "SubmitDate", value);
+
+      status["StartDate"].getValue( value);
+      setProperty( "StartDate", value);
+
+      status["CompletionDate"].getValue( value);
+      setProperty( "CompletionDate", value);
+    }
   }
   else
   {
-    throw( std::runtime_error( "Error querying remote jobs: " + errMsg));
+    std::string errMsg;
+    resp["Err_Msg"].getValue( errMsg);
+    throw( std::runtime_error( errMsg));
   }
 }
 

@@ -1,5 +1,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
 
@@ -55,15 +56,16 @@ namespace
     void subscribe(FunctionFactoryImpl & self, const boost::python::object & obj )
     {
       Poco::ScopedLock<Poco::Mutex> lock(FUNCTION_REGISTER_MUTEX);
+      static PyTypeObject * baseClass =
+          const_cast<PyTypeObject*>(converter::registered<IFunction>::converters.to_python_target_type());
 
-      static PyObject * const baseClass = (PyObject*)converter::registered<IFunction>::converters.to_python_target_type();
       // obj could be or instance/class, check instance first
       PyObject *classObject(NULL);
-      if( PyObject_IsInstance(obj.ptr(), baseClass) )
+      if( PyObject_IsInstance(obj.ptr(), (PyObject*)baseClass) )
       {
         classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
       }
-      else if(PyObject_IsSubclass(obj.ptr(), baseClass))
+      else if(PyObject_IsSubclass(obj.ptr(), (PyObject*)baseClass))
       {
         classObject = obj.ptr(); // We need to ensure the type of lifetime management so grab the raw pointer
       }

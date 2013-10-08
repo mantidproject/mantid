@@ -200,6 +200,7 @@ namespace MDAlgorithms
       obc->resetNumBoxes();
       // Perform the first box splitting
       outWS->splitBox();
+      size_t lastNumBoxes = obc->getTotalNumMDBoxes();
 
       // --- File back end ? ----------------
       std::string filename = getProperty("OutputFilename");
@@ -245,7 +246,8 @@ namespace MDAlgorithms
       // The root of the output workspace
       MDBoxBase<OMDE,ond>* outRootBox = outWS->getBox();
 
-      uint64_t totalAdded = 0;
+      // if target workspace has events, we should count them as added
+      uint64_t totalAdded = outWS->getNEvents();
       uint64_t numSinceSplit = 0;
 
       // Go through every box for this chunk.
@@ -285,8 +287,9 @@ namespace MDAlgorithms
               }
               box->releaseEvents();
 
-              // Every 20 million events, or at the last box: do splitting
-              if (numSinceSplit > 20000000 || (i == int(boxes.size()-1)))
+              //Ask BC if one needs to split boxes
+              if (obc->shouldSplitBoxes(totalAdded,numSinceSplit,lastNumBoxes))
+              //if (numSinceSplit > 20000000 || (i == int(boxes.size()-1)))
               {
                   // This splits up all the boxes according to split thresholds and sizes.
                   Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
@@ -296,6 +299,7 @@ namespace MDAlgorithms
                   // Accumulate stats
                   totalAdded += numSinceSplit;
                   numSinceSplit = 0;
+                  lastNumBoxes = obc->getTotalNumMDBoxes();
                   // Progress reporting
                   if(!fileBackedWS)prog->report(i);
 

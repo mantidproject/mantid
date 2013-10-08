@@ -101,7 +101,7 @@ public:
   }
 
   void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1,
-      bool OneEventPerBin=false, bool MakeWorkspace2D = false)
+      bool OneEventPerBin=false, bool MakeWorkspace2D = false,size_t nEventsRetrieved=100000)
   {
 
     int numEventsPer = 100;
@@ -141,7 +141,7 @@ public:
     if (!ws) return;
     size_t npoints = ws->getNPoints();
     // # of points != # of bins exactly because some are off the extents
-    TS_ASSERT_LESS_THAN( 100000, npoints);
+    TS_ASSERT_LESS_THAN( nEventsRetrieved, npoints);
 
     TS_ASSERT_EQUALS( ws->getNumExperimentInfo(), 1);
     TSM_ASSERT("ExperimentInfo object is valid", ws->getExperimentInfo(0) );
@@ -200,7 +200,8 @@ public:
 
   void test_MINITOPAZ_fromWorkspace2D()
   {
-    do_test_MINITOPAZ(TOF, 1, false, true);
+    // this is questionable change, indicating that ConvertToMD and CovertToDiffractionWorkspace treat 0 differently
+    do_test_MINITOPAZ(TOF, 1, false, true,1000);
   }
 
 

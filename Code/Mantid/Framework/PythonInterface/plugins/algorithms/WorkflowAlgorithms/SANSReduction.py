@@ -38,7 +38,10 @@ class SANSReduction(PythonAlgorithm):
         p = property_manager.getProperty('LoadAlgorithm')
         alg = Algorithm.fromString(p.valueAsStr)
         
-        if AnalysisDataService.doesExist(filename):
+        if AnalysisDataService.doesExist(filename) \
+            and AnalysisDataService.retrieve(filename).__class__.__name__.find('EventWorkspace')>=0 \
+            and not AnalysisDataService.retrieve(filename).getRun().hasProperty("event_ws") \
+            and not AnalysisDataService.retrieve(filename).getRun().hasProperty("sample_detector_distance"):
             alg.setProperty("InputWorkspace", filename)
         else:
             alg.setProperty('Filename', filename)
@@ -400,8 +403,8 @@ class SANSReduction(PythonAlgorithm):
                     if os.path.isfile(process_file):
                         proc = open(process_file, 'r')
                         proc_xml = proc.read()
-                    elif len(process_file)>0:
-                        Logger.get("SANSReduction").error("Could not read %s\n" % process_file)               
+                    elif len(process_file)>0 and process_file.lower().find("none") != 0:
+                        Logger.get("SANSReduction").error("Could not read process info file %s\n" % process_file)               
                 
                 filename = os.path.join(output_dir, iq_output+'.txt')
                 

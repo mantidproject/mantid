@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+#include <fstream>
 
 #include "MantidKernel/Strings.h"
 #include <string>
@@ -422,6 +423,21 @@ public:
   {
     TS_ASSERT_THROWS_EQUALS(parseRange("5-1,6,7"), const std::invalid_argument& e, 
                             e.what(), std::string("Range boundaries are reversed: 5-1"));
+  }
+
+  void test_toString_vector_of_ints()
+  {
+    std::vector<int> sortedInts;
+    sortedInts.push_back(1);
+    sortedInts.push_back(2);
+    sortedInts.push_back(3);
+    sortedInts.push_back(5);
+    sortedInts.push_back(6);
+    sortedInts.push_back(8);
+
+    auto result = toString(sortedInts);
+
+    TS_ASSERT_EQUALS(std::string("1-3,5-6,8"), result);
   }
 
 };

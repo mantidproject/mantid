@@ -1,11 +1,11 @@
 from scripter import BaseScriptElement
-from mantid.api import AnalysisDataService
 
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
     IS_IN_MANTIDPLOT = True
+    from mantid.api import AnalysisDataService
 except:
     pass
  
@@ -18,11 +18,7 @@ class Output(BaseScriptElement):
             Update data members according to reduction results
         """
         if IS_IN_MANTIDPLOT:
-            # Allow for the old reducer, which uses Python API v1
-            if self.PYTHON_API==1:
-                from reduction.command_interface import ReductionSingleton
-            else:
-                from reduction_workflow.command_interface import ReductionSingleton
+            from reduction_workflow.command_interface import ReductionSingleton
             self.log_text = ReductionSingleton().log_text
             try:
                 if hasattr(ReductionSingleton(), "output_workspaces") \

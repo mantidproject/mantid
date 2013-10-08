@@ -266,12 +266,12 @@ namespace Algorithms
     // Get workspace index from
     vector<size_t> wsindexvec;
 
-    detid2index_map* refermap = dataws->getDetectorIDToWorkspaceIndexMap(false);
+    detid2index_map refermap = dataws->getDetectorIDToWorkspaceIndexMap(false);
     for (size_t i = 0; i < numitems; ++i)
     {
       detid_t detid = detidvec[i];
-      detid2index_map::iterator fiter = refermap->find(detid);
-      if (fiter != refermap->end())
+      detid2index_map::const_iterator fiter = refermap.find(detid);
+      if (fiter != refermap.end())
       {
         size_t wsindex = fiter->second;
         wsindexvec.push_back(wsindex);
@@ -281,8 +281,6 @@ namespace Algorithms
         g_log.warning() << "Detector ID " << detid << " cannot be mapped to any workspace index/spectrum." << ".\n";
       }
     }
-
-    delete refermap;
 
     // Sort the vector
     if (wsindexvec.size() == 0)

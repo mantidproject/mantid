@@ -287,9 +287,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
 void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice)
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  bool isObserving = m_observingADS;
-  if ( isObserving )
-    observeADSNotifications( false );
+
   const std::string replacedName = notice->object_name();
   for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
   {
@@ -299,8 +297,6 @@ void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceN
       break;
     }
   }
-  if ( isObserving )
-    observeADSNotifications( true );
 }
 
 /**

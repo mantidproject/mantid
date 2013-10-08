@@ -27,10 +27,10 @@ class ForCE(PythonAlgorithm):
 		ana = self.getPropertyValue('Analyser')
 		refl = self.getPropertyValue('Reflection')
 		run = self.getPropertyValue('RunName')
-		rejectZ = self.getProperty('RejectZero')
-		useM = self.getProperty('UseMap')
-		verbOp = self.getProperty('Verbose')
-		saveOp = self.getProperty('Save')
+		rejectZ = self.getProperty('RejectZero').value
+		useM = self.getProperty('UseMap').value
+		verbOp = self.getProperty('Verbose').value
+		saveOp = self.getProperty('Save').value
 		plotOp = self.getPropertyValue('Plot')
 
                 from IndirectForce import IbackStart, InxStart

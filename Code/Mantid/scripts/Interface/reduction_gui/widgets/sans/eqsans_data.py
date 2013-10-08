@@ -31,7 +31,6 @@ class DataSetsWidget(BaseWidget):
             self.set_state(state)
         else:
             m = DataSets()
-            if self._settings.api2: m.PYTHON_API=2
             self.set_state(m)
             
     def initialize_content(self):
@@ -124,9 +123,6 @@ class DataSetsWidget(BaseWidget):
             self._content.background_plot_button.hide()
             self._content.bck_empty_plot_button.hide()
             self._content.bck_sample_plot_button.hide()
-            
-        #if not self._settings.api2:
-        #    self._content.separate_jobs_check.hide()
         
     def _background_plot_clicked(self):
         self.show_instrument(file_name=self._content.background_edit.text)
@@ -150,13 +146,13 @@ class DataSetsWidget(BaseWidget):
         """
         popup_warning = ""
         
-        self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.transmission))
-        self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.transmission_spread))
-        self._content.sample_thickness_edit.setText(QtCore.QString("%6.4f" % state.sample_thickness))
+        self._content.transmission_edit.setText(str("%6.4f" % state.transmission))
+        self._content.dtransmission_edit.setText(str("%6.4f" % state.transmission_spread))
+        self._content.sample_thickness_edit.setText(str("%6.4f" % state.sample_thickness))
         
-        self._content.beam_radius_edit.setText(QtCore.QString(str(state.calculation_method.beam_radius)))
-        self._content.sample_edit.setText(QtCore.QString(state.calculation_method.sample_file))
-        self._content.empty_edit.setText(QtCore.QString(state.calculation_method.direct_beam))
+        self._content.beam_radius_edit.setText(str(state.calculation_method.beam_radius))
+        self._content.sample_edit.setText(state.calculation_method.sample_file)
+        self._content.empty_edit.setText(state.calculation_method.direct_beam)
 
         self._content.calculate_radio.setChecked(state.calculate_transmission)
         self._content.fix_trans_radio.setChecked(not state.calculate_transmission)
@@ -178,7 +174,7 @@ class DataSetsWidget(BaseWidget):
             current_file = data_files[0].strip()
         self._content.separate_jobs_check.setChecked(state.separate_jobs)
         
-        self._content.data_file_edit.setText(QtCore.QString(';'.join(state.data_files)))
+        self._content.data_file_edit.setText(str(';'.join(state.data_files)))
         if len(state.data_files)>0:
             self._settings.last_file = state.data_files[0]
             self._settings.last_data_ws = ''
@@ -195,18 +191,18 @@ class DataSetsWidget(BaseWidget):
         # Background
         bck_file = str(self._content.background_edit.text()).strip()
         self._content.background_chk.setChecked(state.background.background_corr)
-        self._content.background_edit.setText(QtCore.QString(state.background.background_file))
+        self._content.background_edit.setText(state.background.background_file)
         if state.background.background_file.strip() != bck_file:
             self.get_data_info()
         self._background_clicked(state.background.background_corr)
 
-        self._content.bck_transmission_edit.setText(QtCore.QString("%6.4f" % state.background.bck_transmission))
-        self._content.bck_dtransmission_edit.setText(QtCore.QString("%6.4f" % state.background.bck_transmission_spread))
+        self._content.bck_transmission_edit.setText(str("%6.4f" % state.background.bck_transmission))
+        self._content.bck_dtransmission_edit.setText(str("%6.4f" % state.background.bck_transmission_spread))
         #self._content.bck_thickness_edit.setText(QtCore.QString("%6.4f" % state.background.sample_thickness))
                 
-        self._content.bck_beam_radius_edit.setText(QtCore.QString(str(state.background.trans_calculation_method.beam_radius)))
-        self._content.bck_sample_edit.setText(QtCore.QString(state.background.trans_calculation_method.sample_file))
-        self._content.bck_empty_edit.setText(QtCore.QString(state.background.trans_calculation_method.direct_beam))
+        self._content.bck_beam_radius_edit.setText(str(state.background.trans_calculation_method.beam_radius))
+        self._content.bck_sample_edit.setText(state.background.trans_calculation_method.sample_file)
+        self._content.bck_empty_edit.setText(state.background.trans_calculation_method.direct_beam)
 
         self._content.bck_calculate_radio.setChecked(state.background.calculate_transmission)
         self._content.bck_fix_trans_radio.setChecked(not state.background.calculate_transmission)
@@ -229,7 +225,6 @@ class DataSetsWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = DataSets()
-        if self._settings.api2: m.PYTHON_API=2
 
         m.transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
         m.transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
@@ -266,10 +261,10 @@ class DataSetsWidget(BaseWidget):
         d.sample_file = unicode(self._content.bck_sample_edit.text())
         d.direct_beam = unicode(self._content.bck_empty_edit.text())
 
-        self._settings.emit_key_value("TRANS_SAMPLE", QtCore.QString(str(self._content.sample_edit.text())))
-        self._settings.emit_key_value("TRANS_DIRECT", QtCore.QString(str(self._content.empty_edit.text())))
-        self._settings.emit_key_value("TRANS_BCK", QtCore.QString(str(self._content.bck_sample_edit.text())))
-        self._settings.emit_key_value("TRANS_DIRECT", QtCore.QString(str(self._content.bck_empty_edit.text())))
+        self._settings.emit_key_value("TRANS_SAMPLE", str(self._content.sample_edit.text()))
+        self._settings.emit_key_value("TRANS_DIRECT", str(self._content.empty_edit.text()))
+        self._settings.emit_key_value("TRANS_BCK", str(self._content.bck_sample_edit.text()))
+        self._settings.emit_key_value("TRANS_DIRECT", str(self._content.bck_empty_edit.text()))
         return m
 
     def _background_clicked(self, is_checked):
@@ -406,11 +401,11 @@ class DataSetsWidget(BaseWidget):
             
             self._settings.last_data_ws = dataproxy.data_ws
             if dataproxy.sample_detector_distance is not None:
-                self._settings.emit_key_value("sample_detector_distance", QtCore.QString(str(dataproxy.sample_detector_distance)))
+                self._settings.emit_key_value("sample_detector_distance", str(dataproxy.sample_detector_distance))
             # Keep for later
             #if dataproxy.sample_thickness is not None:
             #    self._settings.emit_key_value("sample_thickness", QtCore.QString(str(dataproxy.sample_thickness)))
             if dataproxy.beam_diameter is not None:
-                self._settings.emit_key_value("beam_diameter", QtCore.QString(str(dataproxy.beam_diameter)))
+                self._settings.emit_key_value("beam_diameter", str(dataproxy.beam_diameter))
              
             self._emit_experiment_parameters()    

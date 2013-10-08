@@ -58,7 +58,7 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories ( ../SliceViewer/inc )
 include_directories ( ../MantidWidgets/inc )
 include_directories ( ../Factory/inc )
-include_directories ( ../ImageViewer/inc )
+include_directories ( ../SpectrumViewer/inc )
 include_directories ( ../RefDetectorViewer/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../SliceViewer ) # to find the ui_*.h auto-generated files
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../RefDetectorViewer ) # to find the ui_*.h auto-generated files

@@ -27,23 +27,16 @@ from _qti import app
 # Alias threadsafe_call so users have a more understandable name
 gui_cmd = threadsafe_call
 
-#-------------------------- Mantid Python access functions----------------
+#---------------- Mantid Python access functions--------------------------
 # Grab a few Mantid things so that we can recognise workspace variables
-# While we have 2 APIs we need to figure out which to use so add a little bit of indirection
 def _get_analysis_data_service():
     """Returns an object that can be used to get a workspace by name from Mantid
     
     Returns:
         A object that acts like a dictionary to retrieve workspaces
     """
-    import sys
-    if 'mantid.api' in sys.modules:
-        import mantid
-        return mantid.AnalysisDataService.Instance()
-    else:
-        import MantidFramework
-        return MantidFramework.mtd
-    
+    import mantid
+    return mantid.AnalysisDataService.Instance()
 
 #-------------------------- Wrapped MantidPlot functions -----------------
 
@@ -342,6 +335,19 @@ def selectMultiPeak(source, showFitPropertyBrowser = True, xmin = None, xmax = N
         threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser, xmin, xmax)
     else:
         threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser)
+
+def disableTools():
+    """Disable all the tools from all the graphs within MantidPlot."""
+    threadsafe_call(_qti.app.disableTools)
+
+#------------------------------------------------------------------------------
+def setToolbarsVisible(visible):
+    """Show/hide MantidPlot toolbars
+
+    Args:
+        visible: If True, make toolbars visible, if False - hidden 
+    """
+    threadsafe_call(_qti.app.setToolbarsVisible, visible)
 
 #-----------------------------------------------------------------------------
 #-------------------------- Project/Folder functions -----------------------

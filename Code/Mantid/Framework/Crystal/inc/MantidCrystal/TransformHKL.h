@@ -1,9 +1,7 @@
 #ifndef MANTID_CRYSTAL_TRANSFORM_HKL_H_
 #define MANTID_CRYSTAL_TRANSFORM_HKL_H_
     
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -45,16 +43,13 @@ namespace Crystal
     ~TransformHKL();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const 
-            { return "TransformHKL";};
+    virtual const std::string name() const;
 
     /// Algorithm's version for identification 
-    virtual int version() const 
-            { return 1;};
+    virtual int version() const;
 
     /// Algorithm's category for identification
-    virtual const std::string category() const 
-            { return "Crystal";}
+    virtual const std::string category() const;
     
   private:
 

@@ -118,10 +118,12 @@ public:
 
   void test_comparison_operators()
   {
-    DateAndTime a,b,c;
+    DateAndTime a,b,c, d;
     a = DateAndTime("1990-01-02 00:00:02.000");
     b = DateAndTime("1990-01-02 00:01:02.345");
     c = DateAndTime("1990-01-02 00:01:02.345");
+    d = DateAndTime("1990-01-02 00:00:02.000000001");
+
     TS_ASSERT( a < b );
     TS_ASSERT( b > a );
     TS_ASSERT( a <= b );
@@ -130,6 +132,9 @@ public:
     TS_ASSERT( b == b );
     TS_ASSERT( b == c );
     TS_ASSERT( a != b );
+     // intentionally different to confirm the tolerance check works
+    TS_ASSERT( a != d );
+    TS_ASSERT( a.equals(d));
 
     boost::posix_time::ptime p;
     p = boost::posix_time::from_iso_string("19900102T000002.000");

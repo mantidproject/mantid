@@ -27,13 +27,17 @@ using namespace Mantid::API;
 StepScan::StepScan(QWidget *parent)
   : UserSubWindow(parent), m_dataReloadNeeded(false),
     m_instrument(ConfigService::Instance().getInstrument().name()),
+    m_algRunner(new API::AlgorithmRunner(this)),
     m_addObserver(*this, &StepScan::handleAddEvent),
-    m_replObserver(*this, &StepScan::handleReplEvent)
+    m_replObserver(*this, &StepScan::handleReplEvent),
+    m_replaceObserverAdded(false)
 {
 }
 
 StepScan::~StepScan()
 {
+  // Stop any async algorithm
+  m_algRunner->cancelRunningAlgorithm();
   // Stop live data collection, if running
   m_uiForm.mWRunFiles->stopLiveAlgorithm();
   // Disconnect the observers for the mask workspace combobox
@@ -78,6 +82,7 @@ void StepScan::cleanupWorkspaces()
     m_inputWSName.clear();
     if ( ADS.doesExist( m_plotWSName ) ) ADS.remove( m_plotWSName );
     m_plotWSName.clear();
+    disconnect( SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)) );
   }
 
   m_uiForm.startButton->setEnabled(false);
@@ -114,37 +119,50 @@ void StepScan::startLiveListener()
     return;
   }
 
-  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
 
-  // TODO: Run entirely asynchronously (see AlgorithmRunner)
+  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(startLiveListenerComplete(bool)));
+
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("UpdateEvery",5.0);
+  startLiveData->setProperty("FromNow",false);
+  startLiveData->setProperty("FromStartOfRun",true);
   startLiveData->setProperty("Instrument",m_instrument);
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace",m_inputWSName);
-  try {
-    const bool executed = startLiveData->execute();
-    if ( ! executed ) throw std::runtime_error("Unable to run StartLiveData");
-  } catch (std::runtime_error&)
+  if ( ! startLiveData->validateInputs().empty() )
   {
-    QApplication::restoreOverrideCursor();
     QMessageBox::critical(this,"StartLiveData failed","Unable to start live data collection");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
     return;
   }
-
-  // Keep track of the algorithm that's pulling in the live data
-  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
-
-  setupOptionControls();
-
-  QApplication::restoreOverrideCursor();
+  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData);
+  m_algRunner->startAlgorithm(startLiveData);
 }
 
-void StepScan::loadFile()
+void StepScan::startLiveListenerComplete(bool error)
+{
+  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(startLiveListenerComplete(bool)));
+  if ( ! error )
+  {
+    // Keep track of the algorithm that's pulling in the live data
+    m_uiForm.mWRunFiles->setLiveAlgorithm(m_algRunner->getAlgorithm()->getProperty("MonitorLiveData"));
+
+    setupOptionControls();
+
+    addReplaceObserverOnce();
+    connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
+             SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
+  }
+  else
+  {
+    QMessageBox::critical(this,"StartLiveData failed","Unable to start live data collection");
+    m_uiForm.mWRunFiles->liveButtonSetChecked(false);
+  }
+}
+
+void StepScan::loadFile(bool async)
 {
   const QString filename = m_uiForm.mWRunFiles->getFirstFilename();
   // This handles the fact that mwRunFiles emits the filesFound signal more than
@@ -153,28 +171,39 @@ void StepScan::loadFile()
   {
     m_inputFilename = filename;
 
-    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-
     // Remove any previously-loaded workspaces
     cleanupWorkspaces();
 
-    // TODO: Run entirely asynchronously (see AlgorithmRunner or AlgorithmObserver)
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadEventNexus");
     alg->setPropertyValue("Filename", filename.toStdString());
     m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
     alg->setPropertyValue("OutputWorkspace", m_inputWSName);
     alg->setProperty("LoadMonitors", true);
-    if ( alg->execute() )  // executeAsync???
+
+    if ( async )
     {
-      QApplication::restoreOverrideCursor();
-      m_dataReloadNeeded = false;
-      setupOptionControls();
+      connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(loadFileComplete(bool)));
+      m_algRunner->startAlgorithm(alg);
     }
     else
     {
-      QApplication::restoreOverrideCursor();
-      QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
+      alg->execute();
+      loadFileComplete(!alg->isExecuted());
     }
+  }
+}
+
+void StepScan::loadFileComplete(bool error)
+{
+  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(loadFileComplete(bool)));
+  if ( ! error )
+  {
+    m_dataReloadNeeded = false;
+    setupOptionControls();
+  }
+  else
+  {
+    QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
   }
 }
 
@@ -199,13 +228,15 @@ void StepScan::launchInstrumentWindow()
   // Attach the observers so that if a mask workspace is generated over in the instrument view,
   // it is automatically selected by the combobox over here
   AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
+  addReplaceObserverOnce();
 }
 
 void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
 {
   // Hold the name of the scan index log in a common place
   const std::string scan_index("scan_index");
+  // If this has already been set to something, keep track of what
+  auto currentSetting = m_uiForm.plotVariable->currentText();
   // Clear the combobox and immediately re-insert 'scan_index' (so it's the first entry)
   m_uiForm.plotVariable->clear();
   m_uiForm.plotVariable->addItem( QString::fromStdString(scan_index) );
@@ -225,6 +256,8 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
 
   expandPlotVarCombobox( ws );
 
+  // Set back to whatever it was set to before
+  m_uiForm.plotVariable->setCurrentIndex(m_uiForm.plotVariable->findText(currentSetting));
   // Now that this has been populated, allow the user to select from it
   m_uiForm.plotVariable->setEnabled(true);
   // Now's the time to enable the start button as well
@@ -293,9 +326,11 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
   m_tableWSName = m_inputWSName.substr(2) + "_StepScan";
   stepScan->setPropertyValue("OutputWorkspace", m_tableWSName);
 
+  // ROI masking
   const QString maskWS = m_uiForm.maskWorkspace->currentText();
   stepScan->setPropertyValue("MaskWorkspace",maskWS.toStdString());
 
+  // Filtering on time (or other unit)
   const QString xminStr = m_uiForm.xmin->text();
   const QString xmaxStr = m_uiForm.xmax->text();
   const double xmin = xminStr.toDouble();
@@ -308,7 +343,15 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
   }
   if ( ! xminStr.isEmpty() ) stepScan->setProperty("XMin",xmin);
   if ( ! xmaxStr.isEmpty() ) stepScan->setProperty("XMax",xmax);
-  // TODO: Update when entries added to rangeUnit combobox
+  switch (m_uiForm.rangeUnit->currentIndex())
+  {
+  case 1:
+    stepScan->setProperty("RangeUnit","dSpacing");
+    break;
+  default:
+    // The default value for the property is TOF (which is index 0 in the combobox)
+    break;
+  }
 
   // If any of the filtering options were set, next time round we'll need to reload the data
   // as they cause the workspace to be changed
@@ -323,19 +366,27 @@ void StepScan::runStepScanAlg()
   if ( !stepScan ) return;
 
   QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+  // Block mouse clicks while the algorithms runs. Have to be sure to unset this below.
+  setAttribute( Qt::WA_TransparentForMouseEvents );
 
+  bool algSuccessful;
   if ( m_uiForm.mWRunFiles->liveButtonIsChecked() )  // Live data
   {
-    runStepScanAlgLive(stepScan->toString());
+    algSuccessful = runStepScanAlgLive(stepScan->toString());
   }
   else  // Offline data
   {
-    if ( m_dataReloadNeeded ) loadFile(); // Reload if workspace isn't fresh
+    if ( m_dataReloadNeeded ) loadFile(false); // Reload if workspace isn't fresh
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
-    stepScan->execute();
+    algSuccessful = stepScan->execute();
   }
 
-  QApplication::restoreOverrideCursor();
+  if ( !algSuccessful )
+  {
+    QApplication::restoreOverrideCursor();
+    setAttribute( Qt::WA_TransparentForMouseEvents, false );
+    return;
+  }
 
   // Now that the algorithm's been run, connect up the signal to change the plot variable
   connect( m_uiForm.plotVariable, SIGNAL(currentIndexChanged(const QString &)),
@@ -345,9 +396,11 @@ void StepScan::runStepScanAlg()
            SLOT(updateForNormalizationChange()) );
   // Create the plot for the first time
   generateCurve( m_uiForm.plotVariable->currentText() );
+  QApplication::restoreOverrideCursor();
+  setAttribute( Qt::WA_TransparentForMouseEvents, false );
 }
 
-void StepScan::runStepScanAlgLive(std::string stepScanProperties)
+bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
 {
   // First stop the currently running live algorithm
   IAlgorithm_const_sptr oldMonitorLiveData = m_uiForm.mWRunFiles->stopLiveAlgorithm();
@@ -358,7 +411,8 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
 
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("Instrument", m_instrument);
-  // TODO: startLive->setProperty("FromStartOfRun",true);
+  startLiveData->setProperty("FromNow",false);
+  startLiveData->setProperty("FromStartOfRun",true);
   startLiveData->setProperty("UpdateEvery",10.0);
   startLiveData->setProperty("PreserveEvents",true);
   startLiveData->setProperty("PostProcessingAlgorithm","StepScan");
@@ -369,16 +423,20 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
   // The previous listener needs to finish before this one can start
   while ( oldMonitorLiveData->isRunning() )
   {
-    Poco::Thread::sleep(200);
+    Poco::Thread::sleep(100);
   }
-  startLiveData->execute();
+  auto result = startLiveData->executeAsync();
+  while ( !result.available() )
+  {
+    Poco::Thread::sleep(100);
+  }
+  if ( ! startLiveData->isExecuted() ) return false;
+
   // Keep track of the algorithm that's pulling in the live data
   m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
-  connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
-           SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
   connect( this, SIGNAL(updatePlot(const QString&)), SLOT(generateCurve(const QString&)) );
+  return true;
 }
 
 void StepScan::updateForNormalizationChange()
@@ -462,6 +520,15 @@ void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_pt
   checkForMaskWorkspace(pNf->object_name());
   checkForResultTableUpdate(pNf->object_name());
   checkForVaryingLogs(pNf->object_name());
+}
+
+void StepScan::addReplaceObserverOnce()
+{
+  if ( ! m_replaceObserverAdded )
+  {
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
+    m_replaceObserverAdded = true;
+  }
 }
 
 void StepScan::checkForMaskWorkspace(const std::string & wsName)

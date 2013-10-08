@@ -12,8 +12,6 @@ namespace RemoteAlgorithms {
     Input Properties:
     <UL>
     <LI> ComputeResource  - The name of the compute resource the file will be sent to </LI>
-    <LI> UserName         - User name on the compute resource </LI>
-    <LI> Password         - Password for the compute resource </LI>
     <LI> TransactionID    - ID of the transaction this file belongs to.  See StartRemoteTransaction </LI>
     <LI> LocalFileName    - The name of the file to be uploaded.  This should be the full pathnam
       on the local filesystem. </LI>

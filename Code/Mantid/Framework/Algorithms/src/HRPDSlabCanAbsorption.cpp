@@ -184,19 +184,19 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
   double sigma_atten = getProperty("SampleAttenuationXSection"); // in barns
   double sigma_s = getProperty("SampleScatteringXSection"); // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
-  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
-  if( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
+  const Material& sampleMaterial = m_inputWS->sample().getMaterial();
+  if( sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
   {
-        if(rho == EMPTY_DBL()) rho =  m_sampleMaterial->numberDensity();
-        if(sigma_s == EMPTY_DBL()) sigma_s =  m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda);
-        if(sigma_atten == EMPTY_DBL()) sigma_atten = m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda);
+    if (rho == EMPTY_DBL()) rho = sampleMaterial.numberDensity();
+    if (sigma_s == EMPTY_DBL()) sigma_s =  sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda);
+    if (sigma_atten == EMPTY_DBL()) sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
   }
   else  //Save input in Sample with wrong atomic number and name
   {
-        NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
+    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
                         0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
-    Material *mat = new Material("SetInSphericalAbsorption", *neutron, rho);
-    m_inputWS->mutableSample().setMaterial(*mat);
+    Material mat("SetInSphericalAbsorption", neutron, rho);
+    m_inputWS->mutableSample().setMaterial(mat);
   }
 
   // Call FlatPlateAbsorption as a Child Algorithm

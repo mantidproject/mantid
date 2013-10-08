@@ -288,7 +288,7 @@ namespace CurveFitting
     // Disabled std::map<std::vector<int>, CurveFitting::BackToBackExponential_sptr> m_peaksmap;
 
     /// Sorted vector for peaks.  double = d_h, vector = (HKL), peak
-    vector<pair<double, pair<vector<int>, BackToBackExponential_sptr> > > m_peaks;
+    vector<pair<double, pair<vector<int>, BackToBackExponential_sptr> > > m_vecPeakFunctions;
 
     /// Peak fitting information
     vector<double> m_peakFitChi2;

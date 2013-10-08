@@ -11,18 +11,6 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from base_ref_reduction import BaseRefWidget
 import ui.reflectometer.ui_data_refl_simple
 
-IS_IN_MANTIDPLOT = False
-try:
-    import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
-    from reduction.instruments.reflectometer import data_manipulation
-
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
-
 class DataReflWidget(BaseRefWidget):    
     """
         Widget that present instrument details to the user
@@ -121,6 +109,9 @@ class DataReflWidget(BaseRefWidget):
         q_step = float(self._summary.q_step_edit.text())
         if self._summary.log_scale_chk.isChecked():
             q_step = -q_step
+
+        # Scaling factor file
+#         data.scaling_factor_file_flag = self._summary.use_sf_config_switch.isChecked()
             
         # Angle offset
         if hasattr(m, "angle_offset"):
@@ -128,7 +119,7 @@ class DataReflWidget(BaseRefWidget):
             angle_offset_error = float(self._summary.angle_offset_error_edit.text())
                 
         for i in range(self._summary.angle_list.count()):
-            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
+            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole)
             # Over-write Q binning with common binning
             data.q_min = q_min
             data.q_step = q_step

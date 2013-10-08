@@ -7,8 +7,6 @@ from reduction import Reducer
 from reduction import ReductionStep
 from reduction import validate_step
 import sans_reduction_steps
-import hfir_load
-import absolute_scale
 import mantid.simpleapi as api
 from mantid import simpleapi
 import warnings
@@ -83,10 +81,10 @@ class SANSReducer(Reducer):
         self._beam_finder = sans_reduction_steps.BaseBeamFinder()
         
         # Default normalization
-        self._normalizer = sans_reduction_steps.Normalize(SANSReducer.NORMALIZATION_TIME)
+        self._normalizer = None
         
         # Default data loader
-        self._data_loader = hfir_load.LoadRun()
+        self._data_loader = None
         
         # Default mask object
         self._mask = sans_reduction_steps.Mask()
@@ -172,13 +170,11 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
     
+    @validate_step
     def set_absolute_scale(self, scaler):
         """
         """
-        if issubclass(scaler.__class__, absolute_scale.BaseAbsoluteScale) or scaler is None:
-            self._absolute_scale = scaler
-        else:
-            raise RuntimeError, "Reducer.set_absolute_scale expects an object of class ReductionStep"
+        self._absolute_scale = scaler
     
     def set_data_loader(self, loader):
         """
@@ -257,19 +253,6 @@ class SANSReducer(Reducer):
         """
         self._save_iq = save_iq
     
-    def set_background(self, data_file=None):
-        """
-            Sets the background data to be subtracted from sample data files
-            @param data_file: Name of the background file
-        """
-        if data_file is None:
-            self._background_subtracter = None
-        else:
-            self._background_subtracter = sans_reduction_steps.SubtractBackground(data_file)
-    
-    def get_background(self):
-        return self._background_subtracter
-
     def set_bck_transmission(self, trans):
         """
              Set the reduction step that will apply the transmission correction

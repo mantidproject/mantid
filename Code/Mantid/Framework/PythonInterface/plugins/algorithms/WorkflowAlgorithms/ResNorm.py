@@ -3,6 +3,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
+import os
 
 class ResNorm(PythonAlgorithm):
  
@@ -45,9 +46,9 @@ class ResNorm(PythonAlgorithm):
 		vname = prefix+van+'_'+ana+ '_red'
 		rname = prefix+res+'_'+ana+ '_res'
 		erange = [float(emin), float(emax)]
-		verbOp = self.getProperty('Verbose')
+		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getPropertyValue('Plot')
-		saveOp = self.getProperty('Save')
+		saveOp = self.getProperty('Save').value
 
 		workdir = config['defaultsave.directory']
 		if inType == 'File':

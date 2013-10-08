@@ -85,10 +85,10 @@ namespace DataHandling
 
      /// Grouping Workspace
      DataObjects::GroupingWorkspace_sptr mGroupWS;
-     /// Instrument name
-     std::string mInstrumentName;
-     /// User-define instrument name
-     bool mUserGiveInstrument;
+
+     /// Instrument to use if given by user
+     Geometry::Instrument_const_sptr mInstrument;
+
      /// XML document loaded
      Poco::XML::Document* pDoc;
      /// Root element of the parsed XML
@@ -116,24 +116,14 @@ namespace DataHandling
       mStartGroupID = startgroupid;
     }
 
-    std::string getInstrumentName()
-    {
-      return mInstrumentName;
-    }
-    bool isGivenInstrumentName()
-    {
-      return mUserGiveInstrument;
-    }
+    std::string getInstrumentName() { return mInstrumentName; }
+    bool isGivenInstrumentName() { return mUserGiveInstrument; }
 
-    std::string getDescription()
-    {
-        return mDescription;
-    }
+    std::string getDate() { return mDate; }
+    bool isGivenDate() { return mUserGiveDate; }
 
-    bool isGivenDescription()
-    {
-        return mUserGiveDescription;
-    }
+    std::string getDescription() { return mDescription; }
+    bool isGivenDescription() { return mUserGiveDescription; }
 
     /// Data structures to store XML to Group/Detector conversion map
     std::map<int, std::vector<std::string> > getGroupComponentsMap()
@@ -160,6 +150,11 @@ namespace DataHandling
     /// User-define instrument name
     bool mUserGiveInstrument;
 
+    /// Date in ISO 8601 for which this grouping is relevant
+    std::string mDate;
+    /// Whether date is given by user
+    bool mUserGiveDate;
+
     /// Grouping description. Empty if not specified.
     std::string mDescription;
     /// Whether description is given by user
@@ -182,14 +177,8 @@ namespace DataHandling
     void initializeXMLParser(const std::string & filename);
     /// Parse XML
     void parseXML();
-    /// Convert detector ID combination string to vector of detectors
-    void parseDetectorIDs(std::string inputstring, std::vector<detid_t>& detids);
-    /// Convert spectrum IDs combintation string to vector of spectrum ids
-    void parseSpectrumIDs(std::string inputstring, std::vector<int>& specids);
     /// Get attribute value from an XML node
     static std::string getAttributeValueByName(Poco::XML::Node* pNode, std::string attributename, bool& found);
-    /// Split and convert string
-    void parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs);
 
   };
 
@@ -213,7 +202,6 @@ namespace DataHandling
 
     /// Return the map parsed from file. Should only be called after the file is parsed,
     /// otherwise a map will always be empty.
-    /// TODO: make return const pointer.
     std::map<int, std::vector<int> > getGroupSpectraMap() { return m_groupSpectraMap; }
 
   private:

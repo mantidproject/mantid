@@ -1,5 +1,5 @@
 #include "MantidPythonInterface/api/BinaryOperations.h"
-#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Policies/DowncastReturnedValue.h"
 
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -36,15 +36,15 @@ void export_BinaryOperations()
   using Mantid::PythonInterface::performBinaryOp;
   using Mantid::PythonInterface::performBinaryOpWithDouble;
 
-  def("performBinaryOp", (binary_fn_md_md)&performBinaryOp, return_value_policy<Policies::downcast_returned_value>());
-  def("performBinaryOp", (binary_fn_md_gp)&performBinaryOp, return_value_policy<Policies::downcast_returned_value>());
-  def("performBinaryOp", (binary_fn_gp_md)&performBinaryOp, return_value_policy<Policies::downcast_returned_value>());
-  def("performBinaryOp", (binary_fn_gp_gp)&performBinaryOp, return_value_policy<Policies::downcast_returned_value>());
-  def("performBinaryOp", (binary_fn_mh_mh)&performBinaryOp, return_value_policy<Policies::downcast_returned_value>());
+  def("performBinaryOp", (binary_fn_md_md)&performBinaryOp, return_value_policy<Policies::DowncastReturnedValue>());
+  def("performBinaryOp", (binary_fn_md_gp)&performBinaryOp, return_value_policy<Policies::DowncastReturnedValue>());
+  def("performBinaryOp", (binary_fn_gp_md)&performBinaryOp, return_value_policy<Policies::DowncastReturnedValue>());
+  def("performBinaryOp", (binary_fn_gp_gp)&performBinaryOp, return_value_policy<Policies::DowncastReturnedValue>());
+  def("performBinaryOp", (binary_fn_mh_mh)&performBinaryOp, return_value_policy<Policies::DowncastReturnedValue>());
 
-  def("performBinaryOp", (binary_fn_md_db)&performBinaryOpWithDouble, return_value_policy<Policies::downcast_returned_value>());
-  def("performBinaryOp", (binary_fn_mh_db)&performBinaryOpWithDouble, return_value_policy<Policies::downcast_returned_value>());
-  def("performBinaryOp", (binary_fn_gp_db)&performBinaryOpWithDouble, return_value_policy<Policies::downcast_returned_value>());
+  def("performBinaryOp", (binary_fn_md_db)&performBinaryOpWithDouble, return_value_policy<Policies::DowncastReturnedValue>());
+  def("performBinaryOp", (binary_fn_mh_db)&performBinaryOpWithDouble, return_value_policy<Policies::DowncastReturnedValue>());
+  def("performBinaryOp", (binary_fn_gp_db)&performBinaryOpWithDouble, return_value_policy<Policies::DowncastReturnedValue>());
 
 }
 

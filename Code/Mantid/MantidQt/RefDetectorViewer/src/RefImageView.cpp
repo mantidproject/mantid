@@ -1,6 +1,6 @@
 #include <iostream>
 #include  "MantidQtRefDetectorViewer/RefImageView.h"
-#include  "MantidQtImageViewer/ColorMaps.h"
+#include  "MantidQtSpectrumViewer/ColorMaps.h"
 
 #include "ui_RefImageView.h"
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
@@ -18,12 +18,12 @@ namespace RefDetectorViewer
 
 
 /**
- *  Construct an ImageView to display data from the specified data source.
- *  The specified ImageDataSource must be constructed elsewhere and passed
- *  into this ImageView constructor.  Most other components of the ImageView
+ *  Construct an SpectrumView to display data from the specified data source.
+ *  The specified SpectrumDataSource must be constructed elsewhere and passed
+ *  into this SpectrumView constructor.  Most other components of the SpectrumView
  *  are managed by this class.  That is the graphs, image display and other
- *  parts of the ImageView are constructed here and are deleted when the
- *  ImageView destructor is called.
+ *  parts of the SpectrumView are constructed here and are deleted when the
+ *  SpectrumView destructor is called.
  *
  *  @param data_source  The source of the data that will be displayed. 
  *  @param peak_min The min peak value
@@ -33,7 +33,7 @@ namespace RefDetectorViewer
  *  @param tof_min The min time of flight value
  *  @param tof_max  The max time of flight value
  */
-RefImageView::RefImageView( ImageView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
+RefImageView::RefImageView( SpectrumView::SpectrumDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
 {
   Ui_RefImageViewer* ui = new Ui_RefImageViewer();
   saved_ui          = ui; 
@@ -58,8 +58,8 @@ RefImageView::RefImageView( ImageView::ImageDataSource* data_source, int peak_mi
   // This ends up being owned by the RefImagePlotItem instance
   RefLimitsHandler* limits_handler = new RefLimitsHandler(ui);
 
-  h_graph = new ImageView::GraphDisplay( ui->h_graphPlot, NULL, false );
-  v_graph = new ImageView::GraphDisplay( ui->v_graphPlot, NULL, true );
+  h_graph = new SpectrumView::GraphDisplay( ui->h_graphPlot, NULL, false );
+  v_graph = new SpectrumView::GraphDisplay( ui->v_graphPlot, NULL, true );
 
 
   RefImageDisplay* image_display = new RefImageDisplay( ui->imagePlot,
@@ -106,7 +106,7 @@ RefImageView::RefImageView( ImageView::ImageDataSource* data_source, int peak_mi
 
 RefImageView::~RefImageView()
 {
-//  std::cout << "ImageView destructor called" << std::endl;
+//  std::cout << "RefImageView destructor called" << std::endl;
 
   delete  h_graph;
   delete  v_graph;
@@ -131,6 +131,5 @@ RefImageView::~RefImageView()
 }
 
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
-

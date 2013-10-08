@@ -192,7 +192,6 @@ namespace Mantid
 
       static void loadEntryMetadata(const std::string &nexusfilename, Mantid::API::MatrixWorkspace_sptr WS,
           const std::string &entry_name);
-
       /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file 
       static bool loadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
           const std::string & top_entry_name, Algorithm * alg);
@@ -210,6 +209,7 @@ namespace Mantid
       /// Load a spectra mapping from the given file
       bool loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name);
 
+      static void loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS);
     private:
 
       // ISIS specific methods for dealing with wide events
@@ -218,6 +218,7 @@ namespace Mantid
 
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
+
 
     public:
       /// name of top level NXentry to use
