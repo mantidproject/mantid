@@ -357,6 +357,8 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     #check if temp was increasing of decreasing
     if(datTx[0] > datTx[-1]):
     	datTx = datTx[::-1]
+        datTy = datTy[::-1]
+        datTe = datTe[::-1]
     
     CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
         Nspec=nQ, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=q1)
