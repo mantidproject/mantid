@@ -64,7 +64,7 @@ namespace Algorithms
     /// Run the algorithm
     void exec();
     /// Function to copy information from one sample to another
-    void copyParameters(API::Sample& from,API::Sample& to,bool nameFlag,bool materialFlag, bool environmentFlag, bool shapeFlag,bool latticeFlag);
+    void copyParameters(API::Sample& from, API::Sample& to, bool nameFlag, bool materialFlag, bool environmentFlag, bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag);
 
 
 
