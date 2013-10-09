@@ -117,7 +117,7 @@ public:
 
     TS_ASSERT(params);
     TS_ASSERT_EQUALS(params->columnCount(), 3);
-    TS_ASSERT_EQUALS(params->rowCount(), 3);
+    TS_ASSERT_EQUALS(params->rowCount(), 4);
     TS_ASSERT_EQUALS(params->String(0,0), "Height");
     TS_ASSERT_EQUALS(params->String(1,0), "Lifetime");
     TS_ASSERT_EQUALS(params->String(2,0), "Cost function value");

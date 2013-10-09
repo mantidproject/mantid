@@ -773,6 +773,11 @@ namespace CurveFitting
       row << "Cost function value" << finalCostFuncVal;      
       setProperty("OutputParameters",result);
 
+      Mantid::API::TableRow row2 = result->appendRow();
+      std::string name(getPropertyValue("CostFunction"));
+      name += " value";
+      row2 << name << minimizer->costFunctionVal();
+
       const bool unrollComposites = getProperty("OutputCompositeMembers");
       m_domainCreator->separateCompositeMembersInOutput(unrollComposites);
       m_domainCreator->createOutputWorkspace(baseName,m_function,domain,values);
