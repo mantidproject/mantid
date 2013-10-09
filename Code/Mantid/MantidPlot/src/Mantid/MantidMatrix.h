@@ -43,38 +43,38 @@ class UpdateDAEThread;
 class ProjectData;
 
 /**
- * Find the minimum and maximum Y values in a matrix workspace.
- *
- * @param ws :: A matrix workspace.
- * @param miny :: Variable to receive the minimum value.
- * @param maxy :: Variable to receive the maximum value.
- */
+* Find the minimum and maximum Y values in a matrix workspace.
+*
+* @param ws :: A matrix workspace.
+* @param miny :: Variable to receive the minimum value.
+* @param maxy :: Variable to receive the maximum value.
+*/
 void findYRange(Mantid::API::MatrixWorkspace_const_sptr ws, double &miny, double &maxy);
 
 /** MantidMatrix is the class that represents a Qtiplot window for displaying workspaces.
-    It has separate tabs for displaying spectrum values, bin boundaries, and errors.
+It has separate tabs for displaying spectrum values, bin boundaries, and errors.
 
-    @author Roman Tolchenov, Tessella Support Services plc
+@author Roman Tolchenov, Tessella Support Services plc
 
-    Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
-    This file is part of Mantid.
+This file is part of Mantid.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
+File change history is stored at: <https://github.com/mantidproject/mantid>.
+Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
 class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver
@@ -159,76 +159,76 @@ signals:
   void needToClose();
   void needsUpdating();
 
-public slots:
+  public slots:
 
-  void changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
-  void closeMatrix();
+    void changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+    void closeMatrix();
 
-  //! Return the width of all columns
-  int columnsWidth(int i=-1);
-  //! Set the width of all columns for all views (all==true) or the active view (all==false)
-  void setColumnsWidth(int width, bool all = true);
-  // Set the width of column in view i (0 - Y, 1 - X, 2 - E)
-  void setColumnsWidth(int i, int width);
+    //! Return the width of all columns
+    int columnsWidth(int i=-1);
+    //! Set the width of all columns for all views (all==true) or the active view (all==false)
+    void setColumnsWidth(int width, bool all = true);
+    // Set the width of column in view i (0 - Y, 1 - X, 2 - E)
+    void setColumnsWidth(int i, int width);
 
-  //! Return the content of the cell as a string
-  QString text(int row, int col);
-  //! Return the value of the cell as a double
-  double cell(int row, int col);
+    //! Return the content of the cell as a string
+    QString text(int row, int col);
+    //! Return the value of the cell as a double
+    double cell(int row, int col);
 
-  //! Returns the X value corresponding to column 1
-  double xStart(){return x_start;}
-  //! Returns the X value corresponding to the last column
-  double xEnd(){return x_end;}
-  //! Returns the Y value corresponding to row 1
-  double yStart(){return y_start;}
-  //! Returns the Y value corresponding to the last row
-  double yEnd(){return y_end;}
+    //! Returns the X value corresponding to column 1
+    double xStart(){return x_start;}
+    //! Returns the X value corresponding to the last column
+    double xEnd(){return x_end;}
+    //! Returns the Y value corresponding to row 1
+    double yStart(){return y_start;}
+    //! Returns the Y value corresponding to the last row
+    double yEnd(){return y_end;}
 
-  //! Returns the step of the X axis
-  double dx(){return fabs(x_end - x_start)/(double)(numCols() - 1);}
-  //! Returns the step of the Y axis
-  double dy(){return fabs(y_end - y_start)/(double)(numRows() - 1);}
+    //! Returns the step of the X axis
+    double dx(){return fabs(x_end - x_start)/(double)(numCols() - 1);}
+    //! Returns the step of the Y axis
+    double dy(){return fabs(y_end - y_start)/(double)(numRows() - 1);}
 
-  //! Returns the bounding rect of the matrix coordinates
-  QwtDoubleRect boundingRect();
-  /// Invalidates the bounding rect forcing it to be recalculated
-  void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
+    //! Returns the bounding rect of the matrix coordinates
+    QwtDoubleRect boundingRect();
+    /// Invalidates the bounding rect forcing it to be recalculated
+    void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
 
-  //! Min and max values in the matrix.
-  void range(double *min, double *max);
-  //! Set min and max values in the matrix.
-  void setRange(double min, double max);
+    //! Min and max values in the matrix.
+    void range(double *min, double *max);
+    //! Set min and max values in the matrix.
+    void setRange(double min, double max);
 
-  // Scroll to row and column
-  void goTo(int row,int col);
-  //! Scroll to row (row starts with 1)
-  void goToRow(int row);
-  //! Scroll to column (column starts with 1)
-  void goToColumn(int col);
-  // Set the active tab by name
-  void goToTab(const QString & name);
+    // Scroll to row and column
+    void goTo(int row,int col);
+    //! Scroll to row (row starts with 1)
+    void goToRow(int row);
+    //! Scroll to column (column starts with 1)
+    void goToColumn(int col);
+    // Set the active tab by name
+    void goToTab(const QString & name);
 
-  void copySelection();
+    void copySelection();
 
-  //! Allocate memory for a matrix buffer
-  static double** allocateMatrixData(int rows, int columns);
-  //! Free memory used for a matrix buffer
-  static void freeMatrixData(double **data, int rows);
+    //! Allocate memory for a matrix buffer
+    static double** allocateMatrixData(int rows, int columns);
+    //! Free memory used for a matrix buffer
+    static void freeMatrixData(double **data, int rows);
 
-  int verticalHeaderWidth(){return m_table_viewY->verticalHeader()->width();}
+    int verticalHeaderWidth(){return m_table_viewY->verticalHeader()->width();}
 
-  void dependantClosed(MdiSubWindow* w);
-  void selfClosed(MdiSubWindow* w);
-  void repaintAll();
-  void closeDependants();
-  // for context menu filtering
-  bool eventFilter(QObject *object, QEvent *e);
-  //to synchronize the views
-  void viewChanged(int);
+    void dependantClosed(MdiSubWindow* w);
+    void selfClosed(MdiSubWindow* w);
+    void repaintAll();
+    void closeDependants();
+    // for context menu filtering
+    bool eventFilter(QObject *object, QEvent *e);
+    //to synchronize the views
+    void viewChanged(int);
 
-  // Opens modified QtiPlot's MatrixDialog and sets column width and number format
-  void setMatrixProperties();
+    // Opens modified QtiPlot's MatrixDialog and sets column width and number format
+    void setMatrixProperties();
 
 protected:
 
@@ -246,9 +246,9 @@ protected:
   QColor m_bk_color;
   QPixmap m_matrix_icon;
   double x_start,             //!< X value corresponding to column 1
-  x_end,                      //!< X value corresponding to the last column
-  y_start,                    //!< Y value corresponding to row 1
-  y_end;                      //!< Y value corresponding to the last row
+    x_end,                      //!< X value corresponding to the last column
+    y_start,                    //!< Y value corresponding to row 1
+    y_end;                      //!< Y value corresponding to the last row
   int m_rows,m_cols;
   int m_startRow;
   int m_endRow;
@@ -294,7 +294,7 @@ class ProjectData
 {
 public:
   ProjectData() : m_grayScale(0),m_intensityChanged(0),m_contourMode(0),m_contourLevels(0),
-                 m_customPen(0),m_contourLabels(0),m_colormapPen(0),m_ContourLinesEditor(0)
+    m_customPen(0),m_contourLabels(0),m_colormapPen(0),m_ContourLinesEditor(0)
   {}
   ~ProjectData(){}
   bool getGrayScale() const {return m_grayScale;}
@@ -332,10 +332,10 @@ private:
 };
 
 /**
-    MantidMatrixModel is an implementation of QAbstractTableModel which is an
-    interface between the data (workspace) and the widget displaying it (QTableView).
-    It presents spectrum data (Type Y), bin boundaries (Type X), and errors (Type E)
-    as a table.
+MantidMatrixModel is an implementation of QAbstractTableModel which is an
+interface between the data (workspace) and the widget displaying it (QTableView).
+It presents spectrum data (Type Y), bin boundaries (Type X), and errors (Type E)
+as a table.
 */
 class MantidMatrixModel:public QAbstractTableModel
 {
@@ -343,17 +343,17 @@ class MantidMatrixModel:public QAbstractTableModel
 public:
   typedef enum {Y,X,E} Type;
   MantidMatrixModel(QObject *parent,
-                    const Mantid::API::MatrixWorkspace* ws,
-                    int rows,
-                    int cols,
-                    int start,
-                    Type type);
+    const Mantid::API::MatrixWorkspace* ws,
+    int rows,
+    int cols,
+    int start,
+    Type type);
 
   /// Call this function if the workspace has changed
   void setup(const Mantid::API::MatrixWorkspace* ws,
-             int rows,
-             int cols,
-             int start);
+    int rows,
+    int cols,
+    int start);
 
   /// Implementation of QAbstractTableModel::rowCount() -- number of rows (spectra) that can be shown
   int rowCount(const QModelIndex &parent = QModelIndex()) const
