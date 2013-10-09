@@ -1585,6 +1585,8 @@ void Indirect::calPlotRaw()
   // Replot
   m_calCalPlot->replot();
 
+  // also replot the energy
+  calPlotEnergy();
 }
 
 void Indirect::calPlotEnergy()
