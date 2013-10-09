@@ -1630,9 +1630,36 @@ void Indirect::calPlotEnergy()
   m_calResR2->setMinimum(m_calDblMng->value(m_calResProp["ELow"]));
   m_calResR2->setMaximum(m_calDblMng->value(m_calResProp["EHigh"]));
 
+  calSetDefaultResolution(input);
+
   // Replot
   m_calResPlot->replot();
 }
+
+void Indirect::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+{
+  auto inst = ws->getInstrument();
+  auto analyser = inst->getStringParameter("analyser");
+
+  if(analyser.size() > 0)
+  {
+    auto comp = inst->getComponentByName(analyser[0]);
+    auto params = comp->getNumberParameter("resolution", true);
+
+    //set the default instrument resolution
+    if(params.size() > 0)
+    {
+      double res = params[0];
+      m_calDblMng->setValue(m_calResProp["ELow"], -res*10);
+      m_calDblMng->setValue(m_calResProp["EHigh"], res*10);
+
+      m_calDblMng->setValue(m_calResProp["Start"], -res*9);
+      m_calDblMng->setValue(m_calResProp["End"], -res*8);
+    }
+
+  }
+}
+
 
 void Indirect::calMinChanged(double val)
 {
