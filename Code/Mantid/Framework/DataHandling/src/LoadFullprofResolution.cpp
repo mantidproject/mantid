@@ -73,7 +73,7 @@ namespace DataHandling
         "Path to an Fullprof .irf file to load.");
 
     // Output workspace
-    auto wsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output);
+    auto wsprop = new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace", "", Direction::Output);
     declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
     // Bank to import
@@ -170,7 +170,7 @@ namespace DataHandling
     }
 
     // Generate output table workspace
-    TableWorkspace_sptr outws = genTableWorkspace(bankparammap);
+    API::ITableWorkspace_sptr outws = genTableWorkspace(bankparammap);
 
     // 6. Output
     setProperty("OutputWorkspace", outws);
@@ -295,12 +295,20 @@ namespace DataHandling
     double cwl;
     int tmpbankid;
     parseBankLine(bankline, cwl, tmpbankid);
-    g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
+    if(tmpbankid != -1) 
+    {
+      g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
+    }
+    else
+    {
+      g_log.warning() << "No CWL found for bank " << bankid;
+      tmpbankid = bankid;
+    }
     if (bankid != tmpbankid)
     {
       stringstream errss;
       errss << "Input bank ID (" << bankid << ") is not same as the bank ID (" << tmpbankid
-            << ") found in the specified region from input. ";
+        << ") found in the specified region from input. ";
       throw runtime_error(errss.str());
     }
     parammap["CWL"] = cwl;
@@ -559,6 +567,11 @@ namespace DataHandling
           tempdb = atof(terms[4].c_str());
           parammap["Beta1t"] = tempdb;
         }
+      }  // "ALFBT"
+      else if (boost::starts_with(line,"END"))
+      {
+        // Ignore END line
+        g_log.debug() << "END line of bank";
       }
       else
       {
