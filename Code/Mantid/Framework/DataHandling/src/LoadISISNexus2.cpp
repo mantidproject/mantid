@@ -202,8 +202,8 @@ namespace Mantid
       } catch(std::exception & ) {  // No valid instrument and sample section found
         parameterString="not found";
       }
+      local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
       if( parameterString == "not found") {
-        local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
         runLoadInstrument(local_workspace);
       } else {  // Use parameters got from instrument section of Nexus file
         local_workspace->readParameterMap(parameterString);
