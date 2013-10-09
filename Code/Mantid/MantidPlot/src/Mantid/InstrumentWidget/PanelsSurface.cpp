@@ -57,14 +57,11 @@ void PanelsSurface::init()
     m_assemblies.clear();
 
     size_t ndet = m_instrActor->ndetectors();
-    //m_unwrappedDetectors.resize(ndet);
     if (ndet == 0) return;
 
     // Pre-calculate all the detector positions (serial because
     // I suspect the IComponent->getPos() method to not be properly thread safe)
     m_instrActor->cacheDetPos();
-
-    Instrument_const_sptr inst = m_instrActor->getInstrument();
 
     findFlatBanks();
     spreadBanks();
