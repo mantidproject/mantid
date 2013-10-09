@@ -387,6 +387,8 @@ public slots:
   /// Signals QTableView that the data have changed.
   void resetData(){reset();}
 private:
+  bool checkMontorCache(int row) const; //check the cache and add to it if neccessary
+
   const Mantid::API::MatrixWorkspace* m_workspace;
   int m_startRow; ///< starting workspace index to display
   int m_endRow;   ///< ending workspace index to display
@@ -396,6 +398,8 @@ private:
   Type m_type;///< The type: X for bin boundaries, Y for the spectrum data, E for errors
   char m_format;   //  Format of numbers returned by data(): 'f' - fixed, 'e' - scientific.
   int m_prec;       //  Number precision
+  QColor m_mon_color; // Monitor Specific background color
+  mutable QHash<int, bool> m_monCache; //monitor flag cache
 };
 
 #endif

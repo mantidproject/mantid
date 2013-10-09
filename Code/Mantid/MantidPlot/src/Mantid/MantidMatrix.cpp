@@ -1163,6 +1163,7 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace* ws,
   m_rows = rows;
   m_cols = cols;
   m_startRow = start >= 0? start : 0;
+  m_mon_color = QColor(255,255,204);
   if (ws->blocksize() != 0)
     m_colNumCorr = ws->isHistogramData() ? 1 : 0;
   else
@@ -1239,30 +1240,53 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
     }
   case Qt::BackgroundRole:
     {
-    try
-    {
-      std::cerr << "row: " << index.row() << std::endl;
-      size_t wsIndex = static_cast<size_t>(index.row());
-      std::cerr << "wsindex: " << wsIndex << std::endl;
-      IDetector_const_sptr det = m_workspace->getDetector(wsIndex);/*(index.row());*/
-      std::string out = det->isMonitor() ? "yes" : "no" ;
-      std::cerr << "ismonitor: " << out << std::endl;
-      return QVariant();
-      }
-      catch (std::exception e)
+      if (checkMontorCache(index.row()))
       {
-       int probs = 6;
+        return m_mon_color;
+      }
+      else
+      {
+        return QVariant();
       }
     }
   default:
     {
       return QVariant();
     }
+    return QVariant();
   }
-  //cache row vlaues the first time a row is accessed
-  //if (role != Qt::DisplayRole && role != Qt::BackgroundRole) return QVariant();
-  //double val = data(index.row(),index.column());
-  //return QVariant(m_locale.toString(val,m_format,m_prec));
+}
+
+bool MantidMatrixModel::checkMontorCache(int row) const
+{
+  bool isMon = false;
+  if (m_monCache.contains(row))
+  {
+    isMon = m_monCache.value(row);
+  }
+  else
+  {
+    try
+    {
+      size_t wsIndex = static_cast<size_t>(row);
+      IDetector_const_sptr det = m_workspace->getDetector(wsIndex);
+      if (det->isMonitor())
+      {
+        isMon = true;
+      }
+      else
+      {
+        isMon = false;
+      }
+      m_monCache.insert(row, isMon);
+    }
+    catch (std::exception e)
+    {
+      m_monCache.insert(row,false);
+      isMon = false;
+    }
+  }
+  return isMon;
 }
 
 
