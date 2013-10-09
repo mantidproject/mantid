@@ -56,6 +56,8 @@ namespace DataHandling
 
     std::string toProf10IrfString(int bankid);
 
+    std::string toProf9IrfString(int bankid);
+
     /// Parse input workspace to map of parameters
     void parseTableWorkspace();
 

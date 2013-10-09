@@ -19,8 +19,7 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s)
 
 /**
   CHANGE:
-  1. Remove the 2nd output for bank information
-  2. Make the output to be a n(bank) + 1 column workspace
+  1. Understand profile 9
 
   **/
 
@@ -305,6 +304,24 @@ namespace DataHandling
       throw runtime_error(errss.str());
     }
     parammap["CWL"] = cwl;
+
+    // TODO - Implement this!
+    int profilenumber = searchProfile();
+
+    switch (profilenumber)
+    {
+      case 9:
+        parseProfile9();
+        break;
+
+      case 10:
+        parseProfile10();
+        break;
+
+      default:
+        throw runtime_error("Not implemented for this profile.");
+        break;
+    }
 
     double tempdb;
     for (int i = startlineindex+1; i <= endlineindex; ++i)
@@ -696,6 +713,26 @@ namespace DataHandling
     return tablews;
   }
 
+  // TODO - Implement this
+  int LoadFullprofResolution::searchProfile()
+  {
+
+  }
+
+  // TODO - Implement this
+  void LoadFullprofResolution::parseProfile9()
+  {
+
+
+  }
+
+  // TODO - Implement this
+  void LoadFullprofResolution::parseProfile10()
+  {
+
+
+
+  }
 
 } // namespace DataHandling
 } // namespace Mantid

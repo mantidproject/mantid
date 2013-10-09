@@ -75,6 +75,8 @@ namespace DataHandling
                           "Name of the output .irf file.");
 
     this->declareProperty("Bank", 1, "Bank number of the parameters belonged to. ");
+
+    declareProperty("ProfileNumber", 10, "Profile number defined in Fullprof.");
   }
 
   /** Main execution body
@@ -251,6 +253,15 @@ namespace DataHandling
 
     return content.str();
 
+  }
+
+  // TODO - Wrok on this
+  std::string SaveFullprofResolution::toProf9IrfString(int bankid)
+  {
+
+
+
+    return "";
   }
   
 
