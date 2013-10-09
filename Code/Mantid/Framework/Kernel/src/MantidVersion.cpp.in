@@ -39,7 +39,7 @@ const char* MantidVersion::mainDOI()
 
 std::string MantidVersion::releaseDOI()
 {
-  unsigned int patchVersion = @MtdVersion_WC_LAST_CHANGED_REV@;
+  unsigned int patchVersion = @VERSION_PATCH@;
 
   std::stringstream doi;
   doi << mainDOI() << @VERSION_MAJOR@ << "." << @VERSION_MINOR@;
