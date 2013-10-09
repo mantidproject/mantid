@@ -62,7 +62,7 @@ namespace DataHandling
     void parseTableWorkspace();
 
     /// Map containing the name of value of each parameter required by .irf file
-    std::map<std::string, double> mParameters;
+    std::map<std::string, double> m_profileParamMap;
 
     /// Input table workspace
     DataObjects::TableWorkspace_sptr inpWS;

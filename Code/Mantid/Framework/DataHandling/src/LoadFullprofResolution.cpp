@@ -571,7 +571,7 @@ namespace DataHandling
       else if (boost::starts_with(line,"END"))
       {
         // Ignore END line
-        g_log.debug() << "END line of bank";
+        g_log.debug("END line of bank." );
       }
       else
       {
@@ -726,6 +726,7 @@ namespace DataHandling
     return tablews;
   }
 
+#if 0
   // TODO - Implement this
   int LoadFullprofResolution::searchProfile()
   {
@@ -746,6 +747,7 @@ namespace DataHandling
 
 
   }
+#endif
 
 } // namespace DataHandling
 } // namespace Mantid
