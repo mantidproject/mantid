@@ -9,6 +9,7 @@ The following information can be copied:
 * Shape
 * Oriented lattice 
 
+One can copy the orientation matrix only. To do this, select both CopyLattice and CopyOrientationOnly. If only CopyOrientationOnly is true, the algorithm will throw an error.
 
 *WIKI*/
 #include "MantidAlgorithms/CopySample.h"
@@ -163,6 +164,10 @@ namespace Algorithms
         {
             to.setOrientedLattice(new Geometry::OrientedLattice(from.getOrientedLattice()));
         }
+    }
+    if ((!latticeFlag)&& orientationOnlyFlag)
+    {
+        throw std::runtime_error("CopyOrientationOnly flag is set to true, but CopyLattice is false");
     }
 
   }
