@@ -24,6 +24,22 @@ namespace MantidQt
 {
   namespace CustomDialogs
   {
+    namespace
+    {
+      /// Holds a flag at a given value
+      /// and flips it back to its starting value on destruction
+      struct HoldFlag
+      {
+        HoldFlag(bool& current, const bool holdValue) : initial(current), heldflag(current)
+        {
+          heldflag = holdValue;
+        }
+        ~HoldFlag() { heldflag = initial; }
+        bool initial;
+        bool & heldflag;
+      };
+    }
+
     // Declare the dialog. Name must match the class name
     DECLARE_DIALOG(LoadDialog);
 
@@ -33,7 +49,8 @@ namespace MantidQt
 
     /// Default constructor
     LoadDialog:: LoadDialog(QWidget *parent) 
-      : API::AlgorithmDialog(parent), m_form(), m_currentFiles(), m_initialHeight(0)
+      : API::AlgorithmDialog(parent), m_form(), m_currentFiles(), m_initialHeight(0),
+        m_populating(false)
     {
       // We will handle parsing the input ourselves on startup
       m_autoParseOnInit = false;
@@ -48,6 +65,8 @@ namespace MantidQt
     */
     void LoadDialog::createDynamicWidgets()
     {
+      HoldFlag hold(m_populating, true);
+
       m_form.fileWidget->blockSignals(true);
       createDynamicLayout();
       m_form.fileWidget->blockSignals(false);
@@ -95,10 +114,20 @@ namespace MantidQt
     }
 
     /**
-     * Protection against removing the file while the dialog is up.
+     * Called when the run button is clicked
      */
     void LoadDialog::accept()
     {
+      // The file widget may have been edited but not lost focus so that the search wasn't
+      // attempted for the new contents. Force one here.
+      // The widget does nothing if the contents have not changed so it will be quick for this case
+      m_form.fileWidget->findFiles();
+      while(m_form.fileWidget->isSearching() || m_populating)
+      {
+        QApplication::instance()->processEvents();
+      }
+
+      // Check that the file still exists just incase it somehow got removed
       std::string errMess = getAlgorithm()->getPointerToProperty("Filename")->isValid();
       if ( !errMess.empty() )
       {
