@@ -1,3 +1,4 @@
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtMantidWidgets/ICatSearch2.h"
@@ -909,10 +910,25 @@ namespace MantidQt
     /**
      * Loads the selected dataFiles into workspaces.
      */
-    void ICatSearch2::loadDataFile()
+    void ICatSearch2::loadDataFiles()
     {
+      // Get the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
+      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
+      // Create & initialize the load algorithm we will use to load the file by path to a workspace.
+      Mantid::API::Algorithm_sptr loadAlgorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      loadAlgorithm->initialize();
 
+      // For all the files downloaded (or in archive) we want to load them.
+      for (unsigned i = 0; i < filePaths.size(); i++)
+      {
+        // Set the filename (path) of the algorithm to load from.
+        loadAlgorithm->setPropertyValue("Filename", filePaths.at(i));
+        // Sets the output workspace to be the name of the file.
+        loadAlgorithm->setPropertyValue("OutputWorkspace", Poco::Path(Poco::Path(filePaths.at(i)).getFileName()).getBaseName());
+        loadAlgorithm->execute();
+      }
     }
+
 
   } // namespace MantidWidgets
 } // namespace MantidQt
