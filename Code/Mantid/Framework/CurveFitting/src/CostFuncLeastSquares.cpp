@@ -75,7 +75,7 @@ double CostFuncLeastSquares::val() const
     }
   }
 
-  // std::cout << "Returned val() = " << m_value << "\n";
+  // std::cout << "**** " << name() << ": Returned val() = " << m_value << "\n";
 
   m_dirtyVal = false;
   return m_value;
@@ -94,7 +94,6 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
   double retVal = 0.0;
 
   double sqrtw = calSqrtW(values);
-  // std::cout << "*** DBOUT *** Sqrt(W) = " << sqrtw << "\n";
 
   for (size_t i = 0; i < ny; i++)
   {
@@ -112,7 +111,8 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
   PARALLEL_ATOMIC
   m_value += m_factor * retVal;
 
-  // std::cout << "m_value (final) = " << m_value << ", retVal = " << retVal << "\n";
+  // std::cout << "m_value (final) = " << m_value << ", retVal = " << retVal
+  //           << ", factor = " << m_factor << " \n";
 
   return;
 }
