@@ -19,8 +19,8 @@ namespace MantidQt
       void executeSearch(std::map<std::string, std::string> userInputs);
       /// Search for all related dataFiles for the specified investigation.
       void executeGetDataFiles(int64_t investigationId);
-      /// Retrieve the path(s) to the file that was downloaded (via HTTP) or is stored in the archive
-      std::vector<std::string> getDataFilePaths(std::vector<std::pair<int64_t, std::string>>& userSelectedFiles);
+      /// Download dataFile (via HTTP or copy if access to archive) and return the path to it.
+      std::vector<std::string> downloadDataFiles(std::vector<std::pair<int64_t, std::string>> userSelectedFiles, std::string downloadPath);
     };
   } // namespace MantidWidgets
 } // namespace MantidQt

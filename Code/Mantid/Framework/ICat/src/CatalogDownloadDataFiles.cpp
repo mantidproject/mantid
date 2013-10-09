@@ -62,6 +62,7 @@ namespace Mantid
                                                      boost::make_shared<NullValidator>(),
                                                      Direction::Output),
                       "A list of containing  locations of files downloaded from data server");
+      declareProperty<std::string>("downloadPath","The path to save the files to download to.");
     }
 
     /// Raise an error concerning catalog searching
@@ -225,8 +226,9 @@ namespace Mantid
      */
     std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream& rs,const std::string& fileName)
     {
-      Poco::Path defaultSaveDir(Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-      Poco::Path path(defaultSaveDir, fileName);
+      std::string downloadPath = getProperty("downloadPath");
+      Poco::Path defaultSaveDir(downloadPath);
+      Poco::Path path(downloadPath, fileName);
       std::string filepath = path.toString();
 
       std::ios_base::openmode mode;

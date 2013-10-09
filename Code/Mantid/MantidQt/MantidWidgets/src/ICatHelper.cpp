@@ -121,9 +121,10 @@ namespace MantidQt
     /**
      * Retrieve the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
      * @param userSelectedFiles :: The file(s) the user has selected and wants to download.
+     * @param downloadPath      :: The location to save the datafile(s).
      * @return A vector containing the paths to the file(s) the user wants.
      */
-    std::vector<std::string> ICatHelper::getDataFilePaths(std::vector<std::pair<int64_t, std::string>>& userSelectedFiles)
+    std::vector<std::string> ICatHelper::downloadDataFiles(std::vector<std::pair<int64_t, std::string>> userSelectedFiles, std::string downloadPath)
     {
       Mantid::API::IAlgorithm_sptr catalogAlgorithm;
       try
@@ -153,6 +154,7 @@ namespace MantidQt
       // The file IDs and file names of the data file(s) the user wants to download.
       catalogAlgorithm->setProperty("FileIds",fileIDs);
       catalogAlgorithm->setProperty("FileNames",fileNames);
+      catalogAlgorithm->setProperty("downloadPath",downloadPath);
 
       Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
       while( !result.available() )

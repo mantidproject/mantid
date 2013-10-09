@@ -1,8 +1,11 @@
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtMantidWidgets/ICatSearch2.h"
 #include <Poco/Path.h>
 
 #include <QDesktopServices>
+#include <QFileDialog>
+#include <QSettings>
 #include <QUrl>
 
 namespace MantidQt
@@ -17,6 +20,8 @@ namespace MantidQt
       // Verify if the user has logged in.
       // if they have: continue...
       initLayout();
+      // Load saved settings from store.
+      loadSettings();
     }
 
     /**
@@ -287,6 +292,38 @@ namespace MantidQt
       m_icatUiForm.searchResultsCbox->setEnabled(true);
       m_icatUiForm.searchResultsCbox->setChecked(true);
       m_icatUiForm.resFrame->show();
+    }
+
+
+    /**
+     * Save the current state of ICAT for next time
+     */
+    void ICatSearch2::saveSettings()
+    {
+      QSettings settings;
+      settings.beginGroup("/ICatSettings");
+        settings.setValue("lastDownloadPath",m_downloadSaveDir);
+      settings.endGroup();
+    }
+
+    /**
+     * Read the saved settings from the store.
+     */
+    void ICatSearch2::loadSettings()
+    {
+      QSettings settings;
+      settings.beginGroup("/ICatSettings");
+
+      QString lastdir = settings.value("lastDownloadPath").toString();
+
+      // The user has not previously selected a directory to save ICAT downloads to.
+      if (lastdir.isEmpty())
+      {
+        lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+      }
+      // Initalise the member variable to the last saved directory.
+      m_downloadSaveDir = lastdir;
+      settings.endGroup();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -865,7 +902,18 @@ namespace MantidQt
      */
     void ICatSearch2::downloadDataFiles()
     {
+      QString downloadSavePath = QFileDialog::getExistingDirectory(this, tr("Select a directory to save data files."), m_downloadSaveDir, QFileDialog::ShowDirsOnly);
 
+      // The user has clicked "Open" and changed the path (and not clicked cancel).
+      if (!downloadSavePath.isEmpty())
+      {
+        // Set setting prior to saving.
+        m_downloadSaveDir = downloadSavePath;
+        // Save settings to store for use next time.
+        saveSettings();
+        // Download the selected dataFiles to the chosen directory.
+        m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
+      }
     }
 
     /**

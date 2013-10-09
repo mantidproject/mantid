@@ -69,6 +69,10 @@ namespace MantidQt
       void showSearchResultsFrame();
       /// Obtain the index of the column in a table that contains a specified name.
       int headerIndexByName(QTableWidget* table, const std::string &searchFor);
+      /// Save the current state of ICAT for next time.
+      void saveSettings();
+      /// Read settings from store.
+      void loadSettings();
 
       ///////////////////////////////////////////////////////////////////////////////
       /// Methods for: "Catalog Search"
@@ -174,6 +178,8 @@ namespace MantidQt
       QCalendarWidget * m_calendar;
       /// The helper class that accesses ICAT algorithmic functionality.
       ICatHelper * m_icatHelper;
+      /// The directory to save the downloaded dataFiles.
+      QString m_downloadSaveDir;
     };
   }
 }
