@@ -294,6 +294,29 @@ namespace MantidQt
       m_icatUiForm.resFrame->show();
     }
 
+    /**
+     * Obtain the index of the column in a table that contains a specified name.
+     * @param table     :: The table to search the headers on.
+     * @param searchFor :: The header name to search against.
+     * @return The index of the column with the specified name.
+     */
+    int ICatSearch2::headerIndexByName(QTableWidget* table, const std::string &searchFor)
+    {
+      QAbstractItemModel *model = table->model();
+
+      // For every column in the table
+      for (int col = 0; col < table->columnCount(); col++)
+      {
+        // Is the column name the same as the searchFor string?
+        if (searchFor.compare(model->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString()) == 0)
+        {
+          // Yes? Return the index of the column.
+          return (col);
+        }
+      }
+      // This indicates that the column was not found.
+      return (-1);
+    }
 
     /**
      * Save the current state of ICAT for next time
@@ -547,30 +570,6 @@ namespace MantidQt
       m_icatUiForm.myDataCbox->setChecked(false);
     }
 
-    /**
-     * Obtain the index of the column in a table that contains a specified name.
-     * @param table     :: The table to search the headers on.
-     * @param searchFor :: The header name to search against.
-     * @return The index of the column with the specified name.
-     */
-    int ICatSearch2::headerIndexByName(QTableWidget* table, const std::string &searchFor)
-    {
-      QAbstractItemModel *model = table->model();
-
-      // For every column in the table
-      for (int col = 0; col < table->columnCount(); col++)
-      {
-        // Is the column name the same as the searchFor string?
-        if (searchFor.compare(model->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString()) == 0)
-        {
-          // Yes? Return the index of the column.
-          return (col);
-        }
-      }
-      // This indicates that the column was not found.
-      return (-1);
-    }
-
     ///////////////////////////////////////////////////////////////////////////////
     // Methods for "Search results"
     ///////////////////////////////////////////////////////////////////////////////
@@ -641,7 +640,7 @@ namespace MantidQt
     /**
      * Populate the result table, and update the page number.
      */
-    bool ICatSearch2::nextPageClicked()
+    void ICatSearch2::nextPageClicked()
     {
 
     }
@@ -649,7 +648,7 @@ namespace MantidQt
     /**
      * Populate the result table, and update the page number.
      */
-    bool ICatSearch2::prevPageClicked()
+    void ICatSearch2::prevPageClicked()
     {
 
     }
@@ -657,7 +656,7 @@ namespace MantidQt
     /**
      * Populate's result table depending page number input by user.
      */
-    bool ICatSearch2::goToInputPage()
+    void ICatSearch2::goToInputPage()
     {
 
     }
@@ -843,29 +842,6 @@ namespace MantidQt
       }
     }
 
-    /**
-     * Filters the "DataFile information" table to display user specified files (based on file extension).
-     */
-    void ICatSearch2::filterDataFileType(int index)
-    {
-      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
-
-      for (int row = 0; row < table->rowCount(); ++row)
-      {
-        // Hide row by default, in order to show only relevant ones.
-        table->setRowHidden(row,true);
-
-        QTableWidgetItem *item = table->item(row,headerIndexByName(table, "Name"));
-
-        // Show the relevant rows depending on file extension. 0 index is "Filter type..." so all will be shown.
-        // Have to convert to lowercase as ".TXT", and ".txt" should be filtered as the same.
-        if (index == 0 || (item->text().toLower().contains(m_icatUiForm.dataFileFilterCombo->text(index).toLower())))
-        {
-          table->setRowHidden(row,false);
-        }
-      }
-    }
-
     ///////////////////////////////////////////////////////////////////////////////
     // SLOTS for: "DataFile information"
     ///////////////////////////////////////////////////////////////////////////////
@@ -893,8 +869,22 @@ namespace MantidQt
      */
     void ICatSearch2::doFilter(int index)
     {
-      // Filter by the user selected file extension.
-      filterDataFileType(index);
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+
+      for (int row = 0; row < table->rowCount(); ++row)
+      {
+        // Hide row by default, in order to show only relevant ones.
+        table->setRowHidden(row,true);
+
+        QTableWidgetItem *item = table->item(row,headerIndexByName(table, "Name"));
+
+        // Show the relevant rows depending on file extension. 0 index is "Filter type..." so all will be shown.
+        // Have to convert to lowercase as ".TXT", and ".txt" should be filtered as the same.
+        if (index == 0 || (item->text().toLower().contains(m_icatUiForm.dataFileFilterCombo->text(index).toLower())))
+        {
+          table->setRowHidden(row,false);
+        }
+      }
     }
 
     /**

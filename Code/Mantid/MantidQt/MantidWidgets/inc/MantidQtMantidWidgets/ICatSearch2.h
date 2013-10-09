@@ -114,8 +114,6 @@ namespace MantidQt
       std::set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
       /// Add the list of file extensions to the "Filter type..." drop-down.
       void populateDataFileType(std::set<std::string> extensions);
-      /// Filter the table to show only results by data type user wants to view.
-      void filterDataFileType(int index);
 
     private slots:
       /// When the facility login button is clicked
@@ -151,10 +149,10 @@ namespace MantidQt
       ///////////////////////////////////////////////////////////////////////////////
 
       /// Populate the result table, and update the page number.
-      bool nextPageClicked();
-      bool prevPageClicked();
+      void nextPageClicked();
+      void prevPageClicked();
       /// Populate's result table depending page number input by user.
-      bool goToInputPage();
+      void goToInputPage();
       /// Checks that the investigation is selected and performs investigationClicked.
       void investigationSelected(QTableWidgetItem* item);
 
