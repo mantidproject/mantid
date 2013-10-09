@@ -655,7 +655,8 @@ namespace CurveFitting
     // degrees of freedom
     size_t dof = values->size() - costFunc->nParams();
     if (dof == 0) dof = 1;
-    double finalCostFuncVal = minimizer->costFunctionVal() / double(dof);
+    double rawcostfuncval = minimizer->costFunctionVal();
+    double finalCostFuncVal = rawcostfuncval / double(dof);
 
     setProperty("OutputChi2overDoF",finalCostFuncVal);
 
@@ -770,13 +771,22 @@ namespace CurveFitting
       }
       // Add chi-squared value at the end of parameter table
       Mantid::API::TableRow row = result->appendRow();
-      row << "Cost function value" << finalCostFuncVal;      
+#if 1
+      std::string costfuncname = getPropertyValue("CostFunction");
+      if (costfuncname == "Rwp")
+        row << "Cost function value" << rawcostfuncval;
+      else
+        row << "Cost function value" << finalCostFuncVal;
       setProperty("OutputParameters",result);
-
+#else
+      row << "Cost function value" << finalCostFuncVal;
       Mantid::API::TableRow row2 = result->appendRow();
       std::string name(getPropertyValue("CostFunction"));
       name += " value";
-      row2 << name << minimizer->costFunctionVal();
+      row2 << name << rawcostfuncval;
+#endif
+
+      setProperty("OutputParameters",result);
 
       const bool unrollComposites = getProperty("OutputCompositeMembers");
       m_domainCreator->separateCompositeMembersInOutput(unrollComposites);
