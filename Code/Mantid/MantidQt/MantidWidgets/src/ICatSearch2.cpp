@@ -75,7 +75,7 @@ namespace MantidQt
       // When the user clicks the "load" button then load their selected datafiles into a workspace.
       connect(m_icatUiForm.dataFileLoadBtn,SIGNAL(clicked()),this,SLOT(loadDataFiles()));
       // When the user double clicks a row in the table check (or uncheck) the checkbox in prep for download.
-      connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(dataFileSelected(QModelIndex)));
+      connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(clicked(QModelIndex)),this,SLOT(dataFileSelected(QModelIndex)));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -847,7 +847,7 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Change the state of the checkbox when the user double clicks a row in the dataFile table.
+     * Change the state of the checkbox when the user clicks a row in the dataFile table.
      * @param index :: The row that the user has clicked.
      */
     void ICatSearch2::dataFileSelected(const QModelIndex & index)
