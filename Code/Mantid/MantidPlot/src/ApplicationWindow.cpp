@@ -9457,13 +9457,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-  // don't ask the closing sub-windows: the answer will be ignored
-  MDIWindowList windows = getAllWindows();
-  foreach(MdiSubWindow* w,windows)
-  {
-    w->confirmClose(false);
-  }
-
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
     if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
@@ -9485,6 +9478,14 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
       ce->ignore();
       return;
     }
+  }
+
+  // Close all the MDI windows
+  MDIWindowList windows = getAllWindows();
+  foreach(MdiSubWindow* w,windows)
+  {
+    w->confirmClose(false);
+    w->close();
   }
 
   mantidUI->shutdown();
