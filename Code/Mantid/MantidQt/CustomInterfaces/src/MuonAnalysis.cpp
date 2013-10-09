@@ -3366,6 +3366,10 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
+
+  QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
+  m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
+
   if (deadTimeTypeIndex != 2)
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
 }
@@ -3858,6 +3862,7 @@ void MuonAnalysis::setToolbarsHidden(bool hidden)
 void MuonAnalysis::changeDeadTimeType(int choice)
 {
   m_deadTimesChanged = true;
+
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
@@ -3865,8 +3870,8 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   }
   else // choice must be from workspace
   {
-    m_uiForm.mwRunDeadTimeFile->setText("");
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
+    m_uiForm.mwRunDeadTimeFile->setUserInput("");
   }
 
   QSettings group;
@@ -3882,6 +3887,14 @@ void MuonAnalysis::changeDeadTimeType(int choice)
 */
 void MuonAnalysis::deadTimeFileSelected()
 {
+  if(!m_uiForm.mwRunDeadTimeFile->isValid())
+    return;
+
+  // Remember the filename for the next time interface is opened
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "DeadTimeOptions");
+  group.setValue("deadTimeFile", m_uiForm.mwRunDeadTimeFile->getText());
+
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
 }
