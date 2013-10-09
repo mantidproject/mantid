@@ -1257,6 +1257,10 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
   }
 }
 
+/**   Checks the row cache to see if the detector flag is stored, then returns it, otherwise it looks it up and adds it to the cache for quick lookup
+@param row :: current row in the table that maps to a detector.
+@return bool :: the value of if the detector is a monitor or not.
+*/
 bool MantidMatrixModel::checkMontorCache(int row) const
 {
   bool isMon = false;
