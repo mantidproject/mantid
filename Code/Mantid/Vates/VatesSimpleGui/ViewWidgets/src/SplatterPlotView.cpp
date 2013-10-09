@@ -134,11 +134,12 @@ void SplatterPlotView::render()
   QString renderType = "Points";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
+  /*
   if (this->checkForBadDimensions(src))
   {
     return;
   }
-
+  */
   // Do not allow overplotting of MDWorkspaces
   if (!this->isPeaksWorkspace(src) && NULL != this->splatSource)
   {

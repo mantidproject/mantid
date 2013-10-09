@@ -77,7 +77,9 @@ namespace VATES
     // Find out how many events to plot, and the percentage of the largest
     // boxes to use.
     size_t totalPoints = ws->getNPoints();
+    std::cout << "AAA: " << totalPoints << ", " << m_numPoints << std::endl;
     size_t numPoints = m_numPoints;
+
     if (numPoints > totalPoints)
     {
       numPoints = totalPoints;
@@ -128,6 +130,7 @@ namespace VATES
           size_t newPoints = box->getNPoints();
           if (newPoints > 0)
           {
+            std::cout << "D: (" << i << "): " << newPoints << std::endl;
             m_sortedBoxes.push_back(box);
           }
         }
@@ -144,7 +147,7 @@ namespace VATES
         std::cout << "DONE SORTING" << std::endl;
       }
     }
-
+    std::cout << "GG: " << m_sortedBoxes.size() << std::endl;
     size_t num_boxes_to_use = static_cast<size_t>(percent_to_use * static_cast<double>(m_sortedBoxes.size()) / 100.0);
     if (num_boxes_to_use >= m_sortedBoxes.size())
     {
@@ -157,6 +160,7 @@ namespace VATES
     for (size_t i = 0; i < num_boxes_to_use; i++)
     {
       size_t newPoints = m_sortedBoxes[i]->getNPoints();
+      std::cout << "E: (" << i << "): " << newPoints << std::endl;
       total_points_available += newPoints;
     }
 
@@ -313,6 +317,7 @@ namespace VATES
     }
 
     size_t nd = m_workspace->getNumDims();
+    std::cout << "AA: " << m_workspace->getNPoints() << std::endl;
      
     Mantid::Kernel::ReadLock lock(*m_workspace);
     if (nd > 3)
@@ -329,6 +334,8 @@ namespace VATES
       // Define where the slice is in 4D
       // TODO: Where to slice? Right now is just 0
       std::vector<coord_t> point(nd, 0);
+      std::cout << "BB: " << m_time << std::endl;
+      point[3] = coord_t(m_time); //Specifically for 4th/time dimension.
 
       // Define two opposing planes that point in all higher dimensions
       std::vector<coord_t> normal1(nd, 0);
@@ -354,7 +361,7 @@ namespace VATES
     // Clean up
     if (this->slice)
     {
-      delete this->sliceMask;
+      delete[] this->sliceMask;
       delete this->sliceImplicitFunction;
     }
 
@@ -388,11 +395,13 @@ namespace VATES
     {
       throw std::runtime_error("Invalid vtkSplatterPlotFactory. Workspace must have at least 3 dimensions.");
     }
+    /*
     size_t nd = m_workspace->getNonIntegratedDimensions().size();
     if (nd > 3)
     {
       throw std::runtime_error("SplatterPlot cannot handle 4D data, please integrate to 3D!");
     }
+    */
   }
 
   /**
@@ -427,6 +436,20 @@ namespace VATES
     {
       m_percentToUse = percentToUse;
     }
+  }
+
+  /**
+   * Set the time value.
+   * @param double : the time
+   */
+  void vtkSplatterPlotFactory::setTime(double time)
+  {
+    std::cout << "GG: " << time << ", " << m_time << std::endl;
+    if (m_time != time)
+    {
+      m_buildSortedList = true;
+    }
+    m_time = time;
   }
 
 }
