@@ -576,7 +576,7 @@ namespace WorkflowAlgorithms
     m_progress->report();
 
     // edit the instrument geometry
-    if (m_l1 > 0 || !tths.empty() || !l2s.empty() || !phis.empty())
+    if (m_groupWS && (m_l1 > 0 || !tths.empty() || !l2s.empty() || !phis.empty()))
     {
       size_t numreg = m_outputW->getNumberHistograms();
 
