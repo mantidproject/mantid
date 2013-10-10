@@ -223,6 +223,9 @@ public:
   void addDetInfo(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &Observer);
   void returnAvrgDetPar(DetParameters &det);
 
+  void setUseSpherical(bool shouldWe=true)
+  {m_useSphericalSizes = shouldWe;}
+
 };
 
 

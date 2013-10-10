@@ -176,8 +176,6 @@ FindDetectorsPar::exec()
    
 
 }
-// Constant for converting Radians to Degrees
-const double rad2deg = 180.0 / M_PI;
 
 // functions defines the ouptput table with parameters 
 void FindDetectorsPar::setOutputTable()
@@ -217,6 +215,9 @@ void FindDetectorsPar::setOutputTable()
 
 }
 
+// Constant for converting Radians to Degrees
+const double rad2deg = 180.0 / M_PI;
+
 /// method to cacluate the detectors parameters and add them to the average detector
 void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &Observer)
 {
@@ -242,19 +243,22 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const 
    Kernel::V3D er(0,1,0),e_th,ez(0,0,1);  //ez along beamline, which is always oz; (can be amended)
    if(dist2Det)er  = toDet/dist2Det; // direction to the detector
    Kernel::V3D e_tg = er.cross_prod(ez);  // tangential to the ring and anticloakwise;
+   e_tg.normalize();
+   // make orthogonal
+   ez = e_tg.cross_prod(er);
 
-   coord[0]=er;
-   coord[1]=ez;
-   coord[2]=e_tg ;
+   coord[0]=er; // new X
+   coord[1]=ez; // new y
+   coord[2]=e_tg ; // new z
    bbox.setBoxAlignment(ringCentre,coord);
 
    spDet->getBoundingBox(bbox);
 
    // linear extensions of the bounding box orientied tangentially to the equal scattering angle circle
-   double azimMin = bbox.xMin();
-   double azimMax = bbox.xMax();
-   double polarMin = bbox.zMin(); // bounding box has been rotated according to coord above, so z is along e_tg
-   double polarMax = bbox.zMax();
+   double azimMin = bbox.zMin();
+   double azimMax = bbox.zMax();
+   double polarMin = bbox.yMin(); // bounding box has been rotated according to coord above, so z is along e_tg
+   double polarMax = bbox.yMax();
 
 
    if (m_useSphericalSizes)
@@ -263,12 +267,12 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const 
   
        // convert to angular units 
        double polarHalfSize  = rad2deg*atan2(0.5*(polarMax-polarMin), dist2Det);
-       double azimHalfSize   = rad2deg*atan2(0.5*(polarMax-azimMax), dist2Det);
+       double azimHalfSize   = rad2deg*atan2(0.5*(azimMax-azimMin), dist2Det);
 
-       double polarMin = Polar -polarHalfSize;
-       double polarMax = Polar +polarHalfSize;
-       double azimMin  = Azimut -azimHalfSize;
-       double azimMax  = Azimut +azimHalfSize;
+       polarMin = Polar -polarHalfSize;
+       polarMax = Polar +polarHalfSize;
+       azimMin  = Azimut -azimHalfSize;
+       azimMax  = Azimut +azimHalfSize;
 
    }
    if (m_AzimMin>azimMin)m_AzimMin=azimMin;
@@ -304,7 +308,7 @@ void FindDetectorsPar::calcDetPar(const Geometry::IDetector_const_sptr &spDet,co
    // define summator
    AvrgDetector detSum;
    // do we want spherical or linear box sizes?
-   detSum.m_useSphericalSizes = !m_SizesAreLinear;
+   detSum.setUseSpherical(!m_SizesAreLinear);
 
    if( nDetectors == 1)
    {
