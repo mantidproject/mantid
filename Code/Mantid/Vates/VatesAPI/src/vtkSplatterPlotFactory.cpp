@@ -389,13 +389,6 @@ namespace VATES
     {
       throw std::runtime_error("Invalid vtkSplatterPlotFactory. Workspace must have at least 3 dimensions.");
     }
-    /*
-    size_t nd = m_workspace->getNonIntegratedDimensions().size();
-    if (nd > 3)
-    {
-      throw std::runtime_error("SplatterPlot cannot handle 4D data, please integrate to 3D!");
-    }
-    */
   }
 
   /**

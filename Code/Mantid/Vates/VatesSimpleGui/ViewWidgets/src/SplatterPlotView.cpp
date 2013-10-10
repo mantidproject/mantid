@@ -134,12 +134,6 @@ void SplatterPlotView::render()
   QString renderType = "Points";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
-  /*
-  if (this->checkForBadDimensions(src))
-  {
-    return;
-  }
-  */
   // Do not allow overplotting of MDWorkspaces
   if (!this->isPeaksWorkspace(src) && NULL != this->splatSource)
   {
@@ -207,41 +201,6 @@ void SplatterPlotView::renderAll()
 void SplatterPlotView::resetDisplay()
 {
   this->view->resetDisplay();
-}
-
-/**
- * This function checks any incoming MDEventWorkspace to ensure that it has
- * only 3 non-integrated dimensions. Have to do this since the
- * vtkSplatterPlotFactory isn't setup properly.
- *
- * @param src : The pipeline source to perform the dimension check
- * @return True if there are more than 3 non-integrated dimensions
- */
-bool SplatterPlotView::checkForBadDimensions(pqPipelineSource *src)
-{
-  if (!this->isPeaksWorkspace(src))
-  {
-    QString wsName(vtkSMPropertyHelper(src->getProxy(),
-                        "Mantid Workspace Name", true).GetAsString());
-    if(!wsName.isEmpty())
-    {
-      ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> wsProvider;
-      API::Workspace_sptr ws = wsProvider.fetchWorkspace(wsName.toStdString());
-      API::IMDEventWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
-      std::size_t numDims = infoWs->getNonIntegratedDimensions().size();
-      if (numDims > 3)
-      {
-        QMessageBox::warning(this, QApplication::tr("Dimension Warning"),
-                             QApplication::tr("SplatterPlot mode does not allow "\
-                                              "4D data. Please integrate to 3D "\
-                                              "via SliceMD!. Returning to Standard View."));
-        pqActiveObjects::instance().setActiveSource(src);
-        emit this->resetToStandardView();
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 /**
