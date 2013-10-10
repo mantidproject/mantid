@@ -151,14 +151,18 @@ void FindDetectorsPar::exec()
    {
      PARALLEL_START_INTERUPT_REGION
      Geometry::IDetector_const_sptr spDet;
-     try{
+     try
+     {
         spDet= inputWS->getDetector(i);
      }catch(Kernel::Exception::NotFoundError &){
         spDet = Geometry::IDetector_const_sptr();
      }
- 
-    // Check that we aren't writing a monitor...
-    if (!spDet || spDet->isMonitor())continue;   
+     // avoid MAC problem 
+     if (!spDet)continue;   
+
+     // Check that we aren't writing a monitor...
+     if (spDet->isMonitor())continue;   
+
 
     // valid detector has valid detID
      Detectors[i].detID = spDet->getID();
