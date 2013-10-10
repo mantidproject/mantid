@@ -255,7 +255,7 @@ public:
     auto outParams = WorkspaceCreationHelper::getWS<TableWorkspace>("mfun_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),10);
+    TS_ASSERT_EQUALS(outParams->rowCount(),9);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();

@@ -117,7 +117,7 @@ class SimpleAPIFitTest(unittest.TestCase):
         
         self.assertTrue(output_name + '_Parameters' in mtd)
         params = mtd[output_name+'_Parameters']
-        self.assertEqual(params.rowCount(), 11)
+        self.assertEqual(params.rowCount(), 10)
 
         self.assertAlmostEqual(params.row(0)['Value'], 3.0, 10)
         self.assertAlmostEqual(params.row(3)['Value'], 3.0, 10)
