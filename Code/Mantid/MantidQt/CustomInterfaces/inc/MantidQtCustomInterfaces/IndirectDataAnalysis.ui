@@ -1968,6 +1968,16 @@
            <property name="autoLoad">
             <bool>false</bool>
            </property>
+           <property name="workspaceSuffixes" stdset="0">
+            <stringlist>
+             <string>_red</string>
+            </stringlist>
+           </property>
+           <property name="fileBrowserSuffixes" stdset="0">
+            <stringlist>
+             <string>_red.nxs</string>
+            </stringlist>
+           </property>
            <property name="showLoad">
             <bool>false</bool>
            </property>
