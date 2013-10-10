@@ -55,7 +55,8 @@ namespace Algorithms
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Sample;Utility\\Workspaces;DataHandling";}
-    
+    /// @inheritdocs
+    virtual std::map<std::string, std::string> validateInputs();
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -65,8 +66,6 @@ namespace Algorithms
     void exec();
     /// Function to copy information from one sample to another
     void copyParameters(API::Sample& from, API::Sample& to, bool nameFlag, bool materialFlag, bool environmentFlag, bool shapeFlag, bool latticeFlag, bool orientationOnlyFlag);
-
-
 
   };
 
