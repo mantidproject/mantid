@@ -23,7 +23,7 @@ namespace Mantid
   namespace Kernel
   {
 
-  /** A class that holds information about a catalogs.
+  /** A class that holds information about catalogs.
 
       Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -54,23 +54,23 @@ namespace Mantid
         /// Obtain catalog name from the facility file.
         const std::string catalogName() const;
         /// Obtain soap end point from the facility file.
-        std::string soapEndPoint();
+        const std::string soapEndPoint() const;
         /// Obtain the regex prefix from the  facility file.
-        std::string catalogPrefix();
+        const std::string catalogPrefix() const;
         /// Obtain Windows prefix from the facility file.
-        std::string windowsPrefix();
+        const std::string windowsPrefix() const;
         /// Obtain Macintosh prefix from facility file.
-        std::string macPrefix();
+        const std::string macPrefix() const;
         /// Obtain Linux prefix from facility file.
-        std::string linuxPrefix();
+        const std::string linuxPrefix() const;
         /// Transform's the archive path based on operating system used.
-        std::string transformArchivePath(std::string path);
+        std::string transformArchivePath(std::string &path);
 
       private:
         /// Replace the content of a string using regex.
-        std::string replacePrefix(std::string path, std::string regex, std::string prefix);
+        std::string replacePrefix(std::string &path, const std::string &regex, const std::string &prefix);
         /// Replace all occurrences of the search string in the input with the format string.
-        std::string replaceAllOccurences(std::string path, std::string search, std::string format);
+        std::string replaceAllOccurences(std::string &path, const std::string &search, const std::string &format);
         /// Obtain the attribute from a given element tag and attribute name.
         std::string getAttribute(const Poco::XML::Element* element, const std::string &tagName, const std::string &attributeName);
 

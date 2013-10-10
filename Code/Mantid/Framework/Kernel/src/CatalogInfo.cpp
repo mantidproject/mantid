@@ -38,7 +38,7 @@ namespace Mantid
     /**
      * Obtain soap end point from the facility file.
      */
-    std::string CatalogInfo::soapEndPoint()
+    const std::string CatalogInfo::soapEndPoint() const
     {
       return (m_soapEndPoint);
     }
@@ -46,7 +46,7 @@ namespace Mantid
     /**
      * Obtain the regex prefix for default archive path.
      */
-    std::string CatalogInfo::catalogPrefix()
+    const std::string CatalogInfo::catalogPrefix() const
     {
       return (m_catalogPrefix);
     }
@@ -54,7 +54,7 @@ namespace Mantid
     /**
      * Obtain Windows prefix from the facility file.
      */
-    std::string CatalogInfo::windowsPrefix()
+    const std::string CatalogInfo::windowsPrefix() const
     {
       return (m_windowsPrefix);
     }
@@ -62,7 +62,7 @@ namespace Mantid
     /**
      * Obtain Macintosh prefix from facility file.
      */
-    std::string CatalogInfo::macPrefix()
+    const std::string CatalogInfo::macPrefix() const
     {
       return (m_macPrefix);
     }
@@ -70,7 +70,7 @@ namespace Mantid
     /**
      * Obtain Linux prefix from facility file.
      */
-    std::string CatalogInfo::linuxPrefix()
+    const std::string CatalogInfo::linuxPrefix() const
     {
       return (m_linuxPrefix);
     }
@@ -80,7 +80,7 @@ namespace Mantid
      * @param path :: The archive path from ICAT to perform the transform on.
      * @return The path to the archive for the user's OS.
      */
-    std::string CatalogInfo::transformArchivePath(std::string path)
+    std::string CatalogInfo::transformArchivePath(std::string &path)
     {
       #ifdef __linux__
         path = replacePrefix(path,catalogPrefix(),linuxPrefix());
@@ -118,7 +118,7 @@ namespace Mantid
      * @param prefix :: Replace result of regex with this prefix.
      * @return A string containing the replacement.
      */
-    std::string CatalogInfo::replacePrefix(std::string path, std::string regex, std::string prefix)
+    std::string CatalogInfo::replacePrefix(std::string &path, const std::string &regex, const std::string &prefix)
     {
       boost::regex re(regex);
       // Assign the result of the replacement back to path and return it.
@@ -133,7 +133,7 @@ namespace Mantid
      * @param format  :: A substitute string.
      * @return A string containing the replacement.
      */
-    std::string CatalogInfo::replaceAllOccurences(std::string path, std::string search, std::string format)
+    std::string CatalogInfo::replaceAllOccurences(std::string &path, const std::string &search, const std::string &format)
     {
       boost::replace_all(path, search, format);
       return (path);

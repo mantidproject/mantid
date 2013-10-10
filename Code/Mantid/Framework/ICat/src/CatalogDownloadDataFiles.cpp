@@ -127,13 +127,13 @@ namespace Mantid
         std::ifstream isisfile(fileLocation.c_str());
         if(isisfile)
         {
-          g_log.information() << "File(" << *fileName << ") located in archives. Preparing to download..." << std::endl;
+          g_log.information() << "File (" << *fileName << ") located in archives." << std::endl;
 
           fileLocations.push_back(fileLocation);
         }
         else
         {
-          g_log.information() << "Unable to open file(" << *fileName << ") from archive. Beginning to download over Internet." << std::endl;
+          g_log.information() << "Unable to open file (" << *fileName << ") from archive. Beginning to download over Internet." << std::endl;
 
           progress(prog/2,"getting the url ....");
 
