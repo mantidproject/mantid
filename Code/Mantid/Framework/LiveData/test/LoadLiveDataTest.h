@@ -12,6 +12,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidTestHelpers/FacilityHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::LiveData;
@@ -64,6 +65,8 @@ public:
       bool makeThrow = false
       )
   {
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+
     std::auto_ptr<LoadLiveDataImpl> alg(new LoadLiveDataImpl);
     TS_ASSERT_THROWS_NOTHING( alg->initialize() )
     TS_ASSERT( alg->isInitialized() )
