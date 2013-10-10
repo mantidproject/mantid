@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/ApplyCorr.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 namespace MantidQt
 {
@@ -14,14 +15,8 @@ namespace IDA
 
   void ApplyCorr::setup()
   {
-    // Disable Container inputs is "Use Container" is not checked
-    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_lbContainerInputType, SLOT(setEnabled(bool)));
-    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_cbContainerInputType, SLOT(setEnabled(bool)));
-    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_swContainerInput, SLOT(setEnabled(bool)));
-
-    connect(uiForm().abscor_cbSampleInputType, SIGNAL(currentIndexChanged(int)), uiForm().abscor_swSampleInput, SLOT(setCurrentIndex(int)));
-    connect(uiForm().abscor_cbContainerInputType, SIGNAL(currentIndexChanged(int)), uiForm().abscor_swContainerInput, SLOT(setCurrentIndex(int)));
-    
+    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_dsContainer, SLOT(setEnabled(bool)));
+    connect(uiForm().abscor_ckUseCorrections, SIGNAL(toggled(bool)), uiForm().abscor_dsCorrections, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
 
     // Create a validator for input box of the Scale option.
@@ -80,45 +75,68 @@ namespace IDA
 
     QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
 
-    if ( uiForm().abscor_cbSampleInputType->currentText() == "File" )
+    QString sample = uiForm().abscor_dsSample->getCurrentDataName();
+    if (!Mantid::API::AnalysisDataService::Instance().doesExist(sample.toStdString()) )
     {
       pyInput +=
-        "sample = loadNexus(r'" + uiForm().abscor_sample->getFirstFilename() + "')\n";
+        "sample = loadNexus(r'" + uiForm().abscor_dsSample->getFullFilePath() + "')\n";
     }
     else
     {
       pyInput +=
-        "sample = '" + uiForm().abscor_wsSample->currentText() + "'\n";
+        "sample = '" + sample + "'\n";
     }
 
+    bool noContainer = false;
     if ( uiForm().abscor_ckUseCan->isChecked() )
     {
-      if ( uiForm().abscor_cbContainerInputType->currentText() == "File" )
+      QString container = uiForm().abscor_dsContainer->getCurrentDataName();
+      if ( !Mantid::API::AnalysisDataService::Instance().doesExist(container.toStdString()) )
       {
         pyInput +=
-          "container = loadNexus(r'" + uiForm().abscor_can->getFirstFilename() + "')\n";
+          "container = loadNexus(r'" + uiForm().abscor_dsContainer->getFullFilePath() + "')\n";
       }
       else
       {
         pyInput +=
-          "container = '" + uiForm().abscor_wsContainer->currentText() + "'\n";
+          "container = '" + container + "'\n";
       }
     }
     else
     {
       pyInput += "container = ''\n";
+      noContainer = true;
     }
 
     pyInput += "geom = '" + geom + "'\n";
 
-
-    if ( uiForm().abscor_ckUseCorrections->isChecked() )
+    
+    if( uiForm().abscor_ckUseCorrections->isChecked() )
     {
       pyInput += "useCor = True\n";
+      QString corrections = uiForm().abscor_dsCorrections->getCurrentDataName();
+      if ( !Mantid::API::AnalysisDataService::Instance().doesExist(corrections.toStdString()) )
+      {
+        pyInput +=
+          "corrections = loadNexus(r'" + uiForm().abscor_dsCorrections->getFullFilePath() + "')\n";
+      }
+      else
+      {
+        pyInput +=
+          "corrections = '" + corrections + "'\n";
+      }
     }
     else
     {
       pyInput += "useCor = False\n";
+      pyInput += "corrections = ''\n";
+
+      // if we have no container and no corrections then abort
+      if(noContainer)
+      {
+        showInformationBox("Apply Corrections requires either a can file or corrections.");
+        return;
+      }
     }
     
     QString ScalingFactor = "1.0\n";
@@ -161,7 +179,7 @@ namespace IDA
     if ( uiForm().abscor_ckPlotContrib->isChecked() ) pyInput += "plotContrib = True\n";
     else pyInput += "plotContrib = False\n";
 
-    pyInput += "abscorFeeder(sample, container, geom, useCor, Verbose=verbose, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
+    pyInput += "abscorFeeder(sample, container, geom, useCor, corrections, Verbose=verbose, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
@@ -173,8 +191,9 @@ namespace IDA
 
   void ApplyCorr::loadSettings(const QSettings & settings)
   {
-    uiForm().abscor_sample->readSettings(settings.group());
-    uiForm().abscor_can->readSettings(settings.group());
+    uiForm().abscor_dsCorrections->readSettings(settings.group());
+    uiForm().abscor_dsContainer->readSettings(settings.group());
+    uiForm().abscor_dsSample->readSettings(settings.group());
   }
 } // namespace IDA
 } // namespace CustomInterfaces

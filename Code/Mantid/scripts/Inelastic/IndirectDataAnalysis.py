@@ -1043,10 +1043,10 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     DeleteWorkspace('Fit_NormalisedCovarianceMatrix')
     DeleteWorkspace('Fit_Parameters')
     DeleteWorkspace('Fit_Workspace')
-    DeleteWorkspace('corrections')
+    DeleteWorkspace(corr)
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
+def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
         PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
@@ -1069,14 +1069,11 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
             if container != '':
                 text += ' with ' + container
             logger.notice(text)
-        file = sam_name + geom +'_Abs.nxs'
-        abs_path = os.path.join(workdir, file)					# path name for nxs file
-        if Verbose:
-            logger.notice('Correction file :'+abs_path)
-        LoadNexus(Filename=abs_path, OutputWorkspace='corrections')
-        cor_result = applyCorrections(sample, container, 'corrections', Verbose)
+            
+        cor_result = applyCorrections(sample, container, corrections, Verbose)
         rws = mtd[cor_result+'_red']
         outNm= cor_result + '_Result_'
+
         if Save:
             cred_path = os.path.join(workdir,cor_result+'_red.nxs')
             SaveNexusProcessed(InputWorkspace=cor_result+'_red',Filename=cred_path)
