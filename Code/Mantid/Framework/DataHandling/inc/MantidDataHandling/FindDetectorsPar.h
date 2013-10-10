@@ -183,7 +183,7 @@ namespace Mantid
       void load_plain(std::ifstream &stream,std::vector<double> &Data,FileTypeDescriptor const &FILE_TYPE);
     };
 
-/**Small helper class used to precalculate the detectors parameters */
+/**Small helper class-holder used to precalculate the detectors parameters in spherical coordinate system */
 class DetParameters
 {
 public:

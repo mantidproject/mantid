@@ -100,8 +100,7 @@ void FindDetectorsPar::init()
 
 }
 
-void 
-FindDetectorsPar::exec()
+void FindDetectorsPar::exec()
 {
 
  // Get the input workspace
@@ -184,7 +183,7 @@ FindDetectorsPar::exec()
 
 }
 
-// functions defines the ouptput table with parameters 
+/// fills in the ouptput table workspace with calculated values 
 void FindDetectorsPar::setOutputTable()
 {
   std::string output = getProperty("OutputParTable");
@@ -225,7 +224,10 @@ void FindDetectorsPar::setOutputTable()
 // Constant for converting Radians to Degrees
 const double rad2deg = 180.0 / M_PI;
 
-/// method to cacluate the detectors parameters and add them to the average detector
+/** method to cacluate the detectors parameters and add them to the detectors averages
+*@param spDet    -- shared pointer to the Mantid Detector
+*@param Observer -- sample position or the centre of the polar system of coordinates to calculate detector's parameters. 
+*/
 void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &Observer)
 {
   m_nComponents++;
@@ -247,11 +249,11 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const 
    Geometry::BoundingBox bbox;
    std::vector<Kernel::V3D> coord(3);
 
-   Kernel::V3D er(0,1,0),e_th,ez(0,0,1);  //ez along beamline, which is always oz; (can be amended)
+   Kernel::V3D er(0,1,0),e_th,ez(0,0,1);  //ez along beamline, which is always oz; 
    if(dist2Det)er  = toDet/dist2Det; // direction to the detector
    Kernel::V3D e_tg = er.cross_prod(ez);  // tangential to the ring and anticloakwise;
    e_tg.normalize();
-   // make orthogonal
+   // make orthogonal -- projections are calculated in this coordinate system
    ez = e_tg.cross_prod(er);
 
    coord[0]=er; // new X
@@ -290,7 +292,9 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const 
 
 }
 
-
+/** Method processes accumulated averages and return them in preexistent avrgDet class
+@returns avrgDet -- the detector with averaged parameters
+ */
 void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet)
 {
 
@@ -305,7 +309,13 @@ void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet)
   avrgDet.polarWidth=(m_PolarMax-m_PolarMin);
 
 }
+/** Method calculates averaged polar coordinates of the detector's group   (which may consist of one detector)
+*@param spDet    -- shared pointer to the Mantid Detector
+*@param Observer -- sample position or the centre of the polar system of coordinates to calculate detector's parameters. 
 
+*@param Detector  -- return Detector class containing averaged polar coordinates of the detector or detector's group in 
+                     spherical coordinate system with centre at Observer
+*/
 void FindDetectorsPar::calcDetPar(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &Observer,
                                    DetParameters  &Detector)
 {
@@ -342,7 +352,8 @@ void FindDetectorsPar::calcDetPar(const Geometry::IDetector_const_sptr &spDet,co
    detSum.returnAvrgDetPar(Detector);
 
 }
-
+/**Method to convert vector of Detector's classes into vectors of doubles with all correspondent information 
+   also drops non-existent detectors and monitors */ 
 void FindDetectorsPar::extractAndLinearize(const std::vector<DetParameters> &detPar)
 {
   size_t nDetectors;
@@ -380,7 +391,6 @@ void FindDetectorsPar::extractAndLinearize(const std::vector<DetParameters> &det
   this->polarWidth.resize(nDetectors);
   this->secondaryFlightpath.resize(nDetectors);
   this->detID.resize(nDetectors);
-
 
 }
    
