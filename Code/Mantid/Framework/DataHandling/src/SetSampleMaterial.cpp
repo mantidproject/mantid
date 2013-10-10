@@ -235,10 +235,10 @@ namespace DataHandling
 
     // determine the sample number density
     double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+    double zParameter = getProperty("ZParameter"); // number of atoms
     if (isEmpty(rho))
     {
       double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
-      double zParameter = getProperty("ZParameter"); // number of atoms
 
       // get the unit cell volume from the workspace if it isn't set
       if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice())
