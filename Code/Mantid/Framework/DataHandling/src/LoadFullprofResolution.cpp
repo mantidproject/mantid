@@ -17,12 +17,6 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s)
 
 #include <fstream>
 
-/**
-  CHANGE:
-  1. Understand profile 9
-
-  **/
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -313,24 +307,6 @@ namespace DataHandling
     }
     parammap["CWL"] = cwl;
 
-    // TODO - Implement this!
-    int profilenumber = searchProfile();
-
-    switch (profilenumber)
-    {
-      case 9:
-        parseProfile9();
-        break;
-
-      case 10:
-        parseProfile10();
-        break;
-
-      default:
-        throw runtime_error("Not implemented for this profile.");
-        break;
-    }
-
     double tempdb;
     for (int i = startlineindex+1; i <= endlineindex; ++i)
     {
@@ -345,6 +321,7 @@ namespace DataHandling
 
       if (boost::starts_with(line, "TOFRG"))
       {
+        // TOFRG tof-min step tof-max
         vector<string> terms;
         boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
         if (terms.size() != 4)
@@ -366,12 +343,13 @@ namespace DataHandling
       }
       else if (boost::starts_with(line, "D2TOF"))
       {
+        // D2TOF Dtt1 Dtt2 Zero
         vector<string> terms;
         boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
         if (terms.size() != 2 && terms.size() != 4)
         {
           stringstream errmsg;
-          errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 2/4 terms in definition.";
+          errmsg << "Line D2TOF has " << terms.size() << " terms.  Different from 2/4 terms in definition.";
           g_log.error(errmsg.str());
           throw runtime_error(errmsg.str());
         }
@@ -400,7 +378,7 @@ namespace DataHandling
         if (terms.size() != 3)
         {
           stringstream errmsg;
-          errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 4 terms in definition.";
+          errmsg << "Line ZD2TOF has " << terms.size() << " terms.  Different from 4 terms in definition.";
           g_log.error(errmsg.str());
           throw runtime_error(errmsg.str());
         }
@@ -524,6 +502,7 @@ namespace DataHandling
       } // "GAMMA"
       else if (boost::starts_with(line, "ALFBE"))
       {
+        // ALFBE alph0 beta0 alph1 beta1
         vector<string> terms;
         boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
         if (terms.size() != 5)
@@ -725,29 +704,6 @@ namespace DataHandling
 
     return tablews;
   }
-
-#if 0
-  // TODO - Implement this
-  int LoadFullprofResolution::searchProfile()
-  {
-
-  }
-
-  // TODO - Implement this
-  void LoadFullprofResolution::parseProfile9()
-  {
-
-
-  }
-
-  // TODO - Implement this
-  void LoadFullprofResolution::parseProfile10()
-  {
-
-
-
-  }
-#endif
 
 } // namespace DataHandling
 } // namespace Mantid
