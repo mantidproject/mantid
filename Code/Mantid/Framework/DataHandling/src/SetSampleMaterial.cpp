@@ -273,21 +273,30 @@ namespace DataHandling
 
       double numAtoms = 0.; // number of atoms in formula
       NeutronAtom neutron(0, 0., 0., 0., 0., 0., 0.); // starting thing for neutronic information
-      for (size_t i=0; i<CF.atoms.size(); i++)
+      if (CF.atoms.size()== 1)
       {
-        Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
-        neutron = neutron + CF.numberAtoms[i] * myAtom.neutron;
 
-        g_log.information() << myAtom << ": " << myAtom.neutron << "\n";
-        numAtoms += static_cast<double>(CF.numberAtoms[i]);
+			Atom myAtom = getAtom(chemicalSymbol, CF.aNumbers[0]);
+			mat.reset(new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density));
       }
-      // normalize the accumulated number by the number of atoms
-      neutron = (1. / numAtoms) * neutron; // funny syntax b/c of operators in neutron atom
+      else
+      {
+			for (size_t i=0; i<CF.atoms.size(); i++)
+			{
+				Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
+				neutron = neutron + CF.numberAtoms[i] * myAtom.neutron;
 
-      fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
+				g_log.information() << myAtom << ": " << myAtom.neutron << "\n";
+				numAtoms += static_cast<double>(CF.numberAtoms[i]);
+			}
+			// normalize the accumulated number by the number of atoms
+			neutron = (1. / numAtoms) * neutron; // funny syntax b/c of operators in neutron atom
 
-      // create the material
-      mat.reset(new Material(chemicalSymbol, neutron, rho));
+			fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
+
+			// create the material
+			mat.reset(new Material(chemicalSymbol, neutron, rho));
+      }
     }
     else
     {
