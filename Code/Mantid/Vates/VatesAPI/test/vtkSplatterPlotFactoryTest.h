@@ -91,36 +91,32 @@ public:
 
     Mantid::MDEvents::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error&);
-    //vtkDataSet* product = NULL;
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
 
-    //TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error&);
-    //TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
-    /*
-    const size_t expected_n_points = 8*125;
-    const size_t expected_n_cells = 125;
+    // 6 is 5% of 125
+    const size_t expected_n_points = 6;
+    const size_t expected_n_cells = 6;
     const size_t expected_n_signals = expected_n_cells;
 
     TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
     TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
-    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,  product->GetNumberOfPoints());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
 
     //Check dataset bounds
     double* bounds = product->GetBounds();
-    TS_ASSERT_EQUALS(-9.5, bounds[0]);
-    TS_ASSERT_EQUALS(9.5, bounds[1]);
-    TS_ASSERT_EQUALS(-9.5, bounds[2]);
-    TS_ASSERT_EQUALS(9.5, bounds[3]);
-    TS_ASSERT_EQUALS(-9.5, bounds[4]);
-    TS_ASSERT_EQUALS(9.5, bounds[5]);
+    TS_ASSERT_EQUALS(-8.0, bounds[0]);
+    TS_ASSERT_EQUALS(8.0, bounds[1]);
+    TS_ASSERT_EQUALS(-8.0, bounds[2]);
+    TS_ASSERT_EQUALS(4.0, bounds[3]);
+    TS_ASSERT_EQUALS(4.0, bounds[4]);
+    TS_ASSERT_EQUALS(4.0, bounds[5]);
 
     product->Delete();
-    */
   }
-
 
 };
 
