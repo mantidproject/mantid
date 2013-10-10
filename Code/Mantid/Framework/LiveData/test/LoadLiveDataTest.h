@@ -20,12 +20,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class LoadLiveDataImpl : public LoadLiveData
-{
-public:
-//  void store() { Algorithm::store(); }
-};
-
 class LoadLiveDataTest : public CxxTest::TestSuite
 {
 public:
@@ -67,27 +61,27 @@ public:
   {
     FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
-    std::auto_ptr<LoadLiveDataImpl> alg(new LoadLiveDataImpl);
-    TS_ASSERT_THROWS_NOTHING( alg->initialize() )
-    TS_ASSERT( alg->isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("Instrument", "TestDataListener") );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("AccumulationMethod", AccumulationMethod) );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm) );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("ProcessingProperties", ProcessingProperties) );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("PostProcessingAlgorithm", PostProcessingAlgorithm) );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("PostProcessingProperties", PostProcessingProperties) );
-    TS_ASSERT_THROWS_NOTHING( alg->setProperty("PreserveEvents", PreserveEvents) );
+    LoadLiveData alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Instrument", "TestDataListener") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AccumulationMethod", AccumulationMethod) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ProcessingAlgorithm", ProcessingAlgorithm) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ProcessingProperties", ProcessingProperties) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingAlgorithm", PostProcessingAlgorithm) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PostProcessingProperties", PostProcessingProperties) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PreserveEvents", PreserveEvents) );
     if (!PostProcessingAlgorithm.empty())
-      TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("AccumulationWorkspace", "fake_accum") );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", "fake") );
+      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AccumulationWorkspace", "fake_accum") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "fake") );
     if (listener)
-      alg->setLiveListener(listener);
+      alg.setLiveListener(listener);
 
     if (!makeThrow)
-    { TS_ASSERT_THROWS_NOTHING( alg->execute(); ); }
+    { TS_ASSERT_THROWS_NOTHING( alg.execute(); ); }
     else
-      alg->exec();
-    TS_ASSERT( alg->isExecuted() );
+      alg.exec();
+    TS_ASSERT( alg.isExecuted() );
 
     // Retrieve the workspace from data service.
     boost::shared_ptr<TYPE> ws;
