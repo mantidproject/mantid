@@ -62,6 +62,64 @@ public:
 
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test writing out a single bank in a multiple bank table workspace
+    */
+  void test_write1BankInMultiBankTableProf9()
+  {
+    // TODO - Implement this!
+    {
+      "... ... ...";
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Test writing out a single bank in a multiple bank table workspace
+    */
+  void test_appendBankInMultiBankTableProf9()
+  {
+    // TODO - Implement this!
+    {
+      "... ... ...";
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+    * ISIS HRPD Data
+    */
+  DataObjects::TableWorkspace_sptr create2BankProf9Table()
+  {
+
+    /*
+    BANK	1	2
+    Alph0	0	0
+    Alph1	0.081722	0.109024
+    Beta0	0.023271	0.018108
+    Beta1	0.006292	0.015182
+    CWL	-1	-1
+    Dtt1	48303.1	34837.1
+    Dtt2	-4.093	-0.232
+    Gam0	6.611	0
+    Gam1	0	5.886
+    Gam2	0	0
+    Sig0	0	0
+    Sig1	10.6313	61.5518
+    Sig2	0	12.1755
+    Zero	-4.734	2.461
+    step	1	7.85
+    tof-max	105100	111500
+    tof-min	14364	12680
+    twotheta	168.33	89.58
+    */
+
+    // TODO - Implement ASAP
+    {
+      "... ...";
+    }
+
+  }
 
 
   //----------------  Helpers To Create Input Workspaces --------------------------
