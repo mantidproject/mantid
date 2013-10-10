@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -19,6 +20,7 @@ namespace Mantid
   namespace Algorithms
   {
     using namespace API;
+    using namespace DataObjects;
     /**Takes a muon workspace as input and sums all the spectra into two spectra which represent
 	  the two detector groupings. The resultant spectra are used to calculate (F-aB) / (F+aB) the results of which
 	  are stored in the output workspace.
@@ -87,6 +89,14 @@ namespace Mantid
       /// Get log value
       double getLogValue(MatrixWorkspace& ws,const std::string& logName);
 
+      /// Applies DTC to a group of workspaces using a single table
+      void applyDeadTimeCorrection(ITableWorkspace_sptr deadTimeTable, WorkspaceGroup_sptr wsGroup);
+
+      /// Applies DTC to a group of workspace using a group of tables
+      void applyDeadTimeCorrection(WorkspaceGroup_sptr deadTimeGroup, WorkspaceGroup_sptr wsGroup);
+
+      /// Runs ApplyDeadTimeCorr to apply DTC to a workspace using a table
+      void applyDeadTimeCorrection(ITableWorkspace_sptr deadTimeTable, Workspace2D_sptr ws);
 
       /// Stores property "Int"
       bool m_int;
