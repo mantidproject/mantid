@@ -29,19 +29,6 @@
             The set the viewing limit to the top percentile of the denses boxes.
          </Documentation>
       </DoubleVectorProperty>
-      <DoubleVectorProperty
-      name="TimestepValues"
-      information_only="1">
-      <TimeStepsInformationHelper/>
-      <Documentation>
-        Available timestep values.
-      </Documentation>
-     </DoubleVectorProperty>
-     <StringVectorProperty
-       name="TimeLabelAnnotation"
-       information_only="1"
-       si_class="vtkSITimeLabelProperty">
-     </StringVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End SplatterPlot -->
