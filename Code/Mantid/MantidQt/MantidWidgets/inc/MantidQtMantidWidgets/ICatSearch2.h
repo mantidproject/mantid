@@ -161,7 +161,7 @@ namespace MantidQt
       ///////////////////////////////////////////////////////////////////////////////
 
       /// Change the state of the checkbox when the user double clicks a row in the dataFile table.
-      void dataFileSelected(const QModelIndex & index);
+      void singleDataFileClicked(const QModelIndex & index);
       /// Performs filterDataFileType() for specified filer type.
       void doFilter(int index);
       /// Downloads selected datFiles to a specified location.

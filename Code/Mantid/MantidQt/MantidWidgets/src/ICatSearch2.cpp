@@ -38,8 +38,11 @@ namespace MantidQt
       // Draw the GUI from .ui header generated file.
       m_icatUiForm.setupUi(this);
 
-      // Hide the three frames
-      m_icatUiForm.searchFrame->hide();
+      // Show the search frame by default.
+      m_icatUiForm.searchCbox->setChecked(true);
+      showCatalogSearch();
+
+      // Hide the other two frames
       m_icatUiForm.resFrame->hide();
       m_icatUiForm.dataFileFrame->hide();
 
@@ -76,7 +79,7 @@ namespace MantidQt
       // When the user clicks the "load" button then load their selected datafiles into a workspace.
       connect(m_icatUiForm.dataFileLoadBtn,SIGNAL(clicked()),this,SLOT(loadDataFiles()));
       // When the user double clicks a row in the table check (or uncheck) the checkbox in prep for download.
-      connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(clicked(QModelIndex)),this,SLOT(dataFileSelected(QModelIndex)));
+      connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(clicked(QModelIndex)),this,SLOT(singleDataFileClicked(QModelIndex)));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -851,17 +854,17 @@ namespace MantidQt
      * Change the state of the checkbox when the user clicks a row in the dataFile table.
      * @param index :: The row that the user has clicked.
      */
-    void ICatSearch2::dataFileSelected(const QModelIndex & index)
+    void ICatSearch2::singleDataFileClicked(const QModelIndex & index)
     {
-      QTableWidgetItem* checkbox = m_icatUiForm.dataFileResultsTbl->item(index.row(), 0);
+      QTableWidgetItem* item = m_icatUiForm.dataFileResultsTbl->item(index.row(), 0);
 
-      if (checkbox->checkState())
+      if (item->checkState())
       {
-        checkbox->setCheckState(Qt::Unchecked);
+        item->setCheckState(Qt::Unchecked);
       }
       else
       {
-        checkbox->setCheckState(Qt::Checked);
+        item->setCheckState(Qt::Checked);
       }
     }
 
@@ -877,8 +880,11 @@ namespace MantidQt
         // Hide row by default, in order to show only relevant ones.
         table->setRowHidden(row,true);
 
-        QTableWidgetItem *item = table->item(row,headerIndexByName(table, "Name"));
+        // As we use checkboxes in "selectedDataFileNames" to obtain the row of the file the user wants to download
+        // the state of these checkboxes remain when filtered. Thus we un-check them here to prevent accidently downloading.
+        table->item(row, 0)->setCheckState(Qt::Unchecked);
 
+        QTableWidgetItem *item = table->item(row,headerIndexByName(table, "Name"));
         // Show the relevant rows depending on file extension. 0 index is "Filter type..." so all will be shown.
         // Have to convert to lowercase as ".TXT", and ".txt" should be filtered as the same.
         if (index == 0 || (item->text().toLower().contains(m_icatUiForm.dataFileFilterCombo->text(index).toLower())))
