@@ -55,21 +55,28 @@ LineViewerCurve(const QString& curveTitle, bool logScale = false ) :  QwtPlotCur
     {
       const QwtData& data = this->data();
 
-      if (data.size() == 0) return QwtDoubleRect(0,0,1,1);
+      if (data.size() == 0)
+        return QwtDoubleRect(0, 0, 1, 1);
       double y_min = std::numeric_limits<double>::infinity();
       double y_max = -y_min;
-      for(size_t i=0;i<data.size();++i)
+      for (size_t i = 0; i < data.size(); ++i)
       {
         double y = data.y(i);
-        if (y == std::numeric_limits<double>::infinity() || y != y) continue;
-        if (y < y_min && (!m_logScale || y > 0.)) y_min = y;
-        if (y > y_max) y_max = y;
+        if (y == std::numeric_limits<double>::infinity() || y != y)
+          continue;
+        if (y < y_min && (!m_logScale || y > 0.))
+          y_min = y;
+        if (y > y_max)
+          y_max = y;
       }
-      double x_min = data.x(0);
-      double x_max = data.x(data.size()-1);
-      m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
+      const double firstX = data.x(0);
+      const double lastX = data.x(data.size() - 1);
+      const double x_min = std::min(firstX, lastX);
+      const double x_max = std::max(firstX, lastX);
+      m_boundingRect = QwtDoubleRect(x_min, y_min, x_max - x_min, y_max - y_min);
       // Need the following casts to get back a writeable pointer to the workspace data.
-      MantidQwtWorkspaceData* wsData = const_cast<MantidQwtWorkspaceData*>(dynamic_cast<const MantidQwtWorkspaceData*>(&data));
+      MantidQwtWorkspaceData* wsData =
+          const_cast<MantidQwtWorkspaceData*>(dynamic_cast<const MantidQwtWorkspaceData*>(&data));
       wsData->saveLowestPositiveValue(m_boundingRect.y());
     }
     return m_boundingRect;
