@@ -1,6 +1,8 @@
 #include "MantidQtCustomInterfaces/ApplyCorr.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+#include <QStringList>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -16,8 +18,10 @@ namespace IDA
   void ApplyCorr::setup()
   {
     connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_dsContainer, SLOT(setEnabled(bool)));
+    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_ckScaleMultiplier, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_ckUseCorrections, SIGNAL(toggled(bool)), uiForm().abscor_dsCorrections, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
+    connect(uiForm().abscor_cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
 
     // Create a validator for input box of the Scale option.
     m_valPosDbl = new QDoubleValidator(this);
@@ -134,7 +138,7 @@ namespace IDA
       // if we have no container and no corrections then abort
       if(noContainer)
       {
-        showInformationBox("Apply Corrections requires either a can file or corrections.");
+        showInformationBox("Apply Corrections requires either a can file or a corrections file.");
         return;
       }
     }
@@ -194,6 +198,31 @@ namespace IDA
     uiForm().abscor_dsCorrections->readSettings(settings.group());
     uiForm().abscor_dsContainer->readSettings(settings.group());
     uiForm().abscor_dsSample->readSettings(settings.group());
+  }
+
+  /**
+   * Handles when the type of geometry changes
+   * 
+   * Updates the file extension to search for
+   */
+  void ApplyCorr::handleGeometryChange(int index)
+  {
+    QString ext("");
+    switch(index)
+    {
+      case 0:
+        // Geomtry is flat
+        ext = "_flt_Abs";
+        uiForm().abscor_dsCorrections->setWSSuffixes(QStringList(ext));
+        uiForm().abscor_dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
+        break;
+      case 1:
+        // Geomtry is cylinder
+        ext = "_cyl_Abs";
+        uiForm().abscor_dsCorrections->setWSSuffixes(QStringList(ext));
+        uiForm().abscor_dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
+        break;
+    }
   }
 } // namespace IDA
 } // namespace CustomInterfaces
