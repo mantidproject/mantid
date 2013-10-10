@@ -1903,7 +1903,7 @@
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Scale By:</string>
+            <string>Scale Can By:</string>
            </property>
            <property name="checked">
             <bool>false</bool>
