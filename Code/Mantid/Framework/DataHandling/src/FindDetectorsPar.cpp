@@ -154,11 +154,11 @@ void FindDetectorsPar::exec()
      try{
         spDet= inputWS->getDetector(i);
      }catch(Kernel::Exception::NotFoundError &){
-        continue;
+        spDet = Geometry::IDetector_const_sptr();
      }
  
     // Check that we aren't writing a monitor...
-    if (spDet->isMonitor())continue;   
+    if (!spDet || spDet->isMonitor())continue;   
 
     // valid detector has valid detID
      Detectors[i].detID = spDet->getID();
