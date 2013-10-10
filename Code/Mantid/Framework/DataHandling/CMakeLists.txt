@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/ISISRunLogs.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
+	src/LoadAscii2.cpp
 	src/LoadHelper.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
@@ -103,6 +104,7 @@ set ( SRC_FILES
 	src/SNSDataArchive.cpp
 	src/SNSDataArchiveICAT2.cpp
 	src/SaveAscii.cpp
+	src/SaveAscii2.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
@@ -153,6 +155,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
+	inc/MantidDataHandling/LoadAscii2.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
@@ -232,6 +235,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SNSDataArchiveICAT2.h
 	inc/MantidDataHandling/SaveAscii.h
+	inc/MantidDataHandling/SaveAscii2.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
