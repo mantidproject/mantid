@@ -209,9 +209,9 @@ class AvrgDetector
   double m_AzimutSum;
   double m_PolarSum;
   double m_FlightPathSum;
-  double m_AzimMin,m_PolarMin,m_AzimMax,m_PolarMax;
   // if azimuthal and polar sizes expressed in angular or linear units
   bool m_useSphericalSizes;
+  double m_AzimMin,m_PolarMin,m_AzimMax,m_PolarMax;
   /// numbr of primary detectors, contributing into this detector
   size_t m_nComponents;
 public:
