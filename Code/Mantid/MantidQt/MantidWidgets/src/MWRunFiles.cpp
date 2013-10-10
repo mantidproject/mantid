@@ -73,6 +73,8 @@ void FindFilesThread::run()
   // Reset result member vars.
   m_error.clear();
   m_filenames.clear();
+  m_valueForProperty.clear();
+
   if( m_text.empty() )
   {
     if( m_isOptional )
@@ -87,7 +89,6 @@ void FindFilesThread::run()
 
   try
   {
-    m_valueForProperty = "";
     // Use the property of the algorithm to find files, if one has been specified.
     if( m_algorithm.length() != 0 && m_property.length() != 0 )
     {
@@ -493,6 +494,16 @@ bool MWRunFiles::isValid() const
     return false;
   }
 }
+
+/**
+ * Is the widget currently searching
+ * @return True if a search is inprogress
+ */
+bool MWRunFiles::isSearching() const
+{
+  return (m_thread ? m_thread->isRunning() : false);
+}
+
 
 /** 
 * Returns the names of the files found
