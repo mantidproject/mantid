@@ -30,16 +30,18 @@ When processed by this algorithm, 4th and 5th column are transformed into angula
 
 *WIKI*/
 #include "MantidDataHandling/FindDetectorsPar.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+
 #include <Poco/File.h>
 #include <limits>
 #include <iostream>
@@ -145,7 +147,7 @@ FindDetectorsPar::exec()
    Kernel::V3D Observer =inputWS->getInstrument()->getSample()->getPos();
 
    // Loop over the spectra
-   //PRAGMA_OMP
+   PARALLEL_FOR_NO_WSP_CHECK()  
    for (int64_t i = 0; i < nHist; i++)
    {
      Geometry::IDetector_const_sptr spDet;
@@ -165,11 +167,15 @@ FindDetectorsPar::exec()
      calcDetPar(spDet,Observer,Detectors[i]);
  
      // make regular progress reports and check for canceling the algorithm
+     PARALLEL_START_INTERUPT_REGION
      if ( i % progStep == 0 ){
             progress.report();
      }
+     PARALLEL_END_INTERUPT_REGION
 
    }
+   PARALLEL_CHECK_INTERUPT_REGION
+
    this->extractAndLinearize(Detectors);
    // if necessary set up table workspace with detectors parameters. 
    this->setOutputTable();
