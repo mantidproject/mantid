@@ -589,11 +589,27 @@ void Indirect::createRESfile(const QString& file)
 
   QString background = "[ " +QString::number(m_calDblMng->value(m_calResProp["Start"]))+ ", " +QString::number(m_calDblMng->value(m_calResProp["End"]))+"]";
 
+  QString scaled = m_uiForm.cal_ckIntensityScaleMultiplier->isChecked() ? "True" : "False";
   pyInput +=
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = " + file + "\n"
-    "resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n";
+    "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n"
+    "scaled = "+ scaled +"\n"
+    "scaleFactor = "+m_uiForm.cal_leIntensityScaleMultiplier->text()+"\n"
+    "backStart = "+QString::number(m_calDblMng->value(m_calCalProp["BackMin"]))+"\n"
+    "backEnd = "+QString::number(m_calDblMng->value(m_calCalProp["BackMax"]))+"\n"
+    "rebinLow = "+QString::number(m_calDblMng->value(m_calResProp["ELow"]))+"\n"
+    "rebinWidth = "+QString::number(m_calDblMng->value(m_calResProp["EWidth"]))+"\n"
+    "rebinHigh = "+QString::number(m_calDblMng->value(m_calResProp["EHigh"]))+"\n"
+    "AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
+    "if scaled:"
+    "  AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText=str(scaleFactor))\n"
+    "AddSampleLog(Workspace=ws, LogName='back_start', LogType='Number', LogText=str(backStart))\n"
+    "AddSampleLog(Workspace=ws, LogName='back_end', LogType='Number', LogText=str(backEnd))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_low', LogType='Number', LogText=str(rebinLow))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_width', LogType='Number', LogText=str(rebinWidth))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_high', LogType='Number', LogText=str(rebinHigh))\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
