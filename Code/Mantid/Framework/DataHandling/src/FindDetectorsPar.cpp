@@ -150,6 +150,7 @@ FindDetectorsPar::exec()
    PARALLEL_FOR_NO_WSP_CHECK()  
    for (int64_t i = 0; i < nHist; i++)
    {
+     PARALLEL_START_INTERUPT_REGION
      Geometry::IDetector_const_sptr spDet;
      try{
         spDet= inputWS->getDetector(i);
@@ -167,7 +168,7 @@ FindDetectorsPar::exec()
      calcDetPar(spDet,Observer,Detectors[i]);
  
      // make regular progress reports and check for canceling the algorithm
-     PARALLEL_START_INTERUPT_REGION
+
      if ( i % progStep == 0 ){
             progress.report();
      }
@@ -296,9 +297,9 @@ void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet)
   // return undefined detector parameters if no average detector is defined;
   if(m_nComponents==0)return;
 
-  avrgDet.azimutAngle = m_AzimutSum/m_nComponents;
-  avrgDet.polarAngle  = m_PolarSum/m_nComponents;
-  avrgDet.secondaryFlightPath = m_FlightPathSum/m_nComponents;
+  avrgDet.azimutAngle = m_AzimutSum/double(m_nComponents);
+  avrgDet.polarAngle  = m_PolarSum/double(m_nComponents);
+  avrgDet.secondaryFlightPath = m_FlightPathSum/double(m_nComponents);
 
   avrgDet.azimWidth =(m_AzimMax-m_AzimMin);
   avrgDet.polarWidth=(m_PolarMax-m_PolarMin);
