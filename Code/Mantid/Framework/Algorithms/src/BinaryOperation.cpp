@@ -12,6 +12,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
+#include <boost/make_shared.hpp>
+
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -675,10 +677,11 @@ namespace Mantid
      */
     void BinaryOperation::do2D( bool mismatchedSpectra)
     {
-      BinaryOperationTable * table = NULL;
+      BinaryOperationTable_sptr table;
       if (mismatchedSpectra)
+      {
         table = BinaryOperation::buildBinaryOperationTable(m_lhs, m_rhs);
-
+      }
 
       // Propagate any masking first or it could mess up the numbers
       //TODO: Check if this works for event workspaces...
@@ -999,12 +1002,13 @@ namespace Mantid
      * @return map from detector ID to workspace index for the RHS workspace.
      *        NULL if there is not a 1:1 mapping from detector ID to workspace index (e.g more than one detector per pixel).
      */
-    BinaryOperation::BinaryOperationTable * BinaryOperation::buildBinaryOperationTable(MatrixWorkspace_const_sptr lhs, MatrixWorkspace_const_sptr rhs)
+    BinaryOperation::BinaryOperationTable_sptr
+      BinaryOperation::buildBinaryOperationTable(const MatrixWorkspace_const_sptr &lhs, const MatrixWorkspace_const_sptr & rhs)
     {
       //An addition table is a list of pairs:
       //  First int = workspace index in the EW being added
       //  Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
-      BinaryOperationTable * table = new BinaryOperationTable();
+      auto table = boost::make_shared<BinaryOperationTable>();
 
       int rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
       int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
