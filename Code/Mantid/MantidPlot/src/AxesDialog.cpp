@@ -687,10 +687,18 @@ AxesDialog::~AxesDialog()
 */
 void AxesDialog::accept()
 {
-  if (apply())
+  m_btnOk->setFocus();
+  if (pressToGraph())
     close();
 }
-
+/** Applys the changes to the graph without closing the window
+*
+*/
+void AxesDialog::apply()
+{
+  m_btnApply->setFocus();
+  pressToGraph();
+}
 /**shows the Axes tab
 *
 */
@@ -1199,7 +1207,7 @@ void AxesDialog::updateGrid()
 /**applies the changes throughout the entire dialog to the graph
 *
 */
-bool AxesDialog::apply()
+bool AxesDialog::pressToGraph()
 {
   //Check if all tabs and axes are valid first
   for (auto axisItr = m_Axis_list.begin(); axisItr != m_Axis_list.end(); axisItr++)

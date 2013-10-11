@@ -83,7 +83,8 @@ class AxesDialog: public QDialog
     int exec();
 
   private slots:
-    bool apply();
+    bool pressToGraph();
+    void apply();
     void accept();
     void updateGrid();
     void changeMinorTicksLength(int minLength);
