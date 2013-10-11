@@ -84,7 +84,7 @@ namespace DataHandling
 
     boost::shared_ptr<BoundedValidator<int> > bankboundval = boost::make_shared<BoundedValidator<int> >();
     bankboundval->setLower(0);
-    this->declareProperty("Bank", EMPTY_DBL(), "Bank number of the parameters belonged to. ");
+    this->declareProperty("Bank", EMPTY_INT(), "Bank number of the parameters belonged to. ");
 
     vector<string> supportedfunctions;
     supportedfunctions.push_back("Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
@@ -105,7 +105,7 @@ namespace DataHandling
     processProperties();
 
     // Parse the input
-    parseTableWorkspace(m_bankID);
+    parseTableWorkspace();
 
     // Generate the string for the file to write
     std::string filestr;
@@ -126,18 +126,15 @@ namespace DataHandling
 
     // Write to file
     std::ofstream ofile;
-    // TODO - Make it an option to write or append a file
-#if 0
     // Make it work!
     if (m_append)
     {
-      ofile.open(irffilename.c_str());
+      ofile.open(m_outIrfFilename.c_str(), std::ofstream::out | std::ofstream::app);
     }
     else
     {
-      ofile.open(irffilename.c_str());
+      ofile.open(m_outIrfFilename.c_str(), std::ofstream::out | std::ofstream::trunc);
     }
-#endif
     ofile << filestr;
     ofile.close();
 
@@ -187,10 +184,12 @@ namespace DataHandling
   /** Parse the table workspace to a map of parameters (name and value)
     * to look up
     */
-  void SaveFullprofResolution::parseTableWorkspace(int bankid)
+  void SaveFullprofResolution::parseTableWorkspace()
   {
     // Check the table workspace
     std::vector<std::string> colnames = m_profileTableWS->getColumnNames();
+    size_t numcols = colnames.size();
+
     stringstream dbmsgss("Input table's column names: ");
     for (size_t i = 0; i < colnames.size(); ++i)
     {
@@ -198,27 +197,52 @@ namespace DataHandling
     }
     g_log.debug(dbmsgss.str());
 
-    // TODO - Read out a list of parameter names
-    vector<string> vec_parnames;
-    {"......";}
+    if (colnames[0] != "Name")
+      throw runtime_error("First colunm must be 'Name'");
 
+    // Read out a list of parameter names
+    size_t numpars = m_profileTableWS->rowCount();
+    vector<string> vec_parnames(numpars);
     int rowbankindex = -1;
-    // TODO - Locate BANK
-    {"......";}
-
+    for (size_t i = 0; i < numpars; ++i)
+    {
+      string parname = m_profileTableWS->cell<string>(i, 0);
+      vec_parnames[i] = parname;
+      if (parname == "BANK")
+        rowbankindex = static_cast<int>(i);
+    }
 
     // Locate the column number to pass parameters
     int colindex = -1;
     if (rowbankindex < 0)
     {
-      // TODO - If there is NO 'BANK', Locate first (from left) column starting with 'Value'
-      "......";
+      // If there is NO 'BANK', locate first (from left) column starting with 'Value'
+      for (size_t i = 1; i < numcols; ++i)
+      {
+        if (boost::starts_with(colnames[i], "Value"))
+        {
+          colindex = static_cast<int>(i);
+          break;
+        }
+      }
     }
     else
     {
-      // TODO - If there is BANK, Locate first (from left) column starting with 'Value' and BANK matches
-      "......";
+      // If there is BANK, Locate first (from left) column starting with 'Value' and BANK matches
+      for (size_t i = 1; i < numcols; ++i)
+      {
+        if (boost::starts_with(colnames[i], "Value"))
+        {
+          int bankid = static_cast<int>(m_profileTableWS->cell<double>(rowbankindex, i)+0.5);
+          if (bankid == m_bankID)
+          {
+            colindex = static_cast<int>(i);
+            break;
+          }
+        }
+      }
     }
+
     if (colindex < 0)
     {
       throw runtime_error("Unable to find column");
@@ -228,23 +252,10 @@ namespace DataHandling
       throw runtime_error("Impossible to have this situation.");
     }
 
-#if 0
-    // FIXME - The order of the column name can be flexible in future
-    if (colnames.size() < 2 || colnames[0].compare("Name") || !boost::starts_with(colnames[colindex], "Value"))
-    {
-      std::stringstream errmsg;
-      errmsg << "Input parameter workspace is not supported or recoganizable.  Possible reason is " << "\n";
-      errmsg << "(1) too few columns.  (2) first and second column are not Name and Value.";
-      g_log.error() << errmsg.str() << "\n";
-      throw std::invalid_argument(errmsg.str());
-    }
-#endif
-
     // Clear the parameter
     m_profileParamMap.clear();
 
     // Parse
-    size_t numpars = vec_parnames.size();
     for (size_t ir = 0; ir < numpars; ++ir)
     {
       double parvalue = m_profileTableWS->cell<double>(ir, static_cast<size_t>(colindex));
@@ -323,7 +334,10 @@ namespace DataHandling
     if (has_key(m_profileParamMap, "CWL"))
     {
       double cwl = m_profileParamMap["CWL"];
-      content << "CWL =   " << setprecision(4) << cwl << "A" << "\n";
+      if (cwl > 0)
+        content << "CWL =   " << setprecision(4) << cwl << "A" << "\n";
+      else
+        content << "\n";
     }
     else
     {
@@ -342,7 +356,7 @@ namespace DataHandling
 
     content << "!       Zero   Dtt1" << "\n";
     content << "ZD2TOF     "
-            << setprecision(5) << zero
+            << setw(16) << setprecision(5) << zero
             << setw(16) << setprecision(5) << dtt1 << "\n";
 
     content << "!       Zerot    Dtt1t       Dtt2t    x-cross    Width" << "\n";
@@ -463,7 +477,7 @@ namespace DataHandling
     content << "!        Dtt1           Dtt2       Zero" << "\n";
     content << "D2TOF     "
             << setw(16) << setprecision(5) << dtt1
-            << setprecision(5) << dtt2
+            << setw(16) << setprecision(5) << dtt2
             << setw(16) << setprecision(5) << zero << "\n";
 
     content << "!     TOF-TWOTH of the bank" << "\n";
@@ -500,12 +514,13 @@ namespace DataHandling
     */
   bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap, std::string key)
   {
-    // TODO - Implement this function
-    {"... ...";}
+    map<string, double>::iterator fiter;
+    fiter = profmap.find(key);
+    bool exist = true;
+    if (fiter == profmap.end())
+      exist = false;
 
-
-    throw runtime_error("To Implement ASAP");
-    return false;
+    return exist;
   }
   
 

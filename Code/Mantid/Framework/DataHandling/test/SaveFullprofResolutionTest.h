@@ -7,6 +7,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
+#include <Poco/File.h>
+
 #include <fstream>
 #include <iostream>
 
@@ -34,9 +36,13 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void Passsed_test_SaveFile()
+  //----------------------------------------------------------------------------------------------
+  /** Test save profile 10
+    */
+  void XXXtest_SaveFile()
   {
     // 1. Create input workspace
+    throw runtime_error("Need to dig out the data");
     string filename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentTable.dat");
     map<std::string, double> parameters, newvalueparameters;
     map<string, vector<double> > parametermcs;
@@ -51,7 +57,7 @@ public:
 
     // 3. Set up
     alg.setProperty("InputWorkspace", "Bank1InstrumentParameterTable");
-    alg.setProperty("OutputFile", "bank1.irf");
+    alg.setProperty("OutputFilename", "bank1.irf");
     alg.setProperty("Bank", 1);
 
     // 4. Execute
@@ -67,10 +73,40 @@ public:
     */
   void test_write1BankInMultiBankTableProf9()
   {
-    // TODO - Implement this!
+    // Generate test table workspace
+    string parwsname("HRPD2BankParameterTableWS");
+    create2BankProf9Table(parwsname);
+
+    // Create and set up algorithm to test
+    Mantid::DataHandling::SaveFullprofResolution alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setProperty("InputWorkspace", parwsname);
+    alg.setProperty("OutputFilename", "bank2.irf");
+    alg.setProperty("Bank", 2);
+    alg.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+
+    // Execute
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Locate file
+    Poco::File irffile("bank2.irf");
+    TS_ASSERT(irffile.exists());
+    if (!irffile.exists())
     {
-      "... ... ...";
+      Poco::File(parwsname).remove();
+      return;
     }
+
+    // Count number of lines
+    int numlines = getFileLines("bank2.irf");
+    TS_ASSERT_EQUALS(numlines, 18);
+
+    // Clean
+    Poco::File("bank2.irf").remove();
+
+    return;
   }
 
 
@@ -79,46 +115,134 @@ public:
     */
   void test_appendBankInMultiBankTableProf9()
   {
-    // TODO - Implement this!
+    // Generate test table workspace
+    string parwsname("HRPD2BankParameterTableWS");
+    create2BankProf9Table(parwsname);
+
+    // Write out the first bank
+    Mantid::DataHandling::SaveFullprofResolution alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setProperty("InputWorkspace", parwsname);
+    alg.setProperty("OutputFilename", "bankall.irf");
+    alg.setProperty("Bank", 1);
+    alg.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+
+    // Execute
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Append the second bank
+    Mantid::DataHandling::SaveFullprofResolution alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+
+    alg2.setProperty("InputWorkspace", parwsname);
+    alg2.setProperty("OutputFilename", "bankall.irf");
+    alg2.setProperty("Bank", 2);
+    alg2.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+    alg2.setProperty("Append", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg2.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Locate file
+    Poco::File irffile("bankall.irf");
+    TS_ASSERT(irffile.exists());
+    if (!irffile.exists())
     {
-      "... ... ...";
+      Poco::File(parwsname).remove();
+      return;
     }
+
+    // Count number of lines
+    int numlines = getFileLines("bankall.irf");
+    TS_ASSERT_EQUALS(numlines, 34);
+
+    // Clean
+    irffile.remove();
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Find out number of lines in a text file
+    */
+  int getFileLines(std::string filename)
+  {
+    ifstream infile;
+    infile.open(filename);
+
+    int numlines = 0;
+    if (infile.is_open())
+    {
+      string line;
+      while(getline(infile, line))
+      {
+        if (line.size() > 0)
+          ++ numlines;
+      }
+    }
+    else
+    {
+      numlines = -1;
+    }
+
+    return numlines;
   }
 
   //----------------------------------------------------------------------------------------------
-  /**
+  /** Write out a TableWorkspace contain 2 banks' parameters
     * ISIS HRPD Data
     */
-  DataObjects::TableWorkspace_sptr create2BankProf9Table()
+  void create2BankProf9Table(string workspacename)
   {
+    TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
+    partablews->addColumn("str", "Name");
+    partablews->addColumn("double", "Value_1");
+    partablews->addColumn("double", "Value_2");
 
-    /*
-    BANK	1	2
-    Alph0	0	0
-    Alph1	0.081722	0.109024
-    Beta0	0.023271	0.018108
-    Beta1	0.006292	0.015182
-    CWL	-1	-1
-    Dtt1	48303.1	34837.1
-    Dtt2	-4.093	-0.232
-    Gam0	6.611	0
-    Gam1	0	5.886
-    Gam2	0	0
-    Sig0	0	0
-    Sig1	10.6313	61.5518
-    Sig2	0	12.1755
-    Zero	-4.734	2.461
-    step	1	7.85
-    tof-max	105100	111500
-    tof-min	14364	12680
-    twotheta	168.33	89.58
-    */
+    TableRow row0 = partablews->appendRow();
+    row0 << "BANK" << 1. << 2.;
+    TableRow row1 = partablews->appendRow();
+    row1 << "Alph0" 	<< 	0.		<< 0.         ;
+    TableRow row2 = partablews->appendRow();
+    row2 << "Alph1" 	<< 	0.081722	<< 0.109024;
+    TableRow row3 = partablews->appendRow();
+    row3 << "Beta0" 	<< 	0.023271	<< 0.018108;
+    TableRow row4 = partablews->appendRow();
+    row4 << "Beta1" 	<< 	0.006292	<< 0.015182;
+    TableRow row5 = partablews->appendRow();
+    row5 << "CWL" 	<< 	-1.		<< -1.     ;
+    TableRow row6 = partablews->appendRow();
+    row6 << "Dtt1" 	<< 	48303.1		<< 34837.1 ;
+    TableRow row7 = partablews->appendRow();
+    row7 << "Dtt2" 	<< 	-4.093		<< -0.232  ;
+    TableRow row8 = partablews->appendRow();
+    row8 << "Gam0" 	<< 	6.611		<< 0.      ;
+    TableRow row9 = partablews->appendRow();
+    row9 << "Gam1" 	<< 	0.		<< 5.886   ;
+    TableRow row10 = partablews->appendRow();
+    row10 << "Gam2" 	<< 	0.		<< 0.      ;
+    TableRow row11 = partablews->appendRow();
+    row11 << "Sig0" 	<< 	0.		<< 0.      ;
+    TableRow row12 = partablews->appendRow();
+    row12 << "Sig1" 	<< 	10.6313		<< 61.5518 ;
+    TableRow row13 = partablews->appendRow();
+    row13 << "Sig2" 	<< 	0.		<< 12.1755 ;
+    TableRow row14 = partablews->appendRow();
+    row14 << "Zero" 	<< 	-4.734		<< 2.461   ;
+    TableRow row15 = partablews->appendRow();
+    row15 << "step" 	<< 	1.		<< 7.85    ;
+    TableRow row16 = partablews->appendRow();
+    row16 << "tof-max" << 	105100.		<< 111500. ;
+    TableRow row17 = partablews->appendRow();
+    row17 << "tof-min" << 	14364.		<< 12680.  ;
+    TableRow row18 = partablews->appendRow();
+    row18 << "twotheta" << 	168.33		<< 89.58   ;
 
-    // TODO - Implement ASAP
-    {
-      "... ...";
-    }
+    AnalysisDataService::Instance().addOrReplace(workspacename, partablews);
 
+    return;
   }
 
 

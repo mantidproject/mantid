@@ -65,7 +65,7 @@ namespace DataHandling
     std::string toProf9IrfString();
 
     /// Parse input workspace to map of parameters
-    void parseTableWorkspace(int bankid);
+    void parseTableWorkspace();
 
     /// Check wether a profile parameter map has the parameter
     bool has_key(std::map<std::string, double> profmap, std::string key);
