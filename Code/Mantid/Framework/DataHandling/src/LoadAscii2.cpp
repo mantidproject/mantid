@@ -1,6 +1,6 @@
 /*WIKI* 
 
-The LoadAscii algorithm reads in spectra data from a text file and stores it in a [[Workspace2D]] as data points. The data in the file must be organized in columns separated by commas, tabs, spaces, colons or semicolons. Only one separator type can be used throughout the file; use the "Separator" property to tell the algorithm which to use. The algorithm [[SaveAscii]] is normally able to produce such a file.
+The LoadAscii2 algorithm reads in spectra data from a text file and stores it in a [[Workspace2D]] as data points. The data in the file must be organized in columns separated by commas, tabs, spaces, colons or semicolons. Only one separator type can be used throughout the file; use the "Separator" property to tell the algorithm which to use. The algorithm [[SaveAscii2]] is normally able to produce such a file.
 
 By default the algorithm attempts to guess which lines are header lines by trying to see where a contiguous block of numbers starts. This can be turned off by specifying the "SkipNumLines" property, which will then tell the algorithm to simply use that as the the number of header lines.
 
@@ -13,14 +13,14 @@ The number of bins is defined by the number of rows.
 
 The resulting workspace will have common X binning for all spectra.
 
-This algorithm cannot load a file created by [[SaveAscii]] if it has X errors written and several spectra.
+This algorithm cannot load a file created by [[SaveAscii2]] if it has X errors written and several spectra.
 
 
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadAscii2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
@@ -38,10 +38,10 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    DECLARE_FILELOADER_ALGORITHM(LoadAscii);
+    DECLARE_FILELOADER_ALGORITHM(LoadAscii2);
     
     /// Sets documentation strings for this algorithm
-    void LoadAscii::initDocs()
+    void LoadAscii2::initDocs()
     {
       this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
       this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
@@ -52,7 +52,7 @@ namespace Mantid
     using namespace API;
 
     /// Empty constructor
-    LoadAscii::LoadAscii() : m_columnSep(), m_separatorIndex()
+    LoadAscii2::LoadAscii2() : m_columnSep(), m_separatorIndex()
     {
     }
 
@@ -61,7 +61,7 @@ namespace Mantid
      * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    int LoadAscii::confidence(Kernel::FileDescriptor & descriptor) const
+    int LoadAscii2::confidence(Kernel::FileDescriptor & descriptor) const
     {
       const std::string & filePath = descriptor.filename();
       const size_t filenameLength = filePath.size();
@@ -86,7 +86,7 @@ namespace Mantid
     * @param file :: The file pointer
     * @returns true if the file an ascii text file, false otherwise
     */
-    bool LoadAscii::isAscii(FILE *file)
+    bool LoadAscii2::isAscii(FILE *file)
     {
           char data[256];
       char *pend = &data[fread(data, 1, sizeof(data), file)];
@@ -114,7 +114,7 @@ namespace Mantid
     * Process the header information. This implementation just skips it entirely. 
     * @param file :: A reference to the file stream
     */
-    void LoadAscii::processHeader(std::ifstream & file) const
+    void LoadAscii2::processHeader(std::ifstream & file) const
     {
 
       // Most files will have some sort of header. If we've haven't been told how many lines to 
@@ -189,7 +189,7 @@ namespace Mantid
     * @param file :: A reference to a file stream
     * @returns A pointer to a new workspace
     */
-    API::Workspace_sptr LoadAscii::readData(std::ifstream & file) const
+    API::Workspace_sptr LoadAscii2::readData(std::ifstream & file) const
     {
       // Get the first line and find the number of spectra from the number of columns
       std::string line;
@@ -227,7 +227,7 @@ namespace Mantid
       else
       {
         g_log.error() << "Invalid data format found in file \"" << getPropertyValue("Filename") << "\"\n";
-        g_log.error() << "LoadAscii requires the number of columns to be an even multiple of either 2 or 3.";
+        g_log.error() << "LoadAscii2 requires the number of columns to be an even multiple of either 2 or 3.";
         throw std::runtime_error("Invalid data format.");
       }
 
@@ -309,7 +309,7 @@ namespace Mantid
     /**
     * Peek at a line without extracting it from the stream
     */
-    void LoadAscii::peekLine(std::ifstream & is, std::string & str) const
+    void LoadAscii2::peekLine(std::ifstream & is, std::string & str) const
     {
       getline(is, str);
       is.seekg(-(int)str.length(),std::ios::cur);
@@ -321,7 +321,7 @@ namespace Mantid
     * @param line :: The line to be checked
     * @return True if the line should be skipped
     */
-    bool LoadAscii::skipLine(const std::string & line) const
+    bool LoadAscii2::skipLine(const std::string & line) const
     {
       // Empty or comment
       return ( line.empty() || boost::starts_with(line, "#") );
@@ -333,7 +333,7 @@ namespace Mantid
     * @param[in] str :: The input string
     * @returns The number of columns
     */
-    int LoadAscii::splitIntoColumns(std::list<std::string> & columns, const std::string & str) const
+    int LoadAscii2::splitIntoColumns(std::list<std::string> & columns, const std::string & str) const
     {
       boost::split(columns, str, boost::is_any_of(m_columnSep), boost::token_compress_on);
       return static_cast<int>(columns.size());
@@ -344,7 +344,7 @@ namespace Mantid
     * @param[out] values :: The data vector fill
     * @param columns :: The list of strings denoting columns
     */
-    void LoadAscii::fillInputValues(std::vector<double> &values, 
+    void LoadAscii2::fillInputValues(std::vector<double> &values, 
       const std::list<std::string>& columns) const
     {
       values.resize(columns.size());
@@ -373,7 +373,7 @@ namespace Mantid
     // Private methods
     //--------------------------------------------------------------------------
     /// Initialisation method.
-    void LoadAscii::init()
+    void LoadAscii2::init()
     {
       std::vector<std::string> exts;
       exts.push_back(".dat");
@@ -414,7 +414,7 @@ namespace Mantid
     /** 
     *   Executes the algorithm.
     */
-    void LoadAscii::exec()
+    void LoadAscii2::exec()
     {
       std::string filename = getProperty("Filename");
       std::ifstream file(filename.c_str());

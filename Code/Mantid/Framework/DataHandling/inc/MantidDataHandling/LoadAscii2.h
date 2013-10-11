@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADASCII_H_
-#define MANTID_DATAHANDLING_LOADASCII_H_
+#ifndef MANTID_DATAHANDLING_LoadAscii2_H_
+#define MANTID_DATAHANDLING_LoadAscii2_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -21,8 +21,8 @@ namespace Mantid
     <li>Unit      - the unit to assign to the X axis (default: Energy).</li>
     </ul>
 
-    @author Roman Tolchenov, Tessella plc
-    @date 3/07/09
+@author Keith Brown, ISIS, Placement student from the University of Derby
+    @date 10/10/13
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -44,15 +44,15 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadAscii :public API::IFileLoader<Kernel::FileDescriptor>
+    class DLLExport LoadAscii2 :public API::IFileLoader<Kernel::FileDescriptor>
     {
     public:
       /// Default constructor
-      LoadAscii();
+      LoadAscii2();
       /// The name of the algorithm
       virtual const std::string name() const { return "LoadAscii"; }
       /// The version number
-      virtual int version() const { return 1; }
+      virtual int version() const { return 2; }
       /// The category
       virtual const std::string category() const { return "DataHandling\\Text"; }
       /// Returns a confidence value that this algorithm can load a file
@@ -93,4 +93,4 @@ namespace Mantid
   } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /*  MANTID_DATAHANDLING_LOADASCII_H_  */
+#endif  /*  MANTID_DATAHANDLING_LoadAscii2_H_  */

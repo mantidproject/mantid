@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_SAVEASCII_H_
-#define MANTID_DATAHANDLING_SAVEASCII_H_
+#ifndef MANTID_DATAHANDLING_SaveAscii2_H_
+#define MANTID_DATAHANDLING_SaveAscii2_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,7 +10,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    /** @class SaveAscii SaveAscii.h DataHandling/SaveAscii.h
+    /** @class SaveAscii2 SaveAscii2.h DataHandling/SaveAscii2.h
 
     Saves a workspace or selected spectra in a coma-separated ascii file. Spectra are saved in columns.
     Properties:
@@ -24,8 +24,8 @@ namespace Mantid
     </ul>
 
 
-    @author Roman Tolchenov, Tessella plc
-    @date 3/07/09
+    @author Keith Brown, ISIS, Placement student from the University of Derby
+    @date 10/10/13
 
     Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -47,17 +47,17 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport SaveAscii : public API::Algorithm
+    class DLLExport SaveAscii2 : public API::Algorithm
     {
     public:
       /// Default constructor
-      SaveAscii();
+      SaveAscii2();
       /// Destructor
-      ~SaveAscii() {}
+      ~SaveAscii2() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveAscii"; }
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 1; }
+      virtual int version() const { return 2; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Text"; }
 
@@ -78,4 +78,4 @@ namespace Mantid
   } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /*  MANTID_DATAHANDLING_SAVEASCII_H_  */
+#endif  /*  MANTID_DATAHANDLING_SaveAscii2_H_  */
