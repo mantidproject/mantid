@@ -1795,8 +1795,8 @@ void Indirect::sOfQwPlotInput()
     pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
   }
 
-  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input+'_q', Target='ElasticQ', EMode='Indirect')\n"
-    "ws = importMatrixWorkspace(input+'_q')\n"
+  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
+    "ws = importMatrixWorkspace(input[:-4]+'_rqw')\n"
     "ws.plotGraph2D()\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
