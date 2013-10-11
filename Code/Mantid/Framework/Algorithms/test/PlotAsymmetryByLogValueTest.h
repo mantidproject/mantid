@@ -167,41 +167,6 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_DeadTimeCorrection_FromRunData()
-  {
-    const std::string ws = "Test_DeadTimeCorrection_FromRunData_Ws";
-
-    PlotAsymmetryByLogValue alg;
-
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    alg.setPropertyValue("FirstRun", firstRun);
-    alg.setPropertyValue("LastRun", lastRun);
-    alg.setPropertyValue("OutputWorkspace", ws);
-    alg.setPropertyValue("LogValue","run_number");
-    alg.setPropertyValue("DeadTimeCorrType","FromRunData");
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve(ws));
-
-    TS_ASSERT(outWs);
-    TS_ASSERT_EQUALS(outWs->blocksize(), 5);
-    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),1);
-
-    const Mantid::MantidVec& Y = outWs->readY(0);
-
-    TS_ASSERT_DELTA(Y[0], 0.150616294231, 0.00001);
-    TS_ASSERT_DELTA(Y[1], 0.143444393798, 0.00001);
-    TS_ASSERT_DELTA(Y[2], 0.128855908289, 0.00001);
-    TS_ASSERT_DELTA(Y[3], 0.109394706098, 0.00001);
-    TS_ASSERT_DELTA(Y[4], 0.0753987939882,0.00001);
-
-    AnalysisDataService::Instance().remove(ws);
-  }
-
   void test_DeadTimeCorrection_FromSpecifiedFile()
   {
     const std::string ws = "Ws";
@@ -242,6 +207,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
+    if(!alg.isExecuted()) return;
+
     MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(ws));
 
@@ -251,15 +218,52 @@ public:
 
     const Mantid::MantidVec& Y = outWs->readY(0);
 
-    TS_ASSERT_DELTA(Y[0], 0.151080923001, 0.00001);
-    TS_ASSERT_DELTA(Y[1], 0.143898031353, 0.00001);
-    TS_ASSERT_DELTA(Y[2], 0.129297179508, 0.00001);
-    TS_ASSERT_DELTA(Y[3], 0.109825415218, 0.00001);
-    TS_ASSERT_DELTA(Y[4], 0.0758170520939,0.00001);
+    TS_ASSERT_DELTA(Y[0], 0.15108, 0.00001);
+    TS_ASSERT_DELTA(Y[1], 0.14389, 0.00001);
+    TS_ASSERT_DELTA(Y[2], 0.12929, 0.00001);
+    TS_ASSERT_DELTA(Y[3], 0.10982, 0.00001);
+    TS_ASSERT_DELTA(Y[4], 0.07581, 0.00001);
 
     AnalysisDataService::Instance().remove(ws);
     AnalysisDataService::Instance().remove(deadTimeWs);
     Poco::File(deadTimeFile).remove();
+  }
+
+  void test_DeadTimeCorrection_FromRunData()
+  {
+    const std::string ws = "Test_DeadTimeCorrection_FromRunData_Ws";
+
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", ws);
+    alg.setPropertyValue("LogValue","run_number");
+    alg.setPropertyValue("DeadTimeCorrType","FromRunData");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    if(!alg.isExecuted()) return;
+
+    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT(outWs);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 5);
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),1);
+
+    const Mantid::MantidVec& Y = outWs->readY(0);
+
+    TS_ASSERT_DELTA(Y[0], 0.150616, 0.00001);
+    TS_ASSERT_DELTA(Y[1], 0.143444, 0.00001);
+    TS_ASSERT_DELTA(Y[2], 0.128855, 0.00001);
+    TS_ASSERT_DELTA(Y[3], 0.109394, 0.00001);
+    TS_ASSERT_DELTA(Y[4], 0.075398, 0.00001);
+
+    AnalysisDataService::Instance().remove(ws);
   }
 
 private:
