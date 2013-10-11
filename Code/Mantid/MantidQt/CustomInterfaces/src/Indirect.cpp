@@ -98,6 +98,8 @@ void Indirect::initLayout()
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
+  connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), m_uiForm.cal_ckResScale, SLOT(setEnabled(bool)));
+  connect(m_uiForm.cal_ckResScale, SIGNAL(toggled(bool)), m_uiForm.cal_leResScale, SLOT(setEnabled(bool)));
   connect(m_uiForm.cal_ckIntensityScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(intensityScaleMultiplierCheck(bool)));
   connect(m_uiForm.cal_leIntensityScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(calibValidateIntensity(const QString &)));
 
@@ -137,6 +139,7 @@ void Indirect::initLayout()
 
   m_uiForm.leScaleMultiplier->setValidator(m_valPosDbl);
   m_uiForm.cal_leIntensityScaleMultiplier->setValidator(m_valDbl);
+  m_uiForm.cal_leResScale->setValidator(m_valDbl);
   
   m_uiForm.sqw_leELow->setValidator(m_valDbl);
   m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
@@ -565,10 +568,13 @@ QString Indirect::savePyCode()
 */
 void Indirect::createRESfile(const QString& file)
 {
-  QString scaleFactor("None");
-  if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
+  QString scaleFactor("1.0");
+  if(m_uiForm.cal_ckResScale->isChecked())
   {
-    scaleFactor = m_uiForm.cal_leIntensityScaleMultiplier->text();
+    if(!m_uiForm.cal_leResScale->text().isEmpty())
+    {
+      scaleFactor = m_uiForm.cal_leResScale->text();
+    }
   }
 
   QString pyInput =
@@ -776,6 +782,17 @@ QString Indirect::validateCalib()
     double eWidth = m_calDblMng->value(m_calResProp["EWidth"]);
 
     uiv.checkBins(eLow, eWidth, eHigh);
+  }
+
+  if( m_uiForm.cal_ckIntensityScaleMultiplier->isChecked()
+    && m_uiForm.cal_leIntensityScaleMultiplier->text().isEmpty() )
+  {
+    uiv.addErrorMessage("You must enter a scale for the calibration file");
+  }
+
+  if( m_uiForm.cal_ckResScale->isChecked() && m_uiForm.cal_leResScale->text().isEmpty() )
+  {
+    uiv.addErrorMessage("You must enter a scale for the resolution file");
   }
 
   return uiv.generateErrorMessage();
@@ -1449,7 +1466,6 @@ void Indirect::calibValidateIntensity(const QString & text)
   }
 }
 
-
 void Indirect::useCalib(bool state)
 {
   m_uiForm.ind_calibFile->isOptional(!state);
@@ -1486,7 +1502,12 @@ void Indirect::calibCreate()
     //scale values by arbitrary scalar if requested
     if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
     {
-      reducer += "calib.set_intensity_scale("+m_uiForm.cal_leIntensityScaleMultiplier->text()+")\n";
+      QString scale = m_uiForm.cal_leIntensityScaleMultiplier->text(); 
+      if(scale.isEmpty())
+      {
+        scale = "1.0";
+      }
+      reducer += "calib.set_intensity_scale("+scale+")\n";
     }
 
     reducer += "calib.execute(None, None)\n"
