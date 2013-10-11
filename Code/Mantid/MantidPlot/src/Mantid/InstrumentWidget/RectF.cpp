@@ -55,7 +55,7 @@ bool RectF::contains(const RectF &rect)
   * @param trans :: The result transform.
   * @param rect  :: The transform's destination QRectF.
   */
-void RectF::findTransform(QTransform& trans, const QRectF& rect)
+void RectF::findTransform(QTransform& trans, const QRectF& rect) const
 {
     double m11 =  rect.width() / xSpan();
     double m22 = -rect.height() / ySpan();

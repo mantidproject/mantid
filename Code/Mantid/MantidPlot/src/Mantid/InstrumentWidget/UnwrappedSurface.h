@@ -13,6 +13,7 @@
 #include <QStack>
 #include <QSet>
 #include <QMap>
+#include <QPainter>
 
 namespace Mantid{
   namespace Geometry{
@@ -70,7 +71,7 @@ public:
   *
   * In init() the implementation must set values for:
   *
-  *   m_u_min, m_u_max, m_v_min, m_v_max, m_height_max, m_width_max,
+  *   m_u_min, m_u_max, m_v_min, m_v_max, m_height_max, m_width_max, m_viewRect,
   *   m_unwrappedDetectors, m_assemblies
   *
   */
@@ -148,6 +149,9 @@ protected:
   virtual void calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos);
   virtual void calcSize(UnwrappedDetector& udet);
   virtual QString getDimInfo() const;
+  /// Called in non-picking drawSimpleToImage to draw something other than detectors
+  /// Useful for debuging
+  virtual void drawCustom(QPainter*) const {}
   //@}
 
   /** @name Protected methods */
