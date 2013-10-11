@@ -291,6 +291,7 @@ set ( TEST_FILES
 	ISISDataArchiveTest.h
 	InstrumentRayTracerTest.h
 	LoadAsciiTest.h
+	LoadAscii2Test.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
@@ -360,6 +361,7 @@ set ( TEST_FILES
 	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
 	SaveAsciiTest.h
+	SaveAscii2Test.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
