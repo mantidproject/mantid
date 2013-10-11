@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_RADIUSSUM_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid
@@ -46,20 +47,74 @@ namespace Algorithms
     virtual int version() const;
     virtual const std::string category() const;
 
+    static bool inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr ); 
+    static std::vector<double> getBoundariesOfNumericImage(API::MatrixWorkspace_sptr); 
+    static std::vector<double> getBoundariesOfInstrument(API::MatrixWorkspace_sptr); 
+    
+    static void centerIsInsideLimits(const std::vector<double> & centre, 
+                                     const std::vector<double> & boundaries);
+
   private:
     virtual void initDocs();
     void init();
     void exec();
 
+
+    std::vector<double> processInstrumentRadiusSum(); 
+    std::vector<double> processNumericImageRadiusSum();
+
     void cacheInputPropertyValues();
+    void inputValidationSanityCheck(); 
+    void numBinsIsReasonable();
+    std::vector<double> getBoundariesOfInputWorkspace(); 
 
+    
+    double getMaxDistance(const std::vector<double> & centre, 
+                          const std::vector<double> & boundary_limits);
 
-    double centre_x, centre_y, centre_z; 
+    void setUpOutputWorkspace(std::vector<double> & output);
+
+    int getBinForPixelPos(const Kernel::V3D & pos);
+
+    Kernel::V3D centre; 
     int num_bins; 
     bool normalize_flag; 
     double normalization_order;
     API::MatrixWorkspace_sptr inputWS;
-    double min_radius, max_radius;     
+    double min_radius, max_radius;
+
+
+    double getMinBinSizeForInstrument(API::MatrixWorkspace_sptr); 
+    double getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr); 
+
+
+    /** Return the bin position for a given distance
+     *  From the input, it is defined the limits of distances as:
+     *  Dominium => [min_radius, max_radius]
+     * 
+     *  Besides, it is defined that this dominium is splited in num_bins. 
+     * 
+     *  Hence, each bin will follow this rule: 
+     * 
+     *  Bins(n) = [min_radius + n bin_size, min_radius + (n+1) bin_size[
+     * 
+     *  for bin_size = (max_radius - min_radius ) / num_bins
+     * 
+     *  For a distance given as x, its position (n) is such as: 
+     * 
+     *  min_radius + n bin_size < x < min_radius + (n+1) bin_size
+     * 
+     *  n < (x - min_radius)/bin_size < n+1
+     * 
+     * Hence, n = truncate ( (x- min_radius)/bin_size)
+     * 
+     * @note Made inline for performance
+     * return bin position.
+     */
+    int fromDistanceToBin(double distance){
+      return static_cast<int>(((distance-min_radius)*num_bins)/(max_radius-min_radius));
+    }
+
   };
 
 

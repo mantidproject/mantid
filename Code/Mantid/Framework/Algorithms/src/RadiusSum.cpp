@@ -8,9 +8,13 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <limits>
-
+#include <math.h>
+#include <sstream>
 using namespace Mantid::Kernel;
 
 namespace Mantid
@@ -95,22 +99,503 @@ namespace Algorithms
    */
   void RadiusSum::exec()
   {
-    cacheInputPropertyValues(); 
+    cacheInputPropertyValues();
+    inputValidationSanityCheck();
+
+    // this is the main method, that executes the algorithm of radius sum
+    std::vector<double> output;  
+    if (inputWorkspaceHasInstrumentAssociated(inputWS))
+      output = processInstrumentRadiusSum(); 
+    else
+      output = processNumericImageRadiusSum(); 
+    
+    // TODO : remove this
+    std::stringstream s; 
+    for (auto v: output)
+      s << v << " "; 
+    g_log.notice() << "Output result = " << s.str() << std::endl; 
+
+    setUpOutputWorkspace(output); 
   }
+
+
+  std::vector<double> RadiusSum::processInstrumentRadiusSum(){
+    g_log.debug() << "processing Instrument related image" << std::endl; 
+    std::vector<double> accumulator(num_bins, 0); 
+
+    for (size_t i = 0; i< inputWS->getNumberHistograms(); i++){
+      try{
+        auto det = inputWS->getDetector(i); 
+
+        if (det->isMonitor())
+          continue; 
+        
+        int bin_n = getBinForPixelPos(det->getPos());
+        
+        if (bin_n < 0)
+          continue ; // not in the limits of min_radius and max_radius
+        
+        auto refY = inputWS->getSpectrum(i)->readY(); 
+        accumulator[bin_n] += std::accumulate(refY.begin(),refY.end(), 0.0);
+
+      }catch(Kernel::Exception::NotFoundError & ex){
+        // it may occur because there is no detector assigned, but it does not 
+        // cause problem. Hence, continue the loop.
+        g_log.information() << "It found that detector for " << i << " is not valid. " << ex.what() << std::endl; 
+        continue;
+      }
+    }
+    return accumulator; 
+  }
+
+  
+  std::vector<double> RadiusSum::processNumericImageRadiusSum(){
+    g_log.debug() << "processing Numeric Image" << std::endl; 
+    std::vector<double> accumulator(num_bins, 0); 
+
+    API::NumericAxis *verticalAxis = dynamic_cast<API::NumericAxis*>(inputWS->getAxis(1));
+
+    // assumption: in a numeric image, all the bins position for every row in the image
+    // will be in the same place. 
+    // The positions in the horizontal axis is the position of X if it is not a histogram, 
+    // or the center of the bin, if it is a histogram.
+
+    // define the positions of the pixels in the axis 0
+    auto refX = inputWS->getSpectrum(0)->readX();
+    auto refY = inputWS->getSpectrum(0)->readY();
+    std::vector<double> x_pos(refY.size());
+
+    if (refY.size() == refX.size())
+    {
+      std::copy(refX.begin(), refX.end(), x_pos.begin()); 
+    }
+    else
+    {
+      for (size_t ind = 0; ind < x_pos.size(); ind++)
+        x_pos[ind] = (refX[ind] + refX[ind+1])/2.0;
+    }
+
+
+    // for each row in the image
+    for (size_t i = 0; i < inputWS->getNumberHistograms(); i++){
+      
+      // pixel values
+      auto refY = inputWS->getSpectrum(i)->readY();
+      
+      // for every pixel
+      for (size_t j = 0; j < refY.size(); j++){
+        
+        // the position of the pixel is the horizontal position of the pixel 
+        // and the vertical row position. 
+        V3D pixelPos(x_pos[j], (*verticalAxis)(i), 0);
+
+        int bin_pos = getBinForPixelPos(pixelPos); 
+
+        if (bin_pos < 0)
+          continue; // not in the region [min_radius, max_radius]
+        
+        accumulator[bin_pos] += refY[j];      
+      }
+    }
+
+    return accumulator;
+  }
+  
+  
+  int RadiusSum::getBinForPixelPos(const V3D & pos){
+    double radio, theta, phi; 
+    V3D diff_vector = pos - centre; 
+    diff_vector.getSpherical(radio, theta, phi); 
+    
+    double effect_distance = radio * sin(theta * M_PI/180); 
+    
+    if (effect_distance < min_radius || effect_distance > max_radius)
+      return -1; 
+  
+    return fromDistanceToBin(effect_distance); 
+  }
+  
 
   void RadiusSum::cacheInputPropertyValues(){
     g_log.debug() << "Copy the input property values" << std::endl;
     inputWS = getProperty("InputWorkspace"); 
-    std::vector<double> centre = getProperty("Centre");
-    centre_x = centre[0]; 
-    centre_y = centre[1];
-    if (centre.size() == 3)
-      centre_z = centre[2]; 
+    
+    // make the centre a V3D object.
+    std::vector<double> centre_aux = getProperty("Centre");
+    if (centre_aux.size() == 2)
+      centre = V3D(centre_aux[0], centre_aux[1], 0); 
+    else
+      centre = V3D(centre_aux[0], centre_aux[1], centre_aux[2]); 
+
     min_radius = getProperty("MinRadius"); 
-    max_radius = getProperty("MaxRadius"); 
+    max_radius = getProperty("MaxRadius");
     num_bins = getProperty("NumBins"); 
     normalize_flag = getProperty("NormalizeByRadius"); 
     normalization_order = getProperty("NormalizationOrder");   
+  }
+
+
+  void RadiusSum::inputValidationSanityCheck(){
+    g_log.debug() << "Sanity check" << std::endl;
+
+    g_log.debug() << "Check input values for radius_min and radius_max" << std::endl; 
+    if (min_radius >= max_radius){
+      std::stringstream s; 
+      s << "Wrong definition of the radius min and max. The minimum radius can not be bigger than maximum. " 
+        << "\nInputs (" << min_radius << ", " << max_radius << ")." <<  std::endl; 
+      throw std::invalid_argument(s.str()); 
+    }
+    
+    std::vector<double> boundary_limits = getBoundariesOfInputWorkspace();
+    std::stringstream s; 
+    for(double value:  boundary_limits)
+      s << value << " , " ; 
+    g_log.debug() <<  "Boundary limits are: " << s.str() << std::endl; 
+
+    g_log.debug() << "Check that the centre is defined internally to the region defined by the image or instrument" << std::endl; 
+    centerIsInsideLimits(getProperty("centre"), boundary_limits);
+
+
+    // if max_radius was given the default value, calculate a proper value here
+    if (max_radius > 0.9 * std::numeric_limits<double>::max()){
+      max_radius = getMaxDistance(getProperty("centre"), boundary_limits); 
+      g_log.notice() << "RadiusMax automatically calculated and set to " << max_radius << std::endl; 
+    }
+
+    g_log.debug() << "Check number of bins to alert user if many bins will end up empty" << std::endl; 
+    numBinsIsReasonable();
+  }
+
+  /** Differentiate between Instrument related image (where the position of the pixels depend on the instrument 
+   *  attached to the workspace) and Numeric image (where the position of the pixels depend on the relative position
+   *  in the workspace). 
+   * 
+   * An instrument related image has the axis 1 defined as spectra (collection of spectrum numbers each one associated to 
+   * one or more detectors in the instrument).
+   *
+   * @param inWS the input workspace
+   * @return True if it is an instrument related workspace.
+   */
+  bool RadiusSum::inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr inWS){
+    return inWS->getAxis(1)->isSpectra();
+  }
+  
+  
+  std::vector<double> RadiusSum::getBoundariesOfInputWorkspace(){
+    if (inputWorkspaceHasInstrumentAssociated(inputWS)){
+      return getBoundariesOfInstrument(inputWS); 
+    }else{
+      return getBoundariesOfNumericImage(inputWS);
+    }
+  }
+
+  /** Assuming that the input workspace is a Numeric Image where the pixel positions depend on their 
+   *  relative position inside the workspace, this function extracts the position of the first and last
+   *  pixel of the image.
+   * 
+   *  It is important that the input workspace must be a numeric image, and not an instrument related workspace.
+   *  The function will raise exception (std::invalid_argument) if an invalid input is give.
+   * 
+   *  @see ::inputWorkspaceHasInstrumentAssociated for reference. 
+   *
+   *  @param inWS reference to the workspace
+   *  @return a list of values that defines the limits of the image in this order: Xmin, Xmax, Ymin, Ymax
+   */
+  std::vector<double> RadiusSum::getBoundariesOfNumericImage(API::MatrixWorkspace_sptr inWS){
+    // horizontal axis
+    
+    // get the pixel position in the horizontal axis from the middle of the image.
+    const MantidVec & refX = inWS->readX(inWS->getNumberHistograms()/2);
+    double min_x, max_x; 
+
+    const double & first_x(refX[0]); 
+    const double & last_x(refX[refX.size()-1]); 
+    if (first_x < last_x)
+    {
+      min_x = first_x;  max_x = last_x; 
+    }
+    else
+    {
+      min_x = last_x; max_x = first_x; 
+    }
+    
+    // vertical axis
+    API::NumericAxis * verticalAxis = dynamic_cast<API::NumericAxis*>(inWS->getAxis(1)); 
+    if (!verticalAxis)
+      throw std::invalid_argument("Vertical axis is not a numeric axis. Can not find the limits of the image.");
+    
+    double min_y, max_y; 
+    min_y = verticalAxis->getMin(); 
+    max_y = verticalAxis->getMax(); 
+    
+    // check the assumption made that verticalAxis will provide the correct answer.
+    if (min_y > max_y )
+    {
+      throw std::logic_error("Failure to get the boundaries of this image. Internal logic error. Please, inform MantidHelp" );
+    }
+    
+    std::vector<double> output = {min_x, max_x, min_y, max_y}; 
+    return output;   
+  }
+
+  /** Assuming that the workspace has an instrument associated with it from which the pixel positions has to be taken, 
+   *  this function extracts the position of the first and last valid pixel (detector) and return a list of values
+   *  giving the boundaries of the instrument.
+   * 
+   * 
+   * @return a list of values that defines the limits of the image in this order: Xmin, Xmax, Ymin, Ymax, Zmin, Zmax
+   */
+  std::vector<double> RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS){
+
+    // This function is implemented based in the following assumption:
+    //   - The workspace is composed by spectrum with associated spectrum ID which is associated to one detector or monitor
+    //   - The first spectrum ID (non monitor) is associated with one detector while the last spectrum ID (non monitor)
+    //     is associated with one detector. 
+    //   - Are in complete oposite direction.
+    // 
+    //   Consider the following 'image' (where the ID is the number and the position is where it is displayed)
+    // 
+    //    1  2  3 
+    //    4  5  6
+    //    7  8  9
+    //   10 11 12
+    //    
+    //    In this image, the assumption is true, because, we can derive the boundaries of the image looking just to the 
+    //    ids 1 and 12. 
+    // 
+    //    But the following image:
+    // 
+    //   1  2  3       6  5  4
+    //   6  5  4       1  2  3
+    //   7  8  9      12 11 10
+    //  12 11 12       7  8  9
+    //    
+    //   Although valid 'IDF' instrument, fail the assumption, and will return wrong values.
+    //   Bear in mind these words if you face problems with the return of the boundaries of one instrument
+    // 
+    //   
+
+    double first_x, first_y, first_z;
+    size_t i = 0; 
+    while(true){
+      i++; 
+      if (i >= inWS->getNumberHistograms())
+        throw std::invalid_argument("Did not find any non monitor detector. Failed to identify the boundaries of this instrument."); 
+
+      auto det = inWS->getDetector(i);
+      if (det->isMonitor())
+        continue;
+      // get the position of the first valid (non-monitor) detector.
+      first_x = det->getPos().X();
+      first_y = det->getPos().Y();
+      first_z = det->getPos().Z(); 
+      break;
+    }
+
+
+    double last_x, last_y, last_z;
+    i = inWS->getNumberHistograms() -1; 
+    while (true){
+      i--; 
+      if (i == 0 )
+        throw std::invalid_argument("There is no region defined for the instrument of this workspace. Failed to identify the boundaries of this instrument");
+
+      auto det = inWS->getDetector(i); 
+      if (det->isMonitor())
+        continue; 
+      // get the last valid detector position
+      last_x = det->getPos().X();
+      last_y = det->getPos().Y();
+      last_z = det->getPos().Z();
+      break;
+    }
+    
+    // order the values
+    double xMax, yMax, zMax; 
+    double xMin, yMin, zMin; 
+    xMax = std::max(first_x, last_x); 
+    yMax = std::max(first_y, last_y); 
+    zMax = std::max(first_z, last_z); 
+    xMin = std::min(first_x, last_x); 
+    yMin = std::min(first_y, last_y); 
+    zMin = std::min(first_z, last_z); 
+    
+
+    std::vector<double> output = {xMin, xMax, yMin, yMax, zMin, zMax };
+    return output; 
+  }
+
+
+
+  void RadiusSum::numBinsIsReasonable(){
+    double size_bins = (max_radius - min_radius) / num_bins; 
+    
+    double min_bin_size; 
+    if (inputWorkspaceHasInstrumentAssociated(inputWS))
+      min_bin_size = getMinBinSizeForInstrument(inputWS);
+    else 
+      min_bin_size = getMinBinSizeForNumericImage(inputWS); 
+    
+    if (size_bins < min_bin_size)
+      g_log.warning() << "The number of bins provided is too big, because it correspond to a separation smaller than the image resolution (detector size). A resonable number is smaller than " << (int)((max_radius - min_radius)/min_bin_size) << std::endl; 
+  }
+
+
+  
+  double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS){
+    // Assumption made: the detectors are placed one after the other, so the minimum 
+    // reasonalbe size for the bin is the width of one detector. 
+
+
+    double width; 
+    size_t i = 0; 
+    while(true){
+      i++; 
+
+      // this should never happen because it was done in getBoundariesOfInstrument, 
+      // but it is here to avoid risk of infiniti loop
+      if (i >= inWS->getNumberHistograms())
+        throw std::invalid_argument("Did not find any non monitor detector position"); 
+
+      auto det = inWS->getDetector(i);
+      if (det->isMonitor())
+        continue;
+
+
+      Geometry::BoundingBox bbox; 
+      det->getBoundingBox(bbox); 
+      
+      width = bbox.width().norm();
+      break;
+    }
+    
+    return width; 
+  }
+
+
+  double RadiusSum::getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr inWS){
+    // The pixel dimensions:
+    //  - width: image width/ number of pixels in one row
+    //  - height: image height/ number of pixels in one column
+    //  The minimum bin size is the smallest value between this two values.
+
+    std::vector<double> boundaries = getBoundariesOfNumericImage(inWS); 
+    const MantidVec & refX = inWS->readX(inputWS->getNumberHistograms()/2);
+    int nX = (int)(refX.size()); 
+    int nY = (int)(inWS->getAxis(1)->length()); 
+
+    // boundaries: xMin, xMax, yMin, yMax
+    return std::min(( (boundaries[1] - boundaries[0]) / nX),
+                    ( (boundaries[3] - boundaries[2]) / nY));
+  }
+
+
+  /** Check if a given position is inside the limits defined by the boundaries. 
+   * 
+   *  It assumes that the centre will be given as a vector of
+   * 
+   *  centre = {x1, x2, ..., xn}
+   * 
+   *  and boundaries will be given as: 
+   * 
+   *  boundaries = {DomX1, DomX2, ..., DomXn}
+   *  
+   *  for DomX1 (dominium of the first dimension given as [x1_min, x1_max], 
+   *  
+   *  Hence, boundaries is given as: 
+   *  
+   *  boundaries = {x1_min, x1_max, x2_min, x2_max, ... , xn_min, xn_max}
+   * 
+   *  It will test that all the values of the centre is inside their respective dominium. 
+   *  If the test fails, it will raise an exception (invalid_argument) to express that
+   *  the given centre is not inside the boundaries.
+   */ 
+  void RadiusSum::centerIsInsideLimits(const std::vector<double> & centre, 
+                                       const std::vector<double> & boundaries){
+    // sanity check
+    if ( (2 * centre.size()) != boundaries.size())
+      throw std::invalid_argument("CenterIsInsideLimits: The centre and boundaries were not given in the correct as {x1,x2,...} and {x1_min, x1_max, x2_min, x2_max, ... }"); 
+    
+    
+    bool check_passed = true; 
+    std::stringstream s; 
+    
+    for (size_t i = 0; i<centre.size(); i++){
+      if (centre[i] < boundaries[2*i] || centre[i] > boundaries[2*i+1]){
+        check_passed = false; 
+        s << "The position for axis " << i+1 << " (" << centre[i] << ") is outside the limits [" 
+          << boundaries[2*i] << ", " << boundaries[2*i+1] << "]. \n";
+      } 
+    }
+    
+    if (! check_passed)
+      throw std::invalid_argument(s.str()); 
+  }
+
+
+  double RadiusSum::getMaxDistance(const std::vector<double> & centre,
+                                   const std::vector<double> & boundary_limits){
+    
+    // the boundaries define 4 positions:
+    // (xMin, yMin), (xMax, yMax), (xMin, yMax), (xMax, yMin)
+    std::vector<double> Xs = {boundary_limits[0], boundary_limits[1]}; 
+    std::vector<double> Ys = {boundary_limits[2], boundary_limits[3]};
+    std::vector<double> Zs = {0, 0};
+    if (boundary_limits.size() == 6){
+      Zs[0] = boundary_limits[4]; 
+      Zs[1] = boundary_limits[5];
+    }
+
+    V3D centre_pos; 
+    if (centre.size() == 2)
+      centre_pos = V3D(centre[0], centre[1], 0); 
+    else // centre has only 2 or 3 elements ensured by ::twoOrThreeElements
+      centre_pos = V3D(centre[0], centre[1], centre[2]); 
+
+
+    double max_distance = 0;     
+    for (size_t x = 0; x<2; x++)
+      for (size_t y = 0; y<2; y++)
+        for( size_t z = 0; z<2; z++){ // define all the possible combinations for the limits
+          double curr_distance = centre_pos.distance(V3D(Xs[x],Ys[y],Zs[z])); 
+          if (curr_distance > max_distance)
+            max_distance = curr_distance; // keep the maximum distance.
+        }
+    return max_distance; 
+  }
+
+  void RadiusSum::setUpOutputWorkspace(std::vector<double> & values){
+
+    API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS, 1, values.size()+1, values.size()); 
+
+    // populate Y values
+    MantidVec & refY = outputWS->dataY(0);     
+    std::copy(values.begin(), values.end(), refY.begin()); 
+    
+    // populate X values
+    MantidVec & refX = outputWS->dataX(0); 
+    double bin_size = (max_radius - min_radius)/num_bins;
+
+    for (int i = 0; i< ((int)refX.size())-1; i++)
+      refX[i] = min_radius + i * bin_size;
+
+    refX[ refX.size() -1 ] = max_radius;
+
+    // configure the axis: 
+    // for numeric images, the axis are the same as the input workspace, and are copied in the creation. 
+
+    // for instrument related, the axis Y (1) continues to be the same. 
+    // it is necessary to change only the axis X. We have to change it to radius.
+    if (inputWorkspaceHasInstrumentAssociated(inputWS))
+    {
+      API::Axis * const horizontal = new API::NumericAxis(refX.size()); 
+      auto labelX = UnitFactory::Instance().create("Label");
+      boost::dynamic_pointer_cast<Units::Label>(labelX)->setLabel("Radius");       
+      horizontal->unit() = labelX; 
+    }
+    
+    setProperty("OutputWorkspace", outputWS); 
+    
   }
 
 
