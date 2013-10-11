@@ -568,10 +568,14 @@ namespace Mantid
      *
      * @param deadTimeTable :: Dead Time Table to be applied
      * @param       wsGroup :: Group of workspaces to apply correction to
+     *
+     * @return Group of workspaces with DTC applied
      */
-    void PlotAsymmetryByLogValue::applyDeadTimeCorrection(ITableWorkspace_sptr deadTimeTable, 
-      WorkspaceGroup_sptr wsGroup)
+    WorkspaceGroup_sptr PlotAsymmetryByLogValue::applyDeadTimeCorrection(
+      ITableWorkspace_sptr deadTimeTable, WorkspaceGroup_sptr wsGroup)
     {
+      WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+
       for(size_t i = 0; i < wsGroup->size(); i++)
       {
         Workspace2D_sptr member = boost::dynamic_pointer_cast<Workspace2D>(wsGroup->getItem(i));
@@ -579,8 +583,12 @@ namespace Mantid
         if(!member)
           throw std::invalid_argument("Group contains unsupported type of workspace");
         
-        applyDeadTimeCorrection(deadTimeTable, member);
+        Workspace2D_sptr outputWs = applyDeadTimeCorrection(deadTimeTable, member);
+
+        outputGroup->addWorkspace(outputWs);
       }
+
+      return outputGroup;
     }
 
     /**
@@ -589,12 +597,16 @@ namespace Mantid
      *
      * @param deadTimeGroup :: Group of Dead Time Tables to be applied
      * @param       wsGroup :: Group of workspaces to apply correction to
+     *
+     * @return Group of workspaces with DTC applied
      */
-    void PlotAsymmetryByLogValue::applyDeadTimeCorrection(WorkspaceGroup_sptr deadTimeGroup, 
-      WorkspaceGroup_sptr wsGroup)
+    WorkspaceGroup_sptr PlotAsymmetryByLogValue::applyDeadTimeCorrection(
+      WorkspaceGroup_sptr deadTimeGroup, WorkspaceGroup_sptr wsGroup)
     {
       if(deadTimeGroup->size() != wsGroup->size())
         throw std::invalid_argument("Dead Time Table group size is not equal to ws group sizes");
+
+      WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
 
       for(size_t i = 0; i < wsGroup->size(); i++)
       {
@@ -609,8 +621,12 @@ namespace Mantid
         if(!deadTimeMember)
           throw std::invalid_argument("Dead Time Table group contains workspace which is not a table");
           
-        applyDeadTimeCorrection(deadTimeMember, wsMember);
+        Workspace2D_sptr outputWs = applyDeadTimeCorrection(deadTimeMember, wsMember);
+
+        outputGroup->addWorkspace(outputWs);
       }
+
+      return outputGroup;
     }
 
     /**
@@ -618,9 +634,11 @@ namespace Mantid
      *
      * @param deadTimeTable :: Dead Time Table to be applied
      * @param            ws :: Workspace to apply correction to
+     *
+     * @return Workspace with DTC applied
      */
-    void PlotAsymmetryByLogValue::applyDeadTimeCorrection(ITableWorkspace_sptr deadTimeTable, 
-      Workspace2D_sptr ws)
+    Workspace2D_sptr PlotAsymmetryByLogValue::applyDeadTimeCorrection(
+      ITableWorkspace_sptr deadTimeTable, Workspace2D_sptr ws)
     {
       IAlgorithm_sptr applyDtc = createChildAlgorithm("ApplyDeadTimeCorr");
 
@@ -630,7 +648,7 @@ namespace Mantid
 
       MatrixWorkspace_sptr output = applyDtc->getProperty("OutputWorkspace");
 
-      ws = boost::dynamic_pointer_cast<Workspace2D>(output);
+      return boost::dynamic_pointer_cast<Workspace2D>(output);
     }
 
   } // namespace Algorithm
