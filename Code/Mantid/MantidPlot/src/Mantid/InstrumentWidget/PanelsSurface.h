@@ -102,7 +102,7 @@ protected:
   static Mantid::Kernel::Logger &g_log;
 
   friend class FlatBankFinder;
-  friend class FlatBankInfo;
+  friend struct FlatBankInfo;
 
 };
 
