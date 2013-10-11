@@ -273,7 +273,7 @@ namespace DataHandling
 
       double numAtoms = 0.; // number of atoms in formula
       NeutronAtom neutron(0, 0., 0., 0., 0., 0., 0.); // starting thing for neutronic information
-      if (CF.atoms.size() == 1 && isEmpty(zParameter))
+      if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho))
       {
 
 			Atom myAtom = getAtom(chemicalSymbol, CF.aNumbers[0]);
