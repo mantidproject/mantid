@@ -223,12 +223,19 @@ namespace Mantid
         IAlgorithm_sptr loadNexus = createChildAlgorithm("LoadMuonNexus");
         loadNexus->initialize();
         loadNexus->setPropertyValue("Filename", fn.str());
-        if (m_autogroup)
-          loadNexus->setPropertyValue("AutoGroup","1");
         loadNexus->execute();
 
         Workspace_sptr loadedWs = loadNexus->getProperty("OutputWorkspace");
 
+        if(m_autogroup)
+        {
+          IAlgorithm_sptr applyGrouping = createChildAlgorithm("ApplyGroupingFromMuonNexus");
+          applyGrouping->initialize();
+          applyGrouping->setProperty("InputWorkspace", loadedWs);
+          applyGrouping->setPropertyValue("Filename", fn.str());
+          applyGrouping->execute();
+          loadedWs = applyGrouping->getProperty("OutputWorkspace");
+        }
 
         WorkspaceGroup_sptr loadedGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
 
