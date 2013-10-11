@@ -318,7 +318,7 @@ private:
   boost::shared_ptr<DataModeHandler> AttributeValues ;
   double ParameterValues[7] ;
 
-  Mantid::detid2index_map * wi_to_detid_map;
+  Mantid::detid2index_map wi_to_detid_map;
 
   int*                     NeighborIDs;//Stores IDs of nearest neighbors
   double R0 ;  ///<for Weak Peaks, these can be set using info from close

@@ -7,7 +7,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/DateAndTime.h"
@@ -15,7 +15,6 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::Kernel::NexusTestHelper;
 
 class PropertyNexusTest : public CxxTest::TestSuite
 {

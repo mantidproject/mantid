@@ -84,7 +84,7 @@ namespace Mantid
       API::MatrixWorkspace_const_sptr inputWorkspace;
 
       // Map from detector ID to WS index
-      detid2index_map * map;
+      detid2index_map map;
 
       // Progress reporting
       API::Progress * prog;

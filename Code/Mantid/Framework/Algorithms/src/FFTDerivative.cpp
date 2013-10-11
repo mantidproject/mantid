@@ -101,19 +101,6 @@ void FFTDerivative::execComplexFFT()
 
     MatrixWorkspace_sptr transWS = fft->getProperty("OutputWorkspace");
 
-    //bool outTrans = getProperty("Transform");
-    //if (n == 1 && outTrans)
-    //{
-    //  declareProperty(new WorkspaceProperty<>("CopyWorkspace","",Direction::Output,"Symmertized input Workspace"));
-    //  std::string name = getPropertyValue("OutputWorkspace");
-    //  setPropertyValue("CopyWorkspace",name+"_copy");
-    //  setProperty("CopyWorkspace",copyWS);
-
-    //  declareProperty(new WorkspaceProperty<>("TransformWorkspace","",Direction::Output,"Workspace with fourier transform"));
-    //  setPropertyValue("TransformWorkspace",name+"_trans");
-    //  setProperty("TransformWorkspace",transWS);
-    //}
-
     Mantid::MantidVec& nu = transWS->dataX(3);
     Mantid::MantidVec& re = transWS->dataY(3);
     Mantid::MantidVec& im = transWS->dataY(4);

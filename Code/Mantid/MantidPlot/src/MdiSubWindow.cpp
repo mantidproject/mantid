@@ -123,6 +123,15 @@ void MdiSubWindow::show()
 }
 
 /**
+ * Focus on the window
+ */
+void MdiSubWindow::setFocus()
+{
+  QWidget::setFocus(Qt::OtherFocusReason);
+}
+
+
+/**
  * Override the QWidget's hide() slot to hide the wrapper window instead.
  */
 void MdiSubWindow::hide()
@@ -237,7 +246,7 @@ return s;
 
 QString MdiSubWindow::sizeToString()
 {
-return QString::number(8*sizeof(this)/1024.0, 'f', 1) + " " + tr("kB");
+return QString::number(8.*static_cast<float>(sizeof(this))/1024.0, 'f', 1) + " " + tr("kB");
 }
 
 void MdiSubWindow::changeEvent(QEvent *event)

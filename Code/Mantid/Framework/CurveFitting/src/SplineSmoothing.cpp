@@ -374,12 +374,11 @@ namespace CurveFitting
         //iterate over smoothing points
         std::set<int>::const_iterator iter = smoothPts.begin();
         int start = *iter;
-        int end(0);
         bool accurate(true);
 
         for(++iter; iter != smoothPts.end(); ++iter)
         {
-          end = *iter;
+          int end = *iter;
 
           //check each point falls within our range of error.
           accurate = checkSmoothingAccuracy(start,end,ys.data(),ysmooth.get());

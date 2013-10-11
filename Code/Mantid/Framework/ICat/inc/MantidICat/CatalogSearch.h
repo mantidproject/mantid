@@ -3,11 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include"MantidICat/ICatHelper.h"
 #include "MantidICat/CatalogSearchParam.h"
-
-
-
 
 namespace Mantid
 {

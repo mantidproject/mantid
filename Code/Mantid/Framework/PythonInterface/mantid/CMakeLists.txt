@@ -53,6 +53,14 @@ add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryMod
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 
 ###########################################################################
+# Bundle Python (where appropriate)
+###########################################################################
+# Defines the target the will cause the Python bundle to be copied
+set ( PYBUNDLE_POST_TARGET PythonModule ) 
+include ( ${CMAKE_CURRENT_SOURCE_DIR}/BundlePython.cmake )
+
+
+###########################################################################
 # Installation settings
 ###########################################################################
 

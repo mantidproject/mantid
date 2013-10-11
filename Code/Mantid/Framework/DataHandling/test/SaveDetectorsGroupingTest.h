@@ -81,8 +81,67 @@ public:
     Poco::File file(file1);
     file.remove(false);
 
+    API::AnalysisDataService::Instance().remove("Vulcan_Group");
+    API::AnalysisDataService::Instance().remove("Vulcan_Group2");
+
   }
 
+  void test_SaveNamingAndDescription()
+  {
+    std::string testWs = "GroupingWorkspace";
+
+    // Load the grouping to test with
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+
+    TS_ASSERT(load.setProperty("InputFile", "MUSRGrouping.xml"));
+    TS_ASSERT(load.setProperty("OutputWorkspace", testWs));
+
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+
+    // Save the test workspace
+    SaveDetectorsGrouping save;
+    save.initialize();
+
+    TS_ASSERT(save.setProperty("InputWorkspace", testWs));
+    TS_ASSERT(save.setProperty("OutputFile", "grouptemp.xml"));
+
+    save.execute();
+    TS_ASSERT(save.isExecuted());
+
+    // Get full path of the file
+    std::string testFile = save.getPropertyValue("OutputFile");
+
+    // Remove saved workspace
+    API::AnalysisDataService::Instance().remove(testWs);
+
+    // Load it again to verify
+    LoadDetectorsGroupingFile load2;
+    load2.initialize();
+
+    TS_ASSERT(load2.setProperty("InputFile", testFile));
+    TS_ASSERT(load2.setProperty("OutputWorkspace", testWs));
+
+    load2.execute();
+    TS_ASSERT(load2.isExecuted());
+
+    // Get GroupingWorkspace instance
+    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(testWs));
+
+    // Check that description was saved
+    TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(), "musr longitudinal (64 detectors)");
+
+    // Check that group names were saved
+    TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_1")->value(), "fwd");
+    TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_2")->value(), "bwd");
+
+    // Clean-up
+    API::AnalysisDataService::Instance().remove(testWs);
+
+    Poco::File file(testFile);
+    file.remove();
+  }
 
 };
 

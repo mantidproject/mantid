@@ -812,6 +812,8 @@ public:
     el2.addEventQuickly( TofEvent(1.5, 5) );
     TS_ASSERT( (el1 == el2) );
     TS_ASSERT( !(el1 != el2) );
+
+    TS_ASSERT( el1.equals(el2, 0., 0., 0));
   }
 
 

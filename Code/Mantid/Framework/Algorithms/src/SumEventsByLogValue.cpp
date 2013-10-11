@@ -160,10 +160,15 @@ namespace Algorithms
     const int maxVal = log->maxValue();
     const int xLength = maxVal - minVal + 1;
 
+    if ( xLength > 10000 )
+    {
+      g_log.warning() << "Did you really want to create a " << xLength << " row table? This will take some time!\n";
+    }
+
     // Accumulate things in a local vector before transferring to the table
     std::vector<int> Y(xLength);
     const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
-    Progress prog(this,0.0,1.0,numSpec);
+    Progress prog(this,0.0,1.0,numSpec+xLength);
     PARALLEL_FOR1(m_inputWorkspace)
     for ( int spec = 0; spec < numSpec; ++spec )
     {
@@ -174,22 +179,24 @@ namespace Algorithms
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    // For now, no errors. Do we need them?
 
     // Create a table workspace to hold the sum.
     ITableWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().createTable();
     auto logValues = outputWorkspace->addColumn("int",m_logName);
     auto counts = outputWorkspace->addColumn("int","Counts");
+    auto errors = outputWorkspace->addColumn("double","Error");
     outputWorkspace->setRowCount(xLength); // One row per log value across the full range
     // Set type for benefit of MantidPlot
     logValues->setPlotType(1); // X
     counts->setPlotType(2);    // Y
+    errors->setPlotType(5);    // E
 
     // Transfer the results to the table
     for ( int i = 0; i < xLength; ++i )
     {
       logValues->cell<int>(i) = minVal+i;
       counts->cell<int>(i) = Y[i];
+      errors->cell<double>(i) = std::sqrt(Y[i]);
     }
 
     // Columns for normalisation: monitors (if available), time & proton charge
@@ -243,8 +250,10 @@ namespace Algorithms
       }
       timeCol->cell<double>(row) = duration;
 
+      interruption_point();
       // Sum up the proton charge for this log value
       if ( protonChargeLog ) protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, filter);
+      interruption_point();
 
       for ( auto log = otherLogs.begin(); log != otherLogs.end(); ++log )
       {
@@ -252,6 +261,7 @@ namespace Algorithms
         // Have to (maybe inefficiently) fetch back column by name - move outside loop if too slow
         outputWorkspace->getColumn(log->first)->cell<double>(row) = log->second->averageValueInFilter(filter);
       }
+      prog.report();
     }
 
     setProperty("OutputWorkspace",outputWorkspace);
@@ -271,7 +281,6 @@ namespace Algorithms
   {
     if ( log->realSize() == 0 ) return;
 
-    // TODO: Handle weighted events and avoid the vector copy below
     const auto pulseTimes = eventList.getPulseTimes();
     for ( std::size_t eventIndex = 0; eventIndex < pulseTimes.size(); ++eventIndex )
     {
@@ -378,12 +387,10 @@ namespace Algorithms
       const Kernel::TimeSplitterType& filter)
   {
     // Clone the proton charge log and filter the clone on this log value
-    auto protonChargeLogClone = protonChargeLog->clone();
+    boost::scoped_ptr<TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
     protonChargeLogClone->filterByTimes(filter);
     // Seems like the only way to sum this is to yank out the values
     const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
-    // Delete the clone
-    delete protonChargeLogClone;
 
     return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
   }
@@ -420,7 +427,6 @@ namespace Algorithms
     {
       PARALLEL_START_INTERUPT_REGION
       const IEventList & eventList = m_inputWorkspace->getEventList(spec);
-      // TODO: Handle weighted events and avoid the vector copy below
       const auto pulseTimes = eventList.getPulseTimes();
       for ( std::size_t eventIndex = 0; eventIndex < pulseTimes.size(); ++eventIndex )
       {

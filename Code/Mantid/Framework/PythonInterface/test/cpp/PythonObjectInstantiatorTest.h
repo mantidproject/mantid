@@ -60,9 +60,6 @@ public:
   //
   PythonObjectInstantiatorTest() : m_creator(NULL)
   {
-    // Make sure we don't load anything that could have the OLD api in it. The hard links here cause trouble on some platforms
-    // when mixing the old API
-    Mantid::Kernel::ConfigService::Instance().remove("pythonalgorithms.directories");
   }
 
   ~PythonObjectInstantiatorTest()

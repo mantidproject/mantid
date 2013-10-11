@@ -8,12 +8,11 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::Kernel::NexusTestHelper;
 
 class WorkspaceHistoryTest : public CxxTest::TestSuite
 {

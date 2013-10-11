@@ -8,10 +8,7 @@ import reduction_gui.widgets.util as util
 import ui.reflectometer.ui_refl_stitching
 
 import mantidplot
-from MantidFramework import *
-mtd.initialise(False)
-from mantidsimple import *
-
+from mantid.simpleapi import *
 from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
 
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -72,7 +69,7 @@ class ReflData(object):
         
         if parent_layout is not None:
             parent_layout.addLayout(self._layout)
-            parent_layout.connect(self._edit_ctrl, QtCore.SIGNAL("returnPressed()"), self._scale_updated)
+            parent_layout.connect(self._edit_ctrl, QtCore.SIGNAL("returnPressed()"), self._return_pressed)
             #parent_layout.connect(self._radio, QtCore.SIGNAL("toggled()"), self._reference_updated)
         
     def is_selected(self):
@@ -95,6 +92,11 @@ class ReflData(object):
                     xmax = _xmax
         return xmin, xmax
         
+    def _return_pressed(self):
+        self._scale_updated()
+        if self._call_back is not None:
+            self._call_back()
+        
     def _scale_updated(self):
         """
             Called when the scaling factors are updated
@@ -107,10 +109,7 @@ class ReflData(object):
                     item.set_scale(self._scale)
                     item.apply_scale(xmin=xmin, xmax=xmax)
                 except:
-                    pass
-            
-        if self._call_back is not None:
-            self._call_back()
+                    pass            
             
     def delete(self):
         if self._radio is not None:
@@ -145,17 +144,17 @@ class ReflData(object):
         
         if self.name.find("Off_Off")>0:
             ws_name = self.name.replace("Off_Off", "On_Off")
-            if mtd.workspaceExists(ws_name):
+            if AnalysisDataService.doesExist(ws_name):
                 self._data[ReflData.ON_OFF] = DataSet(ws_name)
                 self._data[ReflData.ON_OFF].load(True, True)
     
             ws_name = self.name.replace("Off_Off", "Off_On")
-            if mtd.workspaceExists(ws_name):
+            if AnalysisDataService.doesExist(ws_name):
                 self._data[ReflData.OFF_ON] = DataSet(ws_name)
                 self._data[ReflData.OFF_ON].load(True, True)
     
             ws_name = self.name.replace("Off_Off", "On_On")
-            if mtd.workspaceExists(ws_name):
+            if AnalysisDataService.doesExist(ws_name):
                 self._data[ReflData.ON_ON] = DataSet(ws_name)
                 self._data[ReflData.ON_ON].load(True, True)
     
@@ -238,7 +237,7 @@ class StitcherWidget(BaseWidget):
         # Apply and save buttons
         self.connect(self._content.pick_unity_range_btn, QtCore.SIGNAL("clicked()"), self._pick_specular_ridge)        
         self.connect(self._content.auto_scale_btn, QtCore.SIGNAL("clicked()"), self._apply)        
-        self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._save_result)
+        self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._set_unity_scale)
         self._content.min_q_unity_edit.setText("0.00")
         self._content.max_q_unity_edit.setText("0.01")
         self._content.max_q_unity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_q_unity_edit))
@@ -265,7 +264,21 @@ class StitcherWidget(BaseWidget):
             self.radio_group.addButton(self._content.on_off_radio)
             self.radio_group.addButton(self._content.on_on_radio)
             self.radio_group.setExclusive(True)
-                 
+
+    def _set_unity_scale(self):
+        """ 
+            Set scaling factors to reference
+        """
+        ref= 0
+        for item in self._workspace_list:
+            if item.is_selected():
+                ref = item.get_scale()
+                break
+        for item in self._workspace_list:
+            item.set_scale(ref)
+        self.plot_result()
+        
+
     def _email_options_changed(self):
         """
             Send-email checkbox has changed states
@@ -279,6 +292,7 @@ class StitcherWidget(BaseWidget):
         
     def _add_entry(self, workspace):
         entry = ReflData(workspace, parent_layout=self._content.angle_list_layout)
+        entry.connect_to_scale(self.plot_result)
         self._workspace_list.append(entry)
 
     def is_running(self, is_running):
@@ -325,7 +339,7 @@ class StitcherWidget(BaseWidget):
             self._content.min_q_unity_edit.setText("%-g" % xmin)
             self._content.max_q_unity_edit.setText("%-g" % xmax)
                 
-        if mtd.workspaceExists(self._workspace_list[refID].name):
+        if AnalysisDataService.doesExist(self._workspace_list[refID].name):
             data_stitching.RangeSelector.connect([self._workspace_list[refID].name], call_back)
             
     def _scale_data_sets(self):
@@ -375,7 +389,7 @@ class StitcherWidget(BaseWidget):
             s.append(ref_data)
         
         if s.size()==0:
-            mtd.sendLogMessage("No data to scale")
+            Logger.get("Stitcher").notice("No data to scale")
             return
         
         s.set_reference(refID)
@@ -456,7 +470,7 @@ class StitcherWidget(BaseWidget):
                                "Off_On", "On_On"]
                     for pol in pol_list:
                         try:
-                            if mtd.workspaceExists('ref_'+pol):
+                            if AnalysisDataService.doesExist('ref_'+pol):
                                 root, ext = os.path.splitext(os.path.basename(fname))
                                 outdir, filename = os.path.split(fname)
                                 outname = "%s_%s.txt" % (root, pol)
@@ -467,7 +481,7 @@ class StitcherWidget(BaseWidget):
                                           Separator="Space")             
                                 file_list.append(file_path)                   
                         except:
-                            mtd.sendLogMessage("Could not save polarization %s" % pol)
+                            Logger.get("Stitcher").notice("Could not save polarization %s" % pol)
             if send_email:
                 self._email_data(file_list)
                 
@@ -519,7 +533,7 @@ class StitcherWidget(BaseWidget):
         # Refresh combo boxes
         if self._settings.instrument_name == "REFL":
             _tmp_workspace_list = []    
-            for item in mtd.keys():
+            for item in AnalysisDataService.getObjectNames():
                 #retrieve workspaces of interest
                 if item.startswith("reflectivity") and item.endswith("ts"):
                     _tmp_workspace_list.append(item)
@@ -540,7 +554,7 @@ class StitcherWidget(BaseWidget):
                     self._add_entry(item)
 
         else: #REF_M
-            for item in mtd.keys():
+            for item in AnalysisDataService.getObjectNames():
                 if item.startswith("reflectivity") and not item.endswith("scaled") and item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
                     self._add_entry(item)
                 

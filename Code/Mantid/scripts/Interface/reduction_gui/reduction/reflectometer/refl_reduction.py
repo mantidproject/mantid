@@ -25,17 +25,16 @@ class REFLReductionScripter(BaseReductionScripter):
         script = "# %s reduction script\n" % self.instrument_name
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
-        script += "from MantidFramework import *\n"
-        script += "mtd.initialise(False)\n"
-        script += "from mantidsimple import *\n\n"
+        script += "import mantid\n"
+        script += "from mantid.simpleapi import *\n"
         script += "\n"
         script += "#remove all previous workspaces\n"
-        script += "list_mt = mtd.getWorkspaceNames()\n"
+        script += "list_mt = AnalysisDataService.getObjectNames()\n"
         script += "for _mt in list_mt:\n"
         script += "    if _mt.find('_scaled') != -1:\n"
-        script += "        mtd.remove(_mt)\n"
+        script += "        AnalysisDataService.remove(_mt)\n"
         script += "    if _mt.find('reflectivity') != -1:\n"
-        script += "        mtd.remove(_mt)\n"
+        script += "        AnalysisDataService.remove(_mt)\n"
         script += "\n"
         
         for item in self._observers:

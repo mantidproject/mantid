@@ -58,7 +58,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  std::size_t getWkspIndex(detid2index_map * pixel_to_wi, Geometry::IComponent_const_sptr comp,
+  std::size_t getWkspIndex(const detid2index_map& pixel_to_wi, Geometry::IComponent_const_sptr comp,
                            const int x, const int y);
   void getTofRange(double &tofMin, double &tofMax, const double tofPeak, const MantidVec& tof);
   int findPixelID(std::string bankName, int col, int row);

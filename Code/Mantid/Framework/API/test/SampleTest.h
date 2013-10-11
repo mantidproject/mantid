@@ -9,14 +9,13 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::Sample;
 using Mantid::API::SampleEnvironment;
-using Mantid::Kernel::NexusTestHelper;
 
 class SampleTest : public CxxTest::TestSuite
 {
@@ -227,17 +226,15 @@ public:
 
   void test_Material_Returns_The_Correct_Value()
   {
-    Material *vanBlock = new Material("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
+    Material vanBlock("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
     Sample sample;
-    sample.setMaterial(*vanBlock);
+    sample.setMaterial(vanBlock);
 
-    const Material * mat = &sample.getMaterial();
+    const Material& mat = sample.getMaterial();
     const double lambda(2.1);
-    TS_ASSERT_DELTA(mat->cohScatterXSection(lambda), 0.0184,  1e-02);
-    TS_ASSERT_DELTA(mat->incohScatterXSection(lambda), 5.08,  1e-02);
-    TS_ASSERT_DELTA(mat->absorbXSection(lambda), 5.93, 1e-02);
-
-    delete vanBlock;
+    TS_ASSERT_DELTA(mat.cohScatterXSection(lambda), 0.0184,  1e-02);
+    TS_ASSERT_DELTA(mat.incohScatterXSection(lambda), 5.08,  1e-02);
+    TS_ASSERT_DELTA(mat.absorbXSection(lambda), 5.93, 1e-02);
   }
 
   void test_Single_Sample()

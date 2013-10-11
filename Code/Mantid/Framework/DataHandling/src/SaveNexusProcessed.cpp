@@ -48,6 +48,7 @@ off by default.
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <nexus/NeXusFile.hpp>
+#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/File.h>
@@ -255,6 +256,9 @@ namespace DataHandling
     if (m_title.empty()) 
       m_title = inputWorkspace->getTitle();
 
+    //get the workspace name to write to file
+    std::string wsName = inputWorkspace->getName();
+
     // If we don't want to append then remove the file if it already exists
     bool append_to_file = getProperty("Append");
     if( !append_to_file )
@@ -272,7 +276,7 @@ namespace DataHandling
     ::NeXus::File * cppFile = new ::NeXus::File(nexusFile->fileID);
 
     prog_init.reportIncrement(1, "Opening file");
-    if( nexusFile->writeNexusProcessedHeader( m_title ) != 0 )
+    if( nexusFile->writeNexusProcessedHeader( m_title, wsName) != 0 )
       throw Exception::FileError("Failed to write to file", m_filename);
 
     prog_init.reportIncrement(1, "Writing header");
@@ -351,10 +355,6 @@ namespace DataHandling
 
     return;
   }
-
-
-
-
 
 
   //-------------------------------------------------------------------------------------

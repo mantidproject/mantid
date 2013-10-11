@@ -30,12 +30,6 @@ namespace Mantid
   namespace Kernel
   {
 
-    template <> DLLExport
-    const char* IPropertyManager::getValue<const char*>(const std::string &name) const
-    {
-        return getPropertyValue(name).c_str();
-    }
-
     // This template implementation has been left in because although you can't assign to an existing string
     // via the getProperty() method, you can construct a local variable by saying,
     // e.g.: std::string s = getProperty("myProperty")

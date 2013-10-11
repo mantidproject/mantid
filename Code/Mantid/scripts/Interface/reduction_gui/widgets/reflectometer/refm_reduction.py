@@ -668,7 +668,7 @@ class DataReflWidget(BaseWidget):
         self._summary.remove_btn.setEnabled(False)  
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
-            state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+            state = current_item.data(QtCore.Qt.UserRole)
             self.set_editing_state(state)
             self._reset_warnings()
         self._summary.angle_list.setEnabled(True)
@@ -817,7 +817,7 @@ class DataReflWidget(BaseWidget):
             angle_offset_error = float(self._summary.angle_offset_error_edit.text())
                 
         for i in range(self._summary.angle_list.count()):
-            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
+            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole)
             # Over-write Q binning with common binning
             data.q_min = q_min
             data.q_step = q_step

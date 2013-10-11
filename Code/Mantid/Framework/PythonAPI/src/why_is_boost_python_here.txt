@@ -1,9 +1,0 @@
-The boost python source (1.43) has been included here to remedy a problem with
-the boost static libraries that are shipped with the linux distributions. They
-are not compiled with -fPIC, meaning that another shared library cannot be linked 
-with them. The simplest solution, which also avoids having separate static libs
-for Windows & OS X, is to simple include the src in the compilation. It's relatively
-small and hasn't changed in quite some time. This is only required for the old API
-and will disappear when this does.
-
-More detail here as to why this is necessary here: http://trac.mantidproject.org/mantid/ticket/4204

@@ -3,7 +3,7 @@
 
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
-#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Policies/DowncastReturnedValue.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -77,9 +77,9 @@ void export_AnalysisDataService()
 
   class_<AnalysisDataServiceImpl,boost::noncopyable>("AnalysisDataServiceImpl", no_init)
     .def("add", &AnalysisDataServiceImpl::add, "Adds the given object to the service with the given name. If the name/object exists it will raise an error.")
-    .def("addOrReplace", &AnalysisDataServiceImpl::add, "Adds the given object to the service with the given name. The the name exists the object is replaced.")
+    .def("addOrReplace", &AnalysisDataServiceImpl::addOrReplace, "Adds the given object to the service with the given name. The the name exists the object is replaced.")
     .def("doesExist", &AnalysisDataServiceImpl::doesExist, "Returns True if the object is found in the service.")
-    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::downcast_returned_value>(),
+    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::DowncastReturnedValue>(),
          "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
@@ -90,7 +90,7 @@ void export_AnalysisDataService()
     .staticmethod("Instance")
     // Make it act like a dictionary
     .def("__len__", &AnalysisDataServiceImpl::size)
-    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Policies::downcast_returned_value>())
+    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Policies::DowncastReturnedValue>())
     .def("__contains__", &AnalysisDataServiceImpl::doesExist)
     .def("__delitem__", &AnalysisDataServiceImpl::remove)
     ;

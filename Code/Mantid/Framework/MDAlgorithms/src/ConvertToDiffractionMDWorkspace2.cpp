@@ -128,17 +128,14 @@ namespace MDAlgorithms
 
     // Disabled for this version
     declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input),
-        "Clearing the events from the input workspace during conversion, to save memory is not supported by algorithm v2");
+        "Clearing the events from the input workspace during conversion (to save memory) is not supported by algorithm v2");
     // disable property on interface
-     this->setPropertySettings("ClearInputWorkspace",  new DisabledProperty());
+    this->setPropertySettings("ClearInputWorkspace",  new DisabledProperty());
 
-    declareProperty(new PropertyWithValue<bool>("OneEventPerBin", false, Direction::Input),
-        "Algorithm v2 always uses OneMDEvent per histogram bin (including zero bins) when works with histogram workspace\n"
-        " and convers every event into MDEvent when works with event workspace");
-    // disable property on interface
-     this->setPropertySettings("OneEventPerBin", new DisabledProperty());
-
-
+    declareProperty(new PropertyWithValue<bool>("OneEventPerBin", true, Direction::Input),
+        "Use the histogram representation (event for event workspaces).\n"
+        "One MDEvent will be created for each histogram bin (even empty ones).\n"
+        "Warning! This can use signficantly more memory!");
 
     frameOptions.push_back("Q (sample frame)");
     frameOptions.push_back("Q (lab frame)");
@@ -252,11 +249,9 @@ namespace MDAlgorithms
    
     Convert->setRethrows(true);
     Convert->initialize();
-    std::string inWSName = this->getPropertyValue("InputWorkspace");
-    std::string outWSName = this->getPropertyValue("OutputWorkspace");
 
-    Convert->setProperty("InputWorkspace",inWSName);
-    Convert->setProperty("OutputWorkspace",outWSName);
+    Convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace",this->getProperty("InputWorkspace"));
+    Convert->setProperty("OutputWorkspace",this->getPropertyValue("OutputWorkspace"));
     Convert->setProperty("OverwriteExisting",!this->getProperty("Append"));
 
 
@@ -279,6 +274,9 @@ namespace MDAlgorithms
 
      bool lorCorr = this->getProperty("LorentzCorrection");
      Convert->setProperty("LorentzCorrection",lorCorr);
+
+     bool ignoreZeros = !this->getProperty("OneEventPerBin");
+     Convert->setProperty("IgnoreZeroSignals",ignoreZeros);
      //set extents
      std::vector<double> extents = this->getProperty("Extents");
      std::vector<double> minVal,maxVal;

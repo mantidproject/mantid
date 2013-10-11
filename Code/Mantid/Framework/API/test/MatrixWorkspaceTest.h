@@ -8,11 +8,11 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
 
@@ -589,22 +589,39 @@ public:
  
   }
 
+  void test_getSpectrumToWorkspaceIndexMap()
+  {
+    WorkspaceTester ws;
+    ws.initialize(2,1,1);
+    const auto map = ws.getSpectrumToWorkspaceIndexMap();
+    TS_ASSERT_EQUALS( map.size(), 2 );
+    TS_ASSERT_EQUALS( map.begin()->first, 1 );
+    TS_ASSERT_EQUALS( map.begin()->second, 0 );
+    TS_ASSERT_EQUALS( map.rbegin()->first, 2 );
+    TS_ASSERT_EQUALS( map.rbegin()->second, 1 );
+
+    // Check it throws for non-spectra axis
+    ws.replaceAxis(1,new NumericAxis(1));
+    TS_ASSERT_THROWS( ws.getSpectrumToWorkspaceIndexMap(), std::runtime_error);
+  }
+
   void test_getDetectorIDToWorkspaceIndexMap()
   {
     auto ws = makeWorkspaceWithDetectors(5, 1);
-    boost::scoped_ptr<detid2index_map> idmap(ws->getDetectorIDToWorkspaceIndexMap(true));
-    TS_ASSERT_EQUALS( idmap->size(), 5 );
+    detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(true);
+
+    TS_ASSERT_EQUALS( idmap.size(), 5 );
     int i = 0;
-    for ( auto it = idmap->begin(); it != idmap->end(); ++it, ++i )
+    for ( auto it = idmap.begin(); it != idmap.end(); ++it, ++i )
     {
-      TS_ASSERT_EQUALS( idmap->count(i), 1 );
-      TS_ASSERT_EQUALS( (*idmap)[i], i );
+      TS_ASSERT_EQUALS( idmap.count(i), 1 );
+      TS_ASSERT_EQUALS( idmap[i], i );
     }
 
     ws->getSpectrum(2)->addDetectorID(99); // Set a second ID on one spectrum
     TS_ASSERT_THROWS( ws->getDetectorIDToWorkspaceIndexMap(true), std::runtime_error );
-    boost::scoped_ptr<detid2index_map> idmap2(ws->getDetectorIDToWorkspaceIndexMap());
-    TS_ASSERT_EQUALS( idmap2->size(), 6 );
+    detid2index_map idmap2 = ws->getDetectorIDToWorkspaceIndexMap();
+    TS_ASSERT_EQUALS( idmap2.size(), 6 );
   }
 
   void test_getDetectorIDToWorkspaceIndexVector()

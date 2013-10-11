@@ -264,6 +264,15 @@ namespace MDEvents
       output->cell<double>(rowCounter, cellIndex++) = it->getNormalizedError();
       output->cell<int>(rowCounter, cellIndex++) = int(it->getNumEvents());
       VMD center = it->getCenter();
+      const size_t numberOriginal = input->numOriginalWorkspaces();
+      if(numberOriginal > 0)
+      {
+        const size_t index = numberOriginal -1;
+        CoordTransform * transform = input->getTransformToOriginal(index);
+        VMD temp = transform->applyVMD(center);
+        center = temp;
+      }
+
       for(size_t index = 0; index < ndims; ++index)
       {
         output->cell<double>(rowCounter, cellIndex++) = center[index];

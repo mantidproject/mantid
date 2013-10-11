@@ -79,7 +79,7 @@ void CalculateTransmission::init()
     "this can be followed by a comma and more widths and last boundary pairs.\n"
     "Negative width values indicate logarithmic binning.");
 
-  std::vector<std::string> options(7);
+  std::vector<std::string> options(3);
   options[0] = "Linear";
   options[1] = "Log";
   options[2] = "Polynomial"; 
@@ -301,7 +301,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
     }// end logFit
     else if (fitMethod == "Linear")
     {
-      //the simplar linear situation
+      //the simpler linear situation
       for (size_t i = 0; i < Y.size(); ++i)
       {
         Y[i] = (grad*0.5*(X[i]+X[i+1]))+offset;
@@ -309,12 +309,11 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
     }
     else 
     { // the polynomial fit
-      double aux=0;
-      double x_v =0;
       for (size_t i=0; i<Y.size(); ++i)
       {
-        aux = 0;
-        x_v = 0.5*(X[i]+X[i+1]);
+        double aux=0;
+        double x_v =0.5*(X[i]+X[i+1]);
+
         for (int j=0; j<static_cast<int>(coeficients.size()); ++j)
         {
           aux += coeficients[j]*std::pow(x_v,j);

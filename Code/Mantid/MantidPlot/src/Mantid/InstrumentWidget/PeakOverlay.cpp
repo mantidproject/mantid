@@ -196,7 +196,7 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style& style)
     const Mantid::Kernel::V3D & pos = peak.getDetPos();
     // Project the peak (detector) position onto u,v coords
     double u,v, uscale, vscale;
-    m_surface->project(u,v,uscale,vscale, pos);
+    m_surface->project(pos, u,v, uscale, vscale );
 
     // Create a peak marker at this position
     PeakMarker2D* r = new PeakMarker2D(*this,u,v,style);

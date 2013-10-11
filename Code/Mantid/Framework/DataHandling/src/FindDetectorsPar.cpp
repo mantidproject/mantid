@@ -238,7 +238,6 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,cons
         double d1_max(-FLT_MAX);
         double d1_sum(0);
         double dist_sum(0);
-        double d_azim(0);
        
 
         std::vector<Kernel::V3D> coord(3);
@@ -248,7 +247,7 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,cons
         coord[1]  = (GroupCenter-Observer);
         double d0 = coord[1].norm();
         coord[1] /= d0;
-        // access contribured detectors;
+        // access contributed detectors;
         Geometry::DetectorGroup_const_sptr pDetGroup = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(spDet);
         if(!pDetGroup){
              g_log.error()<<"calc_cylDetPar: can not downcast IDetector_sptr to detector group for det->ID: "<<spDet->getID()<<std::endl;
@@ -272,7 +271,7 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,cons
 
             double d_min = d1+bbox.xMin();  if(d_min<d1_min)d1_min = d_min;
             double d_max = d1+bbox.xMax();  if(d_max>d1_max)d1_max = d_max;
-            d_azim = (bbox.zMax()-bbox.zMin())/d1;
+            double d_azim = (bbox.zMax()-bbox.zMin())/d1;
             azim_width+=d_azim;
 
             d1_sum   +=d1;

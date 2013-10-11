@@ -253,7 +253,7 @@ void SmoothNeighbours::findNeighboursRectangular()
   Instrument_const_sptr inst = inWS->getInstrument();
 
   //To get the workspace index from the detector ID
-  detid2index_map * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
 
   //std::cout << " inst->nelements() " << inst->nelements() << "\n";
   Progress prog(this,0.0,1.0,inst->nelements());
@@ -374,9 +374,10 @@ void SmoothNeighbours::findNeighboursRectangular()
               int pixelID = det->getAtXY(j+ix,k+iy)->getID();
 
               //Find the corresponding workspace index, if any
-              if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+              auto mapEntry = pixel_to_wi.find(pixelID);
+              if (mapEntry != pixel_to_wi.end())
               {
-                size_t wi = (*pixel_to_wi)[pixelID];
+                size_t wi = mapEntry->second;
                 neighbours.push_back( weightedNeighbour(wi, smweight) );
                 // Count the total weight
                 totalWeight += smweight;
@@ -398,9 +399,6 @@ void SmoothNeighbours::findNeighboursRectangular()
     prog.report(det_name);
   }
 
-
-  delete pixel_to_wi;
-
 }
 
 
@@ -420,7 +418,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   this->progress(0.2, "Building Neighbour Map");
 
   Instrument_const_sptr inst = inWS->getInstrument();
-  spec2index_map * spec2index = inWS->getSpectrumToWorkspaceIndexMap();
+  const spec2index_map spec2index = inWS->getSpectrumToWorkspaceIndexMap();
 
   // Resize the vector we are setting
   m_neighbours.resize(inWS->getNumberHistograms());
@@ -494,8 +492,8 @@ void SmoothNeighbours::findNeighboursUbiqutious()
       if (weight > 0) 
       {
         // Find the corresponding workspace index
-        spec2index_map::iterator mapIt = spec2index->find(spec);
-        if (mapIt != spec2index->end())
+        spec2index_map::const_iterator mapIt = spec2index.find(spec);
+        if (mapIt != spec2index.end())
         {
           size_t neighWI = mapIt->second;
           if(sum > 1)
@@ -523,7 +521,6 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     m_prog->report("Finding Neighbours");
   } // each workspace index
 
-  delete spec2index;
   delete [] used;
 }
 

@@ -84,7 +84,7 @@ private:
   // Process two groups and ensure the Result string is set properly on the final algorithm
   virtual bool processGroups();
   // Process the two groups
-  void processGroups(boost::shared_ptr<API::WorkspaceGroup> groupOne, boost::shared_ptr<API::WorkspaceGroup> groupTwo);
+  void processGroups(boost::shared_ptr<const API::WorkspaceGroup> groupOne, boost::shared_ptr<const API::WorkspaceGroup> groupTwo);
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   /// Initialisation code

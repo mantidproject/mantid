@@ -32,17 +32,11 @@ class EQSANSReductionScripter(BaseReductionScripter):
         script = "# EQSANS reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
-        if self._settings.api2:
-            script += "import mantid\n"
-            script += "from mantid.simpleapi import *\n"
-            script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
-            script += "config = ConfigService.Instance()\n"
-            script += "config['instrumentName']='EQSANS'\n"
-        else:
-            script += "from MantidFramework import *\n"
-            script += "mtd.initialise(False)\n"
-            script += "from reduction.instruments.sans.sns_command_interface import *\n"
-            script += "mtd.settings['default.instrument'] = 'EQSANS'\n"
+        script += "import mantid\n"
+        script += "from mantid.simpleapi import *\n"
+        script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
+        script += "config = ConfigService.Instance()\n"
+        script += "config['instrumentName']='EQSANS'\n"
         
         script += "\n"
         
@@ -56,10 +50,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
             xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
             
-        if self._settings.api2:
-            script += "SaveIq(process=%r)\n" % xml_process
-        else:
-            script += "SaveIqAscii(process=%r)\n" % xml_process
+        script += "SaveIq(process=%r)\n" % xml_process
 
         script += "Reduce()\n"
 
@@ -90,17 +81,11 @@ class EQSANSReductionScripter(BaseReductionScripter):
             script = "# EQSANS reduction script\n"
             script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
             
-            if self._settings.api2:
-                script += "import mantid\n"
-                script += "from mantid.simpleapi import *\n"
-                script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
-                script += "config = ConfigService.Instance()\n"
-                script += "config['instrumentName']='EQSANS'\n"
-            else:
-                script += "from MantidFramework import *\n"
-                script += "mtd.initialise(False)\n"
-                script += "from reduction.instruments.sans.sns_command_interface import *\n"
-                script += "mtd.settings['default.instrument'] = 'EQSANS'\n"
+            script += "import mantid\n"
+            script += "from mantid.simpleapi import *\n"
+            script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
+            script += "config = ConfigService.Instance()\n"
+            script += "config['instrumentName']='EQSANS'\n"
             
             script += "\n"
             
@@ -118,10 +103,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
             xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
             
-            if self._settings.api2:
-                script += "SaveIq(process=%r)\n" % xml_process
-            else:
-                script += "SaveIqAscii(process=%r)\n" % xml_process
+            script += "SaveIq(process=%r)\n" % xml_process
     
             script += "Reduce()\n"         
             scripts.append(script)

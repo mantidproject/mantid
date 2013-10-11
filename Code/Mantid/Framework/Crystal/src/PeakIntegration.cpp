@@ -49,13 +49,12 @@ namespace Mantid
 
     /// Constructor
     PeakIntegration::PeakIntegration() :
-      API::Algorithm(), pixel_to_wi(NULL)
+      API::Algorithm()
     {}
 
     /// Destructor
     PeakIntegration::~PeakIntegration()
     {
-      delete pixel_to_wi;
     }
 
     /** Initialisation method. Declares properties to be used in algorithm.
@@ -110,7 +109,7 @@ namespace Mantid
 
 
       //To get the workspace index from the detector ID
-      pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap();
+      const auto pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap();
 
       //Sort events if EventWorkspace so it will run in parallel
       EventWorkspace_const_sptr inWS = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
@@ -136,9 +135,10 @@ namespace Mantid
         int pixelID = peak.getDetectorID();
 
         // Find the workspace index for this detector ID
-        if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+        auto wiEntry = pixel_to_wi.find(pixelID);
+        if (wiEntry != pixel_to_wi.end())
         {
-          size_t wi = (*pixel_to_wi)[pixelID];
+          size_t wi = wiEntry->second;
           if((matchRun && peak.getRunNumber() != inputW->getRunNumber()) || wi >= Numberwi) peaksW->removePeak(i);
         }
         else  // This is for appending peak workspaces when running SNSSingleCrystalReduction one bank at at time
@@ -178,7 +178,7 @@ namespace Mantid
         if (!parent) continue;
 
         int TOFPeak=0, TOFmin=0, TOFmax=0;
-        TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan ,peaksW);
+        TOFmax = fitneighbours(i, bankName, XPeak, YPeak, i, qspan, peaksW, pixel_to_wi);
 
         MantidVec& X0 = outputW->dataX(i);
         TOFPeak = VectorHelper::getBinIndex(X0, TOFPeakd);
@@ -319,84 +319,17 @@ namespace Mantid
       }
     }
 
-int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan,
-                                     PeaksWorkspace_sptr &Peaks)
-{
-  UNUSED_ARG( ipeak);
-  UNUSED_ARG( det_name);
-  UNUSED_ARG( x0);
-  UNUSED_ARG( y0);
-  API::IPeak& peak = Peaks->getPeak( ipeak);
-  // Number of slices
-  int TOFmax = 0;
-  //Get some stuff from the input workspace
-  /*   Instrument_const_sptr inst = inputW->getInstrument();
-
-  //Build a list of Rectangular Detectors
- std::vector<boost::shared_ptr<RectangularDetector> > detList;
-  for (int i=0; i < inst->nelements(); i++)
-  {
-    boost::shared_ptr<RectangularDetector> det;
-    boost::shared_ptr<ICompAssembly> assem;
-    boost::shared_ptr<ICompAssembly> assem2;
-
-    det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
-    if (det) 
+    int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan,
+                                       PeaksWorkspace_sptr &Peaks, const detid2index_map& pixel_to_wi)
     {
-      if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
-        detList.push_back(det);
-    }
-    else
-    {
-      //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-      // We are not doing a full recursive search since that will be very long for lots of pixels.
-      assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
-      if (assem)
-      {
-        for (int j=0; j < assem->nelements(); j++)
-        {
-          det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
-          if (det)
-          {
-            if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
-              detList.push_back(det);
-          }
-          else
-          {
-            //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
-            // We are not doing a full recursive search since that will be very long for lots of pixels.
-            assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
-            if (assem2)
-            {
-              for (int k=0; k < assem2->nelements(); k++)
-              {
-                det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
-                if (det) 
-                {
-                  if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0))  
-                    detList.push_back(det);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+      UNUSED_ARG( ipeak);
+      UNUSED_ARG( det_name);
+      UNUSED_ARG( x0);
+      UNUSED_ARG( y0);
+      API::IPeak& peak = Peaks->getPeak( ipeak);
+      // Number of slices
+      int TOFmax = 0;
 
-  if (detList.empty())
-    throw std::runtime_error("This instrument does not have any RectangularDetector's. PeakIntegration cannot operate on this instrument at this time.");
-*/
-  //Loop through the RectangularDetector's we listed before.
-
- // for (int i=0; i < static_cast<int>(detList.size()); i++)
-//  for( int i=0; i< (int)peaksW->rowCount();i++)
-  {
-    //std::string det_name("");
-   // boost::shared_ptr<RectangularDetector> det;
-   // det = detList[i];
-   // if (det)
-    {
       IAlgorithm_sptr slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
       slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
       std::ostringstream tab_str;
@@ -443,19 +376,17 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       int pixelID = peak.getDetectorID();// det->getAtXY(x0,y0)->getID();
 
       //Find the corresponding workspace index, if any
-      if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+      auto wiEntry = pixel_to_wi.find(pixelID);
+      if (wiEntry != pixel_to_wi.end())
       {
-        size_t wi = (*pixel_to_wi)[pixelID];
+        size_t wi = wiEntry->second;
         //Set detectorIDs
         outputW->getSpectrum(idet)->addDetectorIDs( inputW->getSpectrum(wi)->getDetectorIDs() );
       }
+
+      return TOFmax-1;
+
     }
-
-  }
-
-  return TOFmax-1;
-
-}
 
 } // namespace Crystal
 } // namespace Mantid

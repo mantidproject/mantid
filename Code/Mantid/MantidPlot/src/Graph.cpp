@@ -3145,53 +3145,84 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
   else if (style == VectXYXY || style == VectXYAM)
     plotVectorCurve(w, names, style, startRow, endRow);
   else {
-    int curves = (int)names.count();
-    int errCurves = 0;
-    QStringList lst = QStringList();
-    for (int i=0; i<curves; i++)
-    {//We rearrange the list so that the error bars are placed at the end
-      int j = w->colIndex(names[i]);
-      if (w->colPlotDesignation(j) == Table::xErr || w->colPlotDesignation(j) == Table::yErr ||
-          w->colPlotDesignation(j) == Table::Label){
-        errCurves++;
-        lst << names[i];
-      } else
-        lst.prepend(names[i]);
+    QStringList drawableNames;
+    int noOfErrorCols = 0;
+    QString xColNameGiven;
+
+    // Select only those column names which we can draw and search for any X columns specified
+    for (int i = 0; i < names.count(); i++)
+    {
+      int d = w->colPlotDesignation(w->colIndex(names[i]));
+
+      if (d == Table::Y || d == Table::xErr || d == Table::yErr || d == Table::Label)
+      {
+        drawableNames << names[i];
+
+        // Count error columns
+        if(d == Table::xErr || d == Table::yErr)
+          noOfErrorCols++;
+      } else if(d == Table::X)
+      {
+        // If multiple X columns are specified, it's an error, as we don't know which one to use
+        if(!xColNameGiven.isEmpty())
+          return false;
+
+        xColNameGiven = names[i];
+      }
     }
 
-    for (int i=0; i<curves; i++){
-      int j = w->colIndex(names[i]);
-      PlotCurve *c = NULL;
-      if (w->colPlotDesignation(j) == Table::xErr || w->colPlotDesignation(j) == Table::yErr){
-        int ycol = w->colY(w->colIndex(names[i]));
-        if (ycol < 0)
-          return false;
+    // Layout we will use to draw curves
+    CurveLayout cl = initCurveLayout(style, drawableNames.count() - noOfErrorCols);
+    cl.sSize = sSize;
+    cl.lWidth = float(lWidth);
 
-        if (w->colPlotDesignation(j) == Table::xErr)
-          c = dynamic_cast<PlotCurve *>(addErrorBars(w->colName(ycol), w, names[i], static_cast<int>(QwtErrorPlotCurve::Horizontal)));
+    for (int i = 0; i < drawableNames.count(); i++){
+      QString colName = drawableNames[i];
+      int colIndex = w->colIndex(colName);
+      int colType = w->colPlotDesignation(colIndex);
+
+      QString yColName;
+      if(colType == Table::Y)
+        // For Y columns we use the column itself as Y
+        yColName = colName;
+      else 
+        // For other column types, we find associated Y column
+        yColName = w->colName(w->colY(colIndex));
+
+      QString xColName;
+      if(!xColNameGiven.isEmpty())
+        // If X column is given - use it
+        xColName = xColNameGiven;
+      else
+        // Otherise, use associated one
+        xColName = w->colName(w->colX(colIndex));
+
+      if (xColName.isEmpty() || yColName.isEmpty())
+        return false;
+
+      // --- Drawing error columns -----------------------------
+      if (colType == Table::xErr || colType == Table::yErr){
+        int dir;
+        if(colType == Table::xErr)
+          dir = QwtErrorPlotCurve::Horizontal;
         else
-          c = dynamic_cast<PlotCurve *>(addErrorBars(w->colName(ycol), w, names[i]));
-      } else if (w->colPlotDesignation(j) == Table::Label){
-        QString labelsCol = names[i];
-        int xcol = w->colX(w->colIndex(labelsCol));
-        int ycol = w->colY(w->colIndex(labelsCol));
-        if (xcol < 0 || ycol < 0)
+          dir = QwtErrorPlotCurve::Vertical;
+
+        PlotCurve* c = addErrorBars(xColName, yColName, w, colName, dir);
+        updateCurveLayout(c, &cl);
+      // --- Drawing label columns -----------------------------
+      } else if (colType == Table::Label){
+        DataCurve* mc = masterCurve(xColName, yColName);
+        if (!mc)
           return false;
 
-        DataCurve* mc = masterCurve(w->colName(xcol), w->colName(ycol));
-        if (mc){
-          d_plot->replot();
-          mc->setLabelsColumnName(labelsCol);
-        } else
-          return false;
-      } else
-        c = dynamic_cast<PlotCurve *>(insertCurve(w, names[i], style, startRow, endRow));
-
-      if (c){
-        CurveLayout cl = initCurveLayout(style, curves - errCurves);
-        cl.sSize = sSize;
-        cl.lWidth = float(lWidth);
-        updateCurveLayout(c, &cl);	
+        d_plot->replot();
+        mc->setLabelsColumnName(colName);
+      // --- Drawing Y columns -----------------------------
+      } else if (colType == Table::Y)
+      {
+        PlotCurve* c = insertCurve(w, xColName, yColName, style, startRow, endRow);
+        updateCurveLayout(c, &cl);
       }
     }
   }
@@ -3735,7 +3766,7 @@ void Graph::contextMenuEvent(QContextMenuEvent *e)
   QPoint pos = d_plot->canvas()->mapFrom(d_plot, e->pos());
   int dist, point;
   const int curve = d_plot->closestCurve(pos.x(), pos.y(), dist, point);
-  const QwtPlotCurve *c = dynamic_cast<QwtPlotCurve *>(d_plot->curve(curve));
+  const DataCurve *c = dynamic_cast<DataCurve *>(d_plot->curve(curve));
 
   if (c && dist < 10)//10 pixels tolerance
     emit showCurveContextMenu(curve);

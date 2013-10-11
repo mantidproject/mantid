@@ -4,6 +4,7 @@ set ( SRC_FILES
 	# src/ChebyshevPolynomialBackground.cpp
 	src/Abragam.cpp
 	src/BFGS_Minimizer.cpp
+	src/BSpline.cpp
 	src/BackToBackExponential.cpp
 	src/BackgroundFunction.cpp
 	src/BivariateNormal.cpp
@@ -53,6 +54,7 @@ set ( SRC_FILES
 	src/Lorentzian1D.cpp
 	src/MultiDomainCreator.cpp
 	src/MuonFInteraction.cpp
+	src/NeutronBk2BkExpConvPVoigt.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
@@ -72,6 +74,8 @@ set ( SRC_FILES
 	src/SplineInterpolation.cpp
 	src/SplineSmoothing.cpp
 	src/StaticKuboToyabe.cpp
+	src/StaticKuboToyabeTimesExpDecay.cpp
+	src/StaticKuboToyabeTimesGausDecay.cpp
 	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
@@ -94,6 +98,7 @@ set ( INC_FILES
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/Abragam.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
+	inc/MantidCurveFitting/BSpline.h
 	inc/MantidCurveFitting/BackToBackExponential.h
 	inc/MantidCurveFitting/BackgroundFunction.h
 	inc/MantidCurveFitting/BivariateNormal.h
@@ -149,6 +154,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Lorentzian1D.h
 	inc/MantidCurveFitting/MultiDomainCreator.h
 	inc/MantidCurveFitting/MuonFInteraction.h
+	inc/MantidCurveFitting/NeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
@@ -168,6 +174,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SplineInterpolation.h
 	inc/MantidCurveFitting/SplineSmoothing.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
+	inc/MantidCurveFitting/StaticKuboToyabeTimesExpDecay.h
+	inc/MantidCurveFitting/StaticKuboToyabeTimesGausDecay.h
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
@@ -189,6 +197,7 @@ set ( TEST_FILES
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
 	BFGSTest.h
+	BSplineTest.h
 	BackToBackExponentialTest.h
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
@@ -231,6 +240,7 @@ set ( TEST_FILES
 	MultiDomainCreatorTest.h
 	MultiDomainFunctionTest.h
 	MuonFInteractionTest.h
+	NeutronBk2BkExpConvPVoigtTest.h
 	PRConjugateGradientTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
@@ -247,6 +257,8 @@ set ( TEST_FILES
 	SplineInterpolationTest.h
 	SplineSmoothingTest.h
 	StaticKuboToyabeTest.h
+	StaticKuboToyabeTimesExpDecayTest.h
+	StaticKuboToyabeTimesGausDecayTest.h
 	StretchExpMuonTest.h
 	StretchExpTest.h
 	TabulatedFunctionTest.h

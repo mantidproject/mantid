@@ -157,8 +157,11 @@ NXClassInfo NXClass::getNextEntry()
     NXClassInfo res;
     char nxname[NX_MAXNAMELEN],nxclass[NX_MAXNAMELEN];
     res.stat = NXgetnextentry(m_fileID,nxname,nxclass,&res.datatype);
-    res.nxname = nxname;
-    res.nxclass = nxclass;
+    if ( res ) // Check if previous call was successful
+    {
+      res.nxname = nxname;
+      res.nxclass = nxclass;
+    }
     return res;
 }
 

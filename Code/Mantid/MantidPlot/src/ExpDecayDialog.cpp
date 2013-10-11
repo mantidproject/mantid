@@ -207,13 +207,11 @@ void ExpDecayDialog::fit()
 
 	int precision = app->fit_output_precision;
 
-	if (fitter)
-        delete fitter;
-
 	if (slopes == 3)
 	{
 		double x_init[7] = {1.0, boxFirst->text().toDouble(), 1.0, boxSecond->text().toDouble(),
 			1.0, boxThird->text().toDouble(), boxYOffset->text().toDouble()};
+		delete fitter;
 		fitter = new ThreeExpFit(app, graph);
 		fitter->setInitialGuesses(x_init);
 	}
@@ -221,12 +219,14 @@ void ExpDecayDialog::fit()
 	{
 		double x_init[5] = {1.0, boxFirst->text().toDouble(), 1.0, boxSecond->text().toDouble(),
 			boxYOffset->text().toDouble()};
+		delete fitter;
 		fitter = new TwoExpFit(app, graph);
 		fitter->setInitialGuesses(x_init);
 	}
 	else if (slopes == 1 || slopes == -1)
 	{
 		double x_init[3] = {boxAmplitude->text().toDouble(), slopes/boxFirst->text().toDouble(), boxYOffset->text().toDouble()};
+		delete fitter;
 		fitter = new ExponentialFit(app, graph, slopes == -1);
 		fitter->setInitialGuesses(x_init);
 	}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "IRIS" date = "2010-07-15T00:00:00">
+<parameter-file instrument = "IRIS" valid-from = "2010-07-15T00:00:00">
 
 <component-link name = "IRIS">
 
@@ -34,11 +34,6 @@
 <parameter name="back-end">
 	<value val="188000" />
 </parameter>
-
-<component-link name="mica">
-<parameter name="Efixed"> <value val="0.2067" /> </parameter>
-</component-link>
-
 <parameter name="analyser" type="string">
   <value val="fmica" />
 </parameter>
@@ -48,5 +43,9 @@
 </parameter>
 
 </component-link>
-
+<component-link name="mica">
+<parameter name="Efixed"> <value val="0.2067" /> </parameter>
+<parameter name="resolution"> <value val="0.0012" /> </parameter>
+</component-link>
+  
 </parameter-file>

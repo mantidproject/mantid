@@ -331,6 +331,7 @@ namespace Mantid
     void SynchronisingGeometryPresenter::acceptView(GeometryView* view)
     {
       m_view = view;
+      m_binDisplayMode = m_view->getBinDisplayMode();
       const DimensionViewFactory& factory = m_view->getDimensionViewFactory();
       Mantid::Geometry::VecIMDDimension_sptr vecAllDimensions = m_source.getAllDimensions();
 

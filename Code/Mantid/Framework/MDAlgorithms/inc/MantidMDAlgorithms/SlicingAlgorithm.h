@@ -73,8 +73,8 @@ namespace MDAlgorithms
     void makeAlignedDimensionFromString(const std::string & str);
     void makeBasisVectorFromString(const std::string & str);
 
-    Mantid::Geometry::MDImplicitFunction * getImplicitFunctionForChunk(size_t * chunkMin, size_t * chunkMax);
-    Mantid::Geometry::MDImplicitFunction * getGeneralImplicitFunction(size_t * chunkMin, size_t * chunkMax);
+    Mantid::Geometry::MDImplicitFunction * getImplicitFunctionForChunk(const size_t * const chunkMin, const size_t * const chunkMax);
+    Mantid::Geometry::MDImplicitFunction * getGeneralImplicitFunction(const size_t * const chunkMin, const size_t * const chunkMax);
 
     /// Input workspace
     Mantid::API::IMDWorkspace_sptr m_inWS;

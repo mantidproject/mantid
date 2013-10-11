@@ -648,7 +648,7 @@ void ApplicationWindow::initGlobalConstants()
   appStyle = qApp->style()->objectName();
   d_app_rect = QRect();
   projectname = "untitled";
-  lastCopiedLayer = 0;
+  lastCopiedLayer = NULL;
   d_text_copy = NULL;
   d_arrow_copy = NULL;
   d_image_copy = NULL;
@@ -932,14 +932,6 @@ void ApplicationWindow::initToolBars()
   btnCursor->setCheckable( true );
   btnCursor->setIcon(QIcon(getQPixmap("select_xpm")) );
   //plotTools->addAction(btnCursor); disabled until fixed (#2783)
-
-  btnSelect = new QAction(tr("&Select Data Range"), this);
-  btnSelect->setShortcut( tr("ALT+S") );
-  btnSelect->setActionGroup(dataTools);
-  btnSelect->setCheckable( true );
-  btnSelect->setIcon(QIcon(getQPixmap("cursors_xpm")) );
-  //plotTools->addAction(btnSelect); disabled until fixed (#2783)
-
   btnPicker = new QAction(tr("S&creen Reader"), this);
   btnPicker->setActionGroup(dataTools);
   btnPicker->setCheckable( true );
@@ -1320,7 +1312,6 @@ void ApplicationWindow::plotDataMenuAboutToShow()
   plotDataMenu->addAction(actionUnzoom);
   plotDataMenu->insertSeparator();
   plotDataMenu->addAction(btnCursor);
-  plotDataMenu->addAction(btnSelect);
   plotDataMenu->addAction(btnPicker);
   plotDataMenu->insertSeparator();
   plotDataMenu->addAction(actionDrawPoints);
@@ -1695,20 +1686,16 @@ void ApplicationWindow::disableToolbars()
   plotTools->setEnabled(false);
 }
 
-void ApplicationWindow::hideToolbars()
+/**
+ * Show/hide MantidPlot toolbars.
+ * @param visible If true, make toolbar visible, if false - hidden
+ */
+void ApplicationWindow::setToolbarsVisible(bool visible)
 {
-  standardTools->setVisible(false);
-  displayBar->setVisible(false);
-  plotTools->setVisible(false);
-  formatToolBar->setVisible(false);
-}
-
-void ApplicationWindow::showToolbars()
-{
-  standardTools->setVisible(true);
-  displayBar->setVisible(true);
-  plotTools->setVisible(true);
-  formatToolBar->setVisible(true);
+  standardTools->setVisible(visible);
+  displayBar->setVisible(visible);
+  plotTools->setVisible(visible);
+  formatToolBar->setVisible(visible);
 }
 
 void ApplicationWindow::plot3DRibbon()
@@ -6273,7 +6260,7 @@ bool ApplicationWindow::setWindowName(MdiSubWindow *w, const QString &text)
 
   newName.replace("_", "-");
 
-  // cppcheck-suppress unintvar
+  // cppcheck-suppress uninitvar
   while(alreadyUsedName(newName)){
     QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Name <b>%1</b> already exists!").arg(newName)+//Mantid
         "<p>"+tr("Please choose another name!")+
@@ -9470,13 +9457,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-  // don't ask the closing sub-windows: the answer will be ignored
-  MDIWindowList windows = getAllWindows();
-  foreach(MdiSubWindow* w,windows)
-  {
-    w->confirmClose(false);
-  }
-
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
     if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
@@ -9498,6 +9478,14 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
       ce->ignore();
       return;
     }
+  }
+
+  // Close all the MDI windows
+  MDIWindowList windows = getAllWindows();
+  foreach(MdiSubWindow* w,windows)
+  {
+    w->confirmClose(false);
+    w->close();
   }
 
   mantidUI->shutdown();
@@ -12096,8 +12084,7 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
 }
 Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsName,const QStringList &lst)
 {
-  ProjectData *prjData=new ProjectData;
-  if(!prjData)return 0;
+  ProjectData prjData;
 
   foreach (QString str, lst) {
     if(str.contains("<ColorMap>"))
@@ -12106,7 +12093,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     QString colormapLine=lst[index+1];
     QStringList list=colormapLine.split("\t");
     QString colormapFile=list[2];
-    prjData->setColormapFile(colormapFile);
+    prjData.setColormapFile(colormapFile);
     }
     if(str.contains("<ColorPolicy>"))
     { 	//read the colormap policy to set gray scale
@@ -12115,7 +12102,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=colormapPolicy.indexOf(">");
       int index2=colormapPolicy.lastIndexOf("<");
       bool gray=colormapPolicy.mid(index1+1,index2-index1-1).toInt();
-      prjData->setGrayScale(gray);
+      prjData.setGrayScale(gray);
 
     }
     if (str.contains("\t<ContourLines>"))
@@ -12125,14 +12112,14 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=contourlines.indexOf(">");
       int index2=contourlines.lastIndexOf("<");
       int bcontour=contourlines.mid(index1+1,index2-index1-1).toInt();
-      if(bcontour)prjData->setContourMode(true);
+      if(bcontour)prjData.setContourMode(true);
 
       //setting contour levels
       QString contourlevels=lst[index+1];
       index1=contourlevels.indexOf(">");
       index2=contourlevels.lastIndexOf("<");
       int levels=contourlevels.mid(index1+1,index2-index1-1).toInt();
-      prjData->setContourLevels(levels);
+      prjData.setContourLevels(levels);
 
       //setting contour default pen
       QString pen=lst[index+2];
@@ -12154,15 +12141,15 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
         QString penstyle=stylestring.mid(index1+1,index2-index1-1);
         QColor qcolor(pencolor);
         QPen pen = QPen(qcolor, penwidth.toDouble(),Graph::getPenStyle(penstyle.toInt()));
-        prjData->setDefaultContourPen(pen);
-        prjData->setColorMapPen(false);
+        prjData.setDefaultContourPen(pen);
+        prjData.setColorMapPen(false);
       }
       else if (pen.contains("<CustomPen>"))
       {	ContourLinesEditor* contourLinesEditor = new ContourLinesEditor(this->locale());
-      prjData->setCotntourLinesEditor(contourLinesEditor);
-      prjData->setCustomPen(true);
+      prjData.setCotntourLinesEditor(contourLinesEditor);
+      prjData.setCustomPen(true);
       }
-      else prjData->setColorMapPen(true);
+      else prjData.setColorMapPen(true);
     }
     if(str.contains("<IntensityChanged>"))
     {	 //read the intensity changed line from file and setting the spectrogram flag for intenisity
@@ -12172,7 +12159,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=intensity.indexOf(">");
       int index2=intensity.lastIndexOf("<");
       bool bIntensity=intensity.mid(index1+1,index2-index1-1).toInt();
-      prjData->setIntensity(bIntensity);
+      prjData.setIntensity(bIntensity);
     }
 
   }
@@ -12184,8 +12171,13 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     if( *matrixItr && specgramwsName==(*matrixItr)->getWorkspaceName() )
       m = *matrixItr;
   }
-  if(!m) return 0 ;
-  Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);
+
+  if ( !m )
+  {
+    return NULL;
+  }
+
+  Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,&prjData);
   if ( ag->multiLayer() != NULL )
   {
     m->attachMultilayer( ag->multiLayer() );
@@ -12389,8 +12381,6 @@ void ApplicationWindow::pickDataTool( QAction* action )
 
   if (action == btnCursor)
     showCursor();
-  else if (action == btnSelect)
-    showRangeSelectors();
   else if (action == btnPicker)
     showScreenReader();
   else if (action == btnMovePoints)
@@ -13831,10 +13821,6 @@ void ApplicationWindow::translateActionsStrings()
   btnCursor->setShortcut(tr("CTRL+D"));
   btnCursor->setToolTip(tr("Data Reader"));
 
-  btnSelect->setMenuText(tr("&Select Data Range"));
-  btnSelect->setShortcut(tr("ALT+S"));
-  btnSelect->setToolTip(tr("Select data range"));
-
   btnPicker->setMenuText(tr("S&creen Reader"));
   btnPicker->setToolTip(tr("Screen reader"));
 
@@ -14525,7 +14511,7 @@ void ApplicationWindow::showMantidConcepts()
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
-  std::string url("qthelp://org.mantidproject/doc/html/algorithms_index.html");
+  //std::string url("qthelp://org.mantidproject/doc/html/algorithms_index.html");
   HelpWindow::Instance().showAlgorithm();
 }
 
@@ -16223,25 +16209,22 @@ void ApplicationWindow::fitFrameToLayer()
 
 ApplicationWindow::~ApplicationWindow()
 {
-  if (lastCopiedLayer)
-    delete lastCopiedLayer;
-
+  delete lastCopiedLayer;
   delete hiddenWindows;
+  delete scriptingWindow;
+  delete d_text_editor;
 
-  if (scriptingWindow)
+  while(!d_user_menus.isEmpty())
   {
-    delete scriptingWindow;
+    QMenu *menu = d_user_menus.takeLast();
+    delete menu;
   }
-
-  if (d_text_editor)
-    delete d_text_editor;
+  delete current_folder;
 
   QApplication::clipboard()->clear(QClipboard::Clipboard);
 
   btnPointer->setChecked(true);
-
-  //Mantid
-  if (mantidUI) delete mantidUI;
+  delete mantidUI;
 }
 
 QString ApplicationWindow::versionString()
@@ -16466,6 +16449,9 @@ bool ApplicationWindow::validFor2DPlot(Table *table)
   if (!table->selectedYColumns().count()){
     QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Please select a Y column to plot!"));//Mantid
     return false;
+  } else if (table->selectedXColumns().count() > 1){
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Can't plot using multiple X columns!"));//Mantid
+    return false;
   } else if (table->numCols()<2) {
     QMessageBox::critical(this, tr("MantidPlot - Error"),tr("You need at least two columns for this operation!"));//Mantid
     return false;
@@ -16488,7 +16474,7 @@ MultiLayer* ApplicationWindow::generate2DGraph(Graph::CurveType type)
       return 0;
 
     Q3TableSelection sel = table->getSelection();
-    return multilayerPlot(table, table->drawableColumnSelection(), type, sel.topRow(), sel.bottomRow());
+    return multilayerPlot(table, table->selectedColumns(), type, sel.topRow(), sel.bottomRow());
   } else if (w->isA("Matrix")){
     Matrix *m = static_cast<Matrix *>(w);
     return plotHistogram(m);
@@ -17015,25 +17001,12 @@ else
   MantidQt::API::UserSubWindow *user_interface = interfaceManager.createSubWindow(action_data, usr_win);
   if(user_interface)
   {
-    connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
-    connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
     setGeometry(usr_win,user_interface);
-    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
-        SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
-    if(user_interface->objectName() == "Muon Analysis")
-    {
-      // Re-emits the signal caught from the muon analysis
-      connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
-      // Closes the active graph
-      connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
-      // Hides the graph
-      connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
-      // Shows the graph
-      connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
-      //If the fitting is requested then run the peak picker tool in runConnectFitting
-      connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
-          SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
-    }
+    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), 
+                      this, SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
+    // Update the used fit property browser
+    connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
+                  mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
     user_interface->initializeLocalPython();
   }
   else
@@ -17046,201 +17019,6 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
-/**This searches for the graph with a selected name and then attaches the fitFunctionBrowser to it
-*  This also disables the fitFunctionBrowser from all the other graphs.
-* 
-* @param fpb The fit property browser from the custom interface
-* @param nameOfPlot A string variable containing the name of the graph we want to fit.
-*
-*/
-void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot)
-{
-  // Loop through all multilayer (i.e. plots) windows displayed in Mantidplot 
-  // and apply pickpickertool to relevant plot
-  // Search and delete any current peak picker tools first
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-      {
-        // Check to see if graph is the new one by comparing the names
-        if (w->objectName() != nameOfPlot)
-        {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Delete the PeakPickerTool
-            g->disableTools();
-          }
-        }
-      }
-    }
-  }
-  // now check for graphs to add the peak picker tool to.
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-      {
-        if (w->objectName() == nameOfPlot)
-        {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true, true);
-            g->setActiveTool(ppicker);
-          }
-        }     
-      }
-    }
-  } 
-}
-
-
-/**
-* Close a given graph
-*
-* @params wsName :: The name of the graph to delete.
-*/
-void ApplicationWindow::closeGraph(const QString & wsName)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() == wsName)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->close();
-        break;
-      }
-    }
-  }
-}
-
-
-/**
-* Hide all the graphs apart from the exception. Default not to have exception.
-*
-* @params exception :: The workspace not to be hidden. Default is no exception ("").
-*/
-void ApplicationWindow::hideGraphs(const QString & exception)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() != exception)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->setHidden();
-      }
-    }
-  }
-}
-
-
-/**
-* Show all the graphs that are hidden
-*/
-void ApplicationWindow::showGraphs()
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-      activateWindow(w);
-  }
-}
-
-
-/**
-* Makes sure that it is dealing with a graph and then tells the plotDialog class 
-* to change the plot style
-*
-* @params plotDetails :: This includes all details of the plot [wsName, connectType, plotType, Errors, Color]
-*/
-void ApplicationWindow::setPlotType(const QStringList & plotDetails)
-{
-  if (plotDetails.size() == 0)
-  {
-    QMessageBox::information(this, "Mantid - Error", "Plot type or workspace name is missing. Please contact a Mantid team member.");
-  }
-  else
-  {
-    if (plotDetails.size() > 3)
-    {
-      int connectType = plotDetails[1].toInt();
-      QList<MdiSubWindow *> windows = windowsList();
-      foreach (MdiSubWindow *w, windows) 
-      {
-        if (w->isA("MultiLayer"))
-        {
-          MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-          {
-            // Check to see if graph is the new one by comparing the names
-            if (w->objectName() == plotDetails[0] + "-1")
-            {
-              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this, plot);
-              //pd->setMultiLayer(plot);
-              Graph *g = plot->activeGraph();
-              if (g)
-              {
-                int curveNum(-1);
-
-                if (plotDetails[2] == "Data")
-                {
-                  curveNum = g->curveIndex(plotDetails[0]); //workspaceName
-                  if (plotDetails[3] == "AllErrors") // if all errors, display all errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(true, true);
-                  }
-                  else // don't show errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(false, false);
-                  }
-                }
-                if (curveNum > -1) // If one of the curves has been changed 
-                {
-                  // line(0) scatter(1) line+symbol(2)
-                  if (connectType >= 0 && connectType <= 2)
-                  {
-                    if (plotDetails.size() > 4)
-                      pd->setPlotType(connectType, curveNum, plotDetails[4]);
-                    else
-                      pd->setPlotType(connectType, curveNum);            
-                  }
-                  g->replot();
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 
 void ApplicationWindow::loadCustomActions()
 {
@@ -17490,10 +17268,7 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
     if (g->zoomOn())
       btnZoomIn->setOn(true);
 
-    else if (g->areRangeSelectorsOn())
-      btnSelect->setOn(true);
-    //else if (dynamic_cast<PeakPickerTool1D*>(tool))
-    //  btnPeakPick->setOn(true);
+    else if (g->areRangeSelectorsOn()){}
     else if (dynamic_cast<PeakPickerTool*>(tool))
       btnMultiPeakPick->setOn(true);
     else if (dynamic_cast<DataPickerTool*>(tool))

@@ -124,8 +124,8 @@ class SANSMask(PythonAlgorithm):
         else:
             return
         
-        if not workspace.getRun().hasProperty("number-of-x-pixels") \
-            and not workspace.getRun().hasProperty("number-of-y-pixels"):
+        if not workspace.getInstrument().hasParameter("number-of-x-pixels") \
+            and not workspace.getInstrument().hasParameter("number-of-y-pixels"):
             Logger.get("SANSMask").error("Could not find number of pixels: skipping side masking")
             return
             
@@ -135,7 +135,11 @@ class SANSMask(PythonAlgorithm):
         
         for iy in range(ny):
             for ix in range(side_to_mask, nx+side_to_mask, 2):
-                id_side.append([iy,ix])
+                # For some odd reason the HFIR format has the x,y coordinates inverted
+                if facility.upper() == "HFIR":
+                    id_side.append([iy,ix])
+                else:
+                    id_side.append([ix,iy])
 
         self._mask_pixels(id_side, workspace, facility)
        

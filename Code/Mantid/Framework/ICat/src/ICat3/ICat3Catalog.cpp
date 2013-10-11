@@ -2,7 +2,7 @@
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidICat/Session.h"
 #include "MantidAPI/Progress.h"
-#include "MantidICat/ICatHelper.h"
+#include "MantidICat/ICat3/ICat3Helper.h"
 
 namespace Mantid
 {
@@ -56,7 +56,7 @@ namespace Mantid
       CICatHelper helper;
       //search datasets for a given investigation id using ICat api.
       helper.doDataSetsSearch(investigationId,
-          ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATASET_USCOREPARAMETERS_USCOREONLY,datasetsws_sptr);
+          ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATASET_USCOREPARAMETERS_USCOREONLY,datasetsws_sptr);
     }
 
     /*This method returns the datafiles associated to the given investigationid .
@@ -66,7 +66,7 @@ namespace Mantid
     void ICat3Catalog::getDataFiles(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
     {
       CICatHelper helperobj;
-      helperobj.getDataFiles(investigationId,ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
+      helperobj.getDataFiles(investigationId,ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
     }
 
     /**This method returns the list of instruments

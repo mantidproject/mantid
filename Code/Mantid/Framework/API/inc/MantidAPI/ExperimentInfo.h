@@ -113,6 +113,8 @@ namespace API
     double getEFixed(const detid_t detID) const;
     /// Easy access to the efixed value for this run & optional detector
     double getEFixed(const Geometry::IDetector_const_sptr detector = Geometry::IDetector_const_sptr()) const;
+    /// Set the efixed value for a given detector ID
+    void setEFixed(const detid_t detID, const double value);
 
     /// Saves this experiment description to the open NeXus file
     void saveExperimentInfoNexus(::NeXus::File * file) const;

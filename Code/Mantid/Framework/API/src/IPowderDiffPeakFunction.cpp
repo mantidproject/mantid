@@ -10,6 +10,7 @@
 #include <cmath>
 
 const double IGNOREDCHANGE = 1.0E-9;
+const double PI = 3.14159265358979323846264338327950288419716939937510582;
 
 namespace Mantid
 {
@@ -21,7 +22,7 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Constructor. Sets peak radius to the value of curvefitting.peakRadius property
     */
-  IPowderDiffPeakFunction::IPowderDiffPeakFunction()
+  IPowderDiffPeakFunction::IPowderDiffPeakFunction() : LATTICEINDEX(9999), HEIGHTINDEX(9999)
   {
     // Set peak's radius from configuration
     int peakRadius;
@@ -100,12 +101,32 @@ namespace API
 
   //----------------------------------------------------------------------------------------------
   /**  Set peak height (intensity indeed)
-    */
+
   void IPowderDiffPeakFunction::setHeight(const double h)
   {
     m_intensity = h;
 
     return;
+  }
+      */
+
+  //----------------------------------------------------------------------------------------------
+  /** Set peak height
+   */
+  void IPowderDiffPeakFunction::setHeight(const double h)
+  {
+    setParameter(HEIGHTINDEX, h);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get peak's height
+    */
+  double IPowderDiffPeakFunction::height() const
+  {
+    double height = this->getParameter(HEIGHTINDEX);
+    return height;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -143,6 +164,54 @@ namespace API
     return max;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Set Miller Indices for this peak
+   */
+  void IPowderDiffPeakFunction::setMillerIndex(int h, int k, int l)
+  {
+    // Check validity and set flag
+    if (mHKLSet)
+    {
+      // Throw exception if tried to reset the miller index
+      stringstream errss;
+      errss << "Profile function " << name() << "cannot have (HKL) reset.";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+    else
+    {
+      // Set flag
+      mHKLSet = true;
+    }
+
+    // Set value
+    mH = static_cast<int>(h);
+    mK = static_cast<int>(k);
+    mL = static_cast<int>(l);
+
+    // Check value valid or not
+    if (mH*mH + mK*mK + mL*mL < 1.0E-8)
+    {
+      stringstream errmsg;
+      errmsg << "H = K = L = 0 is not allowed";
+      g_log.error(errmsg.str());
+      throw std::invalid_argument(errmsg.str());
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get Miller Index from this peak
+   */
+  void IPowderDiffPeakFunction::getMillerIndex(int& h, int &k, int &l)
+  {
+    h = static_cast<int>(mH);
+    k = static_cast<int>(mK);
+    l = static_cast<int>(mL);
+
+    return;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** General implementation of the method for all peaks. Limits the peak evaluation to
@@ -252,6 +321,74 @@ namespace API
       return false;
 
     return true;
+  }
+
+  //-------------------------  External Functions ---------------------------------------------------
+  // FIXME : This is the same function used for ThermalNeutron... ...
+  /** Implementation of complex integral E_1
+   */
+  std::complex<double> E1(std::complex<double> z)
+  {
+    const double el = 0.5772156649015328;
+
+    std::complex<double> exp_e1;
+
+    double rz = real(z);
+    double az = abs(z);
+
+    if (fabs(az) < 1.0E-8)
+    {
+      // If z = 0, then the result is infinity... diverge!
+      complex<double> r(1.0E300, 0.0);
+      exp_e1 = r;
+    }
+    else if (az <= 10.0 || (rz < 0.0 && az < 20.0))
+    {
+      // Some interesting region, equal to integrate to infinity, converged
+      // cout << "[DB] Type 1" << endl;
+
+      complex<double> r(1.0, 0.0);
+      exp_e1 = r;
+      complex<double> cr = r;
+
+      for (size_t k = 1; k <= 150; ++k)
+      {
+        double dk = double(k);
+        cr = -cr * dk * z / ( (dk+1.0)*(dk+1.0) );
+        exp_e1 += cr;
+        if (abs(cr) < abs(exp_e1)*1.0E-15)
+        {
+          // cr is converged to zero
+          break;
+        }
+      } // ENDFOR k
+
+      // cout << "[DB] el = " << el << ", exp_e1 = " << exp_e1 << endl;
+
+      exp_e1 = -el - log(z) + (z*exp_e1);
+    }
+    else
+    {
+      // Rest of the region
+      complex<double> ct0(0.0, 0.0);
+      for (int k = 120; k > 0; --k)
+      {
+        complex<double> dk(double(k), 0.0);
+        ct0 = dk / (10.0 + dk / (z + ct0));
+      } // ENDFOR k
+
+      exp_e1 = 1.0 / (z + ct0);
+      exp_e1 = exp_e1 * exp(-z);
+      if (rz < 0.0 && fabs(imag(z)) < 1.0E-10 )
+      {
+        complex<double> u(0.0, 1.0);
+        exp_e1 = exp_e1 - (PI * u);
+      }
+    }
+
+    // cout << "[DB] Final exp_e1 = " << exp_e1 << "\n";
+
+    return exp_e1;
   }
 
 

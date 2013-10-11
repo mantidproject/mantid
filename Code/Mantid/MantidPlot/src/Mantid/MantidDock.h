@@ -21,6 +21,7 @@
 #include <QTreeWidgetItem>
 #include <QSortFilterProxyModel>
 #include <QStringList>
+#include <QMap>
 
 #include <set>
 
@@ -80,12 +81,15 @@ private slots:
   void convertMDHistoToMatrixWorkspace();
   void updateTree();
   void incrementUpdateCount();
+  void recordWorkspaceRename(QString,QString);
+  void clearUB();
 
 private:
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }
   void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems, const QStringList & expanded);
   MantidTreeWidgetItem * addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent = NULL);
+  bool shouldBeSelected(QString name) const;
   void createWorkspaceMenuActions();
   void createSortMenuActions();
   void setItemIcon(QTreeWidgetItem *item,  const std::string & wsID);
@@ -96,6 +100,7 @@ private:
   void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr & WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
+  void addClearMenuItems(QMenu* menu, const QString& wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
   
@@ -119,18 +124,24 @@ private:
   //Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr,
   *m_showDetectors, *m_showBoxData, *m_showVatesGui,
-  *m_showImageViewer,
+  *m_showSpectrumViewer,
   *m_showSliceViewer,
   *m_colorFill, *m_showLogs, *m_showHist, *m_showMDPlot, *m_showListData,
   *m_saveNexus, *m_rename, *m_delete,
   *m_program, * m_ascendingSortAction,
   *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
   *m_convertToMatrixWorkspace,
-  *m_convertMDHistoToMatrixWorkspace;
+  *m_convertMDHistoToMatrixWorkspace,
+  *m_clearUB;
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
   Mantid::API::AnalysisDataServiceImpl & m_ads;
+  /// Temporarily keeps names of selected workspaces during tree update
+  /// in order to restore selection after update
+  QStringList m_selectedNames;
+  /// Keep a map of renamed workspaces between updates
+  QMap<QString,QString> m_renameMap;
 
   static Mantid::Kernel::Logger& logObject;
 };

@@ -14,4 +14,5 @@
   #pragma warning( disable: 4100 )
 #endif
 
+#include "GSoap/soapserializersC.cpp"
 #include "GSoap/stdsoap2.cpp"

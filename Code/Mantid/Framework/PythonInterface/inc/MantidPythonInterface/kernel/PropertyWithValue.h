@@ -24,7 +24,7 @@
 */
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Policies/DowncastReturnedValue.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>
@@ -38,7 +38,7 @@
      boost::python::bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, boost::python::no_init) \
      .add_property("value", \
                     make_function(&Mantid::Kernel::PropertyWithValue<type>::operator(),\
-                                  boost::python::return_value_policy<Mantid::PythonInterface::Policies::downcast_returned_value>())) \
+                                  boost::python::return_value_policy<Mantid::PythonInterface::Policies::DowncastReturnedValue>())) \
    ;
 
 #endif /* MANTID_PYTHONINTERFACE_PROPERTY_HPP_ */

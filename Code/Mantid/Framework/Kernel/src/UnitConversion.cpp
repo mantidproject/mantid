@@ -60,6 +60,24 @@ namespace Mantid
       }
     }
 
+    /**
+     * Convert a single value between the given units (overload for Unit objects)
+     * @param srcUnit :: The starting unit
+     * @param destUnit :: The destination unit
+     * @param srcValue :: The value to convert
+     * @param l1 ::       The source-sample distance (in metres)
+     * @param l2 ::       The sample-detector distance (in metres)
+     * @param twoTheta :: The scattering angle (in radians)
+     * @param emode ::    The energy mode enumeration
+     * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+     * @return The value converted to the destination unit
+     */
+    double UnitConversion::run(const double twoTheta, const double efixed)
+    {
+      return convertToElasticQ(twoTheta, efixed);
+    }
+
+
     //---------------------------------------------------------------------------------------------
     // Private methods
     //---------------------------------------------------------------------------------------------
@@ -110,6 +128,26 @@ namespace Mantid
       const double unused(0.0);
       const double tof = srcUnit.convertSingleToTOF(srcValue, l1, l2, twoTheta, emodeAsInt, efixed, unused);
       return destUnit.convertSingleFromTOF(tof, l1, l2, twoTheta, emodeAsInt, efixed, unused);
+    }
+
+    /**
+     *  Convert a to ElasticQ
+     *  @param twoTheta :: The scattering angle (in radians)
+     *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+     * @return The value converted to ElasticQ
+     */
+    double UnitConversion::convertToElasticQ(const double twoTheta, const double efixed)
+    {
+
+      Mantid::Kernel::Units::Energy energyUnit;
+      double wavelengthFactor(0.0), wavelengthPower(0.0);
+      energyUnit.quickConversion("Wavelength", wavelengthFactor,wavelengthPower);
+
+      const double stheta = std::sin(twoTheta);
+      //Calculate the wavelength to allow it to be used to convert to elasticQ.
+      double wavelength = wavelengthFactor*std::pow(efixed, wavelengthPower);
+      // The MomentumTransfer value.
+      return 4.0*M_PI*stheta/wavelength;
     }
 
 

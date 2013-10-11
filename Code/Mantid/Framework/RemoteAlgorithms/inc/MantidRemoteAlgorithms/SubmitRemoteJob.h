@@ -12,13 +12,10 @@ namespace RemoteAlgorithms {
     <LI> ComputeResource  - The name of the compute resource that will execute the job </LI>
     <LI> NumNodes         - The number of nodes to reserve for this job </LI>
     <LI> CoresPerNode     - The number of cores this job will use on each node </LI>
-    <LI> TaskName         - A short, human readable identifier for the job </LI>  
-    <LI> UserName         - User name on the compute resource </LI>
-    <LI> GroupName        - Group name on the compute resource </LI>
-    <LI> Password         - Password for the compute resource </LI>
-    <LI> TransactionID    - ID of the transaction this job belongs to.  See StartRemoteTransaction </LI>
-    <LI> ScriptName       - The name of the script that will actually be executed </LI>
-    <LI> ScriptArguments  - Any arguments that should be passed to the script.  (Optional) </LI>
+    <LI> TaskName         - A short, human readable identifier for the job (Optional) </LI>
+    <LI> TransactionID    - ID of the transaction this job belongs to.  See StartRemoteTransaction </LI>  
+    <LI> PythonScript     - The actual python code that will be executed </LI>
+    <LI> ScriptName       - A name for the python script </LI>
     </UL>
 
     Output Properties:

@@ -1,5 +1,6 @@
 #include "MantidGeometry/Rendering/OCGeometryGenerator.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <vector>
 #include <cmath>
 #include <climits> // Needed for g++4.4 on Mac with OpenCASCADE 6.3.0
@@ -20,7 +21,9 @@
 #endif
 
 #include "MantidGeometry/Rendering/OpenCascadeConfig.h"
+GCC_DIAG_OFF(conversion)
 #include <gp_Trsf.hxx>
+GCC_DIAG_ON(conversion)
 #include <gp_Vec.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>

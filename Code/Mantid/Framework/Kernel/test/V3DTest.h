@@ -8,10 +8,9 @@
 #include <vector>
 
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::V3D;
-using Mantid::Kernel::NexusTestHelper;
 
 class V3DTest : public CxxTest::TestSuite
 {

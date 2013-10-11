@@ -104,6 +104,8 @@ public:
 
   bool operator==(const EventList& rhs) const;
   bool operator!=(const EventList& rhs) const;
+  bool equals(const EventList& rhs, const double tolTof,
+             const double tolWeight, const int64_t tolPulse) const;
 
   // --------------------------------------------------------------------------
   /** Append an event to the histogram, without clearing the cache, to make it faster.
