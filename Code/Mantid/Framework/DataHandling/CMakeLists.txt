@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
+	src/ApplyGroupingFromMuonNexus.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
 	src/CreateModeratorModel.cpp
@@ -18,7 +19,6 @@ set ( SRC_FILES
 	src/ISISRunLogs.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
-	src/LoadHelper.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
 	src/LoadGSS.cpp
+	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
 	src/LoadILLSANS.cpp
@@ -49,8 +50,8 @@ set ( SRC_FILES
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
 	src/LoadMaskingFile.cpp
-	src/LoadMcStasNexus.cpp
 	src/LoadMcStasEventNexus.cpp
+	src/LoadMcStasNexus.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus1.cpp
@@ -61,7 +62,6 @@ set ( SRC_FILES
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadPDFgetNFile.cpp
-	src/LoadSINQ.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
 	src/LoadPreNexusMonitors.cpp
@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadSINQ.cpp
 	src/LoadSNSEventNexus.cpp
 	src/LoadSNSNexus.cpp
 	src/LoadSNSspec.cpp
@@ -133,6 +134,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
+	inc/MantidDataHandling/ApplyGroupingFromMuonNexus.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateModeratorModel.h
@@ -151,7 +153,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
-	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -165,6 +166,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
 	inc/MantidDataHandling/LoadGSS.h
+	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadILLSANS.h
@@ -182,8 +184,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMaskingFile.h
-	inc/MantidDataHandling/LoadMcStasNexus.h
 	inc/MantidDataHandling/LoadMcStasEventNexus.h
+	inc/MantidDataHandling/LoadMcStasNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus1.h
@@ -194,7 +196,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
-	inc/MantidDataHandling/LoadSINQ.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
@@ -206,6 +207,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadSINQ.h
 	inc/MantidDataHandling/LoadSNSEventNexus.h
 	inc/MantidDataHandling/LoadSNSNexus.h
 	inc/MantidDataHandling/LoadSNSspec.h
@@ -267,6 +269,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	#LoadSNSNexusTest.h # TODO has no active tests in it
 	AppendGeometryToSNSNexusTest.h
+	ApplyGroupingFromMuonNexusTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
 	CreateModeratorModelTest.h
@@ -307,8 +310,8 @@ set ( TEST_FILES
 	LoadLogsFromSNSNexusTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
-	LoadMcStasNexusTest.h
 	LoadMcStasEventNexusTest.h
+	LoadMcStasNexusTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
@@ -318,7 +321,6 @@ set ( TEST_FILES
 	LoadNexusProcessedTest.h
 	LoadNexusTest.h
 	LoadPDFgetNFileTest.h
-	LoadSINQTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
@@ -330,6 +332,7 @@ set ( TEST_FILES
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
 	LoadRawTest.h
+	LoadSINQTest.h
 	LoadSNSEventNexusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
