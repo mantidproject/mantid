@@ -16,7 +16,7 @@
 </parameter>
 
 <parameter name="refl-diffraction" type="string">
-  <value val="diffraction" />
+  <value val="diffonly,diffspec" />
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->

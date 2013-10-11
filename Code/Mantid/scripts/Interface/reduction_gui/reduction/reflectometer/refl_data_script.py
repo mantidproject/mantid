@@ -64,6 +64,10 @@ class DataSets(BaseScriptElement):
     fourth_column_dq0 = 0.0009
     fourth_column_dq_over_q = 0.045
 
+    # how to treat overlap values
+    overlap_lowest_error = True
+    overlap_mean_value = False
+
     def __init__(self):
         super(DataSets, self).__init__()
         self.reset()
@@ -171,7 +175,9 @@ class DataSets(BaseScriptElement):
         # Q cut
         xml += "<q_min>%s</q_min>\n" % str(self.q_min)
         xml += "<q_step>%s</q_step>\n" % str(self.q_step)
-        xml += "<auto_q_binning>%s</auto_q_binning>" % str(self.auto_q_binning)
+        xml += "<auto_q_binning>%s</auto_q_binning>\n" % str(self.auto_q_binning)
+        xml += "<overlap_lowest_error>%s</overlap_lowest_error>\n" % str(self.overlap_lowest_error)
+        xml += "<overlap_mean_value>%s</overlap_mean_value>\n" % str(self.overlap_mean_value)
         
         # Angle offset
         xml += "<angle_offset>%s</angle_offset>\n" % str(self.angle_offset)
@@ -288,6 +294,10 @@ class DataSets(BaseScriptElement):
         self.q_min = BaseScriptElement.getFloatElement(instrument_dom, "q_min", default=DataSets.q_min)    
         self.q_step = BaseScriptElement.getFloatElement(instrument_dom, "q_step", default=DataSets.q_step)
         self.auto_q_binning = BaseScriptElement.getBoolElement(instrument_dom, "auto_q_binning", default=False)
+        
+        # overlap_lowest_error
+        self.overlap_lowest_error = BaseScriptElement.getBoolElement(instrument_dom, "overlap_lowest_error", default=True)
+        self.overlap_mean_value = BaseScriptElement.getBoolElement(instrument_dom, "overlap_mean_value", default=False)
     
         # Angle offset
         self.angle_offset = BaseScriptElement.getFloatElement(instrument_dom, "angle_offset", default=DataSets.angle_offset)
@@ -344,6 +354,10 @@ class DataSets(BaseScriptElement):
         self.q_min = DataSets.q_min
         self.q_step = DataSets.q_step
         self.auto_q_binning = DataSets.auto_q_binning
+        
+        # overlap_lowest_error
+        self.overlap_lowest_error = DataSets.overlap_lowest_error
+        self.overlap_mean_value = DataSets.overlap_mean_value
         
         # Angle offset
         self.angle_offset = DataSets.angle_offset

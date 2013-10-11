@@ -173,6 +173,30 @@ public:
     TS_ASSERT( !shape_sptr->isValid(V3D(7.1,2.1,9.1)) );
 	}
 
+  void testSphereWithDefaultCentre()
+  {
+    std::string xmlShape = "<sphere id=\"shape\"> ";
+    xmlShape +=	"<radius val=\"1.0\" /> " ;
+    xmlShape +=	"</sphere>";
+    xmlShape +=	"<algebra val=\"shape\" /> "; 
+
+    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 0.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 1.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 0.0, 1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-1.0, 0.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0,-1.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 0.0,-1.0)) );
+    
+    TS_ASSERT( !shape_sptr->isValid(V3D( 1.1, 0.0, 0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 0.0, 1.1, 0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 0.0, 0.0, 1.1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(-1.1, 0.0, 0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 0.0,-1.1, 0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 0.0, 0.0,-1.1)) );
+  }
+
 	void testCylinder()
 	{
 		//algebra line is essential

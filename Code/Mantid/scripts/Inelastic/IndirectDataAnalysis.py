@@ -76,7 +76,7 @@ def createConvFitFun(options, par, file):
 
 ##############################################################################
 
-def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
+def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, Verbose):
     options = getConvFitOption(ftype, bgd[:-2], Verbose)   
     params = mtd[outNm+'_Parameters']
     A0 = params.column(1)     #bgd A0 value
@@ -94,8 +94,8 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
         H2 = params.column(ip+6)        #height2 value
         C2 = params.column(ip+8)      #centre2 value
         W2 = params.column(ip+10)      #width2 value
-    nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(nHist):
+
+    for i in range(0,specMax-specMin):
         paras = [A0[i], A1[i]]
         if options[1]:
             paras.append(D1[i])
@@ -112,7 +112,7 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
             logger.notice('Fit func : '+func)      
         fitWS = outNm + '_Result_'
         fout = fitWS + str(i)
-        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i+specMin,Output=fout,MaxIterations=0)
         unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
@@ -213,7 +213,7 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
     AddSampleLog(Workspace=wsname, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
 
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
-    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose)
+    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, Verbose)
     if Save:
         o_path = os.path.join(workdir, wsname+'.nxs')                    # path name for nxs file
         if Verbose:
@@ -266,6 +266,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     workdir = config['defaultsave.directory']
     CheckXrange(eRange,'Energy')
     tempWS = '__temp'
+    Range2 = ( len(eRange) == 4 )
     if Verbose:
         range1 = str(eRange[0])+' to '+str(eRange[1])
         if ( len(eRange) == 4 ): 
@@ -363,22 +364,17 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     
     CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
         Nspec=nQ, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=q1)
-    unitx = mtd[elfWS].getAxis(0).setUnit("Label")
-    unitx.setLabel(unit[0], unit[1])
     DeleteWorkspace('__elf')
     label = unit[0]+' / '+unit[1]
     AddSampleLog(Workspace=elfWS, LogName="Vaxis", LogType="String", LogText=label)
     e1WS = ename+'_eq1'
     CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
         Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
-    unity = mtd[e1WS].getAxis(1).setUnit("Label")
-    unity.setLabel(unit[0], unit[1])
+    label = unit[0]+' / '+unit[1]
     AddSampleLog(Workspace=e1WS, LogName="Vaxis", LogType="String", LogText=label)
     e2WS = ename+'_eq2'
     CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
         Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
-    unity = mtd[e2WS].getAxis(1).setUnit("Label")
-    unity.setLabel(unit[0], unit[1])
     AddSampleLog(Workspace=e2WS, LogName="Vaxis", LogType="String", LogText=label)
 
     if unit[0] == 'Temperature':
@@ -389,15 +385,30 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         else:
             lo = nT-1
             hi = 0
-
+        text = 'Temperature range : '+str(Tvalue[lo])+' to '+str(Tvalue[hi])
+        AddSampleLog(Workspace=e1WS, LogName="Temperature normalise", LogType="String", LogText=str(Normalise))
         if Normalise:
             yval = mtd[e1WS].readY(lo)
             normFactor = 1.0/yval[0]
             Scale(InputWorkspace=e1WS, OutputWorkspace=e1WS, Factor=normFactor, Operation='Multiply')
+            AddSampleLog(Workspace=e1WS, LogName="Temperature value", LogType="Number", LogText=str(Tvalue[0]))
             if Verbose:
                 text = 'Temperature range : '+str(Tvalue[lo])+' to '+str(Tvalue[hi])
                 logger.notice(text)
                 logger.notice('Normalised eq1 by scale factor : '+str(normFactor))
+
+    unity = mtd[e1WS].getAxis(1).setUnit("Label")
+    unity.setLabel(unit[0], unit[1])
+    label = unit[0]+' / '+unit[1]
+    addElwinLogs(e1WS, label, eRange, Range2)
+    
+    unity = mtd[e2WS].getAxis(1).setUnit("Label")
+    unity.setLabel(unit[0], unit[1])
+    addElwinLogs(e2WS, label, eRange, Range2)
+    
+    unitx = mtd[elfWS].getAxis(0).setUnit("Label")
+    unitx.setLabel(unit[0], unit[1])
+    addElwinLogs(elfWS, label, eRange, Range2)
 
     if Save:
         e1_path = os.path.join(workdir, e1WS+'.nxs')					# path name for nxs file
@@ -418,6 +429,18 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
 
     EndTime('Elwin')
     return e1WS,e2WS
+
+# Add sample log to each of the workspaces created by Elwin
+def addElwinLogs(ws, label, eRange, Range2):
+
+    AddSampleLog(Workspace=ws, LogName="Vaxis", LogType="String", LogText=label)
+    AddSampleLog(Workspace=ws, LogName="Range1 start", LogType="Number", LogText=str(eRange[0]))
+    AddSampleLog(Workspace=ws, LogName="Range1 end", LogType="Number", LogText=str(eRange[1]))
+    AddSampleLog(Workspace=ws, LogName="Two ranges", LogType="String", LogText=str(Range2))
+
+    if Range2:
+        AddSampleLog(Workspace=ws, LogName="Range2 start", LogType="Number", LogText=str(eRange[2]))
+        AddSampleLog(Workspace=ws, LogName="Range2 end", LogType="Number", LogText=str(eRange[3]))
 
 def elwinPlot(eq1,eq2,elf):
     nhist = mtd[eq1].getNumberHistograms()                      # no. of hist/groups in sam

@@ -2,6 +2,7 @@
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
+#include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 
@@ -75,6 +76,14 @@ void vtkSplatterPlot::SetTopPercentile(double topPercentile)
   }
 }
 
+/**
+ * Getter for the time
+ * @return the time.
+ */
+double vtkSplatterPlot::getTime() const
+{
+  return m_time;
+}
 
 int vtkSplatterPlot::RequestData(vtkInformation *,
                                  vtkInformationVector **inputVector,
@@ -86,6 +95,13 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     vtkDataSet *output = vtkDataSet::SafeDownCast(
           outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
+    {
+      // usually only one actual step requested
+      m_time = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
+    }
+    m_presenter->setTime(m_time);
 
     vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
     vtkDataSet *input = vtkDataSet::SafeDownCast(
@@ -145,12 +161,10 @@ void vtkSplatterPlot::PrintSelf(ostream& os, vtkIndent indent)
 /**
  * Output the progress information and progress text.
  * @param : progress
- *@param : message
+ * @param : message
  */
 void vtkSplatterPlot::updateAlgorithmProgress(double progress, const std::string& message)
 {
   this->SetProgress(progress);
   this->SetProgressText(message.c_str());
 }
-
-
