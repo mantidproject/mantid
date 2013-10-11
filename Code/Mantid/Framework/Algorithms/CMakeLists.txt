@@ -47,6 +47,7 @@ set ( SRC_FILES
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
 	src/CopyInstrumentParameters.cpp
+	src/CopyLogs.cpp
 	src/CopySample.cpp
 	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
@@ -102,8 +103,8 @@ set ( SRC_FILES
 	src/FindCenterOfMassPosition2.cpp
 	src/FindDeadDetectors.cpp
 	src/FindDetectorsOutsideLimits.cpp
-	src/FindPeaks.cpp
 	src/FindPeakBackground.cpp
+	src/FindPeaks.cpp
 	src/FlatBackground.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
@@ -271,6 +272,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
+	inc/MantidAlgorithms/CopyLogs.h
 	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
@@ -326,8 +328,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindCenterOfMassPosition2.h
 	inc/MantidAlgorithms/FindDeadDetectors.h
 	inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
-	inc/MantidAlgorithms/FindPeaks.h
 	inc/MantidAlgorithms/FindPeakBackground.h
+	inc/MantidAlgorithms/FindPeaks.h
 	inc/MantidAlgorithms/FlatBackground.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
@@ -506,6 +508,7 @@ set ( TEST_FILES
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
 	CopyInstrumentParametersTest.h
+	CopyLogsTest.h
 	CopySampleTest.h
 	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
@@ -554,8 +557,8 @@ set ( TEST_FILES
 	FindCenterOfMassPositionTest.h
 	FindDeadDetectorsTest.h
 	FindDetectorsOutsideLimitsTest.h
-	FindPeaksTest.h
 	FindPeakBackgroundTest.h
+	FindPeaksTest.h
 	FlatBackgroundTest.h
 	FlatPlateAbsorptionTest.h
 	GenerateEventsFilterTest.h
