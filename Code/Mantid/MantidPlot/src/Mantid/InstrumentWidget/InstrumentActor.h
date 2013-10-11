@@ -10,7 +10,6 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include <boost/weak_ptr.hpp>
-#include <QObject>
 #include <vector>
 #include <map>
 
@@ -43,7 +42,7 @@ namespace Mantid
    operation for selective rendering of the instrument
 
 */
-class InstrumentActor: public QObject, public GLActor
+class InstrumentActor: public GLActor
 {
   Q_OBJECT
 public:

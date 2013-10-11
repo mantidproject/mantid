@@ -19,6 +19,7 @@
 
 #include <ostream>
 
+#include <QObject>
 #include <QList>
 
 class GLActorVisitor;
@@ -61,7 +62,7 @@ namespace Mantid
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class GLActor
+class GLActor: public QObject
 {
 public:
   /// Rules for visitor propagation. If vistor's visit(...) method returns true
