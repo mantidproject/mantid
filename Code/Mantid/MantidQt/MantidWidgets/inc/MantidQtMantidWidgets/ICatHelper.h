@@ -21,6 +21,10 @@ namespace MantidQt
       void executeGetDataFiles(int64_t investigationId);
       /// Download dataFile (via HTTP or copy if access to archive) and return the path to it.
       std::vector<std::string> downloadDataFiles(std::vector<std::pair<int64_t, std::string>> userSelectedFiles, std::string downloadPath);
+    private:
+      /// Creates an algorithm with the name provided.
+      Mantid::API::IAlgorithm_sptr createCatalogAlgorithm(const std::string& algName);
+
     };
   } // namespace MantidWidgets
 } // namespace MantidQt
