@@ -199,7 +199,7 @@ public:
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table !=NULL);
     size_t expectedCount = 3 + in_ws->getNumDims(); //3 fixed columns are Signal, Error, nEvents 
-    TSM_ASSERT_EQUALS("Six columns expected", expectedCount, table->columnCount());
+    TSM_ASSERT_EQUALS("Five columns expected", expectedCount, table->columnCount());
     TSM_ASSERT_EQUALS("Wrong number of rows", 3, table->rowCount());
   }
 
