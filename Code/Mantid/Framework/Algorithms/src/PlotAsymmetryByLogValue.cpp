@@ -221,60 +221,59 @@ namespace Mantid
 
         // Load a muon nexus file with auto_group set to true
         IAlgorithm_sptr loadNexus = createChildAlgorithm("LoadMuonNexus");
+        loadNexus->initialize();
         loadNexus->setPropertyValue("Filename", fn.str());
-        loadNexus->setPropertyValue("OutputWorkspace","tmp"+fnn.str());
         if (m_autogroup)
           loadNexus->setPropertyValue("AutoGroup","1");
         loadNexus->execute();
 
-        std::string wsProp = "OutputWorkspace";
+        Workspace_sptr loadedWs = loadNexus->getProperty("OutputWorkspace");
 
-        DataObjects::Workspace2D_sptr ws_red;
-        DataObjects::Workspace2D_sptr ws_green;
 
-        // Run through the periods of the loaded file and do calculations on the selected ones
-        Workspace_sptr tmp = loadNexus->getProperty(wsProp);
-        WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(tmp);
-        if (!wsGroup)
+        WorkspaceGroup_sptr loadedGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+
+        if (!loadedGroup)
         {
-          ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
+          Workspace2D_sptr loadedWs2D = boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
+
           double Y,E; 
-          calcIntAsymmetry(ws_red,Y,E);
+          calcIntAsymmetry(loadedWs2D, Y, E);
           outWS->dataY(0)[i-is] = Y;
-          outWS->dataX(0)[i-is] = getLogValue( *ws_red, logName );
+          outWS->dataX(0)[i-is] = getLogValue(*loadedWs2D, logName);
           outWS->dataE(0)[i-is] = E;
         }
         else
         {
+          DataObjects::Workspace2D_sptr ws_red;
+          DataObjects::Workspace2D_sptr ws_green;
 
-          for( int period = 1; period <= wsGroup->getNumberOfEntries(); ++period )
+          // Run through the periods of the loaded file and do calculations on the selected ones
+          for(int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++)
           {
-            std::stringstream suffix;
-            suffix << period;
-            wsProp = "OutputWorkspace_" + suffix.str();// form the property name for higher periods
+            Workspace2D_sptr memberWs = 
+              boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
+
+            if(!memberWs)
+              throw std::runtime_error("Nooooooo");
+
+            int period = mi + 1;
+
             // Do only one period
             if (green == EMPTY_INT() && period == red)
             {
-              Workspace_sptr tmpff = loadNexus->getProperty(wsProp);
-              ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpff);
+              ws_red = memberWs;
               double Y,E; 
               calcIntAsymmetry(ws_red,Y,E);
               outWS->dataY(0)[i-is] = Y;
-              outWS->dataX(0)[i-is] = getLogValue( *ws_red, logName );
+              outWS->dataX(0)[i-is] = getLogValue(*ws_red, logName);
               outWS->dataE(0)[i-is] = E;
             }
             else // red & green
             {
               if (period == red)
-              {
-                Workspace_sptr temp = loadNexus->getProperty(wsProp);
-                ws_red = boost::dynamic_pointer_cast<Workspace2D>(temp);
-              }
+                ws_red = memberWs;
               if (period == green)
-              {
-                Workspace_sptr temp = loadNexus->getProperty(wsProp);
-                ws_green = boost::dynamic_pointer_cast<Workspace2D>(temp);
-              }
+                ws_green = memberWs;
             }
 
           }
