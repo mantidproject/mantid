@@ -1714,12 +1714,15 @@ void Indirect::sOfQwClicked()
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
       "rebin = '" + rebinString + "'\n";
 
-    if(m_uiForm.sqw_cbRebinType->currentText() == "Centre (SofQW)")
+    QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
+    if(rebinType == "Centre (SofQW)")
       pyInput += "SofQW(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped (SofQW2)")
+    else if(rebinType == "Parallelepiped (SofQW2)")
       pyInput += "SofQW2(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped/Fractional Area (SofQW3)")
+    else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
       pyInput += "SofQW3(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
+
+    pyInput += "AddSampleLog(Workspace=sqwOutput, LogName='rebin_type', LogType='String', LogText='"+rebinType+"')\n";
 
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {
