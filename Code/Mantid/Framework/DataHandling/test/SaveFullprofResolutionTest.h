@@ -170,7 +170,7 @@ public:
   int getFileLines(std::string filename)
   {
     ifstream infile;
-    infile.open(filename);
+    infile.open(filename.c_str());
 
     int numlines = 0;
     if (infile.is_open())

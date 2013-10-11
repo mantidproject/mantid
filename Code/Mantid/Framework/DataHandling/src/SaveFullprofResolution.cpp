@@ -323,9 +323,9 @@ namespace DataHandling
     content << fixed;
 
     // Write header
-    if (m_append)
+    if (!m_append)
     {
-      content << "  Instrumental resolution function for POWGEN/SNS  J.P. Hodges  2011-09-02  ireso: 6" << "\n";
+      content << "  Instrumental resolution function for POWGEN/SNS  ireso: 6" << "\n";
       content << "! To be used with function NPROF=" << profindex << " in FullProf  (Res=6)" << "\n";
     }
 
@@ -458,7 +458,10 @@ namespace DataHandling
     if (has_key(m_profileParamMap, "CWL"))
     {
       double cwl = m_profileParamMap["CWL"];
-      content << "CWL =   " << setprecision(4) << cwl << "A" << "\n";
+      if (cwl > 0.)
+        content << "CWL =   " << setprecision(4) << cwl << "A" << "\n";
+      else
+        content << "\n";
     }
     else
     {
