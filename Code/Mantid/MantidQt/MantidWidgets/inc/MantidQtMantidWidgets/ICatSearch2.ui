@@ -7,7 +7,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>666</width>
+    <width>681</width>
     <height>945</height>
    </rect>
   </property>
@@ -194,7 +194,7 @@
          <number>9</number>
         </property>
         <item>
-         <layout class="QGridLayout" name="searchGrid" rowstretch="0,0,0,0,0,0" columnstretch="0,0,0,0,0,0">
+         <layout class="QGridLayout" name="searchGrid" rowstretch="0,0,0,0,0,0" columnstretch="0,0,0,0,0,0,0,0">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
@@ -204,6 +204,16 @@
           <property name="verticalSpacing">
            <number>10</number>
           </property>
+          <item row="4" column="5" colspan="2">
+           <widget class="QComboBox" name="InvestigationType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="runRangeLbl">
             <property name="font">
@@ -239,7 +249,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="3">
+          <item row="4" column="4">
            <widget class="QLabel" name="advTypeLbl">
             <property name="font">
              <font>
@@ -260,7 +270,7 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="runRangeTxt"/>
+           <widget class="QLineEdit" name="RunRange"/>
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="InvestigationName"/>
@@ -278,7 +288,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="5">
+          <item row="0" column="6">
            <widget class="QToolButton" name="startDatePicker">
             <property name="maximumSize">
              <size>
@@ -311,7 +321,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="5">
+          <item row="1" column="6">
            <widget class="QToolButton" name="endDatePicker">
             <property name="maximumSize">
              <size>
@@ -327,23 +337,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <spacer name="searchGridSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>18</width>
-              <height>10</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="3">
+          <item row="0" column="4" alignment="Qt::AlignVCenter">
            <widget class="QLabel" name="startDateLbl">
             <property name="font">
              <font>
@@ -356,7 +350,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
+          <item row="1" column="4" alignment="Qt::AlignVCenter">
            <widget class="QLabel" name="endDateLbl">
             <property name="enabled">
              <bool>true</bool>
@@ -378,7 +372,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="3">
+          <item row="2" column="4">
            <widget class="QLabel" name="keywordsLbl">
             <property name="font">
              <font>
@@ -391,7 +385,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="4" colspan="2">
+          <item row="5" column="5" colspan="2">
            <layout class="QHBoxLayout" name="searchBtnGrid">
             <property name="spacing">
              <number>8</number>
@@ -436,7 +430,7 @@
             </item>
            </layout>
           </item>
-          <item row="2" column="4" colspan="2">
+          <item row="2" column="5" colspan="2">
            <widget class="QLineEdit" name="Keywords"/>
           </item>
           <item row="3" column="0">
@@ -452,7 +446,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="4" colspan="2">
+          <item row="3" column="5" colspan="2">
            <widget class="QLineEdit" name="SampleName"/>
           </item>
           <item row="4" column="0">
@@ -468,7 +462,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="3">
+          <item row="3" column="4">
            <widget class="QLabel" name="advSampleLbl">
             <property name="font">
              <font>
@@ -481,35 +475,141 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="4" colspan="2">
-           <widget class="QComboBox" name="InvestigationType">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="1">
            <widget class="QLineEdit" name="InvestigatorSurname"/>
           </item>
-          <item row="4" column="1">
+          <item row="4" column="1" alignment="Qt::AlignVCenter">
            <widget class="QLineEdit" name="InvestigationAbstract"/>
           </item>
-          <item row="0" column="4">
+          <item row="0" column="5">
            <widget class="QLineEdit" name="StartDate">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Date in DD/MM/YYYY.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
+          <item row="1" column="5">
            <widget class="QLineEdit" name="EndDate">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Date in DD/MM/YYYY .&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="7">
+           <widget class="QLabel" name="EndDate_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="7">
+           <widget class="QLabel" name="Keywords_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2" alignment="Qt::AlignHCenter">
+           <widget class="QLabel" name="InvestigatorSurname_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2" alignment="Qt::AlignHCenter">
+           <widget class="QLabel" name="InvestigationAbstract_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="7" alignment="Qt::AlignHCenter">
+           <widget class="QLabel" name="InvestigationType_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="7">
+           <widget class="QLabel" name="StartDate_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2" alignment="Qt::AlignHCenter">
+           <widget class="QLabel" name="RunRange_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+           <widget class="QLabel" name="Instrument_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="7">
+           <widget class="QLabel" name="SampleName_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="InvestigationName_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="searchGridSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>5</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>

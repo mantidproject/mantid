@@ -21,9 +21,13 @@ namespace MantidQt
       void executeGetDataFiles(int64_t investigationId);
       /// Download dataFile (via HTTP or copy if access to archive) and return the path to it.
       std::vector<std::string> downloadDataFiles(std::vector<std::pair<int64_t, std::string>> userSelectedFiles, std::string downloadPath);
+      /// Validate each input field against the related algorithm property.
+      std::map<std::string, std::string> validateProperties(std::map<std::string, std::string> &inputFields);
     private:
       /// Creates an algorithm with the name provided.
       Mantid::API::IAlgorithm_sptr createCatalogAlgorithm(const std::string& algName);
+      /// Obtain the documentation for a given name from the given algorithm properties.
+      const std::string propertyDocumentation(const std::vector<Mantid::Kernel::Property*> &properties, const std::string &name);
 
     };
   } // namespace MantidWidgets

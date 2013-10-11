@@ -126,6 +126,56 @@ namespace MantidQt
     }
 
     /**
+     * Validate each input field against the related algorithm property.
+     * @param inputFields :: The name of the input field and value of the field (key => "StartDate", value => "00/00/0000").
+     * @return The name of the input field(s) marker to update and related error to throw.
+     */
+    std::map<std::string, std::string> ICatHelper::validateProperties(std::map<std::string, std::string> &inputFields)
+    {
+      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
+
+      // Holds the name of the marker to update if an error is found, and the related error message to use.
+      // E.g. key => "StartDate_err", value => "The start date for..."
+      std::map<std::string, std::string> errors;
+
+      // Validate all input elements in the map.
+      for(auto iter = inputFields.begin(); iter != inputFields.end(); ++iter)
+      {
+        try
+        {
+          catalogAlgorithm->setProperty(iter->first, iter->second);
+        }
+        catch (std::invalid_argument& error)
+        {
+          std::string documentation = propertyDocumentation(catalogAlgorithm->getProperties(), iter->first);
+
+          // Add the input name + "_err" (to indicate the error marker in the GUI,
+          // rather than the input field) as the key, and the related error as the value.
+          errors.insert(std::make_pair(iter->first + "_err", documentation));
+        }
+      }
+      return errors;
+    }
+
+    /**
+     * Obtain the algorithm documentation for the given property.
+     * @param properties :: A list of properties for a provided algorithm.
+     * @param name       :: The name of the property to search for.
+     * @return The documentation for a given property name.
+     */
+    const std::string ICatHelper::propertyDocumentation(const std::vector<Mantid::Kernel::Property*> &properties, const std::string &name)
+    {
+      for (unsigned i = 0; i < properties.size(); i++)
+      {
+        if (properties.at(i)->name() == name)
+        {
+          return properties.at(i)->documentation();
+        }
+      }
+      return "";
+    }
+
+    /**
      * Creates an algorithm with the provided name.
      * @param algName :: The name of the algorithm to create.
      * @return A shared pointer to the algorithm created.
@@ -144,7 +194,6 @@ namespace MantidQt
       // Since no exceptions have occurred we return the algorithm.
       return catalogAlgorithm;
     }
-
 
   } // namespace MantidWidgets
 } // namespace MantidQt

@@ -38,6 +38,9 @@ namespace MantidQt
       // Draw the GUI from .ui header generated file.
       m_icatUiForm.setupUi(this);
 
+      // Only want to show labels when an error occurs.
+      hideErrorLabels();
+
       // Show the search frame by default.
       m_icatUiForm.searchCbox->setChecked(true);
       showCatalogSearch();
@@ -431,7 +434,7 @@ namespace MantidQt
       // Left side of form.
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationName", m_icatUiForm.InvestigationName->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("Instrument", m_icatUiForm.Instrument->currentText().toStdString()));
-      searchFieldInput.insert(std::pair<std::string, std::string>("runRange", m_icatUiForm.runRangeTxt->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("RunRange", m_icatUiForm.RunRange->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigatorSurname", m_icatUiForm.InvestigatorSurname->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationAbstract", m_icatUiForm.InvestigationAbstract->text().toStdString()));
 
@@ -540,6 +543,22 @@ namespace MantidQt
       {
         clearDataFileFrame();
 
+        std::map<std::string, std::string> inputFields = getSearchFields();
+        // Contains the error label names, and the related error message.
+        std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
+
+        // Has any errors occurred?
+        if (!errors.empty())
+        {
+          showErrorLabels(errors);
+          m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
+          // Stop here to prevent the search being carried out below.
+          return;
+        }
+
+        // Since there are no longer errors we hide the error labels.
+        hideErrorLabels();
+
         showSearchResultsFrame();
 
         // Update the label to inform the user that searching is in progress.
@@ -549,12 +568,52 @@ namespace MantidQt
         std::string searchResults = "searchResults";
         clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
 
-        // Perform the search using the values the user has input.
-        m_icatHelper->executeSearch(getSearchFields());
+        // Perform the search using the values the user has input as they are valid.
+        m_icatHelper->executeSearch(inputFields);
 
         // Populate the result table from the searchResult workspace.
         populateResultTable();
       }
+    }
+
+    /**
+     * Show the error message labels, including the error message on the tooltips.
+     * @param errors :: A map containing the error label names, and the related error message.
+     */
+    void ICatSearch2::showErrorLabels(std::map<std::string, std::string> &errors)
+    {
+      for(auto iter = errors.begin(); iter != errors.end(); ++iter)
+      {
+        QLabel* label = m_icatUiForm.searchFrame->findChild<QLabel*>(QString::fromStdString(iter->first));
+
+        if (label)
+        {
+          // Update the tooltip of the element and then show it.
+          label->setToolTip(QString::fromStdString("<span style=\"color: white;\">" + iter->second + "</span>"));
+          label->show();
+        }
+      }
+    }
+
+    /**
+     * Hides the error message labels on the GUI.
+     */
+    void ICatSearch2::hideErrorLabels()
+    {
+      // Left side of form.
+      m_icatUiForm.InvestigationName_err->setVisible(false);
+      m_icatUiForm.Instrument_err->setVisible(false);
+      m_icatUiForm.RunRange_err->setVisible(false);
+      m_icatUiForm.InvestigatorSurname_err->setVisible(false);
+      m_icatUiForm.InvestigationAbstract_err->setVisible(false);
+      // Right side of form.
+      m_icatUiForm.StartDate_err->setVisible(false);
+      m_icatUiForm.EndDate_err->setVisible(false);
+      m_icatUiForm.Keywords_err->setVisible(false);
+      m_icatUiForm.SampleName_err->setVisible(false);
+      m_icatUiForm.InvestigationType_err->setVisible(false);
+
+
     }
 
     /**
@@ -899,6 +958,8 @@ namespace MantidQt
      */
     void ICatSearch2::downloadDataFiles()
     {
+      std::vector<std::pair<int64_t, std::string>> dataFiles = selectedDataFileNames();
+
       QString downloadSavePath = QFileDialog::getExistingDirectory(this, tr("Select a directory to save data files."), m_downloadSaveDir, QFileDialog::ShowDirsOnly);
 
       // The user has clicked "Open" and changed the path (and not clicked cancel).
@@ -909,7 +970,7 @@ namespace MantidQt
         // Save settings to store for use next time.
         saveSettings();
         // Download the selected dataFiles to the chosen directory.
-        m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
+        m_icatHelper->downloadDataFiles(dataFiles, m_downloadSaveDir.toStdString());
       }
     }
 
@@ -918,8 +979,11 @@ namespace MantidQt
      */
     void ICatSearch2::loadDataFiles()
     {
+      std::vector<std::pair<int64_t, std::string>> dataFiles = selectedDataFileNames();
+
       // Get the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
-      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
+      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(dataFiles, m_downloadSaveDir.toStdString());
+
       // Create & initialize the load algorithm we will use to load the file by path to a workspace.
       Mantid::API::Algorithm_sptr loadAlgorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
       loadAlgorithm->initialize();

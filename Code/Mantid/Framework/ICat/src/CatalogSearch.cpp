@@ -48,7 +48,7 @@ namespace Mantid
 
       declareProperty("InvestigationName", "", "The name of the investigation to search.");
       declareProperty("Instrument","","The name of the instrument used for investigation search.");
-      declareProperty("runRange","","The range of runs to search for related investigations.");
+      declareProperty("RunRange","","The range of runs to search for related investigations.");
       declareProperty("StartDate","", isDate, "The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
       declareProperty("EndDate","", isDate, "The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
       declareProperty("Keywords","","An option to search investigations data");

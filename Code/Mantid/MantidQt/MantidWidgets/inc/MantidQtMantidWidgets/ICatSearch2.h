@@ -141,6 +141,10 @@ namespace MantidQt
       void advancedSearchChecked();
       /// When the "Search" button is clicked, display "Search results" frame.
       void searchClicked();
+      /// Show the error message labels, including the error message on the tooltips.
+      void showErrorLabels(std::map<std::string, std::string> &errors);
+      /// Hide the error message labels.
+      void hideErrorLabels();
       /// Reset all fields when "Reset" is clicked.
       void onReset();
 
