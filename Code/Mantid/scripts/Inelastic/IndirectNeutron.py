@@ -313,9 +313,10 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
 	eDat = []
 	ns = 0
 	Q = []
+	tot = []
 	for m in range(0,ngrp):
 		Qq,nd,xd,yd,ed = ReadInxGroup(asc,m,lgrp)
-		tot = sum(yd)
+		tot.append(sum(yd))
 		if Verbose:
 			logger.notice('Spectrum ' + str(m+1) +' at Q= '+ str(Qq)+' ; Total counts = '+str(tot))
 		if ns != 0:
@@ -328,7 +329,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
 			eDat.append(ed[n])
 		xDat.append(2*xd[nd-1]-xd[nd-2])
 		ns += 1
-	ascWS = fname +'_' +ana+refl +'_asc'
+	ascWS = fname +'_' +ana+refl +'_inx'
 	outWS = fname +'_' +ana+refl +'_red'
 	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
 		Nspec=ns, UnitX='Energy')
