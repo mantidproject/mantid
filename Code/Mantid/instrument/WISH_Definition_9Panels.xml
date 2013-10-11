@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="WISH" valid-from   ="2012-09-26 17:24:36"
-                        valid-to     ="2013-07-01 17:24:36"
-		        last-modified="2013-10-10 09:00:00">
+<instrument name="WISH" valid-from   ="2013-07-01 17:24:36"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2012-11-13 16:00:00">
  
    <defaults>
      <length unit="meter"/>
@@ -17,6 +17,7 @@
        <handedness val="right"/>
        <origin val="beam" /> 
      </reference-frame>
+     <offsets spherical="vectors" />
      <!-- Comment "components-are-facing" out if you dont want the
      components defined in this file to face a position by default -->    
      <components-are-facing x="0.0" y="0.0" z="0.0" />
@@ -45,6 +46,15 @@
  <location />
  </component>
  <component type="panel10" idlist="panel10"> 
+ <location />
+ </component>
+ <component type="panel09" idlist="panel09"> 
+ <location />
+ </component>
+ <component type="panel08" idlist="panel08"> 
+ <location />
+ </component>
+ <component type="panel07" idlist="panel07"> 
  <location />
  </component>
  <!-- source and sample-position components -->
@@ -118,6 +128,21 @@
 <type name="panel10">
  <component type="WISHpanel">
 <location  x="0.96521    " z=" -1.9790    " name="WISHpanel10" > <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel09">
+ <component type="WISHpanel">
+<location  x=" 1.8672    " z=" -1.1668    " name="WISHpanel09" > <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel08">
+ <component type="WISHpanel">
+<location  x=" 2.2018    " z="-0.96244E-07" name="WISHpanel08" > <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel07">
+ <component type="WISHpanel">
+<location  x=" 1.8672    " z="  1.1668    " name="WISHpanel07" > <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  <type name="WISHpanel">
@@ -2263,6 +2288,468 @@
    <id start="10104000" end="10104511" />
    <id start="10102000" end="10102511" />
    <id start="10100000" end="10100511" />
+   </idlist>
+  <idlist idname="panel09">
+   <id start="09707000" end="09707511" />
+   <id start="09705000" end="09705511" />
+   <id start="09703000" end="09703511" />
+   <id start="09701000" end="09701511" />
+   <id start="09623000" end="09623511" />
+   <id start="09621000" end="09621511" />
+   <id start="09619000" end="09619511" />
+   <id start="09617000" end="09617511" />
+   <id start="09615000" end="09615511" />
+   <id start="09613000" end="09613511" />
+   <id start="09611000" end="09611511" />
+   <id start="09609000" end="09609511" />
+   <id start="09607000" end="09607511" />
+   <id start="09605000" end="09605511" />
+   <id start="09603000" end="09603511" />
+   <id start="09601000" end="09601511" />
+   <id start="09523000" end="09523511" />
+   <id start="09521000" end="09521511" />
+   <id start="09519000" end="09519511" />
+   <id start="09517000" end="09517511" />
+   <id start="09515000" end="09515511" />
+   <id start="09513000" end="09513511" />
+   <id start="09511000" end="09511511" />
+   <id start="09509000" end="09509511" />
+   <id start="09507000" end="09507511" />
+   <id start="09505000" end="09505511" />
+   <id start="09503000" end="09503511" />
+   <id start="09501000" end="09501511" />
+   <id start="09423000" end="09423511" />
+   <id start="09421000" end="09421511" />
+   <id start="09419000" end="09419511" />
+   <id start="09417000" end="09417511" />
+   <id start="09415000" end="09415511" />
+   <id start="09413000" end="09413511" />
+   <id start="09411000" end="09411511" />
+   <id start="09409000" end="09409511" />
+   <id start="09407000" end="09407511" />
+   <id start="09405000" end="09405511" />
+   <id start="09403000" end="09403511" />
+   <id start="09401000" end="09401511" />
+   <id start="09323000" end="09323511" />
+   <id start="09321000" end="09321511" />
+   <id start="09319000" end="09319511" />
+   <id start="09317000" end="09317511" />
+   <id start="09315000" end="09315511" />
+   <id start="09313000" end="09313511" />
+   <id start="09311000" end="09311511" />
+   <id start="09309000" end="09309511" />
+   <id start="09307000" end="09307511" />
+   <id start="09305000" end="09305511" />
+   <id start="09303000" end="09303511" />
+   <id start="09301000" end="09301511" />
+   <id start="09223000" end="09223511" />
+   <id start="09221000" end="09221511" />
+   <id start="09219000" end="09219511" />
+   <id start="09217000" end="09217511" />
+   <id start="09215000" end="09215511" />
+   <id start="09213000" end="09213511" />
+   <id start="09211000" end="09211511" />
+   <id start="09209000" end="09209511" />
+   <id start="09207000" end="09207511" />
+   <id start="09205000" end="09205511" />
+   <id start="09203000" end="09203511" />
+   <id start="09201000" end="09201511" />
+   <id start="09123000" end="09123511" />
+   <id start="09121000" end="09121511" />
+   <id start="09119000" end="09119511" />
+   <id start="09117000" end="09117511" />
+   <id start="09115000" end="09115511" />
+   <id start="09113000" end="09113511" />
+   <id start="09111000" end="09111511" />
+   <id start="09109000" end="09109511" />
+   <id start="09107000" end="09107511" />
+   <id start="09105000" end="09105511" />
+   <id start="09103000" end="09103511" />
+   <id start="09101000" end="09101511" />
+   <id start="09706000" end="09706511" />
+   <id start="09704000" end="09704511" />
+   <id start="09702000" end="09702511" />
+   <id start="09700000" end="09700511" />
+   <id start="09622000" end="09622511" />
+   <id start="09620000" end="09620511" />
+   <id start="09618000" end="09618511" />
+   <id start="09616000" end="09616511" />
+   <id start="09614000" end="09614511" />
+   <id start="09612000" end="09612511" />
+   <id start="09610000" end="09610511" />
+   <id start="09608000" end="09608511" />
+   <id start="09606000" end="09606511" />
+   <id start="09604000" end="09604511" />
+   <id start="09602000" end="09602511" />
+   <id start="09600000" end="09600511" />
+   <id start="09522000" end="09522511" />
+   <id start="09520000" end="09520511" />
+   <id start="09518000" end="09518511" />
+   <id start="09516000" end="09516511" />
+   <id start="09514000" end="09514511" />
+   <id start="09512000" end="09512511" />
+   <id start="09510000" end="09510511" />
+   <id start="09508000" end="09508511" />
+   <id start="09506000" end="09506511" />
+   <id start="09504000" end="09504511" />
+   <id start="09502000" end="09502511" />
+   <id start="09500000" end="09500511" />
+   <id start="09422000" end="09422511" />
+   <id start="09420000" end="09420511" />
+   <id start="09418000" end="09418511" />
+   <id start="09416000" end="09416511" />
+   <id start="09414000" end="09414511" />
+   <id start="09412000" end="09412511" />
+   <id start="09410000" end="09410511" />
+   <id start="09408000" end="09408511" />
+   <id start="09406000" end="09406511" />
+   <id start="09404000" end="09404511" />
+   <id start="09402000" end="09402511" />
+   <id start="09400000" end="09400511" />
+   <id start="09322000" end="09322511" />
+   <id start="09320000" end="09320511" />
+   <id start="09318000" end="09318511" />
+   <id start="09316000" end="09316511" />
+   <id start="09314000" end="09314511" />
+   <id start="09312000" end="09312511" />
+   <id start="09310000" end="09310511" />
+   <id start="09308000" end="09308511" />
+   <id start="09306000" end="09306511" />
+   <id start="09304000" end="09304511" />
+   <id start="09302000" end="09302511" />
+   <id start="09300000" end="09300511" />
+   <id start="09222000" end="09222511" />
+   <id start="09220000" end="09220511" />
+   <id start="09218000" end="09218511" />
+   <id start="09216000" end="09216511" />
+   <id start="09214000" end="09214511" />
+   <id start="09212000" end="09212511" />
+   <id start="09210000" end="09210511" />
+   <id start="09208000" end="09208511" />
+   <id start="09206000" end="09206511" />
+   <id start="09204000" end="09204511" />
+   <id start="09202000" end="09202511" />
+   <id start="09200000" end="09200511" />
+   <id start="09122000" end="09122511" />
+   <id start="09120000" end="09120511" />
+   <id start="09118000" end="09118511" />
+   <id start="09116000" end="09116511" />
+   <id start="09114000" end="09114511" />
+   <id start="09112000" end="09112511" />
+   <id start="09110000" end="09110511" />
+   <id start="09108000" end="09108511" />
+   <id start="09106000" end="09106511" />
+   <id start="09104000" end="09104511" />
+   <id start="09102000" end="09102511" />
+   <id start="09100000" end="09100511" />
+   </idlist>
+  <idlist idname="panel08">
+   <id start="08707000" end="08707511" />
+   <id start="08705000" end="08705511" />
+   <id start="08703000" end="08703511" />
+   <id start="08701000" end="08701511" />
+   <id start="08623000" end="08623511" />
+   <id start="08621000" end="08621511" />
+   <id start="08619000" end="08619511" />
+   <id start="08617000" end="08617511" />
+   <id start="08615000" end="08615511" />
+   <id start="08613000" end="08613511" />
+   <id start="08611000" end="08611511" />
+   <id start="08609000" end="08609511" />
+   <id start="08607000" end="08607511" />
+   <id start="08605000" end="08605511" />
+   <id start="08603000" end="08603511" />
+   <id start="08601000" end="08601511" />
+   <id start="08523000" end="08523511" />
+   <id start="08521000" end="08521511" />
+   <id start="08519000" end="08519511" />
+   <id start="08517000" end="08517511" />
+   <id start="08515000" end="08515511" />
+   <id start="08513000" end="08513511" />
+   <id start="08511000" end="08511511" />
+   <id start="08509000" end="08509511" />
+   <id start="08507000" end="08507511" />
+   <id start="08505000" end="08505511" />
+   <id start="08503000" end="08503511" />
+   <id start="08501000" end="08501511" />
+   <id start="08423000" end="08423511" />
+   <id start="08421000" end="08421511" />
+   <id start="08419000" end="08419511" />
+   <id start="08417000" end="08417511" />
+   <id start="08415000" end="08415511" />
+   <id start="08413000" end="08413511" />
+   <id start="08411000" end="08411511" />
+   <id start="08409000" end="08409511" />
+   <id start="08407000" end="08407511" />
+   <id start="08405000" end="08405511" />
+   <id start="08403000" end="08403511" />
+   <id start="08401000" end="08401511" />
+   <id start="08323000" end="08323511" />
+   <id start="08321000" end="08321511" />
+   <id start="08319000" end="08319511" />
+   <id start="08317000" end="08317511" />
+   <id start="08315000" end="08315511" />
+   <id start="08313000" end="08313511" />
+   <id start="08311000" end="08311511" />
+   <id start="08309000" end="08309511" />
+   <id start="08307000" end="08307511" />
+   <id start="08305000" end="08305511" />
+   <id start="08303000" end="08303511" />
+   <id start="08301000" end="08301511" />
+   <id start="08223000" end="08223511" />
+   <id start="08221000" end="08221511" />
+   <id start="08219000" end="08219511" />
+   <id start="08217000" end="08217511" />
+   <id start="08215000" end="08215511" />
+   <id start="08213000" end="08213511" />
+   <id start="08211000" end="08211511" />
+   <id start="08209000" end="08209511" />
+   <id start="08207000" end="08207511" />
+   <id start="08205000" end="08205511" />
+   <id start="08203000" end="08203511" />
+   <id start="08201000" end="08201511" />
+   <id start="08123000" end="08123511" />
+   <id start="08121000" end="08121511" />
+   <id start="08119000" end="08119511" />
+   <id start="08117000" end="08117511" />
+   <id start="08115000" end="08115511" />
+   <id start="08113000" end="08113511" />
+   <id start="08111000" end="08111511" />
+   <id start="08109000" end="08109511" />
+   <id start="08107000" end="08107511" />
+   <id start="08105000" end="08105511" />
+   <id start="08103000" end="08103511" />
+   <id start="08101000" end="08101511" />
+   <id start="08706000" end="08706511" />
+   <id start="08704000" end="08704511" />
+   <id start="08702000" end="08702511" />
+   <id start="08700000" end="08700511" />
+   <id start="08622000" end="08622511" />
+   <id start="08620000" end="08620511" />
+   <id start="08618000" end="08618511" />
+   <id start="08616000" end="08616511" />
+   <id start="08614000" end="08614511" />
+   <id start="08612000" end="08612511" />
+   <id start="08610000" end="08610511" />
+   <id start="08608000" end="08608511" />
+   <id start="08606000" end="08606511" />
+   <id start="08604000" end="08604511" />
+   <id start="08602000" end="08602511" />
+   <id start="08600000" end="08600511" />
+   <id start="08522000" end="08522511" />
+   <id start="08520000" end="08520511" />
+   <id start="08518000" end="08518511" />
+   <id start="08516000" end="08516511" />
+   <id start="08514000" end="08514511" />
+   <id start="08512000" end="08512511" />
+   <id start="08510000" end="08510511" />
+   <id start="08508000" end="08508511" />
+   <id start="08506000" end="08506511" />
+   <id start="08504000" end="08504511" />
+   <id start="08502000" end="08502511" />
+   <id start="08500000" end="08500511" />
+   <id start="08422000" end="08422511" />
+   <id start="08420000" end="08420511" />
+   <id start="08418000" end="08418511" />
+   <id start="08416000" end="08416511" />
+   <id start="08414000" end="08414511" />
+   <id start="08412000" end="08412511" />
+   <id start="08410000" end="08410511" />
+   <id start="08408000" end="08408511" />
+   <id start="08406000" end="08406511" />
+   <id start="08404000" end="08404511" />
+   <id start="08402000" end="08402511" />
+   <id start="08400000" end="08400511" />
+   <id start="08322000" end="08322511" />
+   <id start="08320000" end="08320511" />
+   <id start="08318000" end="08318511" />
+   <id start="08316000" end="08316511" />
+   <id start="08314000" end="08314511" />
+   <id start="08312000" end="08312511" />
+   <id start="08310000" end="08310511" />
+   <id start="08308000" end="08308511" />
+   <id start="08306000" end="08306511" />
+   <id start="08304000" end="08304511" />
+   <id start="08302000" end="08302511" />
+   <id start="08300000" end="08300511" />
+   <id start="08222000" end="08222511" />
+   <id start="08220000" end="08220511" />
+   <id start="08218000" end="08218511" />
+   <id start="08216000" end="08216511" />
+   <id start="08214000" end="08214511" />
+   <id start="08212000" end="08212511" />
+   <id start="08210000" end="08210511" />
+   <id start="08208000" end="08208511" />
+   <id start="08206000" end="08206511" />
+   <id start="08204000" end="08204511" />
+   <id start="08202000" end="08202511" />
+   <id start="08200000" end="08200511" />
+   <id start="08122000" end="08122511" />
+   <id start="08120000" end="08120511" />
+   <id start="08118000" end="08118511" />
+   <id start="08116000" end="08116511" />
+   <id start="08114000" end="08114511" />
+   <id start="08112000" end="08112511" />
+   <id start="08110000" end="08110511" />
+   <id start="08108000" end="08108511" />
+   <id start="08106000" end="08106511" />
+   <id start="08104000" end="08104511" />
+   <id start="08102000" end="08102511" />
+   <id start="08100000" end="08100511" />
+   </idlist>
+  <idlist idname="panel07">
+   <id start="07707000" end="07707511" />
+   <id start="07705000" end="07705511" />
+   <id start="07703000" end="07703511" />
+   <id start="07701000" end="07701511" />
+   <id start="07623000" end="07623511" />
+   <id start="07621000" end="07621511" />
+   <id start="07619000" end="07619511" />
+   <id start="07617000" end="07617511" />
+   <id start="07615000" end="07615511" />
+   <id start="07613000" end="07613511" />
+   <id start="07611000" end="07611511" />
+   <id start="07609000" end="07609511" />
+   <id start="07607000" end="07607511" />
+   <id start="07605000" end="07605511" />
+   <id start="07603000" end="07603511" />
+   <id start="07601000" end="07601511" />
+   <id start="07523000" end="07523511" />
+   <id start="07521000" end="07521511" />
+   <id start="07519000" end="07519511" />
+   <id start="07517000" end="07517511" />
+   <id start="07515000" end="07515511" />
+   <id start="07513000" end="07513511" />
+   <id start="07511000" end="07511511" />
+   <id start="07509000" end="07509511" />
+   <id start="07507000" end="07507511" />
+   <id start="07505000" end="07505511" />
+   <id start="07503000" end="07503511" />
+   <id start="07501000" end="07501511" />
+   <id start="07423000" end="07423511" />
+   <id start="07421000" end="07421511" />
+   <id start="07419000" end="07419511" />
+   <id start="07417000" end="07417511" />
+   <id start="07415000" end="07415511" />
+   <id start="07413000" end="07413511" />
+   <id start="07411000" end="07411511" />
+   <id start="07409000" end="07409511" />
+   <id start="07407000" end="07407511" />
+   <id start="07405000" end="07405511" />
+   <id start="07403000" end="07403511" />
+   <id start="07401000" end="07401511" />
+   <id start="07323000" end="07323511" />
+   <id start="07321000" end="07321511" />
+   <id start="07319000" end="07319511" />
+   <id start="07317000" end="07317511" />
+   <id start="07315000" end="07315511" />
+   <id start="07313000" end="07313511" />
+   <id start="07311000" end="07311511" />
+   <id start="07309000" end="07309511" />
+   <id start="07307000" end="07307511" />
+   <id start="07305000" end="07305511" />
+   <id start="07303000" end="07303511" />
+   <id start="07301000" end="07301511" />
+   <id start="07223000" end="07223511" />
+   <id start="07221000" end="07221511" />
+   <id start="07219000" end="07219511" />
+   <id start="07217000" end="07217511" />
+   <id start="07215000" end="07215511" />
+   <id start="07213000" end="07213511" />
+   <id start="07211000" end="07211511" />
+   <id start="07209000" end="07209511" />
+   <id start="07207000" end="07207511" />
+   <id start="07205000" end="07205511" />
+   <id start="07203000" end="07203511" />
+   <id start="07201000" end="07201511" />
+   <id start="07123000" end="07123511" />
+   <id start="07121000" end="07121511" />
+   <id start="07119000" end="07119511" />
+   <id start="07117000" end="07117511" />
+   <id start="07115000" end="07115511" />
+   <id start="07113000" end="07113511" />
+   <id start="07111000" end="07111511" />
+   <id start="07109000" end="07109511" />
+   <id start="07107000" end="07107511" />
+   <id start="07105000" end="07105511" />
+   <id start="07103000" end="07103511" />
+   <id start="07101000" end="07101511" />
+   <id start="07706000" end="07706511" />
+   <id start="07704000" end="07704511" />
+   <id start="07702000" end="07702511" />
+   <id start="07700000" end="07700511" />
+   <id start="07622000" end="07622511" />
+   <id start="07620000" end="07620511" />
+   <id start="07618000" end="07618511" />
+   <id start="07616000" end="07616511" />
+   <id start="07614000" end="07614511" />
+   <id start="07612000" end="07612511" />
+   <id start="07610000" end="07610511" />
+   <id start="07608000" end="07608511" />
+   <id start="07606000" end="07606511" />
+   <id start="07604000" end="07604511" />
+   <id start="07602000" end="07602511" />
+   <id start="07600000" end="07600511" />
+   <id start="07522000" end="07522511" />
+   <id start="07520000" end="07520511" />
+   <id start="07518000" end="07518511" />
+   <id start="07516000" end="07516511" />
+   <id start="07514000" end="07514511" />
+   <id start="07512000" end="07512511" />
+   <id start="07510000" end="07510511" />
+   <id start="07508000" end="07508511" />
+   <id start="07506000" end="07506511" />
+   <id start="07504000" end="07504511" />
+   <id start="07502000" end="07502511" />
+   <id start="07500000" end="07500511" />
+   <id start="07422000" end="07422511" />
+   <id start="07420000" end="07420511" />
+   <id start="07418000" end="07418511" />
+   <id start="07416000" end="07416511" />
+   <id start="07414000" end="07414511" />
+   <id start="07412000" end="07412511" />
+   <id start="07410000" end="07410511" />
+   <id start="07408000" end="07408511" />
+   <id start="07406000" end="07406511" />
+   <id start="07404000" end="07404511" />
+   <id start="07402000" end="07402511" />
+   <id start="07400000" end="07400511" />
+   <id start="07322000" end="07322511" />
+   <id start="07320000" end="07320511" />
+   <id start="07318000" end="07318511" />
+   <id start="07316000" end="07316511" />
+   <id start="07314000" end="07314511" />
+   <id start="07312000" end="07312511" />
+   <id start="07310000" end="07310511" />
+   <id start="07308000" end="07308511" />
+   <id start="07306000" end="07306511" />
+   <id start="07304000" end="07304511" />
+   <id start="07302000" end="07302511" />
+   <id start="07300000" end="07300511" />
+   <id start="07222000" end="07222511" />
+   <id start="07220000" end="07220511" />
+   <id start="07218000" end="07218511" />
+   <id start="07216000" end="07216511" />
+   <id start="07214000" end="07214511" />
+   <id start="07212000" end="07212511" />
+   <id start="07210000" end="07210511" />
+   <id start="07208000" end="07208511" />
+   <id start="07206000" end="07206511" />
+   <id start="07204000" end="07204511" />
+   <id start="07202000" end="07202511" />
+   <id start="07200000" end="07200511" />
+   <id start="07122000" end="07122511" />
+   <id start="07120000" end="07120511" />
+   <id start="07118000" end="07118511" />
+   <id start="07116000" end="07116511" />
+   <id start="07114000" end="07114511" />
+   <id start="07112000" end="07112511" />
+   <id start="07110000" end="07110511" />
+   <id start="07108000" end="07108511" />
+   <id start="07106000" end="07106511" />
+   <id start="07104000" end="07104511" />
+   <id start="07102000" end="07102511" />
+   <id start="07100000" end="07100511" />
    </idlist>
 
  </instrument>
