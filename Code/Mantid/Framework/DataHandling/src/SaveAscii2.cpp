@@ -1,6 +1,6 @@
 /*WIKI* 
 
-The workspace data are stored in the file in columns: the first column contains the X-values, followed by pairs of Y and E values. Columns are separated by commas. The resulting file can normally be loaded into a workspace by the [[LoadAscii]] algorithm.
+The workspace data are stored in the file in columns: the first column contains the X-values, followed by pairs of Y and E values. Columns are separated by commas. The resulting file can normally be loaded into a workspace by the [[LoadAscii2]] algorithm.
 
 ==== Limitations ====
 The algorithm assumes that the workspace has common X values for all spectra (i.e. is not a [[Ragged Workspace|ragged workspace]]). Only the X values from the first spectrum in the workspace are saved out. 
@@ -9,7 +9,7 @@ The algorithm assumes that the workspace has common X values for all spectra (i.
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/SaveAscii.h"
+#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -26,10 +26,10 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(SaveAscii)
+    DECLARE_ALGORITHM(SaveAscii2)
 
     /// Sets documentation strings for this algorithm
-    void SaveAscii::initDocs()
+    void SaveAscii2::initDocs()
     {
       this->setWikiSummary("Saves a 2D [[workspace]] to a comma separated ascii file. ");
       this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
@@ -40,15 +40,15 @@ namespace Mantid
     using namespace API;
 
     // Initialise the logger
-    Logger& SaveAscii::g_log = Logger::get("SaveAscii");
+    Logger& SaveAscii2::g_log = Logger::get("SaveAscii2");
 
     /// Empty constructor
-    SaveAscii::SaveAscii() : m_separatorIndex()
+    SaveAscii2::SaveAscii2() : m_separatorIndex()
     {
     }
 
     /// Initialisation method.
-    void SaveAscii::init()
+    void SaveAscii2::init()
     {
       declareProperty(new WorkspaceProperty<>("InputWorkspace",
         "",Direction::Input), "The name of the workspace containing the data you want to save to a Ascii file.");
@@ -96,12 +96,13 @@ namespace Mantid
     /** 
     *   Executes the algorithm.
     */
-    void SaveAscii::exec()
+    void SaveAscii2::exec()
     {
       // Get the workspace
       MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
       int nSpectra = static_cast<int>(ws->getNumberHistograms());
       int nBins = static_cast<int>(ws->blocksize());
+      bool isHistogram = ws->isHistogramData();
 
       // Get the properties
       std::vector<int> spec_list = getProperty("SpectrumList");
@@ -143,23 +144,36 @@ namespace Mantid
         {
           throw std::invalid_argument("Inconsistent spectra interval");
         }
-        for(int spec=spec_min;spec<=spec_max;spec++)
+        for(int i=spec_min;i<=spec_max;i++)
         {
-          idx.insert(spec);
+          idx.insert(i);
         }
       }
 
       // Add spectra list into the index list
       if (!spec_list.empty())
+      {
         for(size_t i=0;i<spec_list.size();i++)
-          if (spec_list[i] >= nSpectra) throw std::invalid_argument("Inconsistent spectra list");
+        {
+          if (spec_list[i] >= nSpectra)
+          {
+            throw std::invalid_argument("Inconsistent spectra list");
+          }
           else
+          {
             idx.insert(spec_list[i]);
+          }
+        }
+      }
+      if (!idx.empty())
+      {
+        nSpectra = static_cast<int>(idx.size());
+      }
 
-      if (!idx.empty()) nSpectra = static_cast<int>(idx.size());
-
-      if (nBins == 0 || nSpectra == 0) throw std::runtime_error("Trying to save an empty workspace");
-
+      if (nBins == 0 || nSpectra == 0)
+      {
+        throw std::runtime_error("Trying to save an empty workspace");
+      }
       std::string filename = getProperty("Filename");
       std::ofstream file(filename.c_str());
 
@@ -168,101 +182,227 @@ namespace Mantid
         g_log.error("Unable to create file: " + filename);
         throw Exception::FileError("Unable to create file: " , filename);
       }
-
-      // Write the column captions
-      if( writeHeader) {
-        file << comment << "X";
-        std::cerr << comment << "X";
-        if (idx.empty())
-        {
-          for(int spec=0;spec<nSpectra;spec++)
-          {
-            file << " , Y" << spec << " , E" << spec;
-            std::cerr<< " , Y" << spec << " , E" << spec;
-            if (write_dx) file << " , DX" << spec;
-            if (write_dx) std::cerr<< " , DX" << spec;
-          }
-        }
-        else
-        {
-          for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
-          {
-            file << " , Y" << *spec << " , E" << *spec;
-            std::cerr<< " , Y" << *spec << " , E" << *spec;
-            if (write_dx) file << " , DX" << *spec;
-            if (write_dx) std::cerr<< " , DX" << *spec;
-          }
-        }
-        file << std::endl;
-        std::cerr<< std::endl;
-      }
-
-      bool isHistogram = ws->isHistogramData();
-
       // Set the number precision
       int prec = getProperty("Precision");
-      if (prec != EMPTY_INT()) file.precision(prec);
-
-      Progress progress(this,0,1,nBins);
-      for(int bin=0;bin<nBins;bin++)
+      if (prec != EMPTY_INT())
       {
-        if (isHistogram) // bin centres
-        {
-          file << ( ws->readX(0)[bin] + ws->readX(0)[bin+1] )/2;
-          std::cerr<< ( ws->readX(0)[bin] + ws->readX(0)[bin+1] )/2;
-        }
-        else // data points
-        {
-          file << ws->readX(0)[bin];
-          std::cerr<< ws->readX(0)[bin];
-        }
+        file.precision(prec);
+      }
 
-        if (idx.empty())
-          for(int spec=0;spec<nSpectra;spec++)
+
+
+
+      if (idx.empty())
+      {
+        Progress progress(this,0,1,nSpectra);
+        for(int i=0;i<nSpectra;i++)
+        {
+          auto spec = ws->getSpectrum(i);
+          auto specNo = spec->getSpectrumNo();
+          file << specNo << std::endl;
+          if( writeHeader)
           {
-            file << sep;
-            std::cerr<< sep;
-            file << ws->readY(spec)[bin];
-            std::cerr<< ws->readY(spec)[bin];
-            file << sep;
-            std::cerr<< sep;
-            file << ws->readE(spec)[bin];
-            std::cerr<< ws->readE(spec)[bin];
-          }
-        else
-          for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
-          {
-            file << sep;
-            std::cerr<< sep;
-            file << ws->readY(*spec)[bin]; 
-            std::cerr<< ws->readY(*spec)[bin]; 
-            file << sep;
-            std::cerr<< sep;
-            file << ws->readE(*spec)[bin];
-            std::cerr<< ws->readE(*spec)[bin];
+            file << comment << "X, Y, E";
+            if (write_dx) file << " , DX";
+            file << std::endl;
           }
 
-          if (write_dx)
+          for(int bin=0;bin<nBins;bin++)
           {
             if (isHistogram) // bin centres
             {
-              file << sep;
-              std::cerr<< sep;
-              file << ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
-              std::cerr<< ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
+              file << ( ws->readX(0)[bin] + ws->readX(0)[bin+1] )/2;
             }
             else // data points
             {
-              file << sep;
-              std::cerr<< sep;
-              file << ws->readDx(0)[bin];
-              std::cerr<< ws->readDx(0)[bin];
+              file << ws->readX(0)[bin];
             }
+            file << sep;
+            file << ws->readY(i)[bin];
+            file << sep;
+            file << ws->readE(i)[bin];
+            if (write_dx)
+            {
+              if (isHistogram) // bin centres
+              {
+                file << sep;
+                file << ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
+              }
+              else // data points
+              {
+                file << sep;
+                file << ws->readDx(0)[bin];
+              }
+            }
+            file << std::endl;
           }
           file << std::endl;
-          std::cerr<< std::endl;
+
           progress.report();
+        }
       }
+      else
+      {
+        Progress progress(this,0,1,idx.size());
+        for(std::set<int>::const_iterator i=idx.begin();i!=idx.end();++i)
+        {
+          auto spec = ws->getSpectrum(*i);
+          auto specNo = spec->getSpectrumNo();
+          file << specNo << std::endl;
+          if( writeHeader)
+          {
+            file << comment << "X, Y, E";
+            if (write_dx) file << " , DX";
+            file << std::endl;
+          }
+
+          for(int bin=0;bin<nBins;bin++)                                                                                                                                                                                                                                                                     
+          {
+
+            if (isHistogram) // bin centres
+            {
+              file << ( ws->readX(0)[bin] + ws->readX(0)[bin+1] )/2;
+            }
+            else // data points
+            {
+              file << ws->readX(0)[bin];
+            }
+            file << sep;
+            file << ws->readY(*i)[bin];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+            file << sep;
+            std::cerr<< sep;
+            file << ws->readE(*i)[bin];
+            std::cerr<< ws->readE(*i)[bin];
+            file << std::endl;
+            if (write_dx)
+            {
+              if (isHistogram) // bin centres
+              {
+                file << sep;
+                std::cerr<< sep;
+                file << ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
+                std::cerr<< ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
+              }
+              else // data points
+              {
+                file << sep;
+                std::cerr<< sep;
+                file << ws->readDx(0)[bin];
+                std::cerr<< ws->readDx(0)[bin];
+              }
+            }
+            std::cerr<< std::endl;
+          }
+
+
+          file << std::endl;
+          std::cerr<< std::endl;
+
+          progress.report();
+        }
+      }
+
+
+
+
+      /*
+      for(int bin=0;bin<nBins;bin++)
+      {
+      if (isHistogram) // bin centres
+      {
+      file << ( ws->readX(0)[bin] + ws->readX(0)[bin+1] )/2;
+      std::cerr<< ( ws->readX(0)[bin] + ws->readX(0)[bin+1] )/2;
+      }
+      else // data points
+      {
+      file << ws->readX(0)[bin];
+      std::cerr<< ws->readX(0)[bin];
+      }
+
+      if (idx.empty())
+      {
+      for(int spec=0;spec<nSpectra;spec++)
+      {
+      file << sep;
+      std::cerr<< sep;
+      file << ws->readY(spec)[bin];
+      std::cerr<< ws->readY(spec)[bin];
+      file << sep;
+      std::cerr<< sep;
+      file << ws->readE(spec)[bin];
+      std::cerr<< ws->readE(spec)[bin];
+      }
+      }
+      else
+      {
+      for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
+      {
+      file << sep;
+      std::cerr<< sep;
+      file << ws->readY(*spec)[bin]; 
+      std::cerr<< ws->readY(*spec)[bin]; 
+      file << sep;
+      std::cerr<< sep;
+      file << ws->readE(*spec)[bin];
+      std::cerr<< ws->readE(*spec)[bin];
+      }
+      }
+      if (write_dx)
+      {
+      if (isHistogram) // bin centres
+      {
+      file << sep;
+      std::cerr<< sep;
+      file << ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
+      std::cerr<< ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
+      }
+      else // data points
+      {
+      file << sep;
+      std::cerr<< sep;
+      file << ws->readDx(0)[bin];
+      std::cerr<< ws->readDx(0)[bin];
+      }
+      }
+      file << std::endl;
+      std::cerr<< std::endl;
+      }
+
+
+
+      // Write the column captions
+      if( writeHeader) {
+      file << comment << "X";
+      std::cerr << comment << "X";
+      if (idx.empty())
+      {
+      for(int spec=0;spec<nSpectra;spec++)
+      {
+      file << " , Y" << spec << " , E" << spec;
+      std::cerr<< " , Y" << spec << " , E" << spec;
+      if (write_dx) file << " , DX" << spec;
+      if (write_dx) std::cerr<< " , DX" << spec;
+      }
+      }
+      else
+      {
+      for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
+      {
+      file << " , Y" << *spec << " , E" << *spec;
+      std::cerr<< " , Y" << *spec << " , E" << *spec;
+      if (write_dx) file << " , DX" << *spec;
+      if (write_dx) std::cerr<< " , DX" << *spec;
+      }
+      }
+      file << std::endl;
+      std::cerr<< std::endl;
+      }
+
+
+
+
+      Progress progress(this,0,1,nBins);
+      */
 
     }
 
