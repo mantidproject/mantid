@@ -344,6 +344,24 @@ void Indirect::runConvertToEnergy()
     break;
   }
 
+  // add sample logs to each of the workspaces
+  QString calibChecked = m_uiForm.ckUseCalib->isChecked() ? "True" : "False";
+  QString detailedBalance = m_uiForm.ckDetailedBalance->isChecked() ? "True" : "False";
+  QString scaled = m_uiForm.ckScaleMultiplier->isChecked() ? "True" : "False";
+  pyInput += "calibCheck = "+calibChecked+"\n"
+             "detailedBalance = "+detailedBalance+"\n"
+             "scaled = "+scaled+"\n"
+             "for ws in ws_list:\n"
+             "  AddSampleLog(Workspace=ws, LogName='calib_file', LogType='String', LogText=str(calibCheck))\n"
+             "  if calibCheck:\n"
+             "    AddSampleLog(Workspace=ws, LogName='calib_file_name', LogType='String', LogText='"+m_uiForm.ind_calibFile->getFirstFilename()+"')\n"
+             "  AddSampleLog(Workspace=ws, LogName='detailed_balance', LogType='String', LogText=str(detailedBalance))\n"
+             "  if detailedBalance:\n"
+             "    AddSampleLog(Workspace=ws, LogName='detailed_balance_temp', LogType='Number', LogText='"+m_uiForm.leDetailedBalance->text()+"')\n"
+             "  AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
+             "  if scaled:\n"
+             "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n";
+
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
