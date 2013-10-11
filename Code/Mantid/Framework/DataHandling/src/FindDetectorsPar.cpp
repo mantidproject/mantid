@@ -154,12 +154,14 @@ void FindDetectorsPar::exec()
      try
      {
         spDet= inputWS->getDetector(i);
-     }catch(Kernel::Exception::NotFoundError &){
-        spDet = Geometry::IDetector_const_sptr();
      }
-     // avoid MAC problem 
+     catch(Kernel::Exception::NotFoundError &)
+     {// Intel compilers on MAC hungs on continue here
+       // should be no problem with this if get detector implemented properly and workspace keeps ownership for the detector (I expet so)
+        spDet.reset();
+     }
+     // separate check as some compilers do not obey the standard evaluation order
      if (!spDet)continue;   
-
      // Check that we aren't writing a monitor...
      if (spDet->isMonitor())continue;   
 
