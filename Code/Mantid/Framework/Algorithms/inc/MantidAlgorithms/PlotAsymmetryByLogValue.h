@@ -89,6 +89,13 @@ namespace Mantid
       /// Get log value
       double getLogValue(MatrixWorkspace& ws,const std::string& logName);
 
+      /// Create a Dead Time Table using given list of dead times
+      Workspace_sptr deadTimesToTable(const std::vector<double>& deadTimes, size_t numDetectors = 0);
+
+      /// Creates Dead Time Table using all the data between begin and end
+      ITableWorkspace_sptr createDeadTimeTable( std::vector<double>::const_iterator begin, 
+        std::vector<double>::const_iterator end);
+
       /// Applies DTC to a group of workspaces using a single table
       WorkspaceGroup_sptr applyDeadTimeCorrection(ITableWorkspace_sptr deadTimeTable, 
         WorkspaceGroup_sptr wsGroup);
