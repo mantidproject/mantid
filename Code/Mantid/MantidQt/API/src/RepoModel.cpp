@@ -403,7 +403,7 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
       option = false; 
     else
       return false; // only setTrue and setFalse are allowed values for set auto update.
-    count_changed = setAutoUpdateRecursively(item, option);
+    count_changed = repo_ptr->setAutoUpdate(path, option);
     ret = true; 
   }
   
@@ -1054,20 +1054,3 @@ QString RepoModel::DeleteQueryBox::comment(){
 
 }
 
-int MantidQt::API::RepoModel::setAutoUpdateRecursively(RepoItem* item,
-		bool option) {
-	RepoItem * child;
-	int count = 0;
-	for (int i= 0; i< item->childCount(); i++){
-		child = item->child(i);
-		if (child->childCount() > 0)
-			count += setAutoUpdateRecursively(child, option);
-		else{
-			this->repo_ptr->setAutoUpdate(child->path().toStdString(), option);
-			count++;
-		}
-	}
-	this->repo_ptr->setAutoUpdate(item->path().toStdString(), option);
-	count ++;
-	return count;
-}
