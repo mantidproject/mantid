@@ -34,87 +34,60 @@ namespace CurveFitting
    */
   void FullprofPolynomial::function1D(double* out, const double* xValues, const size_t nData)const
   {
-    // FIXME - Not correct
-    // TODO - Make it correct
-    /*
-    x = tof*1.0/bkpos-1.
-    pow_x = 1.
-    for i in xrange(order):
-        y_b += B[i] * pow_x
+    // Generate a vector for all coefficient
+    std::vector<double> B(m_n, 0.0);
+    for (int i = 0; i < m_n; ++i)
+      B[i] = getParameter(i);
 
-        pow_x = pow_x*x
-      */
-    throw std::runtime_error("Implement ASAP");
-
-    // 1. Use a vector for all coefficient
-    std::vector<double> coeff(m_n+1, 0.0);
-    for (int i = 0; i < m_n+1; ++i)
-      coeff[i] = getParameter(i);
-
-    // 2. Calculate
+    // Calculate
     for (size_t i = 0; i < nData; ++i)
     {
-      double x = xValues[i];
-      double temp = coeff[0];
-      double nx = x;
-      for (int j = 1; j <= m_n; ++j)
+      double tof = xValues[i];
+      double x = tof/m_bkpos - 1.;
+      double pow_x =1.;
+#if 1
+      // It is the first try as benchmark
+      double y_b = 0.;
+      for (int j = 0; j < m_n; ++j)
       {
-        temp += coeff[j]*nx;
-        nx *= x;
+        y_b += B[j]*pow_x;
+        pow_x *= x;
       }
-      out[i] = temp;
+#else
+      // This is the efficient coding
+      double y_b = B[0];
+      for (size_t j = 1; j < m_n; ++j)
+      {
+        pow_x *= x;
+        y_b += B[j] * pow_x;
+      }
+#endif
+
+      out[i] = y_b;
     }
 
     return;
   }
-
-  //----------------------------------------------------------------------------------------------
-  /** Function to calcualteFullprofPolynomial based on vector
-
-  void FullprofPolynomial::functionLocal(std::vector<double> &out, std::vector<double> xValues) const
-  {
-    size_t nData = xValues.size();
-    if (out.size() > xValues.size())
-    {
-      std::stringstream errss;
-      errss << "Polynomial::functionLocal: input vector out has a larger size ("
-            << out.size() << ") than xValues's (" << nData << ").";
-      throw std::runtime_error(errss.str());
-    }
-
-    for (size_t i = 0; i < nData; ++i)
-    {
-      double x = xValues[i];
-      double temp = getParameter(0);
-      double nx = x;
-      for (int j = 1; j <= m_n; ++j)
-      {
-        temp += getParameter(j)*nx;
-        nx *= x;
-      }
-      out[i] = temp;
-    }
-
-    return;
-  }
-  */
 
   //----------------------------------------------------------------------------------------------
   /** Function to calculate derivative analytically
    */
   void FullprofPolynomial::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
   {
-    // FIXME - Not correct!
-    // TODO - Re-do ASAP
-    throw std::runtime_error("It is not correct!");
     for (size_t i = 0; i < nData; i++)
     {
-      double x = xValues[i];
-      double nx = 1;
-      for (int j = 0; j <= m_n; ++j)
+      double tof = xValues[i];
+      double x = tof/m_bkpos - 1.;
+
+      // Order 0
+      double pow_x = 1.0;
+      out->set(i, 0, pow_x);
+      // Rest
+      for (int j = 1; j < m_n; ++j)
       {
-        out->set(i, j, nx);
-        nx *= x;
+        // It does dirivative to B_j
+        pow_x *= x;
+        out->set(i, j, pow_x);
       }
     }
 
