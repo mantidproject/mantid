@@ -40,7 +40,7 @@ public:
     // Name of the output workspace.
     std::string loadedWsName("ApplyGroupingFromMuonNexusTest_LoadedWS");
     std::string outWsName("ApplyGroupingFromMuonNexusTest_OutputWS");
-    std::string dataFileName("emu00006473");
+    std::string dataFileName("emu00006473.nxs");
 
     // Load the data we will group
     LoadMuonNexus1 loadAlg;
@@ -85,7 +85,7 @@ public:
     // Name of the output workspace.
     std::string loadedWsName("ApplyGroupingFromMuonNexusTest_LoadedWS");
     std::string outWsName("ApplyGroupingFromMuonNexusTest_OutputWS");
-    std::string dataFileName("MUSR00015189");
+    std::string dataFileName("MUSR00015189.nxs");
 
     // Load the data we will group
     LoadMuonNexus1 loadAlg;
