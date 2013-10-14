@@ -102,7 +102,7 @@ namespace Algorithms
       throw std::runtime_error("Cannot copy logs using unknown merge strategy");
     }
 
-    setProperty("OutputWorkspace", outputWs);
+    setPropertyValue("OutputWorkspace", outputWs->name());
   }
 
   /**
@@ -113,12 +113,13 @@ namespace Algorithms
   {
     for(auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter)
     {
+      Kernel::Property* prop = *iter;
       //if the log exists, remove and replace it
-      if ( outputRun.hasProperty((*iter)->name()) )
+      if ( outputRun.hasProperty(prop->name()) )
       {
-        outputRun.removeLogData((*iter)->name());
+        outputRun.removeLogData(prop->name());
       }
-      outputRun.addLogData(*iter);
+      outputRun.addLogData(prop->clone());
     }
   }
 
@@ -130,10 +131,11 @@ namespace Algorithms
   {
     for(auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter)
     {
+      Kernel::Property* prop = *iter;
       //add the log only if it doesn't already exist
-      if ( ! outputRun.hasProperty((*iter)->name()) )
+      if ( ! outputRun.hasProperty(prop->name()) )
       {
-        outputRun.addLogData(*iter);
+        outputRun.addLogData(prop->clone());
       }
     }
   }
@@ -155,10 +157,9 @@ namespace Algorithms
     //add all the logs from the new workspace
     for(auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter)
     {
-      outputRun.addLogData(*iter);
+      outputRun.addLogData((*iter)->clone());
     }
   }
-
 
 
 } // namespace Algorithms

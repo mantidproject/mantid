@@ -4,8 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CopyLogs.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CopyLogs;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class CopyLogsTest : public CxxTest::TestSuite
 {
@@ -15,7 +19,6 @@ public:
   static CopyLogsTest *createSuite() { return new CopyLogsTest(); }
   static void destroySuite( CopyLogsTest *suite ) { delete suite; }
 
-
   void test_Init()
   {
     CopyLogs alg;
@@ -23,35 +26,135 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec()
+ void test_exec()
+ {
+   MatrixWorkspace_sptr inputWs = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+   MatrixWorkspace_sptr outputWs = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+
+   WorkspaceCreationHelper::storeWS("alpha", outputWs);
+
+   // Merge Strategy
+   std::string mode("MergeReplaceExisting");
+
+   runAlg(inputWs, outputWs, mode);
+
+   WorkspaceCreationHelper::removeWS(outputWs->name());
+ }
+
+  void test_mergeReplaceExisting()
   {
-    // Name of the output workspace.
-    std::string outWSName("CopyLogsTest_OutputWS");
+    MatrixWorkspace_sptr inputWs = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    MatrixWorkspace_sptr outputWs = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+
+    WorkspaceCreationHelper::storeWS("alpha", outputWs);
+
+    //logs for input workspace
+    addSampleLog(inputWs, "A", "Hello");
+    addSampleLog(inputWs, "B", "World");
+
+    //logs for output workspace
+    addSampleLog(outputWs, "B", "Universe");
+    addSampleLog(outputWs, "C", 1);
+
+    // Merge Strategy
+    std::string mode("MergeReplaceExisting");
+
+    runAlg(inputWs, outputWs, mode);
+
+    //check output
+    Run run = outputWs->mutableRun();
+    TS_ASSERT_EQUALS(run.getLogData("A")->value(), "Hello");
+    TS_ASSERT_EQUALS(run.getLogData("B")->value(), "World");
+    TS_ASSERT_EQUALS(run.getLogData("C")->value(), "1");
+
+    WorkspaceCreationHelper::removeWS(outputWs->name());
+  }
+
+  void test_mergeKeepExisting()
+  {
+    MatrixWorkspace_sptr inputWs = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    MatrixWorkspace_sptr outputWs = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+
+    WorkspaceCreationHelper::storeWS("alpha", outputWs);
+
+    //logs for input workspace
+    addSampleLog(inputWs, "A", "Hello");
+    addSampleLog(inputWs, "B", "World");
+
+    //logs for output workspace
+    addSampleLog(outputWs, "B", "Universe");
+    addSampleLog(outputWs, "C", 1);
+
+    // Merge Strategy
+    std::string mode("MergeKeepExisting");
+
+    runAlg(inputWs, outputWs, mode);
+
+    //check output
+    Run run = outputWs->mutableRun();
+    TS_ASSERT_EQUALS(run.getLogData("A")->value(), "Hello");
+    TS_ASSERT_EQUALS(run.getLogData("B")->value(), "Universe");
+    TS_ASSERT_EQUALS(run.getLogData("C")->value(), "1");
+
+    WorkspaceCreationHelper::removeWS(outputWs->name());
+  }
+
+  void test_wipeExisting()
+  {
+    MatrixWorkspace_sptr inputWs = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    MatrixWorkspace_sptr outputWs = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+
+    WorkspaceCreationHelper::storeWS("alpha", outputWs);
+
+    //logs for input workspace
+    addSampleLog(inputWs, "A", "Hello");
+    addSampleLog(inputWs, "B", "World");
+
+    //logs for output workspace
+    addSampleLog(outputWs, "B", "Universe");
+    addSampleLog(outputWs, "C", 1);
+
+    // Merge Strategy
+    std::string mode("WipeExisting");
+
+    runAlg(inputWs, outputWs, mode);
+
+    //check output
+    Run run = outputWs->mutableRun();
+    TS_ASSERT_EQUALS(run.getLogData("A")->value(), "Hello");
+    TS_ASSERT_EQUALS(run.getLogData("B")->value(), "World");
+    TS_ASSERT_THROWS_ANYTHING(run.getLogData("C"));
+
+    WorkspaceCreationHelper::removeWS(outputWs->name());
+  }
   
+  //Run the Copy Logs algorithm
+  void runAlg(MatrixWorkspace_sptr in, MatrixWorkspace_sptr out, const std::string& mode)
+  {
     CopyLogs alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", in) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MergeStrategy", mode) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputWorkspace", out) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
-    
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-    
-    // TODO: Check the results
-    
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
   }
-  
-  void test_Something()
+
+  //Add a string sample log to the workspace
+  void addSampleLog(MatrixWorkspace_sptr ws, const std::string& name, const std::string& value)
   {
-    TSM_ASSERT( "You forgot to write a test!", 0);
+    Run& run = ws->mutableRun();
+    run.addLogData(new PropertyWithValue<std::string>(name, value));
   }
+
+  //Add a double sample log to the workspace
+  void addSampleLog(MatrixWorkspace_sptr ws, const std::string& name, const double value)
+  {
+    Run& run = ws->mutableRun();
+    run.addLogData(new PropertyWithValue<double>(name, value));
+  }
+
 
 
 };
