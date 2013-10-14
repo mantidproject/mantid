@@ -75,8 +75,10 @@ private slots:
   void openFileDialog(const QString& filePropName);
   void fillLogBox(const QString&);
 
-private:
+  /// Show or hide Dead Time file widget depending on which Dead Time type is selected.
+  void showHideDeadTimeFileWidget(int deadTimeTypeIndex);
 
+private:
 
   // The form generated with Qt Designer
   Ui::PlotAsymmetryByLogValueDialog m_uiForm;

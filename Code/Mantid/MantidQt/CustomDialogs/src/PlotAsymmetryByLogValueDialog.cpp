@@ -74,22 +74,29 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   tie(m_uiForm.backwardBox, "BackwardSpectra");
   tie(m_uiForm.timeMinBox, "TimeMin");
   tie(m_uiForm.timeMaxBox, "TimeMax");
+  tie(m_uiForm.dtcType, "DeadTimeCorrType");
+  tie(m_uiForm.dtcFile, "DeadTimeCorrFile");
 
   // Set-up browse button mapping
   browseButtonMapper->setMapping(m_uiForm.browseFirstButton, "FirstRun");
   browseButtonMapper->setMapping(m_uiForm.browseLastButton,  "LastRun");
+  browseButtonMapper->setMapping(m_uiForm.dtcFileBrowseButton, "DeadTimeCorrFile");
 
   // Connect Browse buttons to the mapper
   connect(m_uiForm.browseFirstButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
   connect(m_uiForm.browseLastButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
-  
+  connect(m_uiForm.dtcFileBrowseButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
+
   connect( m_uiForm.firstRunBox, SIGNAL(textChanged(const QString&)), this, SLOT(fillLogBox(const QString&)) );
   connect( m_uiForm.btnOK,SIGNAL(clicked()),this,SLOT(accept()));
   connect( m_uiForm.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
   connect( m_uiForm.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
 
-  // Fill Type ComboBox with allowed values
-  fillAndSetComboBox("Type",m_uiForm.typeBox);
+  connect( m_uiForm.dtcType, SIGNAL(currentIndexChanged(int)), this, SLOT(showHideDeadTimeFileWidget(int)));
+
+  // Fill ComboBoxes with allowed values
+  fillAndSetComboBox("Type", m_uiForm.typeBox);
+  fillAndSetComboBox("DeadTimeCorrType", m_uiForm.dtcType);
 
   // Fill log values from the file
   if ( !m_uiForm.firstRunBox->text().isEmpty() )
@@ -198,4 +205,14 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
   catch(std::exception& )
   {
   }
+}
+
+/**
+ * Show or hide Dead Time file widget depending on which Dead Time type is selected.
+ * @param deadTimeTypeIndex Selected Dead Time Correction type index
+ */
+void PlotAsymmetryByLogValueDialog::showHideDeadTimeFileWidget(int deadTimeTypeIndex)
+{
+  // Show only if "Using specified file" selected
+  m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 1);
 }
