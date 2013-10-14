@@ -5,10 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/DllConfig.h"
+#include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataObjects/TableColumn.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -75,18 +75,8 @@ namespace DataObjects
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#ifdef _WIN32
-#ifdef IN_MANTID_DATA_OBJECTS
-  #define TableWorkspace_DllExport __declspec( dllexport )
-#else
-  #define TableWorkspace_DllExport __declspec( dllimport )
-#endif
-#else
-  #define TableWorkspace_DllExport
-  #define TableWorkspace_DllImport
-#endif
 
-  class TableWorkspace_DllExport TableWorkspace: virtual public API::ITableWorkspace
+  class MANTID_DATAOBJECTS_DLL TableWorkspace: virtual public API::ITableWorkspace
   {
   public:
     /// Constructor.

@@ -323,6 +323,11 @@ p, li { white-space: pre-wrap; }
             <string>microseconds</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Å (d-spacing) </string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>

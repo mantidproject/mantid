@@ -4,6 +4,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
 
+#include <QApplication>
 #include <QMessageBox>
 #include <iostream>
 #include <qfontmetrics.h>
@@ -39,19 +40,43 @@ m_transposed(transpose)
   }
   setHeaderColType();
 
+  // Filling can take a while, so process any pending events and set appropriate cursor
+  QApplication::processEvents();
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
   // Set name and stuff
   parent->initTable(this, parent->generateUniqueName("Table-"));
-  //  askOnCloseEvent(false);
+
   // Fill up the view
   this->fillTable();
 
+  QApplication::restoreOverrideCursor();
+
   connect(this,SIGNAL(needToClose()),this,SLOT(closeTable()));
-  connect(this,SIGNAL(needToUpdate()),this,SLOT(fillTable()));
+  connect(this,SIGNAL(needToUpdate()),this,SLOT(updateTable()));
   observePreDelete();
   observeAfterReplace();
 }
 
 //------------------------------------------------------------------------------------------------
+
+/**
+ * Updates the table when ws used is changed
+ */
+void MantidTable::updateTable()
+{
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  // Delete old data
+  setNumRows(0);
+  setNumCols(0);
+
+  // Fill with the new data
+  fillTable();
+
+  QApplication::restoreOverrideCursor();
+}
+
 /** Refresh the table by filling it */
 void MantidTable::fillTable()
 {
@@ -61,8 +86,9 @@ void MantidTable::fillTable()
     return;
   }
 
-  resizeCols(static_cast<int>(m_ws->columnCount()));
-  resizeRows(static_cast<int>(m_ws->rowCount()));
+  // Resize to fit the new workspace
+  setNumRows(static_cast<int>(m_ws->rowCount()));
+  setNumCols(static_cast<int>(m_ws->columnCount()));
 
   // Add all columns
   for(int i=0; i < static_cast<int>(m_ws->columnCount());i++)
@@ -113,7 +139,6 @@ void MantidTable::fillTable()
     for(int j=0; j < static_cast<int>(m_ws->rowCount()); j++)
       d_table->verticalHeader()->setLabel(j,QString::number(j));
   }
-
 }
 
 /**

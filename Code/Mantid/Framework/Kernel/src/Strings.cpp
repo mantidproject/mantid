@@ -734,7 +734,9 @@ namespace Mantid
           stop = start;
           for ( ; it != last; ++it)
           {
-            if ( (stop + static_cast<T>(1)) == *(it+1) )
+            if( it+1 == last )
+              break;
+            else if ( (stop + static_cast<T>(1)) == *(it+1) )
               stop = *(it+1);
             else
               break;
@@ -1160,6 +1162,8 @@ namespace Mantid
       template MANTID_KERNEL_DLL std::string toString(const uint64_t value);
 #endif
       template MANTID_KERNEL_DLL std::string toString(const std::string value);
+
+      template MANTID_KERNEL_DLL std::string toString(const std::vector<int> &value);
 
       // this block should generate the vector ones as well
       template MANTID_KERNEL_DLL std::string toString(const std::set<int> &value);

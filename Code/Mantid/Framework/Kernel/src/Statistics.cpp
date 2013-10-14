@@ -267,12 +267,134 @@ namespace Mantid
       return rfactor;
     }
 
+    /**
+     * This will calculate the first n-moments (inclusive) about the origin. For example
+     * if maxMoment=2 then this will return 3 values: 0th (total weight), 1st (mean), 2nd (deviation).
+     *
+     * @param x The independent values
+     * @param y The dependent values
+     * @param maxMoment The number of moments to calculate
+     * @returns The first n-moments.
+     */
+    template<typename TYPE>
+    std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE>& x, const std::vector<TYPE>& y, const int maxMoment)
+    {
+      // densities have the same number of x and y
+      bool isDensity(x.size() == y.size());
+
+      // if it isn't a density then check for histogram
+      if ((!isDensity) && (x.size() != y.size()+1))
+      {
+        std::stringstream msg;
+        msg << "length of x (" << x.size() << ") and y (" << y.size() << ")do not match";
+        throw std::out_of_range(msg.str());
+      }
+
+      // initialize a result vector with all zeros
+      std::vector<double> result(maxMoment+1, 0.);
+
+      // cache the maximum index
+      size_t numPoints = y.size();
+      if (isDensity)
+        numPoints = x.size()-1;
+
+      // densities are calculated using Newton's method for numerical integration
+      // as backwards as it sounds, the outer loop should be the points rather than the moments
+      for (size_t j = 0; j < numPoints; ++j)
+      {
+        // reduce item lookup - and central x for histogram
+        const double xVal = .5*static_cast<double>(x[j]+x[j+1]);
+        // this variable will be (x^n)*y
+        double temp = static_cast<double>(y[j]); // correct for histogram
+        if (isDensity)
+        {
+          const double xDelta = static_cast<double>(x[j+1]-x[j]);
+          temp = .5*(temp + static_cast<double>(y[j+1]))*xDelta;
+        }
+
+        // accumulate the moments
+        result[0] += temp;
+        for (size_t i = 1; i < result.size(); ++i)
+        {
+          temp *= xVal;
+          result[i] += temp;
+        }
+      }
+
+      return result;
+    }
+
+    /**
+     * This will calculate the first n-moments (inclusive) about the mean (1st moment). For example
+     * if maxMoment=2 then this will return 3 values: 0th (total weight), 1st (mean), 2nd (deviation).
+     *
+     * @param x The independent values
+     * @param y The dependent values
+     * @param maxMoment The number of moments to calculate
+     * @returns The first n-moments.
+     */
+    template<typename TYPE>
+    std::vector<double> getMomentsAboutMean(const std::vector<TYPE>& x, const std::vector<TYPE>& y, const int maxMoment)
+    {
+      // get the zeroth (integrated value) and first moment (mean)
+      std::vector<double> momentsAboutOrigin = getMomentsAboutOrigin(x, y, 1);
+      const double mean = momentsAboutOrigin[1];
+
+      // initialize a result vector with all zeros
+      std::vector<double> result(maxMoment+1, 0.);
+      result[0] = momentsAboutOrigin[0];
+
+      // escape early if we need to
+      if (maxMoment == 0)
+        return result;
+
+      // densities have the same number of x and y
+      bool isDensity(x.size() == y.size());
+
+      // cache the maximum index
+      size_t numPoints = y.size();
+      if (isDensity)
+        numPoints = x.size()-1;
+
+      // densities are calculated using Newton's method for numerical integration
+      // as backwards as it sounds, the outer loop should be the points rather than the moments
+      for (size_t j = 0; j < numPoints; ++j)
+      {
+        // central x in histogram with a change of variables - and just change for density
+        const double xVal = .5*static_cast<double>(x[j]+x[j+1]) - mean; // change of variables
+
+        // this variable will be (x^n)*y
+        double temp;
+        if (isDensity)
+        {
+          const double xDelta = static_cast<double>(x[j+1]-x[j]);
+          temp = xVal * .5*static_cast<double>(y[j]+y[j+1])*xDelta;
+        }
+        else
+        {
+          temp = xVal * static_cast<double>(y[j]);
+        }
+
+        // accumulate the moment
+        result[1] += temp;
+        for (size_t i = 2; i < result.size(); ++i)
+        {
+          temp *= xVal;
+          result[i] += temp;
+        }
+      }
+
+      return result;
+    }
 
     // -------------------------- Macro to instantiation concrete types --------------------------------
 #define INSTANTIATE(TYPE) \
     template MANTID_KERNEL_DLL Statistics getStatistics<TYPE> (const vector<TYPE> &, const bool); \
     template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE> (const vector<TYPE> &, const bool); \
-    template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE> (const vector<TYPE> &, const bool);
+    template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE> (const vector<TYPE> &, const bool); \
+    template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE> (const std::vector<TYPE>& x, const std::vector<TYPE>& y, const int maxMoment); \
+    template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutMean<TYPE> (const std::vector<TYPE>& x, const std::vector<TYPE>& y, const int maxMoment);
+
 
     // --------------------------- Concrete instantiations ---------------------------------------------
     INSTANTIATE(float);

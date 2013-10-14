@@ -4,6 +4,7 @@
 
 The algorithm uses [[Unit_Factory|Unit Factory ]] and existing unit conversion procedures from input Workspace Units to the Units, necessary for transformation into correspondent MD Event workspace. It also uses [[PreprocessDetectorsToMD]] algorithm to help with transformation to reciprocal space.
 
+If min, max or both lists of values (properties 12 and 13) for the algorithm are not specified, [[ConvertToMDHelper]] is used to estimate missing min-max values. This algorithm is also used to calculate min-max values if specified min-max values are deemed incorrect (e.g. less values then dimensions or some min values are bigger then max values)
 == Notes ==
 <ol>
 <li> For elastic analysis (<math> dEAnalysisMode=Elastic</math>) the target [[units|unit]] is momentum <math>k</math>.
@@ -307,7 +308,10 @@ ConvertToMD::init()
 "by the Lorentz multiplier:\n <math>sin(\\theta)^2/\\lambda^4</math>. Currently works in Q3D Elastic case only "
 "and is ignored in any other case."
                     );
-
+    declareProperty(new PropertyWithValue<bool>("IgnoreZeroSignals", false, Direction::Input),
+ "Enabling this property forces the algorithm to ignore bins with zero signal for an input matrix workspace. Input event workspaces are not affected. "
+ "This violates the data normalization but may substantially accelerate calculations in situations when the normalization is not important (e.g. peak finding)."
+      );
     declareProperty(new ArrayProperty<double>("MinValues"),
 "It has to be N comma separated values, where N is the number of dimensions of the target workspace. Values "
 "smaller then specified here will not be added to workspace.\n Number N is defined by properties 4,6 and 7 and "
@@ -395,8 +399,9 @@ void ConvertToMD::exec()
      ConvToMDSelector AlgoSelector;
      m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
 
+     bool ignoreZeros = getProperty("IgnoreZeroSignals");
     // initate conversion and estimate amout of job to do
-     size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
+     size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper,ignoreZeros);
     // progress reporter
      m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
 

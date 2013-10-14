@@ -1,4 +1,5 @@
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -7,6 +8,7 @@
 
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::FilteredTimeSeriesProperty;
+using Mantid::PythonInterface::Policies::RemoveConst;
 using namespace boost::python;
 
 namespace
@@ -14,12 +16,10 @@ namespace
   /// Macro to reduce copy-and-paste
   #define EXPORT_FILTEREDTIMESERIES_PROP(TYPE, Prefix)\
     register_ptr_to_python<FilteredTimeSeriesProperty<TYPE>*>();\
-    register_ptr_to_python<const FilteredTimeSeriesProperty<TYPE>*>();\
-    implicitly_convertible<FilteredTimeSeriesProperty<TYPE>*,const FilteredTimeSeriesProperty<TYPE>*>();\
-    \
-    class_<FilteredTimeSeriesProperty<TYPE>, bases<TimeSeriesProperty<TYPE> >, boost::noncopyable>(#Prefix"FilteredTimeSeriesProperty", no_init)\
+  \
+  class_<FilteredTimeSeriesProperty<TYPE>, bases<TimeSeriesProperty<TYPE> >, boost::noncopyable>(#Prefix"FilteredTimeSeriesProperty", no_init)\
       .def(init<TimeSeriesProperty<TYPE>*,const TimeSeriesProperty<bool>&,const bool>("Constructor",(arg("source"),arg("filter"),arg("transferOwner"))))\
-      .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered, return_value_policy<return_by_value>(),\
+      .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered, return_value_policy<RemoveConst>(),\
            "Returns a time series containing the unfiltered data") \
       ;
 }

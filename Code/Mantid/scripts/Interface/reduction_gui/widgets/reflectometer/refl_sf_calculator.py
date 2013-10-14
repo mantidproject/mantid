@@ -8,19 +8,14 @@ from functools import partial
 from reduction_gui.reduction.reflectometer.refl_sf_calculator_data_script import DataSets as REFLDataSets
 from reduction_gui.reduction.reflectometer.refl_sf_calculator_data_series import DataSeries
 from reduction_gui.settings.application_settings import GeneralSettings
-#from base_ref_reduction import BaseRefWidget
 from reduction_gui.widgets.base_widget import BaseWidget as BaseRefWidget
 import ui.reflectometer.ui_refl_sf_calculator
 
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-#    from MantidFramework import *
-#    mtd.initialise(False)
-#    from mantidsimple import *
     from mantid.simpleapi import *    
     from reduction.instruments.reflectometer import data_manipulation
-
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -183,10 +178,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        
-#        import launch_peak_back_selection_1d_v2
-#        launch_peak_back_selection_1d_v2.start()
-        
         min, max = self._integrated_plot(True,
                                          self._summary.data_run_number_edit,
                                          self._summary.data_peak_from_pixel,
@@ -313,7 +304,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 #print self._summary.angle_list.item(i)
                 current_item = self._summary.angle_list.item(i)
                 
-                state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+                state = current_item.data(QtCore.Qt.UserRole)
                
                 _tof_min = self._summary.tof_min.text()
                 _tof_max = self._summary.tof_max.text()
@@ -350,10 +341,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             state.incident_medium_index_selected = _incident_medium_index_selected
             item_widget.setData(QtCore.Qt.UserRole, state)
         
-#        # Read logs
-#        if not in_list and self.short_name == "REFM":
-#            self._read_logs()
-        
         self._reset_warnings()
         
     def _reset_warnings(self):
@@ -377,7 +364,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.remove_btn.setEnabled(False)  
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
-            state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+            state = current_item.data(QtCore.Qt.UserRole)
             self.set_editing_state(state)
             self._reset_warnings()
         self._summary.angle_list.setEnabled(True)
@@ -403,8 +390,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._reset_warnings()
 
     def set_editing_state(self, state):
-    #    super(DataReflSFCalculatorWidget, self).set_editing_state(state)
-
         self._summary.incident_medium_combobox.clear() 
         _incident_medium_str = str(state.incident_medium_list[0])
         
@@ -454,7 +439,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         m.sf_factor_file = self._summary.cfg_scaling_factor_file_name.text()
                 
         for i in range(self._summary.angle_list.count()):
-            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
+            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole)
             # Over-write incident medium with global incident medium
             data.incident_medium = incident_medium
             state_list.append(data)
@@ -532,7 +517,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             returns the height and units of the slit #1 
         """
         if mt != None:
-#            _h, units = self.getSh(mt, 's1t', 's1b')
             _h  = self.getSheight(mt, '1')
             return _h
         return None, ''
@@ -542,7 +526,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             returns the height of the slit #2 
         """
         if mt != None:
-#            _h, units = self.getSh(mt, 's2t', 's2b') 
             _h = self.getSheight(mt, '2')
             return _h
         return None
@@ -572,7 +555,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             returns the width and units of the slit #1 
         """
         if mt != None:
-#            _w, units = self.getSw(mt, 's1l', 's1r')
             _w = self.getSwidth(mt, '1') 
             return _w 
         return None, ''
@@ -582,7 +564,6 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             returns the width and units of the slit #2 
         """
         if mt != None:
-#            _w, units = self.getSh(mt, 's2l', 's2r')
             _w = self.getSwidth(mt, '2') 
             return _w
         return None 

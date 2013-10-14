@@ -139,7 +139,13 @@ class QtProxyObject(QtCore.QObject):
         if hasattr(self.__obj, 'close'):
             threadsafe_call(self.__obj.close)
         self._kill_object()
-        
+
+    def inherits(self, className):
+        """
+        Reroute a method call to the stored object
+        """
+        return threadsafe_call(self.__obj.inherits, className)
+
     def _disconnect_from_destroyed(self):
         """
         Disconnects from the wrapped object's destroyed signal

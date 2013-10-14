@@ -852,7 +852,7 @@ def groupGet(wksp, whattoget, field=''):
     elif (whattoget == 'samp' and field != ''):
         if isinstance(mtd[wksp], WorkspaceGroup):
             try:
-                log = mtd[wksp + '_1'].getSampleDetails().getLogData(field).value
+                log = mtd[wksp + '_1'].getRun().getLogData(field).value
                 if (type(log) is int or type(log) is str):
                     res = log
                 else:
@@ -862,7 +862,7 @@ def groupGet(wksp, whattoget, field=''):
                 print "Block " + field + " not found."            
         else:
             try:
-                log = mtd[wksp].getSampleDetails().getLogData(field).value
+                log = mtd[wksp].getRun().getLogData(field).value
                 if (type(log) is int or type(log) is str):
                     res = log
                 else:

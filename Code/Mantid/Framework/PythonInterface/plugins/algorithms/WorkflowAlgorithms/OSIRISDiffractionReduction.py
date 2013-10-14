@@ -1,7 +1,7 @@
 """*WIKI* 
 
 == Source Code ==
-The source code for the Python Algorithm may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/Framework/PythonAPI/PythonAlgorithms/OSIRISDiffractionReduction.py OSIRISDiffractionReduction.py]
+The source code for the Python Algorithm may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py OSIRISDiffractionReduction.py]
 
 The source code for the reducer class which is used may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/scripts/Inelastic/osiris_diffraction_reducer.py osiris_diffraction_reducer.py]
 
@@ -79,14 +79,10 @@ def averageWsList(wsList):
         avName += "_" + name
     
     # Compute the average and put into "__temp_avg".
-    __temp_avg = wsList[0] + wsList[1]
+    __temp_avg = mtd[wsList[0]] + mtd[wsList[1]]
     for i in range(2, len(wsList) ):
-        __temp_avg += wsList[i]
-    __temp_avg/= len(wsList)
-    
-    # Delete the old workspaces that are now included in the average.
-    for name in wsList:
-        DeleteWorkspace(Workspace=name)
+        __temp_avg += mtd[wsList[i]]
+    __temp_avg /= len(wsList)
         
     # Rename the average ws and return it.
     RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=avName)
@@ -185,7 +181,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         """
         self._sams = sampleRuns
         self._vans = self.findRuns(self.getPropertyValue("Vanadium"))
-        
+
         # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
         for file in self._sams + self._vans:
             Load(Filename=file, OutputWorkspace=file, SpectrumMin=3, SpectrumMax=962)
@@ -277,6 +273,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 run_files.append(FileFinder.findRuns(run)[0])
             except IndexError:
                 raise RuntimeError("Could not locate sample file: " + run)
+
         return run_files
 
     def rebinToSmallest(self, samWS, vanWS):

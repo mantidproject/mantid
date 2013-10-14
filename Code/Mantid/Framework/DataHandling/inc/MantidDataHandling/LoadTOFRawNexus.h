@@ -90,13 +90,10 @@ protected:
   void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry & entry);
 
   void loadBank(const std::string &nexusfilename, const std::string & entry_name,
-      const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS);
+      const std::string &bankName, API::MatrixWorkspace_sptr WS, const detid2index_map& id_to_wi);
 
   /// List of the absolute time of each pulse
   std::vector<Kernel::DateAndTime> pulseTimes;
-
-  /// Map where key = detector ID, value = workspace index
-  detid2index_map * id_to_wi;
 
   /// Number of bins
   size_t numBins;

@@ -3,7 +3,7 @@
 
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
-#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Policies/DowncastReturnedValue.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -89,7 +89,7 @@ void export_PropertyManagerDataService()
 
   class_<PropertyManagerDataServiceImpl,boost::noncopyable>("PropertyManagerDataServiceImpl", no_init)
     .def("doesExist", &PropertyManagerDataServiceImpl::doesExist, "Returns True if the property manager is found in the service.")
-    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::downcast_returned_value>(),
+    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::DowncastReturnedValue>(),
          "Retrieve the named property manager. Raises an exception if the name does not exist")
     .def("remove", &PropertyManagerDataServiceImpl::remove, "Remove a named property manager")
     .def("clear", &PropertyManagerDataServiceImpl::clear, "Removes all property managers managed by the service.")
@@ -102,7 +102,7 @@ void export_PropertyManagerDataService()
     .def("addOrReplace", &PropertyManagerDataServiceImpl::add, "Add a property manager to the service or replace an existing one.")
     // Make it act like a dictionary
     .def("__len__", &PropertyManagerDataServiceImpl::size)
-    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Policies::downcast_returned_value>())
+    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Policies::DowncastReturnedValue>())
     .def("__contains__", &PropertyManagerDataServiceImpl::doesExist)
     .def("__delitem__", &PropertyManagerDataServiceImpl::remove)
     .def("__setitem__", &addPtr)

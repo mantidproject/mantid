@@ -149,7 +149,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
 
-  m_algoRunner = new AlgorithmRunner();
+  m_algoRunner = new AlgorithmRunner(this);
   QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(dynamicRebinComplete(bool)));
 
   initMenus();
@@ -177,8 +177,8 @@ SliceViewer::SliceViewer(QWidget *parent)
 /// Destructor
 SliceViewer::~SliceViewer()
 {
-  delete m_data;
   saveSettings();
+  delete m_data;
   // Don't delete Qt objects, I think these are auto-deleted
 }
 

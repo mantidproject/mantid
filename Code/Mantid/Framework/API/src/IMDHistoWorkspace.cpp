@@ -35,7 +35,15 @@ namespace API
   {
   }
 
+  const std::string IMDHistoWorkspace::toString() const
+  {
+    std::ostringstream os;
+    os << IMDWorkspace::toString();
 
+    os << MultipleExperimentInfos::toString() << "\n";
+
+    return os.str();
+  }
 } // namespace Mantid
 } // namespace API
 

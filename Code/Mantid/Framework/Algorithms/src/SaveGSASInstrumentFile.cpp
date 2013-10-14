@@ -1,6 +1,6 @@
-/** *WIKI*
+/*WIKI*
 
-Convert Fullprof"s instrument resolution file (.irf) to  GSAS"s instrument file (.iparm/.prm).
+Convert Fullprof's instrument resolution file (.irf) to  GSAS's instrument file (.iparm/.prm). 
 
 ==== Supported peak profiles ====
 * Time-of-flight back-to-back exponential convoluted with pseudo-voigt (planned)
@@ -8,27 +8,32 @@ Convert Fullprof"s instrument resolution file (.irf) to  GSAS"s instrument file 
 ** GSAS: Type 3 TOF profile.
 
 * Thermal neutron time-of-flight back-to-back exponential convoluted with pseudo-voigt (implemented)
-** Fullprof: Profile 10;
-** GSAS: tabulated peak profile.
+** Fullprof: Profile 10; 
+** GSAS: tabulated peak profile. 
 
 ==== Supported input Fullprof file ====
 There can be several types of Fullprof files as the input file
-* resolution file .irf (implemented)
+* resolution file .irf (implemented) 
 * configuration file .pcr (planned)
 
-==== Supported instruments ====
-Here is the list of instruments (powder diffractomers) supported by this algorithm:
-* NOMAD
-* POWGEN
+==== Set up <math>2\theta</math> ====
+There are several places in this algorithm that can set the value of  <math>2\theta</math>.  From the highest priority, here is the list how  <math>2\theta</math> is set up.
+ 1. Algorithms' input property ''2Theta'';
+ 2. Either input TableWorkspace or input Fullprof resolution (.irf) file;
+ 3. Hard coded default  <math>2\theta</math> of a certain instrument.
+
+==== Set up <math>L_1</math> ====
+There are 2 places in this algorithm that can set the value of  <math>L_1</math>.  From the highest priority, here is the list how  <math>2\theta</math> is set up.
+ 1. Algorithms' input property ''L1'';
+ 2. Hard coded default  <math>2\theta</math> of a certain instrument.
 
 ==== Calculation of L2 ====
-* If 2Theta (<math>2\theta</math>) is given, L2 will be calculated from given 2Theta and L1 by <math>DIFC = 252.816\cdot2sin(\theta)\sqrt{L1+L2}</math>. Notice that <math>2\theta</math> given in input .irf file may have subtle difference to "2Theta", which is input by user in order to calculate L2.
+* If 2Theta (<math>2\theta</math>) is given, L2 will be calculated from given 2Theta and L1 by <math>DIFC = 252.816\cdot2sin(\theta)\sqrt{L1+L2}</math>. Notice that <math>2\theta</math> given in input .irf file may have subtle difference to "2Theta", which is input by user in order to calculate L2.  
 
 * If "2Theta" (<math>2\theta</math>) is not given, L2 will be read from user input.
 
 
-*WIKI*
-*/
+*WIKI*/
 
 #include "MantidAlgorithms/SaveGSASInstrumentFile.h"
 #include "MantidAPI/FileProperty.h"
@@ -52,84 +57,108 @@ namespace Mantid
 namespace Algorithms
 {
 
-  DECLARE_ALGORITHM(SaveGSASInstrumentFile)
+DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 
 class ChopperConfiguration
 {
-public:
-  ChopperConfiguration(const int freq, const std::string& bankidstr, const std::string& cwlstr,
-          const std::string& mndspstr, const std::string& mxdspstr, const std::string& maxtofstr);
+  public:
+    ChopperConfiguration(vector<int> bankids);
+    ChopperConfiguration(const int freq, const std::string& bankidstr, const std::string& cwlstr,
+                         const std::string& mndspstr, const std::string& mxdspstr, const std::string& maxtofstr);
 
-  /// Get bank IDs in configuration
-  std::vector<unsigned int> getBankIDs() const;
-  /// Check wehther a bank is defined
-  bool hasBank(unsigned int bankid) const;
-  /// Get a parameter from a bank
-  double getParameter(unsigned int bankid, const std::string& paramname) const;
-  /// Set a parameter to a bank
-  void setParameter(unsigned int bankid, const std::string& paramname, double value);
+    /// Get bank IDs in configuration
+    std::vector<unsigned int> getBankIDs() const;
+    /// Check wehther a bank is defined
+    bool hasBank(unsigned int bankid) const;
+    /// Get a parameter from a bank
+    double getParameter(unsigned int bankid, const std::string& paramname) const;
+    /// Set a parameter to a bank
+    void setParameter(unsigned int bankid, const std::string& paramname, double value);
 
-private:
-  std::string parseString() const;
-  /// Parse string to a double vector
-  std::vector<double> parseStringDbl(const std::string& instring) const;
-  /// Parse string to an integer vector
-  std::vector<unsigned int> parseStringUnsignedInt(const std::string& instring) const;
+  private:
+    std::string parseString() const;
+    /// Parse string to a double vector
+    std::vector<double> parseStringDbl(const std::string& instring) const;
+    /// Parse string to an integer vector
+    std::vector<unsigned int> parseStringUnsignedInt(const std::string& instring) const;
 
-  const double m_frequency;
-  std::vector<unsigned int> m_bankIDs;
-  std::map<unsigned int, size_t> m_bankIDIndexMap;
+    const double m_frequency;
+    std::vector<unsigned int> m_bankIDs;
+    std::map<unsigned int, size_t> m_bankIDIndexMap;
 
-  std::vector<double> m_vec2Theta;
-  std::vector<double> m_vecL1;
-  std::vector<double> m_vecL2;
+    std::vector<double> m_vec2Theta;
+    std::vector<double> m_vecL1;
+    std::vector<double> m_vecL2;
 
-  std::vector<double> m_vecCWL;
-  std::vector<double> m_mindsps;
-  std::vector<double> m_maxdsps;
-  std::vector<double> m_maxtofs;
+    std::vector<double> m_vecCWL;
+    std::vector<double> m_mindsps;
+    std::vector<double> m_maxdsps;
+    std::vector<double> m_maxtofs;
 
-  std::vector<double> m_splitds;
-  std::vector<int> m_vruns;
-
+    std::vector<double> m_splitds;
+    std::vector<int> m_vruns;
 };
 
 typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor of chopper configuration
+//----------------------------------------------------------------------------------------------
+/** Constructor
+  */
+ChopperConfiguration::ChopperConfiguration(vector<int> bankids) : m_frequency(0)
+{
+  size_t numbanks = bankids.size();
+
+  // Initialize vectors
+  m_bankIDs.assign(numbanks, 0);
+  m_vecCWL.assign(numbanks, EMPTY_DBL());
+  m_mindsps.assign(numbanks, EMPTY_DBL());
+  m_maxdsps.assign(numbanks, EMPTY_DBL());
+  m_maxtofs.assign(numbanks, EMPTY_DBL());
+
+  // Set bank IDs
+  m_bankIDs.assign(bankids.begin(), bankids.end());
+  m_bankIDIndexMap.clear();
+  for (size_t ib = 0; ib < numbanks; ++ib)
+  {
+    m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
+  }
+
+}
+
+//----------------------------------------------------------------------------------------------
+/** Constructor of chopper configuration
     * Removed arguments: std::string splitdstr, std::string vrunstr
     */
-  ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& bankidstr, const std::string& cwlstr,
-                                             const std::string& mndspstr, const std::string& mxdspstr,
-                                             const std::string& maxtofstr) : m_frequency(freq),
-    m_bankIDs(parseStringUnsignedInt(bankidstr)), m_vecCWL(parseStringDbl(cwlstr)), m_mindsps(parseStringDbl(mndspstr)),
-    m_maxdsps(parseStringDbl(mxdspstr)), m_maxtofs(parseStringDbl(maxtofstr))
+ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& bankidstr, const std::string& cwlstr,
+                                           const std::string& mndspstr, const std::string& mxdspstr,
+                                           const std::string& maxtofstr) : m_frequency(freq),
+  m_bankIDs(parseStringUnsignedInt(bankidstr)), m_vecCWL(parseStringDbl(cwlstr)), m_mindsps(parseStringDbl(mndspstr)),
+  m_maxdsps(parseStringDbl(mxdspstr)), m_maxtofs(parseStringDbl(maxtofstr))
 
+{
+  size_t numbanks = m_bankIDs.size();
+
+  // Check size
+  if (m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks)
   {
-    size_t numbanks = m_bankIDs.size();
-
-    // Check size
-    if (m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks)
-    {
-      stringstream errss;
-      errss << "Default chopper constants have different number of elements. ";
-      throw runtime_error(errss.str());
-    }
-
-    // Set up index map
-    m_vec2Theta.resize(numbanks, 0.);
-    m_vecL1.resize(numbanks, 0.);
-    m_vecL2.resize(numbanks, 0.);
-
-
-    // Set up bank ID / looking up index map
-    m_bankIDIndexMap.clear();
-    for (size_t ib = 0; ib < numbanks; ++ib)
-    {
-      m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
-    }
+    stringstream errss;
+    errss << "Default chopper constants have different number of elements. ";
+    throw runtime_error(errss.str());
   }
+
+  // Set up index map
+  m_vec2Theta.resize(numbanks, 0.);
+  m_vecL1.resize(numbanks, 0.);
+  m_vecL2.resize(numbanks, 0.);
+
+
+  // Set up bank ID / looking up index map
+  m_bankIDIndexMap.clear();
+  for (size_t ib = 0; ib < numbanks; ++ib)
+  {
+    m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
+  }
+}
 
   //----------------------------------------------------------------------------------------------
   /** Get bank IDs in the chopper configuration
@@ -213,12 +242,25 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     else
     {
       size_t ibank = biter->second;
+
       if (paramname == "2Theta")
         m_vec2Theta[ibank] = value;
+      else if (paramname == "CWL")
+        m_vecCWL[ibank] = value;
       else if (paramname == "L1")
         m_vecL1[ibank] = value;
       else if (paramname == "L2")
         m_vecL2[ibank] = value;
+      else if (paramname == "MinTOF")
+      {
+        // m_mintofs[ibank] = value;
+      }
+      else if (paramname == "MaxTOF")
+        m_maxtofs[ibank] = value*1.0E-3;
+      else if (paramname == "MinDsp")
+        m_mindsps[ibank] = value;
+      else if (paramname == "MaxDsp")
+        m_maxdsps[ibank] = value;
       else
       {
         stringstream errss;
@@ -300,7 +342,7 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
   //----------------------------------------------------------------------------------------------
   void SaveGSASInstrumentFile::initDocs()
   {
-    setWikiSummary("Save a instrument parameter table workspace to GSAS instrument file.");
+    setWikiSummary("Generate a GSAS instrument file from either a table workspace containing profile parameters or a Fullprof's instrument resolution file (.irf file). ");
     setOptionalMessage("");
   }
 
@@ -310,8 +352,7 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
   void SaveGSASInstrumentFile::init()
   {
     declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
-                    "Name of the table workspace containing the parameters.  Usually it is generated by "
-                    "LoadFullprofResolution.");
+                    "Name of the table workspace containing the parameters.");
 
     vector<string> infileexts;
     infileexts.push_back(".irf");
@@ -328,9 +369,9 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
 
 
     vector<string> instruments;
-    instruments.push_back("PG3");
-    instruments.push_back("NOM");
-    declareProperty("Instrument", "PG3", boost::make_shared<StringListValidator>(instruments),
+    instruments.push_back("powgen");
+    instruments.push_back("nomad");
+    declareProperty("Instrument", "powgen", boost::make_shared<StringListValidator>(instruments),
                     "Name of the instrument that parameters are belonged to. "
                     "So far, only PG3 and NOM are supported.");
 
@@ -340,8 +381,8 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     vecfreq.push_back("60");
     declareProperty("ChopperFrequency", "60", boost::make_shared<StringListValidator>(vecfreq), "Frequency of the chopper. ");
 
-    declareProperty("IDLine", "", "ID line to be written in GSAS instrumetn file.");
-    declareProperty("Sample", "", "Name of the sample used to calibrate the instrument parameters. ");
+    declareProperty("IDLine", "", "ID line to be written in GSAS instrument file");
+    declareProperty("Sample", "", "Sample information written to header (title) ");
 
     boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
     mustBePositive->setLower(0.0);
@@ -351,6 +392,42 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
             "It must be given if 2Theta is not given. ");
     declareProperty("TwoTheta", EMPTY_DBL(), mustBePositive, "Angle of the detector bank. "
             "It must be given if L2 is not given. ");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Main execution body
+    */
+  void SaveGSASInstrumentFile::exec()
+  {
+    // Process user specified properties
+    processProperties();
+
+    // Parse profile table workspace
+    map<unsigned int, map<string, double> > bankprofileparammap;
+    parseProfileTableWorkspace(m_inpWS, bankprofileparammap);
+
+    // Initialize some conversion constants related to the chopper
+    initConstants(bankprofileparammap);
+
+    // Deal with a default
+    if (m_vecBankID2File.empty())
+    {
+      // Default is to export all banks
+      for (map<unsigned int, map<string, double> >::iterator miter = bankprofileparammap.begin();
+           miter != bankprofileparammap.end(); ++miter)
+      {
+        unsigned int bankid = miter->first;
+        m_vecBankID2File.push_back(bankid);
+      }
+      sort(m_vecBankID2File.begin(), m_vecBankID2File.end());
+    }
+    g_log.debug() << "Number of banks to output = " << m_vecBankID2File.size() << ".\n";
+
+
+    // Convert to GSAS
+    convertToGSAS(m_vecBankID2File, m_gsasFileName, bankprofileparammap);
 
     return;
   }
@@ -391,12 +468,14 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     m_vecBankID2File = getProperty("BankIDs");
 
     m_L1 = getProperty("L1");
+    if (isEmpty(m_L1))
+      throw runtime_error("L1 must be given!");
     m_2theta = getProperty("TwoTheta");
     m_L2 = getProperty("L2");
     string freqtempstr = getProperty("ChopperFrequency");
     m_frequency = atoi(freqtempstr.c_str());
 
-    // Set default value for L1
+    /* Set default value for L1
     if (m_L1 == EMPTY_DBL())
     {
       if (m_instrument == "PG3")
@@ -420,11 +499,12 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     {
       throw runtime_error("Input L1 cannot be less or equal to 0.");
     }
+    */
 
     // Set default value for L2
-    if (m_2theta == EMPTY_DBL())
+    if (isEmpty(m_2theta ))
     {
-      if (m_L2 == EMPTY_DBL())
+      if (isEmpty(m_L2))
       {
         string errmsg("User must specify either 2theta or L2.  Neither of them is given.");
         g_log.error(errmsg);
@@ -440,48 +520,15 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Main execution body
-    */
-  void SaveGSASInstrumentFile::exec()
-  {
-    // Process user specified properties
-    processProperties();
-
-    // Initialize some conversion constants related to the chopper
-    initConstants(m_frequency);
-
-    // Parse profile table workspace
-    map<unsigned int, map<string, double> > bankprofileparammap;
-    parseProfileTableWorkspace(m_inpWS, bankprofileparammap);
-
-    // Deal with a default
-    if (m_vecBankID2File.empty())
-    {
-      // Default is to export all banks
-      for (map<unsigned int, map<string, double> >::iterator miter = bankprofileparammap.begin();
-           miter != bankprofileparammap.end(); ++miter)
-      {
-        unsigned int bankid = miter->first;
-        m_vecBankID2File.push_back(bankid);
-      }
-      sort(m_vecBankID2File.begin(), m_vecBankID2File.end());
-    }
-    g_log.debug() << "Number of banks to output = " << m_vecBankID2File.size() << ".\n";
-
-
-    // Convert to GSAS
-    convertToGSAS(m_vecBankID2File, m_gsasFileName, bankprofileparammap);
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Set up some constant by default
     * Output--> m_configuration
     * @param chopperfrequency :: chopper frequency of the profile for.
     */
-  void SaveGSASInstrumentFile::initConstants(int chopperfrequency)
+  void SaveGSASInstrumentFile::initConstants(const map<unsigned int, map<string, double> >& profmap)
   {
+    m_configuration = setupInstrumentConstants(profmap);
+
+    /*
     if (m_instrument.compare("PG3") == 0)
     {
       m_configuration = setupPG3Constants(chopperfrequency);
@@ -496,6 +543,7 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
       errss << "Instrument " << m_instrument << " is not supported. ";
       throw runtime_error(errss.str());
     }
+    */
 
     return;
   }
@@ -559,6 +607,50 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     }
 
     return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up chopper/instrument constant parameters from profile map
+    */
+  ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
+      const map<unsigned int, map<string, double> >& profmap)
+  {
+    // Collect bank ids
+    vector<int> bankids;
+    map<unsigned int, map<string, double> >::const_iterator bmiter;
+    for (bmiter = profmap.begin(); bmiter != profmap.end(); ++ bmiter)
+    {
+      int bankid = bmiter->first;
+      bankids.push_back(bankid);
+    }
+
+    // Create a configuration object
+    ChopperConfiguration_sptr chconfig = boost::make_shared<ChopperConfiguration>(bankids);
+
+    // Add chopper/instrument constants by banks
+    for (bmiter = profmap.begin(); bmiter != profmap.end(); ++ bmiter)
+    {
+      int bankid = bmiter->first;
+
+      double cwl = getProfileParameterValue(bmiter->second, "CWL");
+      double mintof = getProfileParameterValue(bmiter->second, "tof-min");
+      double maxtof = getProfileParameterValue(bmiter->second, "tof-max");
+      double dtt1 = getProfileParameterValue(bmiter->second, "Dtt1");
+      double zero = getProfileParameterValue(bmiter->second, "Zero");
+
+      double dmin = calDspRange(dtt1, zero, mintof);
+      double dmax = calDspRange(dtt1, zero, maxtof);
+
+      chconfig->setParameter(bankid, "CWL", cwl);
+      chconfig->setParameter(bankid, "MaxTOF", maxtof);
+      chconfig->setParameter(bankid, "MinDsp", dmin);
+      chconfig->setParameter(bankid, "MaxDsp", dmax);
+
+      g_log.information() << "Import bank " << bankid << ".  TOF range: " << mintof << ", " << maxtof
+                          << "; D-space range: " << dmin << ", " << dmax << ".\n";
+    }
+
+    return chconfig;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -840,13 +932,12 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
 
     double mindsp = m_configuration->getParameter(bankid, "MinDsp");
     double maxtof = m_configuration->getParameter(bankid, "MaxTOF");
-
     double cwl = m_configuration->getParameter(bankid, "CWL");
 
     // Calculate L2
     double instC = dtt1 - (4*(alph0+alph1));
-    g_log.debug() << "Dtt1 = " << dtt1 << ", Alph0 = " << alph0 << ", Alph1 = " << alph1 << ".\n"
-                  << "MinDsp = " << mindsp << ".\n";
+    g_log.debug() << "Bank " << bankid << ": MaxTOF = " << maxtof << "; Dtt1 = " << dtt1 << ", Alph0 = "
+                  << alph0 << ", Alph1 = " << alph1 << ", MinDsp = " << mindsp << ".\n";
 
     if (m_L2 <= 0. || m_L2 == EMPTY_DBL())
     {
@@ -874,8 +965,7 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     fprintf(pFile, "INS %2dBAKGD     1    4    Y    0    Y\n", bankid);
     fprintf(pFile, "INS %2dI HEAD %s\n", bankid, titleline.c_str());
     fprintf(pFile, "INS %2dI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0, mindsp*0.001*instC, maxtof, randint);
-    // FIXME - "powgen" should be m_instrumentName
-    fprintf(pFile, "INS %2dINAME   %s \n", bankid, "powgen");
+    fprintf(pFile, "INS %2dINAME   %s \n", bankid, m_instrument.c_str());
     fprintf(pFile, "INS %2dPRCF1 %5d%5d%10.5f\n", bankid, -3, 21, 0.002);
     fprintf(pFile, "INS %2dPRCF11%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig0);
     fprintf(pFile, "INS %2dPRCF12%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
@@ -1021,6 +1111,19 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     double value = piter->second;
 
     return value;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Calcualte range of data on d-spacing from TOF.
+    * Algorithm: use the approximation from Dtt1.  The part with thermal neutron has complex operation
+    * on d ralated.
+    * @return :: d-space value
+   */
+  double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero, double tof)
+  {
+    double dsp = (tof-zero)/dtt1;
+    return dsp;
   }
 
   //----------------------------------------------------------------------------------------------

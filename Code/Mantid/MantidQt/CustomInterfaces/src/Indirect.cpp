@@ -344,6 +344,24 @@ void Indirect::runConvertToEnergy()
     break;
   }
 
+  // add sample logs to each of the workspaces
+  QString calibChecked = m_uiForm.ckUseCalib->isChecked() ? "True" : "False";
+  QString detailedBalance = m_uiForm.ckDetailedBalance->isChecked() ? "True" : "False";
+  QString scaled = m_uiForm.ckScaleMultiplier->isChecked() ? "True" : "False";
+  pyInput += "calibCheck = "+calibChecked+"\n"
+             "detailedBalance = "+detailedBalance+"\n"
+             "scaled = "+scaled+"\n"
+             "for ws in ws_list:\n"
+             "  AddSampleLog(Workspace=ws, LogName='calib_file', LogType='String', LogText=str(calibCheck))\n"
+             "  if calibCheck:\n"
+             "    AddSampleLog(Workspace=ws, LogName='calib_file_name', LogType='String', LogText='"+m_uiForm.ind_calibFile->getFirstFilename()+"')\n"
+             "  AddSampleLog(Workspace=ws, LogName='detailed_balance', LogType='String', LogText=str(detailedBalance))\n"
+             "  if detailedBalance:\n"
+             "    AddSampleLog(Workspace=ws, LogName='detailed_balance_temp', LogType='Number', LogText='"+m_uiForm.leDetailedBalance->text()+"')\n"
+             "  AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
+             "  if scaled:\n"
+             "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n";
+
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
@@ -1714,12 +1732,15 @@ void Indirect::sOfQwClicked()
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
       "rebin = '" + rebinString + "'\n";
 
-    if(m_uiForm.sqw_cbRebinType->currentText() == "Centre (SofQW)")
+    QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
+    if(rebinType == "Centre (SofQW)")
       pyInput += "SofQW(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped (SofQW2)")
+    else if(rebinType == "Parallelepiped (SofQW2)")
       pyInput += "SofQW2(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped/Fractional Area (SofQW3)")
+    else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
       pyInput += "SofQW3(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
+
+    pyInput += "AddSampleLog(Workspace=sqwOutput, LogName='rebin_type', LogType='String', LogText='"+rebinType+"')\n";
 
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {
@@ -1792,8 +1813,8 @@ void Indirect::sOfQwPlotInput()
     pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
   }
 
-  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input+'_q', Target='ElasticQ', EMode='Indirect')\n"
-    "ws = importMatrixWorkspace(input+'_q')\n"
+  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
+    "ws = importMatrixWorkspace(input[:-4]+'_rqw')\n"
     "ws.plotGraph2D()\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();

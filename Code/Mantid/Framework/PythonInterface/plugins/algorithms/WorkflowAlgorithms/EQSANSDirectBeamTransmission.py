@@ -42,6 +42,9 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                              doc="Property manager name for the reduction")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
                                                      direction = Direction.Output))
+        self.declareProperty(MatrixWorkspaceProperty("TransmissionWorkspace", "", 
+                                                     optional = PropertyMode.Optional,
+                                                     direction = Direction.Output))
         self.declareProperty("OutputMessage", "", 
                              direction=Direction.Output, doc = "Output message")
     
@@ -55,11 +58,15 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
             (workspace.getRun().hasProperty('is_frame_skipping') \
             and workspace.getRun().getProperty('is_frame_skipping').value == 0):
             output_ws_name = self.getPropertyValue('OutputWorkspace')
-            msg, ws = self._call_sans_transmission(workspace, output_ws_name)
+            msg, ws, trans_ws, trans_name = self._call_sans_transmission(workspace, output_ws_name)
             self.setPropertyValue("OutputMessage", msg)
             self.setProperty("OutputWorkspace", ws)
+            if trans_ws is not None:
+                self.setPropertyValue("TransmissionWorkspace", trans_name)
+                self.setProperty("TransmissionWorkspace", trans_ws)
         else:
-            self._with_frame_skipping(workspace)            
+            ws = self._with_frame_skipping(workspace)            
+            self.setProperty("OutputWorkspace", ws)
     
     def _call_sans_transmission(self, workspace, output_workspace_name):
         """
@@ -96,7 +103,14 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         else:
             output_msg = None
         output_ws = alg.getProperty('OutputWorkspace').value
-        return (output_msg, output_ws)
+
+        if alg.existsProperty('TransmissionWorkspace'):
+            trans_ws = alg.getProperty('TransmissionWorkspace').value
+            trans_name = alg.getPropertyValue('TransmissionWorkspace')
+        else:
+            trans_ws = None
+            trans_name = ''
+        return (output_msg, output_ws, trans_ws, trans_name)
     
     def _with_frame_skipping(self, workspace):
         """
@@ -124,7 +138,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
 
         output_str = ""
         if trans_ws is None:
-            trans_ws_name = "transmission_fit_"+input_ws_name
+            trans_ws_name = "__transmission_fit_"+input_ws_name
             # Load data files
             sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID = TransmissionUtils.load_monitors(self, property_manager)
             
@@ -189,10 +203,11 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                                                 "OutputWorkspace": "__transmission",
                                                 })
             trans_ws = alg.getProperty("OutputWorkspace").value
+            self.setPropertyValue("TransmissionWorkspace", trans_ws_name)
+            self.setProperty("TransmissionWorkspace", trans_ws)      
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
-        TransmissionUtils.apply_transmission(self, workspace, trans_ws)
-  
-        
+        return TransmissionUtils.apply_transmission(self, workspace, trans_ws)
+
 AlgorithmFactory.subscribe(EQSANSDirectBeamTransmission)

@@ -75,10 +75,7 @@ using namespace Mantid::DataObjects;
 
 void ModeratorTzeroLinear::init()
 {
-
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "The name of the input workspace, containing events and/or histogram data, in units of time-of-flight");
   //declare the output workspace
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
@@ -89,21 +86,19 @@ void ModeratorTzeroLinear::init()
 void ModeratorTzeroLinear::exec()
 {
   //retrieve the input workspace.
-  const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   //Get a pointer to the instrument contained in the workspace
   m_instrument = inputWS->getInstrument();
 
   //deltaE-mode (should be "indirect")
-  std::string Emode;
   try
   {
-    Emode = m_instrument->getStringParameter("deltaE-mode")[0];
-    g_log.debug() << "Instrument Geometry: " << Emode << std::endl;
-    if(Emode != "indirect")
-    {
-      throw std::invalid_argument("Instrument geometry must be of type indirect.");
-    }
+    const std::vector<std::string> Emode = m_instrument->getStringParameter("deltaE-mode");
+    if(Emode.empty())
+      throw Exception::InstrumentDefinitionError("Unable to retrieve instrument geometry (direct or indirect) parameter", inputWS->getTitle());
+    if(Emode[0]!= "indirect")
+      throw Exception::InstrumentDefinitionError("Instrument geometry must be of type indirect.");
   }
   catch (Exception::NotFoundError &)
   {
@@ -114,11 +109,17 @@ void ModeratorTzeroLinear::exec()
   //gradient, intercept constants
   try
   {
-    m_gradient = m_instrument->getNumberParameter("Moderator.TimeZero.gradient")[0]; //[gradient]=microsecond/Angstrom
+    const std::vector<double> gradientParam = m_instrument->getNumberParameter("Moderator.TimeZero.gradient");
+    if ( gradientParam.empty() )
+      throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (gradient)", inputWS->getTitle());
+    m_gradient = gradientParam[0]; //[gradient]=microsecond/Angstrom
     //conversion factor for gradient from microsecond/Angstrom to meters
-    double convfactor = 1e+4*PhysicalConstants::h/PhysicalConstants::NeutronMass;
+    double convfactor = 1.0e4*PhysicalConstants::h/PhysicalConstants::NeutronMass;
     m_gradient *= convfactor; //[gradient] = meter
-    m_intercept = m_instrument->getNumberParameter("Moderator.TimeZero.intercept")[0]; //[intercept]=microsecond
+    const std::vector<double> interceptParam = m_instrument->getNumberParameter("Moderator.TimeZero.intercept");
+    if ( interceptParam.empty() )
+      throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (intercept)", inputWS->getTitle());
+    m_intercept = interceptParam[0]; //[intercept]=microsecond
     g_log.debug() << "Moderator Time Zero: gradient=" << m_gradient << "intercept=" << m_intercept << std::endl;
   }
   catch (Exception::NotFoundError &)
@@ -144,7 +145,7 @@ void ModeratorTzeroLinear::exec()
   }
 
   // do the shift in X
-  const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
+  const size_t numHists = inputWS->getNumberHistograms();
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
   PARALLEL_FOR2(inputWS, outputWS)
   for (int i=0; i < static_cast<int>(numHists); ++i)
@@ -152,13 +153,13 @@ void ModeratorTzeroLinear::exec()
     PARALLEL_START_INTERUPT_REGION
     double t_f, L_i;
     size_t wsIndex = static_cast<size_t>(i);
-    CalculateTfLi(inputWS, wsIndex ,t_f, L_i);
+    calculateTfLi(inputWS, wsIndex, t_f, L_i);
     // shift the time of flights
     if(t_f >= 0) //t_f < 0 when no detector info is available
     {
-      double scaling = L_i/(L_i+m_gradient);
-      double offset = (1-scaling)*t_f - scaling*m_intercept;
-      MantidVec &inbins = inputWS->dataX(i);
+      const double scaling = L_i/(L_i+m_gradient);
+      const double offset = (1-scaling)*t_f - scaling*m_intercept;
+      const MantidVec & inbins = inputWS->readX(i);
       MantidVec &outbins = outputWS->dataX(i);
       for(unsigned int j=0; j < inbins.size(); j++)
       {
@@ -167,24 +168,24 @@ void ModeratorTzeroLinear::exec()
     }
     else
     {
-      outputWS->dataX(i) = inputWS->dataX(i);
+      outputWS->dataX(i) = inputWS->readX(i);
     }
     //Copy y and e data
-    outputWS->dataY(i) = inputWS->dataY(i);
-    outputWS->dataE(i) = inputWS->dataE(i);
+    outputWS->dataY(i) = inputWS->readY(i);
+    outputWS->dataE(i) = inputWS->readE(i);
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Copy units
-  if (inputWS->getAxis(0)->unit().get())
+  if ( inputWS->getAxis(0)->unit() )
   {
-      outputWS->getAxis(0)->unit() = inputWS->getAxis(0)->unit();
+    outputWS->getAxis(0)->unit() = inputWS->getAxis(0)->unit();
   }
   try
   {
-    if(inputWS->getAxis(1)->unit().get())
+    if( inputWS->getAxis(1)->unit() )
     {
       outputWS->getAxis(1)->unit() = inputWS->getAxis(1)->unit();
     }
@@ -205,8 +206,8 @@ void ModeratorTzeroLinear::execEvent()
   EventWorkspace_const_sptr inputWS= boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
-  const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
-  Mantid::API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  const size_t numHists = inputWS->getNumberHistograms();
+  MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   EventWorkspace_sptr outputWS;
   if (matrixOutputWS == matrixInputWS)
   {
@@ -225,9 +226,6 @@ void ModeratorTzeroLinear::execEvent()
     setProperty("OutputWorkspace", matrixOutputWS);
   }
 
-  //Get a pointer to the sample
-  IObjComponent_const_sptr sample = outputWS->getInstrument()->getSample();
-
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
   PARALLEL_FOR1(outputWS)
@@ -240,10 +238,10 @@ void ModeratorTzeroLinear::execEvent()
     {
       // Calculate the time from sample to detector 'i'
       double t_f, L_i;
-      CalculateTfLi(matrixOutputWS, wsIndex, t_f, L_i);
+      calculateTfLi(matrixOutputWS, wsIndex, t_f, L_i);
       if(t_f >= 0)
       {
-        double scaling = L_i/(L_i+m_gradient);
+        const double scaling = L_i/(L_i+m_gradient);
         //Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f = scaling*TOF + (1-scaling)*t_f - scaling*intercept
         evlist.convertTof(scaling, (1-scaling)*t_f - scaling*m_intercept);
       }
@@ -252,11 +250,11 @@ void ModeratorTzeroLinear::execEvent()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-      outputWS->clearMRU(); // Clears the Most Recent Used lists */
+  outputWS->clearMRU(); // Clears the Most Recent Used lists */
 } // end of void ModeratorTzeroLinear::execEvent()
 
 //calculate time from sample to detector
-void ModeratorTzeroLinear::CalculateTfLi(MatrixWorkspace_sptr inputWS, size_t i, double &t_f, double &L_i)
+void ModeratorTzeroLinear::calculateTfLi(MatrixWorkspace_const_sptr inputWS, size_t i, double &t_f, double &L_i)
 {
   static const double convFact = 1.0e-6*sqrt(2*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
   static const double TfError = -1.0; //signal error when calculating final time

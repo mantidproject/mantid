@@ -2502,12 +2502,29 @@ void SANSRunWindow::handleRunFindCentre()
 
   if( m_uiForm.beamstart_box->currentIndex() == 0 )
   {
-    py_code += "xstart = None, ystart = None)";
+    py_code += "xstart = None, ystart = None";
   }
   else
   {
-    py_code += "xstart=float(" + beam_x->text() + ")/1000.,ystart=float(" + beam_y->text() + ")/1000.)";
+    py_code += "xstart=float(" + beam_x->text() + ")/1000.,ystart=float(" + beam_y->text() + ")/1000.";
   }
+
+  // define the number of interactions and close the FindBeamCentre method call.
+  bool ok; 
+  QString tolerance_str(m_uiForm.toleranceLineEdit->text());
+  double tolerance = tolerance_str.toDouble(&ok); 
+  if (ok)
+    tolerance *= 1e-4; // transform in um
+  if ((!ok || tolerance < 0) && ! tolerance_str.isEmpty()){
+    QString info("You have chosen an invalid value for tolerance. Correct it or leave it blank to use the default value.");
+    QMessageBox::warning(this, "Wrong Input", info);
+    m_uiForm.toleranceLineEdit->setFocus(Qt::OtherFocusReason); 
+    setProcessingState(Ready);
+    return;
+  }
+  py_code += ", tolerance=" + QString::number(tolerance) + ")"; 
+
+  
 
   g_centreFinderLog.notice("Iteration 1\n");
   m_uiForm.beamstart_box->setFocus();

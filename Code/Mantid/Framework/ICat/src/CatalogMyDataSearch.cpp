@@ -9,7 +9,6 @@ This algorithm retrieves logged in users investigations data from the informatio
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/ICatalog.h"
-#include "MantidICat/ErrorHandling.h"
 
 namespace Mantid
 {
@@ -60,10 +59,10 @@ namespace Mantid
       {
         catalog_sptr->myData(outputws);
       }
-      catch(SessionException& e)
+      catch(std::runtime_error& e)
       {
         setProperty("IsValid",false);
-        throw std::runtime_error(e.what());
+        throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
       }
       setProperty("OutputWorkspace",outputws);
 

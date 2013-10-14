@@ -47,15 +47,19 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
-          AnalysisDataService::Instance().retrieve("TestBank1Table"));
+    AnalysisDataService::Instance().retrieve("TestBank1Table"));
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+    TS_ASSERT_EQUALS(outws->rowCount(), 28);
 
-    // 3. Verify value
+    // 3. Verify name and value
     map<string, double> parammap;
     parseTableWorkspace(outws, parammap);
+
+    TS_ASSERT_EQUALS(parammap.count("Zero"),1);
+    TS_ASSERT_EQUALS(parammap.count("Sig2"),1);
+    TS_ASSERT_EQUALS(parammap.count("Beta0t"),1);
 
     TS_ASSERT_DELTA(parammap["Zero"], -1.00, 0.0001);
     TS_ASSERT_DELTA(parammap["Sig2"], sqrt(514.546), 0.0001);
@@ -93,11 +97,14 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+    TS_ASSERT_EQUALS(outws->rowCount(), 28);
 
-    // 3. Verify value
+    // 3. Verify name and value
     map<string, double> parammap;
     parseTableWorkspace(outws, parammap);
+    TS_ASSERT_EQUALS(parammap.count("Dtt1"),1);
+    TS_ASSERT_EQUALS(parammap.count("Sig1"),1);
+    TS_ASSERT_EQUALS(parammap.count("Alph0t"),1);
 
     TS_ASSERT_DELTA(parammap["Dtt1"], 22586.10156, 0.0001);
     TS_ASSERT_DELTA(parammap["Sig1"], sqrt(10.00), 0.0001);
@@ -138,17 +145,19 @@ public:
 
     // Check table workspace size
     TS_ASSERT_EQUALS(outws->columnCount(), 3);
-    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+    TS_ASSERT_EQUALS(outws->rowCount(), 28);
 
-    // Verify value
+    // Verify value (including bank number)
     map<string, double> parammap1;
     parseTableWorkspace(outws, parammap1);
+    TS_ASSERT_DELTA(parammap1["BANK"], 1.0, 0.0001);
     TS_ASSERT_DELTA(parammap1["Dtt1"], 22580.59157, 0.0001);
     TS_ASSERT_DELTA(parammap1["Sig1"], sqrt(0.00044), 0.0001);
     TS_ASSERT_DELTA(parammap1["Alph0t"], 0.010156, 0.00001);
 
     map<string, double> parammap2;
     parseTableWorkspace2(outws, parammap2);
+    TS_ASSERT_DELTA(parammap2["BANK"], 3.0, 0.0001);
     TS_ASSERT_DELTA(parammap2["Dtt1"], 22586.10156, 0.0001);
     TS_ASSERT_DELTA(parammap2["Sig1"], sqrt(10.00), 0.0001);
     TS_ASSERT_DELTA(parammap2["Alph0t"], 86.059, 0.00001);
@@ -191,7 +200,7 @@ public:
 
     // Check table workspace size
     TS_ASSERT_EQUALS(outws->columnCount(), 4);
-    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+    TS_ASSERT_EQUALS(outws->rowCount(), 28);
 
     // Verify value
     map<string, double> parammap1;
@@ -203,6 +212,57 @@ public:
     // Clean
     AnalysisDataService::Instance().remove("TestBank5Table");
     Poco::File("Test3Bank.irf").remove();
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test import of ALFBE, GAMMA and SIGMA parameters
+  *   and check they are given their expected names.
+  *   ConvertFullprofToXML relies on features tested here.
+  */
+  void test_ags_parameters()
+  {
+    // 1. Generate file
+    string filename("TestAGS.irf");
+    generate1BankIrfFile(filename);
+
+    // 2. Load
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Banks", "1");
+    alg.setProperty("OutputWorkspace", "TestAGSTable");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    AnalysisDataService::Instance().retrieve("TestAGSTable"));
+    TS_ASSERT(outws);
+
+    // 3. Verify names 
+    map<string, double> parammap;
+    parseTableWorkspace(outws, parammap);
+
+    // 3a. ALFBE
+    TS_ASSERT_EQUALS(parammap.count("Alph0"),1);
+    TS_ASSERT_EQUALS(parammap.count("Beta0"),1);
+    TS_ASSERT_EQUALS(parammap.count("Alph1"),1);
+    TS_ASSERT_EQUALS(parammap.count("Beta1"),1);
+    // 3b. GAMMA
+    TS_ASSERT_EQUALS(parammap.count("Gam2"),1);
+    TS_ASSERT_EQUALS(parammap.count("Gam1"),1);
+    TS_ASSERT_EQUALS(parammap.count("Gam0"),1);
+    // 3c. SIGMA
+    TS_ASSERT_EQUALS(parammap.count("Sig2"),1);
+    TS_ASSERT_EQUALS(parammap.count("Sig1"),1);
+    TS_ASSERT_EQUALS(parammap.count("Sig0"),1);
+
+    // 4. Clean
+    AnalysisDataService::Instance().remove("TestAGSTable");
+    Poco::File("TestAGS.irf").remove();
 
     return;
   }

@@ -143,7 +143,7 @@ namespace Mantid
     }
 
     IntegratePeakTimeSlices::IntegratePeakTimeSlices() :
-      Algorithm(), wi_to_detid_map(NULL), R0(-1)
+      Algorithm(), R0(-1)
     {
       debug = false;
 
@@ -200,7 +200,6 @@ namespace Mantid
     /// Destructor
     IntegratePeakTimeSlices::~IntegratePeakTimeSlices()
     {
-      delete wi_to_detid_map;
       delete [] NeighborIDs;
     }
 
@@ -331,7 +330,7 @@ namespace Mantid
       {
 
         // Find the workspace index for this detector ID
-        detid2index_map::const_iterator it = wi_to_detid_map->find(detID);
+        detid2index_map::const_iterator it = wi_to_detid_map.find(detID);
         size_t wsIndx = (it->second);
 
         double R      = CalculatePositionSpan( peak, dQ )/2;
@@ -1708,8 +1707,8 @@ namespace Mantid
         int DetID = NeighborIDs[i];
 
         size_t workspaceIndex ;
-        if( wi_to_detid_map->count(DetID)>0)
-           workspaceIndex= wi_to_detid_map->find(DetID)->second;
+        if( wi_to_detid_map.count(DetID)>0)
+           workspaceIndex= wi_to_detid_map.find(DetID)->second;
         else
         {
          g_log.error("No workspaceIndex for detID="+DetID);

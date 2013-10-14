@@ -123,6 +123,15 @@ void MdiSubWindow::show()
 }
 
 /**
+ * Focus on the window
+ */
+void MdiSubWindow::setFocus()
+{
+  QWidget::setFocus(Qt::OtherFocusReason);
+}
+
+
+/**
  * Override the QWidget's hide() slot to hide the wrapper window instead.
  */
 void MdiSubWindow::hide()

@@ -6,8 +6,9 @@ if ( CXXTEST_FOUND )
   include_directories( ../../TestHelpers/inc )
   # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp 
-        ../../TestHelpers/src/ScopedFileHelper.cpp
+  set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp
+                        ../../TestHelpers/src/NexusTestHelper.cpp
+                        ../../TestHelpers/src/ScopedFileHelper.cpp
   )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )

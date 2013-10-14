@@ -225,7 +225,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_ConfigPaths.insert(std::make_pair("requiredpythonscript.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
-  m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories", true));
   m_ConfigPaths.insert(std::make_pair("python.plugins.directories", true));
   m_ConfigPaths.insert(std::make_pair("user.python.plugins.directories", true));
   m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
@@ -438,9 +437,21 @@ void ConfigServiceImpl::configureLogging()
     if (m_logFilePath.empty())
     {
       m_logFilePath = getUserPropertiesDir() + "mantid.log";
-      logpath.assign(m_logFilePath);
-      logpath = logpath.absolute();
-      m_logFilePath = logpath.toString();
+      // Check whether the file can be written. The Poco::File::canWrite method does not work
+      // for files that don't exist, it throws an exception. It also can't be used to check for
+      // directory access as the Windows API doesn't return this information correctly for
+      // directories.
+      FILE *fp = fopen(m_logFilePath.c_str(), "a+");
+      if (!fp)
+      {
+          // if we cannot write to the default directory then set use the system temp
+          logpath = Poco::Path::temp() + "mantid.log";
+          m_logFilePath = logpath.toString();
+          std::cerr << "Error writing to log file path to default location: \"" << m_logFilePath
+                    << "\". Will use a system temp path instead: \"" << m_logFilePath << "\"" << std::endl;
+       }
+       else
+         fclose(fp);
     }
     // Set the line in the configuration properties.
     //  this'll be picked up by LoggingConfigurator (somehow)
@@ -456,10 +467,10 @@ void ConfigServiceImpl::configureLogging()
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
-  } catch (std::exception& e)
-  {
-    std::cerr << "Trouble configuring the logging framework " << e.what() << std::endl;
-  }
+    } catch (std::exception& e)
+    {
+        std::cerr << "Trouble configuring the logging framework " << e.what() << std::endl;
+    }
 
 }
 

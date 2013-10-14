@@ -247,6 +247,7 @@ public slots:
 	void init(int rows, int cols);
 	QStringList selectedColumns();
 	QStringList selectedYColumns();
+	QStringList selectedXColumns();
 	QStringList selectedErrColumns();
 	QStringList selectedYLabels();
 	QStringList drawableColumnSelection();

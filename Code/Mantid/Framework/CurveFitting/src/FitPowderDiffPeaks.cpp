@@ -280,9 +280,9 @@ namespace CurveFitting
     for (size_t i = 0; i < numpts; ++i)
       m_peakData.push_back(0.0);
 
-    g_log.information() << "[FitPeaks] Total Number of Peak = " << m_peaks.size() << std::endl;
-    m_peakFitChi2.resize(m_peaks.size(), -1.0*DBL_MIN);
-    m_goodFit.resize(m_peaks.size(), false);
+    g_log.information() << "[FitPeaks] Total Number of Peak = " << m_vecPeakFunctions.size() << std::endl;
+    m_peakFitChi2.resize(m_vecPeakFunctions.size(), -1.0*DBL_MIN);
+    m_goodFit.resize(m_vecPeakFunctions.size(), false);
 
     if (m_fitMode == ROBUSTFIT)
     {
@@ -426,11 +426,11 @@ namespace CurveFitting
     // I. Prepare
     BackToBackExponential_sptr rightpeak;
     bool isrightmost = true;
-    size_t numpeaks = m_peaks.size();
+    size_t numpeaks = m_vecPeakFunctions.size();
     if (numpeaks == 0)
       throw runtime_error("There is no peak to fit!");
 
-    vector<string> peakparnames = m_peaks[0].second.second->getParameterNames();
+    vector<string> peakparnames = m_vecPeakFunctions[0].second.second->getParameterNames();
 
     // II. Create local background function.
     Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>(Polynomial());
@@ -443,8 +443,8 @@ namespace CurveFitting
 
     for (int peakindex = static_cast<int>(numpeaks)-1; peakindex >= 0; --peakindex)
     {
-      vector<int> peakhkl = m_peaks[peakindex].second.first;
-      BackToBackExponential_sptr thispeak = m_peaks[peakindex].second.second;
+      vector<int> peakhkl = m_vecPeakFunctions[peakindex].second.first;
+      BackToBackExponential_sptr thispeak = m_vecPeakFunctions[peakindex].second.second;
 
       stringstream infoss;
 
@@ -1172,7 +1172,7 @@ namespace CurveFitting
     backgroundfunction->initialize();
 
     // 2. Fit peak / peaks group
-    int ipeak = static_cast<int>(m_peaks.size())-1;
+    int ipeak = static_cast<int>(m_vecPeakFunctions.size())-1;
     double chi2;
 
     // BackToBackExponential_sptr rightpeak = m_peaks[ipeak].second.second;
@@ -1191,7 +1191,7 @@ namespace CurveFitting
         // treated;
 
         // a) Add this peak,
-        BackToBackExponential_sptr thispeak = m_peaks[ipeak].second.second;
+        BackToBackExponential_sptr thispeak = m_vecPeakFunctions[ipeak].second.second;
         indexpeakgroup.push_back(ipeak);
 
         // b) update the peak index
@@ -1206,7 +1206,7 @@ namespace CurveFitting
         {
           // this is not the last peak.  search the left one.
           double thispeakleftbound = thispeak->centre() - thispeak->fwhm()*2.5;
-          BackToBackExponential_sptr leftpeak = m_peaks[ipeak].second.second;
+          BackToBackExponential_sptr leftpeak = m_vecPeakFunctions[ipeak].second.second;
           double leftpeakrightbound = leftpeak->centre() + leftpeak->fwhm()*2.5;
           if (thispeakleftbound > leftpeakrightbound)
           {
@@ -1223,10 +1223,10 @@ namespace CurveFitting
         double peakfitleftbound, peakfitrightbound;
         calculatePeakFitBoundary(ipeak, ipeak, peakfitleftbound, peakfitrightbound);
 
-        g_log.information() << endl << "[T] Fit Peak Indexed " << ipeak << " (" << m_peaks.size()-1-ipeak
+        g_log.information() << endl << "[T] Fit Peak Indexed " << ipeak << " (" << m_vecPeakFunctions.size()-1-ipeak
                        << ")\t----------------------------------" << endl;
 
-        BackToBackExponential_sptr thispeak = m_peaks[ipeak].second.second;
+        BackToBackExponential_sptr thispeak = m_vecPeakFunctions[ipeak].second.second;
         bool annihilatedpeak;
         m_goodFit[ipeak] = fitSinglePeakConfident(thispeak, backgroundfunction, peakfitleftbound,
                                                   peakfitrightbound, chi2, annihilatedpeak);
@@ -1235,7 +1235,7 @@ namespace CurveFitting
           thispeak->setHeight(0.0);
 
         // Debug output
-        vector<int>& hkl = m_peaks[ipeak].second.first;
+        vector<int>& hkl = m_vecPeakFunctions[ipeak].second.first;
         stringstream dbss;
         dbss << "Peak [" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << "] expected @ TOF = "
              << thispeak->centre() << ": \t";
@@ -1252,7 +1252,7 @@ namespace CurveFitting
         for (size_t index = 0; index < indexpeakgroup.size(); ++index)
         {
           size_t ipk = indexpeakgroup[index];
-          BackToBackExponential_sptr temppeak = m_peaks[ipk].second.second;
+          BackToBackExponential_sptr temppeak = m_vecPeakFunctions[ipk].second.second;
           peaksgroup.push_back(temppeak);
         }
 
@@ -1532,8 +1532,8 @@ namespace CurveFitting
   void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak, size_t irightpeak,
                                                      double& peakleftboundary, double& peakrightboundary)
   {
-    BackToBackExponential_sptr leftpeak = m_peaks[ileftpeak].second.second;
-    BackToBackExponential_sptr rightpeak = m_peaks[irightpeak].second.second;
+    BackToBackExponential_sptr leftpeak = m_vecPeakFunctions[ileftpeak].second.second;
+    BackToBackExponential_sptr rightpeak = m_vecPeakFunctions[irightpeak].second.second;
 
     // 1. Determine its left boundary
     peakleftboundary = leftpeak->centre() - PEAKFITRANGEFACTOR * leftpeak->fwhm();
@@ -1548,7 +1548,7 @@ namespace CurveFitting
     else
     {
       // b) Compare to the right peak boundary of its left neighbor
-      BackToBackExponential_sptr leftneighbor = m_peaks[ileftneighbor].second.second;
+      BackToBackExponential_sptr leftneighbor = m_vecPeakFunctions[ileftneighbor].second.second;
       double leftneighborrightbound = leftneighbor->centre() + PEAKBOUNDARYFACTOR * leftneighbor->fwhm();
       if (leftneighborrightbound > peakleftboundary)
         peakleftboundary = leftneighborrightbound;
@@ -1558,10 +1558,10 @@ namespace CurveFitting
     peakrightboundary = rightpeak->centre() + PEAKFITRANGEFACTOR * rightpeak->fwhm();
 
     size_t irightneighbor = irightpeak + 1;
-    if (irightneighbor < m_peaks.size())
+    if (irightneighbor < m_vecPeakFunctions.size())
     {
       // a) right peak exists
-      BackToBackExponential_sptr rightneighbor = m_peaks[irightneighbor].second.second;
+      BackToBackExponential_sptr rightneighbor = m_vecPeakFunctions[irightneighbor].second.second;
       double rightneighborleftbound = rightneighbor->centre() - PEAKBOUNDARYFACTOR * rightneighbor->fwhm();
       if (rightneighborleftbound < peakrightboundary)
         peakrightboundary = rightneighborleftbound;
@@ -2531,12 +2531,12 @@ namespace CurveFitting
   Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace()
   {
     // 1. Check and prepare
-    if (m_peaks.size() != m_peakFitChi2.size())
+    if (m_vecPeakFunctions.size() != m_peakFitChi2.size())
     {
       throw runtime_error("Wrong definition of m_peakFitChi2");
     }
 
-    size_t numpeaks = m_peaks.size();
+    size_t numpeaks = m_vecPeakFunctions.size();
 
     // 2. Collect parameters of peak fitted good
     vector<double> vecdh, vectofh, vecalpha, vecbeta, vecsigma, vecchi2;
@@ -2546,8 +2546,8 @@ namespace CurveFitting
       if (chi2 > 0)
       {
         // a) Get values
-        double dh = m_peaks[i].first;
-        BackToBackExponential_sptr peak = m_peaks[i].second.second;
+        double dh = m_vecPeakFunctions[i].first;
+        BackToBackExponential_sptr peak = m_vecPeakFunctions[i].second.second;
 
         double p_a = peak->getParameter("A");
         double p_b = peak->getParameter("B");
@@ -2603,18 +2603,18 @@ namespace CurveFitting
   pair<TableWorkspace_sptr, TableWorkspace_sptr> FitPowderDiffPeaks::genPeakParametersWorkspace()
   {
     // 1. Debug/Test Output
-    for (size_t i = 0; i < m_peaks.size(); ++i)
+    for (size_t i = 0; i < m_vecPeakFunctions.size(); ++i)
     {
-      g_log.debug() << "Peak @ d = " << m_peaks[i].first << ":  Chi^2 = "
+      g_log.debug() << "Peak @ d = " << m_vecPeakFunctions[i].first << ":  Chi^2 = "
                     << m_peakFitChi2[i] << endl;
     }
 
-    if (m_peaks.size() != m_peakFitChi2.size())
+    if (m_vecPeakFunctions.size() != m_peakFitChi2.size())
     {
       throw runtime_error("Wrong definition of m_peakFitChi2");
     }
 
-    size_t numpeaks = m_peaks.size();
+    size_t numpeaks = m_vecPeakFunctions.size();
     vector<double> vectofh(numpeaks), vecalpha(numpeaks), vecbeta(numpeaks), vecsigma(numpeaks);
 
     // 2. Generate the TableWorkspace for peak parameters
@@ -2646,9 +2646,9 @@ namespace CurveFitting
       if (chi2 > 0)
       {
         // Bad fit peak has chi^2 < 0;
-        double dh = m_peaks[i].first;
-        vector<int>& hkl = m_peaks[i].second.first;
-        BackToBackExponential_sptr peak = m_peaks[i].second.second;
+        double dh = m_vecPeakFunctions[i].first;
+        vector<int>& hkl = m_vecPeakFunctions[i].second.first;
+        BackToBackExponential_sptr peak = m_vecPeakFunctions[i].second.second;
 
         TableRow newrow = tablews->appendRow();
 
@@ -2711,14 +2711,14 @@ namespace CurveFitting
     ztablews->addColumn("double", "Z_Sigma");
 
     // iii. Set values
-    for (size_t i = 0; i < m_peaks.size(); ++i)
+    for (size_t i = 0; i < m_vecPeakFunctions.size(); ++i)
     {
       double chi2 = m_peakFitChi2[i];
       if (chi2 > 0)
       {
         // A good fit has chi^2 larger than 0
-        double dh = m_peaks[i].first;
-        vector<int>& hkl = m_peaks[i].second.first;
+        double dh = m_vecPeakFunctions[i].first;
+        vector<int>& hkl = m_vecPeakFunctions[i].second.first;
 
         TableRow newrow = ztablews->appendRow();
         newrow << hkl[0] << hkl[1] << hkl[2] << dh;
@@ -2742,7 +2742,7 @@ namespace CurveFitting
     */
   void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws)
   {
-    // 1. Check and clear input and output
+    // Check and clear input and output
     if (!peakparamws)
     {
       stringstream errss;
@@ -2751,7 +2751,7 @@ namespace CurveFitting
       throw std::invalid_argument(errss.str());
     }
 
-    m_peaks.clear();
+    m_vecPeakFunctions.clear();
 
     // Give name to peak parameters
     BackToBackExponential tempeak;
@@ -2759,12 +2759,12 @@ namespace CurveFitting
     mPeakParameterNames = tempeak.getParameterNames();
     mPeakParameterNames.push_back("S2");
 
-    // 2. Parse TableWorkspace
+    // Parse TableWorkspace
     vector<map<std::string, double> > peakparametermaps;
     vector<map<std::string, int> > peakhkls;
     this->parseBraggPeakTable(peakparamws, peakparametermaps, peakhkls);
 
-    // 3. Create a map to convert the Bragg peak Table paramter name to BackToBackExp
+    // Create a map to convert the Bragg peak Table paramter name to Back to back exponential+pseudo-voigt
     map<string, string> bk2bk2braggmap;
     bk2bk2braggmap.insert(make_pair("A", "Alpha"));
     bk2bk2braggmap.insert(make_pair("B", "Beta"));
@@ -2773,7 +2773,7 @@ namespace CurveFitting
     bk2bk2braggmap.insert(make_pair("S","Sigma"));
     bk2bk2braggmap.insert(make_pair("S2", "Sigma2"));
 
-    // 4. Generate Peaks       
+    // Generate Peaks
     size_t numbadrows = 0;
     size_t numrows = peakparamws->rowCount();
     for (size_t ir = 0; ir < numrows; ++ir)
@@ -2785,7 +2785,7 @@ namespace CurveFitting
 
       if (good)
       {
-        m_peaks.push_back(make_pair(d_h, make_pair(hkl, newpeak)));
+        m_vecPeakFunctions.push_back(make_pair(d_h, make_pair(hkl, newpeak)));
       }
       else
       {
@@ -2793,44 +2793,50 @@ namespace CurveFitting
       }
     } // ENDFOR Each potential peak
 
-    // 5. Sort and delete peaks out of range
-    sort(m_peaks.begin(), m_peaks.end());
+    // Sort by peaks' centre in d-space
+    sort(m_vecPeakFunctions.begin(), m_vecPeakFunctions.end());
 
-    // a) Remove all peaks outside of tof_min and tof_max
+    // Remove all peaks outside of tof_min and tof_max
     double tofmin = m_dataWS->readX(m_wsIndex)[0];
     double tofmax = m_dataWS->readX(m_wsIndex).back();
 
     stringstream dbss;
-    dbss << "[DBx453] TOF Range: " << tofmin << ", " << tofmax << endl;
+    dbss << "Specified range for peaks in TOF: " << tofmin << ", " << tofmax << "\n";
 
     vector<pair<double, pair<vector<int>, BackToBackExponential_sptr> > >::iterator deliter;
-    for (deliter = m_peaks.begin(); deliter != m_peaks.end(); ++deliter)
+    for (deliter = m_vecPeakFunctions.begin(); deliter != m_vecPeakFunctions.end(); ++deliter)
     {
       double d_h = deliter->first;
-      vector<int> hkl = deliter->second.first;
-      g_log.information() << "[DBx441] Check Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << ") @ d = " << d_h << endl;
-
+      vector<int>& hkl = deliter->second.first;
       BackToBackExponential_sptr peak = deliter->second.second;
       double tofh = peak->getParameter("X0");
+
+      dbss << "\tPeak ("<< hkl[0] << ", " << hkl[1] << ", " << hkl[2] << ") @ d = " << d_h
+           << " (calculated TOF) = " << tofh << " ";
+
       if (tofh < tofmin || tofh > tofmax)
       {
-        deliter = m_peaks.erase(deliter);
-        dbss << "Delete Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << ") @ d = " << d_h
-             << ", TOF = " << tofh << endl;
-        if (deliter == m_peaks.end())
+        // Remove peak from vector
+        deliter = m_vecPeakFunctions.erase(deliter);
+        dbss << ": Delete due to out of range. \n";
+        if (deliter == m_vecPeakFunctions.end())
         {
           break;
         }
       }
+      else
+      {
+        dbss << ": Kept. \n";
+      }
     }
 
-    g_log.notice(dbss.str());
+    g_log.notice() << "[DBx453] " << dbss.str() << "\n";
 
-    // b) Remove peaks lower than minimum
+    // Remove peaks lower than minimum
     if (m_minimumHKL.size() == 3)
     {
       // Only keep peaks from and above minimum HKL
-      for (deliter = m_peaks.begin(); deliter != m_peaks.end(); ++deliter)
+      for (deliter = m_vecPeakFunctions.begin(); deliter != m_vecPeakFunctions.end(); ++deliter)
       {
         vector<int> hkl = deliter->second.first;
         if (hkl == m_minimumHKL)
@@ -2838,15 +2844,15 @@ namespace CurveFitting
           break;
         }
       }
-      if (deliter != m_peaks.end())
+      if (deliter != m_vecPeakFunctions.end())
       {
         // Find the real minum
-        int indminhkl = static_cast<int>(deliter-m_peaks.begin());
+        int indminhkl = static_cast<int>(deliter-m_vecPeakFunctions.begin());
         int ind1stpeak = indminhkl - m_numPeaksLowerToMin;
         if (ind1stpeak > 0)
         {
-          deliter = m_peaks.begin() + ind1stpeak;
-          m_peaks.erase(m_peaks.begin(), deliter);
+          deliter = m_vecPeakFunctions.begin() + ind1stpeak;
+          m_vecPeakFunctions.erase(m_vecPeakFunctions.begin(), deliter);
         }
       }
       else
@@ -2858,9 +2864,9 @@ namespace CurveFitting
       }
     }
 
-    // 6. Keep some input information
+    // Keep some input information
     stringstream dbout;
-    for (deliter = m_peaks.begin(); deliter != m_peaks.end(); ++ deliter)
+    for (deliter = m_vecPeakFunctions.begin(); deliter != m_vecPeakFunctions.end(); ++ deliter)
     {
       vector<int> hkl = deliter->second.first;
       double d_h = deliter->first;
@@ -2868,7 +2874,8 @@ namespace CurveFitting
       dbout << "Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << ") @ d = " << d_h
             << ", TOF = " << tof_h << endl;
     }
-    g_log.information() << "[DBx531] Peaks To Fit:  Number of peaks = " << m_peaks.size() << endl << dbout.str();
+    g_log.information() << "[DBx531] Peaks To Fit:  Number of peaks = " << m_vecPeakFunctions.size()
+                        << "\n" << dbout.str();
 
     return;
   }
@@ -2879,21 +2886,21 @@ namespace CurveFitting
     * @param hklmap: a map containing one (HKL) entry
     * @param parammap :: a map of parameters
     * @param bk2bk2braggmap :: bk2bk2braggmap
-    * @param good :: (output) good
+    * @param good :: (output) peak is valid
     * @param hkl   : (output) (HKL) of the peak generated.
     * @param d_h :: (output) d_h
     * @return      : BackToBackExponential peak
     */
   BackToBackExponential_sptr FitPowderDiffPeaks::genPeak(map<string, int> hklmap, map<string, double> parammap,
-                                                          map<string, string> bk2bk2braggmap, bool &good,
-                                                          vector<int>& hkl, double& d_h)
+                                                         map<string, string> bk2bk2braggmap, bool &good,
+                                                         vector<int>& hkl, double& d_h)
   {
-    // 1. Generate peak whatever
+    // Generate a peak function
     CurveFitting::BackToBackExponential newpeak;
     newpeak.initialize();
     BackToBackExponential_sptr newpeakptr = boost::make_shared<BackToBackExponential>(newpeak);
 
-    // 2. Get basic information: HKL
+    // Check miller index (HKL) is a valid value in a miller indexes pool (hklmap)
     good = getHKLFromMap(hklmap, hkl);
     if (!good)
     {
@@ -2901,7 +2908,7 @@ namespace CurveFitting
       return newpeakptr;
     }
 
-    // 3. Set the peak parameters from 2 methods
+    // Set the peak parameters either by calculating or from table workspace
     string peakcalmode;
     if (m_genPeakStartingValue == HKLCALCULATION)
     {
@@ -3025,7 +3032,7 @@ namespace CurveFitting
 
       peakcalmode = "Calculate all parameters by thermal neutron peak function.";
 
-    }
+    } // Calculate peak variable from Profile function
     else if (m_genPeakStartingValue == FROMBRAGGTABLE)
     {
       // e) Import from input table workspace
@@ -3068,9 +3075,9 @@ namespace CurveFitting
     string peakinfo = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(newpeakptr));
 
     infoss << "Generate Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << ") Of Mode "
-           << peakcalmode << endl;
-    infoss << peakinfo;
-    g_log.notice() << "[DBx426] " << infoss.str();
+           << peakcalmode << ".\n";
+    g_log.notice(infoss.str());
+    g_log.information() << "[DBx426B] " << peakinfo << ".\n";
 
     good = true;
 

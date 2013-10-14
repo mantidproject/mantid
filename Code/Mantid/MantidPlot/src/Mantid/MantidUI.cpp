@@ -17,9 +17,11 @@
 #include "../ScriptingWindow.h"
 
 #include "MantidKernel/Property.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/UnitConversion.h"
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -34,7 +36,6 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -54,16 +55,22 @@
 #include <windows.h>
 #endif
 
+#include <algorithm>
+#include <locale>
 #include <set>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+#include <boost/tokenizer.hpp>
+
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-#include "MantidQtImageViewer/MatrixWSImageView.h"
+#include "MantidQtSpectrumViewer/SpectrumView.h"
+#include <typeinfo>
 
 using namespace std;
 
@@ -94,7 +101,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
   m_workspaceGroupUpdateObserver(*this,&MantidUI::handleWorkspaceGroupUpdate),
   m_configServiceObserver(*this,&MantidUI::handleConfigServiceUpdate),
-  m_appWindow(aw), m_vatesSubWindow(NULL)
+  m_appWindow(aw), m_vatesSubWindow(NULL)//, m_spectrumViewWindow(NULL)
 {
 
   // To be able to use them in queued signals they need to be registered
@@ -185,19 +192,22 @@ void MantidUI::init()
   Mantid::Kernel::ConfigService::Instance().addObserver(m_configServiceObserver);
 
   m_exploreAlgorithms->update();
+
   try
   {
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
-    m_fitFunction->init();
+    m_defaultFitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
+    m_defaultFitFunction->init();
         // this make the progress bar work with Fit algorithm running form the fit browser
-    connect(m_fitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
-      this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
-    m_fitFunction->hide();
-    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
+    connect(m_defaultFitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
+            this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
+    m_defaultFitFunction->hide();
+    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_defaultFitFunction );
 
+    m_fitFunction = m_defaultFitFunction;
   }
   catch(...)
   {
+    m_defaultFitFunction = NULL;
     m_fitFunction = NULL;
     showCritical("The curve fitting plugin is missing");
   }
@@ -298,6 +308,8 @@ MantidUI::~MantidUI()
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
+
+  delete m_fitFunction;
 }
 
 void MantidUI::saveSettings() const
@@ -662,6 +674,7 @@ void MantidUI::showVatesSimpleInterface()
       {
         connect(m_appWindow, SIGNAL(shutting_down()),
                 vsui, SLOT(shutdown()));
+        connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
         vsui->setupPluginMode();
@@ -687,32 +700,37 @@ void MantidUI::showVatesSimpleInterface()
   }
 }
 
-void MantidUI::showImageViewer()
+void MantidUI::showSpectrumViewer()
 {
   QString wsName = getSelectedWorkspaceName();
   try
   {
-    MatrixWorkspace_sptr matwsp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
              AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
-    if ( matwsp )
+    if ( wksp )
     {
-      MantidQt::ImageView::MatrixWSImageView image_view( matwsp );
+        MantidQt::SpectrumView::SpectrumView* viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
+        viewer->setAttribute(Qt::WA_DeleteOnClose, false);
+        viewer->resize( 1050, 800 );
+        connect(m_appWindow, SIGNAL(shutting_down()), viewer, SLOT(close()));
+
+        viewer->show();
+        viewer->renderWorkspace(wksp);
     }
     else
     {
-      const char * msg =
-          "Only event or matrix workspaces are currently supported.\n"
-          "Please convert to one of these before using the ImageView.";
-      g_log.information() << msg << std::endl;
+      g_log.information() << "Only event or matrix workspaces are currently supported.\n"
+                          << "Please convert to one of these before using the ImageView.\n";
     }
   }
     catch (std::runtime_error &e)
   {
+    g_log.error() << e.what() << "\n";
     throw std::runtime_error(e);
   }
   catch (...)
   {
-    g_log.error() << "Image View: Exception getting workspace " << std::endl;
+    g_log.error() << "Image View: Exception getting workspace\n";
   }
 
 }
@@ -1000,21 +1018,39 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
  * @param indices :: Limit the table to these workspace indices
  * @param include_data :: If true then first value from the each spectrum is displayed
  */
-Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws, 
+Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws,
                                      const std::vector<int>& indices, bool include_data)
 {
   using namespace Mantid::Geometry;
+
+  //check if efixed value is available
+  bool calcQ(true);
+  try
+  {
+    auto detector = ws->getDetector(0);
+    ws->getEFixed(detector);
+  } catch(std::runtime_error&)
+  {
+    calcQ = false;
+  }
+
   // Prepare column names. Types will be determined from QVariant
   QStringList colNames;
   colNames << "Index" << "Spectrum No" << "Detector ID(s)";
   if( include_data )
   {
-    colNames << "Data Value" << "Data Error";  
+    colNames << "Data Value" << "Data Error";
   }
-  colNames << "R" << "Theta" << "Phi" << "Monitor";
-  
+
+  colNames << "R" << "Theta";
+  if(calcQ)
+  {
+    colNames << "Q";
+  }
+  colNames << "Phi" << "Monitor";
+
   const int ncols = static_cast<int>(colNames.size());
-  const int nrows = indices.empty()? static_cast<int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
+  const int nrows = indices.empty()? static_cast <int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
   Table* t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
   // Set the column names
@@ -1090,7 +1126,28 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
-      colValues << QVariant(R) << QVariant(theta) << QVariant(phi) // rtp
+      colValues << QVariant(R) << QVariant(theta);
+
+      if(calcQ)
+      {
+
+        double efixed(0.0), usignTheta(0.0);
+        try
+        {
+          // Get unsigned theta and efixed value
+          efixed = ws->getEFixed(det);
+          usignTheta = ws->detectorTwoTheta(det)/2.0;
+
+          double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+          colValues << QVariant(q);
+        }
+        catch (std::runtime_error&)
+        {
+          colValues << QVariant("No Efixed");
+        }
+      }
+
+      colValues << QVariant(phi) // rtp
                 << QVariant(isMonitor);         // monitor
     }
     catch(...)
@@ -1627,6 +1684,15 @@ void MantidUI::renameWorkspace(QStringList wsName)
   }
 
 }
+
+void MantidUI::setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser)
+{
+  if(newBrowser == NULL)
+    m_fitFunction = m_defaultFitFunction;
+  else
+    m_fitFunction = newBrowser;
+}
+
 void MantidUI::groupWorkspaces()
 {
   try
@@ -1903,8 +1969,9 @@ void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
   emit workspaces_cleared();
 }
 
-void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr )
+void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr msg)
 {
+    emit workspace_renamed(QString::fromStdString(msg->object_name()),QString::fromStdString(msg->new_objectname()));
     emit ADS_updated();
 }
 void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr)

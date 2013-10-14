@@ -624,6 +624,21 @@ bool DateAndTime::operator==(const boost::posix_time::ptime& rhs) const
   return this->to_ptime() == rhs;
 }
 
+/**
+ * Compare to another DateAndTime within the specified tolerance.
+ * @param rhs DateAndTime to compare
+ * @param tol the number of nanoseconds they can differ by
+ * @return true if equal within tolerances.
+ */
+bool DateAndTime::equals(const DateAndTime& rhs, const int64_t tol) const
+{
+  int64_t diff = _nanoseconds - rhs._nanoseconds;
+  if (diff > tol)
+    return false;
+  else if (diff < -1*tol)
+    return false;
+  return true;
+}
 
 /** != operator
  * @param rhs :: DateAndTime to compare

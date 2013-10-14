@@ -18,8 +18,6 @@ using namespace boost::python;
 void export_Property()
 {
   register_ptr_to_python<Property*>();
-  register_ptr_to_python<const Property*>();
-  implicitly_convertible<Property*,const Property*>();
 
   // vector of properties
   std_vector_exporter<Property*>::wrap("std_vector_property");

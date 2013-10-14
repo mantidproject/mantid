@@ -20,6 +20,7 @@
 
     File change history is stored at: <https://github.com/mantidproject/mantid>    
 */
+#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 
@@ -29,9 +30,6 @@
 namespace Mantid { namespace PythonInterface {
   namespace Environment
   {
-
-    /// Handle a Python error state
-    DLLExport void translateErrorToException(const bool withTrace = true);
 
     /// Defines start of CallMethod function
     /// @param obj A Python object to perform the call
@@ -48,7 +46,7 @@ namespace Mantid { namespace PythonInterface {
         }\
         catch(boost::python::error_already_set&)\
         {\
-          translateErrorToException();\
+          throwRuntimeError();\
         }\
       }\
       return defaultValue;
@@ -58,7 +56,7 @@ namespace Mantid { namespace PythonInterface {
         }\
         catch(boost::python::error_already_set&)\
         {\
-          translateErrorToException();\
+          throwRuntimeError();\
         }\
       }\
       else\
@@ -76,7 +74,7 @@ namespace Mantid { namespace PythonInterface {
         }\
         catch(boost::python::error_already_set&)\
         {\
-          translateErrorToException();\
+          throwRuntimeError();\
         }\
       }\
       else\

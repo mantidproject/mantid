@@ -615,6 +615,13 @@ void ViewBase::updateUI()
 }
 
 /**
+ * This function is where one specifies updates to the held view.
+ */
+void ViewBase::updateView()
+{
+}
+
+/**
  * This function checks the current pipeline for a filter with the specified
  * name. The function works for generic filter names only.
  * @param name the name of the filter to search for
@@ -636,6 +643,34 @@ bool ViewBase::hasFilter(const QString &name)
     }
   }
   return false;
+}
+
+/**
+ * This function looks through all pipeline sources for one containing the given
+ * workspace name. It hands back a null pointer if that name can't be found.
+ * @param name : The workspace name to search for
+ * @return : Pointer to the pipeline source if found
+ */
+pqPipelineSource *ViewBase::hasWorkspace(const QString &name)
+{
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  QList<pqPipelineSource *>::Iterator source;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+  for (source = sources.begin(); source != sources.end(); ++source)
+  {
+    QString wsName(vtkSMPropertyHelper((*source)->getProxy(),
+                                       "WorkspaceName", true).GetAsString());
+    if (!wsName.isEmpty())
+    {
+      if (wsName == name)
+      {
+        return (*source);
+      }
+    }
+  }
+  return NULL;
 }
 
 } // namespace SimpleGui

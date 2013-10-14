@@ -325,9 +325,8 @@ void LoadNexusMonitors::exec()
   // @todo: Find out if there is a better (i.e. more generic) way to do this
   try
   {
-    file.openGroup("isis_vms_compat", "IXvms");
-    
-    file.closeGroup();
+    g_log.debug() << "Load Sample data isis" << std::endl; 
+    LoadEventNexus::loadSampleDataISIScompatibility(file, this->WS);
   }
   catch(::NeXus::Exception&)
   {

@@ -1,9 +1,9 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/UserSubWindow.h"
 
 #include <QIcon>
 #include <QMessageBox>
@@ -165,18 +165,6 @@ QLabel* UserSubWindow::newValidator(QWidget *parent)
   validLbl->setPalette(pal);
   return validLbl;
 }
-
-/**
-* Re-emits the signal to change the plot style
-*
-* @param plotDetails :: This includes all details of the plot including type,
-* curve number, workspace and color
-*/
-void UserSubWindow::changePlotType(const QStringList& plotDetails)
-{
-  emit setAsPlotType(plotDetails);
-}
-
 
 //--------------------------------------
 // Private member functions

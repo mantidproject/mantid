@@ -34,7 +34,7 @@ set ( TEST_PY_FILES
 )
 
 include_directories ( inc )
-include_directories ( ../ImageViewer/inc )
+include_directories ( ../SpectrumViewer/inc )
 
 
 ###########################################################################
@@ -59,7 +59,7 @@ add_definitions ( -DIN_MANTIDQT_REFDETECTORVIEWER )
 add_library ( MantidQtRefDetectorViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtRefDetectorViewer MantidQtImageViewer )
+target_link_libraries ( MantidQtRefDetectorViewer MantidQtSpectrumViewer )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS

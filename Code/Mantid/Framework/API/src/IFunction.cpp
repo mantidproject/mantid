@@ -45,6 +45,7 @@ namespace API
  */
   IFunction::~IFunction()
   {
+    m_attrs.clear();
     if (m_handler)
     {
       delete m_handler;
