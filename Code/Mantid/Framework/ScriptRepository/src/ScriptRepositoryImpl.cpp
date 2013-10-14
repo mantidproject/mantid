@@ -1219,7 +1219,7 @@ namespace API
     	throw ScriptRepoException(ex.what());
     }
     //g_log.debug() << "SetAutoUpdate... end" << std::endl;
-    return files_to_update.size();
+    return (int)files_to_update.size();
   }
   
 
