@@ -56,9 +56,20 @@ PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog()
 void PlotAsymmetryByLogValueDialog::initLayout()
 {
   m_uiForm.setupUi(this);
+
+  // Tie all the properties
   tie(m_uiForm.firstRunBox, "FirstRun", m_uiForm.FirstRunLayout);
   tie(m_uiForm.lastRunBox, "LastRun", m_uiForm.LastRunLayout);
-  tie( m_uiForm.outWSBox, "OutputWorkspace", m_uiForm.OutputWSLayout);
+  tie(m_uiForm.logBox, "LogValue");
+  tie(m_uiForm.outWSBox, "OutputWorkspace", m_uiForm.OutputWSLayout);
+  tie(m_uiForm.typeBox, "Type");
+  tie(m_uiForm.redBox, "Red");
+  tie(m_uiForm.greenBox, "Green");
+  tie(m_uiForm.forwardBox, "ForwardSpectra");
+  tie(m_uiForm.backwardBox, "BackwardSpectra");
+  tie(m_uiForm.timeMinBox, "TimeMin");
+  tie(m_uiForm.timeMaxBox, "TimeMax");
+
   connect( m_uiForm.browseFirstButton, SIGNAL(clicked()), this, SLOT(browseFirstClicked()) );
   connect( m_uiForm.browseLastButton, SIGNAL(clicked()), this, SLOT(browseLastClicked()) );
   connect( m_uiForm.firstRunBox, SIGNAL(textChanged(const QString&)), this, SLOT(fillLogBox(const QString&)) );
@@ -66,40 +77,15 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   connect( m_uiForm.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
   connect( m_uiForm.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
 
-  fillLineEdit("FirstRun", m_uiForm.firstRunBox);
-  fillLineEdit("LastRun", m_uiForm.lastRunBox);
-  m_uiForm.logBox->setEditable(true);
-  fillLineEdit("OutputWorkspace", m_uiForm.outWSBox);
+  // Fill Type ComboBox with allowed values
   fillAndSetComboBox("Type",m_uiForm.typeBox);
-  fillLineEdit("Red", m_uiForm.redBox);
-  fillLineEdit("Green", m_uiForm.greenBox);
-  fillLineEdit("ForwardSpectra", m_uiForm.forwardBox);
-  fillLineEdit("BackwardSpectra", m_uiForm.backwardBox);
-  fillLineEdit("TimeMin", m_uiForm.timeMinBox);
-  fillLineEdit("TimeMax", m_uiForm.timeMaxBox);
-  
-  QString asdfdasasdf = m_uiForm.firstRunBox->text();
-   
+
+  // Fill log values from the file
   if ( !m_uiForm.firstRunBox->text().isEmpty() )
     fillLogBox(m_uiForm.firstRunBox->text());
-}
 
-/**
- * Retrieve the input from the dialog
- */
-void PlotAsymmetryByLogValueDialog::parseInput()
-{
-  storePropertyValue("FirstRun", m_uiForm.firstRunBox->text());
-  storePropertyValue("LastRun", m_uiForm.lastRunBox->text());
-  storePropertyValue("LogValue", m_uiForm.logBox->currentText());
-  storePropertyValue("OutputWorkspace", m_uiForm.outWSBox->text());
-  storePropertyValue("Type", m_uiForm.typeBox->currentText());
-  storePropertyValue("Red", m_uiForm.redBox->text());
-  storePropertyValue("Green", m_uiForm.greenBox->text());
-  storePropertyValue("ForwardSpectra", m_uiForm.forwardBox->text());
-  storePropertyValue("BackwardSpectra", m_uiForm.backwardBox->text());
-  storePropertyValue("TimeMin", m_uiForm.timeMinBox->text());
-  storePropertyValue("TimeMax", m_uiForm.timeMaxBox->text()); 
+  // So user can enter a custom value
+  m_uiForm.logBox->setEditable(true);
 }
 
 /**

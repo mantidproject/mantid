@@ -66,7 +66,6 @@ private:
   //@{
   /// Create the layout
   void initLayout();
-  void parseInput();
   //@}
 	
 private slots:
