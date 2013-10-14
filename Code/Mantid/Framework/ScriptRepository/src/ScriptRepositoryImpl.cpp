@@ -1219,7 +1219,7 @@ namespace API
     	throw ScriptRepoException(ex.what());
     }
     //g_log.debug() << "SetAutoUpdate... end" << std::endl;
-    return (int)files_to_update.size();
+    return files_to_update.size();
   }
   
 
@@ -1400,6 +1400,7 @@ namespace API
     std::string filename = std::string(local_repository).append(".local.json");
     std::vector<std::string> entries_to_delete;
     Repository::iterator entry_it;
+    std::set<std::string> folders_of_deleted;
     try{
       read_json(filename, pt);
       BOOST_FOREACH(ptree::value_type & file, pt){
@@ -1419,6 +1420,7 @@ namespace API
             // that this entry was deleted (remotelly or locally), 
             // so it should not appear at local_repository json any more
             entries_to_delete.push_back(file.first);
+            folders_of_deleted.insert(getParentFolder(file.first));
           }
         }else{
           // this entry was never created before, so it should not
@@ -1430,6 +1432,23 @@ namespace API
 
       // delete the entries to be deleted in json file
       if (entries_to_delete.size() > 0){
+        
+        // clear the auto_update flag from the folders if the user deleted files
+      	BOOST_FOREACH(const std::string & folder, folders_of_deleted){
+      		ptree::assoc_iterator pt_entry = pt.find(folder);
+      		if (pt_entry == pt.not_found())
+      			continue;
+
+      		entry_it = repo.find(folder);
+      		if (entry_it == repo.end())
+      			continue;
+
+      		if (entry_it->second.auto_update){
+      				entry_it->second.auto_update = false;
+      				entries_to_delete.push_back(folder);
+      		}
+      	}
+
         for (std::vector<std::string>::iterator it = entries_to_delete.begin();
              it != entries_to_delete.end();
              ++it){
@@ -1580,6 +1599,16 @@ namespace API
                       << ex.what() << std::endl; 
     }
     return true;
+  }
+
+  std::string ScriptRepositoryImpl::getParentFolder(const std::string & file){
+  	size_t pos = file.rfind("/");
+  	if (pos == file.npos)
+  	{
+  		return "";
+  	}
+
+  	return std::string(file.begin(),file.begin()+pos);
   }
 
   /**

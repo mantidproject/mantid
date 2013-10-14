@@ -180,6 +180,9 @@ namespace API{
     std::string ignoreregex;    
 
     bool getProxyConfig(std::string&, unsigned short&); 
+
+    std::string getParentFolder(const std::string & entry );
+
   };
   
 }; // namespace API
