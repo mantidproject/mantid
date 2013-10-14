@@ -1191,19 +1191,35 @@ namespace API
    * These configurations will be used at check4update, to download all entries that 
    * are set to auto update.
   */
-  void ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
+  int ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
     ensureValidRepository();
-    std::string path = convertPath(input_path); 
-    //g_log.debug() << "SetAutoUpdate... begin" << std::endl; 
-    try{
-      RepositoryEntry & entry = repo.at(path);
-      entry.auto_update = option; 
-      updateLocalJson(path,entry); 
-    }catch(const std::out_of_range & ex){
-      // fixme: readable exception
-      throw ScriptRepoException(ex.what()); 
+    std::string path = convertPath(input_path);
+    std::vector<std::string> files_to_update;
+    for (Repository::reverse_iterator it = repo.rbegin();
+            it != repo.rend();
+              ++it){
+         // for every entry, it takes the path and RepositoryEntry
+         std::string entry_path = it->first;
+         RepositoryEntry & entry = it->second;
+         if (entry_path.find(path) == 0 && entry.status != REMOTE_ONLY  && entry.status != LOCAL_ONLY)
+        	 	files_to_update.push_back(entry_path);
     }
-    //g_log.debug() << "SetAutoUpdate... end" << std::endl; 
+
+    //g_log.debug() << "SetAutoUpdate... begin" << std::endl;
+    try
+    {
+    	BOOST_FOREACH(auto & path, files_to_update){
+    		RepositoryEntry & entry = repo.at(path);
+    		entry.auto_update = option;
+    		updateLocalJson(path,entry); // TODO: update local json without opening and close file many times
+    	}
+    }catch(const std::out_of_range & ex)
+    {
+    	// fixme: readable exception
+    	throw ScriptRepoException(ex.what());
+    }
+    //g_log.debug() << "SetAutoUpdate... end" << std::endl;
+    return (int)files_to_update.size();
   }
   
 
