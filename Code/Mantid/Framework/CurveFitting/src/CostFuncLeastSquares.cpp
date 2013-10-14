@@ -59,8 +59,6 @@ double CostFuncLeastSquares::val() const
     addVal(m_domain,simpleValues);
   }
 
-  // std::cout << "Final Cost function value = " << m_value << "\n";
-
   // add penalty
   if (m_includePenalty)
   {
@@ -74,8 +72,6 @@ double CostFuncLeastSquares::val() const
       }
     }
   }
-
-  // std::cout << "**** " << name() << ": Returned val() = " << m_value << "\n";
 
   m_dirtyVal = false;
   return m_value;
@@ -100,19 +96,10 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
     // double val = ( values->getCalculated(i) - values->getFitData(i) ) * values->getFitWeight(i);
     double val = ( values->getCalculated(i) - values->getFitData(i) ) * getWeight(values, i, sqrtw);
     retVal += val * val;
-
-    // std::cout << "*** DBOUT *** X[" << i << "], Y_cal = " << values->getCalculated(i)
-    //       << ", Y_obs = " << values->getFitData(i) << ", Weight = " << getWeight(values, i, sqrtw)
-    //     << "; d(Rwp) = " << val * val << "\n";
   }
-  
-  // std::cout << "m_value (before) = " << m_value << "\n";
 
   PARALLEL_ATOMIC
   m_value += m_factor * retVal;
-
-  // std::cout << "m_value (final) = " << m_value << ", retVal = " << retVal
-  //           << ", factor = " << m_factor << " \n";
 
   return;
 }
