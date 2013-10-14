@@ -154,6 +154,9 @@ namespace DataHandling
         groups[group].push_back(static_cast<detid_t>(i));
     }
 
+    if(groups.empty())
+      throw std::invalid_argument("No groups specified in the input file");
+
     // Number of the last group we've met
     int lastGroup = groups.rbegin()->first;
 

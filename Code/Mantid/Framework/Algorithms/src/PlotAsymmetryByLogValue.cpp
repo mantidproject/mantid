@@ -179,9 +179,9 @@ namespace Mantid
 
           deadTimeWs = loadDeadTimes->getProperty("OutputWorkspace");
         }
-        catch(std::exception& e)
+        catch(...)
         {
-          throw std::runtime_error("Unable to load Dead Time Table from the file\n" + std::string(e.what()));
+          throw std::runtime_error("Unable to load Dead Time Table from the file. Please use correct file or set Deat Time Correction to None");
         }
       }
 
@@ -275,9 +275,9 @@ namespace Mantid
           {
             loadedWs = applyDeadTimeCorrection(deadTimeWs, loadedWs);
           }
-          catch(std::exception& e)
+          catch(...)
           {
-            throw std::runtime_error("Unable to apply Dead Time correction\n" + std::string(e.what()) );
+            throw std::runtime_error("Unable to apply Dead Time correction. Please change the Dead Time Table used or set Deat Time Correction to None");
           }
         }
 
@@ -287,7 +287,16 @@ namespace Mantid
           applyGrouping->initialize();
           applyGrouping->setProperty("InputWorkspace", loadedWs);
           applyGrouping->setPropertyValue("Filename", fn.str());
-          applyGrouping->execute();
+
+          try
+          {
+            applyGrouping->execute();
+          }
+          catch(...)
+          {
+            throw std::runtime_error("Unable to auto-group the workspace. Please specify grouping manually");
+          }
+
           loadedWs = applyGrouping->getProperty("OutputWorkspace");
         }
 
