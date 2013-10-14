@@ -96,6 +96,9 @@ namespace Mantid
       ITableWorkspace_sptr createDeadTimeTable( std::vector<double>::const_iterator begin, 
         std::vector<double>::const_iterator end);
 
+      /// Runs an appropriate applyDeadTimeCorrection function depending on the type of workspaces
+      Workspace_sptr applyDeadTimeCorrection(Workspace_sptr deadTimeWs, Workspace_sptr ws);
+
       /// Applies DTC to a group of workspaces using a single table
       WorkspaceGroup_sptr applyDeadTimeCorrection(ITableWorkspace_sptr deadTimeTable, 
         WorkspaceGroup_sptr wsGroup);

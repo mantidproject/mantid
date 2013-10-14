@@ -273,26 +273,7 @@ namespace Mantid
         {
           try
           {
-            WorkspaceGroup_sptr deadTimeGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimeWs);
-            ITableWorkspace_sptr deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(deadTimeWs);
-
-            if(!deadTimeGroup && !deadTimeTable)
-              throw std::invalid_argument("Unsupported type of Dead Time Table");
-
-            if(WorkspaceGroup_sptr loadedGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs) )
-            {
-              if(deadTimeGroup)
-                loadedWs = applyDeadTimeCorrection(deadTimeGroup, loadedGroup);
-              else if(deadTimeTable)
-                loadedWs = applyDeadTimeCorrection(deadTimeTable, loadedGroup);
-            }
-            else if( Workspace2D_sptr loadedWs2D = boost::dynamic_pointer_cast<Workspace2D>(loadedWs) )
-            {
-              if(deadTimeTable)
-                loadedWs = applyDeadTimeCorrection(deadTimeTable, loadedWs2D);
-              else if(deadTimeGroup)
-                throw std::invalid_argument("Can't apply group of tables to a single workspace");
-            }
+            loadedWs = applyDeadTimeCorrection(deadTimeWs, loadedWs);
           }
           catch(std::exception& e)
           {
@@ -631,6 +612,43 @@ namespace Mantid
         }
 
         throw std::invalid_argument("Log "+logName+" cannot be converted to a double type.");
+    }
+
+    /**
+     * Runs an appropriate applyDeadTimeCorrection function depending on the type of workspaces.
+     *
+     * @param deadTimeTable :: 
+     */ 
+    Workspace_sptr PlotAsymmetryByLogValue::applyDeadTimeCorrection(Workspace_sptr deadTimeWs, 
+      Workspace_sptr ws)
+    {
+      WorkspaceGroup_sptr deadTimeGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimeWs);
+      ITableWorkspace_sptr deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(deadTimeWs);
+
+      if(!deadTimeGroup && !deadTimeTable)
+        throw std::invalid_argument("Unsupported type of Dead Time Table");
+
+      WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+      if(wsGroup)
+      {
+        if(deadTimeGroup)
+          return applyDeadTimeCorrection(deadTimeGroup, wsGroup);
+        else
+          return applyDeadTimeCorrection(deadTimeTable, wsGroup);
+      }
+      else if(ws2D)
+      {
+        if(deadTimeTable)
+          return applyDeadTimeCorrection(deadTimeTable, ws2D);
+        else
+          throw std::invalid_argument("Can't apply group of tables to a single workspace");
+      }
+      else
+      {
+        throw std::invalid_argument("Unsupported type of the input workspace");
+      }
     }
 
     /**
