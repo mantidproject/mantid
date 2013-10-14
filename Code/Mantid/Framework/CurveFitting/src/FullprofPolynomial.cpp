@@ -15,7 +15,7 @@ namespace CurveFitting
   FullprofPolynomial::FullprofPolynomial():m_n(6), m_bkpos(1.)
   {
     // Declare first 6th order polynomial as default
-    for(int i=0; i<=m_n; ++i)
+    for(int i=0; i<m_n; ++i)
     {
       std::string parName = "A" + boost::lexical_cast<std::string>(i);
       declareParameter(parName);
@@ -151,7 +151,7 @@ namespace CurveFitting
         clearAllParameters();
 
         m_n = attint;
-        for(int i=0; i<=m_n; ++i)
+        for(int i=0; i<m_n; ++i)
         {
           std::string parName = "A" + boost::lexical_cast<std::string>(i);
           declareParameter(parName);
