@@ -145,7 +145,7 @@ namespace MantidQt
         {
           catalogAlgorithm->setProperty(iter->first, iter->second);
         }
-        catch (std::invalid_argument& error)
+        catch (std::invalid_argument&)
         {
           std::string documentation = propertyDocumentation(catalogAlgorithm->getProperties(), iter->first);
 

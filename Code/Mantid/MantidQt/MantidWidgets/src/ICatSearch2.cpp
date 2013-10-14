@@ -914,6 +914,7 @@ namespace MantidQt
      */
     bool ICatSearch2::eventFilter(QObject* watched, QEvent* event)
     {
+      UNUSED_ARG(watched);
       if (event->type() == QEvent::MouseButtonRelease)
       {
         QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
