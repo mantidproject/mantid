@@ -24,7 +24,6 @@ set ( SRC_FILES
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
-	src/CaltoDspacemap.cpp
 	src/ChangeBinOffset.cpp
 	src/ChangeLogTime.cpp
 	src/ChangePulsetime.cpp
@@ -74,7 +73,6 @@ set ( SRC_FILES
 	src/DiffractionFocussing.cpp
 	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
-	src/DspacemaptoCal.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
 	src/EditInstrumentGeometry.cpp
@@ -85,7 +83,6 @@ set ( SRC_FILES
 	src/ExtractFFTSpectrum.cpp
 	src/ExtractMask.cpp
 	src/ExtractMaskToTable.cpp
-	src/ExtractMasking.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
@@ -248,7 +245,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
-	inc/MantidAlgorithms/CaltoDspacemap.h
 	inc/MantidAlgorithms/ChangeBinOffset.h
 	inc/MantidAlgorithms/ChangeLogTime.h
 	inc/MantidAlgorithms/ChangePulsetime.h
@@ -298,7 +294,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DiffractionFocussing.h
 	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
-	inc/MantidAlgorithms/DspacemaptoCal.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
@@ -309,7 +304,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExtractFFTSpectrum.h
 	inc/MantidAlgorithms/ExtractMask.h
 	inc/MantidAlgorithms/ExtractMaskToTable.h
-	inc/MantidAlgorithms/ExtractMasking.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h
@@ -531,7 +525,6 @@ set ( TEST_FILES
 	DiffractionFocussing2Test.h
 	DiffractionFocussingTest.h
 	DivideTest.h
-	DspacemaptoCalTest.h
 	EditInstrumentGeometryTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
