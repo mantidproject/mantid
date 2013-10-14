@@ -9,6 +9,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/scoped_array.hpp>
 
+#include <numeric> // std::accumulate
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
