@@ -92,6 +92,7 @@ signals:
 private:
     Mantid::API::IAlgorithm_sptr applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws);
     Mantid::API::IAlgorithm_sptr applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+    void setupScaleEngine(MantidQwtWorkspaceData& curveData);
 
     /// Logger object
     Mantid::Kernel::Logger & g_log;
@@ -108,10 +109,10 @@ private:
     QwtPlot * m_plot;
 
     /// Curve of the preview
-    LineViewerCurve * m_previewCurve;
+    QwtPlotCurve * m_previewCurve;
 
     /// Curve of the full integrated
-    LineViewerCurve * m_fullCurve;
+    QwtPlotCurve * m_fullCurve;
 
     /// Vector of labels with the dimension names
     QVector<QLabel *> m_dimensionLabel;
