@@ -26,6 +26,8 @@
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
+#include <boost/function.hpp>
+
 namespace Mantid
 {
   namespace CurveFitting
@@ -39,45 +41,6 @@ namespace Mantid
        Success = 1,
        FTolReached = 2,
        XTolReached = 3
-    };
-
-    /// Non-templated wrapper for objective function object to allow it to be stored
-    /// without templating the class
-    class FunctionWrapper
-    {
-    private:
-      class BaseHolder
-      {
-      public:
-        virtual ~BaseHolder() {};
-        virtual double eval(const std::vector<double> & x) const = 0;
-      };
-      template<typename T>
-      class TypeHolder : public BaseHolder
-      {
-      public:
-        TypeHolder(const T & func) : func(func) {}
-        double eval(const std::vector<double> & x) const { return func.eval(x); }
-        /// The actual function supplied by the user
-        T func;
-      };
-
-    public:
-      /// Construct
-      template<typename T>
-      FunctionWrapper(const T & func) : m_funcHolder(new TypeHolder<T>(func)) {}
-      ~FunctionWrapper()
-      {
-        delete m_funcHolder;
-      }
-      /**
-       * Calls user supplied function
-       * @param x - The current pt
-       * @returns The value of the function
-       */
-      inline double eval(const std::vector<double> & x) const { return m_funcHolder->eval(x); }
-      /// Templated holder
-      BaseHolder *m_funcHolder;
     };
 
     //---------------------------------------------------------------------------------------------
@@ -132,6 +95,11 @@ namespace Mantid
      */
     class MANTID_CURVEFITTING_DLL AugmentedLagrangianOptimizer
     {
+      
+    public:
+      /// Function type
+      typedef boost::function<double(const size_t, const double *)> ObjFunction;
+      
     public:
       /**
        * Constructor
@@ -140,9 +108,8 @@ namespace Mantid
        * "double eval(const std::vector<double> &) const" to return the value of the objective function
        * at a given pt
        */
-      template <typename T>
-      AugmentedLagrangianOptimizer(const size_t nparams, const T & objfunc)
-        : m_userfunc(FunctionWrapper(objfunc)), m_nparams(nparams), m_neq(0),
+      AugmentedLagrangianOptimizer(const size_t nparams, const ObjFunction & objfunc)
+        : m_userfunc(objfunc), m_nparams(nparams), m_neq(0),
           m_eq(), m_nineq(0), m_ineq(), m_maxIter(500)
       {
       }
@@ -156,10 +123,9 @@ namespace Mantid
        * @param equality A matrix of coefficients, \f$A_{eq}\f$ such that in the final solution \f$A_{eq} x = 0\f$
        * @param inequality A matrix of coefficients, \f$A\f$ such that in the final solution \f$A_{eq} x\geq 0\f$
        */
-      template <typename T>
-      AugmentedLagrangianOptimizer(const size_t nparams, const T & objfunc,
+      AugmentedLagrangianOptimizer(const size_t nparams, const ObjFunction & objfunc,
                                    const Kernel::DblMatrix & equality, const Kernel::DblMatrix & inequality)
-        : m_userfunc(FunctionWrapper(objfunc)),
+        : m_userfunc(objfunc),
           m_nparams(nparams), m_neq(equality.numRows()), m_eq(equality), m_nineq(inequality.numRows()),
           m_ineq(inequality), m_maxIter(500)
       {
@@ -195,7 +161,9 @@ namespace Mantid
       void checkConstraints(const Kernel::DblMatrix & equality, const Kernel::DblMatrix & inequality);
 
       /// User-defined function
-      FunctionWrapper m_userfunc;
+      //FunctionWrapper m_userfunc;
+
+      ObjFunction m_userfunc;
       /// Number of parameters under minimization
       const size_t m_nparams;
       /// Number of equality constraints

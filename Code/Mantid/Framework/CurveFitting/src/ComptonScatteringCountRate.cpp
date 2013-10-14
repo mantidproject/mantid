@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/ComptonScatteringCountRate.h"
+#include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
-
+#include <boost/bind.hpp>
 
 namespace Mantid
 {
@@ -17,7 +17,6 @@ namespace CurveFitting
   }
 
   using Kernel::Logger;
-  using Kernel::Math::SLSQPMinimizer;
 
   DECLARE_FUNCTION(ComptonScatteringCountRate);
 
@@ -71,17 +70,19 @@ namespace CurveFitting
       /// Compute the value of the objective function
       Norm2(const Kernel::DblMatrix & cmatrix, const std::vector<double> & data)
         : cm(cmatrix), nrows(cmatrix.numRows()), ncols(cmatrix.numCols()), rhs(data) {}
-      double eval(const std::vector<double> & xpt) const
+
+      double eval(const size_t n, const double * xpt) const
       {
         double norm2(0.0);
         for(size_t i = 0; i < nrows; ++i)
         {
           const double *cmRow = cm[i];
           double cx(0.0);
-          for(size_t j = 0; j < ncols; ++j)
+          for(size_t j = 0; j < n; ++j)
           {
             cx += cmRow[j]*xpt[j];
           }
+          cx *= -1.0; // our definition of cm has been multiplied by -1
           cx -= rhs[i];
           norm2 += cx*cx;
         }
@@ -119,12 +120,14 @@ namespace CurveFitting
     // Compute the constraint matrix
     this->updateCMatrixValues();
 
-    Norm2 objfunc(m_cmatrix, m_dataErrorRatio);
-    SLSQPMinimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
-    auto res = lsqmin.minimize(x0);
+    Norm2 objf(m_cmatrix, m_dataErrorRatio);
+    //boost::function<double(const size_t,const double *)> objfunc =
+    AugmentedLagrangianOptimizer::ObjFunction objfunc = boost::bind(&Norm2::eval, objf, _1, _2);
+    AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
+    lsqmin.minimize(x0);
 
     // Set the parameters for the 'real' function calls
-    setFixedParameterValues(res);
+    setFixedParameterValues(x0);
   }
 
   /**
@@ -139,6 +142,15 @@ namespace CurveFitting
     for(size_t i = 0; i < nparams; ++i)
     {
       this->setParameter(m_fixedParamIndices[i], values[i], true);
+    }
+
+    if(g_log.is(Logger::Priority::PRIO_DEBUG))
+    {
+      g_log.debug() << "--- New Intensity Parameters ---\n";
+      for(size_t i = 0; i < nparams; ++i)
+      {
+        g_log.debug() << "x_" << i << "=" <<values[i] << "\n";
+      }
     }
   }
 
@@ -155,6 +167,7 @@ namespace CurveFitting
       const size_t numFilled = profile->fillConstraintMatrix(m_cmatrix,start,m_errors);
       start += numFilled;
     }
+    m_cmatrix *= -1.0;
 
     if(g_log.is(Logger::Priority::PRIO_DEBUG))
     {

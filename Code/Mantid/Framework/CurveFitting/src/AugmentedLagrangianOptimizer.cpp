@@ -2,6 +2,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <gsl/gsl_multimin.h>
 
@@ -26,19 +27,19 @@ namespace Mantid
       // Relative tolerance on function value
       double FTOL_REL = 1e-10;
       // Absolute tolerance on the X values
-      double XTOL_ABS = 1e-10;
-      // Relative tolerance on the X values
-      double XTOL_REL = 1e-10;
+      double XTOL_ABS = 1e-8;
+      // Relative toleranceon the X values
+      double XTOL_REL = 1e-8;
       // Tolerance on constraint violation
       double CONSTRAINT_TOL = 1e-08;
       /// Maximum number of iterations of unconstrained sub optimizer
-      int MAX_SUBOPT_ITER = 1000;
+      int MAX_SUBOPT_ITER = 100;
 
       /// Holder for data to pass to gsl functions
       struct FunctionData
       {
         size_t n; // number of parameters
-        const FunctionWrapper * userfunc; // user supplied function
+        const AugmentedLagrangianOptimizer::ObjFunction * userfunc; // user supplied function
         const DblMatrix * eqmatrix; // equality constraints
         const std::vector<double> * lambda; // lagrange multiplier for equality
         const DblMatrix * ineqmatrix; // inequality constraints
@@ -51,11 +52,12 @@ namespace Mantid
        * Evaluate a constaint given by a constraint matrix
        * @param cmatrix A matrix of constraint coefficients
        * @param index Index of the row defining the constraint
+       * @param n The number of parameters
        * @param x The current parameter set
        * @return A value for the constraint
        */
       double evaluateConstraint(const DblMatrix & cmatrix, const size_t index,
-                                const std::vector<double> & x)
+          const size_t, const double * x)
       {
         assert(index < cmatrix.numRows());
         const double * row = cmatrix[index];
@@ -85,7 +87,7 @@ namespace Mantid
       }
 
       /**
-       * Evaluate stopping criteria for X values
+       * Evaluate stopping criteria for X values in std::vector
        * @param xvold Old X values
        * @param xvnew New X values
        * @param reltol Relative tolerance
@@ -98,6 +100,24 @@ namespace Mantid
         for(size_t i = 0; i < xvOld.size(); ++i)
         {
           if (!relstop(xvOld[i], xvNew[i],reltol, abstol)) return 0;
+        }
+        return 1;
+      }
+      /**
+       * Evaluate stopping criteria for X values in gsl vector
+       * @param xvold Old X values
+       * @param xvnew New X values
+       * @param reltol Relative tolerance
+       * @param abstol Absolute tolerance
+       * @return 1 if criteria satisfied
+       */
+      int relstopX(const std::vector<double> & xvOld, const gsl_vector * xvNew,
+                   double reltol, double abstol)
+      {
+        for(size_t i = 0; i < xvOld.size(); ++i)
+        {
+          if(boost::math::isnan(gsl_vector_get(xvNew,i))) return 1;
+          if (!relstop(xvOld[i],gsl_vector_get(xvNew, i),reltol, abstol)) return 0;
         }
         return 1;
       }
@@ -129,18 +149,18 @@ namespace Mantid
       if( numEqualityConstraints() > 0 || numInequalityConstraints() > 0 )
       {
         double con2 = 0;
-        fcur = m_userfunc.eval(xcur);
+        fcur = m_userfunc(numParameters(), xcur.data());
         int feasible = 1;
         for (size_t i = 0; i < numEqualityConstraints(); ++i)
         {
-          double hi = evaluateConstraint(m_eq,i,xcur);
+          double hi = evaluateConstraint(m_eq,i,numParameters(), xcur.data());
           penalty += fabs(hi);
           feasible = (feasible && fabs(hi) <= CONSTRAINT_TOL);
           con2 += hi*hi;
         }
         for (size_t i = 0; i < numInequalityConstraints(); ++i)
         {
-          double fci = evaluateConstraint(m_ineq, i,xcur);
+          double fci = evaluateConstraint(m_ineq, i,numParameters(), xcur.data());
           penalty += fci > 0 ? fci : 0;
           feasible = feasible && fci <= CONSTRAINT_TOL;
           if (fci > 0) con2 += fci * fci;
@@ -158,15 +178,16 @@ namespace Mantid
       do
       {
         double prevICM = ICM;
-        unconstrainedOptimization(lambda, mu, rho, xcur);
-        fcur = m_userfunc.eval(xcur);
 
+        unconstrainedOptimization(lambda, mu, rho, xcur);
+
+        fcur = m_userfunc(numParameters(), xcur.data());
         ICM = 0.0;
         penalty = 0.0;
         int feasible = 1;
         for( size_t i = 0; i < numEqualityConstraints(); ++i)
         {
-          double hi = evaluateConstraint(m_eq,i,xcur);
+          double hi = evaluateConstraint(m_eq,i,numParameters(), xcur.data());
           double newlam = lambda[i] + rho * hi;
           penalty += fabs(hi);
           feasible = feasible && (fabs(hi) <= CONSTRAINT_TOL);
@@ -175,7 +196,7 @@ namespace Mantid
         }
         for(size_t i = 0; i < numInequalityConstraints(); ++i)
         {
-          double fci = evaluateConstraint(m_ineq,i,xcur);
+          double fci = evaluateConstraint(m_ineq,i,numParameters(), xcur.data());
           double newmu = mu[i] + rho * fci;
           penalty += fci > 0 ? fci : 0;
           feasible = feasible && fci <= CONSTRAINT_TOL;
@@ -207,6 +228,7 @@ namespace Mantid
         }
         if (ICM == 0.0) { ret = FTolReached; break; }
       } while (auglagIters < m_maxIter);
+
     }
 
     //--------------------------------------------------------------------------------------------------------
@@ -215,26 +237,6 @@ namespace Mantid
 
     namespace
     {
-      double costfImpl(const gsl_vector *v, void *params)
-      {
-        FunctionData *d = static_cast<FunctionData*>(params);
-        std::vector<double> x(d->n);
-        for (size_t i = 0; i < x.size(); ++i) x[i] = gsl_vector_get(v, i);
-
-        double lagrangian = d->userfunc->eval(x);
-        for (size_t i = 0; i < d->eqmatrix->numRows(); ++i)
-        {
-          double h = evaluateConstraint(*d->eqmatrix, i, x) + ((*d->lambda)[i] / d->rho);
-          lagrangian += 0.5 * d->rho * h*h;
-        }
-        for (size_t i = 0; i < d->ineqmatrix->numRows(); ++i)
-        {
-          double fc = evaluateConstraint(*d->ineqmatrix,i, x) + ((*d->mu)[i] / d->rho);
-          if (fc > 0.0) lagrangian += 0.5 * d->rho * fc*fc;
-        }
-        return lagrangian;
-      }
-
       /**
        * GSL-style function for evaluating the cost function
        * @param v GSL vector of current parameter values
@@ -243,7 +245,19 @@ namespace Mantid
        */
       double costf(const gsl_vector *v, void *params)
       {
-        double lagrangian = costfImpl(v,params);
+        FunctionData *d = static_cast<FunctionData*>(params);
+
+        double lagrangian = (*d->userfunc)(d->n, v->data);
+        for (size_t i = 0; i < d->eqmatrix->numRows(); ++i)
+        {
+          double h = evaluateConstraint(*d->eqmatrix, i, d->n, v->data) + ((*d->lambda)[i] / d->rho);
+          lagrangian += 0.5 * d->rho * h*h;
+        }
+        for (size_t i = 0; i < d->ineqmatrix->numRows(); ++i)
+        {
+          double fc = evaluateConstraint(*d->ineqmatrix,i, d->n, v->data) + ((*d->mu)[i] / d->rho);
+          if (fc > 0.0) lagrangian += 0.5 * d->rho * fc*fc;
+        }
         return lagrangian;
       }
 
@@ -257,16 +271,16 @@ namespace Mantid
                   gsl_vector *df)
       {
         FunctionData *d = static_cast<FunctionData*>(params);
-        double f0 = costfImpl(v,params);
+        double f0 = costf(v,params);
         gsl_vector *tmp = d->tmp;
-        for (size_t i = 0; i < d->n; ++i) gsl_vector_set(tmp,i, gsl_vector_get(v, i));
+        std::copy(v->data, v->data + d->n, tmp->data);
 
         const double epsilon(1e-08);
         for(size_t i = 0; i < d->n; ++i)
         {
           const double curx = gsl_vector_get(tmp, i);
           gsl_vector_set(tmp,i,curx + epsilon);
-          gsl_vector_set(df, i, (costfImpl(tmp, params) - f0)/epsilon);
+          gsl_vector_set(df, i, (costf(tmp, params) - f0)/epsilon);
           gsl_vector_set(tmp,i,curx);
         }
       }
@@ -307,11 +321,7 @@ namespace Mantid
       d.rho = rho;
 
       gsl_vector *x = gsl_vector_alloc(d.n);
-      for(size_t i = 0; i < d.n; ++i)
-      {
-        gsl_vector_set (x, i, xcur[i]);
-      }
-
+      std::copy(xcur.begin(), xcur.end(), x->data);
       gsl_vector *tmp = gsl_vector_alloc(d.n); // Used for numerical derivative calculation
       d.tmp = tmp;
 
@@ -331,20 +341,20 @@ namespace Mantid
 
       int iter = 0;
       int status = 0;
+
       do
       {
         iter++;
         status = gsl_multimin_fdfminimizer_iterate (s);
         if (status) break;
         status = gsl_multimin_test_gradient (s->gradient, 1e-3);
+
+        if(relstopX(xcur, s->x, XTOL_REL, XTOL_ABS)) break; // If the X's don't change then assume we're done
+        std::copy(s->x->data, s->x->data + d.n, xcur.begin());
       }
       while (status == GSL_CONTINUE && iter < MAX_SUBOPT_ITER);
-
-      // Update global parameter set with final resuls
-      for(size_t i = 0; i < d.n; ++i)
-      {
-        xcur[i] = gsl_vector_get(s->x, i);
-      }
+      // Final parameter update
+      std::copy(s->x->data, s->x->data + d.n, xcur.begin());
 
       gsl_multimin_fdfminimizer_free(s);
       gsl_vector_free(x);

@@ -6,7 +6,9 @@
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Matrix.h"
 
+#include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
+
 
 class AugmentedLagrangianOptimizerTest : public CxxTest::TestSuite
 {
@@ -30,7 +32,7 @@ public:
     DblMatrix equality(1,nparams+1);  // cols > number parameters
     DblMatrix inequality; // Empty indicates no constraint
 
-    ObjFunction userFunc;
+    AugmentedLagrangianOptimizer::ObjFunction userFunc;
     TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality), std::invalid_argument);
 
     equality = DblMatrix(1,nparams-1); // cols < number parameters
@@ -46,7 +48,7 @@ public:
     DblMatrix equality;  // Empty indicates no constraint
     DblMatrix inequality(1,nparams+1);
 
-    ObjFunction userFunc;
+    AugmentedLagrangianOptimizer::ObjFunction userFunc;
     TS_ASSERT_THROWS(AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality), std::invalid_argument);
 
     inequality = DblMatrix(1,nparams-1); // cols < number parameters
@@ -59,7 +61,9 @@ public:
     using Mantid::CurveFitting::AugmentedLagrangianOptimizer;
 
     bool userFuncCalled = false;
-    TestUserFuncCall userFunc(userFuncCalled);
+    TestUserFuncCall testFunc(userFuncCalled);
+    AugmentedLagrangianOptimizer::ObjFunction userFunc = \
+      boost::bind(&TestUserFuncCall::eval,testFunc,_1,_2);
     AugmentedLagrangianOptimizer lsqmin(2, userFunc);
 
     std::vector<double> xv(2,1);
@@ -101,8 +105,8 @@ public:
     TS_ASSERT_EQUALS(m_nparams, res.size());
     if(res.size() == m_nparams)
     {
-      TS_ASSERT_DELTA(1.0, res[0], 1e-7);
-      TS_ASSERT_DELTA(1.0, res[1], 1e-7);
+      TS_ASSERT_DELTA(1.0, res[0], 1e-5);
+      TS_ASSERT_DELTA(1.0, res[1], 1e-5);
     }
   }
 
@@ -137,7 +141,8 @@ private:
     using Mantid::Kernel::DblMatrix;
 
     const size_t nparams = m_nparams;
-    ObjFunction userFunc;
+    AugmentedLagrangianOptimizer::ObjFunction userFunc = &TestObjFunction::eval;
+
     std::vector<double> xv(nparams, -1);
     xv[1] = 1.0;
 
@@ -181,7 +186,7 @@ private:
   struct TestUserFuncCall
   {
     TestUserFuncCall(bool & flag) : funcCalled(flag) {}
-    double eval(const std::vector<double> &) const
+    double eval(const size_t, const double *) const
     {
       funcCalled = true;
       return 0.0;
@@ -189,9 +194,9 @@ private:
     bool & funcCalled;
   };
 
-  struct ObjFunction
+  struct TestObjFunction
   {
-    double eval(const std::vector<double> & xpt) const
+    static double eval(const size_t, const double * xpt)
     {
       // evaluates f(x) = 2*x*y + 2*x - x**2 - 2*y**2
       const double x(xpt[0]), y(xpt[1]);
