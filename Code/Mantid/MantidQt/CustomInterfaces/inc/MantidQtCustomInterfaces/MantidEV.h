@@ -293,6 +293,9 @@ private slots:
   /// Slot to enable/disable the find UB using FFT controls
   void setEnabledFindUBFFTParams_slot( bool on );
 
+  /// Slot to enable/disable the find UB using Indexed Peaks controls
+  void setEnabledFindUBUsingIndexedPeaksParams_slot( bool on );
+
   /// Slot to enable/disable the load UB controls
   void setEnabledLoadUBParams_slot( bool on );
 
