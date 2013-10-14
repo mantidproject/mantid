@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QCheckBox>
+#include <QSignalMapper>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -27,8 +28,8 @@ namespace CustomDialogs
 }
 }
 
-// Just to save writing this everywhere 
 using namespace MantidQt::CustomDialogs;
+using namespace MantidQt::API; 
 
 //---------------------------------------
 // Public member functions
@@ -38,6 +39,9 @@ using namespace MantidQt::CustomDialogs;
  */
 PlotAsymmetryByLogValueDialog::PlotAsymmetryByLogValueDialog(QWidget *parent) : AlgorithmDialog(parent)
 {
+  browseButtonMapper = new QSignalMapper();
+
+  connect(browseButtonMapper, SIGNAL(mapped(const QString&)), this, SLOT(openFileDialog(const QString&)));
 }
 
 /**
@@ -45,6 +49,7 @@ PlotAsymmetryByLogValueDialog::PlotAsymmetryByLogValueDialog(QWidget *parent) : 
   */
 PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog()
 {	
+  delete browseButtonMapper;
 }
 
 //---------------------------------------
@@ -70,8 +75,14 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   tie(m_uiForm.timeMinBox, "TimeMin");
   tie(m_uiForm.timeMaxBox, "TimeMax");
 
-  connect( m_uiForm.browseFirstButton, SIGNAL(clicked()), this, SLOT(browseFirstClicked()) );
-  connect( m_uiForm.browseLastButton, SIGNAL(clicked()), this, SLOT(browseLastClicked()) );
+  // Set-up browse button mapping
+  browseButtonMapper->setMapping(m_uiForm.browseFirstButton, "FirstRun");
+  browseButtonMapper->setMapping(m_uiForm.browseLastButton,  "LastRun");
+
+  // Connect Browse buttons to the mapper
+  connect(m_uiForm.browseFirstButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
+  connect(m_uiForm.browseLastButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
+  
   connect( m_uiForm.firstRunBox, SIGNAL(textChanged(const QString&)), this, SLOT(fillLogBox(const QString&)) );
   connect( m_uiForm.btnOK,SIGNAL(clicked()),this,SLOT(accept()));
   connect( m_uiForm.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
@@ -89,45 +100,25 @@ void PlotAsymmetryByLogValueDialog::initLayout()
 }
 
 /**
-  * A slot for the browse button "clicked" signal
-  */
-void PlotAsymmetryByLogValueDialog::browseFirstClicked()
+ * Opens a file dialog. Updates the QLineEdit provided when the dialog is closed.
+ */
+void PlotAsymmetryByLogValueDialog::openFileDialog(const QString& filePropName)
 {
-  if( !m_uiForm.firstRunBox->text().isEmpty() )
+  QString selectedPath = AlgorithmDialog::openFileDialog(filePropName);
+
+  if(!selectedPath.isEmpty())
   {
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(m_uiForm.firstRunBox->text()).absoluteDir().path());
+    // Save used directory for the next time
+    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(selectedPath).absoluteDir().path());
+
+    // Get the widget for the file property
+    QLineEdit* lineEdit = dynamic_cast<QLineEdit*>(m_tied_properties[filePropName]);
+
+    if(!lineEdit)
+      throw std::runtime_error("Widget of the file property was not found");
+
+    lineEdit->setText(selectedPath.trimmed());
   }
-
-  QString filepath = this->openFileDialog("FirstRun");
-  if( !filepath.isEmpty() )
-  {
-    m_uiForm.firstRunBox->clear();
-    m_uiForm.firstRunBox->setText(filepath.trimmed());
-  }
-
-//  //Add a suggestion for workspace name
-//  if( m_wsBox->isEnabled() && !filepath.isEmpty() ) m_wsBox->setText(QFileInfo(filepath).baseName());
-}
-
-/**
-  * A slot for the browse button "clicked" signal
-  */
-void PlotAsymmetryByLogValueDialog::browseLastClicked()
-{
-  if( !m_uiForm.firstRunBox->text().isEmpty() )
-  {
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(m_uiForm.firstRunBox->text()).absoluteDir().path());
-  }
-
-  QString filepath = this->openFileDialog("LastRun");
-  if( !filepath.isEmpty() )
-  {
-    m_uiForm.lastRunBox->clear();
-    m_uiForm.lastRunBox->setText(filepath.trimmed());
-  }
-
-//  //Add a suggestion for workspace name
-//  if( m_wsBox->isEnabled() && !filepath.isEmpty() ) m_wsBox->setText(QFileInfo(filepath).baseName());
 }
 
 /**
