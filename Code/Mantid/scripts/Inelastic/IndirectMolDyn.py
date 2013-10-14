@@ -93,7 +93,8 @@ def MolDynImport(fname,functions,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('MolDynImport')
 	workdir = config['defaultsave.directory']
 
-	functions = functions.split(',')
+	#seperate functions string and strip whitespace
+	functions = [x.strip() for x in functions.split(',')]
 
 	path = fname
 	base = os.path.basename(path)
@@ -171,7 +172,7 @@ def MolDynImport(fname,functions,Verbose,Plot,Save):      #Ascii start routine
 			eZero = np.zeros(nF)
 			xUnit = 'Energy'
 		else:
-			error = "ERROR *** Failed to parse function string" + func
+			error = "ERROR *** Failed to parse function string " + func
 			sys.exit(error)
 
 		for n in range(0,nQ):
@@ -182,10 +183,17 @@ def MolDynImport(fname,functions,Verbose,Plot,Save):      #Ascii start routine
 					lstart = m+1
 		lend = FindEnds(asc,';',lstart)
 		start.append(lend+1)
+
+		#Throw error if we couldn't find the function
+		if(len(start) < 2):
+			error = "ERROR *** Failed to parse function string " + func
+			sys.exit(error)
+
 #	logger.notice('Start lines : '+str(start))
 		Qaxis = ''
 		for n in range(0,nQ):
 			if Verbose:
+				print start
 				logger.notice('Reading : '+asc[start[n]])
 			Slist = MakeList(asc,start[n]+1,start[n+1]-1)
 			if n == nQ-1:
