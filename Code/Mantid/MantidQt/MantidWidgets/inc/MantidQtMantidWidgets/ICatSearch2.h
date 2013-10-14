@@ -114,6 +114,8 @@ namespace MantidQt
       std::set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
       /// Add the list of file extensions to the "Filter type..." drop-down.
       void populateDataFileType(std::set<std::string> extensions);
+      /// Allow the user to select multiple files to download in the table.
+      bool eventFilter(QObject* watched, QEvent* event);
 
     private slots:
       /// When the facility login button is clicked
@@ -164,8 +166,6 @@ namespace MantidQt
       // SLOTS for: "Datafile information"
       ///////////////////////////////////////////////////////////////////////////////
 
-      /// Change the state of the checkbox when the user double clicks a row in the dataFile table.
-      void singleDataFileClicked(const QModelIndex & index);
       /// Performs filterDataFileType() for specified filer type.
       void doFilter(int index);
       /// Downloads selected datFiles to a specified location.

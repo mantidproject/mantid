@@ -134,6 +134,7 @@ namespace Mantid
 
           progress(prog,"downloading over internet...");
 
+          g_log.debug() << "URL of file downloading: " << url << std::endl;
           // Download file from the data server to the machine where mantid is installed
           std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*citr2);
 

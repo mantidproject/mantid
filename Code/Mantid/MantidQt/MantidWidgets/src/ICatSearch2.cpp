@@ -81,13 +81,14 @@ namespace MantidQt
       connect(m_icatUiForm.dataFileFootDownloadBtn,SIGNAL(clicked()),this,SLOT(downloadDataFiles()));
       // When the user clicks the "load" button then load their selected datafiles into a workspace.
       connect(m_icatUiForm.dataFileLoadBtn,SIGNAL(clicked()),this,SLOT(loadDataFiles()));
-      // When the user double clicks a row in the table check (or uncheck) the checkbox in prep for download.
-      connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(clicked(QModelIndex)),this,SLOT(singleDataFileClicked(QModelIndex)));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
       // Although this is an advanced option performing it here allows it to be performed once only.
       populateInvestigationTypeBox();
+
+      // Through this we can obtain clicks from the rows in the table.
+      m_icatUiForm.dataFileResultsTbl->viewport()->installEventFilter(this);
 
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
@@ -905,27 +906,36 @@ namespace MantidQt
       }
     }
 
+    /**
+     * Checks the checkboxes the user has selected in the dataFile table.
+     * @param object :: The object to watch the events occuring on.
+     * @param event  :: The event to handle.
+     * @return True if event was handled, otherwise false.
+     */
+    bool ICatSearch2::eventFilter(QObject* watched, QEvent* event)
+    {
+      if (event->type() == QEvent::MouseButtonRelease)
+      {
+        QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+
+        for (int row = 0; row < table->rowCount(); ++row)
+        {
+          // We Uncheck  here to prevent previously selected items staying selected.
+          QTableWidgetItem *item = table->item(row,0);
+
+          if (item->isSelected())
+          {
+            item->setCheckState(Qt::Checked);
+          }
+        }
+        return true;
+      }
+      return false;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     // SLOTS for: "DataFile information"
     ///////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Change the state of the checkbox when the user clicks a row in the dataFile table.
-     * @param index :: The row that the user has clicked.
-     */
-    void ICatSearch2::singleDataFileClicked(const QModelIndex & index)
-    {
-      QTableWidgetItem* item = m_icatUiForm.dataFileResultsTbl->item(index.row(), 0);
-
-      if (item->checkState())
-      {
-        item->setCheckState(Qt::Unchecked);
-      }
-      else
-      {
-        item->setCheckState(Qt::Checked);
-      }
-    }
 
     /**
      * Performs filter option for specified filer type.
