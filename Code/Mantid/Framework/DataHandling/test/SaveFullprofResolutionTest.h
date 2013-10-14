@@ -39,33 +39,42 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test save profile 10
     */
-  void XXXtest_SaveFile()
+  void test_write1BankProfl10()
   {
-    // 1. Create input workspace
-    throw runtime_error("Need to dig out the data");
-    string filename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentTable.dat");
-    map<std::string, double> parameters, newvalueparameters;
-    map<string, vector<double> > parametermcs;
-    importInstrumentTxtFile(filename, parameters, parametermcs);
-    TableWorkspace_sptr itablews = createInstrumentParameterWorkspace(parameters, newvalueparameters, parametermcs);
+    // Create input workspace
+    std::string prof10tablewsname("Bank1InstrumentParameterTable");
+    createProfile10TableWS(prof10tablewsname);
 
-    AnalysisDataService::Instance().addOrReplace("Bank1InstrumentParameterTable", itablews);
-
-    // 2. Init the algorithm
+    // Init the algorithm
     Mantid::DataHandling::SaveFullprofResolution alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    // 3. Set up
+    // Set up properties
     alg.setProperty("InputWorkspace", "Bank1InstrumentParameterTable");
     alg.setProperty("OutputFilename", "bank1.irf");
     alg.setProperty("Bank", 1);
 
-    // 4. Execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_EQUALS(1, 212);
+    // Check file
+    bool outputfileexist = Poco::File("bank1.irf").exists();
+    TS_ASSERT(outputfileexist);
 
+    if (!outputfileexist)
+    {
+      return;
+    }
+
+    // Check file lines
+    int numlines = getFileLines("bank1.irf");
+    TS_ASSERT_EQUALS(numlines, 22);
+
+    // Clean
+    Poco::File("bank1.irf").remove();
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -246,51 +255,61 @@ public:
   }
 
 
-  //----------------  Helpers To Create Input Workspaces --------------------------
-
-  /** Create instrument geometry parameter/LeBail parameter workspaces
+  //----------------------------------------------------------------------------------------------
+  /** Create instrument geometry parameter/LeBail parameter workspaces of profil 10
+    * Source data is from POWGEN's bank 1 calibrated
    */
-  DataObjects::TableWorkspace_sptr createInstrumentParameterWorkspace(std::map<std::string, double> parameters,
-                                                                      std::map<std::string, double> newvalueparameters,
-                                                                      map<string, vector<double> > mcparameters)
+  void createProfile10TableWS(std::string wsname)
   {
-    UNUSED_ARG(mcparameters);
+    // Create a map of string/double for parameters of profile 10
+    std::map<std::string, double> parammap;
+    parammap.insert(make_pair("BANK",    1	    ));
+    parammap.insert(make_pair("Alph0" ,  1.88187));
+    parammap.insert(make_pair("Alph0t",  64.4102));
+    parammap.insert(make_pair("Alph1",   0.     ));
+    parammap.insert(make_pair("Alph1t",  0.     ));
+    parammap.insert(make_pair("Beta0" ,  6.2511 ));
+    parammap.insert(make_pair("Beta0t",  85.9189));
+    parammap.insert(make_pair("Beta1",   0.     ));
+    parammap.insert(make_pair("Beta1t",  0.     ));
+    parammap.insert(make_pair("CWL",     0.533  ));
+    parammap.insert(make_pair("Dtt1",    22584.5));
+    parammap.insert(make_pair("Dtt1t",   22604.9));
+    parammap.insert(make_pair("Dtt2",    0      ));
+    parammap.insert(make_pair("Dtt2t",  0.3     ));
+    parammap.insert(make_pair("Gam0" ,   0      ));
+    parammap.insert(make_pair("Gam1",    5.744  ));
+    parammap.insert(make_pair("Gam2",    0      ));
+    parammap.insert(make_pair("Sig0" ,   0      ));
+    parammap.insert(make_pair("Sig1",    3.16228));
+    parammap.insert(make_pair("Sig2",    16.7331));
+    parammap.insert(make_pair("Tcross",  0.356  ));
+    parammap.insert(make_pair("Width",   1.0521 ));
+    parammap.insert(make_pair("Zero",    0      ));
+    parammap.insert(make_pair("Zerot",   11.3175));
+    parammap.insert(make_pair("step",    4.0002 ));
+    parammap.insert(make_pair("tof-max", 51000  ));
+    parammap.insert(make_pair("tof-min", 5000.23));
+    parammap.insert(make_pair("twotheta", 90.0  ));
 
-    // 1. Combine 2 inputs
-    std::map<std::string, double>::iterator nvit;
-    std::stringstream infoss;
-    infoss << "Modifying parameters: " << std::endl;
-    for (nvit = newvalueparameters.begin(); nvit != newvalueparameters.end(); ++nvit)
-    {
-      std::map<std::string, double>::iterator fdit;
-      fdit = parameters.find(nvit->first);
-      if (fdit != parameters.end())
-      {
-        fdit->second = nvit->second;
-        infoss << "Name: " << std::setw(15) << fdit->first << ", Value: " << fdit->second << std::endl;
-      }
-    }
-    std::cout << infoss.str();
+    // Crate table workspace
+    DataObjects::TableWorkspace_sptr geomws = boost::make_shared<TableWorkspace>();
 
-    // 2. Crate table workspace
-    DataObjects::TableWorkspace* tablews = new DataObjects::TableWorkspace();
-    DataObjects::TableWorkspace_sptr geomws = DataObjects::TableWorkspace_sptr(tablews);
+    geomws->addColumn("str", "Name");
+    geomws->addColumn("double", "Value");
+    geomws->addColumn("str", "FitOrTie");
+    geomws->addColumn("double", "Chi2");
+    geomws->addColumn("double", "Min");
+    geomws->addColumn("double", "Max");
+    geomws->addColumn("double", "StepSize");
 
-    tablews->addColumn("str", "Name");
-    tablews->addColumn("double", "Value");
-    tablews->addColumn("str", "FitOrTie");
-    tablews->addColumn("double", "Chi2");
-    tablews->addColumn("double", "Min");
-    tablews->addColumn("double", "Max");
-    tablews->addColumn("double", "StepSize");
-
-    // 2. Add peak parameters' name and values
+    // Add peak parameters' name and values
     map<string, double>::iterator mit;
     string fitortie("f");
     double minvalue = 0.0;
     double maxvalue = 0.0;
     double stepsize = 0.0;
-    for (mit = parameters.begin(); mit != parameters.end(); ++mit)
+    for (mit = parammap.begin(); mit != parammap.end(); ++mit)
     {
       string parname = mit->first;
       double parvalue = mit->second;
@@ -299,64 +318,7 @@ public:
       newrow << parname << parvalue << fitortie << 1.234 << minvalue << maxvalue << stepsize;
     }
 
-    return geomws;
-  }
-
-  /** Import text file containing the instrument parameters
-    * Format: name, value, min, max, step-size
-    * Input:  a text based file
-    * Output: a map for (parameter name, parameter value)
-    */
-  void importInstrumentTxtFile(std::string filename, std::map<std::string, double>& parameters,
-                               std::map<string, vector<double> >& parametermcs)
-  {
-    // 1. Open file
-    std::ifstream ins;
-    ins.open(filename.c_str());
-    if (!ins.is_open())
-    {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
-      throw std::invalid_argument("Cannot open Reflection-Text-File.");
-    }
-    else
-    {
-      std::cout << "Importing instrument parameter file " << filename << std::endl;
-    }
-
-    // 2. Parse
-    parameters.clear();
-    parametermcs.clear();
-
-    char line[256];
-    while(ins.getline(line, 256))
-    {
-      if (line[0] != '#')
-      {
-        std::string parname;
-        double parvalue, parmin, parmax, parstepsize;
-
-        std::stringstream ss;
-        ss.str(line);
-        ss >> parname >> parvalue;
-        parameters.insert(std::make_pair(parname, parvalue));
-
-        try
-        {
-          ss >> parmin >> parmax >> parstepsize;
-          vector<double> mcpars;
-          mcpars.push_back(parmin);
-          mcpars.push_back(parmax);
-          mcpars.push_back(parstepsize);
-          parametermcs.insert(make_pair(parname, mcpars));
-        }
-        catch (runtime_error err)
-        {
-          ;
-        }
-      }
-    }
-
-    ins.close();
+    AnalysisDataService::Instance().addOrReplace(wsname, geomws);
 
     return;
   }
