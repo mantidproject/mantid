@@ -11,7 +11,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/UnitFactory.h"
-
+#include <numeric>
 #include <limits>
 #include <math.h>
 #include <sstream>
