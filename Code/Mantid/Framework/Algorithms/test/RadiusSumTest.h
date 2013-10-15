@@ -97,6 +97,28 @@ public:
     TS_ASSERT_DELTA (outws->readY(0)[2], 4+1+1+2+2+3+3+4, 0.1);
   }
 
+  void test_radiussum_center_of_numeric_image_normalized(){
+    auto alg = algInstance(); 
+
+    int numbins = 3;
+    alg->setProperty("MaxRadius",0.3);
+    alg->setProperty("NumBins", numbins);
+    alg->setProperty("Centre", std::vector<double>(2,0));
+    alg->setProperty("NormalizeByRadius", true);
+    std::string outWSName("RadiusSumTest_OutputWS"); 
+    alg->setPropertyValue("OutputWorkspace", outWSName);
+    alg->setProperty("InputWorkspace", RingProfileTest::create_2d_workspace());
+
+    TS_ASSERT_EQUALS(alg->execute(), true); 
+
+    MatrixWorkspace_sptr outws = RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins); 
+    TS_ASSERT_DELTA (outws->readY(0)[0], 0, 0.1);
+    TS_ASSERT_DELTA (outws->readY(0)[1], (1+2+3+4)/0.15, 0.1); 
+    TS_ASSERT_DELTA (outws->readY(0)[2], (4+1+1+2+2+3+3+4)/0.25, 0.1);
+  }
+
+
+
   void test_radiussum_horizontal_left_vertical_center_image(){
     auto alg = algInstance(); 
 
