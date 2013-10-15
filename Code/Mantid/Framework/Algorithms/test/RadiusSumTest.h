@@ -137,9 +137,9 @@ public:
 
     MatrixWorkspace_sptr outws = RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins); 
 
-    std::vector <double> output = {0, 8, 11, 6, 5};
+    double output [] = {0, 8, 11, 6, 5};
 
-    for (size_t i = 0; i< output.size(); i++){
+    for (size_t i = 0; i< 5; i++){
       TS_ASSERT_DELTA (outws->readY(0)[i], output[i], 0.1);
     }
   }
@@ -187,12 +187,12 @@ public:
 
     MatrixWorkspace_sptr outws = RingProfileTest::basic_checkup_on_output_workspace((*alg), numbins); 
 
-    std::vector <double> output = {1+2+2, 0, 11, 7, 7};
+    double output[] = {1+2+2, 0, 11, 7, 7};
 
     for (int i=0; i<numbins+1; i++)
       TS_ASSERT_DELTA(outws->readX(0)[i], maxradius/numbins * i, 0.001);
 
-    for (size_t i = 0; i< output.size(); i++)
+    for (int i = 0; i< numbins ; i++)
       TS_ASSERT_DELTA (outws->readY(0)[i], output[i], 0.1);
         
    }
