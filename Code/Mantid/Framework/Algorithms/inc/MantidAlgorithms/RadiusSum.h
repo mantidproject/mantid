@@ -47,12 +47,16 @@ namespace Algorithms
     virtual int version() const;
     virtual const std::string category() const;
 
-    static bool inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr ); 
+    static bool inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr );
+ 
     static std::vector<double> getBoundariesOfNumericImage(API::MatrixWorkspace_sptr); 
+
     static std::vector<double> getBoundariesOfInstrument(API::MatrixWorkspace_sptr); 
     
     static void centerIsInsideLimits(const std::vector<double> & centre, 
                                      const std::vector<double> & boundaries);
+
+
 
   private:
     virtual void initDocs();
@@ -69,7 +73,7 @@ namespace Algorithms
     std::vector<double> getBoundariesOfInputWorkspace(); 
 
     
-    double getMaxDistance(const std::vector<double> & centre, 
+    double getMaxDistance(const Kernel::V3D & centre, 
                           const std::vector<double> & boundary_limits);
 
     void setUpOutputWorkspace(std::vector<double> & output);
@@ -78,8 +82,7 @@ namespace Algorithms
 
     Kernel::V3D centre; 
     int num_bins; 
-    bool normalize_flag; 
-    double normalization_order;
+
     API::MatrixWorkspace_sptr inputWS;
     double min_radius, max_radius;
 
@@ -114,6 +117,8 @@ namespace Algorithms
     int fromDistanceToBin(double distance){
       return static_cast<int>(((distance-min_radius)*num_bins)/(max_radius-min_radius));
     }
+
+    void normalizeOutputByRadius(std::vector<double> & output, double exp_power); 
 
   };
 
