@@ -1,6 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/Quat.h"
+
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
@@ -29,6 +31,7 @@ using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 using Poco::XML::DOMWriter;
+
 
 namespace Mantid
 {
@@ -525,6 +528,97 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element* pElem, std:
   return retAlgebraMatch.str();
 }
 
+/**
+ * Get the four corners of a cuboid from an XML element.  The XML may consist
+ * of one of the two available syntaxes.  We disallow a mixture of syntaxes.
+ *
+ * @param pElem :: XML 'cuboid' element from instrument definition file.
+ * @return The four corners of the cuboid.
+ *
+ * @throw std::invalid_argument if XML string is invalid.
+ */
+CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element* pElem)
+{
+  // Users have two syntax options when defining cuboids:
+
+  // A - "Point" syntax.
+  Element* pElem_lfb = getOptionalShapeElement(pElem, "left-front-bottom-point");
+  Element* pElem_lft = getOptionalShapeElement(pElem, "left-front-top-point");
+  Element* pElem_lbb = getOptionalShapeElement(pElem, "left-back-bottom-point");
+  Element* pElem_rfb = getOptionalShapeElement(pElem, "right-front-bottom-point");
+  
+  // B - "Alternate" syntax.
+  Element* pElem_height = getOptionalShapeElement(pElem, "height");
+  Element* pElem_width  = getOptionalShapeElement(pElem, "width");
+  Element* pElem_depth  = getOptionalShapeElement(pElem, "depth");
+  Element* pElem_centre = getOptionalShapeElement(pElem, "centre");
+  Element* pElem_axis   = getOptionalShapeElement(pElem, "axis");
+
+  const bool usingPointSyntax = pElem_lfb && pElem_lft && pElem_lbb && pElem_rfb;
+  const bool usingAlternateSyntax = pElem_height && pElem_width && pElem_depth;
+
+  const bool usedPointSyntaxField = pElem_lfb || pElem_lft || pElem_lbb || pElem_rfb;
+  const bool usedAlternateSyntaxField = pElem_height || pElem_width || pElem_depth || pElem_centre || pElem_axis;
+
+  const std::string SYNTAX_ERROR_MSG = "XML element: <" + pElem->tagName() +
+      "> may contain EITHER corner points (LFB, LFT, LBB and RFB) OR " +
+      "height, width, depth, centre and axis values.";
+
+  CuboidCorners result;
+
+  if( usingPointSyntax && !usingAlternateSyntax )
+  {
+    if( usedAlternateSyntaxField )
+      throw std::invalid_argument(SYNTAX_ERROR_MSG);
+
+    result.lfb = parsePosition(pElem_lfb);
+    result.lft = parsePosition(pElem_lft);
+    result.lbb = parsePosition(pElem_lbb);
+    result.rfb = parsePosition(pElem_rfb);
+  }
+  else if( usingAlternateSyntax && !usingPointSyntax )
+  {
+    if( usedPointSyntaxField )
+      throw std::invalid_argument(SYNTAX_ERROR_MSG);
+    
+    const double deltaH = getDoubleAttribute(pElem_height, "val") / 2;
+    const double deltaW = getDoubleAttribute(pElem_width, "val") / 2;
+    const double deltaD = getDoubleAttribute(pElem_depth, "val") / 2;
+    
+    const V3D centre = pElem_centre ? parsePosition(pElem_centre) : V3D(0, 0, 0);
+
+    result.lfb = V3D(-deltaW,-deltaH,-deltaD);
+    result.lft = V3D(-deltaW, deltaH,-deltaD);
+    result.lbb = V3D(-deltaW,-deltaH, deltaD);
+    result.rfb = V3D( deltaW,-deltaH,-deltaD);
+    
+    if( pElem_axis )
+    {
+      // Use a quarternion to do a rotation for us, with respect to the default
+      // axis.  Our "Quat" implementation requires that the vectors passed to
+      // it be normalised.
+      V3D axis = parsePosition(pElem_axis);
+      axis.normalize();
+      const V3D DEFAULT_AXIS(0, 0, 1);
+      const Quat rotation(axis, DEFAULT_AXIS);
+
+      rotation.rotate(result.lfb);
+      rotation.rotate(result.lft);
+      rotation.rotate(result.lbb);
+      rotation.rotate(result.rfb);
+    }
+
+    result.lfb += centre;
+    result.lft += centre;
+    result.lbb += centre;
+    result.rfb += centre;
+  }
+  else
+    throw std::invalid_argument(SYNTAX_ERROR_MSG);
+
+  return result;
+}
+
 /** Parse XML 'cuboid' element
  *
  *  @param pElem :: XML 'cuboid' element from instrument def. file
@@ -536,22 +630,14 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element* pElem, std:
  */
 std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
-  Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point"); 
-  Element* pElem_lft = getShapeElement(pElem, "left-front-top-point"); 
-  Element* pElem_lbb = getShapeElement(pElem, "left-back-bottom-point"); 
-  Element* pElem_rfb = getShapeElement(pElem, "right-front-bottom-point"); 
+  auto corners = parseCuboid(pElem);
 
-  V3D lfb = parsePosition(pElem_lfb);  // left front bottom
-  V3D lft = parsePosition(pElem_lft);  // left front top
-  V3D lbb = parsePosition(pElem_lbb);  // left back bottom
-  V3D rfb = parsePosition(pElem_rfb);  // right front bottom
-
-  V3D pointTowardBack = lbb-lfb;
+  V3D pointTowardBack = corners.lbb-corners.lfb;
   pointTowardBack.normalize();
 
   // add front plane cutoff
   Plane* pPlaneFrontCutoff = new Plane();
-  pPlaneFrontCutoff->setPlane(lfb, pointTowardBack); 
+  pPlaneFrontCutoff->setPlane(corners.lfb, pointTowardBack); 
   prim[l_id] = pPlaneFrontCutoff;
 
   std::stringstream retAlgebraMatch;
@@ -560,43 +646,43 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add back plane cutoff
   Plane* pPlaneBackCutoff = new Plane();
-  pPlaneBackCutoff->setPlane(lbb, pointTowardBack); 
+  pPlaneBackCutoff->setPlane(corners.lbb, pointTowardBack); 
   prim[l_id] = pPlaneBackCutoff;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
 
-  V3D pointTowardRight = rfb-lfb;
+  V3D pointTowardRight = corners.rfb-corners.lfb;
   pointTowardRight.normalize();
 
   // add left plane cutoff
   Plane* pPlaneLeftCutoff = new Plane();
-  pPlaneLeftCutoff->setPlane(lfb, pointTowardRight); 
+  pPlaneLeftCutoff->setPlane(corners.lfb, pointTowardRight); 
   prim[l_id] = pPlaneLeftCutoff;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
   // add right plane cutoff
   Plane* pPlaneRightCutoff = new Plane();
-  pPlaneRightCutoff->setPlane(rfb, pointTowardRight); 
+  pPlaneRightCutoff->setPlane(corners.rfb, pointTowardRight); 
   prim[l_id] = pPlaneRightCutoff;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
 
-  V3D pointTowardTop = lft-lfb;
+  V3D pointTowardTop = corners.lft-corners.lfb;
   pointTowardTop.normalize();
 
   // add bottom plane cutoff
   Plane* pPlaneBottomCutoff = new Plane();
-  pPlaneBottomCutoff->setPlane(lfb, pointTowardTop); 
+  pPlaneBottomCutoff->setPlane(corners.lfb, pointTowardTop); 
   prim[l_id] = pPlaneBottomCutoff;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
   // add top plane cutoff
   Plane* pPlaneTopCutoff = new Plane();
-  pPlaneTopCutoff->setPlane(lft, pointTowardTop); 
+  pPlaneTopCutoff->setPlane(corners.lft, pointTowardTop); 
   prim[l_id] = pPlaneTopCutoff;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;
@@ -1050,16 +1136,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
   {
     boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
     Obj->setGeometryHandler(handler);
-    Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
-    Element* pElem_lft = getShapeElement(pElem, "left-front-top-point");
-    Element* pElem_lbb = getShapeElement(pElem, "left-back-bottom-point");
-    Element* pElem_rfb = getShapeElement(pElem, "right-front-bottom-point");
-
-    V3D lfb = parsePosition(pElem_lfb);  // left front bottom
-    V3D lft = parsePosition(pElem_lft);  // left front top
-    V3D lbb = parsePosition(pElem_lbb);  // left back bottom
-    V3D rfb = parsePosition(pElem_rfb);  // right front bottom
-    ((GluGeometryHandler*)(handler.get()))->setCuboid(lfb,lft,lbb,rfb);
+    auto corners = parseCuboid(pElem);
+    ((GluGeometryHandler*)(handler.get()))->setCuboid(corners.lfb,corners.lft,corners.lbb,corners.rfb);
   }
   else if(pElem->tagName()=="sphere")
   {
