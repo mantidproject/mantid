@@ -17,7 +17,7 @@ class Config(object):
         try:
             tree = XML.parse(filename)
             doc = tree.getroot()
-        except XML.ParseError as ex:
+        except:
             raise ValueError("The file does not contain valid XML")
         
         self.__extract_to_dictionary(doc)
