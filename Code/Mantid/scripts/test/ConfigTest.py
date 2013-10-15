@@ -56,7 +56,7 @@ class ConfigTest(unittest.TestCase):
         fileObject = TempFile(contents="<SettingList><Setting>test</Setting></SettingList>", extension=".xml")
         self.assertRaises(ValueError, config.Config, fileObject.pathToFile() )
         
-    def test_sanity_check_missing_attribute_name_throws(self):   
+    def test_sanity_check_missing_attribute_value_throws(self):   
         fileObject = TempFile(contents="<SettingList><Setting name='test_setting'></Setting></SettingList>", extension=".xml")
         self.assertRaises(ValueError, config.Config, fileObject.pathToFile() )
   

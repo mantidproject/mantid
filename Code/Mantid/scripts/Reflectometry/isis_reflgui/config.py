@@ -25,7 +25,7 @@ class Config(object):
     def __check_file(self, filename):
         path, extension = os.path.splitext(filename)
         if extension.lower().strip() != ".xml":
-            raise ValueError("Wrong file extension. *.xml expected not XML.")
+            raise ValueError("Wrong file extension. *.xml expected not %s." % extension)
         if not os.path.isfile(filename):
             ''' Deliberately swallow and re-throw at this point. Consise reinterpreted error, will be much nicer for client code.'''
             raise ValueError("File does not exist filename %s" % filename) 
@@ -50,12 +50,6 @@ class Config(object):
       
     def get_contents_file(self):
         return self.__filename
-            
-        
-            
-        
-         
-        
-        #pyxsval.parseAndValidateXmlInput(filename, xsdFile=xsdFile, validateSchema=0) #Throws 
+
         
         
