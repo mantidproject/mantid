@@ -255,7 +255,7 @@ namespace Algorithms
     
     std::vector<double> boundary_limits = getBoundariesOfInputWorkspace();
     std::stringstream s; 
-    for(double value:  boundary_limits)
+    BOOST_FOREACH(auto & value, boundary_limits)
       s << value << " , " ; 
     g_log.information() <<  "Boundary limits are: " << s.str() << std::endl; 
 
@@ -343,7 +343,11 @@ namespace Algorithms
       throw std::logic_error("Failure to get the boundaries of this image. Internal logic error. Please, inform MantidHelp" );
     }
     
-    std::vector<double> output = {min_x, max_x, min_y, max_y}; 
+    std::vector<double> output(4); // output = {min_x, max_x, min_y, max_y}; not supported in all compilers
+    output[0] = min_x; 
+    output[1] = max_x; 
+    output[2] = min_y; 
+    output[3] = max_y; 
     return output;   
   }
 
@@ -430,7 +434,14 @@ namespace Algorithms
     zMin = std::min(first_z, last_z); 
     
 
-    std::vector<double> output = {xMin, xMax, yMin, yMax, zMin, zMax };
+    std::vector<double> output(6); // output  = {xMin, xMax, yMin, yMax, zMin, zMax }; not supported in all compilers
+    output[0] = xMin; 
+    output[1] = xMax; 
+    output[2] = yMin; 
+    output[3] = yMax; 
+    output[4] = zMin; 
+    output[5] = zMax; 
+    
     return output; 
   }
 
@@ -568,9 +579,13 @@ namespace Algorithms
   double RadiusSum::getMaxDistance(const V3D & centre,
                                    const std::vector<double> & boundary_limits){
     
-    std::vector<double> Xs = {boundary_limits[0], boundary_limits[1]}; 
-    std::vector<double> Ys = {boundary_limits[2], boundary_limits[3]};
-    std::vector<double> Zs = {0, 0};
+    std::vector<double> Xs; //  = {boundary_limits[0], boundary_limits[1]}; 
+    std::vector<double> Ys; // = {boundary_limits[2], boundary_limits[3]};
+    std::vector<double> Zs(2,0); //  = {0, 0};
+    
+    Xs.push_back(boundary_limits[0]); Xs.push_back(boundary_limits[1]); 
+    Ys.push_back(boundary_limits[2]); Ys.push_back(boundary_limits[3]);     
+
     if (boundary_limits.size() == 6){
       Zs[0] = boundary_limits[4]; 
       Zs[1] = boundary_limits[5];
