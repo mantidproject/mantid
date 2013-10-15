@@ -15,6 +15,8 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include <limits>
 #include <math.h>
 #include <sstream>
+#include <boost/foreach.hpp>
+
 using namespace Mantid::Kernel;
 
 namespace Mantid
