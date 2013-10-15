@@ -69,18 +69,29 @@ _translations = {
     'Janik Zikovsky'          : 'Zikovsky, Janik'
 }
 
-# Used to ensure a Git author does not appear on the list.  NOT to be used
-# where a translation entry would suffice.
+# Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
+# to be used in the case where a Git user has multiple accounts; a translation
+# entry would suffice in such an instance.
 _blacklist = [
     '',
     'unknown'
 ]
 
-# Used for sponsors / contributors who should be included, but who are not
-# listed as authors on Git.
-_whitelist = [
+# The whitelist is used for sponsors / contributors who should be included,
+# but who are not listed as authors on Git.  These names will be shown in the
+# "main" DOI only.
+whitelist = [
+    'Cottrell, Stephen',
+    'Hagen, Mark',
+    'Hillier, Adrian',
+    'Howells, Spencer',
+    'McGreevy, Robert',
+    'Pascal, Manuel',
+    'Perring, Toby',
+    'Pratt, Francis',
+    'Proffen, Thomas',
+    'Radaelli, Paolo',
     'Taylor, Jon',
-    'Perring, Toby'
 ]
 
 import subprocess
@@ -107,7 +118,7 @@ def _get_all_git_tags():
     return subprocess.check_output(['git', 'tag']).replace('"', '').split('\n')
 
 def _clean_up_author_list(author_list):
-    '''Apply translations, blacklist and whitelist, and get rid of duplicates.
+    '''Apply translations and blacklist, and get rid of duplicates.
     '''
     # Double check that all names have no leading or trailing whitespace.
     result = map(string.strip, author_list)
@@ -126,8 +137,8 @@ def _clean_up_author_list(author_list):
     # Translate all remaining names.
     result = [_translations[a] for a in result]
 
-    # Return the translated names, plus any whitelisted names.
-    return sorted(set(result + _whitelist))
+    # Return the unique list of translated names.
+    return sorted(set(result))
 
 @run_from_script_dir
 def _authors_from_tag_info(tag_info):

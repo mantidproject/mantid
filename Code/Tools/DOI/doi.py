@@ -52,10 +52,6 @@ USEFUL LINKS:
 
 - HTTP status codes:
   http://docs.python.org/2/library/httplib.html#httplib.HTTPS_PORT
-
-PROBLEMS LEFT TO SOLVE:
-
-- The exact wording of the "description" metadata field.
 """
 
 import argparse
@@ -113,9 +109,8 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
         ET.SubElement(creator, 'creatorName').text = creator_name
 
     # Titles are defined as a "name or title by which a resource is known".
-    title_text_list = 'Mantid: A high performance framework for the ' + \
-                      'reduction and analysis of muon spin resonance and ' + \
-                      'neutron scattering data.',
+    title_text_list = 'Mantid: Manipulation and Analysis Toolkit for ' + \
+                      'Instrument Data.',
     titles = ET.SubElement(root, 'titles')
     for title_text in title_text_list:
         ET.SubElement(titles, 'title').text = title_text
@@ -181,8 +176,9 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     # categories. May be used for technical information."
     descriptions = ET.SubElement(root, 'descriptions')
     description = ET.SubElement(descriptions, 'description')
-    description.text = 'A high performance framework for the reduction and' + \
-        ' analysis of muon spin resonance and neutron scattering data.'
+    description.text = 'Mantid: A high performance framework for the ' + \
+                       'reduction and analysis of muon spin resonance and ' + \
+                       'neutron scattering data.'
     description.set('descriptionType', 'Abstract')
 
     return ET.tostring(root, encoding='utf-8')
@@ -384,6 +380,9 @@ def run(options):
     # is create a single, unlinked DOI to the main project page.
     if options.main:
         creator_name_list = authors.authors_up_to_git_tag(tag)
+        # In the case of the main DOI we need to add the whitelisted names too.
+        creator_name_list = sorted(set(creator_name_list + authors.whitelist))
+        
         xml_form = build_xml_form(doi, {}, creator_name_list, version_str)
 
         create_or_update_metadata(xml_form, server_url_base, doi, options)
