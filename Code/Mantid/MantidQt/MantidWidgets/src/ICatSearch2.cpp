@@ -45,16 +45,18 @@ namespace MantidQt
       m_icatUiForm.searchCbox->setChecked(true);
       showCatalogSearch();
 
-      // Hide the other two frames
-      m_icatUiForm.resFrame->hide();
-      m_icatUiForm.dataFileFrame->hide();
-
       // Hide advanced input fields until "Advanced search" is checked.
       advancedSearchChecked();
 
-      // Disable buttons except search by default.
+      // Prevents a user seeing empty tables.
       m_icatUiForm.searchResultsCbox->setEnabled(false);
       m_icatUiForm.dataFileCbox->setEnabled(false);
+      m_icatUiForm.resFrame->hide();
+      m_icatUiForm.dataFileFrame->hide();
+
+      // Disable download and load buttons until a user has selected a datafile.
+      m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
+      m_icatUiForm.dataFileLoadBtn->setEnabled(false);
 
       // Show related help page when a user clicks on the "Help" button.
       connect(m_icatUiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
@@ -78,7 +80,7 @@ namespace MantidQt
       // When the user has selected a filter type then perform the filter for the specified type.
       connect(m_icatUiForm.dataFileFilterCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(doFilter(int)));
       // When the user clicks "download to..." then open a dialog and download the file(s) to that location.
-      connect(m_icatUiForm.dataFileFootDownloadBtn,SIGNAL(clicked()),this,SLOT(downloadDataFiles()));
+      connect(m_icatUiForm.dataFileDownloadBtn,SIGNAL(clicked()),this,SLOT(downloadDataFiles()));
       // When the user clicks the "load" button then load their selected datafiles into a workspace.
       connect(m_icatUiForm.dataFileLoadBtn,SIGNAL(clicked()),this,SLOT(loadDataFiles()));
 
@@ -919,6 +921,9 @@ namespace MantidQt
       {
         QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 
+        // Enable or disable download & load buttons if a user has selected (or not) row(s).
+        enableDownloadButtons();
+
         for (int row = 0; row < table->rowCount(); ++row)
         {
           // We Uncheck here to prevent previously selected items staying selected.
@@ -939,6 +944,28 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
     // SLOTS for: "DataFile information"
     ///////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Enables the download & load button if user has selected a data file to download. Otherwise, disables them.
+     */
+    void ICatSearch2::enableDownloadButtons()
+    {
+      QModelIndexList indexes = m_icatUiForm.dataFileResultsTbl->selectionModel()->selection().indexes();
+
+      // If the user has selected a data file to download, then enable relevant buttons.
+      // Otherwise null would be passed to download/load, which causes an exception.
+      if (!indexes.empty())
+      {
+        m_icatUiForm.dataFileDownloadBtn->setEnabled(true);
+        m_icatUiForm.dataFileLoadBtn->setEnabled(true);
+      }
+      else
+      {
+        // Otherwise, disable the buttons to prevent the user from downloading/loading nothing.
+        m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
+        m_icatUiForm.dataFileLoadBtn->setEnabled(false);
+      }
+    }
 
     /**
      * Performs filter option for specified filer type.

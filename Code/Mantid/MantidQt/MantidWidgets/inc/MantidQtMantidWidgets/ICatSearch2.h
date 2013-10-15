@@ -166,6 +166,8 @@ namespace MantidQt
       // SLOTS for: "Datafile information"
       ///////////////////////////////////////////////////////////////////////////////
 
+      /// Enables the download & load button if user has selected a data file to download.
+      void enableDownloadButtons();
       /// Performs filterDataFileType() for specified filer type.
       void doFilter(int index);
       /// Downloads selected datFiles to a specified location.

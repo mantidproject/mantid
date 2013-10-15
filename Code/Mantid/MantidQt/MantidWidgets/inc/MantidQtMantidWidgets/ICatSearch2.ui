@@ -972,7 +972,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="dataFileFootDownloadBtn">
+           <widget class="QPushButton" name="dataFileDownloadBtn">
             <property name="font">
              <font>
               <weight>75</weight>
