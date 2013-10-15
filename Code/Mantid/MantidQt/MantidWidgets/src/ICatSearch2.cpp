@@ -921,7 +921,9 @@ namespace MantidQt
 
         for (int row = 0; row < table->rowCount(); ++row)
         {
-          // We Uncheck  here to prevent previously selected items staying selected.
+          // We Uncheck here to prevent previously selected items staying selected.
+          table->item(row, 0)->setCheckState(Qt::Unchecked);
+
           QTableWidgetItem *item = table->item(row,0);
 
           if (item->isSelected())
