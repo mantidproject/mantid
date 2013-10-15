@@ -160,9 +160,12 @@ namespace MantidQt
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
 			QString samplePath = m_uiForm.dsSample->getFullFilePath();
 
-			if(checkFileLoaded(sampleName, samplePath))
+			if(!sampleName.isEmpty())
 			{
-				plotMiniPlot(sampleName, index*2);
+				if(checkFileLoaded(sampleName, samplePath))
+				{
+					plotMiniPlot(sampleName, index*2);
+				}
 			}
 		}
 
