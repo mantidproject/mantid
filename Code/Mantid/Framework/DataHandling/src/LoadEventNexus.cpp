@@ -1802,17 +1802,11 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
  *  @param alg :: Handle of the algorithm 
  *  @return true if successful
  */
-bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
-    const std::string & top_entry_name, Algorithm * alg) 
+bool LoadEventNexus::loadInstrument(const std::string & nexusfilename, MatrixWorkspace_sptr localWorkspace,
+                                    const std::string & top_entry_name, Algorithm * alg)
 {
-
-   // Get the instrument group in the Nexus file
-   ::NeXus::File nxfile(nexusfilename);
-
-   bool foundInstrument = runLoadIDFFromNexus( nexusfilename, localWorkspace, alg);
-
-   if(!foundInstrument) foundInstrument = runLoadInstrument( nexusfilename, localWorkspace, top_entry_name, alg );
-
+   bool foundInstrument = runLoadIDFFromNexus( nexusfilename, localWorkspace, top_entry_name, alg);
+   if (!foundInstrument) foundInstrument = runLoadInstrument( nexusfilename, localWorkspace, top_entry_name, alg );
    return foundInstrument;
 }
 
@@ -1823,10 +1817,9 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, MatrixWork
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  *  @return true if successful
  */
-bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
+bool LoadEventNexus::runLoadIDFFromNexus(const std::string & nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                         const std::string & top_entry_name, Algorithm * alg)
 {
-  // Code to be added here. In meantime, fail to find instrument
-
   IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus",-1,-1,false);
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -1834,7 +1827,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::
   {
     loadInst->setPropertyValue("Filename", nexusfilename);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-    loadInst->setPropertyValue("InstrumentParentPath","/raw_data_1");
+    loadInst->setPropertyValue("InstrumentParentPath",top_entry_name);
     loadInst->execute();
   }
   catch( std::invalid_argument&)
@@ -1843,7 +1836,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::
   }
   catch (std::runtime_error&)
   {
-    alg->getLogger().information("No IDF found in "+nexusfilename+" at raw_data_1/Instrument");
+    alg->getLogger().debug("No IDF found in "+nexusfilename+" at "+top_entry_name+"/instrument");
   }
 
   if ( !loadInst->isExecuted() ) alg->getLogger().information("No IDF loaded from Nexus file.");   
