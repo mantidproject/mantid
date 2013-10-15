@@ -2,13 +2,14 @@
 #define MANTID_ALGORITHMS_RADIUSSUMTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <memory>
+#include <boost/shared_ptr.hpp>
 #include "MantidAlgorithms/RadiusSum.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "RingProfileTest.h"
 using Mantid::Algorithms::RadiusSum;
 using namespace Mantid::API;
+
 
 class RadiusSumTest : public CxxTest::TestSuite
 {
@@ -20,8 +21,8 @@ public:
 
 
   // released automatically when it goes out of scope
-  std::unique_ptr<RadiusSum> algInstance(){
-    std::unique_ptr<RadiusSum> alg(new RadiusSum()); ; 
+  boost::shared_ptr<RadiusSum> algInstance(){
+    boost::shared_ptr<RadiusSum> alg(new RadiusSum());
       TS_ASSERT_THROWS_NOTHING( alg->initialize()); 
       TS_ASSERT( alg->isInitialized());
       return alg;
