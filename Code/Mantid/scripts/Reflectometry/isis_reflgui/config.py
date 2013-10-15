@@ -9,7 +9,7 @@ class Config(object):
     def __init__(self, filename = None):
         self.__filename = filename
         if not filename:
-            filename = "config.xml"
+            filename = os.path.join( os.path.dirname(os.path.realpath(__file__)), "config.xml")
             
         self.__check_file(filename)
         
