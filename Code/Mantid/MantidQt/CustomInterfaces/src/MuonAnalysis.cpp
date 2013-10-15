@@ -1259,6 +1259,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     infoStr += matrix_workspace->getComment();
     
     const Run& runDetails = matrix_workspace->run();
+
     Mantid::Kernel::DateAndTime start, end;
 
     // Add the start time for the run
@@ -1266,7 +1267,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     if ( runDetails.hasProperty("run_start") )
     {
       start = runDetails.getProperty("run_start")->value();
-      infoStr += runDetails.getProperty("run_start")->value();
+      infoStr += start.toSimpleString();
     }
 
     // Add the end time for the run
@@ -1274,7 +1275,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     if ( runDetails.hasProperty("run_end") )
     {
       end = runDetails.getProperty("run_end")->value();
-      infoStr += runDetails.getProperty("run_end")->value();
+      infoStr += end.toSimpleString();
     }
 
     // Add counts to run information
