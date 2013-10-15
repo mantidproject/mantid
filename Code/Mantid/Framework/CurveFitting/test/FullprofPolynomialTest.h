@@ -35,62 +35,83 @@ public:
     TS_ASSERT( categories[0] == "Background" );
   }
 
+  /** Test function on a Fullprof polynomial function
+    */
   void test_FPPolynomial()
   {
-    // create mock data to test against
-    std::string wsName = "QuadraticBackgroundTest";
+    // Create a workspace
+    std::string wsName = "TOFPolybackgroundBackgroundTest";
     int histogramNumber = 1;
-    int timechannels = 5;
+    int timechannels = 1000;
     DataObjects::Workspace2D_sptr ws2D =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels));
+
+    AnalysisDataService::Instance().add(wsName, ws2D);
+
+    double tof0 = 8000.;
+    double dtof = 5.;
+
     for (int i = 0; i < timechannels; i++)
     {
-      ws2D->dataX(0)[i] = i + 1;
-      ws2D->dataY(0)[i] = (i + 1)*(i + 1) + 2*(i+1) + 3.0;
-      ws2D->dataE(0)[i] = 1.0;
+      ws2D->dataX(0)[i] = static_cast<double>(i) * dtof + tof0;
     }
 
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    // Create a function
+    IFunction_sptr tofbkgd = boost::dynamic_pointer_cast<IFunction>(boost::make_shared<FullprofPolynomial>());
+    TS_ASSERT_THROWS_NOTHING(tofbkgd->setAttributeValue("n", 6));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd->setAttributeValue("Bkpos", 10000.));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A0", 0.3));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A1", 1.0));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A2", -0.5));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A3", 0.05));
+    TS_ASSERT_THROWS_NOTHING(tofbkgd->setParameter("A4", -0.02));
 
-    CurveFitting::Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
+    // Calculate function
+    FunctionDomain1DVector domain(ws2D->readX(0));
+    FunctionValues values(domain);
+    tofbkgd->function(domain, values);
 
-    // set up fitting function
-    IFunction_sptr quadB(new FullprofPolynomial());
-    quadB->setAttributeValue("n", 2);
-    quadB->initialize();
+    // Test result
+    TS_ASSERT_DELTA(values[400], 0.3, 1.0E-10); // Y[10000] = B0
+    TS_ASSERT_DELTA(values[0], 0.079568, 1.0E-5);
+    TS_ASSERT_DELTA(values[605], 0.39730, 1.0E-5);
+    TS_ASSERT_DELTA(values[999], 0.55583, 1.0E-5);
 
-    quadB->setParameter("A0", 0.0);
-    quadB->setParameter("A1", 1.0);
+    // Set the workspace
+    for (size_t i = 0; i < ws2D->readY(0).size(); ++i)
+    {
+      ws2D->dataY(0)[i] = values[i];
+      ws2D->dataE(0)[i] = sqrt(fabs(values[i]));
+    }
 
-    //alg2.setFunction(linB);
-    alg2.setProperty("Function", quadB);
+    // Make function a little bit off
+    tofbkgd->setParameter("A0", 0.5);
+    tofbkgd->setParameter("A3", 0.0);
 
-    // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex", "0");
+    // Set up fit
+    CurveFitting::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT( fitalg.isInitialized() );
+
+    fitalg.setProperty("Function", tofbkgd);
+    fitalg.setPropertyValue("InputWorkspace", wsName);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
 
     // execute fit
-    TS_ASSERT_THROWS_NOTHING(TS_ASSERT( alg2.execute() ))
-
-    TS_ASSERT( alg2.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT( fitalg.execute() ));
+    TS_ASSERT( fitalg.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
+    double chi2 = fitalg.getProperty("OutputChi2overDoF");
 
-    TS_ASSERT_DELTA( dummy, 0.0,0.1);
-    IFunction_sptr out = alg2.getProperty("Function");
-    TS_ASSERT_DELTA( out->getParameter("A0"), 3.0, 0.01);
-    TS_ASSERT_DELTA( out->getParameter("A1"), 2.0, 0.0003);
-    TS_ASSERT_DELTA( out->getParameter("A2"), 1.0, 0.01);
+    TS_ASSERT_DELTA( chi2, 0.0, 0.1);
+    TS_ASSERT_DELTA( tofbkgd->getParameter("A0"), 0.3, 0.01);
+    TS_ASSERT_DELTA( tofbkgd->getParameter("A1"), 1.0, 0.0003);
+    TS_ASSERT_DELTA( tofbkgd->getParameter("A3"), 0.05, 0.01);
 
-    // check its categories
-    const std::vector<std::string> categories = out->categories();
-    TS_ASSERT( categories.size() == 1 );
-    TS_ASSERT( categories[0] == "Background" );
+    // Clean
+    AnalysisDataService::Instance().remove(wsName);
 
     return;
   }
