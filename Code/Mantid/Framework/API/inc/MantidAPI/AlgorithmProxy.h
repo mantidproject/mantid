@@ -101,6 +101,10 @@ namespace Mantid
       void enableHistoryRecordingForChild(const bool) {};
       void setRethrows(const bool rethrow);
 
+      const std::string workspaceMethodName() const;
+      const std::vector<std::string> workspaceMethodOn() const;
+      const std::string workspaceMethodInputProperty() const;
+
       /** @name PropertyManager methods */
       //@{
       /// Set the property value

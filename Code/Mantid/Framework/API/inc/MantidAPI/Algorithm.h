@@ -180,6 +180,11 @@ public:
   virtual const std::string categorySeparator() const {return ";";}
   /// function to return any aliases to the algorithm;  A default implementation is provided
   virtual const std::string alias() const {return "";}
+
+  const std::string workspaceMethodName() const;
+  const std::vector<std::string> workspaceMethodOn() const;
+  const std::string workspaceMethodInputProperty() const;
+
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
   AlgorithmID getAlgorithmID()const{return m_algorithmID;}
 
@@ -266,6 +271,9 @@ protected:
   virtual void exec() = 0;
   /// Method defining summary, optional
   virtual void initDocs() {};
+
+  /// Returns a semi-colon separated list of workspace types to attach this algorithm
+  virtual const std::string workspaceMethodOnTypes() const { return ""; }
 
   void cacheWorkspaceProperties();
 
