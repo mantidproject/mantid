@@ -119,6 +119,8 @@ namespace MantidQt
       bool eventFilter(QObject* watched, QEvent* event);
 
     private slots:
+      /// Selects/deselects ALL rows in dataFile table.
+      void selectAllDataFiles(bool toggled);
       /// When the facility login button is clicked
       void onFacilityLogin();
       /// When the help button is clicked.

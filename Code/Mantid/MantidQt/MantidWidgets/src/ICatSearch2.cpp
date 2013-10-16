@@ -956,6 +956,35 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
+     * If the user has checked "check all", then check and select ALL rows. Otherwise, deselect all.
+     * @param toggled :: True if user has checked the checkbox in the dataFile table header.
+     */
+    void ICatSearch2::selectAllDataFiles(bool toggled)
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+
+      for(int col = 0 ; col < table->columnCount(); col++)
+      {
+        for(int row = 0; row < table->rowCount(); ++row)
+        {
+          QTableWidgetItem *item  = table->item(row, col);
+
+          if (toggled)
+          {
+            table->item(row, 0)->setCheckState(Qt::Checked);
+            item->setSelected(true);
+          }
+          else
+          {
+            table->item(row, 0)->setCheckState(Qt::Unchecked);
+            item->setSelected(false);
+          }
+        }
+      }
+      enableDownloadButtons();
+    }
+
+    /**
      * Enables the download & load button if user has selected a data file to download. Otherwise, disables them.
      */
     void ICatSearch2::enableDownloadButtons()
