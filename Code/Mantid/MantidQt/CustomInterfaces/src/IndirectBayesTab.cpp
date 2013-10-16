@@ -84,13 +84,13 @@ namespace MantidQt
     {
       using Mantid::MantidVec;
 
-      MantidQwtMatrixWorkspaceData wsData(workspace, static_cast<int>(wsIndex), false); 
-
-      //check if we have enough points to plot
-      if( workspace->readX().size() < 2)
+      //check if we can plot
+      if( wsIndex >= workspace->getNumberHistograms() || workspace->readX(0).size() < 2 )
       {
         return;
       }
+
+      MantidQwtMatrixWorkspaceData wsData(workspace, static_cast<int>(wsIndex), false); 
 
       if ( m_curve != NULL )
       {

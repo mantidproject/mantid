@@ -1,3 +1,4 @@
+#include "MantidAPI/Run.h"
 #include "MantidQtCustomInterfaces/JumpFit.h"
 
 #include <string>
@@ -73,7 +74,7 @@ namespace MantidQt
 			}
 
 			// width should be 0, 2 or 4
-			int width = m_uiForm.cbWidth->currentIndex() * 2;
+			int width = 1 + m_uiForm.cbWidth->currentIndex() * 2;
 			QString widthTxt = boost::lexical_cast<std::string>(width).c_str();
 
 			// Cropping values
@@ -113,12 +114,18 @@ namespace MantidQt
 		 */
 		void JumpFit::handleSampleInputReady(const QString& filename)
 		{
-			plotMiniPlot(filename, 0);
+			// re-add option if it was removed
+			if(m_uiForm.cbWidth->count() < 3)
+			{
+				m_uiForm.cbWidth->insertItem(0,"1.1");
+			}
+
+			plotMiniPlot(filename, 1);
 			std::pair<double,double> res;
 			std::pair<double,double> range = getCurveRange();
 
 			auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(filename.toStdString());
-			auto mws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws);
+			auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
 			size_t size = mws->getNumberHistograms();
 
@@ -131,7 +138,18 @@ namespace MantidQt
 			}
 			else
 			{
-				//we're using a QLines files as input
+				//Check the sample logs on the file additonal information
+				Mantid::API::Run run = mws->mutableRun();
+				if(run.hasProperty("Lorentzians"))
+				{
+					auto prop = run.getProperty("Lorentzians");
+					if(prop->value() == "2")
+					{
+						m_uiForm.cbWidth->removeItem(0);
+					}
+				}
+
+				//we're using a QLines file as input
 				//enable the option to select other spectra
 				m_uiForm.cbWidth->setEnabled(true);
 			}
@@ -164,7 +182,7 @@ namespace MantidQt
 			{
 				if(checkFileLoaded(sampleName, samplePath))
 				{
-					plotMiniPlot(sampleName, index*2);
+					plotMiniPlot(sampleName, 1+index*2);
 				}
 			}
 		}
