@@ -1,4 +1,4 @@
-from isis_reflgui.config import *
+from isis_reflgui.settings import *
 import xml.etree.ElementTree as xml
 
 '''
@@ -19,9 +19,9 @@ class LatestISISRuns(object):
         
         self.__instrument = instrument.upper().strip()    
         
-        settings = isis_reflgui.config.Config() # This will throw a missing config exception if no config file is available.
+        usersettings = Settings() # This will throw a missing config exception if no config file is available.
         try:
-            self.__mountpoint = settings.get_named_setting("DataMountPoint")
+            self.__mountpoint = usersettings.get_named_setting("DataMountPoint")
         except KeyError:
             print "DataMountPoint is missing from the config.xml file."
             raise

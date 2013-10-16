@@ -16,11 +16,13 @@ from PyQt4 import QtCore, QtGui, uic
 from PyQt4.QtGui import QFont
 # from mantidsimple import *
 from mantid.simpleapi import *  # New API
-from mantidplot import *
+
 # import qti as qti
 from quick import *
 from combineMulti import *
 from mantid.api import WorkspaceGroup
+from settings import *
+from latest_isis_runs import *
 
 currentTable = ' '
 
@@ -128,18 +130,16 @@ class Ui_SaveWindow(object):
         names = mtd.getObjectNames()
         for ws in names:
             self.listWidget.addItem(ws)
-        # try to get correct user directory
-        currentInstrument = config['default.instrument']
+        try:
+            instrumentRuns =  LatestISISRuns(instrument=config['default.instrument'])
+            runs = instrumentRuns.getLatestJournalRuns()
+            for run in runs:    
+                    self.listWidget.addItem(run)
+        except:
+            # We should log the error here.
+            pass
         
-        tree1 = xml.parse(r'\\isis\inst$\NDX' + currentInstrument + '\Instrument\logs\journal\journal_main.xml')
-        root1 = tree1.getroot()
-        currentJournal = root1[len(root1) - 1].attrib.get('name')
-        tree = xml.parse(r'\\isis\inst$\NDX' + currentInstrument + '\Instrument\logs\journal\\' + currentJournal)
-        root = tree.getroot()
-        # for entry in root:#910252
-            # if (entry[4].text ==self.RBEdit.text()):
-             #   runno=str(int(entry[6].text))
-        # path=root[0]
+        
         
         
         
@@ -463,6 +463,21 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.actionReLoad_table, QtCore.SIGNAL(_fromUtf8("triggered()")), self.ReloadDialog)
         QtCore.QObject.connect(self.actionSaveDialog, QtCore.SIGNAL(_fromUtf8("triggered()")), self.saveWksp)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        
+        
+    def populateList(self):
+        self.listWidget.clear()
+        names = mtd.getObjectNames()
+        for ws in names:
+            self.listWidget.addItem(ws)
+        try:
+            instrumentRuns =  LatestISISRuns(instrument=config['default.instrument'])
+            runs = instrumentRuns.getLatestJournalRuns()
+            for run in runs:    
+                    self.listWidget.addItem(run)
+        except:
+            # We should log the error here.
+            pass
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("ISIS Reflectometry", "ISIS Reflectometry", None, QtGui.QApplication.UnicodeUTF8))
@@ -505,28 +520,7 @@ class Ui_MainWindow(object):
 
 
     def readJournal(self):
-        self.listWidget.clear()
-        currentInstrument = config['default.instrument']
-        t = 0
-        l = 0
-        while (t == 0 and l < 15 and self.RBEdit.text() != ''):
-            l = l + 1
-            tree1 = xml.parse(r'\\isis\inst$\NDX' + currentInstrument + '\Instrument\logs\journal\journal_main.xml')
-            root1 = tree1.getroot()
-            currentJournal = root1[len(root1) - l].attrib.get('name')
-            tree = xml.parse(r'\\isis\inst$\NDX' + currentInstrument + '\Instrument\logs\journal\\' + currentJournal)
-            root = tree.getroot()
-            t = 0
-            for entry in root:  # 910252
-                if (entry[4].text == self.RBEdit.text()):
-                    t = t + 1
-                    runno = str(int(entry[6].text)) 
-                    # print "RB",entry[3].text, runno, entry[0].text
-                    journalentry = runno + ": " + entry[0].text
-                    self.listWidget.addItem(journalentry)
-        self.listWidget.setMaximumWidth(self.listWidget.sizeHintForColumn(0) + 100)
-        spacerItem0 = QtGui.QSpacerItem(self.listWidget.sizeHintForColumn(0) - 100, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
-        self.gridLayout.addItem(spacerItem0, 0, 1, 1, 1)
+        self.populateList()
 
 
     def initTable(self): 
@@ -763,6 +757,7 @@ class Ui_MainWindow(object):
     def on_comboBox_Activated(self, instrument):
         config['default.instrument'] = str(instrument)
         print "Instrument is now: ", str(instrument)
+        self.readJournal()
 
     def saveDialog(self):
         filename = QtGui.QFileDialog.getSaveFileName() 

@@ -1,10 +1,11 @@
 import xml.etree.ElementTree as XML
 import os.path
+from mantid.simpleapi import *
 
-class MissingConfig(Exception):
+class MissingSettings(Exception):
     pass
 
-class Config(object):
+class Settings(object):
 
     __contents = None
     __filename = None
@@ -12,7 +13,7 @@ class Config(object):
     def __init__(self, filename = None):
         self.__filename = filename
         if not filename:
-            filename = os.path.join( os.path.dirname(os.path.realpath(__file__)), "config.xml")
+            filename = os.path.join( os.path.dirname(os.path.realpath(__file__)), "settings.xml")
             
         self.__check_file(filename)
         
@@ -31,7 +32,7 @@ class Config(object):
             raise ValueError("Wrong file extension. *.xml expected not %s." % extension)
         if not os.path.isfile(filename):
             ''' Deliberately swallow and re-throw at this point. Consise reinterpreted error, will be much nicer for client code.'''
-            raise MissingConfig("Config file does not exist filename %s" % filename) 
+            raise MissingSettings("Settings file does not exist filename %s" % filename) 
         
     def __extract_to_dictionary(self, doc):
         temp = dict()
