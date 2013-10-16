@@ -1,6 +1,8 @@
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtCustomInterfaces/CalcCorr.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
+
 
 #include <QLineEdit>
 #include <QList>
@@ -97,7 +99,6 @@ namespace IDA
   void CalcCorr::setup()
   {
     // set signals and slot connections for F2Py Absorption routine
-    connect(uiForm().absp_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swInput, SLOT(setCurrentIndex(int)));
     connect(uiForm().absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(shape(int)));
     connect(uiForm().absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(useCanChecked(bool)));
     connect(uiForm().absp_letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
@@ -195,9 +196,11 @@ namespace IDA
 
     QString width = uiForm().absp_lewidth->text();
 
-    if ( uiForm().absp_cbInputType->currentText() == "File" )
+    QString filename = uiForm().absp_dsSampleInput->getCurrentDataName();
+
+    if ( !Mantid::API::AnalysisDataService::Instance().doesExist(filename.toStdString()) )
     {
-      QString input = uiForm().absp_inputFile->getFirstFilename();
+      QString input = uiForm().absp_dsSampleInput->getFullFilePath();
       if ( input == "" ) { return; }
       pyInput +=
       "import os.path as op\n"
@@ -209,7 +212,7 @@ namespace IDA
     }
     else
     {
-      pyInput += "inputws = '" + uiForm().absp_wsInput->currentText() + "'\n";
+      pyInput += "inputws = '" + filename + "'\n";
     }
   
     if ( uiForm().absp_ckUseCan->isChecked() )
@@ -251,10 +254,12 @@ namespace IDA
     UserInputValidator uiv;
 
     // Input (file or workspace)
-    if ( uiForm().absp_cbInputType->currentText() == "File" )
-      uiv.checkMWRunFilesIsValid("Input", uiForm().absp_inputFile);
-    else
-      uiv.checkWorkspaceSelectorIsNotEmpty("Input", uiForm().absp_wsInput);
+    QString filename = uiForm().absp_dsSampleInput->getCurrentDataName();
+
+    if(filename.isEmpty())
+    {
+      uiv.addErrorMessage("You must select a Sample file or workspace.");
+    }
 
     if ( uiForm().absp_cbShape->currentText() == "Flat" )
     {
@@ -319,15 +324,16 @@ namespace IDA
 
   void CalcCorr::loadSettings(const QSettings & settings)
   {
-    uiForm().absp_inputFile->readSettings(settings.group());
+    uiForm().absp_dsSampleInput->readSettings(settings.group());
+    uiForm().absp_dsCanInput->readSettings(settings.group());
   }
 
   void CalcCorr::shape(int index)
   {
     uiForm().absp_swShapeDetails->setCurrentIndex(index);
     // Meaning of the "avar" variable changes depending on shape selection
-    if ( index == 0 ) { uiForm().absp_lbAvar->setText("Can Angle to Beam"); }
-    else if ( index == 1 ) { uiForm().absp_lbAvar->setText("Step Size"); }
+    if ( index == 0 ) { uiForm().absp_lbAvar->setText("Sample Angle:"); }
+    else if ( index == 1 ) { uiForm().absp_lbAvar->setText("Step Size:"); }
   }
 
   void CalcCorr::useCanChecked(bool checked)
@@ -350,6 +356,8 @@ namespace IDA
     uiForm().absp_valCanden->setVisible(checked);
     uiForm().absp_valCansigs->setVisible(checked);
     uiForm().absp_valCansiga->setVisible(checked);
+
+    uiForm().absp_dsCanInput->setEnabled(checked);
   
     // Workaround for "disabling" title of the QGroupBox.
     QPalette palette;
