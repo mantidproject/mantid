@@ -6,10 +6,12 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
+#include "LoadDAE/idc.h"
 
 // Time we'll wait on a receive call (in seconds)
 const long RECV_TIMEOUT = 30;
@@ -48,6 +50,9 @@ static char* junk_buffer[10000];
 // receive data that cannot be processed
 #define COLLECT_JUNK(head) m_socket.receiveBytes(junk_buffer, head.length - static_cast<uint32_t>(sizeof(head)));
 
+#define PROTON_CHARGE_PROPERTY "proton_charge"
+#define RUN_NUMBER_PROPERTY "run_number"
+
 // Get a reference to the logger
 Kernel::Logger& ISISLiveEventDataListener::g_log = Kernel::Logger::get("ISISLiveEventDataListener");
 
@@ -84,7 +89,6 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener()
                       << "This should never happen and Mantid is pretty much guaranteed to crash shortly.  "
                       << "Talk to the Mantid developer team." << std::endl;
       }
-
     }
 }
 
@@ -95,7 +99,8 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     // localhost on the default port
     if (address.host().toString().compare( "0.0.0.0") == 0)
     {
-      Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
+        Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
+        //Poco::Net::SocketAddress tempAddress("NDXTESTFAA:10000");
       try {
         m_socket.connect( tempAddress);  // BLOCKING connect
       } catch (...) {
@@ -116,9 +121,32 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     m_socket.setReceiveTimeout( Poco::Timespan( RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
     g_log.debug() << "Connected to " << m_socket.address().toString() << std::endl;
 
+    std::string daeName = address.toString();
+    // remove the port part
+    auto i = daeName.find(':');
+    if ( i != std::string::npos )
+    {
+      daeName.erase( i );
+    }
+
+    // set IDC reporter function for errors
+    IDCsetreportfunc(&ISISLiveEventDataListener::IDCReporter);
+
+    if (IDCopen(daeName.c_str(), 0, 0, &m_daeHandle) != 0)
+    {
+      m_daeHandle = NULL;
+      return false;
+    }
+
+    m_numberOfPeriods = getInt("NPER");
+    m_numberOfSpectra = getInt("NSP1");
+
+    std::cerr << "number of periods " << m_numberOfPeriods << std::endl;
+    std::cerr << "number of spectra " << m_numberOfSpectra << std::endl;
+
     TCPStreamEventDataSetup setup;
     RECEIVE(setup,"Wrong version");
-    std::cerr << "run number " << setup.head_setup.run_number<< " instr " << setup.head_setup.inst_name  << std::endl;
+    m_startTime.set_from_time_t(setup.head_setup.start_time);
 
     // initialize the buffer workspace
     initEventBuffer( setup );
@@ -204,6 +232,13 @@ void ISISLiveEventDataListener::run()
             RECEIVE(events.head_n,"Corrupt stream - you should reconnect.");
             COLLECT_JUNK( events.head_n );
 
+            // absolute pulse (frame) time
+            Mantid::Kernel::DateAndTime pulseTime = m_startTime + static_cast<double>( events.head_n.frame_time_zero );
+            // Save the pulse charge in the logs
+            double protons = static_cast<double>( events.head_n.protons );
+            m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( PROTON_CHARGE_PROPERTY)
+                          ->addValue( pulseTime, protons );
+
             events.data.resize(events.head_n.nevents);
             uint32_t nread = 0;
             // receive the events
@@ -230,7 +265,7 @@ void ISISLiveEventDataListener::run()
             }
 
             // store the events
-            saveEvents( events.data );
+            saveEvents( events.data, pulseTime );
         }
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
@@ -268,15 +303,85 @@ void ISISLiveEventDataListener::run()
  */
 void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &setup)
 {
-    // try to load the instrument
+    // Create an event workspace for the output
+    auto workspace = API::WorkspaceFactory::Instance().create( "EventWorkspace", m_numberOfSpectra, 2, 1 );
+
+    // save this workspace as the event buffer
+    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>( workspace );
+    if ( !m_eventBuffer )
+    {
+        throw std::runtime_error("Failed to create an event workspace");
+    }
+    // Set the units
+    m_eventBuffer->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+    m_eventBuffer->setYUnit( "Counts");
+
+    // Set the spectra-detector maping
+    loadSpectraMap();
+
+    // Load the instrument
     std::string instrName(setup.head_setup.inst_name);
-    // get the IDF for instrument in setup for the current date
-    std::string instrFilename = API::ExperimentInfo::getInstrumentFilename( instrName );
-    API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadEmptyInstrument",-1);
+    loadInstrument(instrName);
+
+    // Set the run number
+    std::string run_num = boost::lexical_cast<std::string>( setup.head_setup.run_number );
+    m_eventBuffer->mutableRun().addLogData( new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY, run_num) );
+
+    // Add the proton charge property
+    m_eventBuffer->mutableRun().addLogData( new Mantid::Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY) );
+}
+
+/**
+ * Save received event data in the buffer workspace.
+ * @param data :: A vector with events.
+ */
+void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Kernel::DateAndTime &pulseTime)
+{
+    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
+    for(auto it = data.begin(); it != data.end(); ++it)
+    {
+        Mantid::DataObjects::TofEvent event( it->time_of_flight, pulseTime );
+        m_eventBuffer->getEventList( it->spectrum ).addEventQuickly( event );
+    }
+}
+
+/**
+  * Set the spectra-detector map to the buffer workspace.
+  */
+void ISISLiveEventDataListener::loadSpectraMap()
+{
+    // Read in the number of detectors
+    int ndet = getInt( "NDET" );
+    // Read in matching arrays of spectra indices and detector ids
+    std::vector<int> udet;
+    std::vector<int> spec;
+    getIntArray( "UDET", udet, ndet);
+    getIntArray( "SPEC", spec, ndet);
+
+    // Assign spectra ids to the spectra
+    int nspec = m_numberOfSpectra;
+    if ( ndet < nspec ) nspec = ndet;
+    for(size_t i = 0; i < static_cast<size_t>(nspec); ++i)
+    {
+        m_eventBuffer->getSpectrum(i)->setSpectrumNo( spec[i] );
+    }
+
+    // set up the mapping
+    m_eventBuffer->updateSpectraUsing(API::SpectrumDetectorMapping(spec, udet));
+}
+
+/**
+  * Load the instrument
+  * @param instrName :: Instrument name
+  */
+void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
+{
+    API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument",-1);
     alg->initialize();
-    alg->setPropertyValue("Filename",instrFilename);
-    alg->setProperty("MakeEventWorkspace", true);
-    alg->setProperty("OutputWorkspace", "tmp");
+    alg->setPropertyValue("InstrumentName",instrName);
+    alg->setProperty("Workspace", m_eventBuffer);
+    alg->setProperty("RewriteSpectraMap", false);
     alg->setChild(true);
     alg->execute();
     // check if the instrument was loaded
@@ -284,37 +389,38 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
     {
         throw std::runtime_error("Failed to load instrument " + instrName);
     }
-    // get the workspace created by the algorithm
-    API::MatrixWorkspace_sptr workspace = alg->getProperty("OutputWorkspace");
-    if ( !workspace )
-    {
-        throw std::runtime_error("Couldn't create the workspace for instrument " + instrName);
-    }
-
-    // save this workspace as the event buffer
-    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>( workspace );
-    if ( !m_eventBuffer )
-    {
-        throw std::runtime_error("Couldn't create an event workspace for instrument " + instrName);
-    }
-    // Set the units
-    m_eventBuffer->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
-    m_eventBuffer->setYUnit( "Counts");
 }
 
-/**
- * Save received event data in the buffer workspace.
- * @param data :: A vector with events.
- */
-void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutron> &data)
+int ISISLiveEventDataListener::getInt(const std::string &par) const
 {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-
-    for(auto it = data.begin(); it != data.end(); ++it)
+    int sv_dims_array[1] = { 1 }, sv_ndims = 1, buffer;
+    int stat = IDCgetpari(m_daeHandle, par.c_str(), &buffer, sv_dims_array, &sv_ndims);
+    if ( stat != 0 )
     {
-        Mantid::DataObjects::TofEvent event( it->time_of_flight );
-        m_eventBuffer->getEventList( it->spectrum ).addEventQuickly( event );
+      throw std::runtime_error("Unable to read " + par + " from DAE");
     }
+    return buffer;
+}
+
+void ISISLiveEventDataListener::getIntArray(const std::string &par, std::vector<int> &arr, const size_t dim)
+{
+    int dims = static_cast<int>(dim), ndims = 1;
+    arr.resize( dim );
+    if (IDCgetpari(m_daeHandle, par.c_str(), arr.data(), &dims, &ndims) != 0)
+    {
+      throw std::runtime_error("Unable to read " + par + " from DAE");
+    }
+}
+
+/** Function called by IDC routines to report an error. Passes the error through to the logger
+* @param status ::  The status code of the error (disregarded)
+* @param code ::    The error code (disregarded)
+* @param message :: The error message - passed to the logger at error level
+*/
+void ISISLiveEventDataListener::IDCReporter(int status, int code, const char *message)
+{
+    (void) status; (void) code; // Avoid compiler warning
+    g_log.error(message);
 }
 
 

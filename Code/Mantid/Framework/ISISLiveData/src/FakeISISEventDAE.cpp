@@ -77,7 +77,7 @@ public:
           for(uint32_t i = 0; i < data.head_n.nevents; ++i)
           {
               TCPStreamEventNeutron neutron;
-              neutron.time_of_flight = 0.01f;
+              neutron.time_of_flight = 150.01f;
               neutron.spectrum = 3;
               socket().sendBytes(&neutron,(int)sizeof(neutron));
           }

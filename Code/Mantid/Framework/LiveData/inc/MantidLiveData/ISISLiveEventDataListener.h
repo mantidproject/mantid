@@ -13,6 +13,13 @@
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
 
+//----------------------------------------------------------------------
+// Forward declarations
+//----------------------------------------------------------------------
+
+struct idc_info;
+typedef struct idc_info* idc_handle_t;
+
 namespace Mantid
 {
   namespace LiveData
@@ -120,7 +127,15 @@ namespace Mantid
       // Initialize the event buffer
       void initEventBuffer(const TCPStreamEventDataSetup& setup);
       // Save received event data in the buffer workspace
-      void saveEvents(const std::vector<TCPStreamEventNeutron>& data);
+      void saveEvents(const std::vector<TCPStreamEventNeutron>& data, const Mantid::Kernel::DateAndTime& pulseTime);
+      // Set the spectra-detector map
+      void loadSpectraMap();
+      // Load the instrument
+      void loadInstrument(const std::string& instrName);
+      // Get an integer value ising the IDC interface
+      int getInt(const std::string& par) const;
+      // Get an integer array ising the IDC interface
+      void getIntArray(const std::string& par, std::vector<int>& arr, const size_t dim);
 
       /// The socket communicating with the DAE
       Poco::Net::StreamSocket m_socket;
@@ -139,9 +154,23 @@ namespace Mantid
       DataObjects::EventWorkspace_sptr m_eventBuffer;
       /// Protects m_eventBuffer
       Poco::FastMutex m_mutex;
+      /// Run start time
+      Kernel::DateAndTime m_startTime;
+
+      /// the DAE handle to use with IDC commands
+      idc_handle_t m_daeHandle;
+
+      /// number of periods
+      int m_numberOfPeriods;
+
+      /// number of spectra
+      int m_numberOfSpectra;
 
       /// reference to the logger class
       static Kernel::Logger& g_log;
+
+      /// reporter function called when the IDC reading routines raise an error
+      static void IDCReporter(int status, int code, const char* message);
     };
 
   } // namespace LiveData
