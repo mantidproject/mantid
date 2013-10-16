@@ -353,6 +353,7 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
+    <livedata address="vision-sms.sns.gov:31415" />
   </instrument>
 
    <instrument name="SEQUOIA" shortname="SEQ" beamline="17"> 
