@@ -82,9 +82,10 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
     
     # Do we need to clean up
     if clear_tmps:
+        ads = _api.AnalysisDataServiceImpl.Instance()
         for name in _workspace_op_tmps:
-            if name in _api.AnalysisDataService and output_name != name:
-                del _api.AnalysisDataService[name]
+            if name in ads and output_name != name:
+                del ads[name]
         _workspace_op_tmps = []
     else:
         if type(resultws) == _api.WorkspaceGroup: 
@@ -148,16 +149,19 @@ def _do_unary_operation(op, self, lhs_vars):
         _workspace_op_tmps.append(output_name)
 
     # Do the operation
-    alg = _api.FrameworkManager.createAlgorithm(op)
+    ads = _api.AnalysisDataServiceImpl.Instance()
+    fmgr = _api.FrameworkManagerImpl.Instance()
+
+    alg = fmgr.createAlgorithm(op)
     alg.setPropertyValue("InputWorkspace", self.name())
     alg.setPropertyValue("OutputWorkspace", output_name)
     alg.execute()
-    resultws = _api.AnalysisDataService[output_name]
+    resultws = ads[output_name]
 
     if clear_tmps:
         for name in _workspace_op_tmps:
-            if name in _api.AnalysisDataService and output_name != name:
-                _api.AnalysisDataService.remove(name)
+            if name in ads and output_name != name:
+                ads.remove(name)
         _workspace_op_tmps = []
         
     return resultws
