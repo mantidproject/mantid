@@ -85,27 +85,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
   m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
-{
-  try
-  {
-    Poco::File tempFile(ConfigService::Instance().getInstrumentDirectory());
-
-    // If the instrument directory can't be written to... (linux problem)
-    if (tempFile.exists() && !tempFile.canWrite() ) 
-    {
-      g_log.information() << "Instrument directory is read only, writing temp grouping to system temp.\n";
-      m_groupingTempFilename = ConfigService::Instance().getTempDir()+"tempMuonAnalysisGrouping.xml";
-    }
-    else
-    {
-      m_groupingTempFilename = ConfigService::Instance().getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
-    }
-  }
-  catch(...)
-  {
-    g_log.debug() << "Problem writing temp grouping file";
-  }
-}
+{}
 
 /**
  * Initialize local Python environmnet. 
@@ -405,7 +385,9 @@ void MuonAnalysis::runSaveGroupButton()
 
   if( ! groupingFile.isEmpty() )
   {
-    saveGroupingTabletoXML(m_uiForm, groupingFile.toStdString());
+    Grouping groupingToSave;
+    parseGroupingTable(m_uiForm, groupingToSave);
+    saveGroupingToXML(groupingToSave, groupingFile.toStdString());
     
     QString directory = QFileInfo(groupingFile).path();
     prevValues.setValue("dir", directory);
@@ -438,19 +420,21 @@ void MuonAnalysis::runLoadGroupButton()
   QString directory = QFileInfo(groupingFile).path();
   prevValues.setValue("dir", directory);
 
-  saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-  clearTablesAndCombo();
+  Grouping loadedGrouping;
 
   try
   {
-    loadGroupingXMLtoTable(m_uiForm, groupingFile.toStdString());
+    loadGroupingFromXML(groupingFile.toStdString(), loadedGrouping);
   }
   catch (Exception::FileError& e)
   {
+    g_log.error("Unable to load grouping. Data left unchanged");
     g_log.error(e.what());
-    g_log.error("Revert to previous grouping");
-    loadGroupingXMLtoTable(m_uiForm, m_groupingTempFilename);
+    return;
   }
+
+  clearTablesAndCombo();
+  fillGroupingTable(loadedGrouping, m_uiForm);
 
   // add number of detectors column to group table
   int numRows = m_uiForm.groupTable->rowCount();
@@ -2664,8 +2648,8 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
         m_optionTab->nowDataAvailable();
     }
 
-    saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-    return applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
+    // TODO: applyGroupingToWS(inputWS, outputWS, grouping)
+    return true;
   }
   return false;
 }
@@ -3086,15 +3070,20 @@ void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, Mat
 
   if ( groupFile.size() == 1 )
   {
+    Grouping loadedGrouping;
+
     try
     {
-      loadGroupingXMLtoTable(m_uiForm, directoryName+groupFile[0]);
+      loadGroupingFromXML(directoryName+groupFile[0], loadedGrouping);
     }
     catch (...)
     {
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", QString("Can't load default grouping file in IDF.\n")
-        + "with name: " + groupFile[0].c_str());
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", 
+        QString("Can't load default grouping file in IDF. \n With name: ") + groupFile[0].c_str());
+      return;
     }
+
+    fillGroupingTable(loadedGrouping, m_uiForm);
   }
 }
 

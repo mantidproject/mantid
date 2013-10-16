@@ -344,9 +344,6 @@ private:
   /// List of current group names 
   std::vector<std::string> m_groupNames;
 
-  /// name for file to temperary store grouping
-  std::string m_groupingTempFilename;
-
   /// Deal with input file changes.
   void handleInputFileChanges();
 

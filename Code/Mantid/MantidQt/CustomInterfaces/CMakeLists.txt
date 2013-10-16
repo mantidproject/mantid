@@ -148,6 +148,7 @@ set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 WorkspaceMementoTest.h
                 WorkspaceInADSTest.h
                 RawFileMementoTest.h
+                IO_MuonGroupingTest.h
 )
 
 include_directories ( inc )
