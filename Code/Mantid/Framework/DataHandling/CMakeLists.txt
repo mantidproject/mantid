@@ -13,7 +13,6 @@ set ( SRC_FILES
 	src/FindDetectorsInShape.cpp
 	src/FindDetectorsPar.cpp
 	src/GenerateGroupingPowder.cpp
-	src/GetMaskedDetectors.cpp
 	src/GroupDetectors.cpp
 	src/GroupDetectors2.cpp
 	src/ISISDataArchive.cpp
@@ -50,7 +49,6 @@ set ( SRC_FILES
 	src/LoadLogsFromSNSNexus.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
-	src/LoadMaskingFile.cpp
 	src/LoadMcStasEventNexus.cpp
 	src/LoadMcStasNexus.cpp
 	src/LoadMuonLog.cpp
@@ -109,7 +107,6 @@ set ( SRC_FILES
 	src/SaveCanSAS1D.cpp
 	src/SaveCanSAS1D2.cpp
 	src/SaveDaveGrp.cpp
-	src/SaveDetectorMasks.cpp
 	src/SaveDetectorsGrouping.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
@@ -148,7 +145,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/FindDetectorsPar.h
 	inc/MantidDataHandling/GenerateGroupingPowder.h
-	inc/MantidDataHandling/GetMaskedDetectors.h
 	inc/MantidDataHandling/GroupDetectors.h
 	inc/MantidDataHandling/GroupDetectors2.h
 	inc/MantidDataHandling/ISISDataArchive.h
@@ -185,7 +181,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLogsFromSNSNexus.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
-	inc/MantidDataHandling/LoadMaskingFile.h
 	inc/MantidDataHandling/LoadMcStasEventNexus.h
 	inc/MantidDataHandling/LoadMcStasNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
@@ -239,7 +234,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCanSAS1D.h
 	inc/MantidDataHandling/SaveCanSAS1D2.h
 	inc/MantidDataHandling/SaveDaveGrp.h
-	inc/MantidDataHandling/SaveDetectorMasks.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
@@ -284,7 +278,6 @@ set ( TEST_FILES
 	FindDetectorsInShapeTest.h
 	FindDetectorsParTest.h
 	GenerateGroupingPowderTest.h
-	GetMaskedDetectorsTest.h
 	GroupDetectors2Test.h
 	GroupDetectorsTest.h
 	ISISDataArchiveTest.h
