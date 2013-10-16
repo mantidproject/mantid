@@ -195,8 +195,13 @@ public:
 
     for (int i = 0; i< numbins ; i++)
       TS_ASSERT_DELTA (outws->readY(0)[i], output[i], 0.1);
-        
+   
+    //check the units of the instrument
+    TS_ASSERT_EQUALS(outws->getAxis(0)->unit()->caption(), "Radius"); 
+     
    }
+
+
 };
 
 

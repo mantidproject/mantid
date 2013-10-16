@@ -636,6 +636,7 @@ namespace Algorithms
       auto labelX = UnitFactory::Instance().create("Label");
       boost::dynamic_pointer_cast<Units::Label>(labelX)->setLabel("Radius");       
       horizontal->unit() = labelX; 
+      outputWS->replaceAxis(0, horizontal);
     }
     
     setProperty("OutputWorkspace", outputWS); 
