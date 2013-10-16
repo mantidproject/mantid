@@ -8,9 +8,9 @@ from IPython.qt.inprocess import QtInProcessKernelManager
 
 
 def our_run_code(self, code_obj):
-    """ Method which we replace the run_code method of IPython's InteractiveShell class.
-        It call's the original method (renamed to ipython_run_code) on a separate thread
-        so that we can avoid locking up the whole of MantidPlot while a command runs
+    """ Method with which we replace the run_code method of IPython's InteractiveShell class.
+        It calls the original method (renamed to ipython_run_code) on a separate thread
+        so that we can avoid locking up the whole of MantidPlot while a command runs.
 
         Parameters
         ----------
