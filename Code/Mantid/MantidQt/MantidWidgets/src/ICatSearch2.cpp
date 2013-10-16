@@ -800,11 +800,17 @@ namespace MantidQt
       // Update the label to inform the user of how many dataFiles relating to the selected investigation have been found.
       m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) + " datafiles found.");
 
+      // Create the custom header with checkbox ability.
+      m_customHeader = new CheckboxHeader(Qt::Horizontal, dataFileTable);
+
+      // Set it prior to adding labels in populateTable.
+      dataFileTable->setHorizontalHeader(m_customHeader);
+
       // Add data from the workspace to the results table.
       populateTable(dataFileTable, workspace);
 
-      // Add a column full of checkboxes to the results table.
-      addCheckBoxes(dataFileTable);
+      // As a new column is being added we do this after populateTable to prevent null errors.
+      addCheckBoxColumn(dataFileTable);
 
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
@@ -818,10 +824,14 @@ namespace MantidQt
      * Add a row of checkboxes to the first column of a table.
      * @param table :: The table to add the checkboxes to.
      */
-    void ICatSearch2::addCheckBoxes(QTableWidget* table)
+    void ICatSearch2::addCheckBoxColumn(QTableWidget* table)
     {
-      // Add the "checkbox" column to the start
-      table->insertColumn(0);
+      // Add a new column checkbox column.
+      m_icatUiForm.dataFileResultsTbl->insertColumn(0);
+      // Add a new header item to this column. This allows us to overwrite the default text!
+      m_icatUiForm.dataFileResultsTbl->setHorizontalHeaderItem(0, new QTableWidgetItem());
+      // Set this here (rather than on initialisation) as the customer header would be null otherwise.
+      connect(m_customHeader,SIGNAL(toggled(bool)),this,SLOT(selectAllDataFiles(bool)));
 
       // Add a checkbox to all rows in the first column.
       for (int row = 0; row < table->rowCount(); row++)
