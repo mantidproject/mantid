@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/AlgorithmSelectorWidget.cpp
+	src/CheckboxHeader.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/FindReplaceDialog.cpp
@@ -42,6 +43,7 @@ set ( SRC_UNITY_IGNORE_FILES
 # Header files with Q_OBJECT that qmake will "moc"
 set ( MOC_FILES 
 	inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
+	inc/MantidQtMantidWidgets/CheckboxHeader.h
 	inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
