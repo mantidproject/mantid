@@ -958,16 +958,13 @@ namespace API
       }
       catch (std::exception & e)
       {
-        g_log.error() << "Error loading instrument IDF file for '" << instrumentName << "'." << std::endl;
+        g_log.error() << "Error loading instrument IDF file for '" << instrumentName << "'.\n";
         g_log.error() << e.what() << std::endl;
       }
     }
     else
     {
-      // The filename in the file = just bare file.
-      // So Get the full path back to the instrument directory.
-      instrumentFilename = ConfigService::Instance().getInstrumentDirectory() + "/" + instrumentFilename;
-      g_log.debug() << "Using instrument IDF XML text contained in .nxs file." << std::endl;
+      g_log.debug() << "Using instrument IDF XML text contained in nexus file.\n";
     }
 
 
