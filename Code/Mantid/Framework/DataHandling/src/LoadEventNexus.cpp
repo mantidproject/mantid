@@ -1820,7 +1820,7 @@ bool LoadEventNexus::loadInstrument(const std::string & nexusfilename, MatrixWor
 bool LoadEventNexus::runLoadIDFFromNexus(const std::string & nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
                                          const std::string & top_entry_name, Algorithm * alg)
 {
-  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus",-1,-1,false);
+  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try

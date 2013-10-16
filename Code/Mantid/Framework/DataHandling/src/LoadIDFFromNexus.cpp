@@ -6,16 +6,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIDFFromNexus.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidNexus/MuonNexusReader.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
-
-#include <fstream>
-
 
 namespace Mantid
 {
@@ -68,7 +61,7 @@ void LoadIDFFromNexus::init()
 void LoadIDFFromNexus::exec()
 {
   // Retrieve the filename from the properties
-  m_filename = getPropertyValue("Filename");
+  const std::string filename = getPropertyValue("Filename");
 
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
@@ -77,7 +70,7 @@ void LoadIDFFromNexus::exec()
   std::string instrumentParentPath = getPropertyValue("InstrumentParentPath");
 
   // Get the instrument group in the Nexus file
-  ::NeXus::File nxfile(m_filename);
+  ::NeXus::File nxfile(filename);
   // Assume one level in instrument path
   nxfile.openPath(instrumentParentPath);
 
@@ -85,7 +78,24 @@ void LoadIDFFromNexus::exec()
   localWorkspace->loadExperimentInfoNexus( &nxfile, parameterString );
   localWorkspace->readParameterMap(parameterString);
 
+  runLoadParameterFile(localWorkspace);
+
   return;
+}
+
+void LoadIDFFromNexus::runLoadParameterFile(MatrixWorkspace_sptr workspace)
+{
+  const std::string directory = ConfigService::Instance().getString("parameterDefinition.directory");
+  const std::string instrumentName = workspace->getInstrument()->getName();
+  const std::string paramFile = directory + instrumentName + "_Parameters.xml";
+
+  try {
+    LoadParameterFile::execManually(paramFile, workspace);
+  } catch ( std::runtime_error& ex) {
+    g_log.notice() << "File " << paramFile << " not found or un-parsable. "
+                       "However, the instrument has been loaded successfully.\n";
+  }
+
 }
 
 
