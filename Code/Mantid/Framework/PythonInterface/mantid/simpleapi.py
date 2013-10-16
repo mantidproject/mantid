@@ -24,6 +24,7 @@ import kernel as _kernel
 from kernel import funcreturns as _funcreturns
 from api import AnalysisDataService as _ads
 from api import FrameworkManager as _framework
+from api import _workspaceops
 
 # This is a simple API so give access to the aliases by default as well
 from mantid import apiVersion, __gui__
@@ -540,9 +541,17 @@ def _create_algorithm(algorithm, version, _algm_object):
             del kwargs["Version"]
         algm = _framework.createAlgorithm(algorithm, _version)
         _set_logging_option(algm, kwargs)
-        lhs = _funcreturns.lhs_info()
+
+        try:
+            frame = kwargs["__LHS_FRAME_OBJECT__"]
+            del kwargs["__LHS_FRAME_OBJECT__"]
+        except KeyError:
+            frame = None
+            
+        lhs = _funcreturns.lhs_info(frame=frame)
         lhs_args = _get_args_from_lhs(lhs, algm)
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
+
         _set_properties(algm, *args, **final_keywords)
         algm.execute()
         return _gather_returns(algorithm, lhs, algm)
@@ -598,7 +607,10 @@ def _create_algorithm(algorithm, version, _algm_object):
         alias = alias.strip()
         if len(alias)>0:
             globals()[alias] = algorithm_wrapper
-            
+
+    return algorithm_wrapper
+#-------------------------------------------------------------------------------------------------------------
+    
 def _set_properties_dialog(algm_object, *args, **kwargs):
     """
     Set the properties all in one go assuming that you are preparing for a
@@ -777,7 +789,10 @@ def _translate():
     """
     from api import AlgorithmFactory, AlgorithmManager
     
-    new_functions = []
+    new_functions = [] # Names of new functions added to the global namespace
+    new_methods = {} # Method names mapped to their algorithm names. Used to detect multiple copies of same method name
+                     # on different algorithms, which is an error
+    
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
     for name, versions in algs.iteritems():
@@ -785,12 +800,48 @@ def _translate():
             continue
         try:
             # Create the algorithm object
-            _algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
-            _algm_object.initialize()
+            algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
+            algm_object.initialize()
         except Exception:
             continue
-        _create_algorithm(name, max(versions), _algm_object)
-        _create_algorithm_dialog(name, max(versions), _algm_object)
+
+        algorithm_wrapper = _create_algorithm(name, max(versions), algm_object)
+        method_name = algm_object.workspaceMethodName()
+        if len(method_name) > 0:
+            if method_name in new_methods:
+                other_alg = new_methods[method_name]
+                raise RuntimeError("simpleapi: Trying to attach '%s' as method to point to '%s' algorithm but "
+                                   "it has already been attached to point to the '%s' algorithm.\n"
+                                   "Does one inherit from the other? "
+                                   "Please check and update one of the algorithms accordingly." % (method_name,algm_object.name(),other_alg))
+            _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object)
+            new_methods[method_name] = algm_object.name()
+
+        # Dialog variant
+        _create_algorithm_dialog(name, max(versions), algm_object)
         new_functions.append(name)
     
     return new_functions
+
+#-------------------------------------------------------------------------------------------------------------
+
+def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object):
+    """
+        Attachs the given algorithm free function to those types specified by the algorithm
+        @param method_name The name of the new method on the type
+        @param algorithm_wrapper Function object whose signature should be f(*args,**kwargs) and when
+                                 called will run the selected algorithm
+        @param algm_object An algorithm object that defines the extra properties of the new method
+    """
+    input_prop = algm_object.workspaceMethodInputProperty()
+    if input_prop == "":
+        raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
+                           "Algorithm::workspaceMethodInputProperty() has returned an empty string."
+                           "This method is required to map the calling object to the correct property." % algm_object.name())
+    if input_prop not in algm_object:
+        raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
+                           "Algorithm::workspaceMethodInputProperty() has returned a property name that "
+                           "does not exist on the algorithm." % algm_object.name())
+
+    _workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop,
+                                        algm_object.workspaceMethodOn())

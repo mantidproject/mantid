@@ -1,13 +1,13 @@
 """
-    This module adds functions to  the Workspace classe
+    This module adds functions to  the Workspace classes
     so that Python operators, i.e +-*/,  can be used on them
     
     It is intended for internal use.
 """
-from mantid.api import (AnalysisDataService, FrameworkManager, ITableWorkspace, 
-                        Workspace, WorkspaceGroup)
-from mantid.api import performBinaryOp as _performBinaryOp
 from mantid.kernel.funcreturns import lhs_info
+import _api
+
+import inspect as _inspect
 
 #------------------------------------------------------------------------------
 # Binary Ops
@@ -26,7 +26,7 @@ def attach_binary_operators_to_workspace():
             return _do_binary_operation(algorithm, self, other, result_info, 
                                  inplace, reverse)
         op_wrapper.__name__ = attr
-        setattr(Workspace, attr, op_wrapper)
+        setattr(_api.Workspace, attr, op_wrapper)
     # Binary operations that workspaces are aware of
     operations = {
         "Plus":("__add__", "__radd__","__iadd__"),
@@ -78,16 +78,16 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
         output_name = _workspace_op_prefix + str(len(_workspace_op_tmps))
 
     # Do the operation
-    resultws = _performBinaryOp(self,rhs, op, output_name, inplace, reverse)
+    resultws = _api.performBinaryOp(self,rhs, op, output_name, inplace, reverse)
     
     # Do we need to clean up
     if clear_tmps:
         for name in _workspace_op_tmps:
-            if name in AnalysisDataService and output_name != name:
-                del AnalysisDataService[name]
+            if name in _api.AnalysisDataService and output_name != name:
+                del _api.AnalysisDataService[name]
         _workspace_op_tmps = []
     else:
-        if type(resultws) == WorkspaceGroup: 
+        if type(resultws) == _api.WorkspaceGroup: 
             # Ensure the members are removed aswell
             members = resultws.getNames()
             for member in members:
@@ -113,7 +113,7 @@ def attach_unary_operators_to_workspace():
             # Pass off to helper
             return _do_unary_operation(algorithm, self, result_info)
         op_wrapper.__name__ = attr
-        setattr(Workspace, attr, op_wrapper)
+        setattr(_api.Workspace, attr, op_wrapper)
     # Binary operations that workspaces are aware of
     operations = {
         'NotMD':'__invert__'
@@ -148,16 +148,16 @@ def _do_unary_operation(op, self, lhs_vars):
         _workspace_op_tmps.append(output_name)
 
     # Do the operation
-    alg = FrameworkManager.createAlgorithm(op)
+    alg = _api.FrameworkManager.createAlgorithm(op)
     alg.setPropertyValue("InputWorkspace", self.name())
     alg.setPropertyValue("OutputWorkspace", output_name)
     alg.execute()
-    resultws = AnalysisDataService[output_name]
+    resultws = _api.AnalysisDataService[output_name]
 
     if clear_tmps:
         for name in _workspace_op_tmps:
-            if name in AnalysisDataService and output_name != name:
-                AnalysisDataService.remove(name)
+            if name in _api.AnalysisDataService and output_name != name:
+                _api.AnalysisDataService.remove(name)
         _workspace_op_tmps = []
         
     return resultws
@@ -180,11 +180,35 @@ def attach_tableworkspaceiterator():
                 return self.__wksp.row(self.__pos-1)
         return ITableWorkspaceIter(self)
 
-    setattr(ITableWorkspace, "__iter__", __iter_method)
+    setattr(_api.ITableWorkspace, "__iter__", __iter_method)
 
 #------------------------------------------------------------------------------
-# Attach the operators
+# Algorithms as workspace methods
 #------------------------------------------------------------------------------
-attach_binary_operators_to_workspace()
-attach_unary_operators_to_workspace()
-attach_tableworkspaceiterator()
+def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None):
+    """
+        Adds a method to the given type that calls an algorithm
+        using the calling object as the input workspace
+        
+        @param name The name of the new method as it should appear on the type
+        @param func_obj A free function object that defines the implementation of the call
+        @param self_param_name The name of the parameter in the free function that the method's self maps to
+        @param workspace_types A list of string names of a workspace types. If None, then it is attached
+                              to the general Workspace type. Default=None
+    """
+    def _method_impl(self, *args, **kwargs):
+        # Map the calling object to the requested parameter
+        kwargs[self_param_name] = self
+        # Define the frame containing the final variable assignment
+        # used to figure out the workspace name
+        kwargs["__LHS_FRAME_OBJECT__"] = _inspect.currentframe().f_back
+        # Call main function
+        return func_obj(*args, **kwargs)
+    #------------------------------------------------------------------
+
+    if workspace_types or len(workspace_types) > 0:
+        for typename in workspace_types:
+            cls = getattr(_api, typename)
+            setattr(cls, name, _method_impl)
+    else:
+        setattr(_api.Workspace, name, _method_impl)
