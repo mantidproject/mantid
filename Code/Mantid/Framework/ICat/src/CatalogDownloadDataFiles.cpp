@@ -184,7 +184,11 @@ namespace Mantid
       //use HTTP  Get method to download the data file from the server to local disk
       try
       {
-        URI uri(URL);
+        // Temporary fix (can be removed when ICAT3 disabled) as URL returned is HTTPS, which will cause the
+        // HTTPResponse below to fail the download. We can replace HTTPS with HTTP and download as expected.
+        std::string newURL = URL; // Need to convert to none const to perform replacement.
+        boost::replace_first(newURL, "https", "http");
+        URI uri(newURL);
         std::string path(uri.getPathAndQuery());
         if (path.empty())
         {
