@@ -1,6 +1,9 @@
 import xml.etree.ElementTree as XML
 import os.path
 
+class MissingConfig(Exception):
+    pass
+
 class Config(object):
 
     __contents = None
@@ -28,7 +31,7 @@ class Config(object):
             raise ValueError("Wrong file extension. *.xml expected not %s." % extension)
         if not os.path.isfile(filename):
             ''' Deliberately swallow and re-throw at this point. Consise reinterpreted error, will be much nicer for client code.'''
-            raise ValueError("File does not exist filename %s" % filename) 
+            raise MissingConfig("Config file does not exist filename %s" % filename) 
         
     def __extract_to_dictionary(self, doc):
         temp = dict()

@@ -46,7 +46,7 @@ class ConfigTest(unittest.TestCase):
       
     def test_bad_file_location_throws(self):
         missing_file = "fictional_file.xml"
-        self.assertRaises(ValueError, config.Config, missing_file)    
+        self.assertRaises(config.MissingConfig, config.Config, missing_file)    
         
     def test_bad_xml_format_throws(self):
         fileObject = TempFile(contents="<SettingList>invalid xml", extension=".xml")
