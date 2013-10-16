@@ -40,8 +40,6 @@ set ( SRC_FILES
 	src/GausDecay.cpp
 	src/GausOsc.cpp
 	src/Gaussian.cpp
-	src/Gaussian1D.cpp
-	src/Gaussian1D2.cpp
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
@@ -50,7 +48,6 @@ set ( SRC_FILES
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
 	src/LevenbergMarquardtMinimizer.cpp
-	src/Linear.cpp
 	src/LinearBackground.cpp
 	src/LogNormal.cpp
 	src/Lorentzian.cpp
@@ -142,8 +139,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GausDecay.h
 	inc/MantidCurveFitting/GausOsc.h
 	inc/MantidCurveFitting/Gaussian.h
-	inc/MantidCurveFitting/Gaussian1D.h
-	inc/MantidCurveFitting/Gaussian1D2.h
 	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
@@ -153,7 +148,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
-	inc/MantidCurveFitting/Linear.h
 	inc/MantidCurveFitting/LinearBackground.h
 	inc/MantidCurveFitting/LogNormal.h
 	inc/MantidCurveFitting/Lorentzian.h
@@ -230,7 +224,6 @@ set ( TEST_FILES
 	GSLMatrixTest.h
 	GausDecayTest.h
 	GausOscTest.h
-	Gaussian1DTest.h
 	GaussianComptonProfileTest.h
 	GaussianTest.h
 	GramCharlierComptonProfileTest.h
@@ -241,7 +234,6 @@ set ( TEST_FILES
 	LevenbergMarquardtMDTest.h
 	LevenbergMarquardtTest.h
 	LinearBackgroundTest.h
-	LinearTest.h
 	LogNormalTest.h
 	Lorentzian1DTest.h
 	LorentzianTest.h
