@@ -37,8 +37,8 @@ class Settings(object):
     def __extract_to_dictionary(self, doc):
         temp = dict()
         for elem in doc:
-            key = elem.attrib.get('name')
-            value = elem.text
+            key = elem.attrib.get('name').strip()
+            value = elem.text.strip()
             if not key:
                 raise ValueError("Missing name attribute on Setting element")
             if not value:
