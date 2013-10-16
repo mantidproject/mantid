@@ -182,7 +182,10 @@ PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorks
 
         ws2 = simpleapi.Rebin(ws1,Params=[1.5,1.5,3])
         ws3 = ws1.rebin(Params=[1.5,1.5,3])
+        ws4 = ws1.rebin([1.5,1.5,3])
         result = simpleapi.CheckWorkspacesMatch(ws2,ws3)
+        self.assertEquals("Success!",result)
+        result = simpleapi.CheckWorkspacesMatch(ws2,ws4)
         self.assertEquals("Success!",result)
 
         simpleapi.DeleteWorkspace(ws1)

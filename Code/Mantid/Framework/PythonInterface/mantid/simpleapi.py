@@ -498,10 +498,21 @@ def _set_properties(alg_object, *args, **kwargs):
         :param **kwargs: Keyword arguments  
     """
     if len(args) > 0:
-        prop_order = alg_object.mandatoryProperties()
-        # add the args to the kw list so everything can be set in a single way
-        for (key, arg) in zip(prop_order[:len(args)], args):
-            kwargs[key] = arg
+        mandatory_props = alg_object.mandatoryProperties()
+        # Remove any already in kwargs
+        for key in kwargs.keys():
+            try:
+                mandatory_props.remove(key)
+            except ValueError:
+                pass
+        # If have any left
+        if len(mandatory_props) > 0:
+            # Now pair up the properties & arguments
+            for (key, arg) in zip(mandatory_props[:len(args)], args):
+                kwargs[key] = arg
+        else:
+            raise RuntimeError("No required properties left but a positional argument remains. "
+                               "Check function call has correct arguments.")
 
     # Set the properties of the algorithm.
     for key in kwargs.keys():
