@@ -7,6 +7,8 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h" 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/CatalogInfo.h"
+#include "MantidKernel/FacilityInfo.h"
 
 #include <QHeaderView>
 #include <QDesktopServices>
@@ -539,7 +541,11 @@ namespace MantidQt
       foreach(index, indexes)
       {
         QTableWidgetItem *item = m_uiForm.invsttableWidget->item(index.row(),1);
-        QString location = item->text();
+        Mantid::Kernel::CatalogInfo catalogInfo = Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo();
+        std::string loc = item->text().toStdString();
+        std::string transformedLoc = catalogInfo.transformArchivePath(loc);
+        QString location = QString::fromStdString(transformedLoc);
+
         loadData(location);
       }
     }
