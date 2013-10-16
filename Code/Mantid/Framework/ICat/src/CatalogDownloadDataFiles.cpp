@@ -16,7 +16,7 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include "MantidAPI/ICatalog.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-
+#include "MantidKernel/FileDescriptor.h"
 
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
@@ -55,7 +55,7 @@ namespace Mantid
     void CatalogDownloadDataFiles::init()
     {
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
-      declareProperty(new ArrayProperty<std::string> ("Filenames"),"List of filenames to download from the data server");
+      declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
       declareProperty(new ArrayProperty<std::string>("Filelocations",std::vector<std::string>(),
                                                      boost::make_shared<NullValidator>(),
                                                      Direction::Output),
@@ -124,8 +124,8 @@ namespace Mantid
         fileLocation = catalogInfo.transformArchivePath(fileLocation);
 
         // Can we open the file (Hence, have access to the archives?)
-        std::ifstream isisfile(fileLocation.c_str());
-        if(isisfile)
+        std::ifstream hasAccessToArchives(fileLocation.c_str());
+        if(hasAccessToArchives)
         {
           g_log.information() << "File (" << *fileName << ") located in archives." << std::endl;
 
@@ -159,19 +159,14 @@ namespace Mantid
      * @param fileName ::  file name
      * @returns true if the file is a data file
      */
-    bool CatalogDownloadDataFiles::isDataFile(const std::string & fileName)
+    bool CatalogDownloadDataFiles::isBinary(const std::string & fileName)
     {
       std::basic_string <char>::size_type dotIndex;
-      //const std::basic_string <char>::size_type npos = -1;
-      //find the position of .in row file
       dotIndex = fileName.find_last_of (".");
       std::string fextn=fileName.substr(dotIndex+1,fileName.size()-dotIndex);
       std::transform(fextn.begin(),fextn.end(),fextn.begin(),tolower);
 
-      bool binary;
-      (!fextn.compare("raw")|| !fextn.compare("nxs")) ? binary = true : binary = false;
-      return binary;
-
+      return !FileDescriptor::isAscii(fextn);
     }
 
     /**
@@ -236,7 +231,7 @@ namespace Mantid
 
       std::ios_base::openmode mode;
       //if raw/nexus file open it in binary mode else ascii
-      isDataFile(fileName)? mode = std::ios_base::binary : mode = std::ios_base::out;
+      isBinary(fileName) ? mode = std::ios_base::binary : mode = std::ios_base::out;
       std::ofstream ofs(filepath.c_str(), mode);
       if ( ofs.rdstate() & std::ios::failbit )
       {
