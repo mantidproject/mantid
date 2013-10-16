@@ -29,8 +29,20 @@ class TempFile(object):
         return self.__tempFile.name
 
 '''
+Determine if all tests should be skipped. Check for the expat module to decide.
+'''
+def skipAllTests():
+    skiptests = False
+    try:
+        import xml.parsers.expat
+    except ImportError:
+        skiptests = True
+    return skiptests
+        
+'''
 Test suite for the Config
 '''
+@unittest.skipIf(skipAllTests(), "Skip test if expat parser is not available.")
 class ConfigTest(unittest.TestCase):
 
     def test_avalid_file(self):
