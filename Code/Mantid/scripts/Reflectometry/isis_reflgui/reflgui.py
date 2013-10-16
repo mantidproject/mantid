@@ -135,9 +135,9 @@ class Ui_SaveWindow(object):
             runs = instrumentRuns.getLatestJournalRuns()
             for run in runs:    
                     self.listWidget.addItem(run)
-        except:
-            # We should log the error here.
-            pass
+        except Exception as ex:
+            logger.notice("Could not list archive runs")
+            logger.information(str(ex))
         
         
         
@@ -475,9 +475,9 @@ class Ui_MainWindow(object):
             runs = instrumentRuns.getLatestJournalRuns()
             for run in runs:    
                     self.listWidget.addItem(run)
-        except:
-            # We should log the error here.
-            pass
+        except Exception as ex:
+            logger.notice("Could not list archive runs")
+            logger.information(str(ex))
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("ISIS Reflectometry", "ISIS Reflectometry", None, QtGui.QApplication.UnicodeUTF8))

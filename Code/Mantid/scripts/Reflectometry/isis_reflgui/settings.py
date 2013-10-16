@@ -22,7 +22,7 @@ class Settings(object):
             tree = XML.parse(filename)
             doc = tree.getroot()
         except:
-            raise ValueError("The file does not contain valid XML")
+            raise ValueError("The file %s does not contain valid XML" % filename)
         
         self.__extract_to_dictionary(doc)
         
@@ -32,7 +32,7 @@ class Settings(object):
             raise ValueError("Wrong file extension. *.xml expected not %s." % extension)
         if not os.path.isfile(filename):
             ''' Deliberately swallow and re-throw at this point. Consise reinterpreted error, will be much nicer for client code.'''
-            raise MissingSettings("Settings file does not exist filename %s" % filename) 
+            raise MissingSettings("Settings file %s does not exist so no manual settings will be applied."  % filename) 
         
     def __extract_to_dictionary(self, doc):
         temp = dict()
