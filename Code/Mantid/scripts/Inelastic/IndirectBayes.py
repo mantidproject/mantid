@@ -136,7 +136,7 @@ def CheckBinning(nbins):
 	return nbin,nrbin
 
 # QLines programs
-def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,Save):
+def QLRun(program,samWS,resWS,rsname,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Save):
 	StartTime(program)
 	workdir = config['defaultsave.directory']
 	facility = config['default.facility']
@@ -154,6 +154,32 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 	if Loop != True:
 		nsam = 1
 	nres,ntr = CheckHistZero(resWS)
+	if Fit[0]:
+		elastic = True
+		o_el = 1
+	else:
+		elastic = False
+		o_el = 0
+	if Fit[1] == 'Sloping':
+		o_bgd = 2
+	if Fit[1] == 'Flat':
+		o_bgd = 1
+	if Fit[1] == 'Zero':
+		o_bgd = 0
+	background = Fit[1]
+	if Fit[2]:
+		width = True
+		o_w1 = 1
+	else:
+		width = False
+		o_w1 = 0
+	if Fit[3]:
+		resnorm = True
+		o_res = 1
+	else:
+		resnorm = False
+		o_res = 0
+	fitOp = [o_el, o_bgd, o_w1, o_res]
 	if program == 'QL':
 		if nres == 1:
 			prog = 'QLr'						# res file
@@ -504,8 +530,8 @@ def C2Se(sname):
 		Eb.append(be[1])
 	Vaxis = []
 	dataX = np.array(Xout)
-	dataY = np.array(Yf1)
-	dataE = np.array(Ef1)
+	dataY = np.array(Yf)
+	dataE = np.array(Ef)
 	nhist = 1
 	Vaxis.append('ampl')
 

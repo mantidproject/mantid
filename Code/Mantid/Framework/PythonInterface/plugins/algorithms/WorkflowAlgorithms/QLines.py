@@ -71,25 +71,8 @@ class QLines(PythonAlgorithm):
 		rname = prefix+res+'_'+ana + '_' + rext
 		rsname = prefix+resn+'_'+ana + '_ResNorm_Paras'
 		erange = [float(emin), float(emax)]
-		if elastic:
-			o_el = 1
-		else:
-			o_el = 0
-		if bgd == 'Sloping':
-			o_bgd = 2
-		if bgd == 'Flat':
-			o_bgd = 1
-		if bgd == 'Zero':
-			o_bgd = 0
-		if width:
-			o_w1 = 1
-		else:
-			o_w1 = 0
-		if resnorm:
-			o_res = 1
-		else:
-			o_res = 0
-		fitOp = [o_el, o_bgd, o_w1, o_res]
+
+		fitOp = [elastic, bgd, width, resnorm]
 		loopOp = self.getProperty('Sequence').value
 		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getPropertyValue('Plot')
