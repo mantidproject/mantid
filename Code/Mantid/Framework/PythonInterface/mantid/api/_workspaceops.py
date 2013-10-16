@@ -54,12 +54,12 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
     """
         Perform the given binary operation
 
-        @param op A string containing the Mantid algorithm name
-        @param self The object that was the self argument when object.__op__(other) was called
-        @param rhs The object that was the other argument when object.__op__(other) was called
-        @param lhs_vars A tuple containing details of the lhs of the assignment, i.e a = b + c, lhs_vars = (1, 'a')
-        @param inplace True if the operation should be performed inplace
-        @param reverse True if the reverse operator was called, i.e. 3 + a calls __radd__
+        :param op: A string containing the Mantid algorithm name
+        :param self: The object that was the self argument when object.__op__(other) was called
+        :param rhs: The object that was the other argument when object.__op__(other) was called
+        :param lhs_vars: A tuple containing details of the lhs of the assignment, i.e a = b + c, lhs_vars = (1, 'a')
+        :param inplace: True if the operation should be performed inplace
+        :param reverse: True if the reverse operator was called, i.e. 3 + a calls __radd__
         
     """
     global _workspace_op_tmps
@@ -129,9 +129,9 @@ def _do_unary_operation(op, self, lhs_vars):
     """
     Perform the unary operation
 
-    @param op :: name of the algorithm to run
-    @param self :: The object that this operation was called on
-    @param lhs_vars :: is expected to be a tuple containing the number of lhs variables and
+    :param op: name of the algorithm to run
+    :param self: The object that this operation was called on
+    :param lhs_vars: is expected to be a tuple containing the number of lhs variables and
             their names as the first and second element respectively
     """
     global _workspace_op_tmps
@@ -190,10 +190,10 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         Adds a method to the given type that calls an algorithm
         using the calling object as the input workspace
         
-        @param name The name of the new method as it should appear on the type
-        @param func_obj A free function object that defines the implementation of the call
-        @param self_param_name The name of the parameter in the free function that the method's self maps to
-        @param workspace_types A list of string names of a workspace types. If None, then it is attached
+        :param name: The name of the new method as it should appear on the type
+        :param func_obj: A free function object that defines the implementation of the call
+        :param self_param_name: The name of the parameter in the free function that the method's self maps to
+        :param workspace_types: A list of string names of a workspace types. If None, then it is attached
                               to the general Workspace type. Default=None
     """
     def _method_impl(self, *args, **kwargs):

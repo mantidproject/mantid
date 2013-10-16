@@ -42,7 +42,7 @@ def specialization_exists(name):
         Returns true if a specialization for the given name
         already exists, false otherwise
         
-        @param name :: The name of a possible new function
+        :param name: The name of a possible new function
     """
     return name in __SPECIALIZED_FUNCTIONS__
 
@@ -72,7 +72,7 @@ def Load(*args, **kwargs):
       # Simple usage, ISIS NeXus file
       run_ws = Load('INSTR00001000.nxs')
       
-      # Historgram NeXus with SpectrumMin and SpectrumMax = 1
+      # Histogram NeXus with SpectrumMin and SpectrumMax = 1
       run_ws = Load('INSTR00001000.nxs', SpectrumMin=1,SpectrumMax=1)
       
       # Event NeXus with precount on
@@ -393,11 +393,6 @@ def _get_args_from_lhs(lhs, algm_obj):
     i = 0
     while len(ret_names) > 0 and i < nprops:
         p = output_props[i]
-        #
-        # Some algorithms declare properties as EventWorkspace and not its interface
-        # so Python doesn't know about it. Need to find a better way of
-        # dealing with WorkspaceProperty types. If they didn't multiple inherit
-        # that would help
         if _is_workspace_property(p):
             extra_args[p.name] = ret_names[0]
             ret_names = ret_names[1:]
@@ -828,10 +823,10 @@ def _translate():
 def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object):
     """
         Attachs the given algorithm free function to those types specified by the algorithm
-        @param method_name The name of the new method on the type
-        @param algorithm_wrapper Function object whose signature should be f(*args,**kwargs) and when
+        :param method_name: The name of the new method on the type
+        :param algorithm_wrapper: Function object whose signature should be f(*args,**kwargs) and when
                                  called will run the selected algorithm
-        @param algm_object An algorithm object that defines the extra properties of the new method
+        :param algm_object: An algorithm object that defines the extra properties of the new method
     """
     input_prop = algm_object.workspaceMethodInputProperty()
     if input_prop == "":
