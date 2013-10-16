@@ -157,16 +157,19 @@ namespace Mantid
     /**
      * Checks to see if the file to be downloaded is a datafile.
      * @param fileName ::  file name
-     * @returns true if the file is a data file
+     * @returns true if the file is a data file, otherwise false.
      */
     bool CatalogDownloadDataFiles::isBinary(const std::string & fileName)
     {
-      std::basic_string <char>::size_type dotIndex;
-      dotIndex = fileName.find_last_of (".");
-      std::string fextn=fileName.substr(dotIndex+1,fileName.size()-dotIndex);
-      std::transform(fextn.begin(),fextn.end(),fextn.begin(),tolower);
-
-      return !FileDescriptor::isAscii(fextn);
+      // If an invalid argument is passed (which is a test), then return false.
+      try
+      {
+        return !FileDescriptor::isAscii(fileName);
+      }
+      catch(std::invalid_argument&)
+      {
+        return false;
+      }
     }
 
     /**
