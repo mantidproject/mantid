@@ -109,8 +109,8 @@ namespace Mantid
       void rebuildSpectraMapping(const bool includeMonitors = true);
 
       // More mapping
-      spec2index_map * getSpectrumToWorkspaceIndexMap() const;
-      detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets=false ) const;
+      spec2index_map getSpectrumToWorkspaceIndexMap() const;
+      detid2index_map getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets=false ) const;
       void getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets=false) const;
       void getSpectrumToWorkspaceIndexVector(std::vector<size_t> & out, specid_t & offset) const;
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
@@ -118,7 +118,7 @@ namespace Mantid
       void getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const;
       void getSpectraFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<specid_t>& spectraList) const;
 
-	  bool hasGroupedDetectors() const;
+      bool hasGroupedDetectors() const;
 
       /// Get the footprint in memory in bytes.
       virtual size_t getMemorySize() const;

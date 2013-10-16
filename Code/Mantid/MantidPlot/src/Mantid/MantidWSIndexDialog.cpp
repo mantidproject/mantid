@@ -68,7 +68,7 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
       Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_wsNames[i].toStdString()));
       if ( NULL == ws ) continue;
 
-      Mantid::spec2index_map *spec2index = ws->getSpectrumToWorkspaceIndexMap();
+      const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
 
       std::set<int> origSet = m_spectraIdChoice.getIntSet();
       std::set<int>::iterator it = origSet.begin();
@@ -77,7 +77,7 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
       for( ; it != origSet.end(); ++it)
       {
         int origInt = (*it);
-        int convertedInt = static_cast<int>(spec2index->find(origInt)->second);
+        int convertedInt = static_cast<int>(spec2index.find(origInt)->second);
         convertedSet.insert(convertedInt);
       }
 
@@ -266,15 +266,15 @@ void MantidWSIndexDialog::generateSpectraIdIntervals()
   {
     Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
     if ( NULL == ws ) continue;
-    Mantid::spec2index_map * spec2index = ws->getSpectrumToWorkspaceIndexMap();
+    const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
     
-    Mantid::spec2index_map::const_iterator last = spec2index->end();
+    Mantid::spec2index_map::const_iterator last = spec2index.end();
     --last;
-    Mantid::spec2index_map::const_iterator first = spec2index->begin();
+    Mantid::spec2index_map::const_iterator first = spec2index.begin();
     
     const int startSpectrum = static_cast<int> (first->first);
     const int endSpectrum = static_cast<int> (last->first);
-    const int size = static_cast<int> (spec2index->size());
+    const int size = static_cast<int> (spec2index.size());
     if(size == (1 + endSpectrum - startSpectrum))
     {
       // Here we make the assumption (?) that the spectra IDs are sorted, and so

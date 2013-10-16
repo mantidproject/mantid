@@ -11,9 +11,7 @@ using namespace SpectrumView;
  */
 MatrixWSSpectrumView::MatrixWSSpectrumView( MatrixWorkspace_const_sptr mat_ws )
 {
-  MatrixWSDataSource* source = new MatrixWSDataSource( mat_ws );
-
-  spectrum_view = new SpectrumView( source );  // this is the QMainWindow
+  spectrum_view = new SpectrumView();  // this is the QMainWindow
                                                // for the viewer.  It is
                                                // deleted when the window
                                                // is closed
@@ -25,6 +23,7 @@ MatrixWSSpectrumView::MatrixWSSpectrumView( MatrixWorkspace_const_sptr mat_ws )
   QString qtitle = QString::fromStdString(title);
 
   spectrum_view->setCaption( qtitle );
+  spectrum_view->renderWorkspace(mat_ws);
 }
 
 MatrixWSSpectrumView::~MatrixWSSpectrumView()

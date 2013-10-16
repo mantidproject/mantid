@@ -318,7 +318,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
  * @param WS :: workspace to modify
  */
 void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::string & entry_name,
-    const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS)
+    const std::string &bankName, API::MatrixWorkspace_sptr WS, const detid2index_map& id_to_wi)
 {
   g_log.debug() << "Loading bank " << bankName << std::endl;
   // To avoid segfaults on RHEL5/6 and Fedora
@@ -392,9 +392,9 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   if ( m_spec_max != Mantid::EMPTY_INT())
   {
     uint32_t ifirst = pixel_id[0];
-    range_check out_range(m_spec_min, m_spec_max, *id_to_wi);
+    range_check out_range(m_spec_min, m_spec_max, id_to_wi);
     std::vector<uint32_t>::iterator newEnd =
-	std::remove_if (pixel_id.begin(), pixel_id.end(), out_range);
+        std::remove_if (pixel_id.begin(), pixel_id.end(), out_range);
     pixel_id.erase(newEnd, pixel_id.end());
     // check if beginning or end of array was erased
     if(ifirst != pixel_id[0]) iPart = numPixels - pixel_id.size();
@@ -454,7 +454,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   {
     // Find the workspace index for this detector
     detid_t pixelID = pixel_id[i-iPart];
-    size_t wi = (*id_to_wi)[pixelID];
+    size_t wi = id_to_wi.find(pixelID)->second;
 
     // Set the basic info of that spectrum
     ISpectrum * spec = WS->getSpectrum(wi);
@@ -571,7 +571,7 @@ void LoadTOFRawNexus::exec()
   WS->rebuildSpectraMapping(false);
   // And map ID to WI
   g_log.debug() << "Mapping ID to WI" << std::endl;
-  id_to_wi = WS->getDetectorIDToWorkspaceIndexMap();
+  const auto id_to_wi = WS->getDetectorIDToWorkspaceIndexMap();
 
   // Load each bank sequentially
   //PARALLEL_FOR1(WS)
@@ -581,7 +581,7 @@ void LoadTOFRawNexus::exec()
     std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
     g_log.debug() << "Loading bank " << bankName << std::endl;
-    loadBank(filename, entry_name, bankName, WS);
+    loadBank(filename, entry_name, bankName, WS, id_to_wi);
 //    PARALLEL_END_INTERUPT_REGION
   }
 //  PARALLEL_CHECK_INTERUPT_REGION
@@ -600,7 +600,6 @@ void LoadTOFRawNexus::exec()
   setProperty("OutputWorkspace", WS);
 
   delete prog;
-  delete id_to_wi;
 }
 
 } // namespace DataHandling

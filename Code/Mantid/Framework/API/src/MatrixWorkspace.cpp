@@ -315,19 +315,18 @@ namespace Mantid
     *    KEY is the Spectrum #
     *    VALUE is the Workspace Index
     */
-    spec2index_map * MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const
+    spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const
     {
       SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
       if (!ax)
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
-      spec2index_map * map = new spec2index_map();
+      spec2index_map map;
       try
       {
-        ax->getSpectraIndexMap(*map);
+        ax->getSpectraIndexMap(map);
       }
       catch (std::runtime_error &)
       {
-        delete map;
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: no elements!");
       }
       return map;
@@ -372,7 +371,7 @@ namespace Mantid
       }
     }
 
-	//---------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------
     /** Does the workspace has any grouped detectors?
     *  @return true if the workspace has any grouped detectors, otherwise false
     */
@@ -386,8 +385,8 @@ namespace Mantid
         auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
         if (detList.size() > 1)
         {
-			retVal=true;
-			break;
+          retVal=true;
+          break;
         }
       }
       return retVal;
@@ -405,12 +404,12 @@ namespace Mantid
     *  @throw runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
     *  @return Index to Index Map object. THE CALLER TAKES OWNERSHIP OF THE MAP AND IS RESPONSIBLE FOR ITS DELETION.
     */
-    detid2index_map * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
+    detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
     {
-      detid2index_map * map = new detid2index_map();
+      detid2index_map map;
 
       //Loop through the workspace index
-      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
+      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); ++workspaceIndex)
       {
         auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
 
@@ -418,23 +417,23 @@ namespace Mantid
         {
           if (detList.size() > 1)
           {
-            delete map;
             throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.");
           }
 
           //Set the KEY to the detector ID and the VALUE to the workspace index.
           if (detList.size() == 1)
-            (*map)[ *detList.begin() ] = workspaceIndex;
+            map[ *detList.begin() ] = workspaceIndex;
         }
         else
         {
           //Allow multiple detectors per workspace index
           for (auto it = detList.begin(); it != detList.end(); ++it)
-            (*map)[ *it ] = workspaceIndex;
+            map[ *it ] = workspaceIndex;
         }
 
         //Ignore if the detector list is empty.
       }
+
       return map;
     }
 

@@ -64,6 +64,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
 
      virtual ~SpectrumDisplay();
 
+     virtual bool hasData(const std::string &wsName,
+                          const boost::shared_ptr<Mantid::API::Workspace> ws);
+
      /// Set some properties of the SpectrumPlotItem object
      void setupSpectrumPlotItem();
 

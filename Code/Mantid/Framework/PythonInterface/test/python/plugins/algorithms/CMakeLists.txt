@@ -14,12 +14,13 @@ set ( TEST_PY_FILES
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   MaskWorkspaceToCalFileTest.py
+  MeanTest.py
   MergeCalFilesTest.py
   RetrieveRunInfoTest.py
-  RunPythonScriptTest.py
   SANSWideAngleCorrectionTest.py
   SortXAxisTest.py
   Stitch1DTest.py
+  Stitch1DManyTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py

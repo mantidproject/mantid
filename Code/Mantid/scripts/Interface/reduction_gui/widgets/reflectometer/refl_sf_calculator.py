@@ -304,7 +304,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 #print self._summary.angle_list.item(i)
                 current_item = self._summary.angle_list.item(i)
                 
-                state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+                state = current_item.data(QtCore.Qt.UserRole)
                
                 _tof_min = self._summary.tof_min.text()
                 _tof_max = self._summary.tof_max.text()
@@ -364,7 +364,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         self._summary.remove_btn.setEnabled(False)  
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
-            state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+            state = current_item.data(QtCore.Qt.UserRole)
             self.set_editing_state(state)
             self._reset_warnings()
         self._summary.angle_list.setEnabled(True)
@@ -439,7 +439,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         m.sf_factor_file = self._summary.cfg_scaling_factor_file_name.text()
                 
         for i in range(self._summary.angle_list.count()):
-            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
+            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole)
             # Over-write incident medium with global incident medium
             data.incident_medium = incident_medium
             state_list.append(data)

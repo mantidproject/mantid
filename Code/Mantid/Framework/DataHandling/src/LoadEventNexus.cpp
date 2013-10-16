@@ -1442,6 +1442,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       file.closeGroup();
     }
   }
+  
+  loadSampleDataISIScompatibility(file, WS); 
 
   //Close up the file
   file.closeGroup();
@@ -1455,6 +1457,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // set more properties on the workspace
   try
   {
+    // this is a static method that is why it is passing the file path
     loadEntryMetadata(m_filename, WS, m_top_entry_name);
   }
   catch (std::runtime_error & e)
@@ -1787,6 +1790,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   // close the file
   file.close();
 }
+
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file or if not found from the IDF file
@@ -2257,6 +2261,21 @@ bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool 
   {
     return false; // Doesn't exist
   }
+
+  // The ISIS spectrum mapping is defined by 2 arrays in isis_vms_compat block:
+  //   UDET - An array of detector IDs
+  //   SPEC - An array of spectrum numbers
+  // There sizes must match. Hardware allows more than one detector ID to be mapped to a single spectrum
+  // and this is encoded in the SPEC/UDET arrays by repeating the spectrum number in the array
+  // for each mapped detector, e.g.
+  //
+  // 1 1001
+  // 1 1002
+  // 2 2001
+  // 3 3001
+  //
+  // defines 3 spectra, where the first spectrum contains 2 detectors
+
   // UDET
   file.openData("UDET");
   std::vector<int32_t> udet;
@@ -2305,8 +2324,18 @@ bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool 
   else
   {
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-    SpectrumDetectorMapping mapping(spec,udet);
-    WS->resizeTo(mapping.getMapping().size()-nmons);
+    SpectrumDetectorMapping mapping(spec,udet, monitors);
+    WS->resizeTo(mapping.getMapping().size());
+    // Make sure spectrum numbers are correct
+    auto uniqueSpectra = mapping.getSpectrumNumbers();
+    auto itend = uniqueSpectra.end();
+    size_t counter = 0;
+    for(auto it = uniqueSpectra.begin(); it != itend; ++it)
+    {
+      WS->getSpectrum(counter)->setSpectrumNo(*it);
+      ++counter;
+    }
+    // Fill detectors based on this mapping
     WS->updateSpectraUsing(mapping);
   }
   return true;
@@ -2550,6 +2579,54 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
   } // for wi
   file.closeData();
 }
+
+/** Load information of the sample. It is valid only for ISIS it get the information from 
+ *  the group isis_vms_compat. 
+ * 
+ *   If it does not find this group, it assumes that there is nothing to do. 
+ *   But, if the information is there, but not in the way it was expected, it will log the occurrence. 
+ * 
+ * @note: It does essentially the same thing of the method: LoadISISNexus2::loadSampleData
+ * 
+ * @param nexusfilename : path for the nexus file
+ * @param WS : pointer to the workspace
+ */
+void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS){
+  try
+  {
+    file.openGroup("isis_vms_compat", "IXvms");
+  }
+  catch( ::NeXus::Exception & )
+  {
+    // No problem, it just means that this entry does not exist
+    return;
+  }
+
+  // read the data
+  try
+  {
+    std::vector<int32_t> spb; 
+    std::vector<float> rspb;
+    file.readData("SPB", spb);
+    file.readData("RSPB",rspb);
+    
+    WS->mutableSample().setGeometryFlag(spb[2]); // the flag is in the third value
+    WS->mutableSample().setThickness(rspb[3]); 
+    WS->mutableSample().setHeight(rspb[4]); 
+    WS->mutableSample().setWidth(rspb[5]); 
+  }
+  catch ( ::NeXus::Exception & ex)
+  {
+    // it means that the data was not as expected, report the problem
+    std::stringstream s;
+    s << "Wrong definition found in isis_vms_compat :> " << ex.what(); 
+    file.closeGroup();
+    throw std::runtime_error(s.str());
+  }
+
+  file.closeGroup();
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -209,6 +209,22 @@ inline bool isNaN(T val)
   volatile T buf=val;
   return (val!=buf);
 }
+
+const std::string ConvertToMD::name() const
+{
+  return "ConvertToMD";
+}
+
+int ConvertToMD::version() const
+{
+  return 1;
+}
+
+const std::string ConvertToMD::category() const
+{
+  return "MDAlgorithms";
+}
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -308,7 +324,10 @@ ConvertToMD::init()
 "by the Lorentz multiplier:\n <math>sin(\\theta)^2/\\lambda^4</math>. Currently works in Q3D Elastic case only "
 "and is ignored in any other case."
                     );
-
+    declareProperty(new PropertyWithValue<bool>("IgnoreZeroSignals", false, Direction::Input),
+ "Enabling this property forces the algorithm to ignore bins with zero signal for an input matrix workspace. Input event workspaces are not affected. "
+ "This violates the data normalization but may substantially accelerate calculations in situations when the normalization is not important (e.g. peak finding)."
+      );
     declareProperty(new ArrayProperty<double>("MinValues"),
 "It has to be N comma separated values, where N is the number of dimensions of the target workspace. Values "
 "smaller then specified here will not be added to workspace.\n Number N is defined by properties 4,6 and 7 and "
@@ -347,6 +366,48 @@ ConvertToMD::init()
 "property is necessary if one wants to generate multiple file based workspaces in order to merge them later.");
     setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
  
+}
+
+std::map<std::string, std::string> ConvertToMD::validateInputs()
+{
+  std::map<std::string, std::string> result;
+
+  std::vector<double> minVals = this->getProperty("MinValues");
+  std::vector<double> maxVals = this->getProperty("MaxValues");
+
+  if (minVals.size() != maxVals.size())
+  {
+    std::stringstream msg;
+    msg << "Rank of MinValues != MaxValues (" << minVals.size() << "!=" << maxVals.size() << ")";
+    result["MinValues"] = msg.str();
+    result["MaxValues"] = msg.str();
+  }
+  else
+  {
+    std::stringstream msg;
+
+    size_t rank = minVals.size();
+    for (size_t i = 0; i < rank; ++i)
+    {
+      if (minVals[i] >= maxVals[i])
+      {
+        if (msg.str().empty())
+          msg << "max not bigger than min ";
+        else
+          msg << ", ";
+        msg << "at index=" << (i+1) << " ("
+            << minVals[i] << ">=" << maxVals[i] << ")";
+      }
+    }
+
+    if (!msg.str().empty())
+    {
+      result["MinValues"] = msg.str();
+      result["MaxValues"] = msg.str();
+    }
+  }
+
+  return result;
 }
 
  //----------------------------------------------------------------------------------------------
@@ -396,8 +457,9 @@ void ConvertToMD::exec()
      ConvToMDSelector AlgoSelector;
      m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
 
+     bool ignoreZeros = getProperty("IgnoreZeroSignals");
     // initate conversion and estimate amout of job to do
-     size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
+     size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper,ignoreZeros);
     // progress reporter
      m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
 

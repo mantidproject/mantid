@@ -156,7 +156,7 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
 
   postBody << finalBoundaryLine;
 
-  req.setContentLength( postBody.str().size());
+  req.setContentLength( static_cast<int>(postBody.str().size()));
 
   std::ostream &postStream = m_session->sendRequest( req);
 

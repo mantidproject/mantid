@@ -119,7 +119,7 @@ class DataReflWidget(BaseRefWidget):
             angle_offset_error = float(self._summary.angle_offset_error_edit.text())
                 
         for i in range(self._summary.angle_list.count()):
-            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
+            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole)
             # Over-write Q binning with common binning
             data.q_min = q_min
             data.q_step = q_step

@@ -63,6 +63,11 @@
     <livedata address="NDXIRIS:6789" />
   </instrument>
 
+  <instrument name="LARMOR">
+    <technique>Small Angle Scattering</technique>
+    <livedata address="NDXLARMOR:6789" />
+  </instrument>
+
   <instrument name="LOQ">
     <technique>Small Angle Scattering</technique>
     <livedata address="NDXLOQ:6789" />
@@ -385,7 +390,7 @@
 
 </facility>
 
-<facility name="ILL" FileExtensions=".nxs,.hdf">
+<facility name="ILL" FileExtensions=".nxs,.hdf,.inx,.asc">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique> 
@@ -403,6 +408,21 @@
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
+  </instrument>
+
+  <instrument name="IN10">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="IN13">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="IN16">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
   
   <instrument name="D33">

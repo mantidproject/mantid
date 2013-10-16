@@ -31,6 +31,7 @@ set ( TEST_PY_FILES
   PythonAlgorithmChildAlgCallTest.py
   PythonAlgorithmTraitsTest.py
   PythonAlgorithmWorkspacePropertyTest.py
+  RunPythonScriptTest.py
   RunTest.py
   WorkspaceFactoryTest.py
   WorkspaceTest.py

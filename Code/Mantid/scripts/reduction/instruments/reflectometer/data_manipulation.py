@@ -18,11 +18,9 @@ def tof_distribution(file_path, callback=None,
 #     if not mtd.workspaceExists(ws_raw):
     LoadEventNexus(Filename=file_path, OutputWorkspace=ws_raw)
     
-    print '#a'
     Rebin(InputWorkspace=ws_raw, OutputWorkspace=ws,Params="0,200,200000")
     SumSpectra(InputWorkspace=ws, OutputWorkspace=ws)
     
-    print '#b'
     # Get range of TOF where we have data
     x = mtd[ws].readX(0)
     y = mtd[ws].readY(0)
@@ -34,17 +32,13 @@ def tof_distribution(file_path, callback=None,
         if y[i]>0:
             xmax = x[i]
     
-    print '#c'
     if callback is not None:
-        print '#d'
         from LargeScaleStructures import data_stitching
-        print '#e'
         data_stitching.RangeSelector.connect([ws], callback,
                                              xmin=xmin, xmax=xmax,
                                              range_min=range_min,
                                              range_max=range_max)
         
-        print '#f'
     
 def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                  range_min=None, range_max=None,
@@ -91,9 +85,9 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
         if 1==0:
             ws_list.append(ws_output)
         else:
-            if not mtd.doesExist(ws):
-                ws = LoadEventNexus(Filename=file_path,
-                               NXentryName=entry)
+#            if not mtd.doesExist(ws):
+            ws = LoadEventNexus(Filename=file_path,
+                                NXentryName=entry)
 
             if ws.getNumberEvents()==0:
                 print 'No data in entry %s' % entry

@@ -146,9 +146,6 @@ protected:
   /// Workspaces we are working with.
   Mantid::DataObjects::EventWorkspace_const_sptr inputW;
 
-  /// Mapping between indices
-  detid2index_map * input_detectorIDToWorkspaceIndexMap;
-
   /// Map where KEY = pixel ID; value = tof to D conversion factor (tof * factor = d).
   std::map<detid_t, double> * tof_to_d;
 };

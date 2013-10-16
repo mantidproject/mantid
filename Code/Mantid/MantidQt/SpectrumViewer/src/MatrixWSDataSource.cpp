@@ -55,6 +55,19 @@ MatrixWSDataSource::~MatrixWSDataSource()
 {
 }
 
+bool MatrixWSDataSource::hasData(const std::string& wsName,
+                                 const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  if (mat_ws->getName() == wsName)
+    return true;
+
+  Mantid::API::MatrixWorkspace_const_sptr other
+      = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  if (!other)
+    return false;
+
+  return (mat_ws == other);
+}
 
 /**
  * Get the smallest 'x' value covered by the data.  Must override base class

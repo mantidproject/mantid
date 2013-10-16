@@ -136,9 +136,8 @@ public:
     //Checks on the workspace
     EventWorkspace_const_sptr inputW = AnalysisDataService::Instance().retrieveWS<const EventWorkspace>(wsName);
     TS_ASSERT_EQUALS( inputW->getNumberHistograms(), NUMPIXELS);
-    detid2index_map * m;
-    m = inputW->getDetectorIDToWorkspaceIndexMap(true);
-    TS_ASSERT_EQUALS( m->size(), NUMPIXELS);
+    detid2index_map m = inputW->getDetectorIDToWorkspaceIndexMap(true);
+    TS_ASSERT_EQUALS( m.size(), NUMPIXELS);
     //2 events per bin
     TS_ASSERT_EQUALS( inputW->dataY(0)[0], 2);
     //Make the units in X to be TOF

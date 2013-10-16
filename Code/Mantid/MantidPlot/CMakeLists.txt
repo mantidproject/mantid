@@ -216,6 +216,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
                    src/Mantid/InstrumentWidget/RotationSurface.cpp
+                   src/Mantid/InstrumentWidget/PanelsSurface.cpp
                    src/Mantid/InstrumentWidget/ProjectionSurface.cpp
                    src/Mantid/InstrumentWidget/Projection3D.cpp
                    src/Mantid/InstrumentWidget/PeakMarker2D.cpp
@@ -448,6 +449,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/RotationSurface.h
                    src/Mantid/InstrumentWidget/PeakMarker2D.h
                    src/Mantid/InstrumentWidget/PeakOverlay.h
+                   src/Mantid/InstrumentWidget/PanelsSurface.h
                    src/Mantid/InstrumentWidget/ProjectionSurface.h
                    src/Mantid/InstrumentWidget/Projection3D.h
                    src/Mantid/InstrumentWidget/RectF.h
@@ -731,38 +733,6 @@ qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-
-
-###########################################################################
-# Files specific to the remote job submission code
-###########################################################################
-if(MAKE_REMOTE_JOBS)
-# Add the algorithms for managing remote job submission
-  LIST(APPEND MANTID_SRCS
-	src/Mantid/Remote/JobStatusDialog.cpp
-	src/Mantid/Remote/MantidRemoteCluster.cpp
-	src/Mantid/Remote/NewClusterDialog.cpp
-  )
-
-  LIST(APPEND MANTID_HDRS
-	src/Mantid/Remote/JobStatusDialog.h
-	src/Mantid/Remote/MantidRemoteCluster.h
-	src/Mantid/Remote/NewClusterDialog.h
-  )
-
-  LIST(APPEND MANTID_MOC_FILES
-	src/Mantid/Remote/JobStatusDialog.h
-	src/Mantid/Remote/MantidRemoteCluster.h
-	src/Mantid/Remote/NewClusterDialog.h
-  )
-
-  LIST(APPEND UI_FILES
-	src/Mantid/Remote/JobStatusDialog.ui
-	src/Mantid/Remote/NewClusterDialog.ui
-  )
-
-endif(MAKE_REMOTE_JOBS)
-
 
 ###########################################################################
 # Internal icon links

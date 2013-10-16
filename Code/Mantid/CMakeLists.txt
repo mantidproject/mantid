@@ -107,7 +107,6 @@ set( FULL_PACKAGE_BUILD 1 )
 # Framework Build options
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
-set ( MAKE_REMOTE_JOBS ON CACHE BOOL "Add code for executing algorithms on a remote cluster")
 
 add_subdirectory ( Framework )
 

@@ -107,6 +107,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_background_clicked)
         self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
         self.connect(self._summary.tof_range_switch, QtCore.SIGNAL("clicked(bool)"), self._tof_range_clicked)
+        self.connect(self._summary.geometry_correction_switch, QtCore.SIGNAL("clicked(bool)"), self._geometry_correction_clicked)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_x)
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
@@ -278,6 +279,7 @@ class DataReflWidget(BaseWidget):
         util.set_edited(self._summary.norm_low_res_range_switch, False)
         util.set_edited(self._summary.norm_switch, False)
         util.set_edited(self._summary.tof_range_switch, False)
+        util.set_edited(self._summary.geometry_correction_switch, False)
         util.set_edited(self._summary.q_min_edit, False)
         util.set_edited(self._summary.q_step_edit, False)
         util.set_edited(self._summary.det_angle_check, False)
@@ -631,6 +633,12 @@ class DataReflWidget(BaseWidget):
         #self._summary.plot_tof_btn.setEnabled(is_checked)
         self._edit_event(None, self._summary.tof_range_switch)
 
+    def _geometry_correction_clicked(self, is_checked):
+        """
+        this is reached by the geometry correction switch
+        """
+        pass
+    
     def _plot_count_vs_y(self, is_peak=True):
         """
             Plot counts as a function of high-resolution pixels
@@ -832,7 +840,7 @@ class DataReflWidget(BaseWidget):
         self._summary.remove_btn.setEnabled(False)  
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
-            state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+            state = current_item.data(QtCore.Qt.UserRole)
             self.set_editing_state(state)
             self._reset_warnings()
         self._summary.angle_list.setEnabled(True)
@@ -993,7 +1001,7 @@ class DataReflWidget(BaseWidget):
             angle_offset_error = float(self._summary.angle_offset_error_edit.text())
                 
         for i in range(self._summary.angle_list.count()):
-            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole).toPyObject()
+            data = self._summary.angle_list.item(i).data(QtCore.Qt.UserRole)
             # Over-write Q binning with common binning
             data.q_min = q_min
             data.q_step = q_step

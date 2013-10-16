@@ -12,7 +12,7 @@ let total_tasks=$(wc -l $PBS_NODEFILE | awk '{print $1}')
 export OMP_NUM_THREADS=192/$total_tasks
 cd $PBS_O_WORKDIR
 export LD_LIBRARY_PATH=/shared/openmpi/gcc/lib:/home/vel/Mantid/Code/mpi-build/lib:/home/tr9/mantid-deps 
-export PYTHONPATH=/home/vel/Mantid/Code/mpi-build/bin:/home/tr9/mantid-deps/site-packages:/home/vel/Mantid/Code/Mantid/Framework/PythonAPI/PythonAlgorithms
+export PYTHONPATH=/home/vel/Mantid/Code/mpi-build/bin:/home/tr9/mantid-deps/site-packages:/home/vel/Mantid/Code/Mantid/Framework/PythonInterface/plugins/algorithms
 
 let tasks_per_job=$total_tasks/2
 let second_start=$tasks_per_job+1

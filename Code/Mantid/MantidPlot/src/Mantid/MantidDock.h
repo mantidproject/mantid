@@ -21,6 +21,7 @@
 #include <QTreeWidgetItem>
 #include <QSortFilterProxyModel>
 #include <QStringList>
+#include <QMap>
 
 #include <set>
 
@@ -80,6 +81,7 @@ private slots:
   void convertMDHistoToMatrixWorkspace();
   void updateTree();
   void incrementUpdateCount();
+  void recordWorkspaceRename(QString,QString);
   void clearUB();
 
 private:
@@ -87,6 +89,7 @@ private:
   inline bool isTreeUpdating() const { return m_treeUpdating; }
   void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems, const QStringList & expanded);
   MantidTreeWidgetItem * addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent = NULL);
+  bool shouldBeSelected(QString name) const;
   void createWorkspaceMenuActions();
   void createSortMenuActions();
   void setItemIcon(QTreeWidgetItem *item,  const std::string & wsID);
@@ -134,6 +137,11 @@ private:
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
   Mantid::API::AnalysisDataServiceImpl & m_ads;
+  /// Temporarily keeps names of selected workspaces during tree update
+  /// in order to restore selection after update
+  QStringList m_selectedNames;
+  /// Keep a map of renamed workspaces between updates
+  QMap<QString,QString> m_renameMap;
 
   static Mantid::Kernel::Logger& logObject;
 };

@@ -367,7 +367,6 @@ add_subdirectory ( test )
 # determine it from git and the file already exists. This makes sure the 
 # version number is correct when building off the source tarball
 
-include (PatchVersionNumber)
 if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in
                    ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp
@@ -397,8 +396,7 @@ set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
-set ( PYTHONALG_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/PythonAlgorithms" ) # deprecated
-set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/plugins" )
+set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
 SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
@@ -472,8 +470,7 @@ else ()
 endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
-set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs ) # deprecated
-set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python;${PYTHONALG_DIRS}" )
+set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( DATADIRS "" )
 SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
 

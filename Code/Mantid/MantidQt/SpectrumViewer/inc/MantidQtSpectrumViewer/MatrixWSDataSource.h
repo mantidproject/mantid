@@ -54,6 +54,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
 
    ~MatrixWSDataSource();
 
+    virtual bool hasData(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
+
     /// OVERRIDES: Get the smallest 'x' value covered by the data
     virtual double GetXMin();
 

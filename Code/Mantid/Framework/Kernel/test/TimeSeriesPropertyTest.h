@@ -3,12 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 #include <ctime>
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/DateAndTime.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/CPUTimer.h"
-#include "algorithm"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -1376,6 +1377,25 @@ public:
     delete filter;
 
     return;
+  }
+
+  void test_filter_with_single_value_in_series()
+  {
+    auto p1 = boost::make_shared<TimeSeriesProperty<double>>("SingleValueTSP");
+    p1->addValue("2007-11-30T16:17:00", 1.5);
+
+    auto filterEndsBefore = boost::make_shared<TimeSeriesProperty<bool>>("EndsBefore");
+    filterEndsBefore->addValue("2007-11-30T16:16:30",false);
+    filterEndsBefore->addValue("2007-11-30T16:16:58",true);
+    p1->filterWith(filterEndsBefore.get());
+    TS_ASSERT_EQUALS(1, p1->size());
+
+    p1->clearFilter();
+    auto filterEndsAfter = boost::make_shared<TimeSeriesProperty<bool>>("EndsAfter");
+    filterEndsAfter->addValue("2007-11-30T16:16:30",false);
+    filterEndsAfter->addValue("2007-11-30T16:17:01",true);
+    p1->filterWith(filterEndsAfter.get());
+    TS_ASSERT_EQUALS(1, p1->size());
   }
 
 
