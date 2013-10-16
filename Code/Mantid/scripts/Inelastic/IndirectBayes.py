@@ -378,10 +378,30 @@ def LorBlock(a,first,nl):                                 #read Ascii block of I
 	first += 1
 	return first,Q,int0,fw,int                                      #values as list
 
+# Append data from C2Fw to the output spectra
+def appendData(nl, dataXYE, Xout, calcYData, calcEData):
+	
+	for i in range(0, nl):
+			#append amplitude
+			dataXYE["x"] = np.append(dataX,np.array(Xout))
+			dataXYE["y"] = np.append(dataY,np.array(calcYData[i+1]*2))
+			dataXYE["e"] = np.append(dataE,np.array(calcEData[i+1]*2))
+			Vaxis.append('ampl.'+str(nl)+'.'+str(i))
+
+			#append width
+			dataXYE["x"] = np.append(data,np.array(Xout))
+			dataXYE["y"] = np.append(dataY,np.array(calcYData[i]*2))
+			dataXYE["e"] = np.append(dataE,np.array(calcEData[i]*2))
+			Vaxis.append('width.'+str(nl)+'.'+str(i))
+
+	return dataXYE
+
 def C2Fw(prog,sname):
 	workdir = config['defaultsave.directory']
 	outWS = sname+'_Workspace'
 	Vaxis = []
+	dataXYE = {"x": [], "y": [], "e": []}
+
 	for nl in range(1,4):
 		file = sname + '.ql' +str(nl)
 		handle = open(os.path.join(workdir, file), 'r')
@@ -397,117 +417,24 @@ def C2Fw(prog,sname):
 		var = ExtractInt(asc[6])
 		first = 7
 		Xout = []
-		Yf1 = []
-		Ef1 = []
-		Yf2 = []
-		Ef2 = []
-		Yf3 = []
-		Ef3 = []
-		Yi1 = []
-		Ei1 = []
-		Yi2 = []
-		Ei2 = []
-		Yi3 = []
-		Ei3 = []
+
 		ns = int(nspec)
+
+		calcYData = [[]]*6
+		calcEData = [[]]*6
+
 		for m in range(0,ns):
-			if nl == 1:
+			for i in range(0, nl*2):
 				first,Q,i0,fw,it = LorBlock(asc,first,1)
 				Xout.append(Q)
-				Yf1.append(fw[0])
-				Ef1.append(fw[1])
-				Yi1.append(it[0])
-				Ei1.append(it[1])
-			if nl == 2:
-				first,Q,i0,fw,it = LorBlock(asc,first,2)
-				Xout.append(Q)
-				Yf1.append(fw[0])
-				Ef1.append(fw[2])
-				Yf2.append(fw[1])
-				Ef2.append(fw[3])
-				Yi1.append(it[0])
-				Ei1.append(it[2])
-				Yi2.append(it[1])
-				Ei2.append(it[3])
-			if nl == 3:
-				first,Q,i0,fw,it = LorBlock(asc,first,3)
-				Xout.append(Q)
-				Yf1.append(fw[0])
-				Ef1.append(fw[3])
-				Yf2.append(fw[1])
-				Ef2.append(fw[4])
-				Yf3.append(fw[2])
-				Ef3.append(fw[5])
-				Yi1.append(it[0])
-				Ei1.append(it[3])
-				Yi2.append(it[1])
-				Ei2.append(it[4])
-				Yi3.append(it[2])
-				Ei3.append(it[5])
-		if nl ==1:
-			dataX = np.array(Xout)
-			dataY = np.array(Yf1)
-			dataE = np.array(Ef1)
-			nhist = 1
-			Vaxis.append('width.1.1')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yi1))
-			dataE = np.append(dataE,np.array(Ei1))
-			nhist += 1
-			Vaxis.append('ampl.1.1')
-		if nl ==2:
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yf1))
-			dataE = np.append(dataE,np.array(Ef1))
-			nhist += 1
-			Vaxis.append('width.2.1')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yi1))
-			dataE = np.append(dataE,np.array(Ei1))
-			nhist += 1
-			Vaxis.append('ampl.2.1')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yf2))
-			dataE = np.append(dataE,np.array(Ef2))
-			nhist += 1
-			Vaxis.append('width.2.2')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yi2))
-			dataE = np.append(dataE,np.array(Ei2))
-			nhist += 1
-			Vaxis.append('ampl.2.2')
-		if nl ==3:
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yf1))
-			dataE = np.append(dataE,np.array(Ef1))
-			nhist += 1
-			Vaxis.append('width.3.1')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yi1))
-			dataE = np.append(dataE,np.array(Ei1))
-			nhist += 1
-			Vaxis.append('ampl.3.1')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yf2))
-			dataE = np.append(dataE,np.array(Ef2))
-			nhist += 1
-			Vaxis.append('width.3.2')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yi2))
-			dataE = np.append(dataE,np.array(Ei2))
-			nhist += 1
-			Vaxis.append('ampl.3.2')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yf3))
-			dataE = np.append(dataE,np.array(Ef3))
-			nhist += 1
-			Vaxis.append('width.3.3')
-			dataX = np.append(dataX,np.array(Xout))
-			dataY = np.append(dataY,np.array(Yi3))
-			dataE = np.append(dataE,np.array(Ei3))
-			nhist += 1
-			Vaxis.append('ampl.3.3')
-	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
+				#append amplitude and width data
+				calcYData[i*2].append(fw[i])
+				calcEData[i*2].append(it[i])
+		
+		nhist += nl * 2
+		dataXYE = appendData(nl, dataXYE, Xout, calcYData, calcEData)
+
+	CreateWorkspace(OutputWorkspace=outWS, DataX=dataXYE["x"], DataY=dataXYE["y"], DataE=dataXYE["e"], Nspec=nhist,
 		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 	return outWS
 
@@ -580,17 +507,20 @@ def C2Se(sname):
 	dataY = np.array(Yf1)
 	dataE = np.array(Ef1)
 	nhist = 1
-	Vaxis.append('width')
-	dataX = np.append(dataX,np.array(Xout))
-	dataY = np.append(dataY,np.array(Yi1))
-	dataE = np.append(dataE,np.array(Ei1))
-	nhist += 1
 	Vaxis.append('ampl')
+
 	dataX = np.append(dataX,np.array(Xout))
-	dataY = np.append(dataY,np.array(Yb1))
-	dataE = np.append(dataE,np.array(Eb1))
+	dataY = np.append(dataY,np.array(Yb))
+	dataE = np.append(dataE,np.array(Eb))
+	nhist += 1
+	Vaxis.append('width')
+
+	dataX = np.append(dataX,np.array(Xout))
+	dataY = np.append(dataY,np.array(Yi))
+	dataE = np.append(dataE,np.array(Ei))
 	nhist += 1
 	Vaxis.append('beta')
+
 	logger.notice('Vaxis=' + str(Vaxis))
 	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
 		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
