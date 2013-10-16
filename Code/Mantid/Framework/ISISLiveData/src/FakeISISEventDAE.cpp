@@ -10,9 +10,13 @@ When connected starts sending event packets.
 #include "MantidISISLiveData/FakeISISEventDAE.h"
 #include "MantidISISLiveData/TCPEventStreamDefs.h"
 
+#include "MantidKernel/MersenneTwister.h"
+
 #include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Thread.h>
+
+#include <boost/random/uniform_int.hpp>
 
 #include <numeric>
 
@@ -29,13 +33,21 @@ DECLARE_ALGORITHM(FakeISISEventDAE);
  */
 class TestServerConnection: public Poco::Net::TCPServerConnection
 {
+    int m_nPeriods;
+    int m_nSpectra;
+    int m_Rate;
+    int m_nEvents;
 public:
   /**
    * Constructor. Defines the simulated dataset dimensions.
    * @param soc :: A socket that provides communication with the client.
    */
-  TestServerConnection( const Poco::Net::StreamSocket & soc ):
-      Poco::Net::TCPServerConnection(soc)
+  TestServerConnection( const Poco::Net::StreamSocket & soc, int nper, int nspec,int rate, int nevents ):
+    Poco::Net::TCPServerConnection(soc),
+    m_nPeriods(nper),
+    m_nSpectra(nspec),
+      m_Rate(rate),
+      m_nEvents(nevents)
   {
     sendInitialSetup();
   }
@@ -65,11 +77,13 @@ public:
    */
   void run()
   {
+      Kernel::MersenneTwister tof(0,100.0,200.0);
+      Kernel::MersenneTwister spec(1234,0.0,static_cast<double>(m_nSpectra));
       for(;;)
       {
-          Poco::Thread::sleep(1000);
+          Poco::Thread::sleep(m_Rate);
           TCPStreamEventDataNeutron data;
-          data.head_n.nevents = 100;
+          data.head_n.nevents = m_nEvents;
 
           socket().sendBytes(&data.head,(int)sizeof(data.head));
           socket().sendBytes(&data.head_n,(int)sizeof(data.head_n));
@@ -77,8 +91,8 @@ public:
           for(uint32_t i = 0; i < data.head_n.nevents; ++i)
           {
               TCPStreamEventNeutron neutron;
-              neutron.time_of_flight = 150.01f;
-              neutron.spectrum = 3;
+              neutron.time_of_flight = static_cast<float>(tof.nextValue());
+              neutron.spectrum = static_cast<uint32_t>(spec.nextValue());
               socket().sendBytes(&neutron,(int)sizeof(neutron));
           }
       }
@@ -94,12 +108,20 @@ public:
  */
 class TestServerConnectionFactory: public Poco::Net::TCPServerConnectionFactory
 {
+    int m_nPeriods; ///< Number of periods in the fake dataset
+    int m_nSpectra; ///< Number of spectra in the fake dataset
+    int m_Rate;
+    int m_nEvents;
 public:
   /**
    * Constructor.
    */
-  TestServerConnectionFactory():
-  Poco::Net::TCPServerConnectionFactory()
+  TestServerConnectionFactory(int nper, int nspec,int rate, int nevents):
+  Poco::Net::TCPServerConnectionFactory(),
+  m_nPeriods(nper),
+  m_nSpectra(nspec),
+      m_Rate(rate),
+      m_nEvents(nevents)
   {}
   /**
    * The factory method.
@@ -107,7 +129,7 @@ public:
    */
   Poco::Net::TCPServerConnection * createConnection(const Poco::Net::StreamSocket & socket)
   {
-    return new TestServerConnection( socket );
+    return new TestServerConnection( socket, m_nPeriods, m_nSpectra, m_Rate, m_nEvents );
   }
 };
 
@@ -142,6 +164,11 @@ FakeISISEventDAE::~FakeISISEventDAE()
  */
 void FakeISISEventDAE::init()
 {
+    declareProperty(new PropertyWithValue<int>("NPeriods", 1, Direction::Input),"Number of periods.");
+    declareProperty(new PropertyWithValue<int>("NSpectra", 100, Direction::Input),"Number of spectra.");
+    declareProperty(new PropertyWithValue<int>("Rate", 1000, Direction::Input),
+                    "Rate of sending the data: stream of NEvents events is sent every Rate microseconds.");
+    declareProperty(new PropertyWithValue<int>("NEvents", 100, Direction::Input),"Number of events in each packet.");
 }
 
 /**
@@ -149,10 +176,15 @@ void FakeISISEventDAE::init()
  */
 void FakeISISEventDAE::exec()
 {
+    int nper = getProperty("NPeriods");
+    int nspec = getProperty("NSpectra");
+    int rate = getProperty("Rate");
+    int nevents = getProperty("NEvents");
   Mutex::ScopedLock lock(m_mutex);
   Poco::Net::ServerSocket socket(10000);
   socket.listen();
-  m_server = new Poco::Net::TCPServer(TestServerConnectionFactory::Ptr( new TestServerConnectionFactory() ), socket );
+  m_server = new Poco::Net::TCPServer(
+              TestServerConnectionFactory::Ptr( new TestServerConnectionFactory(nper,nspec,rate,nevents) ), socket );
   m_server->start();
   // Keep going until you get cancelled
   while (true)
