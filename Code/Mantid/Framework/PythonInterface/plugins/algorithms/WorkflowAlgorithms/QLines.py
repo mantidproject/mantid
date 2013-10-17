@@ -26,7 +26,6 @@ class QLines(PythonAlgorithm):
 		self.declareProperty(name='FixWidth',defaultValue=False, doc='Fix one of the widths')
 		self.declareProperty(name='WidthFile', defaultValue='', doc='Name of file containing fixed width values')
 		self.declareProperty(name='ResNorm',defaultValue=False, doc='Use ResNorm output file')
-		self.declareProperty(name='ResNormNumber', defaultValue='', doc='Name of file containing fixed width values')
 		self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
 		self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
 		self.declareProperty(name='SamBinning', defaultValue=1, doc='Binning value (integer) for sample. Default=1')
