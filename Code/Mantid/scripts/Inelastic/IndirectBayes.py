@@ -408,8 +408,12 @@ def C2Fw(prog,sname):
 	workdir = config['defaultsave.directory']
 	outWS = sname+'_Workspace'
 	Vaxis = []
-	dataXYE = {"x": [], "y": [], "e": []}
 
+	dataX = np.array([])
+	dataY = np.array([])
+	dataE = np.array([])
+
+	nhist = 0
 	for nl in range(1,4):
 		file = sname + '.ql' +str(nl)
 		handle = open(os.path.join(workdir, file), 'r')
@@ -428,32 +432,36 @@ def C2Fw(prog,sname):
 
 		ns = int(nspec)
 
-		calcYData = [[]]*6
-		calcEData = [[]]*6
+		YData = [[] for i in range(6)]
+		EData = [[] for i in range(6)]
 
 		for m in range(0,ns):
-			for i in range(0, nl*2):
-				first,Q,i0,fw,it = LorBlock(asc,first,1)
-				Xout.append(Q)
+			first,Q,i0,fw,it = LorBlock(asc,first,nl)
+			Xout.append(Q)
+
+			for i in range(0,nl):
 				#collect amplitude and width data
-				calcYData[i*2].append(fw[i])
-				calcEData[i*2].append(it[i])
+				YData[i*2].append(fw[i])
+				YData[i*2+1].append(it[i])
+				EData[i*2].append(fw[nl+i])
+				EData[i*2+1].append(it[nl+i])
+
+		nhist += nl*2
 		
-		nhist += nl * 2
-		for i in range(0, nl):
+		for i in range(0,nl):
 			#append amplitude
-			dataXYE["x"].append(np.array(Xout))
-			dataXYE["y"].append(np.array(calcYData[(i+1)*2]))
-			dataXYE["e"].append(np.array(calcEData[(i+1)*2]))
-			Vaxis.append('ampl.'+str(nl)+'.'+str(i))
+			dataX = np.append(dataX, np.array(Xout))
+			dataY = np.append(dataY, np.array(YData[i*2+1]))
+			dataE = np.append(dataE, np.array(EData[i*2+1]))
+			Vaxis.append('ampl.'+str(nl)+'.'+str(i+1))
 
 			#append width
-			dataXYE["x"].append(np.array(Xout))
-			dataXYE["y"].append(np.array(calcYData[i*2]))
-			dataXYE["e"].append(np.array(calcEData[i*2]))
-			Vaxis.append('width.'+str(nl)+'.'+str(i))
+			dataX = np.append(dataX, np.array(Xout))
+			dataY = np.append(dataY, np.array(YData[i*2]))
+			dataE = np.append(dataE, np.array(EData[i*2]))
+			Vaxis.append('width.'+str(nl)+'.'+str(i+1))
 
-	CreateWorkspace(OutputWorkspace=outWS, DataX=dataXYE["x"], DataY=dataXYE["y"], DataE=dataXYE["e"], Nspec=nhist,
+	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
 		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 	return outWS
 
@@ -523,15 +531,15 @@ def C2Se(sname):
 		Eb.append(be[1])
 	Vaxis = []
 
-	dataX = np.array(Xout)
-	dataY = np.array(Yf)
-	dataE = np.array(Ef)
-	nhist = 1
-	Vaxis.append('ampl')
-
 	dataX = np.append(dataX,np.array(Xout))
 	dataY = np.append(dataY,np.array(Yi))
 	dataE = np.append(dataE,np.array(Ei))
+	nhist = 1
+	Vaxis.append('ampl')
+
+	dataX = np.array(Xout)
+	dataY = np.array(Yf)
+	dataE = np.array(Ef)
 	nhist += 1
 	Vaxis.append('width')
 
