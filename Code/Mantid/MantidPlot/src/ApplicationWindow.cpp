@@ -1235,10 +1235,10 @@ void ApplicationWindow::initMainMenu()
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
   icat->addAction(actionICatLogin);//Login menu item
-  icat->addAction(actionMydataSearch);// my data search menu item
-  icat->addAction(actionICatSearch);//search menu item
+//  icat->addAction(actionMydataSearch);// my data search menu item
+//  icat->addAction(actionICatSearch);//search menu item
   icat->addAction(actionICatSearch2); // new ICAT GUI menu item
-  icat->addAction(actionAdvancedSearch); //advanced search menu item
+//  icat->addAction(actionAdvancedSearch); //advanced search menu item
   icat->addAction(actionICatLogout);//logout menu item
   disableActions();
 }
