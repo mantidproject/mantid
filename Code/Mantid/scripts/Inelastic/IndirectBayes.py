@@ -520,6 +520,11 @@ def C2Se(sname):
 	Yb = []
 	Eb = []
 	ns = int(nspec)
+
+	dataX = np.array([])
+	dataY = np.array([])
+	dataE = np.array([])
+
 	for m in range(0,ns):
 		first,Q,int0,fw,it,be = SeBlock(asc,first)
 		Xout.append(Q)
@@ -537,9 +542,9 @@ def C2Se(sname):
 	nhist = 1
 	Vaxis.append('ampl')
 
-	dataX = np.array(Xout)
-	dataY = np.array(Yf)
-	dataE = np.array(Ef)
+	dataX = np.append(dataX, np.array(Xout))
+	dataY = np.append(dataY, np.array(Yf))
+	dataE = np.append(dataE, np.array(Ef))
 	nhist += 1
 	Vaxis.append('width')
 
