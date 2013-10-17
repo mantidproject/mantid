@@ -51,7 +51,7 @@ using namespace MantidQt::API;
  */
 void saveGroupingToXML(const Grouping& g, const std::string& filename)
 {
-  std::ofstream outFile(filename);
+  std::ofstream outFile(filename.c_str());
   if (!outFile)
     throw Mantid::Kernel::Exception::FileError("Unable to open output file", filename);
 
