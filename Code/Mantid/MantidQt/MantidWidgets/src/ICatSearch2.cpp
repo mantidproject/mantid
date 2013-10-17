@@ -25,7 +25,7 @@ namespace MantidQt
 
       if (!m_icatHelper->validSession())
       {
-        m_icatUiForm.facilityName->setText(QString::fromStdString("You need to log into ICAT to perform a search."));
+        m_icatUiForm.facilityName->setText(QString::fromStdString("You need to log into the catalog to perform a search."));
       }
     }
 
