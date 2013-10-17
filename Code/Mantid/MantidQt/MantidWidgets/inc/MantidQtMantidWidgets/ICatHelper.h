@@ -23,6 +23,9 @@ namespace MantidQt
       std::vector<std::string> downloadDataFiles(std::vector<std::pair<int64_t, std::string>> userSelectedFiles, std::string downloadPath);
       /// Validate each input field against the related algorithm property.
       std::map<std::string, std::string> validateProperties(std::map<std::string, std::string> &inputFields);
+      /// Using a property (isValid) in the list instruments algorithm verify if the session is valid.
+      bool validSession();
+
     private:
       /// Creates an algorithm with the name provided.
       Mantid::API::IAlgorithm_sptr createCatalogAlgorithm(const std::string& algName);

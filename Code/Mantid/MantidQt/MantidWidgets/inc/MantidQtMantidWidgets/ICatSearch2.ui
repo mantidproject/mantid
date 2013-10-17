@@ -636,19 +636,6 @@
      <item row="0" column="0">
       <layout class="QHBoxLayout" name="headerGrid">
        <item>
-        <widget class="QLabel" name="loggedInto">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Currently logged into</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QLabel" name="facilityName">
          <property name="font">
           <font>

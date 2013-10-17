@@ -157,6 +157,24 @@ namespace MantidQt
       return errors;
     }
 
+
+    /**
+     * Using the list instruments algorithm verify if the session is valid.
+     * @return True if session is valid, otherwise false.
+     */
+    bool ICatHelper::validSession()
+    {
+      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
+
+      catalogAlgorithm->execute();
+
+      if (catalogAlgorithm->getProperty("IsValid"))
+      {
+        return true;
+      }
+      return false;
+    }
+
     /**
      * Obtain the algorithm documentation for the given property.
      * @param properties :: A list of properties for a provided algorithm.

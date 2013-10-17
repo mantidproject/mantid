@@ -1,6 +1,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidQtMantidWidgets/ICatSearch2.h"
 #include <Poco/Path.h>
 
@@ -18,11 +19,14 @@ namespace MantidQt
      */
     ICatSearch2::ICatSearch2(QWidget* parent) : QWidget(parent)
     {
-      // Verify if the user has logged in.
-      // if they have: continue...
       initLayout();
       // Load saved settings from store.
       loadSettings();
+
+      if (!m_icatHelper->validSession())
+      {
+        m_icatUiForm.facilityName->setText(QString::fromStdString("You need to log into ICAT to perform a search."));
+      }
     }
 
     /**
@@ -37,6 +41,9 @@ namespace MantidQt
     {
       // Draw the GUI from .ui header generated file.
       m_icatUiForm.setupUi(this);
+
+      // What facilities is the user logged in to?
+      m_icatUiForm.facilityName->setText(QString::fromStdString("Currently logged into " + Mantid::Kernel::ConfigService::Instance().getFacility().name()));
 
       // Only want to show labels when an error occurs.
       hideErrorLabels();
@@ -83,7 +90,6 @@ namespace MantidQt
       connect(m_icatUiForm.dataFileDownloadBtn,SIGNAL(clicked()),this,SLOT(downloadDataFiles()));
       // When the user clicks the "load" button then load their selected datafiles into a workspace.
       connect(m_icatUiForm.dataFileLoadBtn,SIGNAL(clicked()),this,SLOT(loadDataFiles()));
-
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
       // Although this is an advanced option performing it here allows it to be performed once only.
@@ -477,7 +483,6 @@ namespace MantidQt
 
       // Improve UX, then display the m_calendar.
       m_calendar->setGridVisible(true);
-      m_calendar->setHeaderVisible(false);
       m_calendar->setWindowTitle("Calendar picker");
       m_calendar->show();
 
@@ -827,9 +832,9 @@ namespace MantidQt
     void ICatSearch2::addCheckBoxColumn(QTableWidget* table)
     {
       // Add a new column checkbox column.
-      m_icatUiForm.dataFileResultsTbl->insertColumn(0);
+      table->insertColumn(0);
       // Add a new header item to this column. This allows us to overwrite the default text!
-      m_icatUiForm.dataFileResultsTbl->setHorizontalHeaderItem(0, new QTableWidgetItem());
+      table->setHorizontalHeaderItem(0, new QTableWidgetItem());
       // Set this here (rather than on initialisation) as the customer header would be null otherwise.
       connect(m_customHeader,SIGNAL(toggled(bool)),this,SLOT(selectAllDataFiles(bool)));
 
@@ -1077,7 +1082,6 @@ namespace MantidQt
         loadAlgorithm->execute();
       }
     }
-
 
   } // namespace MantidWidgets
 } // namespace MantidQt
