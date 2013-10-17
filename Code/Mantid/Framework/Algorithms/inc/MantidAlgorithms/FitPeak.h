@@ -126,8 +126,10 @@ namespace Algorithms
     double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
 
     /// Generate table workspace
-    DataObjects::TableWorkspace_sptr genOutputTableWS(API::IFunction_sptr func,
-                                                      std::map<std::string, double> fiterrormap);
+    DataObjects::TableWorkspace_sptr genOutputTableWS(API::IFunction_sptr peakfunc,
+                                                      std::map<std::string, double> peakerrormap,
+                                                      API::IFunction_sptr bkgdfunc,
+                                                      std::map<std::string, double> bkgderrormap);
 
     /// Input data workspace
     API::MatrixWorkspace_sptr m_dataWS;
@@ -180,10 +182,6 @@ namespace Algorithms
     /// Tolerance on peak positions as criteria
     double m_peakPositionTolerance;
 
-    /// Function information
-    std::string m_peakFuncType;
-    std::string m_backgroundType;
-
     DataObjects::TableWorkspace_sptr m_peakParameterTableWS;
     DataObjects::TableWorkspace_sptr m_bkgdParameterTableWS;
 
@@ -200,6 +198,9 @@ namespace Algorithms
     std::map<std::string, double> m_bestBkgdFunc;
     /// Best Rwp ...
     double m_bestRwp;
+
+    /// Final
+    double m_finalGoodnessValue;
 
     /// Backups
     std::vector<double> m_vecybkup;

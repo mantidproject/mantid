@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/FitPeak.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/TableRow.h"
@@ -23,7 +24,11 @@ class FitPeakTest : public CxxTest::TestSuite
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FitPeakTest *createSuite() { return new FitPeakTest(); }
+  static FitPeakTest *createSuite()
+  {
+    API::FrameworkManager::Instance();
+    return new FitPeakTest();
+  }
   static void destroySuite( FitPeakTest *suite ) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
@@ -35,11 +40,12 @@ public:
     MatrixWorkspace_sptr dataws = gen_4866P5Data();
     AnalysisDataService::Instance().addOrReplace("PG3_4866Peak5", dataws);
 
-    TableWorkspace_sptr bkgdparamws = gen_BkgdTable();
-    AnalysisDataService::Instance().addOrReplace("Peak5_BkgdParameters", bkgdparamws);
+    // Generate peak and background parameters
+    vector<string> peakparnames, bkgdparnames;
+    vector<double> peakparvalues, bkgdparvalues;
 
-    TableWorkspace_sptr peakparamws = gen_PeakTable();
-    AnalysisDataService::Instance().addOrReplace("Peak5_PeakParameters", peakparamws);
+    gen_BkgdParameters(bkgdparnames, bkgdparvalues);
+    gen_PeakParameters(peakparnames, peakparvalues);
 
     // Initialize FitPeak
     FitPeak fitpeak;
@@ -52,10 +58,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("OutputWorkspace", "FittedPeak"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("ParameterTableWorkspace", "Fitted_Peak5_Parameters"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("WorkspaceIndex", 0));
-    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunction", "Gaussian"));
-    TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("PeakParameterTable", "Peak5_PeakParameters"));
-    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Quadratic"));
-    TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("BackgroundParameterTable", "Peak5_BkgdParameters"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunctionType", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Linear"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterNames", bkgdparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterValues", bkgdparvalues));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("FitWindow", "10.0, 20.0"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("PeakRange", "11.0, 12.0"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("FitBackgroundFirst", true));
@@ -77,6 +85,13 @@ public:
     MatrixWorkspace_sptr dataws = gen_4866P5Data();
     AnalysisDataService::Instance().addOrReplace("PG3_4866Peak5", dataws);
 
+    // Generate peak and background parameters
+    vector<string> peakparnames, bkgdparnames;
+    vector<double> peakparvalues, bkgdparvalues;
+
+    gen_BkgdParameters(bkgdparnames, bkgdparvalues);
+    gen_PeakParameters(peakparnames, peakparvalues);
+
 #if 0
     const MantidVec& vecx = dataws->readX(0);
     const MantidVec& vecy = dataws->readY(0);
@@ -85,12 +100,6 @@ public:
     TS_ASSERT_EQUALS(1, 100);
     return;
 #endif
-
-    TableWorkspace_sptr bkgdparamws = gen_BkgdTable();
-    AnalysisDataService::Instance().addOrReplace("Peak5_BkgdParameters", bkgdparamws);
-
-    TableWorkspace_sptr peakparamws = gen_PeakTable();
-    AnalysisDataService::Instance().addOrReplace("Peak5_PeakParameters", peakparamws);
 
     // Initialize FitPeak
     FitPeak fitpeak;
@@ -101,10 +110,12 @@ public:
     fitpeak.setPropertyValue("OutputWorkspace", "FittedPeak");
     fitpeak.setPropertyValue("ParameterTableWorkspace", "Fitted_Peak5_Parameters");
     fitpeak.setProperty("WorkspaceIndex", 0);
-    fitpeak.setProperty("PeakFunction", "Gaussian");
-    fitpeak.setPropertyValue("PeakParameterTable", "Peak5_PeakParameters");
-    fitpeak.setProperty("BackgroundType", "Quadratic");
-    fitpeak.setPropertyValue("BackgroundParameterTable", "Peak5_BkgdParameters");
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunctionType", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Quadratic"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterNames", bkgdparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterValues", bkgdparvalues));
     fitpeak.setPropertyValue("FitWindow", "0.586, 0.604");
     fitpeak.setPropertyValue("PeakRange", "0.591, 0.597");
     fitpeak.setProperty("FitBackgroundFirst", true);
@@ -118,6 +129,8 @@ public:
     TS_ASSERT(fitpeak.isExecuted());
 
     // Check
+    vector<double> fittedpeakvalues = fitpeak.getProperty("FittedPeakParameterValues");
+    TS_ASSERT_EQUALS(fittedpeakvalues.size(), 100);
 
 
     return;
@@ -126,43 +139,41 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
     */
-  TableWorkspace_sptr gen_PeakTable()
+  void gen_PeakParameters(vector<string>& parnames, vector<double>& parvalues)
   {
-    TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
-    partablews->addColumn("str", "Name");
-    partablews->addColumn("double", "Value");
+    parnames.clear();
+    parvalues.clear();
 
-    // Add peak profile
-    TableRow newrow = partablews->appendRow();
-    newrow << "Height" << 1.0;
+    parnames.push_back("Height");
+    parvalues.push_back(1.0);
 
-    newrow = partablews->appendRow();
-    newrow << "PeakCentre" << 0.5936;
+    parnames.push_back("PeakCentre");
+    parvalues.push_back(0.5936);
 
-    newrow = partablews->appendRow();
-    newrow << "Sigma" << 0.01;
+    parnames.push_back("Sigma");
+    parvalues.push_back(0.01);
 
-    return partablews;
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
     */
-  TableWorkspace_sptr gen_BkgdTable()
+  void gen_BkgdParameters(vector<string>& parnames, vector<double>& parvalues)
   {
+    parnames.clear();
+    parvalues.clear();
 
-    TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
-    partablews->addColumn("str", "Name");
-    partablews->addColumn("double", "Value");
+    parnames.push_back("A0");
+    parvalues.push_back(1000.);
 
-    // Add background
-    TableRow newrow = partablews->appendRow();
-    newrow << "A0" << 1000.;
+    parnames.push_back("A1");
+    parvalues.push_back(-10.);
 
-    newrow = partablews->appendRow();
-    newrow << "A1" << -10.;
+    parnames.push_back("A2");
+    parvalues.push_back(0.01);
 
-    return partablews;
+    return;
   }
 
 

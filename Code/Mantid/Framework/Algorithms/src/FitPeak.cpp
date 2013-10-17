@@ -26,13 +26,17 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FitPeak.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/IValidator.h"
+#include "MantidKernel/StartsWithValidator.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -100,18 +104,18 @@ namespace Algorithms
     mustBeNonNegative->setLower(0);
     declareProperty("WorkspaceIndex", 0, mustBeNonNegative, "Workspace index ");
 
-#if 0
-    declareProperty(new FunctionProperty("PeakFunction"),
-                    "Peak function parameters defining the fitting function and its initial values");
-
-    declareProperty(new FunctionProperty("BackgroundFunction"),
-                    "Background function parameters defining the fitting function and its initial values");
-#else
     std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-    declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(peakNames));
+    declareProperty("PeakFunctionType", "Gaussian", boost::make_shared<StringListValidator>(peakNames),
+                    "Peak function type. ");
 
-    declareProperty(new WorkspaceProperty<TableWorkspace>("PeakParameterTable", "", Direction::InOut),
-                    "Name of the table workspace containing the peak function's parameter names and values. ");
+    declareProperty(new ArrayProperty<string>("PeakParameterNames"),
+                    "List of peak parameter names. ");
+
+    declareProperty(new ArrayProperty<double>("PeakParameterValues"),
+                    "List of peak parameter values.  They must have a 1-to-1 mapping to PeakParameterNames list. ");
+
+    declareProperty(new ArrayProperty<double>("FittedPeakParameterValues", Direction::Output),
+                    "Fitted peak parameter values. ");
 
     vector<string> bkgdtypes;
     bkgdtypes.push_back("Flat");
@@ -120,11 +124,14 @@ namespace Algorithms
     declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
                     "Type of Background.");
 
-    declareProperty(new WorkspaceProperty<TableWorkspace>("BackgroundParameterTable", "", Direction::InOut),
-                    "Name of the table workspace containing the bakground parameter "
-                    "function's names and values. ");
+    declareProperty(new ArrayProperty<string>("BackgroundParameterNames"),
+                    "List of background parameter names. ");
 
-#endif
+    declareProperty(new ArrayProperty<double>("BackgroundParameterValues"),
+                    "List of background parameter values.  "
+                    "They must have a 1-to-1 mapping to BackgroundParameterNames list. ");
+
+    // TODO - Add FittedBackgroundParameterValues
 
     declareProperty(new ArrayProperty<double>("FitWindow"),
                     "Enter a comma-separated list of the expected X-position of windows to fit. "
@@ -157,6 +164,21 @@ namespace Algorithms
                     "Peak position tolerance.  If fitted peak's position differs from proposed value more than "
                     "the given value, fit is treated as failure. ");
 
+    // TODO - Add choice on cost function and minmizer
+#if 0
+    std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
+    costFuncOptions.push_back("Chi-Square");
+    costFuncOptions.push_back("Rwp");
+    declareProperty("CostFunction","Least squares",
+                    Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(costFuncOptions)),
+                    "Cost functions");
+
+    std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
+
+    declareProperty("Minimizer", "Levenberg-Marquardt",
+      Kernel::IValidator_sptr(new Kernel::StartsWithValidator(minimizerOptions)),
+      "Minimizer to use for fitting. Minimizers available are \"Levenberg-Marquardt\", \"Simplex\", \"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate gradient (Polak-Ribiere imp.)\", \"BFGS\", and \"Levenberg-MarquardtMD\"");
+#endif
     return;
   }
 
@@ -198,45 +220,57 @@ namespace Algorithms
     g_log.information("Running 'createFunction'. ");
 
     // Generate background function
-    m_backgroundType = getPropertyValue("BackgroundType");
+    string bkgdtype = getPropertyValue("BackgroundType");
+    // Fix the inconsistency in nameing the background
+    if (bkgdtype == "Flat" || bkgdtype == "Linear")
+      bkgdtype += "Background";
+
     m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
-          FunctionFactory::Instance().createFunction(m_backgroundType));
+          FunctionFactory::Instance().createFunction(bkgdtype));
+    g_log.information() << "[DB] Created background function of type " << bkgdtype << "\n";
 
     // Set background function parameter values
-    m_bkgdParameterTableWS = getProperty("BackgroundParameterTable");
-    size_t numrows = m_bkgdParameterTableWS->rowCount();
-    for (size_t i = 0; i < numrows; ++i)
+    vector<string> vec_bkgdparnames = getProperty("BackgroundParameterNames");
+    vector<double> vec_bkgdparvalues = getProperty("BackgroundParameterValues");
+    if (vec_bkgdparnames.size() != vec_bkgdparvalues.size() || vec_bkgdparnames.size() == 0)
     {
-      TableRow row = m_bkgdParameterTableWS->getRow(i);
-      string parname;
-      double parvalue;
-      row >> parname >> parvalue;
-      m_bkgdFunc->setParameter(parname, parvalue);
+      throw runtime_error("Input background properties' arrays are not correct!");
+    }
+
+    // Set parameter values
+    for (size_t i = 0; i < vec_bkgdparnames.size(); ++i)
+    {
+      g_log.information() << "[DB] Set to background: " << vec_bkgdparnames[i]
+                          << " = " << vec_bkgdparvalues[i] << "\n";
+      m_bkgdFunc->setParameter(vec_bkgdparnames[i], vec_bkgdparvalues[i]);
     }
 
     // Generate peak function
-    m_peakFuncType = getPropertyValue("PeakFunction");
+    string peaktype = getPropertyValue("PeakFunctionType");
     m_peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(
-          FunctionFactory::Instance().createFunction(m_peakFuncType));
+          FunctionFactory::Instance().createFunction(peaktype));
+    g_log.information() << "[DB] Create peak function of type " << peaktype << "\n";
 
-    // Set peak function parameter values
-    m_peakParameterTableWS = getProperty("PeakParameterTable");
-
-    numrows = m_peakParameterTableWS->rowCount();
-    for (size_t i = 0; i < numrows; ++i)
+    // Given by arrays
+    vector<string> vec_peakparnames = getProperty("PeakParameterNames");
+    vector<double> vec_peakparvalues = getProperty("PeakParameterValues");
+    if (vec_peakparnames.size() != vec_peakparvalues.size() || vec_peakparnames.size() == 0)
     {
-      TableRow row = m_peakParameterTableWS->getRow(i);
-      string parname;
-      double parvalue;
-      row >> parname >> parvalue;
-      m_peakFunc->setParameter(parname, parvalue);
-    }   
+      throw runtime_error("Input peak properties' arrays are not correct!");
+    }
+    else
+    {
+      for (size_t i = 0; i < vec_peakparnames.size(); ++i)
+        g_log.information() << "[DB] Input peak parameter name (" << i << ") = " << vec_peakparnames[i] << "\n";
+    }
 
-    // vector<string> peakparnames = m_peakFunc->getParameterNames();
-    // vector<string> bkgdparnames = m_bkgdFunc->getParameterNames();
+    // Set peak parameter values
+    for (size_t i = 0; i < vec_bkgdparnames.size(); ++i)
+    {
+      m_peakFunc->setParameter(vec_peakparnames[i], vec_peakparvalues[i]);
+    }
 
-
-    g_log.information("Finished running 'createFunction'. ");
+    g_log.debug("Finished running 'createFunction'. ");
 
     return;
   }
@@ -388,7 +422,7 @@ namespace Algorithms
     g_log.information("Starting fitPeakMultipleStep(). ");
 
     // Fit background
-    // FIXME - fit bakcground related to multiple domain.  Read Roman's email ...
+    // FIXME : Which one to use?
 #if 1
     m_bkgdFunc = fitBackground(m_bkgdFunc);
 #else
@@ -443,11 +477,8 @@ namespace Algorithms
     // Recover the original Y value from pure peak data range
     recoverOriginalData();
 
-    double final_goodness = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
-    g_log.information() << "Final goodness = " << final_goodness << "\n";
-
-    // Prepare output
-    throw runtime_error("Need to set up output!");
+    m_finalGoodnessValue = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
+    g_log.information() << "Final goodness = " << m_finalGoodnessValue << "\n";
 
     return;
   }
@@ -491,6 +522,7 @@ namespace Algorithms
   void FitPeak::setupOutput()
   {
     // Data workspace
+    // TODO - Make it a 3 spectra output (original, model and difference).  But only with FitWindow
     size_t nspec = 1;
     size_t sizex = m_dataWS->readX(m_wsIndex).size();
     size_t sizey = m_dataWS->readY(m_wsIndex).size();
@@ -511,11 +543,18 @@ namespace Algorithms
     setProperty("OutputWorkspace", outws);
 
     // Function parameter table workspaces
-    TableWorkspace_sptr peaktablews = genOutputTableWS(m_peakFunc, m_fitErrorPeakFunc);
-    setProperty("PeakParametrTable", peaktablews);
+    TableWorkspace_sptr peaktablews = genOutputTableWS(m_peakFunc, m_fitErrorPeakFunc, m_bkgdFunc, m_fitErrorBkgdFunc);
+    setProperty("ParameterTableWorkspace", peaktablews);
 
-    TableWorkspace_sptr bkgdtablews = genOutputTableWS(m_bkgdFunc, m_fitErrorBkgdFunc);
-    setProperty("BackgroundParameterTable", bkgdtablews);
+    // Parameter vector
+    // FIXME - This is not correct!
+    vector<double> vec_fitpeak;
+    vec_fitpeak.push_back(1.0);
+    vec_fitpeak.push_back(2.0);
+    vec_fitpeak.push_back(3.0);
+    setProperty("FittedPeakParameterValues", vec_fitpeak);
+
+    // TODO - Add FittedBackgroundParameterValues
 
     return;
   }
@@ -566,8 +605,6 @@ namespace Algorithms
     }
     throw runtime_error("Check here!");
 #endif
-
-    // FIXME - Use m_bkgdFunc to generate a vector of background.
 
     MantidVec& vecY = m_dataWS->dataY(m_wsIndex);
     MantidVec& vecE = m_dataWS->dataE(m_wsIndex);
@@ -714,6 +751,7 @@ namespace Algorithms
       funcparammap.insert(make_pair(funcparnames[i], parvalue));
 
       double parerror = func->getError(i);
+      // g_log.debug() << "Error(" << funcparnames[i] << ") = " << parerror << "\n";
       paramerrormap.insert(make_pair(funcparnames[i], parerror));
     }
 
@@ -746,6 +784,7 @@ namespace Algorithms
   double FitPeak::fitPeakFuncion(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_sptr dataws,
                                  size_t wsindex, double startx, double endx, std::string& errorreason)
   {
+    // FIXME - Shall I use errorreason?
     // Check validity and debug output
     if (!peakfunc)
       throw std::runtime_error("fitPeakFunction's input peakfunc has not been initialized.");
@@ -891,7 +930,7 @@ namespace Algorithms
     }
     else if (goodness_init <= goodness && goodness_init < DBL_MAX)
     {
-      goodness = goodness_init;
+      goodness_final = goodness_init;
       errorreason = "";
       g_log.information("Fit peak/background composite function FAILS to render a better solution.");
       pop(bkuppeakmap, peakfunc);
@@ -902,7 +941,7 @@ namespace Algorithms
       g_log.information("Fit peak-background function fails in all approaches! ");
     }
 
-    return goodness;
+    return goodness_final;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -984,6 +1023,14 @@ namespace Algorithms
 
       maxiteration = 1;
     }
+    else
+    {
+      // Unfix all parameters
+      // FIXME - Remove this after 0-error is solved.
+      parnames = fitfunc->getParameterNames();
+      for (size_t i = 0; i < parnames.size(); ++i)
+        fitfunc->unfix(i);
+    }
 
     // Set up sub algorithm fit
     IAlgorithm_sptr fit;
@@ -1042,6 +1089,14 @@ namespace Algorithms
       chi2 = fit->getProperty("OutputChi2overDoF");
       fitfunc = fit->getProperty("Function");
 
+      // FIXME - This is a temporary debug output. Should remove later
+      // ROMAN: I tried to get error from the fitted function.  But all that I've got is zero.
+      for (size_t i = 0; i < fitfunc->getParameterNames().size(); ++i)
+      {
+        g_log.notice() << "[For Roman] Error of parameter " << fitfunc->getParameterNames()[i]
+                       << " = " << fitfunc->getError(i) << "\n";
+      }
+
 #if 0
       API::MatrixWorkspace_sptr outws = fit->getProperty("OutputWorkspace");
       const MantidVec& vec_fitY = outws->readY(wsindex);
@@ -1085,7 +1140,11 @@ namespace Algorithms
       throw std::runtime_error(errss.str());
     }
 
+    // ROMAN: I tried to fit the background with multiple domain.  But "Start_1" and "End_1" are not
+    //        recognized.  Do you know how to set it up in C++?  I failed to use the way to set up in Python
+    //        to C++
 #if 0
+    // This use multi-domain; but does not know how to set up
     boost::shared_ptr<MultiDomainFunction> funcmd = boost::make_shared<MultiDomainFunction>();
     funcmd->addFunction(fitfunc);
     funcmd->addFunction(fitfunc);
@@ -1179,7 +1238,8 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Generate table workspace
     */
-  TableWorkspace_sptr FitPeak::genOutputTableWS(IFunction_sptr func, map<string, double> fiterrormap)
+  TableWorkspace_sptr FitPeak::genOutputTableWS(IFunction_sptr peakfunc, map<string, double> peakerrormap,
+                                                IFunction_sptr bkgdfunc, map<string, double> bkgderrormap)
   {
     // Empty table
     TableWorkspace_sptr outtablews = boost::make_shared<TableWorkspace>();
@@ -1187,14 +1247,33 @@ namespace Algorithms
     outtablews->addColumn("double", "Value");
     outtablews->addColumn("double", "Error");
 
-    // Set paraemters
-    vector<string> parnames = func->getParameterNames();
-    for (size_t i = 0; i < parnames.size(); ++i)
+    // Set chi^2
+    TableRow newrow = outtablews->appendRow();
+    newrow << "ChiSquare" << m_finalGoodnessValue;
+
+    // Set peak paraemters
+    newrow = outtablews->appendRow();
+    newrow << "Peak";
+    vector<string> peakparnames = peakfunc->getParameterNames();
+    for (size_t i = 0; i < peakparnames.size(); ++i)
     {
-      string& parname = parnames[i];
-      double parvalue = func->getParameter(parname);
-      double error = fiterrormap[parname];
-      TableRow newrow = outtablews->appendRow();
+      string& parname = peakparnames[i];
+      double parvalue = peakfunc->getParameter(parname);
+      double error = peakerrormap[parname];
+      newrow = outtablews->appendRow();
+      newrow << parname << parvalue << error;
+    }
+
+    // Set background paraemters
+    newrow = outtablews->appendRow();
+    newrow << "Background";
+    vector<string> bkgdparnames = bkgdfunc->getParameterNames();
+    for (size_t i = 0; i < bkgdparnames.size(); ++i)
+    {
+      string& parname = bkgdparnames[i];
+      double parvalue = bkgdfunc->getParameter(parname);
+      double error = bkgderrormap[parname];
+      newrow = outtablews->appendRow();
       newrow << parname << parvalue << error;
     }
 
