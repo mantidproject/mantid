@@ -98,6 +98,19 @@ namespace MantidQt
       // Through this we can obtain clicks from the rows in the table.
       m_icatUiForm.dataFileResultsTbl->viewport()->installEventFilter(this);
 
+      // As the methods have been created, and elements are in GUI I have opted to hide
+      // these elements for testing purposes as multiple facilities or paging has not yet been implemented.
+      // They will be implemented in separate tickets in the next release.
+      m_icatUiForm.facilityLogin->hide();
+      m_icatUiForm.resDisplayingTxt->hide();
+      m_icatUiForm.resInstructions->hide();
+      m_icatUiForm.resPageEndNumTxt->hide();
+      m_icatUiForm.resPageNextTxt->hide();
+      m_icatUiForm.resPageOfTxt->hide();
+      m_icatUiForm.resPageStartNumTxt->hide();
+      m_icatUiForm.resPageTxt->hide();
+      m_icatUiForm.resPreviousTxt->hide();
+
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
       // Auto contract GUI to improve UX.
