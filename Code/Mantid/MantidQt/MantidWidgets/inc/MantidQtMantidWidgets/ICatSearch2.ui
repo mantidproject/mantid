@@ -1067,6 +1067,34 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="9"/>
+ <tabstops>
+  <tabstop>InvestigationName</tabstop>
+  <tabstop>StartDate</tabstop>
+  <tabstop>startDatePicker</tabstop>
+  <tabstop>Instrument</tabstop>
+  <tabstop>EndDate</tabstop>
+  <tabstop>endDatePicker</tabstop>
+  <tabstop>RunRange</tabstop>
+  <tabstop>Keywords</tabstop>
+  <tabstop>InvestigatorSurname</tabstop>
+  <tabstop>SampleName</tabstop>
+  <tabstop>InvestigationAbstract</tabstop>
+  <tabstop>InvestigationType</tabstop>
+  <tabstop>advSearchCbox</tabstop>
+  <tabstop>myDataCbox</tabstop>
+  <tabstop>resetBtn</tabstop>
+  <tabstop>searchBtn</tabstop>
+  <tabstop>searchResultsCbox</tabstop>
+  <tabstop>searchResultsTbl</tabstop>
+  <tabstop>dataFileCbox</tabstop>
+  <tabstop>dataFileResultsTbl</tabstop>
+  <tabstop>dataFileFilterCombo</tabstop>
+  <tabstop>dataFileDownloadBtn</tabstop>
+  <tabstop>dataFileLoadBtn</tabstop>
+  <tabstop>searchCbox</tabstop>
+  <tabstop>facilityLogin</tabstop>
+  <tabstop>helpBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
  <designerdata>
