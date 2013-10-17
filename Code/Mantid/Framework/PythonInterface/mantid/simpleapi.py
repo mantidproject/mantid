@@ -511,8 +511,7 @@ def _set_properties(alg_object, *args, **kwargs):
             for (key, arg) in zip(mandatory_props[:len(args)], args):
                 kwargs[key] = arg
         else:
-            raise RuntimeError("No required properties left but a positional argument remains. "
-                               "Check function call has correct arguments.")
+            raise RuntimeError("Positional argument(s) provided but none are required. Check function call.")
 
     # Set the properties of the algorithm.
     for key in kwargs.keys():
