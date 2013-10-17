@@ -66,8 +66,6 @@ namespace MantidQt
       void clearSearchResultFrame();
       /// Clear "dataFileFrame" when the user tries to search again.
       void clearDataFileFrame();
-      /// Show the search results frame.
-      void showSearchResultsFrame();
       /// Obtain the index of the column in a table that contains a specified name.
       int headerIndexByName(QTableWidget* table, const std::string &searchFor);
       /// Save the current state of ICAT for next time.

@@ -314,16 +314,6 @@ namespace MantidQt
     }
 
     /**
-     * Show the search results frame.
-     */
-    void ICatSearch2::showSearchResultsFrame()
-    {
-      m_icatUiForm.searchResultsCbox->setEnabled(true);
-      m_icatUiForm.searchResultsCbox->setChecked(true);
-      m_icatUiForm.resFrame->show();
-    }
-
-    /**
      * Obtain the index of the column in a table that contains a specified name.
      * @param table     :: The table to search the headers on.
      * @param searchFor :: The header name to search against.
@@ -580,7 +570,10 @@ namespace MantidQt
         // Since there are no longer errors we hide the error labels.
         hideErrorLabels();
 
-        showSearchResultsFrame();
+        // We want to disable/hide these as a search is in progress, but no results have been obtained.
+        m_icatUiForm.resFrame->hide();
+        m_icatUiForm.searchResultsCbox->setEnabled(false);
+        m_icatUiForm.searchResultsCbox->setChecked(false);
 
         // Update the label to inform the user that searching is in progress.
         m_icatUiForm.searchResultsLbl->setText("searching investigations...");
@@ -693,6 +686,11 @@ namespace MantidQt
 
       // Update the label to inform the user of how many investigations have been returned from the search.
       m_icatUiForm.searchResultsLbl->setText(QString::number(workspace->rowCount()) + " investigations found.");
+
+      // We want to show this now as we are certain that search results exist, and not display a blank frame (bad UX).
+      m_icatUiForm.resFrame->show();
+      m_icatUiForm.searchResultsCbox->setEnabled(true);
+      m_icatUiForm.searchResultsCbox->setChecked(true);
 
       // Add data from the workspace to the results table.
       populateTable(resultsTable, workspace);
