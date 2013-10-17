@@ -19,6 +19,8 @@ class QLines(PythonAlgorithm):
 		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (*_res.nxs) or Workspace')
 		self.declareProperty(name='ResType',defaultValue='Res',validator=StringListValidator(['Res','Data']), doc='Format of Resolution file')
 		self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
+		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (*_red.nxs) or Workspace')
+		self.declareProperty(name='ResNormNumber',defaultValue='',validator=StringMandatoryValidator(), doc='ResNorm run number')
 		self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']), doc='Form of background to fit')
 		self.declareProperty(name='ElasticOption',defaultValue=True, doc='Include elastic peak in fit')
 		self.declareProperty(name='FixWidth',defaultValue=False, doc='Fix one of the widths')
@@ -51,6 +53,8 @@ class QLines(PythonAlgorithm):
 		rinType = self.getPropertyValue('ResInputType')
 		rtype = self.getPropertyValue('ResType')
 		res = self.getPropertyValue('ResNumber')
+		rsnormType = self.getPropertyValue('ResNormInputType')
+		rsnormNum = self.getPropertyValue('ResNormNumber')
 		elastic = self.getProperty('ElasticOption').value
 		bgd = self.getPropertyValue('BackgroundOption')
 		width = self.getProperty('FixWidth').value
@@ -91,6 +95,14 @@ class QLines(PythonAlgorithm):
 			Rmessage = 'Resolution from File : '+rpath
 		else:
 			Rmessage = 'Resolution from Workspace : '+rname
+
+		if rsnormType == 'File':
+			rpath = os.path.join(workdir, rsname+'.nxs')		# path name for res nxs file
+			LoadNexusProcessed(Filename=rpath, OutputWorkspace=rsname)
+			Rmessage = 'ResNorm from File : '+rpath
+		else:
+			Rmessage = 'ResNorm from Workspace : '+rsname
+
 		if verbOp:
 			logger.notice(Smessage)
 			logger.notice(Rmessage)

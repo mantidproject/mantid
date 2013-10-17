@@ -60,7 +60,7 @@ class Quest(PythonAlgorithm):
 
 		sname = prefix+sam+'_'+ana + '_red'
 		rname = prefix+res+'_'+ana + '_res'
-		rsname = prefix+rsnormNum+'_'+ana+ '_ResNorm'
+		rsname = prefix+rsnormNum+'_'+ana+ '_ResNorm_Paras'
 		erange = [float(emin), float(emax)]
 		if elastic:
 			o_el = 1
