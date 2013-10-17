@@ -1813,13 +1813,24 @@ bool LoadEventNexus::loadInstrument(const std::string & nexusfilename, MatrixWor
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file
  *
- *  @param nxfile :: C++ interface to Nexus file with instrumentr group opened
+ *  @param nexusfilename :: The name of the nexus file being loaded
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm
  *  @return true if successful
  */
 bool LoadEventNexus::runLoadIDFFromNexus(const std::string & nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
                                          const std::string & top_entry_name, Algorithm * alg)
 {
+  // Test if IDF exists in file, move on quickly if not
+  try {
+    ::NeXus::File nxsfile(nexusfilename);
+    nxsfile.openPath(top_entry_name+"/instrument/instrument_xml");
+  } catch (::NeXus::Exception&) {
+    alg->getLogger().information("No instrument definition found in "+nexusfilename+" at "+top_entry_name+"/instrument");
+    return false;
+  }
+
   IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -1836,7 +1847,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string & nexusfilename, API:
   }
   catch (std::runtime_error&)
   {
-    alg->getLogger().debug("No IDF found in "+nexusfilename+" at "+top_entry_name+"/instrument");
+    alg->getLogger().debug("No instrument definition found in "+nexusfilename+" at "+top_entry_name+"/instrument");
   }
 
   if ( !loadInst->isExecuted() ) alg->getLogger().information("No IDF loaded from Nexus file.");   
