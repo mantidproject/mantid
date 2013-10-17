@@ -404,24 +404,6 @@ def LorBlock(a,first,nl):                                 #read Ascii block of I
 	first += 1
 	return first,Q,int0,fw,int                                      #values as list
 
-# Append data from C2Fw to the output spectra
-def appendData(nl, dataXYE, Xout, calcYData, calcEData):
-	
-	for i in range(0, nl):
-			#append amplitude
-			dataXYE["x"] = np.append(dataX,np.array(Xout))
-			dataXYE["y"] = np.append(dataY,np.array(calcYData[i+1]*2))
-			dataXYE["e"] = np.append(dataE,np.array(calcEData[i+1]*2))
-			Vaxis.append('ampl.'+str(nl)+'.'+str(i))
-
-			#append width
-			dataXYE["x"] = np.append(data,np.array(Xout))
-			dataXYE["y"] = np.append(dataY,np.array(calcYData[i]*2))
-			dataXYE["e"] = np.append(dataE,np.array(calcEData[i]*2))
-			Vaxis.append('width.'+str(nl)+'.'+str(i))
-
-	return dataXYE
-
 def C2Fw(prog,sname):
 	workdir = config['defaultsave.directory']
 	outWS = sname+'_Workspace'
@@ -453,12 +435,23 @@ def C2Fw(prog,sname):
 			for i in range(0, nl*2):
 				first,Q,i0,fw,it = LorBlock(asc,first,1)
 				Xout.append(Q)
-				#append amplitude and width data
+				#collect amplitude and width data
 				calcYData[i*2].append(fw[i])
 				calcEData[i*2].append(it[i])
 		
 		nhist += nl * 2
-		dataXYE = appendData(nl, dataXYE, Xout, calcYData, calcEData)
+		for i in range(0, nl):
+			#append amplitude
+			dataXYE["x"].append(np.array(Xout))
+			dataXYE["y"].append(np.array(calcYData[(i+1)*2]))
+			dataXYE["e"].append(np.array(calcEData[(i+1)*2]))
+			Vaxis.append('ampl.'+str(nl)+'.'+str(i))
+
+			#append width
+			dataXYE["x"].append(np.array(Xout))
+			dataXYE["y"].append(np.array(calcYData[i*2]))
+			dataXYE["e"].append(np.array(calcEData[i*2]))
+			Vaxis.append('width.'+str(nl)+'.'+str(i))
 
 	CreateWorkspace(OutputWorkspace=outWS, DataX=dataXYE["x"], DataY=dataXYE["y"], DataE=dataXYE["e"], Nspec=nhist,
 		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
@@ -541,7 +534,7 @@ def C2Se(sname):
 	dataE = np.append(dataE,np.array(Ei))
 	nhist += 1
 	Vaxis.append('width')
-	
+
 	dataX = np.append(dataX,np.array(Xout))
 	dataY = np.append(dataY,np.array(Yb))
 	dataE = np.append(dataE,np.array(Eb))
