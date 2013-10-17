@@ -193,7 +193,7 @@ namespace Mantid
       {
         //Get the base instrument detectors
         out_map.clear();
-        const detid2det_map & in_dets = dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
+        const detid2det_map & in_dets = static_cast<const Instrument*>(m_base)->m_detectorCache;
         //And turn them into parametrized versions
         for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
         {
@@ -216,7 +216,7 @@ namespace Mantid
       std::vector<detid_t> out;
       if (m_isParametrized)
       {
-        const detid2det_map & in_dets = dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
+        const detid2det_map & in_dets = static_cast<const Instrument*>(m_base)->m_detectorCache;
         for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
           if (!skipMonitors || !it->second->isMonitor())
             out.push_back(it->first);
@@ -238,7 +238,7 @@ namespace Mantid
 
       if (m_isParametrized)
       {
-        numDetIDs = dynamic_cast<const Instrument*>(m_base)->m_detectorCache.size();
+        numDetIDs = static_cast<const Instrument*>(m_base)->m_detectorCache.size();
       }
       else
       {
@@ -250,7 +250,7 @@ namespace Mantid
         std::size_t monitors(0);
         if (m_isParametrized)
         {
-          const detid2det_map & in_dets = dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
+          const detid2det_map & in_dets = static_cast<const Instrument*>(m_base)->m_detectorCache;
           for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
             if (it->second->isMonitor())
               monitors += 1;
@@ -279,7 +279,7 @@ namespace Mantid
     {
       const detid2det_map * in_dets;
       if (m_isParametrized)
-        in_dets = &dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
+        in_dets = &(static_cast<const Instrument*>(m_base)->m_detectorCache);
       else
         in_dets = &this->m_detectorCache;
 
@@ -336,7 +336,7 @@ namespace Mantid
       }
       else if (m_isParametrized)
       {
-        return IObjComponent_const_sptr(new ObjComponent(dynamic_cast<const Instrument*>(m_base)->m_sourceCache,m_map));
+        return IObjComponent_const_sptr(new ObjComponent(static_cast<const Instrument*>(m_base)->m_sourceCache,m_map));
       }
       else
       {
@@ -383,7 +383,7 @@ namespace Mantid
       }
       else if (m_isParametrized)
       {
-        return IObjComponent_const_sptr(new ObjComponent(dynamic_cast<const Instrument*>(m_base)->m_sampleCache,m_map));
+        return IObjComponent_const_sptr(new ObjComponent(static_cast<const Instrument*>(m_base)->m_sampleCache,m_map));
       }
       else
       {
@@ -789,7 +789,7 @@ namespace Mantid
     {
       //Monitors cannot be parametrized. So just return the base.
       if (m_isParametrized)
-        return dynamic_cast<const Instrument*>(m_base)->m_monitorCache;
+        return static_cast<const Instrument*>(m_base)->m_monitorCache;
       else
         return m_monitorCache;
     }
