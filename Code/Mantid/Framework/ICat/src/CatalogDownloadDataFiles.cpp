@@ -156,20 +156,12 @@ namespace Mantid
 
     /**
      * Checks to see if the file to be downloaded is a datafile.
-     * @param fileName ::  file name
-     * @returns true if the file is a data file, otherwise false.
+     * @param stream ::  input stream
+     * @returns True if the stream is not considered ASCII (e.g. binary), false otherwise
      */
-    bool CatalogDownloadDataFiles::isBinary(const std::string & fileName)
+    bool CatalogDownloadDataFiles::isBinary(std::istream& stream)
     {
-      // If an invalid argument is passed (which is a test), then return false.
-      try
-      {
-        return !FileDescriptor::isAscii(fileName);
-      }
-      catch(std::invalid_argument&)
-      {
-        return false;
-      }
+      return !FileDescriptor::isAscii(stream);
     }
 
     /**
@@ -232,9 +224,8 @@ namespace Mantid
       Poco::Path path(defaultSaveDir, fileName);
       std::string filepath = path.toString();
 
-      std::ios_base::openmode mode;
-      //if raw/nexus file open it in binary mode else ascii
-      isBinary(fileName) ? mode = std::ios_base::binary : mode = std::ios_base::out;
+      std::ios_base::openmode mode = isBinary(rs) ? std::ios_base::binary : std::ios_base::out;
+
       std::ofstream ofs(filepath.c_str(), mode);
       if ( ofs.rdstate() & std::ios::failbit )
       {

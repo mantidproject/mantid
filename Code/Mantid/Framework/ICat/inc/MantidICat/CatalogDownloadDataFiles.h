@@ -82,8 +82,8 @@ namespace Mantid
       void exec();
       /// get location of data file  or download method
       int doDownload( ICATPortBindingProxy & icat);
-      /// True if the extension of the file is ".raw"
-      bool isBinary(const std::string& fileName);
+      /// True if the stream is considered binary, false otherwise
+      bool isBinary(std::istream& stream);
       /// Saves the downloaded file to disc
       std::string saveFiletoDisk(std::istream& rs,const std::string &fileName);
       /// Saves downloaded file to local disk
