@@ -46,7 +46,6 @@ set ( SRC_FILES
 	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
-	src/LoadLogsFromSNSNexus.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
 	src/LoadMcStasEventNexus.cpp
@@ -78,7 +77,6 @@ set ( SRC_FILES
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
 	src/LoadSINQ.cpp
-	src/LoadSNSEventNexus.cpp
 	src/LoadSNSNexus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
@@ -178,7 +176,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
-	inc/MantidDataHandling/LoadLogsFromSNSNexus.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMcStasEventNexus.h
@@ -205,7 +202,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
 	inc/MantidDataHandling/LoadSINQ.h
-	inc/MantidDataHandling/LoadSNSEventNexus.h
 	inc/MantidDataHandling/LoadSNSNexus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
@@ -303,7 +299,6 @@ set ( TEST_FILES
 	LoadIsawDetCalTest.h
 	LoadLLBTest.h
 	LoadLogTest.h
-	LoadLogsFromSNSNexusTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
 	LoadMcStasEventNexusTest.h
@@ -329,7 +324,6 @@ set ( TEST_FILES
 	LoadRawSpectrum0Test.h
 	LoadRawTest.h
 	LoadSINQTest.h
-	LoadSNSEventNexusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
 	LoadSassenaTest.h
