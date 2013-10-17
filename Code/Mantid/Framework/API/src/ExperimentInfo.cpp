@@ -868,6 +868,8 @@ namespace API
    * @param file :: open NeXus file
    * @param[out] parameterStr :: special string for all the parameters.
    *             Feed that to ExperimentInfo::readParameterMap() after the instrument is done.
+   * @throws Exception::NotFoundError If instrument definition is not in the nexus file and cannot
+   *                                  be loaded from the IDF.
    */
   void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File * file, std::string & parameterStr)
   {
@@ -959,7 +961,8 @@ namespace API
       catch (std::exception & e)
       {
         g_log.error() << "Error loading instrument IDF file for '" << instrumentName << "'.\n";
-        g_log.error() << e.what() << std::endl;
+        g_log.debug() << e.what() << std::endl;
+        throw;
       }
     }
     else
