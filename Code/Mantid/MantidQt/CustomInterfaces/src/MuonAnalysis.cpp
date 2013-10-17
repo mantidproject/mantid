@@ -2595,63 +2595,82 @@ bool MuonAnalysis::isGroupingSet()
 }
 
 /**
- * Apply grouping specified in xml file to workspace
- *
- * @param inputWS :: The input workspace to apply grouping
- * @param outputWS :: The resulting workspace
- * @param filename :: Name of grouping file
- */
-bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS,
-   const std::string& filename)
-{
-  if ( AnalysisDataService::Instance().doesExist(inputWS) )
-  {
-    AnalysisDataService::Instance().remove(outputWS);
-
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", inputWS);
-    alg->setPropertyValue("OutputWorkspace", outputWS);
-    alg->setPropertyValue("MapFile", filename);
-    try
-    {
-      alg->execute();
-      return true;
-    }
-    catch(...)
-    {
-      m_optionTab->noDataAvailable();
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
-      return false;
-    }
-  }
-  return false;
-}
-
-/**
  * Apply whatever grouping is specified in GUI tables to workspace.
  */
-bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS)
+bool MuonAnalysis::applyGroupingToWS( const std::string& inputWsName,  const std::string& outputWsName)
 {
-  if ( isGroupingSet() && AnalysisDataService::Instance().doesExist(inputWS) )
+  if (!isGroupingSet() || !AnalysisDataService::Instance().doesExist(inputWsName))
+    return false;
+
+  std::string complaint = isGroupingAndDataConsistent();
+  if (!( complaint.empty() ) )
   {
-
-    std::string complaint = isGroupingAndDataConsistent();
-    if (!( complaint.empty() ) )
-    {
-      if (m_uiForm.frontPlotButton->isEnabled() )
-        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
-      m_optionTab->noDataAvailable();
-      return false;
-    }
-    {
-      if (!m_uiForm.frontPlotButton->isEnabled() )
-        m_optionTab->nowDataAvailable();
-    }
-
-    // TODO: applyGroupingToWS(inputWS, outputWS, grouping)
-    return true;
+    if (m_uiForm.frontPlotButton->isEnabled() )
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
+    m_optionTab->noDataAvailable();
+    return false;
   }
-  return false;
+  else
+  {
+    if (!m_uiForm.frontPlotButton->isEnabled() )
+      m_optionTab->nowDataAvailable();
+  }
+
+  // As I couldn't specify multiple groups for GroupDetectors, I am going down quite a complicated
+  // route - for every group distinct grouped workspace is created using GroupDetectors. These
+  // workspaces are then merged into the output workspace.
+
+  // Remove explicitly, so even if something goes wrong - old data is not used
+  AnalysisDataService::Instance().remove(outputWsName);
+
+  Grouping g;
+  parseGroupingTable(m_uiForm, g);
+
+  // Retrieve input workspace
+  MatrixWorkspace_sptr inputWs = 
+    boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWsName));
+  if(!inputWs)
+    throw std::invalid_argument("Input workspace is not a MatrixWorkspace");
+
+  // Create resulting workspace
+  MatrixWorkspace_sptr outputWs =
+    WorkspaceFactory::Instance().create(inputWs, g.groups.size(), inputWs->readX(0).size(), inputWs->blocksize());
+
+  try
+  {
+    for(size_t gi = 0; gi < g.groups.size(); gi++)
+    {
+      Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().create("GroupDetectors");
+      alg->setChild(true); // So Output workspace is not added to the ADS
+      alg->initialize();
+      alg->setProperty("InputWorkspace", inputWs);
+      alg->setPropertyValue("SpectraList", g.groups[gi]);
+      alg->setPropertyValue("OutputWorkspace", "grouped" + boost::lexical_cast<std::string>(gi)); // Is not actually used, just to make validators happy
+      alg->execute();
+
+      MatrixWorkspace_sptr grouped = alg->getProperty("OutputWorkspace");
+
+      // Update the spectra of output workspace
+      ISpectrum* s = grouped->getSpectrum(0);
+      s->setSpectrumNo(static_cast<specid_t>(gi));
+      *(outputWs->getSpectrum(gi)) = *s;
+
+      //Copy to the output workspace
+      outputWs->dataY(gi) = grouped->readY(0);
+      outputWs->dataX(gi) = grouped->readX(0);
+      outputWs->dataE(gi) = grouped->readE(0);
+    }
+  }
+  catch(...)
+  {
+    m_optionTab->noDataAvailable();
+    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
+    return false;
+  }
+
+  AnalysisDataService::Instance().add(outputWsName, outputWs);
+
+  return true;
 }
 
 /**
