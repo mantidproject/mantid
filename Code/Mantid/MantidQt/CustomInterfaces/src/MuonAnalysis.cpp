@@ -1185,8 +1185,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size()));
 
     if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
-      // TODO: applyGroupingToWS shows it's own messages as well. Should make it throw exceptions 
-      //       instead.
       throw std::runtime_error("Couldn't apply grouping");
 
     // Populate instrument fields
@@ -2616,55 +2614,59 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWsName,  const std
       m_optionTab->nowDataAvailable();
   }
 
-  // As I couldn't specify multiple groups for GroupDetectors, I am going down quite a complicated
-  // route - for every group distinct grouped workspace is created using GroupDetectors. These
-  // workspaces are then merged into the output workspace.
+  // If output workspace exists, remove explicitly, so even if something goes wrong - old data 
+  // is not used
+  if(AnalysisDataService::Instance().doesExist(outputWsName))
+  {
+    // Using DeleteWorkspace algorithm so if outputWs is a group - it is fully removed
+    Mantid::API::IAlgorithm_sptr rmWs = AlgorithmManager::Instance().create("DeleteWorkspace");
+    rmWs->initialize();
+    rmWs->setPropertyValue("Workspace", outputWsName);
+    rmWs->execute();
+  }
 
-  // Remove explicitly, so even if something goes wrong - old data is not used
-  AnalysisDataService::Instance().remove(outputWsName);
-
-  Grouping g;
-  parseGroupingTable(m_uiForm, g);
+  Grouping tableGrouping;
+  parseGroupingTable(m_uiForm, tableGrouping);
 
   // Retrieve input workspace
-  MatrixWorkspace_sptr inputWs = 
-    boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWsName));
-  if(!inputWs)
-    throw std::invalid_argument("Input workspace is not a MatrixWorkspace");
+  Workspace_sptr inputWs = AnalysisDataService::Instance().retrieve(inputWsName);
 
-  // Create resulting workspace
-  MatrixWorkspace_sptr outputWs =
-    WorkspaceFactory::Instance().create(inputWs, g.groups.size(), inputWs->readX(0).size(), inputWs->blocksize());
+  Workspace_sptr outputWs;
 
-  try
+  try // ... to group
   {
-    for(size_t gi = 0; gi < g.groups.size(); gi++)
+    // Single workspace
+    if(MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWs))
     {
-      Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().create("GroupDetectors");
-      alg->setChild(true); // So Output workspace is not added to the ADS
-      alg->initialize();
-      alg->setProperty("InputWorkspace", inputWs);
-      alg->setPropertyValue("SpectraList", g.groups[gi]);
-      alg->setPropertyValue("OutputWorkspace", "grouped" + boost::lexical_cast<std::string>(gi)); // Is not actually used, just to make validators happy
-      alg->execute();
-
-      MatrixWorkspace_sptr grouped = alg->getProperty("OutputWorkspace");
-
-      // Update the spectra of output workspace
-      ISpectrum* s = grouped->getSpectrum(0);
-      s->setSpectrumNo(static_cast<specid_t>(gi));
-      *(outputWs->getSpectrum(gi)) = *s;
-
-      //Copy to the output workspace
-      outputWs->dataY(gi) = grouped->readY(0);
-      outputWs->dataX(gi) = grouped->readX(0);
-      outputWs->dataE(gi) = grouped->readE(0);
+      outputWs = groupWorkspace(ws, tableGrouping);
     }
+    // Workspace group
+    else if(WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWs))
+    { 
+      // Create output group
+      WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+  
+      for(size_t i = 0; i < group->size(); i++)
+      {
+        if(MatrixWorkspace_sptr member = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i)))
+        {
+          MatrixWorkspace_sptr groupedMember = groupWorkspace(member, tableGrouping);
+
+          outputGroup->addWorkspace(groupedMember);
+        }
+        else
+          throw std::invalid_argument("Group contains unsupported workspace type");
+      }
+
+      outputWs = outputGroup;
+    }
+    else
+      throw std::invalid_argument("Unsupported workspace type");
   }
-  catch(...)
+  catch(std::exception& e)
   {
     m_optionTab->noDataAvailable();
-    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
+    g_log.error(e.what());
     return false;
   }
 
@@ -2887,7 +2889,6 @@ void MuonAnalysis::startUpLook()
 */
 void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 {
-  // for now do try to set grouping from nexus file if it is already set
   if ( isGroupingSet() )
     return;
 

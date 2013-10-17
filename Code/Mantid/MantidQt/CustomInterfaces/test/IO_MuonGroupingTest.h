@@ -1,12 +1,17 @@
 #ifndef MANTID_CUSTOMINTERFACES_IO_MUONGROUPINGTEST_H_
 #define MANTID_CUSTOMINTERFACES_IO_MUONGROUPINGTEST_H_
 
+#include <numeric>
+
 #include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::Muon;
 
 class IO_MuonGroupingTest : public CxxTest::TestSuite
@@ -39,6 +44,9 @@ public:
     TSM_ASSERT("Unable to find AutoTestData directory", !m_testDataDir.empty());
 
     m_tmpDir = ConfigService::Instance().getTempDir();
+
+    // To make sure API is initialized properly
+    FrameworkManager::Instance();
   }
 
   void test_loadGroupingFromXML()
@@ -110,9 +118,60 @@ public:
     Poco::File(tmpFile).remove();
   }
 
+  void test_groupWorkspace()
+  {
+    // Load grouping for MUSR
+    Grouping g;
+    TS_ASSERT_THROWS_NOTHING(loadGroupingFromXML(m_testDataDir + "MUSRGrouping.xml", g));
+
+    // Load MUSR data file
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
+    loadAlg->setChild(true); // So outptu ws don't end up in the ADS
+    loadAlg->initialize();
+    loadAlg->setPropertyValue("Filename", m_testDataDir + "MUSR00015189.nxs");
+    loadAlg->setPropertyValue("OutputWorkspace", "data"); // Is not used, just for validator
+    loadAlg->execute();
+
+    Workspace_sptr loadedWs = loadAlg->getProperty("OutputWorkspace");
+    WorkspaceGroup_sptr loadedGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedGroup->getItem(0));
+
+    // Group the loaded workspace using loaded grouping
+    MatrixWorkspace_sptr gWs; // Grouped workspace
+    TS_ASSERT_THROWS_NOTHING(gWs = groupWorkspace(ws, g));
+    TS_ASSERT(gWs);
+
+    if(!gWs) 
+      return;
+
+    // Check that was grouped properly
+    TS_ASSERT_EQUALS(gWs->getNumberHistograms(), 2);
+
+    TS_ASSERT_EQUALS(gWs->getSpectrum(0)->getDetectorIDs(), setFromRange(33, 64));
+    TS_ASSERT_EQUALS(gWs->getSpectrum(1)->getDetectorIDs(), setFromRange(1, 32));
+
+    TS_ASSERT_EQUALS(std::accumulate(gWs->readY(0).begin(), gWs->readY(0).end(), 0.0), 355655);
+    TS_ASSERT_DELTA(std::accumulate(gWs->readX(0).begin(), gWs->readX(0).end(), 0.0), 30915.5, 0.1);
+    TS_ASSERT_DELTA(std::accumulate(gWs->readE(0).begin(), gWs->readE(0).end(), 0.0), 14046.9, 0.1);
+
+    TS_ASSERT_EQUALS(std::accumulate(gWs->readY(1).begin(), gWs->readY(1).end(), 0.0), 262852);
+    TS_ASSERT_EQUALS(gWs->readX(1), gWs->readX(0));
+    TS_ASSERT_DELTA(std::accumulate(gWs->readE(1).begin(), gWs->readE(1).end(), 0.0), 12079.8, 0.1);
+  }
+
 private:
   std::string m_testDataDir;
   std::string m_tmpDir;
+
+  std::set<int> setFromRange(int from, int to)
+  {
+    std::set<int> result;
+
+    for(int i = from; i <= to; i++)
+      result.insert(i);
+    
+    return result;
+  }
 
 };
 

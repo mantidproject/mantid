@@ -52,6 +52,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 using namespace Mantid;
+using namespace Mantid::API;
 
 /// Structure to represent grouping information for Muon Analysis
 typedef struct {
@@ -77,6 +78,9 @@ void parseGroupingTable(const Ui::MuonAnalysis& form, Grouping& grouping);
 
 /// Fills in the grouping table using information from provided Grouping struct
 void fillGroupingTable(const Grouping& grouping, Ui::MuonAnalysis& form);
+
+/// Groups the workspace according to grouping provided
+MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws, const Grouping& g);
 
 /// create 'map' relating group number to row number in group table
 void whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow);
