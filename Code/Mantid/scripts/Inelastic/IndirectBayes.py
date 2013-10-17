@@ -51,10 +51,10 @@ def GetXYE(inWS,n,array_len):
 	E=PadArray(Ein,array_len)
 	return N,X,Y,E
 
-def GetResNorm(ngrp):
+def GetResNorm(resnormWS,ngrp):
 	if ngrp == 0:                                # read values from WS
-		dtnorm = mtd['ResNorm_1'].readY(0)
-		xscale = mtd['ResNorm_2'].readY(0)
+		dtnorm = mtd[resnormWS+'_Intensity'].readY(0)
+		xscale = mtd[resnormWS+'_Stretch'].readY(0)
 	else:                                        # constant values
 		dtnorm = []
 		xscale = []
@@ -65,15 +65,15 @@ def GetResNorm(ngrp):
 	xsc=PadArray(xscale,51)
 	return dtn,xsc
 	
-def ReadNormFile(o_res,nsam,Verbose):            # get norm & scale values
-	if o_res == 1:                     # use ResNorm file option=o_res
-		Xin = mtd['ResNorm_1'].readX(0)
+def ReadNormFile(readRes,resnormWS,nsam,Verbose):            # get norm & scale values
+	if readRes:                   # use ResNorm file option=o_res
+		Xin = mtd[resnormWS+'_Intensity'].readX(0)
 		nrm = len(Xin)						# no. points from length of x array
 		if nrm == 0:				
 			error = 'ResNorm file has no dtnorm points'			
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-		Xin = mtd['ResNorm_2'].readX(0)					# no. points from length of x array
+		Xin = mtd[resnormWS+'_Stretch'].readX(0)					# no. points from length of x array
 		if len(Xin) == 0:				
 			error = 'ResNorm file has no xscale points'			
 			logger.notice('ERROR *** ' + error)
@@ -83,16 +83,17 @@ def ReadNormFile(o_res,nsam,Verbose):            # get norm & scale values
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
 		else:
-			dtn,xsc = GetResNorm(0)
-	if o_res == 0:                     # do not use ResNorm file option=o_res
-		dtn,xsc = GetResNorm(nsam)
+			dtn,xsc = GetResNorm(resnormWS,0)
+	else:
+		# do not use ResNorm file
+		dtn,xsc = GetResNorm(resnormWS,nsam)
 	return dtn,xsc
 
-def ReadWidthFile(op_w1,wfile,ngrp,Verbose):                       # reads width file ASCII
+def ReadWidthFile(readWidth,wfile,ngrp,Verbose):                       # reads width file ASCII
 	workdir = config['defaultsave.directory']
-	if op_w1 == 1:                               # use width1 data  option=o_w1
-		if Verbose:
-			w_path = os.path.join(workdir, wfile)					# path name for nxs file
+	if readWidth:                            # use width1 data  option=o_w1
+		w_path = os.path.join(workdir, wfile)					# path name for nxs file
+		if Verbose:	
 			logger.notice('Width file is ' + w_path)
 		handle = open(w_path, 'r')
 		asc = []
@@ -138,67 +139,71 @@ def CheckBinning(nbins):
 # QLines programs
 def QLRun(program,samWS,resWS,rsname,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Save):
 	StartTime(program)
+
+	#expand fit options
+	elastic, background, width, resnorm = Fit
+	
+	#convert true/false to 1/0 for fortran
+	o_el = 1 if elastic else 0
+	o_w1 = 1 if width else 0
+	o_res = 1 if resnorm else 0
+
+	#fortran code uses background choices defined using the following numbers
+	if background == 'Sloping':
+		o_bgd = 2
+	elif background == 'Flat':
+		o_bgd = 1
+	elif background == 'Zero':
+		o_bgd = 0
+
+	fitOp = [o_el, o_bgd, o_w1, o_res]
+
 	workdir = config['defaultsave.directory']
 	facility = config['default.facility']
 	array_len = 4096						   # length of array in Fortran
 	CheckXrange(erange,'Energy')
 	nbin,nrbin = CheckBinning(nbins)
+
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
+
 	if facility == 'ISIS':
 		CheckAnalysers(samWS,resWS,Verbose)
 		efix = getEfixed(samWS)
 		theta,Q = GetThetaQ(samWS)
+
 	nsam,ntc = CheckHistZero(samWS)
+
+	totalNoSam = nsam
+	
+	#check if we're performing a sequential fit
 	if Loop != True:
 		nsam = 1
+
 	nres,ntr = CheckHistZero(resWS)
-	if Fit[0]:
-		elastic = True
-		o_el = 1
-	else:
-		elastic = False
-		o_el = 0
-	if Fit[1] == 'Sloping':
-		o_bgd = 2
-	if Fit[1] == 'Flat':
-		o_bgd = 1
-	if Fit[1] == 'Zero':
-		o_bgd = 0
-	background = Fit[1]
-	if Fit[2]:
-		width = True
-		o_w1 = 1
-	else:
-		width = False
-		o_w1 = 0
-	if Fit[3]:
-		resnorm = True
-		o_res = 1
-	else:
-		resnorm = False
-		o_res = 0
-	fitOp = [o_el, o_bgd, o_w1, o_res]
+	
 	if program == 'QL':
 		if nres == 1:
 			prog = 'QLr'						# res file
 		else:
 			prog = 'QLd'						# data file
 			CheckHistSame(samWS,'Sample',resWS,'Resolution')
-	if program == 'QSe':
+	elif program == 'QSe':
 		if nres == 1:
 			prog = 'QSe'						# res file
 		else:
-			error = 'Stretched Exp ONLY works with RES file'			
-			logger.notice('ERROR *** ' + error)
+			error = 'Stretched Exp ONLY works with RES file'
 			sys.exit(error)
+
 	if Verbose:
 		logger.notice('Version is ' +prog)
 		logger.notice(' Number of spectra = '+str(nsam))
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
-	Wy,We = ReadWidthFile(fitOp[2],wfile,nsam,Verbose)
-	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
+
+	Wy,We = ReadWidthFile(width,wfile,totalNoSam,Verbose)
+	dtn,xsc = ReadNormFile(resnorm,rsname,totalNoSam,Verbose)
+
 	fname = samWS[:-4] + '_'+ prog
 	probWS = fname + '_Prob'
 	fitWS = fname + '_Fit'
@@ -619,8 +624,11 @@ def CheckBetSig(nbs):
 		sys.exit(error)
 	return Nbet,Nsig
 
-def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
+def QuestRun(samWS,resWS,rsname,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
 	StartTime('Quest')
+
+	resnorm = (fitOp[:3] == 1)
+
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
 	CheckXrange(erange,'Energy')
@@ -644,7 +652,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
 	if Verbose:
 		logger.notice(' Number of spectra = '+str(nsam))
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
-	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
+	dtn,xsc = ReadNormFile(resnorm,rsname,nsam,Verbose)
 	fname = samWS[:-4] + '_'+ prog
 	wrks=workdir + samWS[:-4]
 	if Verbose:
