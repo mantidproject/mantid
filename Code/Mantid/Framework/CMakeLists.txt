@@ -117,6 +117,7 @@ add_subdirectory (WorkflowAlgorithms)
 add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)
+add_subdirectory (SINQ) 
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if ( MPI_BUILD )
@@ -149,6 +150,7 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
+		     SINQ
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 

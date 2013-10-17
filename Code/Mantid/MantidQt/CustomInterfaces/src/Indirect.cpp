@@ -100,8 +100,9 @@ void Indirect::initLayout()
 
   // "SofQW" tab
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
-  connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(sOfQwInputType(const QString&)));
-  connect(m_uiForm.sqw_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(int)), m_uiForm.sqw_swInput, SLOT(setCurrentIndex(int)));
+  connect(m_uiForm.sqw_cbWorkspace, SIGNAL(currentIndexChanged(int)), this, SLOT(validateSofQ(int)));
+
   connect(m_uiForm.sqw_pbPlotInput, SIGNAL(clicked()), this, SLOT(sOfQwPlotInput()));
 
   // "Slice" tab
@@ -134,6 +135,7 @@ void Indirect::initLayout()
   m_uiForm.sqw_leQWidth->setValidator(m_valDbl);
   m_uiForm.sqw_leQHigh->setValidator(m_valDbl);
 
+
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);
   m_uiForm.save_ckNexus->setChecked(true);
@@ -146,8 +148,6 @@ void Indirect::initLayout()
   tabChanged(0);
 
   loadSettings();
-
-  refreshWSlist();
 }
 /**
 * This function will hold any Python-dependent setup actions for the interface.
@@ -757,6 +757,11 @@ QString Indirect::validateCalib()
   return uiv.generateErrorMessage();
 }
 
+void Indirect::validateSofQ(int)
+{
+  validateSofQw();
+}
+
 bool Indirect::validateSofQw()
 {
   bool valid = true;
@@ -1098,19 +1103,6 @@ void Indirect::pbRunFinished()
   tabChanged(m_uiForm.tabWidget->currentIndex());
 }
 
-void Indirect::refreshWSlist()
-{
-  m_uiForm.sqw_cbWorkspace->clear();
-  std::set<std::string> workspaceList = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-  if ( ! workspaceList.empty() )
-  {
-    std::set<std::string>::const_iterator wsIt;
-    for ( wsIt=workspaceList.begin(); wsIt != workspaceList.end(); ++wsIt )
-    {
-      m_uiForm.sqw_cbWorkspace->addItem(QString::fromStdString(*wsIt));
-    }
-  }
-}
 /**
 * This function is called when the user selects an analyser from the cbAnalyser QComboBox
 * object. It's main purpose is to initialise the values for the Reflection ComboBox.
@@ -1333,7 +1325,7 @@ void Indirect::plotRaw()
     }
 
     QString pyInput =
-      "from mantid.simpleapi import FlatBackground,GroupDetectors,Load\n"
+      "from mantid.simpleapi import CalculateFlatBackground,GroupDetectors,Load\n"
       "from mantidplot import plotSpectrum\n"
       "import os.path as op\n"
       "file = r'" + rawFile + "'\n"
@@ -1342,7 +1334,7 @@ void Indirect::plotRaw()
       "Load(Filename=file, OutputWorkspace=name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
       "if ( bgrange != [-1, -1] ):\n"
       "    #Remove background\n"
-      "    FlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
+      "    CalculateFlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
       "    GroupDetectors(InputWorkspace=name+'_bg', OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
       "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
       "else: # Just group detectors as they are\n"
@@ -1732,19 +1724,6 @@ void Indirect::sOfQwRebinE(bool state)
   m_uiForm.sqw_lbELow->setEnabled(state);
   m_uiForm.sqw_lbEWidth->setEnabled(state);
   m_uiForm.sqw_lbEHigh->setEnabled(state);
-}
-
-void Indirect::sOfQwInputType(const QString& input)
-{
-  if ( input == "File" )
-  {
-    m_uiForm.sqw_swInput->setCurrentIndex(0);
-  }
-  else
-  {
-    m_uiForm.sqw_swInput->setCurrentIndex(1);
-    refreshWSlist();
-  }
 }
 
 void Indirect::sOfQwPlotInput()

@@ -35,14 +35,11 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
 
-    if (outWSName.compare("Grouping_2012-11-27") != 0)
-    {
-      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 24794);
-    }
-    else
-    {
-      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 25872);
-    }
+    // We expect the same number of histograms as detectors in the instrument (excluding monitors)
+    const bool skipMonitors(true);
+    const size_t ndets = ws->getInstrument()->getNumberDetectors(skipMonitors);
+    TS_ASSERT_EQUALS(ndets, ws->getNumberHistograms());
+
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     // All zero.
     TS_ASSERT_EQUALS( ws->dataY(0)[0], 0.0);

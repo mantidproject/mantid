@@ -99,6 +99,8 @@ public:
 
   /// Methods relating to peaks overlays.
   boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
+  void setPeaksWorkspaces(const QStringList& list); // For python binding
+  void clearPeaksWorkspaces(); // For python binding
 
   /* -- Methods from implementation of ZoomablePeaksView. --*/
   virtual void zoomToRectangle(const PeakBoundingBox& box);
@@ -191,6 +193,7 @@ private:
   // Autorebin methods.
   bool isAutoRebinSet() const;
   void autoRebinIfRequired();
+
 
 private:
 

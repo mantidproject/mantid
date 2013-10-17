@@ -86,12 +86,11 @@ Script::ScriptThreadPool::ScriptThreadPool() : QThreadPool()
 
 Script::Script(ScriptingEnv *env, const QString &name,
                const InteractionType interact, QObject * context)
-  : QObject(), m_env(env), m_name() , m_context(context),
+  : QObject(), m_env(env), m_name(name.toStdString()) , m_context(context),
     m_redirectOutput(true), m_reportProgress(false), m_interactMode(interact),
     m_execMode(NotExecuting), m_thread(new ScriptThreadPool)
 {
   m_env->incref();
-  setName(name);
 
   connect(this, SIGNAL(started(const QString &)), this, SLOT(setIsRunning()));
   /** On some systems it has been observed that 
@@ -117,7 +116,7 @@ Script::~Script()
 /**
  * Sets a new name for the script
  */
-void Script::setName(const QString & name)
+void Script::setIdentifier(const QString & name)
 { 
   m_name = name.toStdString();
 }

@@ -75,7 +75,7 @@ namespace Algorithms
 
     std::set<int> m_workGroupIndexes;
     Kernel::TimeSplitterType m_splitters;
-    std::map<int, DataObjects::EventWorkspace_sptr> mOutputWorkspaces;
+    std::map<int, DataObjects::EventWorkspace_sptr> m_outputWS;
     std::vector<std::string> m_wsNames;
 
     std::vector<detid_t> m_detectorIDs;

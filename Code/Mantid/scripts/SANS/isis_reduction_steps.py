@@ -572,6 +572,9 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self.arm_width = None
         #when there is an arm to mask this is its angle in degrees
         self.arm_angle = None
+        #RMD Mod 24/7/13
+        self.arm_x = None
+        self.arm_y = None
 
         ########################## Masking  ################################################
         # Mask the corners and beam stop if radius parameters are given
@@ -673,10 +676,19 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 else:
                     self.add_mask_string(mask_string=typeSplit[1],detect=typeSplit[0])                    
             elif type.startswith('LINE'):
-                if len(typeSplit) != 3:
-                    _issueWarning('Unrecognized line masking command "' + details + '" syntax is MASK/LINE width angle')
-                self.arm_width = float(typeSplit[1])
-                self.arm_angle = float(typeSplit[2])                                               
+                # RMD mod 24/7/13
+                if len(typeSplit) == 5:
+                    self.arm_width = float(typeSplit[1])
+                    self.arm_angle = float(typeSplit[2])
+                    self.arm_x = float(typeSplit[3])
+                    self.arm_y = float(typeSplit[4])
+                elif len(typeSplit) == 3:
+                    self.arm_width = float(typeSplit[1])
+                    self.arm_angle = float(typeSplit[2])
+                    self.arm_x=0.0
+                    self.arm_y=0.0
+                else:
+                    _issueWarning('Unrecognized line masking command "' + details + '" syntax is MASK/LINE width angle or MASK/LINE width angle x y')
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
         elif len(parts) == 3:
@@ -926,7 +938,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 ws = mtd[str(workspace)]
                 det = ws.getInstrument().getComponentByName('rear-detector')
                 det_Z = det.getPos().getZ()
-                start_point = [0, 0, det_Z]
+                start_point = [self.arm_x, self.arm_y, det_Z]
                 MaskDetectorsInShape(Workspace=workspace,ShapeXML=
                                  self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
 
@@ -1160,7 +1172,7 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
         TOF_start, TOF_end = reducer.inst.get_TOFs(
                                     self.NORMALISATION_SPEC_NUMBER)
         if TOF_start and TOF_end:
-            FlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end,
+            CalculateFlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end,
                 WorkspaceIndexList=self.NORMALISATION_SPEC_INDEX, Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
@@ -1308,7 +1320,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             back_start, back_end = inst.get_TOFs(spectra_number)
             if back_start and back_end:
                 index = spectra_number - spectrum1
-                FlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX=back_start, EndX=back_end,
+                CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX=back_start, EndX=back_end,
                                WorkspaceIndexList=index, Mode='Mean')
 
         ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Target="Wavelength")

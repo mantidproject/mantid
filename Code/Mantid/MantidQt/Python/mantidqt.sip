@@ -115,17 +115,16 @@ class MWRunFiles : QWidget
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 %End
 public:
-void setLabelText(const QString&);
 void setLabelMinWidth(const int);
-void doMultiEntry(const bool);
-void allowMultipleFiles(const bool);
-void setAlgorithmProperty(const QString &);
+void liveButtonSetChecked(bool);
+bool liveButtonIsChecked();
 QString getText() /PyName=text/;
 bool isValid();
 void setUserInput(const QVariant &);
 void setText(const QString&);
 signals:
 void fileFindingFinished();
+void liveButtonPressed(bool);
 };
 
 };
@@ -203,9 +202,6 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
   const QString& getLabel() const;
 
 };
-
-
-
 
 /***************************************************************************/
 /***************************************************************************/
@@ -1076,6 +1072,23 @@ void SliceViewer::refreshRebin()
    
 %End
 
+  void setPeaksWorkspaces(const QStringList&);
+%Docstring
+void SliceViewer::setPeaksWorkspaces(const QStringList&)
+--------------------------------
+    Enable overplotting of one or more peaks workspaces. 
+    See clearPeaksWorkspaces() for removal.
+   
+%End
+
+  void clearPeaksWorkspaces();
+%Docstring
+void SliceViewer::clearPeaksWorkspaces()
+--------------------------------
+    Clear overplotting of all overplotted peaks workspaces.
+    See setPeaksWorkspaces() for addition.
+   
+%End
 };
 
 

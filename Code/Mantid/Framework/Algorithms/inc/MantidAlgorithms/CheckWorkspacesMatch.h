@@ -92,6 +92,8 @@ private:
   /// Execution code
   void exec();
   
+  // property indicate that relative error tolerance in data is set up rather then absolute error. 
+  bool m_ErrorIsRelative;
   void doComparison();
   // Compare two MD workspaces
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);

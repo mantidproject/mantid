@@ -442,7 +442,7 @@ namespace MDAlgorithms
       V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
       // The "bin count" used will be the box density.
-      double binCount = box->getSignalNormalized() * m_densityScaleFactor;
+      double binCount = box->getSignalNormalized();
 
       try
       {

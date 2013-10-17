@@ -243,7 +243,7 @@ namespace IDA
     const int fitType = uiForm().furyfit_cbFitType->currentIndex();
 
     Mantid::API::IFunction_sptr func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
-    func->setParameter("A0", m_ffDblMng->value(m_ffProp["BackgroundA0"]));
+    func->setParameter("A0", m_ffRangeManager->value(m_ffProp["BackgroundA0"]));
     result->addFunction(func);
     result->tie("f0.A1", "0");
     if ( tie ) { result->tie("f0.A0", m_ffProp["BackgroundA0"]->valueText().toStdString()); }
@@ -317,6 +317,7 @@ namespace IDA
     m_ffProp[name+".Intensity"] = m_ffDblMng->addProperty("Intensity");
     m_ffProp[name+".Tau"] = m_ffDblMng->addProperty("Tau");
     m_ffProp[name+".Beta"] = m_ffDblMng->addProperty("Beta");
+    m_ffDblMng->setRange(m_ffProp[name+".Beta"], 0, 1);
     m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], NUM_DECIMALS);
     m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], NUM_DECIMALS);
     m_ffDblMng->setDecimals(m_ffProp[name+".Beta"], NUM_DECIMALS);

@@ -3,7 +3,7 @@
 Definition of Calibration
 =========================
 
-.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolin, outputPeak ] )
+.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak ] )
 
 =========
 Use Cases
@@ -34,12 +34,6 @@ Other Usefull Methods
 .. autofunction:: tube.savePeak
 
 .. autofunction:: tube.readPeakFile
-
-=========================
-Details on Implementation
-=========================
-
-.. automodule:: tube_calib
 
 """
 
@@ -229,7 +223,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        positions with a quadratic function in order to define an operation to 
        move all the pixels to their real positions. If necessary, the user may 
        select to fit using a polinomial of 3rd order, through the parameter 
-       **fitPolin**.
+       **fitPolyn**.
 
        .. note::
          
@@ -268,7 +262,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        >>> self.tube_spec = TubeSpec(ws)
        >>> self.tube_spec.setTubeSpecByStringArray(tubeSet)
 
-       If a TubeSet object is passed, it will be used as it is.
+       If a :class:`~tube_spec.TubeSpec` object is passed, it will be used as it is.
 
        
       :param knownPositions: The defined position for the peaks/edges, taking the center as the origin and having the same units as the tube length in the 3D space.
@@ -278,7 +272,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
       Optionals parameters to tune the calibration: 
 
-      :param fitPar: Define the parameters to be used in the fit. If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
+      :param fitPar: Define the parameters to be used in the fit as a :class:`~tube_calib_fit_params.TubeCalibFitParams`. If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
 
       :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 10. See: :py:mod:`~Examples.TubeCalibDemoMerlin`
 
@@ -304,7 +298,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         >>>    # skip finding peaks
         >>>    fit_peaks_to_position()
 
-      :param fitPolin: Define the order of the polinomial to fit the pixels positions agains the known positions. The acceptable values are 2 or 3. Default = 2. (not implemented yet)
+      :param fitPolyn: Define the order of the polinomial to fit the pixels positions agains the known positions. The acceptable values are 1, 2 or 3. Default = 2.
 
 
       :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes. (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
@@ -326,7 +320,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     PLOTTUBE = 'plotTube'
     EXCLUDESHORT = 'excludeShortTubes'
     OVERRIDEPEAKS = 'overridePeaks'
-    FITPOLIN = 'fitPolin'
+    FITPOLIN = 'fitPolyn'
     OUTPUTPEAK = 'outputPeak'
 
     #check that only valid arguments were passed through kwargs    
@@ -400,9 +394,10 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # centre_pixel = known_pos * ndets/tube_length + ndets / 2
         # 
         wsp_index_for_tube0 = tubeSet.getTube(0)
+        baseInstrument = ws.getInstrument().getBaseInstrument()
         # get the first and last detectors
-        det0 = ws.getDetector(wsp_index_for_tube0[0])
-        detN = ws.getDetector(wsp_index_for_tube0[-1])
+        det0 = baseInstrument.getDetector(ws.getDetector(wsp_index_for_tube0[0]).getID())
+        detN = baseInstrument.getDetector(ws.getDetector(wsp_index_for_tube0[-1]).getID())
         tube_length = det0.getDistance(detN)
         ndets = len(wsp_index_for_tube0)
         
@@ -512,8 +507,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     # deal with FITPOLIN parameter
     if kwargs.has_key(FITPOLIN):
         polinFit = kwargs[FITPOLIN]
-        if polinFit not in [2,3]:
-            raise RuntimeError("Wrong argument %s. It expects a number 2 for quadratic, or 3 for 3rd polinomial order when fitting the pixels positions agains the known positions" % FITPOLIN)
+        if polinFit not in [1, 2,3]:
+            raise RuntimeError("Wrong argument %s. It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polinomial order when fitting the pixels positions agains the known positions" % FITPOLIN)
     else:
         polinFit = 2
 

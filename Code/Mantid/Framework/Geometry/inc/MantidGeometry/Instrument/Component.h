@@ -176,6 +176,51 @@ namespace Mantid
       }
 
       /**
+      * Get a parameter defined as an int
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns A list of values
+      */
+      std::vector<int> getIntParameter(const std::string& pname, bool recursive = true) const
+      {
+        return getParameter<int>(pname, recursive);
+      }
+
+
+      /**
+      * Get a parameter's type -- this is HACK untill Python can export property regardless of the property type 
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns std::string describing parameter type or empty string if the type is not found
+      */
+      std::string getParameterType(const std::string& pname, bool recursive = true)const
+      {
+          Parameter_sptr param = Parameter_sptr(); //Null shared pointer
+          if( recursive )
+          {
+            param = m_map->getRecursive(this, pname);
+          }
+          else
+          {
+            param = m_map->get(this, pname);
+          }
+          if(param)
+            return std::string(param->type());
+          else
+            return std::string("");
+      }
+      /**
+      * Get a parameter defined as a bool
+      * @param pname :: The name of the parameter
+      * @param recursive :: If true the search will walk up through the parent components
+      * @returns A list of values
+      */
+      std::vector<bool> getBoolParameter(const std::string& pname, bool recursive = true) const
+      {
+        return getParameter<bool>(pname, recursive);
+      }
+
+      /**
       * Get a parameter defined as a Kernel::V3D
       * @param pname :: The name of the parameter
       * @param recursive :: If true the search will walk up through the parent components
@@ -224,6 +269,7 @@ namespace Mantid
       virtual void writeXML(Poco::XML::XMLWriter & writer) const;
       virtual void appendXML(std::ostream& xmlStream) const;
 
+     
     protected:
       /// Parent component in the tree
       const IComponent* m_parent;

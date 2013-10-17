@@ -239,7 +239,7 @@ class LoadData(ReductionStep):
 
 class BackgroundOperations(ReductionStep):
     """Removes, if requested, a background from the detectors data in TOF
-    units. Currently only uses the FlatBackground algorithm, more options
+    units. Currently only uses the CalculateFlatBackground algorithm, more options
     to cover SNS use to be added at a later point.
     """
     _multiple_frames = False
@@ -263,7 +263,7 @@ class BackgroundOperations(ReductionStep):
 
         for ws in workspaces:
             ConvertToDistribution(Workspace=ws)
-            FlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,
+            CalculateFlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,
                            EndX=self._background_end, Mode='Mean')
             ConvertFromDistribution(Workspace=ws)
 
@@ -331,7 +331,7 @@ class CreateCalibrationWorkspace(ReductionStep):
             Scale(InputWorkspace=cwsn,OutputWorkspace= cwsn,Factor= factor)
         else:
             cwsn = runs[0]
-        FlatBackground(InputWorkspace=cwsn,OutputWorkspace= cwsn,StartX= backMin,EndX= backMax, Mode='Mean')
+        CalculateFlatBackground(InputWorkspace=cwsn,OutputWorkspace= cwsn,StartX= backMin,EndX= backMax, Mode='Mean')
         Integration(InputWorkspace=cwsn,OutputWorkspace= cwsn,RangeLower= peakMin,RangeUpper= peakMax)
         cal_ws = mtd[cwsn]
         sum = 0
@@ -720,6 +720,17 @@ class ConvertToEnergy(ReductionStep):
                 Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= self._rebin_string)
             else:
                 Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= rstwo)
+
+class RebinToFirstSpectrum(ReductionStep):
+    """
+        A simple step to rebin the input workspace to match
+        the first spectrum of itself
+    """
+
+    def execute(self, reducer, inputworkspace):
+        RebinToWorkspace(WorkspaceToRebin=inputworkspace,WorkspaceToMatch=inputworkspace,
+                         OutputWorkspace=inputworkspace)
+        
 
 class DetailedBalance(ReductionStep):
     """

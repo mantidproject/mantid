@@ -4,8 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/MultiFileNameParser.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidTestHelpers/FacilityHelper.h"
 
+#include <Poco/Path.h>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -363,6 +364,7 @@ public:
 
   void test_instrument_with_multiple_padding()
   {
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
 
     Parser parser;
     parser.parse("TESTHISTOLISTENER123,299-301");
@@ -373,6 +375,7 @@ public:
     TS_ASSERT_EQUALS(filenames[1][0], "TESTHISTOLISTENER00000299" );
     TS_ASSERT_EQUALS(filenames[1][1], "TST00000000300" );
     TS_ASSERT_EQUALS(filenames[1][2], "TST00000000301" );
+
   }
 
 };

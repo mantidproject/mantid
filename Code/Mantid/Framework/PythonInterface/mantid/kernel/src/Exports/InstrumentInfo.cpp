@@ -36,6 +36,10 @@ void export_InstrumentInfo()
 
     .def("facility", &InstrumentInfo::facility, return_value_policy<copy_const_reference>(),
          "Returns the facility that contains this instrument.")
+
+    .def("instdae", &InstrumentInfo::liveDataAddress, return_value_policy<copy_const_reference>(),
+         "Returns the host name and the port of the machine hosting DAE and providing port to connect to for a live data stream")
+
   ;
 }
 

@@ -84,7 +84,49 @@ class DgsReductionScripter(BaseReductionScripter):
         
         return script
         
+    def to_live_script(self):
+        """
+            Generate the script for live data reduction
+        """
+        # Need to construct Dgs call slightly differently: no line breaks & extract output workspace
+        options = ""
+        for item in self._observers:
+            if item.state() is not None:
+                for subitem in str(item.state()).split('\n'):
+                    if len(subitem):
+                        if 'OutputWorkspace' in subitem:
+                            output_workspace = subitem
+                            options += "OutputWorkspace=output,"
+                        else:
+                            options += subitem
+                            
+        if '_spe' in output_workspace:
+            output_workspace_name = 'live_spe'
+            output_workspace = 'OutputWorkspace="live_spe"'
+        else:
+            output_workspace_name = output_workspace.split('"')[1]
+
+        script = """StartLiveData(UpdateEvery='10',Instrument='"""
+        script += self.instrument_name
+        script += """',ProcessingScript='"""
         
+        # Have to jump through this hoop because chunks after the first have an empty EnergyRequest property
+        script += """if mtd.doesExist(\""""
+        script += output_workspace_name
+        script += """\"): input.run().addProperty("EnergyRequest",mtd[\""""
+        script += output_workspace_name
+        script += """\"].getRun()["EnergyRequest"],True)\\n"""
+        script +=  DgsReductionScripter.TOPLEVEL_WORKFLOWALG + '('
+        script += options
+        script += ")"
+        
+        script += """',PreserveEvents=True,EndRunBehavior='Stop',"""
+        script += output_workspace
+        script += ")\n" 
+        
+        print script
+        return script
+
     def to_batch(self):
         """
         """

@@ -68,9 +68,6 @@ private:
   std::string m_backType;
   std::string m_peakType;
   double m_maxChiSq;
-
-  DataObjects::TableWorkspace_sptr m_infoTableWS;
-  DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;
 };
 
 } // namespace Algorithm

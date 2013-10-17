@@ -61,9 +61,15 @@ def combineDataMulti(wkspList,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning
 		names = mtd.getObjectNames()
 		for ws in wkspList:
 			#print ws.rstrip("_binned")
-			DeleteWorkspace(ws)
-			DeleteWorkspace(ws.rstrip("_IvsQ_binned")+"_IvsLam")
-			DeleteWorkspace(ws.rstrip("_IvsQ_binned")+"_IvsQ")
+			candidate = ws
+			if candidate in names: 
+				DeleteWorkspace(candidate)
+			candidate = ws.rstrip("_IvsQ_binned")+"_IvsLam"
+			if  candidate in names:
+				DeleteWorkspace(candidate)
+			candidate = ws.rstrip("_IvsQ_binned")+"_IvsQ"
+			if candidate in names:
+				DeleteWorkspace(candidate)
 	return mtd[outputwksp]
 
 

@@ -1,0 +1,10 @@
+data=/entry1/area_detector2/data
+x-axis=/entry1/area_detector2/x
+x-axis-name=x
+y-axis=/entry1/area_detector2/y
+y-axis-name=y
+z-axis=/entry1/area_detector2/rotation_angle
+z-axis-name=om
+title=/entry1/title
+sample=/entry1/sample/name
+monitor1=/entry1/control/data

@@ -449,19 +449,17 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Create an object capable of using the information in the
             interface and turn it into a reduction process.
         """
-        self.reduce_button.setEnabled(False)   
+        self.reduce_button.setEnabled(False)
         self.export_button.setEnabled(False)
         self.save_button.setEnabled(False)
         self.interface_chk.setEnabled(False)
         self.file_menu.setEnabled(False)
         self.tools_menu.setEnabled(False)
-        if IS_IN_MANTIDPLOT:
-            mantidplot.app.mantidUI.setIsRunning(True)
+        
         if self._interface is not None:
             self._interface.reduce()
-        if IS_IN_MANTIDPLOT:
-            mantidplot.app.mantidUI.setIsRunning(False)
-        self.reduce_button.setEnabled(True)   
+            
+        self.reduce_button.setEnabled(True)
         self.export_button.setEnabled(True)
         self.save_button.setEnabled(True)
         self.interface_chk.setEnabled(True)

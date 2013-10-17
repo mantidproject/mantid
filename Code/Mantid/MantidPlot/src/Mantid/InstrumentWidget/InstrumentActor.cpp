@@ -31,6 +31,15 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid;
 
+/// to be used in std::transform
+struct Sqrt
+{
+  double operator()(double x)
+  {
+    return sqrt(x);
+  }
+};
+
 double InstrumentActor::m_tolerance = 0.00001;
 
 /**
@@ -380,7 +389,87 @@ double InstrumentActor::getIntegratedCounts(Mantid::detid_t id)const
   } catch (NotFoundError &) {
     // If the detector is not represented in the workspace
     return -1.0;
-  }
+    }
+}
+
+/**
+ * Sum counts in detectors for purposes of rough plotting against time of flight.
+ * Silently assumes that all spectra share the x vector.
+ *
+ * @param dets :: A list of detector IDs to sum.
+ * @param x :: (output) Time of flight values (or whatever values the x axis has) to plot against.
+ * @param y :: (output) The sums of the counts for each bin.
+ * @param err :: (optional output) Pointer to a buffer to receive the errors of the summed spectra.
+ *               If NULL the errors are not returned.
+ */
+void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x, std::vector<double> &y, std::vector<double> *err) const
+{
+
+    size_t wi;
+    bool isDataEmpty = dets.isEmpty();
+
+    if ( !isDataEmpty )
+    {
+        try {
+            wi = getWorkspaceIndex( dets[0] );
+        } catch (Mantid::Kernel::Exception::NotFoundError &) {
+          isDataEmpty = true; // Detector doesn't have a workspace index relating to it
+        }
+    }
+
+    if ( isDataEmpty )
+    {
+        x.clear();
+        y.clear();
+        if ( err )
+        {
+            err->clear();
+        }
+        return;
+    }
+
+    // find the bins inside the integration range
+    size_t imin,imax;
+    getBinMinMaxIndex(wi,imin,imax);
+
+    Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
+    const Mantid::MantidVec& X = ws->readX(wi);
+    x.assign(X.begin() + imin, X.begin() + imax);
+    if ( ws->isHistogramData() )
+    {
+      // calculate the bin centres
+      std::transform(x.begin(),x.end(),X.begin() + imin + 1,x.begin(),std::plus<double>());
+      std::transform(x.begin(),x.end(),x.begin(),std::bind2nd(std::divides<double>(),2.0));
+    }
+    y.resize(x.size(),0);
+    if (err)
+    {
+      err->resize(x.size(),0);
+    }
+
+    foreach(int id, dets)
+    {
+        try {
+          size_t index = getWorkspaceIndex( id );
+          const Mantid::MantidVec& Y = ws->readY(index);
+          std::transform(y.begin(),y.end(),Y.begin() + imin,y.begin(),std::plus<double>());
+          if (err)
+          {
+            const Mantid::MantidVec& E = ws->readE(index);
+            std::vector<double> tmp;
+            tmp.assign(E.begin() + imin,E.begin() + imax);
+            std::transform(tmp.begin(),tmp.end(),tmp.begin(),tmp.begin(),std::multiplies<double>());
+            std::transform(err->begin(),err->end(),tmp.begin(),err->begin(),std::plus<double>());
+          }
+        } catch (Mantid::Kernel::Exception::NotFoundError &) {
+          continue; // Detector doesn't have a workspace index relating to it
+        }
+    }
+
+    if (err)
+    {
+      std::transform(err->begin(),err->end(),err->begin(),Sqrt());
+    }
 }
 
 /**
@@ -779,6 +868,54 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D& Xfrom,
 
     // Combined rotation
     R = R3*R2*R1;
+  }
+}
+
+/**
+ * Find the offsets in the spectrum's x vector of the bounds of integration.
+ * @param wi :: The works[ace index of the spectrum.
+ * @param imin :: Index of the lower bound: x_min == readX(wi)[imin]
+ * @param imax :: Index of the upper bound: x_max == readX(wi)[imax]
+ */
+void InstrumentActor::getBinMinMaxIndex( size_t wi, size_t& imin, size_t& imax ) const
+{
+  Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
+  const Mantid::MantidVec& x = ws->readX(wi);
+  Mantid::MantidVec::const_iterator x_begin = x.begin();
+  Mantid::MantidVec::const_iterator x_end = x.end();
+  if (x_begin == x_end)
+  {
+    throw std::runtime_error("No bins found to plot");
+  }
+  if (ws->isHistogramData())
+  {
+    --x_end;
+  }
+  if ( wholeRange() )
+  {
+    imin = 0;
+    imax = static_cast<size_t>(x_end - x_begin);
+  }
+  else
+  {
+    Mantid::MantidVec::const_iterator x_from = std::lower_bound( x_begin, x_end, minBinValue() );
+    Mantid::MantidVec::const_iterator x_to = std::upper_bound( x_begin, x_end, maxBinValue() );
+    imin = static_cast<size_t>(x_from - x_begin);
+    imax = static_cast<size_t>(x_to - x_begin);
+    if (imax <= imin)
+    {
+      if (x_from == x_end)
+      {
+        --x_from;
+        x_to = x_end;
+      }
+      else
+      {
+        x_to = x_from + 1;
+      }
+      imin = static_cast<size_t>(x_from - x_begin);
+      imax = static_cast<size_t>(x_to - x_begin);
+    }
   }
 }
 

@@ -1061,13 +1061,20 @@ void SANSRunWindow::updateMaskTable()
       "print i.ReductionSingleton().mask.arm_width");
     QString arm_angle = runReduceScriptFunction(
       "print i.ReductionSingleton().mask.arm_angle");
+    QString arm_x = runReduceScriptFunction(
+      "print i.ReductionSingleton().mask.arm_x");
+    QString arm_y = runReduceScriptFunction(
+      "print i.ReductionSingleton().mask.arm_y");
     if ( arm_width != "None" && arm_angle != "None" )
     {
       int row = m_uiForm.mask_table->rowCount();
       m_uiForm.mask_table->insertRow(row);
       m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem("Arm"));
       m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(reardet_name));
-      m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle));      
+      if (arm_x != "None" && arm_y != "None")
+        m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle + " " + arm_x +" " + arm_y));      
+      else
+        m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle));      
     }
   }
 

@@ -11,7 +11,6 @@ namespace Mantid
 {
 namespace Geometry
 {
-
   /** PolygonEdge 
     Defines a directed edge between two points on a polygon
 
@@ -73,8 +72,8 @@ namespace Geometry
 
   /// Enumeration for point type w.r.t an edge
   enum PointClassification {
-    Left,         /**< Point is to left of edge */
-    Right,        /**< Point is to right of edge */
+    OnLeft,         /**< Point is to left of edge */
+    OnRight,        /**< Point is to right of edge */
     Beyond,       /**< Point is right of edge destination */
     Behind,       /**< Point is left of edge origin */
     Between,      /**< Point is between edge origin and destination */

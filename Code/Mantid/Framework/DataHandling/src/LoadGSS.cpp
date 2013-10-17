@@ -27,6 +27,7 @@ Two types of GSAS files are supported
 #include <Poco/File.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 
 using namespace Mantid::DataHandling;
@@ -91,7 +92,7 @@ namespace Mantid
       declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
                       "Workspace name to load into.");
 
-      declareProperty("UseBankIDasSpectrumNumber", false, "If true, spectrum number corresponding to one bank should be its bank ID. ");
+      declareProperty("UseBankIDasSpectrumNumber", false, "If true, spectrum number corresponding to each bank is to be its bank ID. ");
     }
 
     /**
@@ -414,7 +415,9 @@ namespace Mantid
       // 2.2 Put data from MatidVec's into outputWorkspace
       if (detectorIDs.size() != static_cast<size_t>(nHist))
       {
-        throw std::runtime_error("It seems not possible to have mismatch spectrum numbers and nHist.");
+        std::ostringstream mess("");
+        mess << "Number of spectra (" << detectorIDs.size() << ") is not equal to number of histograms (" << nHist << ").";
+        throw std::runtime_error(mess.str());
       }
       for (int i = 0; i < nHist; ++i)
       {
@@ -479,7 +482,7 @@ namespace Mantid
       // 0. Check Input
       g_log.information() << "L1 = " << primaryflightpath << std::endl;
       if (detectorids.size() != totalflightpaths.size() || totalflightpaths.size() != twothetas.size()){
-        g_log.warning() << "Cannot create geometry due to number of L2, Polar are not same." << std::endl;
+        g_log.warning() << "Cannot create geometry, because the numbers of L2 and Polar are not equal." << std::endl;
         return;
       }
       for (size_t i = 0; i < detectorids.size(); i ++){

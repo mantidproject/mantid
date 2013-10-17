@@ -55,24 +55,16 @@ void LoadILL::initDocs() {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-    int LoadILL::confidence(Kernel::NexusDescriptor & descriptor) const
-    {
+int LoadILL::confidence(Kernel::NexusDescriptor & descriptor) const {
 
-	const std::string path = descriptor.pathOfType("NXinstrument");
-	g_log.debug() << "Path of type NXinstrument: " << path << std::endl;
-
-	::NeXus::File &file = descriptor.data();
-	file.openPath(path + "/name");
-	std::string instrumentName = file.getStrData();
-
-	for (auto it = m_supportedInstruments.begin();
-			it != m_supportedInstruments.end(); ++it) {
-		g_log.debug() << "\t: " << *it << std::endl;
-		if (instrumentName == *it)
-			return 80;
-    }
-
-	return 0;
+	// fields existent only at the ILL
+	if (descriptor.pathExists("/entry0/wavelength")
+			&& descriptor.pathExists("/entry0/experiment_identifier")
+			&& descriptor.pathExists("/entry0/mode")) {
+		return 80;
+	} else {
+		return 0;
+	}
 }
 
 //---------------------------------------------------

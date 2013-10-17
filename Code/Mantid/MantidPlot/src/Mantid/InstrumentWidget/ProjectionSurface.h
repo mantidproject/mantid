@@ -190,7 +190,6 @@ signals:
   // detector selection
   void singleDetectorTouched(int);
   void singleDetectorPicked(int);
-  void multipleDetectorsSelected(QList<int>&);
 
   // shape manipulation
   void signalToStartCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);
@@ -199,6 +198,8 @@ signals:
   void shapesDeselected();
   void shapeChanged();
   void shapesCleared();
+  void shapesRemoved();
+  void shapeChangeFinished();
 
   // peaks
   void peaksWorkspaceAdded();
@@ -213,7 +214,7 @@ protected slots:
 
   void setSelectionRect(const QRect& rect);
   void emptySelectionRect();
-  void selectMultipleDetectors();
+  void selectMultipleMasks(const QRect& rect);
   void pickDetectorAt(int x,int y);
   void touchDetectorAt(int x,int y);
   void erasePeaks(const QRect& rect);

@@ -121,11 +121,6 @@ bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime)
   return ((this->startTime == otherStartTime) && (this->numPulses == otherNumPulse));
 }
 
-namespace
-{
-  Poco::Mutex g_eventVectorMutex;
-}
-  
 //===============================================================================================
 //===============================================================================================
 /** This task does the disk IO from loading the NXS file,
@@ -175,11 +170,11 @@ public:
   void run()
   {
     //Local tof limits
-    double my_shortest_tof, my_longest_tof;
-    my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
-    my_longest_tof = 0.;
+    double my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
+    double my_longest_tof = 0.;
     // A count of "bad" TOFs that were too high
     size_t badTofs = 0;
+    size_t my_discarded_events(0);
 
     prog->report(entry_name + ": precount");
 
@@ -293,12 +288,16 @@ public:
             // NULL eventVector indicates a bad spectrum lookup
             if(eventVector)
             {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
+#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
               // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
               eventVector->emplace_back( tof, pulsetime, weight, errorSq );
 #else
               eventVector->push_back( WeightedEvent(tof, pulsetime, weight, errorSq) );
 #endif
+            }
+            else
+            {
+              ++my_discarded_events;
             }
           }
           else
@@ -308,12 +307,16 @@ public:
             // NULL eventVector indicates a bad spectrum lookup
             if(eventVector)
             {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
+#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
               // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
               eventVector->emplace_back( tof, pulsetime );
 #else
               eventVector->push_back( TofEvent(tof, pulsetime) );
 #endif
+            }
+            else
+            {
+              ++my_discarded_events;
             }
           }
 
@@ -369,6 +372,7 @@ public:
       if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
       if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
       alg->bad_tofs += badTofs;
+      alg->discarded_events += my_discarded_events;
     }
 
 
@@ -943,7 +947,7 @@ private:
 
 /// Empty default constructor
 LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
-    event_id_is_spec(false), m_allBanksPulseTimes(NULL)
+    discarded_events(0), event_id_is_spec(false), m_allBanksPulseTimes(NULL)
 {
 }
 
@@ -1175,6 +1179,14 @@ void LoadEventNexus::exec()
   // Load the detector events
   WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
+
+  if ( discarded_events > 0 )
+  {
+    g_log.information() << discarded_events
+                        << " events were encountered coming from pixels which are not in the Instrument Definition File."
+                           "These events were discarded.\n";
+  }
+
   //add filename
   WS->mutableRun().addProperty("Filename",m_filename);
   //Save output
@@ -1250,46 +1262,19 @@ void LoadEventNexus::makeMapToEventLists(std::vector<T> & vectors)
     eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size()) + pixelID_to_wi_offset;
     
     // Make an array where index = pixel ID
-    // Set the value to the 0th workspace index by default
-    resizeFrom(vectors, eventid_max+1, WS->getEventList(0));
+    // Set the value to NULL by default
+    vectors.resize(eventid_max+1, NULL);
 
     for (size_t j=size_t(pixelID_to_wi_offset); j<pixelID_to_wi_vector.size(); j++)
     {
       size_t wi = pixelID_to_wi_vector[j];
       // Save a POINTER to the vector
-      getEventsFrom(WS->getEventList(wi), vectors[j-pixelID_to_wi_offset]);
+      if ( wi < WS->getNumberHistograms() )
+      {
+        getEventsFrom(WS->getEventList(wi), vectors[j-pixelID_to_wi_offset]);
+      }
     }
   }
-}
-
-//-----------------------------------------------------------------------------
-/**
- * This function takes the given vector of pointers for the TofEvents and
- * resizes it according to the specified length using the events in the
- * EventList to provide overfill information.
- * @param vec :: The vector to resize
- * @param size :: The length to resize the incoming vector to
- * @param el :: The event list to use as fill values
- */
-void LoadEventNexus::resizeFrom(std::vector<EventVector_pt> &vec,
-    const int32_t &size, EventList &el)
-{
-  vec.resize(size, &el.getEvents());
-}
-
-//-----------------------------------------------------------------------------
-/**
- * This function takes the given vector of pointers for the WeightedEvents and
- * resizes it according to the specified length using the events in the
- * EventList to provide overfill information.
- * @param vec :: The vector to resize
- * @param size :: The length to resize the incoming vector to
- * @param el :: The event list to use as fill values
- */
-void LoadEventNexus::resizeFrom(std::vector<WeightedEventVector_pt> &vec,
-    const int32_t &size, EventList &el)
-{
-  vec.resize(size, &el.getWeightedEvents());
 }
 
 /**

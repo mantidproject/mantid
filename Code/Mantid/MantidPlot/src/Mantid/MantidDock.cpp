@@ -69,7 +69,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   QFrame *f = new QFrame(this);
   setWidget(f);
 
-  m_tree = new MantidTreeWidget(f,m_mantidUI);
+  m_tree = new MantidTreeWidget(this,m_mantidUI);
   m_tree->setHeaderLabel("Workspaces");
 
   FlowLayout * buttonLayout = new FlowLayout();
@@ -105,41 +105,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_loadButton->setMenu(m_loadMenu);
 
   // SET UP SORT
-  chooseByName();
-  m_sortMenu = new QMenu(this);
-  m_choiceMenu = new QMenu(m_sortMenu);
-
-  m_choiceMenu->setTitle(tr("Sort by"));
-
-  QAction* m_ascendingSortAction = new QAction("Ascending", this);
-  QAction* m_descendingSortAction = new QAction("Descending", this);
-  QAction* m_byNameChoice = new QAction("Name", this);
-  QAction* m_byLastModifiedChoice = new QAction("Last Modified", this);
-  
-  m_byNameChoice->setCheckable(true);
-  m_byNameChoice->setEnabled(true);
-  m_byNameChoice->setToggleAction(true);
-  
-  m_byLastModifiedChoice->setCheckable(true);
-  m_byLastModifiedChoice->setEnabled(true);
-  m_byLastModifiedChoice->setToggleAction(true);
-
-  m_sortChoiceGroup = new QActionGroup(m_sortMenu);
-  m_sortChoiceGroup->addAction(m_byNameChoice);
-  m_sortChoiceGroup->addAction(m_byLastModifiedChoice);
-  m_sortChoiceGroup->setExclusive(true);
-  m_byNameChoice->setChecked(true);
-  
-  connect(m_ascendingSortAction, SIGNAL(activated()), this, SLOT(sortAscending()));
-  connect(m_descendingSortAction, SIGNAL(activated()), this, SLOT(sortDescending()));
-  connect(m_byNameChoice, SIGNAL(activated()), this, SLOT(chooseByName()));
-  connect(m_byLastModifiedChoice, SIGNAL(activated()), this, SLOT(chooseByLastModified()));
-  m_sortMenu->addAction(m_ascendingSortAction);
-  m_sortMenu->addAction(m_descendingSortAction);
-  m_sortMenu->addSeparator();
-  m_sortMenu->addMenu(m_choiceMenu);
-  m_choiceMenu->addActions(m_sortChoiceGroup->actions());
-  m_sortButton->setMenu(m_sortMenu);
+  createSortMenuActions();
   createWorkspaceMenuActions();
 
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
@@ -299,6 +265,58 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
   m_convertMDHistoToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertMDHistoToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertMDHistoToMatrixWorkspace()));
+}
+
+/**
+ * Create actions for sorting.
+ */
+void MantidDockWidget::createSortMenuActions()
+{
+  chooseByName();
+  m_sortMenu = new QMenu(this);
+
+  QAction* m_ascendingSortAction = new QAction("Ascending", this);
+  QAction* m_descendingSortAction = new QAction("Descending", this);
+  QAction* m_byNameChoice = new QAction("Name", this);
+  QAction* m_byLastModifiedChoice = new QAction("Last Modified", this);
+  
+  m_ascendingSortAction->setCheckable(true);
+  m_ascendingSortAction->setEnabled(true);
+  m_ascendingSortAction->setToggleAction(true);
+  
+  m_descendingSortAction->setCheckable(true);
+  m_descendingSortAction->setEnabled(true);
+  m_descendingSortAction->setToggleAction(true);
+  
+  QActionGroup *sortDirectionGroup = new QActionGroup(m_sortMenu);
+  sortDirectionGroup->addAction(m_ascendingSortAction);
+  sortDirectionGroup->addAction(m_descendingSortAction);
+  sortDirectionGroup->setExclusive(true);
+  m_ascendingSortAction->setChecked(true);
+  
+  m_byNameChoice->setCheckable(true);
+  m_byNameChoice->setEnabled(true);
+  m_byNameChoice->setToggleAction(true);
+  
+  m_byLastModifiedChoice->setCheckable(true);
+  m_byLastModifiedChoice->setEnabled(true);
+  m_byLastModifiedChoice->setToggleAction(true);
+
+  m_sortChoiceGroup = new QActionGroup(m_sortMenu);
+  m_sortChoiceGroup->addAction(m_byNameChoice);
+  m_sortChoiceGroup->addAction(m_byLastModifiedChoice);
+  m_sortChoiceGroup->setExclusive(true);
+  m_byNameChoice->setChecked(true);
+  
+  connect(m_ascendingSortAction, SIGNAL(activated()), this, SLOT(sortAscending()));
+  connect(m_descendingSortAction, SIGNAL(activated()), this, SLOT(sortDescending()));
+  connect(m_byNameChoice, SIGNAL(activated()), this, SLOT(chooseByName()));
+  connect(m_byLastModifiedChoice, SIGNAL(activated()), this, SLOT(chooseByLastModified()));
+
+  m_sortMenu->addActions(sortDirectionGroup->actions());
+  m_sortMenu->addSeparator();
+  m_sortMenu->addActions(m_sortChoiceGroup->actions());
+  m_sortButton->setMenu(m_sortMenu);
 }
 
 /**
@@ -462,6 +480,7 @@ void MantidDockWidget::updateTree()
           entry->setExpanded( true );
         }
     }
+    m_tree->sort();
 }
 
 /**
@@ -648,23 +667,25 @@ void MantidDockWidget::deleteWorkspaces()
 void MantidDockWidget::sortAscending()
 {
   m_tree->setSortOrder(Qt::Ascending);
-  m_tree->sortItems(m_tree->sortColumn(), Qt::Ascending);
+  m_tree->sort();
 }
 
 void MantidDockWidget::sortDescending()
 {
    m_tree->setSortOrder(Qt::Descending);
-   m_tree->sortItems(m_tree->sortColumn(), Qt::Descending);
+   m_tree->sort();
 }
 
 void MantidDockWidget::chooseByName()
 {
   m_tree->setSortScheme(ByName);
+  m_tree->sort();
 }
 
 void MantidDockWidget::chooseByLastModified()
 {
   m_tree->setSortScheme(ByLastModified);
+  m_tree->sort();
 }
 
 void MantidDockWidget::excludeItemFromSort(MantidTreeWidgetItem *item)
@@ -1075,7 +1096,7 @@ void MantidDockWidget::convertMDHistoToMatrixWorkspace()
 
 //------------ MantidTreeWidget -----------------------//
 
-MantidTreeWidget::MantidTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui),m_sortScheme()
+MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui):QTreeWidget(w),m_dockWidget(w),m_mantidUI(mui),m_sortScheme()
 {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -1150,14 +1171,14 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
     /// This relies on the item descriptions being up-to-date
     /// so ensure that they are or if something was
     /// replaced then it might not be correct.
-    static_cast<MantidDockWidget*>(parentWidget())->populateChildData(*it);
+    m_dockWidget->populateChildData(*it);
 
     // Look for children (workspace groups)
     QTreeWidgetItem *child = (*it)->child(0);
     if ( child && child->text(0) == "WorkspaceGroup" )
     {
       // Have to populate the group's children if it hasn't been expanded
-      if (!(*it)->isExpanded()) static_cast<MantidDockWidget*>(parentWidget())->populateChildData(*it);
+      if (!(*it)->isExpanded()) m_dockWidget->populateChildData(*it);
       const int count = (*it)->childCount();
       for ( int i=1; i < count; ++i )
       {
@@ -1247,6 +1268,22 @@ MantidItemSortScheme MantidTreeWidget::getSortScheme() const
   return m_sortScheme;
 }
 
+/**
+ * Sort the items according to the current sort scheme and order.
+ */
+void MantidTreeWidget::sort()
+{
+  sortItems(sortColumn(), m_sortOrder);
+}
+
+/**
+ * Log a warning message.
+ * @param msg :: A message to log.
+ */
+void MantidTreeWidget::logWarningMessage(const std::string& msg)
+{
+  logObject.warning( msg );
+}
 
 //-------------------- MantidTreeWidgetItem ----------------------//
 /**Constructor.
@@ -1326,7 +1363,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
         }
         catch(std::out_of_range &e)
         {
-          QMessageBox::warning(m_parent, "Error", e.what());
+          m_parent->logWarningMessage( e.what() );
           return false;
         }
       }

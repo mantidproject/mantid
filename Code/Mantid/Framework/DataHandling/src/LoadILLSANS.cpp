@@ -67,23 +67,15 @@ void LoadILLSANS::initDocs() {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadILLSANS::confidence(Kernel::NexusDescriptor & descriptor) const
-{
-	const std::string path = descriptor.pathOfType("NXinstrument");
-	g_log.debug() << "Path of type NXinstrument: " << path << std::endl;
-
-	::NeXus::File &file = descriptor.data();
-	file.openPath( path + "/name");
-	std::string instrumentName = file.getStrData();
-
-	for (auto it = m_supportedInstruments.begin();
-			it != m_supportedInstruments.end(); ++it) {
-		g_log.debug() << "\t: " << *it << std::endl;
-		if (instrumentName == *it)
-			return 80;
+int LoadILLSANS::confidence(Kernel::NexusDescriptor & descriptor) const {
+	// fields existent only at the ILL for SANS machines
+	if (descriptor.pathExists("/entry0/reactor_power")
+			&& descriptor.pathExists("/entry0/instrument_name")
+			&& descriptor.pathExists("/entry0/mode")) {
+		return 80;
+	} else {
+		return 0;
 	}
-
-	return 0;
 }
 
 

@@ -12,6 +12,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class SampleSetupScript(BaseScriptElement):
     
     sample_file = ""
+    live_button = False
     output_wsname = ""
     detcal_file = ""
     relocate_dets = False
@@ -42,7 +43,11 @@ class SampleSetupScript(BaseScriptElement):
         SampleSetupScript.monitor2_specid = int(ip.get_parameter("ei-mon2-spec"))
         
     def to_script(self):
-        script =  "SampleInputFile=\"%s\",\n" % self.sample_file
+        script = ""
+        if not self.live_button:
+            script += "SampleInputFile=\"%s\",\n" % self.sample_file
+        else:
+            script += "SampleInputWorkspace=input,\n"
         tmp_wsname = ""
         if self.output_wsname == SampleSetupScript.output_wsname:
             # Make a default name from the incoming file
@@ -89,6 +94,7 @@ class SampleSetupScript(BaseScriptElement):
         """
         xml = "<SampleSetup>\n"
         xml += "  <sample_input_file>%s</sample_input_file>\n" % self.sample_file
+        xml += "  <live_button>%s</live_button>\n" % self.live_button
         xml += "  <output_wsname>%s</output_wsname>\n" % self.output_wsname
         xml += "  <detcal_file>%s</detcal_file>\n" % self.detcal_file
         xml += "  <relocate_dets>%s</relocate_dets>\n" % self.relocate_dets
@@ -122,6 +128,9 @@ class SampleSetupScript(BaseScriptElement):
             self.sample_file = BaseScriptElement.getStringElement(instrument_dom, 
                                                                   "sample_input_file",
                                                                   default=SampleSetupScript.sample_file)
+            self.live_button = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                  "live_button",
+                                                                  default=SampleSetupScript.live_button)
             self.output_wsname = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "output_wsname",
                                                                     default=SampleSetupScript.output_wsname)
@@ -176,6 +185,7 @@ class SampleSetupScript(BaseScriptElement):
             Reset state
         """
         self.sample_file = SampleSetupScript.sample_file
+        self.live_button = SampleSetupScript.live_button
         self.output_wsname = SampleSetupScript.output_wsname
         self.detcal_file = SampleSetupScript.detcal_file
         self.relocate_dets = SampleSetupScript.relocate_dets
