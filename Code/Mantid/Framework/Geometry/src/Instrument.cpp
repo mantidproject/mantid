@@ -783,9 +783,9 @@ namespace Mantid
     }
 
     /** This method returns monitor detector ids
-    *@return a vector holding detector ids of  monitors
-    */
-    const std::vector<detid_t> Instrument::getMonitors()const
+     *  @return a vector holding detector ids of  monitors
+     */
+    std::vector<detid_t> Instrument::getMonitors() const
     {
       //Monitors cannot be parametrized. So just return the base.
       if (m_isParametrized)
@@ -794,6 +794,21 @@ namespace Mantid
         return m_monitorCache;
     }
 
+    /**
+     * Returns the number of monitors attached to this instrument
+     * @returns The number of monitors within the instrument
+     */
+    size_t Instrument::numMonitors() const
+    {
+      if (m_isParametrized)
+      {
+        return static_cast<const Instrument*>(m_base)->m_monitorCache.size();
+      }
+      else
+      {
+        return m_monitorCache.size();
+      }
+    }
 
    /**
     * Get the bounding box for this instrument. It is simply the sum of the bounding boxes of its children excluding the source
