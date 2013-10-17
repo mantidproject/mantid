@@ -1391,7 +1391,7 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
+  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
   QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
@@ -1472,6 +1472,8 @@ private:
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
+  
+  QList<QAction *> m_interfaceActions;
 
   QUndoView *d_undo_view;
   /// list of mantidmatrix windows opened from project file.

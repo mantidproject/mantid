@@ -167,6 +167,7 @@
 #include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
+#include <QPair>
 #include <zlib.h>
 
 #include <gsl/gsl_sort.h>
@@ -1514,36 +1515,36 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
 
   myMenuBar()->insertItem(tr("&Catalog"),icat);
 
-  // Interface menu. Build the interface from the user sub windows list.
-  // Modifications will be done through the ManageCustomMenus dialog and
-  // remembered through QSettings.
-  MantidQt::API::InterfaceManager interfaceManager;
-  QStringList user_windows = interfaceManager.getUserSubWindowKeys();
-  QStringListIterator itr(user_windows);
-  QString menuName = "&Interfaces";
-  addUserMenu(menuName);
-  while( itr.hasNext() )
+  // -- INTERFACE MENU --
+
+  interfaceMenu = new QMenu(this);
+  interfaceMenu->setObjectName("interfaceMenu");
+  myMenuBar()->insertItem(tr("&Interfaces"), interfaceMenu);
+  m_interfaceActions.clear();
+
+  const MantidQt::API::InterfaceManager interfaceManager;
+  const QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
+
+  // A collection of the names of each interface as they appear in the menu and also "data"
+  // relating to how each interface can be opened.  The data can either be a python file
+  // location, or else just the name of the interface as known to the InterfaceManager.
+  QList<QPair<QString, QString>> interfaceNameDataPairs;
+
+  // Add all interfaces inherited from UserSubWindow to the collection.
+  foreach(const QString userSubWindowName, interfaceManager.getUserSubWindowKeys())
   {
-      QString itemName = itr.next();
-      // Check whether the menu item was flagged in the QSettings.
-      if (getMenuSettingsFlag(itemName))
-          addUserMenuAction( menuName, itemName, itemName);
+    interfaceNameDataPairs.append(qMakePair(userSubWindowName, userSubWindowName));
   }
 
-  // Go through PyQt interfaces
-  QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
-  QStringListIterator pyqt_itr(pyqt_interfaces);
-  while( pyqt_itr.hasNext() )
+  // Add all PyQt interfaces to the collection.
+  foreach(const QString pyQtInterface, pyqt_interfaces)
   {
-    QString itemName = pyqt_itr.next();
-    QString scriptPath = scriptsDir + '/' + itemName;
+    const QString scriptPath = scriptsDir + '/' + pyQtInterface;
 
-    if( QFileInfo(scriptPath).exists() ) {
-      QString baseName = QFileInfo(scriptPath).baseName();
-      // Need to use "nice" name to check if scripts has been removed by user.
-      QString niceName = baseName.replace("_", " ");
-      if (getMenuSettingsFlag(niceName))
-        addUserMenuAction(menuName, baseName, scriptPath);
+    if( QFileInfo(scriptPath).exists() )
+    {
+      QString pyQtInterfaceName = QFileInfo(scriptPath).baseName().replace("_", " ");
+      interfaceNameDataPairs.append(qMakePair(pyQtInterfaceName, scriptPath));
     }
     else
     {
@@ -1551,6 +1552,20 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
     }
   }
+
+  // Turn the name/data pairs into QActions with which we populate the menu.
+  foreach(const auto interfaceNameDataPair, interfaceNameDataPairs)
+  {
+    const QString name = interfaceNameDataPair.first;
+    const QString data = interfaceNameDataPair.second;
+    
+    QAction * openInterface = new QAction(tr(name), interfaceMenu);
+    openInterface->setData(data);
+    interfaceMenu->addAction(openInterface);
+    m_interfaceActions.append(openInterface);
+  }
+
+  connect(interfaceMenu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
 
   myMenuBar()->insertItem(tr("&Help"), help );
 
@@ -16948,7 +16963,7 @@ void ApplicationWindow::removeCustomAction(QAction *action)
 
 void ApplicationWindow::performCustomAction(QAction *action)
 {
-  if (!action || !d_user_actions.contains(action))
+  if (!action || !(d_user_actions.contains(action) || m_interfaceActions.contains(action)))
     return;
 #ifdef SCRIPTING_PYTHON
 QString action_data = action->data().toString();
