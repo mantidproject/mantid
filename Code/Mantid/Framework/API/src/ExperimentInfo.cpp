@@ -893,10 +893,6 @@ namespace API
       this->mutableRun().loadNexus(file, "logs");
     }
 
-    // Now the instrument source
-    instrumentXml = "";
-    instrumentName = "";
-
     // Try to get the instrument file
     file->openGroup("instrument", "NXinstrument");
     file->readData("name", instrumentName);
