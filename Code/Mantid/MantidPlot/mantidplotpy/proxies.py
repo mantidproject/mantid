@@ -163,6 +163,9 @@ class QtProxyObject(QtCore.QObject):
         callable = getattr(self._getHeldObject(), attr)
         return CrossThreadCall(callable)
 
+    def __dir__(self):
+        return dir(self._getHeldObject())
+
     def __str__(self):
         """
         Return a string representation of the proxied object
