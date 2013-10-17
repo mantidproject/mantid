@@ -30,8 +30,13 @@ try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
-
-
+    
+canMantidPlot = True
+try:
+    from mantidplot import *
+except ImportError:
+    canMantidPlot = False
+    
 class Ui_SaveWindow(object):
     def setupUi(self, SaveWindow):
         SaveWindow.setObjectName(_fromUtf8("SaveWindow"))
@@ -137,8 +142,8 @@ class Ui_SaveWindow(object):
                     self.listWidget.addItem(run)
         except Exception as ex:
             logger.notice("Could not list archive runs")
-            logger.information(str(ex))
-        
+            logger.notice(str(ex))
+            logger.notice(str(type(ex)))
         
         
         
@@ -221,8 +226,6 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderItem(16, item)
         item = QtGui.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(17, item)
-
-
 
 # RB number label and edit field
         self.RBLabel = QtGui.QLabel("RB: ", self.centralWidget)
@@ -477,7 +480,8 @@ class Ui_MainWindow(object):
                     self.listWidget.addItem(run)
         except Exception as ex:
             logger.notice("Could not list archive runs")
-            logger.information(str(ex))
+            logger.notice(str(ex))
+            logger.notice(str(type(ex)))
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("ISIS Reflectometry", "ISIS Reflectometry", None, QtGui.QApplication.UnicodeUTF8))
@@ -697,15 +701,16 @@ class Ui_MainWindow(object):
                     wsb = getWorkspace(ws_name_binned)
                     Imin = min(wsb.readY(0))
                     Imax = max(wsb.readY(0))
-                    g[i] = plotSpectrum(ws_name_binned, 0, True)
-                    titl = groupGet(ws_name_binned, 'samp', 'run_title')
-                    if (i > 0):
-                        mergePlots(g[0], g[i])
-                    if (type(titl) == str):
-                        g[0].activeLayer().setTitle(titl)
-                    g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
-                    g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-                    g[0].activeLayer().setAutoScale()
+                    if canMantidPlot:
+                        g[i] = plotSpectrum(ws_name_binned, 0, True)
+                        titl = groupGet(ws_name_binned, 'samp', 'run_title')
+                        if (i > 0):
+                            mergePlots(g[0], g[i])
+                        if (type(titl) == str):
+                            g[0].activeLayer().setTitle(titl)
+                        g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
+                        g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                        g[0].activeLayer().setAutoScale()
                 if (self.tableWidget.cellWidget(row, 17).checkState() > 0):
                     if (len(runno) == 1):
                         print "Nothing to combine!"
@@ -729,11 +734,12 @@ class Ui_MainWindow(object):
                         Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableWidget.item(row, 16).text()))
                     Qmin = getWorkspace(outputwksp).readX(0)[0]
                     Qmax = max(getWorkspace(outputwksp).readX(0))
-                    gcomb = plotSpectrum(outputwksp, 0, True)
-                    titl = groupGet(outputwksp, 'samp', 'run_title')
-                    gcomb.activeLayer().setTitle(titl)
-                    gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
-                    gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                    if canMantidPlot:
+                        gcomb = plotSpectrum(outputwksp, 0, True)
+                        titl = groupGet(outputwksp, 'samp', 'run_title')
+                        gcomb.activeLayer().setTitle(titl)
+                        gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
+                        gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
 
     def dorun(self, runno, row, which):
         g = ['g1', 'g2', 'g3']
