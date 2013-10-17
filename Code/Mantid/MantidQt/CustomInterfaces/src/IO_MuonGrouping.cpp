@@ -330,23 +330,6 @@ void fillGroupingTable(const Grouping& g, Ui::MuonAnalysis& form)
     form.groupTable->setItem(gi, 1, new QTableWidgetItem(g.groups[gi].c_str()));
   }
 
-  // Fill up forward/backward group combo-boxes for pair table
-  for (int ri = 0; ri < form.pairTable->rowCount(); ri++)
-  {
-    QComboBox* fwd = static_cast<QComboBox*>(form.pairTable->cellWidget(ri,1));
-    QComboBox* bwd = static_cast<QComboBox*>(form.pairTable->cellWidget(ri,2));
-
-    for (size_t gi = 0; gi < g.groups.size(); gi++)
-    {
-      fwd->addItem(g.groupNames[gi].c_str());
-      bwd->addItem(g.groupNames[gi].c_str());
-    }
-    
-    // Set the backward group to the second one by default, if have one
-    if (bwd->count() > 1 )
-      bwd->setCurrentIndex(1);
-  }
-
   // Add pairs to the table
   for(int pi = 0; pi < static_cast<int>(g.pairs.size()); pi++)
   {
