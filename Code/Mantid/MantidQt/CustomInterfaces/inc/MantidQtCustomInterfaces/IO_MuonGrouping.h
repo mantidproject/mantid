@@ -68,28 +68,36 @@ typedef struct {
 } Grouping;
 
 /// Saves grouping to the XML file specified
-void saveGroupingToXML(const Grouping& grouping, const std::string& filename);
+void MANTIDQT_CUSTOMINTERFACES_DLL 
+  saveGroupingToXML(const Grouping& grouping, const std::string& filename);
 
 /// Loads grouping from the XML file specified
-void loadGroupingFromXML(const std::string& filename, Grouping& grouping);
+void MANTIDQT_CUSTOMINTERFACES_DLL 
+  loadGroupingFromXML(const std::string& filename, Grouping& grouping);
 
 /// Parses information from the grouping table and saves to Grouping struct
-void parseGroupingTable(const Ui::MuonAnalysis& form, Grouping& grouping);
+void MANTIDQT_CUSTOMINTERFACES_DLL 
+  parseGroupingTable(const Ui::MuonAnalysis& form, Grouping& grouping);
 
 /// Fills in the grouping table using information from provided Grouping struct
-void fillGroupingTable(const Grouping& grouping, Ui::MuonAnalysis& form);
+void MANTIDQT_CUSTOMINTERFACES_DLL 
+  fillGroupingTable(const Grouping& grouping, Ui::MuonAnalysis& form);
 
 /// Groups the workspace according to grouping provided
-MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws, const Grouping& g);
+MatrixWorkspace_sptr MANTIDQT_CUSTOMINTERFACES_DLL 
+  groupWorkspace(MatrixWorkspace_const_sptr ws, const Grouping& g);
 
 /// create 'map' relating group number to row number in group table
-void whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow);
+void MANTIDQT_CUSTOMINTERFACES_DLL 
+  whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow);
 
 /// create 'map' relating pair number to row number in pair table
-void whichPairToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow);
+void MANTIDQT_CUSTOMINTERFACES_DLL 
+  whichPairToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow);
 
 /// Set Group / Group Pair name
-void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name);
+void MANTIDQT_CUSTOMINTERFACES_DLL 
+  setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name);
 
 }
 }
