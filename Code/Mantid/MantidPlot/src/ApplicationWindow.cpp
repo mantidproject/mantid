@@ -16227,7 +16227,7 @@ ApplicationWindow::~ApplicationWindow()
   delete hiddenWindows;
   delete scriptingWindow;
   delete d_text_editor;
-
+  delete icatsearch;
   while(!d_user_menus.isEmpty())
   {
     QMenu *menu = d_user_menus.takeLast();
@@ -17569,13 +17569,14 @@ void ApplicationWindow::ICatLogin()
 
 void ApplicationWindow::ICatSearch2()
 {
-  if (icatsearch == NULL)
+  if ( icatsearch == NULL || icatsearch)
   {
+    // Only one ICAT GUI will appear, and that the previous one will be overridden.
+    // E.g. if a user opens the ICAT GUI without being logged into ICAT they will need to
+    // login in and then click "Search" again.
+    delete icatsearch;
     icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
-    icatsearch->show();
-  }
-  if (icatsearch)
-  {
+
     icatsearch->show();
     icatsearch->raise();
   }
