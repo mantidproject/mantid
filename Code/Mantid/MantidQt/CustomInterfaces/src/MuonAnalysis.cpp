@@ -430,6 +430,7 @@ void MuonAnalysis::runLoadGroupButton()
   {
     g_log.error("Unable to load grouping. Data left unchanged");
     g_log.error(e.what());
+    m_updating = false;
     return;
   }
 
