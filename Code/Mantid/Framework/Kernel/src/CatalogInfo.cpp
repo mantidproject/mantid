@@ -160,7 +160,9 @@ namespace Mantid
           elementTag->release();
           return (item->getAttribute(attributeName));
         }
+        elementTag->release();
       }
+      elementTag->release();
       return ("");
     }
 
