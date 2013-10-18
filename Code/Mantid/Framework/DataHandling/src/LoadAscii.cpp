@@ -76,7 +76,7 @@ namespace Mantid
       }
       else if(descriptor.isAscii())
       {
-        confidence = 10; // Low so that others may try
+        confidence = 9; // Low so that others may try but not stopping version 2
       }
       return confidence;
     }
