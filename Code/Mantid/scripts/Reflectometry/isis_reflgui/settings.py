@@ -21,10 +21,11 @@ class Settings(object):
         try:
             tree = XML.parse(filename)
             doc = tree.getroot()
+            self.__extract_to_dictionary(doc)
         except:
             raise ValueError("The file %s does not contain valid XML" % filename)
         
-        self.__extract_to_dictionary(doc)
+        
         
     def __check_file(self, filename):
         path, extension = os.path.splitext(filename)
