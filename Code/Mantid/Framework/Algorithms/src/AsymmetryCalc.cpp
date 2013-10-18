@@ -110,6 +110,11 @@ void AsymmetryCalc::exec()
     specIDs[1] = backward;
     std::vector<size_t> indices;
     tmpWS->getIndicesFromSpectra( specIDs, indices );
+
+    // If some spectra were not found, can't continue
+    if(specIDs.size() != indices.size())
+      throw std::invalid_argument("Some of the spectra specified do not exist in a workspace");
+
     forward = static_cast<int>( indices[0] );
     backward = static_cast<int>( indices[1] );
   }

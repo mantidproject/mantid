@@ -85,27 +85,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
   m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
-{
-  try
-  {
-    Poco::File tempFile(ConfigService::Instance().getInstrumentDirectory());
-
-    // If the instrument directory can't be written to... (linux problem)
-    if (tempFile.exists() && !tempFile.canWrite() ) 
-    {
-      g_log.information() << "Instrument directory is read only, writing temp grouping to system temp.\n";
-      m_groupingTempFilename = ConfigService::Instance().getTempDir()+"tempMuonAnalysisGrouping.xml";
-    }
-    else
-    {
-      m_groupingTempFilename = ConfigService::Instance().getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
-    }
-  }
-  catch(...)
-  {
-    g_log.debug() << "Problem writing temp grouping file";
-  }
-}
+{}
 
 /**
  * Initialize local Python environmnet. 
@@ -405,7 +385,9 @@ void MuonAnalysis::runSaveGroupButton()
 
   if( ! groupingFile.isEmpty() )
   {
-    saveGroupingTabletoXML(m_uiForm, groupingFile.toStdString());
+    Grouping groupingToSave;
+    parseGroupingTable(m_uiForm, groupingToSave);
+    saveGroupingToXML(groupingToSave, groupingFile.toStdString());
     
     QString directory = QFileInfo(groupingFile).path();
     prevValues.setValue("dir", directory);
@@ -438,19 +420,22 @@ void MuonAnalysis::runLoadGroupButton()
   QString directory = QFileInfo(groupingFile).path();
   prevValues.setValue("dir", directory);
 
-  saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-  clearTablesAndCombo();
+  Grouping loadedGrouping;
 
   try
   {
-    loadGroupingXMLtoTable(m_uiForm, groupingFile.toStdString());
+    loadGroupingFromXML(groupingFile.toStdString(), loadedGrouping);
   }
   catch (Exception::FileError& e)
   {
+    g_log.error("Unable to load grouping. Data left unchanged");
     g_log.error(e.what());
-    g_log.error("Revert to previous grouping");
-    loadGroupingXMLtoTable(m_uiForm, m_groupingTempFilename);
+    m_updating = false;
+    return;
   }
+
+  clearTablesAndCombo();
+  fillGroupingTable(loadedGrouping, m_uiForm);
 
   // add number of detectors column to group table
   int numRows = m_uiForm.groupTable->rowCount();
@@ -1201,8 +1186,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size()));
 
     if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
-      // TODO: applyGroupingToWS shows it's own messages as well. Should make it throw exceptions 
-      //       instead.
       throw std::runtime_error("Couldn't apply grouping");
 
     // Populate instrument fields
@@ -2612,63 +2595,86 @@ bool MuonAnalysis::isGroupingSet()
 }
 
 /**
- * Apply grouping specified in xml file to workspace
- *
- * @param inputWS :: The input workspace to apply grouping
- * @param outputWS :: The resulting workspace
- * @param filename :: Name of grouping file
- */
-bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS,
-   const std::string& filename)
-{
-  if ( AnalysisDataService::Instance().doesExist(inputWS) )
-  {
-    AnalysisDataService::Instance().remove(outputWS);
-
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", inputWS);
-    alg->setPropertyValue("OutputWorkspace", outputWS);
-    alg->setPropertyValue("MapFile", filename);
-    try
-    {
-      alg->execute();
-      return true;
-    }
-    catch(...)
-    {
-      m_optionTab->noDataAvailable();
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
-      return false;
-    }
-  }
-  return false;
-}
-
-/**
  * Apply whatever grouping is specified in GUI tables to workspace.
  */
-bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS)
+bool MuonAnalysis::applyGroupingToWS( const std::string& inputWsName,  const std::string& outputWsName)
 {
-  if ( isGroupingSet() && AnalysisDataService::Instance().doesExist(inputWS) )
+  if (!isGroupingSet() || !AnalysisDataService::Instance().doesExist(inputWsName))
+    return false;
+
+  std::string complaint = isGroupingAndDataConsistent();
+  if (!( complaint.empty() ) )
   {
-
-    std::string complaint = isGroupingAndDataConsistent();
-    if (!( complaint.empty() ) )
-    {
-      if (m_uiForm.frontPlotButton->isEnabled() )
-        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
-      m_optionTab->noDataAvailable();
-      return false;
-    }
-    {
-      if (!m_uiForm.frontPlotButton->isEnabled() )
-        m_optionTab->nowDataAvailable();
-    }
-
-    saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-    return applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
+    if (m_uiForm.frontPlotButton->isEnabled() )
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
+    m_optionTab->noDataAvailable();
+    return false;
   }
-  return false;
+  else
+  {
+    if (!m_uiForm.frontPlotButton->isEnabled() )
+      m_optionTab->nowDataAvailable();
+  }
+
+  // If output workspace exists, remove explicitly, so even if something goes wrong - old data 
+  // is not used
+  if(AnalysisDataService::Instance().doesExist(outputWsName))
+  {
+    // Using DeleteWorkspace algorithm so if outputWs is a group - it is fully removed
+    Mantid::API::IAlgorithm_sptr rmWs = AlgorithmManager::Instance().create("DeleteWorkspace");
+    rmWs->initialize();
+    rmWs->setPropertyValue("Workspace", outputWsName);
+    rmWs->execute();
+  }
+
+  Grouping tableGrouping;
+  parseGroupingTable(m_uiForm, tableGrouping);
+
+  // Retrieve input workspace
+  Workspace_sptr inputWs = AnalysisDataService::Instance().retrieve(inputWsName);
+
+  Workspace_sptr outputWs;
+
+  try // ... to group
+  {
+    // Single workspace
+    if(MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWs))
+    {
+      outputWs = groupWorkspace(ws, tableGrouping);
+    }
+    // Workspace group
+    else if(WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWs))
+    { 
+      // Create output group
+      WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+  
+      for(size_t i = 0; i < group->size(); i++)
+      {
+        if(MatrixWorkspace_sptr member = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i)))
+        {
+          MatrixWorkspace_sptr groupedMember = groupWorkspace(member, tableGrouping);
+
+          outputGroup->addWorkspace(groupedMember);
+        }
+        else
+          throw std::invalid_argument("Group contains unsupported workspace type");
+      }
+
+      outputWs = outputGroup;
+    }
+    else
+      throw std::invalid_argument("Unsupported workspace type");
+  }
+  catch(std::exception& e)
+  {
+    m_optionTab->noDataAvailable();
+    g_log.error(e.what());
+    return false;
+  }
+
+  AnalysisDataService::Instance().add(outputWsName, outputWs);
+
+  return true;
 }
 
 /**
@@ -2885,7 +2891,6 @@ void MuonAnalysis::startUpLook()
 */
 void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 {
-  // for now do try to set grouping from nexus file if it is already set
   if ( isGroupingSet() )
     return;
 
@@ -3087,15 +3092,20 @@ void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, Mat
 
   if ( groupFile.size() == 1 )
   {
+    Grouping loadedGrouping;
+
     try
     {
-      loadGroupingXMLtoTable(m_uiForm, directoryName+groupFile[0]);
+      loadGroupingFromXML(directoryName+groupFile[0], loadedGrouping);
     }
     catch (...)
     {
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", QString("Can't load default grouping file in IDF.\n")
-        + "with name: " + groupFile[0].c_str());
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", 
+        QString("Can't load default grouping file in IDF. \n With name: ") + groupFile[0].c_str());
+      return;
     }
+
+    fillGroupingTable(loadedGrouping, m_uiForm);
   }
 }
 
