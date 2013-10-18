@@ -488,6 +488,7 @@ class Ui_MainWindow(object):
                     self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
             self.__populateListCycle(selected_cycle)
         except Exception as ex:
+            self.cycleWidget.setVisible(False)
             logger.notice("Could not list archive runs")
             logger.notice(str(ex))
         
@@ -507,6 +508,8 @@ class Ui_MainWindow(object):
                 if cycle == self.__instrumentRuns.getLatestCycle():
                     self.cycleWidget.setCurrentIndex(cycle_count)
                 cycle_count+=1
+        # Ensure that the cycle widget is shown.
+        self.cycleWidget.setVisible(True)
      
     def __populateListADSWorkspaces(self):
         names = mtd.getObjectNames()
