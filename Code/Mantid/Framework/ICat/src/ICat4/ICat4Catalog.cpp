@@ -27,7 +27,7 @@ namespace Mantid
     void ICat4Catalog::login(const std::string& username, const std::string& password, const std::string& url)
     {
       UNUSED_ARG(url)
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
 
       // Define ssl authentication scheme
       setSSLContext(icat);
@@ -84,7 +84,7 @@ namespace Mantid
      */
     void ICat4Catalog::logout()
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
       setSSLContext(icat);
 
       ns1__logout request;
@@ -256,7 +256,8 @@ namespace Mantid
         throw std::runtime_error("You have not selected any inputs to search for!");
       }
 
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -283,7 +284,8 @@ namespace Mantid
      */
     void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -363,7 +365,8 @@ namespace Mantid
      */
     void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -430,7 +433,8 @@ namespace Mantid
      */
     void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -513,7 +517,8 @@ namespace Mantid
      */
     void ICat4Catalog::listInstruments(std::vector<std::string>& instruments)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -553,7 +558,8 @@ namespace Mantid
      */
     void ICat4Catalog::listInvestigationTypes(std::vector<std::string>& invstTypes)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -594,7 +600,8 @@ namespace Mantid
      */
     void ICat4Catalog::getFileLocation(const long long & fileID, std::string & fileLocation)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__get request;
       ns1__getResponse response;
@@ -662,10 +669,10 @@ namespace Mantid
      * Defines the SSL authentication scheme.
      * @param icat :: ICATPortBindingProxy object.
      */
-    void ICat4Catalog::setSSLContext(ICATPortBindingProxy& icat)
+    void ICat4Catalog::setSSLContext(ICat4::ICATPortBindingProxy& icat)
     {
       if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
+          SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
           NULL,       /* keyfile: required only when client must authenticate to
               server (see SSL docs on how to obtain this file) */
           NULL,       /* password to read the keyfile */
@@ -682,7 +689,7 @@ namespace Mantid
      * Throws an error message (returned by gsoap) to Mantid upper layer.
      * @param icat :: ICATPortBindingProxy object.
      */
-    void ICat4Catalog::throwErrorMessage(ICATPortBindingProxy& icat)
+    void ICat4Catalog::throwErrorMessage(ICat4::ICATPortBindingProxy& icat)
     {
       char buf[600];
       const int len = 600;
