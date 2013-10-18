@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/Histogram1D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -61,20 +63,30 @@ namespace Mantid
       static bool isAscii(FILE *file);
 
     protected:
-      /// Process the header information within the file.
-      virtual void processHeader(std::ifstream & file) const;
       /// Read the data from the file
-      virtual API::Workspace_sptr readData(std::ifstream & file) const;
-
-      /// Peek at a line without extracting it from the stream
-      void peekLine(std::ifstream & is, std::string & str) const;
+      virtual API::Workspace_sptr readData(std::ifstream & file);
       /// Return true if the line is to be skipped
       bool skipLine(const std::string & line) const;
+      /// Return true if the line doesn't start with a valid character
+      bool badLine(const std::string & line) const;
+      /// check and configure flags and values relating to starting a new spectra
+      void newSpectra();
+      /// Check if the file has been found to incosistantly include spectra IDs
+      void inconsistantIDCheck() const;
       /// Split the data into columns.
       int splitIntoColumns(std::list<std::string> & columns, const std::string & str) const;
       /// Fill the given vector with the data values
       void fillInputValues(std::vector<double> &values, const std::list<std::string>& columns) const;
-
+      //write the values in the current line to teh end fo teh current spectra
+      void addToCurrentSpectra(std::list<std::string> & columns);
+      //check that the nubmer of columns in the current line match the number found previously
+      void checkLineColumns(const int & cols) const;
+      //interpret a line that has been deemed valid enough to look at.
+      void parseLine(const std::string & line, std::list<std::string> & columns, const int & lineNo);
+      //find the number of collums we should expect from now on
+      void setcolumns(std::ifstream & file, std::string & line, std::list<std::string> & columns);
+      //wirte the spectra to the workspace
+      void writeToWorkspace(API::MatrixWorkspace_sptr & localWorkspace, const size_t & numSpectra) const;
       /// The column separator
       std::string m_columnSep;
 
@@ -88,6 +100,15 @@ namespace Mantid
 
       /// Map the separator options to their string equivalents
       std::map<std::string,std::string> m_separatorIndex;
+      std::string m_comment;
+      int m_baseCols;
+      int m_specNo;
+      int m_lastBins;
+      int m_curBins;
+      bool m_spectraStart;
+      int m_specIDs;
+      std::vector<DataObjects::Histogram1D> m_spectra;
+      DataObjects::Histogram1D *m_curSpectra;
     };
 
   } // namespace DataHandling

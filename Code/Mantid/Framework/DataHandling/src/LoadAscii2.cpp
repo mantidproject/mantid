@@ -2,19 +2,26 @@
 
 The LoadAscii2 algorithm reads in spectra data from a text file and stores it in a [[Workspace2D]] as data points. The data in the file must be organized in columns separated by commas, tabs, spaces, colons or semicolons. Only one separator type can be used throughout the file; use the "Separator" property to tell the algorithm which to use. The algorithm [[SaveAscii2]] is normally able to produce such a file.
 
-By default the algorithm attempts to guess which lines are header lines by trying to see where a contiguous block of numbers starts. This can be turned off by specifying the "SkipNumLines" property, which will then tell the algorithm to simply use that as the the number of header lines.
+The format must be:
+* A single integer or blank line to denote a new spectra
+* For each bin, between two and four columns of delimted data in the following order: 1st column=X, 2nd column=Y, 3rd column=E, 4th column=DX (X error)
+* Comments can be included by prefixing the line with a non-numerical character which must be consistant throughout the file and specified when you load the file. Defaults to "#"
+* The number of bins is defined by the number of rows and must be identical for each spectra
 
-The format can be one of:
-* Two columns: 1st column=X, 2nd column=Y, E=0
-* For a workspace of ''n'' spectra, 2''n''+1 columns: 1''st'' column=X, 2i''th'' column=Y, 2i+1''th'' column =E
-* Four columns: 1st column=X, 2nd column=Y, 3rd column=E, 4th column=DX (X error)
-
-The number of bins is defined by the number of rows.
-
-The resulting workspace will have common X binning for all spectra.
-
-This algorithm cannot load a file created by [[SaveAscii2]] if it has X errors written and several spectra.
-
+The following is an example valid file of 4 spectra of 2 bins each with no X error
+# X , Y , E
+1
+2.00000000,2.00000000,1.00000000
+4.00000000,1.00000000,1.00000000
+2
+2.00000000,5.00000000,2.00000000
+4.00000000,4.00000000,2.00000000
+3
+2.00000000,3.00000000,1.00000000
+4.00000000,0.00000000,0.00000000
+4
+2.00000000,0.00000000,0.00000000
+4.00000000,0.00000000,0.00000000
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -33,20 +40,20 @@ This algorithm cannot load a file created by [[SaveAscii2]] if it has X errors w
 #include <Poco/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 namespace Mantid
 {
   namespace DataHandling
   {
     DECLARE_FILELOADER_ALGORITHM(LoadAscii2);
-    
+
     /// Sets documentation strings for this algorithm
     void LoadAscii2::initDocs()
     {
       this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
       this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
     }
-    
 
     using namespace Kernel;
     using namespace API;
@@ -57,10 +64,10 @@ namespace Mantid
     }
 
     /**
-     * Return the confidence with with this algorithm can load the file
-     * @param descriptor A descriptor for the file
-     * @returns An integer specifying the confidence level. 0 indicates it will not be used
-     */
+    * Return the confidence with with this algorithm can load the file
+    * @param descriptor A descriptor for the file
+    * @returns An integer specifying the confidence level. 0 indicates it will not be used
+    */
     int LoadAscii2::confidence(Kernel::FileDescriptor & descriptor) const
     {
       const std::string & filePath = descriptor.filename();
@@ -69,8 +76,8 @@ namespace Mantid
       // Avoid some known file types that have different loaders
       int confidence(0);
       if( filePath.compare(filenameLength - 12,12,"_runinfo.xml") == 0 ||
-          filePath.compare(filenameLength - 6,6,".peaks") == 0 ||
-          filePath.compare(filenameLength - 10,10,".integrate") == 0 )
+        filePath.compare(filenameLength - 6,6,".peaks") == 0 ||
+        filePath.compare(filenameLength - 10,10,".integrate") == 0 )
       {
         confidence = 0;
       }
@@ -88,7 +95,7 @@ namespace Mantid
     */
     bool LoadAscii2::isAscii(FILE *file)
     {
-          char data[256];
+      char data[256];
       char *pend = &data[fread(data, 1, sizeof(data), file)];
       fseek(file,0,SEEK_SET);
       /*
@@ -110,78 +117,6 @@ namespace Mantid
     //--------------------------------------------------------------------------
     // Protected methods
     //--------------------------------------------------------------------------
-    /**
-    * Process the header information. This implementation just skips it entirely. 
-    * @param file :: A reference to the file stream
-    */
-    void LoadAscii2::processHeader(std::ifstream & file) const
-    {
-
-      // Most files will have some sort of header. If we've haven't been told how many lines to 
-      // skip then try and guess 
-      int numToSkip = getProperty("SkipNumLines");
-      if( numToSkip == EMPTY_INT() )
-      {
-        const int rowsToMatch(5);
-        // Have a guess where the data starts. Basically say, when we have say "rowsToMatch" lines of pure numbers
-        // in a row then the line that started block is the top of the data
-        int numCols(-1), matchingRows(0), row(0);
-        std::string line;
-        std::vector<double> values;
-        while( getline(file,line) )
-        {
-          ++row;
-          //int nchars = (int)line.length(); TODO dead code?
-          boost::trim(line);
-          if( this->skipLine(line) )
-          {
-            continue;
-          }
-
-          std::list<std::string> columns;
-          int lineCols = this->splitIntoColumns(columns, line);
-          try
-          {
-            fillInputValues(values, columns);
-          }
-          catch(boost::bad_lexical_cast&)
-          {
-            continue;
-          }
-          if( numCols < 0 ) numCols = lineCols;
-          if( lineCols == numCols )
-          {
-            ++matchingRows;
-            if( matchingRows == rowsToMatch ) break;
-          }
-          else
-          {
-            numCols = lineCols;
-            matchingRows = 1;
-          }
-        }
-        // if the file does not have more than rowsToMatch + skipped lines, it will stop 
-        // and raise the EndOfFile, this may cause problems for small workspaces.
-        // In this case clear the flag
-        if (file.eof()){
-          file.clear(file.eofbit);
-        }
-        // Seek the file pointer back to the start.
-        // NOTE: Originally had this as finding the stream position of the data and then moving the file pointer
-        // back to the start of the data. This worked when a file was read on the same platform it was written
-        // but failed when read on a different one due to underlying differences in the stream translation.
-        file.seekg(0,std::ios::beg);
-        // We've read the header plus the number of rowsToMatch
-        numToSkip = row - rowsToMatch;
-      }
-      int i(0);
-      std::string line;
-      while( i < numToSkip && getline(file, line) )
-      {
-        ++i;
-      }
-      g_log.information() << "Skipped " << numToSkip << " line(s) of header information()\n";
-    }
 
     /**
     * Reads the data from the file. It is assumed that the provided file stream has its position
@@ -189,99 +124,115 @@ namespace Mantid
     * @param file :: A reference to a file stream
     * @returns A pointer to a new workspace
     */
-    API::Workspace_sptr LoadAscii2::readData(std::ifstream & file) const
+    API::Workspace_sptr LoadAscii2::readData(std::ifstream & file)
     {
-      // Get the first line and find the number of spectra from the number of columns
+      //there should be no need for processheader now as this will now skip blanks and comment lines and throw on anything unusual
+      //it's probably more stirct versus version 1, but then this is a format change and we don't want any bad data getting into the workspace
+      //there is still flexibility, but the format should jsut make more sense in general
+
+      m_baseCols = 0;
+      m_specNo = 0;
+      m_lastBins = 0;
+      m_curBins = 0;
+      m_spectraStart = true;
+      m_specIDs = 0;
+
+      int lineNo = 0;
+      m_spectra.clear();
+      m_curSpectra = new DataObjects::Histogram1D();
       std::string line;
-      getline(file,line);
-      boost::trim(line);
 
       std::list<std::string> columns;
-      const int numCols = splitIntoColumns(columns, line);
-      if( numCols < 2 ) 
+
+      setcolumns(file, line, columns);
+
+      while( getline(file,line) )
       {
-        g_log.error() << "Invalid data format found in file \"" << getPropertyValue("Filename") << "\"\n";
-        throw std::runtime_error("Invalid data format. Fewer than 2 columns found.");
+        lineNo++;
+        if (line.empty())
+        {
+          //the line is empty, treat as a break before a new spectra
+          //Signifies the start of a new spectra if it wasn't preceeded with another blank line or a spectra ID
+          newSpectra();
+        }
+        else if (!skipLine(line))
+        {
+          parseLine(line, columns, lineNo);
+        }
       }
-      size_t numSpectra(0);
-      bool haveErrors(false);
-      bool haveXErrors(false);
-      // Assume single data set with no errors
-      if( numCols == 2 )
+
+      newSpectra();
+
+      const size_t numSpectra = m_spectra.size();
+      MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace2D",numSpectra, m_lastBins, m_lastBins);
+
+      writeToWorkspace(localWorkspace, numSpectra);
+      delete m_curSpectra;
+      return localWorkspace;
+    }
+
+    /**
+    * Check the start of the file for the first data set, then set the number of columns that hsould be expected thereafter
+    * @param[in] line : The current line of data
+    * @param[in] columns : the columns of values in the current line of data
+    * @param[in] lineNo : the current line number
+    */
+    void LoadAscii2::parseLine(const std::string & line, std::list<std::string> & columns, const int & lineNo)
+    {
+      if (std::isdigit(line.at(0)))
       {
-        numSpectra = numCols/2;
+        const int cols = splitIntoColumns(columns, line);
+        if (cols > 4 || cols < 0)
+        {
+          //there were more separators than there should have been, which isn't right, or something went rather wrong
+          throw std::runtime_error("Sets of values must have between 1 and 3 delimiters");
+        }
+        else if (cols == 1)
+        {
+          //a size of 1 is a spectra ID as long as there are no alphabetic characters in it. Signifies the start of a new spectra if it wasn't preceeded with a blank line
+          newSpectra();
+
+          //at this point both vectors should be the same size (or the ID counter should be 0, but as we're here then that's out the window),
+          if (m_spectra.size() == m_specIDs)
+          {
+            m_specIDs++;
+          }
+          else
+          {
+            //if not then they've ommitted IDs in the the file previously and just decided to include one (which is wrong and confuses everything)
+            throw std::runtime_error("Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. "
+              "Check for blank lines, as they symbolize the end of one spectra and the start of another.");
+          }
+          //this will overwrite the old id in the case of consecutive spectra ID lines
+          m_curSpectra->setSpectrumNo(boost::lexical_cast<int>(*(columns.begin())));
+        }
+        else if (cols != 1)
+        {
+          inconsistantIDCheck();
+
+          checkLineColumns(cols);
+
+          addToCurrentSpectra(columns);
+        }
       }
-      // Data with errors
-      else if( (numCols-1) % 2 == 0 )
+      else if (badLine(line))
       {
-        numSpectra = (numCols - 1)/2;
-        haveErrors = true;
-      }
-      // Data with errors on both X and Y (4-column file)
-      else if( numCols == 4 )
-      {
-        numSpectra = 1;
-        haveErrors = true;
-        haveXErrors = true;
+        throw std::runtime_error("Unexpected character found at beggining of line " + std::to_string(lineNo) + ". Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
       }
       else
       {
-        g_log.error() << "Invalid data format found in file \"" << getPropertyValue("Filename") << "\"\n";
-        g_log.error() << "LoadAscii2 requires the number of columns to be an even multiple of either 2 or 3.";
-        throw std::runtime_error("Invalid data format.");
+        //strictly speaking this should never be hit, but just being sure
+        throw std::runtime_error("Unknown format at line " + std::to_string(lineNo) + ". Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
       }
+    }
 
-      // A quick check at the number of lines won't be accurate enough as potentially there
-      // could be blank lines and comment lines
-      int numBins(0), lineNo(0);
-      std::vector<DataObjects::Histogram1D> spectra(numSpectra);
-      std::vector<double> values(numCols, 0.);
-      do
-      {
-        ++lineNo;
-        boost::trim(line);
-        if( this->skipLine(line) ) continue;
-        columns.clear();
-        int lineCols = this->splitIntoColumns(columns, line); 
-        if( lineCols != numCols )
-        {
-          std::ostringstream ostr;
-          ostr << "Number of columns changed at line " << lineNo;
-          throw std::runtime_error(ostr.str());
-        }
-
-        try
-        {
-          fillInputValues(values, columns); //ignores nans and replaces them with 0
-        }
-        catch(boost::bad_lexical_cast&)
-        {
-          g_log.error() << "Invalid value on line " << lineNo << " of \""
-            << getPropertyValue("Filename") << "\"\n";
-          throw std::runtime_error("Invalid value encountered.");
-        }
-
-        for (size_t i = 0; i < numSpectra; ++i)
-        {
-          spectra[i].dataX().push_back(values[0]);
-          spectra[i].dataY().push_back(values[i*2+1]);
-          if( haveErrors )
-          {
-            spectra[i].dataE().push_back(values[i*2+2]);
-          }
-          if( haveXErrors )
-          {
-            // Note: we only have X errors with 4-column files.
-            // We are only here when i=0.
-            spectra[i].dataDx().push_back(values[3]);
-          }
-        }
-        ++numBins;
-      }
-      while(getline(file,line));
-
-      MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
-        (WorkspaceFactory::Instance().create("Workspace2D",numSpectra,numBins,numBins));
+    /**
+    * Construct the workspace
+    * @param[out] localWorkspace : the workspace beign constructed
+    * @param[in] numSpectra : The number of spectra found in the file
+    */
+    void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr & localWorkspace, const size_t & numSpectra) const
+    {
       try 
       {
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
@@ -293,39 +244,192 @@ namespace Mantid
 
       for (size_t i = 0; i < numSpectra; ++i)
       {
-        localWorkspace->dataX(i) = spectra[i].dataX();
-        localWorkspace->dataY(i) = spectra[i].dataY();
-        /* If Y or E errors are not there, DON'T copy across as the 'spectra' vectors
-           have not been filled above. The workspace will by default have vectors of
-           the right length filled with zeroes. */
-        if ( haveErrors ) localWorkspace->dataE(i) = spectra[i].dataE();
-        if ( haveXErrors ) localWorkspace->dataDx(i) = spectra[i].dataDx();
-        // Just have spectrum number start at 1 and count up
-        localWorkspace->getSpectrum(i)->setSpectrumNo(static_cast<specid_t>(i)+1);
+        localWorkspace->dataX(i) = m_spectra[i].readX();
+        localWorkspace->dataY(i) = m_spectra[i].readY();
+        //if E or DX are ommitted they're implicitly initalised as 0
+        if (m_baseCols == 4 || m_baseCols == 3)
+        {
+          //E in file
+          localWorkspace->dataE(i) = m_spectra[i].readE();
+        }
+        if (m_baseCols == 4)
+        {
+          //DX in file
+          localWorkspace->dataDx(i) = m_spectra[i].readDx();
+        }
+        if (m_specIDs!= 0)
+        {
+          localWorkspace->getSpectrum(i)->setSpectrumNo(m_spectra[i].getSpectrumNo());
+        }
+        else
+        {
+          localWorkspace->getSpectrum(i)->setSpectrumNo(static_cast<specid_t>(i)+1);
+        }
       }
-      return localWorkspace;
     }
 
     /**
-    * Peek at a line without extracting it from the stream
+    * Check the start of the file for the first data set, then set the number of columns that hsould be expected thereafter
+    * @param[in] file : The file stream
+    * @param[in] line : The current line of data
+    * @param[in] columns : the columns of values in the current line of data
     */
-    void LoadAscii2::peekLine(std::ifstream & is, std::string & str) const
+    void LoadAscii2::setcolumns(std::ifstream & file, std::string & line, std::list<std::string> & columns)
     {
-      getline(is, str);
-      is.seekg(-(int)str.length(),std::ios::cur);
-      boost::trim(str);
+      //first find the first data set and set that as the template for the number of data collumns we expect from this file
+      while( getline(file,line) && m_baseCols == 0)
+      {
+        if (!line.empty())
+        {
+          if (std::isdigit(line.at(0)))
+          {
+            const int cols = splitIntoColumns(columns, line);
+            //we might have the first set of values but there can't be more than 3 commas if it is
+            //int values = std::count(line.begin(), line.end(), ',');
+            if (cols > 4 || cols < 1)
+            {
+              //there were more separators than there should have been, which isn't right, or something went rather wrong
+              throw std::runtime_error("Sets of values must have between 1 and 3 delimiters");
+            }
+            else if (cols != 1)
+            {
+              //a size of 1 is most likely a spectra ID so ignore it, a value of 2, 3 or 4 is a valid data set
+              m_baseCols = cols;
+            }
+          }
+        }
+      }
+      //make sure some valid data has been found to set the amount of columns, and the file isn't at EOF
+      if (m_baseCols > 4 || m_baseCols < 2 || file.eof())
+      {
+        throw std::runtime_error("No valid data in file, check separator settings.");
+      }
+
+      //start from the top again, this time filling in the list
+      file.seekg(0,std::ios_base::beg);
+    }
+
+    /**
+    * Check if the file has been found to incosistantly include spectra IDs
+    * @param[in] columns : the columns of values in the current line of data
+    */
+    void LoadAscii2::addToCurrentSpectra(std::list<std::string> & columns)
+    {
+      std::vector<double> values(m_baseCols, 0.);
+      m_spectraStart = false;
+      fillInputValues(values, columns);
+      //add X and Y
+      m_curSpectra->dataX().push_back(values[0]);
+      m_curSpectra->dataY().push_back(values[1]);
+      //check for E and DX
+      switch (m_baseCols)
+      {
+        // if only 2 collumns X and Y in file, E = 0 is implicit when constructing workspace, omit DX
+      case 3:
+        {
+          //E in file, include it, omit DX
+          m_curSpectra->dataE().push_back(values[2]);
+          break;
+        }
+      case 4:
+        {
+          //E and DX in file, include both
+          m_curSpectra->dataE().push_back(values[2]);
+          m_curSpectra->dataDx().push_back(values[3]);
+          break;
+        }
+      }
+      m_curBins++;
+    }
+
+    /**
+    * Check if the file has been found to incosistantly include spectra IDs
+    * @param[in] cols : the number of columns in the current line of data
+    */
+    void LoadAscii2::checkLineColumns(const int & cols) const
+    {
+      //a size of 2, 3 or 4 is a valid data set, but first see if it's the same as the first observed one
+      if (m_baseCols != cols)
+      {
+        throw std::runtime_error("Number of data columns not consistent throughout file");
+      }
+    }
+
+    /**
+    * Check if the file has been found to incosistantly include spectra IDs
+    * @param[in] spectraSize : the number of spectra recorded so far
+    */
+    void LoadAscii2::inconsistantIDCheck() const
+    {
+      //we need to do a check regarding spectra ids before doing anything else
+      //is this the first bin in the spectra? if not this check has already been done for this spectra
+      //If the ID vector is completly empty then it's ok we're assigning them later
+      //if there are equal or less IDs in their vector than there are spectra in thiers, then there's been no ID assigned to this spectra and there should be
+      if (m_spectraStart && m_specIDs != 0 && !(m_spectra.size() < m_specIDs))
+      {
+        throw std::runtime_error("Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. Check for blank lines, as they symbolize the end of one spectra and the start of another.");
+      }
+    }
+
+    /**
+    * Check if the file has been found to incosistantly include spectra IDs
+    */
+    void LoadAscii2::newSpectra()
+    {
+      if (!m_spectraStart)
+      {
+        if (m_lastBins == 0)
+        {
+          m_lastBins = m_curBins;
+          m_curBins = 0;
+        }
+        else if (m_lastBins == m_curBins)
+        {
+          m_curBins = 0;
+        }
+        else
+        {
+          throw std::runtime_error("Number of bins per spectra not consistant.");
+        }
+
+        if (m_curSpectra)
+        {
+          size_t specSize = m_curSpectra->size();
+          if (specSize > 0 && specSize == m_lastBins)
+          {
+            m_spectra.push_back(*m_curSpectra);
+          }
+          delete m_curSpectra;
+        }
+
+        m_curSpectra = new DataObjects::Histogram1D();
+        m_spectraStart = true;
+      }
     }
 
     /**
     * Return true if the line is to be skipped.
-    * @param line :: The line to be checked
+    * @param[in] line :: The line to be checked
     * @return True if the line should be skipped
     */
     bool LoadAscii2::skipLine(const std::string & line) const
     {
-      // Empty or comment
-      return ( line.empty() || boost::starts_with(line, "#") );
+      // Comments are skipped, Empty actually means somehting and shouldn't be skipped
+      //just checking the comment's first character should be ok as comment cahracters can't be numeric at all, so they can't really be confused
+      return (line.at(0) == m_comment.at(0));
     }
+
+    /**
+    * Return true if the line doesn't start wiht a valid character.
+    * @param[in] line :: The line to be checked
+    * @return :: True if the line doesn't start wiht a valid character.
+    */
+    bool LoadAscii2::badLine(const std::string & line) const
+    {
+      // Empty or comment
+      return (!std::isdigit(line.at(0)) && line.at(0) != m_comment.at(0));
+    }
+
 
     /**
     * Split the data into columns based on the input separator
@@ -342,16 +446,14 @@ namespace Mantid
     /**
     * Fill the given vector with the data values. Its size is assumed to be correct
     * @param[out] values :: The data vector fill
-    * @param columns :: The list of strings denoting columns
+    * @param[in] columns :: The list of strings denoting columns
     */
-    void LoadAscii2::fillInputValues(std::vector<double> &values, 
-      const std::list<std::string>& columns) const
+    void LoadAscii2::fillInputValues(std::vector<double> &values, const std::list<std::string>& columns) const
     {
       values.resize(columns.size());
       std::list<std::string>::const_iterator iend = columns.end();
       int i = 0;
-      for( std::list<std::string>::const_iterator itr = columns.begin();
-        itr != iend; ++itr )
+      for( std::list<std::string>::const_iterator itr = columns.begin(); itr != iend; ++itr )
       {
         std::string value = *itr;
         boost::trim(value);
@@ -387,7 +489,7 @@ namespace Mantid
         "",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
 
       std::string spacers[6][6] = { {"Automatic", ",\t:; "}, {"CSV", ","},
-          {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"} };
+      {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"} };
       // For the ListValidator
       std::vector<std::string> sepOptions;
       for( size_t i = 0; i < 5; ++i )
@@ -399,6 +501,7 @@ namespace Mantid
       declareProperty("Separator", "Automatic", boost::make_shared<StringListValidator>(sepOptions),
         "The separator between data columns in the data file. The possible values are \"CSV\", \"Tab\", "
         "\"Space\", \"SemiColon\", or \"Colon\" (default: Automatic selection).");
+      declareProperty("CommentIndicator", "#", "Character(s) found front of comment lines. Cannot contain numeric characters");
 
       std::vector<std::string> units = UnitFactory::Instance().getKeys();
       units.insert(units.begin(),"Dimensionless");
@@ -407,8 +510,6 @@ namespace Mantid
 
       auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
-      declareProperty("SkipNumLines", EMPTY_INT(), mustBePosInt,
-        "If given, skip this number of lines at the start of the file.");
     }
 
     /** 
@@ -426,14 +527,20 @@ namespace Mantid
 
       std::string sepOption = getProperty("Separator");
       m_columnSep = m_separatorIndex[sepOption];
+      m_comment = getProperty("CommentIndicator");
+
+      boost::regex test("[^0-9]+", boost::regex::perl);
+      if (!boost::regex_match(m_comment.begin(), m_comment.end(), test))
+      {
+        throw std::runtime_error("Comment markers cannot contain numeric characters");
+      }
+
       // Process the header information.
-      processHeader(file);
+      //processHeader(file);
       // Read the data
       MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(readData(file));
       outputWS->mutableRun().addProperty("Filename",filename);
       setProperty("OutputWorkspace", outputWS);
     }
-
-
   } // namespace DataHandling
 } // namespace Mantid
