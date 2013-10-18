@@ -54,9 +54,15 @@ class LatestISISRuns(object):
         if firstonly:
             self.__make_map_entry(map, dom[-1], base_path, instr_path)
         else:
-            for elem in slice:
+            for elem in dom:
                 self.__make_map_entry(map, elem, base_path, instr_path)
         return map
+    
+    def getLatestCycle(self):
+        return self.__most_recent_cycle
+    
+    def getInstrument(self):
+        return self.__instrument
     
     def getCycles(self):
         cached_cycle_keys = list(self.__cycleMap.keys())
@@ -104,11 +110,14 @@ class LatestISISRuns(object):
             if not cycle_dir in current_search_dir:
                 config.appendDataSearchDir(cycle_dir)
                    
-    def getLatestJournalRuns(self, cycle=None):
+    def getJournalRuns(self, cycle=None):
         if not cycle:
             journal_path, cycle_dir_path = self.__cycleMap[self.__most_recent_cycle]
         else:
-            journal_path, cycle_dir_path = self.__cycleMap[cycle]
+            if len(self.__cycleMap) == 1:
+                self.__cycleMap = self.makeMappings() # This will take some time
+            journal_path, cycle_dir_path = self.__cycleMap[str(cycle).strip()]
+            
         # side effect.
         self.__addSettingDirToManagedUserDirs(cycle_dir_path)
 

@@ -137,13 +137,13 @@ class Ui_SaveWindow(object):
             self.listWidget.addItem(ws)
         try:
             instrumentRuns =  LatestISISRuns(instrument=config['default.instrument'])
-            runs = instrumentRuns.getLatestJournalRuns()
+            runs = instrumentRuns.getJournalRuns()
             for run in runs:    
                     self.listWidget.addItem(run)
+                  
         except Exception as ex:
             logger.notice("Could not list archive runs")
             logger.notice(str(ex))
-            logger.notice(str(type(ex)))
         
         
         
@@ -166,6 +166,9 @@ class Ui_SaveWindow(object):
         
 
 class Ui_MainWindow(object):
+    
+    __instrumentRuns = None
+    
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("ISIS Reflectometry"))
         MainWindow.resize(1300, 400)
@@ -226,6 +229,10 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderItem(16, item)
         item = QtGui.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(17, item)
+        
+        self.cycleWidget = QtGui.QComboBox(self.centralWidget)
+        self.gridLayout.addWidget(self.cycleWidget, 0, 1)
+        QtCore.QObject.connect(self.cycleWidget, QtCore.SIGNAL(_fromUtf8("activated(QString)")), self.on_cycle_changed)
 
 # RB number label and edit field
         self.RBLabel = QtGui.QLabel("RB: ", self.centralWidget)
@@ -468,21 +475,45 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         
         
-    def populateList(self):
+    def populateList(self, selected_cycle=None):
+        # Clear existing
         self.listWidget.clear()
-        names = mtd.getObjectNames()
-        for ws in names:
-            self.listWidget.addItem(ws)
+        # Fill with ADS workspaces
+        self.__populateListADSWorkspaces()
         try:
-            instrumentRuns =  LatestISISRuns(instrument=config['default.instrument'])
-            runs = instrumentRuns.getLatestJournalRuns()
-            for run in runs:    
-                    self.listWidget.addItem(run)
+            selectedInstrument = config['default.instrument'].strip().upper()
+            if not self.__instrumentRuns:
+                self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
+            elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
+                    self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
+            self.__populateListCycle(selected_cycle)
         except Exception as ex:
             logger.notice("Could not list archive runs")
             logger.notice(str(ex))
-            logger.notice(str(type(ex)))
-
+        
+    def __populateListCycle(self, selected_cycle=None):  
+        runs = self.__instrumentRuns.getJournalRuns(cycle=selected_cycle)
+        for run in runs:
+            self.listWidget.addItem(run)
+            
+        # Get possible cycles for this instrument.            
+        cycles = self.__instrumentRuns.getCycles() 
+        # Setup the list of possible cycles. And choose the latest as the default
+        if not selected_cycle: 
+            cycle_count = 0
+            self.cycleWidget.clear()
+            for cycle in cycles:
+                self.cycleWidget.addItem(cycle)
+                if cycle == self.__instrumentRuns.getLatestCycle():
+                    self.cycleWidget.setCurrentIndex(cycle_count)
+                cycle_count+=1
+     
+    def __populateListADSWorkspaces(self):
+        names = mtd.getObjectNames()
+        for ws in names:
+            self.listWidget.addItem(ws)
+              
+    
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("ISIS Reflectometry", "ISIS Reflectometry", None, QtGui.QApplication.UnicodeUTF8))
         self.tableWidget.horizontalHeaderItem(0).setText(QtGui.QApplication.translate("ISIS Reflectometry", "Run(s)", None, QtGui.QApplication.UnicodeUTF8))
@@ -525,6 +556,9 @@ class Ui_MainWindow(object):
 
     def readJournal(self):
         self.populateList()
+        
+    def on_cycle_changed(self, cycle):
+        self.populateList(selected_cycle=cycle)
 
 
     def initTable(self): 
@@ -589,9 +623,18 @@ class Ui_MainWindow(object):
         while (self.tableWidget.item(row, 0).text() != ''):
             row = row + 1
         for idx in self.listWidget.selectedItems():
-            runno = idx.text().split(':')[0]
+            contents = str(idx.text()).strip()
+            first_contents = contents.split(':')[0]
+            runnumber = None
+            if mtd.doesExist(first_contents):
+                runnumber = groupGet(mtd[first_contents], "samp", "run_number")
+            else:
+                temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
+                runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
+                DeleteWorkspace(temp)
+            
             item = QtGui.QTableWidgetItem()
-            item.setText(runno)
+            item.setText(runnumber)
             self.tableWidget.setItem(row, col, item)
             item = QtGui.QTableWidgetItem()
             item.setText(self.transRunEdit.text())
