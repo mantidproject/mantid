@@ -254,7 +254,6 @@ class DataCatalog(object):
         c = self.db.cursor()
         
         if not os.path.isdir(data_dir):
-            print "Data path not a valid directory:", data_dir
             return
         
         try:
