@@ -55,6 +55,8 @@ namespace Mantid
         const std::string catalogName() const;
         /// Obtain soap end point from the facility file.
         const std::string soapEndPoint() const;
+        /// Obtain the external download URL.
+        const std::string externalDownloadURL() const;
         /// Obtain the regex prefix from the  facility file.
         const std::string catalogPrefix() const;
         /// Obtain Windows prefix from the facility file.
@@ -76,6 +78,7 @@ namespace Mantid
 
         std::string m_catalogName;
         std::string m_soapEndPoint;
+        std::string m_externalDownloadURL;
         std::string m_catalogPrefix;
         std::string m_windowsPrefix;
         std::string m_macPrefix;

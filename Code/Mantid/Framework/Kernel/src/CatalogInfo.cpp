@@ -19,12 +19,13 @@ namespace Mantid
      */
     CatalogInfo::CatalogInfo(const Poco::XML::Element* element)
     {
-      m_catalogName   = getAttribute(element, "catalog", "name");
-      m_soapEndPoint  = getAttribute(element, "soapendpoint", "url");
-      m_catalogPrefix = getAttribute(element, "prefix", "regex");
-      m_windowsPrefix = getAttribute(element, "windows", "replacement");
-      m_macPrefix     = getAttribute(element, "mac", "replacement");
-      m_linuxPrefix   = getAttribute(element, "linux", "replacement");
+      m_catalogName         = getAttribute(element, "catalog", "name");
+      m_soapEndPoint        = getAttribute(element, "soapendpoint", "url");
+      m_externalDownloadURL = getAttribute(element, "externaldownload", "url");
+      m_catalogPrefix       = getAttribute(element, "prefix", "regex");
+      m_windowsPrefix       = getAttribute(element, "windows", "replacement");
+      m_macPrefix           = getAttribute(element, "mac", "replacement");
+      m_linuxPrefix         = getAttribute(element, "linux", "replacement");
     }
 
     /**
@@ -41,6 +42,14 @@ namespace Mantid
     const std::string CatalogInfo::soapEndPoint() const
     {
       return (m_soapEndPoint);
+    }
+
+    /**
+     * Obtain catalog name from the facility file.
+     */
+    const std::string CatalogInfo::externalDownloadURL() const
+    {
+      return (m_externalDownloadURL);
     }
 
     /**
