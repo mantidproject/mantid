@@ -36,10 +36,10 @@ private:
 
   virtual void initDocs();
 
-  int rank;
-  int currentSpectra;
-  int calculateNSpectra( Mantid::API::IMDHistoWorkspace_sptr inws);
-  void recurseData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS, int currentDim, Mantid::coord_t *pos);
+  size_t rank;
+  size_t currentSpectra;
+  size_t calculateNSpectra( Mantid::API::IMDHistoWorkspace_sptr inws);
+  void recurseData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS, size_t currentDim, Mantid::coord_t *pos);
 
   void checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS);
 

@@ -20,6 +20,7 @@ conversion with MDHistoToWorkspace2D such algorithms can also be applied to MD d
  * Added copying of meta data. Mark Koennecke, July 2013
  */
 #include "MantidSINQ/MDHistoToWorkspace2D.h"
+#include <cmath>
 #include <iostream>
 
 // Register the algorithm into the AlgorithmFactory
@@ -46,7 +47,7 @@ void MDHistoToWorkspace2D::exec()
 	IMDHistoWorkspace_sptr inWS = IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
 
 	rank = inWS->getNumDims();
-	int nSpectra = calculateNSpectra(inWS);
+	size_t nSpectra = calculateNSpectra(inWS);
 	std::cout << "nSpectra = " << nSpectra <<std::endl;
 
 	boost::shared_ptr<const IMDDimension> lastDim = inWS->getDimension(rank-1);
@@ -69,17 +70,17 @@ void MDHistoToWorkspace2D::exec()
 
 }
 
-int MDHistoToWorkspace2D::calculateNSpectra( IMDHistoWorkspace_sptr inWS)
+size_t MDHistoToWorkspace2D::calculateNSpectra( IMDHistoWorkspace_sptr inWS)
 {
-	int nSpectra = 1;
-	for(int i = 0; i < rank-1; i++){
+	size_t nSpectra = 1;
+	for(size_t i = 0; i < rank-1; i++){
 		boost::shared_ptr<const IMDDimension> dim = inWS->getDimension(i);
 		nSpectra *= dim->getNBins();
 	}
 	return nSpectra;
 }
 
-void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS, Workspace2D_sptr outWS, int currentDim, coord_t *pos)
+void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS, Workspace2D_sptr outWS, size_t currentDim, coord_t *pos)
 {
 	boost::shared_ptr<const IMDDimension> dim = inWS->getDimension(currentDim);
 	if(currentDim == rank -1){
@@ -89,14 +90,14 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS, Workspace2D_
 			Y[j] = inWS->getSignalAtCoord(pos,static_cast<Mantid::API::MDNormalization>(0));
 		}
 		MantidVec& E = outWS->dataE(currentSpectra);
-		std::transform(Y.begin(), Y.end(), E.begin(), sqrt);
+    // MSVC compiler can't figure out the correct overload with out the function cast on sqrt
+    std::transform(Y.begin(), Y.end(), E.begin(), (double (*)(double))std::sqrt);
 		std::vector<double> xData;
 		for(unsigned int i = 0; i < dim->getNBins(); i++){
 			xData.push_back(dim->getX(i));
 		}
 		outWS->setX(currentSpectra, xData);
-		//outWS->getAxis(1)->spectraNo(currentSpectra)= currentSpectra;
-		outWS->getAxis(1)->setValue(currentSpectra,currentSpectra);
+		outWS->getAxis(1)->setValue(currentSpectra,static_cast<double>(currentSpectra));
 		currentSpectra++;
 	} else {
 		// recurse deeper
@@ -109,29 +110,24 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS, Workspace2D_
 
 void MDHistoToWorkspace2D::checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS)
 {
-	int nSpectra = outWS->getNumberHistograms();
-	int length = (int)outWS->blocksize();
+	size_t nSpectra = outWS->getNumberHistograms();
+	size_t length = outWS->blocksize();
 	MantidVec x,y,e;
 
-	char buffer[132];
-	snprintf(buffer,sizeof(buffer),"W2D has %d histograms of length %d", nSpectra,length);
-	g_log.information(buffer);
-	for(int i = 0; i < nSpectra; i++){
+	g_log.information() << "W2D has " << nSpectra << " histograms of length " << length;
+	for(size_t i = 0; i < nSpectra; i++){
 		ISpectrum *spec = outWS->getSpectrum(i);
 		x = spec->dataX();
 		y = spec->dataY();
 		e = spec->dataE();
 		if(x.size() != length){
-			snprintf(buffer,sizeof(buffer),"Spectrum %d x-size mismatch, is %d should %d", i, x.size(), length);
-			g_log.information(buffer);
+			g_log.information() << "Spectrum " << i << " x-size mismatch, is " << x.size() << " should be " << length << "\n";
 		}
 		if(y.size() != length){
-			snprintf(buffer,sizeof(buffer),"Spectrum %d y-size mismatch, is %d should %d", i, y.size(), length);
-			g_log.information(buffer);
+			g_log.information() << "Spectrum " << i << " y-size mismatch, is " << y.size() << " should be " << length << "\n";
 		}
 		if(e.size() != length){
-			snprintf(buffer,sizeof(buffer),"Spectrum %d e-size mismatch, is %d should %d", i, e.size(), length);
-			g_log.information(buffer);
+			g_log.information() << "Spectrum " << i << " e-size mismatch, is " << e.size() << " should be " << length << "\n";
 		}
 	}
 }

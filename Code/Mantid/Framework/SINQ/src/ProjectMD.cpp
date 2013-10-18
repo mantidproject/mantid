@@ -80,7 +80,7 @@ void ProjectMD::exec()
 
 
 	std::vector<IMDDimension_sptr> dimensions;
-	for(unsigned int i = 0; i < inWS->getNumDims(); i++){
+	for(size_t i = 0; i < inWS->getNumDims(); i++){
 		if(i != dimNo){
 			dimensions.push_back(boost::const_pointer_cast<IMDDimension>(inWS->getDimension(i)));
 		} else {
@@ -89,9 +89,9 @@ void ProjectMD::exec()
 				start = 0;
 			}
 			if(end == -1) {
-				end = dimi->getNBins();
+				end = static_cast<int>(dimi->getNBins());
 			} else  if(end > int(dimi->getNBins()) ) {
-				end = dimi->getNBins() -1;
+				end = static_cast<int>(dimi->getNBins()) -1;
 			}
 		}
 	}
@@ -102,7 +102,7 @@ void ProjectMD::exec()
 
     memset(targetDim,0,MAXDIM*sizeof(int));
     memset(sourceDim,0,MAXDIM*sizeof(int));
-    sumData(inWS, outWS, sourceDim, targetDim, 0, dimNo, start, end, 0);
+    sumData(inWS, outWS, sourceDim, targetDim, 0, static_cast<int>(dimNo), start, end, 0);
 
 
     copyMetaData(inWS, outWS);
@@ -131,7 +131,7 @@ void ProjectMD::copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid:
  */
 unsigned int ProjectMD::calcIndex(IMDHistoWorkspace_sptr ws, int dim[])
 {
-	unsigned int idx = 0;
+	size_t idx = 0;
 	switch(ws->getNumDims()){
 	case 1:
 	                idx = dim[0];
@@ -148,7 +148,7 @@ unsigned int ProjectMD::calcIndex(IMDHistoWorkspace_sptr ws, int dim[])
 	default:
 		throw std::runtime_error("Unsupported dimension depth");
 	}
-	return idx;
+	return static_cast<unsigned int>(idx);
 }
 
 double ProjectMD::getValue(IMDHistoWorkspace_sptr ws, int dim[])

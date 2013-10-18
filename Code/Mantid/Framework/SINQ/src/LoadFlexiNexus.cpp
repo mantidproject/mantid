@@ -426,10 +426,10 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
 				} else {
 					if(safeOpenpath(fin, it->second)){
 						NeXus::Info inf = fin->getInfo();
-						if(inf.type == CHAR){
+						if(inf.type == ::NeXus::CHAR){
 							std::string data = fin->getStrData();
 							r.addProperty(it->first,data, true);
-						} else if(inf.type == FLOAT32 || inf.type == FLOAT64){
+						} else if(inf.type == ::NeXus::FLOAT32 || inf.type == ::NeXus::FLOAT64){
 							std::vector<double> data;
 							fin->getDataCoerce(data);
 							r.addProperty(it->first,data, true);

@@ -17,7 +17,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
-#include <unistd.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -43,7 +42,7 @@ SINQHMListener::~SINQHMListener()
 bool SINQHMListener::connect(const Poco::Net::SocketAddress& address)
 {
     std::string host = address.toString();
-    unsigned int i = host.find(':');
+    std::string::size_type i = host.find(':');
     if ( i != std::string::npos )
     {
       host.erase( i );
@@ -113,7 +112,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData()
 
     std::vector<MDHistoDimension_sptr> dimensions;
     for(int i = 0; i < rank; i++){
-    	dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(dimNames[i], dimNames[i], "", .0, double(dim[i]), dim[i])));
+    	dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(dimNames[i], dimNames[i], "", .0, coord_t(dim[i]), dim[i])));
     }
     MDHistoWorkspace_sptr ws (new MDHistoWorkspace(dimensions));
     ws->setTo(.0,.0,.0);
@@ -231,18 +230,18 @@ int SINQHMListener::calculateCAddress(coord_t *pos)
 	}
 	return result;
 }
-void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws, int currentDim, coord_t *idx)
+void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws, size_t currentDim, coord_t *idx)
 {
 	if(currentDim == rank){
 		int Cindex = calculateCAddress(idx);
 		int val = data[Cindex];
 		MDHistoWorkspace_sptr mdws = boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
-		unsigned int F77index = mdws->getLinearIndexAtCoord(idx);
+		size_t F77index = mdws->getLinearIndexAtCoord(idx);
 		mdws->setSignalAt(F77index,signal_t(val));
 		mdws->setErrorSquaredAt(F77index,signal_t(val));
 	} else {
 		for(int i = 0; i < dim[currentDim]; i++){
-			idx[currentDim] = i;
+			idx[currentDim] = static_cast<coord_t>(i);
 			recurseDim(data,ws,currentDim+1, idx);
 		}
 	}
@@ -250,16 +249,16 @@ void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws, int curren
 
 void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws)
 {
-	int val, *data = NULL, length = 1;
+	int *data = NULL, length = 1;
 	coord_t *idx;
 	long dataSum = 0;
 
 	for(int i = 0; i < rank; i++){
 		length *= dim[i];
 	}
-	char pathBuffer[132];
-	snprintf(pathBuffer,sizeof(pathBuffer),"/admin/readhmdata.egi?bank=0&start=0&end=%d", length);
-	std::istream& istr = httpRequest(std::string(pathBuffer));
+  std::ostringstream pathBuffer;
+  pathBuffer << "/admin/readhmdata.egi?bank=0&start=0&end=" << length;
+	std::istream& istr = httpRequest(pathBuffer.str());
 
 	//std::cout << "Content-length " << response.getContentLength() << ", Content-type: " << response.getContentType() << std::endl;
 

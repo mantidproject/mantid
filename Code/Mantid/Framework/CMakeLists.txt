@@ -108,7 +108,7 @@ add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)
 add_subdirectory (LiveData)
-#add_subdirectory (SINQ) 
+add_subdirectory (SINQ) 
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if ( MPI_BUILD )
@@ -143,7 +143,7 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
                      LiveData ISISLiveData
-#		     SINQ
+		     SINQ
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 

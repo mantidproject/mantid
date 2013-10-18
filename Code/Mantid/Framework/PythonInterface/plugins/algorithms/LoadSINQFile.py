@@ -16,12 +16,10 @@ from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty, FrameworkManager
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
-import MantidFramework 
 from mantid import config
 
 
 #--------- place to look for dictionary files
-#dictsearch='/home/christophe/poldi/dev/mantid-2.3.2-Source/PSIScripts'
 dictsearch=config['instrumentDefinition.directory']+"/nexusdictionaries/"
 
 class LoadSINQFile(PythonAlgorithm):
