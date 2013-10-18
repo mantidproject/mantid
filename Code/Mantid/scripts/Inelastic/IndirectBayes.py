@@ -89,36 +89,54 @@ def ReadNormFile(readRes,resnormWS,nsam,Verbose):            # get norm & scale 
 		dtn,xsc = GetResNorm(resnormWS,nsam)
 	return dtn,xsc
 
-def ReadWidthFile(readWidth,wfile,ngrp,Verbose):                       # reads width file ASCII
-	workdir = config['defaultsave.directory']
-	if readWidth:                            # use width1 data  option=o_w1
-		w_path = os.path.join(workdir, wfile)					# path name for nxs file
+#Reads in a width ASCII file
+def ReadWidthFile(readWidth,widthFile,numSampleGroups,Verbose):
+	widthY = []
+	widthE = []
+
+	if readWidth:
+
 		if Verbose:	
-			logger.notice('Width file is ' + w_path)
-		handle = open(w_path, 'r')
-		asc = []
-		for line in handle:
-			line = line.rstrip()
-			asc.append(line)
-		handle.close()
-		lasc = len(asc)
-		if lasc == 0:
+			logger.notice('Width file is ' + widthFile)
+
+		# read ascii based width file 
+		try:
+			wfPath = FileFinder.getFullPath(widthFile)
+			handle = open(wfPath, 'r')
+			asc = []
+
+			for line in handle:
+				line = line.rstrip()
+				asc.append(line)
+			handle.close()
+
+		except Exception, e:
+			error = 'Failed to read width file'	
+			logger.notice('ERROR *** ' + error)
+			sys.exit(error)
+
+		numLines = len(asc)
+		
+		if numLines == 0:
 			error = 'No groups in width file'	
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-		if lasc != ngrp:				# check that no. groups are the same
-			error = 'Width groups (' +str(lasc) + ') not = Sample (' +str(ngrp) +')'	
+		
+		if numLines != numSampleGroups:				# check that no. groups are the same
+			error = 'Width groups (' +str(numLines) + ') not = Sample (' +str(numSampleGroups) +')'	
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-	else:                                           # constant values
-		Wy = []
-		We = []
-		for m in range(0,ngrp):
-			Wy.append(0.0)
-			We.append(0.0)
-	Wy=PadArray(Wy,51)                             # pad for Fortran call
-	We=PadArray(We,51)
-	return Wy,We
+
+	else: 
+	 	# no file: just use constant values
+	 	widthY = np.zeros(numSampleGroups)
+	 	widthE = np.zeros(numSampleGroups)
+
+	# pad for Fortran call
+	widthY = PadArray(widthY,51)
+	widthE = PadArray(widthE,51)
+
+	return widthY, widthE
 
 def CheckBinning(nbins):
 	nbin = nbins[0]
