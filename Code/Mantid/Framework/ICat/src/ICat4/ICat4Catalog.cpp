@@ -316,7 +316,7 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
-      outputws->addColumn("str","Investigation Number");
+      outputws->addColumn("long64","Investigation Number");
       outputws->addColumn("str","Title");
       outputws->addColumn("str","Instrument");
       outputws->addColumn("str","Run Range");
@@ -334,7 +334,7 @@ namespace Mantid
           {
             API::TableRow table = outputws->appendRow();
             // Now add the relevant investigation data to the table.
-            savetoTableWorkspace(investigation->name, table); // Investigation number
+            savetoTableWorkspace(investigation->id, table);
             savetoTableWorkspace(investigation->title, table);
             savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
             // Verify that the run parameters vector exist prior to doing anything.
@@ -374,7 +374,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + boost::lexical_cast<std::string>(investigationId) + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + boost::lexical_cast<std::string>(investigationId) + "']";
       request.query     = &query;
 
       int result = icat.search(&request, &response);
@@ -446,7 +446,7 @@ namespace Mantid
       temp << investigationId;
       std::string name = temp.str();
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + name + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + name + "']";
       request.query     = &query;
 
       // If the investigation name is not valid.
