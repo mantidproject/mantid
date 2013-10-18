@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/FitMW.cpp
 	src/FitPowderDiffPeaks.cpp
 	src/FlatBackground.cpp
+	src/FullprofPolynomial.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
 	src/GausDecay.cpp
@@ -133,6 +134,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FitPowderDiffPeaks.h
 	inc/MantidCurveFitting/FlatBackground.h
+	inc/MantidCurveFitting/FullprofPolynomial.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -223,6 +225,7 @@ set ( TEST_FILES
 	FitMWTest.h
 	FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
+	FullprofPolynomialTest.h
 	FunctionFactoryConstraintTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h
