@@ -587,12 +587,12 @@ def QLPlotQL(inputWS,Plot,res_plot,Loop):
 		if (Plot == 'Prob' or Plot == 'All'):
 			pWS = inputWS+'_Prob'
 			p_plot=mp.plotSpectrum(pWS,[1,2],False)
-		if (Plot == 'Intensity' or Plot == 'All'):
+		if (Plot == 'FwHm' or Plot == 'All'):
 			ilist = [1,3,5]
 			i_plot=mp.plotSpectrum(inputWS+'_Workspace',ilist,True)
 			i_layer = i_plot.activeLayer()
 			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
-		if (Plot == 'FwHm' or Plot == 'All'):
+		if (Plot == 'Intensity' or Plot == 'All'):
 			wlist = [0,2,4]
 			w_plot=mp.plotSpectrum(inputWS+'_Workspace',wlist,True)
 			w_layer = w_plot.activeLayer()
@@ -603,11 +603,11 @@ def QLPlotQL(inputWS,Plot,res_plot,Loop):
 
 def QLPlotQSe(inputWS,Plot,res_plot,Loop):
 	if Loop:
-		if (Plot == 'Intensity' or Plot == 'All'):
+		if (Plot == 'FwHm' or Plot == 'All'):
 			i_plot=mp.plotSpectrum(inputWS+'_Workspace',1,True)
 			i_layer = i_plot.activeLayer()
 			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
-		if (Plot == 'FwHm' or Plot == 'All'):
+		if (Plot == 'Intensity' or Plot == 'All'):
 			w_plot=mp.plotSpectrum(inputWS+'_Workspace',0,True)
 			w_layer = w_plot.activeLayer()
 			w_layer.setAxisTitle(mp.Layer.Left,'Full width half maximum (meV)')
