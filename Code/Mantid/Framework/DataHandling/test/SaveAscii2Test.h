@@ -2,7 +2,7 @@
 #define SAVEASCIITEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveAscii.h"
+#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <fstream>
@@ -56,7 +56,7 @@ public:
     std::string filename = "SaveAsciiTestFile.dat";
     std::string filename_nohead ="SaveAsciiTestFileWithoutHeader.dat";
 
-    SaveAscii save;
+    SaveAscii2 save;
     TS_ASSERT_THROWS_NOTHING(save.initialize());
     TS_ASSERT( save.isInitialized() )
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", filename));
@@ -68,19 +68,56 @@ public:
     TS_ASSERT( Poco::File(filename).exists() );
 
     // Now make some checks on the content of the file
-    std::ifstream in(filename.c_str()); 
-    std::string header1, header2, header3, header4;
-    std::string separator;
+    std::ifstream in(filename.c_str());
+    int specID;
+    std::string header1, header2, header3, separator, comment;
 
     // Currently we just test that the first few column headers and a separator are as expected
-    in >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4;
+    in >> specID >> comment >> header1 >> separator >> header2 >> separator >> header3;
+    TS_ASSERT_EQUALS(specID, 1 );
+    TS_ASSERT_EQUALS(comment,"#" );
     TS_ASSERT_EQUALS(separator,"," );
     TS_ASSERT_EQUALS(header1,"X" );
-    TS_ASSERT_EQUALS(header2,"Y0" );
-    TS_ASSERT_EQUALS(header3,"E0" );
-    TS_ASSERT_EQUALS(header4,"Y1" );
+    TS_ASSERT_EQUALS(header2,"Y" );
+    TS_ASSERT_EQUALS(header3,"E" );
     in.close();
 
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(name);
+  }
+
+  void testExec_no_header()
+  {
+  Mantid::DataObjects::Workspace2D_sptr wsToSave = boost::dynamic_pointer_cast<
+      Mantid::DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    for (int i = 0; i < 2; i++)
+    {
+      std::vector<double>& X = wsToSave->dataX(i);
+      std::vector<double>& Y = wsToSave->dataY(i);
+      std::vector<double>& E = wsToSave->dataE(i);
+      for (int j = 0; j < 3; j++)
+      {
+        X[j] = 1.5 * j / 0.9;
+        Y[j] = (i + 1) * (2. + 4. * X[j]);
+        E[j] = 1.;
+      }
+    }
+    const std::string name = "SaveAsciiWS";
+    AnalysisDataService::Instance().add(name, wsToSave);
+
+    std::string filename = "SaveAsciiTestFile.dat";
+    std::string filename_nohead ="SaveAsciiTestFileWithoutHeader.dat";
+
+    SaveAscii2 save;
+    TS_ASSERT_THROWS_NOTHING(save.initialize());
+    TS_ASSERT( save.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", filename));
+    filename = save.getPropertyValue("Filename"); //Get absolute path
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("InputWorkspace", name));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT( Poco::File(filename).exists() );
 
     // Test ColumnHeader property - perhaps this should be a separate test
     save.setPropertyValue("Filename", filename_nohead);
@@ -98,15 +135,17 @@ public:
     std::ifstream in2(filename_nohead.c_str());
     std::string line1noheader;
     getline(in1,line2header);
-    getline(in1,line2header); // 2nd line of file with header
-    getline(in2,line1noheader); // 1st line of file without header
+    getline(in1,line2header);
+    getline(in1,line2header); // 3rd line of file with header
+    getline(in2,line1noheader);
+    getline(in2,line1noheader); // 2nd line of file without header
     TS_ASSERT_EQUALS(line1noheader,line2header);
     in1.close();
     in2.close();
-
     // Remove files
     Poco::File(filename).remove();
     Poco::File(filename_nohead).remove();
+    AnalysisDataService::Instance().remove(name);
   }
 };
 
