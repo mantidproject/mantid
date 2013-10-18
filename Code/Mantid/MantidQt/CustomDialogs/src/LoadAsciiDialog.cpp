@@ -55,10 +55,20 @@ void LoadAsciiDialog::initLayout()
   paramsLayout->addWidget(m_separatorBox,2,1);
   tie(m_separatorBox,"Separator",paramsLayout);
 
+  if (getAlgorithm()->version() == 2)
+  {
+    label = new QLabel(tr("CommentIndicator"));
+    m_lineCommentIndicator = new QLineEdit;
+    label->setBuddy(m_lineCommentIndicator);
+    paramsLayout->addWidget(label,3,0);
+    paramsLayout->addWidget(m_lineCommentIndicator,3,1);
+    tie(m_lineCommentIndicator, "CommentIndicator", paramsLayout);
+  }
+
   QComboBox *unitBox = new QComboBox;
   fillAndSetComboBox("Unit",unitBox );
-  paramsLayout->addWidget(new QLabel("Unit"),3,0);
-  paramsLayout->addWidget(unitBox ,3,1);
+  paramsLayout->addWidget(new QLabel("Unit"),4,0);
+  paramsLayout->addWidget(unitBox ,4,1);
   tie(unitBox ,"Unit",paramsLayout);
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
