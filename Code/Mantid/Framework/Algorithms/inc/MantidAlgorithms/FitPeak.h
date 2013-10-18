@@ -71,8 +71,8 @@ namespace Algorithms
     void setupOutput();
 
     /// Fit a single peak function with pure peak workspace
-    double fitPeakFuncion(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
-                          size_t wsindex, double startx, double endx, std::string &errorreason);
+    double fitPeakFunction(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
+                          size_t wsindex, double startx, double endx);
 
     /// Fit background with multiple domain
     API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);

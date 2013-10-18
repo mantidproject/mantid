@@ -130,8 +130,17 @@ public:
 
     // Check
     vector<double> fittedpeakvalues = fitpeak.getProperty("FittedPeakParameterValues");
-    TS_ASSERT_EQUALS(fittedpeakvalues.size(), 100);
+    TS_ASSERT_EQUALS(fittedpeakvalues.size(), 3);
 
+    double peakheight = fittedpeakvalues[0];
+    double peakcentre = fittedpeakvalues[1];
+    double sigma = fittedpeakvalues[2];
+    TS_ASSERT_DELTA(peakheight, 1000., 10.);
+    TS_ASSERT_DELTA(peakcentre, 0.549, 0.01);
+    TS_ASSERT_DELTA(sigma, 0.01, 0.005);
+
+    vector<double> fittedbkgdvalues = fitpeak.getProperty("FittedBackgroundParameterValues");
+    TS_ASSERT_EQUALS(fittedbkgdvalues.size(), 3);
 
     return;
   }
@@ -289,6 +298,69 @@ public:
 
     return ws;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test on fit a peak with 1 step
+    */
+  void Xtest_FitPeakOneStep()
+  {
+    // Generate input workspace
+    // FIXME - Find a new set of data!
+    MatrixWorkspace_sptr dataws = gen_4866P5Data();
+    AnalysisDataService::Instance().addOrReplace("PG3_4866Peak5", dataws);
+
+    // Generate peak and background parameters
+    vector<string> peakparnames, bkgdparnames;
+    vector<double> peakparvalues, bkgdparvalues;
+
+    gen_BkgdParameters(bkgdparnames, bkgdparvalues);
+    gen_PeakParameters(peakparnames, peakparvalues);
+
+#if 0
+    const MantidVec& vecx = dataws->readX(0);
+    const MantidVec& vecy = dataws->readY(0);
+    for (size_t i = 0; i < vecx.size(); ++i)
+      cout << vecx[i] << "\t\t" << vecy[i] << "\n";
+    TS_ASSERT_EQUALS(1, 100);
+    return;
+#endif
+
+    // Initialize FitPeak
+    FitPeak fitpeak;
+    fitpeak.initialize();
+
+    // Set up properties
+    fitpeak.setPropertyValue("InputWorkspace", "PG3_4866Peak5");
+    fitpeak.setPropertyValue("OutputWorkspace", "FittedPeak");
+    fitpeak.setPropertyValue("ParameterTableWorkspace", "Fitted_Peak5_Parameters");
+    fitpeak.setProperty("WorkspaceIndex", 0);
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunctionType", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Quadratic"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterNames", bkgdparnames));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterValues", bkgdparvalues));
+    fitpeak.setPropertyValue("FitWindow", "0.586, 0.604");
+    fitpeak.setPropertyValue("PeakRange", "0.591, 0.597");
+    fitpeak.setProperty("FitBackgroundFirst", true);
+    fitpeak.setProperty("RawParams", true);
+    fitpeak.setProperty("MinGuessedPeakWidth", 2);
+    fitpeak.setProperty("MaxGuessedPeakWidth", 20);
+    fitpeak.setProperty("GuessedPeakWidthStep", 2);
+    fitpeak.setProperty("CostFunction", "Rwp");
+
+    // Execute
+    fitpeak.execute();
+    TS_ASSERT(fitpeak.isExecuted());
+
+    // Check
+    vector<double> fittedpeakvalues = fitpeak.getProperty("FittedPeakParameterValues");
+    TS_ASSERT_EQUALS(fittedpeakvalues.size(), 100);
+
+
+    return;
+  }
+
 
 
 };
