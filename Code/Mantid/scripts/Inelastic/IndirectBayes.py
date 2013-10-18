@@ -642,10 +642,10 @@ def CheckBetSig(nbs):
 		sys.exit(error)
 	return Nbet,Nsig
 
-def QuestRun(samWS,resWS,rsname,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
+def QuestRun(samWS,resWS,rsname,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	StartTime('Quest')
 
-	resnorm = (fitOp[:3] == 1)
+	resnorm = (Fit[:3] == 1)
 
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
@@ -658,6 +658,20 @@ def QuestRun(samWS,resWS,rsname,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
 	nsam,ntc = CheckHistZero(samWS)
 	if Loop != True:
 		nsam = 1
+	if Fit[0]:
+		elastic = True
+		o_el = 1
+	else:
+		elastic = False
+		o_el = 0
+	if Fit[1] == 'Sloping':
+		o_bgd = 2
+	if Fit[1] == 'Flat':
+		o_bgd = 1
+	if Fit[1] == 'Zero':
+		o_bgd = 0
+	background = Fit[1]
+	fitOp = [o_el, o_bgd, 0, 0]
 	efix = getEfixed(samWS)
 	theta,Q = GetThetaQ(samWS)
 	nres,ntr = CheckHistZero(resWS)
