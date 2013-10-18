@@ -16,7 +16,7 @@ The Mantid standard Load algorithm selects based on file extensions. The file ex
 # Mark Koennecke, November 2012
 #--------------------------------------------------------------
 from mantid.api import AlgorithmFactory
-from mantid.api import PythonAlgorithm, registerAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
+from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
 import datetime

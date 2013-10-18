@@ -333,5 +333,4 @@ class RefLReduction(PythonAlgorithm):
            
         
 AlgorithmFactory.subscribe(RefLReduction)
-# registerAlgorithm(RefLReduction())
 

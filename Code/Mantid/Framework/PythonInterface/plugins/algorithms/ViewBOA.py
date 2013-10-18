@@ -6,7 +6,7 @@
 #---------------------------------------------------------------------
 
 from mantid.api import AlgorithmFactory
-from mantid.api import PythonAlgorithm, registerAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
+from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
 from mantid.simpleapi import mtd
@@ -57,4 +57,4 @@ class ViewBOA(PythonAlgorithm):
             tofdata[i] = (3.9560346E-7*(tofdata[i]*1.E-7/CD))*1.E10
         
 
-registerAlgorithm(ViewBOA())
+AlgorithmFactory.subscribe(ViewBOA)
