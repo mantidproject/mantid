@@ -102,6 +102,8 @@ namespace IDA
     connect(uiForm().absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(shape(int)));
     connect(uiForm().absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(useCanChecked(bool)));
     connect(uiForm().absp_letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
+    connect(uiForm().absp_cbSampleInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swSampleInputType, SLOT(setCurrentIndex(int)));
+    connect(uiForm().absp_cbCanInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swCanInputType, SLOT(setCurrentIndex(int)));
 
     // Sort the fields into various lists.
 
@@ -217,6 +219,26 @@ namespace IDA
   
     if ( uiForm().absp_ckUseCan->isChecked() )
     {
+      QString canFile = uiForm().absp_dsCanInput->getCurrentDataName();
+
+      //load the can file / get the can workspace 
+      if ( !Mantid::API::AnalysisDataService::Instance().doesExist(canFile.toStdString()) )
+      {
+        QString input = uiForm().absp_dsCanInput->getFullFilePath();
+        if ( input == "" ) { return; }
+        pyInput +=
+        "import os.path as op\n"
+        "file = r'" + input + "'\n"
+        "( dir, filename ) = op.split(file)\n"
+        "( name, ext ) = op.splitext(filename)\n"
+        "LoadNexusProcessed(Filename=file, OutputWorkspace=name)\n"
+        "inputws = name\n";
+      }
+      else
+      {
+        pyInput += "inputws = '" + canFile + "'\n";
+      }
+
       pyInput +=
         "ncan = 2\n"
         "density = [" + uiForm().absp_lesamden->text() + ", " + uiForm().absp_lecanden->text() + ", " + uiForm().absp_lecanden->text() + "]\n"
@@ -308,15 +330,44 @@ namespace IDA
 
     // Sample details
     uiv.checkFieldIsValid("Sample Number Density",           uiForm().absp_lesamden,  uiForm().absp_valSamden);
-    uiv.checkFieldIsValid("Sample Scattering Cross-Section", uiForm().absp_lesamsigs, uiForm().absp_valSamsigs);
-    uiv.checkFieldIsValid("Sample Absorption Cross-Section", uiForm().absp_lesamsiga, uiForm().absp_valSamsiga);
+
+    switch(uiForm().absp_cbSampleInputType->currentIndex())
+    {
+      case 0:
+          //using direct input
+          uiv.checkFieldIsValid("Sample Scattering Cross-Section", uiForm().absp_lesamsigs, uiForm().absp_valSamsigs);
+          uiv.checkFieldIsValid("Sample Absorption Cross-Section", uiForm().absp_lesamsiga, uiForm().absp_valSamsiga);
+        break;
+      case 1:
+          //input using formula
+          uiv.checkFieldIsValid("Can Cross-Section Formula", uiForm().absp_leSampleFormula, uiForm().absp_valSampleFormula);
+        break;
+    }
+
 
     // Can details (only test if "Use Can" is checked)
     if ( uiForm().absp_ckUseCan->isChecked() )
     {
-      uiv.checkFieldIsValid("Can Number Density",           uiForm().absp_lecanden,  uiForm().absp_valCanden);
-      uiv.checkFieldIsValid("Can Scattering Cross-Section", uiForm().absp_lecansigs, uiForm().absp_valCansigs);
-      uiv.checkFieldIsValid("Can Absorption Cross-Section", uiForm().absp_lecansiga, uiForm().absp_valCansiga);
+      QString canFile = uiForm().absp_dsCanInput->getCurrentDataName();
+      if(canFile.isEmpty())
+      {
+        uiv.addErrorMessage("You must select a Sample file or workspace.");
+      }
+
+      uiv.checkFieldIsValid("Can Number Density",uiForm().absp_lecanden,uiForm().absp_valCanden);
+
+      switch(uiForm().absp_cbCanInputType->currentIndex())
+      {
+        case 0:
+            // using direct input
+            uiv.checkFieldIsValid("Can Scattering Cross-Section", uiForm().absp_lecansigs, uiForm().absp_valCansigs);
+            uiv.checkFieldIsValid("Can Absorption Cross-Section", uiForm().absp_lecansiga, uiForm().absp_valCansiga);
+          break;
+        case 1:
+            //input using formula
+            uiv.checkFieldIsValid("Can Cross-Section Formula", uiForm().absp_leCanFormula, uiForm().absp_valCanFormula);
+          break;
+      }
     }
 
     return uiv.generateErrorMessage();

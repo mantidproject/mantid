@@ -1719,7 +1719,7 @@
             <item row="1" column="1">
              <widget class="QComboBox" name="absp_cbSampleInputType">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -2036,7 +2036,7 @@
                    <widget class="QLineEdit" name="absp_leCanFormula"/>
                   </item>
                   <item row="0" column="1">
-                   <widget class="QLabel" name="absp_valSamsiga_2">
+                   <widget class="QLabel" name="absp_valCanFormula">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -2060,7 +2060,7 @@
             <item row="1" column="1">
              <widget class="QComboBox" name="absp_cbCanInputType">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>

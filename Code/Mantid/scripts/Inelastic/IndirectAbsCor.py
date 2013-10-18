@@ -83,6 +83,40 @@ def CheckDensity(density,ncan):
             logger.notice('ERROR *** '+error)
             sys.exit(error)
 
+# AbsRun used when user supplies a formula
+def AbsRun(inputWS, canWS, geom, beam, ncan, size, avar, Verbose, Save):
+    sam = mtd[inputWS].sample        # sample parameters
+    if name() in sam:                 # test sample in WS
+        if Verbose:
+            logger.notice('Sample run : '+inputWS)
+            logger.notice('Sample material : '+sam.name())
+    else:
+        error = 'Sample data does not exist'            
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error) 
+    sam_mat = sam.getMaterial()
+    if ncan == 2:
+        can = mtd[canWS].sample          # can parameters
+        if name() in can:                 # test sample in WS
+            if Verbose:
+                logger.notice('Can run : '+canWS)
+                logger.notice('Can material : '+can.name())
+        density = [sam_mat.sampleNumberDensity(), can_mat.sampleNumberDensity()] # number densities
+        sigs = [sam_mat.totalScatterXSection(), can_mat.totalScatterXSection()]   #total scat xsec
+        siga = [sam_mat.absorptionXSection(), can_mat.absorptionXSection()]       #abs xsec
+        else:
+            error = 'Can data does not exist'           
+            logger.notice('ERROR *** ' + error)
+            sys.exit(error) 
+            can_mat = can.getMaterial()
+    else:
+        density = [sam_mat.sampleNumberDensity(), 0.0] # number densities
+        sigs = [sam_mat.totalScatterXSection(), 0.0]   #total scat xsec
+        siga = [sam_mat.absorptionXSection(), 0.0]       #abs xsec
+    CheckDensity(density,ncan)
+
+    AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, Save)
+
 def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, Save):
     workdir = config['defaultsave.directory']
     if Verbose:
