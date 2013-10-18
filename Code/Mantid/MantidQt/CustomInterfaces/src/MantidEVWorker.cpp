@@ -623,7 +623,7 @@ bool MantidEVWorker::changeHKL(  const std::string & peaks_ws_name,
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("TransformHKL");
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
-  alg->setProperty("HKL_Transform",transf_string);
+  alg->setProperty("HKLTransform",transf_string);
 
   if ( alg->execute() )
     return true;
