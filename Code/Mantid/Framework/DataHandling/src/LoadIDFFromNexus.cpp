@@ -83,7 +83,7 @@ void LoadIDFFromNexus::exec()
   return;
 }
 
-void LoadIDFFromNexus::runLoadParameterFile(MatrixWorkspace_sptr workspace)
+void LoadIDFFromNexus::runLoadParameterFile(const MatrixWorkspace_sptr & workspace)
 {
   const std::string directory = ConfigService::Instance().getString("parameterDefinition.directory");
   const std::string instrumentName = workspace->getInstrument()->getName();
@@ -95,7 +95,7 @@ void LoadIDFFromNexus::runLoadParameterFile(MatrixWorkspace_sptr workspace)
     g_log.notice() << "File " << paramFile << " not found or un-parsable. "
                        "However, the instrument has been loaded successfully.\n";
     // This next function needs to have been called. If LoadParameterFile succeeds then it will have been called inside that.
-    localWorkspace->populateInstrumentParameters();
+    workspace->populateInstrumentParameters();
   }
 
 }

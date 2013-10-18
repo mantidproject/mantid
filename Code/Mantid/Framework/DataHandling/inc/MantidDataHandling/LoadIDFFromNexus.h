@@ -73,7 +73,7 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
-      void runLoadParameterFile(API::MatrixWorkspace_sptr workspace);
+      void runLoadParameterFile(const API::MatrixWorkspace_sptr & workspace);
     };
 
   } // namespace DataHandling
