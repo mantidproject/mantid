@@ -9,7 +9,7 @@ This is then written into a [[CalFile|.cal file]] for every detector that contri
 == Usage ==
 '''Python'''
 
-GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
+OutputW,NumberPeaksFitted,Mask = GetDetOffsetsMultiPeaks("InputW",0.01,2.0,1.8,2.2,"output.cal")
 
 
 *WIKI*/

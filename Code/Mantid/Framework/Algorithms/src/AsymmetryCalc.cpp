@@ -14,7 +14,7 @@ Note: this algorithm does not perform any grouping; the grouping must be done vi
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
-    AsymmetryCalc("EmuData","OutWS","1.0","0,1,2,3,4","16,17,18,19,20")
+    OutWS = AsymmetryCalc("EmuData","1.0","0,1,2,3,4","16,17,18,19,20")
 
 '''C++'''
     IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("AsymmetryCalc");
