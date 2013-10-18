@@ -58,15 +58,15 @@ namespace Mantid
     {
     public:
       /// Empty Constructor
-      AlignAndFocusPowder() : API::Algorithm() {}
+      AlignAndFocusPowder();
       /// Destructor
-      virtual ~AlignAndFocusPowder() {}
+      virtual ~AlignAndFocusPowder();
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "AlignAndFocusPowder";}
+      virtual const std::string name() const;
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 1;}
+      virtual int version() const;
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Workflow\\Diffraction";}
+      virtual const std::string category() const;
     
     private:
       /// Sets documentation strings for this algorithm
@@ -98,7 +98,7 @@ namespace Mantid
       DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
       API::MatrixWorkspace_sptr m_maskWS;
       DataObjects::GroupingWorkspace_sptr m_groupWS;
-      double l1;
+      double m_l1;
       std::vector<int32_t> specids;
       std::vector<double> l2s;
       std::vector<double> tths;
@@ -128,6 +128,7 @@ namespace Mantid
       /// Offset to low resolution TOF spectra
       size_t m_lowResSpecOffset;
 
+      API::Progress* m_progress;   ///< Progress reporting
     };
 
   } // namespace WorkflowAlgorithm

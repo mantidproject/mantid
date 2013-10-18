@@ -1,3 +1,11 @@
+/*WIKI* 
+The masking from the InputWorkspace property is extracted by creating a new MatrixWorkspace with a single X bin where:
+* 0 = masked;
+* 1 = unmasked.
+
+The spectra containing 0 are also marked as masked and the instrument link is preserved so that the instrument view functions correctly.
+*WIKI*/
+
 #include "MantidAlgorithms/ExtractMaskToTable.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
@@ -39,7 +47,7 @@ namespace Algorithms
     */
   void ExtractMaskToTable::initDocs()
   {
-    setWikiSummary("Extract mask from a workspace to a TableWorkspace.");
+    setWikiSummary("Extracts the masking from a given workspace and places it in a new table workspace compatible to MaskBinsFromTable.");
     setOptionalMessage("The output TableWorkspace should be compatible to MaskBinsFromTable.");
   }
 
@@ -49,13 +57,13 @@ namespace Algorithms
   void ExtractMaskToTable::init()
   {
     auto inwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input);
-    declareProperty(inwsprop, "Name of a MatrixWorkspace from which the mask will be extracted.");
+    declareProperty(inwsprop, "A workspace whose masking is to be extracted");
 
     auto intblprop = new WorkspaceProperty<TableWorkspace>("MaskTableWorkspace", "", Direction::Input, PropertyMode::Optional);
-    declareProperty(intblprop, "Name of the TableWorkspace to append to.");
+    declareProperty(intblprop, "A workspace containing the masked spectra as zeroes and ones. ");
 
     auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output);
-    declareProperty(outwsprop, "Name of the output TableWorkspace containing the mask information.");
+    declareProperty(outwsprop, "A comma separated list or array containing a list of masked detector ID's ");
 
     declareProperty("Xmin", EMPTY_DBL(), "Minimum of X-value.");
 

@@ -44,7 +44,7 @@ class Quest(PythonAlgorithm):
 		sam = self.getPropertyValue('SamNumber')
 		rinType = self.getPropertyValue('ResInputType')
 		res = self.getPropertyValue('ResNumber')
-		elastic = self.getProperty('ElasticOption')
+		elastic = self.getProperty('ElasticOption').value
 		bgd = self.getPropertyValue('BackgroundOption')
 		emin = self.getPropertyValue('EnergyMin')
 		emax = self.getPropertyValue('EnergyMax')
@@ -68,10 +68,10 @@ class Quest(PythonAlgorithm):
 		if bgd == 'Zero':
 			o_bgd = 0
 		fitOp = [o_el, o_bgd, 0, 0]
-		loopOp = self.getProperty('Sequence')
-		verbOp = self.getProperty('Verbose')
+		loopOp = self.getProperty('Sequence').value
+		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getPropertyValue('Plot')
-		saveOp = self.getProperty('Save')
+		saveOp = self.getProperty('Save').value
 
 		workdir = config['defaultsave.directory']
 		if inType == 'File':

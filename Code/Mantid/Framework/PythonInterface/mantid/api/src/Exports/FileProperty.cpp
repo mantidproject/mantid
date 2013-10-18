@@ -1,13 +1,15 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/IsNone.h"
+
+#include <boost/make_shared.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/default_call_policies.hpp>
 #include <boost/python/overloads.hpp>
-#include <boost/make_shared.hpp>
 
 
 using Mantid::API::FileProperty;
@@ -44,7 +46,7 @@ namespace
                                     unsigned direction = Mantid::Kernel::Direction::Input)
   {
     std::vector<std::string> extsAsVector;
-    if( !extensions.is_none() )
+    if( !Mantid::PythonInterface::isNone(extensions) )
     {
       bpl::extract<std::string> extractor(extensions);
       if(extractor.check())

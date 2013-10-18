@@ -1191,19 +1191,35 @@ namespace API
    * These configurations will be used at check4update, to download all entries that 
    * are set to auto update.
   */
-  void ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
+  int ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
     ensureValidRepository();
-    std::string path = convertPath(input_path); 
-    //g_log.debug() << "SetAutoUpdate... begin" << std::endl; 
-    try{
-      RepositoryEntry & entry = repo.at(path);
-      entry.auto_update = option; 
-      updateLocalJson(path,entry); 
-    }catch(const std::out_of_range & ex){
-      // fixme: readable exception
-      throw ScriptRepoException(ex.what()); 
+    std::string path = convertPath(input_path);
+    std::vector<std::string> files_to_update;
+    for (Repository::reverse_iterator it = repo.rbegin();
+            it != repo.rend();
+              ++it){
+         // for every entry, it takes the path and RepositoryEntry
+         std::string entry_path = it->first;
+         RepositoryEntry & entry = it->second;
+         if (entry_path.find(path) == 0 && entry.status != REMOTE_ONLY  && entry.status != LOCAL_ONLY)
+        	 	files_to_update.push_back(entry_path);
     }
-    //g_log.debug() << "SetAutoUpdate... end" << std::endl; 
+
+    //g_log.debug() << "SetAutoUpdate... begin" << std::endl;
+    try
+    {
+    	BOOST_FOREACH(auto & path, files_to_update){
+    		RepositoryEntry & entry = repo.at(path);
+    		entry.auto_update = option;
+    		updateLocalJson(path,entry); // TODO: update local json without opening and close file many times
+    	}
+    }catch(const std::out_of_range & ex)
+    {
+    	// fixme: readable exception
+    	throw ScriptRepoException(ex.what());
+    }
+    //g_log.debug() << "SetAutoUpdate... end" << std::endl;
+    return (int)files_to_update.size();
   }
   
 
@@ -1384,6 +1400,7 @@ namespace API
     std::string filename = std::string(local_repository).append(".local.json");
     std::vector<std::string> entries_to_delete;
     Repository::iterator entry_it;
+    std::set<std::string> folders_of_deleted;
     try{
       read_json(filename, pt);
       BOOST_FOREACH(ptree::value_type & file, pt){
@@ -1403,6 +1420,7 @@ namespace API
             // that this entry was deleted (remotelly or locally), 
             // so it should not appear at local_repository json any more
             entries_to_delete.push_back(file.first);
+            folders_of_deleted.insert(getParentFolder(file.first));
           }
         }else{
           // this entry was never created before, so it should not
@@ -1414,6 +1432,23 @@ namespace API
 
       // delete the entries to be deleted in json file
       if (entries_to_delete.size() > 0){
+        
+        // clear the auto_update flag from the folders if the user deleted files
+      	BOOST_FOREACH(const std::string & folder, folders_of_deleted){
+      		ptree::assoc_iterator pt_entry = pt.find(folder);
+      		if (pt_entry == pt.not_found())
+      			continue;
+
+      		entry_it = repo.find(folder);
+      		if (entry_it == repo.end())
+      			continue;
+
+      		if (entry_it->second.auto_update){
+      				entry_it->second.auto_update = false;
+      				entries_to_delete.push_back(folder);
+      		}
+      	}
+
         for (std::vector<std::string>::iterator it = entries_to_delete.begin();
              it != entries_to_delete.end();
              ++it){
@@ -1564,6 +1599,16 @@ namespace API
                       << ex.what() << std::endl; 
     }
     return true;
+  }
+
+  std::string ScriptRepositoryImpl::getParentFolder(const std::string & file){
+  	size_t pos = file.rfind("/");
+  	if (pos == file.npos)
+  	{
+  		return "";
+  	}
+
+  	return std::string(file.begin(),file.begin()+pos);
   }
 
   /**
@@ -1738,7 +1783,7 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
     // from windows and linux and macs. 
 #if defined(_WIN32) || defined(_WIN64)
     std::string errmsg, proxy_option;
-    g_log.notice() << "Attempt to get the proxy configuration for this connection" << std::endl; 
+    g_log.debug() << "Attempt to get the proxy configuration for this connection" << std::endl; 
     if(get_proxy_configuration_win(remote_url, proxy_option,errmsg))
     {
       if (!proxy_option.empty()){
@@ -1758,11 +1803,12 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
           PROXYSERVER = proxy_option;
           PROXYPORT = 8080;
         }
-        g_log.notice() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
-        } 
+        g_log.information() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
+        }
+      
     }
     else{
-    g_log.warning() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. " 
+    g_log.information() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. " 
               << errmsg << std::endl; 
     }
 #else  // linux and mac
@@ -1774,6 +1820,9 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
       Poco::URI uri_p(proxy_var);
       PROXYSERVER = uri_p.getHost(); 
       PROXYPORT = uri_p.getPort();
+    }
+#endif 
+    if (!PROXYSERVER.empty()){
       try{
         // test if the proxy is valid for connecting to remote repository
         Poco::URI uri(remote_url); 
@@ -1795,15 +1844,15 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
       }
       catch(Poco::Net::HostNotFoundException & ex){
         g_log.information() << "ScriptRepository found that proxy can not be used for this connection.\n"
-                            << ex.displayText() << std::endl; 
+                          << ex.displayText() << std::endl; 
         PROXYSERVER = "";        
       }catch(...){
         g_log.warning() << "Unexpected error while looking for the proxy for ScriptRepository." << std::endl; 
         PROXYSERVER = ""; 
       }
     }
-#endif    
-  }
+
+  } // end of the configuration of the proxy
   firstTime = false;
   
   bool ret_value; 

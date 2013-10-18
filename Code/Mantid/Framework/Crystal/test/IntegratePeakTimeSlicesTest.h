@@ -127,7 +127,7 @@ public:
 
     double TotIntensity = 0;
 
-    detid2index_map * map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
 
     for (int row = 0; row < NRC; row++)
       for (int col = 0; col < NRC; col++)
@@ -135,7 +135,7 @@ public:
 
         boost::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
 
-        detid2index_map::iterator it = map->find(detP->getID());
+        detid2index_map::const_iterator it = map.find(detP->getID());
         size_t wsIndex = (*it).second;
 
         double MaxR = max<double> (0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
@@ -165,7 +165,6 @@ public:
         wsPtr->setData(wsIndex, dataY, dataE);
 
       }
-    delete map;
 
     PeaksWorkspace_sptr pks(new PeaksWorkspace());
 

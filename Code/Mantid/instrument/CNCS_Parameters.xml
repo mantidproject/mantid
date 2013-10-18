@@ -195,7 +195,7 @@
 		</parameter>
 
 		<parameter name="treat-background-as-events" type="string">
-			<value val="no" />
+			<value val="yes" />
 		</parameter>
 
 	</component-link>

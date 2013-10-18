@@ -61,6 +61,8 @@ namespace Mantid
       int m_datarate;     ///< The data rate to (attempt to) generate in events/sec
       int m_callbackloop; ///< Number of times to loop within each generateEvents() call
       double m_endRunEvery; ///< Make a new run every N seconds
+      int m_notyettimes; ///< Number of calls to extractData for which to throw a NotYet exception
+      int m_numExtractDataCalls; ///< Number of times extractData has been called
 
       /// Date and time of the next time to end the run
       Mantid::Kernel::DateAndTime m_nextEndRunTime;

@@ -919,6 +919,12 @@ def loadNeXus(runNumbers, type):
     add them or just return the workspace created
     """
     
+    wks_name = ''
+    if (type == 'data'):
+        wks_name = 'ws_event_data'
+    else:
+        wks_name = 'ws_event_norm'
+    
     print '-> loading ', type
     if (type == 'data') and len(runNumbers) > 1:
         
@@ -940,13 +946,13 @@ def loadNeXus(runNumbers, type):
                 raise RuntimeError(msg)
                 
             if _index == 0:
-                ws_event_data = LoadEventNexus(Filename=data_file)
+                ws_event_data = LoadEventNexus(Filename=data_file,OutputWorskpace=wks_name)
                 _index += 1
             else:
                 tmp = LoadEventNexus(Filename=data_file)
                 Plus(LHSWorkspace=ws_event_data,
                      RHSWorkspace=tmp, 
-                     OutputWorkspace=ws_event_data)
+                     OutputWorkspace=wks_name)
                 DeleteWorkspace(tmp)
     else:
 
@@ -959,7 +965,7 @@ def loadNeXus(runNumbers, type):
             msg += "Add your data folder to your User Data Directories in the File menu"
             raise RuntimeError(msg)
 
-        ws_event_data = LoadEventNexus(Filename=data_file)
+        ws_event_data = LoadEventNexus(Filename=data_file, OutputWorkspace=wks_name)
     
     return ws_event_data
     
@@ -1226,18 +1232,8 @@ def divideDataByNormalization(data_y_axis,
             
                 tmp_error_1 = pow(float(data_y_error_axis[x,t]) / float(data_y_axis[x,t]),2)
                 tmp_error_2 = pow(float(av_norm_error[t]) / float(av_norm[t]),2)
-                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * (float(data_y_axis[x,t]) / float(av_norm[t]))
+                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * abs(float(data_y_axis[x,t]) / float(av_norm[t]))
             
-#                 if t == 61:
-#                     print 'data_y_error_axis[x,t]: ' , float(data_y_error_axis[x,t])
-#                     print 'data_y_axis[x,t]: ' , float(data_y_axis[x,t])
-#                     print 'tmp_error_1: ' , tmp_error_1
-#                     print 'av_norm_error[t]: ' , av_norm_error[t]
-#                     print 'av_norm[t]: ' , av_norm[t]
-#                     print 'tmp_error_2: ' , tmp_error_2
-#                     print 'tmp_error: ' , tmp_error
-#                     print
-
                 new_data_y_axis[x,t] = tmp_value
                 new_data_y_error_axis[x,t] = tmp_error
     
@@ -1482,7 +1478,7 @@ def applyScalingFactor(tof_axis,
                                                                                    a, b, 
                                                                                    a_error, b_error)
 
-            return [tof_axis, y_data, y_data_error]
+        return [tof_axis, y_data, y_data_error]
 
     else:
         
@@ -1496,7 +1492,7 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
     """
     
     x_axis = tof_axis    
-    nbr_tof = len(x_axis)
+    nbr_tof = len(x_axis)-1
     x_axis_factors = zeros(nbr_tof)
     x_axis_factors_error = zeros(nbr_tof)
     for i in range(nbr_tof):
@@ -1511,10 +1507,12 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
     final_y_data = zeros((nbr_pixel, nbr_tof))
     final_y_data_error = zeros((nbr_pixel, nbr_tof))
     for x in range(nbr_pixel):
+        
         [ratio_array, ratio_array_error] = divideArrays(y_data[x,:], 
                                                         y_data_error[x,:], 
                                                         x_axis_factors, 
                                                         x_axis_factors_error)
+        
         final_y_data[x,:] = ratio_array[:]
         final_y_data_error[x,:] = ratio_array_error
 
@@ -1532,14 +1530,22 @@ def divideArrays(num_array, num_error_array, den_array, den_error_array):
     # calculate the ratio array
     ratio_array = zeros(nbr_elements)
     for i in range(nbr_elements):
-        ratio_array[i] = num_array[i] / den_array[i]
+        if den_array[i] is 0:
+            _tmp_ratio = 0
+        else:
+            _tmp_ratio = num_array[i] / den_array[i]
+        ratio_array[i] = _tmp_ratio
         
     # calculate the error of the ratio array
     ratio_error_array = zeros(nbr_elements)
     for i in range(nbr_elements):
-        tmp1 = pow(num_error_array[i] / num_array[i],2)
-        tmp2 = pow(den_error_array[i] / den_array[i],2)
-        ratio_error_array[i] = sqrt(tmp1+tmp2)*(num_array[i]/den_array[i]) 
+        
+        if (num_array[i] == 0) or (den_array[i] == 0): 
+            ratio_error_array[i] = 0 
+        else:
+            tmp1 = pow(num_error_array[i] / num_array[i],2)
+            tmp2 = pow(den_error_array[i] / den_array[i],2)
+            ratio_error_array[i] = sqrt(tmp1+tmp2)*(num_array[i]/den_array[i])
 
     return [ratio_array, ratio_error_array]
 
@@ -1773,7 +1779,7 @@ def getQaxis(dMD, dSD, theta,
 
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = len(tof_axis)
-    tmp_q_axis = zeros(sz_tof-1)
+    tmp_q_axis = zeros(sz_tof)
     q_array = zeros((len(y_range), sz_tof))
 
     index_y = range(len(y_range))
@@ -1866,6 +1872,7 @@ def createFinalWorkspace(q_axis, final_y_axis, final_error_axis, name_output_ws)
                                       DataE=final_error_axis,
                                       Nspec=1,
                                       UnitX="Wavelength")
+    final_workspace.setDistribution(True)
     
     return final_workspace
     
@@ -1953,6 +1960,32 @@ def cleanupData(final_data_y_axis, final_data_y_error_axis):
     
     
                 
+def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
+    
+    sz = final_data_y_axis.shape
+    nbrTof = sz[0]
+    
+    for t in range(nbrTof):
+            
+        _data = final_data_y_axis[t]
+        _error = final_data_y_error_axis[t]
+            
+        # if error is > value, remove point
+        if _error >= _data:
+            _data = 0
+            _error = 0
+            
+        # if value is below 10^-12
+        if _data < 1e-12:
+            _data = 0
+            _error = 0
+                
+        final_data_y_axis[t] = _data
+        final_data_y_error_axis[t] = _error
+            
+    return [final_data_y_axis, final_data_y_error_axis]
+    
+    
                 
             
     
@@ -1962,4 +1995,3 @@ def cleanupData(final_data_y_axis, final_data_y_error_axis):
     
     
     
-

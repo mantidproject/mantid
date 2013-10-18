@@ -36,9 +36,9 @@ class Moments(PythonAlgorithm):
 		factor = self.getPropertyValue('MultiplyBy')
 		factor = float(factor)
 
-		verbOp = self.getProperty('Verbose')
-		plotOp = self.getProperty('Plot')
-		saveOp = self.getProperty('Save')
+		verbOp = self.getProperty('Verbose').value
+		plotOp = self.getProperty('Plot').value
+		saveOp = self.getProperty('Save').value
 		workdir = config['defaultsave.directory']
 		if inType == 'File':
 			spath = os.path.join(workdir, sam+'.nxs')		# path name for sample nxs file

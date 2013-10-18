@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SpectrumViewer</class>
+ <widget class="QMainWindow" name="SpectrumViewer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1251</width>
+    <height>712</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Image Viewer</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_5">
+    <item row="0" column="0">
+     <widget class="QSplitter" name="left_right_splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QSplitter" name="vgraphSplitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QwtPlot" name="v_graphPlot"/>
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Vertical Graph Info</string>
+        </property>
+       </widget>
+       <widget class="QTableWidget" name="v_graph_table"/>
+      </widget>
+      <widget class="QSplitter" name="imageSplitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QWidget" name="layoutWidget">
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QwtPlot" name="spectrumPlot"/>
+         </item>
+         <item row="0" column="1">
+          <widget class="QScrollBar" name="imageVerticalScrollBar">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QScrollBar" name="imageHorizontalScrollBar">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QwtPlot" name="h_graphPlot"/>
+      </widget>
+      <widget class="QWidget" name="layoutWidget_grid4">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="X_Min_label">
+            <property name="text">
+             <string>X Min</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="x_min_input"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="X_Max_label">
+            <property name="text">
+             <string>X Max</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="x_max_input"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="Step_Label">
+            <property name="text">
+             <string>Step(-if Log)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="step_input"/>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="1" column="0">
+           <widget class="QSlider" name="intensity_slider">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="intensity_label">
+            <property name="text">
+             <string>Intensity</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="0">
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="graph_max_label">
+            <property name="text">
+             <string>Graph Max</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QSlider" name="graph_max_slider">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Color Map (zero at center)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="color_scale"/>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="table_label">
+          <property name="text">
+           <string>Image Info</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QTableWidget" name="image_table"/>
+        </item>
+        <item row="9" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Horizontal Graph Info</string>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="0">
+         <widget class="QTableWidget" name="h_graph_table"/>
+        </item>
+        <item row="5" column="0">
+         <widget class="QComboBox" name="emode_combo_box">
+          <item>
+           <property name="text">
+            <string>Diffractometer</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Direct Geometry Spectrometer</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Indirect Geometry Spectrometer</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <layout class="QFormLayout" name="formLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="efixed_label">
+            <property name="text">
+             <string>E Fixed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="efixed_control">
+            <property name="text">
+             <string> 0.0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1251</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="action_Vscroll"/>
+    <addaction name="action_Hscroll"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <widget class="QMenu" name="menuColor_Map">
+     <property name="title">
+      <string>Color Map</string>
+     </property>
+     <addaction name="actionHeat"/>
+     <addaction name="actionGray"/>
+     <addaction name="actionNegative_Gray"/>
+     <addaction name="actionGreen_Yellow"/>
+     <addaction name="actionRainbow"/>
+     <addaction name="actionOptimal"/>
+     <addaction name="actionMulti"/>
+     <addaction name="actionSpectrum"/>
+     <addaction name="actionLoadColormap"/>
+    </widget>
+    <widget class="QMenu" name="menuGraph_Selected">
+     <property name="title">
+      <string>Graph Selected</string>
+     </property>
+     <addaction name="actionClear_Selections"/>
+     <addaction name="actionOverlaid"/>
+     <addaction name="actionOffset_Vertically"/>
+     <addaction name="actionOffset_Diagonally"/>
+    </widget>
+    <addaction name="menuColor_Map"/>
+    <addaction name="menuGraph_Selected"/>
+    <addaction name="actionGraph_Rebinned_Data"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionOnline_Help_Page"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuOptions"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action">
+   <property name="text">
+    <string>Vertical Scroll Bar</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </action>
+  <action name="action_Hscroll">
+   <property name="text">
+    <string>Horizontal Scroll Bar</string>
+   </property>
+  </action>
+  <action name="action_Vscroll">
+   <property name="text">
+    <string>Vertical Scroll Bar</string>
+   </property>
+  </action>
+  <action name="actionVertical_Cut">
+   <property name="text">
+    <string>Vertical Cut</string>
+   </property>
+  </action>
+  <action name="actionGraph_Rebinned_Data">
+   <property name="text">
+    <string>Graph Rebinned Data</string>
+   </property>
+  </action>
+  <action name="actionHeat">
+   <property name="text">
+    <string>Heat</string>
+   </property>
+  </action>
+  <action name="actionGray">
+   <property name="text">
+    <string>Gray</string>
+   </property>
+  </action>
+  <action name="actionNegative_Gray">
+   <property name="text">
+    <string>Negative Gray</string>
+   </property>
+  </action>
+  <action name="actionGreen_Yellow">
+   <property name="text">
+    <string>Green-Yellow</string>
+   </property>
+  </action>
+  <action name="actionRainbow">
+   <property name="text">
+    <string>Rainbow</string>
+   </property>
+  </action>
+  <action name="actionOptimal">
+   <property name="text">
+    <string>Optimal</string>
+   </property>
+  </action>
+  <action name="actionMulti">
+   <property name="text">
+    <string>Multi</string>
+   </property>
+  </action>
+  <action name="actionSpectrum">
+   <property name="text">
+    <string>Spectrum</string>
+   </property>
+  </action>
+  <action name="actionClear_Selections">
+   <property name="text">
+    <string>Clear Selections</string>
+   </property>
+  </action>
+  <action name="actionOverlaid">
+   <property name="text">
+    <string>Overlaid</string>
+   </property>
+  </action>
+  <action name="actionOffset_Vertically">
+   <property name="text">
+    <string>Offset Vertically</string>
+   </property>
+  </action>
+  <action name="actionOffset_Diagonally">
+   <property name="text">
+    <string>Offset Diagonally</string>
+   </property>
+  </action>
+  <action name="actionLoadColormap">
+   <property name="text">
+    <string>Load Colormap</string>
+   </property>
+  </action>
+  <action name="actionOnline_Help_Page">
+   <property name="text">
+    <string>Online Help Page</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

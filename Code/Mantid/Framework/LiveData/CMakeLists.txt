@@ -24,6 +24,7 @@ set ( INC_FILES
 	inc/MantidLiveData/ADARA/ADARA.h
 	inc/MantidLiveData/ADARA/ADARAPackets.h
 	inc/MantidLiveData/ADARA/ADARAParser.h
+	inc/MantidLiveData/Exception.h
 	inc/MantidLiveData/FakeEventDataListener.h
 	inc/MantidLiveData/FakeISISHistoDAE.h
 	inc/MantidLiveData/FileEventDataListener.h

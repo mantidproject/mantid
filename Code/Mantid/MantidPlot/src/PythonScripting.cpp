@@ -63,7 +63,7 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
   : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
-    m_sys(NULL), refresh_allowed(0), m_mainThreadState(NULL)
+    m_sys(NULL), m_mainThreadState(NULL)
 {
   // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
   // ensure that the internal import that sip does of PyQt picks up the correct version.
@@ -176,6 +176,9 @@ bool PythonScripting::start()
       return false;
     }
 
+    // Our use of the IPython console requires that we use the v2 api for these PyQt types
+    // This has to be set before the very first import of PyQt (which happens in init_qti)
+    PyRun_SimpleString("import sip\nsip.setapi('QString',2)\nsip.setapi('QVariant',2)");
     //Embedded qti module needs sip definitions initializing before it can be used
     init_qti();
 
@@ -210,8 +213,6 @@ bool PythonScripting::start()
     pycode = pycode.arg(mantidbin.absolutePath());
     PyRun_SimpleString(pycode.toStdString().c_str());
 
-    //Get the refresh protection flag
-    configSvc.getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
     if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) ) 
     {
       d_initialized = true;
@@ -383,14 +384,6 @@ const QStringList PythonScripting::fileExtensions() const
   QStringList extensions;
   extensions << "py" << "PY";
   return extensions;
-}
-
-void PythonScripting::refreshAlgorithms(bool force)
-{
-  if(force || refresh_allowed==1)
-  {
-    PyRun_SimpleString("mtd._refreshPyAlgorithms()");
-  }
 }
 
 //------------------------------------------------------------

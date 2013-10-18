@@ -46,7 +46,7 @@ class ExampleWidget(BaseWidget):
     def _button_pressed(self):
         _tmp_str = self._alternate_text
         self._alternate_text = self._content.line_edit.text()
-        self._content.line_edit.setText(QtCore.QString(_tmp_str))
+        self._content.line_edit.setText(_tmp_str)
         
     def set_state(self, state):
         """

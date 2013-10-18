@@ -75,7 +75,6 @@ namespace MantidQt
           "background-repeat: repeat-y; width: 17px; height:20px;} ";
       m_uiForm.Instrument->setStyleSheet(str);
 
-      connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writeErrorToLogWindow(const QString&)));
       try
       {
         populateInstrumentBox();

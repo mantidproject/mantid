@@ -42,7 +42,7 @@ class OutputWidget(BaseWidget):
         self._content.log_binning_radio.hide()
         
     def set_state(self, state):
-        self._content.output_text_edit.setText(QtCore.QString(state.log_text))
+        self._content.output_text_edit.setText(state.log_text)
             
     def get_state(self):
         """

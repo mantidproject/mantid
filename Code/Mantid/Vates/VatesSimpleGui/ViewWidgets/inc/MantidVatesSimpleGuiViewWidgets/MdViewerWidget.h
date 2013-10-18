@@ -5,6 +5,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
 #include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 
 #include <QPointer>
 #include <QWidget>
@@ -58,7 +59,7 @@ class ViewBase;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget : public MantidQt::API::VatesViewerInterface
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget : public MantidQt::API::VatesViewerInterface, MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 
@@ -100,6 +101,14 @@ protected slots:
   void renderingDone();
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
+
+protected:
+  /// Handle workspace preDeletion tasks.
+  void preDeleteHandle(const std::string &wsName,
+                       const boost::shared_ptr<Mantid::API::Workspace> ws);
+  /// Handle workspace replacement tasks.
+  void afterReplaceHandle(const std::string &wsName,
+                          const boost::shared_ptr<Mantid::API::Workspace> ws);
 
 private:
   Q_DISABLE_COPY(MdViewerWidget)

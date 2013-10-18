@@ -31,6 +31,7 @@ protected slots:
   void closeTable();
   void fillTable();
   void fillTableTransposed();
+  void updateTable();
 
 protected:
   void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);

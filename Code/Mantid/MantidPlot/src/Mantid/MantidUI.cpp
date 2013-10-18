@@ -69,7 +69,7 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-#include "MantidQtImageViewer/MatrixWSImageView.h"
+#include "MantidQtSpectrumViewer/SpectrumView.h"
 #include <typeinfo>
 
 using namespace std;
@@ -101,7 +101,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
   m_workspaceGroupUpdateObserver(*this,&MantidUI::handleWorkspaceGroupUpdate),
   m_configServiceObserver(*this,&MantidUI::handleConfigServiceUpdate),
-  m_appWindow(aw), m_vatesSubWindow(NULL)
+  m_appWindow(aw), m_vatesSubWindow(NULL)//, m_spectrumViewWindow(NULL)
 {
 
   // To be able to use them in queued signals they need to be registered
@@ -192,19 +192,22 @@ void MantidUI::init()
   Mantid::Kernel::ConfigService::Instance().addObserver(m_configServiceObserver);
 
   m_exploreAlgorithms->update();
+
   try
   {
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
-    m_fitFunction->init();
+    m_defaultFitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
+    m_defaultFitFunction->init();
         // this make the progress bar work with Fit algorithm running form the fit browser
-    connect(m_fitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
-      this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
-    m_fitFunction->hide();
-    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
+    connect(m_defaultFitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
+            this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
+    m_defaultFitFunction->hide();
+    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_defaultFitFunction );
 
+    m_fitFunction = m_defaultFitFunction;
   }
   catch(...)
   {
+    m_defaultFitFunction = NULL;
     m_fitFunction = NULL;
     showCritical("The curve fitting plugin is missing");
   }
@@ -671,6 +674,7 @@ void MantidUI::showVatesSimpleInterface()
       {
         connect(m_appWindow, SIGNAL(shutting_down()),
                 vsui, SLOT(shutdown()));
+        connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
         vsui->setupPluginMode();
@@ -696,32 +700,37 @@ void MantidUI::showVatesSimpleInterface()
   }
 }
 
-void MantidUI::showImageViewer()
+void MantidUI::showSpectrumViewer()
 {
   QString wsName = getSelectedWorkspaceName();
   try
   {
-    MatrixWorkspace_sptr matwsp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
              AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
-    if ( matwsp )
+    if ( wksp )
     {
-      MantidQt::ImageView::MatrixWSImageView image_view( matwsp );
+        MantidQt::SpectrumView::SpectrumView* viewer = new MantidQt::SpectrumView::SpectrumView(m_appWindow);
+        viewer->setAttribute(Qt::WA_DeleteOnClose, false);
+        viewer->resize( 1050, 800 );
+        connect(m_appWindow, SIGNAL(shutting_down()), viewer, SLOT(close()));
+
+        viewer->show();
+        viewer->renderWorkspace(wksp);
     }
     else
     {
-      const char * msg =
-          "Only event or matrix workspaces are currently supported.\n"
-          "Please convert to one of these before using the ImageView.";
-      g_log.information() << msg << std::endl;
+      g_log.information() << "Only event or matrix workspaces are currently supported.\n"
+                          << "Please convert to one of these before using the ImageView.\n";
     }
   }
     catch (std::runtime_error &e)
   {
+    g_log.error() << e.what() << "\n";
     throw std::runtime_error(e);
   }
   catch (...)
   {
-    g_log.error() << "Image View: Exception getting workspace " << std::endl;
+    g_log.error() << "Image View: Exception getting workspace\n";
   }
 
 }
@@ -1675,6 +1684,15 @@ void MantidUI::renameWorkspace(QStringList wsName)
   }
 
 }
+
+void MantidUI::setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser)
+{
+  if(newBrowser == NULL)
+    m_fitFunction = m_defaultFitFunction;
+  else
+    m_fitFunction = newBrowser;
+}
+
 void MantidUI::groupWorkspaces()
 {
   try
@@ -1951,8 +1969,9 @@ void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
   emit workspaces_cleared();
 }
 
-void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr )
+void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr msg)
 {
+    emit workspace_renamed(QString::fromStdString(msg->object_name()),QString::fromStdString(msg->new_objectname()));
     emit ADS_updated();
 }
 void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr)
@@ -2287,17 +2306,13 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    }
 
    Table *t = createTableFromBins(wsName, ws, binsList, errors);
+   if(!t) return NULL;
    t->confirmClose(false);
    t->setAttribute(Qt::WA_QuitOnClose);
-   MultiLayer* ml(NULL);
-   if( !t )
-   {
-     QApplication::restoreOverrideCursor();
-     return ml;
-   }
 
    // TODO: Use the default style instead of a line if nothing is passed into this method
-   ml = appWindow()->multilayerPlot(t,t->colNames(),style);
+   MultiLayer *ml = appWindow()->multilayerPlot(t,t->colNames(),style);
+   if(!ml) return NULL;
    m->setBinGraph(ml,t);
    ml->confirmClose(false);
    QApplication::restoreOverrideCursor();

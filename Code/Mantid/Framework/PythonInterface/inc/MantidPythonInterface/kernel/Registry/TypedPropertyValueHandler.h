@@ -22,9 +22,10 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
-#include <boost/python/object.hpp>
+
 #include <boost/python/extract.hpp>
 #include <boost/python/converter/arg_from_python.hpp>
 #include <boost/weak_ptr.hpp>
@@ -68,7 +69,7 @@ namespace Mantid
           using boost::python::extract;
           const ValueType valueInC = extract<ValueType>(defaultValue)();
           Kernel::Property *valueProp(NULL);
-          if( validator.is_none() )
+          if( isNone(validator) )
           {
             valueProp = new Kernel::PropertyWithValue<ValueType>(name, valueInC, direction);
           }
@@ -142,7 +143,7 @@ namespace Mantid
           using boost::python::extract;
           const boost::shared_ptr<T> valueInC = extract<PropertyValueType>(defaultValue)();
           Kernel::Property *valueProp(NULL);
-          if( validator.is_none() )
+          if( isNone(validator) )
           {
             valueProp = new Kernel::PropertyWithValue<PropertyValueType>(name, valueInC, direction);
           }

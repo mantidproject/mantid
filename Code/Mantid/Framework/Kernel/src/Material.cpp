@@ -30,7 +30,7 @@ namespace Mantid
     * @param temperature :: The temperature in Kelvin (Default = 300K)
     * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
     */
-    Material::Material(const std::string & name, const PhysicalConstants::NeutronAtom element,
+    Material::Material(const std::string & name, const PhysicalConstants::NeutronAtom& element,
 		       const double numberDensity, const double temperature, 
 		       const double pressure) :
       m_name(name), m_element(element), m_numberDensity(numberDensity), 

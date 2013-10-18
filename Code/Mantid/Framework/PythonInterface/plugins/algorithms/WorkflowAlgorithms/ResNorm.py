@@ -46,9 +46,9 @@ class ResNorm(PythonAlgorithm):
 		vname = prefix+van+'_'+ana+ '_red'
 		rname = prefix+res+'_'+ana+ '_res'
 		erange = [float(emin), float(emax)]
-		verbOp = self.getProperty('Verbose')
+		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getPropertyValue('Plot')
-		saveOp = self.getProperty('Save')
+		saveOp = self.getProperty('Save').value
 
 		workdir = config['defaultsave.directory']
 		if inType == 'File':

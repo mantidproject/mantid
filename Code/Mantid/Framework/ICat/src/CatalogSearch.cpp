@@ -81,7 +81,6 @@ namespace Mantid
       try
       {
         catalog = CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-
       }
       catch(Kernel::Exception::NotFoundError&)
       {
@@ -169,11 +168,6 @@ namespace Mantid
       if(endDate==-1)
       {
         throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
-      }
-
-      if(startDate>endDate)
-      {
-        throw std::runtime_error("End date cannot be lower than Start date");
       }
 
       params.setStartDate(startDate);

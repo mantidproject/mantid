@@ -78,7 +78,7 @@ namespace Mantid
        * @param value :: An object derived from DataItem
        * @return A pointer to an downcasted type or NULL if one cannot be found
        */
-      const PyTypeObject * getDerivedType(boost::python::object value)
+      const PyTypeObject * getDerivedType(const boost::python::object & value)
       {
         // This has to be a search as it is at runtime.
         // Each of the registered type handlers is checked

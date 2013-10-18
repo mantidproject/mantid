@@ -304,7 +304,8 @@ namespace
     const size_t nhistograms = functionsToDisplay.size() + 2;
     const size_t nyvalues = ivalues->size();
     auto ws = createEmptyResultWS(nhistograms, nyvalues);
-    API::TextAxis *textAxis = dynamic_cast<API::TextAxis*>(ws->getAxis(1));
+    // The workspace was constructed with a TextAxis
+    API::TextAxis *textAxis = static_cast<API::TextAxis*>(ws->getAxis(1));
     textAxis->setLabel(0,"Data");
     textAxis->setLabel(1,"Calc");
     textAxis->setLabel(2,"Diff");
@@ -314,7 +315,7 @@ namespace
     size_t wsIndex(1); // Zero reserved for data
     for(auto it = functionsToDisplay.begin(); it != iend; ++it)
     {
-      if(textAxis && wsIndex > 2) textAxis->setLabel(wsIndex, (*it)->name());
+      if(wsIndex > 2) textAxis->setLabel(wsIndex, (*it)->name());
       addFunctionValuesToWS(*it, ws, wsIndex, domain, values);
       if(it == functionsToDisplay.begin()) wsIndex += 2; //Skip difference histogram for now
       else ++wsIndex;

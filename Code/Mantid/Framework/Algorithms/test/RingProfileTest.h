@@ -52,7 +52,7 @@ public:
     // centre must be inside the limits of the workspace
     std::vector<double> twoInputs(2,0); 
     // set the centre outside the matrix workspace
-    twoInputs[0] = goodWS->getAxis(0)->getMin() - 3.5; 
+    twoInputs[0] = goodWS->readX(0)[0] - 3.5;
     twoInputs[1] = goodWS->getAxis(1)->getMin()- 4.5; 
     // it is a valid input because it has just two inputs
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre",twoInputs)); 
@@ -76,7 +76,7 @@ public:
     // centre must be inside the limits of the workspace
     std::vector<double> twoInputs(3,0); 
     // set the centre outside the matrix workspace
-    twoInputs[0] = goodWS->getAxis(0)->getMin() - 3.5; 
+    twoInputs[0] = goodWS->readX(0)[0] - 3.5;
     twoInputs[1] = goodWS->getAxis(1)->getMin()- 4.5; 
     // it is a valid input because it has just two inputs
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre",twoInputs)); 

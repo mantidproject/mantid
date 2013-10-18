@@ -57,7 +57,7 @@ public:
   /// Get peak's centre
   virtual double centre() const;
   /// Get peak's intensity
-  virtual double height() const = 0;
+  virtual double height() const;
   /// Get peakl's FWHM
   virtual double fwhm()const;
   /// Set peak's height
@@ -67,10 +67,10 @@ public:
 
   //--------------- ThermalNeutron peak function special ---------------------------------------
   /// Set Miller Indicies
-  virtual void setMillerIndex(int h, int k, int l) = 0;
+  virtual void setMillerIndex(int h, int k, int l);
 
   /// Get Miller Index from this peak
-  virtual void getMillerIndex(int& h, int &k, int &l) = 0;
+  virtual void getMillerIndex(int& h, int &k, int &l);
 
   /// Get peak parameters
   virtual double getPeakParameter(std::string) = 0;
@@ -100,7 +100,6 @@ public:
 
   /// Calculate function in a range
   using IFunction1D::function;
-
   virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const = 0;
 
   /// Get maximum value on a given set of data points
@@ -147,10 +146,13 @@ protected:
   mutable bool m_parameterValid;
 
   /// Miller Indices
-  int mH;
-  int mK;
-  int mL;
-  bool mHKLSet;
+  mutable int mH;
+  mutable int mK;
+  mutable int mL;
+  mutable bool mHKLSet;
+
+  size_t LATTICEINDEX;
+  size_t HEIGHTINDEX;
 
 private:
   /// Peak intensity
@@ -159,6 +161,9 @@ private:
 };
 
 typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
+
+/// Integral for Gamma
+std::complex<double> MANTID_API_DLL E1(std::complex<double> z);
 
 } // namespace API
 } // namespace Mantid

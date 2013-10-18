@@ -36,7 +36,7 @@ def createMappingFile(groupFile, ngroup, nspec, first):
     if ( ngroup == 1 ): return 'All'
     if ( nspec == 1 ): return 'Individual'
     filename = config['defaultsave.directory']
-    filename += groupFile
+    filename = os.path.join(filename, groupFile)
     handle = open(filename, 'w')
     handle.write(str(ngroup) +  "\n" )
     for n in range(0, ngroup):
@@ -74,7 +74,6 @@ def resolution(files, iconOpt, rebinParam, bground,
         CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
-        DeleteWorkspace(iconWS)
             
         SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
             

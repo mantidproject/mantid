@@ -2,6 +2,7 @@
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
 /********** Source = api.cpp.in **********************************************************/
 /*****************************************************************************************/
+#include <boost/python/def.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
 
@@ -9,6 +10,26 @@
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #include <numpy/arrayobject.h>
 #include <boost/python/numeric.hpp>
+
+
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
+
+namespace
+{
+  /**
+   * We don't want to register the C++ algorithms on loading the python module
+   * since we want then be able to control when the various singletons are started if
+   * we are being imported from vanilla Python.
+   * Here we export a single function that can be called after the FrameworkManager
+   * has been started to registered any hard-coded C++ algorithms that are
+   * contained within this module.
+   */
+  void _declareCPPAlgorithms()
+  {
+    Mantid::API::AlgorithmFactory::Instance().subscribe<Mantid::PythonInterface::RunPythonScript>();
+  }
+}
 
 // Forward declare
 @EXPORT_DECLARE@
@@ -20,6 +41,9 @@ BOOST_PYTHON_MODULE(_api)
   // Import numpy
   _import_array();
   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+  
+  // Internal function to declare C++ algorithms that are a part of this module
+  boost::python::def("_declareCPPAlgorithms", &_declareCPPAlgorithms);
 
 @EXPORT_FUNCTIONS@
 }

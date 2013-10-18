@@ -325,6 +325,7 @@ namespace Mantid
       exts.push_back(".nxspe");
       exts.push_back(".h5");
       exts.push_back(".hd5");
+      exts.push_back(".sqw");
 
       declareProperty(new MultipleFileProperty("Filename", exts),
         "The name of the file(s) to read, including the full or relative "

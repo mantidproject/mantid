@@ -275,8 +275,6 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
   /**
   \class MisMatch
   \brief Error when two numbers should be identical (or close)
-  \date October 2005
-  \version 1.0
 
   Records the object being looked for
   and the range required.
@@ -285,12 +283,11 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
   class MisMatch : public std::runtime_error
   {
   private:
-
     const T Aval;        ///< Number A
     const T Bval;        ///< container size
+    std::string m_message; ///< The message reported by what()
 
   public:
-
     MisMatch(const T&,const T&,const std::string&);
     MisMatch(const MisMatch<T>& A);
     MisMatch<T> & operator=(const MisMatch<T> & rhs);
@@ -298,26 +295,21 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
 
     /// Overloaded reporting method
     const char* what() const throw();
-
   };
 
 
   /**
   \class IndexError
   \brief Exception for index errors
-  \author Stuart Ansell
-  \date Sept 2005
-  \version 1.0
 
   Called when an index falls out of range
-
   */
   class MANTID_KERNEL_DLL IndexError : public std::runtime_error
   {
   private:
-
     const size_t Val;     ///< Actual value called
     const size_t maxVal;  ///< Maximum value
+    std::string m_message; ///< The message reported by what()
 
   public:
     // Unsigned versions
@@ -328,7 +320,6 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
 
     /// Overloaded reporting method
     const char* what() const throw();
-
   };
 
   /** Exception thrown when an attempt is made to dereference a null pointer

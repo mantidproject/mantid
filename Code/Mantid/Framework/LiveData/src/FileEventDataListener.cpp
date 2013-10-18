@@ -1,6 +1,8 @@
 #include "MantidLiveData/FileEventDataListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::Kernel;
@@ -17,14 +19,43 @@ namespace LiveData
 
   /// Constructor
   FileEventDataListener::FileEventDataListener() : ILiveListener(),
-      m_filename(ConfigService::Instance().getString("fileeventdatalistener.filename")),
-      m_tempWSname("__filelistenerchunk"), m_nextChunk(1), m_chunkload(NULL), m_preNexus(false)
+      m_tempWSname("__filelistenerchunk"), m_nextChunk(1), m_filePropName("Filename"),
+      m_loaderName(""), m_canLoadMonitors(true), m_chunkload(NULL)
   {
-    if ( m_filename.empty() ) g_log.error("Configuration property fileeventdatalistener.filename not found. The algorithm will fail!");
-    if ( m_filename.find("runinfo") != std::string::npos )
+    std::string tfilename = ConfigService::Instance().getString("fileeventdatalistener.filename");
+    if ( tfilename.empty() )
     {
-      m_preNexus = true;
-      g_log.information() << "Using LoadPreNexus on file " << m_filename << std::endl;
+      g_log.error("Configuration property fileeventdatalistener.filename not found. The algorithm will fail!");
+    }
+    else
+    {
+      // If passed a filename with no path, find it. Otherwise, same file
+      // will be found.
+      m_filename = FileFinder::Instance().getFullPath(tfilename);
+      if ( m_filename.empty() )
+      {
+        g_log.error("Cannot find " + tfilename + ". The algorithm will fail.");
+      }
+      else
+      {
+        auto loader = FileLoaderRegistry::Instance().chooseLoader(m_filename);
+        m_loaderName = loader->name();
+        if (m_loaderName.find("Nexus") != std::string::npos &&
+            (m_loaderName.find("Pre") != std::string::npos ||
+             m_loaderName.find("Event") != std::string::npos))
+        {
+          if (m_loaderName.find("Pre") != std::string::npos &&
+              m_loaderName.find("Event") != std::string::npos)
+          {
+            m_filePropName = "EventFilename";
+            m_canLoadMonitors = false;
+          }
+        }
+        else
+        {
+          g_log.error("No loader for " + m_filename + " that supports chunking. The algorithm will fail.");
+        }
+      }
     }
 
     if ( ! ConfigService::Instance().getValue("fileeventdatalistener.chunks",m_numChunks) )
@@ -45,9 +76,15 @@ namespace LiveData
   FileEventDataListener::~FileEventDataListener()
   {
     // Don't disappear until any running job has finished or bad things happen!
-    if ( m_chunkload ) m_chunkload->wait();
+    if ( m_chunkload )
+    {
+      m_chunkload->wait();
+    }
     // Clean up the hidden workspace if necessary
-    if ( AnalysisDataService::Instance().doesExist(m_tempWSname) ) AnalysisDataService::Instance().remove(m_tempWSname);
+    if ( AnalysisDataService::Instance().doesExist(m_tempWSname) )
+    {
+      AnalysisDataService::Instance().remove(m_tempWSname);
+    }
     // Don't leak memory
     delete m_chunkload;
   }
@@ -66,11 +103,20 @@ namespace LiveData
   ILiveListener::RunStatus FileEventDataListener::runStatus()
   {
     // Say we're outside a run if this is called before start is
-    if ( m_nextChunk == 1 ) return NoRun;
+    if ( m_nextChunk == 1 )
+    {
+      return NoRun;
+    }
     // This means the first chunk is being/has just been loaded
-    else if ( m_nextChunk == 2 ) return BeginRun;
+    else if ( m_nextChunk == 2 )
+    {
+      return BeginRun;
+    }
     // This means we've read the whole file
-    else if ( m_chunkload == NULL ) return EndRun;
+    else if ( m_chunkload == NULL )
+    {
+      return EndRun;
+    }
     // Otherwise we're in the run
     else return Running;
   }
@@ -86,11 +132,17 @@ namespace LiveData
   {
     // Once the end of the file is reached, this method throws to stop the calling algorithm.
     // This is equivalent to the end of the run - which we still need to figure out how to handle.
-    if ( m_chunkload == NULL ) throw std::runtime_error("The whole file has been read!");
+    if ( m_chunkload == NULL )
+    {
+      throw std::runtime_error("The whole file has been read!");
+    }
 
     // If the loading of the chunk isn't finished, then we need to wait
     m_chunkload->wait();
-    if ( ! m_chunkload->data() ) throw std::runtime_error("LoadEventPreNexus failed for some reason.");
+    if ( ! m_chunkload->data() )
+    {
+      throw std::runtime_error("LoadEventPreNexus failed for some reason.");
+    }
     // The loading succeeded: get the workspace from the ADS.
     MatrixWorkspace_sptr chunk = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tempWSname);
     // Remove the workspace from the ADS now we've extracted it
@@ -114,27 +166,18 @@ namespace LiveData
   /// Load the next chunk of data. Calls Algorithm::executeAsync to do it in another thread.
   void FileEventDataListener::loadChunk()
   {
-    std::string loadingAlg, fileProp;
-    if ( m_preNexus )
-    {
-      loadingAlg = "LoadPreNexus";
-      fileProp = "Filename";
-    }
-    else
-    {
-      loadingAlg = "LoadEventPreNexus";
-      fileProp = "EventFilename";
-    }
-
-    m_loader = AlgorithmManager::Instance().createUnmanaged(loadingAlg);
+    m_loader = AlgorithmManager::Instance().createUnmanaged(m_loaderName);
     m_loader->initialize();
 //    loader->setChild(true); // It can't be a child because the output needs to go in the ADS
     m_loader->setLogging(false);
-    m_loader->setPropertyValue(fileProp,m_filename);
-    m_loader->setProperty("ChunkNumber",m_nextChunk++); // post-increment
-    m_loader->setProperty("TotalChunks",m_numChunks);
-    if ( m_preNexus ) m_loader->setProperty("LoadMonitors",false);
-    m_loader->setPropertyValue("OutputWorkspace",m_tempWSname); // Goes into 'hidden' workspace
+    m_loader->setPropertyValue(m_filePropName, m_filename);
+    m_loader->setProperty("ChunkNumber", m_nextChunk++); // post-increment
+    m_loader->setProperty("TotalChunks", m_numChunks);
+    if ( m_canLoadMonitors )
+    {
+      m_loader->setProperty("LoadMonitors", false);
+    }
+    m_loader->setPropertyValue("OutputWorkspace", m_tempWSname); // Goes into 'hidden' workspace
     m_chunkload = new Poco::ActiveResult<bool>(m_loader->executeAsync());
   }
 

@@ -160,6 +160,10 @@ namespace Crystal
     g_log.notice( std::string(message) );
 
 
+    Kernel::Matrix<double>T(UB);
+    T.Invert();
+    T = newUB * T;
+    g_log.notice() << "Transformation Matrix =  " << T.str() << std::endl;
 
 
     if ( apply )

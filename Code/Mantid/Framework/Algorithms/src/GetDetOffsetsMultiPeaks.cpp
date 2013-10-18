@@ -9,7 +9,7 @@ This is then written into a [[CalFile|.cal file]] for every detector that contri
 == Usage ==
 '''Python'''
 
-GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
+OutputW,NumberPeaksFitted,Mask = GetDetOffsetsMultiPeaks("InputW",0.01,2.0,1.8,2.2,"output.cal")
 
 
 *WIKI*/
@@ -230,7 +230,7 @@ namespace Algorithms
     // Create the output MaskWorkspace
     MatrixWorkspace_sptr maskWS(new MaskWorkspace(inputW->getInstrument()));
     //To get the workspace index from the detector ID
-    detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
     // the peak positions and where to fit
     std::vector<double> peakPositions = getProperty("DReference");
     std::sort(peakPositions.begin(), peakPositions.end());
@@ -337,7 +337,7 @@ namespace Algorithms
         tofitpeakpositions = peakPosToFit;
 
         // Fit offset
-        if (nparams > 0)
+        if (nparams > 0 && numpeaksindrange > 0)
         {
           //double * params = new double[2*nparams+1];
           double params[153];
@@ -445,16 +445,19 @@ namespace Algorithms
         {
           outputW->setValue(*it, offset, fitSum);
           outputNP->setValue(*it, peakPosFittedSize, chisqSum);
+          const auto mapEntry = pixel_to_wi.find(*it);
+          if ( mapEntry == pixel_to_wi.end() ) continue;
+          const size_t workspaceIndex = mapEntry->second;
           if (mask == 1.)
           {
             // Being masked
-            maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);
-            maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            maskWS->maskWorkspaceIndex(workspaceIndex);
+            maskWS->dataY(workspaceIndex)[0] = mask;
           }
           else
           {
             // Using the detector
-            maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            maskWS->dataY(workspaceIndex)[0] = mask;
           }
         }
 
@@ -644,6 +647,7 @@ namespace Algorithms
       }
     }
     int numPeaksInRange = static_cast<int>(peakPosToFit.size());
+    if (numPeaksInRange == 0) return 0;
 
     API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
     findpeaks->setProperty("InputWorkspace", inputW);

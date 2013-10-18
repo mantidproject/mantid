@@ -780,6 +780,8 @@ namespace API
   *  date is selected. If no such files are found the file with the latest from date is 
   *  selected.
   *
+  *  If no file is found for the given instrument, an empty string is returned.
+  *
   *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
   *  @param date :: ISO 8601 date
   *  @return full path of IDF

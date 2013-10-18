@@ -13,6 +13,14 @@ using namespace Kernel;
 
 IPeaksWorkspace::~IPeaksWorkspace() {}
 
+const std::string IPeaksWorkspace::toString() const
+{
+  std::ostringstream os;
+  os << ITableWorkspace::toString() << "\n"
+     << ExperimentInfo::toString();
+
+  return os.str();
+}
 
 } //API namespace
 
