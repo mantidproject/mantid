@@ -165,7 +165,7 @@ namespace Algorithms
                     "Peak position tolerance.  If fitted peak's position differs from proposed value more than "
                     "the given value, fit is treated as failure. ");
 
-    std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
+    vector<string> costFuncOptions;
     costFuncOptions.push_back("Chi-Square");
     costFuncOptions.push_back("Rwp");
     declareProperty("CostFunction","Chi-Square",
@@ -257,7 +257,7 @@ namespace Algorithms
     }
 
     // Set peak parameter values
-    for (size_t i = 0; i < vec_bkgdparnames.size(); ++i)
+    for (size_t i = 0; i < vec_peakparnames.size(); ++i)
     {
       m_peakFunc->setParameter(vec_peakparnames[i], vec_peakparvalues[i]);
     }
@@ -395,6 +395,8 @@ namespace Algorithms
     compfunc->addFunction(m_peakFunc);
     compfunc->addFunction(m_bkgdFunc);
 
+    g_log.notice() << "[DB] Composit Function: " << compfunc->asString() << "\n";
+
     // Set up a list of guessed FWHM
     // Calculate guessed FWHM
     std::vector<double> vec_FWHM;
@@ -409,6 +411,7 @@ namespace Algorithms
     for (size_t i = 0; i < vec_FWHM.size(); ++i)
     {
       // set FWHM
+      g_log.notice() << "[DB SingleStep] FWHM = " << vec_FWHM[i] << "\n";
       m_peakFunc->setFwhm(vec_FWHM[i]);
 
       // fit and process result
@@ -582,7 +585,8 @@ namespace Algorithms
     // Background
     vector<string> vec_bkgdnames = getProperty("BackgroundParameterNames");
     vector<double> vec_fitbkgd;
-    for (size_t i = 0; i < vec_peaknames.size(); ++i)
+
+    for (size_t i = 0; i < vec_bkgdnames.size(); ++i)
     {
       double value = m_bkgdFunc->getParameter(vec_bkgdnames[i]);
       vec_fitbkgd.push_back(value);
@@ -632,14 +636,7 @@ namespace Algorithms
     FunctionValues bkgdvalues(domain);
     m_bkgdFunc->function(domain, bkgdvalues);
 
-#if 0
-    for (size_t i = 0; i < domain.size(); ++i)
-    {
-      g_log.notice() << domain[i] << "\t\t" << bkgdvalues[i] << "\n";
-    }
-    throw runtime_error("Check here!");
-#endif
-
+    // Calculate pure background and put weight on peak if using Rwp
     MantidVec& vecY = m_dataWS->dataY(m_wsIndex);
     MantidVec& vecE = m_dataWS->dataE(m_wsIndex);
     for (size_t i = i_minFitX; i < i_maxFitX; ++i)
@@ -1164,21 +1161,32 @@ namespace Algorithms
     // ROMAN: I tried to fit the background with multiple domain.  But "Start_1" and "End_1" are not
     //        recognized.  Do you know how to set it up in C++?  I failed to use the way to set up in Python
     //        to C++
-#if 0
+#if 1
     // This use multi-domain; but does not know how to set up
     boost::shared_ptr<MultiDomainFunction> funcmd = boost::make_shared<MultiDomainFunction>();
 
-    // [11:54:38] Roman Tolchenov:     // set functio first
-    funcmd->addFunction(fitfunc);
+    // Set function first
     funcmd->addFunction(fitfunc);
 
-    // set domain for function with index 0 and 1
+    // set domain for function with index 0 covering both sides
     funcmd->clearDomainIndices();
-    std::vector<size_t> ii(1);
+    std::vector<size_t> ii(2);
     ii[0] = 0;
+    ii[1] = 1;
     funcmd->setDomainIndices(0, ii);
-    ii[0] = 1;
-    funcmd->setDomainIndices(1, ii);
+
+    // Set 2nd function and tie all parameters to zero
+    IFunction_sptr dummyfunc = fitfunc->clone();
+    funcmd->addFunction(dummyfunc);
+
+    vector<string> vecparnames = dummyfunc->getParameterNames();
+    for (size_t  i = 0; i < vecparnames.size(); ++i)
+      dummyfunc->tie(vecparnames[i], "0.");
+
+    // Set domainfor function 2
+    vector<size_t> ii2(1);
+    ii2[0] = 1;
+    funcmd->setDomainIndices(1, ii2);
 
     g_log.notice() << "[DB] Domain 0: " << vec_xmin[0] << ", " << vec_xmax[0] << "\n"
                    << "     Domain 1: " << vec_xmin[1] << ", " << vec_xmax[1] << "\n";
@@ -1197,8 +1205,7 @@ namespace Algorithms
     fit->setProperty("Minimizer", m_minimizer);
     fit->setProperty("CostFunction", "Least squares");
 
-    g_log.information() << "[DB] Multi-domain fit chi^2 = " << chi2 << "\n"
-                        << "     Funcion: " << funcmd->asString() << "\n";
+    g_log.information() << "[DB] Funcion: " << funcmd->asString() << "\n";
 
 #else
     // FIXME - This is a temp solution

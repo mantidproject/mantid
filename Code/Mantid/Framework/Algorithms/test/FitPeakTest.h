@@ -135,9 +135,9 @@ public:
     double peakheight = fittedpeakvalues[0];
     double peakcentre = fittedpeakvalues[1];
     double sigma = fittedpeakvalues[2];
-    TS_ASSERT_DELTA(peakheight, 1000., 10.);
-    TS_ASSERT_DELTA(peakcentre, 0.549, 0.01);
-    TS_ASSERT_DELTA(sigma, 0.01, 0.005);
+    TS_ASSERT_DELTA(peakheight, 1170., 50.);
+    TS_ASSERT_DELTA(peakcentre, 0.5945, 0.001);
+    TS_ASSERT_DELTA(sigma, 0.00057, 0.0002);
 
     vector<double> fittedbkgdvalues = fitpeak.getProperty("FittedBackgroundParameterValues");
     TS_ASSERT_EQUALS(fittedbkgdvalues.size(), 3);
@@ -313,7 +313,7 @@ public:
     vector<string> peakparnames, bkgdparnames;
     vector<double> peakparvalues, bkgdparvalues;
 
-    gen_BkgdParameters(bkgdparnames, bkgdparvalues);
+    gen_linearBkgdParameters(bkgdparnames, bkgdparvalues);
     gen_PeakParameters(peakparnames, peakparvalues);
 
 #if 0
@@ -337,17 +337,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunctionType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterNames", peakparnames));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterValues", peakparvalues));
-    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Quadratic"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Linear"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterNames", bkgdparnames));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterValues", bkgdparvalues));
     fitpeak.setPropertyValue("FitWindow", "0.586, 0.604");
     fitpeak.setPropertyValue("PeakRange", "0.591, 0.597");
-    fitpeak.setProperty("FitBackgroundFirst", true);
+    fitpeak.setProperty("FitBackgroundFirst", false);
     fitpeak.setProperty("RawParams", true);
-    fitpeak.setProperty("MinGuessedPeakWidth", 2);
-    fitpeak.setProperty("MaxGuessedPeakWidth", 20);
-    fitpeak.setProperty("GuessedPeakWidthStep", 2);
-    fitpeak.setProperty("CostFunction", "Rwp");
 
     // Execute
     fitpeak.execute();
@@ -355,12 +351,34 @@ public:
 
     // Check
     vector<double> fittedpeakvalues = fitpeak.getProperty("FittedPeakParameterValues");
-    TS_ASSERT_EQUALS(fittedpeakvalues.size(), 100);
+    TS_ASSERT_EQUALS(fittedpeakvalues.size(), 3);
+
+    vector<double> fittedbkgdvalues = fitpeak.getProperty("FittedBackgroundParameterValues");
+    TS_ASSERT_EQUALS(fittedbkgdvalues.size(), 2);
+
+    double peakheight = fittedpeakvalues[0];
+    TS_ASSERT_DELTA(peakheight, 1200., 200.);
 
 
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate a workspace contains PG3_4866 5-th peak
+    */
+  void gen_linearBkgdParameters(vector<string>& parnames, vector<double>& parvalues)
+  {
+    parnames.clear();
+    parvalues.clear();
+
+    parnames.push_back("A0");
+    parvalues.push_back(48000.);
+
+    parnames.push_back("A1");
+    parvalues.push_back(-60010.);
+
+    return;
+  }
 
 
 };
