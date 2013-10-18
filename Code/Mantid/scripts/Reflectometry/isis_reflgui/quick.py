@@ -141,7 +141,7 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
 			RunNumber = '0'
 		else:
 			RunNumber = groupGet('IvsLam','samp','run_number') 
-		#mantid['IvsLam'].getSampleDetails().getLogData("goodfrm").value
+		#mantid['IvsLam'].getRun().getLogData("goodfrm").value
 		#Scale('IvsLam','IvsLam',GoodFrames**-1,'Multiply')
 		#IvsLam = mantid['IvsLam']*GoodFrames**-1
 		if (trans==''):
@@ -409,7 +409,7 @@ def groupGet(wksp,whattoget,field=''):
 	elif (whattoget == 'samp' and field != ''):
 		if isinstance(mtd[wksp], WorkspaceGroup):
 			try:
-				log = mtd[wksp + '_1'].getSampleDetails().getLogData(field).value
+				log = mtd[wksp + '_1'].getRun().getLogData(field).value
 				if (type(log) is int or type(log) is str):
 					res=log
 				else:
@@ -419,7 +419,7 @@ def groupGet(wksp,whattoget,field=''):
 				print "Block "+field+" not found."			
 		else:
 			try:
-				log = mtd[wksp].getSampleDetails().getLogData(field).value
+				log = mtd[wksp].getRun().getLogData(field).value
 				if (type(log) is int or type(log) is str):
 					res=log
 				else:

@@ -35,7 +35,7 @@ if ( SPHINX_FOUND )
     source/images/calibrateB2Window.png
     source/images/calibratedCurrentMerlin.png
     source/images/calibratedMantidMerlin.png
-    source/images/calibrateExtendMarginAndExpectedValue.png
+    source/images/calibrateChangeMarginAndExpectedValue.png
     source/images/calibratePlotFittedData.png
     source/images/outputOfMinimalInput.png
     source/images/plotingPeaksDifference.png

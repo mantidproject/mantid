@@ -1,5 +1,6 @@
 set ( SRC_FILES
     src/ApplyCorr.cpp
+    src/C2ETab.cpp
     src/CalcCorr.cpp
     src/ConvertToEnergy.cpp
     src/ConvFit.cpp
@@ -15,6 +16,10 @@ set ( SRC_FILES
 	src/Indirect.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
+  src/IndirectLoadAscii.cpp
+  src/IndirectLoadAsciiTab.cpp
+  src/IndirectNeutron.cpp
+  src/IndirectMolDyn.cpp
     src/MSDFit.cpp
 	src/MuonAnalysis.cpp
 	src/MuonAnalysisFitDataTab.cpp
@@ -26,6 +31,7 @@ set ( SRC_FILES
 	src/SANSDiagnostics.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
+	src/Transmission.cpp
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
 	src/StepScan.cpp
@@ -41,13 +47,15 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
     inc/MantidQtCustomInterfaces/ApplyCorr.h
+    inc/MantidQtCustomInterfaces/C2ETab.h
     inc/MantidQtCustomInterfaces/CalcCorr.h
 	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
     inc/MantidQtCustomInterfaces/ConvFit.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
     inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+    inc/MantidQtCustomInterfaces/DllConfig.h
     inc/MantidQtCustomInterfaces/Elwin.h
-	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h	
+	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
     inc/MantidQtCustomInterfaces/Fury.h
     inc/MantidQtCustomInterfaces/FuryFit.h
 	inc/MantidQtCustomInterfaces/Homer.h
@@ -56,6 +64,10 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+  inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
+  inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
+  inc/MantidQtCustomInterfaces/IndirectNeutron.h
+  inc/MantidQtCustomInterfaces/IndirectMolDyn.h
     inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
@@ -67,6 +79,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
+	inc/MantidQtCustomInterfaces/Transmission.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
 	inc/MantidQtCustomInterfaces/MantidEVWorker.h
 	inc/MantidQtCustomInterfaces/StepScan.h
@@ -82,12 +95,14 @@ set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ApplyCorr.h
+                inc/MantidQtCustomInterfaces/C2ETab.h
                 inc/MantidQtCustomInterfaces/CalcCorr.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/ConvFit.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
                 inc/MantidQtCustomInterfaces/Elwin.h
+
                 inc/MantidQtCustomInterfaces/Fury.h
                 inc/MantidQtCustomInterfaces/FuryFit.h
                 inc/MantidQtCustomInterfaces/Homer.h
@@ -95,6 +110,10 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+                inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
+                inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
+                inc/MantidQtCustomInterfaces/IndirectNeutron.h
+                inc/MantidQtCustomInterfaces/IndirectMolDyn.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
@@ -104,6 +123,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+                inc/MantidQtCustomInterfaces/Transmission.h
 		inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )
@@ -113,6 +133,9 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
+               inc/MantidQtCustomInterfaces/IndirectLoadAscii.ui
+               inc/MantidQtCustomInterfaces/IndirectNeutron.ui
+               inc/MantidQtCustomInterfaces/IndirectMolDyn.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
@@ -120,19 +143,15 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
-set( TEST_FILES
-               EventNexusFileMementoTest.h
-               WorkspaceMementoTest.h
-               WorkspaceInADSTest.h
-               RawFileMementoTest.h
+set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
+                EventNexusFileMementoTest.h
+                WorkspaceMementoTest.h
+                WorkspaceInADSTest.h
+                RawFileMementoTest.h
 )
 
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
-# the directory with the information about ConvertToMD interface definitions
-# TODO: Remove these illegal dependencies (ticket #5151)
-include_directories (../../Framework/MDEvents/inc)
-include_directories (../../Framework/DataObjects/inc)
 
 # Ugly hack to get around issue in Boost version 1.48.0 
 # in conjunction with Qt 4.7.4 or greater
@@ -160,11 +179,12 @@ enable_precompiled_headers( inc/MantidQtCustomInterfaces/PrecompiledHeader.h  AL
 add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # Set the name of the generated library
-set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
+set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces
+                                                    COMPILE_DEFINITIONS IN_MANTIDQT_CUSTOMINTERFACES )
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser MDEvents ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser ${CMAKE_THREAD_LIBS_INIT})
 
 ###########################################################################
 # Testing

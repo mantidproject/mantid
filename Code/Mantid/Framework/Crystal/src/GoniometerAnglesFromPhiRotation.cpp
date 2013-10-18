@@ -172,7 +172,6 @@ namespace Mantid
 
       PeaksWorkspace_sptr PeaksRun1 = getProperty("PeaksWorkspace1");
       PeaksWorkspace_sptr PeaksRun2 = getProperty("PeaksWorkspace2");
-      std::string PeaksWorkspaceName2 = getPropertyValue("PeaksWorkspace2");
 
       double Tolerance = getProperty("Tolerance");
 
@@ -195,7 +194,7 @@ namespace Mantid
         const std::string fft("FindUBUsingFFT");
         API::IAlgorithm_sptr findUB = this->createChildAlgorithm(fft);
         findUB->initialize();
-        findUB->setPropertyValue("PeaksWorkspace", getPropertyValue("PeaksWorkspace1"));
+        findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", getProperty("PeaksWorkspace1"));
         findUB->setProperty("MIND", (double) getProperty("MIND"));
         findUB->setProperty("MAXD", (double) getProperty("MAXD"));
         findUB->setProperty("Tolerance", Tolerance);
@@ -320,7 +319,7 @@ namespace Mantid
       MinData[3] = omchiphi[1];
       MinData[4] = omchiphi[0];
 
-      std::string FunctionArgs = "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksWorkspaceName2
+      std::string FunctionArgs = "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->name()
           + ",OptRuns=" + RunNumStr + ",phi" + RunNumStr + "="
           + boost::lexical_cast<std::string>(MinData[2]) + ",chi" + RunNumStr + "="
           + boost::lexical_cast<std::string>(MinData[3]) + ",omega" + RunNumStr + "="
@@ -426,8 +425,6 @@ namespace Mantid
       latt2.setUB(Gon2a * Mk * UB1);
 
       PeaksRun2->mutableSample().setOrientedLattice(new OrientedLattice(latt2));
-      setPropertyValue("PeaksWorkspace2", PeaksWorkspaceName2);
-
     }
 
     /**

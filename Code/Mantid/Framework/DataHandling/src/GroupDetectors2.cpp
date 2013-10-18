@@ -484,7 +484,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
     axis->getSpectraIndexMap(specs2index);
   }
 
-  detid2index_map* detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
+  const detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
   // 2. Load XML file
   DataHandling::LoadGroupXMLFile loader;
@@ -518,8 +518,8 @@ void GroupDetectors2::processXMLFile(std::string fname,
     for (size_t i = 0; i < detids.size(); i++)
     {
       detid_t detid = detids[i];
-      detid2index_map::iterator ind =detIdToWiMap->find(detid);
-      if ( ind != detIdToWiMap->end() )
+      detid2index_map::const_iterator ind =detIdToWiMap.find(detid);
+      if ( ind != detIdToWiMap.end() )
       {
         size_t wsid = ind->second;
         wsindexes.push_back(wsid);
@@ -1067,9 +1067,9 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<
   }
   Poco::StringTokenizer ranges(line, "-");
 
-  size_t loop = 0;
   try
   {
+    size_t loop = 0;
     do
     {
       Poco::StringTokenizer beforeHyphen(ranges[loop], " ", IGNORE_SPACES);

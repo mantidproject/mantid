@@ -37,6 +37,26 @@ const char* FileError::what() const throw()
 }
 
 //-------------------------
+// ParseError
+//-------------------------
+ParseError::ParseError(const std::string& desc, const std::string& fileName, const int& lineNumber)
+  : FileError(desc, fileName), m_lineNumber(lineNumber)
+{
+  std::stringstream ss;
+  ss << FileError::what() << " on line " << m_lineNumber;
+  m_outMessage = ss.str();
+}
+
+ParseError::ParseError(const ParseError& A) 
+  : FileError(A), m_lineNumber(A.m_lineNumber)
+{}
+
+const char* ParseError::what() const throw()
+{
+  return m_outMessage.c_str();
+}
+
+//-------------------------
 // NotImplementedError
 //-------------------------
 /** Constructor
@@ -256,11 +276,15 @@ MisMatch<T>::MisMatch(const T& A,const T& B,const std::string& Place) :
     @param B :: Item to store
     @param Place :: Reason/Code item for error
   */
-{}
+{
+  std::stringstream cx;
+  cx << Place << " Item A!=B "<< Aval << " "<< Bval << " ";
+  m_message = cx.str();
+}
 
 template<typename T>
 MisMatch<T>::MisMatch(const MisMatch<T>& A) :
-  std::runtime_error(A.what()),Aval(A.Aval),Bval(A.Bval)
+  std::runtime_error(A),Aval(A.Aval),Bval(A.Bval)
    /**
     Copy Constructor
     @param A :: MisMatch to copy
@@ -286,10 +310,7 @@ MisMatch<T>::what() const throw()
     @return String description of error
   */
 {
-  std::stringstream cx;
-  cx<<std::runtime_error::what()<<" Item A!=B "<<Aval<<
-    " "<<Bval<<" ";
-  return cx.str().c_str();
+  return m_message.c_str();
 }
 
 /// \cond TEMPLATE
@@ -309,7 +330,11 @@ template class DLLExport MisMatch<size_t>;
 */
 IndexError::IndexError(const size_t V,const size_t B, const std::string& Place) :
   std::runtime_error(Place),Val(V),maxVal(B)
-{}
+{
+  std::stringstream cx;
+  cx << "IndexError: " << Place << " " << Val << " :: 0 <==> " << maxVal;
+  m_message = cx.str();
+}
 
 /**
   Copy Constructor
@@ -319,15 +344,13 @@ IndexError::IndexError(const IndexError& A) :
   std::runtime_error(A),Val(A.Val),maxVal(A.maxVal)
 {}
 
-    /**
-    Writes out the range and limits
-    @return the error string
-  */
+/**
+  Writes out the range and limits
+  @return the error string
+*/
 const char* IndexError::what() const throw()
 {
-  std::stringstream cx;
-  cx<<"IndexError:"<<std::runtime_error::what()<<" "<<Val<<" :: 0 <==> "<<maxVal;
-  return cx.str().c_str();
+  return m_message.c_str();
 }
 
 //-------------------------

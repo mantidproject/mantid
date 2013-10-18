@@ -179,6 +179,9 @@ m_mantidui(mantidui)
   m_formulaManager = new QtStringPropertyManager(w);
   m_columnManager = new QtEnumPropertyManager(w);
   m_workspace = m_enumManager->addProperty("Workspace");
+  m_vectorManager = new QtGroupPropertyManager(w);
+  m_vectorSizeManager = new QtIntPropertyManager(w);
+  m_vectorDoubleManager = new QtDoublePropertyManager(w);
 }
 
 
@@ -218,7 +221,7 @@ void FitPropertyBrowser::init()
 
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
-  m_costFunctions << "Least squares";
+  m_costFunctions << "Least squares" << "Rwp";
                   //<< "Ignore positive peaks";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
 
@@ -285,6 +288,7 @@ void FitPropertyBrowser::initLayout(QWidget *w)
   connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_columnManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(columnChanged(QtProperty*)));
+  connect(m_vectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(vectorDoubleChanged(QtProperty*)));
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
@@ -432,6 +436,8 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
+  m_browser->setFactoryForManager(m_vectorSizeManager, spinBoxFactory);
+  m_browser->setFactoryForManager(m_vectorDoubleManager, doubleEditorFactory);
 }
 
 
@@ -538,6 +544,7 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString& item)
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser()
 {
+  m_compositeFunction.reset();
 }
 
 /// Get handler to the root composite function
@@ -1773,6 +1780,17 @@ void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
   emit currentChanged();
 }
 
+/**
+ * Slot. Responds to changing a vector attribute member
+ * @param prop :: A property managed by m_vectorDoubleManager.
+ */
+void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop)
+{
+    PropertyHandler* h = getHandler()->findHandler(prop);
+    if ( !h ) return;
+    h->setVectorAttribute(prop);
+}
+
 /** Update the function parameter properties. 
  */
 void FitPropertyBrowser::updateParameters()
@@ -2210,11 +2228,12 @@ void FitPropertyBrowser::clearAllPlots()
  * @param name :: The name of the new property
  * @return Pointer to the created property
  */
-QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name)const
+QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name, QtDoublePropertyManager *manager)const
 {
-  QtProperty* prop = m_doubleManager->addProperty(name);
-  m_doubleManager->setDecimals(prop,m_decimals);
-  m_doubleManager->setRange(prop,-DBL_MAX,DBL_MAX);
+  if ( manager == NULL ) manager = m_doubleManager;
+  QtProperty* prop = manager->addProperty(name);
+  manager->setDecimals(prop,m_decimals);
+  manager->setRange(prop,-DBL_MAX,DBL_MAX);
   return prop;
 }
 
@@ -2668,7 +2687,6 @@ void FitPropertyBrowser::setTextPlotGuess(const QString text)
 */
 void FitPropertyBrowser::workspaceChange(const QString& wsName)
 {
-  UNUSED_ARG(wsName);
   if (m_guessOutputName)
   {
     if (isWorkspaceAGroup())
@@ -2686,20 +2704,9 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
   }
   else
   {
-    //m_groupMember = workspaceName();
     removeLogValue();
   }
-}
 
-/**
-* Shows the correct workspace in the fit property browser and
-* then updates the PeakPickerTool to another workspace.
-*
-* @param wsName :: The name of the workspace the PeakPickerTool is
-*                   to be assigned to.
-*/
-void FitPropertyBrowser::updatePPTool(const QString & wsName)
-{
   emit workspaceNameChanged(wsName);
   emit wsChangePPAssign(wsName);
 }

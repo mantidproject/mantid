@@ -4,6 +4,10 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/Path.h>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+
 #include <cmath>
 #include <fstream>
 #include <iomanip>
@@ -730,7 +734,9 @@ namespace Mantid
           stop = start;
           for ( ; it != last; ++it)
           {
-            if ( (stop + static_cast<T>(1)) == *(it+1) )
+            if( it+1 == last )
+              break;
+            else if ( (stop + static_cast<T>(1)) == *(it+1) )
               stop = *(it+1);
             else
               break;
@@ -1051,6 +1057,82 @@ namespace Mantid
         return num;
       }
 
+      /**
+       * Parses a number range, e.g. "1,4-9,54-111,3,10", to the vector containing all the elements 
+       * within the range. 
+       * @param str String to parse
+       * @param elemSep String with characters used to separate elements (',')
+       * @param rangeSep String with characters used to separate range start and end ('-')
+       * @return A vector with all the elements from the range
+       */
+      std::vector<int> parseRange(const std::string& str, const std::string& elemSep, 
+                                  const std::string& rangeSep)
+      {
+        typedef Poco::StringTokenizer Tokenizer;
+
+        boost::shared_ptr<Tokenizer> elements;
+
+        if(elemSep.find(' ') != std::string::npos)
+        {
+          // If element separator contains space character it's a special case, because in that case
+          // it is allowed to have element separator inside a range, e.g. "4 - 5", but not "4,-5"
+
+          // Space is added so that last empty element of the "1,2,3-" is not ignored and we can 
+          // spot the error. Behaviour is changed in Poco 1.5 and this will not be needed.
+          Tokenizer ranges(str + " ", rangeSep, Tokenizer::TOK_TRIM);
+          std::string new_str = join(ranges.begin(), ranges.end(), rangeSep.substr(0,1));
+
+          elements = boost::make_shared<Tokenizer>(new_str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+        }
+        else
+        {
+          elements = boost::make_shared<Tokenizer>(str, elemSep, Tokenizer::TOK_IGNORE_EMPTY | Tokenizer::TOK_TRIM);
+        }
+
+        std::vector<int> result;
+
+        // Estimation of the resulting number of elements
+        result.reserve(elements->count());
+
+        for (Tokenizer::Iterator it = elements->begin(); it != elements->end(); it++)
+        {
+          // See above for the reason space is added
+          Tokenizer rangeElements(*it + " ", rangeSep, Tokenizer::TOK_TRIM);
+
+          size_t noOfRangeElements = rangeElements.count();
+
+          // A single element
+          if(noOfRangeElements == 1)
+          {
+            int element;
+            if(convert(rangeElements[0], element) != 1)
+              throw std::invalid_argument("Invalid element: " + *it);
+            result.push_back(element);
+          }
+          // A pair
+          else if(noOfRangeElements == 2)
+          {
+            int start, end;
+
+            if(convert(rangeElements[0], start) != 1 || convert(rangeElements[1], end) != 1)
+              throw std::invalid_argument("Invalid range: " + *it);
+
+            if(start >= end)
+              throw std::invalid_argument("Range boundaries are reversed: " + *it);
+
+            for(int i = start; i <= end; i++)
+              result.push_back(i);
+          }
+          // Error - e.g. "--""
+          else
+          {
+            throw std::invalid_argument("Multiple range separators: " + *it);
+          }
+        }
+
+        return result;
+      }
+
       /// \cond TEMPLATE
       template MANTID_KERNEL_DLL int section(std::string&,double&);
       template MANTID_KERNEL_DLL int section(std::string&,float&);
@@ -1080,6 +1162,8 @@ namespace Mantid
       template MANTID_KERNEL_DLL std::string toString(const uint64_t value);
 #endif
       template MANTID_KERNEL_DLL std::string toString(const std::string value);
+
+      template MANTID_KERNEL_DLL std::string toString(const std::vector<int> &value);
 
       // this block should generate the vector ones as well
       template MANTID_KERNEL_DLL std::string toString(const std::set<int> &value);

@@ -5,6 +5,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include <boost/make_shared.hpp>
+
 using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::ParameterMap_sptr;
 using Mantid::Geometry::Parameter_sptr;
@@ -49,6 +51,53 @@ public:
      TS_ASSERT_EQUALS(ParameterMap::rotx(),"rotx");
      TS_ASSERT_EQUALS(ParameterMap::roty(),"roty");
      TS_ASSERT_EQUALS(ParameterMap::rotz(),"rotz");
+  }
+
+  void test_Equality_Operator()
+  {
+    const std::string name("TestName");
+    const double value(5.1);
+   
+    ParameterMap pmapA;
+    ParameterMap pmapB;
+    // Empty
+    TS_ASSERT_EQUALS(pmapA,pmapB);
+    
+    pmapA.addDouble(m_testInstrument.get(), name, value);
+    // Map equals itself
+    TS_ASSERT_EQUALS(pmapA,pmapA);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapB);
+
+    // Same name/value/component
+    pmapB.addDouble(m_testInstrument.get(), name, value);
+    // Now equal
+    TS_ASSERT_EQUALS(pmapA,pmapB);
+
+    ParameterMap pmapC;
+    // Same name/value different component
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    pmapC.addDouble(comp.get(), name, value);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapC);
+
+    // Same name/component different value
+    ParameterMap pmapD;
+    pmapD.addDouble(m_testInstrument.get(), name, value + 1.0);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapD);
+
+    // Same value/component different name
+    ParameterMap pmapE;
+    pmapE.addDouble(m_testInstrument.get(), name + "_differ", value);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapE);
+
+    //Different type
+    ParameterMap pmapF;
+    pmapF.addInt(m_testInstrument.get(), name, 5);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapF);
   }
 
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In()
@@ -107,6 +156,18 @@ public:
     TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pDouble()), false);
   }
 
+  void testMap_Contains_Parameter()
+  {
+    ParameterMap pmap;
+    const std::string name("NewValue");
+    pmap.addInt(m_testInstrument.get(), name, 1);
+    auto param = pmap.get(m_testInstrument.get(), name);
+    
+    TS_ASSERT(pmap.contains(m_testInstrument.get(), *param));
+    auto empty = Mantid::Geometry::ParameterFactory::create("int","testparam");
+    TS_ASSERT(!pmap.contains(m_testInstrument.get(), *empty));
+  }
+
   void testParameter_Name_Matching_Is_Case_Insensitive()
   {
     IComponent_sptr parametrized = m_testInstrument->getChild(0);
@@ -120,19 +181,27 @@ public:
 
   void testRecursive_Parameter_Search_Moves_Up_The_Instrument_Tree()
   {
-    // Attach a parameter to the instrument
-    const std::string topLevel("TopLevelParameter");
-    const int value(2);
+    // Attach 2 parameters to the instrument
+    const std::string topLevel1("top1"), topLevel2("top2");
+    const int value1(2), value2(3);
     ParameterMap pmap;
-    pmap.addInt(m_testInstrument.get(), topLevel, value);
+    pmap.addInt(m_testInstrument.get(), topLevel1, value1);
+    pmap.addInt(m_testInstrument.get(), topLevel2, value2);
     //Ask for the parameter on a child
     IComponent_sptr comp = m_testInstrument->getChild(0);
     // Non-recursive should not find the parameter
-    Parameter_sptr fetched = pmap.get(comp.get(), topLevel);
+    Parameter_sptr fetched = pmap.get(comp.get(), topLevel1);
     TS_ASSERT_EQUALS(fetched, Parameter_sptr());
-    fetched = pmap.getRecursive(comp.get(), topLevel);
+
+    fetched = pmap.getRecursive(comp.get(), topLevel1);
     TS_ASSERT(fetched);
-    TS_ASSERT_EQUALS(fetched->value<int>(), value);
+    TS_ASSERT_EQUALS(fetched->value<int>(), value1);
+
+    // Check that the correct parameter name is found even after a first call that
+    // would be cache the previous one
+    fetched = pmap.getRecursive(comp.get(), topLevel2);
+    TS_ASSERT(fetched);
+    TS_ASSERT_EQUALS(fetched->value<int>(), value2);
   }
 
   void testClearByName_Only_Removes_Named_Parameter()
@@ -255,6 +324,101 @@ public:
 private:
   Instrument_sptr m_testInstrument;
 };
+
+
+//---------------------------------- Performance Tests ----------------------------------------
+class ParameterMapTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  static ParameterMapTestPerformance *createSuite() { return new ParameterMapTestPerformance(); }
+  static void destroySuite( ParameterMapTestPerformance *suite ) { delete suite; }
+
+  ParameterMapTestPerformance()
+  {
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+
+    m_testInst = boost::make_shared<Instrument>(("basic"));
+
+    // One object
+    const double cylRadius(0.004), cylHeight(0.0002);
+    Object_sptr pixelShape = \
+        ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0),
+                                                      V3D(0.,1.0,0.), "pixel-shape");
+
+    //Create a hierarchy
+    // Inst
+    //   -- topbank
+    //     -- subbank_1
+    //       -- subbank_2
+    //        -- leaf
+
+    //Make a new top bank
+    CompAssembly *topbank = new CompAssembly("topbank");
+    //Make a new subbank
+    CompAssembly *subbank1 = new CompAssembly("subbank_1");
+    //Make a new subbank
+    CompAssembly *subbank2 = new CompAssembly("subbank_2");
+    subbank1->add(subbank2);
+    m_leaf = new Detector("pixel-00", 1, pixelShape, subbank2); // position irrelevant here
+    subbank2->add(m_leaf);
+
+    m_testInst->markAsDetector(m_leaf);
+    m_testInst->add(subbank1);
+    m_testInst->add(topbank);
+
+    // Add a double parameter at the top level
+    m_pmap.addDouble(m_testInst->getComponentID(), "instlevel",10.0);
+    // and at leaf level
+    m_pmap.addDouble(m_leaf->getComponentID(), "leaflevel",11.0);
+  }
+
+  void test_Inst_Par_Lookup_Via_GetRecursive_And_Leaf_Component()
+  {
+    // Look for the top level instrument parameter via a leaf component
+
+    Mantid::Geometry::Parameter_sptr par_sptr;
+
+    for(size_t i = 0; i < 10000; ++i)
+    {
+      par_sptr = m_pmap.getRecursive(m_leaf->getComponentID(), "instlevel");
+    }
+    // Use it to ensure the compiler doesn't optimise the loop away
+    TS_ASSERT_DELTA(10.0, par_sptr->value<double>(),1e-12);
+  }
+
+  void test_Leaf_Par_Lookup_Via_GetRecursive_And_Leaf_Component()
+  {
+    Mantid::Geometry::Parameter_sptr par_sptr;
+
+    for(size_t i = 0; i < 10000; ++i)
+    {
+      par_sptr = m_pmap.getRecursive(m_leaf->getComponentID(), "leaflevel");
+    }
+    // Use it to ensure the compiler doesn't optimise the loop away
+    TS_ASSERT_DELTA(11.0, par_sptr->value<double>(),1e-12);
+  }
+
+  void test_Leaf_Par_Lookup_Via_Get_And_Leaf_Component()
+  {
+    Mantid::Geometry::Parameter_sptr par_sptr;
+
+    for(size_t i = 0; i < 10000; ++i)
+    {
+      par_sptr = m_pmap.get(m_leaf->getComponentID(), "leaflevel");
+    }
+    // Use it to ensure the compiler doesn't optimise the loop away
+    TS_ASSERT_DELTA(11.0, par_sptr->value<double>(),1e-12);
+  }
+
+
+private:
+  Mantid::Geometry::Instrument_sptr m_testInst;
+  Mantid::Geometry::ParameterMap m_pmap;
+  Mantid::Geometry::IDetector *m_leaf;
+};
+
 
 
 #endif /* PARAMETERMAPTEST_H_ */

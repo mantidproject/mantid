@@ -104,7 +104,7 @@ void ChopData::exec()
 		  prelow = nlow->first;
 	  }
   }
-  
+  int wsCounter(1);
   for ( int i = 0; i < chops; i++ )
   {
     const double stepDiff = ( i * step );
@@ -155,11 +155,12 @@ void ChopData::exec()
 
     // add the workspace to the AnalysisDataService
     std::stringstream name;
-    name << output << "-" << i+1;
+    name << output << "_" << wsCounter;
     std::string wsname = name.str();
 
     declareProperty(new WorkspaceProperty<>(wsname, wsname, Direction::Output));
     setProperty(wsname, workspace);
+    ++wsCounter;
 
     workspaces.push_back(workspace);
   }

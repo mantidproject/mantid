@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECT_H_
 
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/C2ETab.h"
 #include "ui_ConvertToEnergy.h"
 
 #include <qwt_plot.h>
@@ -113,6 +114,8 @@ namespace MantidQt
       void useCalib(bool state); ///< whether to use calib file
       void calibCreate(); ///< create calibration file
       void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
+      void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
+      void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
 
       void calPlotRaw();
       void calPlotEnergy();
@@ -175,6 +178,8 @@ namespace MantidQt
       QtDoublePropertyManager* m_sltDblMng;
       QtBoolPropertyManager* m_sltBlnMng;
       QtGroupPropertyManager* m_sltGrpMng;
+
+      C2ETab* m_tab_trans;
     };
   }
 }

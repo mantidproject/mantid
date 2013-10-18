@@ -106,8 +106,8 @@ namespace DataObjects
     const Peak & getPeak(int peakNum) const;
 
     API::IPeak* createPeak(Kernel::V3D QFrame, double detectorDistance=1.0) const;
-    std::vector<std::pair<std::string,std::string> > PeakInfo(Kernel::V3D QFrame , bool lab_coords) const;
-    int PeakInfoNumber(Kernel::V3D QFrame, bool lab_coords) const;
+    std::vector<std::pair<std::string,std::string> > peakInfo(Kernel::V3D qFrame , bool labCoords) const;
+    int peakInfoNumber(Kernel::V3D qFrame, bool labCoords) const;
 
     std::vector<Peak> & getPeaks();
     const std::vector<Peak> & getPeaks() const;

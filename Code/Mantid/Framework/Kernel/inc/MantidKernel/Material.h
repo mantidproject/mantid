@@ -56,7 +56,7 @@ namespace Mantid
       /// temperature and pressure
       explicit Material(
           const std::string & name,
-          const PhysicalConstants::NeutronAtom element,
+          const PhysicalConstants::NeutronAtom& element,
           const double numberDensity,
           const double temperature = 300,
           const double pressure = PhysicalConstants::StandardAtmosphere

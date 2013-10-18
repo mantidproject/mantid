@@ -8,7 +8,7 @@ class TubeCalibFitParams:
 
 # Author: Karl Palmen ISIS
 
-    def __init__(self, peaks, height=1000.0, width=30.0, threePointMethod=False, outEdge=30.0,  inEdge=50.0, edgeGrad=6.0, margin=10):
+    def __init__(self, peaks, height=1000.0, width=30.0, threePointMethod=False, outEdge=30.0,  inEdge=50.0, edgeGrad=6.0, margin=15):
 
         """     
         Holds the parameters needed for fitting the positions of the peaks formed by the slits or edges. 

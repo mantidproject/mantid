@@ -39,7 +39,12 @@ namespace Kernel
         <li><b>std::range_error</b> - Thrown to indicate range errors in internal computations.</li>
         <li><b>std::overflow_error</b> - Thrown to indicate arithmetic overflow.</li>
         <li><b>std::underflow_error</b> - Thrown to indicate arithmetic underflow.</li>
-        <li><b>FileError</b> - Thrown to indicate errors with file operations.</li>
+        <li>
+          <b>FileError</b> - Thrown to indicate errors with file operations.
+          <ul>
+            <li><b>ParseError</b> - Thrown to indicate errors when parsing a file.</li>
+          </ul>
+        </li>
         <li><b>NotFoundError</b> - Thrown to indicate that an item was not found in a collection.</li>
         <li><b>ExistsError</b> - Thrown to indicate that an item was is already found in a collection.</li>
         <li><b>InstrumentDefinitionError</b> - Thrown to indicate a problem with the instrument definition.</li>
@@ -94,6 +99,33 @@ class MANTID_KERNEL_DLL FileError : public std::runtime_error
   FileError& operator=(const FileError& A);
   /// Destructor
   ~FileError() throw() {}
+
+  const char* what() const throw();
+};
+
+/// Records the filename, the description of failure and the line on which it happened
+class MANTID_KERNEL_DLL ParseError : public FileError
+{
+ private:
+  /// Number of the line where the error occured
+  const int m_lineNumber;
+  /// The message returned by what()
+  std::string m_outMessage;
+
+ public:
+  /** 
+   * Constructor
+   * @param desc :: Error description
+   * @param fileName :: Filename where happened
+   * @param lineNumber :: Number of the line where error happened
+   */
+  ParseError(const std::string& desc, const std::string& fileName, const int& lineNumber);
+  /// Copy constructor
+  ParseError(const ParseError& A);
+  /// Assignment operator
+  ParseError& operator=(const ParseError& A);
+  /// Destructor
+  ~ParseError() throw() {}
 
   const char* what() const throw();
 };
@@ -243,8 +275,6 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
   /**
   \class MisMatch
   \brief Error when two numbers should be identical (or close)
-  \date October 2005
-  \version 1.0
 
   Records the object being looked for
   and the range required.
@@ -253,12 +283,11 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
   class MisMatch : public std::runtime_error
   {
   private:
-
     const T Aval;        ///< Number A
     const T Bval;        ///< container size
+    std::string m_message; ///< The message reported by what()
 
   public:
-
     MisMatch(const T&,const T&,const std::string&);
     MisMatch(const MisMatch<T>& A);
     MisMatch<T> & operator=(const MisMatch<T> & rhs);
@@ -266,26 +295,21 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
 
     /// Overloaded reporting method
     const char* what() const throw();
-
   };
 
 
   /**
   \class IndexError
   \brief Exception for index errors
-  \author Stuart Ansell
-  \date Sept 2005
-  \version 1.0
 
   Called when an index falls out of range
-
   */
   class MANTID_KERNEL_DLL IndexError : public std::runtime_error
   {
   private:
-
     const size_t Val;     ///< Actual value called
     const size_t maxVal;  ///< Maximum value
+    std::string m_message; ///< The message reported by what()
 
   public:
     // Unsigned versions
@@ -296,7 +320,6 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
 
     /// Overloaded reporting method
     const char* what() const throw();
-
   };
 
   /** Exception thrown when an attempt is made to dereference a null pointer

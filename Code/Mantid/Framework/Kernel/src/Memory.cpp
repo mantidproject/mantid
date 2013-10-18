@@ -39,11 +39,11 @@ string memToString(const TYPE mem_in_kiB)
 {
   std::stringstream buffer;
   if (mem_in_kiB < static_cast<TYPE>(1024))
-    buffer << mem_in_kiB << "kiB";
+    buffer << mem_in_kiB << " kB";
   else if (mem_in_kiB < static_cast<TYPE>(100 * 1024 * 1024))
-    buffer << (mem_in_kiB/static_cast<TYPE>(1024)) << "MiB";
+    buffer << (mem_in_kiB/static_cast<TYPE>(1024)) << " MB";
   else
-    buffer << (mem_in_kiB/static_cast<TYPE>(1024*1024)) << "GiB";
+    buffer << (mem_in_kiB/static_cast<TYPE>(1024*1024)) << " GB";
   return buffer.str();
 }
 

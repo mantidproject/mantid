@@ -8,12 +8,13 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include <cxxtest/TestSuite.h>
+#include <boost/make_shared.hpp>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -23,7 +24,7 @@ using namespace testing;
 
 
 // Declare into the factory.
-DECLARE_WORKSPACE(WorkspaceTester)
+DECLARE_WORKSPACE(WorkspaceTester);
 
 /** Create a workspace with numSpectra, with
  * each spectrum having one detector, at id = workspace index.
@@ -64,6 +65,27 @@ public:
     ws->initialize(1,1,1);
   }
   
+  void test_toString_Produces_Expected_Contents()
+  {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1,2,1);
+    testWS->setTitle("A test run");
+    testWS->getAxis(0)->setUnit("TOF");
+    testWS->setYUnitLabel("Counts");
+
+    std::string expected = \
+        "WorkspaceTester\n"
+        "Title: A test run\n"
+        "Histograms: 1\n"
+        "Bins: 1\n"
+        "Histogram\n"
+        "X axis: Time-of-flight / microsecond\n"
+        "Y axis: Counts\n"
+        "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n";
+
+    TS_ASSERT_EQUALS(expected, testWS->toString());
+  }
+
   void testGetSetTitle()
   {
     TS_ASSERT_EQUALS( ws->getTitle(), "" );
@@ -567,22 +589,39 @@ public:
  
   }
 
+  void test_getSpectrumToWorkspaceIndexMap()
+  {
+    WorkspaceTester ws;
+    ws.initialize(2,1,1);
+    const auto map = ws.getSpectrumToWorkspaceIndexMap();
+    TS_ASSERT_EQUALS( map.size(), 2 );
+    TS_ASSERT_EQUALS( map.begin()->first, 1 );
+    TS_ASSERT_EQUALS( map.begin()->second, 0 );
+    TS_ASSERT_EQUALS( map.rbegin()->first, 2 );
+    TS_ASSERT_EQUALS( map.rbegin()->second, 1 );
+
+    // Check it throws for non-spectra axis
+    ws.replaceAxis(1,new NumericAxis(1));
+    TS_ASSERT_THROWS( ws.getSpectrumToWorkspaceIndexMap(), std::runtime_error);
+  }
+
   void test_getDetectorIDToWorkspaceIndexMap()
   {
     auto ws = makeWorkspaceWithDetectors(5, 1);
-    boost::scoped_ptr<detid2index_map> idmap(ws->getDetectorIDToWorkspaceIndexMap(true));
-    TS_ASSERT_EQUALS( idmap->size(), 5 );
+    detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(true);
+
+    TS_ASSERT_EQUALS( idmap.size(), 5 );
     int i = 0;
-    for ( auto it = idmap->begin(); it != idmap->end(); ++it, ++i )
+    for ( auto it = idmap.begin(); it != idmap.end(); ++it, ++i )
     {
-      TS_ASSERT_EQUALS( idmap->count(i), 1 );
-      TS_ASSERT_EQUALS( (*idmap)[i], i );
+      TS_ASSERT_EQUALS( idmap.count(i), 1 );
+      TS_ASSERT_EQUALS( idmap[i], i );
     }
 
     ws->getSpectrum(2)->addDetectorID(99); // Set a second ID on one spectrum
     TS_ASSERT_THROWS( ws->getDetectorIDToWorkspaceIndexMap(true), std::runtime_error );
-    boost::scoped_ptr<detid2index_map> idmap2(ws->getDetectorIDToWorkspaceIndexMap());
-    TS_ASSERT_EQUALS( idmap2->size(), 6 );
+    detid2index_map idmap2 = ws->getDetectorIDToWorkspaceIndexMap();
+    TS_ASSERT_EQUALS( idmap2.size(), 6 );
   }
 
   void test_getDetectorIDToWorkspaceIndexVector()
@@ -744,25 +783,6 @@ public:
     TS_ASSERT_EQUALS(xmax, 1.0);
     TS_ASSERT_EQUALS(ws->getXMin(), 1.0);
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
-  }
-
-  void test_InfoNode()
-  {
-    Mantid::API::Workspace::InfoNode rootNode( *ws );
-    ws->addInfoNodeTo( rootNode );
-    auto &node = *rootNode.nodes()[0];
-    TS_ASSERT_EQUALS( node.nodes().size(), 0 );
-    TS_ASSERT_EQUALS( node.lines().size(), 8 );
-    TS_ASSERT_EQUALS( node.lines()[0], "WorkspaceTester" );
-    TS_ASSERT_EQUALS( node.lines()[1], "Title: " );
-    TS_ASSERT_EQUALS( node.lines()[2], "Histograms: 1" );
-    TS_ASSERT_EQUALS( node.lines()[3], "Bins: 1" );
-    TS_ASSERT_EQUALS( node.lines()[4], "Data points" );
-    TS_ASSERT_EQUALS( node.lines()[5], "X axis:  / " );
-    TS_ASSERT_EQUALS( node.lines()[6], "Y axis: something per " );
-    TS_ASSERT_EQUALS( node.lines()[7].substr(0,11), "Instrument:" );
-    TS_ASSERT_EQUALS( node.workspaceName(), "" );
-    TS_ASSERT_DIFFERS( node.getMemorySize(), 0 );
   }
 
 private:

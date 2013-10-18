@@ -43,6 +43,9 @@ class QWheelEvent;
 
   * Performs projection of an instrument onto a plane. Draws the resulting image on the screen.
   * Supports selection and zooming.
+  *
+  * Iherited classes must implement the pure virtual methods and set m_viewRect - the bounding
+  * rectangle in surface coordinates.
   */
 
 class ProjectionSurface: public QObject
@@ -51,7 +54,7 @@ class ProjectionSurface: public QObject
 public:
   enum InteractionMode {MoveMode = 0, PickSingleMode, PickTubeMode, AddPeakMode, DrawMode, EraseMode, InteractionModeSize };
   /// Constructor
-  ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
+  ProjectionSurface(const InstrumentActor* rootActor);
   /// Destructor
   virtual ~ProjectionSurface();
   /// Resets the instrument actor.
@@ -251,10 +254,6 @@ protected:
   //-----------------------------------
 
   const InstrumentActor* m_instrActor;
-  const Mantid::Kernel::V3D m_pos;   ///< Origin (sample position)
-  const Mantid::Kernel::V3D m_zaxis; ///< The z axis of the surface specific coord system
-  Mantid::Kernel::V3D m_xaxis;       ///< The x axis
-  Mantid::Kernel::V3D m_yaxis;       ///< The y axis
   mutable QImage* m_viewImage;       ///< storage for view image
   mutable QImage* m_pickImage;       ///< storage for picking image
   QColor m_backgroundColor;          ///< The background colour

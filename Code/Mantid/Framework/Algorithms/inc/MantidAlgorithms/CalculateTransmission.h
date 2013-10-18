@@ -87,6 +87,8 @@ private:
   API::MatrixWorkspace_sptr fit(API::MatrixWorkspace_sptr raw, std::vector<double> rebinParams, const std::string fitMethod);
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitData(API::MatrixWorkspace_sptr WS, double & grad, double & offset);
+  /// Call the Polynomial fitting algorithm as a child algorithm
+  API::MatrixWorkspace_sptr fitPolynomial(API::MatrixWorkspace_sptr WS, int order, std::vector<double> & coeficients);  
   /// Calls the rebin algorithm
   API::MatrixWorkspace_sptr rebin(std::vector<double> & binParams, API::MatrixWorkspace_sptr output);
 };

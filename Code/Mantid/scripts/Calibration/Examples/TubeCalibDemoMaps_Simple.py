@@ -44,7 +44,7 @@ def CalibrateMaps( RunNumber ):
    knownPos, funcForm = [-0.50,-0.16,-0.00, 0.16, 0.50 ],[2,1,1,1,2] 
 
    # Get fitting parameters
-   fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth, margin=15 )
+   fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth)
    fitPar.setAutomatic(True)
 
    print "Created objects needed for calibration."

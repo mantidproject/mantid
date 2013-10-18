@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/AlgorithmSelectorWidget.cpp
+	src/DataSelector.cpp
 	src/DiagResults.cpp
         src/FindReplaceDialog.cpp
         src/FindDialog.cpp
@@ -39,6 +40,7 @@ set ( SRC_UNITY_IGNORE_FILES
 # Header files with Q_OBJECT that qmake will "moc"
 set ( MOC_FILES 
 	inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
+	inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
@@ -78,6 +80,7 @@ set ( INC_FILES
 
 # QtDesigner UI files to process
 set ( UI_FILES 
+	inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
     inc/MantidQtMantidWidgets/ICatInvestigation.ui
     inc/MantidQtMantidWidgets/ICatMyDataSearch.ui

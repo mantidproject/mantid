@@ -8,6 +8,7 @@
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
 #include "Projection3D.h"
+#include "PanelsSurface.h"
 #include "SimpleWidget.h"
 #include "DetXMLFile.h"
 #include "../MantidUI.h"
@@ -297,27 +298,18 @@ void InstrumentWindow::updateInfoText()
 
 void InstrumentWindow::setSurfaceType(int type)
 {
+  // we cannot do 3D without OpenGL
+  if ( type == FULL3D && !isGLEnabled() )
+  {
+    QMessageBox::warning(this,"Mantid - Warning","OpenGL must be enabled to render the instrument in 3D.");
+    return;
+  }
+
   if (type < RENDERMODE_SIZE)
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     m_surfaceType = SurfaceType(type);
     if (!m_instrumentActor) return;
-    Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
-    Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
-    Mantid::Kernel::V3D sample_pos = sample->getPos();
-    Mantid::Kernel::V3D axis;
-    if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
-    {
-      axis = Mantid::Kernel::V3D(0,1,0);
-    }
-    else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
-    {
-      axis = Mantid::Kernel::V3D(0,0,1);
-    }
-    else // SPHERICAL_X || CYLINDRICAL_X
-    {
-      axis = Mantid::Kernel::V3D(1,0,0);
-    }
 
     ProjectionSurface* surface = getSurface().get();
     int peakLabelPrecision = 6;
@@ -337,30 +329,57 @@ void InstrumentWindow::setSurfaceType(int type)
       showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",true).toBool();
     }
 
-    // which display to use?
-    bool useOpenGL = isGLEnabled();
-    if (m_surfaceType == FULL3D)
+
+    // Surface factory
     {
-      Projection3D* p3d = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
-      surface = p3d;
-      // always OpenGL in 3D
-      useOpenGL = true;
+        Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
+        Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+        Mantid::Kernel::V3D sample_pos = sample->getPos();
+        Mantid::Kernel::V3D axis;
+        // define the axis
+        if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
+        {
+          axis = Mantid::Kernel::V3D(0,1,0);
+        }
+        else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
+        {
+          axis = Mantid::Kernel::V3D(0,0,1);
+        }
+        else if (m_surfaceType == SPHERICAL_X || m_surfaceType == CYLINDRICAL_X)
+        {
+          axis = Mantid::Kernel::V3D(1,0,0);
+        }
+        else // SIDE_BY_SIDE
+        {
+            axis = Mantid::Kernel::V3D(0,0,1);
+        }
+
+        // create the surface
+        if (m_surfaceType == FULL3D)
+        {
+          surface = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
+        }
+        else if (m_surfaceType <= CYLINDRICAL_Z)
+        {
+          surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
+        }
+        else if (m_surfaceType <= SPHERICAL_Z)
+        {
+          surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
+        }
+        else // SIDE_BY_SIDE
+        {
+            surface = new PanelsSurface(m_instrumentActor,sample_pos,axis);
+        }
     }
-    else if (m_surfaceType <= CYLINDRICAL_Z)
-    {
-      surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
-    }
-    else // SPHERICAL
-    {
-      surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
-    }
+    // end Surface factory
+
+
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
     // set new surface
     setSurface(surface);
-    // make sure to switch to the right instrument display
-    selectOpenGLDisplay( useOpenGL );
 
     // init tabs with new surface
     foreach (InstrumentWindowTab* tab, m_tabs)
@@ -373,6 +392,7 @@ void InstrumentWindow::setSurfaceType(int type)
     connect(surface,SIGNAL(updateInfoText()),this,SLOT(updateInfoText()),Qt::QueuedConnection);
     QApplication::restoreOverrideCursor();
   }
+  emit surfaceTypeChanged( type );
   updateInfoText();
   update();
 }
@@ -413,8 +433,11 @@ void InstrumentWindow::setSurfaceType(const QString& typeStr)
   {
     typeIndex = 6;
   }
+  else if ( upperCaseStr == "SIDE_BY_SIDE" )
+  {
+    typeIndex = 7;
+  }
   setSurfaceType( typeIndex );
-  emit surfaceTypeChanged( typeIndex );
 }
 
 /**
@@ -1263,7 +1286,7 @@ void InstrumentWindow::enableGL( bool on )
 /// True if the GL instrument display is currently on
 bool InstrumentWindow::isGLEnabled() const
 {
-    return m_useOpenGL || ( m_surfaceType == FULL3D );
+    return m_useOpenGL;
 }
 
 /**

@@ -391,6 +391,12 @@ public:
     TS_ASSERT(ws5);
     MatrixWorkspace_sptr ws6 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_2");
     TS_ASSERT(ws6);
+
+    // Check that originally loaded groups are not left in the ADS
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015189"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015190"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015191"));
+
     removeGroupFromADS(output);
   }
 

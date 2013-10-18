@@ -90,6 +90,14 @@ namespace Mantid
       template<class T>
       const T& value();
   
+      /// Equality operator
+      bool operator==(const Parameter & rhs) const
+      {
+        if(this->name() == rhs.name() && this->type() == rhs.type() &&
+           this->asString() == rhs.asString()) return true;
+        else return false;
+      }
+
     protected:
       friend class ParameterMap;
 

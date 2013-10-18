@@ -42,7 +42,7 @@ void ParamFunction::setParameter(size_t i, const double& value, bool explicitlyS
 {
   // Cppcheck confused by the check for NaN
   // cppcheck-suppress duplicateExpression
-  if ((boost::math::isnan)(value))
+  if (boost::math::isnan(value))
   {
     // Check for NaN or -NaN
     std::stringstream errmsg;

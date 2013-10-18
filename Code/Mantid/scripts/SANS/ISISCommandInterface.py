@@ -81,6 +81,7 @@ def SANS2D():
         instrument = isis_instrument.SANS2D()
         
         ReductionSingleton().set_instrument(instrument)
+	config['default.instrument']='SANS2D'
     except:
         return False
     return True
@@ -95,6 +96,7 @@ def LOQ():
         instrument = isis_instrument.LOQ()
 
         ReductionSingleton().set_instrument(instrument)
+	config['default.instrument']='LOQ'
     except:
         return False
     return True
@@ -177,23 +179,25 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
         scale, shift, fitScale, fitShift, qMin, qMax)
     _printMessage('#Set front detector rescale/shift values')
     
-def TransFit(mode,lambdamin=None,lambdamax=None):
+def TransFit(mode,lambdamin=None,lambdamax=None, selector='BOTH'):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
         over which to do the fit. These arguments are passed to the algorithm
         CalculateTransmission. If mode is set to 'Off' then the unfitted workspace is
         used and lambdamin and max have no effect
-        @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN')
+        @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN'), 'POLYNOMIAL2', 'POLYNOMIAL3', ... 
         @param lambdamin: the lowest wavelength to use in any fit
         @param lambdamax: the end of the fit range
+        @param selector: define for which transmission this fit specification is valid (BOTH, SAMPLE, CAN) 
     """
     mode = str(mode).strip().upper()
     message = mode
     if lambdamin: message += ', ' + str(lambdamin)
     if lambdamax: message += ', ' + str(lambdamax)
+    message += ', selector=' + selector 
     _printMessage("TransFit(\"" + message + "\")")
 
-    ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
+    ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode, selector)
     
 def TransWorkspace(sample, can = None):
     """
@@ -1012,7 +1016,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         
     return script
 
-def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
+def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4):
     """
         Estimates the location of the effective beam centre given a good initial estimate. For more
         information go to this page
@@ -1022,6 +1026,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         @param MaxInter: don't calculate more than this number of iterations (default = 10)
         @param xstart: initial guess for the horizontal distance of the beam centre from the detector centre in meters (default the values in the mask file)
         @param ystart: initial guess for the distance of the beam centre from the detector centre vertically in metres (default the values in the mask file)
+	@param tolerance: define the precision of the search. If the step is smaller than the tolerance, it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
         @return: the best guess for the beam centre point
     """
     XSTEP = ReductionSingleton().inst.cen_find_step
@@ -1092,7 +1097,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
             XSTEP = -XSTEP/2.
         if resY > resY_old:
             YSTEP = -YSTEP/2.
-        if abs(XSTEP) < 0.1251/1000. and abs(YSTEP) < 0.1251/1000. :
+        if abs(XSTEP) < tolerance and abs(YSTEP) < tolerance :
             # this is the success criteria, we've close enough to the center
             centre.logger.notice("Converged - check if stuck in local minimum!")
             break

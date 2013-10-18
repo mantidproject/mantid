@@ -113,7 +113,7 @@ namespace Mantid
       // Create the output MaskWorkspace
       MaskWorkspace_sptr maskWS(new MaskWorkspace(inputW->getInstrument()));
       //To get the workspace index from the detector ID
-      detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
+      const detid2index_map pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
@@ -141,16 +141,19 @@ namespace Mantid
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             outputW->setValue(*it, offset);
+            const auto mapEntry = pixel_to_wi.find(*it);
+            if ( mapEntry == pixel_to_wi.end() ) continue;
+            const size_t workspaceIndex = mapEntry->second;
             if (mask == 1.)
             {
               // Being masked
-              maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);
-              maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+              maskWS->maskWorkspaceIndex(workspaceIndex);
+              maskWS->dataY(workspaceIndex)[0] = mask;
             }
             else
             {
               // Using the detector
-              maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+              maskWS->dataY(workspaceIndex)[0] = mask;
             }
           }
         }

@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name ="detector-grouping">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element name="group">
+          <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+              <xs:element name="detids"/>
+              <xs:element name="component"/>
+              <xs:element name="ids">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="val"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+            <xs:attribute name="ID" type="xs:int" use="optional"/>
+            <xs:attribute name="name"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="pair">
+          <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+              <xs:element name="forward-group">
+                <xs:complexType>
+                  <xs:attribute name="val"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="backward-group">
+                <xs:complexType>
+                  <xs:attribute name="val"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="alpha">
+                <xs:complexType>
+                  <xs:attribute name="val"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+            <xs:attribute name="name"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="default">
+          <xs:complexType>
+            <xs:attribute name="name"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+      <xs:attribute name="instrument" use="optional"/>
+      <xs:attribute name="idf-date"/>
+      <xs:attribute name="description"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -56,6 +56,8 @@ namespace Mantid
       ~ResolutionConvolvedCrossSection();
       /// Name for the function
       std::string name() const { return "ResolutionConvolvedCrossSection"; }
+      /// Function category
+      virtual const std::string category() const { return "Quantification"; }
 
       /// Declare the attributes associated with this function
       void declareAttributes();

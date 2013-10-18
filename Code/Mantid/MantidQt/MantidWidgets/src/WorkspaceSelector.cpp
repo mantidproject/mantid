@@ -190,17 +190,18 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
 
   bool eligible = checkEligibility(newName, ads.retrieve(pNf->new_objectname()));
   int index = findText(name);
-
+  int newIndex = findText(newName); 
   if(eligible)
   {
-    if ( index != -1 )
+    if ( index != -1  && newIndex == -1)
     {
       this->setItemText(index, newName);
     }
-    else
+    else if (index == -1 && newIndex == -1)
     {
       addItem(newName);
-    }
+    }else 
+      removeItem(index);
   }
   else
   {

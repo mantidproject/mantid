@@ -8,7 +8,6 @@
   <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
-    <parameter eq="" type="double" extract-single-value-as="mean" />       
     <reference-frame>
       <!-- The z-axis is set parallel to and in the direction of the beam. the 
            y-axis points up and the coordinate system is right handed. -->
@@ -91,7 +90,9 @@
   <component type="both rings" idlist="both rings">
     <location />
     <!-- Here link orientation of instrument to horizontal or vertical in Nexus file-->
-    <parameter name="roty" logfile-id="fromNexus" extract-single-value-as="position 1" />   
+    <parameter name="roty">
+      <logfile id="fromNexus" extract-single-value-as="position 1"/>
+    </parameter>
   </component>  
   
   <type name="both rings" >

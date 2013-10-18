@@ -8,12 +8,11 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
 
-
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <boost/regex.hpp>
@@ -26,7 +25,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::NexusTestHelper;
 
 class FakeChopper : public Mantid::API::ChopperModel
 {
@@ -64,6 +62,10 @@ private:
 class ExperimentInfoTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ExperimentInfoTest *createSuite() { return new ExperimentInfoTest(); }
+  static void destroySuite( ExperimentInfoTest *suite ) { delete suite; }
 
   ExperimentInfoTest()
   {
@@ -536,11 +538,13 @@ public:
         {
           if (it1 != it2)
           {
-            if ( it2->second.from == it1->second.from )
-            {
-              // some more intelligent stuff here later
-              TS_ASSERT_EQUALS("Two IDFs for one instrument have equal valid-from dates", "0");
-            }
+            // some more intelligent stuff here later
+            std::stringstream messageBuffer;
+            messageBuffer << "Two IDFs for one instrument have equal valid-from dates" << 
+              "IDFs are: " << it1->first << " and " << it2->first <<
+              " Date One: "<< it1->second.from.toFormattedString() <<
+              " Date Two: "<< it2->second.from.toFormattedString();
+            TSM_ASSERT_DIFFERS(messageBuffer.str(), it2->second.from, it1->second.from);
           }
         }
 

@@ -103,7 +103,7 @@ set ( SRC_FILES
 	src/FindDeadDetectors.cpp
 	src/FindDetectorsOutsideLimits.cpp
 	src/FindPeaks.cpp
-	src/FlatBackground.cpp
+	src/FindPeakBackground.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
 	src/GenerateEventsFilter.cpp
@@ -180,8 +180,10 @@ set ( SRC_FILES
 	src/ResampleX.cpp
 	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
+	src/RingProfile.cpp
 	src/SANSDirectBeamScaling.cpp
 	src/SassenaFFT.cpp
+	src/SaveGSASInstrumentFile.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
 	src/SetUncertainties.cpp
@@ -189,7 +191,7 @@ set ( SRC_FILES
 	src/SignalOverError.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
-	src/SofQCommon.cpp    
+	src/SofQCommon.cpp
 	src/SofQW.cpp
 	src/SofQW2.cpp
 	src/SofQW3.cpp
@@ -324,7 +326,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindDeadDetectors.h
 	inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
 	inc/MantidAlgorithms/FindPeaks.h
-	inc/MantidAlgorithms/FlatBackground.h
+	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
@@ -402,8 +404,10 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResampleX.h
 	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
+	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SassenaFFT.h
+	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/SetUncertainties.h
@@ -411,7 +415,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SignalOverError.h
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SmoothNeighbours.h
-	inc/MantidAlgorithms/SofQCommon.h    
+	inc/MantidAlgorithms/SofQCommon.h
 	inc/MantidAlgorithms/SofQW.h
 	inc/MantidAlgorithms/SofQW2.h
 	inc/MantidAlgorithms/SofQW3.h
@@ -490,8 +494,8 @@ set ( TEST_FILES
 	ConjoinWorkspacesTest.h
 	ConvertAxisByFormulaTest.h
 	ConvertFromDistributionTest.h
-	ConvertSpectrumAxisTest.h
 	ConvertSpectrumAxis2Test.h
+	ConvertSpectrumAxisTest.h
 	ConvertTableToMatrixWorkspaceTest.h
 	ConvertToDistributionTest.h
 	ConvertToEventWorkspaceTest.h
@@ -549,7 +553,7 @@ set ( TEST_FILES
 	FindDeadDetectorsTest.h
 	FindDetectorsOutsideLimitsTest.h
 	FindPeaksTest.h
-	FlatBackgroundTest.h
+	FindPeakBackgroundTest.h
 	FlatPlateAbsorptionTest.h
 	GenerateEventsFilterTest.h
 	GeneratePeaksTest.h
@@ -617,7 +621,9 @@ set ( TEST_FILES
 	ResampleXTest.h
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
+	RingProfileTest.h
 	SassenaFFTTest.h
+	SaveGSASInstrumentFileTest.h
 	ScaleTest.h
 	ScaleXTest.h
 	ShiftLogTimeTest.h

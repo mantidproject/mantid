@@ -142,7 +142,7 @@ void ModeratorTzero::exec()
     // shift the time of flights by the emission time from the moderator
     if(t2 >= 0) //t2 < 0 when no detector info is available
     {
-      double tof, E1;  // local variables
+      double E1;  
       mu::Parser parser;
       parser.DefineVar("incidentEnergy", &E1); // associate E1 to this parser
       parser.SetExpr(m_formula);
@@ -150,18 +150,16 @@ void ModeratorTzero::exec()
       double min_t0_next=parser.Eval(); // fast neutrons are shifted by min_t0_next, irrespective of tof
       MantidVec &inbins = inputWS->dataX(i);
       MantidVec &outbins = outputWS->dataX(i);
+
       // iterate over the time-of-flight values
       for(unsigned int ibin=0; ibin < inbins.size(); ibin++)
       {
-        tof=inbins[ibin]; // current time-of-flight
+        double tof=inbins[ibin]; // current time-of-flight
         if(tof<m_t1min+t2)
           tof-=min_t0_next;
         else
           tof-=CalculateT0(tof, L1, t2, E1, parser);
         outbins[ibin] = tof;
-        //if(ibin%400==0)
-          //std::cout<<", "<<tof;
-          //std::cout<<i<<" "<<ibin<<" "<<tof<<" "<<E1<<std::endl;
       }
     }
     else
@@ -344,10 +342,9 @@ double ModeratorTzero::CalculateT2(MatrixWorkspace_sptr inputWS, size_t i)
     {
       double E2 = wsProp.at(0); //[E2]=meV
       double v2 = convFact * sqrt(E2); //[v2]=meter/microsec
-      double L2;
       try
       {
-        L2 = det->getDistance(*sample);
+        double L2 = det->getDistance(*sample);
         t2 = L2 / v2;
       }
       catch (Exception::NotFoundError &)
@@ -367,7 +364,7 @@ double ModeratorTzero::CalculateT2(MatrixWorkspace_sptr inputWS, size_t i)
 /// Calculate emission time for a given detector (L1, t2) and TOF
 double ModeratorTzero::CalculateT0(const double &tof, const double &L1, const double &t2, double &E1, mu::Parser &parser)
 {
-  double t0_curr, t0_next, t1, v1;
+  double t0_curr, t0_next;
   t0_curr=m_tolTOF; // current iteration emission time
   t0_next=0.0; // next iteration emission time, initialized to zero
   size_t iiter(0); // current iteration number
@@ -375,8 +372,8 @@ double ModeratorTzero::CalculateT0(const double &tof, const double &L1, const do
   while (std::fabs(t0_curr-t0_next)>=m_tolTOF && iiter<m_niter)
   {
     t0_curr=t0_next;
-    t1=tof-t0_curr-t2;
-    v1=L1/t1;
+    double t1=tof-t0_curr-t2;
+    double v1=L1/t1;
     E1=m_convfactor*v1*v1; // Energy in meV if v1 in meter/microsecond
     t0_next=parser.Eval();
     iiter++;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<parameter-file instrument="CNCS" date="2011-01-21T00:00:00">
+<parameter-file instrument="CNCS" valid-from="2011-01-21T00:00:00">
 
 	<component-link name="CNCS">
 
@@ -195,7 +195,7 @@
 		</parameter>
 
 		<parameter name="treat-background-as-events" type="string">
-			<value val="no" />
+			<value val="yes" />
 		</parameter>
 
 	</component-link>

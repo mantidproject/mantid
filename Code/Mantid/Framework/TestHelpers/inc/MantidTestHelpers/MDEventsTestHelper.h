@@ -1,3 +1,9 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This header MAY NOT be included in any test from a package below the level of
+ *  MDEvents (e.g. Kernel, Geometry, API, DataObjects).
+ *********************************************************************************/
 #ifndef MDEVENTSTEST_HELPER_H
 #define MDEVENTSTEST_HELPER_H
 

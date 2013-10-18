@@ -4,6 +4,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 
 class vtkImplicitFunction;
+// cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkPeaksReader : public vtkPolyDataAlgorithm
 {
 public:

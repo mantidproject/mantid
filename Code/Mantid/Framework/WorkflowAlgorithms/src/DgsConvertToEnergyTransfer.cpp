@@ -410,15 +410,9 @@ namespace Mantid
             cnvToDist->executeAsChildAlg();
             outputWS = cnvToDist->getProperty("Workspace");
 
-            std::string bkgWsName = this->getPropertyValue("OutputTibWorkspace");
-            if (bkgWsName.empty())
-            {
-              bkgWsName = "background_ws";
-            }
             // Calculate the background
             IAlgorithm_sptr flatBg = this->createChildAlgorithm("CalculateFlatBackground");
             flatBg->setProperty("InputWorkspace", origBkgWS);
-            flatBg->setProperty("OutputWorkspace", bkgWsName);
             flatBg->setProperty("StartX", tibTofStart);
             flatBg->setProperty("EndX", tibTofEnd);
             flatBg->setProperty("Mode", "Mean");

@@ -55,7 +55,7 @@ namespace Mantid
     void MaskPeaksWorkspace::init()
     {
 
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, boost::make_shared<InstrumentValidator>()),
                       "A workspace containing one or more rectangular area detectors. Each spectrum needs to correspond to only one pixelID (e.g. no grouping or previous calls to SumNeighbours).");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input),
                       "The name of the workspace that will be created. Can replace the input workspace.");
@@ -76,15 +76,12 @@ namespace Mantid
       retrieveProperties();
   
       MantidVecPtr XValues;
-      PeaksWorkspace_sptr peaksW;
-      peaksW = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(getProperty("InPeaksWorkspace"));
+      PeaksWorkspace_const_sptr peaksW = getProperty("InPeaksWorkspace");
 
       //To get the workspace index from the detector ID
-      detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap();
+      const detid2index_map pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap();
       //Get some stuff from the input workspace
       Geometry::Instrument_const_sptr inst = inputW->getInstrument();
-      if (!inst)
-        throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
       // Init a table workspace
       DataObjects::TableWorkspace_sptr tablews =
@@ -113,8 +110,8 @@ namespace Mantid
         Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankName);
         if (!comp)
         {
-        	continue;
         	g_log.debug() << "Component "+bankName+" does not exist in instrument\n";
+          continue;
         }
 
         // determine the range in time-of-flight
@@ -171,14 +168,10 @@ namespace Mantid
 
       // Mask bins
       API::IAlgorithm_sptr maskbinstb = this->createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
-      maskbinstb->initialize();
-      maskbinstb->setPropertyValue("InputWorkspace", inputW->getName());
+      maskbinstb->setProperty("InputWorkspace", inputW);
       maskbinstb->setPropertyValue("OutputWorkspace", inputW->getName());
       maskbinstb->setProperty("MaskingInformation", tablews);
       maskbinstb->execute();
-
-      //Clean up memory
-      delete pixel_to_wi;
 
       return;
     }
@@ -211,52 +204,53 @@ namespace Mantid
       }
     }
 
-    size_t MaskPeaksWorkspace::getWkspIndex(detid2index_map *pixel_to_wi, Geometry::IComponent_const_sptr comp,
+    size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map& pixel_to_wi, Geometry::IComponent_const_sptr comp,
                                             const int x, const int y)
     {
         Geometry::RectangularDetector_const_sptr det
             = boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-      if(det)
-      {
-		  if(x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0) return EMPTY_INT();
-		  if ( (x >= det->xpixels()) || (x < 0)     // this check is unnecessary as callers are doing it too
-			   || (y >= det->ypixels()) || (y < 0)) // but just to make debugging easier
-		  {
-			std::stringstream msg;
-			msg << "Failed to find workspace index for x=" << x << " y=" << y
-				<< "(max x=" << det->xpixels() << ", max y=" << det->ypixels() << ")";
-			throw std::runtime_error(msg.str());
-		  }
+        if(det)
+        {
+          if(x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0) return EMPTY_INT();
+          if ( (x >= det->xpixels()) || (x < 0)     // this check is unnecessary as callers are doing it too
+              || (y >= det->ypixels()) || (y < 0)) // but just to make debugging easier
+          {
+            std::stringstream msg;
+            msg << "Failed to find workspace index for x=" << x << " y=" << y
+                << "(max x=" << det->xpixels() << ", max y=" << det->ypixels() << ")";
+            throw std::runtime_error(msg.str());
+          }
 
-		  int pixelID = det->getAtXY(x,y)->getID();
+          int pixelID = det->getAtXY(x,y)->getID();
 
-		  //Find the corresponding workspace index, if any
-		  if (pixel_to_wi->find(pixelID) == pixel_to_wi->end())
-		  {
-			std::stringstream msg;
-			msg << "Failed to find workspace index for x=" << x << " y=" << y;
-			throw std::runtime_error(msg.str());
-		  }
-		  return (*pixel_to_wi)[pixelID];
-      }
-      else
-      {
-		  std::vector<Geometry::IComponent_const_sptr> children;
-		  boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
-		  asmb->getChildren(children, false);
-		  boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-		  std::vector<Geometry::IComponent_const_sptr> grandchildren;
-		  asmb2->getChildren(grandchildren,false);
-		  int NROWS = static_cast<int>(grandchildren.size());
-		  int NCOLS = static_cast<int>(children.size());
-		  // Wish pixels and tubes start at 1 not 0
-			  if(x-1 >= NCOLS || x-1 < 0 || y-1 >= NROWS || y-1 < 0) return EMPTY_INT();
-		  std::string bankName = comp->getName();
-		  detid2index_map::const_iterator it = pixel_to_wi->find(findPixelID(bankName, x, y));
-		  if ( it == pixel_to_wi->end() ) return EMPTY_INT();
-		  return (it->second);
-      }
-      return EMPTY_INT();
+          //Find the corresponding workspace index, if any
+          auto wiEntry = pixel_to_wi.find(pixelID);
+          if (wiEntry == pixel_to_wi.end())
+          {
+            std::stringstream msg;
+            msg << "Failed to find workspace index for x=" << x << " y=" << y;
+            throw std::runtime_error(msg.str());
+          }
+          return wiEntry->second;
+        }
+        else
+        {
+          std::vector<Geometry::IComponent_const_sptr> children;
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
+          asmb->getChildren(children, false);
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+          std::vector<Geometry::IComponent_const_sptr> grandchildren;
+          asmb2->getChildren(grandchildren,false);
+          int NROWS = static_cast<int>(grandchildren.size());
+          int NCOLS = static_cast<int>(children.size());
+          // Wish pixels and tubes start at 1 not 0
+          if(x-1 >= NCOLS || x-1 < 0 || y-1 >= NROWS || y-1 < 0) return EMPTY_INT();
+          std::string bankName = comp->getName();
+          detid2index_map::const_iterator it = pixel_to_wi.find(findPixelID(bankName, x, y));
+          if ( it == pixel_to_wi.end() ) return EMPTY_INT();
+          return (it->second);
+        }
+        return EMPTY_INT();
     }
 
     /**

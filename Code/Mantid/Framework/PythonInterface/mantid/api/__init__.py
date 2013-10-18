@@ -15,14 +15,21 @@ import os as _os
 clib = _os.path.join(_os.path.dirname(__file__), '_api.so')
 flags = _pydlopen.setup_dlopen(clib, ['libMantidKernel', 'libMantidGeometry', 'libMantidAPI']) # Ensure the library is open with the correct flags
 from mantid.kernel import _kernel
+import _api
 from _api import *
 _pydlopen.restore_flags(flags)
 ###############################################################################
 
 ###############################################################################
+# Start the framework (if embedded in other application)
+###############################################################################
+FrameworkManagerImpl.Instance()
+_api._declareCPPAlgorithms()
+
+###############################################################################
 # Make aliases accessible in this namespace
 ###############################################################################
-from _aliases import *
+from _aliases import * 
 
 ###############################################################################
 # Add importAll member to ADS 

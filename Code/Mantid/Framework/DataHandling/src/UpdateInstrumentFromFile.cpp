@@ -39,6 +39,7 @@ would tell the algorithm to interpret the columns as:
 //----------------------------------------------------------------------
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidAPI/FileProperty.h"
@@ -46,12 +47,11 @@ would tell the algorithm to interpret the columns as:
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <nexus/NeXusException.hpp>
 #include <Poco/StringTokenizer.h>
 
 #include <fstream>
@@ -96,7 +96,7 @@ namespace Mantid
       exts.push_back(".s*");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The filename of the input file.\n"
-        "Currently supports RAW, ISIS NeXus & multi-column (at least 2) ascii file"
+        "Currently supports RAW, ISIS NeXus, DAT & multi-column (at least 2) ascii files"
         );
       declareProperty("MoveMonitors", (!m_ignoreMonitors),
                       "If true the positions of any detectors marked as monitors "
@@ -109,8 +109,7 @@ namespace Mantid
                       "Keywords=spectrum,ID,R,theta,phi. A dash means skip column. Keywords are recognised"
                       "as identifying components to move to new positions. Any other names in the list"
                       "are added as instrument parameters.");
-
-
+      declareProperty("SkipFirstNLines", 0, "If the file is ASCII, then skip this number of lines at the start of the file");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -137,17 +136,28 @@ namespace Mantid
       if(NexusDescriptor::isHDF(filename))
       {
         LoadISISNexus2 isisNexus;
-        auto *descriptor = new Kernel::NexusDescriptor(filename);
-        if(isisNexus.confidence(*descriptor) > 0)
+        LoadEventNexus eventNexus;
+        boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(new Kernel::NexusDescriptor(filename));
+        if(isisNexus.confidence(*descriptor) > 0 || eventNexus.confidence(*descriptor) > 0)
         {
-          delete descriptor;
-          updateFromNeXus(filename);
+          auto & nxFile = descriptor->data();
+          const auto & rootEntry = descriptor->firstEntryNameType();
+          nxFile.openGroup(rootEntry.first, rootEntry.second);
+          updateFromNeXus(nxFile);
           return;
         }
       }
 
       if(FileDescriptor::isAscii(filename))
       {
+        // If no header specified & the extension is .dat or .sca, then assume ISIS
+        // DAT file structure
+        if(getPropertyValue("AsciiHeader").empty() &&
+           (boost::iends_with(filename,".dat") || boost::iends_with(filename,".sca")))
+        {
+          this->setPropertyValue("AsciiHeader", "ID,-,R,-,theta,phi,-,-,-,-,-,-,-,-,-,-,-,-,-");
+          this->setProperty("SkipFirstNLines",2);
+        }
         updateFromAscii(filename);
         return;
       }
@@ -200,33 +210,17 @@ namespace Mantid
 
     /**
     * Update the detector information from a NeXus file
-    * @param filename :: The input filename
+    * @param nxFile :: Handle to a NeXus file where the root group has been opened
     */
-    void UpdateInstrumentFromFile::updateFromNeXus(const std::string & filename)
+    void UpdateInstrumentFromFile::updateFromNeXus(::NeXus::File & nxFile)
     {
       try
       {
-        ::NeXus::File file(filename);
+        nxFile.openGroup("isis_vms_compat","IXvms");
       }
       catch(::NeXus::Exception&)
       {
-        throw std::runtime_error("Input file does not look like an ISIS NeXus file.");
-      }
-      ::NeXus::File nxFile(filename);
-      try
-      {
-        nxFile.openPath("raw_data_1/isis_vms_compat");
-      }
-      catch(::NeXus::Exception&)
-      {
-        try
-        {
-          nxFile.openPath("entry/isis_vms_compat"); // Could be original event file.
-        }
-        catch(::NeXus::Exception&)
-        {
-          throw std::runtime_error("Unknown NeXus flavour. Cannot update instrument positions.");
-        }
+        throw std::runtime_error("Unknown NeXus flavour. Cannot update instrument positions using this type of file");
       }
       // Det ID
       std::vector<int32_t> detID;
@@ -260,14 +254,22 @@ namespace Mantid
 
       Geometry::Instrument_const_sptr inst = m_workspace->getInstrument();
       // Throws for multiple detectors
-      boost::scoped_ptr<spec2index_map> specToIndex(m_workspace->getSpectrumToWorkspaceIndexMap());
+      const spec2index_map specToIndex(m_workspace->getSpectrumToWorkspaceIndexMap());
 
       std::ifstream datfile(filename.c_str(), std::ios_base::in);
-
+      const int skipNLines = getProperty("SkipFirstNLines");
       std::string line;
+      int lineCount(0);
+      while(lineCount < skipNLines)
+      {
+        std::getline(datfile,line);
+        ++lineCount;
+      }
+
       std::vector<double> colValues(header.colCount - 1, 0.0);
       while(std::getline(datfile,line))
       {
+        boost::trim(line);
         std::istringstream is(line);
         // Column 0 should be ID/spectrum number
         int32_t detOrSpec(-1000);
@@ -284,8 +286,8 @@ namespace Mantid
         {
           if(isSpectrum)
           {
-            auto it = specToIndex->find(detOrSpec);
-            if(it != specToIndex->end())
+            auto it = specToIndex.find(detOrSpec);
+            if(it != specToIndex.end())
             {
               const size_t wsIndex = it->second;
               det = m_workspace->getDetector(wsIndex);
@@ -418,10 +420,6 @@ namespace Mantid
           try
           {
             Geometry::IDetector_const_sptr det = inst->getDetector(detID[i]);
-            if( m_ignoreMonitors && det->isMonitor() )
-            {
-              continue;
-            }
             setDetectorPosition(det, l2[i], theta[i], phi[i]);
           }
           catch (Kernel::Exception::NotFoundError&)
@@ -442,6 +440,8 @@ namespace Mantid
     void UpdateInstrumentFromFile::setDetectorPosition(const Geometry::IDetector_const_sptr & det, const float l2,
                                                        const float theta, const float phi)
     {
+      if( m_ignoreMonitors && det->isMonitor() ) return;
+
       Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
       Kernel::V3D pos;
       if (!m_ignorePhi)

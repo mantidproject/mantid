@@ -812,6 +812,8 @@ public:
     el2.addEventQuickly( TofEvent(1.5, 5) );
     TS_ASSERT( (el1 == el2) );
     TS_ASSERT( !(el1 != el2) );
+
+    TS_ASSERT( el1.equals(el2, 0., 0., 0));
   }
 
 
@@ -1445,6 +1447,10 @@ public:
     }
   }
 
+  void test_filterByPulseTime_output_same_as_input_throws()
+  {
+    TS_ASSERT_THROWS( el.filterByPulseTime(100,200,el), std::invalid_argument );
+  }
 
   //-----------------------------------------------------------------------------------------------
   void test_splitByTime()

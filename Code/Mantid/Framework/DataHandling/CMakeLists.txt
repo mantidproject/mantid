@@ -1,8 +1,8 @@
 set ( SRC_FILES
-	src/ADARAPackets.cpp
-	src/ADARAParser.cpp
 	src/AppendGeometryToSNSNexus.cpp
+	src/ApplyGroupingFromMuonNexus.cpp
 	src/CompressEvents.cpp
+	src/ConvertFullprofToXML.cpp
 	src/CreateChopperModel.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
@@ -10,9 +10,6 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
-	src/FakeEventDataListener.cpp
-	src/FakeISISHistoDAE.cpp
-	src/FileEventDataListener.cpp
 	src/FindDetectorsInShape.cpp
 	src/FindDetectorsPar.cpp
 	src/GenerateGroupingPowder.cpp
@@ -20,20 +17,12 @@ set ( SRC_FILES
 	src/GroupDetectors.cpp
 	src/GroupDetectors2.cpp
 	src/ISISDataArchive.cpp
-	src/ISISHistoDataListener.cpp
 	src/ISISRunLogs.cpp
-	src/LiveDataAlgorithm.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
-	src/LoadHelper.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
-	src/LoadDAE.cpp
-	src/LoadDAE/idc.cpp
-	src/LoadDAE/idc.h
-	src/LoadDAE/isisds_command.cpp
-	src/LoadDAE/isisds_command.h
 	src/LoadDaveGrp.cpp
 	src/LoadDetectorInfo.cpp
 	src/LoadDetectorsGroupingFile.cpp
@@ -44,6 +33,7 @@ set ( SRC_FILES
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
 	src/LoadGSS.cpp
+	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
 	src/LoadILLSANS.cpp
@@ -55,15 +45,14 @@ set ( SRC_FILES
 	src/LoadIsawDetCal.cpp
 	src/LoadLLB.cpp
 	src/LoadLOQDistancesFromRaw.cpp
-	src/LoadLiveData.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadLogsFromSNSNexus.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
 	src/LoadMaskingFile.cpp
-	src/LoadMcStasNexus.cpp
 	src/LoadMcStasEventNexus.cpp
+	src/LoadMcStasNexus.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus1.cpp
@@ -74,7 +63,6 @@ set ( SRC_FILES
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadPDFgetNFile.cpp
-	src/LoadSINQ.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
 	src/LoadPreNexusMonitors.cpp
@@ -91,6 +79,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadSINQ.cpp
 	src/LoadSNSEventNexus.cpp
 	src/LoadSNSNexus.cpp
 	src/LoadSNSspec.cpp
@@ -105,7 +94,6 @@ set ( SRC_FILES
 	src/MaskDetectorsInShape.cpp
 	src/MergeLogs.cpp
 	src/ModifyDetectorDotDatFile.cpp
-	src/MonitorLiveData.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
 	src/ProcessDasNexusLog.cpp
@@ -115,7 +103,6 @@ set ( SRC_FILES
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
 	src/SNSDataArchiveICAT2.cpp
-	src/SNSLiveEventDataListener.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
@@ -143,19 +130,14 @@ set ( SRC_FILES
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
-	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
-        src/LoadDAE/isisds_command.cpp)
-
 set ( INC_FILES
-	inc/MantidDataHandling/ADARA.h
-	inc/MantidDataHandling/ADARAPackets.h
-	inc/MantidDataHandling/ADARAParser.h
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
+	inc/MantidDataHandling/ApplyGroupingFromMuonNexus.h
 	inc/MantidDataHandling/CompressEvents.h
+    inc/MantidDataHandling/ConvertFullprofToXML.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
@@ -163,9 +145,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
-	inc/MantidDataHandling/FakeEventDataListener.h
-	inc/MantidDataHandling/FakeISISHistoDAE.h
-	inc/MantidDataHandling/FileEventDataListener.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/FindDetectorsPar.h
 	inc/MantidDataHandling/GenerateGroupingPowder.h
@@ -173,16 +152,12 @@ set ( INC_FILES
 	inc/MantidDataHandling/GroupDetectors.h
 	inc/MantidDataHandling/GroupDetectors2.h
 	inc/MantidDataHandling/ISISDataArchive.h
-	inc/MantidDataHandling/ISISHistoDataListener.h
 	inc/MantidDataHandling/ISISRunLogs.h
-	inc/MantidDataHandling/LiveDataAlgorithm.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
-	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
-	inc/MantidDataHandling/LoadDAE.h
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h
 	inc/MantidDataHandling/LoadDetectorsGroupingFile.h
@@ -193,6 +168,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
 	inc/MantidDataHandling/LoadGSS.h
+	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadILLSANS.h
@@ -204,15 +180,14 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadIsawDetCal.h
 	inc/MantidDataHandling/LoadLLB.h
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
-	inc/MantidDataHandling/LoadLiveData.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadLogsFromSNSNexus.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMaskingFile.h
-	inc/MantidDataHandling/LoadMcStasNexus.h
 	inc/MantidDataHandling/LoadMcStasEventNexus.h
+	inc/MantidDataHandling/LoadMcStasNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus1.h
@@ -223,7 +198,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
-	inc/MantidDataHandling/LoadSINQ.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
@@ -235,6 +209,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadSINQ.h
 	inc/MantidDataHandling/LoadSNSEventNexus.h
 	inc/MantidDataHandling/LoadSNSNexus.h
 	inc/MantidDataHandling/LoadSNSspec.h
@@ -249,7 +224,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/MergeLogs.h
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
-	inc/MantidDataHandling/MonitorLiveData.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
@@ -259,7 +233,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SNSDataArchiveICAT2.h
-	inc/MantidDataHandling/SNSLiveEventDataListener.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
@@ -287,7 +260,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
-	inc/MantidDataHandling/StartLiveData.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
@@ -298,10 +270,10 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#LoadSNSNexusTest.h # TODO has no active tests in it
-	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
-	ADARAPacketTest.h
 	AppendGeometryToSNSNexusTest.h
+	ApplyGroupingFromMuonNexusTest.h
 	CompressEventsTest.h
+	ConvertFullprofToXMLTest.h
 	CreateChopperModelTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
@@ -309,8 +281,6 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
-	FakeEventDataListenerTest.h
-	FileEventDataListenerTest.h
 	FindDetectorsInShapeTest.h
 	FindDetectorsParTest.h
 	GenerateGroupingPowderTest.h
@@ -318,13 +288,10 @@ set ( TEST_FILES
 	GroupDetectors2Test.h
 	GroupDetectorsTest.h
 	ISISDataArchiveTest.h
-	ISISHistoDataListenerTest.h
 	InstrumentRayTracerTest.h
-	LiveDataAlgorithmTest.h
 	LoadAsciiTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
-	LoadDAETest.h
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
 	LoadDetectorsGroupingFileTest.h
@@ -342,13 +309,12 @@ set ( TEST_FILES
 	LoadInstrumentTest.h
 	LoadIsawDetCalTest.h
 	LoadLLBTest.h
-	LoadLiveDataTest.h
 	LoadLogTest.h
 	LoadLogsFromSNSNexusTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
-	LoadMcStasNexusTest.h
 	LoadMcStasEventNexusTest.h
+	LoadMcStasNexusTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
@@ -358,7 +324,6 @@ set ( TEST_FILES
 	LoadNexusProcessedTest.h
 	LoadNexusTest.h
 	LoadPDFgetNFileTest.h
-	LoadSINQTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
@@ -370,6 +335,7 @@ set ( TEST_FILES
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
 	LoadRawTest.h
+	LoadSINQTest.h
 	LoadSNSEventNexusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
@@ -383,7 +349,6 @@ set ( TEST_FILES
 	MaskDetectorsTest.h
 	MergeLogsTest.h
 	ModifyDetectorDotDatFileTest.h
-	MonitorLiveDataTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
 	ProcessDasNexusLogTest.h
@@ -416,7 +381,6 @@ set ( TEST_FILES
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
-	StartLiveDataTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLlogfileTest.h
 )
@@ -424,7 +388,7 @@ set ( TEST_FILES
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(CurveFitting SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+  enable_unity_build(DataHandling SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported

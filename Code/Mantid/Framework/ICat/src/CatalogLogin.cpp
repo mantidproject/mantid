@@ -45,10 +45,9 @@ namespace Mantid
       ICatalog_sptr catalog_sptr;
       try
       {
-        g_log.information() << "Attempting to login to " << ConfigService::Instance().getFacility().catalogName()
+        g_log.information() << "Attempting to login to " << ConfigService::Instance().getFacility().catalogInfo().catalogName()
                             << " for " << ConfigService::Instance().getFacility().name() << "\n";
-        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-
+        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
       }
       catch(Kernel::Exception::NotFoundError&)
       {
@@ -58,6 +57,8 @@ namespace Mantid
       {
         throwCatalogError();
       }
+      g_log.notice() << "Verifying user credentials..." << std::endl;
+      progress(0.5, "Verifying user credentials...");
       catalog_sptr->login(username,password,"");
 
     }

@@ -50,10 +50,16 @@ using namespace std;
 class IntegratePeakTimeSlicesTest: public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IntegratePeakTimeSlicesTest *createSuite() { return new IntegratePeakTimeSlicesTest(); }
+  static void destroySuite( IntegratePeakTimeSlicesTest *suite ) { delete suite; }
+  
   IntegratePeakTimeSlicesTest()
   {
     Mantid::API::FrameworkManager::Instance();
   }
+
   void test_abc()
   {
     int NRC =60;// 30;
@@ -121,7 +127,7 @@ public:
 
     double TotIntensity = 0;
 
-    detid2index_map * map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
 
     for (int row = 0; row < NRC; row++)
       for (int col = 0; col < NRC; col++)
@@ -129,7 +135,7 @@ public:
 
         boost::shared_ptr<Detector> detP = bankR->getAtXY(col, row);
 
-        detid2index_map::iterator it = map->find(detP->getID());
+        detid2index_map::const_iterator it = map.find(detP->getID());
         size_t wsIndex = (*it).second;
 
         double MaxR = max<double> (0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
@@ -159,7 +165,6 @@ public:
         wsPtr->setData(wsIndex, dataY, dataE);
 
       }
-    delete map;
 
     PeaksWorkspace_sptr pks(new PeaksWorkspace());
 

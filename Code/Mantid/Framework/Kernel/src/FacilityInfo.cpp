@@ -5,12 +5,12 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/RemoteJobManagerFactory.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/StringTokenizer.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/shared_ptr.hpp>
 #include <algorithm>
 #include <iostream>
 
@@ -27,10 +27,9 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   * @param elem :: The Poco::XML::Element to read the data from
   * @throw std::runtime_error if name or file extensions are not defined
   */
-FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
-  m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(), m_extensions(),
-  m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener(),
-  m_computeResources()
+FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
+  m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(),
+  m_extensions(), m_archiveSearch(), m_instruments(), m_liveListener(), m_computeResources()
 {
   if (m_name.empty())
   {
@@ -42,9 +41,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillZeroPadding(elem);
   fillDelimiter(elem);
   fillExtensions(elem);
-  fillSoapEndPoint(elem);
   fillArchiveNames(elem);
-  fillCatalogName(elem);
   fillLiveListener(elem);
   fillComputeResources(elem);
   fillInstruments(elem); // Make sure this is last as it picks up some defaults that are set above
@@ -94,27 +91,6 @@ void FacilityInfo::addExtension(const std::string& ext)
   if (it == m_extensions.end()) m_extensions.push_back(ext);
 }
 
-/// Called from constructor to fill ICAT soap end point
-void FacilityInfo::fillSoapEndPoint(const Poco::XML::Element* elem)
-{
-  Poco::XML::NodeList* pNL_soapEndPoint = elem->getElementsByTagName("soapEndPoint");
-
-  if (pNL_soapEndPoint->length() > 1)
-  {
-    pNL_soapEndPoint->release();
-    g_log.error("Facility must have only one soapEndPoint tag");
-    throw std::runtime_error("Facility must have only one csoapEndPoint tag");
-  }
-  else if (pNL_soapEndPoint->length() == 1)
-  {
-    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_soapEndPoint->item(0));
-    if(!elem->getAttribute("url").empty())
-    {
-      m_soapEndPoint= elem->getAttribute("url");
-    }
-  }
-  pNL_soapEndPoint->release();
-}
 
 /// Called from constructor to fill archive interface names
 void FacilityInfo::fillArchiveNames(const Poco::XML::Element* elem)
@@ -140,27 +116,6 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element* elem)
     pNL_interfaces->release();
   }
   pNL_archives->release();
-}
-
-/// Called from constructor to fill catalog name
-void FacilityInfo::fillCatalogName(const Poco::XML::Element* elem)
-{
-  Poco::XML::NodeList* pNL_catalogs = elem->getElementsByTagName("catalog");
-
-  if (pNL_catalogs->length() > 1)
-  {
-    g_log.error("Facility must have only one catalog tag");
-    throw std::runtime_error("Facility must have only one catalog tag");
-  }
-  else if (pNL_catalogs->length() == 1)
-  {
-    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
-    if(!elem->getAttribute("name").empty())
-    {
-      m_catalogName= elem->getAttribute("name");
-    }
-  }
-  pNL_catalogs->release();
 }
 
 /// Called from constructor to fill instrument list
@@ -212,18 +167,9 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
   for (unsigned long i = 0; i < n; i++)
   {
     Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_compute->item(i));
-    std::string type = elem->getAttribute("type");
     std::string name = elem->getAttribute("name");
 
-    if (RemoteJobManagerFactory::Instance().exists(type))
-    {
-      m_computeResources.insert( make_pair(name, RemoteJobManagerFactory::Instance().create(elem)));
-    }
-    else
-    {
-      // Log a warning about not having an instantiator for the requested type...
-      g_log.warning( "No instantiator registered for compute resource \"" + name + "\" of type \"" + type + "\"");
-    }
+    m_computeResources.insert( std::make_pair(name, boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
   }
   pNL_compute->release();
 
@@ -297,11 +243,11 @@ std::vector<InstrumentInfo> FacilityInfo::instruments(const std::string& tech)co
 std::vector<std::string> FacilityInfo::computeResources() const
 {
   std::vector<std::string> names;
-  std::map< std::string, boost::shared_ptr<RemoteJobManager> >::const_iterator it = m_computeResources.begin();
+  ComputeResourcesMap::const_iterator it = m_computeResources.begin();
   while (it != m_computeResources.end())
   {
     names.push_back( (*it).first);
-    it++;
+    ++it;
   }
 
   return names;
@@ -313,12 +259,12 @@ std::vector<std::string> FacilityInfo::computeResources() const
   * @return a shared pointer to the RemoteJobManager instance (or
   * Null if the name wasn't recognized)
   */
-boost::shared_ptr <RemoteJobManager> FacilityInfo::getRemoteJobManager( const std::string &name) const
+boost::shared_ptr<RemoteJobManager> FacilityInfo::getRemoteJobManager( const std::string &name) const
 {
   auto it = m_computeResources.find( name);
   if (it == m_computeResources.end())
   {
-    return boost::shared_ptr<RemoteJobManager>();  // return Null
+    return boost::shared_ptr<RemoteJobManager>();  // TODO: should we throw an exception instead??
   }
   return (*it).second;
 }

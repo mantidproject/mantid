@@ -47,7 +47,7 @@ void ConvertTableToMatrixWorkspace::init()
 
 void ConvertTableToMatrixWorkspace::exec()
 {
-  ITableWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  ITableWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   std::string columnX = getProperty("ColumnX");
   std::string columnY = getProperty("ColumnY");
   std::string columnE = getProperty("ColumnE");
@@ -59,28 +59,20 @@ void ConvertTableToMatrixWorkspace::exec()
   }
   std::vector<double> X(nrows);
   std::vector<double> Y(nrows);
-  std::vector<double> E(nrows);
-
   inputWorkspace->getColumn(columnX)->numeric_fill(X);
   inputWorkspace->getColumn(columnY)->numeric_fill(Y);
 
-  if (!columnE.empty())
-  {
-    inputWorkspace->getColumn(columnE)->numeric_fill(E);
-  }
-  else
-  {
-    E.assign(X.size(),1.0);
-  }
-
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",1,X.size(),X.size());
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",1,nrows,nrows);
   outputWorkspace->dataX(0).assign(X.begin(),X.end());
   outputWorkspace->dataY(0).assign(Y.begin(),Y.end());
-  outputWorkspace->dataE(0).assign(E.begin(),E.end());
+  if (!columnE.empty())
+  {
+    std::vector<double> E(nrows);
+    inputWorkspace->getColumn(columnE)->numeric_fill(E);
+    outputWorkspace->dataE(0).assign(E.begin(),E.end());
+  }
 
-  boost::shared_ptr<Kernel::Units::Label> labelX = boost::dynamic_pointer_cast<Kernel::Units::Label>(
-    Kernel::UnitFactory::Instance().create("Label")
-    );
+  auto labelX = boost::dynamic_pointer_cast<Units::Label>(UnitFactory::Instance().create("Label"));
   labelX->setLabel(columnX);
   outputWorkspace->getAxis(0)->unit() = labelX;
 

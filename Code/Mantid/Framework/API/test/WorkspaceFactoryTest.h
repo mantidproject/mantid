@@ -87,13 +87,38 @@ public:
     ws_child->getSpectrum(0)->setSpectrumNo(123);
     ws_child->getSpectrum(1)->setDetectorID(456);
     ws_child->getSpectrum(2)->dataY()[0]=789;
+
+    ws_child->mutableRun().addProperty("Ei", 12.0);
+    ws_child->mutableSample().setName("MySample");
+
     MatrixWorkspace_sptr child;
     TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws_child) );
     TS_ASSERT_EQUALS( child->id(), "Workspace1DTest");
     TS_ASSERT_EQUALS( child->getSpectrum(0)->getSpectrumNo(), 123);
     TS_ASSERT_EQUALS( *child->getSpectrum(1)->getDetectorIDs().begin(), 456);
-    TS_ASSERT_DIFFERS( child->getSpectrum(2)->dataY()[0], 789)
+    TS_ASSERT_DIFFERS( child->getSpectrum(2)->dataY()[0], 789);
 
+    // run/logs
+    double ei(0.0);
+    TS_ASSERT_THROWS_NOTHING(ei = child->run().getPropertyValueAsType<double>("Ei"));
+    TS_ASSERT_DELTA(ei, 12.0, 1e-12);
+
+    // sample
+    TS_ASSERT_EQUALS("MySample", child->sample().getName());
+    
+    // Test change in child does not affect parent
+    child->mutableRun().addProperty("Ei", 15.0, true);
+    TS_ASSERT_THROWS_NOTHING(ei = child->run().getPropertyValueAsType<double>("Ei"));
+    TS_ASSERT_DELTA(ei, 15.0, 1e-12)
+    TS_ASSERT_THROWS_NOTHING(ei = ws_child->run().getPropertyValueAsType<double>("Ei"));
+    TS_ASSERT_DELTA(ei, 12.0, 1e-12);
+
+    // sample
+    child->mutableSample().setName("MySampleChild");
+    TS_ASSERT_EQUALS("MySample", ws_child->sample().getName());
+    TS_ASSERT_EQUALS("MySampleChild", child->sample().getName());
+   
+                             
     MatrixWorkspace_sptr ws2D(new Workspace2DTest);
     ws2D->initialize(3,1,1);
     MatrixWorkspace_sptr child2;

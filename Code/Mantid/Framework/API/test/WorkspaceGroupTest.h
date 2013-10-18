@@ -58,7 +58,7 @@ private:
     MOCK_CONST_METHOD0(id, const std::string());
     MOCK_CONST_METHOD0(name, const std::string());
     MOCK_CONST_METHOD0(threadSafe, bool());
-    MOCK_CONST_METHOD0(toString, std::string());
+    MOCK_CONST_METHOD0(toString, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
   };
 
@@ -79,6 +79,18 @@ public:
     group->add("ws1");
     group->add("ws2");
     return group;
+  }
+
+  void test_toString_Produces_Expected_String()
+  {
+    WorkspaceGroup_sptr group = makeGroup();
+
+    const std::string expected = \
+        "WorkspaceGroup\n"
+        " -- ws0\n"
+        " -- ws1\n"
+        " -- ws2\n";
+    TS_ASSERT_EQUALS(expected, group->toString());
   }
 
   void test_add()
@@ -136,6 +148,25 @@ public:
     TS_ASSERT_EQUALS(names.size(), 2);
     TS_ASSERT_EQUALS(names[0], "");
     TS_ASSERT_EQUALS(names[1], "Workspace2");
+  }
+
+  void test_reportMembers_Does_Not_Clear_List_Already_Passed_In()
+  {
+    Workspace_sptr leaf1(new WorkspaceTester());
+    std::set<Workspace_sptr> topLevel;
+    topLevel.insert(leaf1);
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr ws1(new WorkspaceTester());
+    group->addWorkspace( ws1 );
+    Workspace_sptr ws2(new WorkspaceTester());
+    group->addWorkspace( ws2 );
+
+    group->reportMembers(topLevel);
+    TS_ASSERT_EQUALS(3, topLevel.size());
+    TS_ASSERT_EQUALS(1, topLevel.count(leaf1));
+    TS_ASSERT_EQUALS(1, topLevel.count(ws1));
+    TS_ASSERT_EQUALS(1, topLevel.count(ws2));
+
   }
 
   void test_getItem()
@@ -282,18 +313,6 @@ public:
     group->addWorkspace(a);
     add_periods_logs(group, 1); 
     TS_ASSERT(group->isMultiperiod());
-  }
-
-  void test_InfoNode()
-  {
-      WorkspaceGroup_sptr group = makeGroup();
-      Mantid::API::Workspace::InfoNode rootNode( *group );
-      group->addInfoNodeTo( rootNode );
-      Mantid::API::Workspace::InfoNode &node = *rootNode.nodes()[0];
-      TS_ASSERT_EQUALS( node.nodes().size(), 3 );
-
-      TS_ASSERT_EQUALS( node.workspaceName(), "group" );     // workspace name
-      TS_ASSERT_EQUALS( node.lines()[0], "WorkspaceGroup" ); // workspace id
   }
 
   void test_isInGroup()

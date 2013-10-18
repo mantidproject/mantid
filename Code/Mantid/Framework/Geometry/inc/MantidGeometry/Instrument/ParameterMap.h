@@ -100,11 +100,16 @@ namespace Geometry
     static const std::string & pV3D();
     static const std::string & pQuat();
 
+    /// Inquality comparison operator
+    bool operator!=(const ParameterMap & rhs) const;
+    /// Equality comparison operator
+    bool operator==(const ParameterMap & rhs) const;
+
     /// Clears the map
     inline void clear()
     {
       m_map.clear();
-      clearCache();
+      clearPositionSensitiveCaches();
     }
     /// Clear any parameters with the given name
     void clearParametersByName(const std::string & name);
@@ -112,10 +117,6 @@ namespace Geometry
     /// Method for adding a parameter providing its value as a string
     void add(const std::string& type,const IComponent* comp,const std::string& name,
              const std::string& value);
-
-//    /// Method for adding a parameter providing its value as a char string
-//    void add(const std::string& type,const IComponent* comp,const std::string& name,
-//             const char* value) {add( type, comp, name, std::string(value));}
 
     /**
      * Method for adding a parameter providing its value of a particular type
@@ -136,7 +137,6 @@ namespace Geometry
         ParameterType<T> *paramT = dynamic_cast<ParameterType<T> *>(param.get());
         if (!paramT)
         {
-          reportError("Error in adding parameter: incompatible types");
           throw std::runtime_error("Error in adding parameter: incompatible types");
         }
         paramT->setValue(value);
@@ -173,19 +173,15 @@ namespace Geometry
     void addQuat(const IComponent* comp,const std::string& name, const Kernel::Quat& value);
     //@}
 
-    /// Does the named parameter exist for the given component for any type.
-    bool contains(const IComponent* comp, const char*  name) const;
     /// Does the named parameter exist for the given component and type
     bool contains(const IComponent* comp, const std::string & name, const std::string & type = "") const;
-    /// Get a parameter with a given name
-    boost::shared_ptr<Parameter> get(const IComponent* comp, const char * name) const;
+    /// Does the given parameter & component combination exist
+    bool contains(const IComponent* comp, const Parameter & parameter) const;
     /// Get a parameter with a given name and optional type
     boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name,
                                      const std::string & type = "")const;
     /// Finds the parameter in the map via the parameter type.
     boost::shared_ptr<Parameter>  getByType(const IComponent* comp, const std::string& type) const;
-    /// Use get() recursively to see if can find param in all parents of comp.
-    boost::shared_ptr<Parameter> getRecursive(const IComponent* comp, const char * name) const;
     /// Use get() recursively to see if can find param in all parents of comp and given type
     boost::shared_ptr<Parameter> getRecursive(const IComponent* comp,const std::string& name, 
                                               const std::string & type = "")const;
@@ -249,8 +245,8 @@ namespace Geometry
     /// Returns a string with all component names, parameter names and values
     std::string asString()const;
 
-    ///Clears the location and roatation caches
-    void clearCache();
+    ///Clears the location, rotation & bounding box caches
+    void clearPositionSensitiveCaches();
     ///Sets a cached location on the location cache
     void setCachedLocation(const IComponent* comp, const Kernel::V3D& location) const;
     ///Attempts to retreive a location from the location cache
@@ -263,19 +259,15 @@ namespace Geometry
     void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
     ///Attempts to retrieve a bounding box from the cache
     bool getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const;
-
+    /// Persist a representation of the Parameter map to the open Nexus file
     void saveNexus(::NeXus::File * file, const std::string & group) const;
-//    void loadNexus(::NeXus::File * file, const std::string & group, Instrument_const_sptr instr);
-
 
   private:
     ///Assignment operator
     ParameterMap& operator=(ParameterMap * rhs);
     /// Retrieve a parameter by either creating a new one of getting an existing one
-    Parameter_sptr retrieveParameter(bool &created, const std::string & type, const IComponent* comp, 
+    Parameter_sptr retrieveParameter(bool &created, const std::string & type, const IComponent* comp,
                                      const std::string & name);
-    /// report an error
-    void reportError(const std::string& str);
 
     /// internal parameter map instance
     pmap m_map;
@@ -285,6 +277,7 @@ namespace Geometry
     mutable Kernel::Cache<const ComponentID, Kernel::Quat > m_cacheRotMap;
     ///internal cache map for cached bounding boxes
     mutable Kernel::Cache<const ComponentID,BoundingBox> m_boundingBoxMap;
+
     /// Static reference to the logger class
     static Kernel::Logger& g_log;
   };

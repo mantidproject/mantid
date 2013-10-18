@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
+	src/CatalogInfo.cpp
 	src/CPUTimer.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
@@ -55,7 +56,6 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
-	src/NexusTestHelper.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
@@ -69,6 +69,7 @@ set ( SRC_FILES
 	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
+	src/RemoteJobManager.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
 	src/StartsWithValidator.cpp
@@ -117,6 +118,7 @@ set ( INC_FILES
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
 	inc/MantidKernel/BoundedValidator.h
+	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CompositeValidator.h
@@ -181,7 +183,6 @@ set ( INC_FILES
 	inc/MantidKernel/NDRandomNumberGenerator.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
@@ -199,6 +200,7 @@ set ( INC_FILES
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/RegistrationHelper.h
+	inc/MantidKernel/RemoteJobManager.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/StartsWithValidator.h
@@ -228,6 +230,7 @@ set ( INC_FILES
 	inc/MantidKernel/VMD.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
+	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
@@ -244,6 +247,7 @@ set ( TEST_FILES
 	BoundedValidatorTest.h
 	CPUTimerTest.h
 	CacheTest.h
+	CatalogInfoTest.h
 	CompositeValidatorTest.h
 	ConfigServiceTest.h
 	DataServiceTest.h
@@ -395,8 +399,7 @@ set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
-set ( PYTHONALG_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/PythonAlgorithms" ) # deprecated
-set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/plugins" )
+set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
 SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
@@ -470,8 +473,7 @@ else ()
 endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
-set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs ) # deprecated
-set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python;${PYTHONALG_DIRS}" )
+set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( DATADIRS "" )
 SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
 

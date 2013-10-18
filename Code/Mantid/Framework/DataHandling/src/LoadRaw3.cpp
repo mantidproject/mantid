@@ -174,6 +174,7 @@ namespace Mantid
       // Set the total proton charge for this run
       setProtonCharge(run);
       setRunNumber(run);
+      run.addProperty("Filename",m_filename);
 
       // Set progress to start of range taking account of ChildAlgorithms
       setProg(0.0);

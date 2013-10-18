@@ -86,8 +86,7 @@ private slots:
   void customVectorsPage(bool angleMag);
   void updateEndPointColumns(const QString& text);
 
-  void fillBoxSymbols();
-  void fillSymbols();
+  void showBoxSymbols(bool show);
   bool acceptParams();
   void showWorksheet();
   void quit();
@@ -103,13 +102,6 @@ private slots:
   void showAreaColor(bool show);
 
   void removeSelectedCurve();
-
-  /******* error bars options **************/
-  void pickErrorBarsColor();
-  void changeErrorBarsType();
-  void changeErrorBarsPlus();
-  void changeErrorBarsMinus();
-  void changeErrorBarsThrough();
 
   void setAutomaticBinning();
   bool validInput();
@@ -136,14 +128,6 @@ private slots:
 protected slots:
   void setActiveLayer(LayerItem *item);
   void updateTreeWidgetItem(QTreeWidgetItem *item);
-  void updateBackgroundTransparency(int alpha);
-  void updateCanvasTransparency(int alpha);
-  void updateAntialiasing(bool on);
-  void updateBorder(int width);
-  void pickBackgroundColor();
-  void pickCanvasColor();
-  void pickBorderColor();
-  void changeMargin(int);
   void setTitlesFont();
   void setAxesLabelsFont();
   void setAxesNumbersFont();

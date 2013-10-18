@@ -230,7 +230,7 @@ namespace Algorithms
     // Create the output MaskWorkspace
     MatrixWorkspace_sptr maskWS(new MaskWorkspace(inputW->getInstrument()));
     //To get the workspace index from the detector ID
-    detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
     // the peak positions and where to fit
     std::vector<double> peakPositions = getProperty("DReference");
     std::sort(peakPositions.begin(), peakPositions.end());
@@ -258,23 +258,24 @@ namespace Algorithms
     m_backType = this->getPropertyValue("BackgroundType");
     // the maximum allowable chisq value for an individual peak fit
     m_maxChiSq = this->getProperty("MaxChiSq");
+    m_minPeakHeight = this->getProperty("MinimumPeakHeight");
 
     // Create output information tableworkspace
     auto m_infoTableWS = boost::make_shared<TableWorkspace>();
-    m_infoTableWS->addColumn("int", "SpectrumIndex");
+    m_infoTableWS->addColumn("int", "WorkspaceIndex");
     m_infoTableWS->addColumn("int", "NumberPeaksFitted");
-    m_infoTableWS->addColumn("int", "NumberPeaksToFit");
+    m_infoTableWS->addColumn("int", "NumberPeaksInRange");
     m_infoTableWS->addColumn("str", "OffsetFitStatus");
     m_infoTableWS->addColumn("double", "ChiSquare");
     setProperty("SpectraFitInfoTableWorkspace", m_infoTableWS);
 
     // Create output peak offset workspace
     auto m_peakOffsetTableWS = boost::make_shared<TableWorkspace>();
-    m_peakOffsetTableWS->addColumn("int", "SpectrumIndex");
+    m_peakOffsetTableWS->addColumn("int", "WorkspaceIndex");
     for (size_t i = 0; i < peakPositions.size(); ++i)
     {
       std::stringstream namess;
-      namess << "@ " << std::setprecision(5) << peakPositions[i];
+      namess << "@" << std::setprecision(5) << peakPositions[i];
       m_peakOffsetTableWS->addColumn("str", namess.str());
     }
     m_peakOffsetTableWS->addColumn("double", "OffsetDeviation");
@@ -295,6 +296,7 @@ namespace Algorithms
 
       int numpeaksfitted(0);
       int numpeakstofit(0);
+      int numpeaksindrange(0);
       std::string fitoffsetstatus("N/A");
       double chi2 = -1;
       std::vector<double> fittedpeakpositions, tofitpeakpositions;
@@ -305,9 +307,7 @@ namespace Algorithms
       {
         // dead detector will be masked
         offset = BAD_OFFSET;
-        numpeakstofit = 0;
-        numpeaksfitted = 0;
-        fitoffsetstatus = "N/A";
+        fitoffsetstatus = "empty det";
       }
       else
       {
@@ -319,9 +319,7 @@ namespace Algorithms
         {
           // Dead detector will be masked
           offset=BAD_OFFSET;
-          numpeakstofit = -1;
-          numpeaksfitted = -1;
-          fitoffsetstatus = "N/A";
+          fitoffsetstatus = "dead det";
         }
       }
       if (offset < 10.)
@@ -330,14 +328,16 @@ namespace Algorithms
         std::vector<double> peakPosToFit, peakPosFitted, chisq;
         size_t nparams;
         double minD, maxD;
-        fitSpectra(wi, inputW, peakPositions, fitWindows, nparams, minD, maxD, peakPosToFit, peakPosFitted, chisq);
+        numpeaksindrange =
+            fitSpectra(wi, inputW, peakPositions, fitWindows, nparams, minD, maxD,
+                       peakPosToFit, peakPosFitted, chisq);
         numpeakstofit = static_cast<int>(peakPositions.size());
         numpeaksfitted = static_cast<int>(peakPosFitted.size());
         fittedpeakpositions = peakPosFitted;
         tofitpeakpositions = peakPosToFit;
 
         // Fit offset
-        if (nparams > 0)
+        if (nparams > 0 && numpeaksindrange > 0)
         {
           //double * params = new double[2*nparams+1];
           double params[153];
@@ -423,7 +423,7 @@ namespace Algorithms
           // Output warning
           g_log.debug() << "Spectra " << wi << " has 0 parameter for it.  Set to bad_offset." << ".\n";
           offset = BAD_OFFSET;
-          fitoffsetstatus = "N/A";
+          fitoffsetstatus = "no peaks";
         }
       }
       double mask=0.0;
@@ -445,22 +445,25 @@ namespace Algorithms
         {
           outputW->setValue(*it, offset, fitSum);
           outputNP->setValue(*it, peakPosFittedSize, chisqSum);
+          const auto mapEntry = pixel_to_wi.find(*it);
+          if ( mapEntry == pixel_to_wi.end() ) continue;
+          const size_t workspaceIndex = mapEntry->second;
           if (mask == 1.)
           {
             // Being masked
-            maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);
-            maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            maskWS->maskWorkspaceIndex(workspaceIndex);
+            maskWS->dataY(workspaceIndex)[0] = mask;
           }
           else
           {
             // Using the detector
-            maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
+            maskWS->dataY(workspaceIndex)[0] = mask;
           }
         }
 
         // Add report to TableWorkspace
         TableRow newrow = m_infoTableWS->appendRow();
-        newrow << wi << numpeaksfitted << numpeakstofit << fitoffsetstatus << chi2;
+        newrow << wi << numpeaksfitted << numpeaksindrange << fitoffsetstatus << chi2;
 
         // Add report to offset info table
         TableRow newrow2 = m_peakOffsetTableWS->appendRow();
@@ -500,7 +503,7 @@ namespace Algorithms
             }
             else
             {
-              newrow2 << "-";
+              newrow2 << "";
             }
           }
 
@@ -581,7 +584,7 @@ namespace Algorithms
   //-----------------------------------------------------------------------------------------
   /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
     *
-    * @param s :: The Workspace Index to fit.
+    * @param wi :: The Workspace Index to fit.
     * @param inputW :: Input workspace.
     * @param peakPositions :: Peak positions.
     * @param fitWindows :: Fit windows.
@@ -591,39 +594,67 @@ namespace Algorithms
     * @param peakPosToFit :: Peak positions to fit.
     * @param peakPosFitted :: Peak positions fitted.
     * @param chisq :: chisq.
-    * @return The calculated offset value
+    * @return The number of peaks in range
     */
-  void GetDetOffsetsMultiPeaks::fitSpectra(const int64_t s, MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions,
+  int GetDetOffsetsMultiPeaks::fitSpectra(const int64_t wi, MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions,
                                            const std::vector<double> &fitWindows, size_t &nparams, double &minD, double &maxD,
                                            std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted,
                                            std::vector<double> &chisq)
   {
-    const MantidVec & X = inputW->readX(s);
+    // default overall fit range is the whole spectrum
+    const MantidVec & X = inputW->readX(wi);
     minD = X.front();
     maxD = X.back();
+
+    // trim in the edges based on where the data turns off of zero
+    const MantidVec & Y = inputW->readY(wi);
+    size_t minDindex = 0;
+    for (; minDindex < Y.size(); ++minDindex)
+    {
+      if (Y[minDindex] > 0.)
+      {
+        minD = X[minDindex];
+        break;
+      }
+    }
+    if (minD >= maxD)
+      std::cout << "Stuff went wrong with wkspIndex=" << wi
+                << " specIndex=" <<inputW->getSpectrum(wi)->getSpectrumNo() << std::endl;
+    size_t maxDindex = Y.size()-1;
+    for (; maxDindex > minDindex; --maxDindex)
+    {
+      if (Y[maxDindex] > 0.)
+      {
+        maxD = X[maxDindex];
+        break;
+      }
+    }
+//    std::cout << "D-RANGE[" << inputW->getSpectrum(wi)->getSpectrumNo() << "]: " << minD << " -> " << maxD << std::endl;
+
+    // setup the fit windows
     bool useFitWindows = (!fitWindows.empty());
     std::vector<double> fitWindowsToUse;
     for (int i = 0; i < static_cast<int>(peakPositions.size()); ++i)
     {
       if((peakPositions[i] > minD) && (peakPositions[i] < maxD))
       {
-        peakPosToFit.push_back(peakPositions[i]);
         if (useFitWindows)
         {
           fitWindowsToUse.push_back(std::max(fitWindows[2*i], minD));
           fitWindowsToUse.push_back(std::min(fitWindows[2*i+1], maxD));
         }
+        peakPosToFit.push_back(peakPositions[i]);
       }
     }
-
-    double minpeakheight = getProperty("MinimumPeakHeight");
+    int numPeaksInRange = static_cast<int>(peakPosToFit.size());
+    if (numPeaksInRange == 0) return 0;
 
     API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
     findpeaks->setProperty("InputWorkspace", inputW);
     findpeaks->setProperty<int>("FWHM",7);
     findpeaks->setProperty<int>("Tolerance",4);
     // FindPeaks will do the checking on the validity of WorkspaceIndex
-    findpeaks->setProperty("WorkspaceIndex",static_cast<int>(s));
+    findpeaks->setProperty("WorkspaceIndex",static_cast<int>(wi));
 
     //Get the specified peak positions, which is optional
     findpeaks->setProperty("PeakPositions", peakPosToFit);
@@ -634,8 +665,9 @@ namespace Algorithms
     findpeaks->setProperty<bool>("HighBackground", this->getProperty("HighBackground"));
     findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
     findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
-    findpeaks->setProperty<double>("MinimumPeakHeight", minpeakheight);
+    findpeaks->setProperty<double>("MinimumPeakHeight", m_minPeakHeight);
     findpeaks->executeAsChildAlg();
+
     ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
     std::vector<size_t> banned;
     std::vector<double> peakWidFitted;
@@ -657,6 +689,9 @@ namespace Algorithms
 
       // goodness of fit
       double chi2 = peakslist->getRef<double>("chi2",i);
+
+//      std::cout << " h:" << height << " c:" << centre << " w:" << (width/(2.*std::sqrt(2.*std::log(2.))))
+//                << " b:" << background << " chisq:" << chi2 << std::endl;
 
       // Get references to the data
       peakPosFitted.push_back(centre);
@@ -685,16 +720,23 @@ namespace Algorithms
           continue;
         }
       }
-      if (chisq[i] > m_maxChiSq)
+      if (chisq[i] > m_maxChiSq || chisq[i] < 0.)
       {
-        // ban peaks from HUGE chi-square
+        // ban peaks from HUGE (or negative) chi-square
+        banned.push_back(i);
+        continue;
+      }
+      if (peakHighFitted[i] < m_minPeakHeight)
+      {
+        // ban peaks that don't meet the minimum height requirement
         banned.push_back(i);
         continue;
       }
     }
     // delete banned peaks
-    g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
-                  << " peaks in wkspindex = " << s << "\n";
+    if (!banned.empty())
+      g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
+                    << " peaks in wkspindex = " << wi << "\n";
     deletePeaks(banned, peakPosToFit, peakPosFitted,
                 peakWidFitted, peakHighFitted, peakBackground,
                 chisq);
@@ -704,15 +746,16 @@ namespace Algorithms
     {
       if (peakHighFitted[i]  * FWHM_TO_SIGMA / peakWidFitted[i] < 5.)
       {
-        g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
+        g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << wi
                       << " I/sigma = " << (peakHighFitted[i] * FWHM_TO_SIGMA / peakWidFitted[i]) << "\n";
         banned.push_back(i);
         continue;
-        }
       }
-      // delete banned peaks
+    }
+    // delete banned peaks
+    if (!banned.empty())
       g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
-                    << " peaks in wkspindex = " << s << "\n";
+                    << " peaks in wkspindex = " << wi << "\n";
       deletePeaks(banned, peakPosToFit, peakPosFitted,
                   peakWidFitted, peakHighFitted, peakBackground,
                   chisq);
@@ -728,15 +771,16 @@ namespace Algorithms
       {
         if (Zscore[i] > 2.0)
         {
-          g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
+          g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << wi
                          << " sigma/d = " << widthDivPos[i] << "\n";
           banned.push_back(i);
           continue;
         }
       }
       // delete banned peaks
-      g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
-                    << " peaks in wkspindex = " << s << "\n";
+      if (!banned.empty())
+        g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
+                      << " peaks in wkspindex = " << wi << "\n";
       deletePeaks(banned, peakPosToFit, peakPosFitted,
                   peakWidFitted, peakHighFitted, peakBackground,
                   chisq);
@@ -746,7 +790,7 @@ namespace Algorithms
       {
         if (peakHighFitted[i] < 0.5 * std::sqrt(peakHighFitted[i] + peakBackground[i]))
         {
-          g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
+          g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << wi
                          << " " << peakHighFitted[i] << " < "
                          << 0.5 * std::sqrt(peakHighFitted[i] + peakBackground[i]) << "\n";
           banned.push_back(i);
@@ -754,14 +798,15 @@ namespace Algorithms
         }
       }
       // delete banned peaks
-      g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
-                    << " peaks in wkspindex = " << s << "\n";
+      if (!banned.empty())
+        g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
+                      << " peaks in wkspindex = " << wi << "\n";
       deletePeaks(banned, peakPosToFit, peakPosFitted,
                   peakWidFitted, peakHighFitted, peakBackground,
                   chisq);
 
       nparams = peakPosFitted.size();
-      return;
+      return numPeaksInRange;
     }
 
   } // namespace Algorithm

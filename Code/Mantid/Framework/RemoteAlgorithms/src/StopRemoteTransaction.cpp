@@ -1,9 +1,10 @@
 #include "MantidRemoteAlgorithms/StopRemoteTransaction.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidRemote/RemoteJobManager.h"
+#include "MantidKernel/RemoteJobManager.h"
 
 #include "boost/make_shared.hpp"
 
@@ -44,17 +45,21 @@ void StopRemoteTransaction::exec()
     throw( std::runtime_error( std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  std::string errMsg;
   std::string transId = getPropertyValue( "TransactionID");
-
-  if (jobManager->stopTransaction( transId, errMsg) == RemoteJobManager::JM_OK)
+  std::istream &respStream = jobManager->httpGet( "/transaction", std::string("Action=Stop&TransID=") + transId);
+  if ( jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
     g_log.information() << "Transaction ID " << transId << " stopped." << std::endl;
   }
   else
   {
-    throw( std::runtime_error( "Error stopping transaction " + transId + ": " + errMsg));
+    JSONObject resp;
+    initFromStream( resp, respStream);
+    std::string errMsg;
+    resp["Err_Msg"].getValue( errMsg);
+    throw( std::runtime_error( errMsg));
   }
+
 
 }
 

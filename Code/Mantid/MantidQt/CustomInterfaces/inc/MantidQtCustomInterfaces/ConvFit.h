@@ -44,9 +44,10 @@ namespace IDA
     void fitContextMenu(const QPoint &);
     void fixItem();
     void unFixItem();
+    void showTieCheckbox(QString);
 
   private:
-    boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tie=false);
+    boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tieCentres=false);
     QtProperty* createLorentzian(const QString &);
     void populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie);
     QString fitTypeString() const;

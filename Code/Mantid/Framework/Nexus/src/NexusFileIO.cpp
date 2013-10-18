@@ -13,6 +13,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ConfigService.h"
@@ -150,14 +151,21 @@ using namespace DataObjects;
        Nexus specs.
        @param title :: title field.
   */
-  int NexusFileIO::writeNexusProcessedHeader( const std::string& title) const
+  int NexusFileIO::writeNexusProcessedHeader( const std::string& title, const std::string& wsName) const
   {
 
     std::string className="Mantid Processed Workspace";
     std::vector<std::string> attributes,avalues;
     if( ! writeNxValue<std::string>("title", title, NX_CHAR, attributes, avalues) )
       return(3);
-    //
+
+    //name for workspace if this is a multi workspace nexus file
+    if(!wsName.empty())
+    {
+      if( ! writeNxValue<std::string>("workspace_name", wsName, NX_CHAR, attributes, avalues) )
+        return(3);
+    }
+
     attributes.push_back("URL");
     avalues.push_back("http://www.nexusformat.org/instruments/xml/NXprocessed.xml");
     attributes.push_back("Version");
@@ -384,6 +392,14 @@ using namespace DataObjects;
     std::string dist=(localworkspace->isDistribution()) ? "1" : "0";
     NXputattr(fileID, "distribution",  reinterpret_cast<void*>(const_cast<char*>(dist.c_str())), 2, NX_CHAR);
     NXputattr (fileID, "units",  reinterpret_cast<void*>(const_cast<char*>(xLabel.c_str())), static_cast<int>(xLabel.size()), NX_CHAR);
+
+    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
+    if(label)
+    {
+      NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
+      NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+    }
+
     NXclosedata(fileID);
 
     if ( ! sAxis->isText() )
@@ -394,6 +410,14 @@ using namespace DataObjects;
       NXopendata(fileID, "axis2");
       NXputdata(fileID, (void*)&(axis2[0]));
       NXputattr (fileID, "units",  reinterpret_cast<void*>(const_cast<char*>(sLabel.c_str())), static_cast<int>(sLabel.size()), NX_CHAR);
+
+      auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
+      if(label)
+      {
+        NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
+        NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+      }
+
       NXclosedata(fileID);
     }
     else
@@ -409,6 +433,14 @@ using namespace DataObjects;
       NXopendata(fileID, "axis2");
       NXputdata(fileID,  reinterpret_cast<void*>(const_cast<char*>(textAxis.c_str())));
       NXputattr (fileID, "units",  reinterpret_cast<void*>(const_cast<char*>("TextAxis")), 8, NX_CHAR);
+
+      auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
+      if(label)
+      {
+        NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
+        NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+      }
+
       NXclosedata(fileID);
     }
 
@@ -554,8 +586,7 @@ using namespace DataObjects;
     NXopengroup(fileID,"event_workspace","NXdata");
 
     // The array of indices for each event list #
-    int dims_array[1];
-    int64_t * indices_array = VectorHelper::iteratorToArray<int64_t>(indices.begin(), indices.end(), dims_array);
+    int dims_array[1] = { static_cast<int>(indices.size()) };
     if (indices.size() > 0)
     {
       if (compress)
@@ -563,13 +594,12 @@ using namespace DataObjects;
       else
         NXmakedata(fileID, "indices", NX_INT64, 1, dims_array);
       NXopendata(fileID, "indices");
-      NXputdata(fileID, (void*)(indices_array) );
+      NXputdata(fileID, (void*)(indices.data()) );
       std::string yUnits=ws->YUnit();
       std::string yUnitLabel=ws->YUnitLabel();
       NXputattr (fileID, "units",  reinterpret_cast<void*>(const_cast<char*>(yUnits.c_str())), static_cast<int>(yUnits.size()), NX_CHAR);
       NXputattr (fileID, "unit_label",  reinterpret_cast<void*>(const_cast<char*>(yUnitLabel.c_str())), static_cast<int>(yUnitLabel.size()), NX_CHAR);
       NXclosedata(fileID);
-      delete [] indices_array;
     }
 
     // Write out each field
@@ -706,13 +736,12 @@ using namespace DataObjects;
 
     // Copy the detector IDs to an array.
     const std::set<detid_t>& dets = el.getDetectorIDs();
-    detid_t * detectorIDs = VectorHelper::iteratorToArray<detid_t>(dets.begin(), dets.end(), dims_array);
 
     // Write out the detector IDs
     if (!dets.empty())
     {
-      NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs), false );
-      delete [] detectorIDs;
+      std::vector<detid_t> detectorIDs(dets.begin(),dets.end());
+      NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs.data()), false );
     }
 
     std::string eventType("UNKNOWN");

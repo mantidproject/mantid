@@ -54,7 +54,7 @@ class PdAndScConversionWidget(BaseWidget):
             
     def _check_and_set_lineedit_content(self, lineedit, content):
         lineedit.setText(content)
-        util.set_valid(lineedit, not lineedit.text().isEmpty())
+        util.set_valid(lineedit, not lineedit.text() == '')
 
     def _connect_validated_lineedit(self, ui_ctrl):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
@@ -64,7 +64,7 @@ class PdAndScConversionWidget(BaseWidget):
 
     def _validate_edit(self, ctrl=None):
         is_valid = True
-        if ctrl.text().isEmpty():
+        if not ctrl.text():
             is_valid = False
         util.set_valid(ctrl, is_valid)   
     

@@ -122,7 +122,6 @@ namespace DataHandling
     ::NeXus::File nxFile(filename);
     auto entries = nxFile.getEntries();
     auto itend = entries.end();
-    std::string prefix = getPropertyValue("OutputWorkspace");
     WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
     
     for(auto it = entries.begin(); it != itend; ++it)

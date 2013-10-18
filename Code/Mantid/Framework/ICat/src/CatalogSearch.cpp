@@ -4,7 +4,13 @@ This algorithm searches for the investigations and stores the search results in 
 
 *WIKI*/
 
+#if GCC_VERSION >= 40800 // 4.8.0
+    GCC_DIAG_OFF(literal-suffix)
+#endif
 #include "MantidICat/CatalogSearch.h"
+#if GCC_VERSION >= 40800 // 4.8.0
+    GCC_DIAG_ON(literal-suffix)
+#endif
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -67,8 +73,7 @@ namespace Mantid
       ICatalog_sptr catalog_sptr;
       try
       {
-        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-
+        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
       }
       catch(Kernel::Exception::NotFoundError&)
       {
@@ -137,11 +142,6 @@ namespace Mantid
       if(endDate==-1)
       {
         throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
-      }
-
-      if(startDate>endDate)
-      {
-        throw std::runtime_error("End date cannot be lower than Start date");
       }
 
       params.setStartDate(startDate);

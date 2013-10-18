@@ -202,9 +202,6 @@ public:
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
-  /// Update the PeakPickerTool with the current workspace to be displayed and which to associate itself with
-  void updatePPTool(const QString& name);
-
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
   /// Create a MatrixWorkspace from a TableWorkspace
@@ -268,6 +265,7 @@ private slots:
   void filenameChanged(QtProperty* prop);
   void columnChanged(QtProperty* prop);
   void currentItemChanged(QtBrowserItem*);
+  void vectorDoubleChanged(QtProperty* prop);
   void addTie();
   void addTieToFunction();
   void addFixTie();
@@ -332,7 +330,7 @@ protected:
   void setWorkspaceProperties();
 
   /// Create a double property and set some settings
-  QtProperty* addDoubleProperty(const QString& name)const;
+  QtProperty* addDoubleProperty(const QString& name, QtDoublePropertyManager *manager = NULL)const;
   /// Called when the minimizer changes. Creates minimizes's properties.
   void minimizerChanged();
   /// Do the fitting
@@ -348,6 +346,9 @@ protected:
   QtStringPropertyManager *m_filenameManager;
   QtStringPropertyManager *m_formulaManager;
   QtEnumPropertyManager *m_columnManager;
+  QtGroupPropertyManager  *m_vectorManager;
+  QtIntPropertyManager *m_vectorSizeManager;
+  QtDoublePropertyManager *m_vectorDoubleManager;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;

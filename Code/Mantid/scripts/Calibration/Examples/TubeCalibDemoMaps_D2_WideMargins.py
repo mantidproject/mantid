@@ -33,8 +33,7 @@ funcForm = [2,1,1,1,2]
 print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
-calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm, 
-	 margin=15)
+calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm)
 print "Got calibration (new positions of detectors) "
 
 # == Apply the Calibation ==

@@ -54,6 +54,31 @@ namespace WorkflowAlgorithms
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(AlignAndFocusPowder)
 
+  AlignAndFocusPowder::AlignAndFocusPowder() :
+    API::Algorithm(), m_progress(NULL)
+  {}
+
+  AlignAndFocusPowder::~AlignAndFocusPowder()
+  {
+    if (m_progress)
+      delete m_progress;
+  }
+
+  const std::string AlignAndFocusPowder::name() const
+  {
+    return "AlignAndFocusPowder";
+  }
+
+  int AlignAndFocusPowder::version() const
+  {
+    return 1;
+  }
+
+  const std::string AlignAndFocusPowder::category() const
+  {
+    return "Workflow\\Diffraction";
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Sets documentation strings for this algorithm
     */
@@ -123,6 +148,41 @@ namespace WorkflowAlgorithms
 
   }
 
+  template <typename NumT>
+  void splitVectors(const std::vector<NumT> &orig, const size_t numVal,
+                    const std::string &label,
+                    std::vector<NumT> &left, std::vector<NumT> &right)
+  {
+    // clear the outputs
+    left.clear();
+    right.clear();
+
+    // check that there is work to do
+    if (orig.empty())
+      return;
+
+    // do the spliting
+    if (orig.size() == numVal)
+    {
+      left.assign(orig.begin(), orig.end());
+      right.assign(orig.begin(), orig.end());
+    }
+    else if (orig.size() == 2*numVal)
+    {
+      left.assign(orig.begin(), orig.begin() + numVal);
+      right.assign(orig.begin() + numVal, orig.begin());
+    }
+    else
+    {
+      std::stringstream msg;
+      msg << "Input number of " << label << " ids is not equal to "
+            << "the number of histograms or empty ("
+            << orig.size() << " != 0 or " << numVal
+            << " or " << (2*numVal) << ")";
+      throw std::runtime_error(msg.str());
+    }
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Executes the algorithm
    *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
@@ -139,7 +199,7 @@ namespace WorkflowAlgorithms
     m_offsetsWS = getProperty("OffsetsWorkspace");
     m_maskWS = getProperty("MaskWorkspace");
     m_groupWS = getProperty("GroupingWorkspace");
-    l1 = getProperty("PrimaryFlightPath");
+    m_l1 = getProperty("PrimaryFlightPath");
     specids = getProperty("SpectrumIDs");
     l2s = getProperty("L2");
     tths = getProperty("Polar");
@@ -283,6 +343,9 @@ namespace WorkflowAlgorithms
       }
     }
 
+    // set up a progress bar with the "correct" number of steps
+    m_progress = new Progress(this, 0., 1., 21);
+
     // filter the input events if appropriate
     if (m_inputEW)
     {
@@ -299,6 +362,7 @@ namespace WorkflowAlgorithms
         m_outputW = filterPAlg->getProperty("OutputWorkspace");
         m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
       }
+      m_progress->report();
 
       double tolerance = getProperty("CompressTolerance");
       if (tolerance > 0.)
@@ -318,6 +382,11 @@ namespace WorkflowAlgorithms
         g_log.information() << "Not compressing event list\n";
         doSortEvents(m_outputW); // still sort to help some thing out
       }
+      m_progress->report();
+    }
+    else
+    {
+      m_progress->reportIncrement(2);
     }
 
     if (xmin > 0. || xmax > 0.)
@@ -328,40 +397,62 @@ namespace WorkflowAlgorithms
       }
 
       if (doCorrection) {
+        double tempmin;
+        double tempmax;
+        m_outputW->getXMinMax(tempmin, tempmax);
+
         g_log.information() << "running CropWorkspace(Xmin=" << xmin
                             << ", Xmax=" << xmax << ")\n" ;
         API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
         cropAlg->setProperty("InputWorkspace", m_outputW);
         cropAlg->setProperty("OutputWorkspace", m_outputW);
-        if (xmin > 0.)cropAlg->setProperty("Xmin", xmin);
-        if (xmax > 0.)cropAlg->setProperty("Xmax", xmax);
+        if ((xmin > 0.) && (xmin > tempmin))
+          cropAlg->setProperty("Xmin", xmin);
+        if ((xmax > 0.) && (xmax < tempmax))
+          cropAlg->setProperty("Xmax", xmax);
         cropAlg->executeAsChildAlg();
         m_outputW = cropAlg->getProperty("OutputWorkspace");
       }
     }
+    m_progress->report();
 
-    g_log.information() << "running MaskDetectors\n";
-    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
-    maskAlg->setProperty("Workspace", m_outputW);
-    maskAlg->setProperty("MaskedWorkspace", m_maskWS);
-    maskAlg->executeAsChildAlg();
-    m_outputW = maskAlg->getProperty("Workspace");
+    if (m_maskWS)
+    {
+      g_log.information() << "running MaskDetectors\n";
+      API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
+      maskAlg->setProperty("Workspace", m_outputW);
+      maskAlg->setProperty("MaskedWorkspace", m_maskWS);
+      maskAlg->executeAsChildAlg();
+      m_outputW = maskAlg->getProperty("Workspace");
+    }
+    m_progress->report();
 
     if(!dspace)
-      this->rebin(m_outputW);
+      m_outputW = rebin(m_outputW);
+    m_progress->report();
 
-    g_log.information() << "running AlignDetectors\n";
-    API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
-    alignAlg->setProperty("InputWorkspace", m_outputW);
-    alignAlg->setProperty("OutputWorkspace", m_outputW);
-    alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
-    alignAlg->executeAsChildAlg();
-    m_outputW = alignAlg->getProperty("OutputWorkspace");
+
+    if (m_offsetsWS)
+    {
+      g_log.information() << "running AlignDetectors\n";
+      API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
+      alignAlg->setProperty("InputWorkspace", m_outputW);
+      alignAlg->setProperty("OutputWorkspace", m_outputW);
+      alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
+      alignAlg->executeAsChildAlg();
+      m_outputW = alignAlg->getProperty("OutputWorkspace");
+    }
+    else
+    {
+      m_outputW = convertUnits(m_outputW, "dSpacing");
+    }
+    m_progress->report();
 
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
     {
       m_outputW = convertUnits(m_outputW, "TOF");
     }
+    m_progress->report();
 
     // Beyond this point, low resolution TOF workspace is considered.
     if(LRef > 0.)
@@ -377,6 +468,7 @@ namespace WorkflowAlgorithms
       removeAlg->executeAsChildAlg();
       m_outputW = removeAlg->getProperty("OutputWorkspace");
     }
+    m_progress->report();
 
     if(minwl > 0.)
     {
@@ -423,6 +515,7 @@ namespace WorkflowAlgorithms
       if (m_processLowResTOF)
         m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
     }
+    m_progress->report();
 
     EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
@@ -437,8 +530,7 @@ namespace WorkflowAlgorithms
                             << "Number of low TOF events = " << numlowevents << ".\n";
       }
     }
-
-    // FIXED - Refactor beyond this point!
+    m_progress->report();
 
     // Convert units
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
@@ -447,132 +539,98 @@ namespace WorkflowAlgorithms
       if (m_processLowResTOF)
         m_lowResW = convertUnits(m_lowResW, "dSpacing");
     }
+    m_progress->report();
 
     if(dspace)
     {
-      this->rebin(m_outputW);
+      m_outputW = rebin(m_outputW);
       if (m_processLowResTOF)
-        rebin(m_lowResW);
+    	  m_lowResW = rebin(m_lowResW);
     }
+    m_progress->report();
 
     doSortEvents(m_outputW);
     if (m_processLowResTOF)
       doSortEvents(m_lowResW);
+    m_progress->report();
 
     // Diffraction focus
     m_outputW = diffractionFocus(m_outputW);
     if (m_processLowResTOF)
       m_lowResW = diffractionFocus(m_lowResW);
+    m_progress->report();
 
     doSortEvents(m_outputW);
     if (m_processLowResTOF)
       doSortEvents(m_lowResW);
+    m_progress->report();
 
     // this next call should probably be in for rebin as well
     // but it changes the system tests
     if (dspace && m_resampleX != 0)
     {
-      this->rebin(m_outputW);
+      m_outputW = rebin(m_outputW);
       if (m_processLowResTOF)
-        rebin(m_lowResW);
+        m_lowResW = rebin(m_lowResW);
     }
+    m_progress->report();
 
-    if (l1 > 0)
+    // edit the instrument geometry
+    if (m_groupWS && (m_l1 > 0 || !tths.empty() || !l2s.empty() || !phis.empty()))
     {
       size_t numreg = m_outputW->getNumberHistograms();
 
-      // Check size
-      if (tths.size() < numreg)
-        throw std::runtime_error("Input number of 2thetas is smaller than number of histogram.");
-      if (l2s.size() < numreg)
-        throw std::runtime_error("Input number of L2s is smaller than number of histogram.");
-      if (phis.size() < numreg)
-        throw std::runtime_error("Input number of azimuthals is smaller than number of histogram.");
-
-      std::vector<int32_t> vec_specid_reg;
-      if (specids.size() >= numreg)
-      {
-        vec_specid_reg.resize(numreg, 0);
-        std::copy(specids.begin(), (specids.begin()+numreg), vec_specid_reg.begin());
-      }
-
-      std::vector<double> vec_polar_reg(numreg, 0.);
-      std::copy(tths.begin(), (tths.begin()+numreg), vec_polar_reg.begin());
-      std::vector<double> vec_l2_reg(numreg, 0.);
-      std::copy(l2s.begin(), (l2s.begin()+numreg), vec_l2_reg.begin());
-      std::vector<double> vec_azimuthal_reg(numreg, 0.);
-      std::copy(phis.begin(), (phis.begin()+numreg), vec_azimuthal_reg.begin());
+      // set up the vectors for doing everything
+      std::vector<int32_t> specidsReg;
+      std::vector<int32_t> specidsLow;
+      splitVectors(specids, numreg, "specids", specidsReg, specidsLow);
+      std::vector<double> tthsReg;
+      std::vector<double> tthsLow;
+      splitVectors(tths, numreg, "two-theta", tthsReg, tthsLow);
+      std::vector<double> l2sReg;
+      std::vector<double> l2sLow;
+      splitVectors(l2s, numreg, "L2", l2sReg, l2sLow);
+      std::vector<double> phisReg;
+      std::vector<double> phisLow;
+      splitVectors(phis, numreg, "phi", phisReg, phisLow);
 
       // Edit instrument
-      m_outputW = editInstrument(m_outputW, vec_polar_reg, vec_specid_reg, vec_l2_reg, vec_azimuthal_reg);
+      m_outputW = editInstrument(m_outputW, tthsReg, specidsReg, l2sReg, phisReg);
 
       if (m_processLowResTOF)
       {
-        size_t numlow = m_lowResW->getNumberHistograms();
-        // FIXME : There must be some bug in constructing the vectors for EditInstrumentGeometry
-
-        // Check size
-        size_t numall = numreg+numlow;
-        g_log.information() << "[DBx931] Num-All = " << numall << ".\n";
-        if (tths.size() != numall)
-        {
-          std::stringstream errss;
-          errss << "Input number of 2thetas (" << tths.size() << " is not equal to "
-                << "the number of normal and low resolution histograms " << numall << ".\n";
-          for (size_t i = 0; i < tths.size(); ++i)
-          {
-            errss << "2theta[" << i << "] = " << tths[i] << "\n";
-          }
-          g_log.error(errss.str());
-          throw std::runtime_error(errss.str());
-        }
-        if (l2s.size() != numall)
-          throw std::runtime_error("Input number of L2s is not equal to the number of low and high histograms.");
-        if (phis.size() != numall)
-          throw std::runtime_error("Input number of azimuthals is not equal to the number of low and high histograms.");
-
-        std::vector<int32_t> vec_specid_low;
-        if (specids.size() == numall)
-        {
-          //   vec_specid_low.resize(numlow, 0);
-          //   std::copy((specids.begin()+numreg), specids.end(), vec_specid_low.begin());
-          for (size_t i = 0; i < numlow; ++i)
-          {
-            vec_specid_low.push_back(specids[numreg+i]);
-            g_log.information() << i << " : " << vec_specid_low[i] << ".\n";
-          }
-        }
-        else if (specids.size() == 0)
-        {
-          ;
-        }
-        else
-        {
-          std::stringstream errss;
-          errss << "SpecIDs has a weird size = " << specids.size() << ", OutputW's size = " << numreg
-                << ", LowResW's size = " << numlow << ".\n";
-        }
-
-        std::vector<double> vec_polar_low, vec_l2_low, vec_azimuthal_low;
-        for (size_t i = 0; i < numlow; ++i)
-        {
-          vec_polar_low.push_back(tths[numreg+i]);
-          vec_l2_low.push_back(l2s[numreg+i]);
-          vec_azimuthal_low.push_back(phis[numreg+i]);
-        }
-
-        m_lowResW = editInstrument(m_lowResW, vec_polar_low, vec_specid_low, vec_l2_low, vec_azimuthal_low);
+        m_lowResW = editInstrument(m_lowResW, tthsLow, specidsLow, l2sLow, phisLow);
       }
     }
+    m_progress->report();
 
     // Conjoin 2 workspaces if there is low resolution
     if (m_processLowResTOF)
     {
       m_outputW = conjoinWorkspaces(m_outputW, m_lowResW, m_lowResSpecOffset);
     }
+    m_progress->report();
 
     // Convert units to TOF
     m_outputW = convertUnits(m_outputW, "TOF");
+    m_progress->report();
+
+    // compress again if appropriate
+    double tolerance = getProperty("CompressTolerance");
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    if ((m_outputEW) && (tolerance > 0.))
+    {
+      g_log.information() << "running CompressEvents(Tolerance=" << tolerance << ")\n";
+      API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
+      compressAlg->setProperty("InputWorkspace", m_outputEW);
+      compressAlg->setProperty("OutputWorkspace", m_outputEW);
+      compressAlg->setProperty("OutputWorkspace", m_outputEW);
+      compressAlg->setProperty("Tolerance",tolerance);
+      compressAlg->executeAsChildAlg();
+      m_outputEW = compressAlg->getProperty("OutputWorkspace");
+      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+    }
+    m_progress->report();
 
     if ((!m_params.empty()) && (m_params.size() != 1))
     {
@@ -584,7 +642,8 @@ namespace WorkflowAlgorithms
     if (!m_dmaxs.empty())
       m_dmaxs.clear();
 
-    this->rebin(m_outputW);
+    m_outputW = rebin(m_outputW);
+    m_progress->report();
 
     // return the output workspace
     setProperty("OutputWorkspace",m_outputW);
@@ -603,11 +662,16 @@ namespace WorkflowAlgorithms
 
     API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
     editAlg->setProperty("Workspace", ws);
-    editAlg->setProperty("PrimaryFlightPath", l1);
-    editAlg->setProperty("Polar", polars);
-    editAlg->setProperty("SpectrumIDs", specids);
-    editAlg->setProperty("L2", l2s);
-    editAlg->setProperty("Azimuthal", phis);
+    if (m_l1 > 0.)
+      editAlg->setProperty("PrimaryFlightPath", m_l1);
+    if (!polars.empty())
+      editAlg->setProperty("Polar", polars);
+    if (!specids.empty())
+      editAlg->setProperty("SpectrumIDs", specids);
+    if (!l2s.empty())
+      editAlg->setProperty("L2", l2s);
+    if (!phis.empty())
+      editAlg->setProperty("Azimuthal", phis);
     editAlg->executeAsChildAlg();
 
     ws = editAlg->getProperty("Workspace");
@@ -620,6 +684,12 @@ namespace WorkflowAlgorithms
     */
   API::MatrixWorkspace_sptr AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws)
   {
+    if (!m_groupWS)
+    {
+      g_log.information() << "not focussing data\n";
+      return ws;
+    }
+
     g_log.information() << "running DiffractionFocussing. \n";
 
     API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
@@ -655,7 +725,7 @@ namespace WorkflowAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Rebin
   */
-  void AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws)
+  API::MatrixWorkspace_sptr AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws)
   {
     if (m_resampleX != 0)
     {
@@ -684,6 +754,7 @@ namespace WorkflowAlgorithms
       alg->setProperty("LogBinning", (m_resampleX < 0));
       alg->executeAsChildAlg();
       matrixws = alg->getProperty("OutputWorkspace");
+      return matrixws;
     }
     else
     {
@@ -697,6 +768,7 @@ namespace WorkflowAlgorithms
       rebin3Alg->setProperty("Params",m_params);
       rebin3Alg->executeAsChildAlg();
       matrixws = rebin3Alg->getProperty("OutputWorkspace");
+      return matrixws;
     }
   }
 
@@ -771,7 +843,7 @@ namespace WorkflowAlgorithms
   {
 
     // check if the workspaces exist with their canonical names so they are not reloaded for chunks
-    if (!m_groupWS)
+    if ((!m_groupWS) && (!calFileName.empty()))
     {
       try
       {
@@ -781,7 +853,7 @@ namespace WorkflowAlgorithms
         ; // not noteworthy
       }
     }
-    if (!m_offsetsWS)
+    if ((!m_offsetsWS) && (!calFileName.empty()))
     {
       try
       {
@@ -792,7 +864,7 @@ namespace WorkflowAlgorithms
         ; // not noteworthy
       }
     }
-    if (!m_maskWS)
+    if ((!m_maskWS) && (!calFileName.empty()))
     {
       try
       {
@@ -806,6 +878,10 @@ namespace WorkflowAlgorithms
 
     // see if everything exists to exit early
     if (m_groupWS && m_offsetsWS && m_maskWS)
+      return;
+
+    // see if the calfile is specified
+    if (calFileName.empty())
       return;
 
     g_log.information() << "Loading Calibration file \"" << calFileName << "\"\n";

@@ -76,10 +76,10 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   groupBox->setLayout(vbox);
 
   // -------------- Statistics on logs ------------------------
-  std::string stats[5] = {"Min:", "Max:", "Mean:", "Median:" ,"Std Dev:"};
+  std::string stats[NUM_STATS] = {"Min:", "Max:", "Mean:", "Time Avg:", "Median:", "Std Dev:"};
   QGroupBox * statsBox = new QGroupBox("Log Statistics");
   QFormLayout * statsBoxLayout = new QFormLayout;
-  for (size_t i=0; i<5; i++)
+  for (size_t i=0; i<NUM_STATS; i++)
   {
     statLabels[i] = new QLabel(stats[i].c_str());
     statValues[i] = new QLineEdit("");
@@ -201,7 +201,7 @@ void MantidSampleLogDialog::showLogStatistics()
 void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
 {
   // Assume that you can't show the stats
-  for (size_t i=0; i<5; i++)
+  for (size_t i=0; i<NUM_STATS; i++)
   {
     statValues[i]->setText( QString(""));
   }
@@ -228,10 +228,17 @@ void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
       // Get the stas if its a series of int or double; fail otherwise
       Mantid::Kernel::TimeSeriesProperty<double> * tspd = dynamic_cast<TimeSeriesProperty<double> *>(logData);
       Mantid::Kernel::TimeSeriesProperty<int> * tspi = dynamic_cast<TimeSeriesProperty<int> *>(logData);
+      double timeAvg = 0.;
       if (tspd)
+      {
         stats = tspd->getStatistics();
+        timeAvg = tspd->timeAverageValue();
+      }
       else if (tspi)
+      {
         stats = tspi->getStatistics();
+        timeAvg = tspi->timeAverageValue();
+      }
       else
         return;
 
@@ -239,8 +246,9 @@ void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
       statValues[0]->setText( QString::number( stats.minimum ));
       statValues[1]->setText( QString::number( stats.maximum ));
       statValues[2]->setText( QString::number( stats.mean ));
-      statValues[3]->setText( QString::number( stats.median ));
-      statValues[4]->setText( QString::number( stats.standard_deviation ));
+      statValues[3]->setText( QString::number( timeAvg ));
+      statValues[4]->setText( QString::number( stats.median ));
+      statValues[5]->setText( QString::number( stats.standard_deviation ));
       return;
       break;
   }

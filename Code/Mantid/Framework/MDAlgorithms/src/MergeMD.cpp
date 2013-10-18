@@ -308,8 +308,6 @@ namespace MDAlgorithms
     this->progress(0.95, "Refreshing cache");
     out->refreshCache();
 
-    // Add to data service
-    AnalysisDataService::Instance().addOrReplace(this->getPropertyValue("OutputWorkspace"), out);
     this->setProperty("OutputWorkspace", out);
 
     g_log.debug() << tim << " to merge all workspaces." << std::endl;

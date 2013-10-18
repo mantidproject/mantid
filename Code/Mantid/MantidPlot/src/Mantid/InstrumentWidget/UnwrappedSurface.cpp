@@ -15,12 +15,12 @@
 #include <QMouseEvent>
 #include <QApplication>
 #include <QMessageBox>
+#include <QTransform>
 
 #include <cfloat>
 #include <limits>
 #include <cmath>
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/V3D.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Exception::NotFoundError;
@@ -65,18 +65,18 @@ const UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector &
   return *this;
 }
 
-
-
-
-UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
-    ProjectionSurface(rootActor,origin,axis),
+/**
+ * Constructor.
+ * @param rootActor :: The instrument actor.
+ */
+UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor):
+    ProjectionSurface(rootActor),
     m_u_min(DBL_MAX),
     m_u_max(-DBL_MAX),
     m_v_min(DBL_MAX),
     m_v_max(-DBL_MAX),
     m_height_max(0),
     m_width_max(0),
-    m_u_correction(0),
     m_flippedView(false),
     m_startPeakShapes(false)
 {
@@ -86,169 +86,6 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid
     connect(moveController,SIGNAL(setSelectionRect(QRect)),this,SLOT(setSelectionRect(QRect)));
     connect(moveController,SIGNAL(zoom()),this,SLOT(zoom()));
     connect(moveController,SIGNAL(unzoom()),this,SLOT(unzoom()));
-}
-
-UnwrappedSurface::~UnwrappedSurface()
-{
-}
-
-void UnwrappedSurface::init()
-{
-  // the actor calls this->callback for each detector
-  m_unwrappedDetectors.clear();
-  m_assemblies.clear();
-
-  size_t ndet = m_instrActor->ndetectors();
-  m_unwrappedDetectors.resize(ndet);
-  if (ndet == 0) return;
-
-  Instrument_const_sptr inst = m_instrActor->getInstrument();
-
-  // Pre-calculate all the detector positions (serial because
-  // I suspect the IComponent->getPos() method to not be properly thread safe)
-  m_instrActor->cacheDetPos();
-
-  // First detector defines the surface's x axis
-  if (m_xaxis.nullVector())
-  {
-    Mantid::Kernel::V3D pos = m_instrActor->getDetPos(0) - m_pos;
-    double z = pos.scalar_prod(m_zaxis);
-    if (z == 0.0 || fabs(z) == pos.norm())
-    {
-      // find the shortest projection of m_zaxis and direct m_xaxis along it
-      bool isY = false;
-      bool isZ = false;
-      if (fabs(m_zaxis.Y()) < fabs(m_zaxis.X())) isY = true;
-      if (fabs(m_zaxis.Z()) < fabs(m_zaxis.Y())) isZ = true;
-      if (isZ)
-      {
-        m_xaxis = Mantid::Kernel::V3D(0,0,1);
-      }
-      else if (isY)
-      {
-        m_xaxis = Mantid::Kernel::V3D(0,1,0);
-      }
-      else
-      {
-        m_xaxis = Mantid::Kernel::V3D(1,0,0);
-      }
-    }
-    else
-    {
-      m_xaxis = pos - m_zaxis * z;
-      m_xaxis.normalize();
-    }
-    m_yaxis = m_zaxis.cross_prod(m_xaxis);
-  }
-
-  // give some valid values to u bounds in case some code checks
-  // on u to be within them
-  m_u_min = -DBL_MAX;
-  m_u_max =  DBL_MAX;
-
-  // For each detector in the order of actors
-  // cppcheck-suppress syntaxError
-  PRAGMA_OMP( parallel for )
-  for(int ii = 0; ii < int(ndet); ++ii)
-  {
-    size_t i=size_t(ii);
-
-    unsigned char color[3];
-    Mantid::detid_t id = m_instrActor->getDetID(i);
-
-    boost::shared_ptr<const Mantid::Geometry::IDetector> det;
-    try
-    {
-      det = inst->getDetector(id);
-    }
-    catch (Mantid::Kernel::Exception::NotFoundError & )
-    {
-    }
-
-    if (!det || det->isMonitor() || (id < 0))
-    {
-      // Not a detector or a monitor
-      // Make some blank, empty thing that won't draw
-      m_unwrappedDetectors[i] = UnwrappedDetector();
-    }
-    else
-    {
-      // A real detector.
-      m_instrActor->getColor(id).getUB3(&color[0]);
-
-      // Position, relative to origin
-      //Mantid::Kernel::V3D pos = det->getPos() - m_pos;
-      Mantid::Kernel::V3D pos = m_instrActor->getDetPos(i) - m_pos;
-
-      // Create the unwrapped shape
-      UnwrappedDetector udet(&color[0],det);
-      // Calculate its position/size in UV coordinates
-      this->calcUV(udet, pos);
-
-      m_unwrappedDetectors[i] = udet;
-    } // is a real detectord
-  } // for each detector in pick order
-
-  // Now find the overall edges in U and V coords.
-  m_u_min =  DBL_MAX;
-  m_u_max = -DBL_MAX;
-  m_v_min =  DBL_MAX;
-  m_v_max = -DBL_MAX;
-  for(size_t i=0;i<m_unwrappedDetectors.size();++i)
-  {
-    const UnwrappedDetector& udet = m_unwrappedDetectors[i];
-    if (! udet.detector ) continue;
-    if (udet.u < m_u_min) m_u_min = udet.u;
-    if (udet.u > m_u_max) m_u_max = udet.u;
-    if (udet.v < m_v_min) m_v_min = udet.v;
-    if (udet.v > m_v_max) m_v_max = udet.v;
-  }
-
-  findAndCorrectUGap();
-
-
-  double dU = fabs(m_u_max - m_u_min);
-  double dV = fabs(m_v_max - m_v_min);
-  double du = dU * 0.05;
-  double dv = dV * 0.05;
-  if (m_width_max > du && m_width_max != std::numeric_limits<double>::infinity())
-  {
-    if (du > 0 && !(dU >= m_width_max))
-    {
-      m_width_max = dU;
-    }
-    du = m_width_max;
-  }
-  if (m_height_max > dv && m_height_max != std::numeric_limits<double>::infinity())
-  {
-    if (dv > 0 && !(dV >= m_height_max))
-    {
-      m_height_max = dV;
-    }
-    dv = m_height_max;
-  }
-  m_u_min -= du;
-  m_u_max += du;
-  m_v_min -= dv;
-  m_v_max += dv;
-  m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
-
-}
-
-
-
-//------------------------------------------------------------------------------
-/** Calculate the UV and size of the given detector
- * Calls the pure virtual project() and calcSize() methods that
- * depend on the type of projection
- *
- * @param udet :: detector to unwrap.
- * @param pos :: detector position relative to the sample origin
- */
-void UnwrappedSurface::calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos )
-{
-  this->project(udet.u, udet.v, udet.uscale, udet.vscale, pos);
-    calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
 }
 
 /**
@@ -428,7 +265,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
       glScaled(udet.uscale,udet.vscale,1);
 
       Mantid::Kernel::Quat rot;
-      this->calcRot(udet,rot);
+      this->rotate(udet,rot);
       double deg,ax0,ax1,ax2;
       rot.getAngleAxis(deg,ax0,ax1,ax2);
       glRotated(deg,ax0,ax1,ax2);
@@ -455,55 +292,6 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 
 }
 
-//------------------------------------------------------------------------------
-/** Calculate the size of the detector in U/V
- *
- * @param udet
- * @param X
- * @param Y
- */
-void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Kernel::V3D& X,
-              const Mantid::Kernel::V3D& Y)
-{
-  Mantid::Kernel::Quat R;
-  this->calcRot(udet,R);
-
-  Mantid::Geometry::BoundingBox bbox = udet.detector->shape()->getBoundingBox();
-  Mantid::Kernel::V3D scale = udet.detector->getScaleFactor();
-
-//  udet.minPoint = bbox.minPoint();
-//  udet.maxPoint = bbox.maxPoint();
-
-  Mantid::Kernel::V3D size = bbox.maxPoint() - bbox.minPoint();
-  size *= scale;
-  Mantid::Kernel::V3D s1(size);
-  Mantid::Kernel::V3D s2 = size + Mantid::Kernel::V3D(-size.X(),0,0) - Mantid::Kernel::V3D(size.X(),0,0);
-  Mantid::Kernel::V3D s3 = size + Mantid::Kernel::V3D(0,-size.Y(),0) - Mantid::Kernel::V3D(0,size.Y(),0);
-  R.rotate(s1);
-  R.rotate(s2);
-  R.rotate(s3);
-
-  double d = fabs(s1.scalar_prod(X));
-  udet.width = d;
-  d = fabs(s2.scalar_prod(X));
-  if (d > udet.width) udet.width = d;
-  d = fabs(s3.scalar_prod(X));
-  if (d > udet.width) udet.width = d;
-
-  d = fabs(s1.scalar_prod(Y));
-  udet.height = d;
-  d = fabs(s2.scalar_prod(Y));
-  if (d > udet.height) udet.height = d;
-  d = fabs(s3.scalar_prod(Y));
-  if (d > udet.height) udet.height = d;
-
-  udet.width *= udet.uscale;
-  udet.height *= udet.vscale;
-
-  if (udet.width > m_width_max) m_width_max = udet.width;
-  if (udet.height > m_height_max) m_height_max = udet.height;
-
-}
 
 /**
   * Set detector color in OpenGL context.
@@ -699,104 +487,6 @@ void UnwrappedSurface::getMaskedDetectors(QList<int>& dets)const
   }
 }
 
-void UnwrappedSurface::findAndCorrectUGap()
-{
-  double period = uPeriod();
-  if (period == 0.0) return;
-  const int nbins = 1000;
-  std::vector<bool> ubins(nbins);
-  double bin_width = fabs(m_u_max - m_u_min) / (nbins - 1);
-  if (bin_width == 0.0)
-  {
-	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
-    QMessageBox::warning(NULL, tr("MantidPLot - Instrument view error"), tr("Failed to build unwrapped surface"));
-	QApplication::restoreOverrideCursor();
-    m_u_min = 0.0;
-    m_u_max = 1.0;
-    return;
-  }
-
-  std::vector<UnwrappedDetector>::const_iterator ud = m_unwrappedDetectors.begin();
-  for(;ud != m_unwrappedDetectors.end(); ++ud)
-  {
-    if (! ud->detector ) continue;
-    double u = ud->u;
-    int i = int((u - m_u_min) / bin_width);
-    ubins[i] = true;
-  }
-
-  int iFrom = 0; // marks gap start
-  int iTo   = 0; // marks gap end
-  int i0 = 0;
-  bool inGap = false; 
-  for(int i = 0;i < int(ubins.size())-1;++i)
-  {
-    if (!ubins[i])
-    {
-      if (!inGap)
-      {
-        i0 = i;
-      }
-      inGap = true;
-    }
-    else
-    {
-      if (inGap && iTo - iFrom < i - i0)
-      {
-        iFrom = i0; // first bin in the gap
-        iTo   = i;  // first bin after the gap
-      }
-      inGap = false;
-    }
-  }
-
-  double uFrom = m_u_min + iFrom * bin_width;
-  double uTo   = m_u_min + iTo   * bin_width;
-  if (uTo - uFrom > period - (m_u_max - m_u_min))
-  {
-    double du = m_u_max - uTo;
-    m_u_max = uFrom + du;
-    std::vector<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
-    for(;ud != m_unwrappedDetectors.end(); ++ud)
-    {
-      if (! ud->detector ) continue;
-      double& u = ud->u;
-      u += du;
-      if (u > m_u_max)
-      {
-        u -= period;
-      }
-    }
-    m_u_correction += du;
-    if (m_u_correction > m_u_max)
-    {
-      m_u_correction -= period;
-    }
-  }
-}
-
-/**
- * Apply a correction to u value of a projected point due to 
- * change of u-scale by findAndCorrectUGap()
- * @param u :: u-coordinate to be corrected
- * @return :: Corrected u-coordinate.
- */
-double UnwrappedSurface::applyUCorrection(double u)const
-{
-  double period = uPeriod();
-  if (period == 0.0) return u;
-  u += m_u_correction;
-  if (u < m_u_min)
-  {
-    u += period;
-  }
-  if (u > m_u_max)
-  {
-    u -= period;
-  }
-  return u;
-}
-
 void UnwrappedSurface::changeColorMap()
 {
   for(size_t i = 0; i < m_unwrappedDetectors.size(); ++i)
@@ -952,6 +642,16 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
     paint.fillRect(u - iw/2, v - ih/2, iw, ih, color);
 
   }
+
+  // draw custom stuff
+  if ( !picking )
+  {
+      // TODO: this transform should be done for drawing the detectors
+      QTransform transform;
+      m_viewRect.findTransform( transform, QRectF(0, 0, vwidth, vheight) );
+      paint.setTransform(transform);
+      drawCustom(&paint);
+  }
 }
 
 /**
@@ -1006,5 +706,78 @@ void UnwrappedSurface::zoom()
   updateView();
   emptySelectionRect();
   emit updateInfoText();
+}
+
+//------------------------------------------------------------------------------
+/** Calculate the UV and size of the given detector
+ * Calls the pure virtual project() and calcSize() methods that
+ * depend on the type of projection
+ *
+ * @param udet :: detector to unwrap.
+ * @param pos :: detector position relative to the sample origin
+ */
+void UnwrappedSurface::calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos )
+{
+  this->project(pos, udet.u, udet.v, udet.uscale, udet.vscale);
+  calcSize(udet);
+}
+
+//------------------------------------------------------------------------------
+/** Calculate the size of the detector in U/V
+ *
+ * @param udet
+ * @param X
+ * @param Y
+ */
+void UnwrappedSurface::calcSize(UnwrappedDetector& udet)
+{
+  // U is the horizontal axis on the screen
+  const Mantid::Kernel::V3D U(-1,0,0);
+  // V is the vertical axis on the screen
+  const Mantid::Kernel::V3D V(0,1,0);
+
+  // find the detector's rotation
+  Mantid::Kernel::Quat R;
+  this->rotate(udet,R);
+
+  Mantid::Geometry::BoundingBox bbox = udet.detector->shape()->getBoundingBox();
+  Mantid::Kernel::V3D scale = udet.detector->getScaleFactor();
+
+  // sizes of the detector along each 3D axis
+  Mantid::Kernel::V3D size = bbox.maxPoint() - bbox.minPoint();
+  size *= scale;
+
+  Mantid::Kernel::V3D s1(size);
+  Mantid::Kernel::V3D s2 = size + Mantid::Kernel::V3D(-size.X(),0,0) - Mantid::Kernel::V3D(size.X(),0,0);
+  Mantid::Kernel::V3D s3 = size + Mantid::Kernel::V3D(0,-size.Y(),0) - Mantid::Kernel::V3D(0,size.Y(),0);
+  // rotate the size vectors to get the dimensions along axes U and V
+  R.rotate(s1);
+  R.rotate(s2);
+  R.rotate(s3);
+
+  // get the larges projection to the U axis which is the visible width
+  double d = fabs(s1.scalar_prod(U));
+  udet.width = d;
+  d = fabs(s2.scalar_prod(U));
+  if (d > udet.width) udet.width = d;
+  d = fabs(s3.scalar_prod(U));
+  if (d > udet.width) udet.width = d;
+
+  // get the larges projection to the V axis which is the visible height
+  d = fabs(s1.scalar_prod(V));
+  udet.height = d;
+  d = fabs(s2.scalar_prod(V));
+  if (d > udet.height) udet.height = d;
+  d = fabs(s3.scalar_prod(V));
+  if (d > udet.height) udet.height = d;
+
+  // apply the scale factors
+  udet.width *= udet.uscale;
+  udet.height *= udet.vscale;
+
+  // don't let them be too large
+  if (udet.width > m_width_max) m_width_max = udet.width;
+  if (udet.height > m_height_max) m_height_max = udet.height;
+
 }
 

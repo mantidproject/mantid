@@ -14,6 +14,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -30,6 +31,10 @@ using namespace Mantid::Kernel;
 class PeaksWorkspaceTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PeaksWorkspaceTest *createSuite() { return new PeaksWorkspaceTest(); }
+  static void destroySuite( PeaksWorkspaceTest *suite ) { delete suite; }
 
   PeaksWorkspaceTest()
   {
@@ -37,7 +42,7 @@ public:
      AlgorithmManager::Instance();
   }
 
-  /** Build a test PeaksWorkspace
+  /** Build a test PeaksWorkspace with one peak (others peaks can be added)
    *
    * @return PeaksWorkspace
    */
@@ -135,27 +140,48 @@ public:
 
   void test_Save_Unmodified_PeaksWorkspace_Nexus()
   {
-    auto pw = createSaveTestPeaksWorkspace();
-
-    const V3D sampleFrameQ = pw->getPeak(0).getQSampleFrame();
-    const V3D labFrameQ = pw->getPeak(0).getQLabFrame();
 
     const std::string filename = "test_Save_Unmodified_PeaksWorkspace_Nexus.nxs";
-    auto lpw = saveAndReloadPeaksWorkspace(pw, filename);
+    auto testPWS = createSaveTestPeaksWorkspace();
+    NexusTestHelper nexusHelper(true);
+    nexusHelper.createFile("testSavePeaksWorkspace.nxs");
 
-    TS_ASSERT_EQUALS(17, lpw->columnCount());
-    // Check that the peaks are what we saved
-    TS_ASSERT_EQUALS( lpw->getPeak(0).getDetectorID(), 1300);
-    TS_ASSERT_DELTA( lpw->getPeak(0).getWavelength(), 4.0, 1e-5);
-    TS_ASSERT_EQUALS( lpw->getPeak(0).getQSampleFrame(), sampleFrameQ);
-    TS_ASSERT_EQUALS( lpw->getPeak(0).getQLabFrame(), labFrameQ);
+    testPWS->saveNexus(nexusHelper.file);
+    nexusHelper.reopenFile();
 
-    TS_ASSERT_EQUALS( lpw->getPeak(1).getDetectorID(), 1300);
-    TS_ASSERT_DELTA(  lpw->getPeak(1).getWavelength(), 5.0, 1e-5);
-    TS_ASSERT_EQUALS( lpw->getPeak(2).getDetectorID(), 1350);
-    TS_ASSERT_DELTA(  lpw->getPeak(2).getWavelength(), 3.0, 1e-5);
-    TS_ASSERT_EQUALS( lpw->getPeak(3).getDetectorID(), 1400);
-    TS_ASSERT_DELTA( lpw->getPeak(3).getWavelength(), 3.0, 1e-5);
+    // Verify that this test_entry has a peaks_workspace entry
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openGroup("peaks_workspace","NXentry") );
+
+    // Check detector IDs
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_1") );
+    std::vector<int> detIDs;
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(detIDs));
+    nexusHelper.file->closeData();
+    TS_ASSERT_EQUALS( detIDs.size(), 5);  // We have 5 detectors
+    if( detIDs.size() >= 5) 
+    {
+      TS_ASSERT_EQUALS( detIDs[0], 1);
+      TS_ASSERT_EQUALS( detIDs[1], 10);
+      TS_ASSERT_EQUALS( detIDs[2], 10);
+      TS_ASSERT_EQUALS( detIDs[3], 20);
+      TS_ASSERT_EQUALS( detIDs[4], 50);
+    }
+
+    // Check wavelengths
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_10") );
+    std::vector<double> waveLengths;
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(waveLengths));
+    nexusHelper.file->closeData();
+    TS_ASSERT_EQUALS( waveLengths.size(), 5);  // We have 5 wave lengths
+    if( waveLengths.size() >= 5)
+    {
+      TS_ASSERT_DELTA( waveLengths[0], 3.0, 1e-5);
+      TS_ASSERT_DELTA( waveLengths[1], 4.0, 1e-5);
+      TS_ASSERT_DELTA( waveLengths[2], 5.0, 1e-5);
+      TS_ASSERT_DELTA( waveLengths[3], 3.0, 1e-5);
+      TS_ASSERT_DELTA( waveLengths[4], 3.0, 1e-5);
+    }
+
   }
 
   void test_getSetLogAccess()
@@ -275,45 +301,49 @@ public:
 
    void test_createDetectorTable_With_Many_Peaks_And_Multiple_Dets()
    {
-     auto pw = createSaveTestPeaksWorkspace(); // 4 peaks each with single detector
+     auto pw = createSaveTestPeaksWorkspace(); // 5 peaks each with single detector
+
      // Add some detectors
-     Mantid::API::IPeak & ipeak2 = pw->getPeak(1);
-     auto & peak2 = static_cast<Peak&>(ipeak2);
-     peak2.addContributingDetID(1301);
-     Mantid::API::IPeak & ipeak4 = pw->getPeak(3);
-     auto & peak4 = static_cast<Peak&>(ipeak4);
-     peak4.addContributingDetID(1401);
-     peak4.addContributingDetID(1402);
+     Mantid::API::IPeak & ipeak3 = pw->getPeak(2);
+     auto & peak3 = static_cast<Peak&>(ipeak3);
+     peak3.addContributingDetID(11);
+     Mantid::API::IPeak & ipeak5 = pw->getPeak(4);
+     auto & peak5 = static_cast<Peak&>(ipeak5);
+     peak5.addContributingDetID(51);
+     peak5.addContributingDetID(52);
 
      auto detTable = pw->createDetectorTable();
      TSM_ASSERT("No table has been created",detTable);
      if(!detTable) return;
-     check_Detector_Table_Metadata(*detTable, 7);
+     check_Detector_Table_Metadata(*detTable, 8);
 
      auto column0 = detTable->getColumn(0);
      auto column1 = detTable->getColumn(1);
      // Contents -- Be verbose, it's easier to understand
-     // Peak 1
+     // Peak 1 
      TS_ASSERT_EQUALS(0, column0->cell<int>(0)); // Index 0
-     TS_ASSERT_EQUALS(1300, column1->cell<int>(0)); // Id 1300
-
+     TS_ASSERT_EQUALS(1, column1->cell<int>(0)); // Id 1
      // Peak 2
      TS_ASSERT_EQUALS(1, column0->cell<int>(1)); // Index 1
-     TS_ASSERT_EQUALS(1300, column1->cell<int>(1)); // Id 1300
-     TS_ASSERT_EQUALS(1, column0->cell<int>(2)); // Index 1
-     TS_ASSERT_EQUALS(1301, column1->cell<int>(2)); // Id 1301
+     TS_ASSERT_EQUALS(10, column1->cell<int>(1)); // Id 10
 
      // Peak 3
+     TS_ASSERT_EQUALS(2, column0->cell<int>(2)); // Index 2
+     TS_ASSERT_EQUALS(10, column1->cell<int>(2)); // Id 10
      TS_ASSERT_EQUALS(2, column0->cell<int>(3)); // Index 2
-     TS_ASSERT_EQUALS(1350, column1->cell<int>(3)); // Id 1350
+     TS_ASSERT_EQUALS(11, column1->cell<int>(3)); // Id 11
 
      // Peak 4
      TS_ASSERT_EQUALS(3, column0->cell<int>(4)); // Index 3
-     TS_ASSERT_EQUALS(1400, column1->cell<int>(4)); // Id 1400
-     TS_ASSERT_EQUALS(3, column0->cell<int>(5)); // Index 3
-     TS_ASSERT_EQUALS(1401, column1->cell<int>(5)); // Id 1401
-     TS_ASSERT_EQUALS(3, column0->cell<int>(6)); // Index 3
-     TS_ASSERT_EQUALS(1402, column1->cell<int>(6)); // Id 1402
+     TS_ASSERT_EQUALS(20, column1->cell<int>(4)); // Id 20
+
+     // Peak 5
+     TS_ASSERT_EQUALS(4, column0->cell<int>(5)); // Index 4
+     TS_ASSERT_EQUALS(50, column1->cell<int>(5)); // Id 50
+     TS_ASSERT_EQUALS(4, column0->cell<int>(6)); // Index 4
+     TS_ASSERT_EQUALS(51, column1->cell<int>(6)); // Id 51
+     TS_ASSERT_EQUALS(4, column0->cell<int>(7)); // Index 4
+     TS_ASSERT_EQUALS(52, column1->cell<int>(7)); // Id 52
    }
 
    void test_default_getSpecialCoordinates()
@@ -334,66 +364,21 @@ private:
 
    PeaksWorkspace_sptr createSaveTestPeaksWorkspace()
    {
-     // get an instrument which we load into a dummy workspace and get it from that workspace
-     const std::string inst_filename = "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING5.xml";
-     IAlgorithm_sptr inst_loader = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
-     inst_loader->initialize();
-     inst_loader->setPropertyValue("Filename", inst_filename);
-     std::string inst_output_ws("DummyWorkspaceToGetIDF");
-     inst_loader->setPropertyValue("OutputWorkspace", inst_output_ws);
-     TS_ASSERT_THROWS_NOTHING(inst_loader->execute());
-
-     MatrixWorkspace_sptr dummyWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inst_output_ws);
-     Instrument_const_sptr inst = dummyWS->getInstrument();
-
-
      // Create peak workspace
-     auto pw = boost::make_shared<PeaksWorkspace>();
-     // Populate peak workspace with instrument from dummy workspace
-     pw->setInstrument(inst);
+     auto pw = buildPW();
+     Instrument_const_sptr inst = pw->getInstrument();
 
-     // Populate peak workspace with peaks
-     Peak p1(inst, 1300, 4.0);
-     Peak p2(inst, 1300, 5.0);
-     Peak p3(inst, 1350, 3.0);
-     Peak p4(inst, 1400, 3.0);
+     // Add peaks (one peak already at detector ID 1)
+     Peak p1(inst, 10, 4.0);
+     Peak p2(inst, 10, 5.0);
+     Peak p3(inst, 20, 3.0);
+     Peak p4(inst, 50, 3.0);
      pw->addPeak(p1);
      pw->addPeak(p2);
      pw->addPeak(p3);
      pw->addPeak(p4);
 
      return pw;
-   }
-
-   PeaksWorkspace_sptr saveAndReloadPeaksWorkspace(const PeaksWorkspace_sptr & pws, const std::string & filename)
-   {
-
-     IAlgorithm_sptr saver = AlgorithmManager::Instance().createUnmanaged("SaveNexus");
-     saver->setChild(true);
-     saver->initialize();
-     saver->setProperty<Workspace_sptr>("InputWorkspace", pws);
-     saver->setPropertyValue("Filename", filename);
-     TS_ASSERT_THROWS_NOTHING(saver->execute());
-     TS_ASSERT(saver->isExecuted());
-
-     // Load the nexus file
-     IAlgorithm_sptr loader = AlgorithmManager::Instance().createUnmanaged("LoadNexus");
-     loader->setChild(true);
-     loader->initialize();
-     const std::string absFilename = saver->getPropertyValue("Filename");
-     loader->setPropertyValue("Filename", absFilename); // absolute path
-     loader->setPropertyValue("OutputWorkspace", "__anonymous_output");
-     TS_ASSERT_THROWS_NOTHING(loader->execute());
-     TS_ASSERT(loader->isExecuted());
-
-     // Remove file
-     if (Poco::File(absFilename).exists())
-       Poco::File(absFilename).remove();
-
-     Workspace_sptr ws = loader->getProperty("OutputWorkspace");
-     PeaksWorkspace_sptr lpw = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
-     TS_ASSERT(lpw);
-     return lpw;
    }
 
    void check_Detector_Table_Metadata(const Mantid::API::ITableWorkspace & detTable, const size_t expectedNRows)

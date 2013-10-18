@@ -1,9 +1,9 @@
 #include "MantidRemoteAlgorithms/StartRemoteTransaction.h"
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidRemote/RemoteJobManager.h"
+#include "MantidKernel/RemoteJobManager.h"
 
 #include "boost/make_shared.hpp"
 
@@ -22,20 +22,16 @@ using namespace Mantid::Kernel;
 
 void StartRemoteTransaction::init()
 {
-  auto requireValue = boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string> >();
-
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
   declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
 
-  // Two output properties
+  // output property
   declareProperty( "TransactionID", "", Direction::Output);
-  declareProperty( "TempDirectory", "", Direction::Output);  // directory created on the server for this transaction's use
 }
 
 void StartRemoteTransaction::exec()
 {
-
   boost::shared_ptr<RemoteJobManager> jobManager = Mantid::Kernel::ConfigService::Instance().getFacility().getRemoteJobManager( getPropertyValue("ComputeResource"));
 
   // jobManager is a boost::shared_ptr...
@@ -46,21 +42,22 @@ void StartRemoteTransaction::exec()
     throw( std::runtime_error( std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  std::string transId;
-  std::string tempDir;
-  std::string errMsg;
+  std::istream &respStream = jobManager->httpGet( "/transaction", "Action=Start");
+  JSONObject resp;
+  initFromStream( resp, respStream);
 
-  if (jobManager->startTransaction( transId, tempDir, errMsg) == RemoteJobManager::JM_OK)
+  if ( jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
+    std::string transId;
+    resp["TransID"].getValue( transId);
     setPropertyValue( "TransactionID", transId);
-    setPropertyValue( "TempDirectory", tempDir);
-
-    g_log.information() << "Transaction ID: " << transId << std::endl;
-    g_log.information() << "Temporary directory: " << tempDir << std::endl;
+    g_log.information() << "Transaction ID " << transId << " started." << std::endl;
   }
   else
   {
-    throw( std::runtime_error( "Error starting transaction: " + errMsg));
+    std::string errMsg;
+    resp["Err_Msg"].getValue( errMsg);
+    throw( std::runtime_error( errMsg));
   }
 }
 

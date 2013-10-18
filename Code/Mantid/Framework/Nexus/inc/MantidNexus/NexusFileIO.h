@@ -61,7 +61,7 @@ namespace Mantid
       /// open the nexus file for writing
       void openNexusWrite(const std::string& fileName);
       /// write the header ifon for the Mantid workspace format
-      int writeNexusProcessedHeader( const std::string& title) const;
+      int writeNexusProcessedHeader( const std::string& title, const std::string& wsName="") const;
       /// close the nexus file
       void closeNexusFile();
       /// Write a lgos section

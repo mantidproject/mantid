@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "LET" date = "2010-05-05T00:00:00">
+<parameter-file instrument = "LET" valid-from = "2010-05-05T00:00:00">
 
 <component-link name = "LET">
-
-<!-- Specify that the detector positions should be taken from the data file -->
-<parameter name="det-pos-source" type="string">
-  <value val="datafile"/>
-</parameter>
 
 <parameter name="deltaE-mode" type="string">
   <value val="direct"/>

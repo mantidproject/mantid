@@ -10,7 +10,6 @@ catalog and saves instrument lists to a mantid internal data structure.
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/ICatalog.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidICat/ErrorHandling.h"
 
 namespace Mantid
 {
@@ -44,9 +43,7 @@ namespace Mantid
       ICatalog_sptr catalog_sptr;
       try
       {
-
-        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-
+        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
       }
       catch(Kernel::Exception::NotFoundError&)
       {
@@ -61,10 +58,10 @@ namespace Mantid
       {
         catalog_sptr->listInstruments(intruments);
       }
-      catch(SessionException& e )
+      catch(std::runtime_error& e )
       {
         setProperty("IsValid",false);
-        throw std::runtime_error(e.what());
+        throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
       }
       setProperty("InstrumentList",intruments);
     }

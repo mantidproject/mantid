@@ -61,7 +61,7 @@ namespace MDEvents
     //---------------------------------------------------------------------------------------------------------------------
     /// convert MDWS box structure into flat structure used for saving/loading on hdd 
     void initFlatStructure(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-    /** Method resotores the interconnected box structure in memory, namely the nodes and their connectivity*/
+
     uint64_t restoreBoxTree(std::vector<API::IMDNode *>&Boxes ,API::BoxController_sptr bc, bool FileBackEnd,bool NoFileInfo=false);
 
     /*** this function tries to set file positions of the boxes to 
@@ -70,8 +70,10 @@ namespace MDEvents
 
     /**Save flat box structure into a file, defined by the file name*/
     void saveBoxStructure(const std::string &fileName);
-    /**load box structure from the file, defined by file name */
     void loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType,bool onlyEventInfo=false);
+
+    /// Return number of dimensions this class is initiated for (or not initiated if -1)
+    int getNDims()const{return m_nDim;}
   protected: // for testing
   private:
     /**Load flat box structure from a nexus file*/

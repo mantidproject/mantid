@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "LET" date = "2013-06-12T00:00:00">
+<parameter-file instrument = "LET" valid-from = "2013-06-12T00:00:00">
 
 <component-link name = "LET">
 
 <!-- files properties : -->
 
-<!-- Specify that the detector positions should be taken from the data file -->
-<parameter name="det-pos-source" type="string">
-  <value val="datafile"/>
-</parameter>
 <!-- The file which defines proper (calibrated) detector positions 
      if None - it is undefined -->
 <parameter name="det_cal_file" type="string">

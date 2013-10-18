@@ -1,27 +1,17 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This header MAY NOT be included in any test from a package below Geometry
+ *    (i.e. Kernel).
+ *  Conversely, this file MAY NOT be modified to use anything from a package higher
+ *  than API (e.g. any algorithm or concrete workspace), even if via the factory.
+ *********************************************************************************/
 #ifndef FAKEGMOCKOBJECTS_H_
 #define FAKEGMOCKOBJECTS_H_
 
-/*
- * FakeObjects.h: Fake Tester objects for APITest
- *
- *  Created on: Jul 5, 2011
- *      Author: Janik Zikovsky
- */
-
-#include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/INearestNeighboursFactory.h"
 #include "gmock/gmock.h"
-#include <iostream>
-#include <fstream>
-#include <map>
 
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
 using namespace Mantid;
 
 
