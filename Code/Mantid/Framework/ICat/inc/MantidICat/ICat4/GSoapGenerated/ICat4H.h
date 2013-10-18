@@ -132,8 +132,32 @@ SOAP_FMAC3 time_t * SOAP_FMAC4 soap_get_time(struct soap*, time_t *, const char*
 #endif
 
 
+#ifndef SOAP_TYPE_ICat4_ns1__accessType
+#define SOAP_TYPE_ICat4_ns1__accessType (121)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__accessType(struct soap*, enum ns1__accessType *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__accessType(struct soap*, const char*, int, const enum ns1__accessType *, const char*);
+
+SOAP_FMAC3S const char* SOAP_FMAC4S soap_ns1__accessType2s(struct soap*, enum ns1__accessType);
+SOAP_FMAC3 enum ns1__accessType * SOAP_FMAC4 soap_in_ns1__accessType(struct soap*, const char*, enum ns1__accessType *, const char*);
+
+SOAP_FMAC3S int SOAP_FMAC4S soap_s2ns1__accessType(struct soap*, const char*, enum ns1__accessType *);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns1__accessType(struct soap*, const enum ns1__accessType *, const char*, const char*);
+
+#ifndef soap_write_ns1__accessType
+#define soap_write_ns1__accessType(soap, data) ( ICat4::soap_serialize_ns1__accessType(soap, data), soap_begin_send(soap) || ICat4::soap_put_ns1__accessType(soap, data, "ns1:accessType", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 enum ns1__accessType * SOAP_FMAC4 soap_get_ns1__accessType(struct soap*, enum ns1__accessType *, const char*, const char*);
+
+#ifndef soap_read_ns1__accessType
+#define soap_read_ns1__accessType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__accessType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
 #ifndef SOAP_TYPE_ICat4_ns1__relType
-#define SOAP_TYPE_ICat4_ns1__relType (99)
+#define SOAP_TYPE_ICat4_ns1__relType (119)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__relType(struct soap*, enum ns1__relType *);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__relType(struct soap*, const char*, int, const enum ns1__relType *, const char*);
@@ -156,32 +180,8 @@ SOAP_FMAC3 enum ns1__relType * SOAP_FMAC4 soap_get_ns1__relType(struct soap*, en
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_ns1__destType
-#define SOAP_TYPE_ICat4_ns1__destType (97)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__destType(struct soap*, enum ns1__destType *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__destType(struct soap*, const char*, int, const enum ns1__destType *, const char*);
-
-SOAP_FMAC3S const char* SOAP_FMAC4S soap_ns1__destType2s(struct soap*, enum ns1__destType);
-SOAP_FMAC3 enum ns1__destType * SOAP_FMAC4 soap_in_ns1__destType(struct soap*, const char*, enum ns1__destType *, const char*);
-
-SOAP_FMAC3S int SOAP_FMAC4S soap_s2ns1__destType(struct soap*, const char*, enum ns1__destType *);
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns1__destType(struct soap*, const enum ns1__destType *, const char*, const char*);
-
-#ifndef soap_write_ns1__destType
-#define soap_write_ns1__destType(soap, data) ( ICat4::soap_serialize_ns1__destType(soap, data), soap_begin_send(soap) || ICat4::soap_put_ns1__destType(soap, data, "ns1:destType", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 enum ns1__destType * SOAP_FMAC4 soap_get_ns1__destType(struct soap*, enum ns1__destType *, const char*, const char*);
-
-#ifndef soap_read_ns1__destType
-#define soap_read_ns1__destType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__destType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
 #ifndef SOAP_TYPE_ICat4_ns1__parameterValueType
-#define SOAP_TYPE_ICat4_ns1__parameterValueType (95)
+#define SOAP_TYPE_ICat4_ns1__parameterValueType (117)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__parameterValueType(struct soap*, enum ns1__parameterValueType *);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameterValueType(struct soap*, const char*, int, const enum ns1__parameterValueType *, const char*);
@@ -205,7 +205,7 @@ SOAP_FMAC3 enum ns1__parameterValueType * SOAP_FMAC4 soap_get_ns1__parameterValu
 
 
 #ifndef SOAP_TYPE_ICat4_ns1__studyStatus
-#define SOAP_TYPE_ICat4_ns1__studyStatus (93)
+#define SOAP_TYPE_ICat4_ns1__studyStatus (115)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__studyStatus(struct soap*, enum ns1__studyStatus *);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__studyStatus(struct soap*, const char*, int, const enum ns1__studyStatus *, const char*);
@@ -229,7 +229,7 @@ SOAP_FMAC3 enum ns1__studyStatus * SOAP_FMAC4 soap_get_ns1__studyStatus(struct s
 
 
 #ifndef SOAP_TYPE_ICat4_ns1__icatExceptionType
-#define SOAP_TYPE_ICat4_ns1__icatExceptionType (91)
+#define SOAP_TYPE_ICat4_ns1__icatExceptionType (113)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns1__icatExceptionType(struct soap*, enum ns1__icatExceptionType *);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__icatExceptionType(struct soap*, const char*, int, const enum ns1__icatExceptionType *, const char*);
@@ -277,7 +277,7 @@ SOAP_FMAC3 bool * SOAP_FMAC4 soap_get_bool(struct soap*, bool *, const char*, co
 
 
 #ifndef SOAP_TYPE_ICat4__ns1__login_credentials_entry
-#define SOAP_TYPE_ICat4__ns1__login_credentials_entry (109)
+#define SOAP_TYPE_ICat4__ns1__login_credentials_entry (166)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out__ns1__login_credentials_entry(struct soap*, const char*, int, const _ns1__login_credentials_entry *, const char*);
@@ -306,7 +306,7 @@ inline void soap_delete__ns1__login_credentials_entry(struct soap *soap, _ns1__l
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy__ns1__login_credentials_entry(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4__ns1__login_credentials
-#define SOAP_TYPE_ICat4__ns1__login_credentials (108)
+#define SOAP_TYPE_ICat4__ns1__login_credentials (165)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out__ns1__login_credentials(struct soap*, const char*, int, const _ns1__login_credentials *, const char*);
@@ -334,8 +334,37 @@ inline void soap_delete__ns1__login_credentials(struct soap *soap, _ns1__login_c
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy__ns1__login_credentials(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_ns1__accessType_
+#define SOAP_TYPE_ICat4_ns1__accessType_ (122)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__accessType_(struct soap*, const char*, int, const ns1__accessType_ *, const char*);
+SOAP_FMAC3 ns1__accessType_ * SOAP_FMAC4 soap_in_ns1__accessType_(struct soap*, const char*, ns1__accessType_ *, const char*);
+
+#ifndef soap_write_ns1__accessType_
+#define soap_write_ns1__accessType_(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:accessType", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__accessType_ * SOAP_FMAC4 soap_get_ns1__accessType_(struct soap*, ns1__accessType_ *, const char*, const char*);
+
+#ifndef soap_read_ns1__accessType_
+#define soap_read_ns1__accessType_(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__accessType_(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__accessType_ * SOAP_FMAC2 soap_instantiate_ns1__accessType_(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__accessType_ * soap_new_ns1__accessType_(struct soap *soap, int n = -1) { return soap_instantiate_ns1__accessType_(soap, n, NULL, NULL, NULL); }
+
+inline ns1__accessType_ * soap_new_req_ns1__accessType_(struct soap *soap, enum ns1__accessType __item) { ns1__accessType_ *_p = soap_instantiate_ns1__accessType_(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__accessType_::__item = __item; } return _p; }
+
+inline ns1__accessType_ * soap_new_set_ns1__accessType_(struct soap *soap, enum ns1__accessType __item, char *__item1) { ns1__accessType_ *_p = soap_instantiate_ns1__accessType_(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__accessType_::__item = __item; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__accessType_(struct soap *soap, ns1__accessType_ *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__accessType_(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_ns1__relType_
-#define SOAP_TYPE_ICat4_ns1__relType_ (100)
+#define SOAP_TYPE_ICat4_ns1__relType_ (120)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__relType_(struct soap*, const char*, int, const ns1__relType_ *, const char*);
@@ -363,37 +392,8 @@ inline void soap_delete_ns1__relType_(struct soap *soap, ns1__relType_ *p) { soa
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__relType_(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__destType_
-#define SOAP_TYPE_ICat4_ns1__destType_ (98)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__destType_(struct soap*, const char*, int, const ns1__destType_ *, const char*);
-SOAP_FMAC3 ns1__destType_ * SOAP_FMAC4 soap_in_ns1__destType_(struct soap*, const char*, ns1__destType_ *, const char*);
-
-#ifndef soap_write_ns1__destType_
-#define soap_write_ns1__destType_(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:destType", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__destType_ * SOAP_FMAC4 soap_get_ns1__destType_(struct soap*, ns1__destType_ *, const char*, const char*);
-
-#ifndef soap_read_ns1__destType_
-#define soap_read_ns1__destType_(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__destType_(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__destType_ * SOAP_FMAC2 soap_instantiate_ns1__destType_(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__destType_ * soap_new_ns1__destType_(struct soap *soap, int n = -1) { return soap_instantiate_ns1__destType_(soap, n, NULL, NULL, NULL); }
-
-inline ns1__destType_ * soap_new_req_ns1__destType_(struct soap *soap, enum ns1__destType __item) { ns1__destType_ *_p = soap_instantiate_ns1__destType_(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__destType_::__item = __item; } return _p; }
-
-inline ns1__destType_ * soap_new_set_ns1__destType_(struct soap *soap, enum ns1__destType __item, char *__item1) { ns1__destType_ *_p = soap_instantiate_ns1__destType_(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__destType_::__item = __item; _p->xsd__anyType::__item = __item1; } return _p; }
-
-inline void soap_delete_ns1__destType_(struct soap *soap, ns1__destType_ *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__destType_(struct soap*, int, int, void*, size_t, const void*, size_t);
-
 #ifndef SOAP_TYPE_ICat4_ns1__parameterValueType_
-#define SOAP_TYPE_ICat4_ns1__parameterValueType_ (96)
+#define SOAP_TYPE_ICat4_ns1__parameterValueType_ (118)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameterValueType_(struct soap*, const char*, int, const ns1__parameterValueType_ *, const char*);
@@ -422,7 +422,7 @@ inline void soap_delete_ns1__parameterValueType_(struct soap *soap, ns1__paramet
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__parameterValueType_(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__studyStatus_
-#define SOAP_TYPE_ICat4_ns1__studyStatus_ (94)
+#define SOAP_TYPE_ICat4_ns1__studyStatus_ (116)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__studyStatus_(struct soap*, const char*, int, const ns1__studyStatus_ *, const char*);
@@ -451,7 +451,7 @@ inline void soap_delete_ns1__studyStatus_(struct soap *soap, ns1__studyStatus_ *
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__studyStatus_(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__icatExceptionType_
-#define SOAP_TYPE_ICat4_ns1__icatExceptionType_ (92)
+#define SOAP_TYPE_ICat4_ns1__icatExceptionType_ (114)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__icatExceptionType_(struct soap*, const char*, int, const ns1__icatExceptionType_ *, const char*);
@@ -480,7 +480,7 @@ inline void soap_delete_ns1__icatExceptionType_(struct soap *soap, ns1__icatExce
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__icatExceptionType_(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__getRemainingMinutesResponse
-#define SOAP_TYPE_ICat4_ns1__getRemainingMinutesResponse (90)
+#define SOAP_TYPE_ICat4_ns1__getRemainingMinutesResponse (112)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getRemainingMinutesResponse(struct soap*, const char*, int, const ns1__getRemainingMinutesResponse *, const char*);
@@ -509,7 +509,7 @@ inline void soap_delete_ns1__getRemainingMinutesResponse(struct soap *soap, ns1_
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getRemainingMinutesResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__getRemainingMinutes
-#define SOAP_TYPE_ICat4_ns1__getRemainingMinutes (89)
+#define SOAP_TYPE_ICat4_ns1__getRemainingMinutes (111)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getRemainingMinutes(struct soap*, const char*, int, const ns1__getRemainingMinutes *, const char*);
@@ -538,7 +538,7 @@ inline void soap_delete_ns1__getRemainingMinutes(struct soap *soap, ns1__getRema
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getRemainingMinutes(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__logoutResponse
-#define SOAP_TYPE_ICat4_ns1__logoutResponse (88)
+#define SOAP_TYPE_ICat4_ns1__logoutResponse (110)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__logoutResponse(struct soap*, const char*, int, const ns1__logoutResponse *, const char*);
@@ -567,7 +567,7 @@ inline void soap_delete_ns1__logoutResponse(struct soap *soap, ns1__logoutRespon
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__logoutResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__logout
-#define SOAP_TYPE_ICat4_ns1__logout (87)
+#define SOAP_TYPE_ICat4_ns1__logout (109)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__logout(struct soap*, const char*, int, const ns1__logout *, const char*);
@@ -596,7 +596,7 @@ inline void soap_delete_ns1__logout(struct soap *soap, ns1__logout *p) { soap_de
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__logout(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__searchResponse
-#define SOAP_TYPE_ICat4_ns1__searchResponse (86)
+#define SOAP_TYPE_ICat4_ns1__searchResponse (108)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__searchResponse(struct soap*, const char*, int, const ns1__searchResponse *, const char*);
@@ -625,7 +625,7 @@ inline void soap_delete_ns1__searchResponse(struct soap *soap, ns1__searchRespon
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__searchResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__search
-#define SOAP_TYPE_ICat4_ns1__search (85)
+#define SOAP_TYPE_ICat4_ns1__search (107)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__search(struct soap*, const char*, int, const ns1__search *, const char*);
@@ -653,8 +653,66 @@ inline void soap_delete_ns1__search(struct soap *soap, ns1__search *p) { soap_de
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__search(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_ns1__isAccessAllowedResponse
+#define SOAP_TYPE_ICat4_ns1__isAccessAllowedResponse (106)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__isAccessAllowedResponse(struct soap*, const char*, int, const ns1__isAccessAllowedResponse *, const char*);
+SOAP_FMAC3 ns1__isAccessAllowedResponse * SOAP_FMAC4 soap_in_ns1__isAccessAllowedResponse(struct soap*, const char*, ns1__isAccessAllowedResponse *, const char*);
+
+#ifndef soap_write_ns1__isAccessAllowedResponse
+#define soap_write_ns1__isAccessAllowedResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:isAccessAllowedResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__isAccessAllowedResponse * SOAP_FMAC4 soap_get_ns1__isAccessAllowedResponse(struct soap*, ns1__isAccessAllowedResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__isAccessAllowedResponse
+#define soap_read_ns1__isAccessAllowedResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__isAccessAllowedResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__isAccessAllowedResponse * SOAP_FMAC2 soap_instantiate_ns1__isAccessAllowedResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__isAccessAllowedResponse * soap_new_ns1__isAccessAllowedResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__isAccessAllowedResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__isAccessAllowedResponse * soap_new_req_ns1__isAccessAllowedResponse(struct soap *soap, bool return_) { ns1__isAccessAllowedResponse *_p = soap_instantiate_ns1__isAccessAllowedResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__isAccessAllowedResponse::return_ = return_; } return _p; }
+
+inline ns1__isAccessAllowedResponse * soap_new_set_ns1__isAccessAllowedResponse(struct soap *soap, bool return_, char *__item1) { ns1__isAccessAllowedResponse *_p = soap_instantiate_ns1__isAccessAllowedResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__isAccessAllowedResponse::return_ = return_; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__isAccessAllowedResponse(struct soap *soap, ns1__isAccessAllowedResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__isAccessAllowedResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__isAccessAllowed
+#define SOAP_TYPE_ICat4_ns1__isAccessAllowed (105)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__isAccessAllowed(struct soap*, const char*, int, const ns1__isAccessAllowed *, const char*);
+SOAP_FMAC3 ns1__isAccessAllowed * SOAP_FMAC4 soap_in_ns1__isAccessAllowed(struct soap*, const char*, ns1__isAccessAllowed *, const char*);
+
+#ifndef soap_write_ns1__isAccessAllowed
+#define soap_write_ns1__isAccessAllowed(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:isAccessAllowed", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__isAccessAllowed * SOAP_FMAC4 soap_get_ns1__isAccessAllowed(struct soap*, ns1__isAccessAllowed *, const char*, const char*);
+
+#ifndef soap_read_ns1__isAccessAllowed
+#define soap_read_ns1__isAccessAllowed(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__isAccessAllowed(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__isAccessAllowed * SOAP_FMAC2 soap_instantiate_ns1__isAccessAllowed(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__isAccessAllowed * soap_new_ns1__isAccessAllowed(struct soap *soap, int n = -1) { return soap_instantiate_ns1__isAccessAllowed(soap, n, NULL, NULL, NULL); }
+
+inline ns1__isAccessAllowed * soap_new_req_ns1__isAccessAllowed(struct soap *soap) { ns1__isAccessAllowed *_p = soap_instantiate_ns1__isAccessAllowed(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__isAccessAllowed * soap_new_set_ns1__isAccessAllowed(struct soap *soap, std::string *sessionId, ns1__entityBaseBean *bean, enum ns1__accessType *accessType, char *__item1) { ns1__isAccessAllowed *_p = soap_instantiate_ns1__isAccessAllowed(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__isAccessAllowed::sessionId = sessionId; _p->ns1__isAccessAllowed::bean = bean; _p->ns1__isAccessAllowed::accessType = accessType; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__isAccessAllowed(struct soap *soap, ns1__isAccessAllowed *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__isAccessAllowed(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_ns1__deleteResponse
-#define SOAP_TYPE_ICat4_ns1__deleteResponse (84)
+#define SOAP_TYPE_ICat4_ns1__deleteResponse (104)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteResponse(struct soap*, const char*, int, const ns1__deleteResponse *, const char*);
@@ -683,7 +741,7 @@ inline void soap_delete_ns1__deleteResponse(struct soap *soap, ns1__deleteRespon
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__delete
-#define SOAP_TYPE_ICat4_ns1__delete (83)
+#define SOAP_TYPE_ICat4_ns1__delete (103)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__delete(struct soap*, const char*, int, const ns1__delete *, const char*);
@@ -712,7 +770,7 @@ inline void soap_delete_ns1__delete(struct soap *soap, ns1__delete *p) { soap_de
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__delete(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__entityField
-#define SOAP_TYPE_ICat4_ns1__entityField (82)
+#define SOAP_TYPE_ICat4_ns1__entityField (102)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__entityField(struct soap*, const char*, int, const ns1__entityField *, const char*);
@@ -734,14 +792,14 @@ inline ns1__entityField * soap_new_ns1__entityField(struct soap *soap, int n = -
 
 inline ns1__entityField * soap_new_req_ns1__entityField(struct soap *soap, bool notNullable) { ns1__entityField *_p = soap_instantiate_ns1__entityField(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__entityField::notNullable = notNullable; } return _p; }
 
-inline ns1__entityField * soap_new_set_ns1__entityField(struct soap *soap, bool *cascaded, std::string *comment, std::string *name, bool notNullable, enum ns1__relType *relType, int *stringLength, std::string *type, char *__item1) { ns1__entityField *_p = soap_instantiate_ns1__entityField(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__entityField::cascaded = cascaded; _p->ns1__entityField::comment = comment; _p->ns1__entityField::name = name; _p->ns1__entityField::notNullable = notNullable; _p->ns1__entityField::relType = relType; _p->ns1__entityField::stringLength = stringLength; _p->ns1__entityField::type = type; _p->xsd__anyType::__item = __item1; } return _p; }
+inline ns1__entityField * soap_new_set_ns1__entityField(struct soap *soap, std::string *comment, std::string *name, bool notNullable, enum ns1__relType *relType, int *stringLength, std::string *type, char *__item1) { ns1__entityField *_p = soap_instantiate_ns1__entityField(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__entityField::comment = comment; _p->ns1__entityField::name = name; _p->ns1__entityField::notNullable = notNullable; _p->ns1__entityField::relType = relType; _p->ns1__entityField::stringLength = stringLength; _p->ns1__entityField::type = type; _p->xsd__anyType::__item = __item1; } return _p; }
 
 inline void soap_delete_ns1__entityField(struct soap *soap, ns1__entityField *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__entityField(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__constraint
-#define SOAP_TYPE_ICat4_ns1__constraint (81)
+#define SOAP_TYPE_ICat4_ns1__constraint (101)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__constraint(struct soap*, const char*, int, const ns1__constraint *, const char*);
@@ -770,7 +828,7 @@ inline void soap_delete_ns1__constraint(struct soap *soap, ns1__constraint *p) {
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__constraint(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__entityInfo
-#define SOAP_TYPE_ICat4_ns1__entityInfo (80)
+#define SOAP_TYPE_ICat4_ns1__entityInfo (100)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__entityInfo(struct soap*, const char*, int, const ns1__entityInfo *, const char*);
@@ -799,7 +857,7 @@ inline void soap_delete_ns1__entityInfo(struct soap *soap, ns1__entityInfo *p) {
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__entityInfo(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__getEntityInfoResponse
-#define SOAP_TYPE_ICat4_ns1__getEntityInfoResponse (79)
+#define SOAP_TYPE_ICat4_ns1__getEntityInfoResponse (99)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getEntityInfoResponse(struct soap*, const char*, int, const ns1__getEntityInfoResponse *, const char*);
@@ -828,7 +886,7 @@ inline void soap_delete_ns1__getEntityInfoResponse(struct soap *soap, ns1__getEn
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getEntityInfoResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__getEntityInfo
-#define SOAP_TYPE_ICat4_ns1__getEntityInfo (78)
+#define SOAP_TYPE_ICat4_ns1__getEntityInfo (98)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getEntityInfo(struct soap*, const char*, int, const ns1__getEntityInfo *, const char*);
@@ -856,8 +914,182 @@ inline void soap_delete_ns1__getEntityInfo(struct soap *soap, ns1__getEntityInfo
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getEntityInfo(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_ns1__searchTextResponse
+#define SOAP_TYPE_ICat4_ns1__searchTextResponse (97)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__searchTextResponse(struct soap*, const char*, int, const ns1__searchTextResponse *, const char*);
+SOAP_FMAC3 ns1__searchTextResponse * SOAP_FMAC4 soap_in_ns1__searchTextResponse(struct soap*, const char*, ns1__searchTextResponse *, const char*);
+
+#ifndef soap_write_ns1__searchTextResponse
+#define soap_write_ns1__searchTextResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:searchTextResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__searchTextResponse * SOAP_FMAC4 soap_get_ns1__searchTextResponse(struct soap*, ns1__searchTextResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__searchTextResponse
+#define soap_read_ns1__searchTextResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__searchTextResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__searchTextResponse * SOAP_FMAC2 soap_instantiate_ns1__searchTextResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__searchTextResponse * soap_new_ns1__searchTextResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__searchTextResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__searchTextResponse * soap_new_req_ns1__searchTextResponse(struct soap *soap) { ns1__searchTextResponse *_p = soap_instantiate_ns1__searchTextResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__searchTextResponse * soap_new_set_ns1__searchTextResponse(struct soap *soap, std::vector<xsd__anyType * >& return_, char *__item1) { ns1__searchTextResponse *_p = soap_instantiate_ns1__searchTextResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__searchTextResponse::return_ = return_; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__searchTextResponse(struct soap *soap, ns1__searchTextResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__searchTextResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__searchText
+#define SOAP_TYPE_ICat4_ns1__searchText (96)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__searchText(struct soap*, const char*, int, const ns1__searchText *, const char*);
+SOAP_FMAC3 ns1__searchText * SOAP_FMAC4 soap_in_ns1__searchText(struct soap*, const char*, ns1__searchText *, const char*);
+
+#ifndef soap_write_ns1__searchText
+#define soap_write_ns1__searchText(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:searchText", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__searchText * SOAP_FMAC4 soap_get_ns1__searchText(struct soap*, ns1__searchText *, const char*, const char*);
+
+#ifndef soap_read_ns1__searchText
+#define soap_read_ns1__searchText(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__searchText(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__searchText * SOAP_FMAC2 soap_instantiate_ns1__searchText(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__searchText * soap_new_ns1__searchText(struct soap *soap, int n = -1) { return soap_instantiate_ns1__searchText(soap, n, NULL, NULL, NULL); }
+
+inline ns1__searchText * soap_new_req_ns1__searchText(struct soap *soap, int maxCount) { ns1__searchText *_p = soap_instantiate_ns1__searchText(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__searchText::maxCount = maxCount; } return _p; }
+
+inline ns1__searchText * soap_new_set_ns1__searchText(struct soap *soap, std::string *sessionId, std::string *query, int maxCount, std::string *entityName, char *__item1) { ns1__searchText *_p = soap_instantiate_ns1__searchText(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__searchText::sessionId = sessionId; _p->ns1__searchText::query = query; _p->ns1__searchText::maxCount = maxCount; _p->ns1__searchText::entityName = entityName; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__searchText(struct soap *soap, ns1__searchText *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__searchText(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__luceneCommitResponse
+#define SOAP_TYPE_ICat4_ns1__luceneCommitResponse (95)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneCommitResponse(struct soap*, const char*, int, const ns1__luceneCommitResponse *, const char*);
+SOAP_FMAC3 ns1__luceneCommitResponse * SOAP_FMAC4 soap_in_ns1__luceneCommitResponse(struct soap*, const char*, ns1__luceneCommitResponse *, const char*);
+
+#ifndef soap_write_ns1__luceneCommitResponse
+#define soap_write_ns1__luceneCommitResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:luceneCommitResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneCommitResponse * SOAP_FMAC4 soap_get_ns1__luceneCommitResponse(struct soap*, ns1__luceneCommitResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__luceneCommitResponse
+#define soap_read_ns1__luceneCommitResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__luceneCommitResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__luceneCommitResponse * SOAP_FMAC2 soap_instantiate_ns1__luceneCommitResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__luceneCommitResponse * soap_new_ns1__luceneCommitResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__luceneCommitResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__luceneCommitResponse * soap_new_req_ns1__luceneCommitResponse(struct soap *soap) { ns1__luceneCommitResponse *_p = soap_instantiate_ns1__luceneCommitResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__luceneCommitResponse * soap_new_set_ns1__luceneCommitResponse(struct soap *soap, char *__item1) { ns1__luceneCommitResponse *_p = soap_instantiate_ns1__luceneCommitResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__luceneCommitResponse(struct soap *soap, ns1__luceneCommitResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneCommitResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__luceneCommit
+#define SOAP_TYPE_ICat4_ns1__luceneCommit (94)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneCommit(struct soap*, const char*, int, const ns1__luceneCommit *, const char*);
+SOAP_FMAC3 ns1__luceneCommit * SOAP_FMAC4 soap_in_ns1__luceneCommit(struct soap*, const char*, ns1__luceneCommit *, const char*);
+
+#ifndef soap_write_ns1__luceneCommit
+#define soap_write_ns1__luceneCommit(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:luceneCommit", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneCommit * SOAP_FMAC4 soap_get_ns1__luceneCommit(struct soap*, ns1__luceneCommit *, const char*, const char*);
+
+#ifndef soap_read_ns1__luceneCommit
+#define soap_read_ns1__luceneCommit(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__luceneCommit(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__luceneCommit * SOAP_FMAC2 soap_instantiate_ns1__luceneCommit(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__luceneCommit * soap_new_ns1__luceneCommit(struct soap *soap, int n = -1) { return soap_instantiate_ns1__luceneCommit(soap, n, NULL, NULL, NULL); }
+
+inline ns1__luceneCommit * soap_new_req_ns1__luceneCommit(struct soap *soap) { ns1__luceneCommit *_p = soap_instantiate_ns1__luceneCommit(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__luceneCommit * soap_new_set_ns1__luceneCommit(struct soap *soap, std::string *sessionId, char *__item1) { ns1__luceneCommit *_p = soap_instantiate_ns1__luceneCommit(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__luceneCommit::sessionId = sessionId; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__luceneCommit(struct soap *soap, ns1__luceneCommit *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneCommit(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__loginResponse
+#define SOAP_TYPE_ICat4_ns1__loginResponse (93)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__loginResponse(struct soap*, const char*, int, const ns1__loginResponse *, const char*);
+SOAP_FMAC3 ns1__loginResponse * SOAP_FMAC4 soap_in_ns1__loginResponse(struct soap*, const char*, ns1__loginResponse *, const char*);
+
+#ifndef soap_write_ns1__loginResponse
+#define soap_write_ns1__loginResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:loginResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__loginResponse * SOAP_FMAC4 soap_get_ns1__loginResponse(struct soap*, ns1__loginResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__loginResponse
+#define soap_read_ns1__loginResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__loginResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__loginResponse * SOAP_FMAC2 soap_instantiate_ns1__loginResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__loginResponse * soap_new_ns1__loginResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__loginResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__loginResponse * soap_new_req_ns1__loginResponse(struct soap *soap) { ns1__loginResponse *_p = soap_instantiate_ns1__loginResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__loginResponse * soap_new_set_ns1__loginResponse(struct soap *soap, std::string *return_, char *__item1) { ns1__loginResponse *_p = soap_instantiate_ns1__loginResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__loginResponse::return_ = return_; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__loginResponse(struct soap *soap, ns1__loginResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__loginResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__login
+#define SOAP_TYPE_ICat4_ns1__login (92)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__login(struct soap*, const char*, int, const ns1__login *, const char*);
+SOAP_FMAC3 ns1__login * SOAP_FMAC4 soap_in_ns1__login(struct soap*, const char*, ns1__login *, const char*);
+
+#ifndef soap_write_ns1__login
+#define soap_write_ns1__login(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:login", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__login * SOAP_FMAC4 soap_get_ns1__login(struct soap*, ns1__login *, const char*, const char*);
+
+#ifndef soap_read_ns1__login
+#define soap_read_ns1__login(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__login(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__login * SOAP_FMAC2 soap_instantiate_ns1__login(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__login * soap_new_ns1__login(struct soap *soap, int n = -1) { return soap_instantiate_ns1__login(soap, n, NULL, NULL, NULL); }
+
+inline ns1__login * soap_new_req_ns1__login(struct soap *soap, _ns1__login_credentials& credentials) { ns1__login *_p = soap_instantiate_ns1__login(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__login::credentials = credentials; } return _p; }
+
+inline ns1__login * soap_new_set_ns1__login(struct soap *soap, std::string *plugin, _ns1__login_credentials& credentials, char *__item1) { ns1__login *_p = soap_instantiate_ns1__login(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__login::plugin = plugin; _p->ns1__login::credentials = credentials; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__login(struct soap *soap, ns1__login *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__login(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_ns1__dummyResponse
-#define SOAP_TYPE_ICat4_ns1__dummyResponse (77)
+#define SOAP_TYPE_ICat4_ns1__dummyResponse (91)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dummyResponse(struct soap*, const char*, int, const ns1__dummyResponse *, const char*);
@@ -885,37 +1117,66 @@ inline void soap_delete_ns1__dummyResponse(struct soap *soap, ns1__dummyResponse
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dummyResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__notificationRequest
-#define SOAP_TYPE_ICat4_ns1__notificationRequest (76)
+#ifndef SOAP_TYPE_ICat4_ns1__publicStep
+#define SOAP_TYPE_ICat4_ns1__publicStep (90)
 #endif
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__notificationRequest(struct soap*, const char*, int, const ns1__notificationRequest *, const char*);
-SOAP_FMAC3 ns1__notificationRequest * SOAP_FMAC4 soap_in_ns1__notificationRequest(struct soap*, const char*, ns1__notificationRequest *, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__publicStep(struct soap*, const char*, int, const ns1__publicStep *, const char*);
+SOAP_FMAC3 ns1__publicStep * SOAP_FMAC4 soap_in_ns1__publicStep(struct soap*, const char*, ns1__publicStep *, const char*);
 
-#ifndef soap_write_ns1__notificationRequest
-#define soap_write_ns1__notificationRequest(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:notificationRequest", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_write_ns1__publicStep
+#define soap_write_ns1__publicStep(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:publicStep", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC3 ns1__notificationRequest * SOAP_FMAC4 soap_get_ns1__notificationRequest(struct soap*, ns1__notificationRequest *, const char*, const char*);
+SOAP_FMAC3 ns1__publicStep * SOAP_FMAC4 soap_get_ns1__publicStep(struct soap*, ns1__publicStep *, const char*, const char*);
 
-#ifndef soap_read_ns1__notificationRequest
-#define soap_read_ns1__notificationRequest(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__notificationRequest(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_ns1__publicStep
+#define soap_read_ns1__publicStep(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__publicStep(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC1 ns1__notificationRequest * SOAP_FMAC2 soap_instantiate_ns1__notificationRequest(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC1 ns1__publicStep * SOAP_FMAC2 soap_instantiate_ns1__publicStep(struct soap*, int, const char*, const char*, size_t*);
 
-inline ns1__notificationRequest * soap_new_ns1__notificationRequest(struct soap *soap, int n = -1) { return soap_instantiate_ns1__notificationRequest(soap, n, NULL, NULL, NULL); }
+inline ns1__publicStep * soap_new_ns1__publicStep(struct soap *soap, int n = -1) { return soap_instantiate_ns1__publicStep(soap, n, NULL, NULL, NULL); }
 
-inline ns1__notificationRequest * soap_new_req_ns1__notificationRequest(struct soap *soap) { ns1__notificationRequest *_p = soap_instantiate_ns1__notificationRequest(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+inline ns1__publicStep * soap_new_req_ns1__publicStep(struct soap *soap) { ns1__publicStep *_p = soap_instantiate_ns1__publicStep(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__notificationRequest * soap_new_set_ns1__notificationRequest(struct soap *soap, std::string *crudFlags, std::string *datatypes, enum ns1__destType *destType, std::string *jmsOptions, std::string *name, std::string *what, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__notificationRequest *_p = soap_instantiate_ns1__notificationRequest(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__notificationRequest::crudFlags = crudFlags; _p->ns1__notificationRequest::datatypes = datatypes; _p->ns1__notificationRequest::destType = destType; _p->ns1__notificationRequest::jmsOptions = jmsOptions; _p->ns1__notificationRequest::name = name; _p->ns1__notificationRequest::what = what; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+inline ns1__publicStep * soap_new_set_ns1__publicStep(struct soap *soap, std::string *field, std::string *origin, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__publicStep *_p = soap_instantiate_ns1__publicStep(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__publicStep::field = field; _p->ns1__publicStep::origin = origin; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
 
-inline void soap_delete_ns1__notificationRequest(struct soap *soap, ns1__notificationRequest *p) { soap_delete(soap, p); }
+inline void soap_delete_ns1__publicStep(struct soap *soap, ns1__publicStep *p) { soap_delete(soap, p); }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__notificationRequest(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__publicStep(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__log
+#define SOAP_TYPE_ICat4_ns1__log (89)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__log(struct soap*, const char*, int, const ns1__log *, const char*);
+SOAP_FMAC3 ns1__log * SOAP_FMAC4 soap_in_ns1__log(struct soap*, const char*, ns1__log *, const char*);
+
+#ifndef soap_write_ns1__log
+#define soap_write_ns1__log(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:log", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__log * SOAP_FMAC4 soap_get_ns1__log(struct soap*, ns1__log *, const char*, const char*);
+
+#ifndef soap_read_ns1__log
+#define soap_read_ns1__log(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__log(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__log * SOAP_FMAC2 soap_instantiate_ns1__log(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__log * soap_new_ns1__log(struct soap *soap, int n = -1) { return soap_instantiate_ns1__log(soap, n, NULL, NULL, NULL); }
+
+inline ns1__log * soap_new_req_ns1__log(struct soap *soap, LONG64 duration) { ns1__log *_p = soap_instantiate_ns1__log(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__log::duration = duration; } return _p; }
+
+inline ns1__log * soap_new_set_ns1__log(struct soap *soap, LONG64 duration, LONG64 *entityId, std::string *entityName, std::string *operation, std::string *query, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__log *_p = soap_instantiate_ns1__log(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__log::duration = duration; _p->ns1__log::entityId = entityId; _p->ns1__log::entityName = entityName; _p->ns1__log::operation = operation; _p->ns1__log::query = query; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__log(struct soap *soap, ns1__log *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__log(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__relatedDatafile
-#define SOAP_TYPE_ICat4_ns1__relatedDatafile (75)
+#define SOAP_TYPE_ICat4_ns1__relatedDatafile (88)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__relatedDatafile(struct soap*, const char*, int, const ns1__relatedDatafile *, const char*);
@@ -942,6 +1203,383 @@ inline ns1__relatedDatafile * soap_new_set_ns1__relatedDatafile(struct soap *soa
 inline void soap_delete_ns1__relatedDatafile(struct soap *soap, ns1__relatedDatafile *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__relatedDatafile(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__shift
+#define SOAP_TYPE_ICat4_ns1__shift (87)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__shift(struct soap*, const char*, int, const ns1__shift *, const char*);
+SOAP_FMAC3 ns1__shift * SOAP_FMAC4 soap_in_ns1__shift(struct soap*, const char*, ns1__shift *, const char*);
+
+#ifndef soap_write_ns1__shift
+#define soap_write_ns1__shift(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:shift", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__shift * SOAP_FMAC4 soap_get_ns1__shift(struct soap*, ns1__shift *, const char*, const char*);
+
+#ifndef soap_read_ns1__shift
+#define soap_read_ns1__shift(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__shift(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__shift * SOAP_FMAC2 soap_instantiate_ns1__shift(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__shift * soap_new_ns1__shift(struct soap *soap, int n = -1) { return soap_instantiate_ns1__shift(soap, n, NULL, NULL, NULL); }
+
+inline ns1__shift * soap_new_req_ns1__shift(struct soap *soap) { ns1__shift *_p = soap_instantiate_ns1__shift(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__shift * soap_new_set_ns1__shift(struct soap *soap, std::string *comment, time_t *endDate, ns1__investigation *investigation, time_t *startDate, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__shift *_p = soap_instantiate_ns1__shift(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__shift::comment = comment; _p->ns1__shift::endDate = endDate; _p->ns1__shift::investigation = investigation; _p->ns1__shift::startDate = startDate; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__shift(struct soap *soap, ns1__shift *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__shift(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__publication
+#define SOAP_TYPE_ICat4_ns1__publication (86)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__publication(struct soap*, const char*, int, const ns1__publication *, const char*);
+SOAP_FMAC3 ns1__publication * SOAP_FMAC4 soap_in_ns1__publication(struct soap*, const char*, ns1__publication *, const char*);
+
+#ifndef soap_write_ns1__publication
+#define soap_write_ns1__publication(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:publication", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__publication * SOAP_FMAC4 soap_get_ns1__publication(struct soap*, ns1__publication *, const char*, const char*);
+
+#ifndef soap_read_ns1__publication
+#define soap_read_ns1__publication(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__publication(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__publication * SOAP_FMAC2 soap_instantiate_ns1__publication(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__publication * soap_new_ns1__publication(struct soap *soap, int n = -1) { return soap_instantiate_ns1__publication(soap, n, NULL, NULL, NULL); }
+
+inline ns1__publication * soap_new_req_ns1__publication(struct soap *soap) { ns1__publication *_p = soap_instantiate_ns1__publication(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__publication * soap_new_set_ns1__publication(struct soap *soap, std::string *doi, std::string *fullReference, ns1__investigation *investigation, std::string *repository, std::string *repositoryId, std::string *url, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__publication *_p = soap_instantiate_ns1__publication(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__publication::doi = doi; _p->ns1__publication::fullReference = fullReference; _p->ns1__publication::investigation = investigation; _p->ns1__publication::repository = repository; _p->ns1__publication::repositoryId = repositoryId; _p->ns1__publication::url = url; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__publication(struct soap *soap, ns1__publication *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__publication(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__keyword
+#define SOAP_TYPE_ICat4_ns1__keyword (85)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__keyword(struct soap*, const char*, int, const ns1__keyword *, const char*);
+SOAP_FMAC3 ns1__keyword * SOAP_FMAC4 soap_in_ns1__keyword(struct soap*, const char*, ns1__keyword *, const char*);
+
+#ifndef soap_write_ns1__keyword
+#define soap_write_ns1__keyword(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:keyword", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__keyword * SOAP_FMAC4 soap_get_ns1__keyword(struct soap*, ns1__keyword *, const char*, const char*);
+
+#ifndef soap_read_ns1__keyword
+#define soap_read_ns1__keyword(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__keyword(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__keyword * SOAP_FMAC2 soap_instantiate_ns1__keyword(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__keyword * soap_new_ns1__keyword(struct soap *soap, int n = -1) { return soap_instantiate_ns1__keyword(soap, n, NULL, NULL, NULL); }
+
+inline ns1__keyword * soap_new_req_ns1__keyword(struct soap *soap) { ns1__keyword *_p = soap_instantiate_ns1__keyword(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__keyword * soap_new_set_ns1__keyword(struct soap *soap, ns1__investigation *investigation, std::string *name, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__keyword *_p = soap_instantiate_ns1__keyword(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__keyword::investigation = investigation; _p->ns1__keyword::name = name; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__keyword(struct soap *soap, ns1__keyword *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__keyword(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__sampleType
+#define SOAP_TYPE_ICat4_ns1__sampleType (84)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sampleType(struct soap*, const char*, int, const ns1__sampleType *, const char*);
+SOAP_FMAC3 ns1__sampleType * SOAP_FMAC4 soap_in_ns1__sampleType(struct soap*, const char*, ns1__sampleType *, const char*);
+
+#ifndef soap_write_ns1__sampleType
+#define soap_write_ns1__sampleType(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:sampleType", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__sampleType * SOAP_FMAC4 soap_get_ns1__sampleType(struct soap*, ns1__sampleType *, const char*, const char*);
+
+#ifndef soap_read_ns1__sampleType
+#define soap_read_ns1__sampleType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__sampleType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__sampleType * SOAP_FMAC2 soap_instantiate_ns1__sampleType(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__sampleType * soap_new_ns1__sampleType(struct soap *soap, int n = -1) { return soap_instantiate_ns1__sampleType(soap, n, NULL, NULL, NULL); }
+
+inline ns1__sampleType * soap_new_req_ns1__sampleType(struct soap *soap) { ns1__sampleType *_p = soap_instantiate_ns1__sampleType(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__sampleType * soap_new_set_ns1__sampleType(struct soap *soap, ns1__facility *facility, std::string *molecularFormula, std::string *name, std::string *safetyInformation, std::vector<ns1__sample * >& samples, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__sampleType *_p = soap_instantiate_ns1__sampleType(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__sampleType::facility = facility; _p->ns1__sampleType::molecularFormula = molecularFormula; _p->ns1__sampleType::name = name; _p->ns1__sampleType::safetyInformation = safetyInformation; _p->ns1__sampleType::samples = samples; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__sampleType(struct soap *soap, ns1__sampleType *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__sampleType(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__sample
+#define SOAP_TYPE_ICat4_ns1__sample (83)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sample(struct soap*, const char*, int, const ns1__sample *, const char*);
+SOAP_FMAC3 ns1__sample * SOAP_FMAC4 soap_in_ns1__sample(struct soap*, const char*, ns1__sample *, const char*);
+
+#ifndef soap_write_ns1__sample
+#define soap_write_ns1__sample(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:sample", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__sample * SOAP_FMAC4 soap_get_ns1__sample(struct soap*, ns1__sample *, const char*, const char*);
+
+#ifndef soap_read_ns1__sample
+#define soap_read_ns1__sample(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__sample(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__sample * SOAP_FMAC2 soap_instantiate_ns1__sample(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__sample * soap_new_ns1__sample(struct soap *soap, int n = -1) { return soap_instantiate_ns1__sample(soap, n, NULL, NULL, NULL); }
+
+inline ns1__sample * soap_new_req_ns1__sample(struct soap *soap) { ns1__sample *_p = soap_instantiate_ns1__sample(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__sample * soap_new_set_ns1__sample(struct soap *soap, std::vector<ns1__dataset * >& datasets, ns1__investigation *investigation, std::string *name, std::vector<ns1__sampleParameter * >& parameters, ns1__sampleType *type, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__sample *_p = soap_instantiate_ns1__sample(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__sample::datasets = datasets; _p->ns1__sample::investigation = investigation; _p->ns1__sample::name = name; _p->ns1__sample::parameters = parameters; _p->ns1__sample::type = type; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__sample(struct soap *soap, ns1__sample *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__sample(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__sampleParameter
+#define SOAP_TYPE_ICat4_ns1__sampleParameter (82)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sampleParameter(struct soap*, const char*, int, const ns1__sampleParameter *, const char*);
+SOAP_FMAC3 ns1__sampleParameter * SOAP_FMAC4 soap_in_ns1__sampleParameter(struct soap*, const char*, ns1__sampleParameter *, const char*);
+
+#ifndef soap_write_ns1__sampleParameter
+#define soap_write_ns1__sampleParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:sampleParameter", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__sampleParameter * SOAP_FMAC4 soap_get_ns1__sampleParameter(struct soap*, ns1__sampleParameter *, const char*, const char*);
+
+#ifndef soap_read_ns1__sampleParameter
+#define soap_read_ns1__sampleParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__sampleParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__sampleParameter * SOAP_FMAC2 soap_instantiate_ns1__sampleParameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__sampleParameter * soap_new_ns1__sampleParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__sampleParameter(soap, n, NULL, NULL, NULL); }
+
+inline ns1__sampleParameter * soap_new_req_ns1__sampleParameter(struct soap *soap) { ns1__sampleParameter *_p = soap_instantiate_ns1__sampleParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__sampleParameter * soap_new_set_ns1__sampleParameter(struct soap *soap, ns1__sample *sample, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__sampleParameter *_p = soap_instantiate_ns1__sampleParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__sampleParameter::sample = sample; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
+
+inline void soap_delete_ns1__sampleParameter(struct soap *soap, ns1__sampleParameter *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__sampleParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__permissibleStringValue
+#define SOAP_TYPE_ICat4_ns1__permissibleStringValue (81)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__permissibleStringValue(struct soap*, const char*, int, const ns1__permissibleStringValue *, const char*);
+SOAP_FMAC3 ns1__permissibleStringValue * SOAP_FMAC4 soap_in_ns1__permissibleStringValue(struct soap*, const char*, ns1__permissibleStringValue *, const char*);
+
+#ifndef soap_write_ns1__permissibleStringValue
+#define soap_write_ns1__permissibleStringValue(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:permissibleStringValue", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__permissibleStringValue * SOAP_FMAC4 soap_get_ns1__permissibleStringValue(struct soap*, ns1__permissibleStringValue *, const char*, const char*);
+
+#ifndef soap_read_ns1__permissibleStringValue
+#define soap_read_ns1__permissibleStringValue(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__permissibleStringValue(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__permissibleStringValue * SOAP_FMAC2 soap_instantiate_ns1__permissibleStringValue(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__permissibleStringValue * soap_new_ns1__permissibleStringValue(struct soap *soap, int n = -1) { return soap_instantiate_ns1__permissibleStringValue(soap, n, NULL, NULL, NULL); }
+
+inline ns1__permissibleStringValue * soap_new_req_ns1__permissibleStringValue(struct soap *soap) { ns1__permissibleStringValue *_p = soap_instantiate_ns1__permissibleStringValue(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__permissibleStringValue * soap_new_set_ns1__permissibleStringValue(struct soap *soap, ns1__parameterType *type, std::string *value, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__permissibleStringValue *_p = soap_instantiate_ns1__permissibleStringValue(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__permissibleStringValue::type = type; _p->ns1__permissibleStringValue::value = value; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__permissibleStringValue(struct soap *soap, ns1__permissibleStringValue *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__permissibleStringValue(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__investigationParameter
+#define SOAP_TYPE_ICat4_ns1__investigationParameter (80)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigationParameter(struct soap*, const char*, int, const ns1__investigationParameter *, const char*);
+SOAP_FMAC3 ns1__investigationParameter * SOAP_FMAC4 soap_in_ns1__investigationParameter(struct soap*, const char*, ns1__investigationParameter *, const char*);
+
+#ifndef soap_write_ns1__investigationParameter
+#define soap_write_ns1__investigationParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:investigationParameter", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__investigationParameter * SOAP_FMAC4 soap_get_ns1__investigationParameter(struct soap*, ns1__investigationParameter *, const char*, const char*);
+
+#ifndef soap_read_ns1__investigationParameter
+#define soap_read_ns1__investigationParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__investigationParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__investigationParameter * SOAP_FMAC2 soap_instantiate_ns1__investigationParameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__investigationParameter * soap_new_ns1__investigationParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__investigationParameter(soap, n, NULL, NULL, NULL); }
+
+inline ns1__investigationParameter * soap_new_req_ns1__investigationParameter(struct soap *soap) { ns1__investigationParameter *_p = soap_instantiate_ns1__investigationParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__investigationParameter * soap_new_set_ns1__investigationParameter(struct soap *soap, ns1__investigation *investigation, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__investigationParameter *_p = soap_instantiate_ns1__investigationParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__investigationParameter::investigation = investigation; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
+
+inline void soap_delete_ns1__investigationParameter(struct soap *soap, ns1__investigationParameter *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__datasetParameter
+#define SOAP_TYPE_ICat4_ns1__datasetParameter (79)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datasetParameter(struct soap*, const char*, int, const ns1__datasetParameter *, const char*);
+SOAP_FMAC3 ns1__datasetParameter * SOAP_FMAC4 soap_in_ns1__datasetParameter(struct soap*, const char*, ns1__datasetParameter *, const char*);
+
+#ifndef soap_write_ns1__datasetParameter
+#define soap_write_ns1__datasetParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:datasetParameter", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__datasetParameter * SOAP_FMAC4 soap_get_ns1__datasetParameter(struct soap*, ns1__datasetParameter *, const char*, const char*);
+
+#ifndef soap_read_ns1__datasetParameter
+#define soap_read_ns1__datasetParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__datasetParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__datasetParameter * SOAP_FMAC2 soap_instantiate_ns1__datasetParameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__datasetParameter * soap_new_ns1__datasetParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__datasetParameter(soap, n, NULL, NULL, NULL); }
+
+inline ns1__datasetParameter * soap_new_req_ns1__datasetParameter(struct soap *soap) { ns1__datasetParameter *_p = soap_instantiate_ns1__datasetParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__datasetParameter * soap_new_set_ns1__datasetParameter(struct soap *soap, ns1__dataset *ns1__dataset_, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__datasetParameter *_p = soap_instantiate_ns1__datasetParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__datasetParameter::ns1__dataset_ = ns1__dataset_; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
+
+inline void soap_delete_ns1__datasetParameter(struct soap *soap, ns1__datasetParameter *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datasetParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__datafileParameter
+#define SOAP_TYPE_ICat4_ns1__datafileParameter (78)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datafileParameter(struct soap*, const char*, int, const ns1__datafileParameter *, const char*);
+SOAP_FMAC3 ns1__datafileParameter * SOAP_FMAC4 soap_in_ns1__datafileParameter(struct soap*, const char*, ns1__datafileParameter *, const char*);
+
+#ifndef soap_write_ns1__datafileParameter
+#define soap_write_ns1__datafileParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:datafileParameter", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__datafileParameter * SOAP_FMAC4 soap_get_ns1__datafileParameter(struct soap*, ns1__datafileParameter *, const char*, const char*);
+
+#ifndef soap_read_ns1__datafileParameter
+#define soap_read_ns1__datafileParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__datafileParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__datafileParameter * SOAP_FMAC2 soap_instantiate_ns1__datafileParameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__datafileParameter * soap_new_ns1__datafileParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__datafileParameter(soap, n, NULL, NULL, NULL); }
+
+inline ns1__datafileParameter * soap_new_req_ns1__datafileParameter(struct soap *soap) { ns1__datafileParameter *_p = soap_instantiate_ns1__datafileParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__datafileParameter * soap_new_set_ns1__datafileParameter(struct soap *soap, ns1__datafile *ns1__datafile_, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__datafileParameter *_p = soap_instantiate_ns1__datafileParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__datafileParameter::ns1__datafile_ = ns1__datafile_; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
+
+inline void soap_delete_ns1__datafileParameter(struct soap *soap, ns1__datafileParameter *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datafileParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__parameter
+#define SOAP_TYPE_ICat4_ns1__parameter (77)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameter(struct soap*, const char*, int, const ns1__parameter *, const char*);
+SOAP_FMAC3 ns1__parameter * SOAP_FMAC4 soap_in_ns1__parameter(struct soap*, const char*, ns1__parameter *, const char*);
+
+#ifndef soap_write_ns1__parameter
+#define soap_write_ns1__parameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:parameter", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__parameter * SOAP_FMAC4 soap_get_ns1__parameter(struct soap*, ns1__parameter *, const char*, const char*);
+
+#ifndef soap_read_ns1__parameter
+#define soap_read_ns1__parameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__parameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__parameter * SOAP_FMAC2 soap_instantiate_ns1__parameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__parameter * soap_new_ns1__parameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__parameter(soap, n, NULL, NULL, NULL); }
+
+inline ns1__parameter * soap_new_req_ns1__parameter(struct soap *soap) { ns1__parameter *_p = soap_instantiate_ns1__parameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__parameter * soap_new_set_ns1__parameter(struct soap *soap, time_t *dateTimeValue, double *error, double *numericValue, double *rangeBottom, double *rangeTop, std::string *stringValue, ns1__parameterType *type, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__parameter *_p = soap_instantiate_ns1__parameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__parameter::dateTimeValue = dateTimeValue; _p->ns1__parameter::error = error; _p->ns1__parameter::numericValue = numericValue; _p->ns1__parameter::rangeBottom = rangeBottom; _p->ns1__parameter::rangeTop = rangeTop; _p->ns1__parameter::stringValue = stringValue; _p->ns1__parameter::type = type; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__parameter(struct soap *soap, ns1__parameter *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__parameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__dataCollectionParameter
+#define SOAP_TYPE_ICat4_ns1__dataCollectionParameter (76)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollectionParameter(struct soap*, const char*, int, const ns1__dataCollectionParameter *, const char*);
+SOAP_FMAC3 ns1__dataCollectionParameter * SOAP_FMAC4 soap_in_ns1__dataCollectionParameter(struct soap*, const char*, ns1__dataCollectionParameter *, const char*);
+
+#ifndef soap_write_ns1__dataCollectionParameter
+#define soap_write_ns1__dataCollectionParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:dataCollectionParameter", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dataCollectionParameter * SOAP_FMAC4 soap_get_ns1__dataCollectionParameter(struct soap*, ns1__dataCollectionParameter *, const char*, const char*);
+
+#ifndef soap_read_ns1__dataCollectionParameter
+#define soap_read_ns1__dataCollectionParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__dataCollectionParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__dataCollectionParameter * SOAP_FMAC2 soap_instantiate_ns1__dataCollectionParameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__dataCollectionParameter * soap_new_ns1__dataCollectionParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__dataCollectionParameter(soap, n, NULL, NULL, NULL); }
+
+inline ns1__dataCollectionParameter * soap_new_req_ns1__dataCollectionParameter(struct soap *soap) { ns1__dataCollectionParameter *_p = soap_instantiate_ns1__dataCollectionParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__dataCollectionParameter * soap_new_set_ns1__dataCollectionParameter(struct soap *soap, ns1__dataCollection *dataCollection, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__dataCollectionParameter *_p = soap_instantiate_ns1__dataCollectionParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dataCollectionParameter::dataCollection = dataCollection; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
+
+inline void soap_delete_ns1__dataCollectionParameter(struct soap *soap, ns1__dataCollectionParameter *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataCollectionParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__parameterType
+#define SOAP_TYPE_ICat4_ns1__parameterType (75)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameterType(struct soap*, const char*, int, const ns1__parameterType *, const char*);
+SOAP_FMAC3 ns1__parameterType * SOAP_FMAC4 soap_in_ns1__parameterType(struct soap*, const char*, ns1__parameterType *, const char*);
+
+#ifndef soap_write_ns1__parameterType
+#define soap_write_ns1__parameterType(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:parameterType", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__parameterType * SOAP_FMAC4 soap_get_ns1__parameterType(struct soap*, ns1__parameterType *, const char*, const char*);
+
+#ifndef soap_read_ns1__parameterType
+#define soap_read_ns1__parameterType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__parameterType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__parameterType * SOAP_FMAC2 soap_instantiate_ns1__parameterType(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__parameterType * soap_new_ns1__parameterType(struct soap *soap, int n = -1) { return soap_instantiate_ns1__parameterType(soap, n, NULL, NULL, NULL); }
+
+inline ns1__parameterType * soap_new_req_ns1__parameterType(struct soap *soap, bool applicableToDataCollection, bool applicableToDatafile, bool applicableToDataset, bool applicableToInvestigation, bool applicableToSample, bool enforced, bool verified) { ns1__parameterType *_p = soap_instantiate_ns1__parameterType(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__parameterType::applicableToDataCollection = applicableToDataCollection; _p->ns1__parameterType::applicableToDatafile = applicableToDatafile; _p->ns1__parameterType::applicableToDataset = applicableToDataset; _p->ns1__parameterType::applicableToInvestigation = applicableToInvestigation; _p->ns1__parameterType::applicableToSample = applicableToSample; _p->ns1__parameterType::enforced = enforced; _p->ns1__parameterType::verified = verified; } return _p; }
+
+inline ns1__parameterType * soap_new_set_ns1__parameterType(struct soap *soap, bool applicableToDataCollection, bool applicableToDatafile, bool applicableToDataset, bool applicableToInvestigation, bool applicableToSample, std::vector<ns1__dataCollectionParameter * >& dataCollectionParameters, std::vector<ns1__datafileParameter * >& datafileParameters, std::vector<ns1__datasetParameter * >& datasetParameters, std::string *description, bool enforced, ns1__facility *facility, std::vector<ns1__investigationParameter * >& investigationParameters, double *maximumNumericValue, double *minimumNumericValue, std::string *name, std::vector<ns1__permissibleStringValue * >& permissibleStringValues, std::vector<ns1__sampleParameter * >& sampleParameters, std::string *units, std::string *unitsFullName, enum ns1__parameterValueType *valueType, bool verified, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__parameterType *_p = soap_instantiate_ns1__parameterType(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__parameterType::applicableToDataCollection = applicableToDataCollection; _p->ns1__parameterType::applicableToDatafile = applicableToDatafile; _p->ns1__parameterType::applicableToDataset = applicableToDataset; _p->ns1__parameterType::applicableToInvestigation = applicableToInvestigation; _p->ns1__parameterType::applicableToSample = applicableToSample; _p->ns1__parameterType::dataCollectionParameters = dataCollectionParameters; _p->ns1__parameterType::datafileParameters = datafileParameters; _p->ns1__parameterType::datasetParameters = datasetParameters; _p->ns1__parameterType::description = description; _p->ns1__parameterType::enforced = enforced; _p->ns1__parameterType::facility = facility; _p->ns1__parameterType::investigationParameters = investigationParameters; _p->ns1__parameterType::maximumNumericValue = maximumNumericValue; _p->ns1__parameterType::minimumNumericValue = minimumNumericValue; _p->ns1__parameterType::name = name; _p->ns1__parameterType::permissibleStringValues = permissibleStringValues; _p->ns1__parameterType::sampleParameters = sampleParameters; _p->ns1__parameterType::units = units; _p->ns1__parameterType::unitsFullName = unitsFullName; _p->ns1__parameterType::valueType = valueType; _p->ns1__parameterType::verified = verified; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__parameterType(struct soap *soap, ns1__parameterType *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__parameterType(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__investigationType
 #define SOAP_TYPE_ICat4_ns1__investigationType (74)
@@ -972,356 +1610,37 @@ inline void soap_delete_ns1__investigationType(struct soap *soap, ns1__investiga
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationType(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__shift
-#define SOAP_TYPE_ICat4_ns1__shift (73)
+#ifndef SOAP_TYPE_ICat4_ns1__investigationInstrument
+#define SOAP_TYPE_ICat4_ns1__investigationInstrument (73)
 #endif
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__shift(struct soap*, const char*, int, const ns1__shift *, const char*);
-SOAP_FMAC3 ns1__shift * SOAP_FMAC4 soap_in_ns1__shift(struct soap*, const char*, ns1__shift *, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigationInstrument(struct soap*, const char*, int, const ns1__investigationInstrument *, const char*);
+SOAP_FMAC3 ns1__investigationInstrument * SOAP_FMAC4 soap_in_ns1__investigationInstrument(struct soap*, const char*, ns1__investigationInstrument *, const char*);
 
-#ifndef soap_write_ns1__shift
-#define soap_write_ns1__shift(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:shift", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_write_ns1__investigationInstrument
+#define soap_write_ns1__investigationInstrument(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:investigationInstrument", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC3 ns1__shift * SOAP_FMAC4 soap_get_ns1__shift(struct soap*, ns1__shift *, const char*, const char*);
+SOAP_FMAC3 ns1__investigationInstrument * SOAP_FMAC4 soap_get_ns1__investigationInstrument(struct soap*, ns1__investigationInstrument *, const char*, const char*);
 
-#ifndef soap_read_ns1__shift
-#define soap_read_ns1__shift(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__shift(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_ns1__investigationInstrument
+#define soap_read_ns1__investigationInstrument(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__investigationInstrument(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC1 ns1__shift * SOAP_FMAC2 soap_instantiate_ns1__shift(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC1 ns1__investigationInstrument * SOAP_FMAC2 soap_instantiate_ns1__investigationInstrument(struct soap*, int, const char*, const char*, size_t*);
 
-inline ns1__shift * soap_new_ns1__shift(struct soap *soap, int n = -1) { return soap_instantiate_ns1__shift(soap, n, NULL, NULL, NULL); }
+inline ns1__investigationInstrument * soap_new_ns1__investigationInstrument(struct soap *soap, int n = -1) { return soap_instantiate_ns1__investigationInstrument(soap, n, NULL, NULL, NULL); }
 
-inline ns1__shift * soap_new_req_ns1__shift(struct soap *soap) { ns1__shift *_p = soap_instantiate_ns1__shift(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+inline ns1__investigationInstrument * soap_new_req_ns1__investigationInstrument(struct soap *soap) { ns1__investigationInstrument *_p = soap_instantiate_ns1__investigationInstrument(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__shift * soap_new_set_ns1__shift(struct soap *soap, std::string *comment, time_t *endDate, ns1__investigation *investigation, time_t *startDate, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__shift *_p = soap_instantiate_ns1__shift(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__shift::comment = comment; _p->ns1__shift::endDate = endDate; _p->ns1__shift::investigation = investigation; _p->ns1__shift::startDate = startDate; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+inline ns1__investigationInstrument * soap_new_set_ns1__investigationInstrument(struct soap *soap, ns1__instrument *instrument, ns1__investigation *investigation, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__investigationInstrument *_p = soap_instantiate_ns1__investigationInstrument(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__investigationInstrument::instrument = instrument; _p->ns1__investigationInstrument::investigation = investigation; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
 
-inline void soap_delete_ns1__shift(struct soap *soap, ns1__shift *p) { soap_delete(soap, p); }
+inline void soap_delete_ns1__investigationInstrument(struct soap *soap, ns1__investigationInstrument *p) { soap_delete(soap, p); }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__shift(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__publication
-#define SOAP_TYPE_ICat4_ns1__publication (72)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__publication(struct soap*, const char*, int, const ns1__publication *, const char*);
-SOAP_FMAC3 ns1__publication * SOAP_FMAC4 soap_in_ns1__publication(struct soap*, const char*, ns1__publication *, const char*);
-
-#ifndef soap_write_ns1__publication
-#define soap_write_ns1__publication(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:publication", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__publication * SOAP_FMAC4 soap_get_ns1__publication(struct soap*, ns1__publication *, const char*, const char*);
-
-#ifndef soap_read_ns1__publication
-#define soap_read_ns1__publication(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__publication(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__publication * SOAP_FMAC2 soap_instantiate_ns1__publication(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__publication * soap_new_ns1__publication(struct soap *soap, int n = -1) { return soap_instantiate_ns1__publication(soap, n, NULL, NULL, NULL); }
-
-inline ns1__publication * soap_new_req_ns1__publication(struct soap *soap) { ns1__publication *_p = soap_instantiate_ns1__publication(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__publication * soap_new_set_ns1__publication(struct soap *soap, std::string *doi, std::string *fullReference, ns1__investigation *investigation, std::string *repository, std::string *repositoryId, std::string *url, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__publication *_p = soap_instantiate_ns1__publication(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__publication::doi = doi; _p->ns1__publication::fullReference = fullReference; _p->ns1__publication::investigation = investigation; _p->ns1__publication::repository = repository; _p->ns1__publication::repositoryId = repositoryId; _p->ns1__publication::url = url; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__publication(struct soap *soap, ns1__publication *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__publication(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__sampleType
-#define SOAP_TYPE_ICat4_ns1__sampleType (71)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sampleType(struct soap*, const char*, int, const ns1__sampleType *, const char*);
-SOAP_FMAC3 ns1__sampleType * SOAP_FMAC4 soap_in_ns1__sampleType(struct soap*, const char*, ns1__sampleType *, const char*);
-
-#ifndef soap_write_ns1__sampleType
-#define soap_write_ns1__sampleType(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:sampleType", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__sampleType * SOAP_FMAC4 soap_get_ns1__sampleType(struct soap*, ns1__sampleType *, const char*, const char*);
-
-#ifndef soap_read_ns1__sampleType
-#define soap_read_ns1__sampleType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__sampleType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__sampleType * SOAP_FMAC2 soap_instantiate_ns1__sampleType(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__sampleType * soap_new_ns1__sampleType(struct soap *soap, int n = -1) { return soap_instantiate_ns1__sampleType(soap, n, NULL, NULL, NULL); }
-
-inline ns1__sampleType * soap_new_req_ns1__sampleType(struct soap *soap) { ns1__sampleType *_p = soap_instantiate_ns1__sampleType(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__sampleType * soap_new_set_ns1__sampleType(struct soap *soap, ns1__facility *facility, std::string *molecularFormula, std::string *name, std::string *safetyInformation, std::vector<ns1__sample * >& samples, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__sampleType *_p = soap_instantiate_ns1__sampleType(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__sampleType::facility = facility; _p->ns1__sampleType::molecularFormula = molecularFormula; _p->ns1__sampleType::name = name; _p->ns1__sampleType::safetyInformation = safetyInformation; _p->ns1__sampleType::samples = samples; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__sampleType(struct soap *soap, ns1__sampleType *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__sampleType(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__sample
-#define SOAP_TYPE_ICat4_ns1__sample (70)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sample(struct soap*, const char*, int, const ns1__sample *, const char*);
-SOAP_FMAC3 ns1__sample * SOAP_FMAC4 soap_in_ns1__sample(struct soap*, const char*, ns1__sample *, const char*);
-
-#ifndef soap_write_ns1__sample
-#define soap_write_ns1__sample(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:sample", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__sample * SOAP_FMAC4 soap_get_ns1__sample(struct soap*, ns1__sample *, const char*, const char*);
-
-#ifndef soap_read_ns1__sample
-#define soap_read_ns1__sample(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__sample(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__sample * SOAP_FMAC2 soap_instantiate_ns1__sample(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__sample * soap_new_ns1__sample(struct soap *soap, int n = -1) { return soap_instantiate_ns1__sample(soap, n, NULL, NULL, NULL); }
-
-inline ns1__sample * soap_new_req_ns1__sample(struct soap *soap) { ns1__sample *_p = soap_instantiate_ns1__sample(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__sample * soap_new_set_ns1__sample(struct soap *soap, std::vector<ns1__dataset * >& datasets, ns1__investigation *investigation, std::string *name, std::vector<ns1__sampleParameter * >& parameters, ns1__sampleType *type, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__sample *_p = soap_instantiate_ns1__sample(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__sample::datasets = datasets; _p->ns1__sample::investigation = investigation; _p->ns1__sample::name = name; _p->ns1__sample::parameters = parameters; _p->ns1__sample::type = type; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__sample(struct soap *soap, ns1__sample *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__sample(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__sampleParameter
-#define SOAP_TYPE_ICat4_ns1__sampleParameter (69)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__sampleParameter(struct soap*, const char*, int, const ns1__sampleParameter *, const char*);
-SOAP_FMAC3 ns1__sampleParameter * SOAP_FMAC4 soap_in_ns1__sampleParameter(struct soap*, const char*, ns1__sampleParameter *, const char*);
-
-#ifndef soap_write_ns1__sampleParameter
-#define soap_write_ns1__sampleParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:sampleParameter", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__sampleParameter * SOAP_FMAC4 soap_get_ns1__sampleParameter(struct soap*, ns1__sampleParameter *, const char*, const char*);
-
-#ifndef soap_read_ns1__sampleParameter
-#define soap_read_ns1__sampleParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__sampleParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__sampleParameter * SOAP_FMAC2 soap_instantiate_ns1__sampleParameter(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__sampleParameter * soap_new_ns1__sampleParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__sampleParameter(soap, n, NULL, NULL, NULL); }
-
-inline ns1__sampleParameter * soap_new_req_ns1__sampleParameter(struct soap *soap) { ns1__sampleParameter *_p = soap_instantiate_ns1__sampleParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__sampleParameter * soap_new_set_ns1__sampleParameter(struct soap *soap, ns1__sample *sample, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__sampleParameter *_p = soap_instantiate_ns1__sampleParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__sampleParameter::sample = sample; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
-
-inline void soap_delete_ns1__sampleParameter(struct soap *soap, ns1__sampleParameter *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__sampleParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__permissibleStringValue
-#define SOAP_TYPE_ICat4_ns1__permissibleStringValue (68)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__permissibleStringValue(struct soap*, const char*, int, const ns1__permissibleStringValue *, const char*);
-SOAP_FMAC3 ns1__permissibleStringValue * SOAP_FMAC4 soap_in_ns1__permissibleStringValue(struct soap*, const char*, ns1__permissibleStringValue *, const char*);
-
-#ifndef soap_write_ns1__permissibleStringValue
-#define soap_write_ns1__permissibleStringValue(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:permissibleStringValue", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__permissibleStringValue * SOAP_FMAC4 soap_get_ns1__permissibleStringValue(struct soap*, ns1__permissibleStringValue *, const char*, const char*);
-
-#ifndef soap_read_ns1__permissibleStringValue
-#define soap_read_ns1__permissibleStringValue(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__permissibleStringValue(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__permissibleStringValue * SOAP_FMAC2 soap_instantiate_ns1__permissibleStringValue(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__permissibleStringValue * soap_new_ns1__permissibleStringValue(struct soap *soap, int n = -1) { return soap_instantiate_ns1__permissibleStringValue(soap, n, NULL, NULL, NULL); }
-
-inline ns1__permissibleStringValue * soap_new_req_ns1__permissibleStringValue(struct soap *soap) { ns1__permissibleStringValue *_p = soap_instantiate_ns1__permissibleStringValue(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__permissibleStringValue * soap_new_set_ns1__permissibleStringValue(struct soap *soap, ns1__parameterType *type, std::string *value, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__permissibleStringValue *_p = soap_instantiate_ns1__permissibleStringValue(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__permissibleStringValue::type = type; _p->ns1__permissibleStringValue::value = value; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__permissibleStringValue(struct soap *soap, ns1__permissibleStringValue *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__permissibleStringValue(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__datasetParameter
-#define SOAP_TYPE_ICat4_ns1__datasetParameter (67)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datasetParameter(struct soap*, const char*, int, const ns1__datasetParameter *, const char*);
-SOAP_FMAC3 ns1__datasetParameter * SOAP_FMAC4 soap_in_ns1__datasetParameter(struct soap*, const char*, ns1__datasetParameter *, const char*);
-
-#ifndef soap_write_ns1__datasetParameter
-#define soap_write_ns1__datasetParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:datasetParameter", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__datasetParameter * SOAP_FMAC4 soap_get_ns1__datasetParameter(struct soap*, ns1__datasetParameter *, const char*, const char*);
-
-#ifndef soap_read_ns1__datasetParameter
-#define soap_read_ns1__datasetParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__datasetParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__datasetParameter * SOAP_FMAC2 soap_instantiate_ns1__datasetParameter(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__datasetParameter * soap_new_ns1__datasetParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__datasetParameter(soap, n, NULL, NULL, NULL); }
-
-inline ns1__datasetParameter * soap_new_req_ns1__datasetParameter(struct soap *soap) { ns1__datasetParameter *_p = soap_instantiate_ns1__datasetParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__datasetParameter * soap_new_set_ns1__datasetParameter(struct soap *soap, ns1__dataset *ns1__dataset_, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__datasetParameter *_p = soap_instantiate_ns1__datasetParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__datasetParameter::ns1__dataset_ = ns1__dataset_; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
-
-inline void soap_delete_ns1__datasetParameter(struct soap *soap, ns1__datasetParameter *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datasetParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__datafileParameter
-#define SOAP_TYPE_ICat4_ns1__datafileParameter (66)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datafileParameter(struct soap*, const char*, int, const ns1__datafileParameter *, const char*);
-SOAP_FMAC3 ns1__datafileParameter * SOAP_FMAC4 soap_in_ns1__datafileParameter(struct soap*, const char*, ns1__datafileParameter *, const char*);
-
-#ifndef soap_write_ns1__datafileParameter
-#define soap_write_ns1__datafileParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:datafileParameter", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__datafileParameter * SOAP_FMAC4 soap_get_ns1__datafileParameter(struct soap*, ns1__datafileParameter *, const char*, const char*);
-
-#ifndef soap_read_ns1__datafileParameter
-#define soap_read_ns1__datafileParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__datafileParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__datafileParameter * SOAP_FMAC2 soap_instantiate_ns1__datafileParameter(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__datafileParameter * soap_new_ns1__datafileParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__datafileParameter(soap, n, NULL, NULL, NULL); }
-
-inline ns1__datafileParameter * soap_new_req_ns1__datafileParameter(struct soap *soap) { ns1__datafileParameter *_p = soap_instantiate_ns1__datafileParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__datafileParameter * soap_new_set_ns1__datafileParameter(struct soap *soap, ns1__datafile *ns1__datafile_, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__datafileParameter *_p = soap_instantiate_ns1__datafileParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__datafileParameter::ns1__datafile_ = ns1__datafile_; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
-
-inline void soap_delete_ns1__datafileParameter(struct soap *soap, ns1__datafileParameter *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datafileParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__parameterType
-#define SOAP_TYPE_ICat4_ns1__parameterType (65)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameterType(struct soap*, const char*, int, const ns1__parameterType *, const char*);
-SOAP_FMAC3 ns1__parameterType * SOAP_FMAC4 soap_in_ns1__parameterType(struct soap*, const char*, ns1__parameterType *, const char*);
-
-#ifndef soap_write_ns1__parameterType
-#define soap_write_ns1__parameterType(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:parameterType", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__parameterType * SOAP_FMAC4 soap_get_ns1__parameterType(struct soap*, ns1__parameterType *, const char*, const char*);
-
-#ifndef soap_read_ns1__parameterType
-#define soap_read_ns1__parameterType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__parameterType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__parameterType * SOAP_FMAC2 soap_instantiate_ns1__parameterType(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__parameterType * soap_new_ns1__parameterType(struct soap *soap, int n = -1) { return soap_instantiate_ns1__parameterType(soap, n, NULL, NULL, NULL); }
-
-inline ns1__parameterType * soap_new_req_ns1__parameterType(struct soap *soap, bool applicableToDatafile, bool applicableToDataset, bool applicableToInvestigation, bool applicableToSample, bool enforced, bool verified) { ns1__parameterType *_p = soap_instantiate_ns1__parameterType(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__parameterType::applicableToDatafile = applicableToDatafile; _p->ns1__parameterType::applicableToDataset = applicableToDataset; _p->ns1__parameterType::applicableToInvestigation = applicableToInvestigation; _p->ns1__parameterType::applicableToSample = applicableToSample; _p->ns1__parameterType::enforced = enforced; _p->ns1__parameterType::verified = verified; } return _p; }
-
-inline ns1__parameterType * soap_new_set_ns1__parameterType(struct soap *soap, bool applicableToDatafile, bool applicableToDataset, bool applicableToInvestigation, bool applicableToSample, std::vector<ns1__datafileParameter * >& datafileParameters, std::vector<ns1__datasetParameter * >& datasetParameters, std::string *description, bool enforced, ns1__facility *facility, std::vector<ns1__investigationParameter * >& investigationParameters, double *maximumNumericValue, double *minimumNumericValue, std::string *name, std::vector<ns1__permissibleStringValue * >& permissibleStringValues, std::vector<ns1__sampleParameter * >& sampleParameters, std::string *units, std::string *unitsFullName, enum ns1__parameterValueType *valueType, bool verified, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__parameterType *_p = soap_instantiate_ns1__parameterType(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__parameterType::applicableToDatafile = applicableToDatafile; _p->ns1__parameterType::applicableToDataset = applicableToDataset; _p->ns1__parameterType::applicableToInvestigation = applicableToInvestigation; _p->ns1__parameterType::applicableToSample = applicableToSample; _p->ns1__parameterType::datafileParameters = datafileParameters; _p->ns1__parameterType::datasetParameters = datasetParameters; _p->ns1__parameterType::description = description; _p->ns1__parameterType::enforced = enforced; _p->ns1__parameterType::facility = facility; _p->ns1__parameterType::investigationParameters = investigationParameters; _p->ns1__parameterType::maximumNumericValue = maximumNumericValue; _p->ns1__parameterType::minimumNumericValue = minimumNumericValue; _p->ns1__parameterType::name = name; _p->ns1__parameterType::permissibleStringValues = permissibleStringValues; _p->ns1__parameterType::sampleParameters = sampleParameters; _p->ns1__parameterType::units = units; _p->ns1__parameterType::unitsFullName = unitsFullName; _p->ns1__parameterType::valueType = valueType; _p->ns1__parameterType::verified = verified; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__parameterType(struct soap *soap, ns1__parameterType *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__parameterType(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__parameter
-#define SOAP_TYPE_ICat4_ns1__parameter (64)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__parameter(struct soap*, const char*, int, const ns1__parameter *, const char*);
-SOAP_FMAC3 ns1__parameter * SOAP_FMAC4 soap_in_ns1__parameter(struct soap*, const char*, ns1__parameter *, const char*);
-
-#ifndef soap_write_ns1__parameter
-#define soap_write_ns1__parameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:parameter", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__parameter * SOAP_FMAC4 soap_get_ns1__parameter(struct soap*, ns1__parameter *, const char*, const char*);
-
-#ifndef soap_read_ns1__parameter
-#define soap_read_ns1__parameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__parameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__parameter * SOAP_FMAC2 soap_instantiate_ns1__parameter(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__parameter * soap_new_ns1__parameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__parameter(soap, n, NULL, NULL, NULL); }
-
-inline ns1__parameter * soap_new_req_ns1__parameter(struct soap *soap) { ns1__parameter *_p = soap_instantiate_ns1__parameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__parameter * soap_new_set_ns1__parameter(struct soap *soap, time_t *dateTimeValue, double *error, double *numericValue, double *rangeBottom, double *rangeTop, std::string *stringValue, ns1__parameterType *type, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__parameter *_p = soap_instantiate_ns1__parameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__parameter::dateTimeValue = dateTimeValue; _p->ns1__parameter::error = error; _p->ns1__parameter::numericValue = numericValue; _p->ns1__parameter::rangeBottom = rangeBottom; _p->ns1__parameter::rangeTop = rangeTop; _p->ns1__parameter::stringValue = stringValue; _p->ns1__parameter::type = type; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__parameter(struct soap *soap, ns1__parameter *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__parameter(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__investigationParameter
-#define SOAP_TYPE_ICat4_ns1__investigationParameter (63)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigationParameter(struct soap*, const char*, int, const ns1__investigationParameter *, const char*);
-SOAP_FMAC3 ns1__investigationParameter * SOAP_FMAC4 soap_in_ns1__investigationParameter(struct soap*, const char*, ns1__investigationParameter *, const char*);
-
-#ifndef soap_write_ns1__investigationParameter
-#define soap_write_ns1__investigationParameter(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:investigationParameter", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__investigationParameter * SOAP_FMAC4 soap_get_ns1__investigationParameter(struct soap*, ns1__investigationParameter *, const char*, const char*);
-
-#ifndef soap_read_ns1__investigationParameter
-#define soap_read_ns1__investigationParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__investigationParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__investigationParameter * SOAP_FMAC2 soap_instantiate_ns1__investigationParameter(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__investigationParameter * soap_new_ns1__investigationParameter(struct soap *soap, int n = -1) { return soap_instantiate_ns1__investigationParameter(soap, n, NULL, NULL, NULL); }
-
-inline ns1__investigationParameter * soap_new_req_ns1__investigationParameter(struct soap *soap) { ns1__investigationParameter *_p = soap_instantiate_ns1__investigationParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__investigationParameter * soap_new_set_ns1__investigationParameter(struct soap *soap, ns1__investigation *investigation, time_t *dateTimeValue1, double *error1, double *numericValue1, double *rangeBottom1, double *rangeTop1, std::string *stringValue1, ns1__parameterType *type1, std::string *createId2, time_t *createTime2, time_t *modTime2, LONG64 *id2, std::string *modId2, char *__item3) { ns1__investigationParameter *_p = soap_instantiate_ns1__investigationParameter(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__investigationParameter::investigation = investigation; _p->ns1__parameter::dateTimeValue = dateTimeValue1; _p->ns1__parameter::error = error1; _p->ns1__parameter::numericValue = numericValue1; _p->ns1__parameter::rangeBottom = rangeBottom1; _p->ns1__parameter::rangeTop = rangeTop1; _p->ns1__parameter::stringValue = stringValue1; _p->ns1__parameter::type = type1; _p->ns1__entityBaseBean::createId = createId2; _p->ns1__entityBaseBean::createTime = createTime2; _p->ns1__entityBaseBean::modTime = modTime2; _p->ns1__entityBaseBean::id = id2; _p->ns1__entityBaseBean::modId = modId2; _p->xsd__anyType::__item = __item3; } return _p; }
-
-inline void soap_delete_ns1__investigationParameter(struct soap *soap, ns1__investigationParameter *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__keyword
-#define SOAP_TYPE_ICat4_ns1__keyword (62)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__keyword(struct soap*, const char*, int, const ns1__keyword *, const char*);
-SOAP_FMAC3 ns1__keyword * SOAP_FMAC4 soap_in_ns1__keyword(struct soap*, const char*, ns1__keyword *, const char*);
-
-#ifndef soap_write_ns1__keyword
-#define soap_write_ns1__keyword(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:keyword", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__keyword * SOAP_FMAC4 soap_get_ns1__keyword(struct soap*, ns1__keyword *, const char*, const char*);
-
-#ifndef soap_read_ns1__keyword
-#define soap_read_ns1__keyword(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__keyword(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__keyword * SOAP_FMAC2 soap_instantiate_ns1__keyword(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__keyword * soap_new_ns1__keyword(struct soap *soap, int n = -1) { return soap_instantiate_ns1__keyword(soap, n, NULL, NULL, NULL); }
-
-inline ns1__keyword * soap_new_req_ns1__keyword(struct soap *soap) { ns1__keyword *_p = soap_instantiate_ns1__keyword(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__keyword * soap_new_set_ns1__keyword(struct soap *soap, ns1__investigation *investigation, std::string *name, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__keyword *_p = soap_instantiate_ns1__keyword(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__keyword::investigation = investigation; _p->ns1__keyword::name = name; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__keyword(struct soap *soap, ns1__keyword *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__keyword(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationInstrument(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__rule
-#define SOAP_TYPE_ICat4_ns1__rule (61)
+#define SOAP_TYPE_ICat4_ns1__rule (72)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__rule(struct soap*, const char*, int, const ns1__rule *, const char*);
@@ -1341,45 +1660,45 @@ SOAP_FMAC1 ns1__rule * SOAP_FMAC2 soap_instantiate_ns1__rule(struct soap*, int, 
 
 inline ns1__rule * soap_new_ns1__rule(struct soap *soap, int n = -1) { return soap_instantiate_ns1__rule(soap, n, NULL, NULL, NULL); }
 
-inline ns1__rule * soap_new_req_ns1__rule(struct soap *soap, bool d) { ns1__rule *_p = soap_instantiate_ns1__rule(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__rule::d = d; } return _p; }
+inline ns1__rule * soap_new_req_ns1__rule(struct soap *soap) { ns1__rule *_p = soap_instantiate_ns1__rule(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__rule * soap_new_set_ns1__rule(struct soap *soap, std::string *crudFlags, bool d, ns1__group *group, std::string *what, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__rule *_p = soap_instantiate_ns1__rule(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__rule::crudFlags = crudFlags; _p->ns1__rule::d = d; _p->ns1__rule::group = group; _p->ns1__rule::what = what; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+inline ns1__rule * soap_new_set_ns1__rule(struct soap *soap, std::string *crudFlags, ns1__grouping *grouping, std::string *what, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__rule *_p = soap_instantiate_ns1__rule(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__rule::crudFlags = crudFlags; _p->ns1__rule::grouping = grouping; _p->ns1__rule::what = what; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
 
 inline void soap_delete_ns1__rule(struct soap *soap, ns1__rule *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__rule(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__group
-#define SOAP_TYPE_ICat4_ns1__group (60)
+#ifndef SOAP_TYPE_ICat4_ns1__grouping
+#define SOAP_TYPE_ICat4_ns1__grouping (71)
 #endif
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__group(struct soap*, const char*, int, const ns1__group *, const char*);
-SOAP_FMAC3 ns1__group * SOAP_FMAC4 soap_in_ns1__group(struct soap*, const char*, ns1__group *, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__grouping(struct soap*, const char*, int, const ns1__grouping *, const char*);
+SOAP_FMAC3 ns1__grouping * SOAP_FMAC4 soap_in_ns1__grouping(struct soap*, const char*, ns1__grouping *, const char*);
 
-#ifndef soap_write_ns1__group
-#define soap_write_ns1__group(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:group", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_write_ns1__grouping
+#define soap_write_ns1__grouping(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:grouping", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC3 ns1__group * SOAP_FMAC4 soap_get_ns1__group(struct soap*, ns1__group *, const char*, const char*);
+SOAP_FMAC3 ns1__grouping * SOAP_FMAC4 soap_get_ns1__grouping(struct soap*, ns1__grouping *, const char*, const char*);
 
-#ifndef soap_read_ns1__group
-#define soap_read_ns1__group(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__group(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_ns1__grouping
+#define soap_read_ns1__grouping(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__grouping(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC1 ns1__group * SOAP_FMAC2 soap_instantiate_ns1__group(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC1 ns1__grouping * SOAP_FMAC2 soap_instantiate_ns1__grouping(struct soap*, int, const char*, const char*, size_t*);
 
-inline ns1__group * soap_new_ns1__group(struct soap *soap, int n = -1) { return soap_instantiate_ns1__group(soap, n, NULL, NULL, NULL); }
+inline ns1__grouping * soap_new_ns1__grouping(struct soap *soap, int n = -1) { return soap_instantiate_ns1__grouping(soap, n, NULL, NULL, NULL); }
 
-inline ns1__group * soap_new_req_ns1__group(struct soap *soap) { ns1__group *_p = soap_instantiate_ns1__group(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+inline ns1__grouping * soap_new_req_ns1__grouping(struct soap *soap) { ns1__grouping *_p = soap_instantiate_ns1__grouping(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__group * soap_new_set_ns1__group(struct soap *soap, std::string *name, std::vector<ns1__rule * >& rules, std::vector<ns1__userGroup * >& userGroups, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__group *_p = soap_instantiate_ns1__group(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__group::name = name; _p->ns1__group::rules = rules; _p->ns1__group::userGroups = userGroups; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+inline ns1__grouping * soap_new_set_ns1__grouping(struct soap *soap, std::string *name, std::vector<ns1__rule * >& rules, std::vector<ns1__userGroup * >& userGroups, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__grouping *_p = soap_instantiate_ns1__grouping(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__grouping::name = name; _p->ns1__grouping::rules = rules; _p->ns1__grouping::userGroups = userGroups; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
 
-inline void soap_delete_ns1__group(struct soap *soap, ns1__group *p) { soap_delete(soap, p); }
+inline void soap_delete_ns1__grouping(struct soap *soap, ns1__grouping *p) { soap_delete(soap, p); }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__group(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__grouping(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__userGroup
-#define SOAP_TYPE_ICat4_ns1__userGroup (59)
+#define SOAP_TYPE_ICat4_ns1__userGroup (70)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__userGroup(struct soap*, const char*, int, const ns1__userGroup *, const char*);
@@ -1401,14 +1720,14 @@ inline ns1__userGroup * soap_new_ns1__userGroup(struct soap *soap, int n = -1) {
 
 inline ns1__userGroup * soap_new_req_ns1__userGroup(struct soap *soap) { ns1__userGroup *_p = soap_instantiate_ns1__userGroup(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__userGroup * soap_new_set_ns1__userGroup(struct soap *soap, ns1__group *group, ns1__user *user, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__userGroup *_p = soap_instantiate_ns1__userGroup(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__userGroup::group = group; _p->ns1__userGroup::user = user; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+inline ns1__userGroup * soap_new_set_ns1__userGroup(struct soap *soap, ns1__grouping *grouping, ns1__user *user, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__userGroup *_p = soap_instantiate_ns1__userGroup(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__userGroup::grouping = grouping; _p->ns1__userGroup::user = user; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
 
 inline void soap_delete_ns1__userGroup(struct soap *soap, ns1__userGroup *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__userGroup(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__studyInvestigation
-#define SOAP_TYPE_ICat4_ns1__studyInvestigation (58)
+#define SOAP_TYPE_ICat4_ns1__studyInvestigation (69)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__studyInvestigation(struct soap*, const char*, int, const ns1__studyInvestigation *, const char*);
@@ -1437,7 +1756,7 @@ inline void soap_delete_ns1__studyInvestigation(struct soap *soap, ns1__studyInv
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__studyInvestigation(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__study
-#define SOAP_TYPE_ICat4_ns1__study (57)
+#define SOAP_TYPE_ICat4_ns1__study (68)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__study(struct soap*, const char*, int, const ns1__study *, const char*);
@@ -1466,7 +1785,7 @@ inline void soap_delete_ns1__study(struct soap *soap, ns1__study *p) { soap_dele
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__study(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__investigationUser
-#define SOAP_TYPE_ICat4_ns1__investigationUser (56)
+#define SOAP_TYPE_ICat4_ns1__investigationUser (67)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigationUser(struct soap*, const char*, int, const ns1__investigationUser *, const char*);
@@ -1495,7 +1814,7 @@ inline void soap_delete_ns1__investigationUser(struct soap *soap, ns1__investiga
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigationUser(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__user
-#define SOAP_TYPE_ICat4_ns1__user (55)
+#define SOAP_TYPE_ICat4_ns1__user (66)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__user(struct soap*, const char*, int, const ns1__user *, const char*);
@@ -1524,7 +1843,7 @@ inline void soap_delete_ns1__user(struct soap *soap, ns1__user *p) { soap_delete
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__user(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__instrumentScientist
-#define SOAP_TYPE_ICat4_ns1__instrumentScientist (54)
+#define SOAP_TYPE_ICat4_ns1__instrumentScientist (65)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__instrumentScientist(struct soap*, const char*, int, const ns1__instrumentScientist *, const char*);
@@ -1553,7 +1872,7 @@ inline void soap_delete_ns1__instrumentScientist(struct soap *soap, ns1__instrum
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__instrumentScientist(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__instrument
-#define SOAP_TYPE_ICat4_ns1__instrument (53)
+#define SOAP_TYPE_ICat4_ns1__instrument (64)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__instrument(struct soap*, const char*, int, const ns1__instrument *, const char*);
@@ -1575,14 +1894,14 @@ inline ns1__instrument * soap_new_ns1__instrument(struct soap *soap, int n = -1)
 
 inline ns1__instrument * soap_new_req_ns1__instrument(struct soap *soap) { ns1__instrument *_p = soap_instantiate_ns1__instrument(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__instrument * soap_new_set_ns1__instrument(struct soap *soap, std::string *description, ns1__facility *facility, std::string *fullName, std::vector<ns1__instrumentScientist * >& instrumentScientists, std::vector<ns1__investigation * >& investigations, std::string *name, std::string *type, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__instrument *_p = soap_instantiate_ns1__instrument(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__instrument::description = description; _p->ns1__instrument::facility = facility; _p->ns1__instrument::fullName = fullName; _p->ns1__instrument::instrumentScientists = instrumentScientists; _p->ns1__instrument::investigations = investigations; _p->ns1__instrument::name = name; _p->ns1__instrument::type = type; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+inline ns1__instrument * soap_new_set_ns1__instrument(struct soap *soap, std::string *description, ns1__facility *facility, std::string *fullName, std::vector<ns1__instrumentScientist * >& instrumentScientists, std::vector<ns1__investigationInstrument * >& investigationInstruments, std::string *name, std::string *type, std::string *url, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__instrument *_p = soap_instantiate_ns1__instrument(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__instrument::description = description; _p->ns1__instrument::facility = facility; _p->ns1__instrument::fullName = fullName; _p->ns1__instrument::instrumentScientists = instrumentScientists; _p->ns1__instrument::investigationInstruments = investigationInstruments; _p->ns1__instrument::name = name; _p->ns1__instrument::type = type; _p->ns1__instrument::url = url; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
 
 inline void soap_delete_ns1__instrument(struct soap *soap, ns1__instrument *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__instrument(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__facilityCycle
-#define SOAP_TYPE_ICat4_ns1__facilityCycle (52)
+#define SOAP_TYPE_ICat4_ns1__facilityCycle (63)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__facilityCycle(struct soap*, const char*, int, const ns1__facilityCycle *, const char*);
@@ -1604,246 +1923,14 @@ inline ns1__facilityCycle * soap_new_ns1__facilityCycle(struct soap *soap, int n
 
 inline ns1__facilityCycle * soap_new_req_ns1__facilityCycle(struct soap *soap) { ns1__facilityCycle *_p = soap_instantiate_ns1__facilityCycle(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__facilityCycle * soap_new_set_ns1__facilityCycle(struct soap *soap, std::string *description, time_t *endDate, ns1__facility *facility, std::vector<ns1__investigation * >& investigations, std::string *name, time_t *startDate, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__facilityCycle *_p = soap_instantiate_ns1__facilityCycle(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__facilityCycle::description = description; _p->ns1__facilityCycle::endDate = endDate; _p->ns1__facilityCycle::facility = facility; _p->ns1__facilityCycle::investigations = investigations; _p->ns1__facilityCycle::name = name; _p->ns1__facilityCycle::startDate = startDate; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+inline ns1__facilityCycle * soap_new_set_ns1__facilityCycle(struct soap *soap, std::string *description, time_t *endDate, ns1__facility *facility, std::string *name, time_t *startDate, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__facilityCycle *_p = soap_instantiate_ns1__facilityCycle(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__facilityCycle::description = description; _p->ns1__facilityCycle::endDate = endDate; _p->ns1__facilityCycle::facility = facility; _p->ns1__facilityCycle::name = name; _p->ns1__facilityCycle::startDate = startDate; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
 
 inline void soap_delete_ns1__facilityCycle(struct soap *soap, ns1__facilityCycle *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__facilityCycle(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__investigation
-#define SOAP_TYPE_ICat4_ns1__investigation (51)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigation(struct soap*, const char*, int, const ns1__investigation *, const char*);
-SOAP_FMAC3 ns1__investigation * SOAP_FMAC4 soap_in_ns1__investigation(struct soap*, const char*, ns1__investigation *, const char*);
-
-#ifndef soap_write_ns1__investigation
-#define soap_write_ns1__investigation(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:investigation", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__investigation * SOAP_FMAC4 soap_get_ns1__investigation(struct soap*, ns1__investigation *, const char*, const char*);
-
-#ifndef soap_read_ns1__investigation
-#define soap_read_ns1__investigation(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__investigation(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__investigation * SOAP_FMAC2 soap_instantiate_ns1__investigation(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__investigation * soap_new_ns1__investigation(struct soap *soap, int n = -1) { return soap_instantiate_ns1__investigation(soap, n, NULL, NULL, NULL); }
-
-inline ns1__investigation * soap_new_req_ns1__investigation(struct soap *soap) { ns1__investigation *_p = soap_instantiate_ns1__investigation(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__investigation * soap_new_set_ns1__investigation(struct soap *soap, std::vector<ns1__dataset * >& datasets, std::string *doi, time_t *endDate, ns1__facility *facility, ns1__facilityCycle *facilityCycle, ns1__instrument *instrument, std::vector<ns1__investigationUser * >& investigationUsers, std::vector<ns1__keyword * >& keywords, std::string *name, std::vector<ns1__investigationParameter * >& parameters, std::vector<ns1__publication * >& publications, time_t *releaseDate, std::vector<ns1__sample * >& samples, std::vector<ns1__shift * >& shifts, time_t *startDate, std::vector<ns1__studyInvestigation * >& studyInvestigations, std::string *summary, std::string *title, ns1__investigationType *type, std::string *visitId, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__investigation *_p = soap_instantiate_ns1__investigation(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__investigation::datasets = datasets; _p->ns1__investigation::doi = doi; _p->ns1__investigation::endDate = endDate; _p->ns1__investigation::facility = facility; _p->ns1__investigation::facilityCycle = facilityCycle; _p->ns1__investigation::instrument = instrument; _p->ns1__investigation::investigationUsers = investigationUsers; _p->ns1__investigation::keywords = keywords; _p->ns1__investigation::name = name; _p->ns1__investigation::parameters = parameters; _p->ns1__investigation::publications = publications; _p->ns1__investigation::releaseDate = releaseDate; _p->ns1__investigation::samples = samples; _p->ns1__investigation::shifts = shifts; _p->ns1__investigation::startDate = startDate; _p->ns1__investigation::studyInvestigations = studyInvestigations; _p->ns1__investigation::summary = summary; _p->ns1__investigation::title = title; _p->ns1__investigation::type = type; _p->ns1__investigation::visitId = visitId; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__investigation(struct soap *soap, ns1__investigation *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigation(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__outputDataset
-#define SOAP_TYPE_ICat4_ns1__outputDataset (50)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__outputDataset(struct soap*, const char*, int, const ns1__outputDataset *, const char*);
-SOAP_FMAC3 ns1__outputDataset * SOAP_FMAC4 soap_in_ns1__outputDataset(struct soap*, const char*, ns1__outputDataset *, const char*);
-
-#ifndef soap_write_ns1__outputDataset
-#define soap_write_ns1__outputDataset(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:outputDataset", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__outputDataset * SOAP_FMAC4 soap_get_ns1__outputDataset(struct soap*, ns1__outputDataset *, const char*, const char*);
-
-#ifndef soap_read_ns1__outputDataset
-#define soap_read_ns1__outputDataset(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__outputDataset(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__outputDataset * SOAP_FMAC2 soap_instantiate_ns1__outputDataset(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__outputDataset * soap_new_ns1__outputDataset(struct soap *soap, int n = -1) { return soap_instantiate_ns1__outputDataset(soap, n, NULL, NULL, NULL); }
-
-inline ns1__outputDataset * soap_new_req_ns1__outputDataset(struct soap *soap) { ns1__outputDataset *_p = soap_instantiate_ns1__outputDataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__outputDataset * soap_new_set_ns1__outputDataset(struct soap *soap, ns1__dataset *ns1__dataset_, ns1__job *job, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__outputDataset *_p = soap_instantiate_ns1__outputDataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__outputDataset::ns1__dataset_ = ns1__dataset_; _p->ns1__outputDataset::job = job; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__outputDataset(struct soap *soap, ns1__outputDataset *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__outputDataset(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__outputDatafile
-#define SOAP_TYPE_ICat4_ns1__outputDatafile (49)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__outputDatafile(struct soap*, const char*, int, const ns1__outputDatafile *, const char*);
-SOAP_FMAC3 ns1__outputDatafile * SOAP_FMAC4 soap_in_ns1__outputDatafile(struct soap*, const char*, ns1__outputDatafile *, const char*);
-
-#ifndef soap_write_ns1__outputDatafile
-#define soap_write_ns1__outputDatafile(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:outputDatafile", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__outputDatafile * SOAP_FMAC4 soap_get_ns1__outputDatafile(struct soap*, ns1__outputDatafile *, const char*, const char*);
-
-#ifndef soap_read_ns1__outputDatafile
-#define soap_read_ns1__outputDatafile(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__outputDatafile(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__outputDatafile * SOAP_FMAC2 soap_instantiate_ns1__outputDatafile(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__outputDatafile * soap_new_ns1__outputDatafile(struct soap *soap, int n = -1) { return soap_instantiate_ns1__outputDatafile(soap, n, NULL, NULL, NULL); }
-
-inline ns1__outputDatafile * soap_new_req_ns1__outputDatafile(struct soap *soap) { ns1__outputDatafile *_p = soap_instantiate_ns1__outputDatafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__outputDatafile * soap_new_set_ns1__outputDatafile(struct soap *soap, ns1__datafile *ns1__datafile_, ns1__job *job, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__outputDatafile *_p = soap_instantiate_ns1__outputDatafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__outputDatafile::ns1__datafile_ = ns1__datafile_; _p->ns1__outputDatafile::job = job; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__outputDatafile(struct soap *soap, ns1__outputDatafile *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__outputDatafile(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__inputDatafile
-#define SOAP_TYPE_ICat4_ns1__inputDatafile (48)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__inputDatafile(struct soap*, const char*, int, const ns1__inputDatafile *, const char*);
-SOAP_FMAC3 ns1__inputDatafile * SOAP_FMAC4 soap_in_ns1__inputDatafile(struct soap*, const char*, ns1__inputDatafile *, const char*);
-
-#ifndef soap_write_ns1__inputDatafile
-#define soap_write_ns1__inputDatafile(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:inputDatafile", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__inputDatafile * SOAP_FMAC4 soap_get_ns1__inputDatafile(struct soap*, ns1__inputDatafile *, const char*, const char*);
-
-#ifndef soap_read_ns1__inputDatafile
-#define soap_read_ns1__inputDatafile(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__inputDatafile(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__inputDatafile * SOAP_FMAC2 soap_instantiate_ns1__inputDatafile(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__inputDatafile * soap_new_ns1__inputDatafile(struct soap *soap, int n = -1) { return soap_instantiate_ns1__inputDatafile(soap, n, NULL, NULL, NULL); }
-
-inline ns1__inputDatafile * soap_new_req_ns1__inputDatafile(struct soap *soap) { ns1__inputDatafile *_p = soap_instantiate_ns1__inputDatafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__inputDatafile * soap_new_set_ns1__inputDatafile(struct soap *soap, ns1__datafile *ns1__datafile_, ns1__job *job, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__inputDatafile *_p = soap_instantiate_ns1__inputDatafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__inputDatafile::ns1__datafile_ = ns1__datafile_; _p->ns1__inputDatafile::job = job; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__inputDatafile(struct soap *soap, ns1__inputDatafile *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__inputDatafile(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__application
-#define SOAP_TYPE_ICat4_ns1__application (47)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__application(struct soap*, const char*, int, const ns1__application *, const char*);
-SOAP_FMAC3 ns1__application * SOAP_FMAC4 soap_in_ns1__application(struct soap*, const char*, ns1__application *, const char*);
-
-#ifndef soap_write_ns1__application
-#define soap_write_ns1__application(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:application", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__application * SOAP_FMAC4 soap_get_ns1__application(struct soap*, ns1__application *, const char*, const char*);
-
-#ifndef soap_read_ns1__application
-#define soap_read_ns1__application(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__application(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__application * SOAP_FMAC2 soap_instantiate_ns1__application(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__application * soap_new_ns1__application(struct soap *soap, int n = -1) { return soap_instantiate_ns1__application(soap, n, NULL, NULL, NULL); }
-
-inline ns1__application * soap_new_req_ns1__application(struct soap *soap) { ns1__application *_p = soap_instantiate_ns1__application(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__application * soap_new_set_ns1__application(struct soap *soap, std::vector<ns1__job * >& jobs, std::string *name, std::string *version, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__application *_p = soap_instantiate_ns1__application(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__application::jobs = jobs; _p->ns1__application::name = name; _p->ns1__application::version = version; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__application(struct soap *soap, ns1__application *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__application(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__job
-#define SOAP_TYPE_ICat4_ns1__job (46)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__job(struct soap*, const char*, int, const ns1__job *, const char*);
-SOAP_FMAC3 ns1__job * SOAP_FMAC4 soap_in_ns1__job(struct soap*, const char*, ns1__job *, const char*);
-
-#ifndef soap_write_ns1__job
-#define soap_write_ns1__job(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:job", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__job * SOAP_FMAC4 soap_get_ns1__job(struct soap*, ns1__job *, const char*, const char*);
-
-#ifndef soap_read_ns1__job
-#define soap_read_ns1__job(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__job(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__job * SOAP_FMAC2 soap_instantiate_ns1__job(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__job * soap_new_ns1__job(struct soap *soap, int n = -1) { return soap_instantiate_ns1__job(soap, n, NULL, NULL, NULL); }
-
-inline ns1__job * soap_new_req_ns1__job(struct soap *soap) { ns1__job *_p = soap_instantiate_ns1__job(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__job * soap_new_set_ns1__job(struct soap *soap, ns1__application *application, std::vector<ns1__inputDatafile * >& inputDatafiles, std::vector<ns1__inputDataset * >& inputDatasets, std::vector<ns1__outputDatafile * >& outputDatafiles, std::vector<ns1__outputDataset * >& outputDatasets, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__job *_p = soap_instantiate_ns1__job(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__job::application = application; _p->ns1__job::inputDatafiles = inputDatafiles; _p->ns1__job::inputDatasets = inputDatasets; _p->ns1__job::outputDatafiles = outputDatafiles; _p->ns1__job::outputDatasets = outputDatasets; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__job(struct soap *soap, ns1__job *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__job(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__inputDataset
-#define SOAP_TYPE_ICat4_ns1__inputDataset (45)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__inputDataset(struct soap*, const char*, int, const ns1__inputDataset *, const char*);
-SOAP_FMAC3 ns1__inputDataset * SOAP_FMAC4 soap_in_ns1__inputDataset(struct soap*, const char*, ns1__inputDataset *, const char*);
-
-#ifndef soap_write_ns1__inputDataset
-#define soap_write_ns1__inputDataset(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:inputDataset", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__inputDataset * SOAP_FMAC4 soap_get_ns1__inputDataset(struct soap*, ns1__inputDataset *, const char*, const char*);
-
-#ifndef soap_read_ns1__inputDataset
-#define soap_read_ns1__inputDataset(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__inputDataset(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__inputDataset * SOAP_FMAC2 soap_instantiate_ns1__inputDataset(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__inputDataset * soap_new_ns1__inputDataset(struct soap *soap, int n = -1) { return soap_instantiate_ns1__inputDataset(soap, n, NULL, NULL, NULL); }
-
-inline ns1__inputDataset * soap_new_req_ns1__inputDataset(struct soap *soap) { ns1__inputDataset *_p = soap_instantiate_ns1__inputDataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__inputDataset * soap_new_set_ns1__inputDataset(struct soap *soap, ns1__dataset *ns1__dataset_, ns1__job *job, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__inputDataset *_p = soap_instantiate_ns1__inputDataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__inputDataset::ns1__dataset_ = ns1__dataset_; _p->ns1__inputDataset::job = job; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__inputDataset(struct soap *soap, ns1__inputDataset *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__inputDataset(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__dataset
-#define SOAP_TYPE_ICat4_ns1__dataset (44)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataset(struct soap*, const char*, int, const ns1__dataset *, const char*);
-SOAP_FMAC3 ns1__dataset * SOAP_FMAC4 soap_in_ns1__dataset(struct soap*, const char*, ns1__dataset *, const char*);
-
-#ifndef soap_write_ns1__dataset
-#define soap_write_ns1__dataset(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:dataset", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__dataset * SOAP_FMAC4 soap_get_ns1__dataset(struct soap*, ns1__dataset *, const char*, const char*);
-
-#ifndef soap_read_ns1__dataset
-#define soap_read_ns1__dataset(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__dataset(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__dataset * SOAP_FMAC2 soap_instantiate_ns1__dataset(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__dataset * soap_new_ns1__dataset(struct soap *soap, int n = -1) { return soap_instantiate_ns1__dataset(soap, n, NULL, NULL, NULL); }
-
-inline ns1__dataset * soap_new_req_ns1__dataset(struct soap *soap, bool complete) { ns1__dataset *_p = soap_instantiate_ns1__dataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dataset::complete = complete; } return _p; }
-
-inline ns1__dataset * soap_new_set_ns1__dataset(struct soap *soap, bool complete, std::vector<ns1__datafile * >& datafiles, std::string *description, std::string *doi, time_t *endDate, std::vector<ns1__inputDataset * >& inputDatasets, ns1__investigation *investigation, std::string *location, std::string *name, std::vector<ns1__outputDataset * >& outputDatasets, std::vector<ns1__datasetParameter * >& parameters, ns1__sample *sample, time_t *startDate, ns1__datasetType *type, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__dataset *_p = soap_instantiate_ns1__dataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dataset::complete = complete; _p->ns1__dataset::datafiles = datafiles; _p->ns1__dataset::description = description; _p->ns1__dataset::doi = doi; _p->ns1__dataset::endDate = endDate; _p->ns1__dataset::inputDatasets = inputDatasets; _p->ns1__dataset::investigation = investigation; _p->ns1__dataset::location = location; _p->ns1__dataset::name = name; _p->ns1__dataset::outputDatasets = outputDatasets; _p->ns1__dataset::parameters = parameters; _p->ns1__dataset::sample = sample; _p->ns1__dataset::startDate = startDate; _p->ns1__dataset::type = type; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__dataset(struct soap *soap, ns1__dataset *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataset(struct soap*, int, int, void*, size_t, const void*, size_t);
-
 #ifndef SOAP_TYPE_ICat4_ns1__datasetType
-#define SOAP_TYPE_ICat4_ns1__datasetType (43)
+#define SOAP_TYPE_ICat4_ns1__datasetType (62)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datasetType(struct soap*, const char*, int, const ns1__datasetType *, const char*);
@@ -1871,37 +1958,8 @@ inline void soap_delete_ns1__datasetType(struct soap *soap, ns1__datasetType *p)
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datasetType(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__facility
-#define SOAP_TYPE_ICat4_ns1__facility (42)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__facility(struct soap*, const char*, int, const ns1__facility *, const char*);
-SOAP_FMAC3 ns1__facility * SOAP_FMAC4 soap_in_ns1__facility(struct soap*, const char*, ns1__facility *, const char*);
-
-#ifndef soap_write_ns1__facility
-#define soap_write_ns1__facility(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:facility", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__facility * SOAP_FMAC4 soap_get_ns1__facility(struct soap*, ns1__facility *, const char*, const char*);
-
-#ifndef soap_read_ns1__facility
-#define soap_read_ns1__facility(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__facility(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__facility * SOAP_FMAC2 soap_instantiate_ns1__facility(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__facility * soap_new_ns1__facility(struct soap *soap, int n = -1) { return soap_instantiate_ns1__facility(soap, n, NULL, NULL, NULL); }
-
-inline ns1__facility * soap_new_req_ns1__facility(struct soap *soap) { ns1__facility *_p = soap_instantiate_ns1__facility(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__facility * soap_new_set_ns1__facility(struct soap *soap, std::vector<ns1__datafileFormat * >& datafileFormats, std::vector<ns1__datasetType * >& datasetTypes, int *daysUntilRelease, std::string *description, std::vector<ns1__facilityCycle * >& facilityCycles, std::string *fullName, std::vector<ns1__instrument * >& instruments, std::vector<ns1__investigationType * >& investigationTypes, std::vector<ns1__investigation * >& investigations, std::string *name, std::vector<ns1__parameterType * >& parameterTypes, std::vector<ns1__sampleType * >& sampleTypes, std::string *url, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__facility *_p = soap_instantiate_ns1__facility(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__facility::datafileFormats = datafileFormats; _p->ns1__facility::datasetTypes = datasetTypes; _p->ns1__facility::daysUntilRelease = daysUntilRelease; _p->ns1__facility::description = description; _p->ns1__facility::facilityCycles = facilityCycles; _p->ns1__facility::fullName = fullName; _p->ns1__facility::instruments = instruments; _p->ns1__facility::investigationTypes = investigationTypes; _p->ns1__facility::investigations = investigations; _p->ns1__facility::name = name; _p->ns1__facility::parameterTypes = parameterTypes; _p->ns1__facility::sampleTypes = sampleTypes; _p->ns1__facility::url = url; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
-
-inline void soap_delete_ns1__facility(struct soap *soap, ns1__facility *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__facility(struct soap*, int, int, void*, size_t, const void*, size_t);
-
 #ifndef SOAP_TYPE_ICat4_ns1__datafileFormat
-#define SOAP_TYPE_ICat4_ns1__datafileFormat (41)
+#define SOAP_TYPE_ICat4_ns1__datafileFormat (61)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datafileFormat(struct soap*, const char*, int, const ns1__datafileFormat *, const char*);
@@ -1929,8 +1987,240 @@ inline void soap_delete_ns1__datafileFormat(struct soap *soap, ns1__datafileForm
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datafileFormat(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_ns1__job
+#define SOAP_TYPE_ICat4_ns1__job (60)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__job(struct soap*, const char*, int, const ns1__job *, const char*);
+SOAP_FMAC3 ns1__job * SOAP_FMAC4 soap_in_ns1__job(struct soap*, const char*, ns1__job *, const char*);
+
+#ifndef soap_write_ns1__job
+#define soap_write_ns1__job(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:job", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__job * SOAP_FMAC4 soap_get_ns1__job(struct soap*, ns1__job *, const char*, const char*);
+
+#ifndef soap_read_ns1__job
+#define soap_read_ns1__job(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__job(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__job * SOAP_FMAC2 soap_instantiate_ns1__job(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__job * soap_new_ns1__job(struct soap *soap, int n = -1) { return soap_instantiate_ns1__job(soap, n, NULL, NULL, NULL); }
+
+inline ns1__job * soap_new_req_ns1__job(struct soap *soap) { ns1__job *_p = soap_instantiate_ns1__job(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__job * soap_new_set_ns1__job(struct soap *soap, ns1__application *application, std::string *arguments, ns1__dataCollection *inputDataCollection, ns1__dataCollection *outputDataCollection, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__job *_p = soap_instantiate_ns1__job(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__job::application = application; _p->ns1__job::arguments = arguments; _p->ns1__job::inputDataCollection = inputDataCollection; _p->ns1__job::outputDataCollection = outputDataCollection; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__job(struct soap *soap, ns1__job *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__job(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__application
+#define SOAP_TYPE_ICat4_ns1__application (59)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__application(struct soap*, const char*, int, const ns1__application *, const char*);
+SOAP_FMAC3 ns1__application * SOAP_FMAC4 soap_in_ns1__application(struct soap*, const char*, ns1__application *, const char*);
+
+#ifndef soap_write_ns1__application
+#define soap_write_ns1__application(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:application", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__application * SOAP_FMAC4 soap_get_ns1__application(struct soap*, ns1__application *, const char*, const char*);
+
+#ifndef soap_read_ns1__application
+#define soap_read_ns1__application(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__application(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__application * SOAP_FMAC2 soap_instantiate_ns1__application(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__application * soap_new_ns1__application(struct soap *soap, int n = -1) { return soap_instantiate_ns1__application(soap, n, NULL, NULL, NULL); }
+
+inline ns1__application * soap_new_req_ns1__application(struct soap *soap) { ns1__application *_p = soap_instantiate_ns1__application(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__application * soap_new_set_ns1__application(struct soap *soap, ns1__facility *facility, std::vector<ns1__job * >& jobs, std::string *name, std::string *version, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__application *_p = soap_instantiate_ns1__application(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__application::facility = facility; _p->ns1__application::jobs = jobs; _p->ns1__application::name = name; _p->ns1__application::version = version; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__application(struct soap *soap, ns1__application *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__application(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__facility
+#define SOAP_TYPE_ICat4_ns1__facility (58)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__facility(struct soap*, const char*, int, const ns1__facility *, const char*);
+SOAP_FMAC3 ns1__facility * SOAP_FMAC4 soap_in_ns1__facility(struct soap*, const char*, ns1__facility *, const char*);
+
+#ifndef soap_write_ns1__facility
+#define soap_write_ns1__facility(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:facility", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__facility * SOAP_FMAC4 soap_get_ns1__facility(struct soap*, ns1__facility *, const char*, const char*);
+
+#ifndef soap_read_ns1__facility
+#define soap_read_ns1__facility(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__facility(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__facility * SOAP_FMAC2 soap_instantiate_ns1__facility(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__facility * soap_new_ns1__facility(struct soap *soap, int n = -1) { return soap_instantiate_ns1__facility(soap, n, NULL, NULL, NULL); }
+
+inline ns1__facility * soap_new_req_ns1__facility(struct soap *soap) { ns1__facility *_p = soap_instantiate_ns1__facility(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__facility * soap_new_set_ns1__facility(struct soap *soap, std::vector<ns1__application * >& applications, std::vector<ns1__datafileFormat * >& datafileFormats, std::vector<ns1__datasetType * >& datasetTypes, int *daysUntilRelease, std::string *description, std::vector<ns1__facilityCycle * >& facilityCycles, std::string *fullName, std::vector<ns1__instrument * >& instruments, std::vector<ns1__investigationType * >& investigationTypes, std::vector<ns1__investigation * >& investigations, std::string *name, std::vector<ns1__parameterType * >& parameterTypes, std::vector<ns1__sampleType * >& sampleTypes, std::string *url, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__facility *_p = soap_instantiate_ns1__facility(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__facility::applications = applications; _p->ns1__facility::datafileFormats = datafileFormats; _p->ns1__facility::datasetTypes = datasetTypes; _p->ns1__facility::daysUntilRelease = daysUntilRelease; _p->ns1__facility::description = description; _p->ns1__facility::facilityCycles = facilityCycles; _p->ns1__facility::fullName = fullName; _p->ns1__facility::instruments = instruments; _p->ns1__facility::investigationTypes = investigationTypes; _p->ns1__facility::investigations = investigations; _p->ns1__facility::name = name; _p->ns1__facility::parameterTypes = parameterTypes; _p->ns1__facility::sampleTypes = sampleTypes; _p->ns1__facility::url = url; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__facility(struct soap *soap, ns1__facility *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__facility(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__investigation
+#define SOAP_TYPE_ICat4_ns1__investigation (57)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__investigation(struct soap*, const char*, int, const ns1__investigation *, const char*);
+SOAP_FMAC3 ns1__investigation * SOAP_FMAC4 soap_in_ns1__investigation(struct soap*, const char*, ns1__investigation *, const char*);
+
+#ifndef soap_write_ns1__investigation
+#define soap_write_ns1__investigation(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:investigation", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__investigation * SOAP_FMAC4 soap_get_ns1__investigation(struct soap*, ns1__investigation *, const char*, const char*);
+
+#ifndef soap_read_ns1__investigation
+#define soap_read_ns1__investigation(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__investigation(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__investigation * SOAP_FMAC2 soap_instantiate_ns1__investigation(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__investigation * soap_new_ns1__investigation(struct soap *soap, int n = -1) { return soap_instantiate_ns1__investigation(soap, n, NULL, NULL, NULL); }
+
+inline ns1__investigation * soap_new_req_ns1__investigation(struct soap *soap) { ns1__investigation *_p = soap_instantiate_ns1__investigation(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__investigation * soap_new_set_ns1__investigation(struct soap *soap, std::vector<ns1__dataset * >& datasets, std::string *doi, time_t *endDate, ns1__facility *facility, std::vector<ns1__investigationInstrument * >& investigationInstruments, std::vector<ns1__investigationUser * >& investigationUsers, std::vector<ns1__keyword * >& keywords, std::string *name, std::vector<ns1__investigationParameter * >& parameters, std::vector<ns1__publication * >& publications, time_t *releaseDate, std::vector<ns1__sample * >& samples, std::vector<ns1__shift * >& shifts, time_t *startDate, std::vector<ns1__studyInvestigation * >& studyInvestigations, std::string *summary, std::string *title, ns1__investigationType *type, std::string *visitId, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__investigation *_p = soap_instantiate_ns1__investigation(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__investigation::datasets = datasets; _p->ns1__investigation::doi = doi; _p->ns1__investigation::endDate = endDate; _p->ns1__investigation::facility = facility; _p->ns1__investigation::investigationInstruments = investigationInstruments; _p->ns1__investigation::investigationUsers = investigationUsers; _p->ns1__investigation::keywords = keywords; _p->ns1__investigation::name = name; _p->ns1__investigation::parameters = parameters; _p->ns1__investigation::publications = publications; _p->ns1__investigation::releaseDate = releaseDate; _p->ns1__investigation::samples = samples; _p->ns1__investigation::shifts = shifts; _p->ns1__investigation::startDate = startDate; _p->ns1__investigation::studyInvestigations = studyInvestigations; _p->ns1__investigation::summary = summary; _p->ns1__investigation::title = title; _p->ns1__investigation::type = type; _p->ns1__investigation::visitId = visitId; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__investigation(struct soap *soap, ns1__investigation *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__investigation(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__dataset
+#define SOAP_TYPE_ICat4_ns1__dataset (56)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataset(struct soap*, const char*, int, const ns1__dataset *, const char*);
+SOAP_FMAC3 ns1__dataset * SOAP_FMAC4 soap_in_ns1__dataset(struct soap*, const char*, ns1__dataset *, const char*);
+
+#ifndef soap_write_ns1__dataset
+#define soap_write_ns1__dataset(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:dataset", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dataset * SOAP_FMAC4 soap_get_ns1__dataset(struct soap*, ns1__dataset *, const char*, const char*);
+
+#ifndef soap_read_ns1__dataset
+#define soap_read_ns1__dataset(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__dataset(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__dataset * SOAP_FMAC2 soap_instantiate_ns1__dataset(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__dataset * soap_new_ns1__dataset(struct soap *soap, int n = -1) { return soap_instantiate_ns1__dataset(soap, n, NULL, NULL, NULL); }
+
+inline ns1__dataset * soap_new_req_ns1__dataset(struct soap *soap, bool complete) { ns1__dataset *_p = soap_instantiate_ns1__dataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dataset::complete = complete; } return _p; }
+
+inline ns1__dataset * soap_new_set_ns1__dataset(struct soap *soap, bool complete, std::vector<ns1__dataCollectionDataset * >& dataCollectionDatasets, std::vector<ns1__datafile * >& datafiles, std::string *description, std::string *doi, time_t *endDate, ns1__investigation *investigation, std::string *location, std::string *name, std::vector<ns1__datasetParameter * >& parameters, ns1__sample *sample, time_t *startDate, ns1__datasetType *type, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__dataset *_p = soap_instantiate_ns1__dataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dataset::complete = complete; _p->ns1__dataset::dataCollectionDatasets = dataCollectionDatasets; _p->ns1__dataset::datafiles = datafiles; _p->ns1__dataset::description = description; _p->ns1__dataset::doi = doi; _p->ns1__dataset::endDate = endDate; _p->ns1__dataset::investigation = investigation; _p->ns1__dataset::location = location; _p->ns1__dataset::name = name; _p->ns1__dataset::parameters = parameters; _p->ns1__dataset::sample = sample; _p->ns1__dataset::startDate = startDate; _p->ns1__dataset::type = type; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__dataset(struct soap *soap, ns1__dataset *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataset(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__dataCollectionDataset
+#define SOAP_TYPE_ICat4_ns1__dataCollectionDataset (55)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollectionDataset(struct soap*, const char*, int, const ns1__dataCollectionDataset *, const char*);
+SOAP_FMAC3 ns1__dataCollectionDataset * SOAP_FMAC4 soap_in_ns1__dataCollectionDataset(struct soap*, const char*, ns1__dataCollectionDataset *, const char*);
+
+#ifndef soap_write_ns1__dataCollectionDataset
+#define soap_write_ns1__dataCollectionDataset(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:dataCollectionDataset", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dataCollectionDataset * SOAP_FMAC4 soap_get_ns1__dataCollectionDataset(struct soap*, ns1__dataCollectionDataset *, const char*, const char*);
+
+#ifndef soap_read_ns1__dataCollectionDataset
+#define soap_read_ns1__dataCollectionDataset(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__dataCollectionDataset(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__dataCollectionDataset * SOAP_FMAC2 soap_instantiate_ns1__dataCollectionDataset(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__dataCollectionDataset * soap_new_ns1__dataCollectionDataset(struct soap *soap, int n = -1) { return soap_instantiate_ns1__dataCollectionDataset(soap, n, NULL, NULL, NULL); }
+
+inline ns1__dataCollectionDataset * soap_new_req_ns1__dataCollectionDataset(struct soap *soap) { ns1__dataCollectionDataset *_p = soap_instantiate_ns1__dataCollectionDataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__dataCollectionDataset * soap_new_set_ns1__dataCollectionDataset(struct soap *soap, ns1__dataCollection *dataCollection, ns1__dataset *ns1__dataset_, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__dataCollectionDataset *_p = soap_instantiate_ns1__dataCollectionDataset(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dataCollectionDataset::dataCollection = dataCollection; _p->ns1__dataCollectionDataset::ns1__dataset_ = ns1__dataset_; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__dataCollectionDataset(struct soap *soap, ns1__dataCollectionDataset *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataCollectionDataset(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__dataCollection
+#define SOAP_TYPE_ICat4_ns1__dataCollection (54)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollection(struct soap*, const char*, int, const ns1__dataCollection *, const char*);
+SOAP_FMAC3 ns1__dataCollection * SOAP_FMAC4 soap_in_ns1__dataCollection(struct soap*, const char*, ns1__dataCollection *, const char*);
+
+#ifndef soap_write_ns1__dataCollection
+#define soap_write_ns1__dataCollection(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:dataCollection", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dataCollection * SOAP_FMAC4 soap_get_ns1__dataCollection(struct soap*, ns1__dataCollection *, const char*, const char*);
+
+#ifndef soap_read_ns1__dataCollection
+#define soap_read_ns1__dataCollection(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__dataCollection(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__dataCollection * SOAP_FMAC2 soap_instantiate_ns1__dataCollection(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__dataCollection * soap_new_ns1__dataCollection(struct soap *soap, int n = -1) { return soap_instantiate_ns1__dataCollection(soap, n, NULL, NULL, NULL); }
+
+inline ns1__dataCollection * soap_new_req_ns1__dataCollection(struct soap *soap) { ns1__dataCollection *_p = soap_instantiate_ns1__dataCollection(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__dataCollection * soap_new_set_ns1__dataCollection(struct soap *soap, std::vector<ns1__dataCollectionDatafile * >& dataCollectionDatafiles, std::vector<ns1__dataCollectionDataset * >& dataCollectionDatasets, std::vector<ns1__dataCollectionParameter * >& dataCollectionParameters, std::vector<ns1__job * >& jobsAsInput, std::vector<ns1__job * >& jobsAsOutput, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__dataCollection *_p = soap_instantiate_ns1__dataCollection(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dataCollection::dataCollectionDatafiles = dataCollectionDatafiles; _p->ns1__dataCollection::dataCollectionDatasets = dataCollectionDatasets; _p->ns1__dataCollection::dataCollectionParameters = dataCollectionParameters; _p->ns1__dataCollection::jobsAsInput = jobsAsInput; _p->ns1__dataCollection::jobsAsOutput = jobsAsOutput; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__dataCollection(struct soap *soap, ns1__dataCollection *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataCollection(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__dataCollectionDatafile
+#define SOAP_TYPE_ICat4_ns1__dataCollectionDatafile (53)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dataCollectionDatafile(struct soap*, const char*, int, const ns1__dataCollectionDatafile *, const char*);
+SOAP_FMAC3 ns1__dataCollectionDatafile * SOAP_FMAC4 soap_in_ns1__dataCollectionDatafile(struct soap*, const char*, ns1__dataCollectionDatafile *, const char*);
+
+#ifndef soap_write_ns1__dataCollectionDatafile
+#define soap_write_ns1__dataCollectionDatafile(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:dataCollectionDatafile", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dataCollectionDatafile * SOAP_FMAC4 soap_get_ns1__dataCollectionDatafile(struct soap*, ns1__dataCollectionDatafile *, const char*, const char*);
+
+#ifndef soap_read_ns1__dataCollectionDatafile
+#define soap_read_ns1__dataCollectionDatafile(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__dataCollectionDatafile(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__dataCollectionDatafile * SOAP_FMAC2 soap_instantiate_ns1__dataCollectionDatafile(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__dataCollectionDatafile * soap_new_ns1__dataCollectionDatafile(struct soap *soap, int n = -1) { return soap_instantiate_ns1__dataCollectionDatafile(soap, n, NULL, NULL, NULL); }
+
+inline ns1__dataCollectionDatafile * soap_new_req_ns1__dataCollectionDatafile(struct soap *soap) { ns1__dataCollectionDatafile *_p = soap_instantiate_ns1__dataCollectionDatafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__dataCollectionDatafile * soap_new_set_ns1__dataCollectionDatafile(struct soap *soap, ns1__dataCollection *dataCollection, ns1__datafile *ns1__datafile_, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__dataCollectionDatafile *_p = soap_instantiate_ns1__dataCollectionDatafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dataCollectionDatafile::dataCollection = dataCollection; _p->ns1__dataCollectionDatafile::ns1__datafile_ = ns1__datafile_; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+
+inline void soap_delete_ns1__dataCollectionDatafile(struct soap *soap, ns1__dataCollectionDatafile *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dataCollectionDatafile(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_ns1__datafile
-#define SOAP_TYPE_ICat4_ns1__datafile (40)
+#define SOAP_TYPE_ICat4_ns1__datafile (52)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__datafile(struct soap*, const char*, int, const ns1__datafile *, const char*);
@@ -1952,14 +2242,14 @@ inline ns1__datafile * soap_new_ns1__datafile(struct soap *soap, int n = -1) { r
 
 inline ns1__datafile * soap_new_req_ns1__datafile(struct soap *soap) { ns1__datafile *_p = soap_instantiate_ns1__datafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__datafile * soap_new_set_ns1__datafile(struct soap *soap, std::string *checksum, time_t *datafileCreateTime, ns1__datafileFormat *datafileFormat, time_t *datafileModTime, ns1__dataset *ns1__dataset_, std::string *description, std::vector<ns1__relatedDatafile * >& destDatafiles, std::string *doi, LONG64 *fileSize, std::vector<ns1__inputDatafile * >& inputDatafiles, std::string *location, std::string *name, std::vector<ns1__outputDatafile * >& outputDatafiles, std::vector<ns1__datafileParameter * >& parameters, std::vector<ns1__relatedDatafile * >& sourceDatafiles, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__datafile *_p = soap_instantiate_ns1__datafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__datafile::checksum = checksum; _p->ns1__datafile::datafileCreateTime = datafileCreateTime; _p->ns1__datafile::datafileFormat = datafileFormat; _p->ns1__datafile::datafileModTime = datafileModTime; _p->ns1__datafile::ns1__dataset_ = ns1__dataset_; _p->ns1__datafile::description = description; _p->ns1__datafile::destDatafiles = destDatafiles; _p->ns1__datafile::doi = doi; _p->ns1__datafile::fileSize = fileSize; _p->ns1__datafile::inputDatafiles = inputDatafiles; _p->ns1__datafile::location = location; _p->ns1__datafile::name = name; _p->ns1__datafile::outputDatafiles = outputDatafiles; _p->ns1__datafile::parameters = parameters; _p->ns1__datafile::sourceDatafiles = sourceDatafiles; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
+inline ns1__datafile * soap_new_set_ns1__datafile(struct soap *soap, std::string *checksum, std::vector<ns1__dataCollectionDatafile * >& dataCollectionDatafiles, time_t *datafileCreateTime, ns1__datafileFormat *datafileFormat, time_t *datafileModTime, ns1__dataset *ns1__dataset_, std::string *description, std::vector<ns1__relatedDatafile * >& destDatafiles, std::string *doi, LONG64 *fileSize, std::string *location, std::string *name, std::vector<ns1__datafileParameter * >& parameters, std::vector<ns1__relatedDatafile * >& sourceDatafiles, std::string *createId1, time_t *createTime1, time_t *modTime1, LONG64 *id1, std::string *modId1, char *__item2) { ns1__datafile *_p = soap_instantiate_ns1__datafile(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__datafile::checksum = checksum; _p->ns1__datafile::dataCollectionDatafiles = dataCollectionDatafiles; _p->ns1__datafile::datafileCreateTime = datafileCreateTime; _p->ns1__datafile::datafileFormat = datafileFormat; _p->ns1__datafile::datafileModTime = datafileModTime; _p->ns1__datafile::ns1__dataset_ = ns1__dataset_; _p->ns1__datafile::description = description; _p->ns1__datafile::destDatafiles = destDatafiles; _p->ns1__datafile::doi = doi; _p->ns1__datafile::fileSize = fileSize; _p->ns1__datafile::location = location; _p->ns1__datafile::name = name; _p->ns1__datafile::parameters = parameters; _p->ns1__datafile::sourceDatafiles = sourceDatafiles; _p->ns1__entityBaseBean::createId = createId1; _p->ns1__entityBaseBean::createTime = createTime1; _p->ns1__entityBaseBean::modTime = modTime1; _p->ns1__entityBaseBean::id = id1; _p->ns1__entityBaseBean::modId = modId1; _p->xsd__anyType::__item = __item2; } return _p; }
 
 inline void soap_delete_ns1__datafile(struct soap *soap, ns1__datafile *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__datafile(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__dummy
-#define SOAP_TYPE_ICat4_ns1__dummy (39)
+#define SOAP_TYPE_ICat4_ns1__dummy (51)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__dummy(struct soap*, const char*, int, const ns1__dummy *, const char*);
@@ -1981,130 +2271,72 @@ inline ns1__dummy * soap_new_ns1__dummy(struct soap *soap, int n = -1) { return 
 
 inline ns1__dummy * soap_new_req_ns1__dummy(struct soap *soap) { ns1__dummy *_p = soap_instantiate_ns1__dummy(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__dummy * soap_new_set_ns1__dummy(struct soap *soap, ns1__datafile *arg0, ns1__datafileFormat *arg1, ns1__datafileParameter *arg2, ns1__dataset *arg3, ns1__datasetParameter *arg4, ns1__datasetType *arg5, ns1__facility *arg6, ns1__facilityCycle *arg7, ns1__instrumentScientist *arg8, ns1__user *arg9, ns1__instrument *arg10, ns1__investigation *arg11, ns1__investigationType *arg12, ns1__investigationUser *arg13, ns1__keyword *arg14, ns1__parameterType *arg15, ns1__publication *arg16, ns1__relatedDatafile *arg17, ns1__sample *arg18, ns1__sampleParameter *arg19, ns1__shift *arg20, ns1__study *arg21, ns1__studyInvestigation *arg22, enum ns1__studyStatus *arg23, ns1__application *arg24, ns1__job *arg25, ns1__inputDataset *arg26, ns1__outputDataset *arg27, ns1__inputDatafile *arg28, ns1__outputDatafile *arg29, ns1__notificationRequest *arg30, ns1__group *arg31, ns1__userGroup *arg32, char *__item1) { ns1__dummy *_p = soap_instantiate_ns1__dummy(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dummy::arg0 = arg0; _p->ns1__dummy::arg1 = arg1; _p->ns1__dummy::arg2 = arg2; _p->ns1__dummy::arg3 = arg3; _p->ns1__dummy::arg4 = arg4; _p->ns1__dummy::arg5 = arg5; _p->ns1__dummy::arg6 = arg6; _p->ns1__dummy::arg7 = arg7; _p->ns1__dummy::arg8 = arg8; _p->ns1__dummy::arg9 = arg9; _p->ns1__dummy::arg10 = arg10; _p->ns1__dummy::arg11 = arg11; _p->ns1__dummy::arg12 = arg12; _p->ns1__dummy::arg13 = arg13; _p->ns1__dummy::arg14 = arg14; _p->ns1__dummy::arg15 = arg15; _p->ns1__dummy::arg16 = arg16; _p->ns1__dummy::arg17 = arg17; _p->ns1__dummy::arg18 = arg18; _p->ns1__dummy::arg19 = arg19; _p->ns1__dummy::arg20 = arg20; _p->ns1__dummy::arg21 = arg21; _p->ns1__dummy::arg22 = arg22; _p->ns1__dummy::arg23 = arg23; _p->ns1__dummy::arg24 = arg24; _p->ns1__dummy::arg25 = arg25; _p->ns1__dummy::arg26 = arg26; _p->ns1__dummy::arg27 = arg27; _p->ns1__dummy::arg28 = arg28; _p->ns1__dummy::arg29 = arg29; _p->ns1__dummy::arg30 = arg30; _p->ns1__dummy::arg31 = arg31; _p->ns1__dummy::arg32 = arg32; _p->xsd__anyType::__item = __item1; } return _p; }
+inline ns1__dummy * soap_new_set_ns1__dummy(struct soap *soap, ns1__datafile *arg0, ns1__datafileFormat *arg1, ns1__datafileParameter *arg2, ns1__dataset *arg3, ns1__datasetParameter *arg4, ns1__datasetType *arg5, ns1__facility *arg6, ns1__facilityCycle *arg7, ns1__instrumentScientist *arg8, ns1__user *arg9, ns1__instrument *arg10, ns1__investigation *arg11, ns1__investigationType *arg12, ns1__investigationUser *arg13, ns1__keyword *arg14, ns1__parameterType *arg15, ns1__publication *arg16, ns1__relatedDatafile *arg17, ns1__sample *arg18, ns1__sampleParameter *arg19, ns1__shift *arg20, ns1__study *arg21, ns1__studyInvestigation *arg22, enum ns1__studyStatus *arg23, ns1__application *arg24, ns1__job *arg25, ns1__dataCollection *arg26, ns1__dataCollectionParameter *arg27, ns1__dataCollectionDataset *arg28, ns1__dataCollectionDatafile *arg29, ns1__grouping *arg30, ns1__userGroup *arg31, ns1__log *arg32, ns1__publicStep *arg33, char *__item1) { ns1__dummy *_p = soap_instantiate_ns1__dummy(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__dummy::arg0 = arg0; _p->ns1__dummy::arg1 = arg1; _p->ns1__dummy::arg2 = arg2; _p->ns1__dummy::arg3 = arg3; _p->ns1__dummy::arg4 = arg4; _p->ns1__dummy::arg5 = arg5; _p->ns1__dummy::arg6 = arg6; _p->ns1__dummy::arg7 = arg7; _p->ns1__dummy::arg8 = arg8; _p->ns1__dummy::arg9 = arg9; _p->ns1__dummy::arg10 = arg10; _p->ns1__dummy::arg11 = arg11; _p->ns1__dummy::arg12 = arg12; _p->ns1__dummy::arg13 = arg13; _p->ns1__dummy::arg14 = arg14; _p->ns1__dummy::arg15 = arg15; _p->ns1__dummy::arg16 = arg16; _p->ns1__dummy::arg17 = arg17; _p->ns1__dummy::arg18 = arg18; _p->ns1__dummy::arg19 = arg19; _p->ns1__dummy::arg20 = arg20; _p->ns1__dummy::arg21 = arg21; _p->ns1__dummy::arg22 = arg22; _p->ns1__dummy::arg23 = arg23; _p->ns1__dummy::arg24 = arg24; _p->ns1__dummy::arg25 = arg25; _p->ns1__dummy::arg26 = arg26; _p->ns1__dummy::arg27 = arg27; _p->ns1__dummy::arg28 = arg28; _p->ns1__dummy::arg29 = arg29; _p->ns1__dummy::arg30 = arg30; _p->ns1__dummy::arg31 = arg31; _p->ns1__dummy::arg32 = arg32; _p->ns1__dummy::arg33 = arg33; _p->xsd__anyType::__item = __item1; } return _p; }
 
 inline void soap_delete_ns1__dummy(struct soap *soap, ns1__dummy *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__dummy(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__loginResponse
-#define SOAP_TYPE_ICat4_ns1__loginResponse (38)
+#ifndef SOAP_TYPE_ICat4_ns1__refreshResponse
+#define SOAP_TYPE_ICat4_ns1__refreshResponse (50)
 #endif
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__loginResponse(struct soap*, const char*, int, const ns1__loginResponse *, const char*);
-SOAP_FMAC3 ns1__loginResponse * SOAP_FMAC4 soap_in_ns1__loginResponse(struct soap*, const char*, ns1__loginResponse *, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__refreshResponse(struct soap*, const char*, int, const ns1__refreshResponse *, const char*);
+SOAP_FMAC3 ns1__refreshResponse * SOAP_FMAC4 soap_in_ns1__refreshResponse(struct soap*, const char*, ns1__refreshResponse *, const char*);
 
-#ifndef soap_write_ns1__loginResponse
-#define soap_write_ns1__loginResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:loginResponse", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_write_ns1__refreshResponse
+#define soap_write_ns1__refreshResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:refreshResponse", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC3 ns1__loginResponse * SOAP_FMAC4 soap_get_ns1__loginResponse(struct soap*, ns1__loginResponse *, const char*, const char*);
+SOAP_FMAC3 ns1__refreshResponse * SOAP_FMAC4 soap_get_ns1__refreshResponse(struct soap*, ns1__refreshResponse *, const char*, const char*);
 
-#ifndef soap_read_ns1__loginResponse
-#define soap_read_ns1__loginResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__loginResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_ns1__refreshResponse
+#define soap_read_ns1__refreshResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__refreshResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC1 ns1__loginResponse * SOAP_FMAC2 soap_instantiate_ns1__loginResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC1 ns1__refreshResponse * SOAP_FMAC2 soap_instantiate_ns1__refreshResponse(struct soap*, int, const char*, const char*, size_t*);
 
-inline ns1__loginResponse * soap_new_ns1__loginResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__loginResponse(soap, n, NULL, NULL, NULL); }
+inline ns1__refreshResponse * soap_new_ns1__refreshResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__refreshResponse(soap, n, NULL, NULL, NULL); }
 
-inline ns1__loginResponse * soap_new_req_ns1__loginResponse(struct soap *soap) { ns1__loginResponse *_p = soap_instantiate_ns1__loginResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+inline ns1__refreshResponse * soap_new_req_ns1__refreshResponse(struct soap *soap) { ns1__refreshResponse *_p = soap_instantiate_ns1__refreshResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__loginResponse * soap_new_set_ns1__loginResponse(struct soap *soap, std::string *return_, char *__item1) { ns1__loginResponse *_p = soap_instantiate_ns1__loginResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__loginResponse::return_ = return_; _p->xsd__anyType::__item = __item1; } return _p; }
+inline ns1__refreshResponse * soap_new_set_ns1__refreshResponse(struct soap *soap, char *__item1) { ns1__refreshResponse *_p = soap_instantiate_ns1__refreshResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->xsd__anyType::__item = __item1; } return _p; }
 
-inline void soap_delete_ns1__loginResponse(struct soap *soap, ns1__loginResponse *p) { soap_delete(soap, p); }
+inline void soap_delete_ns1__refreshResponse(struct soap *soap, ns1__refreshResponse *p) { soap_delete(soap, p); }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__loginResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__refreshResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__login
-#define SOAP_TYPE_ICat4_ns1__login (37)
+#ifndef SOAP_TYPE_ICat4_ns1__refresh
+#define SOAP_TYPE_ICat4_ns1__refresh (49)
 #endif
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__login(struct soap*, const char*, int, const ns1__login *, const char*);
-SOAP_FMAC3 ns1__login * SOAP_FMAC4 soap_in_ns1__login(struct soap*, const char*, ns1__login *, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__refresh(struct soap*, const char*, int, const ns1__refresh *, const char*);
+SOAP_FMAC3 ns1__refresh * SOAP_FMAC4 soap_in_ns1__refresh(struct soap*, const char*, ns1__refresh *, const char*);
 
-#ifndef soap_write_ns1__login
-#define soap_write_ns1__login(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:login", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_write_ns1__refresh
+#define soap_write_ns1__refresh(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:refresh", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC3 ns1__login * SOAP_FMAC4 soap_get_ns1__login(struct soap*, ns1__login *, const char*, const char*);
+SOAP_FMAC3 ns1__refresh * SOAP_FMAC4 soap_get_ns1__refresh(struct soap*, ns1__refresh *, const char*, const char*);
 
-#ifndef soap_read_ns1__login
-#define soap_read_ns1__login(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__login(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_ns1__refresh
+#define soap_read_ns1__refresh(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__refresh(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC1 ns1__login * SOAP_FMAC2 soap_instantiate_ns1__login(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC1 ns1__refresh * SOAP_FMAC2 soap_instantiate_ns1__refresh(struct soap*, int, const char*, const char*, size_t*);
 
-inline ns1__login * soap_new_ns1__login(struct soap *soap, int n = -1) { return soap_instantiate_ns1__login(soap, n, NULL, NULL, NULL); }
+inline ns1__refresh * soap_new_ns1__refresh(struct soap *soap, int n = -1) { return soap_instantiate_ns1__refresh(soap, n, NULL, NULL, NULL); }
 
-inline ns1__login * soap_new_req_ns1__login(struct soap *soap, _ns1__login_credentials& credentials) { ns1__login *_p = soap_instantiate_ns1__login(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__login::credentials = credentials; } return _p; }
+inline ns1__refresh * soap_new_req_ns1__refresh(struct soap *soap) { ns1__refresh *_p = soap_instantiate_ns1__refresh(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
 
-inline ns1__login * soap_new_set_ns1__login(struct soap *soap, std::string *plugin, _ns1__login_credentials& credentials, char *__item1) { ns1__login *_p = soap_instantiate_ns1__login(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__login::plugin = plugin; _p->ns1__login::credentials = credentials; _p->xsd__anyType::__item = __item1; } return _p; }
+inline ns1__refresh * soap_new_set_ns1__refresh(struct soap *soap, std::string *sessionId, char *__item1) { ns1__refresh *_p = soap_instantiate_ns1__refresh(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__refresh::sessionId = sessionId; _p->xsd__anyType::__item = __item1; } return _p; }
 
-inline void soap_delete_ns1__login(struct soap *soap, ns1__login *p) { soap_delete(soap, p); }
+inline void soap_delete_ns1__refresh(struct soap *soap, ns1__refresh *p) { soap_delete(soap, p); }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__login(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__deleteManyResponse
-#define SOAP_TYPE_ICat4_ns1__deleteManyResponse (36)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteManyResponse(struct soap*, const char*, int, const ns1__deleteManyResponse *, const char*);
-SOAP_FMAC3 ns1__deleteManyResponse * SOAP_FMAC4 soap_in_ns1__deleteManyResponse(struct soap*, const char*, ns1__deleteManyResponse *, const char*);
-
-#ifndef soap_write_ns1__deleteManyResponse
-#define soap_write_ns1__deleteManyResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:deleteManyResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__deleteManyResponse * SOAP_FMAC4 soap_get_ns1__deleteManyResponse(struct soap*, ns1__deleteManyResponse *, const char*, const char*);
-
-#ifndef soap_read_ns1__deleteManyResponse
-#define soap_read_ns1__deleteManyResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__deleteManyResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__deleteManyResponse * SOAP_FMAC2 soap_instantiate_ns1__deleteManyResponse(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__deleteManyResponse * soap_new_ns1__deleteManyResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__deleteManyResponse(soap, n, NULL, NULL, NULL); }
-
-inline ns1__deleteManyResponse * soap_new_req_ns1__deleteManyResponse(struct soap *soap) { ns1__deleteManyResponse *_p = soap_instantiate_ns1__deleteManyResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__deleteManyResponse * soap_new_set_ns1__deleteManyResponse(struct soap *soap, char *__item1) { ns1__deleteManyResponse *_p = soap_instantiate_ns1__deleteManyResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->xsd__anyType::__item = __item1; } return _p; }
-
-inline void soap_delete_ns1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteManyResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_ns1__deleteMany
-#define SOAP_TYPE_ICat4_ns1__deleteMany (35)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteMany(struct soap*, const char*, int, const ns1__deleteMany *, const char*);
-SOAP_FMAC3 ns1__deleteMany * SOAP_FMAC4 soap_in_ns1__deleteMany(struct soap*, const char*, ns1__deleteMany *, const char*);
-
-#ifndef soap_write_ns1__deleteMany
-#define soap_write_ns1__deleteMany(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:deleteMany", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__deleteMany * SOAP_FMAC4 soap_get_ns1__deleteMany(struct soap*, ns1__deleteMany *, const char*, const char*);
-
-#ifndef soap_read_ns1__deleteMany
-#define soap_read_ns1__deleteMany(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__deleteMany(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__deleteMany * SOAP_FMAC2 soap_instantiate_ns1__deleteMany(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__deleteMany * soap_new_ns1__deleteMany(struct soap *soap, int n = -1) { return soap_instantiate_ns1__deleteMany(soap, n, NULL, NULL, NULL); }
-
-inline ns1__deleteMany * soap_new_req_ns1__deleteMany(struct soap *soap) { ns1__deleteMany *_p = soap_instantiate_ns1__deleteMany(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
-
-inline ns1__deleteMany * soap_new_set_ns1__deleteMany(struct soap *soap, std::string *sessionId, std::vector<ns1__entityBaseBean * >& beans, char *__item1) { ns1__deleteMany *_p = soap_instantiate_ns1__deleteMany(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__deleteMany::sessionId = sessionId; _p->ns1__deleteMany::beans = beans; _p->xsd__anyType::__item = __item1; } return _p; }
-
-inline void soap_delete_ns1__deleteMany(struct soap *soap, ns1__deleteMany *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteMany(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__refresh(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__getUserNameResponse
-#define SOAP_TYPE_ICat4_ns1__getUserNameResponse (34)
+#define SOAP_TYPE_ICat4_ns1__getUserNameResponse (48)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getUserNameResponse(struct soap*, const char*, int, const ns1__getUserNameResponse *, const char*);
@@ -2133,7 +2365,7 @@ inline void soap_delete_ns1__getUserNameResponse(struct soap *soap, ns1__getUser
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getUserNameResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__getUserName
-#define SOAP_TYPE_ICat4_ns1__getUserName (33)
+#define SOAP_TYPE_ICat4_ns1__getUserName (47)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getUserName(struct soap*, const char*, int, const ns1__getUserName *, const char*);
@@ -2161,8 +2393,66 @@ inline void soap_delete_ns1__getUserName(struct soap *soap, ns1__getUserName *p)
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getUserName(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_ns1__deleteManyResponse
+#define SOAP_TYPE_ICat4_ns1__deleteManyResponse (46)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteManyResponse(struct soap*, const char*, int, const ns1__deleteManyResponse *, const char*);
+SOAP_FMAC3 ns1__deleteManyResponse * SOAP_FMAC4 soap_in_ns1__deleteManyResponse(struct soap*, const char*, ns1__deleteManyResponse *, const char*);
+
+#ifndef soap_write_ns1__deleteManyResponse
+#define soap_write_ns1__deleteManyResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:deleteManyResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__deleteManyResponse * SOAP_FMAC4 soap_get_ns1__deleteManyResponse(struct soap*, ns1__deleteManyResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__deleteManyResponse
+#define soap_read_ns1__deleteManyResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__deleteManyResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__deleteManyResponse * SOAP_FMAC2 soap_instantiate_ns1__deleteManyResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__deleteManyResponse * soap_new_ns1__deleteManyResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__deleteManyResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__deleteManyResponse * soap_new_req_ns1__deleteManyResponse(struct soap *soap) { ns1__deleteManyResponse *_p = soap_instantiate_ns1__deleteManyResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__deleteManyResponse * soap_new_set_ns1__deleteManyResponse(struct soap *soap, char *__item1) { ns1__deleteManyResponse *_p = soap_instantiate_ns1__deleteManyResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__deleteManyResponse(struct soap *soap, ns1__deleteManyResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteManyResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__deleteMany
+#define SOAP_TYPE_ICat4_ns1__deleteMany (45)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__deleteMany(struct soap*, const char*, int, const ns1__deleteMany *, const char*);
+SOAP_FMAC3 ns1__deleteMany * SOAP_FMAC4 soap_in_ns1__deleteMany(struct soap*, const char*, ns1__deleteMany *, const char*);
+
+#ifndef soap_write_ns1__deleteMany
+#define soap_write_ns1__deleteMany(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:deleteMany", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__deleteMany * SOAP_FMAC4 soap_get_ns1__deleteMany(struct soap*, ns1__deleteMany *, const char*, const char*);
+
+#ifndef soap_read_ns1__deleteMany
+#define soap_read_ns1__deleteMany(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__deleteMany(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__deleteMany * SOAP_FMAC2 soap_instantiate_ns1__deleteMany(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__deleteMany * soap_new_ns1__deleteMany(struct soap *soap, int n = -1) { return soap_instantiate_ns1__deleteMany(soap, n, NULL, NULL, NULL); }
+
+inline ns1__deleteMany * soap_new_req_ns1__deleteMany(struct soap *soap) { ns1__deleteMany *_p = soap_instantiate_ns1__deleteMany(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__deleteMany * soap_new_set_ns1__deleteMany(struct soap *soap, std::string *sessionId, std::vector<ns1__entityBaseBean * >& beans, char *__item1) { ns1__deleteMany *_p = soap_instantiate_ns1__deleteMany(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__deleteMany::sessionId = sessionId; _p->ns1__deleteMany::beans = beans; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__deleteMany(struct soap *soap, ns1__deleteMany *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__deleteMany(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_ns1__updateResponse
-#define SOAP_TYPE_ICat4_ns1__updateResponse (32)
+#define SOAP_TYPE_ICat4_ns1__updateResponse (44)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__updateResponse(struct soap*, const char*, int, const ns1__updateResponse *, const char*);
@@ -2191,7 +2481,7 @@ inline void soap_delete_ns1__updateResponse(struct soap *soap, ns1__updateRespon
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__updateResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__update
-#define SOAP_TYPE_ICat4_ns1__update (31)
+#define SOAP_TYPE_ICat4_ns1__update (43)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__update(struct soap*, const char*, int, const ns1__update *, const char*);
@@ -2219,8 +2509,66 @@ inline void soap_delete_ns1__update(struct soap *soap, ns1__update *p) { soap_de
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__update(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_ns1__luceneGetPopulatingResponse
+#define SOAP_TYPE_ICat4_ns1__luceneGetPopulatingResponse (42)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneGetPopulatingResponse(struct soap*, const char*, int, const ns1__luceneGetPopulatingResponse *, const char*);
+SOAP_FMAC3 ns1__luceneGetPopulatingResponse * SOAP_FMAC4 soap_in_ns1__luceneGetPopulatingResponse(struct soap*, const char*, ns1__luceneGetPopulatingResponse *, const char*);
+
+#ifndef soap_write_ns1__luceneGetPopulatingResponse
+#define soap_write_ns1__luceneGetPopulatingResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:luceneGetPopulatingResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneGetPopulatingResponse * SOAP_FMAC4 soap_get_ns1__luceneGetPopulatingResponse(struct soap*, ns1__luceneGetPopulatingResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__luceneGetPopulatingResponse
+#define soap_read_ns1__luceneGetPopulatingResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__luceneGetPopulatingResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__luceneGetPopulatingResponse * SOAP_FMAC2 soap_instantiate_ns1__luceneGetPopulatingResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__luceneGetPopulatingResponse * soap_new_ns1__luceneGetPopulatingResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__luceneGetPopulatingResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__luceneGetPopulatingResponse * soap_new_req_ns1__luceneGetPopulatingResponse(struct soap *soap) { ns1__luceneGetPopulatingResponse *_p = soap_instantiate_ns1__luceneGetPopulatingResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__luceneGetPopulatingResponse * soap_new_set_ns1__luceneGetPopulatingResponse(struct soap *soap, std::vector<std::string >& return_, char *__item1) { ns1__luceneGetPopulatingResponse *_p = soap_instantiate_ns1__luceneGetPopulatingResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__luceneGetPopulatingResponse::return_ = return_; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__luceneGetPopulatingResponse(struct soap *soap, ns1__luceneGetPopulatingResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneGetPopulatingResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__luceneGetPopulating
+#define SOAP_TYPE_ICat4_ns1__luceneGetPopulating (41)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneGetPopulating(struct soap*, const char*, int, const ns1__luceneGetPopulating *, const char*);
+SOAP_FMAC3 ns1__luceneGetPopulating * SOAP_FMAC4 soap_in_ns1__luceneGetPopulating(struct soap*, const char*, ns1__luceneGetPopulating *, const char*);
+
+#ifndef soap_write_ns1__luceneGetPopulating
+#define soap_write_ns1__luceneGetPopulating(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:luceneGetPopulating", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneGetPopulating * SOAP_FMAC4 soap_get_ns1__luceneGetPopulating(struct soap*, ns1__luceneGetPopulating *, const char*, const char*);
+
+#ifndef soap_read_ns1__luceneGetPopulating
+#define soap_read_ns1__luceneGetPopulating(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__luceneGetPopulating(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__luceneGetPopulating * SOAP_FMAC2 soap_instantiate_ns1__luceneGetPopulating(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__luceneGetPopulating * soap_new_ns1__luceneGetPopulating(struct soap *soap, int n = -1) { return soap_instantiate_ns1__luceneGetPopulating(soap, n, NULL, NULL, NULL); }
+
+inline ns1__luceneGetPopulating * soap_new_req_ns1__luceneGetPopulating(struct soap *soap) { ns1__luceneGetPopulating *_p = soap_instantiate_ns1__luceneGetPopulating(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__luceneGetPopulating * soap_new_set_ns1__luceneGetPopulating(struct soap *soap, std::string *sessionId, char *__item1) { ns1__luceneGetPopulating *_p = soap_instantiate_ns1__luceneGetPopulating(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__luceneGetPopulating::sessionId = sessionId; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__luceneGetPopulating(struct soap *soap, ns1__luceneGetPopulating *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneGetPopulating(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_ns1__getApiVersionResponse
-#define SOAP_TYPE_ICat4_ns1__getApiVersionResponse (30)
+#define SOAP_TYPE_ICat4_ns1__getApiVersionResponse (40)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getApiVersionResponse(struct soap*, const char*, int, const ns1__getApiVersionResponse *, const char*);
@@ -2249,7 +2597,7 @@ inline void soap_delete_ns1__getApiVersionResponse(struct soap *soap, ns1__getAp
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getApiVersionResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__getApiVersion
-#define SOAP_TYPE_ICat4_ns1__getApiVersion (29)
+#define SOAP_TYPE_ICat4_ns1__getApiVersion (39)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getApiVersion(struct soap*, const char*, int, const ns1__getApiVersion *, const char*);
@@ -2277,8 +2625,66 @@ inline void soap_delete_ns1__getApiVersion(struct soap *soap, ns1__getApiVersion
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getApiVersion(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_ns1__getEntityNamesResponse
+#define SOAP_TYPE_ICat4_ns1__getEntityNamesResponse (38)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getEntityNamesResponse(struct soap*, const char*, int, const ns1__getEntityNamesResponse *, const char*);
+SOAP_FMAC3 ns1__getEntityNamesResponse * SOAP_FMAC4 soap_in_ns1__getEntityNamesResponse(struct soap*, const char*, ns1__getEntityNamesResponse *, const char*);
+
+#ifndef soap_write_ns1__getEntityNamesResponse
+#define soap_write_ns1__getEntityNamesResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:getEntityNamesResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getEntityNamesResponse * SOAP_FMAC4 soap_get_ns1__getEntityNamesResponse(struct soap*, ns1__getEntityNamesResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__getEntityNamesResponse
+#define soap_read_ns1__getEntityNamesResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__getEntityNamesResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__getEntityNamesResponse * SOAP_FMAC2 soap_instantiate_ns1__getEntityNamesResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__getEntityNamesResponse * soap_new_ns1__getEntityNamesResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__getEntityNamesResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__getEntityNamesResponse * soap_new_req_ns1__getEntityNamesResponse(struct soap *soap) { ns1__getEntityNamesResponse *_p = soap_instantiate_ns1__getEntityNamesResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__getEntityNamesResponse * soap_new_set_ns1__getEntityNamesResponse(struct soap *soap, std::vector<std::string >& return_, char *__item1) { ns1__getEntityNamesResponse *_p = soap_instantiate_ns1__getEntityNamesResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__getEntityNamesResponse::return_ = return_; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__getEntityNamesResponse(struct soap *soap, ns1__getEntityNamesResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getEntityNamesResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__getEntityNames
+#define SOAP_TYPE_ICat4_ns1__getEntityNames (37)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getEntityNames(struct soap*, const char*, int, const ns1__getEntityNames *, const char*);
+SOAP_FMAC3 ns1__getEntityNames * SOAP_FMAC4 soap_in_ns1__getEntityNames(struct soap*, const char*, ns1__getEntityNames *, const char*);
+
+#ifndef soap_write_ns1__getEntityNames
+#define soap_write_ns1__getEntityNames(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:getEntityNames", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getEntityNames * SOAP_FMAC4 soap_get_ns1__getEntityNames(struct soap*, ns1__getEntityNames *, const char*, const char*);
+
+#ifndef soap_read_ns1__getEntityNames
+#define soap_read_ns1__getEntityNames(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__getEntityNames(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__getEntityNames * SOAP_FMAC2 soap_instantiate_ns1__getEntityNames(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__getEntityNames * soap_new_ns1__getEntityNames(struct soap *soap, int n = -1) { return soap_instantiate_ns1__getEntityNames(soap, n, NULL, NULL, NULL); }
+
+inline ns1__getEntityNames * soap_new_req_ns1__getEntityNames(struct soap *soap) { ns1__getEntityNames *_p = soap_instantiate_ns1__getEntityNames(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__getEntityNames * soap_new_set_ns1__getEntityNames(struct soap *soap, char *__item1) { ns1__getEntityNames *_p = soap_instantiate_ns1__getEntityNames(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__getEntityNames(struct soap *soap, ns1__getEntityNames *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getEntityNames(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_ns1__getResponse
-#define SOAP_TYPE_ICat4_ns1__getResponse (28)
+#define SOAP_TYPE_ICat4_ns1__getResponse (36)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getResponse(struct soap*, const char*, int, const ns1__getResponse *, const char*);
@@ -2307,7 +2713,7 @@ inline void soap_delete_ns1__getResponse(struct soap *soap, ns1__getResponse *p)
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__get
-#define SOAP_TYPE_ICat4_ns1__get (27)
+#define SOAP_TYPE_ICat4_ns1__get (35)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__get(struct soap*, const char*, int, const ns1__get *, const char*);
@@ -2335,8 +2741,182 @@ inline void soap_delete_ns1__get(struct soap *soap, ns1__get *p) { soap_delete(s
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__get(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_ns1__lucenePopulateResponse
+#define SOAP_TYPE_ICat4_ns1__lucenePopulateResponse (34)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__lucenePopulateResponse(struct soap*, const char*, int, const ns1__lucenePopulateResponse *, const char*);
+SOAP_FMAC3 ns1__lucenePopulateResponse * SOAP_FMAC4 soap_in_ns1__lucenePopulateResponse(struct soap*, const char*, ns1__lucenePopulateResponse *, const char*);
+
+#ifndef soap_write_ns1__lucenePopulateResponse
+#define soap_write_ns1__lucenePopulateResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:lucenePopulateResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__lucenePopulateResponse * SOAP_FMAC4 soap_get_ns1__lucenePopulateResponse(struct soap*, ns1__lucenePopulateResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__lucenePopulateResponse
+#define soap_read_ns1__lucenePopulateResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__lucenePopulateResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__lucenePopulateResponse * SOAP_FMAC2 soap_instantiate_ns1__lucenePopulateResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__lucenePopulateResponse * soap_new_ns1__lucenePopulateResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__lucenePopulateResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__lucenePopulateResponse * soap_new_req_ns1__lucenePopulateResponse(struct soap *soap) { ns1__lucenePopulateResponse *_p = soap_instantiate_ns1__lucenePopulateResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__lucenePopulateResponse * soap_new_set_ns1__lucenePopulateResponse(struct soap *soap, char *__item1) { ns1__lucenePopulateResponse *_p = soap_instantiate_ns1__lucenePopulateResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__lucenePopulateResponse(struct soap *soap, ns1__lucenePopulateResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__lucenePopulateResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__lucenePopulate
+#define SOAP_TYPE_ICat4_ns1__lucenePopulate (33)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__lucenePopulate(struct soap*, const char*, int, const ns1__lucenePopulate *, const char*);
+SOAP_FMAC3 ns1__lucenePopulate * SOAP_FMAC4 soap_in_ns1__lucenePopulate(struct soap*, const char*, ns1__lucenePopulate *, const char*);
+
+#ifndef soap_write_ns1__lucenePopulate
+#define soap_write_ns1__lucenePopulate(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:lucenePopulate", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__lucenePopulate * SOAP_FMAC4 soap_get_ns1__lucenePopulate(struct soap*, ns1__lucenePopulate *, const char*, const char*);
+
+#ifndef soap_read_ns1__lucenePopulate
+#define soap_read_ns1__lucenePopulate(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__lucenePopulate(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__lucenePopulate * SOAP_FMAC2 soap_instantiate_ns1__lucenePopulate(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__lucenePopulate * soap_new_ns1__lucenePopulate(struct soap *soap, int n = -1) { return soap_instantiate_ns1__lucenePopulate(soap, n, NULL, NULL, NULL); }
+
+inline ns1__lucenePopulate * soap_new_req_ns1__lucenePopulate(struct soap *soap) { ns1__lucenePopulate *_p = soap_instantiate_ns1__lucenePopulate(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__lucenePopulate * soap_new_set_ns1__lucenePopulate(struct soap *soap, std::string *sessionId, std::string *entityName, char *__item1) { ns1__lucenePopulate *_p = soap_instantiate_ns1__lucenePopulate(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__lucenePopulate::sessionId = sessionId; _p->ns1__lucenePopulate::entityName = entityName; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__lucenePopulate(struct soap *soap, ns1__lucenePopulate *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__lucenePopulate(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__luceneSearchResponse
+#define SOAP_TYPE_ICat4_ns1__luceneSearchResponse (32)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneSearchResponse(struct soap*, const char*, int, const ns1__luceneSearchResponse *, const char*);
+SOAP_FMAC3 ns1__luceneSearchResponse * SOAP_FMAC4 soap_in_ns1__luceneSearchResponse(struct soap*, const char*, ns1__luceneSearchResponse *, const char*);
+
+#ifndef soap_write_ns1__luceneSearchResponse
+#define soap_write_ns1__luceneSearchResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:luceneSearchResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneSearchResponse * SOAP_FMAC4 soap_get_ns1__luceneSearchResponse(struct soap*, ns1__luceneSearchResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__luceneSearchResponse
+#define soap_read_ns1__luceneSearchResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__luceneSearchResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__luceneSearchResponse * SOAP_FMAC2 soap_instantiate_ns1__luceneSearchResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__luceneSearchResponse * soap_new_ns1__luceneSearchResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__luceneSearchResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__luceneSearchResponse * soap_new_req_ns1__luceneSearchResponse(struct soap *soap) { ns1__luceneSearchResponse *_p = soap_instantiate_ns1__luceneSearchResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__luceneSearchResponse * soap_new_set_ns1__luceneSearchResponse(struct soap *soap, std::vector<std::string >& return_, char *__item1) { ns1__luceneSearchResponse *_p = soap_instantiate_ns1__luceneSearchResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__luceneSearchResponse::return_ = return_; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__luceneSearchResponse(struct soap *soap, ns1__luceneSearchResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneSearchResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__luceneSearch
+#define SOAP_TYPE_ICat4_ns1__luceneSearch (31)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneSearch(struct soap*, const char*, int, const ns1__luceneSearch *, const char*);
+SOAP_FMAC3 ns1__luceneSearch * SOAP_FMAC4 soap_in_ns1__luceneSearch(struct soap*, const char*, ns1__luceneSearch *, const char*);
+
+#ifndef soap_write_ns1__luceneSearch
+#define soap_write_ns1__luceneSearch(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:luceneSearch", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneSearch * SOAP_FMAC4 soap_get_ns1__luceneSearch(struct soap*, ns1__luceneSearch *, const char*, const char*);
+
+#ifndef soap_read_ns1__luceneSearch
+#define soap_read_ns1__luceneSearch(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__luceneSearch(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__luceneSearch * SOAP_FMAC2 soap_instantiate_ns1__luceneSearch(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__luceneSearch * soap_new_ns1__luceneSearch(struct soap *soap, int n = -1) { return soap_instantiate_ns1__luceneSearch(soap, n, NULL, NULL, NULL); }
+
+inline ns1__luceneSearch * soap_new_req_ns1__luceneSearch(struct soap *soap, int maxCount) { ns1__luceneSearch *_p = soap_instantiate_ns1__luceneSearch(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__luceneSearch::maxCount = maxCount; } return _p; }
+
+inline ns1__luceneSearch * soap_new_set_ns1__luceneSearch(struct soap *soap, std::string *sessionId, std::string *query, int maxCount, std::string *entityName, char *__item1) { ns1__luceneSearch *_p = soap_instantiate_ns1__luceneSearch(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__luceneSearch::sessionId = sessionId; _p->ns1__luceneSearch::query = query; _p->ns1__luceneSearch::maxCount = maxCount; _p->ns1__luceneSearch::entityName = entityName; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__luceneSearch(struct soap *soap, ns1__luceneSearch *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneSearch(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__getPropertiesResponse
+#define SOAP_TYPE_ICat4_ns1__getPropertiesResponse (30)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getPropertiesResponse(struct soap*, const char*, int, const ns1__getPropertiesResponse *, const char*);
+SOAP_FMAC3 ns1__getPropertiesResponse * SOAP_FMAC4 soap_in_ns1__getPropertiesResponse(struct soap*, const char*, ns1__getPropertiesResponse *, const char*);
+
+#ifndef soap_write_ns1__getPropertiesResponse
+#define soap_write_ns1__getPropertiesResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:getPropertiesResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getPropertiesResponse * SOAP_FMAC4 soap_get_ns1__getPropertiesResponse(struct soap*, ns1__getPropertiesResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__getPropertiesResponse
+#define soap_read_ns1__getPropertiesResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__getPropertiesResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__getPropertiesResponse * SOAP_FMAC2 soap_instantiate_ns1__getPropertiesResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__getPropertiesResponse * soap_new_ns1__getPropertiesResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__getPropertiesResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__getPropertiesResponse * soap_new_req_ns1__getPropertiesResponse(struct soap *soap) { ns1__getPropertiesResponse *_p = soap_instantiate_ns1__getPropertiesResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__getPropertiesResponse * soap_new_set_ns1__getPropertiesResponse(struct soap *soap, std::vector<std::string >& return_, char *__item1) { ns1__getPropertiesResponse *_p = soap_instantiate_ns1__getPropertiesResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__getPropertiesResponse::return_ = return_; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__getPropertiesResponse(struct soap *soap, ns1__getPropertiesResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getPropertiesResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__getProperties
+#define SOAP_TYPE_ICat4_ns1__getProperties (29)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__getProperties(struct soap*, const char*, int, const ns1__getProperties *, const char*);
+SOAP_FMAC3 ns1__getProperties * SOAP_FMAC4 soap_in_ns1__getProperties(struct soap*, const char*, ns1__getProperties *, const char*);
+
+#ifndef soap_write_ns1__getProperties
+#define soap_write_ns1__getProperties(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:getProperties", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getProperties * SOAP_FMAC4 soap_get_ns1__getProperties(struct soap*, ns1__getProperties *, const char*, const char*);
+
+#ifndef soap_read_ns1__getProperties
+#define soap_read_ns1__getProperties(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__getProperties(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__getProperties * SOAP_FMAC2 soap_instantiate_ns1__getProperties(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__getProperties * soap_new_ns1__getProperties(struct soap *soap, int n = -1) { return soap_instantiate_ns1__getProperties(soap, n, NULL, NULL, NULL); }
+
+inline ns1__getProperties * soap_new_req_ns1__getProperties(struct soap *soap) { ns1__getProperties *_p = soap_instantiate_ns1__getProperties(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__getProperties * soap_new_set_ns1__getProperties(struct soap *soap, std::string *sessionId, char *__item1) { ns1__getProperties *_p = soap_instantiate_ns1__getProperties(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__getProperties::sessionId = sessionId; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__getProperties(struct soap *soap, ns1__getProperties *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__getProperties(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_ns1__createResponse
-#define SOAP_TYPE_ICat4_ns1__createResponse (26)
+#define SOAP_TYPE_ICat4_ns1__createResponse (28)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createResponse(struct soap*, const char*, int, const ns1__createResponse *, const char*);
@@ -2365,7 +2945,7 @@ inline void soap_delete_ns1__createResponse(struct soap *soap, ns1__createRespon
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__create
-#define SOAP_TYPE_ICat4_ns1__create (25)
+#define SOAP_TYPE_ICat4_ns1__create (27)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__create(struct soap*, const char*, int, const ns1__create *, const char*);
@@ -2393,37 +2973,8 @@ inline void soap_delete_ns1__create(struct soap *soap, ns1__create *p) { soap_de
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__create(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_ns1__IcatException
-#define SOAP_TYPE_ICat4_ns1__IcatException (24)
-#endif
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__IcatException(struct soap*, const char*, int, const ns1__IcatException *, const char*);
-SOAP_FMAC3 ns1__IcatException * SOAP_FMAC4 soap_in_ns1__IcatException(struct soap*, const char*, ns1__IcatException *, const char*);
-
-#ifndef soap_write_ns1__IcatException
-#define soap_write_ns1__IcatException(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:IcatException", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__IcatException * SOAP_FMAC4 soap_get_ns1__IcatException(struct soap*, ns1__IcatException *, const char*, const char*);
-
-#ifndef soap_read_ns1__IcatException
-#define soap_read_ns1__IcatException(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__IcatException(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 ns1__IcatException * SOAP_FMAC2 soap_instantiate_ns1__IcatException(struct soap*, int, const char*, const char*, size_t*);
-
-inline ns1__IcatException * soap_new_ns1__IcatException(struct soap *soap, int n = -1) { return soap_instantiate_ns1__IcatException(soap, n, NULL, NULL, NULL); }
-
-inline ns1__IcatException * soap_new_req_ns1__IcatException(struct soap *soap, int offset) { ns1__IcatException *_p = soap_instantiate_ns1__IcatException(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__IcatException::offset = offset; } return _p; }
-
-inline ns1__IcatException * soap_new_set_ns1__IcatException(struct soap *soap, std::string *message, int offset, enum ns1__icatExceptionType *type, char *__item1) { ns1__IcatException *_p = soap_instantiate_ns1__IcatException(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__IcatException::message = message; _p->ns1__IcatException::offset = offset; _p->ns1__IcatException::type = type; _p->xsd__anyType::__item = __item1; } return _p; }
-
-inline void soap_delete_ns1__IcatException(struct soap *soap, ns1__IcatException *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__IcatException(struct soap*, int, int, void*, size_t, const void*, size_t);
-
 #ifndef SOAP_TYPE_ICat4_ns1__createManyResponse
-#define SOAP_TYPE_ICat4_ns1__createManyResponse (23)
+#define SOAP_TYPE_ICat4_ns1__createManyResponse (26)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createManyResponse(struct soap*, const char*, int, const ns1__createManyResponse *, const char*);
@@ -2452,7 +3003,7 @@ inline void soap_delete_ns1__createManyResponse(struct soap *soap, ns1__createMa
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createManyResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__entityBaseBean
-#define SOAP_TYPE_ICat4_ns1__entityBaseBean (22)
+#define SOAP_TYPE_ICat4_ns1__entityBaseBean (25)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__entityBaseBean(struct soap*, const char*, int, const ns1__entityBaseBean *, const char*);
@@ -2481,7 +3032,7 @@ inline void soap_delete_ns1__entityBaseBean(struct soap *soap, ns1__entityBaseBe
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__entityBaseBean(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_ns1__createMany
-#define SOAP_TYPE_ICat4_ns1__createMany (21)
+#define SOAP_TYPE_ICat4_ns1__createMany (24)
 #endif
 
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__createMany(struct soap*, const char*, int, const ns1__createMany *, const char*);
@@ -2508,6 +3059,93 @@ inline ns1__createMany * soap_new_set_ns1__createMany(struct soap *soap, std::st
 inline void soap_delete_ns1__createMany(struct soap *soap, ns1__createMany *p) { soap_delete(soap, p); }
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__createMany(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__IcatException
+#define SOAP_TYPE_ICat4_ns1__IcatException (23)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__IcatException(struct soap*, const char*, int, const ns1__IcatException *, const char*);
+SOAP_FMAC3 ns1__IcatException * SOAP_FMAC4 soap_in_ns1__IcatException(struct soap*, const char*, ns1__IcatException *, const char*);
+
+#ifndef soap_write_ns1__IcatException
+#define soap_write_ns1__IcatException(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:IcatException", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__IcatException * SOAP_FMAC4 soap_get_ns1__IcatException(struct soap*, ns1__IcatException *, const char*, const char*);
+
+#ifndef soap_read_ns1__IcatException
+#define soap_read_ns1__IcatException(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__IcatException(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__IcatException * SOAP_FMAC2 soap_instantiate_ns1__IcatException(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__IcatException * soap_new_ns1__IcatException(struct soap *soap, int n = -1) { return soap_instantiate_ns1__IcatException(soap, n, NULL, NULL, NULL); }
+
+inline ns1__IcatException * soap_new_req_ns1__IcatException(struct soap *soap, int offset) { ns1__IcatException *_p = soap_instantiate_ns1__IcatException(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__IcatException::offset = offset; } return _p; }
+
+inline ns1__IcatException * soap_new_set_ns1__IcatException(struct soap *soap, std::string *message, int offset, enum ns1__icatExceptionType *type, char *__item1) { ns1__IcatException *_p = soap_instantiate_ns1__IcatException(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__IcatException::message = message; _p->ns1__IcatException::offset = offset; _p->ns1__IcatException::type = type; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__IcatException(struct soap *soap, ns1__IcatException *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__IcatException(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__luceneClearResponse
+#define SOAP_TYPE_ICat4_ns1__luceneClearResponse (22)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneClearResponse(struct soap*, const char*, int, const ns1__luceneClearResponse *, const char*);
+SOAP_FMAC3 ns1__luceneClearResponse * SOAP_FMAC4 soap_in_ns1__luceneClearResponse(struct soap*, const char*, ns1__luceneClearResponse *, const char*);
+
+#ifndef soap_write_ns1__luceneClearResponse
+#define soap_write_ns1__luceneClearResponse(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:luceneClearResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneClearResponse * SOAP_FMAC4 soap_get_ns1__luceneClearResponse(struct soap*, ns1__luceneClearResponse *, const char*, const char*);
+
+#ifndef soap_read_ns1__luceneClearResponse
+#define soap_read_ns1__luceneClearResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__luceneClearResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__luceneClearResponse * SOAP_FMAC2 soap_instantiate_ns1__luceneClearResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__luceneClearResponse * soap_new_ns1__luceneClearResponse(struct soap *soap, int n = -1) { return soap_instantiate_ns1__luceneClearResponse(soap, n, NULL, NULL, NULL); }
+
+inline ns1__luceneClearResponse * soap_new_req_ns1__luceneClearResponse(struct soap *soap) { ns1__luceneClearResponse *_p = soap_instantiate_ns1__luceneClearResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__luceneClearResponse * soap_new_set_ns1__luceneClearResponse(struct soap *soap, char *__item1) { ns1__luceneClearResponse *_p = soap_instantiate_ns1__luceneClearResponse(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__luceneClearResponse(struct soap *soap, ns1__luceneClearResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneClearResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_ns1__luceneClear
+#define SOAP_TYPE_ICat4_ns1__luceneClear (21)
+#endif
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns1__luceneClear(struct soap*, const char*, int, const ns1__luceneClear *, const char*);
+SOAP_FMAC3 ns1__luceneClear * SOAP_FMAC4 soap_in_ns1__luceneClear(struct soap*, const char*, ns1__luceneClear *, const char*);
+
+#ifndef soap_write_ns1__luceneClear
+#define soap_write_ns1__luceneClear(soap, data) ( (data)->soap_serialize(soap), soap_begin_send(soap) || (data)->soap_put(soap, "ns1:luceneClear", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneClear * SOAP_FMAC4 soap_get_ns1__luceneClear(struct soap*, ns1__luceneClear *, const char*, const char*);
+
+#ifndef soap_read_ns1__luceneClear
+#define soap_read_ns1__luceneClear(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_ns1__luceneClear(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 ns1__luceneClear * SOAP_FMAC2 soap_instantiate_ns1__luceneClear(struct soap*, int, const char*, const char*, size_t*);
+
+inline ns1__luceneClear * soap_new_ns1__luceneClear(struct soap *soap, int n = -1) { return soap_instantiate_ns1__luceneClear(soap, n, NULL, NULL, NULL); }
+
+inline ns1__luceneClear * soap_new_req_ns1__luceneClear(struct soap *soap) { ns1__luceneClear *_p = soap_instantiate_ns1__luceneClear(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); } return _p; }
+
+inline ns1__luceneClear * soap_new_set_ns1__luceneClear(struct soap *soap, std::string *sessionId, char *__item1) { ns1__luceneClear *_p = soap_instantiate_ns1__luceneClear(soap, -1, NULL, NULL, NULL); if (_p) { _p->soap_default(soap); _p->ns1__luceneClear::sessionId = sessionId; _p->xsd__anyType::__item = __item1; } return _p; }
+
+inline void soap_delete_ns1__luceneClear(struct soap *soap, ns1__luceneClear *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns1__luceneClear(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__string
 #define SOAP_TYPE_ICat4_std__string (20)
@@ -2747,7 +3385,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_xsd__anyType(struct soap*, int, int, void*,
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_ICat4_SOAP_ENV__Fault
-#define SOAP_TYPE_ICat4_SOAP_ENV__Fault (263)
+#define SOAP_TYPE_ICat4_SOAP_ENV__Fault (331)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Fault(struct soap*, struct SOAP_ENV__Fault *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Fault(struct soap*, const struct SOAP_ENV__Fault *);
@@ -2783,7 +3421,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Fault(struct soap*, int, int, voi
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_ICat4_SOAP_ENV__Reason
-#define SOAP_TYPE_ICat4_SOAP_ENV__Reason (262)
+#define SOAP_TYPE_ICat4_SOAP_ENV__Reason (330)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Reason(struct soap*, const struct SOAP_ENV__Reason *);
@@ -2819,7 +3457,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Reason(struct soap*, int, int, vo
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_ICat4_SOAP_ENV__Code
-#define SOAP_TYPE_ICat4_SOAP_ENV__Code (260)
+#define SOAP_TYPE_ICat4_SOAP_ENV__Code (328)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Code(struct soap*, const struct SOAP_ENV__Code *);
@@ -2855,7 +3493,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Code(struct soap*, int, int, void
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_ICat4_SOAP_ENV__Header
-#define SOAP_TYPE_ICat4_SOAP_ENV__Header (259)
+#define SOAP_TYPE_ICat4_SOAP_ENV__Header (327)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Header(struct soap*, struct SOAP_ENV__Header *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Header(struct soap*, const struct SOAP_ENV__Header *);
@@ -2888,72 +3526,328 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap*, int, int, vo
 
 #endif
 
-#ifndef SOAP_TYPE_ICat4___ns1__createMany
-#define SOAP_TYPE_ICat4___ns1__createMany (258)
+#ifndef SOAP_TYPE_ICat4___ns1__luceneSearch
+#define SOAP_TYPE_ICat4___ns1__luceneSearch (326)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__createMany(struct soap*, struct __ns1__createMany *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__createMany(struct soap*, const struct __ns1__createMany *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__createMany(struct soap*, const char*, int, const struct __ns1__createMany *, const char*);
-SOAP_FMAC3 struct __ns1__createMany * SOAP_FMAC4 soap_in___ns1__createMany(struct soap*, const char*, struct __ns1__createMany *, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneSearch(struct soap*, struct __ns1__luceneSearch *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneSearch(struct soap*, const struct __ns1__luceneSearch *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneSearch(struct soap*, const char*, int, const struct __ns1__luceneSearch *, const char*);
+SOAP_FMAC3 struct __ns1__luceneSearch * SOAP_FMAC4 soap_in___ns1__luceneSearch(struct soap*, const char*, struct __ns1__luceneSearch *, const char*);
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__createMany(struct soap*, const struct __ns1__createMany *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneSearch(struct soap*, const struct __ns1__luceneSearch *, const char*, const char*);
 
-#ifndef soap_write___ns1__createMany
-#define soap_write___ns1__createMany(soap, data) ( ICat4::soap_serialize___ns1__createMany(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__createMany(soap, data, "-ns1:createMany", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 struct __ns1__createMany * SOAP_FMAC4 soap_get___ns1__createMany(struct soap*, struct __ns1__createMany *, const char*, const char*);
-
-#ifndef soap_read___ns1__createMany
-#define soap_read___ns1__createMany(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__createMany(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_write___ns1__luceneSearch
+#define soap_write___ns1__luceneSearch(soap, data) ( ICat4::soap_serialize___ns1__luceneSearch(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__luceneSearch(soap, data, "-ns1:luceneSearch", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC1 struct __ns1__createMany * SOAP_FMAC2 soap_instantiate___ns1__createMany(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 struct __ns1__luceneSearch * SOAP_FMAC4 soap_get___ns1__luceneSearch(struct soap*, struct __ns1__luceneSearch *, const char*, const char*);
 
-inline struct __ns1__createMany * soap_new___ns1__createMany(struct soap *soap, int n = -1) { return soap_instantiate___ns1__createMany(soap, n, NULL, NULL, NULL); }
-
-inline struct __ns1__createMany * soap_new_req___ns1__createMany(struct soap *soap) { struct __ns1__createMany *_p = soap_instantiate___ns1__createMany(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__createMany(soap, _p); } return _p; }
-
-inline struct __ns1__createMany * soap_new_set___ns1__createMany(struct soap *soap, ns1__createMany *ns1__createMany_) { struct __ns1__createMany *_p = soap_instantiate___ns1__createMany(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__createMany(soap, _p); _p->ns1__createMany_ = ns1__createMany_; } return _p; }
-
-inline void soap_delete___ns1__createMany(struct soap *soap, struct __ns1__createMany *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__createMany(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4___ns1__getApiVersion
-#define SOAP_TYPE_ICat4___ns1__getApiVersion (254)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getApiVersion(struct soap*, struct __ns1__getApiVersion *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getApiVersion(struct soap*, const struct __ns1__getApiVersion *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getApiVersion(struct soap*, const char*, int, const struct __ns1__getApiVersion *, const char*);
-SOAP_FMAC3 struct __ns1__getApiVersion * SOAP_FMAC4 soap_in___ns1__getApiVersion(struct soap*, const char*, struct __ns1__getApiVersion *, const char*);
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getApiVersion(struct soap*, const struct __ns1__getApiVersion *, const char*, const char*);
-
-#ifndef soap_write___ns1__getApiVersion
-#define soap_write___ns1__getApiVersion(soap, data) ( ICat4::soap_serialize___ns1__getApiVersion(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__getApiVersion(soap, data, "-ns1:getApiVersion", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_read___ns1__luceneSearch
+#define soap_read___ns1__luceneSearch(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__luceneSearch(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC3 struct __ns1__getApiVersion * SOAP_FMAC4 soap_get___ns1__getApiVersion(struct soap*, struct __ns1__getApiVersion *, const char*, const char*);
+SOAP_FMAC1 struct __ns1__luceneSearch * SOAP_FMAC2 soap_instantiate___ns1__luceneSearch(struct soap*, int, const char*, const char*, size_t*);
 
-#ifndef soap_read___ns1__getApiVersion
-#define soap_read___ns1__getApiVersion(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__getApiVersion(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+inline struct __ns1__luceneSearch * soap_new___ns1__luceneSearch(struct soap *soap, int n = -1) { return soap_instantiate___ns1__luceneSearch(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__luceneSearch * soap_new_req___ns1__luceneSearch(struct soap *soap) { struct __ns1__luceneSearch *_p = soap_instantiate___ns1__luceneSearch(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneSearch(soap, _p); } return _p; }
+
+inline struct __ns1__luceneSearch * soap_new_set___ns1__luceneSearch(struct soap *soap, ns1__luceneSearch *ns1__luceneSearch_) { struct __ns1__luceneSearch *_p = soap_instantiate___ns1__luceneSearch(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneSearch(soap, _p); _p->ns1__luceneSearch_ = ns1__luceneSearch_; } return _p; }
+
+inline void soap_delete___ns1__luceneSearch(struct soap *soap, struct __ns1__luceneSearch *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneSearch(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__luceneCommit
+#define SOAP_TYPE_ICat4___ns1__luceneCommit (322)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneCommit(struct soap*, struct __ns1__luceneCommit *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneCommit(struct soap*, const struct __ns1__luceneCommit *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneCommit(struct soap*, const char*, int, const struct __ns1__luceneCommit *, const char*);
+SOAP_FMAC3 struct __ns1__luceneCommit * SOAP_FMAC4 soap_in___ns1__luceneCommit(struct soap*, const char*, struct __ns1__luceneCommit *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneCommit(struct soap*, const struct __ns1__luceneCommit *, const char*, const char*);
+
+#ifndef soap_write___ns1__luceneCommit
+#define soap_write___ns1__luceneCommit(soap, data) ( ICat4::soap_serialize___ns1__luceneCommit(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__luceneCommit(soap, data, "-ns1:luceneCommit", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC1 struct __ns1__getApiVersion * SOAP_FMAC2 soap_instantiate___ns1__getApiVersion(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 struct __ns1__luceneCommit * SOAP_FMAC4 soap_get___ns1__luceneCommit(struct soap*, struct __ns1__luceneCommit *, const char*, const char*);
 
-inline struct __ns1__getApiVersion * soap_new___ns1__getApiVersion(struct soap *soap, int n = -1) { return soap_instantiate___ns1__getApiVersion(soap, n, NULL, NULL, NULL); }
+#ifndef soap_read___ns1__luceneCommit
+#define soap_read___ns1__luceneCommit(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__luceneCommit(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
 
-inline struct __ns1__getApiVersion * soap_new_req___ns1__getApiVersion(struct soap *soap) { struct __ns1__getApiVersion *_p = soap_instantiate___ns1__getApiVersion(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getApiVersion(soap, _p); } return _p; }
+SOAP_FMAC1 struct __ns1__luceneCommit * SOAP_FMAC2 soap_instantiate___ns1__luceneCommit(struct soap*, int, const char*, const char*, size_t*);
 
-inline struct __ns1__getApiVersion * soap_new_set___ns1__getApiVersion(struct soap *soap, ns1__getApiVersion *ns1__getApiVersion_) { struct __ns1__getApiVersion *_p = soap_instantiate___ns1__getApiVersion(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getApiVersion(soap, _p); _p->ns1__getApiVersion_ = ns1__getApiVersion_; } return _p; }
+inline struct __ns1__luceneCommit * soap_new___ns1__luceneCommit(struct soap *soap, int n = -1) { return soap_instantiate___ns1__luceneCommit(soap, n, NULL, NULL, NULL); }
 
-inline void soap_delete___ns1__getApiVersion(struct soap *soap, struct __ns1__getApiVersion *p) { soap_delete(soap, p); }
+inline struct __ns1__luceneCommit * soap_new_req___ns1__luceneCommit(struct soap *soap) { struct __ns1__luceneCommit *_p = soap_instantiate___ns1__luceneCommit(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneCommit(soap, _p); } return _p; }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getApiVersion(struct soap*, int, int, void*, size_t, const void*, size_t);
+inline struct __ns1__luceneCommit * soap_new_set___ns1__luceneCommit(struct soap *soap, ns1__luceneCommit *ns1__luceneCommit_) { struct __ns1__luceneCommit *_p = soap_instantiate___ns1__luceneCommit(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneCommit(soap, _p); _p->ns1__luceneCommit_ = ns1__luceneCommit_; } return _p; }
+
+inline void soap_delete___ns1__luceneCommit(struct soap *soap, struct __ns1__luceneCommit *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneCommit(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__luceneCommitResponse
+#define SOAP_TYPE_ICat4___ns1__luceneCommitResponse (321)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneCommitResponse(struct soap*, struct __ns1__luceneCommitResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneCommitResponse(struct soap*, const struct __ns1__luceneCommitResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneCommitResponse(struct soap*, const char*, int, const struct __ns1__luceneCommitResponse *, const char*);
+SOAP_FMAC3 struct __ns1__luceneCommitResponse * SOAP_FMAC4 soap_in___ns1__luceneCommitResponse(struct soap*, const char*, struct __ns1__luceneCommitResponse *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneCommitResponse(struct soap*, const struct __ns1__luceneCommitResponse *, const char*, const char*);
+
+#ifndef soap_write___ns1__luceneCommitResponse
+#define soap_write___ns1__luceneCommitResponse(soap, data) ( ICat4::soap_serialize___ns1__luceneCommitResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__luceneCommitResponse(soap, data, "-ns1:luceneCommitResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__luceneCommitResponse * SOAP_FMAC4 soap_get___ns1__luceneCommitResponse(struct soap*, struct __ns1__luceneCommitResponse *, const char*, const char*);
+
+#ifndef soap_read___ns1__luceneCommitResponse
+#define soap_read___ns1__luceneCommitResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__luceneCommitResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__luceneCommitResponse * SOAP_FMAC2 soap_instantiate___ns1__luceneCommitResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__luceneCommitResponse * soap_new___ns1__luceneCommitResponse(struct soap *soap, int n = -1) { return soap_instantiate___ns1__luceneCommitResponse(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__luceneCommitResponse * soap_new_req___ns1__luceneCommitResponse(struct soap *soap) { struct __ns1__luceneCommitResponse *_p = soap_instantiate___ns1__luceneCommitResponse(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneCommitResponse(soap, _p); } return _p; }
+
+inline struct __ns1__luceneCommitResponse * soap_new_set___ns1__luceneCommitResponse(struct soap *soap, ns1__luceneCommitResponse *ns1__luceneCommitResponse_) { struct __ns1__luceneCommitResponse *_p = soap_instantiate___ns1__luceneCommitResponse(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneCommitResponse(soap, _p); _p->ns1__luceneCommitResponse_ = ns1__luceneCommitResponse_; } return _p; }
+
+inline void soap_delete___ns1__luceneCommitResponse(struct soap *soap, struct __ns1__luceneCommitResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneCommitResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__luceneClear
+#define SOAP_TYPE_ICat4___ns1__luceneClear (317)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneClear(struct soap*, struct __ns1__luceneClear *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneClear(struct soap*, const struct __ns1__luceneClear *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneClear(struct soap*, const char*, int, const struct __ns1__luceneClear *, const char*);
+SOAP_FMAC3 struct __ns1__luceneClear * SOAP_FMAC4 soap_in___ns1__luceneClear(struct soap*, const char*, struct __ns1__luceneClear *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneClear(struct soap*, const struct __ns1__luceneClear *, const char*, const char*);
+
+#ifndef soap_write___ns1__luceneClear
+#define soap_write___ns1__luceneClear(soap, data) ( ICat4::soap_serialize___ns1__luceneClear(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__luceneClear(soap, data, "-ns1:luceneClear", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__luceneClear * SOAP_FMAC4 soap_get___ns1__luceneClear(struct soap*, struct __ns1__luceneClear *, const char*, const char*);
+
+#ifndef soap_read___ns1__luceneClear
+#define soap_read___ns1__luceneClear(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__luceneClear(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__luceneClear * SOAP_FMAC2 soap_instantiate___ns1__luceneClear(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__luceneClear * soap_new___ns1__luceneClear(struct soap *soap, int n = -1) { return soap_instantiate___ns1__luceneClear(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__luceneClear * soap_new_req___ns1__luceneClear(struct soap *soap) { struct __ns1__luceneClear *_p = soap_instantiate___ns1__luceneClear(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneClear(soap, _p); } return _p; }
+
+inline struct __ns1__luceneClear * soap_new_set___ns1__luceneClear(struct soap *soap, ns1__luceneClear *ns1__luceneClear_) { struct __ns1__luceneClear *_p = soap_instantiate___ns1__luceneClear(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneClear(soap, _p); _p->ns1__luceneClear_ = ns1__luceneClear_; } return _p; }
+
+inline void soap_delete___ns1__luceneClear(struct soap *soap, struct __ns1__luceneClear *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneClear(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__luceneClearResponse
+#define SOAP_TYPE_ICat4___ns1__luceneClearResponse (316)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneClearResponse(struct soap*, struct __ns1__luceneClearResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneClearResponse(struct soap*, const struct __ns1__luceneClearResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneClearResponse(struct soap*, const char*, int, const struct __ns1__luceneClearResponse *, const char*);
+SOAP_FMAC3 struct __ns1__luceneClearResponse * SOAP_FMAC4 soap_in___ns1__luceneClearResponse(struct soap*, const char*, struct __ns1__luceneClearResponse *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneClearResponse(struct soap*, const struct __ns1__luceneClearResponse *, const char*, const char*);
+
+#ifndef soap_write___ns1__luceneClearResponse
+#define soap_write___ns1__luceneClearResponse(soap, data) ( ICat4::soap_serialize___ns1__luceneClearResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__luceneClearResponse(soap, data, "-ns1:luceneClearResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__luceneClearResponse * SOAP_FMAC4 soap_get___ns1__luceneClearResponse(struct soap*, struct __ns1__luceneClearResponse *, const char*, const char*);
+
+#ifndef soap_read___ns1__luceneClearResponse
+#define soap_read___ns1__luceneClearResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__luceneClearResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__luceneClearResponse * SOAP_FMAC2 soap_instantiate___ns1__luceneClearResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__luceneClearResponse * soap_new___ns1__luceneClearResponse(struct soap *soap, int n = -1) { return soap_instantiate___ns1__luceneClearResponse(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__luceneClearResponse * soap_new_req___ns1__luceneClearResponse(struct soap *soap) { struct __ns1__luceneClearResponse *_p = soap_instantiate___ns1__luceneClearResponse(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneClearResponse(soap, _p); } return _p; }
+
+inline struct __ns1__luceneClearResponse * soap_new_set___ns1__luceneClearResponse(struct soap *soap, ns1__luceneClearResponse *ns1__luceneClearResponse_) { struct __ns1__luceneClearResponse *_p = soap_instantiate___ns1__luceneClearResponse(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneClearResponse(soap, _p); _p->ns1__luceneClearResponse_ = ns1__luceneClearResponse_; } return _p; }
+
+inline void soap_delete___ns1__luceneClearResponse(struct soap *soap, struct __ns1__luceneClearResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneClearResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__searchText
+#define SOAP_TYPE_ICat4___ns1__searchText (312)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__searchText(struct soap*, struct __ns1__searchText *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__searchText(struct soap*, const struct __ns1__searchText *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__searchText(struct soap*, const char*, int, const struct __ns1__searchText *, const char*);
+SOAP_FMAC3 struct __ns1__searchText * SOAP_FMAC4 soap_in___ns1__searchText(struct soap*, const char*, struct __ns1__searchText *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__searchText(struct soap*, const struct __ns1__searchText *, const char*, const char*);
+
+#ifndef soap_write___ns1__searchText
+#define soap_write___ns1__searchText(soap, data) ( ICat4::soap_serialize___ns1__searchText(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__searchText(soap, data, "-ns1:searchText", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__searchText * SOAP_FMAC4 soap_get___ns1__searchText(struct soap*, struct __ns1__searchText *, const char*, const char*);
+
+#ifndef soap_read___ns1__searchText
+#define soap_read___ns1__searchText(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__searchText(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__searchText * SOAP_FMAC2 soap_instantiate___ns1__searchText(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__searchText * soap_new___ns1__searchText(struct soap *soap, int n = -1) { return soap_instantiate___ns1__searchText(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__searchText * soap_new_req___ns1__searchText(struct soap *soap) { struct __ns1__searchText *_p = soap_instantiate___ns1__searchText(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__searchText(soap, _p); } return _p; }
+
+inline struct __ns1__searchText * soap_new_set___ns1__searchText(struct soap *soap, ns1__searchText *ns1__searchText_) { struct __ns1__searchText *_p = soap_instantiate___ns1__searchText(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__searchText(soap, _p); _p->ns1__searchText_ = ns1__searchText_; } return _p; }
+
+inline void soap_delete___ns1__searchText(struct soap *soap, struct __ns1__searchText *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__searchText(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__luceneGetPopulating
+#define SOAP_TYPE_ICat4___ns1__luceneGetPopulating (308)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__luceneGetPopulating(struct soap*, struct __ns1__luceneGetPopulating *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__luceneGetPopulating(struct soap*, const struct __ns1__luceneGetPopulating *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__luceneGetPopulating(struct soap*, const char*, int, const struct __ns1__luceneGetPopulating *, const char*);
+SOAP_FMAC3 struct __ns1__luceneGetPopulating * SOAP_FMAC4 soap_in___ns1__luceneGetPopulating(struct soap*, const char*, struct __ns1__luceneGetPopulating *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__luceneGetPopulating(struct soap*, const struct __ns1__luceneGetPopulating *, const char*, const char*);
+
+#ifndef soap_write___ns1__luceneGetPopulating
+#define soap_write___ns1__luceneGetPopulating(soap, data) ( ICat4::soap_serialize___ns1__luceneGetPopulating(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__luceneGetPopulating(soap, data, "-ns1:luceneGetPopulating", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__luceneGetPopulating * SOAP_FMAC4 soap_get___ns1__luceneGetPopulating(struct soap*, struct __ns1__luceneGetPopulating *, const char*, const char*);
+
+#ifndef soap_read___ns1__luceneGetPopulating
+#define soap_read___ns1__luceneGetPopulating(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__luceneGetPopulating(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__luceneGetPopulating * SOAP_FMAC2 soap_instantiate___ns1__luceneGetPopulating(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__luceneGetPopulating * soap_new___ns1__luceneGetPopulating(struct soap *soap, int n = -1) { return soap_instantiate___ns1__luceneGetPopulating(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__luceneGetPopulating * soap_new_req___ns1__luceneGetPopulating(struct soap *soap) { struct __ns1__luceneGetPopulating *_p = soap_instantiate___ns1__luceneGetPopulating(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneGetPopulating(soap, _p); } return _p; }
+
+inline struct __ns1__luceneGetPopulating * soap_new_set___ns1__luceneGetPopulating(struct soap *soap, ns1__luceneGetPopulating *ns1__luceneGetPopulating_) { struct __ns1__luceneGetPopulating *_p = soap_instantiate___ns1__luceneGetPopulating(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__luceneGetPopulating(soap, _p); _p->ns1__luceneGetPopulating_ = ns1__luceneGetPopulating_; } return _p; }
+
+inline void soap_delete___ns1__luceneGetPopulating(struct soap *soap, struct __ns1__luceneGetPopulating *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__luceneGetPopulating(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__lucenePopulate
+#define SOAP_TYPE_ICat4___ns1__lucenePopulate (304)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__lucenePopulate(struct soap*, struct __ns1__lucenePopulate *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__lucenePopulate(struct soap*, const struct __ns1__lucenePopulate *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__lucenePopulate(struct soap*, const char*, int, const struct __ns1__lucenePopulate *, const char*);
+SOAP_FMAC3 struct __ns1__lucenePopulate * SOAP_FMAC4 soap_in___ns1__lucenePopulate(struct soap*, const char*, struct __ns1__lucenePopulate *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__lucenePopulate(struct soap*, const struct __ns1__lucenePopulate *, const char*, const char*);
+
+#ifndef soap_write___ns1__lucenePopulate
+#define soap_write___ns1__lucenePopulate(soap, data) ( ICat4::soap_serialize___ns1__lucenePopulate(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__lucenePopulate(soap, data, "-ns1:lucenePopulate", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__lucenePopulate * SOAP_FMAC4 soap_get___ns1__lucenePopulate(struct soap*, struct __ns1__lucenePopulate *, const char*, const char*);
+
+#ifndef soap_read___ns1__lucenePopulate
+#define soap_read___ns1__lucenePopulate(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__lucenePopulate(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__lucenePopulate * SOAP_FMAC2 soap_instantiate___ns1__lucenePopulate(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__lucenePopulate * soap_new___ns1__lucenePopulate(struct soap *soap, int n = -1) { return soap_instantiate___ns1__lucenePopulate(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__lucenePopulate * soap_new_req___ns1__lucenePopulate(struct soap *soap) { struct __ns1__lucenePopulate *_p = soap_instantiate___ns1__lucenePopulate(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__lucenePopulate(soap, _p); } return _p; }
+
+inline struct __ns1__lucenePopulate * soap_new_set___ns1__lucenePopulate(struct soap *soap, ns1__lucenePopulate *ns1__lucenePopulate_) { struct __ns1__lucenePopulate *_p = soap_instantiate___ns1__lucenePopulate(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__lucenePopulate(soap, _p); _p->ns1__lucenePopulate_ = ns1__lucenePopulate_; } return _p; }
+
+inline void soap_delete___ns1__lucenePopulate(struct soap *soap, struct __ns1__lucenePopulate *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__lucenePopulate(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__lucenePopulateResponse
+#define SOAP_TYPE_ICat4___ns1__lucenePopulateResponse (303)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__lucenePopulateResponse(struct soap*, struct __ns1__lucenePopulateResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__lucenePopulateResponse(struct soap*, const struct __ns1__lucenePopulateResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__lucenePopulateResponse(struct soap*, const char*, int, const struct __ns1__lucenePopulateResponse *, const char*);
+SOAP_FMAC3 struct __ns1__lucenePopulateResponse * SOAP_FMAC4 soap_in___ns1__lucenePopulateResponse(struct soap*, const char*, struct __ns1__lucenePopulateResponse *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__lucenePopulateResponse(struct soap*, const struct __ns1__lucenePopulateResponse *, const char*, const char*);
+
+#ifndef soap_write___ns1__lucenePopulateResponse
+#define soap_write___ns1__lucenePopulateResponse(soap, data) ( ICat4::soap_serialize___ns1__lucenePopulateResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__lucenePopulateResponse(soap, data, "-ns1:lucenePopulateResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__lucenePopulateResponse * SOAP_FMAC4 soap_get___ns1__lucenePopulateResponse(struct soap*, struct __ns1__lucenePopulateResponse *, const char*, const char*);
+
+#ifndef soap_read___ns1__lucenePopulateResponse
+#define soap_read___ns1__lucenePopulateResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__lucenePopulateResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__lucenePopulateResponse * SOAP_FMAC2 soap_instantiate___ns1__lucenePopulateResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__lucenePopulateResponse * soap_new___ns1__lucenePopulateResponse(struct soap *soap, int n = -1) { return soap_instantiate___ns1__lucenePopulateResponse(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__lucenePopulateResponse * soap_new_req___ns1__lucenePopulateResponse(struct soap *soap) { struct __ns1__lucenePopulateResponse *_p = soap_instantiate___ns1__lucenePopulateResponse(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__lucenePopulateResponse(soap, _p); } return _p; }
+
+inline struct __ns1__lucenePopulateResponse * soap_new_set___ns1__lucenePopulateResponse(struct soap *soap, ns1__lucenePopulateResponse *ns1__lucenePopulateResponse_) { struct __ns1__lucenePopulateResponse *_p = soap_instantiate___ns1__lucenePopulateResponse(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__lucenePopulateResponse(soap, _p); _p->ns1__lucenePopulateResponse_ = ns1__lucenePopulateResponse_; } return _p; }
+
+inline void soap_delete___ns1__lucenePopulateResponse(struct soap *soap, struct __ns1__lucenePopulateResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__lucenePopulateResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__isAccessAllowed
+#define SOAP_TYPE_ICat4___ns1__isAccessAllowed (299)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__isAccessAllowed(struct soap*, struct __ns1__isAccessAllowed *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__isAccessAllowed(struct soap*, const struct __ns1__isAccessAllowed *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__isAccessAllowed(struct soap*, const char*, int, const struct __ns1__isAccessAllowed *, const char*);
+SOAP_FMAC3 struct __ns1__isAccessAllowed * SOAP_FMAC4 soap_in___ns1__isAccessAllowed(struct soap*, const char*, struct __ns1__isAccessAllowed *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__isAccessAllowed(struct soap*, const struct __ns1__isAccessAllowed *, const char*, const char*);
+
+#ifndef soap_write___ns1__isAccessAllowed
+#define soap_write___ns1__isAccessAllowed(soap, data) ( ICat4::soap_serialize___ns1__isAccessAllowed(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__isAccessAllowed(soap, data, "-ns1:isAccessAllowed", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__isAccessAllowed * SOAP_FMAC4 soap_get___ns1__isAccessAllowed(struct soap*, struct __ns1__isAccessAllowed *, const char*, const char*);
+
+#ifndef soap_read___ns1__isAccessAllowed
+#define soap_read___ns1__isAccessAllowed(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__isAccessAllowed(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__isAccessAllowed * SOAP_FMAC2 soap_instantiate___ns1__isAccessAllowed(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__isAccessAllowed * soap_new___ns1__isAccessAllowed(struct soap *soap, int n = -1) { return soap_instantiate___ns1__isAccessAllowed(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__isAccessAllowed * soap_new_req___ns1__isAccessAllowed(struct soap *soap) { struct __ns1__isAccessAllowed *_p = soap_instantiate___ns1__isAccessAllowed(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__isAccessAllowed(soap, _p); } return _p; }
+
+inline struct __ns1__isAccessAllowed * soap_new_set___ns1__isAccessAllowed(struct soap *soap, ns1__isAccessAllowed *ns1__isAccessAllowed_) { struct __ns1__isAccessAllowed *_p = soap_instantiate___ns1__isAccessAllowed(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__isAccessAllowed(soap, _p); _p->ns1__isAccessAllowed_ = ns1__isAccessAllowed_; } return _p; }
+
+inline void soap_delete___ns1__isAccessAllowed(struct soap *soap, struct __ns1__isAccessAllowed *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__isAccessAllowed(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__getRemainingMinutes
-#define SOAP_TYPE_ICat4___ns1__getRemainingMinutes (250)
+#define SOAP_TYPE_ICat4___ns1__getRemainingMinutes (295)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getRemainingMinutes(struct soap*, struct __ns1__getRemainingMinutes *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getRemainingMinutes(struct soap*, const struct __ns1__getRemainingMinutes *);
@@ -2984,40 +3878,40 @@ inline void soap_delete___ns1__getRemainingMinutes(struct soap *soap, struct __n
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getRemainingMinutes(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4___ns1__getEntityInfo
-#define SOAP_TYPE_ICat4___ns1__getEntityInfo (246)
+#ifndef SOAP_TYPE_ICat4___ns1__getEntityNames
+#define SOAP_TYPE_ICat4___ns1__getEntityNames (291)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityInfo(struct soap*, struct __ns1__getEntityInfo *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityInfo(struct soap*, const struct __ns1__getEntityInfo *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityInfo(struct soap*, const char*, int, const struct __ns1__getEntityInfo *, const char*);
-SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_in___ns1__getEntityInfo(struct soap*, const char*, struct __ns1__getEntityInfo *, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityNames(struct soap*, struct __ns1__getEntityNames *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityNames(struct soap*, const struct __ns1__getEntityNames *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityNames(struct soap*, const char*, int, const struct __ns1__getEntityNames *, const char*);
+SOAP_FMAC3 struct __ns1__getEntityNames * SOAP_FMAC4 soap_in___ns1__getEntityNames(struct soap*, const char*, struct __ns1__getEntityNames *, const char*);
 
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityInfo(struct soap*, const struct __ns1__getEntityInfo *, const char*, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityNames(struct soap*, const struct __ns1__getEntityNames *, const char*, const char*);
 
-#ifndef soap_write___ns1__getEntityInfo
-#define soap_write___ns1__getEntityInfo(soap, data) ( ICat4::soap_serialize___ns1__getEntityInfo(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__getEntityInfo(soap, data, "-ns1:getEntityInfo", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_get___ns1__getEntityInfo(struct soap*, struct __ns1__getEntityInfo *, const char*, const char*);
-
-#ifndef soap_read___ns1__getEntityInfo
-#define soap_read___ns1__getEntityInfo(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__getEntityInfo(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_write___ns1__getEntityNames
+#define soap_write___ns1__getEntityNames(soap, data) ( ICat4::soap_serialize___ns1__getEntityNames(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__getEntityNames(soap, data, "-ns1:getEntityNames", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC1 struct __ns1__getEntityInfo * SOAP_FMAC2 soap_instantiate___ns1__getEntityInfo(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 struct __ns1__getEntityNames * SOAP_FMAC4 soap_get___ns1__getEntityNames(struct soap*, struct __ns1__getEntityNames *, const char*, const char*);
 
-inline struct __ns1__getEntityInfo * soap_new___ns1__getEntityInfo(struct soap *soap, int n = -1) { return soap_instantiate___ns1__getEntityInfo(soap, n, NULL, NULL, NULL); }
+#ifndef soap_read___ns1__getEntityNames
+#define soap_read___ns1__getEntityNames(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__getEntityNames(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
 
-inline struct __ns1__getEntityInfo * soap_new_req___ns1__getEntityInfo(struct soap *soap) { struct __ns1__getEntityInfo *_p = soap_instantiate___ns1__getEntityInfo(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getEntityInfo(soap, _p); } return _p; }
+SOAP_FMAC1 struct __ns1__getEntityNames * SOAP_FMAC2 soap_instantiate___ns1__getEntityNames(struct soap*, int, const char*, const char*, size_t*);
 
-inline struct __ns1__getEntityInfo * soap_new_set___ns1__getEntityInfo(struct soap *soap, ns1__getEntityInfo *ns1__getEntityInfo_) { struct __ns1__getEntityInfo *_p = soap_instantiate___ns1__getEntityInfo(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getEntityInfo(soap, _p); _p->ns1__getEntityInfo_ = ns1__getEntityInfo_; } return _p; }
+inline struct __ns1__getEntityNames * soap_new___ns1__getEntityNames(struct soap *soap, int n = -1) { return soap_instantiate___ns1__getEntityNames(soap, n, NULL, NULL, NULL); }
 
-inline void soap_delete___ns1__getEntityInfo(struct soap *soap, struct __ns1__getEntityInfo *p) { soap_delete(soap, p); }
+inline struct __ns1__getEntityNames * soap_new_req___ns1__getEntityNames(struct soap *soap) { struct __ns1__getEntityNames *_p = soap_instantiate___ns1__getEntityNames(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getEntityNames(soap, _p); } return _p; }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityInfo(struct soap*, int, int, void*, size_t, const void*, size_t);
+inline struct __ns1__getEntityNames * soap_new_set___ns1__getEntityNames(struct soap *soap, ns1__getEntityNames *ns1__getEntityNames_) { struct __ns1__getEntityNames *_p = soap_instantiate___ns1__getEntityNames(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getEntityNames(soap, _p); _p->ns1__getEntityNames_ = ns1__getEntityNames_; } return _p; }
+
+inline void soap_delete___ns1__getEntityNames(struct soap *soap, struct __ns1__getEntityNames *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityNames(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__deleteMany
-#define SOAP_TYPE_ICat4___ns1__deleteMany (242)
+#define SOAP_TYPE_ICat4___ns1__deleteMany (287)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteMany(struct soap*, struct __ns1__deleteMany *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteMany(struct soap*, const struct __ns1__deleteMany *);
@@ -3049,7 +3943,7 @@ inline void soap_delete___ns1__deleteMany(struct soap *soap, struct __ns1__delet
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteMany(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__deleteManyResponse
-#define SOAP_TYPE_ICat4___ns1__deleteManyResponse (241)
+#define SOAP_TYPE_ICat4___ns1__deleteManyResponse (286)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteManyResponse(struct soap*, struct __ns1__deleteManyResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteManyResponse(struct soap*, const struct __ns1__deleteManyResponse *);
@@ -3080,8 +3974,40 @@ inline void soap_delete___ns1__deleteManyResponse(struct soap *soap, struct __ns
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteManyResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4___ns1__createMany
+#define SOAP_TYPE_ICat4___ns1__createMany (282)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__createMany(struct soap*, struct __ns1__createMany *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__createMany(struct soap*, const struct __ns1__createMany *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__createMany(struct soap*, const char*, int, const struct __ns1__createMany *, const char*);
+SOAP_FMAC3 struct __ns1__createMany * SOAP_FMAC4 soap_in___ns1__createMany(struct soap*, const char*, struct __ns1__createMany *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__createMany(struct soap*, const struct __ns1__createMany *, const char*, const char*);
+
+#ifndef soap_write___ns1__createMany
+#define soap_write___ns1__createMany(soap, data) ( ICat4::soap_serialize___ns1__createMany(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__createMany(soap, data, "-ns1:createMany", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__createMany * SOAP_FMAC4 soap_get___ns1__createMany(struct soap*, struct __ns1__createMany *, const char*, const char*);
+
+#ifndef soap_read___ns1__createMany
+#define soap_read___ns1__createMany(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__createMany(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__createMany * SOAP_FMAC2 soap_instantiate___ns1__createMany(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__createMany * soap_new___ns1__createMany(struct soap *soap, int n = -1) { return soap_instantiate___ns1__createMany(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__createMany * soap_new_req___ns1__createMany(struct soap *soap) { struct __ns1__createMany *_p = soap_instantiate___ns1__createMany(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__createMany(soap, _p); } return _p; }
+
+inline struct __ns1__createMany * soap_new_set___ns1__createMany(struct soap *soap, ns1__createMany *ns1__createMany_) { struct __ns1__createMany *_p = soap_instantiate___ns1__createMany(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__createMany(soap, _p); _p->ns1__createMany_ = ns1__createMany_; } return _p; }
+
+inline void soap_delete___ns1__createMany(struct soap *soap, struct __ns1__createMany *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__createMany(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4___ns1__logout
-#define SOAP_TYPE_ICat4___ns1__logout (237)
+#define SOAP_TYPE_ICat4___ns1__logout (278)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__logout(struct soap*, struct __ns1__logout *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__logout(struct soap*, const struct __ns1__logout *);
@@ -3113,7 +4039,7 @@ inline void soap_delete___ns1__logout(struct soap *soap, struct __ns1__logout *p
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__logout(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__logoutResponse
-#define SOAP_TYPE_ICat4___ns1__logoutResponse (236)
+#define SOAP_TYPE_ICat4___ns1__logoutResponse (277)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__logoutResponse(struct soap*, struct __ns1__logoutResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__logoutResponse(struct soap*, const struct __ns1__logoutResponse *);
@@ -3144,8 +4070,136 @@ inline void soap_delete___ns1__logoutResponse(struct soap *soap, struct __ns1__l
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__logoutResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4___ns1__getUserName
+#define SOAP_TYPE_ICat4___ns1__getUserName (273)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getUserName(struct soap*, struct __ns1__getUserName *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getUserName(struct soap*, const struct __ns1__getUserName *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getUserName(struct soap*, const char*, int, const struct __ns1__getUserName *, const char*);
+SOAP_FMAC3 struct __ns1__getUserName * SOAP_FMAC4 soap_in___ns1__getUserName(struct soap*, const char*, struct __ns1__getUserName *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getUserName(struct soap*, const struct __ns1__getUserName *, const char*, const char*);
+
+#ifndef soap_write___ns1__getUserName
+#define soap_write___ns1__getUserName(soap, data) ( ICat4::soap_serialize___ns1__getUserName(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__getUserName(soap, data, "-ns1:getUserName", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__getUserName * SOAP_FMAC4 soap_get___ns1__getUserName(struct soap*, struct __ns1__getUserName *, const char*, const char*);
+
+#ifndef soap_read___ns1__getUserName
+#define soap_read___ns1__getUserName(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__getUserName(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__getUserName * SOAP_FMAC2 soap_instantiate___ns1__getUserName(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__getUserName * soap_new___ns1__getUserName(struct soap *soap, int n = -1) { return soap_instantiate___ns1__getUserName(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__getUserName * soap_new_req___ns1__getUserName(struct soap *soap) { struct __ns1__getUserName *_p = soap_instantiate___ns1__getUserName(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getUserName(soap, _p); } return _p; }
+
+inline struct __ns1__getUserName * soap_new_set___ns1__getUserName(struct soap *soap, ns1__getUserName *ns1__getUserName_) { struct __ns1__getUserName *_p = soap_instantiate___ns1__getUserName(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getUserName(soap, _p); _p->ns1__getUserName_ = ns1__getUserName_; } return _p; }
+
+inline void soap_delete___ns1__getUserName(struct soap *soap, struct __ns1__getUserName *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getUserName(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__getApiVersion
+#define SOAP_TYPE_ICat4___ns1__getApiVersion (269)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getApiVersion(struct soap*, struct __ns1__getApiVersion *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getApiVersion(struct soap*, const struct __ns1__getApiVersion *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getApiVersion(struct soap*, const char*, int, const struct __ns1__getApiVersion *, const char*);
+SOAP_FMAC3 struct __ns1__getApiVersion * SOAP_FMAC4 soap_in___ns1__getApiVersion(struct soap*, const char*, struct __ns1__getApiVersion *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getApiVersion(struct soap*, const struct __ns1__getApiVersion *, const char*, const char*);
+
+#ifndef soap_write___ns1__getApiVersion
+#define soap_write___ns1__getApiVersion(soap, data) ( ICat4::soap_serialize___ns1__getApiVersion(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__getApiVersion(soap, data, "-ns1:getApiVersion", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__getApiVersion * SOAP_FMAC4 soap_get___ns1__getApiVersion(struct soap*, struct __ns1__getApiVersion *, const char*, const char*);
+
+#ifndef soap_read___ns1__getApiVersion
+#define soap_read___ns1__getApiVersion(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__getApiVersion(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__getApiVersion * SOAP_FMAC2 soap_instantiate___ns1__getApiVersion(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__getApiVersion * soap_new___ns1__getApiVersion(struct soap *soap, int n = -1) { return soap_instantiate___ns1__getApiVersion(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__getApiVersion * soap_new_req___ns1__getApiVersion(struct soap *soap) { struct __ns1__getApiVersion *_p = soap_instantiate___ns1__getApiVersion(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getApiVersion(soap, _p); } return _p; }
+
+inline struct __ns1__getApiVersion * soap_new_set___ns1__getApiVersion(struct soap *soap, ns1__getApiVersion *ns1__getApiVersion_) { struct __ns1__getApiVersion *_p = soap_instantiate___ns1__getApiVersion(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getApiVersion(soap, _p); _p->ns1__getApiVersion_ = ns1__getApiVersion_; } return _p; }
+
+inline void soap_delete___ns1__getApiVersion(struct soap *soap, struct __ns1__getApiVersion *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getApiVersion(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__getEntityInfo
+#define SOAP_TYPE_ICat4___ns1__getEntityInfo (265)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getEntityInfo(struct soap*, struct __ns1__getEntityInfo *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getEntityInfo(struct soap*, const struct __ns1__getEntityInfo *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getEntityInfo(struct soap*, const char*, int, const struct __ns1__getEntityInfo *, const char*);
+SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_in___ns1__getEntityInfo(struct soap*, const char*, struct __ns1__getEntityInfo *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getEntityInfo(struct soap*, const struct __ns1__getEntityInfo *, const char*, const char*);
+
+#ifndef soap_write___ns1__getEntityInfo
+#define soap_write___ns1__getEntityInfo(soap, data) ( ICat4::soap_serialize___ns1__getEntityInfo(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__getEntityInfo(soap, data, "-ns1:getEntityInfo", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__getEntityInfo * SOAP_FMAC4 soap_get___ns1__getEntityInfo(struct soap*, struct __ns1__getEntityInfo *, const char*, const char*);
+
+#ifndef soap_read___ns1__getEntityInfo
+#define soap_read___ns1__getEntityInfo(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__getEntityInfo(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__getEntityInfo * SOAP_FMAC2 soap_instantiate___ns1__getEntityInfo(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__getEntityInfo * soap_new___ns1__getEntityInfo(struct soap *soap, int n = -1) { return soap_instantiate___ns1__getEntityInfo(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__getEntityInfo * soap_new_req___ns1__getEntityInfo(struct soap *soap) { struct __ns1__getEntityInfo *_p = soap_instantiate___ns1__getEntityInfo(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getEntityInfo(soap, _p); } return _p; }
+
+inline struct __ns1__getEntityInfo * soap_new_set___ns1__getEntityInfo(struct soap *soap, ns1__getEntityInfo *ns1__getEntityInfo_) { struct __ns1__getEntityInfo *_p = soap_instantiate___ns1__getEntityInfo(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getEntityInfo(soap, _p); _p->ns1__getEntityInfo_ = ns1__getEntityInfo_; } return _p; }
+
+inline void soap_delete___ns1__getEntityInfo(struct soap *soap, struct __ns1__getEntityInfo *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getEntityInfo(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__login
+#define SOAP_TYPE_ICat4___ns1__login (261)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__login(struct soap*, struct __ns1__login *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__login(struct soap*, const struct __ns1__login *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__login(struct soap*, const char*, int, const struct __ns1__login *, const char*);
+SOAP_FMAC3 struct __ns1__login * SOAP_FMAC4 soap_in___ns1__login(struct soap*, const char*, struct __ns1__login *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__login(struct soap*, const struct __ns1__login *, const char*, const char*);
+
+#ifndef soap_write___ns1__login
+#define soap_write___ns1__login(soap, data) ( ICat4::soap_serialize___ns1__login(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__login(soap, data, "-ns1:login", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__login * SOAP_FMAC4 soap_get___ns1__login(struct soap*, struct __ns1__login *, const char*, const char*);
+
+#ifndef soap_read___ns1__login
+#define soap_read___ns1__login(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__login(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__login * SOAP_FMAC2 soap_instantiate___ns1__login(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__login * soap_new___ns1__login(struct soap *soap, int n = -1) { return soap_instantiate___ns1__login(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__login * soap_new_req___ns1__login(struct soap *soap) { struct __ns1__login *_p = soap_instantiate___ns1__login(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__login(soap, _p); } return _p; }
+
+inline struct __ns1__login * soap_new_set___ns1__login(struct soap *soap, ns1__login *ns1__login_) { struct __ns1__login *_p = soap_instantiate___ns1__login(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__login(soap, _p); _p->ns1__login_ = ns1__login_; } return _p; }
+
+inline void soap_delete___ns1__login(struct soap *soap, struct __ns1__login *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__login(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4___ns1__dummy
-#define SOAP_TYPE_ICat4___ns1__dummy (232)
+#define SOAP_TYPE_ICat4___ns1__dummy (257)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__dummy(struct soap*, struct __ns1__dummy *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__dummy(struct soap*, const struct __ns1__dummy *);
@@ -3177,7 +4231,7 @@ inline void soap_delete___ns1__dummy(struct soap *soap, struct __ns1__dummy *p) 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__dummy(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__dummyResponse
-#define SOAP_TYPE_ICat4___ns1__dummyResponse (231)
+#define SOAP_TYPE_ICat4___ns1__dummyResponse (256)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__dummyResponse(struct soap*, struct __ns1__dummyResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__dummyResponse(struct soap*, const struct __ns1__dummyResponse *);
@@ -3208,8 +4262,72 @@ inline void soap_delete___ns1__dummyResponse(struct soap *soap, struct __ns1__du
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__dummyResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4___ns1__refresh
+#define SOAP_TYPE_ICat4___ns1__refresh (252)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__refresh(struct soap*, struct __ns1__refresh *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__refresh(struct soap*, const struct __ns1__refresh *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__refresh(struct soap*, const char*, int, const struct __ns1__refresh *, const char*);
+SOAP_FMAC3 struct __ns1__refresh * SOAP_FMAC4 soap_in___ns1__refresh(struct soap*, const char*, struct __ns1__refresh *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__refresh(struct soap*, const struct __ns1__refresh *, const char*, const char*);
+
+#ifndef soap_write___ns1__refresh
+#define soap_write___ns1__refresh(soap, data) ( ICat4::soap_serialize___ns1__refresh(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__refresh(soap, data, "-ns1:refresh", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__refresh * SOAP_FMAC4 soap_get___ns1__refresh(struct soap*, struct __ns1__refresh *, const char*, const char*);
+
+#ifndef soap_read___ns1__refresh
+#define soap_read___ns1__refresh(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__refresh(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__refresh * SOAP_FMAC2 soap_instantiate___ns1__refresh(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__refresh * soap_new___ns1__refresh(struct soap *soap, int n = -1) { return soap_instantiate___ns1__refresh(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__refresh * soap_new_req___ns1__refresh(struct soap *soap) { struct __ns1__refresh *_p = soap_instantiate___ns1__refresh(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__refresh(soap, _p); } return _p; }
+
+inline struct __ns1__refresh * soap_new_set___ns1__refresh(struct soap *soap, ns1__refresh *ns1__refresh_) { struct __ns1__refresh *_p = soap_instantiate___ns1__refresh(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__refresh(soap, _p); _p->ns1__refresh_ = ns1__refresh_; } return _p; }
+
+inline void soap_delete___ns1__refresh(struct soap *soap, struct __ns1__refresh *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__refresh(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4___ns1__refreshResponse
+#define SOAP_TYPE_ICat4___ns1__refreshResponse (251)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__refreshResponse(struct soap*, struct __ns1__refreshResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__refreshResponse(struct soap*, const struct __ns1__refreshResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__refreshResponse(struct soap*, const char*, int, const struct __ns1__refreshResponse *, const char*);
+SOAP_FMAC3 struct __ns1__refreshResponse * SOAP_FMAC4 soap_in___ns1__refreshResponse(struct soap*, const char*, struct __ns1__refreshResponse *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__refreshResponse(struct soap*, const struct __ns1__refreshResponse *, const char*, const char*);
+
+#ifndef soap_write___ns1__refreshResponse
+#define soap_write___ns1__refreshResponse(soap, data) ( ICat4::soap_serialize___ns1__refreshResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__refreshResponse(soap, data, "-ns1:refreshResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__refreshResponse * SOAP_FMAC4 soap_get___ns1__refreshResponse(struct soap*, struct __ns1__refreshResponse *, const char*, const char*);
+
+#ifndef soap_read___ns1__refreshResponse
+#define soap_read___ns1__refreshResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__refreshResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__refreshResponse * SOAP_FMAC2 soap_instantiate___ns1__refreshResponse(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__refreshResponse * soap_new___ns1__refreshResponse(struct soap *soap, int n = -1) { return soap_instantiate___ns1__refreshResponse(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__refreshResponse * soap_new_req___ns1__refreshResponse(struct soap *soap) { struct __ns1__refreshResponse *_p = soap_instantiate___ns1__refreshResponse(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__refreshResponse(soap, _p); } return _p; }
+
+inline struct __ns1__refreshResponse * soap_new_set___ns1__refreshResponse(struct soap *soap, ns1__refreshResponse *ns1__refreshResponse_) { struct __ns1__refreshResponse *_p = soap_instantiate___ns1__refreshResponse(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__refreshResponse(soap, _p); _p->ns1__refreshResponse_ = ns1__refreshResponse_; } return _p; }
+
+inline void soap_delete___ns1__refreshResponse(struct soap *soap, struct __ns1__refreshResponse *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__refreshResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4___ns1__update
-#define SOAP_TYPE_ICat4___ns1__update (227)
+#define SOAP_TYPE_ICat4___ns1__update (247)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__update(struct soap*, struct __ns1__update *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__update(struct soap*, const struct __ns1__update *);
@@ -3241,7 +4359,7 @@ inline void soap_delete___ns1__update(struct soap *soap, struct __ns1__update *p
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__update(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__updateResponse
-#define SOAP_TYPE_ICat4___ns1__updateResponse (226)
+#define SOAP_TYPE_ICat4___ns1__updateResponse (246)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__updateResponse(struct soap*, struct __ns1__updateResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__updateResponse(struct soap*, const struct __ns1__updateResponse *);
@@ -3273,7 +4391,7 @@ inline void soap_delete___ns1__updateResponse(struct soap *soap, struct __ns1__u
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__updateResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__create
-#define SOAP_TYPE_ICat4___ns1__create (222)
+#define SOAP_TYPE_ICat4___ns1__create (242)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__create(struct soap*, struct __ns1__create *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__create(struct soap*, const struct __ns1__create *);
@@ -3305,7 +4423,7 @@ inline void soap_delete___ns1__create(struct soap *soap, struct __ns1__create *p
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__create(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__search
-#define SOAP_TYPE_ICat4___ns1__search (218)
+#define SOAP_TYPE_ICat4___ns1__search (238)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__search(struct soap*, struct __ns1__search *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__search(struct soap*, const struct __ns1__search *);
@@ -3337,7 +4455,7 @@ inline void soap_delete___ns1__search(struct soap *soap, struct __ns1__search *p
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__search(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__delete
-#define SOAP_TYPE_ICat4___ns1__delete (214)
+#define SOAP_TYPE_ICat4___ns1__delete (234)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__delete(struct soap*, struct __ns1__delete *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__delete(struct soap*, const struct __ns1__delete *);
@@ -3369,7 +4487,7 @@ inline void soap_delete___ns1__delete(struct soap *soap, struct __ns1__delete *p
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__delete(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4___ns1__deleteResponse
-#define SOAP_TYPE_ICat4___ns1__deleteResponse (213)
+#define SOAP_TYPE_ICat4___ns1__deleteResponse (233)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__deleteResponse(struct soap*, struct __ns1__deleteResponse *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__deleteResponse(struct soap*, const struct __ns1__deleteResponse *);
@@ -3400,8 +4518,40 @@ inline void soap_delete___ns1__deleteResponse(struct soap *soap, struct __ns1__d
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__deleteResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4___ns1__getProperties
+#define SOAP_TYPE_ICat4___ns1__getProperties (229)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getProperties(struct soap*, struct __ns1__getProperties *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getProperties(struct soap*, const struct __ns1__getProperties *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getProperties(struct soap*, const char*, int, const struct __ns1__getProperties *, const char*);
+SOAP_FMAC3 struct __ns1__getProperties * SOAP_FMAC4 soap_in___ns1__getProperties(struct soap*, const char*, struct __ns1__getProperties *, const char*);
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getProperties(struct soap*, const struct __ns1__getProperties *, const char*, const char*);
+
+#ifndef soap_write___ns1__getProperties
+#define soap_write___ns1__getProperties(soap, data) ( ICat4::soap_serialize___ns1__getProperties(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__getProperties(soap, data, "-ns1:getProperties", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 struct __ns1__getProperties * SOAP_FMAC4 soap_get___ns1__getProperties(struct soap*, struct __ns1__getProperties *, const char*, const char*);
+
+#ifndef soap_read___ns1__getProperties
+#define soap_read___ns1__getProperties(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__getProperties(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+SOAP_FMAC1 struct __ns1__getProperties * SOAP_FMAC2 soap_instantiate___ns1__getProperties(struct soap*, int, const char*, const char*, size_t*);
+
+inline struct __ns1__getProperties * soap_new___ns1__getProperties(struct soap *soap, int n = -1) { return soap_instantiate___ns1__getProperties(soap, n, NULL, NULL, NULL); }
+
+inline struct __ns1__getProperties * soap_new_req___ns1__getProperties(struct soap *soap) { struct __ns1__getProperties *_p = soap_instantiate___ns1__getProperties(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getProperties(soap, _p); } return _p; }
+
+inline struct __ns1__getProperties * soap_new_set___ns1__getProperties(struct soap *soap, ns1__getProperties *ns1__getProperties_) { struct __ns1__getProperties *_p = soap_instantiate___ns1__getProperties(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getProperties(soap, _p); _p->ns1__getProperties_ = ns1__getProperties_; } return _p; }
+
+inline void soap_delete___ns1__getProperties(struct soap *soap, struct __ns1__getProperties *p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getProperties(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4___ns1__get
-#define SOAP_TYPE_ICat4___ns1__get (209)
+#define SOAP_TYPE_ICat4___ns1__get (225)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__get(struct soap*, struct __ns1__get *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__get(struct soap*, const struct __ns1__get *);
@@ -3432,74 +4582,10 @@ inline void soap_delete___ns1__get(struct soap *soap, struct __ns1__get *p) { so
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__get(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4___ns1__login
-#define SOAP_TYPE_ICat4___ns1__login (205)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__login(struct soap*, struct __ns1__login *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__login(struct soap*, const struct __ns1__login *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__login(struct soap*, const char*, int, const struct __ns1__login *, const char*);
-SOAP_FMAC3 struct __ns1__login * SOAP_FMAC4 soap_in___ns1__login(struct soap*, const char*, struct __ns1__login *, const char*);
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__login(struct soap*, const struct __ns1__login *, const char*, const char*);
-
-#ifndef soap_write___ns1__login
-#define soap_write___ns1__login(soap, data) ( ICat4::soap_serialize___ns1__login(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__login(soap, data, "-ns1:login", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 struct __ns1__login * SOAP_FMAC4 soap_get___ns1__login(struct soap*, struct __ns1__login *, const char*, const char*);
-
-#ifndef soap_read___ns1__login
-#define soap_read___ns1__login(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__login(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 struct __ns1__login * SOAP_FMAC2 soap_instantiate___ns1__login(struct soap*, int, const char*, const char*, size_t*);
-
-inline struct __ns1__login * soap_new___ns1__login(struct soap *soap, int n = -1) { return soap_instantiate___ns1__login(soap, n, NULL, NULL, NULL); }
-
-inline struct __ns1__login * soap_new_req___ns1__login(struct soap *soap) { struct __ns1__login *_p = soap_instantiate___ns1__login(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__login(soap, _p); } return _p; }
-
-inline struct __ns1__login * soap_new_set___ns1__login(struct soap *soap, ns1__login *ns1__login_) { struct __ns1__login *_p = soap_instantiate___ns1__login(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__login(soap, _p); _p->ns1__login_ = ns1__login_; } return _p; }
-
-inline void soap_delete___ns1__login(struct soap *soap, struct __ns1__login *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__login(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4___ns1__getUserName
-#define SOAP_TYPE_ICat4___ns1__getUserName (201)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default___ns1__getUserName(struct soap*, struct __ns1__getUserName *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize___ns1__getUserName(struct soap*, const struct __ns1__getUserName *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out___ns1__getUserName(struct soap*, const char*, int, const struct __ns1__getUserName *, const char*);
-SOAP_FMAC3 struct __ns1__getUserName * SOAP_FMAC4 soap_in___ns1__getUserName(struct soap*, const char*, struct __ns1__getUserName *, const char*);
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put___ns1__getUserName(struct soap*, const struct __ns1__getUserName *, const char*, const char*);
-
-#ifndef soap_write___ns1__getUserName
-#define soap_write___ns1__getUserName(soap, data) ( ICat4::soap_serialize___ns1__getUserName(soap, data), soap_begin_send(soap) || ICat4::soap_put___ns1__getUserName(soap, data, "-ns1:getUserName", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 struct __ns1__getUserName * SOAP_FMAC4 soap_get___ns1__getUserName(struct soap*, struct __ns1__getUserName *, const char*, const char*);
-
-#ifndef soap_read___ns1__getUserName
-#define soap_read___ns1__getUserName(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get___ns1__getUserName(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-SOAP_FMAC1 struct __ns1__getUserName * SOAP_FMAC2 soap_instantiate___ns1__getUserName(struct soap*, int, const char*, const char*, size_t*);
-
-inline struct __ns1__getUserName * soap_new___ns1__getUserName(struct soap *soap, int n = -1) { return soap_instantiate___ns1__getUserName(soap, n, NULL, NULL, NULL); }
-
-inline struct __ns1__getUserName * soap_new_req___ns1__getUserName(struct soap *soap) { struct __ns1__getUserName *_p = soap_instantiate___ns1__getUserName(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getUserName(soap, _p); } return _p; }
-
-inline struct __ns1__getUserName * soap_new_set___ns1__getUserName(struct soap *soap, ns1__getUserName *ns1__getUserName_) { struct __ns1__getUserName *_p = soap_instantiate___ns1__getUserName(soap, -1, NULL, NULL, NULL); if (_p) { soap_default___ns1__getUserName(soap, _p); _p->ns1__getUserName_ = ns1__getUserName_; } return _p; }
-
-inline void soap_delete___ns1__getUserName(struct soap *soap, struct __ns1__getUserName *p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy___ns1__getUserName(struct soap*, int, int, void*, size_t, const void*, size_t);
-
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_ICat4_SOAP_ENV__Detail
-#define SOAP_TYPE_ICat4_SOAP_ENV__Detail (194)
+#define SOAP_TYPE_ICat4_SOAP_ENV__Detail (218)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Detail(struct soap*, const struct SOAP_ENV__Detail *);
@@ -3535,7 +4621,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Detail(struct soap*, int, int, vo
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_ICat4_PointerToSOAP_ENV__Reason
-#define SOAP_TYPE_ICat4_PointerToSOAP_ENV__Reason (265)
+#define SOAP_TYPE_ICat4_PointerToSOAP_ENV__Reason (333)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Reason(struct soap*, const char *, int, struct SOAP_ENV__Reason *const*, const char *);
@@ -3558,7 +4644,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason ** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Rea
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_ICat4_PointerToSOAP_ENV__Detail
-#define SOAP_TYPE_ICat4_PointerToSOAP_ENV__Detail (264)
+#define SOAP_TYPE_ICat4_PointerToSOAP_ENV__Detail (332)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Detail(struct soap*, const char *, int, struct SOAP_ENV__Detail *const*, const char *);
@@ -3581,7 +4667,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail ** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Det
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_ICat4_PointerToSOAP_ENV__Code
-#define SOAP_TYPE_ICat4_PointerToSOAP_ENV__Code (261)
+#define SOAP_TYPE_ICat4_PointerToSOAP_ENV__Code (329)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Code(struct soap*, const char *, int, struct SOAP_ENV__Code *const*, const char *);
@@ -3601,84 +4687,274 @@ SOAP_FMAC3 struct SOAP_ENV__Code ** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Code(
 
 #endif
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__createManyResponse
-#define SOAP_TYPE_ICat4_PointerTons1__createManyResponse (256)
+#ifndef SOAP_TYPE_ICat4_PointerTons1__luceneSearchResponse
+#define SOAP_TYPE_ICat4_PointerTons1__luceneSearchResponse (324)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createManyResponse(struct soap*, ns1__createManyResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createManyResponse(struct soap*, const char *, int, ns1__createManyResponse *const*, const char *);
-SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_in_PointerTons1__createManyResponse(struct soap*, const char*, ns1__createManyResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createManyResponse(struct soap*, ns1__createManyResponse *const*, const char*, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneSearchResponse(struct soap*, ns1__luceneSearchResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneSearchResponse(struct soap*, const char *, int, ns1__luceneSearchResponse *const*, const char *);
+SOAP_FMAC3 ns1__luceneSearchResponse ** SOAP_FMAC4 soap_in_PointerTons1__luceneSearchResponse(struct soap*, const char*, ns1__luceneSearchResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneSearchResponse(struct soap*, ns1__luceneSearchResponse *const*, const char*, const char*);
 
-#ifndef soap_write_PointerTons1__createManyResponse
-#define soap_write_PointerTons1__createManyResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__createManyResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__createManyResponse(soap, data, "ns1:createManyResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_get_PointerTons1__createManyResponse(struct soap*, ns1__createManyResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__createManyResponse
-#define soap_read_PointerTons1__createManyResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__createManyResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_write_PointerTons1__luceneSearchResponse
+#define soap_write_PointerTons1__luceneSearchResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__luceneSearchResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__luceneSearchResponse(soap, data, "ns1:luceneSearchResponse", NULL) || soap_end_send(soap), soap->error )
 #endif
 
+SOAP_FMAC3 ns1__luceneSearchResponse ** SOAP_FMAC4 soap_get_PointerTons1__luceneSearchResponse(struct soap*, ns1__luceneSearchResponse **, const char*, const char*);
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__createMany
-#define SOAP_TYPE_ICat4_PointerTons1__createMany (255)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createMany(struct soap*, ns1__createMany *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createMany(struct soap*, const char *, int, ns1__createMany *const*, const char *);
-SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_in_PointerTons1__createMany(struct soap*, const char*, ns1__createMany **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createMany(struct soap*, ns1__createMany *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__createMany
-#define soap_write_PointerTons1__createMany(soap, data) ( ICat4::soap_serialize_PointerTons1__createMany(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__createMany(soap, data, "ns1:createMany", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_get_PointerTons1__createMany(struct soap*, ns1__createMany **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__createMany
-#define soap_read_PointerTons1__createMany(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__createMany(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_PointerTons1__luceneSearchResponse
+#define soap_read_PointerTons1__luceneSearchResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__luceneSearchResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse
-#define SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse (252)
+#ifndef SOAP_TYPE_ICat4_PointerTons1__luceneSearch
+#define SOAP_TYPE_ICat4_PointerTons1__luceneSearch (323)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersionResponse(struct soap*, ns1__getApiVersionResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersionResponse(struct soap*, const char *, int, ns1__getApiVersionResponse *const*, const char *);
-SOAP_FMAC3 ns1__getApiVersionResponse ** SOAP_FMAC4 soap_in_PointerTons1__getApiVersionResponse(struct soap*, const char*, ns1__getApiVersionResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersionResponse(struct soap*, ns1__getApiVersionResponse *const*, const char*, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneSearch(struct soap*, ns1__luceneSearch *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneSearch(struct soap*, const char *, int, ns1__luceneSearch *const*, const char *);
+SOAP_FMAC3 ns1__luceneSearch ** SOAP_FMAC4 soap_in_PointerTons1__luceneSearch(struct soap*, const char*, ns1__luceneSearch **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneSearch(struct soap*, ns1__luceneSearch *const*, const char*, const char*);
 
-#ifndef soap_write_PointerTons1__getApiVersionResponse
-#define soap_write_PointerTons1__getApiVersionResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__getApiVersionResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getApiVersionResponse(soap, data, "ns1:getApiVersionResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__getApiVersionResponse ** SOAP_FMAC4 soap_get_PointerTons1__getApiVersionResponse(struct soap*, ns1__getApiVersionResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__getApiVersionResponse
-#define soap_read_PointerTons1__getApiVersionResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getApiVersionResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_write_PointerTons1__luceneSearch
+#define soap_write_PointerTons1__luceneSearch(soap, data) ( ICat4::soap_serialize_PointerTons1__luceneSearch(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__luceneSearch(soap, data, "ns1:luceneSearch", NULL) || soap_end_send(soap), soap->error )
 #endif
 
+SOAP_FMAC3 ns1__luceneSearch ** SOAP_FMAC4 soap_get_PointerTons1__luceneSearch(struct soap*, ns1__luceneSearch **, const char*, const char*);
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__getApiVersion
-#define SOAP_TYPE_ICat4_PointerTons1__getApiVersion (251)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersion(struct soap*, ns1__getApiVersion *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersion(struct soap*, const char *, int, ns1__getApiVersion *const*, const char *);
-SOAP_FMAC3 ns1__getApiVersion ** SOAP_FMAC4 soap_in_PointerTons1__getApiVersion(struct soap*, const char*, ns1__getApiVersion **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersion(struct soap*, ns1__getApiVersion *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__getApiVersion
-#define soap_write_PointerTons1__getApiVersion(soap, data) ( ICat4::soap_serialize_PointerTons1__getApiVersion(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getApiVersion(soap, data, "ns1:getApiVersion", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_read_PointerTons1__luceneSearch
+#define soap_read_PointerTons1__luceneSearch(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__luceneSearch(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC3 ns1__getApiVersion ** SOAP_FMAC4 soap_get_PointerTons1__getApiVersion(struct soap*, ns1__getApiVersion **, const char*, const char*);
 
-#ifndef soap_read_PointerTons1__getApiVersion
-#define soap_read_PointerTons1__getApiVersion(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getApiVersion(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef SOAP_TYPE_ICat4_PointerTons1__luceneCommitResponse
+#define SOAP_TYPE_ICat4_PointerTons1__luceneCommitResponse (319)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneCommitResponse(struct soap*, ns1__luceneCommitResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneCommitResponse(struct soap*, const char *, int, ns1__luceneCommitResponse *const*, const char *);
+SOAP_FMAC3 ns1__luceneCommitResponse ** SOAP_FMAC4 soap_in_PointerTons1__luceneCommitResponse(struct soap*, const char*, ns1__luceneCommitResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneCommitResponse(struct soap*, ns1__luceneCommitResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__luceneCommitResponse
+#define soap_write_PointerTons1__luceneCommitResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__luceneCommitResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__luceneCommitResponse(soap, data, "ns1:luceneCommitResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneCommitResponse ** SOAP_FMAC4 soap_get_PointerTons1__luceneCommitResponse(struct soap*, ns1__luceneCommitResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__luceneCommitResponse
+#define soap_read_PointerTons1__luceneCommitResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__luceneCommitResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__luceneCommit
+#define SOAP_TYPE_ICat4_PointerTons1__luceneCommit (318)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneCommit(struct soap*, ns1__luceneCommit *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneCommit(struct soap*, const char *, int, ns1__luceneCommit *const*, const char *);
+SOAP_FMAC3 ns1__luceneCommit ** SOAP_FMAC4 soap_in_PointerTons1__luceneCommit(struct soap*, const char*, ns1__luceneCommit **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneCommit(struct soap*, ns1__luceneCommit *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__luceneCommit
+#define soap_write_PointerTons1__luceneCommit(soap, data) ( ICat4::soap_serialize_PointerTons1__luceneCommit(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__luceneCommit(soap, data, "ns1:luceneCommit", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneCommit ** SOAP_FMAC4 soap_get_PointerTons1__luceneCommit(struct soap*, ns1__luceneCommit **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__luceneCommit
+#define soap_read_PointerTons1__luceneCommit(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__luceneCommit(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__luceneClearResponse
+#define SOAP_TYPE_ICat4_PointerTons1__luceneClearResponse (314)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneClearResponse(struct soap*, ns1__luceneClearResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneClearResponse(struct soap*, const char *, int, ns1__luceneClearResponse *const*, const char *);
+SOAP_FMAC3 ns1__luceneClearResponse ** SOAP_FMAC4 soap_in_PointerTons1__luceneClearResponse(struct soap*, const char*, ns1__luceneClearResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneClearResponse(struct soap*, ns1__luceneClearResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__luceneClearResponse
+#define soap_write_PointerTons1__luceneClearResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__luceneClearResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__luceneClearResponse(soap, data, "ns1:luceneClearResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneClearResponse ** SOAP_FMAC4 soap_get_PointerTons1__luceneClearResponse(struct soap*, ns1__luceneClearResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__luceneClearResponse
+#define soap_read_PointerTons1__luceneClearResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__luceneClearResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__luceneClear
+#define SOAP_TYPE_ICat4_PointerTons1__luceneClear (313)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneClear(struct soap*, ns1__luceneClear *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneClear(struct soap*, const char *, int, ns1__luceneClear *const*, const char *);
+SOAP_FMAC3 ns1__luceneClear ** SOAP_FMAC4 soap_in_PointerTons1__luceneClear(struct soap*, const char*, ns1__luceneClear **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneClear(struct soap*, ns1__luceneClear *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__luceneClear
+#define soap_write_PointerTons1__luceneClear(soap, data) ( ICat4::soap_serialize_PointerTons1__luceneClear(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__luceneClear(soap, data, "ns1:luceneClear", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneClear ** SOAP_FMAC4 soap_get_PointerTons1__luceneClear(struct soap*, ns1__luceneClear **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__luceneClear
+#define soap_read_PointerTons1__luceneClear(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__luceneClear(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__searchTextResponse
+#define SOAP_TYPE_ICat4_PointerTons1__searchTextResponse (310)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchTextResponse(struct soap*, ns1__searchTextResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__searchTextResponse(struct soap*, const char *, int, ns1__searchTextResponse *const*, const char *);
+SOAP_FMAC3 ns1__searchTextResponse ** SOAP_FMAC4 soap_in_PointerTons1__searchTextResponse(struct soap*, const char*, ns1__searchTextResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__searchTextResponse(struct soap*, ns1__searchTextResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__searchTextResponse
+#define soap_write_PointerTons1__searchTextResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__searchTextResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__searchTextResponse(soap, data, "ns1:searchTextResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__searchTextResponse ** SOAP_FMAC4 soap_get_PointerTons1__searchTextResponse(struct soap*, ns1__searchTextResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__searchTextResponse
+#define soap_read_PointerTons1__searchTextResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__searchTextResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__searchText
+#define SOAP_TYPE_ICat4_PointerTons1__searchText (309)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchText(struct soap*, ns1__searchText *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__searchText(struct soap*, const char *, int, ns1__searchText *const*, const char *);
+SOAP_FMAC3 ns1__searchText ** SOAP_FMAC4 soap_in_PointerTons1__searchText(struct soap*, const char*, ns1__searchText **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__searchText(struct soap*, ns1__searchText *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__searchText
+#define soap_write_PointerTons1__searchText(soap, data) ( ICat4::soap_serialize_PointerTons1__searchText(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__searchText(soap, data, "ns1:searchText", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__searchText ** SOAP_FMAC4 soap_get_PointerTons1__searchText(struct soap*, ns1__searchText **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__searchText
+#define soap_read_PointerTons1__searchText(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__searchText(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulatingResponse
+#define SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulatingResponse (306)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneGetPopulatingResponse(struct soap*, ns1__luceneGetPopulatingResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneGetPopulatingResponse(struct soap*, const char *, int, ns1__luceneGetPopulatingResponse *const*, const char *);
+SOAP_FMAC3 ns1__luceneGetPopulatingResponse ** SOAP_FMAC4 soap_in_PointerTons1__luceneGetPopulatingResponse(struct soap*, const char*, ns1__luceneGetPopulatingResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneGetPopulatingResponse(struct soap*, ns1__luceneGetPopulatingResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__luceneGetPopulatingResponse
+#define soap_write_PointerTons1__luceneGetPopulatingResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__luceneGetPopulatingResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__luceneGetPopulatingResponse(soap, data, "ns1:luceneGetPopulatingResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneGetPopulatingResponse ** SOAP_FMAC4 soap_get_PointerTons1__luceneGetPopulatingResponse(struct soap*, ns1__luceneGetPopulatingResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__luceneGetPopulatingResponse
+#define soap_read_PointerTons1__luceneGetPopulatingResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__luceneGetPopulatingResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulating
+#define SOAP_TYPE_ICat4_PointerTons1__luceneGetPopulating (305)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__luceneGetPopulating(struct soap*, ns1__luceneGetPopulating *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__luceneGetPopulating(struct soap*, const char *, int, ns1__luceneGetPopulating *const*, const char *);
+SOAP_FMAC3 ns1__luceneGetPopulating ** SOAP_FMAC4 soap_in_PointerTons1__luceneGetPopulating(struct soap*, const char*, ns1__luceneGetPopulating **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__luceneGetPopulating(struct soap*, ns1__luceneGetPopulating *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__luceneGetPopulating
+#define soap_write_PointerTons1__luceneGetPopulating(soap, data) ( ICat4::soap_serialize_PointerTons1__luceneGetPopulating(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__luceneGetPopulating(soap, data, "ns1:luceneGetPopulating", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__luceneGetPopulating ** SOAP_FMAC4 soap_get_PointerTons1__luceneGetPopulating(struct soap*, ns1__luceneGetPopulating **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__luceneGetPopulating
+#define soap_read_PointerTons1__luceneGetPopulating(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__luceneGetPopulating(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__lucenePopulateResponse
+#define SOAP_TYPE_ICat4_PointerTons1__lucenePopulateResponse (301)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__lucenePopulateResponse(struct soap*, ns1__lucenePopulateResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__lucenePopulateResponse(struct soap*, const char *, int, ns1__lucenePopulateResponse *const*, const char *);
+SOAP_FMAC3 ns1__lucenePopulateResponse ** SOAP_FMAC4 soap_in_PointerTons1__lucenePopulateResponse(struct soap*, const char*, ns1__lucenePopulateResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__lucenePopulateResponse(struct soap*, ns1__lucenePopulateResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__lucenePopulateResponse
+#define soap_write_PointerTons1__lucenePopulateResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__lucenePopulateResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__lucenePopulateResponse(soap, data, "ns1:lucenePopulateResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__lucenePopulateResponse ** SOAP_FMAC4 soap_get_PointerTons1__lucenePopulateResponse(struct soap*, ns1__lucenePopulateResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__lucenePopulateResponse
+#define soap_read_PointerTons1__lucenePopulateResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__lucenePopulateResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__lucenePopulate
+#define SOAP_TYPE_ICat4_PointerTons1__lucenePopulate (300)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__lucenePopulate(struct soap*, ns1__lucenePopulate *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__lucenePopulate(struct soap*, const char *, int, ns1__lucenePopulate *const*, const char *);
+SOAP_FMAC3 ns1__lucenePopulate ** SOAP_FMAC4 soap_in_PointerTons1__lucenePopulate(struct soap*, const char*, ns1__lucenePopulate **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__lucenePopulate(struct soap*, ns1__lucenePopulate *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__lucenePopulate
+#define soap_write_PointerTons1__lucenePopulate(soap, data) ( ICat4::soap_serialize_PointerTons1__lucenePopulate(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__lucenePopulate(soap, data, "ns1:lucenePopulate", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__lucenePopulate ** SOAP_FMAC4 soap_get_PointerTons1__lucenePopulate(struct soap*, ns1__lucenePopulate **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__lucenePopulate
+#define soap_read_PointerTons1__lucenePopulate(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__lucenePopulate(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__isAccessAllowedResponse
+#define SOAP_TYPE_ICat4_PointerTons1__isAccessAllowedResponse (297)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__isAccessAllowedResponse(struct soap*, ns1__isAccessAllowedResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__isAccessAllowedResponse(struct soap*, const char *, int, ns1__isAccessAllowedResponse *const*, const char *);
+SOAP_FMAC3 ns1__isAccessAllowedResponse ** SOAP_FMAC4 soap_in_PointerTons1__isAccessAllowedResponse(struct soap*, const char*, ns1__isAccessAllowedResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__isAccessAllowedResponse(struct soap*, ns1__isAccessAllowedResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__isAccessAllowedResponse
+#define soap_write_PointerTons1__isAccessAllowedResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__isAccessAllowedResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__isAccessAllowedResponse(soap, data, "ns1:isAccessAllowedResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__isAccessAllowedResponse ** SOAP_FMAC4 soap_get_PointerTons1__isAccessAllowedResponse(struct soap*, ns1__isAccessAllowedResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__isAccessAllowedResponse
+#define soap_read_PointerTons1__isAccessAllowedResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__isAccessAllowedResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__isAccessAllowed
+#define SOAP_TYPE_ICat4_PointerTons1__isAccessAllowed (296)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__isAccessAllowed(struct soap*, ns1__isAccessAllowed *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__isAccessAllowed(struct soap*, const char *, int, ns1__isAccessAllowed *const*, const char *);
+SOAP_FMAC3 ns1__isAccessAllowed ** SOAP_FMAC4 soap_in_PointerTons1__isAccessAllowed(struct soap*, const char*, ns1__isAccessAllowed **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__isAccessAllowed(struct soap*, ns1__isAccessAllowed *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__isAccessAllowed
+#define soap_write_PointerTons1__isAccessAllowed(soap, data) ( ICat4::soap_serialize_PointerTons1__isAccessAllowed(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__isAccessAllowed(soap, data, "ns1:isAccessAllowed", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__isAccessAllowed ** SOAP_FMAC4 soap_get_PointerTons1__isAccessAllowed(struct soap*, ns1__isAccessAllowed **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__isAccessAllowed
+#define soap_read_PointerTons1__isAccessAllowed(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__isAccessAllowed(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutesResponse
-#define SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutesResponse (248)
+#define SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutesResponse (293)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getRemainingMinutesResponse(struct soap*, ns1__getRemainingMinutesResponse *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getRemainingMinutesResponse(struct soap*, const char *, int, ns1__getRemainingMinutesResponse *const*, const char *);
@@ -3697,7 +4973,7 @@ SOAP_FMAC3 ns1__getRemainingMinutesResponse ** SOAP_FMAC4 soap_get_PointerTons1_
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes
-#define SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes (247)
+#define SOAP_TYPE_ICat4_PointerTons1__getRemainingMinutes (292)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getRemainingMinutes(struct soap*, ns1__getRemainingMinutes *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getRemainingMinutes(struct soap*, const char *, int, ns1__getRemainingMinutes *const*, const char *);
@@ -3715,46 +4991,46 @@ SOAP_FMAC3 ns1__getRemainingMinutes ** SOAP_FMAC4 soap_get_PointerTons1__getRema
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse
-#define SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse (244)
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse
+#define SOAP_TYPE_ICat4_PointerTons1__getEntityNamesResponse (289)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfoResponse(struct soap*, ns1__getEntityInfoResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfoResponse(struct soap*, const char *, int, ns1__getEntityInfoResponse *const*, const char *);
-SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfoResponse(struct soap*, const char*, ns1__getEntityInfoResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfoResponse(struct soap*, ns1__getEntityInfoResponse *const*, const char*, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityNamesResponse(struct soap*, ns1__getEntityNamesResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityNamesResponse(struct soap*, const char *, int, ns1__getEntityNamesResponse *const*, const char *);
+SOAP_FMAC3 ns1__getEntityNamesResponse ** SOAP_FMAC4 soap_in_PointerTons1__getEntityNamesResponse(struct soap*, const char*, ns1__getEntityNamesResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityNamesResponse(struct soap*, ns1__getEntityNamesResponse *const*, const char*, const char*);
 
-#ifndef soap_write_PointerTons1__getEntityInfoResponse
-#define soap_write_PointerTons1__getEntityInfoResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__getEntityInfoResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getEntityInfoResponse(soap, data, "ns1:getEntityInfoResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_get_PointerTons1__getEntityInfoResponse(struct soap*, ns1__getEntityInfoResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__getEntityInfoResponse
-#define soap_read_PointerTons1__getEntityInfoResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getEntityInfoResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_write_PointerTons1__getEntityNamesResponse
+#define soap_write_PointerTons1__getEntityNamesResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__getEntityNamesResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getEntityNamesResponse(soap, data, "ns1:getEntityNamesResponse", NULL) || soap_end_send(soap), soap->error )
 #endif
 
+SOAP_FMAC3 ns1__getEntityNamesResponse ** SOAP_FMAC4 soap_get_PointerTons1__getEntityNamesResponse(struct soap*, ns1__getEntityNamesResponse **, const char*, const char*);
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__getEntityInfo
-#define SOAP_TYPE_ICat4_PointerTons1__getEntityInfo (243)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfo(struct soap*, ns1__getEntityInfo *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfo(struct soap*, const char *, int, ns1__getEntityInfo *const*, const char *);
-SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfo(struct soap*, const char*, ns1__getEntityInfo **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfo(struct soap*, ns1__getEntityInfo *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__getEntityInfo
-#define soap_write_PointerTons1__getEntityInfo(soap, data) ( ICat4::soap_serialize_PointerTons1__getEntityInfo(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getEntityInfo(soap, data, "ns1:getEntityInfo", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_read_PointerTons1__getEntityNamesResponse
+#define soap_read_PointerTons1__getEntityNamesResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getEntityNamesResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_get_PointerTons1__getEntityInfo(struct soap*, ns1__getEntityInfo **, const char*, const char*);
 
-#ifndef soap_read_PointerTons1__getEntityInfo
-#define soap_read_PointerTons1__getEntityInfo(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getEntityInfo(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getEntityNames
+#define SOAP_TYPE_ICat4_PointerTons1__getEntityNames (288)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityNames(struct soap*, ns1__getEntityNames *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityNames(struct soap*, const char *, int, ns1__getEntityNames *const*, const char *);
+SOAP_FMAC3 ns1__getEntityNames ** SOAP_FMAC4 soap_in_PointerTons1__getEntityNames(struct soap*, const char*, ns1__getEntityNames **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityNames(struct soap*, ns1__getEntityNames *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__getEntityNames
+#define soap_write_PointerTons1__getEntityNames(soap, data) ( ICat4::soap_serialize_PointerTons1__getEntityNames(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getEntityNames(soap, data, "ns1:getEntityNames", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getEntityNames ** SOAP_FMAC4 soap_get_PointerTons1__getEntityNames(struct soap*, ns1__getEntityNames **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__getEntityNames
+#define soap_read_PointerTons1__getEntityNames(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getEntityNames(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse
-#define SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse (239)
+#define SOAP_TYPE_ICat4_PointerTons1__deleteManyResponse (284)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteManyResponse(struct soap*, ns1__deleteManyResponse *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteManyResponse(struct soap*, const char *, int, ns1__deleteManyResponse *const*, const char *);
@@ -3773,7 +5049,7 @@ SOAP_FMAC3 ns1__deleteManyResponse ** SOAP_FMAC4 soap_get_PointerTons1__deleteMa
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__deleteMany
-#define SOAP_TYPE_ICat4_PointerTons1__deleteMany (238)
+#define SOAP_TYPE_ICat4_PointerTons1__deleteMany (283)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteMany(struct soap*, ns1__deleteMany *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteMany(struct soap*, const char *, int, ns1__deleteMany *const*, const char *);
@@ -3791,8 +5067,46 @@ SOAP_FMAC3 ns1__deleteMany ** SOAP_FMAC4 soap_get_PointerTons1__deleteMany(struc
 #endif
 
 
+#ifndef SOAP_TYPE_ICat4_PointerTons1__createManyResponse
+#define SOAP_TYPE_ICat4_PointerTons1__createManyResponse (280)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createManyResponse(struct soap*, ns1__createManyResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createManyResponse(struct soap*, const char *, int, ns1__createManyResponse *const*, const char *);
+SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_in_PointerTons1__createManyResponse(struct soap*, const char*, ns1__createManyResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createManyResponse(struct soap*, ns1__createManyResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__createManyResponse
+#define soap_write_PointerTons1__createManyResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__createManyResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__createManyResponse(soap, data, "ns1:createManyResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__createManyResponse ** SOAP_FMAC4 soap_get_PointerTons1__createManyResponse(struct soap*, ns1__createManyResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__createManyResponse
+#define soap_read_PointerTons1__createManyResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__createManyResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__createMany
+#define SOAP_TYPE_ICat4_PointerTons1__createMany (279)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createMany(struct soap*, ns1__createMany *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createMany(struct soap*, const char *, int, ns1__createMany *const*, const char *);
+SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_in_PointerTons1__createMany(struct soap*, const char*, ns1__createMany **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createMany(struct soap*, ns1__createMany *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__createMany
+#define soap_write_PointerTons1__createMany(soap, data) ( ICat4::soap_serialize_PointerTons1__createMany(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__createMany(soap, data, "ns1:createMany", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__createMany ** SOAP_FMAC4 soap_get_PointerTons1__createMany(struct soap*, ns1__createMany **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__createMany
+#define soap_read_PointerTons1__createMany(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__createMany(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
 #ifndef SOAP_TYPE_ICat4_PointerTons1__logoutResponse
-#define SOAP_TYPE_ICat4_PointerTons1__logoutResponse (234)
+#define SOAP_TYPE_ICat4_PointerTons1__logoutResponse (275)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__logoutResponse(struct soap*, ns1__logoutResponse *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__logoutResponse(struct soap*, const char *, int, ns1__logoutResponse *const*, const char *);
@@ -3811,7 +5125,7 @@ SOAP_FMAC3 ns1__logoutResponse ** SOAP_FMAC4 soap_get_PointerTons1__logoutRespon
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__logout
-#define SOAP_TYPE_ICat4_PointerTons1__logout (233)
+#define SOAP_TYPE_ICat4_PointerTons1__logout (274)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__logout(struct soap*, ns1__logout *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__logout(struct soap*, const char *, int, ns1__logout *const*, const char *);
@@ -3829,274 +5143,8 @@ SOAP_FMAC3 ns1__logout ** SOAP_FMAC4 soap_get_PointerTons1__logout(struct soap*,
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__dummyResponse
-#define SOAP_TYPE_ICat4_PointerTons1__dummyResponse (229)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummyResponse(struct soap*, ns1__dummyResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummyResponse(struct soap*, const char *, int, ns1__dummyResponse *const*, const char *);
-SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_in_PointerTons1__dummyResponse(struct soap*, const char*, ns1__dummyResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummyResponse(struct soap*, ns1__dummyResponse *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__dummyResponse
-#define soap_write_PointerTons1__dummyResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__dummyResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__dummyResponse(soap, data, "ns1:dummyResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_get_PointerTons1__dummyResponse(struct soap*, ns1__dummyResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__dummyResponse
-#define soap_read_PointerTons1__dummyResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__dummyResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__dummy
-#define SOAP_TYPE_ICat4_PointerTons1__dummy (228)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummy(struct soap*, ns1__dummy *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummy(struct soap*, const char *, int, ns1__dummy *const*, const char *);
-SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_in_PointerTons1__dummy(struct soap*, const char*, ns1__dummy **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummy(struct soap*, ns1__dummy *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__dummy
-#define soap_write_PointerTons1__dummy(soap, data) ( ICat4::soap_serialize_PointerTons1__dummy(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__dummy(soap, data, "ns1:dummy", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_get_PointerTons1__dummy(struct soap*, ns1__dummy **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__dummy
-#define soap_read_PointerTons1__dummy(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__dummy(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__updateResponse
-#define SOAP_TYPE_ICat4_PointerTons1__updateResponse (224)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__updateResponse(struct soap*, ns1__updateResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__updateResponse(struct soap*, const char *, int, ns1__updateResponse *const*, const char *);
-SOAP_FMAC3 ns1__updateResponse ** SOAP_FMAC4 soap_in_PointerTons1__updateResponse(struct soap*, const char*, ns1__updateResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__updateResponse(struct soap*, ns1__updateResponse *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__updateResponse
-#define soap_write_PointerTons1__updateResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__updateResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__updateResponse(soap, data, "ns1:updateResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__updateResponse ** SOAP_FMAC4 soap_get_PointerTons1__updateResponse(struct soap*, ns1__updateResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__updateResponse
-#define soap_read_PointerTons1__updateResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__updateResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__update
-#define SOAP_TYPE_ICat4_PointerTons1__update (223)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__update(struct soap*, ns1__update *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__update(struct soap*, const char *, int, ns1__update *const*, const char *);
-SOAP_FMAC3 ns1__update ** SOAP_FMAC4 soap_in_PointerTons1__update(struct soap*, const char*, ns1__update **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__update(struct soap*, ns1__update *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__update
-#define soap_write_PointerTons1__update(soap, data) ( ICat4::soap_serialize_PointerTons1__update(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__update(soap, data, "ns1:update", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__update ** SOAP_FMAC4 soap_get_PointerTons1__update(struct soap*, ns1__update **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__update
-#define soap_read_PointerTons1__update(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__update(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__createResponse
-#define SOAP_TYPE_ICat4_PointerTons1__createResponse (220)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createResponse(struct soap*, ns1__createResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createResponse(struct soap*, const char *, int, ns1__createResponse *const*, const char *);
-SOAP_FMAC3 ns1__createResponse ** SOAP_FMAC4 soap_in_PointerTons1__createResponse(struct soap*, const char*, ns1__createResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createResponse(struct soap*, ns1__createResponse *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__createResponse
-#define soap_write_PointerTons1__createResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__createResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__createResponse(soap, data, "ns1:createResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__createResponse ** SOAP_FMAC4 soap_get_PointerTons1__createResponse(struct soap*, ns1__createResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__createResponse
-#define soap_read_PointerTons1__createResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__createResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__create
-#define SOAP_TYPE_ICat4_PointerTons1__create (219)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__create(struct soap*, ns1__create *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__create(struct soap*, const char *, int, ns1__create *const*, const char *);
-SOAP_FMAC3 ns1__create ** SOAP_FMAC4 soap_in_PointerTons1__create(struct soap*, const char*, ns1__create **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__create(struct soap*, ns1__create *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__create
-#define soap_write_PointerTons1__create(soap, data) ( ICat4::soap_serialize_PointerTons1__create(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__create(soap, data, "ns1:create", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__create ** SOAP_FMAC4 soap_get_PointerTons1__create(struct soap*, ns1__create **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__create
-#define soap_read_PointerTons1__create(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__create(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__searchResponse
-#define SOAP_TYPE_ICat4_PointerTons1__searchResponse (216)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchResponse(struct soap*, ns1__searchResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__searchResponse(struct soap*, const char *, int, ns1__searchResponse *const*, const char *);
-SOAP_FMAC3 ns1__searchResponse ** SOAP_FMAC4 soap_in_PointerTons1__searchResponse(struct soap*, const char*, ns1__searchResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__searchResponse(struct soap*, ns1__searchResponse *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__searchResponse
-#define soap_write_PointerTons1__searchResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__searchResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__searchResponse(soap, data, "ns1:searchResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__searchResponse ** SOAP_FMAC4 soap_get_PointerTons1__searchResponse(struct soap*, ns1__searchResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__searchResponse
-#define soap_read_PointerTons1__searchResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__searchResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__search
-#define SOAP_TYPE_ICat4_PointerTons1__search (215)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__search(struct soap*, ns1__search *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__search(struct soap*, const char *, int, ns1__search *const*, const char *);
-SOAP_FMAC3 ns1__search ** SOAP_FMAC4 soap_in_PointerTons1__search(struct soap*, const char*, ns1__search **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__search(struct soap*, ns1__search *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__search
-#define soap_write_PointerTons1__search(soap, data) ( ICat4::soap_serialize_PointerTons1__search(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__search(soap, data, "ns1:search", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__search ** SOAP_FMAC4 soap_get_PointerTons1__search(struct soap*, ns1__search **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__search
-#define soap_read_PointerTons1__search(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__search(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__deleteResponse
-#define SOAP_TYPE_ICat4_PointerTons1__deleteResponse (211)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteResponse(struct soap*, ns1__deleteResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteResponse(struct soap*, const char *, int, ns1__deleteResponse *const*, const char *);
-SOAP_FMAC3 ns1__deleteResponse ** SOAP_FMAC4 soap_in_PointerTons1__deleteResponse(struct soap*, const char*, ns1__deleteResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteResponse(struct soap*, ns1__deleteResponse *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__deleteResponse
-#define soap_write_PointerTons1__deleteResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__deleteResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__deleteResponse(soap, data, "ns1:deleteResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__deleteResponse ** SOAP_FMAC4 soap_get_PointerTons1__deleteResponse(struct soap*, ns1__deleteResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__deleteResponse
-#define soap_read_PointerTons1__deleteResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__deleteResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__delete
-#define SOAP_TYPE_ICat4_PointerTons1__delete (210)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__delete(struct soap*, ns1__delete *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__delete(struct soap*, const char *, int, ns1__delete *const*, const char *);
-SOAP_FMAC3 ns1__delete ** SOAP_FMAC4 soap_in_PointerTons1__delete(struct soap*, const char*, ns1__delete **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__delete(struct soap*, ns1__delete *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__delete
-#define soap_write_PointerTons1__delete(soap, data) ( ICat4::soap_serialize_PointerTons1__delete(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__delete(soap, data, "ns1:delete", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__delete ** SOAP_FMAC4 soap_get_PointerTons1__delete(struct soap*, ns1__delete **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__delete
-#define soap_read_PointerTons1__delete(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__delete(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__getResponse
-#define SOAP_TYPE_ICat4_PointerTons1__getResponse (207)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getResponse(struct soap*, ns1__getResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getResponse(struct soap*, const char *, int, ns1__getResponse *const*, const char *);
-SOAP_FMAC3 ns1__getResponse ** SOAP_FMAC4 soap_in_PointerTons1__getResponse(struct soap*, const char*, ns1__getResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getResponse(struct soap*, ns1__getResponse *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__getResponse
-#define soap_write_PointerTons1__getResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__getResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getResponse(soap, data, "ns1:getResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__getResponse ** SOAP_FMAC4 soap_get_PointerTons1__getResponse(struct soap*, ns1__getResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__getResponse
-#define soap_read_PointerTons1__getResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__get
-#define SOAP_TYPE_ICat4_PointerTons1__get (206)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__get(struct soap*, ns1__get *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__get(struct soap*, const char *, int, ns1__get *const*, const char *);
-SOAP_FMAC3 ns1__get ** SOAP_FMAC4 soap_in_PointerTons1__get(struct soap*, const char*, ns1__get **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__get(struct soap*, ns1__get *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__get
-#define soap_write_PointerTons1__get(soap, data) ( ICat4::soap_serialize_PointerTons1__get(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__get(soap, data, "ns1:get", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__get ** SOAP_FMAC4 soap_get_PointerTons1__get(struct soap*, ns1__get **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__get
-#define soap_read_PointerTons1__get(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__get(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__loginResponse
-#define SOAP_TYPE_ICat4_PointerTons1__loginResponse (203)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__loginResponse(struct soap*, ns1__loginResponse *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__loginResponse(struct soap*, const char *, int, ns1__loginResponse *const*, const char *);
-SOAP_FMAC3 ns1__loginResponse ** SOAP_FMAC4 soap_in_PointerTons1__loginResponse(struct soap*, const char*, ns1__loginResponse **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__loginResponse(struct soap*, ns1__loginResponse *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__loginResponse
-#define soap_write_PointerTons1__loginResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__loginResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__loginResponse(soap, data, "ns1:loginResponse", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__loginResponse ** SOAP_FMAC4 soap_get_PointerTons1__loginResponse(struct soap*, ns1__loginResponse **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__loginResponse
-#define soap_read_PointerTons1__loginResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__loginResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__login
-#define SOAP_TYPE_ICat4_PointerTons1__login (202)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__login(struct soap*, ns1__login *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__login(struct soap*, const char *, int, ns1__login *const*, const char *);
-SOAP_FMAC3 ns1__login ** SOAP_FMAC4 soap_in_PointerTons1__login(struct soap*, const char*, ns1__login **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__login(struct soap*, ns1__login *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__login
-#define soap_write_PointerTons1__login(soap, data) ( ICat4::soap_serialize_PointerTons1__login(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__login(soap, data, "ns1:login", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__login ** SOAP_FMAC4 soap_get_PointerTons1__login(struct soap*, ns1__login **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__login
-#define soap_read_PointerTons1__login(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__login(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
 #ifndef SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse
-#define SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse (199)
+#define SOAP_TYPE_ICat4_PointerTons1__getUserNameResponse (271)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getUserNameResponse(struct soap*, ns1__getUserNameResponse *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getUserNameResponse(struct soap*, const char *, int, ns1__getUserNameResponse *const*, const char *);
@@ -4115,7 +5163,7 @@ SOAP_FMAC3 ns1__getUserNameResponse ** SOAP_FMAC4 soap_get_PointerTons1__getUser
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__getUserName
-#define SOAP_TYPE_ICat4_PointerTons1__getUserName (198)
+#define SOAP_TYPE_ICat4_PointerTons1__getUserName (270)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getUserName(struct soap*, ns1__getUserName *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getUserName(struct soap*, const char *, int, ns1__getUserName *const*, const char *);
@@ -4133,8 +5181,426 @@ SOAP_FMAC3 ns1__getUserName ** SOAP_FMAC4 soap_get_PointerTons1__getUserName(str
 #endif
 
 
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse
+#define SOAP_TYPE_ICat4_PointerTons1__getApiVersionResponse (267)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersionResponse(struct soap*, ns1__getApiVersionResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersionResponse(struct soap*, const char *, int, ns1__getApiVersionResponse *const*, const char *);
+SOAP_FMAC3 ns1__getApiVersionResponse ** SOAP_FMAC4 soap_in_PointerTons1__getApiVersionResponse(struct soap*, const char*, ns1__getApiVersionResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersionResponse(struct soap*, ns1__getApiVersionResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__getApiVersionResponse
+#define soap_write_PointerTons1__getApiVersionResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__getApiVersionResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getApiVersionResponse(soap, data, "ns1:getApiVersionResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getApiVersionResponse ** SOAP_FMAC4 soap_get_PointerTons1__getApiVersionResponse(struct soap*, ns1__getApiVersionResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__getApiVersionResponse
+#define soap_read_PointerTons1__getApiVersionResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getApiVersionResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getApiVersion
+#define SOAP_TYPE_ICat4_PointerTons1__getApiVersion (266)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getApiVersion(struct soap*, ns1__getApiVersion *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getApiVersion(struct soap*, const char *, int, ns1__getApiVersion *const*, const char *);
+SOAP_FMAC3 ns1__getApiVersion ** SOAP_FMAC4 soap_in_PointerTons1__getApiVersion(struct soap*, const char*, ns1__getApiVersion **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getApiVersion(struct soap*, ns1__getApiVersion *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__getApiVersion
+#define soap_write_PointerTons1__getApiVersion(soap, data) ( ICat4::soap_serialize_PointerTons1__getApiVersion(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getApiVersion(soap, data, "ns1:getApiVersion", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getApiVersion ** SOAP_FMAC4 soap_get_PointerTons1__getApiVersion(struct soap*, ns1__getApiVersion **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__getApiVersion
+#define soap_read_PointerTons1__getApiVersion(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getApiVersion(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse
+#define SOAP_TYPE_ICat4_PointerTons1__getEntityInfoResponse (263)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfoResponse(struct soap*, ns1__getEntityInfoResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfoResponse(struct soap*, const char *, int, ns1__getEntityInfoResponse *const*, const char *);
+SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfoResponse(struct soap*, const char*, ns1__getEntityInfoResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfoResponse(struct soap*, ns1__getEntityInfoResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__getEntityInfoResponse
+#define soap_write_PointerTons1__getEntityInfoResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__getEntityInfoResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getEntityInfoResponse(soap, data, "ns1:getEntityInfoResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getEntityInfoResponse ** SOAP_FMAC4 soap_get_PointerTons1__getEntityInfoResponse(struct soap*, ns1__getEntityInfoResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__getEntityInfoResponse
+#define soap_read_PointerTons1__getEntityInfoResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getEntityInfoResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getEntityInfo
+#define SOAP_TYPE_ICat4_PointerTons1__getEntityInfo (262)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getEntityInfo(struct soap*, ns1__getEntityInfo *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getEntityInfo(struct soap*, const char *, int, ns1__getEntityInfo *const*, const char *);
+SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_in_PointerTons1__getEntityInfo(struct soap*, const char*, ns1__getEntityInfo **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getEntityInfo(struct soap*, ns1__getEntityInfo *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__getEntityInfo
+#define soap_write_PointerTons1__getEntityInfo(soap, data) ( ICat4::soap_serialize_PointerTons1__getEntityInfo(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getEntityInfo(soap, data, "ns1:getEntityInfo", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getEntityInfo ** SOAP_FMAC4 soap_get_PointerTons1__getEntityInfo(struct soap*, ns1__getEntityInfo **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__getEntityInfo
+#define soap_read_PointerTons1__getEntityInfo(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getEntityInfo(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__loginResponse
+#define SOAP_TYPE_ICat4_PointerTons1__loginResponse (259)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__loginResponse(struct soap*, ns1__loginResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__loginResponse(struct soap*, const char *, int, ns1__loginResponse *const*, const char *);
+SOAP_FMAC3 ns1__loginResponse ** SOAP_FMAC4 soap_in_PointerTons1__loginResponse(struct soap*, const char*, ns1__loginResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__loginResponse(struct soap*, ns1__loginResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__loginResponse
+#define soap_write_PointerTons1__loginResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__loginResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__loginResponse(soap, data, "ns1:loginResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__loginResponse ** SOAP_FMAC4 soap_get_PointerTons1__loginResponse(struct soap*, ns1__loginResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__loginResponse
+#define soap_read_PointerTons1__loginResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__loginResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__login
+#define SOAP_TYPE_ICat4_PointerTons1__login (258)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__login(struct soap*, ns1__login *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__login(struct soap*, const char *, int, ns1__login *const*, const char *);
+SOAP_FMAC3 ns1__login ** SOAP_FMAC4 soap_in_PointerTons1__login(struct soap*, const char*, ns1__login **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__login(struct soap*, ns1__login *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__login
+#define soap_write_PointerTons1__login(soap, data) ( ICat4::soap_serialize_PointerTons1__login(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__login(soap, data, "ns1:login", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__login ** SOAP_FMAC4 soap_get_PointerTons1__login(struct soap*, ns1__login **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__login
+#define soap_read_PointerTons1__login(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__login(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__dummyResponse
+#define SOAP_TYPE_ICat4_PointerTons1__dummyResponse (254)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummyResponse(struct soap*, ns1__dummyResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummyResponse(struct soap*, const char *, int, ns1__dummyResponse *const*, const char *);
+SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_in_PointerTons1__dummyResponse(struct soap*, const char*, ns1__dummyResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummyResponse(struct soap*, ns1__dummyResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__dummyResponse
+#define soap_write_PointerTons1__dummyResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__dummyResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__dummyResponse(soap, data, "ns1:dummyResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dummyResponse ** SOAP_FMAC4 soap_get_PointerTons1__dummyResponse(struct soap*, ns1__dummyResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__dummyResponse
+#define soap_read_PointerTons1__dummyResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__dummyResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__dummy
+#define SOAP_TYPE_ICat4_PointerTons1__dummy (253)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dummy(struct soap*, ns1__dummy *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dummy(struct soap*, const char *, int, ns1__dummy *const*, const char *);
+SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_in_PointerTons1__dummy(struct soap*, const char*, ns1__dummy **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dummy(struct soap*, ns1__dummy *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__dummy
+#define soap_write_PointerTons1__dummy(soap, data) ( ICat4::soap_serialize_PointerTons1__dummy(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__dummy(soap, data, "ns1:dummy", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dummy ** SOAP_FMAC4 soap_get_PointerTons1__dummy(struct soap*, ns1__dummy **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__dummy
+#define soap_read_PointerTons1__dummy(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__dummy(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__refreshResponse
+#define SOAP_TYPE_ICat4_PointerTons1__refreshResponse (249)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__refreshResponse(struct soap*, ns1__refreshResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__refreshResponse(struct soap*, const char *, int, ns1__refreshResponse *const*, const char *);
+SOAP_FMAC3 ns1__refreshResponse ** SOAP_FMAC4 soap_in_PointerTons1__refreshResponse(struct soap*, const char*, ns1__refreshResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__refreshResponse(struct soap*, ns1__refreshResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__refreshResponse
+#define soap_write_PointerTons1__refreshResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__refreshResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__refreshResponse(soap, data, "ns1:refreshResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__refreshResponse ** SOAP_FMAC4 soap_get_PointerTons1__refreshResponse(struct soap*, ns1__refreshResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__refreshResponse
+#define soap_read_PointerTons1__refreshResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__refreshResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__refresh
+#define SOAP_TYPE_ICat4_PointerTons1__refresh (248)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__refresh(struct soap*, ns1__refresh *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__refresh(struct soap*, const char *, int, ns1__refresh *const*, const char *);
+SOAP_FMAC3 ns1__refresh ** SOAP_FMAC4 soap_in_PointerTons1__refresh(struct soap*, const char*, ns1__refresh **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__refresh(struct soap*, ns1__refresh *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__refresh
+#define soap_write_PointerTons1__refresh(soap, data) ( ICat4::soap_serialize_PointerTons1__refresh(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__refresh(soap, data, "ns1:refresh", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__refresh ** SOAP_FMAC4 soap_get_PointerTons1__refresh(struct soap*, ns1__refresh **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__refresh
+#define soap_read_PointerTons1__refresh(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__refresh(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__updateResponse
+#define SOAP_TYPE_ICat4_PointerTons1__updateResponse (244)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__updateResponse(struct soap*, ns1__updateResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__updateResponse(struct soap*, const char *, int, ns1__updateResponse *const*, const char *);
+SOAP_FMAC3 ns1__updateResponse ** SOAP_FMAC4 soap_in_PointerTons1__updateResponse(struct soap*, const char*, ns1__updateResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__updateResponse(struct soap*, ns1__updateResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__updateResponse
+#define soap_write_PointerTons1__updateResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__updateResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__updateResponse(soap, data, "ns1:updateResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__updateResponse ** SOAP_FMAC4 soap_get_PointerTons1__updateResponse(struct soap*, ns1__updateResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__updateResponse
+#define soap_read_PointerTons1__updateResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__updateResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__update
+#define SOAP_TYPE_ICat4_PointerTons1__update (243)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__update(struct soap*, ns1__update *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__update(struct soap*, const char *, int, ns1__update *const*, const char *);
+SOAP_FMAC3 ns1__update ** SOAP_FMAC4 soap_in_PointerTons1__update(struct soap*, const char*, ns1__update **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__update(struct soap*, ns1__update *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__update
+#define soap_write_PointerTons1__update(soap, data) ( ICat4::soap_serialize_PointerTons1__update(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__update(soap, data, "ns1:update", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__update ** SOAP_FMAC4 soap_get_PointerTons1__update(struct soap*, ns1__update **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__update
+#define soap_read_PointerTons1__update(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__update(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__createResponse
+#define SOAP_TYPE_ICat4_PointerTons1__createResponse (240)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__createResponse(struct soap*, ns1__createResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__createResponse(struct soap*, const char *, int, ns1__createResponse *const*, const char *);
+SOAP_FMAC3 ns1__createResponse ** SOAP_FMAC4 soap_in_PointerTons1__createResponse(struct soap*, const char*, ns1__createResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__createResponse(struct soap*, ns1__createResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__createResponse
+#define soap_write_PointerTons1__createResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__createResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__createResponse(soap, data, "ns1:createResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__createResponse ** SOAP_FMAC4 soap_get_PointerTons1__createResponse(struct soap*, ns1__createResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__createResponse
+#define soap_read_PointerTons1__createResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__createResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__create
+#define SOAP_TYPE_ICat4_PointerTons1__create (239)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__create(struct soap*, ns1__create *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__create(struct soap*, const char *, int, ns1__create *const*, const char *);
+SOAP_FMAC3 ns1__create ** SOAP_FMAC4 soap_in_PointerTons1__create(struct soap*, const char*, ns1__create **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__create(struct soap*, ns1__create *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__create
+#define soap_write_PointerTons1__create(soap, data) ( ICat4::soap_serialize_PointerTons1__create(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__create(soap, data, "ns1:create", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__create ** SOAP_FMAC4 soap_get_PointerTons1__create(struct soap*, ns1__create **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__create
+#define soap_read_PointerTons1__create(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__create(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__searchResponse
+#define SOAP_TYPE_ICat4_PointerTons1__searchResponse (236)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__searchResponse(struct soap*, ns1__searchResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__searchResponse(struct soap*, const char *, int, ns1__searchResponse *const*, const char *);
+SOAP_FMAC3 ns1__searchResponse ** SOAP_FMAC4 soap_in_PointerTons1__searchResponse(struct soap*, const char*, ns1__searchResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__searchResponse(struct soap*, ns1__searchResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__searchResponse
+#define soap_write_PointerTons1__searchResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__searchResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__searchResponse(soap, data, "ns1:searchResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__searchResponse ** SOAP_FMAC4 soap_get_PointerTons1__searchResponse(struct soap*, ns1__searchResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__searchResponse
+#define soap_read_PointerTons1__searchResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__searchResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__search
+#define SOAP_TYPE_ICat4_PointerTons1__search (235)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__search(struct soap*, ns1__search *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__search(struct soap*, const char *, int, ns1__search *const*, const char *);
+SOAP_FMAC3 ns1__search ** SOAP_FMAC4 soap_in_PointerTons1__search(struct soap*, const char*, ns1__search **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__search(struct soap*, ns1__search *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__search
+#define soap_write_PointerTons1__search(soap, data) ( ICat4::soap_serialize_PointerTons1__search(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__search(soap, data, "ns1:search", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__search ** SOAP_FMAC4 soap_get_PointerTons1__search(struct soap*, ns1__search **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__search
+#define soap_read_PointerTons1__search(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__search(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__deleteResponse
+#define SOAP_TYPE_ICat4_PointerTons1__deleteResponse (231)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__deleteResponse(struct soap*, ns1__deleteResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__deleteResponse(struct soap*, const char *, int, ns1__deleteResponse *const*, const char *);
+SOAP_FMAC3 ns1__deleteResponse ** SOAP_FMAC4 soap_in_PointerTons1__deleteResponse(struct soap*, const char*, ns1__deleteResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__deleteResponse(struct soap*, ns1__deleteResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__deleteResponse
+#define soap_write_PointerTons1__deleteResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__deleteResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__deleteResponse(soap, data, "ns1:deleteResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__deleteResponse ** SOAP_FMAC4 soap_get_PointerTons1__deleteResponse(struct soap*, ns1__deleteResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__deleteResponse
+#define soap_read_PointerTons1__deleteResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__deleteResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__delete
+#define SOAP_TYPE_ICat4_PointerTons1__delete (230)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__delete(struct soap*, ns1__delete *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__delete(struct soap*, const char *, int, ns1__delete *const*, const char *);
+SOAP_FMAC3 ns1__delete ** SOAP_FMAC4 soap_in_PointerTons1__delete(struct soap*, const char*, ns1__delete **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__delete(struct soap*, ns1__delete *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__delete
+#define soap_write_PointerTons1__delete(soap, data) ( ICat4::soap_serialize_PointerTons1__delete(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__delete(soap, data, "ns1:delete", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__delete ** SOAP_FMAC4 soap_get_PointerTons1__delete(struct soap*, ns1__delete **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__delete
+#define soap_read_PointerTons1__delete(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__delete(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse
+#define SOAP_TYPE_ICat4_PointerTons1__getPropertiesResponse (227)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getPropertiesResponse(struct soap*, ns1__getPropertiesResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getPropertiesResponse(struct soap*, const char *, int, ns1__getPropertiesResponse *const*, const char *);
+SOAP_FMAC3 ns1__getPropertiesResponse ** SOAP_FMAC4 soap_in_PointerTons1__getPropertiesResponse(struct soap*, const char*, ns1__getPropertiesResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getPropertiesResponse(struct soap*, ns1__getPropertiesResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__getPropertiesResponse
+#define soap_write_PointerTons1__getPropertiesResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__getPropertiesResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getPropertiesResponse(soap, data, "ns1:getPropertiesResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getPropertiesResponse ** SOAP_FMAC4 soap_get_PointerTons1__getPropertiesResponse(struct soap*, ns1__getPropertiesResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__getPropertiesResponse
+#define soap_read_PointerTons1__getPropertiesResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getPropertiesResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getProperties
+#define SOAP_TYPE_ICat4_PointerTons1__getProperties (226)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getProperties(struct soap*, ns1__getProperties *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getProperties(struct soap*, const char *, int, ns1__getProperties *const*, const char *);
+SOAP_FMAC3 ns1__getProperties ** SOAP_FMAC4 soap_in_PointerTons1__getProperties(struct soap*, const char*, ns1__getProperties **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getProperties(struct soap*, ns1__getProperties *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__getProperties
+#define soap_write_PointerTons1__getProperties(soap, data) ( ICat4::soap_serialize_PointerTons1__getProperties(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getProperties(soap, data, "ns1:getProperties", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getProperties ** SOAP_FMAC4 soap_get_PointerTons1__getProperties(struct soap*, ns1__getProperties **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__getProperties
+#define soap_read_PointerTons1__getProperties(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getProperties(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__getResponse
+#define SOAP_TYPE_ICat4_PointerTons1__getResponse (223)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__getResponse(struct soap*, ns1__getResponse *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__getResponse(struct soap*, const char *, int, ns1__getResponse *const*, const char *);
+SOAP_FMAC3 ns1__getResponse ** SOAP_FMAC4 soap_in_PointerTons1__getResponse(struct soap*, const char*, ns1__getResponse **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__getResponse(struct soap*, ns1__getResponse *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__getResponse
+#define soap_write_PointerTons1__getResponse(soap, data) ( ICat4::soap_serialize_PointerTons1__getResponse(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__getResponse(soap, data, "ns1:getResponse", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__getResponse ** SOAP_FMAC4 soap_get_PointerTons1__getResponse(struct soap*, ns1__getResponse **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__getResponse
+#define soap_read_PointerTons1__getResponse(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__getResponse(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__get
+#define SOAP_TYPE_ICat4_PointerTons1__get (222)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__get(struct soap*, ns1__get *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__get(struct soap*, const char *, int, ns1__get *const*, const char *);
+SOAP_FMAC3 ns1__get ** SOAP_FMAC4 soap_in_PointerTons1__get(struct soap*, const char*, ns1__get **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__get(struct soap*, ns1__get *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__get
+#define soap_write_PointerTons1__get(soap, data) ( ICat4::soap_serialize_PointerTons1__get(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__get(soap, data, "ns1:get", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__get ** SOAP_FMAC4 soap_get_PointerTons1__get(struct soap*, ns1__get **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__get
+#define soap_read_PointerTons1__get(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__get(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
 #ifndef SOAP_TYPE_ICat4_PointerTons1__IcatException
-#define SOAP_TYPE_ICat4_PointerTons1__IcatException (195)
+#define SOAP_TYPE_ICat4_PointerTons1__IcatException (219)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__IcatException(struct soap*, ns1__IcatException *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__IcatException(struct soap*, const char *, int, ns1__IcatException *const*, const char *);
@@ -4152,27 +5618,8 @@ SOAP_FMAC3 ns1__IcatException ** SOAP_FMAC4 soap_get_PointerTons1__IcatException
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__destType
-#define SOAP_TYPE_ICat4_PointerTons1__destType (193)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__destType(struct soap*, enum ns1__destType *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__destType(struct soap*, const char *, int, enum ns1__destType *const*, const char *);
-SOAP_FMAC3 enum ns1__destType ** SOAP_FMAC4 soap_in_PointerTons1__destType(struct soap*, const char*, enum ns1__destType **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__destType(struct soap*, enum ns1__destType *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__destType
-#define soap_write_PointerTons1__destType(soap, data) ( ICat4::soap_serialize_PointerTons1__destType(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__destType(soap, data, "ns1:destType", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 enum ns1__destType ** SOAP_FMAC4 soap_get_PointerTons1__destType(struct soap*, enum ns1__destType **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__destType
-#define soap_read_PointerTons1__destType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__destType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
 #ifndef SOAP_TYPE_ICat4_PointerTons1__parameterValueType
-#define SOAP_TYPE_ICat4_PointerTons1__parameterValueType (192)
+#define SOAP_TYPE_ICat4_PointerTons1__parameterValueType (217)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__parameterValueType(struct soap*, enum ns1__parameterValueType *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__parameterValueType(struct soap*, const char *, int, enum ns1__parameterValueType *const*, const char *);
@@ -4191,7 +5638,7 @@ SOAP_FMAC3 enum ns1__parameterValueType ** SOAP_FMAC4 soap_get_PointerTons1__par
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__permissibleStringValue
-#define SOAP_TYPE_ICat4_PointerTons1__permissibleStringValue (189)
+#define SOAP_TYPE_ICat4_PointerTons1__permissibleStringValue (214)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__permissibleStringValue(struct soap*, ns1__permissibleStringValue *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__permissibleStringValue(struct soap*, const char *, int, ns1__permissibleStringValue *const*, const char *);
@@ -4210,7 +5657,7 @@ SOAP_FMAC3 ns1__permissibleStringValue ** SOAP_FMAC4 soap_get_PointerTons1__perm
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTodouble
-#define SOAP_TYPE_ICat4_PointerTodouble (188)
+#define SOAP_TYPE_ICat4_PointerTodouble (213)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTodouble(struct soap*, double *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTodouble(struct soap*, const char *, int, double *const*, const char *);
@@ -4229,7 +5676,7 @@ SOAP_FMAC3 double ** SOAP_FMAC4 soap_get_PointerTodouble(struct soap*, double **
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__rule
-#define SOAP_TYPE_ICat4_PointerTons1__rule (186)
+#define SOAP_TYPE_ICat4_PointerTons1__rule (211)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__rule(struct soap*, ns1__rule *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__rule(struct soap*, const char *, int, ns1__rule *const*, const char *);
@@ -4247,27 +5694,8 @@ SOAP_FMAC3 ns1__rule ** SOAP_FMAC4 soap_get_PointerTons1__rule(struct soap*, ns1
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__investigationParameter
-#define SOAP_TYPE_ICat4_PointerTons1__investigationParameter (177)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigationParameter(struct soap*, ns1__investigationParameter *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigationParameter(struct soap*, const char *, int, ns1__investigationParameter *const*, const char *);
-SOAP_FMAC3 ns1__investigationParameter ** SOAP_FMAC4 soap_in_PointerTons1__investigationParameter(struct soap*, const char*, ns1__investigationParameter **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__investigationParameter(struct soap*, ns1__investigationParameter *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__investigationParameter
-#define soap_write_PointerTons1__investigationParameter(soap, data) ( ICat4::soap_serialize_PointerTons1__investigationParameter(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__investigationParameter(soap, data, "ns1:investigationParameter", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__investigationParameter ** SOAP_FMAC4 soap_get_PointerTons1__investigationParameter(struct soap*, ns1__investigationParameter **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__investigationParameter
-#define soap_read_PointerTons1__investigationParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__investigationParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
 #ifndef SOAP_TYPE_ICat4_PointerTons1__sampleType
-#define SOAP_TYPE_ICat4_PointerTons1__sampleType (168)
+#define SOAP_TYPE_ICat4_PointerTons1__sampleType (206)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__sampleType(struct soap*, ns1__sampleType *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__sampleType(struct soap*, const char *, int, ns1__sampleType *const*, const char *);
@@ -4285,27 +5713,65 @@ SOAP_FMAC3 ns1__sampleType ** SOAP_FMAC4 soap_get_PointerTons1__sampleType(struc
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerToxsd__anyType
-#define SOAP_TYPE_ICat4_PointerToxsd__anyType (154)
+#ifndef SOAP_TYPE_ICat4_PointerTons1__investigationParameter
+#define SOAP_TYPE_ICat4_PointerTons1__investigationParameter (192)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToxsd__anyType(struct soap*, xsd__anyType *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToxsd__anyType(struct soap*, const char *, int, xsd__anyType *const*, const char *);
-SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_in_PointerToxsd__anyType(struct soap*, const char*, xsd__anyType **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToxsd__anyType(struct soap*, xsd__anyType *const*, const char*, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigationParameter(struct soap*, ns1__investigationParameter *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigationParameter(struct soap*, const char *, int, ns1__investigationParameter *const*, const char *);
+SOAP_FMAC3 ns1__investigationParameter ** SOAP_FMAC4 soap_in_PointerTons1__investigationParameter(struct soap*, const char*, ns1__investigationParameter **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__investigationParameter(struct soap*, ns1__investigationParameter *const*, const char*, const char*);
 
-#ifndef soap_write_PointerToxsd__anyType
-#define soap_write_PointerToxsd__anyType(soap, data) ( ICat4::soap_serialize_PointerToxsd__anyType(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerToxsd__anyType(soap, data, "xsd:anyType", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_write_PointerTons1__investigationParameter
+#define soap_write_PointerTons1__investigationParameter(soap, data) ( ICat4::soap_serialize_PointerTons1__investigationParameter(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__investigationParameter(soap, data, "ns1:investigationParameter", NULL) || soap_end_send(soap), soap->error )
 #endif
 
-SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_get_PointerToxsd__anyType(struct soap*, xsd__anyType **, const char*, const char*);
+SOAP_FMAC3 ns1__investigationParameter ** SOAP_FMAC4 soap_get_PointerTons1__investigationParameter(struct soap*, ns1__investigationParameter **, const char*, const char*);
 
-#ifndef soap_read_PointerToxsd__anyType
-#define soap_read_PointerToxsd__anyType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerToxsd__anyType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_PointerTons1__investigationParameter
+#define soap_read_PointerTons1__investigationParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__investigationParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__investigationInstrument
+#define SOAP_TYPE_ICat4_PointerTons1__investigationInstrument (188)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigationInstrument(struct soap*, ns1__investigationInstrument *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigationInstrument(struct soap*, const char *, int, ns1__investigationInstrument *const*, const char *);
+SOAP_FMAC3 ns1__investigationInstrument ** SOAP_FMAC4 soap_in_PointerTons1__investigationInstrument(struct soap*, const char*, ns1__investigationInstrument **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__investigationInstrument(struct soap*, ns1__investigationInstrument *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__investigationInstrument
+#define soap_write_PointerTons1__investigationInstrument(soap, data) ( ICat4::soap_serialize_PointerTons1__investigationInstrument(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__investigationInstrument(soap, data, "ns1:investigationInstrument", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__investigationInstrument ** SOAP_FMAC4 soap_get_PointerTons1__investigationInstrument(struct soap*, ns1__investigationInstrument **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__investigationInstrument
+#define soap_read_PointerTons1__investigationInstrument(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__investigationInstrument(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__accessType
+#define SOAP_TYPE_ICat4_PointerTons1__accessType (178)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__accessType(struct soap*, enum ns1__accessType *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__accessType(struct soap*, const char *, int, enum ns1__accessType *const*, const char *);
+SOAP_FMAC3 enum ns1__accessType ** SOAP_FMAC4 soap_in_PointerTons1__accessType(struct soap*, const char*, enum ns1__accessType **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__accessType(struct soap*, enum ns1__accessType *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__accessType
+#define soap_write_PointerTons1__accessType(soap, data) ( ICat4::soap_serialize_PointerTons1__accessType(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__accessType(soap, data, "ns1:accessType", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 enum ns1__accessType ** SOAP_FMAC4 soap_get_PointerTons1__accessType(struct soap*, enum ns1__accessType **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__accessType
+#define soap_read_PointerTons1__accessType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__accessType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
 
 #ifndef SOAP_TYPE_ICat4_PointerToint
-#define SOAP_TYPE_ICat4_PointerToint (153)
+#define SOAP_TYPE_ICat4_PointerToint (177)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToint(struct soap*, int *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToint(struct soap*, const char *, int, int *const*, const char *);
@@ -4324,7 +5790,7 @@ SOAP_FMAC3 int ** SOAP_FMAC4 soap_get_PointerToint(struct soap*, int **, const c
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__relType
-#define SOAP_TYPE_ICat4_PointerTons1__relType (152)
+#define SOAP_TYPE_ICat4_PointerTons1__relType (176)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__relType(struct soap*, enum ns1__relType *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__relType(struct soap*, const char *, int, enum ns1__relType *const*, const char *);
@@ -4342,27 +5808,8 @@ SOAP_FMAC3 enum ns1__relType ** SOAP_FMAC4 soap_get_PointerTons1__relType(struct
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTobool
-#define SOAP_TYPE_ICat4_PointerTobool (151)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTobool(struct soap*, bool *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTobool(struct soap*, const char *, int, bool *const*, const char *);
-SOAP_FMAC3 bool ** SOAP_FMAC4 soap_in_PointerTobool(struct soap*, const char*, bool **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTobool(struct soap*, bool *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTobool
-#define soap_write_PointerTobool(soap, data) ( ICat4::soap_serialize_PointerTobool(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTobool(soap, data, "boolean", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 bool ** SOAP_FMAC4 soap_get_PointerTobool(struct soap*, bool **, const char*, const char*);
-
-#ifndef soap_read_PointerTobool
-#define soap_read_PointerTobool(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTobool(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
 #ifndef SOAP_TYPE_ICat4_PointerTons1__entityField
-#define SOAP_TYPE_ICat4_PointerTons1__entityField (148)
+#define SOAP_TYPE_ICat4_PointerTons1__entityField (174)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__entityField(struct soap*, ns1__entityField *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__entityField(struct soap*, const char *, int, ns1__entityField *const*, const char *);
@@ -4381,7 +5828,7 @@ SOAP_FMAC3 ns1__entityField ** SOAP_FMAC4 soap_get_PointerTons1__entityField(str
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__constraint
-#define SOAP_TYPE_ICat4_PointerTons1__constraint (146)
+#define SOAP_TYPE_ICat4_PointerTons1__constraint (172)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__constraint(struct soap*, ns1__constraint *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__constraint(struct soap*, const char *, int, ns1__constraint *const*, const char *);
@@ -4400,7 +5847,7 @@ SOAP_FMAC3 ns1__constraint ** SOAP_FMAC4 soap_get_PointerTons1__constraint(struc
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__entityInfo
-#define SOAP_TYPE_ICat4_PointerTons1__entityInfo (145)
+#define SOAP_TYPE_ICat4_PointerTons1__entityInfo (171)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__entityInfo(struct soap*, ns1__entityInfo *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__entityInfo(struct soap*, const char *, int, ns1__entityInfo *const*, const char *);
@@ -4418,8 +5865,84 @@ SOAP_FMAC3 ns1__entityInfo ** SOAP_FMAC4 soap_get_PointerTons1__entityInfo(struc
 #endif
 
 
+#ifndef SOAP_TYPE_ICat4_PointerToxsd__anyType
+#define SOAP_TYPE_ICat4_PointerToxsd__anyType (169)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToxsd__anyType(struct soap*, xsd__anyType *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToxsd__anyType(struct soap*, const char *, int, xsd__anyType *const*, const char *);
+SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_in_PointerToxsd__anyType(struct soap*, const char*, xsd__anyType **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerToxsd__anyType(struct soap*, xsd__anyType *const*, const char*, const char*);
+
+#ifndef soap_write_PointerToxsd__anyType
+#define soap_write_PointerToxsd__anyType(soap, data) ( ICat4::soap_serialize_PointerToxsd__anyType(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerToxsd__anyType(soap, data, "xsd:anyType", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 xsd__anyType ** SOAP_FMAC4 soap_get_PointerToxsd__anyType(struct soap*, xsd__anyType **, const char*, const char*);
+
+#ifndef soap_read_PointerToxsd__anyType
+#define soap_read_PointerToxsd__anyType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerToxsd__anyType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry
+#define SOAP_TYPE_ICat4_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry (168)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, std::vector<_ns1__login_credentials_entry >*const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, const char *, int, std::vector<_ns1__login_credentials_entry >*const*, const char *);
+SOAP_FMAC3 std::vector<_ns1__login_credentials_entry >** SOAP_FMAC4 soap_in_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, const char*, std::vector<_ns1__login_credentials_entry >**, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, std::vector<_ns1__login_credentials_entry >*const*, const char*, const char*);
+
+#ifndef soap_write_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry
+#define soap_write_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data) ( ICat4::soap_serialize_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data, "", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 std::vector<_ns1__login_credentials_entry >** SOAP_FMAC4 soap_get_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, std::vector<_ns1__login_credentials_entry >**, const char*, const char*);
+
+#ifndef soap_read_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry
+#define soap_read_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__publicStep
+#define SOAP_TYPE_ICat4_PointerTons1__publicStep (164)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__publicStep(struct soap*, ns1__publicStep *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__publicStep(struct soap*, const char *, int, ns1__publicStep *const*, const char *);
+SOAP_FMAC3 ns1__publicStep ** SOAP_FMAC4 soap_in_PointerTons1__publicStep(struct soap*, const char*, ns1__publicStep **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__publicStep(struct soap*, ns1__publicStep *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__publicStep
+#define soap_write_PointerTons1__publicStep(soap, data) ( ICat4::soap_serialize_PointerTons1__publicStep(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__publicStep(soap, data, "ns1:publicStep", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__publicStep ** SOAP_FMAC4 soap_get_PointerTons1__publicStep(struct soap*, ns1__publicStep **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__publicStep
+#define soap_read_PointerTons1__publicStep(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__publicStep(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__log
+#define SOAP_TYPE_ICat4_PointerTons1__log (163)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__log(struct soap*, ns1__log *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__log(struct soap*, const char *, int, ns1__log *const*, const char *);
+SOAP_FMAC3 ns1__log ** SOAP_FMAC4 soap_in_PointerTons1__log(struct soap*, const char*, ns1__log **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__log(struct soap*, ns1__log *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__log
+#define soap_write_PointerTons1__log(soap, data) ( ICat4::soap_serialize_PointerTons1__log(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__log(soap, data, "ns1:log", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__log ** SOAP_FMAC4 soap_get_PointerTons1__log(struct soap*, ns1__log **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__log
+#define soap_read_PointerTons1__log(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__log(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
 #ifndef SOAP_TYPE_ICat4_PointerTons1__userGroup
-#define SOAP_TYPE_ICat4_PointerTons1__userGroup (144)
+#define SOAP_TYPE_ICat4_PointerTons1__userGroup (162)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__userGroup(struct soap*, ns1__userGroup *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__userGroup(struct soap*, const char *, int, ns1__userGroup *const*, const char *);
@@ -4437,122 +5960,103 @@ SOAP_FMAC3 ns1__userGroup ** SOAP_FMAC4 soap_get_PointerTons1__userGroup(struct 
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__group
-#define SOAP_TYPE_ICat4_PointerTons1__group (143)
+#ifndef SOAP_TYPE_ICat4_PointerTons1__grouping
+#define SOAP_TYPE_ICat4_PointerTons1__grouping (161)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__group(struct soap*, ns1__group *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__group(struct soap*, const char *, int, ns1__group *const*, const char *);
-SOAP_FMAC3 ns1__group ** SOAP_FMAC4 soap_in_PointerTons1__group(struct soap*, const char*, ns1__group **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__group(struct soap*, ns1__group *const*, const char*, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__grouping(struct soap*, ns1__grouping *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__grouping(struct soap*, const char *, int, ns1__grouping *const*, const char *);
+SOAP_FMAC3 ns1__grouping ** SOAP_FMAC4 soap_in_PointerTons1__grouping(struct soap*, const char*, ns1__grouping **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__grouping(struct soap*, ns1__grouping *const*, const char*, const char*);
 
-#ifndef soap_write_PointerTons1__group
-#define soap_write_PointerTons1__group(soap, data) ( ICat4::soap_serialize_PointerTons1__group(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__group(soap, data, "ns1:group", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__group ** SOAP_FMAC4 soap_get_PointerTons1__group(struct soap*, ns1__group **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__group
-#define soap_read_PointerTons1__group(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__group(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_write_PointerTons1__grouping
+#define soap_write_PointerTons1__grouping(soap, data) ( ICat4::soap_serialize_PointerTons1__grouping(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__grouping(soap, data, "ns1:grouping", NULL) || soap_end_send(soap), soap->error )
 #endif
 
+SOAP_FMAC3 ns1__grouping ** SOAP_FMAC4 soap_get_PointerTons1__grouping(struct soap*, ns1__grouping **, const char*, const char*);
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__notificationRequest
-#define SOAP_TYPE_ICat4_PointerTons1__notificationRequest (142)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__notificationRequest(struct soap*, ns1__notificationRequest *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__notificationRequest(struct soap*, const char *, int, ns1__notificationRequest *const*, const char *);
-SOAP_FMAC3 ns1__notificationRequest ** SOAP_FMAC4 soap_in_PointerTons1__notificationRequest(struct soap*, const char*, ns1__notificationRequest **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__notificationRequest(struct soap*, ns1__notificationRequest *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__notificationRequest
-#define soap_write_PointerTons1__notificationRequest(soap, data) ( ICat4::soap_serialize_PointerTons1__notificationRequest(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__notificationRequest(soap, data, "ns1:notificationRequest", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__notificationRequest ** SOAP_FMAC4 soap_get_PointerTons1__notificationRequest(struct soap*, ns1__notificationRequest **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__notificationRequest
-#define soap_read_PointerTons1__notificationRequest(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__notificationRequest(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_PointerTons1__grouping
+#define soap_read_PointerTons1__grouping(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__grouping(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__outputDatafile
-#define SOAP_TYPE_ICat4_PointerTons1__outputDatafile (141)
+#ifndef SOAP_TYPE_ICat4_PointerTons1__dataCollectionDatafile
+#define SOAP_TYPE_ICat4_PointerTons1__dataCollectionDatafile (160)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__outputDatafile(struct soap*, ns1__outputDatafile *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__outputDatafile(struct soap*, const char *, int, ns1__outputDatafile *const*, const char *);
-SOAP_FMAC3 ns1__outputDatafile ** SOAP_FMAC4 soap_in_PointerTons1__outputDatafile(struct soap*, const char*, ns1__outputDatafile **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__outputDatafile(struct soap*, ns1__outputDatafile *const*, const char*, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dataCollectionDatafile(struct soap*, ns1__dataCollectionDatafile *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dataCollectionDatafile(struct soap*, const char *, int, ns1__dataCollectionDatafile *const*, const char *);
+SOAP_FMAC3 ns1__dataCollectionDatafile ** SOAP_FMAC4 soap_in_PointerTons1__dataCollectionDatafile(struct soap*, const char*, ns1__dataCollectionDatafile **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dataCollectionDatafile(struct soap*, ns1__dataCollectionDatafile *const*, const char*, const char*);
 
-#ifndef soap_write_PointerTons1__outputDatafile
-#define soap_write_PointerTons1__outputDatafile(soap, data) ( ICat4::soap_serialize_PointerTons1__outputDatafile(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__outputDatafile(soap, data, "ns1:outputDatafile", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__outputDatafile ** SOAP_FMAC4 soap_get_PointerTons1__outputDatafile(struct soap*, ns1__outputDatafile **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__outputDatafile
-#define soap_read_PointerTons1__outputDatafile(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__outputDatafile(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_write_PointerTons1__dataCollectionDatafile
+#define soap_write_PointerTons1__dataCollectionDatafile(soap, data) ( ICat4::soap_serialize_PointerTons1__dataCollectionDatafile(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__dataCollectionDatafile(soap, data, "ns1:dataCollectionDatafile", NULL) || soap_end_send(soap), soap->error )
 #endif
 
+SOAP_FMAC3 ns1__dataCollectionDatafile ** SOAP_FMAC4 soap_get_PointerTons1__dataCollectionDatafile(struct soap*, ns1__dataCollectionDatafile **, const char*, const char*);
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__inputDatafile
-#define SOAP_TYPE_ICat4_PointerTons1__inputDatafile (140)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__inputDatafile(struct soap*, ns1__inputDatafile *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__inputDatafile(struct soap*, const char *, int, ns1__inputDatafile *const*, const char *);
-SOAP_FMAC3 ns1__inputDatafile ** SOAP_FMAC4 soap_in_PointerTons1__inputDatafile(struct soap*, const char*, ns1__inputDatafile **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__inputDatafile(struct soap*, ns1__inputDatafile *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__inputDatafile
-#define soap_write_PointerTons1__inputDatafile(soap, data) ( ICat4::soap_serialize_PointerTons1__inputDatafile(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__inputDatafile(soap, data, "ns1:inputDatafile", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__inputDatafile ** SOAP_FMAC4 soap_get_PointerTons1__inputDatafile(struct soap*, ns1__inputDatafile **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__inputDatafile
-#define soap_read_PointerTons1__inputDatafile(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__inputDatafile(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_read_PointerTons1__dataCollectionDatafile
+#define soap_read_PointerTons1__dataCollectionDatafile(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__dataCollectionDatafile(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__outputDataset
-#define SOAP_TYPE_ICat4_PointerTons1__outputDataset (139)
+#ifndef SOAP_TYPE_ICat4_PointerTons1__dataCollectionDataset
+#define SOAP_TYPE_ICat4_PointerTons1__dataCollectionDataset (159)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__outputDataset(struct soap*, ns1__outputDataset *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__outputDataset(struct soap*, const char *, int, ns1__outputDataset *const*, const char *);
-SOAP_FMAC3 ns1__outputDataset ** SOAP_FMAC4 soap_in_PointerTons1__outputDataset(struct soap*, const char*, ns1__outputDataset **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__outputDataset(struct soap*, ns1__outputDataset *const*, const char*, const char*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dataCollectionDataset(struct soap*, ns1__dataCollectionDataset *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dataCollectionDataset(struct soap*, const char *, int, ns1__dataCollectionDataset *const*, const char *);
+SOAP_FMAC3 ns1__dataCollectionDataset ** SOAP_FMAC4 soap_in_PointerTons1__dataCollectionDataset(struct soap*, const char*, ns1__dataCollectionDataset **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dataCollectionDataset(struct soap*, ns1__dataCollectionDataset *const*, const char*, const char*);
 
-#ifndef soap_write_PointerTons1__outputDataset
-#define soap_write_PointerTons1__outputDataset(soap, data) ( ICat4::soap_serialize_PointerTons1__outputDataset(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__outputDataset(soap, data, "ns1:outputDataset", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 ns1__outputDataset ** SOAP_FMAC4 soap_get_PointerTons1__outputDataset(struct soap*, ns1__outputDataset **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__outputDataset
-#define soap_read_PointerTons1__outputDataset(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__outputDataset(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef soap_write_PointerTons1__dataCollectionDataset
+#define soap_write_PointerTons1__dataCollectionDataset(soap, data) ( ICat4::soap_serialize_PointerTons1__dataCollectionDataset(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__dataCollectionDataset(soap, data, "ns1:dataCollectionDataset", NULL) || soap_end_send(soap), soap->error )
 #endif
 
+SOAP_FMAC3 ns1__dataCollectionDataset ** SOAP_FMAC4 soap_get_PointerTons1__dataCollectionDataset(struct soap*, ns1__dataCollectionDataset **, const char*, const char*);
 
-#ifndef SOAP_TYPE_ICat4_PointerTons1__inputDataset
-#define SOAP_TYPE_ICat4_PointerTons1__inputDataset (138)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__inputDataset(struct soap*, ns1__inputDataset *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__inputDataset(struct soap*, const char *, int, ns1__inputDataset *const*, const char *);
-SOAP_FMAC3 ns1__inputDataset ** SOAP_FMAC4 soap_in_PointerTons1__inputDataset(struct soap*, const char*, ns1__inputDataset **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__inputDataset(struct soap*, ns1__inputDataset *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__inputDataset
-#define soap_write_PointerTons1__inputDataset(soap, data) ( ICat4::soap_serialize_PointerTons1__inputDataset(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__inputDataset(soap, data, "ns1:inputDataset", NULL) || soap_end_send(soap), soap->error )
+#ifndef soap_read_PointerTons1__dataCollectionDataset
+#define soap_read_PointerTons1__dataCollectionDataset(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__dataCollectionDataset(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
-SOAP_FMAC3 ns1__inputDataset ** SOAP_FMAC4 soap_get_PointerTons1__inputDataset(struct soap*, ns1__inputDataset **, const char*, const char*);
 
-#ifndef soap_read_PointerTons1__inputDataset
-#define soap_read_PointerTons1__inputDataset(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__inputDataset(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#ifndef SOAP_TYPE_ICat4_PointerTons1__dataCollectionParameter
+#define SOAP_TYPE_ICat4_PointerTons1__dataCollectionParameter (158)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dataCollectionParameter(struct soap*, ns1__dataCollectionParameter *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dataCollectionParameter(struct soap*, const char *, int, ns1__dataCollectionParameter *const*, const char *);
+SOAP_FMAC3 ns1__dataCollectionParameter ** SOAP_FMAC4 soap_in_PointerTons1__dataCollectionParameter(struct soap*, const char*, ns1__dataCollectionParameter **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dataCollectionParameter(struct soap*, ns1__dataCollectionParameter *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__dataCollectionParameter
+#define soap_write_PointerTons1__dataCollectionParameter(soap, data) ( ICat4::soap_serialize_PointerTons1__dataCollectionParameter(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__dataCollectionParameter(soap, data, "ns1:dataCollectionParameter", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dataCollectionParameter ** SOAP_FMAC4 soap_get_PointerTons1__dataCollectionParameter(struct soap*, ns1__dataCollectionParameter **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__dataCollectionParameter
+#define soap_read_PointerTons1__dataCollectionParameter(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__dataCollectionParameter(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
+#ifndef SOAP_TYPE_ICat4_PointerTons1__dataCollection
+#define SOAP_TYPE_ICat4_PointerTons1__dataCollection (157)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dataCollection(struct soap*, ns1__dataCollection *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dataCollection(struct soap*, const char *, int, ns1__dataCollection *const*, const char *);
+SOAP_FMAC3 ns1__dataCollection ** SOAP_FMAC4 soap_in_PointerTons1__dataCollection(struct soap*, const char*, ns1__dataCollection **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__dataCollection(struct soap*, ns1__dataCollection *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__dataCollection
+#define soap_write_PointerTons1__dataCollection(soap, data) ( ICat4::soap_serialize_PointerTons1__dataCollection(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__dataCollection(soap, data, "ns1:dataCollection", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 ns1__dataCollection ** SOAP_FMAC4 soap_get_PointerTons1__dataCollection(struct soap*, ns1__dataCollection **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__dataCollection
+#define soap_read_PointerTons1__dataCollection(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__dataCollection(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
 #endif
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__job
-#define SOAP_TYPE_ICat4_PointerTons1__job (137)
+#define SOAP_TYPE_ICat4_PointerTons1__job (156)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__job(struct soap*, ns1__job *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__job(struct soap*, const char *, int, ns1__job *const*, const char *);
@@ -4571,7 +6075,7 @@ SOAP_FMAC3 ns1__job ** SOAP_FMAC4 soap_get_PointerTons1__job(struct soap*, ns1__
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__application
-#define SOAP_TYPE_ICat4_PointerTons1__application (136)
+#define SOAP_TYPE_ICat4_PointerTons1__application (155)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__application(struct soap*, ns1__application *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__application(struct soap*, const char *, int, ns1__application *const*, const char *);
@@ -4590,7 +6094,7 @@ SOAP_FMAC3 ns1__application ** SOAP_FMAC4 soap_get_PointerTons1__application(str
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__studyStatus
-#define SOAP_TYPE_ICat4_PointerTons1__studyStatus (135)
+#define SOAP_TYPE_ICat4_PointerTons1__studyStatus (154)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__studyStatus(struct soap*, enum ns1__studyStatus *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__studyStatus(struct soap*, const char *, int, enum ns1__studyStatus *const*, const char *);
@@ -4609,7 +6113,7 @@ SOAP_FMAC3 enum ns1__studyStatus ** SOAP_FMAC4 soap_get_PointerTons1__studyStatu
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__studyInvestigation
-#define SOAP_TYPE_ICat4_PointerTons1__studyInvestigation (134)
+#define SOAP_TYPE_ICat4_PointerTons1__studyInvestigation (153)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__studyInvestigation(struct soap*, ns1__studyInvestigation *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__studyInvestigation(struct soap*, const char *, int, ns1__studyInvestigation *const*, const char *);
@@ -4628,7 +6132,7 @@ SOAP_FMAC3 ns1__studyInvestigation ** SOAP_FMAC4 soap_get_PointerTons1__studyInv
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__study
-#define SOAP_TYPE_ICat4_PointerTons1__study (133)
+#define SOAP_TYPE_ICat4_PointerTons1__study (152)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__study(struct soap*, ns1__study *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__study(struct soap*, const char *, int, ns1__study *const*, const char *);
@@ -4647,7 +6151,7 @@ SOAP_FMAC3 ns1__study ** SOAP_FMAC4 soap_get_PointerTons1__study(struct soap*, n
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__shift
-#define SOAP_TYPE_ICat4_PointerTons1__shift (132)
+#define SOAP_TYPE_ICat4_PointerTons1__shift (151)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__shift(struct soap*, ns1__shift *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__shift(struct soap*, const char *, int, ns1__shift *const*, const char *);
@@ -4666,7 +6170,7 @@ SOAP_FMAC3 ns1__shift ** SOAP_FMAC4 soap_get_PointerTons1__shift(struct soap*, n
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__sampleParameter
-#define SOAP_TYPE_ICat4_PointerTons1__sampleParameter (131)
+#define SOAP_TYPE_ICat4_PointerTons1__sampleParameter (150)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__sampleParameter(struct soap*, ns1__sampleParameter *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__sampleParameter(struct soap*, const char *, int, ns1__sampleParameter *const*, const char *);
@@ -4685,7 +6189,7 @@ SOAP_FMAC3 ns1__sampleParameter ** SOAP_FMAC4 soap_get_PointerTons1__sampleParam
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__sample
-#define SOAP_TYPE_ICat4_PointerTons1__sample (130)
+#define SOAP_TYPE_ICat4_PointerTons1__sample (149)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__sample(struct soap*, ns1__sample *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__sample(struct soap*, const char *, int, ns1__sample *const*, const char *);
@@ -4704,7 +6208,7 @@ SOAP_FMAC3 ns1__sample ** SOAP_FMAC4 soap_get_PointerTons1__sample(struct soap*,
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__relatedDatafile
-#define SOAP_TYPE_ICat4_PointerTons1__relatedDatafile (129)
+#define SOAP_TYPE_ICat4_PointerTons1__relatedDatafile (148)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__relatedDatafile(struct soap*, ns1__relatedDatafile *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__relatedDatafile(struct soap*, const char *, int, ns1__relatedDatafile *const*, const char *);
@@ -4723,7 +6227,7 @@ SOAP_FMAC3 ns1__relatedDatafile ** SOAP_FMAC4 soap_get_PointerTons1__relatedData
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__publication
-#define SOAP_TYPE_ICat4_PointerTons1__publication (128)
+#define SOAP_TYPE_ICat4_PointerTons1__publication (147)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__publication(struct soap*, ns1__publication *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__publication(struct soap*, const char *, int, ns1__publication *const*, const char *);
@@ -4742,7 +6246,7 @@ SOAP_FMAC3 ns1__publication ** SOAP_FMAC4 soap_get_PointerTons1__publication(str
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__parameterType
-#define SOAP_TYPE_ICat4_PointerTons1__parameterType (127)
+#define SOAP_TYPE_ICat4_PointerTons1__parameterType (146)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__parameterType(struct soap*, ns1__parameterType *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__parameterType(struct soap*, const char *, int, ns1__parameterType *const*, const char *);
@@ -4761,7 +6265,7 @@ SOAP_FMAC3 ns1__parameterType ** SOAP_FMAC4 soap_get_PointerTons1__parameterType
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__keyword
-#define SOAP_TYPE_ICat4_PointerTons1__keyword (126)
+#define SOAP_TYPE_ICat4_PointerTons1__keyword (145)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__keyword(struct soap*, ns1__keyword *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__keyword(struct soap*, const char *, int, ns1__keyword *const*, const char *);
@@ -4780,7 +6284,7 @@ SOAP_FMAC3 ns1__keyword ** SOAP_FMAC4 soap_get_PointerTons1__keyword(struct soap
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__investigationUser
-#define SOAP_TYPE_ICat4_PointerTons1__investigationUser (125)
+#define SOAP_TYPE_ICat4_PointerTons1__investigationUser (144)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigationUser(struct soap*, ns1__investigationUser *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigationUser(struct soap*, const char *, int, ns1__investigationUser *const*, const char *);
@@ -4799,7 +6303,7 @@ SOAP_FMAC3 ns1__investigationUser ** SOAP_FMAC4 soap_get_PointerTons1__investiga
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__investigationType
-#define SOAP_TYPE_ICat4_PointerTons1__investigationType (124)
+#define SOAP_TYPE_ICat4_PointerTons1__investigationType (143)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigationType(struct soap*, ns1__investigationType *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigationType(struct soap*, const char *, int, ns1__investigationType *const*, const char *);
@@ -4818,7 +6322,7 @@ SOAP_FMAC3 ns1__investigationType ** SOAP_FMAC4 soap_get_PointerTons1__investiga
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__investigation
-#define SOAP_TYPE_ICat4_PointerTons1__investigation (123)
+#define SOAP_TYPE_ICat4_PointerTons1__investigation (142)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__investigation(struct soap*, ns1__investigation *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__investigation(struct soap*, const char *, int, ns1__investigation *const*, const char *);
@@ -4837,7 +6341,7 @@ SOAP_FMAC3 ns1__investigation ** SOAP_FMAC4 soap_get_PointerTons1__investigation
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__instrument
-#define SOAP_TYPE_ICat4_PointerTons1__instrument (122)
+#define SOAP_TYPE_ICat4_PointerTons1__instrument (141)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__instrument(struct soap*, ns1__instrument *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__instrument(struct soap*, const char *, int, ns1__instrument *const*, const char *);
@@ -4856,7 +6360,7 @@ SOAP_FMAC3 ns1__instrument ** SOAP_FMAC4 soap_get_PointerTons1__instrument(struc
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__user
-#define SOAP_TYPE_ICat4_PointerTons1__user (121)
+#define SOAP_TYPE_ICat4_PointerTons1__user (140)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__user(struct soap*, ns1__user *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__user(struct soap*, const char *, int, ns1__user *const*, const char *);
@@ -4875,7 +6379,7 @@ SOAP_FMAC3 ns1__user ** SOAP_FMAC4 soap_get_PointerTons1__user(struct soap*, ns1
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__instrumentScientist
-#define SOAP_TYPE_ICat4_PointerTons1__instrumentScientist (120)
+#define SOAP_TYPE_ICat4_PointerTons1__instrumentScientist (139)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__instrumentScientist(struct soap*, ns1__instrumentScientist *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__instrumentScientist(struct soap*, const char *, int, ns1__instrumentScientist *const*, const char *);
@@ -4894,7 +6398,7 @@ SOAP_FMAC3 ns1__instrumentScientist ** SOAP_FMAC4 soap_get_PointerTons1__instrum
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__facilityCycle
-#define SOAP_TYPE_ICat4_PointerTons1__facilityCycle (119)
+#define SOAP_TYPE_ICat4_PointerTons1__facilityCycle (138)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__facilityCycle(struct soap*, ns1__facilityCycle *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__facilityCycle(struct soap*, const char *, int, ns1__facilityCycle *const*, const char *);
@@ -4913,7 +6417,7 @@ SOAP_FMAC3 ns1__facilityCycle ** SOAP_FMAC4 soap_get_PointerTons1__facilityCycle
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__facility
-#define SOAP_TYPE_ICat4_PointerTons1__facility (118)
+#define SOAP_TYPE_ICat4_PointerTons1__facility (137)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__facility(struct soap*, ns1__facility *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__facility(struct soap*, const char *, int, ns1__facility *const*, const char *);
@@ -4932,7 +6436,7 @@ SOAP_FMAC3 ns1__facility ** SOAP_FMAC4 soap_get_PointerTons1__facility(struct so
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__datasetType
-#define SOAP_TYPE_ICat4_PointerTons1__datasetType (117)
+#define SOAP_TYPE_ICat4_PointerTons1__datasetType (136)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datasetType(struct soap*, ns1__datasetType *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datasetType(struct soap*, const char *, int, ns1__datasetType *const*, const char *);
@@ -4951,7 +6455,7 @@ SOAP_FMAC3 ns1__datasetType ** SOAP_FMAC4 soap_get_PointerTons1__datasetType(str
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__datasetParameter
-#define SOAP_TYPE_ICat4_PointerTons1__datasetParameter (116)
+#define SOAP_TYPE_ICat4_PointerTons1__datasetParameter (135)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datasetParameter(struct soap*, ns1__datasetParameter *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datasetParameter(struct soap*, const char *, int, ns1__datasetParameter *const*, const char *);
@@ -4970,7 +6474,7 @@ SOAP_FMAC3 ns1__datasetParameter ** SOAP_FMAC4 soap_get_PointerTons1__datasetPar
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__dataset
-#define SOAP_TYPE_ICat4_PointerTons1__dataset (115)
+#define SOAP_TYPE_ICat4_PointerTons1__dataset (134)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__dataset(struct soap*, ns1__dataset *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__dataset(struct soap*, const char *, int, ns1__dataset *const*, const char *);
@@ -4989,7 +6493,7 @@ SOAP_FMAC3 ns1__dataset ** SOAP_FMAC4 soap_get_PointerTons1__dataset(struct soap
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__datafileParameter
-#define SOAP_TYPE_ICat4_PointerTons1__datafileParameter (114)
+#define SOAP_TYPE_ICat4_PointerTons1__datafileParameter (133)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datafileParameter(struct soap*, ns1__datafileParameter *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datafileParameter(struct soap*, const char *, int, ns1__datafileParameter *const*, const char *);
@@ -5008,7 +6512,7 @@ SOAP_FMAC3 ns1__datafileParameter ** SOAP_FMAC4 soap_get_PointerTons1__datafileP
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__datafileFormat
-#define SOAP_TYPE_ICat4_PointerTons1__datafileFormat (113)
+#define SOAP_TYPE_ICat4_PointerTons1__datafileFormat (132)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datafileFormat(struct soap*, ns1__datafileFormat *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datafileFormat(struct soap*, const char *, int, ns1__datafileFormat *const*, const char *);
@@ -5027,7 +6531,7 @@ SOAP_FMAC3 ns1__datafileFormat ** SOAP_FMAC4 soap_get_PointerTons1__datafileForm
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__datafile
-#define SOAP_TYPE_ICat4_PointerTons1__datafile (112)
+#define SOAP_TYPE_ICat4_PointerTons1__datafile (131)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__datafile(struct soap*, ns1__datafile *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__datafile(struct soap*, const char *, int, ns1__datafile *const*, const char *);
@@ -5045,46 +6549,8 @@ SOAP_FMAC3 ns1__datafile ** SOAP_FMAC4 soap_get_PointerTons1__datafile(struct so
 #endif
 
 
-#ifndef SOAP_TYPE_ICat4_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry
-#define SOAP_TYPE_ICat4_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry (111)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, std::vector<_ns1__login_credentials_entry >*const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, const char *, int, std::vector<_ns1__login_credentials_entry >*const*, const char *);
-SOAP_FMAC3 std::vector<_ns1__login_credentials_entry >** SOAP_FMAC4 soap_in_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, const char*, std::vector<_ns1__login_credentials_entry >**, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, std::vector<_ns1__login_credentials_entry >*const*, const char*, const char*);
-
-#ifndef soap_write_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry
-#define soap_write_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data) ( ICat4::soap_serialize_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data, "", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 std::vector<_ns1__login_credentials_entry >** SOAP_FMAC4 soap_get_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, std::vector<_ns1__login_credentials_entry >**, const char*, const char*);
-
-#ifndef soap_read_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry
-#define soap_read_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTostd__vectorTemplateOf_ns1__login_credentials_entry(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
-#ifndef SOAP_TYPE_ICat4_PointerTons1__icatExceptionType
-#define SOAP_TYPE_ICat4_PointerTons1__icatExceptionType (107)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__icatExceptionType(struct soap*, enum ns1__icatExceptionType *const*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__icatExceptionType(struct soap*, const char *, int, enum ns1__icatExceptionType *const*, const char *);
-SOAP_FMAC3 enum ns1__icatExceptionType ** SOAP_FMAC4 soap_in_PointerTons1__icatExceptionType(struct soap*, const char*, enum ns1__icatExceptionType **, const char*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__icatExceptionType(struct soap*, enum ns1__icatExceptionType *const*, const char*, const char*);
-
-#ifndef soap_write_PointerTons1__icatExceptionType
-#define soap_write_PointerTons1__icatExceptionType(soap, data) ( ICat4::soap_serialize_PointerTons1__icatExceptionType(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__icatExceptionType(soap, data, "ns1:icatExceptionType", NULL) || soap_end_send(soap), soap->error )
-#endif
-
-SOAP_FMAC3 enum ns1__icatExceptionType ** SOAP_FMAC4 soap_get_PointerTons1__icatExceptionType(struct soap*, enum ns1__icatExceptionType **, const char*, const char*);
-
-#ifndef soap_read_PointerTons1__icatExceptionType
-#define soap_read_PointerTons1__icatExceptionType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__icatExceptionType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
-#endif
-
-
 #ifndef SOAP_TYPE_ICat4_PointerToLONG64
-#define SOAP_TYPE_ICat4_PointerToLONG64 (105)
+#define SOAP_TYPE_ICat4_PointerToLONG64 (128)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToLONG64(struct soap*, LONG64 *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToLONG64(struct soap*, const char *, int, LONG64 *const*, const char *);
@@ -5103,7 +6569,7 @@ SOAP_FMAC3 LONG64 ** SOAP_FMAC4 soap_get_PointerToLONG64(struct soap*, LONG64 **
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTotime
-#define SOAP_TYPE_ICat4_PointerTotime (104)
+#define SOAP_TYPE_ICat4_PointerTotime (127)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTotime(struct soap*, time_t *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTotime(struct soap*, const char *, int, time_t *const*, const char *);
@@ -5122,7 +6588,7 @@ SOAP_FMAC3 time_t ** SOAP_FMAC4 soap_get_PointerTotime(struct soap*, time_t **, 
 
 
 #ifndef SOAP_TYPE_ICat4_PointerTons1__entityBaseBean
-#define SOAP_TYPE_ICat4_PointerTons1__entityBaseBean (102)
+#define SOAP_TYPE_ICat4_PointerTons1__entityBaseBean (125)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__entityBaseBean(struct soap*, ns1__entityBaseBean *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__entityBaseBean(struct soap*, const char *, int, ns1__entityBaseBean *const*, const char *);
@@ -5140,8 +6606,27 @@ SOAP_FMAC3 ns1__entityBaseBean ** SOAP_FMAC4 soap_get_PointerTons1__entityBaseBe
 #endif
 
 
+#ifndef SOAP_TYPE_ICat4_PointerTons1__icatExceptionType
+#define SOAP_TYPE_ICat4_PointerTons1__icatExceptionType (124)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTons1__icatExceptionType(struct soap*, enum ns1__icatExceptionType *const*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTons1__icatExceptionType(struct soap*, const char *, int, enum ns1__icatExceptionType *const*, const char *);
+SOAP_FMAC3 enum ns1__icatExceptionType ** SOAP_FMAC4 soap_in_PointerTons1__icatExceptionType(struct soap*, const char*, enum ns1__icatExceptionType **, const char*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_PointerTons1__icatExceptionType(struct soap*, enum ns1__icatExceptionType *const*, const char*, const char*);
+
+#ifndef soap_write_PointerTons1__icatExceptionType
+#define soap_write_PointerTons1__icatExceptionType(soap, data) ( ICat4::soap_serialize_PointerTons1__icatExceptionType(soap, data), soap_begin_send(soap) || ICat4::soap_put_PointerTons1__icatExceptionType(soap, data, "ns1:icatExceptionType", NULL) || soap_end_send(soap), soap->error )
+#endif
+
+SOAP_FMAC3 enum ns1__icatExceptionType ** SOAP_FMAC4 soap_get_PointerTons1__icatExceptionType(struct soap*, enum ns1__icatExceptionType **, const char*, const char*);
+
+#ifndef soap_read_PointerTons1__icatExceptionType
+#define soap_read_PointerTons1__icatExceptionType(soap, data) ( soap_begin_recv(soap) || !ICat4::soap_get_PointerTons1__icatExceptionType(soap, data, NULL, NULL) || soap_end_recv(soap), soap->error )
+#endif
+
+
 #ifndef SOAP_TYPE_ICat4_PointerTostd__string
-#define SOAP_TYPE_ICat4_PointerTostd__string (101)
+#define SOAP_TYPE_ICat4_PointerTostd__string (123)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerTostd__string(struct soap*, std::string *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerTostd__string(struct soap*, const char *, int, std::string *const*, const char *);
@@ -5202,7 +6687,7 @@ SOAP_FMAC3 char ** SOAP_FMAC4 soap_get_string(struct soap*, char **, const char*
 
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleParameter
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleParameter (191)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleParameter (216)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__sampleParameter(struct soap*, std::vector<ns1__sampleParameter * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__sampleParameter(struct soap*, const std::vector<ns1__sampleParameter * >*);
@@ -5217,7 +6702,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__sampleParameter(struc
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__sampleParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__permissibleStringValue
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__permissibleStringValue (190)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__permissibleStringValue (215)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__permissibleStringValue(struct soap*, std::vector<ns1__permissibleStringValue * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__permissibleStringValue(struct soap*, const std::vector<ns1__permissibleStringValue * >*);
@@ -5232,7 +6717,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__permissibleStringValu
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__permissibleStringValue(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__rule
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__rule (187)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__rule (212)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__rule(struct soap*, std::vector<ns1__rule * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__rule(struct soap*, const std::vector<ns1__rule * >*);
@@ -5247,7 +6732,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__rule(struct soap *soa
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__rule(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__userGroup
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__userGroup (185)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__userGroup (210)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__userGroup(struct soap*, std::vector<ns1__userGroup * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__userGroup(struct soap*, const std::vector<ns1__userGroup * >*);
@@ -5262,7 +6747,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__userGroup(struct soap
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__userGroup(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__study
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__study (184)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__study (209)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__study(struct soap*, std::vector<ns1__study * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__study(struct soap*, const std::vector<ns1__study * >*);
@@ -5277,7 +6762,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__study(struct soap *so
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__study(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrumentScientist
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrumentScientist (183)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrumentScientist (208)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__instrumentScientist(struct soap*, std::vector<ns1__instrumentScientist * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__instrumentScientist(struct soap*, const std::vector<ns1__instrumentScientist * >*);
@@ -5291,188 +6776,8 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__instrumentScientist(s
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__instrumentScientist(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__studyInvestigation
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__studyInvestigation (182)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, std::vector<ns1__studyInvestigation * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, const std::vector<ns1__studyInvestigation * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, const char*, int, const std::vector<ns1__studyInvestigation * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__studyInvestigation * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, const char*, std::vector<ns1__studyInvestigation * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__studyInvestigation * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__studyInvestigation * > * soap_new_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__studyInvestigation(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap *soap, std::vector<ns1__studyInvestigation * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__shift
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__shift (181)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__shift(struct soap*, std::vector<ns1__shift * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__shift(struct soap*, const std::vector<ns1__shift * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__shift(struct soap*, const char*, int, const std::vector<ns1__shift * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__shift * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__shift(struct soap*, const char*, std::vector<ns1__shift * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__shift * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__shift(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__shift * > * soap_new_std__vectorTemplateOfPointerTons1__shift(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__shift(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__shift(struct soap *soap, std::vector<ns1__shift * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__shift(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sample
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sample (180)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__sample(struct soap*, std::vector<ns1__sample * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__sample(struct soap*, const std::vector<ns1__sample * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__sample(struct soap*, const char*, int, const std::vector<ns1__sample * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__sample * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__sample(struct soap*, const char*, std::vector<ns1__sample * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__sample * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__sample(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__sample * > * soap_new_std__vectorTemplateOfPointerTons1__sample(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__sample(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__sample(struct soap *soap, std::vector<ns1__sample * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__sample(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__publication
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__publication (179)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__publication(struct soap*, std::vector<ns1__publication * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__publication(struct soap*, const std::vector<ns1__publication * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__publication(struct soap*, const char*, int, const std::vector<ns1__publication * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__publication * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__publication(struct soap*, const char*, std::vector<ns1__publication * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__publication * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__publication(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__publication * > * soap_new_std__vectorTemplateOfPointerTons1__publication(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__publication(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__publication(struct soap *soap, std::vector<ns1__publication * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__publication(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationParameter
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationParameter (178)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, std::vector<ns1__investigationParameter * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, const std::vector<ns1__investigationParameter * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, const char*, int, const std::vector<ns1__investigationParameter * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__investigationParameter * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, const char*, std::vector<ns1__investigationParameter * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__investigationParameter * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__investigationParameter * > * soap_new_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__investigationParameter(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap *soap, std::vector<ns1__investigationParameter * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__keyword
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__keyword (176)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__keyword(struct soap*, std::vector<ns1__keyword * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__keyword(struct soap*, const std::vector<ns1__keyword * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__keyword(struct soap*, const char*, int, const std::vector<ns1__keyword * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__keyword * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__keyword(struct soap*, const char*, std::vector<ns1__keyword * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__keyword * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__keyword(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__keyword * > * soap_new_std__vectorTemplateOfPointerTons1__keyword(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__keyword(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__keyword(struct soap *soap, std::vector<ns1__keyword * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__keyword(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationUser
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationUser (175)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, std::vector<ns1__investigationUser * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, const std::vector<ns1__investigationUser * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, const char*, int, const std::vector<ns1__investigationUser * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__investigationUser * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, const char*, std::vector<ns1__investigationUser * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__investigationUser * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__investigationUser * > * soap_new_std__vectorTemplateOfPointerTons1__investigationUser(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__investigationUser(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__investigationUser(struct soap *soap, std::vector<ns1__investigationUser * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job (174)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__job(struct soap*, std::vector<ns1__job * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__job(struct soap*, const std::vector<ns1__job * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__job(struct soap*, const char*, int, const std::vector<ns1__job * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__job * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__job(struct soap*, const char*, std::vector<ns1__job * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__job * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__job(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__job * > * soap_new_std__vectorTemplateOfPointerTons1__job(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__job(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__job(struct soap *soap, std::vector<ns1__job * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__job(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetParameter
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetParameter (173)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, std::vector<ns1__datasetParameter * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, const std::vector<ns1__datasetParameter * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, const char*, int, const std::vector<ns1__datasetParameter * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__datasetParameter * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, const char*, std::vector<ns1__datasetParameter * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__datasetParameter * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__datasetParameter * > * soap_new_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__datasetParameter(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap *soap, std::vector<ns1__datasetParameter * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__outputDataset
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__outputDataset (172)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__outputDataset(struct soap*, std::vector<ns1__outputDataset * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__outputDataset(struct soap*, const std::vector<ns1__outputDataset * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__outputDataset(struct soap*, const char*, int, const std::vector<ns1__outputDataset * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__outputDataset * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__outputDataset(struct soap*, const char*, std::vector<ns1__outputDataset * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__outputDataset * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__outputDataset(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__outputDataset * > * soap_new_std__vectorTemplateOfPointerTons1__outputDataset(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__outputDataset(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__outputDataset(struct soap *soap, std::vector<ns1__outputDataset * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__outputDataset(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__inputDataset
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__inputDataset (171)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__inputDataset(struct soap*, std::vector<ns1__inputDataset * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__inputDataset(struct soap*, const std::vector<ns1__inputDataset * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__inputDataset(struct soap*, const char*, int, const std::vector<ns1__inputDataset * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__inputDataset * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__inputDataset(struct soap*, const char*, std::vector<ns1__inputDataset * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__inputDataset * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__inputDataset(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__inputDataset * > * soap_new_std__vectorTemplateOfPointerTons1__inputDataset(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__inputDataset(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__inputDataset(struct soap *soap, std::vector<ns1__inputDataset * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__inputDataset(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataset
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataset (170)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__dataset(struct soap*, std::vector<ns1__dataset * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__dataset(struct soap*, const std::vector<ns1__dataset * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__dataset(struct soap*, const char*, int, const std::vector<ns1__dataset * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__dataset * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__dataset(struct soap*, const char*, std::vector<ns1__dataset * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__dataset * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__dataset(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__dataset * > * soap_new_std__vectorTemplateOfPointerTons1__dataset(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__dataset(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__dataset(struct soap *soap, std::vector<ns1__dataset * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__dataset(struct soap*, int, int, void*, size_t, const void*, size_t);
-
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleType
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleType (169)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sampleType (207)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__sampleType(struct soap*, std::vector<ns1__sampleType * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__sampleType(struct soap*, const std::vector<ns1__sampleType * >*);
@@ -5487,7 +6792,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__sampleType(struct soa
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__sampleType(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__parameterType
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__parameterType (167)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__parameterType (205)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__parameterType(struct soap*, std::vector<ns1__parameterType * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__parameterType(struct soap*, const std::vector<ns1__parameterType * >*);
@@ -5502,7 +6807,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__parameterType(struct 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__parameterType(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigation
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigation (166)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigation (204)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__investigation(struct soap*, std::vector<ns1__investigation * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__investigation(struct soap*, const std::vector<ns1__investigation * >*);
@@ -5517,7 +6822,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__investigation(struct 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__investigation(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationType
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationType (165)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationType (203)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__investigationType(struct soap*, std::vector<ns1__investigationType * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__investigationType(struct soap*, const std::vector<ns1__investigationType * >*);
@@ -5532,7 +6837,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__investigationType(str
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__investigationType(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrument
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrument (164)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__instrument (202)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__instrument(struct soap*, std::vector<ns1__instrument * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__instrument(struct soap*, const std::vector<ns1__instrument * >*);
@@ -5547,7 +6852,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__instrument(struct soa
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__instrument(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__facilityCycle
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__facilityCycle (163)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__facilityCycle (201)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__facilityCycle(struct soap*, std::vector<ns1__facilityCycle * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__facilityCycle(struct soap*, const std::vector<ns1__facilityCycle * >*);
@@ -5562,7 +6867,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__facilityCycle(struct 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__facilityCycle(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetType
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetType (162)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetType (200)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__datasetType(struct soap*, std::vector<ns1__datasetType * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__datasetType(struct soap*, const std::vector<ns1__datasetType * >*);
@@ -5577,7 +6882,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__datasetType(struct so
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__datasetType(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileFormat
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileFormat (161)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileFormat (199)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__datafileFormat(struct soap*, std::vector<ns1__datafileFormat * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__datafileFormat(struct soap*, const std::vector<ns1__datafileFormat * >*);
@@ -5591,8 +6896,173 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__datafileFormat(struct
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__datafileFormat(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__application
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__application (198)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__application(struct soap*, std::vector<ns1__application * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__application(struct soap*, const std::vector<ns1__application * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__application(struct soap*, const char*, int, const std::vector<ns1__application * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__application * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__application(struct soap*, const char*, std::vector<ns1__application * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__application * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__application(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__application * > * soap_new_std__vectorTemplateOfPointerTons1__application(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__application(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__application(struct soap *soap, std::vector<ns1__application * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__application(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__studyInvestigation
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__studyInvestigation (197)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, std::vector<ns1__studyInvestigation * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, const std::vector<ns1__studyInvestigation * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, const char*, int, const std::vector<ns1__studyInvestigation * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__studyInvestigation * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, const char*, std::vector<ns1__studyInvestigation * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__studyInvestigation * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__studyInvestigation * > * soap_new_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__studyInvestigation(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap *soap, std::vector<ns1__studyInvestigation * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__studyInvestigation(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__shift
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__shift (196)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__shift(struct soap*, std::vector<ns1__shift * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__shift(struct soap*, const std::vector<ns1__shift * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__shift(struct soap*, const char*, int, const std::vector<ns1__shift * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__shift * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__shift(struct soap*, const char*, std::vector<ns1__shift * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__shift * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__shift(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__shift * > * soap_new_std__vectorTemplateOfPointerTons1__shift(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__shift(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__shift(struct soap *soap, std::vector<ns1__shift * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__shift(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sample
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__sample (195)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__sample(struct soap*, std::vector<ns1__sample * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__sample(struct soap*, const std::vector<ns1__sample * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__sample(struct soap*, const char*, int, const std::vector<ns1__sample * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__sample * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__sample(struct soap*, const char*, std::vector<ns1__sample * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__sample * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__sample(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__sample * > * soap_new_std__vectorTemplateOfPointerTons1__sample(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__sample(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__sample(struct soap *soap, std::vector<ns1__sample * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__sample(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__publication
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__publication (194)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__publication(struct soap*, std::vector<ns1__publication * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__publication(struct soap*, const std::vector<ns1__publication * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__publication(struct soap*, const char*, int, const std::vector<ns1__publication * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__publication * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__publication(struct soap*, const char*, std::vector<ns1__publication * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__publication * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__publication(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__publication * > * soap_new_std__vectorTemplateOfPointerTons1__publication(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__publication(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__publication(struct soap *soap, std::vector<ns1__publication * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__publication(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationParameter
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationParameter (193)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, std::vector<ns1__investigationParameter * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, const std::vector<ns1__investigationParameter * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, const char*, int, const std::vector<ns1__investigationParameter * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__investigationParameter * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, const char*, std::vector<ns1__investigationParameter * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__investigationParameter * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__investigationParameter * > * soap_new_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__investigationParameter(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap *soap, std::vector<ns1__investigationParameter * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__investigationParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__keyword
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__keyword (191)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__keyword(struct soap*, std::vector<ns1__keyword * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__keyword(struct soap*, const std::vector<ns1__keyword * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__keyword(struct soap*, const char*, int, const std::vector<ns1__keyword * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__keyword * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__keyword(struct soap*, const char*, std::vector<ns1__keyword * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__keyword * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__keyword(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__keyword * > * soap_new_std__vectorTemplateOfPointerTons1__keyword(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__keyword(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__keyword(struct soap *soap, std::vector<ns1__keyword * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__keyword(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationUser
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationUser (190)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, std::vector<ns1__investigationUser * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, const std::vector<ns1__investigationUser * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, const char*, int, const std::vector<ns1__investigationUser * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__investigationUser * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, const char*, std::vector<ns1__investigationUser * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__investigationUser * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__investigationUser * > * soap_new_std__vectorTemplateOfPointerTons1__investigationUser(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__investigationUser(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__investigationUser(struct soap *soap, std::vector<ns1__investigationUser * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__investigationUser(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationInstrument
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__investigationInstrument (189)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__investigationInstrument(struct soap*, std::vector<ns1__investigationInstrument * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__investigationInstrument(struct soap*, const std::vector<ns1__investigationInstrument * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__investigationInstrument(struct soap*, const char*, int, const std::vector<ns1__investigationInstrument * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__investigationInstrument * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__investigationInstrument(struct soap*, const char*, std::vector<ns1__investigationInstrument * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__investigationInstrument * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__investigationInstrument(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__investigationInstrument * > * soap_new_std__vectorTemplateOfPointerTons1__investigationInstrument(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__investigationInstrument(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__investigationInstrument(struct soap *soap, std::vector<ns1__investigationInstrument * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__investigationInstrument(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataset
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataset (187)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__dataset(struct soap*, std::vector<ns1__dataset * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__dataset(struct soap*, const std::vector<ns1__dataset * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__dataset(struct soap*, const char*, int, const std::vector<ns1__dataset * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__dataset * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__dataset(struct soap*, const char*, std::vector<ns1__dataset * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__dataset * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__dataset(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__dataset * > * soap_new_std__vectorTemplateOfPointerTons1__dataset(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__dataset(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__dataset(struct soap *soap, std::vector<ns1__dataset * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__dataset(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetParameter
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datasetParameter (186)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, std::vector<ns1__datasetParameter * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, const std::vector<ns1__datasetParameter * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, const char*, int, const std::vector<ns1__datasetParameter * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__datasetParameter * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, const char*, std::vector<ns1__datasetParameter * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__datasetParameter * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__datasetParameter * > * soap_new_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__datasetParameter(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap *soap, std::vector<ns1__datasetParameter * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__datasetParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafile
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafile (160)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafile (185)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__datafile(struct soap*, std::vector<ns1__datafile * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__datafile(struct soap*, const std::vector<ns1__datafile * >*);
@@ -5606,8 +7076,53 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__datafile(struct soap 
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__datafile(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__job (184)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__job(struct soap*, std::vector<ns1__job * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__job(struct soap*, const std::vector<ns1__job * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__job(struct soap*, const char*, int, const std::vector<ns1__job * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__job * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__job(struct soap*, const char*, std::vector<ns1__job * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__job * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__job(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__job * > * soap_new_std__vectorTemplateOfPointerTons1__job(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__job(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__job(struct soap *soap, std::vector<ns1__job * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__job(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionParameter
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionParameter (183)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap*, std::vector<ns1__dataCollectionParameter * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap*, const std::vector<ns1__dataCollectionParameter * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap*, const char*, int, const std::vector<ns1__dataCollectionParameter * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__dataCollectionParameter * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap*, const char*, std::vector<ns1__dataCollectionParameter * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__dataCollectionParameter * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__dataCollectionParameter * > * soap_new_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionParameter(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap *soap, std::vector<ns1__dataCollectionParameter * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__dataCollectionParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDataset
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDataset (182)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap*, std::vector<ns1__dataCollectionDataset * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap*, const std::vector<ns1__dataCollectionDataset * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap*, const char*, int, const std::vector<ns1__dataCollectionDataset * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__dataCollectionDataset * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap*, const char*, std::vector<ns1__dataCollectionDataset * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__dataCollectionDataset * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<ns1__dataCollectionDataset * > * soap_new_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionDataset(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap *soap, std::vector<ns1__dataCollectionDataset * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__dataCollectionDataset(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileParameter
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileParameter (159)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__datafileParameter (181)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__datafileParameter(struct soap*, std::vector<ns1__datafileParameter * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__datafileParameter(struct soap*, const std::vector<ns1__datafileParameter * >*);
@@ -5621,38 +7136,8 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__datafileParameter(str
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__datafileParameter(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__outputDatafile
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__outputDatafile (158)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__outputDatafile(struct soap*, std::vector<ns1__outputDatafile * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__outputDatafile(struct soap*, const std::vector<ns1__outputDatafile * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__outputDatafile(struct soap*, const char*, int, const std::vector<ns1__outputDatafile * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__outputDatafile * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__outputDatafile(struct soap*, const char*, std::vector<ns1__outputDatafile * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__outputDatafile * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__outputDatafile(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__outputDatafile * > * soap_new_std__vectorTemplateOfPointerTons1__outputDatafile(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__outputDatafile(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__outputDatafile(struct soap *soap, std::vector<ns1__outputDatafile * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__outputDatafile(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__inputDatafile
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__inputDatafile (157)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__inputDatafile(struct soap*, std::vector<ns1__inputDatafile * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__inputDatafile(struct soap*, const std::vector<ns1__inputDatafile * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__inputDatafile(struct soap*, const char*, int, const std::vector<ns1__inputDatafile * >*, const char*);
-SOAP_FMAC3 std::vector<ns1__inputDatafile * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__inputDatafile(struct soap*, const char*, std::vector<ns1__inputDatafile * >*, const char*);
-SOAP_FMAC1 std::vector<ns1__inputDatafile * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__inputDatafile(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<ns1__inputDatafile * > * soap_new_std__vectorTemplateOfPointerTons1__inputDatafile(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__inputDatafile(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfPointerTons1__inputDatafile(struct soap *soap, std::vector<ns1__inputDatafile * >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__inputDatafile(struct soap*, int, int, void*, size_t, const void*, size_t);
-
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__relatedDatafile
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__relatedDatafile (156)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__relatedDatafile (180)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__relatedDatafile(struct soap*, std::vector<ns1__relatedDatafile * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__relatedDatafile(struct soap*, const std::vector<ns1__relatedDatafile * >*);
@@ -5666,38 +7151,23 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__relatedDatafile(struc
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__relatedDatafile(struct soap*, int, int, void*, size_t, const void*, size_t);
 
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerToxsd__anyType
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerToxsd__anyType (155)
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDatafile
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__dataCollectionDatafile (179)
 #endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, std::vector<xsd__anyType * >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, const std::vector<xsd__anyType * >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, const char*, int, const std::vector<xsd__anyType * >*, const char*);
-SOAP_FMAC3 std::vector<xsd__anyType * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, const char*, std::vector<xsd__anyType * >*, const char*);
-SOAP_FMAC1 std::vector<xsd__anyType * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(struct soap*, std::vector<ns1__dataCollectionDatafile * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(struct soap*, const std::vector<ns1__dataCollectionDatafile * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(struct soap*, const char*, int, const std::vector<ns1__dataCollectionDatafile * >*, const char*);
+SOAP_FMAC3 std::vector<ns1__dataCollectionDatafile * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(struct soap*, const char*, std::vector<ns1__dataCollectionDatafile * >*, const char*);
+SOAP_FMAC1 std::vector<ns1__dataCollectionDatafile * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(struct soap*, int, const char*, const char*, size_t*);
 
-inline std::vector<xsd__anyType * > * soap_new_std__vectorTemplateOfPointerToxsd__anyType(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerToxsd__anyType(soap, n, NULL, NULL, NULL); }
+inline std::vector<ns1__dataCollectionDatafile * > * soap_new_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(soap, n, NULL, NULL, NULL); }
 
-inline void soap_delete_std__vectorTemplateOfPointerToxsd__anyType(struct soap *soap, std::vector<xsd__anyType * >*p) { soap_delete(soap, p); }
+inline void soap_delete_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(struct soap *soap, std::vector<ns1__dataCollectionDatafile * >*p) { soap_delete(soap, p); }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfstd__string
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfstd__string (150)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfstd__string(struct soap*, std::vector<std::string >*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfstd__string(struct soap*, const std::vector<std::string >*);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfstd__string(struct soap*, const char*, int, const std::vector<std::string >*, const char*);
-SOAP_FMAC3 std::vector<std::string >* SOAP_FMAC4 soap_in_std__vectorTemplateOfstd__string(struct soap*, const char*, std::vector<std::string >*, const char*);
-SOAP_FMAC1 std::vector<std::string > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfstd__string(struct soap*, int, const char*, const char*, size_t*);
-
-inline std::vector<std::string > * soap_new_std__vectorTemplateOfstd__string(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfstd__string(soap, n, NULL, NULL, NULL); }
-
-inline void soap_delete_std__vectorTemplateOfstd__string(struct soap *soap, std::vector<std::string >*p) { soap_delete(soap, p); }
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfstd__string(struct soap*, int, int, void*, size_t, const void*, size_t);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__dataCollectionDatafile(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__entityField
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__entityField (149)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__entityField (175)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__entityField(struct soap*, std::vector<ns1__entityField * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__entityField(struct soap*, const std::vector<ns1__entityField * >*);
@@ -5712,7 +7182,7 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__entityField(struct so
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__entityField(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__constraint
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__constraint (147)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__constraint (173)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__constraint(struct soap*, std::vector<ns1__constraint * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__constraint(struct soap*, const std::vector<ns1__constraint * >*);
@@ -5726,8 +7196,23 @@ inline void soap_delete_std__vectorTemplateOfPointerTons1__constraint(struct soa
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerTons1__constraint(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerToxsd__anyType
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerToxsd__anyType (170)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, std::vector<xsd__anyType * >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, const std::vector<xsd__anyType * >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, const char*, int, const std::vector<xsd__anyType * >*, const char*);
+SOAP_FMAC3 std::vector<xsd__anyType * >* SOAP_FMAC4 soap_in_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, const char*, std::vector<xsd__anyType * >*, const char*);
+SOAP_FMAC1 std::vector<xsd__anyType * > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<xsd__anyType * > * soap_new_std__vectorTemplateOfPointerToxsd__anyType(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfPointerToxsd__anyType(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfPointerToxsd__anyType(struct soap *soap, std::vector<xsd__anyType * >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerToxsd__anyType(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOf_ns1__login_credentials_entry
-#define SOAP_TYPE_ICat4_std__vectorTemplateOf_ns1__login_credentials_entry (110)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOf_ns1__login_credentials_entry (167)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, std::vector<_ns1__login_credentials_entry >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, const std::vector<_ns1__login_credentials_entry >*);
@@ -5741,8 +7226,23 @@ inline void soap_delete_std__vectorTemplateOf_ns1__login_credentials_entry(struc
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOf_ns1__login_credentials_entry(struct soap*, int, int, void*, size_t, const void*, size_t);
 
+#ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfstd__string
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfstd__string (130)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfstd__string(struct soap*, std::vector<std::string >*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfstd__string(struct soap*, const std::vector<std::string >*);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_std__vectorTemplateOfstd__string(struct soap*, const char*, int, const std::vector<std::string >*, const char*);
+SOAP_FMAC3 std::vector<std::string >* SOAP_FMAC4 soap_in_std__vectorTemplateOfstd__string(struct soap*, const char*, std::vector<std::string >*, const char*);
+SOAP_FMAC1 std::vector<std::string > * SOAP_FMAC2 soap_instantiate_std__vectorTemplateOfstd__string(struct soap*, int, const char*, const char*, size_t*);
+
+inline std::vector<std::string > * soap_new_std__vectorTemplateOfstd__string(struct soap *soap, int n = -1) { return soap_instantiate_std__vectorTemplateOfstd__string(soap, n, NULL, NULL, NULL); }
+
+inline void soap_delete_std__vectorTemplateOfstd__string(struct soap *soap, std::vector<std::string >*p) { soap_delete(soap, p); }
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfstd__string(struct soap*, int, int, void*, size_t, const void*, size_t);
+
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfLONG64
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfLONG64 (106)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfLONG64 (129)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfLONG64(struct soap*, std::vector<LONG64 >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfLONG64(struct soap*, const std::vector<LONG64 >*);
@@ -5757,7 +7257,7 @@ inline void soap_delete_std__vectorTemplateOfLONG64(struct soap *soap, std::vect
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfLONG64(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__entityBaseBean
-#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__entityBaseBean (103)
+#define SOAP_TYPE_ICat4_std__vectorTemplateOfPointerTons1__entityBaseBean (126)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfPointerTons1__entityBaseBean(struct soap*, std::vector<ns1__entityBaseBean * >*);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfPointerTons1__entityBaseBean(struct soap*, const std::vector<ns1__entityBaseBean * >*);
