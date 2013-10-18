@@ -1164,38 +1164,41 @@ namespace Algorithms
     // ROMAN: I tried to fit the background with multiple domain.  But "Start_1" and "End_1" are not
     //        recognized.  Do you know how to set it up in C++?  I failed to use the way to set up in Python
     //        to C++
-#if 1
+#if 0
     // This use multi-domain; but does not know how to set up
     boost::shared_ptr<MultiDomainFunction> funcmd = boost::make_shared<MultiDomainFunction>();
 
-    // set functio first
+    // [11:54:38] Roman Tolchenov:     // set functio first
+    funcmd->addFunction(fitfunc);
     funcmd->addFunction(fitfunc);
 
     // set domain for function with index 0 and 1
     funcmd->clearDomainIndices();
-    std::vector<size_t> ii(2);
+    std::vector<size_t> ii(1);
     ii[0] = 0;
-    ii[1] = 1;
     funcmd->setDomainIndices(0, ii);
+    ii[0] = 1;
+    funcmd->setDomainIndices(1, ii);
 
-
-    g_log.information() << "Input workspace size = " << dataws->size() << ".\n";
+    g_log.notice() << "[DB] Domain 0: " << vec_xmin[0] << ", " << vec_xmax[0] << "\n"
+                   << "     Domain 1: " << vec_xmin[1] << ", " << vec_xmax[1] << "\n";
 
     // Set the properties
-    fit->setProperty("Function", fitfunc);
+    fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(funcmd));
     fit->setProperty("InputWorkspace", dataws);
     fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
     fit->setProperty("StartX", vec_xmin[0]);
     fit->setProperty("EndX", vec_xmax[0]);
-    // FIXME - There is not 'InputWorkspace_1' or 'WorkspaceIndex_1' in fit
     fit->setProperty("InputWorkspace_1", dataws);
     fit->setProperty("WorkspaceIndex_1", static_cast<int>(wsindex));
     fit->setProperty("StartX_1", vec_xmin[1]);
     fit->setProperty("EndX_1", vec_xmax[1]);
-
     fit->setProperty("MaxIterations", 50);
     fit->setProperty("Minimizer", m_minimizer);
     fit->setProperty("CostFunction", "Least squares");
+
+    g_log.information() << "[DB] Multi-domain fit chi^2 = " << chi2 << "\n"
+                        << "     Funcion: " << funcmd->asString() << "\n";
 
 #else
     // FIXME - This is a temp solution
@@ -1252,14 +1255,16 @@ namespace Algorithms
 
     // Retrieve result
     std::string fitStatus = fit->getProperty("OutputStatus");
-    g_log.debug() << "Multi-domain fit status: " << fitStatus << ".\n";
+    g_log.notice() << "[DB] Multi-domain fit status: " << fitStatus << ".\n";
 
     double chi2 = EMPTY_DBL();
     if (fitStatus == "success")
     {
       chi2 = fit->getProperty("OutputChi2overDoF");
-      g_log.debug() << "Multi-domain fit chi^2 = " << chi2 << ".\n";
+      g_log.information() << "[DB] Multi-domain fit chi^2 = " << chi2 << "\n"
+                          << "     Funcion: " << fitfunc->asString() << "\n";
     }
+
 
     return chi2;
   }
