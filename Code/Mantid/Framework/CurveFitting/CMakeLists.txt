@@ -3,6 +3,7 @@ set ( SRC_FILES
 	#	src/SCDPanelErrors.cpp
 	# src/ChebyshevPolynomialBackground.cpp
 	src/Abragam.cpp
+	src/AugmentedLagrangianOptimizer.cpp
 	src/BFGS_Minimizer.cpp
 	src/BSpline.cpp
 	src/BackToBackExponential.cpp
@@ -98,6 +99,7 @@ set ( INC_FILES
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/Abragam.h
+	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BSpline.h
 	inc/MantidCurveFitting/BackToBackExponential.h
@@ -198,6 +200,7 @@ set ( TEST_FILES
 	#DiffSphereTest.h
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
+	AugmentedLagrangianOptimizerTest.h
 	BFGSTest.h
 	BSplineTest.h
 	BackToBackExponentialTest.h
