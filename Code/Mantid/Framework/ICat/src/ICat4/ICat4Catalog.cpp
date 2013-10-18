@@ -211,7 +211,7 @@ namespace Mantid
       // Instrument name
       if(!inputs.getInstrument().empty())
       {
-        querySegments.push_back("Instrument[name = '" + inputs.getInstrument() + "']");
+        querySegments.push_back("InvestigationInstrument <-> Instrument[name = '" + inputs.getInstrument() + "']");
       }
 
       // Keywords
@@ -232,7 +232,7 @@ namespace Mantid
       // We then append the required includes to output related data, such as instrument name and run parameters.
       if (!query.empty())
       {
-        query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> ");
+        query.insert(0, "DISTINCT Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> ");
       }
 
       g_log.debug() << "Query: { " << query << " }" << std::endl;
@@ -293,7 +293,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
+      std::string query = "Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
       request.query     = &query;
 
       int result = icat.search(&request, &response);
@@ -336,7 +336,7 @@ namespace Mantid
             // Now add the relevant investigation data to the table.
             savetoTableWorkspace(investigation->name, table); // Investigation number
             savetoTableWorkspace(investigation->title, table);
-            savetoTableWorkspace(investigation->instrument->name, table);
+            savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
             // Verify that the run parameters vector exist prior to doing anything.
             // Since some investigations may not have run parameters.
             if (!investigation->parameters.empty())
