@@ -1158,10 +1158,6 @@ namespace Algorithms
       throw std::runtime_error(errss.str());
     }
 
-    // ROMAN: I tried to fit the background with multiple domain.  But "Start_1" and "End_1" are not
-    //        recognized.  Do you know how to set it up in C++?  I failed to use the way to set up in Python
-    //        to C++
-#if 1
     // This use multi-domain; but does not know how to set up
     boost::shared_ptr<MultiDomainFunction> funcmd = boost::make_shared<MultiDomainFunction>();
 
@@ -1174,22 +1170,6 @@ namespace Algorithms
     ii[0] = 0;
     ii[1] = 1;
     funcmd->setDomainIndices(0, ii);
-
-    // Set 2nd function and tie all parameters to zero
-    IFunction_sptr dummyfunc = fitfunc->clone();
-    funcmd->addFunction(dummyfunc);
-
-    vector<string> vecparnames = dummyfunc->getParameterNames();
-    for (size_t  i = 0; i < vecparnames.size(); ++i)
-      dummyfunc->tie(vecparnames[i], "0.");
-
-    // Set domainfor function 2
-    vector<size_t> ii2(1);
-    ii2[0] = 1;
-    funcmd->setDomainIndices(1, ii2);
-
-    g_log.notice() << "[DB] Domain 0: " << vec_xmin[0] << ", " << vec_xmax[0] << "\n"
-                   << "     Domain 1: " << vec_xmin[1] << ", " << vec_xmax[1] << "\n";
 
     // Set the properties
     fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(funcmd));
@@ -1206,52 +1186,6 @@ namespace Algorithms
     fit->setProperty("CostFunction", "Least squares");
 
     g_log.information() << "[DB] Funcion: " << funcmd->asString() << "\n";
-
-#else
-    // FIXME - This is a temp solution
-    vector<double> vecx, vecy, vece;
-    const MantidVec& vecX = dataws->readX(wsindex);
-    const MantidVec& vecY = dataws->readY(wsindex);
-    const MantidVec& vecE = dataws->readE(wsindex);
-    for (size_t i = 0; i < vec_xmin.size(); ++i)
-    {
-      double xmin = vec_xmin[i];
-      double xmax = vec_xmax[i];
-      size_t ixmin = getVectorIndex(vecX, xmin);
-      size_t ixmax = getVectorIndex(vecX, xmax);
-      for (size_t j = ixmin; j <= ixmax; ++j)
-      {
-        vecx.push_back(vecX[j]);
-        vecy.push_back(vecY[j]);
-        vece.push_back(vecE[j]);
-      }
-    }
-
-    MatrixWorkspace_sptr tempbkgdws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, vecx.size(), vecy.size()));
-
-    MantidVec& dataX = tempbkgdws->dataX(0);
-    MantidVec& dataY = tempbkgdws->dataY(0);
-    MantidVec& dataE = tempbkgdws->dataE(0);
-
-    for (size_t i = 0; i < vecx.size(); ++i)
-    {
-      dataX[i] = vecx[i];
-      dataY[i] = vecy[i];
-      dataE[i] = vece[i];
-    }
-
-    fit->setProperty("Function", fitfunc);
-    fit->setProperty("InputWorkspace", tempbkgdws);
-    fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-    fit->setProperty("StartX", vecx.front());
-    fit->setProperty("EndX", vecx.back());
-
-    fit->setProperty("MaxIterations", 50);
-    fit->setProperty("Minimizer", m_minimizer);
-    fit->setProperty("CostFunction", "Least squares");
-    fit->setProperty("CalcErrors", true);
-#endif
 
     // Execute
     fit->execute();
@@ -1271,7 +1205,6 @@ namespace Algorithms
       g_log.information() << "[DB] Multi-domain fit chi^2 = " << chi2 << "\n"
                           << "     Funcion: " << fitfunc->asString() << "\n";
     }
-
 
     return chi2;
   }
