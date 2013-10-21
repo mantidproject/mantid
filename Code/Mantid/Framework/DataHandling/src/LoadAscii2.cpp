@@ -152,7 +152,6 @@ namespace Mantid
         if (line.empty())
         {
           //the line is empty, treat as a break before a new spectra
-          //Signifies the start of a new spectra if it wasn't preceeded with another blank line or a spectra ID
           newSpectra();
         }
         else if (!skipLine(line))
@@ -185,7 +184,7 @@ namespace Mantid
         if (cols > 4 || cols < 0)
         {
           //there were more separators than there should have been, which isn't right, or something went rather wrong
-          throw std::runtime_error("Sets of values must have between 1 and 3 delimiters");
+          throw std::runtime_error("Line " + std::to_string(lineNo) + ": Sets of values must have between 1 and 3 delimiters");
         }
         else if (cols == 1)
         {
@@ -200,10 +199,9 @@ namespace Mantid
           else
           {
             //if not then they've ommitted IDs in the the file previously and just decided to include one (which is wrong and confuses everything)
-            throw std::runtime_error("Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. "
-              "Check for blank lines, as they symbolize the end of one spectra and the start of another.");
+            throw std::runtime_error("Line " + std::to_string(lineNo) + ": Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. "
+              "Check for blank lines, as they symbolize the end of one spectra and the start of another. Also check for spectra IDs with no associated bins.");
           }
-          //this will overwrite the old id in the case of consecutive spectra ID lines
           m_curSpectra->setSpectrumNo(boost::lexical_cast<int>(*(columns.begin())));
         }
         else if (cols != 1)
@@ -217,12 +215,12 @@ namespace Mantid
       }
       else if (badLine(line))
       {
-        throw std::runtime_error("Unexpected character found at beggining of line " + std::to_string(lineNo) + ". Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
+        throw std::runtime_error("Line " + std::to_string(lineNo) + ": Unexpected character found at beggining of line. Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
       }
       else
       {
         //strictly speaking this should never be hit, but just being sure
-        throw std::runtime_error("Unknown format at line " + std::to_string(lineNo) + ". Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
+        throw std::runtime_error("Line " + std::to_string(lineNo) + ": Unknown format at line. Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
       }
     }
 
@@ -310,7 +308,7 @@ namespace Mantid
     }
 
     /**
-    * Check if the file has been found to incosistantly include spectra IDs
+    * Check if the file has been found to inconsistantly include spectra IDs
     * @param[in] columns : the columns of values in the current line of data
     */
     void LoadAscii2::addToCurrentSpectra(std::list<std::string> & columns)

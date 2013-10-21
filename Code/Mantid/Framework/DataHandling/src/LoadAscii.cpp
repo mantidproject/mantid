@@ -88,7 +88,7 @@ namespace Mantid
     */
     bool LoadAscii::isAscii(FILE *file)
     {
-          char data[256];
+      char data[256];
       char *pend = &data[fread(data, 1, sizeof(data), file)];
       fseek(file,0,SEEK_SET);
       /*
