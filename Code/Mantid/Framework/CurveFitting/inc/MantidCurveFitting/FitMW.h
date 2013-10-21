@@ -96,6 +96,8 @@ namespace Mantid
     private:
       // Unrolls function into its constituent parts if it is a composite and adds it to the list. Note this is recursive
       void appendCompositeFunctionMembers(std::list<API::IFunction_sptr> & functionList, const API::IFunction_sptr & function) const;
+      // Create separate Convolutions for each component of the model of a convolution
+      bool appendConvolvedCompositeFunctionMembers(std::list<API::IFunction_sptr> & functionList, const API::IFunction_sptr & function) const;
       /// Creates the blank output workspace of the correct size
       boost::shared_ptr<API::MatrixWorkspace> createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
       /// Add the calculated function values to the workspace

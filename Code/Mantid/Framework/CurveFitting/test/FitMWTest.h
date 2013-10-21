@@ -9,6 +9,8 @@
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidCurveFitting/SeqDomain.h"
+#include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/Gaussian.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -482,6 +484,108 @@ public:
 
       // test that the Lifetime parameter value was picked up from the instrument parameter map
       TS_ASSERT_EQUALS( expDecay->getParameter("Lifetime"), 20.0 );
+  }
+
+  void test_convolve_members_option()
+  {
+      auto conv = boost::shared_ptr<Convolution>(new Convolution);
+      auto resolution = IFunction_sptr(new Gaussian);
+      resolution->initialize();
+      resolution->setParameter("Height", 1.0);
+      resolution->setParameter("PeakCentre", 0.0);
+      resolution->setParameter("Sigma", 1.0);
+      auto gaussian1 = IFunction_sptr(new Gaussian);
+      gaussian1->initialize();
+      gaussian1->setParameter("Height", 1.0);
+      gaussian1->setParameter("PeakCentre", 0.0);
+      gaussian1->setParameter("Sigma", 1.0);
+      auto gaussian2 = IFunction_sptr(new Gaussian);
+      gaussian2->initialize();
+      gaussian2->setParameter("Height", 1.0);
+      gaussian2->setParameter("PeakCentre", 1.0);
+      gaussian2->setParameter("Sigma", 1.0);
+
+      conv->addFunction( resolution );
+      conv->addFunction( gaussian1 );
+      conv->addFunction( gaussian2 );
+
+      // workspace with 100 points on interval -10 <= x <= 10
+      boost::shared_ptr<WorkspaceTester> data(new WorkspaceTester());
+      data->init(1,100,100);
+      for(size_t i = 0; i < data->blocksize(); i++)
+      {
+          data->dataX(0)[i] = -10.0 + 0.2 * double( i );
+      }
+
+      FunctionDomain_sptr domain;
+      IFunctionValues_sptr values;
+
+      // Requires a property manager to make a workspce
+      auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+      const std::string wsPropName = "TestWorkspaceInput";
+      propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+      propManager->setProperty<Workspace_sptr>(wsPropName, data);
+
+      FitMW fitmw(propManager.get(), wsPropName);
+      fitmw.declareDatasetProperties("", true);
+      fitmw.initFunction(conv);
+      fitmw.separateCompositeMembersInOutput(true,true);
+      fitmw.createDomain(domain, values);
+
+      // Create Output
+      const std::string baseName("TestOutput_");
+      fitmw.createOutputWorkspace(baseName, conv, domain, values);
+
+
+      MatrixWorkspace_sptr outputWS;
+      // A new property should have appeared
+      TS_ASSERT_THROWS_NOTHING(outputWS = propManager->getProperty("OutputWorkspace"));
+      if(!outputWS)
+      {
+        TS_FAIL("No output workspace was found in the property manager");
+        return;
+      }
+
+      static const size_t nExpectedHist(5);
+      TS_ASSERT_EQUALS(nExpectedHist, outputWS->getNumberHistograms());
+      // Check axis has expected labels
+      API::Axis* axis = outputWS->getAxis(1);
+      TS_ASSERT(axis);
+      TS_ASSERT(axis->isText());
+      TS_ASSERT_EQUALS(axis->length(), nExpectedHist);
+      TS_ASSERT_EQUALS(axis->label(0), "Data");
+      TS_ASSERT_EQUALS(axis->label(1), "Calc");
+      TS_ASSERT_EQUALS(axis->label(2), "Diff");
+      TS_ASSERT_EQUALS(axis->label(3), "Convolution");
+      TS_ASSERT_EQUALS(axis->label(4), "Convolution");
+
+
+      FunctionDomain1DView x(data->dataX(0).data(),data->dataX(0).size());
+      FunctionValues gaus1Values(x);
+      FunctionValues gaus2Values(x);
+
+      Convolution conv1;
+      conv1.addFunction( resolution );
+      conv1.addFunction( gaussian1 );
+      conv1.function(x,gaus1Values);
+
+      for(size_t i = 0; i < data->blocksize(); i++)
+      {
+          TS_ASSERT_EQUALS( outputWS->dataY(3)[i], gaus1Values[i] );
+          TS_ASSERT_DIFFERS( outputWS->dataY(3)[i], 0.0 );
+      }
+
+      Convolution conv2;
+      conv2.addFunction( resolution );
+      conv2.addFunction( gaussian2 );
+      conv2.function(x,gaus2Values);
+
+      for(size_t i = 0; i < data->blocksize(); i++)
+      {
+          TS_ASSERT_EQUALS( outputWS->dataY(4)[i], gaus2Values[i] );
+          TS_ASSERT_DIFFERS( outputWS->dataY(4)[i], 0.0 );
+          TS_ASSERT_DIFFERS( outputWS->dataY(4)[i], outputWS->dataY(3)[i] );
+      }
   }
 
 private:

@@ -3,6 +3,7 @@
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/EmptyValues.h"
+#include "MantidCurveFitting/Convolution.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -454,6 +455,16 @@ namespace
   void FitMW::appendCompositeFunctionMembers(std::list<API::IFunction_sptr> & functionList,
                                              const API::IFunction_sptr & function) const
   {
+      // if function is a Convolution then output of convolved model's mebers may be required
+      if ( m_convolutionCompositeMembers && boost::dynamic_pointer_cast<CurveFitting::Convolution>(function) )
+      {
+          if ( appendConvolvedCompositeFunctionMembers( functionList, function ) )
+          {
+            return;
+          }
+          // if convolution is impossible try the default way
+      }
+
     const auto compositeFn = boost::dynamic_pointer_cast<API::CompositeFunction>(function);
     if(!compositeFn) return;
 
@@ -465,6 +476,35 @@ namespace
       if(localComposite) appendCompositeFunctionMembers(functionList, localComposite);
       else functionList.insert(functionList.end(), localFunction);
     }
+  }
+
+  /**
+    * If the fit function is Convolution and flag m_convolutionCompositeMembers is set and Convolution's
+    * second function (the model) is composite then use members of the model for the output.
+    * @param functionList :: A list of Convolutions constructed from the resolution of the fitting function (index 0)
+    *   and members of the model.
+    * @param function A Convolution function which model may or may not be a composite function.
+    * @return True if all conditions are fulfilled and it is possible to produce the output.
+    */
+  bool FitMW::appendConvolvedCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList, const API::IFunction_sptr &function) const
+  {
+      boost::shared_ptr<CurveFitting::Convolution> convolution = boost::dynamic_pointer_cast<CurveFitting::Convolution>(function);
+
+      const auto compositeFn = boost::dynamic_pointer_cast<API::CompositeFunction>( convolution->getFunction(1) );
+      if(!compositeFn) return false;
+
+      auto resolution = convolution->getFunction(0);
+
+      const size_t nlocals = compositeFn->nFunctions();
+      for(size_t i = 0; i < nlocals; ++i)
+      {
+        auto localFunction = compositeFn->getFunction(i);
+        boost::shared_ptr<CurveFitting::Convolution> localConvolution = boost::make_shared<CurveFitting::Convolution>();
+        localConvolution->addFunction( resolution );
+        localConvolution->addFunction( localFunction );
+        functionList.insert( functionList.end(), localConvolution );
+      }
+      return true;
   }
 
   /**

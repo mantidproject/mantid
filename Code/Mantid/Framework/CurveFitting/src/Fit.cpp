@@ -228,6 +228,7 @@ the algorithm will have these additional properties:
 #include "MantidCurveFitting/CostFuncFitting.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
+#include "MantidCurveFitting/Convolution.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
@@ -359,6 +360,13 @@ namespace CurveFitting
     else
     {
       m_workspacePropertyNames.resize(1,"InputWorkspace");
+    }
+
+    auto cf = boost::dynamic_pointer_cast<Convolution>(m_function);
+    if ( cf && (!existsProperty("ConvolveMembers")) && boost::dynamic_pointer_cast<API::CompositeFunction>(cf->getFunction(1)) )
+    {
+        declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
+          "Convolve members of the model in output");
     }
   }
 
@@ -789,7 +797,12 @@ namespace CurveFitting
       setProperty("OutputParameters",result);
 
       const bool unrollComposites = getProperty("OutputCompositeMembers");
-      m_domainCreator->separateCompositeMembersInOutput(unrollComposites);
+      bool convolveMembers = existsProperty("ConvolveMembers");
+      if ( convolveMembers )
+      {
+          convolveMembers = getProperty("ConvolveMembers");
+      }
+      m_domainCreator->separateCompositeMembersInOutput(unrollComposites,convolveMembers);
       m_domainCreator->createOutputWorkspace(baseName,m_function,domain,values);
 
     }
