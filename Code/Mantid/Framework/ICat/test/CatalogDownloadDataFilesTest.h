@@ -254,7 +254,7 @@ public:
 		std::string fName = Kernel::ConfigService::Instance().getString("defaultsave.directory");
 		// Need to initialize the algorithm in order to set the "downloadPath" property.
 		if ( !downloadobj1.isInitialized() ) downloadobj1.initialize();
-		downloadobj1.setPropertyValue("downloadPath",fName);
+		downloadobj1.setPropertyValue("DownloadPath",fName);
 
 		clock_t start=clock();
 		std::string fullPathDownloadedFile = downloadobj1.testDownload("http://download.mantidproject.org/videos/Installation.htm","test.htm");

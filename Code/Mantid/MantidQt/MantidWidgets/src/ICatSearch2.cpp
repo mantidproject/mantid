@@ -459,7 +459,7 @@ namespace MantidQt
 
       // Since we check if the field is empty in the algorithm, there's no need to check if advanced was clicked.
       // If the "My data only" field is checked. We return the state of the checkbox (1 is true, 0 is false).
-      searchFieldInput.insert(std::pair<std::string, std::string>("myData", boost::lexical_cast<std::string>(m_icatUiForm.myDataCbox->isChecked())));
+      searchFieldInput.insert(std::pair<std::string, std::string>("MyData", boost::lexical_cast<std::string>(m_icatUiForm.myDataCbox->isChecked())));
 
       return (searchFieldInput);
     }

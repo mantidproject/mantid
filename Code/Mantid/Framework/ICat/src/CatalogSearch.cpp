@@ -53,7 +53,7 @@ namespace Mantid
       declareProperty("EndDate","", isDate, "The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
       declareProperty("Keywords","","An option to search investigations data");
 
-      declareProperty("myData",false, "Boolean option to do my data only search.");
+      declareProperty("MyData",false, "Boolean option to do my data only search.");
 
       // NOTE: This has changed in ICAT4 to simply "investigator's name". Will need fixed when ICAT3 is removed.
       declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
@@ -80,7 +80,7 @@ namespace Mantid
       ICatalog_sptr catalog;
       try
       {
-        catalog = CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
+        catalog = CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
       }
       catch(Kernel::Exception::NotFoundError&)
       {
@@ -198,7 +198,7 @@ namespace Mantid
       std::string dataFileName=getPropertyValue("DataFileName");
       params.setDatafileName(dataFileName);
 
-      bool mydata = boost::lexical_cast<bool>(getPropertyValue("myData"));
+      bool mydata = boost::lexical_cast<bool>(getPropertyValue("MyData"));
       params.setMyData(mydata);
     }
 

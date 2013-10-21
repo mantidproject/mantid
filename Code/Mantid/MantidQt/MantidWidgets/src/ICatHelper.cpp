@@ -112,7 +112,7 @@ namespace MantidQt
       // The file IDs and file names of the data file(s) the user wants to download.
       catalogAlgorithm->setProperty("FileIds",fileIDs);
       catalogAlgorithm->setProperty("FileNames",fileNames);
-      catalogAlgorithm->setProperty("downloadPath",downloadPath);
+      catalogAlgorithm->setProperty("DownloadPath",downloadPath);
 
       Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
       while( !result.available() )

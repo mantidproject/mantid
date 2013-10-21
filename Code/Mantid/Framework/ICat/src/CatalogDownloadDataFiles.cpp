@@ -62,7 +62,7 @@ namespace Mantid
       declareProperty(new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(), 
                                                      boost::make_shared<NullValidator>(),
                                                      Direction::Output),
-                      "A list of file locations to the ICAT datafiles.");
+                      "A list of file locations to the catalog datafiles.");
     }
 
     /// Raise an error concerning catalog searching
@@ -185,6 +185,7 @@ namespace Mantid
         std::string newURL = URL; // Need to convert to none const to perform replacement.
         boost::replace_first(newURL, "https", "http");
         URI uri(newURL);
+
         std::string path(uri.getPathAndQuery());
         if (path.empty())
         {
@@ -226,7 +227,7 @@ namespace Mantid
      */
     std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream& rs,const std::string& fileName)
     {
-      std::string downloadPath = getProperty("downloadPath");
+      std::string downloadPath = getProperty("DownloadPath");
       Poco::Path defaultSaveDir(downloadPath);
       Poco::Path path(downloadPath, fileName);
       std::string filepath = path.toString();
