@@ -155,7 +155,7 @@ def CheckBinning(nbins):
 	return nbin,nrbin
 
 # QLines programs
-def QLRun(program,samWS,resWS,rsname,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Save):
+def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Save):
 	StartTime(program)
 
 	#expand fit options
@@ -220,7 +220,7 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Sa
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
 	Wy,We = ReadWidthFile(width,wfile,totalNoSam,Verbose)
-	dtn,xsc = ReadNormFile(resnorm,rsname,totalNoSam,Verbose)
+	dtn,xsc = ReadNormFile(resnorm,resnormWS,totalNoSam,Verbose)
 
 	fname = samWS[:-4] + '_'+ prog
 	probWS = fname + '_Prob'
