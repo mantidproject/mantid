@@ -369,13 +369,14 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
  *
  *  @return true if FindUBusingIndexedPeaks completed successfully.
  */
-bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name)
+bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name, double tolerance )
 {
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FindUBUsingIndexedPeaks");
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
+  alg->setProperty("Tolerance",tolerance);
 
   if ( alg->execute() )
     return true;

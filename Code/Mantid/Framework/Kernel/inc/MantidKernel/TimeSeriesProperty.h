@@ -233,6 +233,8 @@ namespace Mantid
 
       /// Deletes the series of values in the property
       void clear();
+      /// Deletes all but the 'last entry' in the property
+      void clearOutdated();
       /// Clears and creates a TimeSeriesProperty from these parameters
       void create(const Kernel::DateAndTime &start_time, const std::vector<double> & time_sec, const std::vector<TYPE> & new_values);
       /// Clears and creates a TimeSeriesProperty from these parameters
