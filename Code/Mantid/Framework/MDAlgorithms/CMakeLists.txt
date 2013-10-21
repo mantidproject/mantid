@@ -15,7 +15,9 @@ set ( SRC_FILES
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace2.cpp
 	src/ConvertToMD.cpp
+	src/ConvertToMDParent.cpp    
 	src/ConvertToMDHelper.cpp
+	src/ConvertToMDHelper2.cpp    
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
@@ -88,7 +90,9 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
+	inc/MantidMDAlgorithms/ConvertToMDParent.h    
 	inc/MantidMDAlgorithms/ConvertToMDHelper.h
+	inc/MantidMDAlgorithms/ConvertToMDHelper2.h    
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/DivideMD.h

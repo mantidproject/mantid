@@ -7,6 +7,7 @@
 #include "MantidMDEvents/ConvToMDBase.h"
 
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidMDAlgorithms/ConvertToMDParent.h"
 
 
 namespace Mantid
@@ -48,7 +49,7 @@ namespace MDAlgorithms
  
  
 /// Convert to MD Events class itself:
-  class DLLExport ConvertToMD  : public MDEvents::BoxControllerSettingsAlgorithm
+  class DLLExport ConvertToMD  : public ConvertToMDParent
   {
   public:
     ConvertToMD();
@@ -58,12 +59,9 @@ namespace MDAlgorithms
     virtual const std::string name() const;
     /// Algorithm's version for identification 
     virtual int version() const;
-    /// Algorithm's category for identification
-    virtual const std::string category() const;
 
 
   private:
-    void init();
     std::map<std::string, std::string> validateInputs();
     void exec();
    /// Sets documentation strings for this algorithm
@@ -71,8 +69,6 @@ namespace MDAlgorithms
    /// progress reporter
    boost::scoped_ptr<API::Progress > m_Progress;
  
-  /// logger -> to provide logging, for MD dataset file operations
-   static Mantid::Kernel::Logger& g_Log;
    //------------------------------------------------------------------------------------------------------------------------------------------
    protected: //for testing, otherwise private:
       /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
@@ -82,8 +78,6 @@ namespace MDAlgorithms
       /// pointer to the class, which does the particular conversion
       boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
 
-
-       static Mantid::Kernel::Logger & getLogger();
 
         // Workflow helpers:
         /**Check if target workspace new or existing one and we need to create new workspace*/
