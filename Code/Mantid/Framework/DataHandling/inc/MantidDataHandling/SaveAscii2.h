@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -15,12 +16,12 @@ namespace Mantid
     Saves a workspace or selected spectra in a coma-separated ascii file. Spectra are saved in columns.
     Properties:
     <ul>
-          <li>Filename - the name of the file to write to.  </li>
-          <li>Workspace - the workspace name to be saved.</li>
-          <li>SpectrumMin - the starting spectrum index to save (optional) </li>
-          <li>SpectrumMax - the ending spectrum index to save (optional) </li>
-          <li>SpectrumList - a list of comma-separated spectra indeces to save (optional) </li>
-          <li>Precision - the numeric precision - the number of significant digits for the saved data (optional) </li>
+    <li>Filename - the name of the file to write to.  </li>
+    <li>Workspace - the workspace name to be saved.</li>
+    <li>SpectrumMin - the starting spectrum index to save (optional) </li>
+    <li>SpectrumMax - the ending spectrum index to save (optional) </li>
+    <li>SpectrumList - a list of comma-separated spectra indeces to save (optional) </li>
+    <li>Precision - the numeric precision - the number of significant digits for the saved data (optional) </li>
     </ul>
 
 
@@ -68,13 +69,28 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
+      /**writes a spectra to the file using a workspace ID
+      @param spectraIndex :: an integer relating to a workspace ID
+      @param file :: the file writer object
+      */
+      void writeSpectra(const int & spectraIndex, std::ofstream & file);
+      /**writes a spectra to the file using an iterator
+      @param spectraItr :: a set<int> iterator pointing to a set of workspace IDs to be saved
+      @param file :: the file writer object
+      */
+      void writeSpectra(const std::set<int>::const_iterator & spectraItr, std::ofstream & file);
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 
       /// Map the separator options to their string equivalents
       std::map<std::string,std::string> m_separatorIndex;
-    };
 
+      int m_nBins;
+      std::string m_sep;
+      bool m_writeDX;
+      bool m_isHistogram;
+      API::MatrixWorkspace_const_sptr m_ws;
+    };
   } // namespace DataHandling
 } // namespace Mantid
 
