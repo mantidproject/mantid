@@ -14,7 +14,7 @@ namespace MantidQt
      */
     std::vector<std::string> ICatHelper::getInstrumentList()
     {
-      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
       catalogAlgorithm->execute();
       // return the vector containing the list of instruments available.
       return (catalogAlgorithm->getProperty("InstrumentList"));
@@ -26,7 +26,7 @@ namespace MantidQt
      */
     std::vector<std::string> ICatHelper::getInvestigationTypeList()
     {
-      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
       catalogAlgorithm->execute();
       // return the vector containing the list of investigation types available.
       return (catalogAlgorithm->getProperty("InvestigationTypes"));
@@ -38,7 +38,7 @@ namespace MantidQt
      */
     void ICatHelper::executeSearch(std::map<std::string, std::string> userInputFields)
     {
-      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
       // This will be the workspace where the content of the search result is output to.
       catalogAlgorithm->setProperty("OutputWorkspace", "__searchResults");
@@ -69,7 +69,7 @@ namespace MantidQt
      */
     void ICatHelper::executeGetDataFiles(int64_t investigationId)
     {
-      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
 
       // Search for all related dataFiles to this investigation id.
       catalogAlgorithm->setProperty("InvestigationId", investigationId);
@@ -92,7 +92,7 @@ namespace MantidQt
      */
     std::vector<std::string> ICatHelper::downloadDataFiles(std::vector<std::pair<int64_t, std::string>> userSelectedFiles, std::string downloadPath)
     {
-      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogDownloadDataFiles");
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogDownloadDataFiles");
 
       // Prepare for the ugly!
 
@@ -132,7 +132,7 @@ namespace MantidQt
      */
     std::map<std::string, std::string> ICatHelper::validateProperties(std::map<std::string, std::string> &inputFields)
     {
-      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
       // Holds the name of the marker to update if an error is found, and the related error message to use.
       // E.g. key => "StartDate_err", value => "The start date for..."
@@ -164,7 +164,7 @@ namespace MantidQt
      */
     bool ICatHelper::validSession()
     {
-      Mantid::API::IAlgorithm_sptr catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
 
       catalogAlgorithm->execute();
 
@@ -200,17 +200,8 @@ namespace MantidQt
      */
     Mantid::API::IAlgorithm_sptr ICatHelper::createCatalogAlgorithm(const std::string& algName)
     {
-      Mantid::API::IAlgorithm_sptr catalogAlgorithm;
-      try
-      {
-        catalogAlgorithm = Mantid::API::AlgorithmManager::Instance().create(algName);
-      }
-      catch(std::runtime_error& exception)
-      {
-        exception.what();
-      }
-      // Since no exceptions have occurred we return the algorithm.
-      return catalogAlgorithm;
+      // If there is an exception we want it to be thrown.
+      return Mantid::API::AlgorithmManager::Instance().create(algName);
     }
 
   } // namespace MantidWidgets

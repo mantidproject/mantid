@@ -643,7 +643,6 @@ namespace Mantid
           if(datafile->location)
           {
             fileLocation = *(datafile->location);
-            g_log.debug() << "Filelocation: { " << fileLocation << " }" << std::endl;
           }
         }
         else
