@@ -257,7 +257,6 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	#LoadSNSNexusTest.h # TODO has no active tests in it
 	AppendGeometryToSNSNexusTest.h
 	ApplyGroupingFromMuonNexusTest.h
 	CompressEventsTest.h
