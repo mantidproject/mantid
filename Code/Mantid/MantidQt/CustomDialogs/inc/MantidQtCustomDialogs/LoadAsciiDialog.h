@@ -71,7 +71,8 @@ private:
   QLineEdit *m_lineFilename;
   QLineEdit *m_lineOutputWorkspace;
   QLineEdit *m_lineCommentIndicator;
-  QComboBox  *m_separatorBox;
+  QLineEdit *m_lineCustomSeparator;
+  QComboBox *m_separatorBox;
 
 };
 

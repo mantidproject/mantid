@@ -56,19 +56,34 @@ namespace MantidQt
 
       if (getAlgorithm()->version() == 2)
       {
+        label = new QLabel(tr("CustomSeparator"));
+        m_lineCustomSeparator = new QLineEdit;
+        label->setBuddy(m_lineCustomSeparator);
+        paramsLayout->addWidget(label,3,0);
+        paramsLayout->addWidget(m_lineCustomSeparator,3,1);
+        tie(m_lineCustomSeparator, "CustomSeparator", paramsLayout);
+
         label = new QLabel(tr("CommentIndicator"));
         m_lineCommentIndicator = new QLineEdit;
         label->setBuddy(m_lineCommentIndicator);
-        paramsLayout->addWidget(label,3,0);
-        paramsLayout->addWidget(m_lineCommentIndicator,3,1);
+        paramsLayout->addWidget(label,4,0);
+        paramsLayout->addWidget(m_lineCommentIndicator,4,1);
         tie(m_lineCommentIndicator, "CommentIndicator", paramsLayout);
-      }
 
-      QComboBox *unitBox = new QComboBox;
-      fillAndSetComboBox("Unit",unitBox );
-      paramsLayout->addWidget(new QLabel("Unit"),4,0);
-      paramsLayout->addWidget(unitBox ,4,1);
-      tie(unitBox ,"Unit",paramsLayout);
+        QComboBox *unitBox = new QComboBox;
+        fillAndSetComboBox("Unit",unitBox );
+        paramsLayout->addWidget(new QLabel("Unit"),5,0);
+        paramsLayout->addWidget(unitBox ,5,1);
+        tie(unitBox ,"Unit",paramsLayout);
+      }
+      else
+      {
+        QComboBox *unitBox = new QComboBox;
+        fillAndSetComboBox("Unit",unitBox );
+        paramsLayout->addWidget(new QLabel("Unit"),3,0);
+        paramsLayout->addWidget(unitBox ,3,1);
+        tie(unitBox ,"Unit",paramsLayout);
+      }
 
       QVBoxLayout *mainLayout = new QVBoxLayout;
 

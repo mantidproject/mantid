@@ -428,7 +428,6 @@ namespace Mantid
       return (!std::isdigit(line.at(0)) && line.at(0) != m_comment.at(0));
     }
 
-
     /**
     * Split the data into columns based on the input separator
     * @param[out] columns :: A reference to a list to store the column data
@@ -487,7 +486,7 @@ namespace Mantid
         "",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
 
       std::string spacers[6][6] = { {"Automatic", ",\t:; "}, {"CSV", ","},
-      {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"} };
+      {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}  };
       // For the ListValidator
       std::vector<std::string> sepOptions;
       for( size_t i = 0; i < 5; ++i )
@@ -498,7 +497,9 @@ namespace Mantid
       }
       declareProperty("Separator", "Automatic", boost::make_shared<StringListValidator>(sepOptions),
         "The separator between data columns in the data file. The possible values are \"CSV\", \"Tab\", "
-        "\"Space\", \"SemiColon\", or \"Colon\" (default: Automatic selection).");
+        "\"Space\", \"SemiColon\", \"Colon\" or a user defined value. (default: Automatic selection from comma, tab, space, semicolon or colon.).");
+      declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),
+        "If present, will override any specified choice given to Separator.");
       declareProperty("CommentIndicator", "#", "Character(s) found front of comment lines. Cannot contain numeric characters");
 
       std::vector<std::string> units = UnitFactory::Instance().getKeys();
@@ -525,9 +526,38 @@ namespace Mantid
 
       std::string sepOption = getProperty("Separator");
       m_columnSep = m_separatorIndex[sepOption];
-      m_comment = getProperty("CommentIndicator");
+
+      std::string choice = getPropertyValue("Separator");
+      std::string custom = getPropertyValue("CustomSeparator");
+      std::string sep;
+      // If the custom separator property is not empty, then we use that under any circumstance.
+      if(custom != "")
+      {
+        sep = custom;
+      }
+      // Else if the separator drop down choice is not UserDefined then we use that.
+      else if(choice != "UserDefined")
+      {
+        std::map<std::string, std::string>::iterator it = m_separatorIndex.find(choice);
+        sep = it->second;
+      }
+      // If we still have nothing, then we are forced to use a default.
+      if(sep.empty())
+      {
+        g_log.notice() << "\"UserDefined\" has been selected, but no custom separator has been entered.  Using default instead.";
+        sep = ",";
+      }
+      m_columnSep = sep;
 
       boost::regex test("[^0-9]+", boost::regex::perl);
+
+      if (!boost::regex_match(m_columnSep.begin(), m_columnSep.end(), test))
+      {
+        throw std::runtime_error("Separators cannot contain numeric characters");
+      }
+
+      m_comment = getProperty("CommentIndicator");
+
       if (!boost::regex_match(m_comment.begin(), m_comment.end(), test))
       {
         throw std::runtime_error("Comment markers cannot contain numeric characters");
