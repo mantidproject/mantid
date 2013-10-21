@@ -332,7 +332,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
  */
 std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
-  Element* pElemCentre = getShapeElement(pElem, "centre"); 
+  Element* pElemCentre = getOptionalShapeElement(pElem, "centre"); 
   Element* pElemRadius = getShapeElement(pElem, "radius"); 
 
   // getDoubleAttribute can throw - put the calls above any new
@@ -340,7 +340,10 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, S
   
   // create sphere
   Sphere* pSphere = new Sphere;
-  pSphere->setCentre(parsePosition(pElemCentre)); 
+  if( pElemCentre )
+    pSphere->setCentre(parsePosition(pElemCentre));
+  else
+    pSphere->setCentre(V3D(0, 0, 0));
   pSphere->setRadius(radius);
   prim[l_id] = pSphere;
 
@@ -942,6 +945,31 @@ Poco::XML::Element* ShapeFactory::getShapeElement(Poco::XML::Element* pElem, con
 }
 
 
+/**
+ * Return a subelement of an XML element.  The subelement is optional so it may not exist, but
+ * we also check that there is never more than one.
+ *
+ * @param pElem :: XML from instrument definition file.
+ * @param name :: Name of the subelement.
+ * @return The subelement, or a null pointer if it does not exist.
+ *
+ * @throw std::invalid_argument if XML string is invalid.
+ */
+Poco::XML::Element* ShapeFactory::getOptionalShapeElement(Poco::XML::Element* pElem, const std::string& name)
+{
+  // Allow zero or one occurances of subelements with the given name.
+  Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName(name);
+  if ( pNL->length() == 0)
+    return NULL;
+  else if ( pNL->length() > 1)
+    throw std::invalid_argument("XML element: <" + pElem->tagName() +
+      "> may contain at most one sub-element with name: <" + name + ">.");
+
+  Element* retVal = static_cast<Element*>(pNL->item(0));
+  return retVal;
+}
+
+
 /** Return value of attribute to XML element. It is an extension of poco's getAttribute method, which
  *  in addition check that this attribute exists and if not throws an error. 
  *
@@ -1037,9 +1065,12 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
   {
     boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
     Obj->setGeometryHandler(handler);
-    Element* pElemCentre = getShapeElement(pElem, "centre");
+    Element* pElemCentre = getOptionalShapeElement(pElem, "centre");
     Element* pElemRadius = getShapeElement(pElem, "radius");
-    ((GluGeometryHandler*)(handler.get()))->setSphere(parsePosition(pElemCentre),atof( (pElemRadius->getAttribute("val")).c_str() ));
+    V3D centre;
+    if( pElemCentre )
+      centre = parsePosition(pElemCentre);
+    ((GluGeometryHandler*)(handler.get()))->setSphere(centre,atof( (pElemRadius->getAttribute("val")).c_str() ));
   }
   else if(pElem->tagName()=="cylinder")
   {

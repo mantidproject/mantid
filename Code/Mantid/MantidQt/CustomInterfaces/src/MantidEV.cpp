@@ -345,6 +345,7 @@ void MantidEV::initLayout()
    m_uiForm.MinD_ledt->setValidator( new QDoubleValidator(m_uiForm.MinD_ledt));
    m_uiForm.MaxD_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxD_ledt));
    m_uiForm.FFTTolerance_ledt->setValidator( new QDoubleValidator(m_uiForm.FFTTolerance_ledt));
+   m_uiForm.IndexedPeaksTolerance_ledt->setValidator( new QDoubleValidator(m_uiForm.IndexedPeaksTolerance_ledt));
    m_uiForm.MaxGoniometerChange_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxGoniometerChange_ledt));
    m_uiForm.IndexingTolerance_ledt->setValidator( new QDoubleValidator(m_uiForm.IndexingTolerance_ledt));
    m_uiForm.MaxScalarError_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxScalarError_ledt));
@@ -404,6 +405,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.MaxD_ledt->setText("15");
    m_uiForm.FFTTolerance_ledt->setText("0.12");
    m_uiForm.FindUBUsingIndexedPeaks_rbtn->setChecked(false);
+   m_uiForm.IndexedPeaksTolerance_ledt->setText("0.1");
    m_uiForm.LoadISAWUB_rbtn->setChecked(false);
    m_uiForm.SelectUBFile_ledt->setText("");
    m_uiForm.OptimizeGoniometerAngles_ckbx->setChecked(false);
@@ -800,7 +802,12 @@ void MantidEV::findUB_slot()
 
    else if ( use_IndexedPeaks )
    {
-     if ( !worker->findUBUsingIndexedPeaks( peaks_ws_name ) )
+	   double indPeaks_tolerance   = 0.1;
+
+	   if ( !getPositiveDouble( m_uiForm.IndexedPeaksTolerance_ledt, indPeaks_tolerance ) )
+	     return;
+
+     if ( !worker->findUBUsingIndexedPeaks( peaks_ws_name,indPeaks_tolerance) )
      {
        errorMessage( "Find UB Using Indexed Peaks Failed" );
        return;
@@ -1521,6 +1528,17 @@ void MantidEV::setEnabledFindUBFFTParams_slot( bool on )
   m_uiForm.FFTTolerance_ledt->setEnabled( on );
 }
 
+/**
+ * Set the enabled state of the find UB using Indexed Peaks components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
+void MantidEV::setEnabledFindUBUsingIndexedPeaksParams_slot( bool on )
+{
+  m_uiForm.IndexedPeaksTolerance_lbl->setEnabled( on );
+  m_uiForm.IndexedPeaksTolerance_ledt->setEnabled( on );
+}
 
 /**
  * Set the enabled state of the load UB file components to the
@@ -1907,6 +1925,7 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("MaxD_ledt", m_uiForm.MaxD_ledt->text());
   state->setValue("FFTTolerance_ledt", m_uiForm.FFTTolerance_ledt->text());
   state->setValue("FindUBUsingIndexedPeaks_rbtn", m_uiForm.FindUBUsingIndexedPeaks_rbtn->isChecked());
+  state->setValue("IndexedPeaksTolerance_ledt", m_uiForm.IndexedPeaksTolerance_ledt->text());
   state->setValue("LoadISAWUB_rbtn", m_uiForm.LoadISAWUB_rbtn->isChecked());
   state->setValue("SelectUBFile_ledt", m_uiForm.SelectUBFile_ledt->text());
   state->setValue("OptimizeGoniometerAngles_ckbx", m_uiForm.OptimizeGoniometerAngles_ckbx->isChecked());
@@ -2007,6 +2026,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "MaxD_ledt", m_uiForm.MaxD_ledt );
   restore( state, "FFTTolerance_ledt", m_uiForm.FFTTolerance_ledt );
   restore( state, "FindUBUsingIndexedPeaks_rbtn", m_uiForm.FindUBUsingIndexedPeaks_rbtn );
+  restore( state, "IndexedPeaksTolerance_ledt", m_uiForm.IndexedPeaksTolerance_ledt );
   restore( state, "LoadISAWUB_rbtn", m_uiForm.LoadISAWUB_rbtn );
   restore( state, "SelectUBFile_ledt", m_uiForm.SelectUBFile_ledt );
   restore( state, "OptimizeGoniometerAngles_ckbx", m_uiForm.OptimizeGoniometerAngles_ckbx );

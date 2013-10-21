@@ -2,10 +2,10 @@
 #include "InstrumentActor.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -15,6 +15,16 @@ ComponentActor::ComponentActor(const InstrumentActor& instrActor, const Mantid::
   m_instrActor(instrActor),
 	m_id(compID)
 {
+}
+
+bool ComponentActor::accept(GLActorVisitor &visitor, GLActor::VisitorAcceptRule)
+{
+    return visitor.visit(this);
+}
+
+bool ComponentActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule) const
+{
+    return visitor.visit(this);
 }
 
 boost::shared_ptr<const Mantid::Geometry::IComponent> ComponentActor::getComponent() const
@@ -34,7 +44,12 @@ boost::shared_ptr<const Mantid::Geometry::IDetector> ComponentActor::getDetector
 
 boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> ComponentActor::getObjCompAssembly() const
 {
-  return boost::dynamic_pointer_cast<const Mantid::Geometry::ObjCompAssembly>(getComponent());
+    return boost::dynamic_pointer_cast<const Mantid::Geometry::ObjCompAssembly>(getComponent());
+}
+
+boost::shared_ptr<const Mantid::Geometry::CompAssembly> ComponentActor::getCompAssembly() const
+{
+    return boost::dynamic_pointer_cast<const Mantid::Geometry::CompAssembly>(getComponent());
 }
 
 /**

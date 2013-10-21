@@ -96,7 +96,6 @@ void Indirect::initLayout()
   // "Calibration" tab
   connect(m_uiForm.cal_leRunNo, SIGNAL(filesFound()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
-  connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), m_uiForm.cal_ckResScale, SLOT(setEnabled(bool)));
   connect(m_uiForm.cal_ckResScale, SIGNAL(toggled(bool)), m_uiForm.cal_leResScale, SLOT(setEnabled(bool)));
@@ -347,6 +346,24 @@ void Indirect::runConvertToEnergy()
     break;
   }
 
+  // add sample logs to each of the workspaces
+  QString calibChecked = m_uiForm.ckUseCalib->isChecked() ? "True" : "False";
+  QString detailedBalance = m_uiForm.ckDetailedBalance->isChecked() ? "True" : "False";
+  QString scaled = m_uiForm.ckScaleMultiplier->isChecked() ? "True" : "False";
+  pyInput += "calibCheck = "+calibChecked+"\n"
+             "detailedBalance = "+detailedBalance+"\n"
+             "scaled = "+scaled+"\n"
+             "for ws in ws_list:\n"
+             "  AddSampleLog(Workspace=ws, LogName='calib_file', LogType='String', LogText=str(calibCheck))\n"
+             "  if calibCheck:\n"
+             "    AddSampleLog(Workspace=ws, LogName='calib_file_name', LogType='String', LogText='"+m_uiForm.ind_calibFile->getFirstFilename()+"')\n"
+             "  AddSampleLog(Workspace=ws, LogName='detailed_balance', LogType='String', LogText=str(detailedBalance))\n"
+             "  if detailedBalance:\n"
+             "    AddSampleLog(Workspace=ws, LogName='detailed_balance_temp', LogType='Number', LogText='"+m_uiForm.leDetailedBalance->text()+"')\n"
+             "  AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
+             "  if scaled:\n"
+             "    AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText='"+m_uiForm.leScaleMultiplier->text()+"')\n";
+
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
@@ -595,11 +612,27 @@ void Indirect::createRESfile(const QString& file)
 
   QString background = "[ " +QString::number(m_calDblMng->value(m_calResProp["Start"]))+ ", " +QString::number(m_calDblMng->value(m_calResProp["End"]))+"]";
 
+  QString scaled = m_uiForm.cal_ckIntensityScaleMultiplier->isChecked() ? "True" : "False";
   pyInput +=
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = " + file + "\n"
-    "resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n";
+    "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n"
+    "scaled = "+ scaled +"\n"
+    "scaleFactor = "+m_uiForm.cal_leIntensityScaleMultiplier->text()+"\n"
+    "backStart = "+QString::number(m_calDblMng->value(m_calCalProp["BackMin"]))+"\n"
+    "backEnd = "+QString::number(m_calDblMng->value(m_calCalProp["BackMax"]))+"\n"
+    "rebinLow = "+QString::number(m_calDblMng->value(m_calResProp["ELow"]))+"\n"
+    "rebinWidth = "+QString::number(m_calDblMng->value(m_calResProp["EWidth"]))+"\n"
+    "rebinHigh = "+QString::number(m_calDblMng->value(m_calResProp["EHigh"]))+"\n"
+    "AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
+    "if scaled:"
+    "  AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText=str(scaleFactor))\n"
+    "AddSampleLog(Workspace=ws, LogName='back_start', LogType='Number', LogText=str(backStart))\n"
+    "AddSampleLog(Workspace=ws, LogName='back_end', LogType='Number', LogText=str(backEnd))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_low', LogType='Number', LogText=str(rebinLow))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_width', LogType='Number', LogText=str(rebinWidth))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_high', LogType='Number', LogText=str(rebinHigh))\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1606,6 +1639,8 @@ void Indirect::calPlotRaw()
   // Replot
   m_calCalPlot->replot();
 
+  // also replot the energy
+  calPlotEnergy();
 }
 
 void Indirect::calPlotEnergy()
@@ -1651,9 +1686,36 @@ void Indirect::calPlotEnergy()
   m_calResR2->setMinimum(m_calDblMng->value(m_calResProp["ELow"]));
   m_calResR2->setMaximum(m_calDblMng->value(m_calResProp["EHigh"]));
 
+  calSetDefaultResolution(input);
+
   // Replot
   m_calResPlot->replot();
 }
+
+void Indirect::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+{
+  auto inst = ws->getInstrument();
+  auto analyser = inst->getStringParameter("analyser");
+
+  if(analyser.size() > 0)
+  {
+    auto comp = inst->getComponentByName(analyser[0]);
+    auto params = comp->getNumberParameter("resolution", true);
+
+    //set the default instrument resolution
+    if(params.size() > 0)
+    {
+      double res = params[0];
+      m_calDblMng->setValue(m_calResProp["ELow"], -res*10);
+      m_calDblMng->setValue(m_calResProp["EHigh"], res*10);
+
+      m_calDblMng->setValue(m_calResProp["Start"], -res*9);
+      m_calDblMng->setValue(m_calResProp["End"], -res*8);
+    }
+
+  }
+}
+
 
 void Indirect::calMinChanged(double val)
 {
@@ -1735,12 +1797,15 @@ void Indirect::sOfQwClicked()
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
       "rebin = '" + rebinString + "'\n";
 
-    if(m_uiForm.sqw_cbRebinType->currentText() == "Centre (SofQW)")
+    QString rebinType = m_uiForm.sqw_cbRebinType->currentText();
+    if(rebinType == "Centre (SofQW)")
       pyInput += "SofQW(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped (SofQW2)")
+    else if(rebinType == "Parallelepiped (SofQW2)")
       pyInput += "SofQW2(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped/Fractional Area (SofQW3)")
+    else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
       pyInput += "SofQW3(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
+
+    pyInput += "AddSampleLog(Workspace=sqwOutput, LogName='rebin_type', LogType='String', LogText='"+rebinType+"')\n";
 
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {
@@ -1813,8 +1878,8 @@ void Indirect::sOfQwPlotInput()
     pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
   }
 
-  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input+'_q', Target='ElasticQ', EMode='Indirect')\n"
-    "ws = importMatrixWorkspace(input+'_q')\n"
+  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
+    "ws = importMatrixWorkspace(input[:-4]+'_rqw')\n"
     "ws.plotGraph2D()\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();

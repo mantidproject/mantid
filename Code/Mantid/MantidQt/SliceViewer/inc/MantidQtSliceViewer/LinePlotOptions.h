@@ -22,16 +22,20 @@ public:
 
   Mantid::API::MDNormalization getNormalization() const;
   void setNormalization(Mantid::API::MDNormalization method);
+  bool isLogScaledY() const;
 
 public slots:
   void radPlot_changed();
   void radNormalization_changed();
+  void onYScalingChanged();
 
 signals:
   /// Signal emitted when the PlotAxisChoice changes
   void changedPlotAxis();
   /// Signal emitted when the Normalization method changes
   void changedNormalization();
+  /// Signal emitted when the Y log scaling changes
+  void changedYLogScaling();
 
 private:
 

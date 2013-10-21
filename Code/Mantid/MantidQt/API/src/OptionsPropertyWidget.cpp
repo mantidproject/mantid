@@ -39,7 +39,6 @@ namespace API
     //output box and used the saved combo box
     m_combo = new QComboBox(this);
     m_combo->setToolTip(m_doc);
-    connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(valueChangedSlot()));
     m_widgets.push_back(m_combo);
 
     std::set<std::string> items = prop->allowedValues();
@@ -47,10 +46,14 @@ namespace API
     {
       m_combo->addItem(QString::fromStdString(*vitr));
     }
+    // Make current value visible
+    this->setValue(QString::fromStdString(m_prop->value()));
+
+    // Make sure the connection comes after updating any values
+    connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(valueChangedSlot()));
 
     // Put the combo in column 1
     m_gridLayout->addWidget(m_combo, m_row, 1, 0);
-
   }
 
   //----------------------------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Multiply("w1","w2","output")
+ output = Multiply("w1","w2")
  w3 = w1 * w2
  w1 *= w2  # Perform "in-place"
  # Using a scalar

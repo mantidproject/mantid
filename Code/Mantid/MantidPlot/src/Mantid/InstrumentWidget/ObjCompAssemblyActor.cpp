@@ -152,3 +152,13 @@ void ObjCompAssemblyActor::setColors()
   generateTexture(m_data,m_idData);
 }
 
+bool ObjCompAssemblyActor::accept(GLActorVisitor &visitor, GLActor::VisitorAcceptRule )
+{
+    return visitor.visit(this);
+}
+
+bool ObjCompAssemblyActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule) const
+{
+    return visitor.visit(this);
+}
+
