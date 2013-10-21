@@ -2425,19 +2425,9 @@ void MantidUI::importString(const QString &logName, const QString &data, const Q
   if( !t ) return;
   //Have to replace "_" since the legend widget uses them to separate things
   QString label;
-  if (wsName.isEmpty())
-  {
-    label = logName;
-    label.replace("_","-");
-  }
-  else
-  {
-    label = logName;
-    label.replace("_","-");
-    label = wsName + "-" + label;
-  }
+  label = logName;
+  formatLogName(label, wsName);
 
-  //appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
   appWindow()->initTable(t, appWindow()->generateUniqueName(label + "-"));
   t->setColName(0, "Log entry");
   t->setReadOnlyColumn(0, true); //Read-only
@@ -2468,17 +2458,8 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, c
   //t->askOnCloseEvent(false);
   //Have to replace "_" since the legend widget uses them to separate things
   QString label;
-  if (wsName.isEmpty())
-  {
-    label = logName;
-    label.replace("_","-");
-  }
-  else
-  {
-    label = logName;
-    label.replace("_","-");
-    label = wsName + "-" + label;
-  }
+  label = logName;
+  formatLogName(label, wsName);
 
   //appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
   appWindow()->initTable(t, appWindow()->generateUniqueName(label + "-"));
@@ -2546,17 +2527,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   if( !t ) return;
   //Have to replace "_" since the legend widget uses them to separate things
   QString label;
-  if (wsName.isEmpty())
-  {
-    label = logName;
-    label.replace("_","-");
-  }
-  else
-  {
-    label = logName;
-    label.replace("_","-");
-    label = wsName + "-" + label;
-  }
+  label = logName;
+  formatLogName(label, wsName);
 
   //Get the starting time of the log.
   Mantid::Kernel::DateAndTime startTime;
@@ -2828,6 +2800,19 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   ml->showNormal();
 
+}
+
+/** Format a log name for a title bar
+@param[out] label :: the QString that will hold the caption
+@param[in] wsName :: the workspace name
+*/
+void MantidUI::formatLogName(QString &label, const QString &wsName)
+{
+  label.replace("_","-");
+  if (!wsName.isEmpty())
+  {
+    label = wsName + "-" + label;
+  }
 }
 
 std::string  MantidUI::extractLogTime(Mantid::Kernel::DateAndTime value,bool useAbsoluteDate, Mantid::Kernel::DateAndTime start)
