@@ -18,7 +18,6 @@ namespace MantidQt
     {
       m_uiForm.setupUi(this);
 
-      connect(this,SIGNAL(error(const QString&)),parent()->parent(),SLOT(writeErrorToLogWindow(const QString&)));
       connect(m_uiForm.myDatatableWidget,SIGNAL(itemDoubleClicked(QTableWidgetItem* )),
           this,SLOT(investigationSelected(QTableWidgetItem* )));
 

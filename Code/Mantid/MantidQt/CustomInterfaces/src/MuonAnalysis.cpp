@@ -85,27 +85,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
   m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
-{
-  try
-  {
-    Poco::File tempFile(ConfigService::Instance().getInstrumentDirectory());
-
-    // If the instrument directory can't be written to... (linux problem)
-    if (tempFile.exists() && !tempFile.canWrite() ) 
-    {
-      g_log.information() << "Instrument directory is read only, writing temp grouping to system temp.\n";
-      m_groupingTempFilename = ConfigService::Instance().getTempDir()+"tempMuonAnalysisGrouping.xml";
-    }
-    else
-    {
-      m_groupingTempFilename = ConfigService::Instance().getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
-    }
-  }
-  catch(...)
-  {
-    g_log.debug() << "Problem writing temp grouping file";
-  }
-}
+{}
 
 /**
  * Initialize local Python environmnet. 
@@ -405,7 +385,9 @@ void MuonAnalysis::runSaveGroupButton()
 
   if( ! groupingFile.isEmpty() )
   {
-    saveGroupingTabletoXML(m_uiForm, groupingFile.toStdString());
+    Grouping groupingToSave;
+    parseGroupingTable(m_uiForm, groupingToSave);
+    saveGroupingToXML(groupingToSave, groupingFile.toStdString());
     
     QString directory = QFileInfo(groupingFile).path();
     prevValues.setValue("dir", directory);
@@ -438,19 +420,22 @@ void MuonAnalysis::runLoadGroupButton()
   QString directory = QFileInfo(groupingFile).path();
   prevValues.setValue("dir", directory);
 
-  saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-  clearTablesAndCombo();
+  Grouping loadedGrouping;
 
   try
   {
-    loadGroupingXMLtoTable(m_uiForm, groupingFile.toStdString());
+    loadGroupingFromXML(groupingFile.toStdString(), loadedGrouping);
   }
   catch (Exception::FileError& e)
   {
+    g_log.error("Unable to load grouping. Data left unchanged");
     g_log.error(e.what());
-    g_log.error("Revert to previous grouping");
-    loadGroupingXMLtoTable(m_uiForm, m_groupingTempFilename);
+    m_updating = false;
+    return;
   }
+
+  clearTablesAndCombo();
+  fillGroupingTable(loadedGrouping, m_uiForm);
 
   // add number of detectors column to group table
   int numRows = m_uiForm.groupTable->rowCount();
@@ -1201,8 +1186,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size()));
 
     if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
-      // TODO: applyGroupingToWS shows it's own messages as well. Should make it throw exceptions 
-      //       instead.
       throw std::runtime_error("Couldn't apply grouping");
 
     // Populate instrument fields
@@ -1259,6 +1242,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     infoStr += matrix_workspace->getComment();
     
     const Run& runDetails = matrix_workspace->run();
+
     Mantid::Kernel::DateAndTime start, end;
 
     // Add the start time for the run
@@ -1266,7 +1250,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     if ( runDetails.hasProperty("run_start") )
     {
       start = runDetails.getProperty("run_start")->value();
-      infoStr += runDetails.getProperty("run_start")->value();
+      infoStr += start.toSimpleString();
     }
 
     // Add the end time for the run
@@ -1274,7 +1258,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     if ( runDetails.hasProperty("run_end") )
     {
       end = runDetails.getProperty("run_end")->value();
-      infoStr += runDetails.getProperty("run_end")->value();
+      infoStr += end.toSimpleString();
     }
 
     // Add counts to run information
@@ -2136,6 +2120,8 @@ void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QStri
   // If autoscaling disabled - set manual Y axis values
   if(params["YAxisAuto"] == "False")
     code += "l.setAxisScale(Layer.Left," + params["YAxisMin"] + "," + params["YAxisMax"] + ")\n";
+  else
+    code += "l.setAutoScale()\n";
 
   // Replot
   code += "l.replot()\n";
@@ -2198,16 +2184,45 @@ void MuonAnalysis::closePlotWindow(const QString& wsName)
 }
 
 /**
+ * Checks if the plot for the workspace does exist.
+ * @param wsName Name of the workspace
+ * @return True if exists, false if not
+ */
+bool MuonAnalysis::plotExists(const QString& wsName)
+{
+  QString code;
+
+  code += "g = graph('%1-1')\n"
+          "if g != None:\n"
+          "  print('1')\n"
+          "else:\n"
+          "  print('0')\n";
+  
+  QString output = runPythonCode(code.arg(wsName));
+
+  bool ok;
+  int outputCode = output.toInt(&ok);
+
+  if(!ok)
+    throw std::logic_error("Script should print 0 or 1");
+
+  return (outputCode == 1);
+}
+
+/**
  * Enable PP tool for the plot of the given WS.
  * @param wsName Name of the WS which plot PP tool will be attached to.
  */
 void MuonAnalysis::selectMultiPeak(const QString& wsName)
 {
+  disableAllTools();
+
   QString code;
 
   code += "g = graph('" + wsName + "-1')\n"
           "if g != None:\n"
           "  g.show()\n"
+          "  g.setFocus()\n"
           "  selectMultiPeak(g)\n";
 
   runPythonCode(code);
@@ -2258,8 +2273,6 @@ void MuonAnalysis::showPlot(const QString& wsName)
   // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
   //       only one groups)
 
-  // TODO: if we are using Python, can first check if window exists, and just show it in that case
-
   // If empty -> no workspaces available to choose (e.g. all were deleted)
   if(wsName.isEmpty())
   {
@@ -2276,14 +2289,12 @@ void MuonAnalysis::showPlot(const QString& wsName)
   {
     setCurrentDataName(wsName);
 
-    closePlotWindow(m_currentDataName);
-    plotSpectrum(m_currentDataName, 0, false);
+    if(!plotExists(wsName))
+    {
+      plotSpectrum(m_currentDataName, 0, false);
+      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
+    }
 
-    // Change the plot style of the graph so that it matches what is selected on
-    // the plot options tab.
-    setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
-
-    disableAllTools();
     selectMultiPeak(m_currentDataName);
   }
 }
@@ -2584,63 +2595,86 @@ bool MuonAnalysis::isGroupingSet()
 }
 
 /**
- * Apply grouping specified in xml file to workspace
- *
- * @param inputWS :: The input workspace to apply grouping
- * @param outputWS :: The resulting workspace
- * @param filename :: Name of grouping file
- */
-bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS,
-   const std::string& filename)
-{
-  if ( AnalysisDataService::Instance().doesExist(inputWS) )
-  {
-    AnalysisDataService::Instance().remove(outputWS);
-
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", inputWS);
-    alg->setPropertyValue("OutputWorkspace", outputWS);
-    alg->setPropertyValue("MapFile", filename);
-    try
-    {
-      alg->execute();
-      return true;
-    }
-    catch(...)
-    {
-      m_optionTab->noDataAvailable();
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
-      return false;
-    }
-  }
-  return false;
-}
-
-/**
  * Apply whatever grouping is specified in GUI tables to workspace.
  */
-bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS)
+bool MuonAnalysis::applyGroupingToWS( const std::string& inputWsName,  const std::string& outputWsName)
 {
-  if ( isGroupingSet() && AnalysisDataService::Instance().doesExist(inputWS) )
+  if (!isGroupingSet() || !AnalysisDataService::Instance().doesExist(inputWsName))
+    return false;
+
+  std::string complaint = isGroupingAndDataConsistent();
+  if (!( complaint.empty() ) )
   {
-
-    std::string complaint = isGroupingAndDataConsistent();
-    if (!( complaint.empty() ) )
-    {
-      if (m_uiForm.frontPlotButton->isEnabled() )
-        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
-      m_optionTab->noDataAvailable();
-      return false;
-    }
-    {
-      if (!m_uiForm.frontPlotButton->isEnabled() )
-        m_optionTab->nowDataAvailable();
-    }
-
-    saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-    return applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
+    if (m_uiForm.frontPlotButton->isEnabled() )
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
+    m_optionTab->noDataAvailable();
+    return false;
   }
-  return false;
+  else
+  {
+    if (!m_uiForm.frontPlotButton->isEnabled() )
+      m_optionTab->nowDataAvailable();
+  }
+
+  // If output workspace exists, remove explicitly, so even if something goes wrong - old data 
+  // is not used
+  if(AnalysisDataService::Instance().doesExist(outputWsName))
+  {
+    // Using DeleteWorkspace algorithm so if outputWs is a group - it is fully removed
+    Mantid::API::IAlgorithm_sptr rmWs = AlgorithmManager::Instance().create("DeleteWorkspace");
+    rmWs->initialize();
+    rmWs->setPropertyValue("Workspace", outputWsName);
+    rmWs->execute();
+  }
+
+  Grouping tableGrouping;
+  parseGroupingTable(m_uiForm, tableGrouping);
+
+  // Retrieve input workspace
+  Workspace_sptr inputWs = AnalysisDataService::Instance().retrieve(inputWsName);
+
+  Workspace_sptr outputWs;
+
+  try // ... to group
+  {
+    // Single workspace
+    if(MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWs))
+    {
+      outputWs = groupWorkspace(ws, tableGrouping);
+    }
+    // Workspace group
+    else if(WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWs))
+    { 
+      // Create output group
+      WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+  
+      for(size_t i = 0; i < group->size(); i++)
+      {
+        if(MatrixWorkspace_sptr member = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i)))
+        {
+          MatrixWorkspace_sptr groupedMember = groupWorkspace(member, tableGrouping);
+
+          outputGroup->addWorkspace(groupedMember);
+        }
+        else
+          throw std::invalid_argument("Group contains unsupported workspace type");
+      }
+
+      outputWs = outputGroup;
+    }
+    else
+      throw std::invalid_argument("Unsupported workspace type");
+  }
+  catch(std::exception& e)
+  {
+    m_optionTab->noDataAvailable();
+    g_log.error(e.what());
+    return false;
+  }
+
+  AnalysisDataService::Instance().add(outputWsName, outputWs);
+
+  return true;
 }
 
 /**
@@ -2857,7 +2891,6 @@ void MuonAnalysis::startUpLook()
 */
 void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 {
-  // for now do try to set grouping from nexus file if it is already set
   if ( isGroupingSet() )
     return;
 
@@ -3059,15 +3092,20 @@ void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, Mat
 
   if ( groupFile.size() == 1 )
   {
+    Grouping loadedGrouping;
+
     try
     {
-      loadGroupingXMLtoTable(m_uiForm, directoryName+groupFile[0]);
+      loadGroupingFromXML(directoryName+groupFile[0], loadedGrouping);
     }
     catch (...)
     {
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", QString("Can't load default grouping file in IDF.\n")
-        + "with name: " + groupFile[0].c_str());
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", 
+        QString("Can't load default grouping file in IDF. \n With name: ") + groupFile[0].c_str());
+      return;
     }
+
+    fillGroupingTable(loadedGrouping, m_uiForm);
   }
 }
 
@@ -3339,6 +3377,10 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
+
+  QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
+  m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
+
   if (deadTimeTypeIndex != 2)
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
 }
@@ -3668,6 +3710,7 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.optionStepSizeText, SIGNAL(editingFinished()), this, SLOT(settingsTabUpdatePlot()));
 
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_optionTab, SIGNAL(plotStyleChanged()), this, SLOT(updateCurrentPlotStyle()));
 }
 
 void MuonAnalysis::changeHomeFunction()
@@ -3732,6 +3775,31 @@ void MuonAnalysis::settingsTabUpdatePlot()
 {
   if (isAutoUpdateEnabled() && m_tabNumber == 2 && m_loaded == true)
     runFrontPlotButton();
+}
+
+/**
+ * Updates the style of the current plot according to actual parameters on settings tab.
+ */
+void MuonAnalysis::updateCurrentPlotStyle()
+{
+  if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE)
+  {
+    if(plotExists(m_currentDataName))
+    {
+      // TODO: This index magic wouldn't be needed if we'd store only a single group in a workspace.
+
+      // Get selected group index
+      int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+
+      // Check if pair is selected
+      if(index >= numGroups())
+        index = 0;
+
+      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, index));
+    }
+    else
+      runFrontPlotButton();
+  }
 }
 
 bool MuonAnalysis::isAutoUpdateEnabled()
@@ -3805,6 +3873,7 @@ void MuonAnalysis::setToolbarsHidden(bool hidden)
 void MuonAnalysis::changeDeadTimeType(int choice)
 {
   m_deadTimesChanged = true;
+
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
@@ -3812,8 +3881,8 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   }
   else // choice must be from workspace
   {
-    m_uiForm.mwRunDeadTimeFile->setText("");
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
+    m_uiForm.mwRunDeadTimeFile->setUserInput("");
   }
 
   QSettings group;
@@ -3829,6 +3898,14 @@ void MuonAnalysis::changeDeadTimeType(int choice)
 */
 void MuonAnalysis::deadTimeFileSelected()
 {
+  if(!m_uiForm.mwRunDeadTimeFile->isValid())
+    return;
+
+  // Remember the filename for the next time interface is opened
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "DeadTimeOptions");
+  group.setValue("deadTimeFile", m_uiForm.mwRunDeadTimeFile->getText());
+
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
 }

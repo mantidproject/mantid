@@ -171,6 +171,21 @@ namespace IDA
     }
   }
 
+  void Elwin::setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws)
+  {
+    auto inst = ws->getInstrument();
+    auto log = inst->getStringParameter("Workflow.SE-log");
+    QString logName("sample");
+
+    if(log.size() > 0)
+    {
+      logName = QString::fromStdString(log[0]);
+    }
+    
+    uiForm().leLogName->setText(logName);
+  }
+
+
   void Elwin::plotInput()
   {
     if ( uiForm().elwin_inputFile->isValid() )
@@ -187,6 +202,7 @@ namespace IDA
       }
 
       setDefaultResolution(ws);
+      setDefaultSampleLog(ws);
 
       m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, ws, 0);
       try

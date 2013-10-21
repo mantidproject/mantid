@@ -42,7 +42,6 @@ void PointByPointVCorrection::initDocs()
   this->setOptionalMessage("Spectrum by spectrum division for vanadium normalisation correction.");
 }
 
-
 using namespace Kernel;
 using namespace API;
 
@@ -84,9 +83,7 @@ void PointByPointVCorrection::exec()
 		PARALLEL_START_INTERUPT_REGION
 
     const MantidVec& X=inputWS1->readX(i);
-
-    MantidVec& Xresult=outputWS->dataX(i); //Copy the Xs
-    Xresult=X;
+    outputWS->setX( i, inputWS1->refX(i) );
 
     const MantidVec& Y1=inputWS1->readY(i);
     const MantidVec& Y2=inputWS2->readY(i);
@@ -116,7 +113,6 @@ void PointByPointVCorrection::exec()
         errors[j]=0;
     }
 
-
     // Calculate the normaliser
     double factor1=std::accumulate(Y1.begin(),Y1.end(),0.0);
     double factor2=std::accumulate(resultY.begin(),resultY.end(),0.0);
@@ -134,10 +130,16 @@ void PointByPointVCorrection::exec()
       error2_factor2+=errors[j]*test/factor2/factor2;
     }
     double error2_factor=(error2_factor1/factor1/factor1+error2_factor2);
-
-    //Calculate the normalized Y values
-    std::transform(resultY.begin(),resultY.end(),resultY.begin(),std::bind2nd(std::multiplies<double>(),factor)); // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
-
+    
+    // Calculate the normalized Y values
+    // NOTE: Previously, we had been using std::transform with std::bind2nd(std::multiplies<double>(),factor)
+    //       here, but that seemed to have strange effects in Windows Debug builds which caused the unit tests
+    //       to sometimes fail.  Maybe this is some compiler bug to do with using bind2nd within the parrallel macros.
+    for( auto rY = resultY.begin(); rY != resultY.end(); ++rY )
+    {
+      *rY *= factor; // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
+    }
+    
     //Finally get the normalized errors
     for (int j=0;j<size-1;j++)
       resultE[j]=resultY[j]*sqrt(errors[j]+error2_factor);

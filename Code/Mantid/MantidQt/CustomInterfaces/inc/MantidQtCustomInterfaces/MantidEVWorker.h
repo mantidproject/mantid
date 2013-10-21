@@ -98,7 +98,7 @@ public:
                        double              tolerance );
 
   /// Index the peaks using the indexing of the peaks in the peaks workspace
-  bool findUBUsingIndexedPeaks( const std::string & peaks_ws_name );
+  bool findUBUsingIndexedPeaks(const std::string & peaks_ws_name, double tolerance );
 
   /// Load the UB matrix from a file
   bool loadIsawUB( const std::string & peaks_ws_name,

@@ -2,8 +2,8 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument name="WISH" valid-from   ="2012-09-26 17:24:36"
-                        valid-to     ="2100-01-31 23:59:59"
-		        last-modified="2012-11-13 16:00:00">
+                        valid-to     ="2013-07-01 17:24:36"
+		        last-modified="2013-10-10 09:00:00">
  
    <defaults>
      <length unit="meter"/>

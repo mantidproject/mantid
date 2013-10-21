@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="MolDyn" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2010-10-07 00:00:00">
+<!-- modified by FD 7/10/2010 -->
+
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+  <offsets spherical="delta" />
+</defaults>
+
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+<!-- source and sample-position components -->
+
+<component type="moderator">
+  <location z="-36.41" />
+</component>
+
+<type name="moderator" is="Source">
+  <properties />
+</type>
+
+<component type="sample">
+  <location z="0.0" />
+</component>
+
+<type name="sample" is="SamplePos">
+  <cuboid id="shape">
+    <left-front-bottom-point x="0.02" y="-0.02" z="0.0"  />
+    <left-front-top-point  x="0.02" y="-0.02" z="0.02"  />
+    <left-back-bottom-point  x="-0.02" y="-0.02" z="0.0"  />
+    <right-front-bottom-point  x="0.02" y="0.02" z="0.0"  />
+  </cuboid>
+  <algebra val="shape" />
+</type>
+
+<!-- LIST OF DETECTORS AND MONITORS -->
+
+  
+<!--  detector components -->
+
+<component type="simul" idlist="simul">
+  <properties />
+  <parameter name="Efixed"> <value val="2.08" /> </parameter>
+  <parameter name="efixed-val">	<value val="2.08" /></parameter>
+  <location  />
+</component>
+
+<type name="simul">
+ <component type="pix1">
+  <location r="1.45" t="25.0" p="0" name="S1" />
+  <location r="1.45" t="31.5" p="0" name="S2" />
+  <location r="1.45" t="38.0" p="0" name="S3" />
+  <location r="1.45" t="44.5" p="0" name="S4" />
+  <location r="1.45" t="51.8" p="0" name="S5" />
+  <location r="1.45" t="57.5" p="0" name="S6" />
+  <location r="1.45" t="64.0" p="0" name="S7" />
+  <location r="1.45" t="70.5" p="0" name="S8" />
+  <location r="1.45" t="77.0" p="0" name="S9" />
+  <location r="1.45" t="83.5" p="0" name="S10" />
+  <location r="1.45" t="90.0" p="0" name="S11" />
+  <location r="1.45" t="96.5" p="0" name="S12" />
+  <location r="1.45" t="103.0" p="0" name="S13" />
+  <location r="1.45" t="109.5" p="0" name="S14" />
+  <location r="1.45" t="116.0" p="0" name="S15" />
+  <location r="1.45" t="122.5" p="0" name="S16" />
+  <location r="1.45" t="129.0" p="0" name="S17" />
+  <location r="1.45" t="135.5" p="0" name="S18" />
+  <location r="1.45" t="142.0" p="0" name="S19" />
+  <location r="1.45" t="148.5" p="0" name="S20" />
+  <location r="1.45" t="0.0" p="0" name="S21" />
+  <location r="1.45" t="0.0" p="0" name="S22" />
+  <location r="1.45" t="10.96" p="0" name="S23" />
+  <location r="1.45" t="16.8" p="0" name="S24" />
+  <location r="1.45" t="0.0" p="0" name="S25" />
+  <location r="1.45" t="0.0" p="0" name="S26" />
+  <location r="1.45" t="0.0" p="0" name="S27" />
+  <location r="1.45" t="0.0" p="0" name="S28" />
+ </component>
+</type>
+
+<idlist idname="simul">
+  <id start="1" end="28" />
+</idlist>
+
+<type name="pix1" is="detector">
+  <cuboid id="app-shape">
+    <left-front-bottom-point x="0.005" y="-0.1" z="0.0"  />
+    <left-front-top-point  x="0.005" y="-0.1" z="0.0002"  />
+    <left-back-bottom-point  x="-0.005" y="-0.1" z="0.0"  />
+    <right-front-bottom-point  x="0.005" y="0.1" z="0.0"  />
+  </cuboid>
+  <algebra val="app-shape" />
+</type>
+
+</instrument>

@@ -1232,18 +1232,8 @@ def divideDataByNormalization(data_y_axis,
             
                 tmp_error_1 = pow(float(data_y_error_axis[x,t]) / float(data_y_axis[x,t]),2)
                 tmp_error_2 = pow(float(av_norm_error[t]) / float(av_norm[t]),2)
-                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * (float(data_y_axis[x,t]) / float(av_norm[t]))
+                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * abs(float(data_y_axis[x,t]) / float(av_norm[t]))
             
-#                 if t == 61:
-#                     print 'data_y_error_axis[x,t]: ' , float(data_y_error_axis[x,t])
-#                     print 'data_y_axis[x,t]: ' , float(data_y_axis[x,t])
-#                     print 'tmp_error_1: ' , tmp_error_1
-#                     print 'av_norm_error[t]: ' , av_norm_error[t]
-#                     print 'av_norm[t]: ' , av_norm[t]
-#                     print 'tmp_error_2: ' , tmp_error_2
-#                     print 'tmp_error: ' , tmp_error
-#                     print
-
                 new_data_y_axis[x,t] = tmp_value
                 new_data_y_error_axis[x,t] = tmp_error
     
@@ -1970,6 +1960,32 @@ def cleanupData(final_data_y_axis, final_data_y_error_axis):
     
     
                 
+def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
+    
+    sz = final_data_y_axis.shape
+    nbrTof = sz[0]
+    
+    for t in range(nbrTof):
+            
+        _data = final_data_y_axis[t]
+        _error = final_data_y_error_axis[t]
+            
+        # if error is > value, remove point
+        if _error >= _data:
+            _data = 0
+            _error = 0
+            
+        # if value is below 10^-12
+        if _data < 1e-12:
+            _data = 0
+            _error = 0
+                
+        final_data_y_axis[t] = _data
+        final_data_y_error_axis[t] = _error
+            
+    return [final_data_y_axis, final_data_y_error_axis]
+    
+    
                 
             
     

@@ -550,10 +550,12 @@ They will work as was expected for folders @ref folders-sec.
         
         @param option: flag to set for auto-update, or not. If true, new versions of the path will replace the local file as soon as they are available at the central repository.
         
+        @return int: number of files changed (because of the cascading of folders)
+
         @exception ScriptRepoException : Invalid entry.
                 
     */
-    virtual void setAutoUpdate(const std::string & path, bool option = true) = 0;
+    virtual int setAutoUpdate(const std::string & path, bool option = true) = 0;
 
 
   };

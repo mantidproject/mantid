@@ -16,6 +16,9 @@ namespace IDA
   public:
     ApplyCorr(QWidget * parent = 0);
 
+  private slots:
+    void handleGeometryChange(int index);
+
   private:
     virtual void setup();
     virtual void run();

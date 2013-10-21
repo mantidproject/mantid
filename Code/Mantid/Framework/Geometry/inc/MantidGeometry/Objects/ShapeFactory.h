@@ -87,6 +87,7 @@ namespace Mantid
       std::string parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       Poco::XML::Element* getShapeElement(Poco::XML::Element* pElem, const std::string& name);
+      Poco::XML::Element* getOptionalShapeElement(Poco::XML::Element* pElem, const std::string& name);
       double getDoubleAttribute(Poco::XML::Element* pElem, const std::string& name);
       Kernel::V3D parsePosition(Poco::XML::Element* pElem);     
       void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Object>);

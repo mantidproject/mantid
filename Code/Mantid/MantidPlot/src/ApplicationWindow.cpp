@@ -3386,29 +3386,23 @@ void ApplicationWindow::convertTableToWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
-  {
-    mt = convertTableToTableWorkspace(t);
-  }
+  convertTableToTableWorkspace(t);
 }
 
 /**
- * Convert Table in the active window to a TableWorkspace
+ * Convert Table in the active window to a MatrixWorkspace
  */
 void ApplicationWindow::convertTableToMatrixWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
+  if(auto *mt = dynamic_cast<MantidTable*>(t))
   {
     mt = convertTableToTableWorkspace(t);
+    QMap<QString,QString> params;
+    params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+    mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
   }
-  if ( !mt ) return;
-  QMap<QString,QString> params;
-  params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-  mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
 }
 
 /**
@@ -3485,8 +3479,7 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
   {
     Mantid::API::AnalysisDataService::Instance().add(wsName,tws);
   }
-  MantidTable* mt = new MantidTable(scriptingEnv(), tws, t->objectName(), this);
-  return mt;
+  return new MantidTable(scriptingEnv(), tws, t->objectName(), this);
 }
 
 Matrix* ApplicationWindow::tableToMatrix(Table* t)
@@ -9456,13 +9449,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-  // don't ask the closing sub-windows: the answer will be ignored
-  MDIWindowList windows = getAllWindows();
-  foreach(MdiSubWindow* w,windows)
-  {
-    w->confirmClose(false);
-  }
-
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
     if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
@@ -9484,6 +9470,14 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
       ce->ignore();
       return;
     }
+  }
+
+  // Close all the MDI windows
+  MDIWindowList windows = getAllWindows();
+  foreach(MdiSubWindow* w,windows)
+  {
+    w->confirmClose(false);
+    w->close();
   }
 
   mantidUI->shutdown();

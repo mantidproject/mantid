@@ -871,7 +871,9 @@ class SANS2D(ISISInstrument):
             return float(log_data.getLogData(log_name).value)
         except TypeError:
             # Python 2.4 doesn't have datetime.strptime...
-            def format_date(date_string, format):
+            def format_date(date_string, format, date_str_len):
+                if len(date_string)>date_str_len:
+                    date_string = date_string[:date_str_len]
                 from datetime import datetime
                 if sys.version_info[0] == 2 and sys.version_info[1] <  5:
 	            import time
@@ -887,9 +889,9 @@ class SANS2D(ISISInstrument):
                 return float(log_data.getLogData(log_name).value[0])
 
             start = log_data.getLogData('run_start')
-            dt_0 = format_date(start.value,"%Y-%m-%dT%H:%M:%S")
+            dt_0 = format_date(start.value,"%Y-%m-%dT%H:%M:%S",19)
             for i in range(0, size):
-                dt = format_date(str(property.times[i]),"%Y-%m-%dT%H:%M:%S")
+                dt = format_date(str(property.times[i]),"%Y-%m-%dT%H:%M:%S",19)
                 if dt > dt_0:
                     if i == 0:
                         return float(log_data.getLogData(log_name).value[0])
