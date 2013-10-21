@@ -113,8 +113,6 @@ namespace MantidQt
 
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
-      // Auto contract GUI to improve UX.
-      this->layout()->setSizeConstraint(QLayout::SetFixedSize);
     }
 
     /**
