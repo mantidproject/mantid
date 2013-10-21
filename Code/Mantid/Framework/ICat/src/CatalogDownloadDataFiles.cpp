@@ -130,7 +130,7 @@ namespace Mantid
         std::ifstream hasAccessToArchives(fileLocation.c_str());
         if(hasAccessToArchives)
         {
-          g_log.information() << "File (" << *fileName << ") located in archives." << std::endl;
+          g_log.information() << "File (" << *fileName << ") located in archives (" << fileLocation << ")." << std::endl;
 
           fileLocations.push_back(fileLocation);
         }
