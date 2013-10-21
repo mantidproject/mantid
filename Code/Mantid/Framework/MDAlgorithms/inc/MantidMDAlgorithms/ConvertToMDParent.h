@@ -62,9 +62,9 @@ namespace MDAlgorithms
     virtual const std::string category() const;
 
     static Mantid::Kernel::Logger & getLogger();
-
-  private:
+  protected:
     void init();
+  private:
     virtual void exec()=0;
    /// Sets documentation strings for this algorithm
     virtual void initDocs()=0;  

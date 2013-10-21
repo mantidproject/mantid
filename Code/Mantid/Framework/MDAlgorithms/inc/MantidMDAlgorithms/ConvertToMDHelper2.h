@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -41,12 +42,13 @@ namespace MDAlgorithms
     virtual int version() const{return 2;}
 
   protected: // for testing 
-    void buildReducedMinMaxWorkspace(Mantid::API::MatrixWorkspace_const_sptr &InWS2D);
+    void buildMinMaxWorkspaceWithMinInstrument(Mantid::API::MatrixWorkspace_const_sptr &InWS2D, const std::vector<std::string> &oterDimNames);
   private:
     virtual void initDocs();
     void exec();
+    void init();
     /// pointer to the input workspace;
-    Mantid::API::MatrixWorkspace_sptr m_InWS2D;
+    Mantid::DataObjects::Workspace2D_sptr m_MinMaxWS2D;
 
   };
 

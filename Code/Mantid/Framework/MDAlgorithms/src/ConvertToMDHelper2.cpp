@@ -4,6 +4,7 @@
 
 #include "MantidMDAlgorithms/ConvertToMDHelper2.h"
 #include "MantidMDEvents/MDWSTransform.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <cfloat>
 
@@ -47,7 +48,14 @@ namespace MDAlgorithms
     this->setWikiSummary("Calculate limits required for ConvertToMD");
     this->setOptionalMessage("Calculate limits required for ConvertToMD");
   }
+  void ConvertToMDHelper2::init()
+  {
+    ConvertToMDParent::init();
 
+    declareProperty(new Kernel::ArrayProperty<double>("MinValues",Direction::Output));
+    declareProperty(new Kernel::ArrayProperty<double>("MaxValues",Direction::Output));
+
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
@@ -55,9 +63,9 @@ namespace MDAlgorithms
 
   void ConvertToMDHelper2::exec()
   {
-    std::vector<double> MinValues,MaxValues;
+
    // -------- get Input workspace
-     Mantid::API::MatrixWorkspace_const_sptr InWS2D = getProperty("InputWorkspace");
+   Mantid::API::MatrixWorkspace_const_sptr InWS2D = getProperty("InputWorkspace");
    
    
   // Collect and Analyze the requests to the job, specified by the input parameters:
@@ -81,16 +89,20 @@ namespace MDAlgorithms
    // get number of dimensions this Q transformation generates from the workspace. 
    auto iEmode = Kernel::DeltaEMode().fromString(dEModReq);
    // get total numner of dimensions the workspace would have.
-   unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(iEmode,m_InWS2D);
+   unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(iEmode,InWS2D);
    // total number of dimensions
    size_t nDim =nMatrixDim+otherDimNames.size();
-   MinValues.resize(nDim,FLT_MAX);
-   MaxValues.resize(nDim,-FLT_MAX);
 
+   // this builds reduced workspace with fake instrument used to calculate min-max values. We may avoid this and use source workspace instead
+   // but this left for compartibility with ConvertToMDHelper Version 1)
+    buildMinMaxWorkspaceWithMinInstrument(InWS2D,otherDimNames);
 
+    std::vector<double> MinValues,MaxValues;
+    MinValues.resize(nDim,-FLT_MAX);
+    MaxValues.resize(nDim,FLT_MAX);
     // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less max
     targWSDescr.setMinMax(MinValues,MaxValues);   
-    targWSDescr.buildFromMatrixWS(m_InWS2D,QModReq,dEModReq,otherDimNames);
+    targWSDescr.buildFromMatrixWS(m_MinMaxWS2D,QModReq,dEModReq,otherDimNames);
 
   // instanciate class, responsible for defining Mslice-type projection
     MDEvents::MDWSTransform MsliceProj;
@@ -111,9 +123,6 @@ namespace MDAlgorithms
    // set up target coordinate system and identify/set the (multi) dimension's names to use
     targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);           
 
-    // this builds reduced workspace with fake instrument used to calculate min-max values. We may avoid this and use source workspace instead
-    // but this left for compartibility with ConvertToMDHelper Version 1)
-    buildReducedMinMaxWorkspace(InWS2D);
     //std::vector<double> MinValues,MaxValues;
     //std::string QDimension=getPropertyValue("QDimensions");
     //std::string GeometryMode=getPropertyValue("dEAnalysisMode");
@@ -280,8 +289,99 @@ namespace MDAlgorithms
     //setProperty("MaxValues",MaxValues);
   }
 
-   void ConvertToMDHelper2::buildReducedMinMaxWorkspace(Mantid::API::MatrixWorkspace_const_sptr &InWS2D)
+   void ConvertToMDHelper2::buildMinMaxWorkspaceWithMinInstrument(Mantid::API::MatrixWorkspace_const_sptr &InWS2D)
    {
+
+     // Create workspace with min-max values
+    double xMin,xMax;
+    InWS2D->getXMinMax(xMin,xMax);
+
+    m_MinMaxWS2D=Mantid::DataObjects::Workspace2D_sptr(new Mantid::DataObjects::Workspace2D ,const std::vector<std::string> &oterDimName);
+
+    size_t nHist = 2; // number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
+    size_t nBins = 1; // number of bins in min-max workspace
+
+
+    MantidVecPtr X,Y,ERR;
+    X.access().resize(nBins+1);
+    Y.access().resize(nBins,0);
+    ERR.access().resize(nBins,0);
+
+    X.access()[0]=xMin;
+    X.access()[1]=xMax;
+
+
+    m_MinMaxWS2D->initialize(nHist,nBins+1,nBins);
+    for (int i=0; i< nHist; i++)
+    {
+      m_MinMaxWS2D->setX(i,X);
+      m_MinMaxWS2D->setData(i,Y,ERR);
+    }
+
+    m_MinMaxWS2D->getAxis(0)->setUnit("TOF");
+    space->setYUnit("Counts");
+
+
+    //m_MinMaxWS2D->setAxis(0,InWS2D->getAxis(0));
+    //m_MinMaxWS2D->setAxis(1,InWS2D->getAxis(1));
+    //
+
+    //boost::shared_ptr<Instrument> testInst(new Instrument("MinMaxInstr"));
+    //testInst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y,X,Left,"")));
+    //space->setInstrument(testInst);
+
+    //const double pixelRadius(0.05);
+    //Object_sptr pixelShape = 
+    //  ComponentCreationHelper::createCappedCylinder(pixelRadius, 0.02, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
+
+    //const double detXPos(5.0);
+    //int ndets = nhist;
+    //if( includeMonitors ) ndets -= 2;
+    //for( int i = 0; i < ndets; ++i )
+    //{
+    //  std::ostringstream lexer;
+    //  lexer << "pixel-" << i << ")";
+    //  Detector * physicalPixel = new Detector(lexer.str(), space->getAxis(1)->spectraNo(i), pixelShape, testInst.get());
+    //  int ycount(i);
+    //  if(startYNegative) ycount -= 1;
+    //  const double ypos = ycount*2.0*pixelRadius;
+    //  physicalPixel->setPos(detXPos, ypos,0.0);
+    //  testInst->add(physicalPixel);
+    //  testInst->markAsDetector(physicalPixel);
+    //  space->getSpectrum(i)->addDetectorID(physicalPixel->getID());
+    //}
+
+    //// Monitors last
+    //if( includeMonitors ) // These occupy the last 2 spectra
+    //{
+    //  Detector *monitor1 = new Detector("mon1", space->getAxis(1)->spectraNo(ndets), Object_sptr(), testInst.get());
+    //  monitor1->setPos(-9.0,0.0,0.0);
+    //  monitor1->markAsMonitor();
+    //  testInst->add(monitor1);
+    //  testInst->markAsMonitor(monitor1);
+
+    //  Detector *monitor2 = new Detector("mon2", space->getAxis(1)->spectraNo(ndets)+1, Object_sptr(), testInst.get());
+    //  monitor2->setPos(-2.0,0.0,0.0);
+    //  monitor2->markAsMonitor();
+    //  testInst->add(monitor2);
+    //  testInst->markAsMonitor(monitor2);
+    //}
+
+
+    //// Define a source and sample position
+    ////Define a source component
+    //ObjComponent *source = new ObjComponent("moderator", Object_sptr(), testInst.get());
+    //source->setPos(V3D(-20, 0.0, 0.0));
+    //testInst->add(source);
+    //testInst->markAsSource(source);
+
+    //// Define a sample as a simple sphere
+    //ObjComponent *sample = new ObjComponent("samplePos", Object_sptr(), testInst.get());
+    //testInst->setPos(0.0, 0.0, 0.0);
+    //testInst->add(sample);
+    //testInst->markAsSamplePos(sample);
+
+
 
    }
 
