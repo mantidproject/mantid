@@ -16992,12 +16992,12 @@ if( QFileInfo(action_data).exists() )
 }
 else
 {
-  //First search for an existing window
-  foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
+  // Check to see if the window is already open.  If so, just show it to the user.
+  foreach( auto userSubWindow, this->findChildren<UserSubWindow *>() )
   {
-    if( sub_win->widget()->objectName() == action_data )
+    if( userSubWindow->objectName() == action_data )
     {
-      sub_win->widget()->show();
+      userSubWindow->activateWindow();
       return;
     }
   }
