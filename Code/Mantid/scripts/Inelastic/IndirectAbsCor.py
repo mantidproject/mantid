@@ -204,14 +204,18 @@ def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
         graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
 
 
-# FlatAbs - CALCULATE FLAT PLATE ABSORPTION FACTORS
+# FlatAbs - calculate flat plate absorption factors
+# 
+# For more information See:
+#   - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf  
+#   - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)  
 #
 #  Input parameters :
 #  sigs - list of scattering  cross-sections
 #  siga - list of absorption cross-sections
 #  density - list of density
 #  ncan - =0 no can, >1 with can
-#  thick - list of thicknesses ts,t1,t2
+#  thick - list of thicknesses: sample thickness, can thickness1, can thickness2
 #  angles - list of angles
 #  waves - list of wavelengths
 #  Output parameters :
