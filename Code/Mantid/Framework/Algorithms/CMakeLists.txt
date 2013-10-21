@@ -105,7 +105,6 @@ set ( SRC_FILES
 	src/FindDetectorsOutsideLimits.cpp
 	src/FindPeakBackground.cpp
 	src/FindPeaks.cpp
-	src/FlatBackground.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
 	src/GenerateEventsFilter.cpp
@@ -330,7 +329,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
 	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FindPeaks.h
-	inc/MantidAlgorithms/FlatBackground.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
@@ -559,7 +557,6 @@ set ( TEST_FILES
 	FindDetectorsOutsideLimitsTest.h
 	FindPeakBackgroundTest.h
 	FindPeaksTest.h
-	FlatBackgroundTest.h
 	FlatPlateAbsorptionTest.h
 	GenerateEventsFilterTest.h
 	GeneratePeaksTest.h

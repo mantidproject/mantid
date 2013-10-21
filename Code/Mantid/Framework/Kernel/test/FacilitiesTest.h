@@ -75,8 +75,6 @@ public:
     TS_ASSERT_EQUALS( fac->extensions().size(), 1 );
     TS_ASSERT_EQUALS( fac->extensions()[0],".xyz" );
     TS_ASSERT_EQUALS( fac->preferredExtension(), ".xyz" );
-    TS_ASSERT( fac->getSoapEndPoint().empty() );
-    TS_ASSERT( fac->catalogName().empty() );
     TS_ASSERT( fac->archiveSearch().empty() );
     TS_ASSERT( fac->liveListener().empty() );
     TS_ASSERT_EQUALS( fac->instruments().size(), 1 );

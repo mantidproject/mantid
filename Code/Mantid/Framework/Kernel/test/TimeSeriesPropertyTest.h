@@ -11,6 +11,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::Kernel;
 
@@ -966,17 +967,47 @@ public:
 
   void test_clear()
   {
-    TimeSeriesProperty<int> * p = new TimeSeriesProperty<int>("aProp");
+    boost::scoped_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
     p->addValue("2007-11-30T16:17:00",1);
 
     TS_ASSERT_EQUALS( p->size(), 1);
     TS_ASSERT_EQUALS( p->realSize(), 1);
 
-    ITimeSeriesProperty * pi = p;
+    ITimeSeriesProperty * pi = p.get();
     TS_ASSERT_THROWS_NOTHING( pi->clear() );
 
     TS_ASSERT_EQUALS( p->size(), 0);
     TS_ASSERT_EQUALS( p->realSize(), 0);
+  }
+
+  void test_clearOutdated()
+  {
+    boost::scoped_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
+    p->addValue("2007-11-30T16:17:00",99);
+
+    ITimeSeriesProperty * pi = p.get();
+    TS_ASSERT_THROWS_NOTHING( pi->clearOutdated() );
+    // No change
+    TS_ASSERT_EQUALS( p->size(), 1);
+    TS_ASSERT_EQUALS( p->realSize(), 1);
+    TS_ASSERT_EQUALS( p->lastValue(), 99);
+
+    DateAndTime t("2007-11-30T15:17:00");
+    p->addValue(t,88);
+    TS_ASSERT_EQUALS( p->size(), 2);
+
+    TS_ASSERT_THROWS_NOTHING( pi->clearOutdated() );
+    TS_ASSERT_EQUALS( p->size(), 1);
+    TS_ASSERT_EQUALS( p->realSize(), 1);
+    // Note that it kept the last-added entry even though its time is earlier
+    TS_ASSERT_EQUALS( p->lastTime(), t);
+    TS_ASSERT_EQUALS( p->firstValue(), 88);
+
+    TimeSeriesProperty<double> pp("empty");
+    TS_ASSERT_THROWS_NOTHING( pp.clearOutdated() );
+    // No change
+    TS_ASSERT_EQUALS( pp.size(), 0);
+    TS_ASSERT_EQUALS( pp.realSize(), 0);
   }
 
   /*

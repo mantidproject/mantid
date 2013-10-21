@@ -8,6 +8,7 @@
 #include "ui_PlotAsymmetryByLogValueDialog.h"
 
 #include <QString>
+#include <QSignalMapper>
 
 //---------------------------
 // Qt Forward declarations
@@ -66,21 +67,24 @@ private:
   //@{
   /// Create the layout
   void initLayout();
-  void parseInput();
   //@}
 	
 private slots:
 
-  /// A slot for the browse button clicked signal
-  void browseFirstClicked();
-  void browseLastClicked();
+  /// Opens a file dialog. Updates the QLineEdit provided when the dialog is closed.
+  void openFileDialog(const QString& filePropName);
   void fillLogBox(const QString&);
+
+  /// Show or hide Dead Time file widget depending on which Dead Time type is selected.
+  void showHideDeadTimeFileWidget(int deadTimeTypeIndex);
 
 private:
 
-
   // The form generated with Qt Designer
   Ui::PlotAsymmetryByLogValueDialog m_uiForm;
+
+  /// Maps Browse buttons to file properties
+  QSignalMapper* browseButtonMapper;
 };
 
 }

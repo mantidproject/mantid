@@ -529,9 +529,6 @@
              </item>
              <item>
               <widget class="QComboBox" name="file_opt">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
               </widget>
              </item>
             </layout>
