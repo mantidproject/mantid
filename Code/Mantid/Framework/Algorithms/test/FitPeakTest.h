@@ -92,15 +92,6 @@ public:
     gen_BkgdParameters(bkgdparnames, bkgdparvalues);
     gen_PeakParameters(peakparnames, peakparvalues);
 
-#if 0
-    const MantidVec& vecx = dataws->readX(0);
-    const MantidVec& vecy = dataws->readY(0);
-    for (size_t i = 0; i < vecx.size(); ++i)
-      cout << vecx[i] << "\t\t" << vecy[i] << "\n";
-    TS_ASSERT_EQUALS(1, 100);
-    return;
-#endif
-
     // Initialize FitPeak
     FitPeak fitpeak;
     fitpeak.initialize();

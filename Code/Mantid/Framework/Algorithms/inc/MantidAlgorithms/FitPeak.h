@@ -126,9 +126,9 @@ namespace Algorithms
     double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
 
     /// Generate table workspace
-    DataObjects::TableWorkspace_sptr genOutputTableWS(API::IFunction_sptr peakfunc,
+    DataObjects::TableWorkspace_sptr genOutputTableWS(API::IPeakFunction_sptr peakfunc,
                                                       std::map<std::string, double> peakerrormap,
-                                                      API::IFunction_sptr bkgdfunc,
+                                                      API::IBackgroundFunction_sptr bkgdfunc,
                                                       std::map<std::string, double> bkgderrormap);
 
     /// Input data workspace

@@ -66,6 +66,7 @@ namespace Algorithms
   FitPeak::FitPeak()
   {
     m_minimizer = "Levenberg-MarquardtMD";
+    m_bestRwp = DBL_MAX;
   }
     
   //----------------------------------------------------------------------------------------------
@@ -367,12 +368,12 @@ namespace Algorithms
     // Cost function
     string costfunname = getProperty("CostFunction");
     if (costfunname == "Chi-Square")
+    {
       m_costFunction = "Least squares";
+    }
     else if (costfunname == "Rwp")
     {
       m_costFunction = "Rwp";
-      // FIXME - Write a unit test for this!
-      throw runtime_error("Rwp has not been not tested yet.");
     }
     else
     {
@@ -408,7 +409,8 @@ namespace Algorithms
     push(m_bkgdFunc, m_bkupBkgdFunc, temperrormap);
 
     // Fit with different starting values of peak width
-    for (size_t i = 0; i < vec_FWHM.size(); ++i)
+    size_t numfits = vec_FWHM.size();
+    for (size_t i = 0; i < numfits; ++i)
     {
       // set FWHM
       g_log.notice() << "[DB SingleStep] FWHM = " << vec_FWHM[i] << "\n";
@@ -419,9 +421,19 @@ namespace Algorithms
       processNStoreFitResult(goodndess, true);
 
       // restore the function parameters
-      pop(m_bkupPeakFunc, m_peakFunc);
-      pop(m_bkupBkgdFunc, m_bkgdFunc);
+      if (i != numfits-1)
+      {
+        pop(m_bkupPeakFunc, m_peakFunc);
+        pop(m_bkupBkgdFunc, m_bkgdFunc);
+      }
     }
+
+    // Retrieve the best result stored
+    pop(m_bestPeakFunc, m_peakFunc);
+    pop(m_bestBkgdFunc, m_bkgdFunc);
+    m_finalGoodnessValue = m_bestRwp;
+
+    g_log.information() << "Best peak function fitted: " << m_peakFunc->asString() << ".\n";
 
     return;
   }
@@ -758,6 +770,7 @@ namespace Algorithms
       push(m_peakFunc, m_bestPeakFunc, m_fitErrorPeakFunc);
       if (storebkgd)
         push(m_bkgdFunc, m_bestBkgdFunc, m_fitErrorBkgdFunc);
+      m_bestRwp = rwp;
     }
 
     return;
@@ -1212,8 +1225,8 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Generate table workspace
     */
-  TableWorkspace_sptr FitPeak::genOutputTableWS(IFunction_sptr peakfunc, map<string, double> peakerrormap,
-                                                IFunction_sptr bkgdfunc, map<string, double> bkgderrormap)
+  TableWorkspace_sptr FitPeak::genOutputTableWS(IPeakFunction_sptr peakfunc, map<string, double> peakerrormap,
+                                                IBackgroundFunction_sptr bkgdfunc, map<string, double> bkgderrormap)
   {
     // Empty table
     TableWorkspace_sptr outtablews = boost::make_shared<TableWorkspace>();
@@ -1228,27 +1241,63 @@ namespace Algorithms
     // Set peak paraemters
     newrow = outtablews->appendRow();
     newrow << peakfunc->name();
-    vector<string> peakparnames = peakfunc->getParameterNames();
-    for (size_t i = 0; i < peakparnames.size(); ++i)
+
+    if (m_outputRawParams)
     {
-      string& parname = peakparnames[i];
-      double parvalue = peakfunc->getParameter(parname);
-      double error = peakerrormap[parname];
+      vector<string> peakparnames = peakfunc->getParameterNames();
+      for (size_t i = 0; i < peakparnames.size(); ++i)
+      {
+        string& parname = peakparnames[i];
+        double parvalue = peakfunc->getParameter(parname);
+        double error = peakerrormap[parname];
+        newrow = outtablews->appendRow();
+        newrow << parname << parvalue << error;
+      }
+    }
+    else
+    {
       newrow = outtablews->appendRow();
-      newrow << parname << parvalue << error;
+      newrow << "centre" << peakfunc->centre();
+
+      newrow = outtablews->appendRow();
+      newrow << "width" << peakfunc->fwhm();
+
+      newrow = outtablews->appendRow();
+      newrow << "height" << peakfunc->height();
     }
 
     // Set background paraemters
     newrow = outtablews->appendRow();
     newrow << bkgdfunc->name();
-    vector<string> bkgdparnames = bkgdfunc->getParameterNames();
-    for (size_t i = 0; i < bkgdparnames.size(); ++i)
+
+    if (m_outputRawParams)
     {
-      string& parname = bkgdparnames[i];
-      double parvalue = bkgdfunc->getParameter(parname);
-      double error = bkgderrormap[parname];
+      vector<string> bkgdparnames = bkgdfunc->getParameterNames();
+      for (size_t i = 0; i < bkgdparnames.size(); ++i)
+      {
+        string& parname = bkgdparnames[i];
+        double parvalue = bkgdfunc->getParameter(parname);
+        double error = bkgderrormap[parname];
+        newrow = outtablews->appendRow();
+        newrow << parname << parvalue << error;
+      }
+    }
+    else
+    {
+      string bkgdtype = getProperty("BackgroundType");
+
       newrow = outtablews->appendRow();
-      newrow << parname << parvalue << error;
+      newrow << "backgroundintercept" << bkgdfunc->getParameter("A0");
+      if (bkgdtype != "Flat")
+      {
+        newrow = outtablews->appendRow();
+        newrow << "backgroundintercept" << bkgdfunc->getParameter("A1");
+      }
+      if (bkgdtype == "Quadratic")
+      {
+        newrow = outtablews->appendRow();
+        newrow << "A2" << bkgdfunc->getParameter("A2");
+      }
     }
 
     return outtablews;
