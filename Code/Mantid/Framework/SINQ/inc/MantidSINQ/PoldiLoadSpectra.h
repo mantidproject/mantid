@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/System.h"
 
 #include <napi.h>
 //----------------------------------------------------------------------
@@ -19,7 +19,7 @@ namespace Mantid
   namespace DataHandling
   {
 
-    class DLLExport PoldiLoadSpectra : public API::Algorithm
+    class MANTID_SINQ_DLL PoldiLoadSpectra : public API::Algorithm
     {
     public:
       /// Default constructor

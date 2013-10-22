@@ -11,6 +11,7 @@
 #ifndef SINQHMLISTENER_H_
 #define SINQHMLISTENER_H_
 
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/ILiveListener.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
@@ -18,7 +19,7 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPClientSession.h>
 
-class SINQHMListener : public Mantid::API::ILiveListener
+class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener
 {
 public:
 	SINQHMListener();

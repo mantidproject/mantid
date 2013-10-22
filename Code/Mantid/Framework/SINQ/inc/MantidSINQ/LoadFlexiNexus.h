@@ -24,10 +24,8 @@
 #ifndef FLEXINEXUSLOADER_H_
 #define FLEXINEXUSLOADER_H_
 
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-
-//#include "MantidNexusCPP/NeXusFile.hpp"
-//#include "MantidNexusCPP/NeXusException.hpp"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -36,7 +34,7 @@
 #include <boost/shared_array.hpp>
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
-class LoadFlexiNexus : public Mantid::API::Algorithm
+class MANTID_SINQ_DLL LoadFlexiNexus : public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor

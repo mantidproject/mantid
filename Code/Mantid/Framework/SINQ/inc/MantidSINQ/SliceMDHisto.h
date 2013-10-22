@@ -9,10 +9,11 @@
 #ifndef SLICEMDHISTO_H_
 #define SLICEMDHISTO_H_
 
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
-class SliceMDHisto : public Mantid::API::Algorithm
+class MANTID_SINQ_DLL SliceMDHisto : public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor

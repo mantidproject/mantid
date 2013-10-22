@@ -17,6 +17,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+    inc/MantidSINQ/DllConfig.h
     inc/MantidSINQ/LoadFlexiNexus.h
     inc/MantidSINQ/PoldiRemoveDeadWires.h
     inc/MantidSINQ/PoldiLoadChopperSlits.h
@@ -48,7 +49,8 @@ enable_precompiled_headers ( inc/MantidSINQ/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( SINQ ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
-set_target_properties ( SINQ PROPERTIES OUTPUT_NAME MantidSINQ )
+set_target_properties ( SINQ PROPERTIES OUTPUT_NAME MantidSINQ 
+                                        COMPILE_DEFINITIONS "IN_MANTID_SINQ" )
 # Add to the 'Framework' group in VS
 set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 

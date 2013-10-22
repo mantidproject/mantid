@@ -9,10 +9,11 @@
 #ifndef PROJECTMD_H_
 #define PROJECTMD_H_
 
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
-class ProjectMD : public Mantid::API::Algorithm
+class MANTID_SINQ_DLL ProjectMD : public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor

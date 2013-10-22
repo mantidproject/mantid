@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 #include <vector>
 
@@ -52,7 +52,7 @@ namespace Poldi
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at <http://doxygen.mantidproject.org>
 */
-class DLLExport PoldiPeakDetection2 : public API::Algorithm
+class MANTID_SINQ_DLL PoldiPeakDetection2 : public API::Algorithm
 {
 public:
 	/// Default constructor

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -51,7 +51,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       Code Documentation is available at <http://doxygen.mantidproject.org>
   */
-    class DLLExport PoldiRemoveDeadWires : public API::Algorithm
+    class MANTID_SINQ_DLL PoldiRemoveDeadWires : public API::Algorithm
     {
     public:
       /// Default constructor
