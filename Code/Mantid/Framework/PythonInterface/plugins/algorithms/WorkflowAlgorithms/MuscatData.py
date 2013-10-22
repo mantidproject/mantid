@@ -1,6 +1,6 @@
 """*WIKI* 
 
-Calculates Multiple Scattering based on the Monte Carlo program MINUS. It takes a sample <math>S(Q,ω)</math> from an input sqw workspace and supports both
+Calculates Multiple Scattering based on the Monte Carlo program MINUS. It takes a sample <math>S(Q,w)</math> from an input sqw workspace and supports both
 Flat and Cylindrical geometries.
 
 ==== References ====

@@ -1,6 +1,6 @@
 """*WIKI* 
 
-Calculates Multiple Scattering based on the Monte Carlo program MINUS. It calculates <math>S(Q,ω)</math> from specified functions (such as those used in JumpFit) and supports both
+Calculates Multiple Scattering based on the Monte Carlo program MINUS. It calculates <math>S(Q,w)</math> from specified functions (such as those used in JumpFit) and supports both
 Flat and Cylindrical geometries.
 
 ==== References ====
