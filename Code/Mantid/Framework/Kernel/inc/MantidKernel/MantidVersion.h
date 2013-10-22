@@ -41,8 +41,7 @@ public:
   static const char* revision();    ///< The abbreviated SHA-1 of the last commit
   static const char* revisionFull();    ///< The full SHA-1 of the last commit
   static const char* releaseDate(); ///< The date of the last commit
-  static const char* mainDOI();  ///< The main landing page DOI for Mantid.
-  static std::string releaseDOI();  ///< The DOI for this release of Mantid.
+  static std::string doi();         ///< The DOI for this release of Mantid.
 
 private:
   MantidVersion(); ///< Private, unimplemented constructor. Not a class that can be instantiated.
