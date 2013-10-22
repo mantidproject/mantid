@@ -80,10 +80,17 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     // Check the results
-    //TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"-12.667,-12.667,-12.667,-50");
-    //TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"12.667,12.667,12.667,50");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"-0.724983,-0,-1.86877,-50");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"-0.218591,-0,3.19515,50");
+    double minS[]={-0.724983,-0,-1.86877,-50};
+    double maxS[]={-0.218591,-0,3.19515,50};
+    std::vector<double> minSample(minS,minS+4),maxSample(maxS,maxS+4);
+
+    std::vector<double> minVal = alg.getProperty("MinValues");
+    std::vector<double> maxVal = alg.getProperty("MaxValues");
+    for(size_t i=0;i<4;++)
+    {
+      TS_ASSERT_DELTA(minSample[i],minVal[i],1.e-4);
+      TS_ASSERT_DELTA(maxSample[i],maxVal[i],1.e-4);
+    }
 
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
@@ -105,9 +112,20 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("QConversionScales","HKL") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
+
     // Check the results
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"-0.724983,-0,-1.86877,-50");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"-0.218591,-0,3.19515,50");
+    double minS[]={-0.724983,-0,-1.86877,-50};
+    double maxS[]={-0.218591,-0,3.19515,50};
+    std::vector<double> minSample(minS,minS+4),maxSample(maxS,maxS+4);
+
+    std::vector<double> minVal = alg.getProperty("MinValues");
+    std::vector<double> maxVal = alg.getProperty("MaxValues");
+    for(size_t i=0;i<4;++)
+    {
+      TS_ASSERT_DELTA(minSample[i],minVal[i],1.e-4);
+      TS_ASSERT_DELTA(maxSample[i],maxVal[i],1.e-4);
+    }
+
 
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
