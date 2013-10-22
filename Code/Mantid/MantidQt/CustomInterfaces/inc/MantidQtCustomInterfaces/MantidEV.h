@@ -196,6 +196,8 @@ public:
 
   /// The name of the interface as registered into the factory
   static std::string name() { return "SCD Event Data Reduction"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "Diffraction"; }
 
 public slots:
   /// Slot for Q-Point selection notification
