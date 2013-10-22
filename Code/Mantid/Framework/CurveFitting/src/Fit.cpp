@@ -218,6 +218,27 @@ the algorithm will have these additional properties:
 |An X value in the last bin to be included in the fit
 |}
 
+=== Additional property when fitting with Convolution ===
+If Function is a Convolution and the model function (function index 1) is a
+CompositeFunction itself it is possible to output each component of the model
+convolved with the resolution (function index 0) by setting ConvolveMembers
+option to true. This option will only have effect if OutputCompositeMembers is
+also true.
+
+{| border="1" cellpadding="5" cellspacing="0"
+!Name
+!Direction
+!Type
+!Default
+!Description
+|-
+|ConvolveMembers
+|Input
+|bool
+|false
+|Convolve members of the model in output
+|}
+
 *WIKI*/
 
 //----------------------------------------------------------------------
