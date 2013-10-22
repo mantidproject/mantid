@@ -57,7 +57,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -609,7 +609,7 @@
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>150</y>
+         <y>140</y>
          <width>431</width>
          <height>27</height>
         </rect>
@@ -757,6 +757,22 @@
        </property>
        <property name="text">
         <string>0.12</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="IndexedPeaksTolerance_ledt">
+       <property name="geometry">
+        <rect>
+         <x>410</x>
+         <y>160</y>
+         <width>81</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Maximum distance of h,k or l from integer values to&lt;br&gt; consider a peak to be indexed.</string>
+       </property>
+       <property name="text">
+        <string>0.1</string>
        </property>
       </widget>
       <widget class="QLabel" name="FFTTolerance_lbl">
@@ -915,6 +931,19 @@
        </property>
        <property name="text">
         <string>Use Current UB (if already found or loaded)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="IndexedPeaksTolerance_lbl">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>160</y>
+         <width>331</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Tolerance</string>
        </property>
       </widget>
      </widget>

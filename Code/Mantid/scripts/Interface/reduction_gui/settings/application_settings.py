@@ -46,8 +46,8 @@ class GeneralSettings(QtCore.QObject):
             @param settings: QSettings object
         """
         settings.setValue("general_data_path", str(self.data_path))
-        settings.setValue("debug_mode", self.debug)
-        settings.setValue("advanced_mode", self.advanced)
+        settings.setValue("debug_mode", str(self.debug))
+        settings.setValue("advanced_mode", str(self.advanced))
         settings.setValue("instrument_name", str(self.instrument_name))
         settings.setValue("facility_name", str(self.facility_name))
         
@@ -57,8 +57,8 @@ class GeneralSettings(QtCore.QObject):
             @param settings: QSettings object
         """
         self.data_path = unicode(settings.value("general_data_path", '.'))
-        self.debug = bool(settings.value("debug_mode", False))
-        self.advanced = bool(settings.value("advanced_mode", True))
+        self.debug = unicode(settings.value("debug_mode", 'false')).lower()=='true'
+        self.advanced = unicode(settings.value("advanced_mode", 'true')).lower()=='true'
         self.instrument_name = unicode(settings.value("instrument_name", ''))
         self.facility_name = unicode(settings.value("facility_name", ''))
         

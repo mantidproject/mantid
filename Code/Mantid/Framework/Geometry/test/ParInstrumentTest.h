@@ -34,6 +34,7 @@ public:
     instrument->markAsDetector(det2.get());
     det3 = boost::shared_ptr<Detector>(new Detector("det3",11,0));
     instrument->markAsDetector(det3.get());
+    instrument->markAsMonitor(det3.get());
 
     pmap.reset(new ParameterMap);
   }
@@ -77,6 +78,12 @@ public:
 
     ComponentID  id3 = det3->getComponentID ();
     TS_ASSERT_EQUALS(det3->getName(), instrument->getComponentByID(id3)->getName() );
+  }
+
+  void test_numMonitors()
+  {
+    Instrument pinstrument(instrument,pmap);
+    TS_ASSERT_EQUALS( pinstrument.numMonitors(), 1 )
   }
 
 private:

@@ -12,7 +12,7 @@ This is then written into a [[CalFile|.cal file]] for every detector that contri
 /*WIKI_USAGE*
 '''Python'''
 
- GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal","offsets","mask")
+ offsets,mask = GetDetOffsetsMultiPeaks("InputW",0.01,2.0,1.8,2.2,"output.cal")
 *WIKI_USAGE*/
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/FileProperty.h"

@@ -96,7 +96,6 @@ void Indirect::initLayout()
   // "Calibration" tab
   connect(m_uiForm.cal_leRunNo, SIGNAL(filesFound()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
-  connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
   connect(m_uiForm.cal_ckIntensityScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(intensityScaleMultiplierCheck(bool)));
   connect(m_uiForm.cal_leIntensityScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(calibValidateIntensity(const QString &)));
@@ -607,11 +606,27 @@ void Indirect::createRESfile(const QString& file)
 
   QString background = "[ " +QString::number(m_calDblMng->value(m_calResProp["Start"]))+ ", " +QString::number(m_calDblMng->value(m_calResProp["End"]))+"]";
 
+  QString scaled = m_uiForm.cal_ckIntensityScaleMultiplier->isChecked() ? "True" : "False";
   pyInput +=
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = " + file + "\n"
-    "resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n";
+    "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n"
+    "scaled = "+ scaled +"\n"
+    "scaleFactor = "+m_uiForm.cal_leIntensityScaleMultiplier->text()+"\n"
+    "backStart = "+QString::number(m_calDblMng->value(m_calCalProp["BackMin"]))+"\n"
+    "backEnd = "+QString::number(m_calDblMng->value(m_calCalProp["BackMax"]))+"\n"
+    "rebinLow = "+QString::number(m_calDblMng->value(m_calResProp["ELow"]))+"\n"
+    "rebinWidth = "+QString::number(m_calDblMng->value(m_calResProp["EWidth"]))+"\n"
+    "rebinHigh = "+QString::number(m_calDblMng->value(m_calResProp["EHigh"]))+"\n"
+    "AddSampleLog(Workspace=ws, LogName='scale', LogType='String', LogText=str(scaled))\n"
+    "if scaled:"
+    "  AddSampleLog(Workspace=ws, LogName='scale_factor', LogType='Number', LogText=str(scaleFactor))\n"
+    "AddSampleLog(Workspace=ws, LogName='back_start', LogType='Number', LogText=str(backStart))\n"
+    "AddSampleLog(Workspace=ws, LogName='back_end', LogType='Number', LogText=str(backEnd))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_low', LogType='Number', LogText=str(rebinLow))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_width', LogType='Number', LogText=str(rebinWidth))\n"
+    "AddSampleLog(Workspace=ws, LogName='rebin_high', LogType='Number', LogText=str(rebinHigh))\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1603,6 +1618,8 @@ void Indirect::calPlotRaw()
   // Replot
   m_calCalPlot->replot();
 
+  // also replot the energy
+  calPlotEnergy();
 }
 
 void Indirect::calPlotEnergy()
@@ -1648,9 +1665,36 @@ void Indirect::calPlotEnergy()
   m_calResR2->setMinimum(m_calDblMng->value(m_calResProp["ELow"]));
   m_calResR2->setMaximum(m_calDblMng->value(m_calResProp["EHigh"]));
 
+  calSetDefaultResolution(input);
+
   // Replot
   m_calResPlot->replot();
 }
+
+void Indirect::calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+{
+  auto inst = ws->getInstrument();
+  auto analyser = inst->getStringParameter("analyser");
+
+  if(analyser.size() > 0)
+  {
+    auto comp = inst->getComponentByName(analyser[0]);
+    auto params = comp->getNumberParameter("resolution", true);
+
+    //set the default instrument resolution
+    if(params.size() > 0)
+    {
+      double res = params[0];
+      m_calDblMng->setValue(m_calResProp["ELow"], -res*10);
+      m_calDblMng->setValue(m_calResProp["EHigh"], res*10);
+
+      m_calDblMng->setValue(m_calResProp["Start"], -res*9);
+      m_calDblMng->setValue(m_calResProp["End"], -res*8);
+    }
+
+  }
+}
+
 
 void Indirect::calMinChanged(double val)
 {
