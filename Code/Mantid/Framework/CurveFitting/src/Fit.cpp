@@ -218,27 +218,6 @@ the algorithm will have these additional properties:
 |An X value in the last bin to be included in the fit
 |}
 
-=== Additional property when fitting with Convolution ===
-If Function is a Convolution and the model function (function index 1) is a
-CompositeFunction itself it is possible to output each component of the model
-convolved with the resolution (function index 0) by setting ConvolveMembers
-option to true. This option will only have effect if OutputCompositeMembers is
-also true.
-
-{| border="1" cellpadding="5" cellspacing="0"
-!Name
-!Direction
-!Type
-!Default
-!Description
-|-
-|ConvolveMembers
-|Input
-|bool
-|false
-|Convolve members of the model in output
-|}
-
 *WIKI*/
 
 //----------------------------------------------------------------------
@@ -383,12 +362,6 @@ namespace CurveFitting
       m_workspacePropertyNames.resize(1,"InputWorkspace");
     }
 
-    auto cf = boost::dynamic_pointer_cast<Convolution>(m_function);
-    if ( cf && (!existsProperty("ConvolveMembers")) && boost::dynamic_pointer_cast<API::CompositeFunction>(cf->getFunction(1)) )
-    {
-        declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
-          "Convolve members of the model in output");
-    }
   }
 
   /**
@@ -582,6 +555,9 @@ namespace CurveFitting
       "(default is false)." );
     declareProperty("OutputCompositeMembers",false,
         "If true and CreateOutput is true then the value of each member of a Composite Function is also output.");
+    declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
+      "If true and OutputCompositeMembers is true members of any Convolution are output convolved\n"
+      "with corresponding resolution");
   }
 
   /** Executes the algorithm

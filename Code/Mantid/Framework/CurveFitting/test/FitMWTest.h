@@ -486,7 +486,7 @@ public:
       TS_ASSERT_EQUALS( expDecay->getParameter("Lifetime"), 20.0 );
   }
 
-  void test_convolve_members_option()
+  void do_test_convolve_members_option(bool withBackground)
   {
       auto conv = boost::shared_ptr<Convolution>(new Convolution);
       auto resolution = IFunction_sptr(new Gaussian);
@@ -526,9 +526,25 @@ public:
       propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
       propManager->setProperty<Workspace_sptr>(wsPropName, data);
 
+      IFunction_sptr fitfun;
+      if ( withBackground )
+      {
+          API::IFunction_sptr bckgd(new ExpDecay);
+          bckgd->setParameter("Height",1.);
+          bckgd->setParameter("Lifetime",1.);
+          auto composite = boost::shared_ptr<API::CompositeFunction>(new API::CompositeFunction);
+          composite->addFunction(bckgd);
+          composite->addFunction(conv);
+          fitfun = composite;
+      }
+      else
+      {
+          fitfun = conv;
+      }
+
       FitMW fitmw(propManager.get(), wsPropName);
       fitmw.declareDatasetProperties("", true);
-      fitmw.initFunction(conv);
+      fitmw.initFunction(fitfun);
       fitmw.separateCompositeMembersInOutput(true,true);
       fitmw.createDomain(domain, values);
 
@@ -586,6 +602,16 @@ public:
           TS_ASSERT_DIFFERS( outputWS->dataY(4)[i], 0.0 );
           TS_ASSERT_DIFFERS( outputWS->dataY(4)[i], outputWS->dataY(3)[i] );
       }
+  }
+
+  void test_convolve_members_option_without_background()
+  {
+      do_test_convolve_members_option(false);
+  }
+
+  void test_convolve_members_option_with_background()
+  {
+      do_test_convolve_members_option(true);
   }
 
 private:
