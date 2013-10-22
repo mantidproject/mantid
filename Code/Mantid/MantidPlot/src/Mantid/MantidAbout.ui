@@ -93,7 +93,7 @@
         <item row="4" column="0">
          <widget class="QLabel" name="mantidlabel">
           <property name="text">
-           <string>Homepage</string>
+           <string>Homepage:</string>
           </property>
          </widget>
         </item>
@@ -140,7 +140,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="builitusing_label">
           <property name="text">
-           <string>Extended from</string>
+           <string>Extended from:</string>
           </property>
          </widget>
         </item>
