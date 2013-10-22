@@ -1,3 +1,13 @@
+"""*WIKI* 
+
+Calculates Multiple Scattering based on the Monte Carlo program MINUS. It takes a sample <math>S(Q,ω)</math> from an input sqw workspace and supports both
+Flat and Cylindrical geometries.
+
+==== References ====
+# M W Johnson, AERE Report R7682 (1974)
+
+*WIKI*"""
+
 # Algorithm to start Bayes programs
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator, logger

@@ -1,3 +1,10 @@
+"""*WIKI* 
+
+Symmetrise takes an asymmetric <math>S(Q,ω)</math> - i.e. one in which the moduli emin & emax are different. Typically emax is > mod(emin). 
+A negative value of e is chosen (e-pivot) so that the curve for mod(e-pivot) to emax is reflected and inserted for e less than the e-pivot.
+
+*WIKI*"""
+
 # Algorithm to start Symmetrise
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
