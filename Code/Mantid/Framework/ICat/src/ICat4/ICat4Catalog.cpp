@@ -501,6 +501,7 @@ namespace Mantid
       outputws->addColumn("str","Location");
       outputws->addColumn("str","Create Time");
       outputws->addColumn("long64","Id");
+      outputws->addColumn("str","File size");
 
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
@@ -519,6 +520,8 @@ namespace Mantid
             savetoTableWorkspace(&createDate, table);
 
             savetoTableWorkspace(datafile->id, table);
+            std::string fileSize = bytesToString(*datafile->fileSize);
+            savetoTableWorkspace(&fileSize, table);
           }
           catch(std::runtime_error& exception)
           {
@@ -726,6 +729,26 @@ namespace Mantid
       }
 
       throw std::runtime_error(exception);
+    }
+
+    /**
+     * Convert a file size to human readable file format.
+     * @param size    :: The size in bytes of the file.
+     * @return string :: A human readable file format (e.g. 5MB).
+     */
+    std::string ICat4Catalog::bytesToString(int64_t &fileSize)
+    {
+      std::vector<std::string> units { "B", "KB", "MB", "GB" };
+
+      unsigned order = 0;
+
+      while (fileSize >= 1024 && order + 1 < units.size())
+      {
+          order++;
+          fileSize = fileSize / 1024;
+      }
+
+      return boost::lexical_cast<std::string>(fileSize) + units.at(order);
     }
 
     /**

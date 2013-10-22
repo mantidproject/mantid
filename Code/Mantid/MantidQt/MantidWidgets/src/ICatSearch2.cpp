@@ -835,6 +835,10 @@ namespace MantidQt
       // As a new column is being added we do this after populateTable to prevent null errors.
       addCheckBoxColumn(dataFileTable);
 
+      // Hide these columns as they're not useful for the user, but are used by the algorithms.
+      dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Id"), true);
+      dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Location"), true);
+
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
       std::set<std::string> extensions = getDataFileExtensions(workspace.get()->getColumn(headerIndexByName(dataFileTable, "Name")));
