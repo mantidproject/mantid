@@ -50,7 +50,6 @@ using namespace Mantid::Kernel;
 
 using namespace std;
 
-const bool DEBUG219 = true;
 const double MAGICNUMBER = 2.0;
 
 namespace Mantid
@@ -217,8 +216,6 @@ namespace Algorithms
     */
   void FitPeak::createFunctions()
   {
-    g_log.information("Running 'createFunction'. ");
-
     // Generate background function
     string bkgdtype = getPropertyValue("BackgroundType");
     // Fix the inconsistency in nameing the background
@@ -262,8 +259,6 @@ namespace Algorithms
     {
       m_peakFunc->setParameter(vec_peakparnames[i], vec_peakparvalues[i]);
     }
-
-    g_log.debug("Finished running 'createFunction'. ");
 
     return;
   }
@@ -396,7 +391,7 @@ namespace Algorithms
     compfunc->addFunction(m_peakFunc);
     compfunc->addFunction(m_bkgdFunc);
 
-    g_log.notice() << "[DB] Composit Function: " << compfunc->asString() << "\n";
+    g_log.information() << "One-Step-Fit Function: " << compfunc->asString() << "\n";
 
     // Set up a list of guessed FWHM
     // Calculate guessed FWHM
@@ -413,7 +408,7 @@ namespace Algorithms
     for (size_t i = 0; i < numfits; ++i)
     {
       // set FWHM
-      g_log.notice() << "[DB SingleStep] FWHM = " << vec_FWHM[i] << "\n";
+      g_log.debug() << "[SingleStepFit] FWHM = " << vec_FWHM[i] << "\n";
       m_peakFunc->setFwhm(vec_FWHM[i]);
 
       // fit and process result
@@ -433,7 +428,7 @@ namespace Algorithms
     pop(m_bestBkgdFunc, m_bkgdFunc);
     m_finalGoodnessValue = m_bestRwp;
 
-    g_log.information() << "Best peak function fitted: " << m_peakFunc->asString() << ".\n";
+    g_log.information() << "One-Step-Fit Best Fitted Function: " << compfunc->asString() << "\n";
 
     return;
   }
@@ -443,8 +438,6 @@ namespace Algorithms
     */
   void FitPeak::fitPeakMultipleStep()
   {
-    g_log.debug("Starting fitPeakMultipleStep(). ");
-
     // Fit background
     m_bkgdFunc = fitBackground(m_bkgdFunc);
 
@@ -474,9 +467,9 @@ namespace Algorithms
         pop(m_bkupPeakFunc, m_peakFunc);
 
       // Set FWHM
+      m_peakFunc->setFwhm(vec_FWHM[i]);
       g_log.debug() << "Round " << i << " of " << vec_FWHM.size() << ". Using proposed FWHM = "
                     << vec_FWHM[i] << "\n";
-      m_peakFunc->setFwhm(vec_FWHM[i]);
 
       // Fit
       double rwp = fitPeakFunction(m_peakFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
@@ -489,13 +482,13 @@ namespace Algorithms
 
     // Get best fitting peak function
     pop(m_bestPeakFunc, m_peakFunc);
-    g_log.information() << "Best peak function fitted: " << m_peakFunc->asString() << ".\n";
+    g_log.information() << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString() << "\n";
 
     // Recover the original Y value from pure peak data range
     recoverOriginalData();
 
     m_finalGoodnessValue = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
-    g_log.notice() << "Final " << m_costFunction << " = " << m_finalGoodnessValue << "\n";
+    g_log.information() << "Final " << m_costFunction << " = " << m_finalGoodnessValue << "\n";
 
     return;
   }
@@ -506,8 +499,6 @@ namespace Algorithms
     */
   void FitPeak::prescreenInputData()
   {
-    g_log.information("Running prescreenInputData. ");
-
     // Check functions
     if (!m_peakFunc || !m_bkgdFunc)
       throw runtime_error("Either peak function or background function has not been set up.");
@@ -526,8 +517,6 @@ namespace Algorithms
     // Peak width and centre: from user input
     m_userGuessedFWHM = m_peakFunc->fwhm();
     m_userPeakCentre = m_peakFunc->centre();
-
-    g_log.information("Finished running prescreenInputData. ");
 
     return;
   }
@@ -795,7 +784,6 @@ namespace Algorithms
       funcparammap.insert(make_pair(funcparnames[i], parvalue));
 
       double parerror = func->getError(i);
-      // g_log.debug() << "Error(" << funcparnames[i] << ") = " << parerror << "\n";
       paramerrormap.insert(make_pair(funcparnames[i], parerror));
     }
 
@@ -834,16 +822,6 @@ namespace Algorithms
     else
       g_log.debug() << "Function (to fit): " << peakfunc->asString() << "  From "
                     << startx << "  to " << endx << ".\n";
-
-    if (DEBUG219)
-    {
-      std::stringstream dbss;
-      dbss << "Fit data workspace spectrum " << wsindex << ".  Parameters: ";
-      std::vector<std::string> comparnames = peakfunc->getParameterNames();
-      for (size_t i = 0; i < comparnames.size(); ++i)
-        dbss << comparnames[i] << ", ";
-      g_log.information(dbss.str());
-    }
 
     double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, false);
     g_log.debug() << "Peak parameter goodness-Fit = " << goodness << "\n";
@@ -907,7 +885,7 @@ namespace Algorithms
     peakfunc->function(svdomain, svvalues);
     double curpeakheight = svvalues[0];
 
-    g_log.debug() << "Current peak height = " << curpeakheight << "\n";
+    g_log.debug() << "Estimate-Peak-Height: Current peak height = " << curpeakheight << "\n";
 
     // Get maximum peak value among
     const MantidVec& vecX = dataws->readX(wsindex);
@@ -926,8 +904,9 @@ namespace Algorithms
         iymax = i;
       }
     }
-    g_log.debug() << "Maximum Y value between " << startx << " and " << endx << " is "
-                        << ymax << " at X = " << vecX[iymax] << ".\n";
+    g_log.debug() << "Estimate-Peak-Height: Maximum Y value between " << startx << " and "
+                  << endx << " is "
+                  << ymax << " at X = " << vecX[iymax] << ".\n";
 
     // Compute new peak
     double estheight = ymax/curpeakheight*peakfunc->height();
@@ -959,7 +938,6 @@ namespace Algorithms
 
     // Fit
     modecal = false;
-    g_log.information("[D] Start to evaluate composite function. ");
     double goodness = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
     string errorreason;
     goodness = checkFittedPeak(peakfunc, goodness, errorreason);
@@ -1034,14 +1012,11 @@ namespace Algorithms
     */
   void FitPeak::recoverOriginalData()
   {
-    g_log.notice("[D] Start to recover data.");
     MantidVec& dataY = m_dataWS->dataY(m_wsIndex);
     MantidVec& dataE = m_dataWS->dataE(m_wsIndex);
 
     copy(m_vecybkup.begin(), m_vecybkup.end(), dataY.begin() + i_minFitX);
     copy(m_vecebkup.begin(), m_vecebkup.end(), dataE.begin() + i_minFitX);
-
-    g_log.notice("[D] Finished recovering data.");
 
     return;
   }
@@ -1101,22 +1076,7 @@ namespace Algorithms
     fit->setProperty("CalcErrors", true);
 
     // Execute fit and get result of fitting background
-    g_log.information() << "Fit function: " << fit->asString() << ".\n";
-
-#if 0
-    CompositeFunction_sptr comfunc = boost::dynamic_pointer_cast<CompositeFunction>(fitfunc);
-    bool plot = false;
-    if (comfunc)
-      plot = true;
-    if (plot)
-    {
-      for (size_t i = 0; i < dataws->readX(wsindex).size(); ++i)
-      {
-        g_log.information() << dataws->readX(wsindex)[i] << "\t\t" << dataws->readY(wsindex)[i] << "\t\t"
-                            << dataws->readE(wsindex)[i] << "\n";
-      }
-    }
-#endif
+    g_log.debug() << "FitSingleDomain: Fit " << fit->asString() << ".\n";
 
     fit->executeAsChildAlg();
     if (!fit->isExecuted())
@@ -1141,7 +1101,8 @@ namespace Algorithms
         fitfunc->unfix(i);
     }
 
-    g_log.information() << "Fit function " << fitfunc->asString() << ": Fit-status = " << fitStatus
+    g_log.information() << "FitSingleDomain Fitted-Function " << fitfunc->asString()
+                        << ": Fit-status = " << fitStatus
                         << ", chi^2 = " << chi2 << ".\n";
 
     return chi2;
@@ -1198,7 +1159,7 @@ namespace Algorithms
     fit->setProperty("Minimizer", m_minimizer);
     fit->setProperty("CostFunction", "Least squares");
 
-    g_log.information() << "[DB] Funcion: " << funcmd->asString() << "\n";
+    g_log.information() << "FitMultiDomain: Funcion " << funcmd->asString() << "\n";
 
     // Execute
     fit->execute();
@@ -1209,14 +1170,14 @@ namespace Algorithms
 
     // Retrieve result
     std::string fitStatus = fit->getProperty("OutputStatus");
-    g_log.notice() << "[DB] Multi-domain fit status: " << fitStatus << ".\n";
+    g_log.debug() << "[DB] Multi-domain fit status: " << fitStatus << ".\n";
 
     double chi2 = EMPTY_DBL();
     if (fitStatus == "success")
     {
       chi2 = fit->getProperty("OutputChi2overDoF");
-      g_log.information() << "[DB] Multi-domain fit chi^2 = " << chi2 << "\n"
-                          << "     Funcion: " << fitfunc->asString() << "\n";
+      g_log.information() << "FitMultidomain: Successfully-Fitted Function " <<fitfunc->asString()
+                          << ", Chi^2 = "<< chi2 << "\n";
     }
 
     return chi2;
