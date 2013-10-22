@@ -66,14 +66,16 @@ public:
   bool isEventWorkspace( const std::string & event_ws_name );
 
   /// Load and event file and convert to MD workspace
-  bool loadAndConvertToMD( const std::string & file_name,
-                           const std::string & ev_ws_name,
-                           const std::string & md_ws_name,
-                                 double        maxQ,
-                                 bool          do_lorentz_corr,
-                                 bool          load_det_cal,
-                           const std::string & det_cal_file,
-                           const std::string & det_cal_file2 );
+  bool loadAndConvertToMD(const std::string & file_name,
+                          const std::string & ev_ws_name,
+                          const std::string & md_ws_name,
+                          const double        minQ,
+                          const double        maxQ,
+                          const bool          do_lorentz_corr,
+                          const bool          load_data,
+                          const bool          load_det_cal,
+                          const std::string & det_cal_file,
+                          const std::string & det_cal_file2 );
 
   /// Find peaks in MD workspace and set peaks into peaks workspace
   bool findPeaks( const std::string & md_ws_name, 

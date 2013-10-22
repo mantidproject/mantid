@@ -57,295 +57,575 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
        <string>Select Data</string>
       </attribute>
-      <widget class="QPushButton" name="ApplySelectData_btn">
+      <widget class="QWidget" name="verticalLayoutWidget">
        <property name="geometry">
         <rect>
-         <x>430</x>
-         <y>520</y>
-         <width>115</width>
-         <height>28</height>
+         <x>0</x>
+         <y>0</y>
+         <width>761</width>
+         <height>652</height>
         </rect>
        </property>
-       <property name="toolTip">
-        <string>Actually load the data and convert to MD, or just&lt;br&gt; proceed to the next tab using previously loaded data.</string>
-       </property>
-       <property name="text">
-        <string>Apply</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="SelectMDWorkspace_lbl">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>80</y>
-         <width>231</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>MD Workspace Name</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="MDworkspace_ledt">
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>90</y>
-         <width>331</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Name of the MD workspace to use.  This name is set&lt;br&gt;by default, if data is loaded from an event file and mapped to an MD workspace.</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="SelectEventWorkspace_lbl">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>40</y>
-         <width>221</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Event Workspace Name</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="SelectEventWorkspace_ledt">
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>40</y>
-         <width>331</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Name of the event workspace to use.  This name is set by default,&lt;br&gt; if data is loaded from an event file and mapped to an MD workspace.</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="LoadEventFile_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>150</y>
-         <width>451</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Load an event data file&lt;br&gt; and map the events to an MD workspace.</string>
-       </property>
-       <property name="text">
-        <string> Load From Event File and Map to MD</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="UseExistingWorkspaces_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>480</y>
-         <width>441</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Use the specified Event Workspace and the&lt;br&gt; specified MD Workspace, that have already been loaded.</string>
-       </property>
-       <property name="text">
-        <string>Use Existing Event and MD Workspaces</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="EventFileName_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>190</y>
-         <width>101</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Filename</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="EventFileName_ledt">
-       <property name="geometry">
-        <rect>
-         <x>160</x>
-         <y>190</y>
-         <width>341</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Specify the name of the data file to load.  Press&lt;br&gt; return to set default names for Event, MD and Peaks workspaces.</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="SelectEventFile_btn">
-       <property name="geometry">
-        <rect>
-         <x>520</x>
-         <y>190</y>
-         <width>94</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Browse for the event file to be loaded.</string>
-       </property>
-       <property name="text">
-        <string>Browse</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="MaxMagQ_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>390</y>
-         <width>221</width>
-         <height>18</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Max |Q| to Map to MD</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="MaxMagQ_ledt">
-       <property name="geometry">
-        <rect>
-         <x>300</x>
-         <y>380</y>
-         <width>101</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Specify value to use as bound on |Qx|, |Qy| and |Qz|</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="LorentzCorrection_ckbx">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>430</y>
-         <width>271</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Apply the Lorentz Correction as&lt;br&gt; data is mapped to reciprocal space and stored in the MD workspace.  This helps with finding peaks with larger |Q|.</string>
-       </property>
-       <property name="text">
-        <string>Apply Lorentz Correction</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="LoadDetCal_ckbx">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>240</y>
-         <width>391</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Optionally, apply&lt;br&gt; calibration  information from the specified .DetCal file(s).</string>
-       </property>
-       <property name="text">
-        <string> Load ISAW Detector Calibration</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="CalFileName_lbl">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>280</y>
-         <width>91</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Filename</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="CalFileName_ledt">
-       <property name="geometry">
-        <rect>
-         <x>210</x>
-         <y>280</y>
-         <width>291</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Select the .DetCal file to apply.</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="SelectCalFile_btn">
-       <property name="geometry">
-        <rect>
-         <x>520</x>
-         <y>280</y>
-         <width>91</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Browse for the first .DetCal file to be used.</string>
-       </property>
-       <property name="text">
-        <string>Browse</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="CalFileName2_lbl">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>330</y>
-         <width>101</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Filename2</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="CalFileName2_ledt">
-       <property name="geometry">
-        <rect>
-         <x>210</x>
-         <y>330</y>
-         <width>291</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Select the second .DetCal file for the second detector&lt;br&gt; panel on the SNAP instrument at the SNS.</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="SelectCalFile2_btn">
-       <property name="geometry">
-        <rect>
-         <x>520</x>
-         <y>330</y>
-         <width>91</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Browse for the second .DetCal file to be used&lt;br&gt; for the second panel on SNAP.</string>
-       </property>
-       <property name="text">
-        <string>Browse</string>
-       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QScrollArea" name="selectDataScrollArea">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAsNeeded</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>759</width>
+             <height>650</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>500</width>
+             <height>500</height>
+            </size>
+           </property>
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
+           <widget class="QPushButton" name="ApplySelectData_btn">
+            <property name="geometry">
+             <rect>
+              <x>520</x>
+              <y>580</y>
+              <width>115</width>
+              <height>28</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Actually load the data and convert to MD, or just&lt;br&gt; proceed to the next tab using previously loaded data.</string>
+            </property>
+            <property name="text">
+             <string>Apply</string>
+            </property>
+           </widget>
+           <widget class="QGroupBox" name="loadDataGroupBox">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>260</y>
+              <width>671</width>
+              <height>221</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>If disabled then use existing workspaces</string>
+            </property>
+            <property name="title">
+             <string>Load Event Data</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="horizontalLayoutWidget_5">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>20</y>
+               <width>621</width>
+               <height>51</height>
+              </rect>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QLabel" name="EventFileName_lbl">
+                <property name="text">
+                 <string>Filename</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="EventFileName_ledt">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>400</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Specify the name of the data file to load.  Press&lt;br&gt; return to set default names for Event, MD and Peaks workspaces.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="SelectEventFile_btn">
+                <property name="toolTip">
+                 <string>Browse for the event file to be loaded.</string>
+                </property>
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="verticalLayoutWidget_4">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>80</y>
+               <width>621</width>
+               <height>141</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetDefaultConstraint</enum>
+              </property>
+              <item>
+               <widget class="QCheckBox" name="LoadDetCal_ckbx">
+                <property name="toolTip">
+                 <string>Optionally, apply&lt;br&gt; calibration  information from the specified .DetCal file(s).</string>
+                </property>
+                <property name="text">
+                 <string> Load ISAW Detector Calibration</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <widget class="QLabel" name="CalFileName_lbl">
+                  <property name="text">
+                   <string>Filename</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Expanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="CalFileName_ledt">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>400</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Select the .DetCal file to apply.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="SelectCalFile_btn">
+                  <property name="toolTip">
+                   <string>Browse for the first .DetCal file to be used.</string>
+                  </property>
+                  <property name="text">
+                   <string>Browse</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <widget class="QLabel" name="CalFileName2_lbl">
+                  <property name="text">
+                   <string>Filename2</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Expanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="CalFileName2_ledt">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>400</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Select the second .DetCal file for the second detector&lt;br&gt; panel on the SNAP instrument at the SNS.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="SelectCalFile2_btn">
+                  <property name="toolTip">
+                   <string>Browse for the second .DetCal file to be used&lt;br&gt; for the second panel on SNAP.</string>
+                  </property>
+                  <property name="text">
+                   <string>Browse</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+           <widget class="QGroupBox" name="convertToMDGroupBox">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>110</y>
+              <width>671</width>
+              <height>151</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Not doing this will use existing workspace</string>
+            </property>
+            <property name="title">
+             <string>Convert to MD</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="verticalLayoutWidget_2">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>641</width>
+               <height>111</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetDefaultConstraint</enum>
+              </property>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <widget class="QLabel" name="MinMagQ_lbl">
+                  <property name="text">
+                   <string>Min |Q| to Map to MD</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_2">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="MinMagQ_ledt">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Specify value to use as bound on |Qx|, |Qy| and |Qz|</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_8">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                 <widget class="QLabel" name="MaxMagQ_lbl">
+                  <property name="text">
+                   <string>Max |Q| to Map to MD</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="MaxMagQ_ledt">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string>Specify value to use as bound on |Qx|, |Qy| and |Qz|</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_9">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="LorentzCorrection_ckbx">
+                <property name="toolTip">
+                 <string>Apply the Lorentz Correction as&lt;br&gt; data is mapped to reciprocal space and stored in the MD workspace.  This helps with finding peaks with larger |Q|.</string>
+                </property>
+                <property name="text">
+                 <string>Apply Lorentz Correction</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+           <widget class="QWidget" name="verticalLayoutWidget_3">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>10</y>
+              <width>641</width>
+              <height>91</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <item>
+                <widget class="QLabel" name="SelectEventWorkspace_lbl">
+                 <property name="text">
+                  <string>Event Workspace Name</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_6">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="SelectEventWorkspace_ledt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>200</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Name of the event workspace to use.  This name is set by default,&lt;br&gt; if data is loaded from an event file and mapped to an MD workspace.</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <item>
+                <widget class="QLabel" name="SelectMDWorkspace_lbl">
+                 <property name="text">
+                  <string>MD Workspace Name</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_7">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="MDworkspace_ledt">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>200</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Name of the MD workspace to use.  This name is set&lt;br&gt;by default, if data is loaded from an event file and mapped to an MD workspace.</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
      <widget class="QWidget" name="FindPeaks">
