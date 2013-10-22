@@ -45,7 +45,9 @@ public:
     bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dEModeRequested,const std::vector<std::string> &other_dim_names,
                                       const std::string &QFrame,const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr)
     {
-        return ConvertToMD::buildTargetWSDescription(spws,Q_mod_req,dEModeRequested,other_dim_names,QFrame,convert_to_,targWSDescr);
+       std::vector<double> dimMin = this->getProperty("MinValues");
+       std::vector<double> dimMax = this->getProperty("MaxValues");
+       return ConvertToMD::buildTargetWSDescription(spws,Q_mod_req,dEModeRequested,other_dim_names,dimMin,dimMax,QFrame,convert_to_,targWSDescr);
     }
     void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS,MDEvents::MDWSDescription &targWSDescr) const
     {
@@ -55,6 +57,11 @@ public:
     API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription)
     {
             return ConvertToMD::createNewMDWorkspace(NewMDWSDescription);
+    }
+
+    std::string convertParamToHelperParam(const std::string &targFrame,const std::string &convTo)
+    {
+      return ConvertToMD::convertParamToHelperParam(targFrame,convTo);
     }
 };
 
@@ -258,13 +265,6 @@ void testCopyMethadata()
 
 
 }
-void xestConvertParamToHelperParam()
-{
-  // this is hopefully redundant
-  /** Test assures integrity between ConvertToMD and ConvertToMDHelper algorithms */ 
-  auto mdHelper = Mantid::API::FrameworkManager::Instance().createAlgorithm("ConvertToMDHelper",1);
-  TSM_ASSERT("Can not instantiate ConvertToMDHelper algorithm ",mdHelper);
-  if(!mdHelper)return;
 
 
 ConvertToMDComponentsTest()
