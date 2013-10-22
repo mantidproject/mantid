@@ -3,8 +3,10 @@
 #include "MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h"
 #include "MantidICat/ICat4/ICat4Catalog.h"
 #include "MantidICat/Session.h"
-#include "MantidKernel/Strings.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid
 {
@@ -645,8 +647,20 @@ namespace Mantid
      */
     void ICat4Catalog::getDownloadURL(const long long & fileID, std::string& url)
     {
-      UNUSED_ARG(fileID);
-      UNUSED_ARG(url);
+      // Obtain the URL from the Facilities.xml file.
+      std::string urlToBuild = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
+
+      // Set the REST features of the URL.
+      std::string session  = "sessionId="    + Session::Instance().getSessionId();
+      std::string datafile = "&datafileIds=" + boost::lexical_cast<std::string>(fileID);
+      std::string outname  = "&outname="     + boost::lexical_cast<std::string>(fileID);
+
+      // Add all the REST pieces to the URL.
+      urlToBuild += ("getData?" + session + datafile + outname + "&zip=false");
+
+      g_log.debug() << "External URL is: " << urlToBuild << std::endl;
+
+      url = urlToBuild;
     }
 
     /**
