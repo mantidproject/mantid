@@ -86,7 +86,7 @@ public:
 
     std::vector<double> minVal = alg.getProperty("MinValues");
     std::vector<double> maxVal = alg.getProperty("MaxValues");
-    for(size_t i=0;i<4;++)
+    for(size_t i=0;i<4;i++)
     {
       TS_ASSERT_DELTA(minSample[i],minVal[i],1.e-4);
       TS_ASSERT_DELTA(maxSample[i],maxVal[i],1.e-4);
@@ -120,7 +120,7 @@ public:
 
     std::vector<double> minVal = alg.getProperty("MinValues");
     std::vector<double> maxVal = alg.getProperty("MaxValues");
-    for(size_t i=0;i<4;++)
+    for(size_t i=0;i<4;i++)
     {
       TS_ASSERT_DELTA(minSample[i],minVal[i],1.e-4);
       TS_ASSERT_DELTA(maxSample[i],maxVal[i],1.e-4);
