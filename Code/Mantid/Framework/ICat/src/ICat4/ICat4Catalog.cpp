@@ -738,7 +738,8 @@ namespace Mantid
      */
     std::string ICat4Catalog::bytesToString(int64_t &fileSize)
     {
-      std::vector<std::string> units { "B", "KB", "MB", "GB" };
+      const char* args[] = {"B", "KB", "MB", "GB"};
+      std::vector<std::string> units(args, args + 4);
 
       unsigned order = 0;
 
