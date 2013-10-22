@@ -62,16 +62,35 @@ namespace MDAlgorithms
     virtual const std::string category() const;
 
     static Mantid::Kernel::Logger & getLogger();
-  protected:
-    void init();
   private:
     virtual void exec()=0;
    /// Sets documentation strings for this algorithm
     virtual void initDocs()=0;  
    //------------------------------------------------------------------------------------------------------------------------------------------
    protected: 
+    void init();
+    // 
+    DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,bool updateMasks);
+    DataObjects::TableWorkspace_sptr runPreprocessDetectorsToMDChildUpdatingMasks(Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &OutWSName,
+                                                                                  const std::string &dEModeRequested,Kernel::DeltaEMode::Type &Emode);
+
   /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& g_Log;
+
+  /// pointer to the class, which does the particular conversion
+   boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
+  ///TODO: This will go: the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
+   boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
+
+
+  /// Template to check if a variable equal to NaN
+   template <class T>
+   inline bool isNaN(T val)
+   {
+     volatile T buf=val;
+     return (val!=buf);
+   }
+
 
  };
 

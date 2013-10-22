@@ -104,10 +104,13 @@ void testPreprocDetLogic()
       Mantid::API::MatrixWorkspace_sptr ws2DNew =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(9,10,true);
       // this is the probems with alg, as ws has to be added to data service to be avail to algorithm.
       pAlg->setSourceWS(ws2DNew);
+     
+      TS_ASSERT_THROWS(pAlg->preprocessDetectorsPositions(ws2DNew),std::runtime_error);
+      AnalysisDataService::Instance().addOrReplace("testWSProcessed2",ws2DNew);
 
       TSM_ASSERT_THROWS("WS has to have input energy for indirect methods",pAlg->preprocessDetectorsPositions(ws2DNew),std::invalid_argument);
+      ws2DNew->mutableRun().addProperty("Ei",130.,"meV",true);
 
-      ws2DNew->mutableRun().addProperty("Ei",130,"meV",true);
       auto TableWS6= pAlg->preprocessDetectorsPositions(ws2DNew);
       TS_ASSERT(TableWS6.get()!=TableWS5.get());
       TS_ASSERT_EQUALS(9,TableWS6->rowCount());
@@ -130,6 +133,7 @@ void testUpdateMasksSkipped()
 
       Mantid::API::MatrixWorkspace_sptr ws2DCopy = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("InWSCopy");
      // if workspace name is specified, it has been preprocessed and added to analysis data service:
+
 
      pAlg->setPropertyValue("PreprocDetectorsWS","PreprDetWS");
      // the workspace has t
@@ -254,6 +258,13 @@ void testCopyMethadata()
 
 
 }
+void xestConvertParamToHelperParam()
+{
+  // this is hopefully redundant
+  /** Test assures integrity between ConvertToMD and ConvertToMDHelper algorithms */ 
+  auto mdHelper = Mantid::API::FrameworkManager::Instance().createAlgorithm("ConvertToMDHelper",1);
+  TSM_ASSERT("Can not instantiate ConvertToMDHelper algorithm ",mdHelper);
+  if(!mdHelper)return;
 
 
 ConvertToMDComponentsTest()
