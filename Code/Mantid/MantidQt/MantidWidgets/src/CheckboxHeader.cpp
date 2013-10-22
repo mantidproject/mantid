@@ -13,6 +13,7 @@ namespace MantidQt
     CheckboxHeader::CheckboxHeader(Qt::Orientation orientation, QWidget *parent) : QHeaderView(orientation, parent), m_checked(false)
     {
       show();
+      setClickable(true);
     }
 
 
