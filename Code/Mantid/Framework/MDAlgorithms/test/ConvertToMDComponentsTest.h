@@ -30,7 +30,8 @@ class Convert2MDComponentsTestHelper: public ConvertToMD
 public:
     TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string dEModeRequested="Direct",bool updateMasks=true)
     {
-      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested,updateMasks);
+      std::string OutWSName(this->getProperty("PreprocDetectorsWS"));
+      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested,updateMasks,OutWSName);
     }
     void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D)
     {
@@ -59,10 +60,6 @@ public:
             return ConvertToMD::createNewMDWorkspace(NewMDWSDescription);
     }
 
-    std::string convertParamToHelperParam(const std::string &targFrame,const std::string &convTo)
-    {
-      return ConvertToMD::convertParamToHelperParam(targFrame,convTo);
-    }
 };
 
 

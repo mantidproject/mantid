@@ -178,6 +178,13 @@ DECLARE_ALGORITHM(ConvertToMD)
 void ConvertToMD::init()
 {
     ConvertToMDParent::init();
+    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
+                  "Name of the output [[MDEventWorkspace]].");
+
+    declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
+              "By default  (''\"1\"''), existing Output Workspace will be replaced. Select false (''\"0\"'') if you want to add new events to the workspace, which already exist. "
+              "\nChoosing ''\"0\"''' can be very inefficient for file-based workspaces");
+
     
     declareProperty(new ArrayProperty<double>("MinValues"),
 "It has to be N comma separated values, where N is the number of dimensions of the target workspace. Values "
@@ -322,7 +329,7 @@ void ConvertToMD::exec()
     // copy the necessary methadata and get the unique number, that identifies the run, the source workspace came from.
     copyMetaData(spws,targWSDescr);
      // preprocess detectors;
-    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq,getProperty("UpdateMasks"));
+    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq,getProperty("UpdateMasks"), std::string(getProperty("PreprocDetectorsWS")));
 
  
     //DO THE JOB:

@@ -52,12 +52,6 @@ void ConvertToMDParent::init()
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,ws_valid),
         "An input Matrix Workspace (2DMatrix or Event workspace) ");
    
-     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-                  "Name of the output [[MDEventWorkspace]].");
-
-     declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
-              "By default  (''\"1\"''), existing Output Workspace will be replaced. Select false (''\"0\"'') if you want to add new events to the workspace, which already exist. "
-              "\nChoosing ''\"0\"''' can be very inefficient for file-based workspaces");
 
      std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
      // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this. 
@@ -160,7 +154,8 @@ void ConvertToMDParent::init()
  * @param updateMasks
  * @return
  */
-DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,bool updateMasks)
+DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,
+                                                                                       bool updateMasks, const std::string & OutWSName)
 {
 
     DataObjects::TableWorkspace_sptr TargTableWS;
@@ -168,11 +163,11 @@ DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPos
 
     // Do we need to reuse output workspace
     bool storeInDataService(true);
-    std::string OutWSName = std::string(getProperty("PreprocDetectorsWS"));
-    if(OutWSName=="-"||OutWSName.empty()) // TargTableWS is recalculated each time;
+    std::string tOutWSName(OutWSName);
+    if(tOutWSName=="-"||tOutWSName.empty()) // TargTableWS is recalculated each time;
     {
       storeInDataService = false;
-      OutWSName = "ServiceTableWS";  // TODO: should be hidden?
+      tOutWSName = "ServiceTableWS";  // TODO: should be hidden?
     }
     else
     {
@@ -180,9 +175,9 @@ DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPos
     }
 
      // if output workspace exists in dataservice, we may try to use it
-    if(storeInDataService && API::AnalysisDataService::Instance().doesExist(OutWSName) ) 
+    if(storeInDataService && API::AnalysisDataService::Instance().doesExist(tOutWSName) ) 
     {
-        TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(OutWSName);
+        TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(tOutWSName);
         // get number of all histograms (may be masked or invalid)
         size_t nHist = InWS2D->getNumberHistograms();
         size_t nDetMap=TargTableWS->rowCount();
@@ -197,20 +192,21 @@ DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPos
             if(!updateMasks) return TargTableWS;
             //Target workspace with preprocessed detectors exists and seems is correct one. 
             // We still need to update masked detectors information
-            TargTableWS = this->runPreprocessDetectorsToMDChildUpdatingMasks(InWS2D,OutWSName,dEModeRequested,Emode);
+            TargTableWS = this->runPreprocessDetectorsToMDChildUpdatingMasks(InWS2D,tOutWSName,dEModeRequested,Emode);
             return TargTableWS;
           }
         }
         else // there is a workspace in the data service with the same name but this ws is not suitable as target for this algorithm. 
         {    // Should delete this WS from the dataservice
-          API::AnalysisDataService::Instance().remove(OutWSName);
+          API::AnalysisDataService::Instance().remove(tOutWSName);
         }
     }
     // No result found in analysis data service or the result is unsatisfactory. Try to calculate target workspace.  
-    TargTableWS =this->runPreprocessDetectorsToMDChildUpdatingMasks(InWS2D,OutWSName,dEModeRequested,Emode);
+
+    TargTableWS =this->runPreprocessDetectorsToMDChildUpdatingMasks(InWS2D,tOutWSName,dEModeRequested,Emode);
 
     if(storeInDataService)
-      API::AnalysisDataService::Instance().addOrReplace(OutWSName,TargTableWS);
+      API::AnalysisDataService::Instance().addOrReplace(tOutWSName,TargTableWS);
 //    else
 //      TargTableWS->setName(OutWSName);
 

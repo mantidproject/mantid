@@ -49,6 +49,9 @@ namespace MDAlgorithms
     void init();
     /// pointer to the input workspace;
     Mantid::DataObjects::Workspace2D_sptr m_MinMaxWS2D;
+   //TODO: This will eventually go. ///The pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
+    boost::shared_ptr<MDEvents::MDEventWSWrapper> m_HelperWSWrapper;
+
 
   };
 

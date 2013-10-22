@@ -84,8 +84,8 @@ namespace Mantid
         // convert units 
         localUnitConv.updateConversion(i);
         std::vector<double> XtargetUnits;
-
         XtargetUnits.resize(X.size());
+
         if(histogram) 
         {
           double xm1=localUnitConv.convertUnits(X[0]);
@@ -95,6 +95,7 @@ namespace Mantid
             XtargetUnits[j-1]=0.5*(xm+xm1);
             xm1=xm;
           }
+          XtargetUnits[XtargetUnits.size()-1]=xm1; // just in case, should not be used
         }
         else
           for(size_t j=0;j<XtargetUnits.size();j++) XtargetUnits[j]=localUnitConv.convertUnits(X[j]);

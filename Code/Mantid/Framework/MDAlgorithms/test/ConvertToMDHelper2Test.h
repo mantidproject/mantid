@@ -44,7 +44,8 @@ public:
     ConvertToMDHelper2 alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-50,1,true,60,0);
     WorkspaceCreationHelper::storeWS(WSName,ws);
-
+    
+    
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", WSName) );

@@ -73,6 +73,9 @@ namespace MDAlgorithms
   void ConvertToMDHelper2::exec()
   {
 
+    // initiate class which would deal with any dimension workspaces requested by algorithm parameters
+    if(!m_HelperWSWrapper) m_HelperWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+
    // -------- get Input workspace
    Mantid::API::MatrixWorkspace_const_sptr InWS2D = getProperty("InputWorkspace");
    
@@ -107,40 +110,39 @@ namespace MDAlgorithms
     buildMinMaxWorkspaceWithMinInstrument(InWS2D,otherDimNames);
 
     std::vector<double> MinValues,MaxValues;
-    MinValues.resize(nDim,-FLT_MAX);
-    MaxValues.resize(nDim,FLT_MAX);
+    MinValues.resize(nDim,-FLT_MAX/10);
+    MaxValues.resize(nDim,FLT_MAX/10);
     // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less max
     targWSDescr.setMinMax(MinValues,MaxValues);   
     targWSDescr.buildFromMatrixWS(m_MinMaxWS2D,QModReq,dEModReq,otherDimNames);
+  // add rinindex to the target workspace description for further usage as the identifier for the events, which come from this run. 
+    targWSDescr.addProperty("RUN_INDEX",uint16_t(0),true);  
+
  
     // create new md workspace and set internal shared pointer of m_OutWSWrapper to this workspace
-    API::IMDEventWorkspace_sptr spws = m_OutWSWrapper->createEmptyMDWS(targWSDescr);
+    API::IMDEventWorkspace_sptr spws = m_HelperWSWrapper->createEmptyMDWS(targWSDescr);
     if(!spws)
     {
         g_log.error()<<"can not create target event workspace with :"<<targWSDescr.nDimensions()<<" dimensions\n";
         throw(std::invalid_argument("can not create target workspace"));
     }
   // Build up the box controller
-    Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
+     Mantid::API::BoxController_sptr bc = m_HelperWSWrapper->pWorkspace()->getBoxController();
     // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
-//this->setBoxController(bc, m_MinMaxWS2D->getInstrument());
-      size_t nd = bc->getNDims();
+     //this->setBoxController(bc, m_MinMaxWS2D->getInstrument());
+     size_t nd = bc->getNDims();
 
-      this->takeDefaultsFromInstrument(m_MinMaxWS2D->getInstrument(), nd);
-
-      // TODO: make nHist*2
-    bc->setSplitThreshold(1000000);
-    bc->setMaxDepth( 1 );
+     // let it be all in one box
+     bc->setSplitThreshold(m_MinMaxWS2D->getNumberHistograms()*2);
+     bc->setMaxDepth( 2 ); // just in case
 
     // Build MDGridBox
-      bc->setSplitInto(2);
-      bc->resetNumBoxes();
+     bc->setSplitInto(2);
+     bc->resetNumBoxes();
 
-
-
-    // split boxes;
-    spws->splitBox();
-    spws->setMinRecursionDepth(1);  
+     // split boxes;
+     spws->splitBox();
+     spws->setMinRecursionDepth(1);  
 
 
   // instanciate class, responsible for defining Mslice-type projection
@@ -162,8 +164,7 @@ namespace MDAlgorithms
    // set up target coordinate system and identify/set the (multi) dimension's names to use
     targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);           
 
-
-    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_MinMaxWS2D,dEModReq,false);
+    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_MinMaxWS2D,dEModReq,false,"");
 
  
     //DO THE JOB:
@@ -172,7 +173,7 @@ namespace MDAlgorithms
      this->m_Convertor  = AlgoSelector.convSelector(m_MinMaxWS2D,this->m_Convertor);
 
      // initate conversion and estimate amout of job to do
-     size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper,false);
+     size_t n_steps = m_Convertor->initialize(targWSDescr,m_HelperWSWrapper,false);
     // progress reporter
      auto progress = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,0.1,n_steps)); 
 
@@ -181,14 +182,14 @@ namespace MDAlgorithms
  /// may be  Get the minimum extents that hold the data will be sufficietn but I am not sure it works properly with convertToMD
     //virtual std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > m_OutWSWrapper->pWorkspace()->getMinimumExtents(size_t depth=2);
      size_t eventShift;
-     std::string EventName = m_OutWSWrapper->pWorkspace()->getEventTypeName();
+     std::string EventName = m_HelperWSWrapper->pWorkspace()->getEventTypeName();
      if(EventName=="MDEvent")
        eventShift = 4;
      else
        eventShift = 2;
 
      std::vector<API::IMDNode *> boxes;
-     m_OutWSWrapper->pWorkspace()->getBoxes(boxes,1000,false);
+     m_HelperWSWrapper->pWorkspace()->getBoxes(boxes,1000,false);
      MinValues.assign(nDim,FLT_MAX);
      MaxValues.assign(nDim,-FLT_MAX);
 
@@ -215,6 +216,10 @@ namespace MDAlgorithms
 
     setProperty("MinValues",MinValues);
     setProperty("MaxValues",MaxValues);
+
+    m_HelperWSWrapper->releaseWorkspace();
+    // remove service workspace from analysis data service to decrease rubbish
+    API::AnalysisDataService::Instance().remove(m_MinMaxWS2D->getName());
   }
 
   Geometry::Object_sptr createCappedCylinder(double radius, double height, const V3D & baseCentre, const V3D & axis, const std::string & id)
@@ -287,11 +292,11 @@ namespace MDAlgorithms
     m_MinMaxWS2D=Mantid::DataObjects::Workspace2D_sptr(new Mantid::DataObjects::Workspace2D );
 
     size_t nHist = 2; // number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
-    size_t nBins = 1; // number of bins in min-max workspace
+    size_t nBins = 2; // number of bins in min-max workspace
 
 
     MantidVecPtr X,Y,ERR;
-    X.access().resize(nBins+1);
+    X.access().resize(nBins);
     Y.access().resize(nBins,1);
     ERR.access().resize(nBins,1);
 
@@ -299,7 +304,8 @@ namespace MDAlgorithms
     X.access()[1]=xMax;
 
 
-    m_MinMaxWS2D->initialize(nHist,nBins+1,nBins);
+    m_MinMaxWS2D->initialize(nHist,nBins,nBins);
+    //m_MinMaxWS2D->initialize(nHist,nBins+1,nBins);
     for (int i=0; i< nHist; i++)
     {
       m_MinMaxWS2D->setX(i,X);
@@ -313,10 +319,11 @@ namespace MDAlgorithms
     else
       m_MinMaxWS2D->setYUnit(yAxis->unit()->unitID());
 
+    // detectors parameters
     std::vector<double> L2(nHist,1);
     std::vector<double> polar(nHist,0);
     std::vector<double> azim(nHist,0);
-    polar[1]=90*M_PI/180;
+    polar[1]=M_PI;
 
     boost::shared_ptr<Geometry::Instrument> minMaxInstr = createCylInstrumentWithDetInGivenPosisions(-1,L2,polar,azim);
     m_MinMaxWS2D->setInstrument(minMaxInstr);
@@ -327,7 +334,19 @@ namespace MDAlgorithms
     {
       theRun.addProperty(InWS2D->run().getProperty(oterDimNames[i]));
     }
+    auto EnProperty=InWS2D->run().getProperty("Ei");
+    if(EnProperty)
+        theRun.addProperty(EnProperty);
+    else
+    {
+      EnProperty=InWS2D->run().getProperty("EFixed");
+      if(EnProperty)
+          theRun.addProperty(EnProperty);
+    }
 
+
+    // add workspace to analysis data servise for it to be availible for subalgorithms
+    API::AnalysisDataService::Instance().addOrReplace("_"+InWS2D->getName()+"_MinMaxServiceWS",m_MinMaxWS2D);
    }
 
 } // namespace MDAlgorithms
