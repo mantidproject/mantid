@@ -105,9 +105,8 @@ namespace MDAlgorithms
    // total number of dimensions
    size_t nDim =nMatrixDim+otherDimNames.size();
 
-   // this builds reduced workspace with fake instrument used to calculate min-max values. We may avoid this and use source workspace instead
-   // but this left for compartibility with ConvertToMDHelper Version 1)
-    buildMinMaxWorkspaceWithMinInstrument(InWS2D,otherDimNames);
+   // u
+    buildMinMaxWorkspaceWithMinInstrument(InWS2D,otherDimNames,true);
 
     std::vector<double> MinValues,MaxValues;
     MinValues.resize(nDim,-FLT_MAX/10);
@@ -164,7 +163,8 @@ namespace MDAlgorithms
    // set up target coordinate system and identify/set the (multi) dimension's names to use
     targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);           
 
-    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_MinMaxWS2D,dEModReq,false,"");
+    //TODO: in a future it can be a choice -- use source workspace or the workspace with spherical instrument. Current settings 
+    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_MinMaxWS2D,dEModReq,false,std::string(getProperty("PreprocDetectorsWS")));
 
  
     //DO THE JOB:
@@ -236,8 +236,36 @@ namespace MDAlgorithms
     return shapeMaker.createShape(xml.str());
   }
 
+  /**Create spherical instrument with specified number of detectors 
+  @param nDetectors -- number of detectors to create in the instrument
+  */
+  Mantid::Geometry::Instrument_sptr ConvertToMDHelper2::createSphericalInstrument(size_t nDetectors)
+  {
+    // detectors parameters
+    std::vector<double> L2(nDetectors,1);
+    std::vector<double> polar(nDetectors,0);
+    std::vector<double> azim(nDetectors,0);
+    polar[1]=M_PI;
+    for (size_t ic=2;ic<nDetectors;ic++)
+    {
+      polar[ic]=M_PI/2;
+      azim[ic] =M_PI*double(ic-2)/2.;
+    }
+
+    return createCylInstrumentWithDetInGivenPosisions(-1,L2,polar,azim);
+
+  }
+
+  /**Create instrument with detectors in specified angular positions 
+  @param L1    :: source-sample distance
+  @param L2    :: vector of sample-detector distances
+  @param ploar :: vector of polar(spherical) angles of detectors
+  @param azim  :: vector of azim(spherical) angles of detectors
+
+  @returns shared pointer to the instrument
+  */
   Mantid::Geometry::Instrument_sptr 
-  createCylInstrumentWithDetInGivenPosisions(const double &L1,const std::vector<double>& L2, const std::vector<double>& polar, const std::vector<double>& azim)
+  ConvertToMDHelper2::createCylInstrumentWithDetInGivenPosisions(const double &L1,const std::vector<double>& L2, const std::vector<double>& polar, const std::vector<double>& azim)
   {
     boost::shared_ptr<Geometry::Instrument> theInstument(new Geometry::Instrument("processed"));
 
@@ -282,18 +310,24 @@ namespace MDAlgorithms
 }
 
   /**Build min-max instrument with 2 detectors*/
-   void ConvertToMDHelper2::buildMinMaxWorkspaceWithMinInstrument(Mantid::API::MatrixWorkspace_const_sptr &InWS2D,const std::vector<std::string> &oterDimNames)
+   void ConvertToMDHelper2::buildMinMaxWorkspaceWithMinInstrument(Mantid::API::MatrixWorkspace_const_sptr &InWS2D,const std::vector<std::string> &oterDimNames,bool useWorkspace)
    {
 
      // Create workspace with min-max values
     double xMin,xMax;
     InWS2D->getXMinMax(xMin,xMax);
 
-    m_MinMaxWS2D=Mantid::DataObjects::Workspace2D_sptr(new Mantid::DataObjects::Workspace2D );
+    m_MinMaxWS2D=boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(InWS2D));
+    if(!m_MinMaxWS2D)
+    {
+      throw(std::runtime_error(" Can not get Workspace 2D from the matrix workspace"));
+    }
 
-    size_t nHist = 2; // number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
+    //size_t nHist = 2+4; // -- for spherical instrument number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
+    size_t nHist = InWS2D->getNumberHistograms(); // number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
     size_t nBins = 2; // number of bins in min-max workspace
 
+    if (xMin<0 && xMax>0)nBins=3;
 
     MantidVecPtr X,Y,ERR;
     X.access().resize(nBins);
@@ -301,7 +335,13 @@ namespace MDAlgorithms
     ERR.access().resize(nBins,1);
 
     X.access()[0]=xMin;
-    X.access()[1]=xMax;
+    if (xMin<0 && xMax>0)
+    {
+       X.access()[1]=0;
+       X.access()[2]=xMax;
+    }
+    else
+      X.access()[1]=xMax;
 
 
     m_MinMaxWS2D->initialize(nHist,nBins,nBins);
@@ -312,37 +352,26 @@ namespace MDAlgorithms
       m_MinMaxWS2D->setData(i,Y,ERR);
     }
 
-    m_MinMaxWS2D->getAxis(0)->setUnit(InWS2D->getAxis(0)->unit()->unitID());
-    auto yAxis = InWS2D->getAxis(1);
-    if (!yAxis)
-      m_MinMaxWS2D->setYUnit("Counts");
-    else
-      m_MinMaxWS2D->setYUnit(yAxis->unit()->unitID());
+    //m_MinMaxWS2D->getAxis(0)->setUnit(InWS2D->getAxis(0)->unit()->unitID());
+    //auto yAxis = InWS2D->getAxis(1);
+    //if (!yAxis)
+    //  m_MinMaxWS2D->setYUnit("Counts");
+    //else
+    //  m_MinMaxWS2D->setYUnit(yAxis->unit()->unitID());
 
-    // detectors parameters
-    std::vector<double> L2(nHist,1);
-    std::vector<double> polar(nHist,0);
-    std::vector<double> azim(nHist,0);
-    polar[1]=M_PI;
 
-    boost::shared_ptr<Geometry::Instrument> minMaxInstr = createCylInstrumentWithDetInGivenPosisions(-1,L2,polar,azim);
-    m_MinMaxWS2D->setInstrument(minMaxInstr);
-
-    Run &theRun = m_MinMaxWS2D->mutableRun();
-
-    for (size_t i=0;i<oterDimNames.size();i++)
+    if (!useWorkspace) 
+      //m_MinMaxWS2D->mutableRun() = InWS2D->cloneExperimentInfo();
+      //m_MinMaxWS2D->setInstrument(InWS2D->getInstrument());
+      //m_MinMaxWS2D->mutableRun().setGoniometer(InWS2D->run().getGoniometer());
+      //else
     {
-      theRun.addProperty(InWS2D->run().getProperty(oterDimNames[i]));
+      // create spherical instrument has range of problems at the moment as detectors should be placed in RUB matrix egenvectors directions
+      // this is for the future
+        boost::shared_ptr<Geometry::Instrument> minMaxInstr = createSphericalInstrument(6);
+        m_MinMaxWS2D->setInstrument(minMaxInstr);
     }
-    auto EnProperty=InWS2D->run().getProperty("Ei");
-    if(EnProperty)
-        theRun.addProperty(EnProperty);
-    else
-    {
-      EnProperty=InWS2D->run().getProperty("EFixed");
-      if(EnProperty)
-          theRun.addProperty(EnProperty);
-    }
+
 
 
     // add workspace to analysis data servise for it to be availible for subalgorithms

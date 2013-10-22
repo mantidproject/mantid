@@ -45,7 +45,6 @@ public:
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-50,1,true,60,0);
     WorkspaceCreationHelper::storeWS(WSName,ws);
     
-    
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", WSName) );
@@ -54,9 +53,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     // Check the results
-
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0,-50");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"12.667,50");
+    // this is spherical instrument
+    //TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0.,-50");
+    //TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"12.667,50");
+    // real instrument produces as follows:
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0.536101,-50");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"3.20262,50");
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
@@ -74,12 +76,15 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", WSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("QDimensions","Q3D") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("dEAnalysisMode","Direct") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Q3DFrames","Q") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("QConversionScales","Q in A^-1") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     // Check the results
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"-12.667,-12.667,-12.667,-50");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"12.667,12.667,12.667,50");
+    //TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"-12.667,-12.667,-12.667,-50");
+    //TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"12.667,12.667,12.667,50");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"-0.724983,-0,-1.86877,-50");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"-0.218591,-0,3.19515,50");
+
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
@@ -97,19 +102,20 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", WSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("QDimensions","Q3D") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("dEAnalysisMode","Direct") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Q3DFrames","HKL") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("QConversionScales","HKL") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     // Check the results
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"-4.03205,-6.04807,-8.06409,-50");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"4.03205,6.04807,8.06409,50");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"-0.724983,-0,-1.86877,-50");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"-0.218591,-0,3.19515,50");
+
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
 
   void test_indirect1D()
   {
-
+    
     Mantid::API::FrameworkManager::Instance();
     ConvertToMDHelper2 alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-2.5,0.05,true,0,5);
@@ -124,8 +130,8 @@ public:
     TS_ASSERT( alg.isExecuted() );
     // Check the results
 
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0,-2.5");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"3.45587,2.5");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0.536101,-2.5");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"0.55285,2.5");
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
@@ -147,8 +153,8 @@ public:
     TS_ASSERT( alg.isExecuted() );
     // Check the results
 
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"2.54437");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0.12187");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"0.126745");
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
@@ -171,8 +177,8 @@ public:
     TS_ASSERT( alg.isExecuted() );
     // Check the results
 
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0,5.55");
-    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"2.54437,10.55");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MinValues"),"0.12187,9.99");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("MaxValues"),"0.126745,9.99");
     // Remove workspace from the data service.
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }

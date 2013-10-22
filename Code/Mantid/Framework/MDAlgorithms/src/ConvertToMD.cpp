@@ -569,9 +569,9 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
     childAlg->setPropertyValue("Q3DFrames",QFrame);
     childAlg->setProperty("OtherDimensions",otherDim);
     childAlg->setProperty("QConversionScales",ConvertTo);
-
+    childAlg->setProperty("PreprocDetectorsWS",std::string(getProperty("PreprocDetectorsWS")));
     childAlg->execute();
-    if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child algorithm to find min/max values"));
+    if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child algorithm to find min/max workspace values"));
 
     minVal = childAlg->getProperty("MinValues");
     maxVal = childAlg->getProperty("MaxValues");
@@ -598,6 +598,17 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
             maxVal[i]*=0.9;
 
         }
+      }
+      else // expand min-max values a bit to avoid cutting data on the edges
+      {
+        if (std::fabs(minVal[i])>FLT_EPSILON)
+             minVal[i]*=(1+2*FLT_EPSILON);
+        else
+             minVal[i]-=2*FLT_EPSILON;
+        if (std::fabs(minVal[i])>FLT_EPSILON)
+            maxVal[i]*=(1+2*FLT_EPSILON);
+        else
+            minVal[i]+=2*FLT_EPSILON;
       }
     }
 

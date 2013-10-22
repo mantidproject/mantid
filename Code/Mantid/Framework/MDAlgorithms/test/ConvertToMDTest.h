@@ -29,7 +29,7 @@ public:
     Convert2AnyTestHelper(){};
     TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string dEModeRequested="Direct",bool updateMasks=false)
     {
-      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested,updateMasks);
+      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested,updateMasks,std::string(this->getProperty("PreprocDetectorsWS")));
     }
     void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D)
     {

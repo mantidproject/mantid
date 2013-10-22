@@ -169,6 +169,7 @@ set ( TEST_FILES
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDComponentsTest.h
 	ConvertToMDHelperTest.h
+	ConvertToMDHelper2Test.h    
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h

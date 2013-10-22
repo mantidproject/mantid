@@ -40,9 +40,12 @@ namespace MDAlgorithms
     
     virtual const std::string name() const;
     virtual int version() const{return 2;}
-
+    // helper functions
+    static Mantid::Geometry::Instrument_sptr createSphericalInstrument(size_t nDetectors=6);
+    static Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPosisions(const double &L1,const std::vector<double>& L2, const std::vector<double>& polar, const std::vector<double>& azim);
   protected: // for testing 
-    void buildMinMaxWorkspaceWithMinInstrument(Mantid::API::MatrixWorkspace_const_sptr &InWS2D, const std::vector<std::string> &oterDimNames);
+    
+    void buildMinMaxWorkspaceWithMinInstrument(Mantid::API::MatrixWorkspace_const_sptr &InWS2D, const std::vector<std::string> &oterDimNames,bool useWorkspace);
   private:
     virtual void initDocs();
     void exec();
