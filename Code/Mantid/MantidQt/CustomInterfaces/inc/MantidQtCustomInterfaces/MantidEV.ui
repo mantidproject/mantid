@@ -57,7 +57,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <property name="sizePolicy">
@@ -602,6 +602,12 @@
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
         <widget class="QScrollArea" name="scrollArea">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -610,8 +616,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>736</width>
-            <height>631</height>
+            <width>738</width>
+            <height>633</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -961,6 +967,12 @@
       <layout class="QVBoxLayout" name="verticalLayout_11">
        <item>
         <widget class="QScrollArea" name="scrollArea_2">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -969,8 +981,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>736</width>
-            <height>631</height>
+            <width>738</width>
+            <height>633</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -1550,6 +1562,12 @@
       <layout class="QVBoxLayout" name="verticalLayout_13">
        <item>
         <widget class="QScrollArea" name="scrollArea_3">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -1558,8 +1576,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>736</width>
-            <height>631</height>
+            <width>738</width>
+            <height>633</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -2096,125 +2114,257 @@
       <attribute name="title">
        <string>Change HKL</string>
       </attribute>
-      <widget class="QPushButton" name="ApplyChangeHKL_btn">
-       <property name="geometry">
-        <rect>
-         <x>430</x>
-         <y>520</y>
-         <width>115</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Use the specified matrix&lt;br&gt; to update the peak indexes and UB matrix.</string>
-       </property>
-       <property name="text">
-        <string>Apply</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="HKL_Transfrom_lbl">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>30</y>
-         <width>431</width>
-         <height>18</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Transform the UB matrix&lt;br&gt; and peak indexes using the specified 3X3 matrix.</string>
-       </property>
-       <property name="text">
-        <string>Specify 3x3 Matrix to Apply to HKL</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="HKL_Tran_Row_1_lbl">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>70</y>
-         <width>291</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>HKL Transformation, Row 1</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="HKL_tran_row_1_ledt">
-       <property name="geometry">
-        <rect>
-         <x>350</x>
-         <y>70</y>
-         <width>291</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>First row of the&lt;br&gt; transformation matrix to apply the HKL indexes.</string>
-       </property>
-       <property name="text">
-        <string>1,  0,  0</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="HKL_Tran_Row_2_lbl">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>100</y>
-         <width>291</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>HKL Transformation, Row 2</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="HKL_tran_row_2_ledt">
-       <property name="geometry">
-        <rect>
-         <x>350</x>
-         <y>100</y>
-         <width>291</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Second row of the&lt;br&gt; transformation matrix to apply the HKL indexes.</string>
-       </property>
-       <property name="text">
-        <string>0,  1,  0</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="HKL_Tran_Row_3_lbl">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>130</y>
-         <width>291</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>HKL Transformation, Row 3</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="HKL_tran_row_3_ledt">
-       <property name="geometry">
-        <rect>
-         <x>350</x>
-         <y>130</y>
-         <width>291</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Third row of the&lt;br&gt; transformation matrix to apply the HKL indexes.</string>
-       </property>
-       <property name="text">
-        <string>0,  0,  1</string>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_15">
+       <item>
+        <widget class="QScrollArea" name="scrollArea_4">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents_6">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>738</width>
+            <height>633</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_16">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_37">
+             <item>
+              <widget class="QLabel" name="HKL_Transfrom_lbl">
+               <property name="toolTip">
+                <string>Transform the UB matrix&lt;br&gt; and peak indexes using the specified 3X3 matrix.</string>
+               </property>
+               <property name="text">
+                <string>Specify 3x3 Matrix to Apply to HKL</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_38">
+             <item>
+              <spacer name="horizontalSpacer_48">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="HKL_Tran_Row_1_lbl">
+               <property name="text">
+                <string>HKL Transformation, Row 1</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_45">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="HKL_tran_row_1_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>First row of the&lt;br&gt; transformation matrix to apply the HKL indexes.</string>
+               </property>
+               <property name="text">
+                <string>1,  0,  0</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_39">
+             <item>
+              <spacer name="horizontalSpacer_49">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="HKL_Tran_Row_2_lbl">
+               <property name="text">
+                <string>HKL Transformation, Row 2</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_46">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="HKL_tran_row_2_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Second row of the&lt;br&gt; transformation matrix to apply the HKL indexes.</string>
+               </property>
+               <property name="text">
+                <string>0,  1,  0</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_40">
+             <item>
+              <spacer name="horizontalSpacer_50">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="HKL_Tran_Row_3_lbl">
+               <property name="text">
+                <string>HKL Transformation, Row 3</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_47">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="HKL_tran_row_3_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Third row of the&lt;br&gt; transformation matrix to apply the HKL indexes.</string>
+               </property>
+               <property name="text">
+                <string>0,  0,  1</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_42">
+             <item>
+              <spacer name="horizontalSpacer_44">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="ApplyChangeHKL_btn">
+               <property name="toolTip">
+                <string>Use the specified matrix&lt;br&gt; to update the peak indexes and UB matrix.</string>
+               </property>
+               <property name="text">
+                <string>Apply</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+      <zorder>HKL_Transfrom_lbl</zorder>
+      <zorder>scrollArea_4</zorder>
      </widget>
      <widget class="QWidget" name="Integrate">
       <attribute name="title">
