@@ -27,6 +27,9 @@ import os.path
 datapath='/afs/psi.ch/project/sinqdata'
 
 class LoadSINQ(PythonAlgorithm):
+    def version(self):
+        return 2
+
     def category(self):
         return "DataHandling;PythonAlgorithms"
 
