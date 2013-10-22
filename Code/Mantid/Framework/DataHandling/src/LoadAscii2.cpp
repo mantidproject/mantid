@@ -88,32 +88,6 @@ namespace Mantid
       return confidence;
     }
 
-    /**
-    * Check if a file is a text file
-    * @param file :: The file pointer
-    * @returns true if the file an ascii text file, false otherwise
-    */
-    bool LoadAscii2::isAscii(FILE *file)
-    {
-      char data[256];
-      char *pend = &data[fread(data, 1, sizeof(data), file)];
-      fseek(file,0,SEEK_SET);
-      /*
-      * Call it a binary file if we find a non-ascii character in the 
-      * first 256 bytes of the file.
-      */
-      for( char *p = data;  p < pend; ++p )
-      {
-        unsigned long ch = (unsigned long)*p;
-        if( !(ch <= 0x7F) )
-        {
-          return false;
-        }
-
-      }
-      return true;
-    }
-
     //--------------------------------------------------------------------------
     // Protected methods
     //--------------------------------------------------------------------------
@@ -481,11 +455,11 @@ namespace Mantid
       exts.push_back("");
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "The name of the text file to read, including its full or relative path. The file extension must be .tst, .dat, or .csv");
+        "The name of the text file to read, including its full or relative path. The file extension must be .txt, .dat, or .csv");
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
         "",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
 
-      std::string spacers[6][6] = { {"Automatic", ",\t:; "}, {"CSV", ","},
+      std::string spacers[7][2] = { {"Automatic", ",\t:; "}, {"CSV", ","},
       {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}  };
       // For the ListValidator
       std::vector<std::string> sepOptions;

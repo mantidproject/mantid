@@ -60,8 +60,6 @@ namespace Mantid
       /// Returns a confidence value that this algorithm can load a file
       virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
-      static bool isAscii(FILE *file);
-
     protected:
       /// Read the data from the file
       virtual API::Workspace_sptr readData(std::ifstream & file);
