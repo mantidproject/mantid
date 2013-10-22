@@ -31,7 +31,6 @@ public:
   }
   ~SaveAscii2Test()
   {
-    FrameworkManager::Instance().deleteWorkspace("SaveAsciiWS");
   }
 
   void testExec()
@@ -58,7 +57,7 @@ public:
 
     SaveAscii2 save;
     TS_ASSERT_THROWS_NOTHING(save.initialize());
-    TS_ASSERT( save.isInitialized() )
+    TS_ASSERT(save.isInitialized());
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", filename));
     filename = save.getPropertyValue("Filename"); //Get absolute path
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("InputWorkspace", name));
@@ -70,16 +69,45 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
+    //double bin1_0, bin1_1, bin1_2, bin2_0, bin2_1, bin2_2;
     std::string header1, header2, header3, separator, comment;
 
-    // Currently we just test that the first few column headers and a separator are as expected
-    in >> specID >> comment >> header1 >> separator >> header2 >> separator >> header3;
+    // Test that the first few column headers, separator and first two bins are as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
+    // bin1_0 >> separator >> bin1_1 >> separator >> bin1_2 >> separator >> bin2_0 >> separator >> bin2_1 >> separator >> bin2_2;
     TS_ASSERT_EQUALS(specID, 1 );
     TS_ASSERT_EQUALS(comment,"#" );
     TS_ASSERT_EQUALS(separator,"," );
     TS_ASSERT_EQUALS(header1,"X" );
     TS_ASSERT_EQUALS(header2,"Y" );
     TS_ASSERT_EQUALS(header3,"E" );
+
+    std::string binlines;
+    std::vector<std::string> binstr;
+    std::vector<double> bins;
+    std::getline(in,binlines);
+    std::getline(in,binlines);
+
+    boost::split(binstr, binlines,boost::is_any_of(","));
+    for (int i = 0; i < binstr.size(); i++)
+    {
+      bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
+    }
+    TS_ASSERT_EQUALS(bins[0], 0 );
+    TS_ASSERT_EQUALS(bins[1], 2 );
+    TS_ASSERT_EQUALS(bins[2], 1 );
+
+    std::getline(in,binlines);
+    bins.clear();
+    boost::split(binstr, binlines,boost::is_any_of(","));
+    for (int i = 0; i < binstr.size(); i++)
+    {
+      bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
+    }
+    TS_ASSERT_EQUALS(bins[0], 1.66667 );
+    TS_ASSERT_EQUALS(bins[1], 8.66667 );
+    TS_ASSERT_EQUALS(bins[2], 1 );
+
     in.close();
 
     Poco::File(filename).remove();
@@ -88,7 +116,7 @@ public:
 
   void testExec_no_header()
   {
-  Mantid::DataObjects::Workspace2D_sptr wsToSave = boost::dynamic_pointer_cast<
+    Mantid::DataObjects::Workspace2D_sptr wsToSave = boost::dynamic_pointer_cast<
       Mantid::DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++)
     {
@@ -110,7 +138,7 @@ public:
 
     SaveAscii2 save;
     TS_ASSERT_THROWS_NOTHING(save.initialize());
-    TS_ASSERT( save.isInitialized() )
+    TS_ASSERT(save.isInitialized());
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", filename));
     filename = save.getPropertyValue("Filename"); //Get absolute path
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("InputWorkspace", name));
