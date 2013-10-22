@@ -57,7 +57,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <property name="sizePolicy">
@@ -958,363 +958,590 @@
       <attribute name="title">
        <string>Find UB</string>
       </attribute>
-      <widget class="QRadioButton" name="FindUBUsingFFT_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>20</y>
-         <width>331</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Find a UB matrix using the&lt;br&gt; FindUBUsingFFT algorithm.  This will produce a UB matrix corresponding to the Niggli reduced cell for the lattice.</string>
-       </property>
-       <property name="text">
-        <string>Find UB Using FFT</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="FindUBUsingIndexedPeaks_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>140</y>
-         <width>431</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Find the UB matrix using the FindUBUsingIndexedPeaks algorithm.  Specifically, if the&lt;br&gt; peaks in the peaks workspace have already been indexed, find the UB matrix that corresponds to that indexing.</string>
-       </property>
-       <property name="text">
-        <string>Find UB Using Indexed Peaks</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="LoadISAWUB_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>190</y>
-         <width>271</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Load the UB matrix from a file.</string>
-       </property>
-       <property name="text">
-        <string>Load Isaw UB</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="SelectUBFile_btn">
-       <property name="geometry">
-        <rect>
-         <x>500</x>
-         <y>220</y>
-         <width>81</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Browse for the file with the UB matrix.</string>
-       </property>
-       <property name="text">
-        <string>Browse</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="IndexPeaks_ckbx">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>400</y>
-         <width>311</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>After obtaining the UB&lt;br&gt; matrix, index the peaks using that UB.</string>
-       </property>
-       <property name="text">
-        <string>Index Peaks Using UB</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="ApplyFindUB_btn">
-       <property name="geometry">
-        <rect>
-         <x>430</x>
-         <y>520</y>
-         <width>115</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Proceed to actually get the&lt;br&gt; UB matrix and (optionally) index the peaks.</string>
-       </property>
-       <property name="text">
-        <string>Apply</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="MinD_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>50</y>
-         <width>331</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Estimated Lower Bound for a,b,c</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="MinD_ledt">
-       <property name="geometry">
-        <rect>
-         <x>410</x>
-         <y>50</y>
-         <width>81</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Set this to a value that is&lt;br&gt; about 50%-90% of the shortest real space edge length, in Angstroms.</string>
-       </property>
-       <property name="text">
-        <string>3</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="MaxD_ledt">
-       <property name="geometry">
-        <rect>
-         <x>410</x>
-         <y>80</y>
-         <width>81</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Set this to a value that is&lt;br&gt; about 110%-150% of the longest real space edge length, in Angstroms.</string>
-       </property>
-       <property name="text">
-        <string>15</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="MaxD_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>80</y>
-         <width>331</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Estimated Upper Bound for a,b,c</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="FFTTolerance_ledt">
-       <property name="geometry">
-        <rect>
-         <x>410</x>
-         <y>110</y>
-         <width>81</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Maximum distance of h,k or l from integer values to&lt;br&gt; consider a peak to be indexed.</string>
-       </property>
-       <property name="text">
-        <string>0.12</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="IndexedPeaksTolerance_ledt">
-       <property name="geometry">
-        <rect>
-         <x>410</x>
-         <y>160</y>
-         <width>81</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Maximum distance of h,k or l from integer values to&lt;br&gt; consider a peak to be indexed.</string>
-       </property>
-       <property name="text">
-        <string>0.1</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="FFTTolerance_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>110</y>
-         <width>331</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Tolerance</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="OptimizeGoniometerAngles_ckbx">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>260</y>
-         <width>361</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Optimize the goniometer&lt;br&gt; angles, to index the peaks as accurately as possible using the UB matrix that was loaded.</string>
-       </property>
-       <property name="text">
-        <string>Optimize Phi, Chi and Omega</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="MaxGoniometerChange_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>290</y>
-         <width>301</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Maximum Change (degrees)</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="MaxGoniometerChange_ledt">
-       <property name="geometry">
-        <rect>
-         <x>410</x>
-         <y>280</y>
-         <width>81</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Maximum number of degrees that CHI, PHI&lt;br&gt; or OMEGA can be changed.</string>
-       </property>
-       <property name="text">
-        <string>5</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="IndexingTolerance_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>440</y>
-         <width>271</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Indexing Tolerance</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="IndexingTolerance_ledt">
-       <property name="geometry">
-        <rect>
-         <x>410</x>
-         <y>440</y>
-         <width>81</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Only set the h,k,l values on peaks for which the maximum distance of h,k or l from integer values&lt;br&gt; is less than this tolerance.</string>
-       </property>
-       <property name="text">
-        <string>0.12</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="RoundHKLs_ckbx">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>470</y>
-         <width>283</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Round the h,k,l values to the nearest integer.</string>
-       </property>
-       <property name="text">
-        <string>Round HKLs</string>
-       </property>
-      </widget>
-      <widget class="Line" name="line">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>380</y>
-         <width>531</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="SelectUBFile_ledt">
-       <property name="geometry">
-        <rect>
-         <x>180</x>
-         <y>220</y>
-         <width>311</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Name of the file with the UB matrix.</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="SelectUBFile_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>230</y>
-         <width>101</width>
-         <height>18</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Filename</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="UseCurrentUB_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>340</y>
-         <width>521</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>If the peaks workspace&lt;br&gt; already has a UB matrix, just use that UB.</string>
-       </property>
-       <property name="text">
-        <string>Use Current UB (if already found or loaded)</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="IndexedPeaksTolerance_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>160</y>
-         <width>331</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Tolerance</string>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <widget class="QScrollArea" name="scrollArea_2">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents_4">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>736</width>
+            <height>631</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_12">
+           <item>
+            <widget class="QRadioButton" name="FindUBUsingFFT_rbtn">
+             <property name="toolTip">
+              <string>Find a UB matrix using the&lt;br&gt; FindUBUsingFFT algorithm.  This will produce a UB matrix corresponding to the Niggli reduced cell for the lattice.</string>
+             </property>
+             <property name="text">
+              <string>Find UB Using FFT</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_20">
+             <item>
+              <spacer name="horizontalSpacer_28">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="MinD_lbl">
+               <property name="text">
+                <string>Estimated Lower Bound for a,b,c</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_29">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="MinD_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Set this to a value that is&lt;br&gt; about 50%-90% of the shortest real space edge length, in Angstroms.</string>
+               </property>
+               <property name="text">
+                <string>3</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_21">
+             <item>
+              <spacer name="horizontalSpacer_27">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="MaxD_lbl">
+               <property name="text">
+                <string>Estimated Upper Bound for a,b,c</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_30">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="MaxD_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Set this to a value that is&lt;br&gt; about 110%-150% of the longest real space edge length, in Angstroms.</string>
+               </property>
+               <property name="text">
+                <string>15</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_22">
+             <item>
+              <spacer name="horizontalSpacer_26">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="FFTTolerance_lbl">
+               <property name="text">
+                <string>Tolerance</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_31">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="FFTTolerance_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Maximum distance of h,k or l from integer values to&lt;br&gt; consider a peak to be indexed.</string>
+               </property>
+               <property name="text">
+                <string>0.12</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="FindUBUsingIndexedPeaks_rbtn">
+             <property name="toolTip">
+              <string>Find the UB matrix using the FindUBUsingIndexedPeaks algorithm.  Specifically, if the&lt;br&gt; peaks in the peaks workspace have already been indexed, find the UB matrix that corresponds to that indexing.</string>
+             </property>
+             <property name="text">
+              <string>Find UB Using Indexed Peaks</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_23">
+             <item>
+              <spacer name="horizontalSpacer_25">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="IndexedPeaksTolerance_lbl">
+               <property name="text">
+                <string>Tolerance</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_32">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="IndexedPeaksTolerance_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Maximum distance of h,k or l from integer values to&lt;br&gt; consider a peak to be indexed.</string>
+               </property>
+               <property name="text">
+                <string>0.1</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="LoadISAWUB_rbtn">
+             <property name="toolTip">
+              <string>Load the UB matrix from a file.</string>
+             </property>
+             <property name="text">
+              <string>Load Isaw UB</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_24">
+             <item>
+              <spacer name="horizontalSpacer_24">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="SelectUBFile_lbl">
+               <property name="text">
+                <string>Filename</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_33">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::MinimumExpanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="SelectUBFile_ledt">
+               <property name="toolTip">
+                <string>Name of the file with the UB matrix.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="SelectUBFile_btn">
+               <property name="toolTip">
+                <string>Browse for the file with the UB matrix.</string>
+               </property>
+               <property name="text">
+                <string>Browse</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_31">
+             <item>
+              <spacer name="horizontalSpacer_23">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="OptimizeGoniometerAngles_ckbx">
+               <property name="toolTip">
+                <string>Optimize the goniometer&lt;br&gt; angles, to index the peaks as accurately as possible using the UB matrix that was loaded.</string>
+               </property>
+               <property name="text">
+                <string>Optimize Phi, Chi and Omega</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_25">
+             <item>
+              <spacer name="horizontalSpacer_22">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="MaxGoniometerChange_lbl">
+               <property name="text">
+                <string>Maximum Change (degrees)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_34">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="MaxGoniometerChange_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Maximum number of degrees that CHI, PHI&lt;br&gt; or OMEGA can be changed.</string>
+               </property>
+               <property name="text">
+                <string>5</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_30">
+             <item>
+              <widget class="QRadioButton" name="UseCurrentUB_rbtn">
+               <property name="toolTip">
+                <string>If the peaks workspace&lt;br&gt; already has a UB matrix, just use that UB.</string>
+               </property>
+               <property name="text">
+                <string>Use Current UB (if already found or loaded)</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_29">
+             <item>
+              <widget class="QCheckBox" name="IndexPeaks_ckbx">
+               <property name="toolTip">
+                <string>After obtaining the UB&lt;br&gt; matrix, index the peaks using that UB.</string>
+               </property>
+               <property name="text">
+                <string>Index Peaks Using UB</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_26">
+             <item>
+              <spacer name="horizontalSpacer_20">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="IndexingTolerance_lbl">
+               <property name="text">
+                <string>Indexing Tolerance</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_35">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="IndexingTolerance_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Only set the h,k,l values on peaks for which the maximum distance of h,k or l from integer values&lt;br&gt; is less than this tolerance.</string>
+               </property>
+               <property name="text">
+                <string>0.12</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_28">
+             <item>
+              <spacer name="horizontalSpacer_21">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="RoundHKLs_ckbx">
+               <property name="toolTip">
+                <string>Round the h,k,l values to the nearest integer.</string>
+               </property>
+               <property name="text">
+                <string>Round HKLs</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_27">
+             <item>
+              <spacer name="horizontalSpacer_19">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="ApplyFindUB_btn">
+               <property name="toolTip">
+                <string>Proceed to actually get the&lt;br&gt; UB matrix and (optionally) index the peaks.</string>
+               </property>
+               <property name="text">
+                <string>Apply</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+      <zorder>MinD_lbl</zorder>
+      <zorder>scrollArea_2</zorder>
      </widget>
      <widget class="QWidget" name="ChooseCell">
       <attribute name="title">
