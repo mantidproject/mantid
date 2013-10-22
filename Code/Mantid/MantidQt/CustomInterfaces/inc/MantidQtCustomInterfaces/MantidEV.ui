@@ -57,7 +57,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <property name="sizePolicy">
@@ -599,238 +599,360 @@
       <attribute name="title">
        <string>Find Peaks</string>
       </attribute>
-      <widget class="QPushButton" name="ApplyFindPeaks_btn">
-       <property name="geometry">
-        <rect>
-         <x>430</x>
-         <y>520</y>
-         <width>115</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Proceed to actually get the&lt;br&gt; peaks or use the existing peaks, as specified..</string>
-       </property>
-       <property name="text">
-        <string>Apply</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="UseExistingPeaksWorkspace_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>270</y>
-         <width>351</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Use a peaks workspace with peaks that have been&lt;br&gt; been previously found, predicted, or loaded. </string>
-       </property>
-       <property name="text">
-        <string>Use Existing Peaks Workspace</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="FindPeaks_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>110</y>
-         <width>134</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Search through the MD workspace to find Bragg peaks.</string>
-       </property>
-       <property name="text">
-        <string>Find Peaks</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="PeaksWorkspace_lbl">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>50</y>
-         <width>241</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Peaks Workspace Name</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="PeaksWorkspace_ledt">
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>50</y>
-         <width>311</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Name of the peaks workspace to use.  This name is set by default,&lt;br&gt; if data is loaded from an event file and mapped to an MD workspace on the Select Data tab.</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="MaxABC_lbl">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>150</y>
-         <width>271</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Estimated Max of a,b,c</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="MaxABC_ledt">
-       <property name="geometry">
-        <rect>
-         <x>360</x>
-         <y>150</y>
-         <width>151</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Estimated maximum for real&lt;br&gt; space cell edge length in Angstroms.  This is used to get an approximate lower bound on the possible distances between peaks.</string>
-       </property>
-       <property name="text">
-        <string>15</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="NumToFind_lbl">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>180</y>
-         <width>261</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Number of Peaks to Find</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="NumToFind_ledt">
-       <property name="geometry">
-        <rect>
-         <x>360</x>
-         <y>180</y>
-         <width>151</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Maximum number of peaks to find.  Boxes with progressively&lt;br&gt; lower local intensity will be tried, until the specified number of peaks is found, or until the intensity falls below the specified Min Intensity.</string>
-       </property>
-       <property name="text">
-        <string>50</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="MinIntensity_lbl">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
-         <y>210</y>
-         <width>261</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Min Intensity(above ave)</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="MinIntensity_ledt">
-       <property name="geometry">
-        <rect>
-         <x>360</x>
-         <y>210</y>
-         <width>151</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Lower bound on the local intensity of MD boxes to consider as possible peaks, expressed as a multiple of the overall average intensity of the entire MD workspace region.  Boxes with progressively&lt;br&gt; lower local intensity will be tried, until the specified number of peaks is found, or until the intensity falls below the specified Min Intensity.</string>
-       </property>
-       <property name="text">
-        <string>10000</string>
-       </property>
-      </widget>
-      <widget class="Line" name="line_2">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>90</y>
-         <width>521</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="LoadIsawPeaks_rbtn">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>320</y>
-         <width>361</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Load the peaks workspace from a file of peaks&lt;br&gt; that have been previously found or predicted.</string>
-       </property>
-       <property name="text">
-        <string>Load ISAW Peaks (or Integrate) File</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="SelectPeaksFile_btn">
-       <property name="geometry">
-        <rect>
-         <x>480</x>
-         <y>366</y>
-         <width>94</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Browse for the file of peaks to load.</string>
-       </property>
-       <property name="text">
-        <string>Browse</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="SelectPeaksFile_lbl">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>370</y>
-         <width>101</width>
-         <height>18</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Filename</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="SelectPeaksFile_ledt">
-       <property name="geometry">
-        <rect>
-         <x>172</x>
-         <y>363</y>
-         <width>291</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Name of the peaks file that should be loaded.</string>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QScrollArea" name="scrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents_2">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>736</width>
+            <height>631</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <item>
+              <widget class="QLabel" name="PeaksWorkspace_lbl">
+               <property name="text">
+                <string>Peaks Workspace Name</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_18">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="PeaksWorkspace_ledt">
+               <property name="toolTip">
+                <string>Name of the peaks workspace to use.  This name is set by default,&lt;br&gt; if data is loaded from an event file and mapped to an MD workspace on the Select Data tab.</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="line_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="FindPeaks_rbtn">
+             <property name="toolTip">
+              <string>Search through the MD workspace to find Bragg peaks.</string>
+             </property>
+             <property name="text">
+              <string>Find Peaks</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <item>
+              <spacer name="horizontalSpacer_9">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="MaxABC_lbl">
+               <property name="text">
+                <string>Estimated Max of a,b,c</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_14">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="MaxABC_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Estimated maximum for real&lt;br&gt; space cell edge length in Angstroms.  This is used to get an approximate lower bound on the possible distances between peaks.</string>
+               </property>
+               <property name="text">
+                <string>15</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
+             <item>
+              <spacer name="horizontalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="NumToFind_lbl">
+               <property name="text">
+                <string>Number of Peaks to Find</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_15">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="NumToFind_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Maximum number of peaks to find.  Boxes with progressively&lt;br&gt; lower local intensity will be tried, until the specified number of peaks is found, or until the intensity falls below the specified Min Intensity.</string>
+               </property>
+               <property name="text">
+                <string>50</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
+             <item>
+              <spacer name="horizontalSpacer_12">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="MinIntensity_lbl">
+               <property name="text">
+                <string>Min Intensity(above ave)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_16">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="MinIntensity_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Lower bound on the local intensity of MD boxes to consider as possible peaks, expressed as a multiple of the overall average intensity of the entire MD workspace region.  Boxes with progressively&lt;br&gt; lower local intensity will be tried, until the specified number of peaks is found, or until the intensity falls below the specified Min Intensity.</string>
+               </property>
+               <property name="text">
+                <string>10000</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="UseExistingPeaksWorkspace_rbtn">
+             <property name="toolTip">
+              <string>Use a peaks workspace with peaks that have been&lt;br&gt; been previously found, predicted, or loaded. </string>
+             </property>
+             <property name="text">
+              <string>Use Existing Peaks Workspace</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="LoadIsawPeaks_rbtn">
+             <property name="toolTip">
+              <string>Load the peaks workspace from a file of peaks&lt;br&gt; that have been previously found or predicted.</string>
+             </property>
+             <property name="text">
+              <string>Load ISAW Peaks (or Integrate) File</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_14">
+             <item>
+              <spacer name="horizontalSpacer_13">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="SelectPeaksFile_lbl">
+               <property name="text">
+                <string>Filename</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_17">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="SelectPeaksFile_ledt">
+               <property name="toolTip">
+                <string>Name of the peaks file that should be loaded.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="SelectPeaksFile_btn">
+               <property name="toolTip">
+                <string>Browse for the file of peaks to load.</string>
+               </property>
+               <property name="text">
+                <string>Browse</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <item>
+              <spacer name="horizontalSpacer_8">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="ApplyFindPeaks_btn">
+               <property name="toolTip">
+                <string>Proceed to actually get the&lt;br&gt; peaks or use the existing peaks, as specified..</string>
+               </property>
+               <property name="text">
+                <string>Apply</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="FindUB">
       <attribute name="title">
