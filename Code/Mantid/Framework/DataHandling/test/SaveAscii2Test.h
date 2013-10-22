@@ -69,12 +69,10 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
-    //double bin1_0, bin1_1, bin1_2, bin2_0, bin2_1, bin2_2;
     std::string header1, header2, header3, separator, comment;
 
     // Test that the first few column headers, separator and first two bins are as expected
     in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
-    // bin1_0 >> separator >> bin1_1 >> separator >> bin1_2 >> separator >> bin2_0 >> separator >> bin2_1 >> separator >> bin2_2;
     TS_ASSERT_EQUALS(specID, 1 );
     TS_ASSERT_EQUALS(comment,"#" );
     TS_ASSERT_EQUALS(separator,"," );
