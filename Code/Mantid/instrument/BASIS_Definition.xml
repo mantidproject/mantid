@@ -51882,6 +51882,7 @@
     <id val="8185"/>
     <id val="8186"/>
   </idlist>
+
   <component type="elastic" idlist="elastic">
     <location/>
   </component>
@@ -52022,18 +52023,8 @@
       </location>
     </component>
   </type>
-  <idlist idname="elastic">
-    <id start="16384" end="16511"/>
-    <id start="16512" end="16639"/>
-    <id start="16640" end="16767"/>
-    <id start="16768" end="16895"/>
-    <id start="16896" end="17023"/>
-    <id start="17024" end="17151"/>
-    <id start="17152" end="17279"/>
-    <id start="17280" end="17407"/>
-    <id start="17408" end="17535"/>
-  </idlist>
- 
+
+
   <!--ELASTIC TUBE (90 degrees)-->
   <type name="tube-elastic" outline="yes">
     <properties/>
@@ -52424,6 +52415,19 @@
       </location>
     </component>
   </type>
+
+  <idlist idname="elastic">
+    <id start="16384" end="16511"/>
+    <id start="16512" end="16639"/>
+    <id start="16640" end="16767"/>
+    <id start="16768" end="16895"/>
+    <id start="16896" end="17023"/>
+    <id start="17024" end="17151"/>
+    <id start="17152" end="17279"/>
+    <id start="17280" end="17407"/>
+    <id start="17408" end="17535"/>
+  </idlist>
+
   <!--PIXEL FOR DIFFRACTION TUBES-->
   <type is="detector" name="pixel-elastic-tube">
     <cylinder id="cyl-approx">
