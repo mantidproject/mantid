@@ -527,14 +527,14 @@ namespace Mantid
 
       if (!boost::regex_match(m_columnSep.begin(), m_columnSep.end(), test))
       {
-        throw std::runtime_error("Separators cannot contain numeric characters");
+        throw std::invalid_argument("Separators cannot contain numeric characters");
       }
 
       m_comment = getProperty("CommentIndicator");
 
       if (!boost::regex_match(m_comment.begin(), m_comment.end(), test))
       {
-        throw std::runtime_error("Comment markers cannot contain numeric characters");
+        throw std::invalid_argument("Comment markers cannot contain numeric characters");
       }
 
       // Process the header information.

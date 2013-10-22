@@ -136,14 +136,14 @@ namespace Mantid
 
       if (!boost::regex_match(m_sep.begin(), m_sep.end(), test))
       {
-        throw std::runtime_error("Separators cannot contain numeric characters");
+        throw std::invalid_argument("Separators cannot contain numeric characters");
       }
 
       std::string comment = getPropertyValue("CommentIndicator");
 
       if (!boost::regex_match(comment.begin(), comment.end(), test))
       {
-        throw std::runtime_error("Comment markers cannot contain numeric characters");
+        throw std::invalid_argument("Comment markers cannot contain numeric characters");
       }
 
       // Create an spectra index list for output
