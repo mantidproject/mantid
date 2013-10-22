@@ -122,7 +122,7 @@ void LoadFlexiNexus::exec()
 
 void LoadFlexiNexus::loadDictionary(std::string dictFile)
 {
-  std::ifstream in(dictFile, std::ifstream::in);
+  std::ifstream in(dictFile.c_str(), std::ifstream::in);
   std::string line, key, value;
 
   while(std::getline(in,line)){
