@@ -116,8 +116,8 @@
     </xs:choice>
   </xs:complexType>
 
-  <!-- Guide Parameters -->
-  <xs:complexType name="guide-parameters">
+  <!-- Tapered Guide Parameters -->
+  <xs:complexType name="tapered-guide-parameters">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="axis">
         <xs:complexType>
@@ -562,10 +562,10 @@
                       </xs:complexContent>
                     </xs:complexType>
                   </xs:element>
-                  <xs:element name="guide">
+                  <xs:element name="tapered-guide">
                     <xs:complexType>
                       <xs:complexContent>
-                        <xs:extension base="guide-parameters">
+                        <xs:extension base="tapered-guide-parameters">
                           <xs:attribute name ="id"/>
                         </xs:extension>
                       </xs:complexContent>

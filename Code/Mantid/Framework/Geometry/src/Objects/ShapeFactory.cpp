@@ -212,9 +212,9 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
             idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);  
             numPrimitives++;
           }
-          else if ( !primitiveName.compare("guide"))
+          else if ( !primitiveName.compare("tapered-guide"))
           {
-            idMatching[idFromUser] = parseGuide(pE, primitives, l_id);  
+            idMatching[idFromUser] = parseTaperedGuide(pE, primitives, l_id);  
             numPrimitives++;
           }
           else if ( !primitiveName.compare("torus"))
@@ -810,7 +810,7 @@ namespace // anonymous
   };
 
   /**
-   * The "guide" shape is actually a special case of hexahedron; once we have
+   * The "tapered-guide" shape is actually a special case of hexahedron; once we have
    * the 8 points that make up either shape, the process of parsing them can be
    * exactly the same in both cases.
    */
@@ -921,7 +921,7 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
   return parseHexahedronFromStruct(hex, prim, l_id);
 }
 
-/** Parse XML 'guide' element, which is a special case of the XML 'hexahedron' element.
+/** Parse XML 'tapered-guide' element, which is a special case of the XML 'hexahedron' element.
  *
  *  @param pElem :: XML 'hexahedron' element from instrument def. file
  *  @param prim :: To add shapes to
@@ -930,7 +930,7 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseGuide(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemApertureStart = getShapeElement(pElem, "aperture-start");
   Element* pElemLength = getShapeElement(pElem, "length");

@@ -205,13 +205,13 @@ public:
     TS_ASSERT( !shape_sptr->isValid(V3D(0.0,-0.003, -0.038)) );
   }
 	
-  void testGuideDefaults()
+  void testTaperedGuideDefaults()
   {
-    std::string xmlShape = "<guide id=\"shape\">";
+    std::string xmlShape = "<tapered-guide id=\"shape\">";
     xmlShape +=	"<aperture-start height=\"2.0\" width=\"2.0\" />";
     xmlShape +=	"<length val=\"2.0\" />";
     xmlShape +=	"<aperture-end height=\"4.0\" width=\"4.0\" />";
-    xmlShape +=	"</guide>";
+    xmlShape +=	"</tapered-guide>";
     xmlShape +=	"<algebra val=\"shape\"/>";
 
     boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
@@ -239,15 +239,15 @@ public:
     TS_ASSERT(!shape_sptr->isValid(V3D(-1.6,-1.6, 0.0)) );
   }
 	
-  void testGuideDifferentAxisAndCentre()
+  void testTaperedGuideDifferentAxisAndCentre()
   {
-    std::string xmlShape = "<guide id=\"shape\">";
+    std::string xmlShape = "<tapered-guide id=\"shape\">";
     xmlShape +=	"<aperture-start height=\"2.0\" width=\"2.0\" />";
     xmlShape +=	"<length val=\"2.0\" />";
     xmlShape +=	"<aperture-end height=\"4.0\" width=\"4.0\" />";
     xmlShape +=	"<centre x=\"0.0\" y=\"0.0\" z=\"-1.0\" />";
     xmlShape +=	"<axis x=\"1.0\" y=\"0.0\" z=\"0\" />";
-    xmlShape +=	"</guide>";
+    xmlShape +=	"</tapered-guide>";
     xmlShape +=	"<algebra val=\"shape\"/>";
 
     boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);

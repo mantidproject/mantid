@@ -56,7 +56,7 @@
   <location x="0.0" y="0.0" z="100.0"> <facing val="none"/> </location>
 </component>
 
-<component type="guide-test" idlist="guide-test">
+<component type="tapered-guide-test" idlist="tapered-guide-test">
   <location x="0.0" y="0.0" z="100.0"> <facing val="none"/> </location>
 </component>
 
@@ -243,14 +243,14 @@
     <algebra val="some-shape" />  
   </type>    
   
-  <type name="guide-test" is="detector">
-    <guide id="some-shape">
+  <type name="tapered-guide-test" is="detector">
+    <tapered-guide id="some-shape">
       <aperture-start height="2.0" width="2.0" />
       <length val="2.0" />
       <aperture-end height="4.0" width="4.0" />
       <centre x="0.0" y="0.0" z="0.0" />
       <axis x="0.0" y="0.0" z="1" />
-    </guide>
+    </tapered-guide>
     <algebra val="some-shape" />
   </type>
   
@@ -357,7 +357,7 @@
     <id val="8" />
   </idlist> 
   
-  <idlist idname="guide-test">
+  <idlist idname="tapered-guide-test">
     <id val="9" />
   </idlist> 
   
