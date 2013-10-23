@@ -210,12 +210,12 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
     else:
         return graph
     
-def plotMD(source, plot_axis, normalization = mantid.api.MDNormalization.VolumeNormalization, error_bars = False):
+def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.VolumeNormalization, error_bars = False):
     """Open a 1D plot of a MDWorkspace.
     
     Args:
         source: Workspace(s) to plot
-        plot_axis: Index of the plot axis
+        plot_axis: Index of the plot axis (defaults to auto-select)
         normalization: Type of normalization required (defaults to volume)
         error_bars: Flag for error bar plotting.
     Returns:
