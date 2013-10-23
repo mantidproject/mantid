@@ -361,6 +361,10 @@ public:
     FrameworkManager::Instance().exec("FakeMDEventData", 4,
         "InputWorkspace", "IntegratePeaksMDTest_MDEWS", "UniformParams", "100000");
 
+    MDEventWorkspace3Lean::sptr mdews =
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMDTest_MDEWS");
+    mdews->setCoordinateSystem(Mantid::API::HKL);
+
 
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
