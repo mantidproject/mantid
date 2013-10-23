@@ -251,28 +251,28 @@ public:
     xmlShape +=	"<algebra val=\"shape\"/>";
 
     boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
-
+    
     // Vertices.
-    TS_ASSERT( shape_sptr->isValid(V3D( 3.0,-2.0,-2.0)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 3.0, 2.0,-2.0)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 3.0, 2.0, 2.0)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 3.0,-2.0, 2.0)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 1.0,-1.0,-1.0)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 1.0,-1.0)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 1.0, 1.0)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 1.0,-1.0, 1.0)) );
-
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0,-1.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 1.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0,-1.0, 2.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 1.0, 2.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0,-2.0,-1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0, 2.0,-1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0,-2.0, 3.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0, 2.0, 3.0)) );
+    
     // Middle of edges that connect front and back faces.
-    TS_ASSERT( shape_sptr->isValid(V3D( 2.0,-1.5,-1.5)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 2.0, 1.5,-1.5)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 2.0, 1.5, 1.5)) );
-    TS_ASSERT( shape_sptr->isValid(V3D( 2.0,-1.5, 1.5)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0,-1.5,-0.5)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 1.5,-0.5)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0,-1.5, 2.5)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 1.5, 2.5)) );
     
     // Close to, but outside of shape.
-    TS_ASSERT(!shape_sptr->isValid(V3D( 2.0,-1.6,-1.6)) );
-    TS_ASSERT(!shape_sptr->isValid(V3D( 2.0, 1.6,-1.6)) );
-    TS_ASSERT(!shape_sptr->isValid(V3D( 2.0, 1.6, 1.6)) );
-    TS_ASSERT(!shape_sptr->isValid(V3D( 2.0,-1.6, 1.6)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 1.0,-1.6,-0.6)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 1.0, 1.6,-0.6)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 1.0,-1.6, 2.6)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 1.0, 1.6, 2.6)) );
   }
 
 	void testSphere()

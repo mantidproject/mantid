@@ -610,7 +610,7 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element* pElem)
       // it be normalised.
       V3D axis = parsePosition(pElem_axis);
       axis.normalize();
-      const Quat rotation(axis, DEFAULT_AXIS);
+      const Quat rotation(DEFAULT_AXIS, axis);
 
       rotation.rotate(result.lfb);
       rotation.rotate(result.lft);
@@ -957,16 +957,18 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element* pElem, std::map<
   const double halfEW = apertureEndWidth / 2;
   const double halfEH = apertureEndHeight / 2;
 
+  // Build the basic shape.
   Hexahedron hex;
-  hex.lfb = V3D(-halfSW, -halfSH, 0     ) + centre;
-  hex.lft = V3D(-halfSW,  halfSH, 0     ) + centre;
-  hex.lbb = V3D(-halfEW, -halfEH, length) + centre;
-  hex.lbt = V3D(-halfEW,  halfEH, length) + centre;
-  hex.rfb = V3D( halfSW, -halfSH, 0     ) + centre;
-  hex.rft = V3D( halfSW,  halfSH, 0     ) + centre;
-  hex.rbb = V3D( halfEW, -halfEH, length) + centre;
-  hex.rbt = V3D( halfEW,  halfEH, length) + centre;
+  hex.lfb = V3D(-halfSW, -halfSH, 0     );
+  hex.lft = V3D(-halfSW,  halfSH, 0     );
+  hex.lbb = V3D(-halfEW, -halfEH, length);
+  hex.lbt = V3D(-halfEW,  halfEH, length);
+  hex.rfb = V3D( halfSW, -halfSH, 0     );
+  hex.rft = V3D( halfSW,  halfSH, 0     );
+  hex.rbb = V3D( halfEW, -halfEH, length);
+  hex.rbt = V3D( halfEW,  halfEH, length);
 
+  // Point it along the defined axis.
   if( axis != DEFAULT_AXIS)
   {
     const Quat q(DEFAULT_AXIS, axis);
@@ -980,6 +982,16 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element* pElem, std::map<
     q.rotate(hex.rbb);
     q.rotate(hex.rbt);
   }
+  
+  // Move it to the defined centre.
+  hex.lfb += centre;
+  hex.lft += centre;
+  hex.lbb += centre;
+  hex.lbt += centre;
+  hex.rfb += centre;
+  hex.rft += centre;
+  hex.rbb += centre;
+  hex.rbt += centre;
   
   return parseHexahedronFromStruct(hex, prim, l_id);
 }
