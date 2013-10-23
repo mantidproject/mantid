@@ -116,9 +116,8 @@ namespace MDAlgorithms
   void ConvertToDiffractionMDWorkspace2::init()
   {
 
-    // Input units must be TOF
-    auto validator = boost::make_shared<API::WorkspaceUnitValidator>("TOF");
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, validator),
+
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "An input workspace.");
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
