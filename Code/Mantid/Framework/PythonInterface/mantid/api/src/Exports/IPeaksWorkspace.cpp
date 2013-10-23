@@ -3,7 +3,6 @@
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
 
 using Mantid::API::IPeaksWorkspace;

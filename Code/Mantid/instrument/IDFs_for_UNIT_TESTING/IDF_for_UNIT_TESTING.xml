@@ -70,6 +70,10 @@
   <location x="0.0" y="200.0" z="0.0" rot="45"> </location>  
 </component>
 
+<component type="cuboid-alternate-test" idlist="cuboid-alternate-test">
+  <location x="0.0" y="0.0" z="0.0">  </location>
+</component>
+  
 <component type="infinite-cylinder-test" idlist="infinite-cylinder-test">
   <location x="0.0" y="0.0" z="0.0"> <facing val="none"/> </location>
 </component>
@@ -259,6 +263,17 @@
     </cuboid>
     <algebra val="approximate-shape" /> 
   </type>    
+
+  <type name="cuboid-alternate-test" is="detector">
+    <cuboid id="some-shape">
+      <height val="0.2" />
+      <width val="0.1" />
+      <depth val="0.4" />
+      <centre x="1.0" y="1.0" z="1.0" />
+      <axis x="0" y="0" z="1" />
+    </cuboid>
+    <algebra val="some-shape" />
+  </type> 
   
   <type name="infinite-cylinder-test" is="detector">
     <infinite-cylinder id="some-shape">
@@ -305,6 +320,7 @@
   
   
   
+
   <!-- DETECTOR ID LISTS -->
   
   <idlist idname="cylinder-right">
@@ -352,6 +368,10 @@
   <idlist idname="cuboid-rotating-test2">
     <id start="1000" end="1001" />
   </idlist>  
+
+  <idlist idname="cuboid-alternate-test">
+    <id val="18" />
+  </idlist>
   
   <idlist idname="infinite-cylinder-test">
     <id val="12" />

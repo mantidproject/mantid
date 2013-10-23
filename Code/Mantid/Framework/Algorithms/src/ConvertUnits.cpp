@@ -109,17 +109,35 @@ void ConvertUnits::init()
 void ConvertUnits::exec()
 {
   // Get the workspaces
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   this->setupMemberVariables(inputWS);
 
+
   // Check that the input workspace doesn't already have the desired unit.
-  // If it does, just set the output workspace to point to the input one and be done.
-  if ( m_inputUnit->unitID() == m_outputUnit->unitID() )
+  if (m_inputUnit->unitID() == m_outputUnit->unitID())
   {
-    g_log.information() << "Input workspace already has target unit (" << m_outputUnit->unitID()
-                        << "), so just pointing the output workspace property to the input workspace." << std::endl;
-    setProperty("OutputWorkspace",boost::const_pointer_cast<MatrixWorkspace>(inputWS));
-    return;
+    const std::string outputWSName = getPropertyValue("OutputWorkspace");
+    const std::string inputWSName = getPropertyValue("InputWorkspace");
+    if (outputWSName == inputWSName)
+    {
+      // If it does, just set the output workspace to point to the input one and be done.
+      g_log.information() << "Input workspace already has target unit (" << m_outputUnit->unitID() << "), so just pointing the output workspace property to the input workspace."<< std::endl;
+      setProperty("OutputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(inputWS));
+      return;
+    }
+    else
+    {
+      // Clone the workspace.
+      IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace",0.0,0.6);
+      duplicate->initialize();
+      duplicate->setProperty("InputWorkspace",  inputWS);
+      duplicate->execute();
+      Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
+      auto outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      setProperty("OutputWorkspace", outputWs);
+      return;
+    }
+
   }
 
   if (inputWS->dataX(0).size() < 2)

@@ -88,6 +88,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 
   // call this slot directly after the signal is received. just increment the update counter
+  connect(m_mantidUI, SIGNAL(workspace_renamed(QString,QString)), this, SLOT(recordWorkspaceRename(QString,QString)),Qt::DirectConnection);
+  // call this slot directly after the signal is received. just increment the update counter
   connect(m_mantidUI, SIGNAL(ADS_updated()), this, SLOT(incrementUpdateCount()), Qt::DirectConnection);
   // this slot is called when the GUI thread is free. decrement the counter. do nothing until the counter == 0
   connect(m_mantidUI, SIGNAL(ADS_updated()), this, SLOT(updateTree()), Qt::QueuedConnection);
@@ -286,6 +288,7 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
       auto ws = group->getItem(i);
       auto * node = addTreeEntry(std::make_pair(ws->name(), ws), item);
       excludeItemFromSort(node);
+      if (shouldBeSelected(node->text(0))) node->setSelected(true);
     }
   }
   else
@@ -361,6 +364,31 @@ void MantidDockWidget::incrementUpdateCount()
 }
 
 /**
+  * Save the old and the new name in m_renameMap. This is needed to restore selection
+  *   of the renamed workspace (if it was selected before renaming).
+  * @param old_name :: Old name of a renamed workspace.
+  * @param new_name :: New name of a renamed workspace.
+  */
+void MantidDockWidget::recordWorkspaceRename(QString old_name, QString new_name)
+{
+    // check if old_name has been recently a new name
+    QList<QString> oldNames = m_renameMap.keys(old_name);
+    // non-empty list of oldNames become new_name
+    if ( !oldNames.isEmpty() )
+    {
+        foreach(QString name, oldNames)
+        {
+            m_renameMap[name] = new_name;
+        }
+    }
+    else
+    {
+        // record a new rename pair
+        m_renameMap[old_name] = new_name;
+    }
+}
+
+/**
  * Flips the flag indicating whether a tree update is in progress. Actions such as sorting
  * are disabled while an update is in progress.
  * @param state The required state for the flag
@@ -378,13 +406,27 @@ void MantidDockWidget::setTreeUpdating(const bool state)
 void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems,
                                         const QStringList & expanded)
 {
+  // collect names of selected workspaces
+  QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
+  m_selectedNames.clear(); // just in case
+  foreach( QTreeWidgetItem *item, selected)
+  {
+      m_selectedNames << item->text(0);
+  }
+
+  // populate the tree from scratch
   m_tree->clear();
   auto iend = topLevelItems.end();
   for(auto it = topLevelItems.begin(); it != iend; ++it)
   {
     auto *node = addTreeEntry(*it);
-    if(expanded.contains(node->text(0))) node->setExpanded(true);
+    QString name = node->text(0);
+    if(expanded.contains(name)) node->setExpanded(true);
+    // see if item must be selected
+    if ( shouldBeSelected(name) ) node->setSelected(true);
   }
+  m_selectedNames.clear();
+  m_renameMap.clear();
 }
 
 /**
@@ -414,6 +456,30 @@ MantidTreeWidgetItem * MantidDockWidget::addTreeEntry(const std::pair<std::strin
     m_tree->addTopLevelItem(node);
   }
   return node;
+}
+
+/**
+  * Check if a workspace should be selected after dock update.
+  * @param name :: Name of a workspace to check.
+  */
+bool MantidDockWidget::shouldBeSelected(QString name) const
+{
+    QStringList renamed = m_renameMap.keys(name);
+    if ( !renamed.isEmpty() )
+    {
+        foreach(QString oldName,renamed)
+        {
+            if ( m_selectedNames.contains(oldName) )
+            {
+                return true;
+            }
+        }
+    }
+    else if(m_selectedNames.contains(name))
+    {
+      return true;
+    }
+    return false;
 }
 
 /**

@@ -1180,8 +1180,8 @@ namespace LiveData
   {
     // It'd be nice to use operator[], but we might end up inserting a value....
     // Have to use find() instead.
-    detid2index_map::iterator it = m_indexMap->find( pixelId);
-    if (it != m_indexMap->end())
+    detid2index_map::iterator it = m_indexMap.find( pixelId);
+    if (it != m_indexMap.end())
     {
       std::size_t workspaceIndex = it->second;
       Mantid::DataObjects::TofEvent event( tof, pulseTime);
@@ -1239,8 +1239,8 @@ namespace LiveData
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp, false);
 
-    // Clear out the old logs
-    temp->mutableRun().clearTimeSeriesLogs();
+    // Clear out the old logs, except for the most recent entry
+    temp->mutableRun().clearOutdatedTimeSeriesLogValues();
 
     // Lock the mutex and swap the workspaces
     {

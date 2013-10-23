@@ -2,8 +2,11 @@
 #define  SPECTRUM_VIEW_H
 
 #include <QMainWindow>
+#include <QMdiSubWindow>
 #include <QtGui>
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
@@ -39,35 +42,62 @@
                  <http://doxygen.mantidproject.org>
  */
 
+namespace Ui
+{
+class SpectrumViewer; // forward declaration of ui file
+}
+
 namespace MantidQt
 {
 namespace SpectrumView
 {
 
+// forward declarations
+class EModeHandler;
+class RangeHandler;
+class SliderHandler;
+class SpectrumDisplay;
+class SVConnections;
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView : public QMainWindow
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView : public QMainWindow, public MantidQt::API::WorkspaceObserver
 {
-  public:
+  Q_OBJECT
+public:
 
-     /// Construct an SpectrumView to display data from the specified data source 
-     SpectrumView( SpectrumDataSource* data_source );
+  /// Construct an SpectrumView to display data from the specified data source
+  SpectrumView( QWidget * parent = 0);
 
-    ~SpectrumView();
+  ~SpectrumView();
+  void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
 
-  private:
-    GraphDisplay*    h_graph;
-    GraphDisplay*    v_graph;
-                                 
-    // keep void pointers to the following objects, to avoid having to 
-    // include ui_SpectrumView.h, which disappears by the time MantidPlot is
-    // being built.  We need the pointers so we can delete them in the 
-    // destructor.  
-    void*            saved_ui;               // Ui_SpectrumViewer*
-    void*            saved_slider_handler;   // SliderHandler*
-    void*            saved_range_handler;    // RangeHandler*
-    void*            saved_spectrum_display; // SpectrumDisplay*
-    void*            saved_sv_connections;   // SVConnections*
-    void*            saved_emode_handler;    // EModeHandler*
+protected slots:
+  void closeWindow();
+  void updateWorkspace();
+
+protected:
+  void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+
+private:
+  void init(SpectrumDataSource* data_source);
+  void updateHandlers(SpectrumDataSource* data_source);
+  GraphDisplay*    h_graph;
+  GraphDisplay*    v_graph;
+
+  // keep void pointers to the following objects, to avoid having to
+  // include ui_SpectrumView.h, which disappears by the time MantidPlot is
+  // being built.  We need the pointers so we can delete them in the
+  // destructor.
+  Ui::SpectrumViewer *m_ui; ///< Ui_SpectrumViewer*
+  SliderHandler      *m_slider_handler;   // SliderHandler*
+  RangeHandler       *m_range_handler;    // RangeHandler*
+  SpectrumDisplay    *m_spectrum_display; // SpectrumDisplay*
+  SVConnections      *m_sv_connections;   // SVConnections*
+  EModeHandler       *m_emode_handler;    // EModeHandler*
+
+signals:
+  void needToClose();
+  void needToUpdate();
 };
 
 } // namespace SpectrumView

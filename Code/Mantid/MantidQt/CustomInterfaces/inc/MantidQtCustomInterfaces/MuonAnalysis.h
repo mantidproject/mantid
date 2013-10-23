@@ -124,6 +124,9 @@ private slots:
   /// Run the plot button on the home tab.
   void runFrontPlotButton();
 
+  /// Creates a plot of selected group/pair.
+  void plotSelectedItem();
+
   /// 
   void runFrontGroupGroupPairComboBox(int index);
 
@@ -157,17 +160,20 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
-  /**
-   * Checks whether plots should be auto-updated when some settings change
-   * @return true if enabled, false if not
-   */
+  /// Updates the style of the current plot according to actual parameters on settings tab.
+  void updateCurrentPlotStyle();
+
+  /// Checks whether plots should be auto-updated when some settings change.
   bool isAutoUpdateEnabled();
 
-  // Show a plot for a given workspace. Closes previous plot if exists.
+  /// Show a plot for a given workspace. Closes previous plot if exists.
   void showPlot(const QString& wsName);
 
   /// Closes the window with the plot of the given ws
   void closePlotWindow(const QString& wsName);
+
+  /// Checks if the plot for the workspace does exist.
+  bool plotExists(const QString& wsName);
 
   /// Enable PP tool for the plot of the given WS
   void selectMultiPeak(const QString& wsName);
@@ -221,10 +227,6 @@ private:
 
   /// is grouping set
   bool isGroupingSet();
-
-  /// Apply grouping specified in xml file to workspace
-  bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
-    const std::string& filename);
 
   /// create WS contained the data for a plot
   void createPlotWS(const std::string& groupName, 
@@ -338,9 +340,6 @@ private:
   /// List of current group names 
   std::vector<std::string> m_groupNames;
 
-  /// name for file to temperary store grouping
-  std::string m_groupingTempFilename;
-
   /// Deal with input file changes.
   void handleInputFileChanges();
 
@@ -405,6 +404,9 @@ private:
 
   /// Boolean to show whether the gui is being updated
   bool m_updating;
+
+  /// Flag to indicate that grouping table is being updated
+  bool m_updatingGrouping;
 
   /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
   bool m_loaded;

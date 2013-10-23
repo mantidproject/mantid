@@ -77,6 +77,10 @@ InstrumentWindowTab(instrWindow)
   m_sphericalZ->setCheckable(true);
   connect(m_sphericalZ,SIGNAL(triggered()),signalMapper,SLOT(map()));
   signalMapper->setMapping(m_sphericalZ, 6);
+  m_sideBySide = new QAction("Side by Side",this);
+  m_sideBySide->setCheckable(true);
+  connect(m_sideBySide,SIGNAL(triggered()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(m_sideBySide, 7);
 
   m_surfaceTypeActionGroup = new QActionGroup(this);
   m_surfaceTypeActionGroup->setExclusive(true);
@@ -87,6 +91,7 @@ InstrumentWindowTab(instrWindow)
   m_surfaceTypeActionGroup->addAction(m_sphericalX);
   m_surfaceTypeActionGroup->addAction(m_sphericalY);
   m_surfaceTypeActionGroup->addAction(m_sphericalZ);
+  m_surfaceTypeActionGroup->addAction(m_sideBySide);
 
   QMenu *renderModeMenu = new QMenu(this);
   renderModeMenu->addActions(m_surfaceTypeActionGroup->actions());
@@ -423,7 +428,7 @@ void InstrumentWindowRenderTab::showEvent (QShowEvent *)
   InstrumentActor* actor = m_instrWindow->getInstrumentActor();
   if ( actor )
   {
-    auto visitor = SetAllVisibleVisitor();
+    auto visitor = SetAllVisibleVisitor(actor->areGuidesShown());
     actor->accept( visitor );
     getSurface()->updateView();
     getSurface()->requestRedraw();
@@ -582,7 +587,8 @@ void InstrumentWindowRenderTab::surfaceTypeChanged(int index)
         // checking action calls setSurfaceType slot
         action->setChecked(true);
     }
-
+    showFlipControl( index );
+    showResetView( index );
 }
 
 /**

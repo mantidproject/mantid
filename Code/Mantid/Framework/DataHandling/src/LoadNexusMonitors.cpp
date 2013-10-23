@@ -325,9 +325,8 @@ void LoadNexusMonitors::exec()
   // @todo: Find out if there is a better (i.e. more generic) way to do this
   try
   {
-    file.openGroup("isis_vms_compat", "IXvms");
-    
-    file.closeGroup();
+    g_log.debug() << "Load Sample data isis" << std::endl; 
+    LoadEventNexus::loadSampleDataISIScompatibility(file, this->WS);
   }
   catch(::NeXus::Exception&)
   {
@@ -366,7 +365,7 @@ void LoadNexusMonitors::exec()
     // The start_time, however, has been known to be wrong in old files.
   }
   // Load the instrument
-  this->runLoadInstrument(instrumentName, this->WS);
+  LoadEventNexus::loadInstrument(filename,WS,m_top_entry_name,this);
 
   // Load the meta data, but don't stop on errors
   g_log.debug() << "Loading metadata" << std::endl;
@@ -456,52 +455,6 @@ void LoadNexusMonitors::runLoadLogs(const std::string filename, API::MatrixWorks
     {
       g_log.error() << "Error while loading Logs from Nexus. Some sample logs may be missing." << std::endl;
     }
-}
-
-/**
- * Load the instrument geometry File
- *  @param instrument :: instrument name.
- *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
- */
-void LoadNexusMonitors::runLoadInstrument(const std::string &instrument,
-    API::MatrixWorkspace_sptr localWorkspace)
-{
-
-  // do the actual work
-  API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  bool executionSuccessful(true);
-  try
-  {
-    loadInst->setPropertyValue("InstrumentName", instrument);
-    loadInst->setProperty<API::MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false); // We have a custom mapping
-    loadInst->execute();
-
-    // Populate the instrument parameters in this workspace - this works around a bug
-    localWorkspace->populateInstrumentParameters();
-  } catch (std::invalid_argument& e)
-  {
-    g_log.information() << "Invalid argument to LoadInstrument Child Algorithm : " << e.what()
-        << std::endl;
-    executionSuccessful = false;
-  } catch (std::runtime_error& e)
-  {
-    g_log.information() << "Unable to successfully run LoadInstrument Child Algorithm : " << e.what()
-        << std::endl;
-    executionSuccessful = false;
-  }
-
-  // If loading instrument definition file fails
-  if (!executionSuccessful)
-  {
-    g_log.error() << "Error loading Instrument definition file\n";
-  }
-  else
-  {
-    this->instrument_loaded_correctly = true;
-  }
 }
 
 } // end DataHandling

@@ -65,7 +65,8 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                 self.setPropertyValue("TransmissionWorkspace", trans_name)
                 self.setProperty("TransmissionWorkspace", trans_ws)
         else:
-            self._with_frame_skipping(workspace)            
+            ws = self._with_frame_skipping(workspace)            
+            self.setProperty("OutputWorkspace", ws)
     
     def _call_sans_transmission(self, workspace, output_workspace_name):
         """
@@ -207,7 +208,6 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
-        TransmissionUtils.apply_transmission(self, workspace, trans_ws)
-  
-        
+        return TransmissionUtils.apply_transmission(self, workspace, trans_ws)
+
 AlgorithmFactory.subscribe(EQSANSDirectBeamTransmission)

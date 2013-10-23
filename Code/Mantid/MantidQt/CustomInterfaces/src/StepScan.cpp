@@ -235,6 +235,8 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
 {
   // Hold the name of the scan index log in a common place
   const std::string scan_index("scan_index");
+  // If this has already been set to something, keep track of what
+  auto currentSetting = m_uiForm.plotVariable->currentText();
   // Clear the combobox and immediately re-insert 'scan_index' (so it's the first entry)
   m_uiForm.plotVariable->clear();
   m_uiForm.plotVariable->addItem( QString::fromStdString(scan_index) );
@@ -254,6 +256,8 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
 
   expandPlotVarCombobox( ws );
 
+  // Set back to whatever it was set to before
+  m_uiForm.plotVariable->setCurrentIndex(m_uiForm.plotVariable->findText(currentSetting));
   // Now that this has been populated, allow the user to select from it
   m_uiForm.plotVariable->setEnabled(true);
   // Now's the time to enable the start button as well
@@ -322,9 +326,11 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
   m_tableWSName = m_inputWSName.substr(2) + "_StepScan";
   stepScan->setPropertyValue("OutputWorkspace", m_tableWSName);
 
+  // ROI masking
   const QString maskWS = m_uiForm.maskWorkspace->currentText();
   stepScan->setPropertyValue("MaskWorkspace",maskWS.toStdString());
 
+  // Filtering on time (or other unit)
   const QString xminStr = m_uiForm.xmin->text();
   const QString xmaxStr = m_uiForm.xmax->text();
   const double xmin = xminStr.toDouble();
@@ -337,7 +343,15 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
   }
   if ( ! xminStr.isEmpty() ) stepScan->setProperty("XMin",xmin);
   if ( ! xmaxStr.isEmpty() ) stepScan->setProperty("XMax",xmax);
-  // TODO: Update when entries added to rangeUnit combobox
+  switch (m_uiForm.rangeUnit->currentIndex())
+  {
+  case 1:
+    stepScan->setProperty("RangeUnit","dSpacing");
+    break;
+  default:
+    // The default value for the property is TOF (which is index 0 in the combobox)
+    break;
+  }
 
   // If any of the filtering options were set, next time round we'll need to reload the data
   // as they cause the workspace to be changed

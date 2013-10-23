@@ -69,9 +69,6 @@ namespace Mantid
     // Fix the detector numbers if the defaults are not correct
     void fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File & file, 
                   const boost::scoped_array<specid_t> &spec_ids, const size_t nmonitors) const; 
-    /// Load the appropriate instrument
-    void runLoadInstrument(const std::string& instrument,
-        API::MatrixWorkspace_sptr localWorkspace);
     /// Load the logs
     void runLoadLogs(const std::string filename,
         API::MatrixWorkspace_sptr localWorkspace);
@@ -81,8 +78,6 @@ namespace Mantid
     API::MatrixWorkspace_sptr WS;
     /// Number of monitors
     size_t nMonitors;
-    /// Set to true when instrument geometry was loaded.
-    bool instrument_loaded_correctly;
     /// name of top level NXentry to use
     std::string m_top_entry_name;
   };

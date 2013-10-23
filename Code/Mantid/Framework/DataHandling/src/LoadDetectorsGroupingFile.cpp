@@ -301,7 +301,7 @@ namespace DataHandling
     }
 
     // 1. Prepare
-    detid2index_map* indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
 
     // 2. Set
     for (std::map<int, std::vector<std::string> >::iterator it =  mGroupComponentsMap.begin();
@@ -331,8 +331,8 @@ namespace DataHandling
           if (det){
             // Component is DETECTOR:
             int32_t detid = det->getID();
-            detid2index_map::iterator itx = indexmap->find(detid);
-            if (itx != indexmap->end()){
+            detid2index_map::const_iterator itx = indexmap.find(detid);
+            if (itx != indexmap.end()){
               size_t wsindex = itx->second;
               mGroupWS->dataY(wsindex)[0] = it->first;
             }
@@ -346,9 +346,6 @@ namespace DataHandling
        } // ENDFOR (component)
 
     } // ENDFOR GroupID
-
-    // 3. Clear
-    delete indexmap;
 
     return;
   }
@@ -379,7 +376,7 @@ namespace DataHandling
     }
 
     // 1. Prepare
-    detid2index_map* indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
 
     // 2. Set GroupingWorkspace
     for (std::map<int, std::vector<detid_t> >::iterator it =  mGroupDetectorsMap.begin();
@@ -389,9 +386,9 @@ namespace DataHandling
 
       for (size_t i = 0; i < it->second.size(); i ++){
         detid_t detid = it->second[i];
-        detid2index_map::iterator itx = indexmap->find(detid);
+        detid2index_map::const_iterator itx = indexmap.find(detid);
 
-        if (itx != indexmap->end())
+        if (itx != indexmap.end())
         {
           size_t wsindex = itx->second;
           mGroupWS->dataY(wsindex)[0] = it->first;
@@ -400,9 +397,6 @@ namespace DataHandling
         }
       } // ENDFOR detid (in range)
     } // ENDFOR each group ID
-
-    // 3. Clear
-    delete indexmap;
 
     return;
   }
@@ -413,8 +407,8 @@ namespace DataHandling
   void LoadDetectorsGroupingFile::setBySpectrumIDs()
   {
     // 1. Get map
-    spec2index_map* s2imap = mGroupWS->getSpectrumToWorkspaceIndexMap();
-    spec2index_map::iterator s2iter;
+    const spec2index_map s2imap = mGroupWS->getSpectrumToWorkspaceIndexMap();
+    spec2index_map::const_iterator s2iter;
 
     // 2. Locate in loop
     //      std::map<int, std::vector<int> > mGroupSpectraMap;
@@ -425,8 +419,8 @@ namespace DataHandling
       for (size_t isp=0; isp<gsiter->second.size(); isp++)
       {
         int specid = gsiter->second[isp];
-        s2iter = s2imap->find(specid);
-        if (s2iter == s2imap->end())
+        s2iter = s2imap.find(specid);
+        if (s2iter == s2imap.end())
         {
           g_log.error() << "Spectrum " << specid << " does not have an entry in GroupWorkspace's spec2index map" << std::endl;
           throw std::runtime_error("Logic error");
@@ -448,9 +442,6 @@ namespace DataHandling
         } // IF-ELSE: spectrum ID has an entry
       } // FOR: each spectrum ID
     } // FOR: each group ID
-
-    // 3. Clean
-    delete s2imap;
 
     return;
   }
@@ -700,7 +691,9 @@ namespace DataHandling
             finalvalue = val_value;
           else
             finalvalue = value;
-          parseDetectorIDs(finalvalue, it->second);
+
+          std::vector<int> parsedRange = Strings::parseRange(finalvalue);
+          it->second.insert(it->second.end(), parsedRange.begin(), parsedRange.end());
         }
       } // "detids"
       else if (pNode->nodeName().compare("ids") == 0)
@@ -724,7 +717,9 @@ namespace DataHandling
             finalvalue = val_value;
           else
             finalvalue = value;
-          parseSpectrumIDs(finalvalue, it->second);
+
+          std::vector<int> parsedRange = Strings::parseRange(finalvalue);
+          it->second.insert(it->second.end(), parsedRange.begin(), parsedRange.end());
         }
       }
 
@@ -757,124 +752,6 @@ namespace DataHandling
     } // ENDFOR
 
     return value;
-  }
-
-  /*
-   * Parse a,b-c,d,... string to a vector in 1-1 mapping
-   */
-  void LoadGroupXMLFile::parseDetectorIDs(std::string inputstring, std::vector<detid_t>& detids)
-  {
-
-    // 1. Parse range out
-    std::vector<int32_t> singles;
-    std::vector<int32_t> pairs;
-    this->parseRangeText(inputstring, singles, pairs);
-
-    // 2. Store single detectors... ..., detx,
-    for (size_t i = 0; i < singles.size(); i ++)
-    {
-      detids.push_back(singles[i]);
-    }
-
-    // 3. Store detectors parsed in pairs, det0., det1, ... detN
-    for (size_t i = 0; i < pairs.size()/2; i ++)
-    {
-      for (detid_t detid = pairs[2*i]; detid <= pairs[2*i+1]; detid ++)
-        detids.push_back(detid);
-    }
-
-    return;
-  }
-
-
-  /*
-   * Parse a,b-c,d,... string to a vector
-   * Size of the vector is equal to the number of spectrum IDs.
-   * Not like the vector for detector IDs that are in pair, each spectrum ID will be recorded in
-   * spectrum IDs vector
-   */
-  void LoadGroupXMLFile::parseSpectrumIDs(std::string inputstring, std::vector<int>& specids)
-  {
-    // 1. Parse range out
-    std::vector<int32_t> singles;
-    std::vector<int32_t> pairs;
-    this->parseRangeText(inputstring, singles, pairs);
-
-    // 2. Store single detectors... ..., detx, detx, ...
-    for (size_t i = 0; i < singles.size(); i ++){
-      specids.push_back(singles[i]);
-    }
-
-    // 3. Store detectors pairs
-    for (size_t i = 0; i < pairs.size()/2; i ++){
-      for (int specid=pairs[2*i]; specid<=pairs[2*i+1]; specid++)
-        specids.push_back(specid);
-    }
-
-    return;
-  }
-
-  /*
-   * Parse index range text to singles and pairs
-   * Example: 3,4,9-10,33
-   */
-  void LoadGroupXMLFile::parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs){
-
-    // 1. Split ','
-    std::vector<std::string> rawstrings;
-    boost::split(rawstrings, inputstr, boost::is_any_of(","), boost::token_compress_on);
-
-    // 2. Filter
-    std::vector<std::string> strsingles;
-    std::vector<std::string> strpairs;
-    for (size_t i = 0; i < rawstrings.size(); i ++){
-      // a) Find '-':
-      bool containto = false;
-      const char* tempchs = rawstrings[i].c_str();
-      for (size_t j = 0; j < rawstrings[i].size(); j ++)
-        if (tempchs[j] == '-'){
-          containto = true;
-          break;
-        }
-      // b) Rebin
-      if (containto)
-        strpairs.push_back(rawstrings[i]);
-      else
-        strsingles.push_back(rawstrings[i]);
-    } // ENDFOR i
-
-    // 3. Treat singles
-    for (size_t i = 0; i < strsingles.size(); i ++){
-      int32_t itemp = atoi(strsingles[i].c_str());
-      singles.push_back(itemp);
-    }
-
-    // 4. Treat pairs
-    for (size_t i = 0; i < strpairs.size(); i ++){
-      // a) split and check
-      std::vector<std::string> ptemp;
-      boost::split(ptemp, strpairs[i], boost::is_any_of("-"), boost::token_compress_on);
-      if (ptemp.size() != 2)
-      {
-        std::stringstream ss;
-        ss << "Wrong format:  Range string " << strpairs[i] << " has a wrong format!" << std::endl;
-        throw std::invalid_argument(ss.str());
-      }
-
-      // b) parse
-      int32_t intstart = atoi(ptemp[0].c_str());
-      int32_t intend = atoi(ptemp[1].c_str());
-      if (intstart >= intend)
-      {
-        std::stringstream ss;
-        ss << "Wrong format: Range string " << strpairs[i] << " has a reversed order" << std::endl;
-        throw std::invalid_argument(ss.str());
-      }
-      pairs.push_back(intstart);
-      pairs.push_back(intend);
-    }
-
-    return;
   }
 
   // -----------------------------------------------------------------------------------------------

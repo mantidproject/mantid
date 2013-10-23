@@ -166,6 +166,7 @@ namespace MantidQt
       QString getText() const;
 
       bool isValid() const;
+      bool isSearching() const;
       QStringList getFilenames() const;
       QString getFirstFilename() const;
       int getEntryNum() const;

@@ -26,6 +26,7 @@
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <Poco/ScopedLock.h>
+#include <nexus/NeXusException.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -780,6 +781,8 @@ namespace API
   *  date is selected. If no such files are found the file with the latest from date is 
   *  selected.
   *
+  *  If no file is found for the given instrument, an empty string is returned.
+  *
   *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
   *  @param date :: ISO 8601 date
   *  @return full path of IDF
@@ -865,6 +868,8 @@ namespace API
    * @param file :: open NeXus file
    * @param[out] parameterStr :: special string for all the parameters.
    *             Feed that to ExperimentInfo::readParameterMap() after the instrument is done.
+   * @throws Exception::NotFoundError If instrument definition is not in the nexus file and cannot
+   *                                  be loaded from the IDF.
    */
   void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File * file, std::string & parameterStr)
   {
@@ -888,34 +893,50 @@ namespace API
       this->mutableRun().loadNexus(file, "logs");
     }
 
-    // Now the instrument source
-    instrumentXml = "";
-    instrumentName = "";
-
     // Try to get the instrument file
     file->openGroup("instrument", "NXinstrument");
     file->readData("name", instrumentName);
+
+    try {
+      file->openGroup("instrument_xml", "NXnote");
+      file->readData("data", instrumentXml );
+      file->closeGroup();
+    }
+    catch (NeXus::Exception& ex) {
+      // Just carry on - it might not be there (e.g. old-style processed files)
+      g_log.debug(ex.what());
+    }
 
     // We first assume this is a new version file, but if the next step fails we assume its and old version file.
     int version = 1;
     try {
       file->readData("instrument_source", instrumentFilename);
-    } 
-    catch(...) {
+    }
+    catch (NeXus::Exception&) {
       version = 0;
+      // In the old version 'processed' file, this was held at the top level (as was the parameter map)
       file->closeGroup();
-      file->readData("instrument_source", instrumentFilename);
+      try {
+        file->readData("instrument_source", instrumentFilename);
+      }
+      catch (NeXus::Exception& ex) {
+        // Just carry on - it might not be there (e.g. for SNS files)
+        g_log.debug(ex.what());
+      }
     }
 
-    file->openGroup("instrument_parameter_map", "NXnote");
-    file->readData("data", parameterStr);
-    file->closeGroup();
-
-    if (version > 0)
-    {
-      file->openGroup("instrument_xml", "NXnote");
-      file->readData("data", instrumentXml );
+    try {
+      file->openGroup("instrument_parameter_map", "NXnote");
+      file->readData("data", parameterStr);
       file->closeGroup();
+    }
+    catch (NeXus::Exception& ex) {
+      // Just carry on - it might not be there (e.g. for SNS files)
+      g_log.debug(ex.what());
+    }
+
+    if ( version == 1 )
+    {
       file->closeGroup();
     }
 
@@ -935,16 +956,14 @@ namespace API
       }
       catch (std::exception & e)
       {
-        g_log.error() << "Error loading instrument IDF file for '" << instrumentName << "'." << std::endl;
-        g_log.error() << e.what() << std::endl;
+        g_log.error() << "Error loading instrument IDF file for '" << instrumentName << "'.\n";
+        g_log.debug() << e.what() << std::endl;
+        throw;
       }
     }
     else
     {
-      // The filename in the file = just bare file.
-      // So Get the full path back to the instrument directory.
-      instrumentFilename = ConfigService::Instance().getInstrumentDirectory() + "/" + instrumentFilename;
-      g_log.debug() << "Using instrument IDF XML text contained in .nxs file." << std::endl;
+      g_log.debug() << "Using instrument IDF XML text contained in nexus file.\n";
     }
 
 

@@ -1,4 +1,4 @@
-from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, where, mean, sum
+from numpy import zeros, ones, arctan2, arange, shape, sqrt, fliplr, asfarray, where, mean, sum
 from mantid.simpleapi import *
 # from MantidFramework import *
 import math
@@ -40,8 +40,8 @@ def getProtonCharge(st=None):
     if st is not None:
         mt_run = st.getRun()
         proton_charge_mtd_unit = mt_run.getProperty('gd_prtn_chrg').value
-        proton_charge = proton_charge_mtd_unit / 2.77777778e-10
-        return proton_charge
+#        proton_charge = proton_charge_mtd_unit / 2.77777778e-10
+        return proton_charge_mtd_unit
     return None  
 
 def getIndex(value, array):
@@ -1048,7 +1048,7 @@ def integrateOverLowResRange(mt1,
 
 def substractBackground(tof_axis, y_axis, y_error_axis,
                         peakRange, backFlag, backRange,
-                        type):
+                        error_0, type):
     """
     shape of y_axis : [256, nbr_tof]
     This routine will calculate the background, remove it from the peak
@@ -1072,11 +1072,7 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     # retrieve data
     _tofAxis = tof_axis
     nbrTof = len(_tofAxis)
-    
-    # by default, no space for background subtraction below and above peak
-    bMinBack = False
-    bMaxBack = False
-        
+            
     # size peak
     szPeak = peakMax - peakMin + 1
     
@@ -1094,19 +1090,22 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
 
     for t in range(nbrTof):
 
+        # by default, no space for background subtraction below and above peak
+        bMinBack = False
+        bMaxBack = False
+
         if backMin < (peakMin):
             bMinBack = True
             _backMinArray = y_axis[backMin:peakMin, t]
             _backMinErrorArray = y_error_axis[backMin:peakMin, t]
             [_backMin, _backMinError] = weightedMean(_backMinArray,
-                                                          _backMinErrorArray)
+                                                          _backMinErrorArray, error_0)
              
         if (peakMax) < backMax:
             bMaxBack = True
             _backMaxArray = y_axis[peakMax+1:backMax+1, t]
-
             _backMaxErrorArray = y_error_axis[peakMax+1:backMax+1, t]
-            [_backMax, _backMaxError] = weightedMean(_backMaxArray, _backMaxErrorArray)    
+            [_backMax, _backMaxError] = weightedMean(_backMaxArray, _backMaxErrorArray, error_0)    
     
         # if no max background use min background
         if not bMaxBack:
@@ -1119,7 +1118,7 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
             background_error = _backMaxError
             
         if bMinBack and bMaxBack:
-            [background, background_error] = weightedMean([_backMin, _backMax], [_backMinError, _backMaxError])
+            [background, background_error] = weightedMean([_backMin, _backMax], [_backMinError, _backMaxError], error_0)
         
         # remove background for each pixel of the peak
         for x in range(szPeak):
@@ -1131,32 +1130,35 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     
     return [final_y_axis, final_y_error_axis]
 
-def weightedMean(data_array, error_array):
+def weightedMean(data_array, error_array, error_0):
     
     sz = len(data_array)
     
     # calculate the numerator of mean
     dataNum = 0;
     for i in range(sz):
-        if not (data_array[i] == 0):
-            tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
-            dataNum += tmpFactor
+        if (error_array[i] == 0):
+            error_array[i] = error_0
+            
+        tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
+        dataNum += tmpFactor
     
     # calculate denominator
     dataDen = 0;
     for i in range(sz):
-        if not (error_array[i] == 0):
-            tmpFactor = 1./float((pow(error_array[i],2)))
-            dataDen += tmpFactor
+        if (error_array[i] == 0):
+            error_array[i] = error_0
+        tmpFactor = 1./float((pow(error_array[i],2)))
+        dataDen += tmpFactor
 
     if dataDen == 0:
-        mean = 0
+        data_mean = 0
         mean_error = 0
     else:            
-        mean = float(dataNum) / float(dataDen)
+        data_mean = float(dataNum) / float(dataDen)
         mean_error = math.sqrt(1/dataDen)     
 
-    return [mean, mean_error]
+    return [data_mean, mean_error]
 
 def weightedMeanOfRange(norm_y_axis, norm_y_error_axis):
     """
@@ -1232,18 +1234,8 @@ def divideDataByNormalization(data_y_axis,
             
                 tmp_error_1 = pow(float(data_y_error_axis[x,t]) / float(data_y_axis[x,t]),2)
                 tmp_error_2 = pow(float(av_norm_error[t]) / float(av_norm[t]),2)
-                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * (float(data_y_axis[x,t]) / float(av_norm[t]))
+                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * abs(float(data_y_axis[x,t]) / float(av_norm[t]))
             
-#                 if t == 61:
-#                     print 'data_y_error_axis[x,t]: ' , float(data_y_error_axis[x,t])
-#                     print 'data_y_axis[x,t]: ' , float(data_y_axis[x,t])
-#                     print 'tmp_error_1: ' , tmp_error_1
-#                     print 'av_norm_error[t]: ' , av_norm_error[t]
-#                     print 'av_norm[t]: ' , av_norm[t]
-#                     print 'tmp_error_2: ' , tmp_error_2
-#                     print 'tmp_error: ' , tmp_error
-#                     print
-
                 new_data_y_axis[x,t] = tmp_value
                 new_data_y_error_axis[x,t] = tmp_error
     
@@ -1334,11 +1326,6 @@ def ouput_big_Q_ascii_file(file_name,
                          x_axis,
                          y_axis,
                          y_error_axis):
-      
-    print x_axis.shape
-    print y_axis.shape
-    print y_error_axis.shape
-      
       
     f=open(file_name,'w')
       
@@ -1882,6 +1869,7 @@ def createFinalWorkspace(q_axis, final_y_axis, final_error_axis, name_output_ws)
                                       DataE=final_error_axis,
                                       Nspec=1,
                                       UnitX="Wavelength")
+    final_workspace.setDistribution(True)
     
     return final_workspace
     
@@ -1969,6 +1957,32 @@ def cleanupData(final_data_y_axis, final_data_y_error_axis):
     
     
                 
+def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
+    
+    sz = final_data_y_axis.shape
+    nbrTof = sz[0]
+    
+    for t in range(nbrTof):
+            
+        _data = final_data_y_axis[t]
+        _error = final_data_y_error_axis[t]
+            
+        # if error is > value, remove point
+        if _error >= _data:
+            _data = 0
+            _error = 0
+            
+        # if value is below 10^-12
+        if _data < 1e-12:
+            _data = 0
+            _error = 0
+                
+        final_data_y_axis[t] = _data
+        final_data_y_error_axis[t] = _error
+            
+    return [final_data_y_axis, final_data_y_error_axis]
+    
+    
                 
             
     

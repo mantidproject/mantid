@@ -111,6 +111,22 @@ namespace API
     }
   }
 
+  const std::string MultipleExperimentInfos::toString() const
+  {
+//    if (m_expInfos.size() == 1)
+//      return m_expInfos[0]->toString();
+
+    // mess with things in multiple case
+    std::ostringstream os;
+    for (std::size_t i = 0; i < m_expInfos.size(); ++i)
+    {
+      os << m_expInfos[i]->toString();
+      if (i+1 != m_expInfos.size())
+        os << "\n";
+    }
+
+    return os.str();
+  }
 
 
 

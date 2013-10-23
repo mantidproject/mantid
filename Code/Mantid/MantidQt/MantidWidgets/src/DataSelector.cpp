@@ -158,21 +158,31 @@ namespace MantidQt
      *
      * This will either return the base name of the filepath or
      * the currently selected item in the workspace selector depending
-     * on what view is available.
+     * on what view is available. If there is no valid input the method returns
+     * an empty string.
      *
      * @return The name of the current data item
      */
     QString DataSelector::getCurrentDataName()
     {
       QString filename("");
-      if(m_uiForm.rfFileInput->isValid())
+
+      int index = m_uiForm.stackedDataSelect->currentIndex();
+
+      switch(index)
       {
-        QFileInfo qfio(m_uiForm.rfFileInput->getFirstFilename());
-        filename = qfio.completeBaseName();
-      }
-      else
-      {
-        filename = m_uiForm.wsWorkspaceInput->currentText();
+        case 0:
+          // the file selector is visible
+          if(m_uiForm.rfFileInput->isValid())
+          {
+            QFileInfo qfio(m_uiForm.rfFileInput->getFirstFilename());
+            filename = qfio.completeBaseName();
+          }
+          break;
+        case 1:
+          // the workspace selector is visible
+          filename = m_uiForm.wsWorkspaceInput->currentText();
+          break;
       }
 
       return filename;

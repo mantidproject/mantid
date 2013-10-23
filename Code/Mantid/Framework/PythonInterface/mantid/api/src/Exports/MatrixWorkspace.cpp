@@ -6,6 +6,7 @@
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
@@ -130,17 +131,23 @@ void export_MatrixWorkspace()
 {
   REGISTER_SHARED_PTR_TO_PYTHON(MatrixWorkspace);
 
+  /// Typedef to remove const qualifier on input detector shared_ptr. See Policies/RemoveConst.h for more details
+  typedef double (MatrixWorkspace::*getDetectorSignature)(Mantid::Geometry::IDetector_sptr det) const;
+
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo,IMDWorkspace>, boost::noncopyable>("MatrixWorkspace", no_init)
     //--------------------------------------- Meta information -----------------------------------------------------------------------
     .def("blocksize", &MatrixWorkspace::blocksize, "Returns size of the Y data array")
     .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms, "Returns the number of spectra in the workspace")
-    .def("binIndexOf", &MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads((arg("xvalue"), arg("workspace_index")),
+    .def("binIndexOf", &MatrixWorkspace::binIndexOf,
+          MatrixWorkspace_binIndexOfOverloads((arg("xvalue"), arg("workspace_index")),
          "Returns the index of the bin containing the given xvalue. The workspace_index is optional [default=0]"))
-    .def("detectorTwoTheta", &MatrixWorkspace::detectorTwoTheta, "Returns the two theta value for a given detector")
-    .def("detectorSignedTwoTheta",&MatrixWorkspace::detectorSignedTwoTheta, "Returns the signed two theta value for given detector")
+    .def("detectorTwoTheta", (getDetectorSignature)&MatrixWorkspace::detectorTwoTheta,
+         "Returns the two theta value for a given detector")
+    .def("detectorSignedTwoTheta",(getDetectorSignature)&MatrixWorkspace::detectorSignedTwoTheta,
+         "Returns the signed two theta value for given detector")
     .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&MatrixWorkspace::getSpectrum,
-       return_internal_reference<>(), "Return the spectra at the given workspace index.")
-    .def("getDetector", (IDetector_sptr (MatrixWorkspace::*) (const size_t) const)&MatrixWorkspace::getDetector,
+         return_internal_reference<>(), "Return the spectra at the given workspace index.")
+    .def("getDetector", &MatrixWorkspace::getDetector, return_value_policy<Policies::RemoveConstSharedPtr>(),
         "Return the Detector or DetectorGroup that is linked to the given workspace index")
     .def("getRun", &MatrixWorkspace::mutableRun, return_internal_reference<>(),
              "Return the Run object for this workspace")

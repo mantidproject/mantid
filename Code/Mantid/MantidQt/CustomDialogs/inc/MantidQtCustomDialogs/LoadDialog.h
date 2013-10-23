@@ -102,6 +102,8 @@ namespace MantidQt
       QString m_currentFiles;
       /// The initial height
       int m_initialHeight;
+      /// Flag to indicating if we are populating the dialog
+      bool m_populating;
     };
 
   }

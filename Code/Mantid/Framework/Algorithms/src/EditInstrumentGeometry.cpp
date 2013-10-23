@@ -2,7 +2,16 @@
 This algorithm can 
  1. add an Instrument to a Workspace without any real instrument associated with, or
  2. replace a Workspace's Instrument with a new Instrument, or
- 3. edit whole and partial detectors' parameters of the Instrument associated with a Workspace.
+ 3. edit all detectors' parameters of the instrument associated with a Workspace (partial instrument editing is not supported). 
+
+== Requirements on input properties ==
+1. PrimaryFightPath (L1): If it is not given, L1 will be the distance between source and sample in the original instrument.  Otherwise, L1 is read from input.  The source position of the modified instrument is (0, 0, -L1);
+
+2. SpectrumIDs: If not specified (empty list), then SpectrumIDs will be set up to any array such that SpectrumIDs[wsindex] is the spectrum ID of workspace index 'wsindex'; 
+
+3. L2 and Polar cannot be empty list;
+
+4. SpectrumIDs[i], L2[i], Polar[i], Azimuthal[i] and optional DetectorIDs[i] correspond to the detector of a same spectrum.
 
 ==Limitations==
 There are some limitations of this algorithm.  
@@ -11,16 +20,13 @@ There are some limitations of this algorithm.
 
 2. For each spectrum, there is only one and only one new detector.  Thus, if one spectrum is associated with a group of detectors previously, the replacement (new) detector is the one which is (diffraction) focused on after this algorithm is called.
 
-3. If only part of the spectra to have detector edited, for rest of the spectra, if any of them is associated with a group of detectors, then after the algorithm is called, this spectra won't have any detector associated.
-
 ==Instruction==
-1. For powder diffractomer, user can input
-   SpectrumIDs = "1, 2, 3"
+1. For powder diffractomer with 3 spectra, user can input
+   SpectrumIDs = "1, 3, 2"
    L2 = "3.1, 3.2, 3.3"
    Polar = "90.01, 90.02, 90.03"
    Azimuthal = "0.1,0.2,0.3"
-   NewInstrument = False
-   to set up the focused detectors' parameters for spectrum 1, 2 and 3.  
+   to set up the focused detectors' parameters for spectrum 1, 3 and 2. 
 *WIKI*/
 
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
@@ -96,8 +102,7 @@ namespace Algorithms
 
     // Spectrum ID for the spectrum to have instrument geometry edited
     declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
-                    "Spectrum IDs (note that it is not detector ID or workspace indices). "
-                    "Number of spectrum IDs must be same as workspace's histogram number.");
+                    "Spectrum IDs (note that it is not detector ID or workspace indices). The list must be either empty or have a size equal to input workspace's histogram number. ");
 
     auto required = boost::make_shared<MandatoryValidator<std::vector<double> > >();
 
@@ -111,7 +116,7 @@ namespace Algorithms
 
     // Vector for Azimuthal angle
     declareProperty(new ArrayProperty<double>("Azimuthal"),
-                    "Azimuthal angles (out-of-plain) for detectors. "
+                    "Azimuthal angles (out-of-plane) for detectors. "
                     "Number of azimuthal angles given must be same as number of histogram.");
 
     // Detector IDs
@@ -267,7 +272,7 @@ namespace Algorithms
     }
 
     // Keep original instrument and set the new instrument, if necessary
-    boost::shared_ptr<std::map<specid_t,size_t> > spec2indexmap(workspace->getSpectrumToWorkspaceIndexMap());
+    const auto spec2indexmap = workspace->getSpectrumToWorkspaceIndexMap();
 
     // ??? Condition: spectrum has 1 and only 1 detector
     size_t nspec = workspace->getNumberHistograms();
@@ -282,8 +287,8 @@ namespace Algorithms
     for (size_t i = 0; i < specids.size(); i ++)
     {
       // Find spectrum's workspace index
-      spec2index_map::iterator it = spec2indexmap->find(specids[i]);
-      if (it == spec2indexmap->end())
+      spec2index_map::const_iterator it = spec2indexmap.find(specids[i]);
+      if (it == spec2indexmap.end())
       {
         stringstream errss;
         errss << "Spectrum ID " << specids[i] << " is not found. "

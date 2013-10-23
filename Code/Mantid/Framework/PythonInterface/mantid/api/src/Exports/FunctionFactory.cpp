@@ -48,7 +48,6 @@ namespace
     /// Python algorithm registration mutex in anonymous namespace (aka static)
     Poco::Mutex FUNCTION_REGISTER_MUTEX;
 
-GCC_DIAG_ON(cast-qual)
     /**
      * A free function to register a fit function from Python
      * @param obj :: A Python object that should either be a class type derived from IFunction
@@ -57,15 +56,16 @@ GCC_DIAG_ON(cast-qual)
     void subscribe(FunctionFactoryImpl & self, const boost::python::object & obj )
     {
       Poco::ScopedLock<Poco::Mutex> lock(FUNCTION_REGISTER_MUTEX);
-      static PyObject * const baseClass = (PyObject*)converter::registered<IFunction>::converters.to_python_target_type();
+      static PyTypeObject * baseClass =
+          const_cast<PyTypeObject*>(converter::registered<IFunction>::converters.to_python_target_type());
 
       // obj could be or instance/class, check instance first
       PyObject *classObject(NULL);
-      if( PyObject_IsInstance(obj.ptr(), baseClass) )
+      if( PyObject_IsInstance(obj.ptr(), (PyObject*)baseClass) )
       {
         classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
       }
-      else if(PyObject_IsSubclass(obj.ptr(), baseClass))
+      else if(PyObject_IsSubclass(obj.ptr(), (PyObject*)baseClass))
       {
         classObject = obj.ptr(); // We need to ensure the type of lifetime management so grab the raw pointer
       }
@@ -85,7 +85,6 @@ GCC_DIAG_ON(cast-qual)
     }
   ///@endcond
 }
-GCC_DIAG_OFF(cast-qual)
 
 void export_FunctionFactory()
 {

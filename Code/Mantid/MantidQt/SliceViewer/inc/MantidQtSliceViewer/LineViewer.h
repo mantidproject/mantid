@@ -18,7 +18,7 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-
+class LineViewerCurve; // Forward dec curve class
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget
 {
     Q_OBJECT
@@ -65,6 +65,7 @@ private:
     void updateStartEnd();
     void updateBinWidth();
     void readTextboxes();
+    bool isLogScaledY() const;
 
 public slots:
     void startEndTextEdited();
@@ -78,6 +79,7 @@ public slots:
     void textBinWidth_changed();
     void refreshPlot();
     void lineIntegrationComplete(bool error);
+    void onToggleLogYAxis();
 
 signals:
     /// Signal emitted when the planar width changes
@@ -90,6 +92,7 @@ signals:
 private:
     Mantid::API::IAlgorithm_sptr applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws);
     Mantid::API::IAlgorithm_sptr applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+    void setupScaleEngine(MantidQwtWorkspaceData& curveData);
 
     /// Logger object
     Mantid::Kernel::Logger & g_log;

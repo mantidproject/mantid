@@ -322,6 +322,26 @@ public:
     TS_ASSERT( !ptrDet1001->isValid(V3D(0.0,-0.01,0.05)+ptrDet1001->getPos()) );
     TS_ASSERT( !ptrDet1001->isValid(V3D(0.0,-0.01,-0.05)+ptrDet1001->getPos()) );
 
+    // test for "cuboid-alternate-test".
+    boost::shared_ptr<const IDetector> ptrDet18 = i->getDetector(18);
+
+    TS_ASSERT( ptrDet18->isValid(V3D( 1.05, 1.10, 1.20)+ptrDet18->getPos()) );
+    TS_ASSERT( ptrDet18->isValid(V3D( 1.05, 1.10, 0.80)+ptrDet18->getPos()) );
+    TS_ASSERT( ptrDet18->isValid(V3D( 1.05, 0.90, 1.20)+ptrDet18->getPos()) );
+    TS_ASSERT( ptrDet18->isValid(V3D( 1.05, 0.90, 0.80)+ptrDet18->getPos()) );
+    TS_ASSERT( ptrDet18->isValid(V3D( 0.95, 1.10, 1.20)+ptrDet18->getPos()) );
+    TS_ASSERT( ptrDet18->isValid(V3D( 0.95, 1.10, 0.80)+ptrDet18->getPos()) );
+    TS_ASSERT( ptrDet18->isValid(V3D( 0.95, 0.90, 1.20)+ptrDet18->getPos()) );
+    TS_ASSERT( ptrDet18->isValid(V3D( 0.95, 0.90, 0.80)+ptrDet18->getPos()) );
+
+    TS_ASSERT( !ptrDet18->isValid(V3D( 1.06, 1.11, 1.21)+ptrDet18->getPos()) );
+    TS_ASSERT( !ptrDet18->isValid(V3D( 1.06, 1.11, 0.79)+ptrDet18->getPos()) );
+    TS_ASSERT( !ptrDet18->isValid(V3D( 1.06, 0.89, 1.21)+ptrDet18->getPos()) );
+    TS_ASSERT( !ptrDet18->isValid(V3D( 1.06, 0.89, 0.79)+ptrDet18->getPos()) );
+    TS_ASSERT( !ptrDet18->isValid(V3D( 0.94, 1.11, 1.21)+ptrDet18->getPos()) );
+    TS_ASSERT( !ptrDet18->isValid(V3D( 0.94, 1.11, 0.79)+ptrDet18->getPos()) );
+    TS_ASSERT( !ptrDet18->isValid(V3D( 0.94, 0.89, 1.21)+ptrDet18->getPos()) );
+    TS_ASSERT( !ptrDet18->isValid(V3D( 0.94, 0.89, 0.79)+ptrDet18->getPos()) );
 
     // test for "infinite-cylinder-test".
     boost::shared_ptr<const IDetector> ptrDet12 = i->getDetector(12);

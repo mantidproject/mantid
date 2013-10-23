@@ -193,5 +193,10 @@
 		<parameter name="t0_formula" type="string">
 			<value val="4.0 + (107.0 / (1.0 + (incidentEnergy / 31.0)^3))" />
 		</parameter>
+		
+		<parameter name="treat-background-as-events" type="string">
+			<value val="yes" />
+		</parameter>
+		
 	</component-link>
 </parameter-file>

@@ -2,7 +2,6 @@
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::DataItem;
 using Mantid::Kernel::DataItem_sptr;

@@ -1890,13 +1890,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="cal_pbPlotEnergy">
-               <property name="text">
-                <string>Plot Energy</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
           </layout>

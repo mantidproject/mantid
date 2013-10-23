@@ -1068,6 +1068,23 @@ namespace Mantid
       m_filterApplied = false;
     }
 
+    /** Clears out all but the last value in the property.
+     *  The last value is the last entry in the m_values vector - no sorting is
+     *  done or checked for to ensure that the last value is the most recent in time.
+     *  It is up to the client to call sort() first if this is a requirement.
+     */
+    template<typename TYPE>
+    void TimeSeriesProperty<TYPE>::clearOutdated()
+    {
+      if ( realSize() > 1 )
+      {
+        auto lastValue = m_values.back();
+        clear();
+        m_values.push_back(lastValue);
+        m_size = 1;
+      }
+    }
+
     /**
      * Clears and creates a TimeSeriesProperty from these parameters:
      *  @param start_time :: The reference time as a boost::posix_time::ptime value
@@ -1490,23 +1507,28 @@ namespace Mantid
       // 2. Construct mFilter
       std::vector<Kernel::DateAndTime> filtertimes = filter->timesAsVector();
       std::vector<bool> filtervalues = filter->valuesAsVector();
-      m_filter.reserve(filtertimes.size()+1);
+      assert(filtertimes.size() == filtervalues.size());
+      const size_t nFilterTimes(filtertimes.size());
+      m_filter.reserve(nFilterTimes+1);
 
       bool lastIsTrue = false;
-      for (size_t i = 0; i < filtertimes.size(); i ++)
+      auto fend = filtertimes.end();
+      auto vit = filtervalues.begin();
+      for(auto fit = filtertimes.begin(); fit != fend; ++fit)
       {
-        if (filtervalues[i] && !lastIsTrue)
+        if (*vit && !lastIsTrue)
         {
           // Get a true in filter but last recorded value is for false
-          m_filter.push_back(std::make_pair(filtertimes[i], true));
+          m_filter.push_back(std::make_pair(*fit, true));
           lastIsTrue = true;
         }
-        else if (!filtervalues[i] && lastIsTrue)
+        else if (!(*vit) && lastIsTrue)
         {
           // Get a False in filter but last recorded value is for TRUE
-          m_filter.push_back(std::make_pair(filtertimes[i], false));
+          m_filter.push_back(std::make_pair(*fit, false));
           lastIsTrue = false;
         }
+        ++vit; // move to next value
       }
 
       // 2b) Get a clean finish
@@ -1515,10 +1537,11 @@ namespace Mantid
         DateAndTime lastTime, nextLastT;
         if (m_values.back().time() > filtertimes.back())
         {
+          const size_t nvalues(m_values.size());
           // Last log time is later than last filter time
           lastTime = m_values.back().time();
-          if ( m_values[m_values.size()-2].time() > filtertimes.back() )
-            nextLastT = m_values[m_values.size()-2].time();
+          if ( nvalues > 1 && m_values[nvalues-2].time() > filtertimes.back() )
+            nextLastT = m_values[nvalues-2].time();
           else
             nextLastT = filtertimes.back();
         }
@@ -1526,18 +1549,16 @@ namespace Mantid
         {
           // Last log time is no later than last filter time
           lastTime = filtertimes.back();
-          if (m_values.back().time() > filtertimes[filtertimes.size()-1])
-          {
-            nextLastT = m_values.back().time();
-          }
+          const size_t nfilterValues(filtervalues.size());
+          // If last-but-one filter time is still later than value then previous is this
+          // else it is the last value time
+          if(nfilterValues > 1 && m_values.back().time() > filtertimes[nfilterValues-2])
+            nextLastT = filtertimes[nfilterValues-2];
           else
-          {
-            nextLastT = *(filtertimes.rbegin()+1);
-          }
+            nextLastT = m_values.back().time();
         }
 
         time_duration dtime = lastTime - nextLastT;
-
         m_filter.push_back(std::make_pair(lastTime+dtime, false));
       }
 
