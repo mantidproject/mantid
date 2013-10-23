@@ -244,7 +244,7 @@ namespace MDAlgorithms
          
 
 
-    Mantid::API::Algorithm_sptr Convert = createChildAlgorithm("ConvertToMD");
+    Mantid::API::Algorithm_sptr Convert = createChildAlgorithm("ConvertToMD",0.,1.);
     Convert->initialize();
    
     Convert->setRethrows(true);
