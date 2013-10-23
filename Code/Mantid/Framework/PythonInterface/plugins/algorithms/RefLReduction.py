@@ -360,7 +360,7 @@ class RefLReduction(PythonAlgorithm):
         [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis,
                                                                         final_error_axis)
 
-        
+
         # create final workspace
         import time
         _time = int(time.time())
