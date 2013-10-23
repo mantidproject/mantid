@@ -48,12 +48,12 @@ namespace MantidQt
       // Only want to show labels when an error occurs.
       hideErrorLabels();
 
+      // Hide advanced input fields until "Advanced search" is checked.
+      advancedSearchChecked();
+
       // Show the search frame by default.
       m_icatUiForm.searchCbox->setChecked(true);
       showCatalogSearch();
-
-      // Hide advanced input fields until "Advanced search" is checked.
-      advancedSearchChecked();
 
       // Prevents a user seeing empty tables.
       m_icatUiForm.searchResultsCbox->setEnabled(false);
@@ -251,12 +251,8 @@ namespace MantidQt
           newItem->setToolTip(QString::fromStdString(ostr.str()));
         }
       }
-      // Stretch the columns to fit table.
-      table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
       // Set the table widgets header labels from the table workspace.
       table->setHorizontalHeaderLabels(columnHeaders);
-      // Resize the label to improve the viewing experience.
-      table->resizeColumnsToContents();
       // Make the headers of the table bold.
       emboldenTableHeaders(table);
     }
@@ -704,6 +700,9 @@ namespace MantidQt
 
       // Hide the "Investigation id" column (It's used by the CatalogGetDataFiles algorithm).
       resultsTable->setColumnHidden(0, true);
+
+      // Show only a portion of the title as they can be quite long.
+      resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
     }
 
     /**
@@ -834,6 +833,10 @@ namespace MantidQt
 
       // As a new column is being added we do this after populateTable to prevent null errors.
       addCheckBoxColumn(dataFileTable);
+
+      // Resize the columns to improve the viewing experience.
+      // Has been called here since we added the checkbox column after populating table.
+      dataFileTable->resizeColumnsToContents();
 
       // Hide these columns as they're not useful for the user, but are used by the algorithms.
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Id"), true);
