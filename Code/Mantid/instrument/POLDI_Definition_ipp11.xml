@@ -285,7 +285,7 @@
 
 <!-- monitor components -->
 
-  <component type="monitor1" mark-as="monitor" idlist="monitor1">
+  <component type="monitor1" idlist="monitor1">
     <location z="-0.335" />
   </component>
 
