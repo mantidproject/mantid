@@ -94,6 +94,82 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
+  void testExec_DX()
+  {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave = boost::dynamic_pointer_cast<
+      Mantid::DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    for (int i = 0; i < 2; i++)
+    {
+      std::vector<double>& X = wsToSave->dataX(i);
+      std::vector<double>& Y = wsToSave->dataY(i);
+      std::vector<double>& E = wsToSave->dataE(i);
+      std::vector<double>& DX = wsToSave->dataDx(i);
+      for (int j = 0; j < 3; j++)
+      {
+        X[j] = 1.5 * j / 0.9;
+        Y[j] = (i + 1) * (2. + 4. * X[j]);
+        E[j] = 1.;
+        DX[j] = i + 1;
+      }
+    }
+
+    AnalysisDataService::Instance().add(m_name, wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT( Poco::File(filename).exists() );
+
+    // Now make some checks on the content of the file
+    std::ifstream in(m_filename.c_str());
+    int specID;
+    std::string header1, header2, header3, header4, separator, comment;
+
+    // Test that the first few column headers, separator and first two bins are as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4 >> specID;
+    TS_ASSERT_EQUALS(specID, 1 );
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(header4, "DX");
+
+    std::string binlines;
+    std::vector<std::string> binstr;
+    std::vector<double> bins;
+    std::getline(in,binlines);
+    std::getline(in,binlines);
+
+    boost::split(binstr, binlines,boost::is_any_of(","));
+    for (int i = 0; i < binstr.size(); i++)
+    {
+      bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
+    }
+    TS_ASSERT_EQUALS(bins[0], 0 );
+    TS_ASSERT_EQUALS(bins[1], 2 );
+    TS_ASSERT_EQUALS(bins[2], 1 );
+
+    std::getline(in,binlines);
+    bins.clear();
+    boost::split(binstr, binlines,boost::is_any_of(","));
+    for (int i = 0; i < binstr.size(); i++)
+    {
+      bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
+    }
+    TS_ASSERT_EQUALS(bins[0], 1.66667 );
+    TS_ASSERT_EQUALS(bins[1], 8.66667 );
+    TS_ASSERT_EQUALS(bins[2], 1 );
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
   void testExec_no_header()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
