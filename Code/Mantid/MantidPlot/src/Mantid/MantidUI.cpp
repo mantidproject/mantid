@@ -554,20 +554,23 @@ void MantidUI::showMDPlot()
   // Extract the settings from the dialog opened earlier
   bool showErrors = dlg.showErrorBars();
   LinePlotOptions * opts = dlg.getLineOptionsWidget();
-  plotMD(wsName, opts->getPlotAxis(), opts->getNormalization(), showErrors);
+  QStringList all;
+  all << wsName;
+  plotMDList(all, opts->getPlotAxis(), opts->getNormalization(), showErrors);
 }
 
 /**
- * Plots a curve showing intensities for a MDWorkspace
- * @param wsName : Name of the workspace to plot
+ * Plots a curve showing intensities for MDWorkspaces
+ * @param wsNames : Names of the workspaces to plot
  * @param plotAxis : Axis number to plot
  * @param normalization: Normalization option to use
  * @param showErrors: True if errors are to be show
  * @return
  */
-MultiLayer* MantidUI::plotMD(const QString& wsName, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showErrors)
+MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showErrors)
 {
-  MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
+  auto firstName = wsNames.at(0);
+  MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstName));
   ml->setCloseOnEmpty(true);
   Graph *g = ml->activeGraph();
   if (!g)
@@ -580,20 +583,28 @@ MultiLayer* MantidUI::plotMD(const QString& wsName, const int plotAxis, const Ma
     appWindow()->setPreferences(g);
     g->newLegend("");
 
-    // Create the curve with defaults
-    MantidMDCurve* curve = new MantidMDCurve(wsName, g, showErrors);
-    MantidQwtIMDWorkspaceData * data = curve->mantidData();
-    // Apply the settings
-    data->setPreviewMode(false);
-    data->setPlotAxisChoice(plotAxis);
-    data->setNormalization(normalization);
+    for (int i = 0; i < wsNames.size(); ++i)
+    {
+      // Create the curve with defaults
+      auto wsName = wsNames.at(i);
+      MantidMDCurve* curve = new MantidMDCurve(wsName, g, showErrors);
+      MantidQwtIMDWorkspaceData * data = curve->mantidData();
+      // Apply the settings
+      data->setPreviewMode(false);
+      data->setPlotAxisChoice(plotAxis);
+      data->setNormalization(normalization);
 
-    // Set some of the labels on the plot
-    g->setTitle(tr("Workspace ") + wsName);
-    g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
-    g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
-    g->setAntialiasing(false);
-    g->setAutoScale();
+      // Using information from the first graph
+      if (i == 0)
+      {
+        g->setTitle(tr("Workspace ") + wsName);
+        g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
+        g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
+        g->setAntialiasing(false);
+        g->setAutoScale();
+      }
+    }
+
   } catch (std::invalid_argument &e)
   {
     g_log.warning() << e.what() << std::endl;

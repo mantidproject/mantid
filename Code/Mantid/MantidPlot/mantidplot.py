@@ -214,20 +214,17 @@ def plotMD(source, plot_axis, normalization = mantid.api.MDNormalization.VolumeN
     """Open a 1D plot of a MDWorkspace.
     
     Args:
-        source: Workspace to plot
+        source: Workspace(s) to plot
         plot_axis: Index of the plot axis
         normalization: Type of normalization required (defaults to volume)
         error_bars: Flag for error bar plotting.
     Returns:
         A handle to the matrix containing the image data.
     """
-    if isinstance(source, str):
-        wkspname = source
-    elif isinstance(source, mantid.api.IMDWorkspace):
-        wkspname = source.getName()
-    else:
-        raise RuntimeError("plotMD does not accept input types of %s" % str(type(source)))
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMD, wkspname, plot_axis, normalization, error_bars))
+    workspace_names = __getWorkspaceNames(source)
+    if len(workspace_names) == 0:
+        raise ValueError("No workspace names given to plot")
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization, error_bars))
     return graph
 
 def fitBrowser():
