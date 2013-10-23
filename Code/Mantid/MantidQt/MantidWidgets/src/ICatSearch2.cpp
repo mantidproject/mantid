@@ -128,7 +128,7 @@ namespace MantidQt
      */
     void ICatSearch2::helpClicked()
     {
-      QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Search"));
+      QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Catalog_Search"));
     }
 
     /**
