@@ -58,7 +58,8 @@ LineViewer::LineViewer(QWidget *parent)
   m_fullCurve->setVisible(false);
 
   // The plotOptions
-  m_lineOptions = new LinePlotOptions(this);
+  bool showLogOptions = true;
+  m_lineOptions = new LinePlotOptions(this, showLogOptions);
   m_plotLayout->addWidget(m_lineOptions, 0);
 
   // To run BinMD in the background
