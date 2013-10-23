@@ -19,14 +19,14 @@ namespace MantidQt
      */
     ICatSearch2::ICatSearch2(QWidget* parent) : QWidget(parent)
     {
+      if (!m_icatHelper->validSession())
+      {
+        m_icatHelper->openLoginDialog(parent);
+      }
+
       initLayout();
       // Load saved settings from store.
       loadSettings();
-
-      if (!m_icatHelper->validSession())
-      {
-        m_icatUiForm.facilityName->setText(QString::fromStdString("You need to log into the catalog to perform a search."));
-      }
     }
 
     /**

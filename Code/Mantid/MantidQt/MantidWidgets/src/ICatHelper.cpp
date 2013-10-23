@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/ICatHelper.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtAPI/InterfaceManager.h"
 
 #include <QCoreApplication>
 
@@ -173,6 +174,23 @@ namespace MantidQt
         return true;
       }
       return false;
+    }
+
+    /**
+     * Open the login dialog if user not logged in.
+     * @param window :: The window to open the dialog box in.
+     */
+    void ICatHelper::openLoginDialog(QWidget* window)
+    {
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogLogin");
+
+      MantidQt::API::InterfaceManager interfaceManager;
+      auto *loginDialog = interfaceManager.createDialog(catalogAlgorithm.get(), window);
+
+      if(loginDialog->exec() == QDialog::Accepted)
+      {
+        catalogAlgorithm->execute();
+      }
     }
 
     /**

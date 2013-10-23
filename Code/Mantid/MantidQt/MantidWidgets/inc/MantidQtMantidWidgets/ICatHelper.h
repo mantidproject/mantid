@@ -2,6 +2,7 @@
 #define MANTIDQTWIDGETS_ICATHELPER_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include <QWidget>
 
 namespace MantidQt
 {
@@ -25,6 +26,8 @@ namespace MantidQt
       std::map<std::string, std::string> validateProperties(std::map<std::string, std::string> &inputFields);
       /// Using a property (isValid) in the list instruments algorithm verify if the session is valid.
       bool validSession();
+      /// Open the login dialog if user not logged in.
+      void openLoginDialog(QWidget* window);
 
     private:
       /// Creates an algorithm with the name provided.
