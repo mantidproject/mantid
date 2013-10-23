@@ -125,8 +125,8 @@ namespace Mantid
       bool queryDataset = false;
 
       // Format the timestamps in order to compare them.
-      std::string startDate = formatDateTime(inputs.getStartDate());
-      std::string endDate   = formatDateTime(inputs.getEndDate());
+      std::string startDate = formatDateTime(inputs.getStartDate(), "%F %T");
+      std::string endDate   = formatDateTime(inputs.getEndDate(), "%F %T");
 
       // Investigation startDate if endDate is not selected
       if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0)
@@ -360,12 +360,12 @@ namespace Mantid
             // Again, we need to check first if start and end date exist prior to insertion.
             if (investigation->startDate)
             {
-              std::string startDate = formatDateTime(*investigation->startDate);
+              std::string startDate = formatDateTime(*investigation->startDate, "%d-%m-%y");
               savetoTableWorkspace(&startDate, table);
             }
             if (investigation->endDate)
             {
-              std::string endDate = formatDateTime(*investigation->endDate);
+              std::string endDate = formatDateTime(*investigation->endDate, "%d-%m-%y");
               savetoTableWorkspace(&endDate, table);
             }
           }
@@ -516,7 +516,7 @@ namespace Mantid
             savetoTableWorkspace(datafile->name, table);
             savetoTableWorkspace(datafile->location, table);
 
-            std::string createDate = formatDateTime(*(datafile->createTime));
+            std::string createDate = formatDateTime(*datafile->createTime, "%F %T");
             savetoTableWorkspace(&createDate, table);
 
             savetoTableWorkspace(datafile->id, table);
@@ -755,12 +755,13 @@ namespace Mantid
     /**
      * Formats a given timestamp to human readable datetime.
      * @param timestamp :: Unix timestamp.
-     * @return string   :: Formatted Unix timestamp in the format "%F %T" ("2011-12-25 00:00:00")
+     * @param format    :: The desired format to output.
+     * @return string   :: Formatted Unix timestamp.
      */
-    std::string ICat4Catalog::formatDateTime(time_t timestamp)
+    std::string ICat4Catalog::formatDateTime(const time_t &timestamp, const std::string &format)
     {
       auto dateTime = DateAndTime(boost::posix_time::from_time_t(timestamp));
-      return (dateTime.toFormattedString("%F %T"));
+      return (dateTime.toFormattedString(format));
     }
 
   }
