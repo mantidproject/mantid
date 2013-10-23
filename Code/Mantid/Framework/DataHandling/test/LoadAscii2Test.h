@@ -36,7 +36,7 @@ public:
     TS_ASSERT_EQUALS(2, testLoad.version());
     TS_ASSERT_EQUALS("DataHandling\\Text", testLoad.category());
   }
-
+  //the Poco::File.remove() is always in a TS_ASERT as i need to make sure the loader has released the file.
   void testConfidence()
   {
     LoadAscii2 testLoad;
@@ -105,32 +105,297 @@ public:
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
   }
 
-  //void test_Spacing_Around_Separators()
-  //{
-  //  const std::string filename("LoadAsciiTest_test_Spaced_Separators.txt");
-  //  std::ofstream file(filename.c_str());
-  //  file << "X , Y0 , E0\n";
-  //  file << "0.0105 , 0.374914 , 0.00584427\n"
-  //    "0.0115 , 0.393394 , 0.00464693\n"
-  //    "0.0125 , 0.414756 , 0.00453993\n"
-  //    "0.0135 , 0.443152 , 0.00492027\n"
-  //    "0.0145 , 0.460175 , 0.00478891\n"
-  //    "0.0155 , 0.456802 , 0.00481\n"
-  //    "0.0165 , 0.477264 , 0.00504672\n"
-  //    "0.0175 , 0.478456 , 0.00524423\n"
-  //    "0.0185 , 0.488523 , 0.00515007\n";
-  //  file.close();
-  //  using Mantid::API::MatrixWorkspace_sptr;
-  //  MatrixWorkspace_sptr outputWS = runTest(filename, "CSV",true,false);
-  //  TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-  //  TS_ASSERT_EQUALS(outputWS->blocksize(), 9);
-  //  Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
-  //  Poco::File(filename).remove();
-  //}
+  void test_Four_Column_With_Different_Separator()
+  {
+    m_abspath = writeTestFile(4,true,"#", true, 6, "Space");
+    runTest(4,true,"#","Space");
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Custom_Separators()
+  {
+    m_abspath = writeTestFile(4,true,"#", true, 6, "UserDefined", "~");
+    runTest(4,false,"#","UserDefined",false,"~");
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Spacing_Around_Separators()
+  {
+    m_abspath = writeTestFile(4,true,"#", true, 6, "UserDefined", " , "); //space comma space
+    //this should work as the load will look for commas and strip out excess spaces
+    runTest(4);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Double_Spacing_Separators()
+  {
+    m_abspath = writeTestFile(4,true,"#", true, 6, "UserDefined", "  "); //double space
+    //this should work as the load will strip out excess spaces
+    runTest(4,true,"#","Space");
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_five_columns()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X , Y, E, DX, Z" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      file << i << std::endl;
+      for (int j = 0; j < 4; j++)
+      {
+        file << 1.5 * j / 0.9 << "," <<
+          (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+          1 << "," <<
+          0 << "," <<
+          (i + 5) * (6. + 3. * (1.7 * j / 0.8)) << std::endl;
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(4,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_one_column()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      file << i << std::endl;
+      for (int j = 0; j < 4; j++)
+      {
+        file << 1.5 * j / 0.9 << std::endl;
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(1,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_mismatching_bins()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X , Y, E, DX" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      file << i << std::endl;
+      for (int j = 0; j < 4; j++)
+      {
+        if (!(i == 3 && j == 2))
+        {
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(4,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_mismatching_columns()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X , Y, E, DX" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      file << i << std::endl;
+      for (int j = 0; j < 4; j++)
+      {
+        if (!(i == 3 && j == 2))
+        {
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+        else
+        {
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << std::endl;
+        }
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(4,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_line_start_letter()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X , Y, E, DX" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      file << i << std::endl;
+      for (int j = 0; j < 4; j++)
+      {
+        if (!(i == 3 && j == 2))
+        {
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+        else
+        {
+          //used e to make sure it'd not get mistaken for a scientific index
+          file << "e" << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(4,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_line_start_noncomment_symbol()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X , Y, E, DX" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      file << i << std::endl;
+      for (int j = 0; j < 4; j++)
+      {
+        if (!(i == 3 && j == 2))
+        {
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+        else
+        {
+          file << "@" << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(4,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_line_mixed_letter_number()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X , Y, E, DX" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      file << i << std::endl;
+      for (int j = 0; j < 4; j++)
+      {
+        if (!(i == 3 && j == 2))
+        {
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+        else
+        {
+          //used e to make sure it'd not get mistaken for a scientific index
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "e" << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(4,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_line_mixed_symbol_number()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X , Y, E, DX" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      file << i << std::endl;
+      for (int j = 0; j < 4; j++)
+      {
+        if (!(i == 3 && j == 2))
+        {
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+        else
+        {
+          file << 1.5 * j / 0.9 << "," <<
+            (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "/" << "," <<
+            1 << "," <<
+            0 << std::endl;
+        }
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(4,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_fail_spectra_ID_inclusion_inconisitant()
+  {
+    std::ofstream file(m_filename.c_str());
+    file << std::scientific;
+    file << "# X , Y, E, DX" << std::endl;
+    for (int i = 0; i < 5; i++)
+    {
+      if (i != 3)
+      {
+        file << i << std::endl;
+      }
+      else
+      {
+        file << std::endl;
+      }
+      for (int j = 0; j < 4; j++)
+      {
+        file << 1.5 * j / 0.9 << "," <<
+          (i + 1) * (2. + 4. * (1.5 * j / 0.9)) << "," <<
+          1 << "," <<
+          0 << std::endl;
+      }
+    }
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+    runTest(4,false,"#","CSV",true);//cols doesn't matter here
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
 private:
 
   // Write the test file
-  std::string writeTestFile(const int cols, const bool header = true, const std::string & comment = "#", const bool scientific = true, const int precision = -1)
+  std::string writeTestFile(const int cols, const bool header = true, const std::string & comment = "#", const bool scientific = true, const int precision = -1, const std::string & sep = "CSV", const std::string & custsep = "")
   {
     SaveAscii2 save;
     save.initialize();
@@ -145,13 +410,11 @@ private:
       }
       if( header )
       {
-        file << comment << "X , Y" << std::endl;;
+        file << comment << "X , Y" << std::endl;
       }
       for (int i = 0; i < 5; i++)
       {
         file << i << std::endl;
-        std::vector<double> X;
-        std::vector<double> Y;
         for (int j = 0; j < 4; j++)
         {
           file << 1.5 * j / 0.9 << "," <<
@@ -159,6 +422,7 @@ private:
         }
       }
       file.unsetf(std::ios_base::floatfield);
+      file.close();
     }
     else
     {
@@ -195,6 +459,8 @@ private:
       save.setPropertyValue("ScientificFormat", boost::lexical_cast<std::string>(scientific));
       save.setPropertyValue("ColumnHeader", boost::lexical_cast<std::string>(header));
       save.setPropertyValue("WriteXError", boost::lexical_cast<std::string>(cols == 4));
+      save.setPropertyValue("Separator",sep);
+      save.setPropertyValue("CustomSeparator", custsep);
       save.execute();
 
       AnalysisDataService::Instance().remove(name);
@@ -202,23 +468,25 @@ private:
     return save.getPropertyValue("Filename");
   }
 
-  Mantid::API::MatrixWorkspace_sptr runTest(const int cols, const bool dataCheck = true, const std::string & comment = "#", const std::string & sep = "CSV", const bool execThrows = false)
+  Mantid::API::MatrixWorkspace_sptr runTest(const int cols, const bool dataCheck = true, const std::string & comment = "#", const std::string & sep = "CSV", const bool execThrows = false, const std::string & custsep = "")
   {
     using Mantid::DataHandling::LoadAscii2;
     using namespace Mantid::API;
 
     LoadAscii2 loader;
     loader.initialize();
+    loader.setRethrows(true);
     const std::string outputName(m_filename);
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_abspath));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace",outputName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Separator", sep));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CustomSeparator", custsep));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CommentIndicator", comment));
-    loader.setRethrows(true);
+
 
     if (execThrows)
     {
-      TS_ASSERT_THROWS(loader.execute(),std::invalid_argument);
+      TS_ASSERT_THROWS_ANYTHING(loader.execute());
     }
     else
     {
@@ -264,72 +532,49 @@ private:
 
   void checkData(const Mantid::API::MatrixWorkspace_sptr outputWS, const int cols)
   {
-    if( cols == 3 )
-    {
-      TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
-      TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
 
-      TS_ASSERT_DELTA(outputWS->readX(0)[0], 0, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(0)[0], 2, 1e-6);
+    TS_ASSERT_DELTA(outputWS->readX(0)[0], 0, 1e-6);
+    TS_ASSERT_DELTA(outputWS->readY(0)[0], 2, 1e-6);
+
+    TS_ASSERT_DELTA(outputWS->readX(0)[1], 1.666667, 1e-6);
+    TS_ASSERT_DELTA(outputWS->readY(0)[1], 8.666667, 1e-6);
+
+    TS_ASSERT_DELTA(outputWS->readX(1)[2], 3.333333, 1e-6);
+    TS_ASSERT_DELTA(outputWS->readY(1)[2], 30.66667, 1e-6);
+
+    TS_ASSERT_DELTA(outputWS->readX(3)[3], 5, 1e-6);
+    TS_ASSERT_DELTA(outputWS->readY(3)[3], 88, 1e-6);
+    if( cols == 3 || cols == 4 )
+    {
       TS_ASSERT_DELTA(outputWS->readE(0)[0], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readX(0)[1], 1.666667, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(0)[1], 8.666667, 1e-6);
       TS_ASSERT_DELTA(outputWS->readE(0)[1], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readX(1)[2], 3.333333, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(1)[2], 30.66667, 1e-6);
       TS_ASSERT_DELTA(outputWS->readE(1)[2], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readX(3)[3], 5, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(3)[3], 88, 1e-6);
       TS_ASSERT_DELTA(outputWS->readE(3)[3], 1, 1e-6);
-    }
-    else if( cols == 4 )
-    {
-      TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
-      TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
-
-      TS_ASSERT_DELTA(outputWS->readX(0)[0], 0, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(0)[0], 2, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readE(0)[0], 1, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readDx(0)[0], 1, 1e-6);
-
-      TS_ASSERT_DELTA(outputWS->readX(0)[1], 1.666667, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(0)[1], 8.666667, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readE(0)[1], 1, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readDx(0)[1], 1, 1e-6);
-
-      TS_ASSERT_DELTA(outputWS->readX(1)[2], 3.333333, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(1)[2], 30.66667, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readE(1)[2], 1, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readDx(1)[2], 1, 1e-6);
-
-      TS_ASSERT_DELTA(outputWS->readX(3)[3], 5, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(3)[3], 88, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readE(3)[3], 1, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readDx(3)[3], 1, 1e-6);
     }
     else
     {
-      TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
-      TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
-
-      TS_ASSERT_DELTA(outputWS->readX(0)[0], 0, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(0)[0], 2, 1e-6);
       TS_ASSERT_DELTA(outputWS->readE(0)[0], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readX(0)[1], 1.666667, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(0)[1], 8.666667, 1e-6);
       TS_ASSERT_DELTA(outputWS->readE(0)[1], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readX(1)[2], 3.333333, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(1)[2], 30.66667, 1e-6);
       TS_ASSERT_DELTA(outputWS->readE(1)[2], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readX(3)[3], 5, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(3)[3], 88, 1e-6);
       TS_ASSERT_DELTA(outputWS->readE(3)[3], 0, 1e-6);
+    }
+    if( cols == 4 )
+    {
+      TS_ASSERT_DELTA(outputWS->readDx(0)[0], 1, 1e-6);
+
+      TS_ASSERT_DELTA(outputWS->readDx(0)[1], 1, 1e-6);
+
+      TS_ASSERT_DELTA(outputWS->readDx(1)[2], 1, 1e-6);
+
+      TS_ASSERT_DELTA(outputWS->readDx(3)[3], 1, 1e-6);
     }
   }
   std::string m_filename;
