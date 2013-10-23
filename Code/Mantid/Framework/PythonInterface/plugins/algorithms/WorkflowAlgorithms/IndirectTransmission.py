@@ -92,8 +92,8 @@ class IndirectTransmission(PythonAlgorithm):
 
 		#build table of values
 		for name, value in output:
-			tableWs.addRow(name, value)
-			logger.notice(name, value)
+			tableWs.addRow([name, value])
+			logger.notice(name + ": " + value)
 
 		#remove idf/ipf workspace
 		DeleteWorkspace(workspace)
