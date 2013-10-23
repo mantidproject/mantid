@@ -2855,7 +2855,6 @@ void MuonAnalysis::startUpLook()
   }
 }
 
-
 /**
 * set grouping in table from information from nexus raw file
 */
@@ -3114,17 +3113,35 @@ QString MuonAnalysis::firstGoodBin()
  */
 double MuonAnalysis::plotFromTime()
 {
-  double retVal;
-  try
+  QLineEdit* startTimeBox;
+  double defaultValue;
+
+  // If is first good bin used - we use a different box
+  if(m_uiForm.timeComboBox->currentIndex() == 0)
   {
-    retVal = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
+    startTimeBox = m_uiForm.firstGoodBinFront;
+    defaultValue = 0.3;
   }
-  catch (...)
+  else
   {
-    retVal = 0.0;
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ms)' input box. Plot from time zero.");
+    startTimeBox = m_uiForm.timeAxisStartAtInput;
+    defaultValue = 0.0;
   }
-  return retVal;
+
+  bool ok;
+  double returnValue = startTimeBox->text().toDouble(&ok);
+
+  if(!ok)
+  {
+    returnValue = defaultValue;
+
+    startTimeBox->setText(QString::number(defaultValue));
+
+    QMessageBox::warning(this, "Mantid - MuonAnalysis", 
+      QString("Start time number not recognized. Reset to default of %1").arg(defaultValue));
+  }
+  
+  return returnValue;
 }
 
 
