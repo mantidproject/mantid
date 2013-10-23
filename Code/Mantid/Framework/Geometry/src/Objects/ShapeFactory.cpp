@@ -42,6 +42,12 @@ namespace Geometry
 
 using namespace Kernel;
 
+namespace
+{
+  const V3D DEFAULT_CENTRE(0, 0, 0);
+  const V3D DEFAULT_AXIS(0, 0, 1);
+}
+
 Logger& ShapeFactory::g_log = Logger::get("ShapeFactory");
 
 /// Empty default constructor
@@ -349,11 +355,9 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, S
   const double radius = getDoubleAttribute(pElemRadius,"val");
   
   // create sphere
+  const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
   Sphere* pSphere = new Sphere;
-  if( pElemCentre )
-    pSphere->setCentre(parsePosition(pElemCentre));
-  else
-    pSphere->setCentre(V3D(0, 0, 0));
+  pSphere->setCentre(centre);
   pSphere->setRadius(radius);
   prim[l_id] = pSphere;
 
@@ -592,7 +596,7 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element* pElem)
     const double deltaW = getDoubleAttribute(pElem_width, "val") / 2;
     const double deltaD = getDoubleAttribute(pElem_depth, "val") / 2;
     
-    const V3D centre = pElem_centre ? parsePosition(pElem_centre) : V3D(0, 0, 0);
+    const V3D centre = pElem_centre ? parsePosition(pElem_centre) : DEFAULT_CENTRE;
 
     result.lfb = V3D(-deltaW,-deltaH,-deltaD);
     result.lft = V3D(-deltaW, deltaH,-deltaD);
@@ -606,7 +610,6 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element* pElem)
       // it be normalised.
       V3D axis = parsePosition(pElem_axis);
       axis.normalize();
-      const V3D DEFAULT_AXIS(0, 0, 1);
       const Quat rotation(axis, DEFAULT_AXIS);
 
       rotation.rotate(result.lfb);
@@ -935,28 +938,12 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element* pElem, std::map<
   Element* pElemApertureStart = getShapeElement(pElem, "aperture-start");
   Element* pElemLength = getShapeElement(pElem, "length");
   Element* pElemApertureEnd = getShapeElement(pElem, "aperture-end");
+  Element* pElemCentre = getOptionalShapeElement(pElem, "centre");
+  Element* pElemAxis = getOptionalShapeElement(pElem, "axis");
 
-  // For centre and axis we allow defaults, so swallow any parsing errors and
-  // use default values.
-  V3D centre;
-  try
-  {
-    centre = parsePosition(getShapeElement(pElem, "centre"));
-  }
-  catch (std::invalid_argument & )
-  {
-    centre = V3D(0.0, 0.0, 0.0);
-  }
-  V3D axis;
-  try
-  {
-    axis = parsePosition(getShapeElement(pElem, "axis"));
-    axis.normalize();
-  }
-  catch (std::invalid_argument & )
-  {
-    axis = V3D(0.0, 0.0, 1.0);
-  }
+  // For centre and axis we allow defaults.
+  V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
+  V3D axis = pElemAxis ? parsePosition(pElemAxis) : DEFAULT_AXIS;
 
   const double apertureStartWidth = getDoubleAttribute(pElemApertureStart, "width");
   const double apertureStartHeight = getDoubleAttribute(pElemApertureStart, "height");
@@ -979,8 +966,6 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element* pElem, std::map<
   hex.rft = V3D( halfSW,  halfSH, -halfLength) - centre;
   hex.rbb = V3D( halfEW, -halfEH,  halfLength) - centre;
   hex.rbt = V3D( halfEW,  halfEH,  halfLength) - centre;
-
-  const static V3D DEFAULT_AXIS = V3D(0.0, 0.0, 1.0);
 
   if( axis != DEFAULT_AXIS)
   {
