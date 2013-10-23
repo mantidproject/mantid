@@ -21,8 +21,8 @@ class IndirectTransmission(PythonAlgorithm):
 		self.declareProperty(name='Instrument',defaultValue='IRIS',validator=StringListValidator(['IRIS','OSIRIS']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite',validator=StringListValidator(['graphite','fmica']), doc='Analyser')
 		self.declareProperty(name='Reflection',defaultValue='002',validator=StringListValidator(['002','004']), doc='Reflection')
-		self.declareProperty(name='Chemical Formula',defaultValue='',validator=StringMandatoryValidator(), doc='Sample chemical formula')
-		self.declareProperty(name='Number Density', defaultValue=0.1, doc='Number denisty. Default=0.1')
+		self.declareProperty(name='ChemicalFormula',defaultValue='',validator=StringMandatoryValidator(), doc='Sample chemical formula')
+		self.declareProperty(name='NumberDensity', defaultValue=0.1, doc='Number denisty. Default=0.1')
 		self.declareProperty(name='Thickness', defaultValue=0.1, doc='Sample thickness. Default=0.1')
  
 	def PyExec(self):
@@ -32,8 +32,8 @@ class IndirectTransmission(PythonAlgorithm):
 		instrumentName = self.getPropertyValue('Instrument')
 		analyser = self.getPropertyValue('Analyser')
 		reflection = self.getPropertyValue('Reflection')
-		formula = self.getPropertyValue('Chemical Formula')
-		density = self.getPropertyValue('Number Density')
+		formula = self.getPropertyValue('ChemicalFormula')
+		density = self.getPropertyValue('NumberDensity')
 		thickness = self.getPropertyValue('Thickness')
 		
 		#Load instrument defintion file
