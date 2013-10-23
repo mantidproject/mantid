@@ -128,22 +128,23 @@ namespace Mantid
       // If we still have nothing, then we are forced to use a default.
       if(m_sep.empty())
       {
-        g_log.notice() << "\"UserDefined\" has been selected, but no custom separator has been entered.  Using default instead.";
+        g_log.notice() << "\"UserDefined\" has been selected, but no custom separator has been entered."
+        " Using default instead.";
         m_sep = ",";
       }
 
-      boost::regex test("[^0-9]+", boost::regex::perl);
-
-      if (!boost::regex_match(m_sep.begin(), m_sep.end(), test))
+      // e + and - are included as they're part of the scientific notation
+      if (!boost::regex_match(m_sep.begin(), m_sep.end(), boost::regex("[^0-9e+-]+", boost::regex::perl)))
       {
-        throw std::invalid_argument("Separators cannot contain numeric characters");
+        throw std::invalid_argument("Separators cannot contain numeric characters, plus signs, hyphens or 'e'");
       }
 
       std::string comment = getPropertyValue("CommentIndicator");
 
-      if (!boost::regex_match(comment.begin(), comment.end(), test))
+      if (comment.at(0) == m_sep.at(0)||!boost::regex_match(comment.begin(), comment.end(), boost::regex("[^0-9e" + m_sep + "+-]+", boost::regex::perl)))
       {
-        throw std::invalid_argument("Comment markers cannot contain numeric characters");
+        throw std::invalid_argument("Comment markers cannot contain numeric characters, plus signs, hyphens,"
+        " 'e' or the selected separator character");
       }
 
       // Create an spectra index list for output
@@ -152,7 +153,7 @@ namespace Mantid
       // Add spectra interval into the index list
       if (spec_max != EMPTY_INT() && spec_min != EMPTY_INT())
       {
-        if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min > spec_max)
+        if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min <= 0 || spec_max <= 0 || spec_min > spec_max)
         {
           throw std::invalid_argument("Inconsistent spectra interval");
         }
@@ -207,8 +208,11 @@ namespace Mantid
       }
       if( writeHeader)
       {
-        file << comment << " X , Y , E";
-        if (m_writeDX) file << " , DX";
+        file << comment << " X "<< m_sep << " Y "<< m_sep <<" E";
+        if (m_writeDX)
+        {
+          file << " "<< m_sep <<" DX";
+        }
         file << std::endl;
       }
 
@@ -232,6 +236,7 @@ namespace Mantid
       }
 
       file.unsetf(std::ios_base::floatfield);
+      file.close();
     }
 
     /**writes a spectra to the file using an iterator
