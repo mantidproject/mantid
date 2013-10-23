@@ -73,6 +73,7 @@ min_pred_dspacing         = params_dictionary[ "min_pred_dspacing" ]
 max_pred_dspacing         = params_dictionary[ "max_pred_dspacing" ]
 
 use_sphere_integration    = params_dictionary[ "use_sphere_integration" ]
+use_cylinder_integration    = params_dictionary[ "use_cylinder_integration" ]
 use_ellipse_integration   = params_dictionary[ "use_ellipse_integration" ]
 use_fit_peaks_integration = params_dictionary[ "use_fit_peaks_integration" ]
 
@@ -80,6 +81,10 @@ peak_radius               = params_dictionary[ "peak_radius" ]
 bkg_inner_radius          = params_dictionary[ "bkg_inner_radius" ]
 bkg_outer_radius          = params_dictionary[ "bkg_outer_radius" ]
 integrate_if_edge_peak    = params_dictionary[ "integrate_if_edge_peak" ]
+
+cylinder_length    = params_dictionary[ "cylinder_length" ]
+cylinder_percent_bkg    = params_dictionary[ "cylinder_percent_bkg" ]
+cylinder_profile_fit    = params_dictionary[ "cylinder_profile_fit" ]
 
 rebin_step                = params_dictionary[ "rebin_step" ]
 preserve_events           = params_dictionary[ "preserve_events" ] 
@@ -213,6 +218,27 @@ if use_sphere_integration:
                   BackgroundInnerRadius=bkg_inner_radius,
 	          PeaksWorkspace=peaks_ws, 
                   IntegrateIfOnEdge=integrate_if_edge_peak )
+elif use_cylinder_integration:
+#
+# Integrate found or predicted peaks in Q space using spheres, and save 
+# integrated intensities, with Niggli indexing.  First get an un-weighted 
+# workspace to do raw integration (we don't need high resolution or 
+# LorentzCorrection to do the raw sphere integration )
+#
+  MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
+                    dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
+                    LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
+                    SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
+
+  peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
+                  CoordinatesToUse="Q (sample frame)",
+	          BackgroundOuterRadius=bkg_outer_radius, 
+                  BackgroundInnerRadius=bkg_inner_radius,
+	          PeaksWorkspace=peaks_ws, 
+                  IntegrateIfOnEdge=integrate_if_edge_peak, 
+                  Cylinder=True,CylinderLength=cylinder_length,
+                  PercentBackground=cylinder_percent_bkg,
+                  ProfileFunction=cylinder_profile_fit)
 
 elif use_fit_peaks_integration:
   event_ws = Rebin( InputWorkspace=event_ws,
