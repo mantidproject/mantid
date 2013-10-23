@@ -33,6 +33,7 @@ The following is an example valid file of 4 spectra of 2 bins each with no X err
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include <fstream>
 
@@ -261,7 +262,7 @@ namespace Mantid
             if (cols > 4 || cols < 1)
             {
               //there were more separators than there should have been, which isn't right, or something went rather wrong
-              throw std::runtime_error("Sets of values must have between 1 and 3 delimiters");
+              throw std::runtime_error("Sets of values must have between 1 and 3 delimiters. Found " + std::to_string(cols) + ".");
             }
             else if (cols != 1)
             {
@@ -274,7 +275,7 @@ namespace Mantid
       //make sure some valid data has been found to set the amount of columns, and the file isn't at EOF
       if (m_baseCols > 4 || m_baseCols < 2 || file.eof())
       {
-        throw std::runtime_error("No valid data in file, check separator settings.");
+        throw std::runtime_error("No valid data in file, check separator settings or number of collumns per bin.");
       }
 
       //start from the top again, this time filling in the list
@@ -336,10 +337,11 @@ namespace Mantid
       //we need to do a check regarding spectra ids before doing anything else
       //is this the first bin in the spectra? if not this check has already been done for this spectra
       //If the ID vector is completly empty then it's ok we're assigning them later
-      //if there are equal or less IDs in their vector than there are spectra in thiers, then there's been no ID assigned to this spectra and there should be
+      //if there are equal or less IDs than there are spectra, then there's been no ID assigned to this spectra and there should be
       if (m_spectraStart && m_specIDs != 0 && !(m_spectra.size() < m_specIDs))
       {
-        throw std::runtime_error("Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. Check for blank lines, as they symbolize the end of one spectra and the start of another.");
+        throw std::runtime_error("Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs."
+          " Check for blank lines, as they symbolize the end of one spectra and the start of another.");
       }
     }
 
@@ -457,13 +459,14 @@ namespace Mantid
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the text file to read, including its full or relative path. The file extension must be .txt, .dat, or .csv");
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
-        "",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
+        "",Direction::Output), "The name of the workspace that will be created, "
+        "filled with the read-in data and stored in the [[Analysis Data Service]].");
 
       std::string spacers[7][2] = { {"Automatic", ",\t:; "}, {"CSV", ","},
       {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}  };
       // For the ListValidator
       std::vector<std::string> sepOptions;
-      for( size_t i = 0; i < 5; ++i )
+      for( size_t i = 0; i < 7; ++i )
       {
         std::string option = spacers[i][0];
         m_separatorIndex.insert(std::pair<std::string,std::string>(option, spacers[i][1]));
@@ -471,9 +474,14 @@ namespace Mantid
       }
       declareProperty("Separator", "Automatic", boost::make_shared<StringListValidator>(sepOptions),
         "The separator between data columns in the data file. The possible values are \"CSV\", \"Tab\", "
-        "\"Space\", \"SemiColon\", \"Colon\" or a user defined value. (default: Automatic selection from comma, tab, space, semicolon or colon.).");
+        "\"Space\", \"SemiColon\", \"Colon\" or a user defined value. (default: Automatic selection from comma,"
+        " tab, space, semicolon or colon.).");
+
       declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),
         "If present, will override any specified choice given to Separator.");
+
+      setPropertySettings("CustomSeparator", new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined") );
+
       declareProperty("CommentIndicator", "#", "Character(s) found front of comment lines. Cannot contain numeric characters");
 
       std::vector<std::string> units = UnitFactory::Instance().getKeys();
@@ -518,23 +526,24 @@ namespace Mantid
       // If we still have nothing, then we are forced to use a default.
       if(sep.empty())
       {
-        g_log.notice() << "\"UserDefined\" has been selected, but no custom separator has been entered.  Using default instead.";
+        g_log.notice() << "\"UserDefined\" has been selected, but no custom separator has been entered."
+          " Using default instead." << std::endl;
         sep = ",";
       }
       m_columnSep = sep;
 
-      boost::regex test("[^0-9]+", boost::regex::perl);
-
-      if (!boost::regex_match(m_columnSep.begin(), m_columnSep.end(), test))
+      // e + and - are included as they're part of the scientific notation
+      if (!boost::regex_match(m_columnSep.begin(), m_columnSep.end(), boost::regex("[^0-9e+-]+", boost::regex::perl)))
       {
-        throw std::invalid_argument("Separators cannot contain numeric characters");
+        throw std::invalid_argument("Separators cannot contain numeric characters, plus signs, hyphens or 'e'");
       }
 
       m_comment = getProperty("CommentIndicator");
 
-      if (!boost::regex_match(m_comment.begin(), m_comment.end(), test))
+      if (!boost::regex_match(m_comment.begin(), m_comment.end(), boost::regex("[^0-9e"+ m_columnSep +"+-]+", boost::regex::perl)))
       {
-        throw std::invalid_argument("Comment markers cannot contain numeric characters");
+        throw std::invalid_argument("Comment markers cannot contain numeric characters, plus signs, hyphens,"
+          " 'e' or the selected separator character");
       }
 
       // Process the header information.
