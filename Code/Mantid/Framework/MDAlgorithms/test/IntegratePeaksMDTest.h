@@ -112,6 +112,7 @@ public:
 
     MDEventWorkspace3Lean::sptr mdews =
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMDTest_MDEWS");
+    mdews->setCoordinateSystem(Mantid::API::HKL);
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
