@@ -942,8 +942,9 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element* pElem, std::map<
   Element* pElemAxis = getOptionalShapeElement(pElem, "axis");
 
   // For centre and axis we allow defaults.
-  V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
+  const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
   V3D axis = pElemAxis ? parsePosition(pElemAxis) : DEFAULT_AXIS;
+  axis.normalize(); // Quat requires normalised axes.
 
   const double apertureStartWidth = getDoubleAttribute(pElemApertureStart, "width");
   const double apertureStartHeight = getDoubleAttribute(pElemApertureStart, "height");
@@ -955,17 +956,16 @@ std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element* pElem, std::map<
   const double halfSH = apertureStartHeight / 2;
   const double halfEW = apertureEndWidth / 2;
   const double halfEH = apertureEndHeight / 2;
-  const double halfLength = length / 2;
 
   Hexahedron hex;
-  hex.lfb = V3D(-halfSW, -halfSH, -halfLength) - centre;
-  hex.lft = V3D(-halfSW,  halfSH, -halfLength) - centre;
-  hex.lbb = V3D(-halfEW, -halfEH,  halfLength) - centre;
-  hex.lbt = V3D(-halfEW,  halfEH,  halfLength) - centre;
-  hex.rfb = V3D( halfSW, -halfSH, -halfLength) - centre;
-  hex.rft = V3D( halfSW,  halfSH, -halfLength) - centre;
-  hex.rbb = V3D( halfEW, -halfEH,  halfLength) - centre;
-  hex.rbt = V3D( halfEW,  halfEH,  halfLength) - centre;
+  hex.lfb = V3D(-halfSW, -halfSH, 0     ) + centre;
+  hex.lft = V3D(-halfSW,  halfSH, 0     ) + centre;
+  hex.lbb = V3D(-halfEW, -halfEH, length) + centre;
+  hex.lbt = V3D(-halfEW,  halfEH, length) + centre;
+  hex.rfb = V3D( halfSW, -halfSH, 0     ) + centre;
+  hex.rft = V3D( halfSW,  halfSH, 0     ) + centre;
+  hex.rbb = V3D( halfEW, -halfEH, length) + centre;
+  hex.rbt = V3D( halfEW,  halfEH, length) + centre;
 
   if( axis != DEFAULT_AXIS)
   {

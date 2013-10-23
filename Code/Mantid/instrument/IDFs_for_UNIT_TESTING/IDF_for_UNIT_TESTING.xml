@@ -248,7 +248,7 @@
       <aperture-start height="2.0" width="2.0" />
       <length val="2.0" />
       <aperture-end height="4.0" width="4.0" />
-      <centre x="0.0" y="0.0" z="0.0" />
+      <centre x="0.0" y="0.0" z="-1.0" />
       <axis x="0.0" y="0.0" z="1" />
     </tapered-guide>
     <algebra val="some-shape" />
