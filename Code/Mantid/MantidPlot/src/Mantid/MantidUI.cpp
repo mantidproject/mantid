@@ -554,7 +554,19 @@ void MantidUI::showMDPlot()
   // Extract the settings from the dialog opened earlier
   bool showErrors = dlg.showErrorBars();
   LinePlotOptions * opts = dlg.getLineOptionsWidget();
+  plotMD(wsName, opts->getPlotAxis(), opts->getNormalization(), showErrors);
+}
 
+/**
+ * Plots a curve showing intensities for a MDWorkspace
+ * @param wsName : Name of the workspace to plot
+ * @param plotAxis : Axis number to plot
+ * @param normalization: Normalization option to use
+ * @param showErrors: True if errors are to be show
+ * @return
+ */
+MultiLayer* MantidUI::plotMD(const QString& wsName, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showErrors)
+{
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
   ml->setCloseOnEmpty(true);
   Graph *g = ml->activeGraph();
@@ -564,44 +576,42 @@ void MantidUI::showMDPlot()
   }
   try
   {
-    connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));  
+    connect(g, SIGNAL(curveRemoved()), ml, SLOT(maybeNeedToClose()));
     appWindow()->setPreferences(g);
     g->newLegend("");
 
     // Create the curve with defaults
-    MantidMDCurve* curve = new MantidMDCurve(wsName,g,showErrors);
+    MantidMDCurve* curve = new MantidMDCurve(wsName, g, showErrors);
     MantidQwtIMDWorkspaceData * data = curve->mantidData();
     // Apply the settings
     data->setPreviewMode(false);
-    data->setPlotAxisChoice(opts->getPlotAxis());
-    data->setNormalization(opts->getNormalization());
+    data->setPlotAxisChoice(plotAxis);
+    data->setNormalization(normalization);
 
     // Set some of the labels on the plot
-    g->setTitle(tr("Workspace ")+wsName);
+    g->setTitle(tr("Workspace ") + wsName);
     g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
     g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
     g->setAntialiasing(false);
     g->setAutoScale();
-  }
-  catch (std::invalid_argument &e)
+  } catch (std::invalid_argument &e)
   {
     g_log.warning() << e.what() << std::endl;
-  }
-  catch (std::runtime_error &e)
-  { 
+  } catch (std::runtime_error &e)
+  {
     g_log.warning() << e.what() << std::endl;
-  }
-  catch (...)
+  } catch (...)
   {
   }
   /*
-  This is not a good way of doing it. Taken from ::plotSpectraList.
-  */
-  if ( g->curves() == 0 )
+   This is not a good way of doing it. Taken from ::plotSpectraList.
+   */
+  if (g->curves() == 0)
   {
     ml->close();
     QApplication::restoreOverrideCursor();
   }
+  return ml;
 }
 
 /*

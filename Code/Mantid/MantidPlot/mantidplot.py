@@ -15,6 +15,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 import os
 import time
+import mantid.api
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
@@ -208,6 +209,26 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
+    
+def plotMD(source, plot_axis, normalization = mantid.api.MDNormalization.VolumeNormalization, error_bars = False):
+    """Open a 1D plot of a MDWorkspace.
+    
+    Args:
+        source: Workspace to plot
+        plot_axis: Index of the plot axis
+        normalization: Type of normalization required (defaults to volume)
+        error_bars: Flag for error bar plotting.
+    Returns:
+        A handle to the matrix containing the image data.
+    """
+    if isinstance(source, str):
+        wkspname = source
+    elif isinstance(source, mantid.api.IMDWorkspace):
+        wkspname = source.getName()
+    else:
+        raise RuntimeError("plotMD does not accept input types of %s" % str(type(source)))
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMD, wkspname, plot_axis, normalization, error_bars))
+    return graph
 
 def fitBrowser():
     """
