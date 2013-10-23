@@ -1,7 +1,7 @@
 """*WIKI* 
 
 Calculates Multiple Scattering based on the Monte Carlo program MINUS. It takes a sample <math>S(Q,w)</math> from an input sqw workspace and supports both
-Flat and Cylindrical geometries.
+Flat and Cylindrical geometries. More information on the multiple scattering can be procedure can be found in the [http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf modes manual].
 
 ==== References ====
 # M W Johnson, AERE Report R7682 (1974)
@@ -30,7 +30,7 @@ class MuscatData(PythonAlgorithm):
 		self.declareProperty(name='Thick', defaultValue='',validator=StringMandatoryValidator(), doc='Sample thickness')
 		self.declareProperty(name='Width', defaultValue='',validator=StringMandatoryValidator(), doc='Sample width')
 		self.declareProperty(name='Height', defaultValue=3.0, doc='Sample height. Default=3.0')
-		self.declareProperty(name='Density', defaultValue=0.1, doc='Sample density. Default=0.1')
+		self.declareProperty(name='Density', defaultValue=0.1, doc='Sample number density. Default=0.1')
 		self.declareProperty(name='SigScat', defaultValue=5.0, doc='Scattering cross-section. Default=5.0')
 		self.declareProperty(name='SigAbs', defaultValue=0.1, doc='Absorption cross-section. Default=0.1')
 		self.declareProperty(name='Temperature', defaultValue=300.0, doc='Sample temperature (K). Default=300.0')

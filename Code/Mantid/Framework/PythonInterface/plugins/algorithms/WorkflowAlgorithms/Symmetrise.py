@@ -1,7 +1,7 @@
 """*WIKI* 
 
-Symmetrise takes an asymmetric <math>S(Q,w)</math> - i.e. one in which the moduli emin & emax are different. Typically emax is > mod(emin). 
-A negative value of e is chosen (e-pivot) so that the curve for mod(e-pivot) to emax is reflected and inserted for e less than the e-pivot.
+Symmetrise takes an asymmetric <math>S(Q,w)</math> - i.e. one in which the moduli of xmin & xmax are different. Typically xmax is > mod(xmin). 
+A negative value of x is chosen (Xcut) so that the curve for mod(Xcut) to xmax is reflected and inserted for x less than the Xcut.
 
 *WIKI*"""
 
