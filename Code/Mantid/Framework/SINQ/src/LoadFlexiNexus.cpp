@@ -160,7 +160,7 @@ void LoadFlexiNexus::readData(NeXus::File *fin)
 	}
 
 	Info inf = fin->getInfo();
-	int rank = inf.dims.size();
+	size_t rank = inf.dims.size();
 	boost::shared_array<int> data;
 
 	if(rank <= 2){
@@ -182,10 +182,10 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin)
     Info inf = fin->getInfo();
 	if(inf.dims.size() == 1){
 		nSpectra = 1;
-		spectraLength = inf.dims[0];
+		spectraLength = static_cast<int>(inf.dims[0]);
 	} else {
-		nSpectra = inf.dims[0];
-		spectraLength = inf.dims[1];
+		nSpectra = static_cast<int>(inf.dims[0]);
+		spectraLength = static_cast<int>(inf.dims[1]);
 	}
 
 	// need to locate x-axis data too.....
@@ -266,9 +266,9 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin)
     }
 */
     std::vector<MDHistoDimension_sptr> dimensions;
-    for(int k = inf.dims.size()-1; k >=0; k--)
+    for(int k = static_cast<int>(inf.dims.size())-1; k >=0; k--)
     {
-      dimensions.push_back(makeDimension(fin,k,inf.dims[k]));
+      dimensions.push_back(makeDimension(fin,k,static_cast<int>(inf.dims[k])));
     }
 
     MDHistoWorkspace_sptr ws (new MDHistoWorkspace(dimensions));
@@ -285,7 +285,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin)
     signal_t *ddE=  ws->getErrorSquaredArray();
 
     // assign tata
-    for(int i = 0; i < data.size(); i++){
+    for(size_t i = 0; i < data.size(); i++){
     	dd[i] = data[i];
     	ddE[i] = dblSqrt(data[i]);
     }
@@ -317,14 +317,16 @@ int LoadFlexiNexus::calculateCAddress(int *pos, int* dim, int rank)
 	}
 	return result;
 }
-int LoadFlexiNexus::calculateF77Address(int *pos, int rank)
+int LoadFlexiNexus::calculateF77Address(int *, int)
 {
-	int result = 0;
+    // --- Unused code ---
+	// int result = 0;
 
-	for(int i = 0; i < rank; i++){
-		result += pos[i]*indexMaker[i];
-	}
-	return result;
+	// for(int i = 0; i < rank; i++){
+	// 	result += pos[i]*indexMaker[i];
+	// }
+	// return result;
+  return 0;
 }
 
 double LoadFlexiNexus::dblSqrt(double in)

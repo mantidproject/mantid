@@ -130,12 +130,12 @@ void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS)
     inErr = inWS->getErrorSquaredArray();
     outVal = outWS->getSignalArray();
     outErr = outWS->getErrorSquaredArray();
-    xdim = x->getNBins();
-    ydim = y->getNBins();
-    zdim = z->getNBins();
-    for(unsigned int xx = 0; xx < x->getNBins(); xx++){
-    	for(unsigned int yy= 0; yy < y->getNBins(); yy++){
-    		for(unsigned int zz = 0; zz <  z->getNBins(); zz++){
+    xdim = static_cast<unsigned int>(x->getNBins());
+    ydim = static_cast<unsigned int>(y->getNBins());
+    zdim = static_cast<unsigned int>(z->getNBins());
+    for(unsigned int xx = 0; xx < xdim; xx++){
+    	for(unsigned int yy= 0; yy < ydim; yy++){
+    		for(unsigned int zz = 0; zz <  zdim; zz++){
     			idxIn = inWS->getLinearIndex(xx,yy,zz);
     			idxOut = outWS->getLinearIndex(xx,zz,yy);
     			outVal[idxOut] = inVal[idxIn];
@@ -172,12 +172,12 @@ void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS)
     inErr = inWS->getErrorSquaredArray();
     outVal = outWS->getSignalArray();
     outErr = outWS->getErrorSquaredArray();
-    xdim = x->getNBins();
-    ydim = y->getNBins();
-    zdim = z->getNBins();
-    for(unsigned int xx = 0; xx < x->getNBins(); xx++){
-    	for(unsigned int yy= 0; yy < y->getNBins(); yy++){
-    		for(unsigned int zz = 0; zz <  z->getNBins(); zz++){
+    xdim = static_cast<unsigned int>(x->getNBins());
+    ydim = static_cast<unsigned int>(y->getNBins());
+    zdim = static_cast<unsigned int>(z->getNBins());
+    for(unsigned int xx = 0; xx < xdim; xx++){
+    	for(unsigned int yy= 0; yy < ydim; yy++){
+    		for(unsigned int zz = 0; zz <  zdim; zz++){
     			idxIn = ydim*zdim*xx + zdim*yy + zz; // this works for TRICS
     			idxOut = outWS->getLinearIndex(xx,zz,yy);
     			outVal[idxOut] = inVal[idxIn];
@@ -209,9 +209,9 @@ void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS)
     MDHistoWorkspace_sptr outWS (new MDHistoWorkspace(dimensions));
     outWS->setTo(.0,.0,.0);
 
-    xdim = x->getNBins();
-    ydim = y->getNBins();
-    zdim = z->getNBins();
+    xdim = static_cast<unsigned int>(x->getNBins());
+    ydim = static_cast<unsigned int>(y->getNBins());
+    zdim = static_cast<unsigned int>(z->getNBins());
     inVal = inWS->getSignalArray();
     for(unsigned int xx = 0; xx < xdim; xx++){
     	for(unsigned int yy = 0; yy < ydim; yy++){

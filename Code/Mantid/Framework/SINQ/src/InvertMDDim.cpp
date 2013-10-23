@@ -42,7 +42,7 @@ void InvertMDDim::exec()
 {
 	IMDHistoWorkspace_sptr inWS = IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
 	std::vector<IMDDimension_sptr> dimensions;
-	for(int i = inWS->getNumDims()-1; i >= 0; i--){
+	for(int i = static_cast<int>(inWS->getNumDims())-1; i >= 0; i--){
 		boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);
 			dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dimi));
 	}
@@ -50,7 +50,7 @@ void InvertMDDim::exec()
     MDHistoWorkspace_sptr outWS (new MDHistoWorkspace(dimensions));
     outWS->setTo(.0,.0,.0);
 
-    unsigned int rank = inWS->getNumDims();
+    int rank = static_cast<int>(inWS->getNumDims());
     int *idx = new int[rank];
     if(idx == NULL || outWS == NULL){
     	throw std::runtime_error("Out of memory in InvertMDDim");
@@ -70,7 +70,7 @@ void InvertMDDim::recurseDim(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr
 	boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(currentDim);
 	if(currentDim == rank - 1) {
 		unsigned int inIDX, outIDX;
-		for(int i = 0; i < dimi->getNBins(); i++){
+		for(int i = 0; i < static_cast<int>(dimi->getNBins()); i++){
 			idx[currentDim] = i;
 			inIDX = calcIndex(inWS,idx);
 			outIDX = calcInvertedIndex(outWS,idx);
@@ -78,7 +78,7 @@ void InvertMDDim::recurseDim(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr
 			outWS->setErrorSquaredAt(outIDX,inWS->errorSquaredAt(inIDX));
 		}
 	} else {
-		for(int i = 0; i < dimi->getNBins(); i++){
+		for(int i = 0; i < static_cast<int>(dimi->getNBins()); i++){
 			idx[currentDim] = i;
 			recurseDim(inWS,outWS,currentDim+1,idx,rank);
 		}
@@ -101,7 +101,7 @@ void InvertMDDim::copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Manti
  */
 unsigned int InvertMDDim::calcIndex(IMDHistoWorkspace_sptr ws, int dim[])
 {
-	unsigned int idx = 0;
+	size_t idx = 0;
 	switch(ws->getNumDims()){
 	case 2:
 		    idx = ws->getLinearIndex(dim[0],dim[1]);
@@ -115,12 +115,12 @@ unsigned int InvertMDDim::calcIndex(IMDHistoWorkspace_sptr ws, int dim[])
 	default:
 		throw std::runtime_error("Unsupported dimension depth");
 	}
-	return idx;
+	return static_cast<unsigned int>(idx);
 }
 
 unsigned int InvertMDDim::calcInvertedIndex(IMDHistoWorkspace_sptr ws, int dim[])
 {
-	unsigned int idx = 0;
+	size_t idx = 0;
 	switch(ws->getNumDims()){
 	case 2:
 		    idx = ws->getLinearIndex(dim[1],dim[0]);
@@ -134,7 +134,7 @@ unsigned int InvertMDDim::calcInvertedIndex(IMDHistoWorkspace_sptr ws, int dim[]
 	default:
 		throw std::runtime_error("Unsupported dimension depth");
 	}
-	return idx;
+	return static_cast<unsigned int>(idx);
 }
 void InvertMDDim::initDocs()
 {

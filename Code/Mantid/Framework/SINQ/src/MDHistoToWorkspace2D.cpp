@@ -101,7 +101,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS, Workspace2D_
 		currentSpectra++;
 	} else {
 		// recurse deeper
-		for(int i = 0; i < dim->getNBins(); i++){
+		for(int i = 0; i < static_cast<int>(dim->getNBins()); i++){
 			pos[currentDim] = dim->getX(i);
 			recurseData(inWS, outWS, currentDim+1,pos);
 		}

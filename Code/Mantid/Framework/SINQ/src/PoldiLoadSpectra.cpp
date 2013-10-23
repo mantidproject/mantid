@@ -117,7 +117,7 @@ void PoldiLoadSpectra::exec()
 			g_log.debug() << "_poldi : slits children.size()" <<  children.size() <<  std::endl;
 
 			int ewLine = 0;
-			double lambda, intensity;
+			double lambda(0.0), intensity(0.0);
 
 			for (unsigned int it = 0; it < children.size(); ++it)
 			{

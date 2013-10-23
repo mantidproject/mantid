@@ -250,7 +250,7 @@ void PoldiRemoveDeadWires::autoRemoveDeadWires
 			average.at(i) = 0;
 			MantidVec& tempY = localWorkspace.get()->dataY(i);
 			for(unsigned int j=0;j<this->m_channelsPerSpectrum;j++){average.at(i) += tempY[j];}
-			average.at(i)/=this->m_channelsPerSpectrum;
+			average.at(i) /= static_cast<double>(this->m_channelsPerSpectrum);
 			if(average[i]<minValue){
 				minValue = average[i];
 				minPos   = i;

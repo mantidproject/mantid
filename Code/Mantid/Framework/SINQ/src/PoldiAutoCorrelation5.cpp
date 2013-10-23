@@ -193,7 +193,7 @@ void PoldiAutoCorrelation5::exec()
 	double dist_detector_radius       = getTableValueFromLabel(ws_poldi_IPP,"param","value","det_radius");             // # rdet
 	size_t nb_det_channel             = int( getTableValueFromLabel(ws_poldi_IPP,"param","value","det_nb_channel"));   //   # 400
 	size_t nb_time_channels           = time_channels.size();
-	int indice_mid_detector           = int((1+nb_det_channel)/2.);                                                          // # mitteldet
+	int indice_mid_detector           = int((1+nb_det_channel)/2);                                                          // # mitteldet
 	double ang_det_channel_resolution = getTableValueFromLabel(ws_poldi_IPP,"param","value","det_channel_resolution");
 
 	g_log.information() << "_Poldi -        dist_chopper_sample                " <<  dist_chopper_sample   << " mm"  << std::endl;
@@ -240,13 +240,13 @@ void PoldiAutoCorrelation5::exec()
 	double ang_wire_apperture = 2*atan2(ang_det_channel_resolution/2., dist_detector_radius); //  # shoulb be = 2.5
 	g_log.debug() << "_Poldi -        ang_wire_apperture                 " <<  ang_wire_apperture*rad2deg          << " deg" << std::endl;
 
-	double ang_total_det_apperture = nb_det_channel * ang_wire_apperture;
+	double ang_total_det_apperture = static_cast<double>(nb_det_channel) * ang_wire_apperture;
 	g_log.debug() << "_Poldi -        ang_total_det_apperture            " <<  ang_total_det_apperture*rad2deg          << " deg" << std::endl;
 
 	double ang_beta_max = ang_beta_det_mittel + indice_mid_detector * ang_wire_apperture;
 	g_log.debug() << "_Poldi -        ang_beta_max                       " <<  ang_beta_max*rad2deg          << " deg" << std::endl;
 
-	double ang_beta_min = ang_beta_max - nb_det_channel * ang_wire_apperture;
+	double ang_beta_min = ang_beta_max - static_cast<double>(nb_det_channel) * ang_wire_apperture;
 	g_log.debug() << "_Poldi -        ang_beta_min                       " <<  ang_beta_min*rad2deg          << " deg" << std::endl;
 
 
@@ -299,7 +299,7 @@ void PoldiAutoCorrelation5::exec()
 
 	for (size_t wire = 0; wire < nb_det_channel; wire ++){
 
-		double ang_phi2det = ang_beta_min+(wire+0.5)*ang_wire_apperture;
+		double ang_phi2det = ang_beta_min+(static_cast<double>(wire)+0.5)*ang_wire_apperture;
 		double helpy = dist_detector_radius*sin(ang_phi2det) + pos_y0_det;
 		double helpx = dist_detector_radius*cos(ang_phi2det) + pos_x0_det;
 		double dist_samp_wire_i = sqrt(helpx*helpx + helpy*helpy);
@@ -371,7 +371,7 @@ void PoldiAutoCorrelation5::exec()
 			summdbr += time_TOF_for_1A[i];
 		}
 	}
-	summdbr *=  dspace2 * n_d_space/time_delta_t;
+	summdbr *=  dspace2 * static_cast<double>(n_d_space)/time_delta_t;
 	g_log.debug() << "_Poldi -        summdbr                            " <<  summdbr  << std::endl;
 
 
@@ -436,16 +436,16 @@ void PoldiAutoCorrelation5::exec()
 
 					double cmin = center-width[wire]/2.;
 					double cmax = center+width[wire]/2.;
-					double icmin = cmin - int(cmin/nb_time_elmt)*nb_time_elmt;        // modulo for a float
-					double icmax = cmax - int(cmax/nb_time_elmt)*nb_time_elmt;
-					int iicmin = int(cmin)%nb_time_elmt;                     // modulo for the equivalent int
-					int iicmax = int(cmax)%nb_time_elmt;
+					double icmin = cmin - static_cast<double>(int(cmin/static_cast<double>(nb_time_elmt))*nb_time_elmt);        // modulo for a float
+					double icmax = cmax - static_cast<double>(int(cmax/static_cast<double>(nb_time_elmt))*nb_time_elmt);
+					int iicmin = static_cast<int>(int(cmin)%nb_time_elmt);                     // modulo for the equivalent int
+					int iicmax = static_cast<int>(int(cmax)%nb_time_elmt);
 
-					double I, delta_q;
+					double I(0.0), delta_q(0.0);
 					if(iicmax>iicmin){
 						for(int k = iicmin; k<iicmax; k++){
 							delta_q = min(k+1,icmax) - max(k,icmin);                   // range hight limit - range low limit
-							I = nhe3(wire,k);
+							I = nhe3(static_cast<int>(wire),k);
 							cmess[slit] += I*delta_q/float(max(1.,I));
 							csigm[slit] +=   delta_q/float(max(1.,I));
 						}
@@ -495,7 +495,7 @@ void PoldiAutoCorrelation5::exec()
 	for(size_t i=0; i<nb_det_channel; i++){
 		if(table_dead_wires[i]){
 			for(size_t j=0; j<nb_time_elmt; j++){
-				summdet += nhe3(i,j);
+				summdet += nhe3(static_cast<int>(i),static_cast<int>(j));
 			}
 		}
 	}

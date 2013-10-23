@@ -162,8 +162,8 @@ void PoldiPeakDetection2::exec()
 		double fwhm = X[ifwhm_max] - X[ifwhm_min+1];
 
 		//determination of the range used for the peak definition
-		size_t ipeak_min = max(0,            imax - int(2.5*(imax-ifwhm_min)));
-		size_t ipeak_max = min(nb_d_channel, imax + int(2.5*(ifwhm_max-imax)));
+		size_t ipeak_min = max(0,            imax - int(2.5*static_cast<double>(imax-ifwhm_min)));
+		size_t ipeak_max = min(nb_d_channel, imax + int(2.5*static_cast<double>(ifwhm_max-imax)));
 		size_t i_delta_peak = ipeak_max - ipeak_min;
 
 		// the used wires are removed

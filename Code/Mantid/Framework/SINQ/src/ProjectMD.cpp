@@ -180,7 +180,7 @@ void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr outW
 	     when we have recursed through  all dimensions
 	     we actually do the sums...
 	   */
-	  if (currentDim == inWS->getNumDims()) {
+	  if (currentDim == static_cast<int>(inWS->getNumDims())) {
 	    length = end - start;
 	    sumVal = getValue(outWS, targetDim);
 	    for (i = 0; i < length; i++) {
@@ -204,7 +204,7 @@ void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr outW
 	       */
 	      dimi = inWS->getDimension(currentDim);
 	      //std::cout << " dim " << currentDim << " val " <<  dimi->getNBins() << std::endl;
-	      for (i = 0; i < dimi->getNBins(); i++) {
+	      for (i = 0; i < static_cast<int>(dimi->getNBins()); i++) {
 	        /*
 	           the problem here is that we have to jump over the summed
 	           dimension here. This why we have to maintain a separate
