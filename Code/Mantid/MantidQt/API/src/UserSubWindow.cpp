@@ -78,15 +78,6 @@ bool UserSubWindow::isPyInitialized() const
 }
 
 /**
- * Return the name of the interface
- * @return Interface name
- */
-QString UserSubWindow::interfaceName() const
-{
-  return m_ifacename;
-}
-
-/**
  * Initialize local Python environment. This is called once when the interface is created and
  * is meant to be used to run one off code, i.e. importing modules.
  */
@@ -174,18 +165,6 @@ QLabel* UserSubWindow::newValidator(QWidget *parent)
   validLbl->setPalette(pal);
   return validLbl;
 }
-
-/**
-* Re-emits the signal to change the plot style
-*
-* @param plotDetails :: This includes all details of the plot including type,
-* curve number, workspace and color
-*/
-void UserSubWindow::changePlotType(const QStringList& plotDetails)
-{
-  emit setAsPlotType(plotDetails);
-}
-
 
 //--------------------------------------
 // Private member functions

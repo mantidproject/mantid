@@ -105,7 +105,17 @@ namespace IDA
 
     uiv.checkBins(eLow, eWidth, eHigh);
 
-    return uiv.generateErrorMessage();
+    QString message = uiv.generateErrorMessage();
+    
+    if(message.isEmpty())
+    {
+      if(uiForm().fury_dsInput->getCurrentDataName().isEmpty())
+      {
+        message = "Please correct the following:\n\n  The specified data file could not be found";
+      }
+    }
+
+    return message;
   }
 
   void Fury::loadSettings(const QSettings & settings)

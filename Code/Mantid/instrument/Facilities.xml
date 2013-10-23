@@ -7,10 +7,14 @@
   </archive>
   
   <catalog name="ICat3Catalog">
+    <soapendpoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT"></soapendpoint>
+    <filelocation>
+      <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
+      <windows replacement=""></windows>
+      <linux replacement="/archive"></linux>
+      <mac replacement="/archive"></mac>
+    </filelocation>
   </catalog>
-
-  <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
-  </soapEndPoint>
   
   <instrument name="ALF">  
     <technique>Single Crystal Diffraction</technique>
@@ -61,6 +65,11 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <livedata address="NDXIRIS:6789" />
+  </instrument>
+
+  <instrument name="LARMOR">
+    <technique>Small Angle Scattering</technique>
+    <livedata address="NDXLARMOR:6789" />
   </instrument>
 
   <instrument name="LOQ">
@@ -337,13 +346,6 @@
     <livedata address="hyspec-sms1.sns.gov:31415" />
   </instrument> 
   
-  <!-- This is a virtual temp instrument for testing ADARA -->
-  <instrument name="HYSPECA" shortname="HYSA" beamline="14BS"> 
-    <technique>Neutron Spectroscopy</technique>
-    <technique>TOF Direct Geometry Spectroscopy</technique>
-    <livedata address="hyspec-sms1.sns.gov:31415" />
-  </instrument> 
-
   <instrument name="VISION" shortname="VIS" beamline="16B">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
@@ -385,7 +387,7 @@
 
 </facility>
 
-<facility name="ILL" FileExtensions=".nxs,.hdf">
+<facility name="ILL" FileExtensions=".nxs,.hdf,.inx,.asc">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique> 
@@ -403,6 +405,21 @@
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
+  </instrument>
+
+  <instrument name="IN10">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="IN13">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="IN16">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
   
   <instrument name="D33">

@@ -54,6 +54,20 @@ namespace Algorithms
   {
   }
   
+  const std::string CreateGroupingWorkspace::name() const
+  {
+    return "CreateGroupingWorkspace";
+  }
+
+  int CreateGroupingWorkspace::version() const
+  {
+    return 1;
+  }
+
+  const std::string CreateGroupingWorkspace::category() const
+  {
+    return "Utility\\Workspaces;Transforms\\Grouping";
+  }
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
@@ -312,7 +326,7 @@ namespace Algorithms
       inst = tempWS->getInstrument();
     }
 
-    if (GroupNames.empty())
+    if (GroupNames.empty() && OldCalFilename.empty())
     {
       if (grouping.compare("All") == 0)
       {
@@ -355,9 +369,9 @@ namespace Algorithms
 
     Progress prog(this,0.2,1.0, outWS->getNumberHistograms() );
     // Make the grouping one of two ways:
-    if (GroupNames != "")
+    if (!GroupNames.empty())
       makeGroupingByNames(GroupNames, inst, detIDtoGroup, prog, sortnames);
-    else if (OldCalFilename != "")
+    else if (!OldCalFilename.empty())
       readGroupingFile(OldCalFilename, detIDtoGroup, prog);
 
     g_log.information() << detIDtoGroup.size() << " entries in the detectorID-to-group map.\n";

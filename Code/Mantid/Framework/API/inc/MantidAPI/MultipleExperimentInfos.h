@@ -53,7 +53,9 @@ namespace API
     uint16_t getNumExperimentInfo() const;
 
     void copyExperimentInfos(const MultipleExperimentInfos & other);
-
+  protected:
+    /// Returns a string description of the object
+    const std::string toString() const;
   private:
     /// Vector for each ExperimentInfo class
     std::vector<ExperimentInfo_sptr> m_expInfos;

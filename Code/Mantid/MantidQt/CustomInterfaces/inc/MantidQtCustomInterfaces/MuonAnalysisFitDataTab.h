@@ -62,8 +62,6 @@ public:
   void makeRawWorkspace(const std::string & wsName);
   /// Group the list of workspaces given to the workspace name given.
   void groupWorkspaces(const std::vector<std::string> & inputWorkspaces, const std::string & groupName);
-  /// Get all plot details for a workspace [wsName, connectType, plotType, Errors, Color].
-  QStringList getAllPlotDetails(const QString & workspace);
 
 signals:
 

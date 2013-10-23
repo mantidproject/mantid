@@ -88,7 +88,6 @@ include_directories (API/inc)
 add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
-add_subdirectory (PythonAPI)
 add_subdirectory (PythonInterface)
 
 find_package ( Matlab )
@@ -100,10 +99,7 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
-if(MAKE_REMOTE_JOBS)
-  add_subdirectory (RemoteAlgorithms)
-endif(MAKE_REMOTE_JOBS)
-
+add_subdirectory (RemoteAlgorithms)
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
@@ -141,7 +137,7 @@ add_subdirectory (ISISLiveData)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule 
+set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule 
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms

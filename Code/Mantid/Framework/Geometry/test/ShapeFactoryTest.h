@@ -42,6 +42,103 @@ public:
     TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.09, 0.00001)) );
 	}
 
+  void testAlternateCuboid()
+  {
+    std::string xmlShape;
+    xmlShape +=	"<cuboid id=\"some-shape\">";
+    xmlShape +=	"<height val=\"0.2\" />";
+    xmlShape +=	"<width val=\"0.1\" />";
+    xmlShape +=	"<depth val=\"0.4\" />";
+    xmlShape +=	"<centre x=\"1.0\" y=\"1.0\" z=\"1.0\" />";
+    xmlShape +=	"<axis x=\"1\" y=\"0\" z=\"0\" />"; // Note non-default axis.
+    xmlShape +=	"</cuboid>";
+    xmlShape +=	"<algebra val=\"some-shape\" />";
+		
+    auto cuboid = getObject(xmlShape);
+
+    TS_ASSERT( cuboid->isValid(V3D(1.20, 1.10, 0.95)) );
+    TS_ASSERT( cuboid->isValid(V3D(0.80, 1.10, 0.95)) );
+    TS_ASSERT( cuboid->isValid(V3D(1.20, 0.90, 0.95)) );
+    TS_ASSERT( cuboid->isValid(V3D(0.80, 0.90, 0.95)) );
+    TS_ASSERT( cuboid->isValid(V3D(1.20, 1.10, 1.05)) );
+    TS_ASSERT( cuboid->isValid(V3D(0.80, 1.10, 1.05)) );
+    TS_ASSERT( cuboid->isValid(V3D(1.20, 0.90, 1.05)) );
+    TS_ASSERT( cuboid->isValid(V3D(0.80, 0.90, 1.05)) );
+
+    TS_ASSERT( !cuboid->isValid(V3D(1.21, 1.11, 0.94)) );
+    TS_ASSERT( !cuboid->isValid(V3D(0.79, 1.11, 0.94)) );
+    TS_ASSERT( !cuboid->isValid(V3D(1.21, 0.89, 0.94)) );
+    TS_ASSERT( !cuboid->isValid(V3D(0.79, 0.89, 0.94)) );
+    TS_ASSERT( !cuboid->isValid(V3D(1.21, 1.11, 1.06)) );
+    TS_ASSERT( !cuboid->isValid(V3D(0.79, 1.11, 1.06)) );
+    TS_ASSERT( !cuboid->isValid(V3D(1.21, 0.89, 1.06)) );
+    TS_ASSERT( !cuboid->isValid(V3D(0.79, 0.89, 1.06)) );
+  }
+
+  void testAlternateCuboidDefaultAxis()
+  {
+    std::string xmlShape;
+    xmlShape +=	"<cuboid id=\"some-shape\">";
+    xmlShape +=	"<height val=\"0.2\" />";
+    xmlShape +=	"<width val=\"0.1\" />";
+    xmlShape +=	"<depth val=\"0.4\" />";
+    xmlShape +=	"<centre x=\"1.0\" y=\"1.0\" z=\"1.0\" />";
+    xmlShape +=	"</cuboid>";
+    xmlShape +=	"<algebra val=\"some-shape\" />";
+		
+    auto cuboid = getObject(xmlShape);
+
+    TS_ASSERT( cuboid->isValid(V3D( 1.05, 1.10, 1.20)) );
+    TS_ASSERT( cuboid->isValid(V3D( 1.05, 1.10, 0.80)) );
+    TS_ASSERT( cuboid->isValid(V3D( 1.05, 0.90, 1.20)) );
+    TS_ASSERT( cuboid->isValid(V3D( 1.05, 0.90, 0.80)) );
+    TS_ASSERT( cuboid->isValid(V3D( 0.95, 1.10, 1.20)) );
+    TS_ASSERT( cuboid->isValid(V3D( 0.95, 1.10, 0.80)) );
+    TS_ASSERT( cuboid->isValid(V3D( 0.95, 0.90, 1.20)) );
+    TS_ASSERT( cuboid->isValid(V3D( 0.95, 0.90, 0.80)) );
+
+    TS_ASSERT( !cuboid->isValid(V3D( 1.06, 1.11, 1.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 1.06, 1.11, 0.79)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 1.06, 0.89, 1.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 1.06, 0.89, 0.79)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 0.94, 1.11, 1.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 0.94, 1.11, 0.79)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 0.94, 0.89, 1.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 0.94, 0.89, 0.79)) );
+  }
+
+  void testAlternateCuboidDefaultCentre()
+  {
+    std::string xmlShape;
+    xmlShape +=	"<cuboid id=\"some-shape\">";
+    xmlShape +=	"<height val=\"0.2\" />";
+    xmlShape +=	"<width val=\"0.1\" />";
+    xmlShape +=	"<depth val=\"0.4\" />";
+    xmlShape +=	"<axis x=\"0\" y=\"0\" z=\"1\" />";
+    xmlShape +=	"</cuboid>";
+    xmlShape +=	"<algebra val=\"some-shape\" />";
+		
+    auto cuboid = getObject(xmlShape);
+
+    TS_ASSERT( cuboid->isValid(V3D( 0.05, 0.10, 0.20)) );
+    TS_ASSERT( cuboid->isValid(V3D( 0.05, 0.10,-0.20)) );
+    TS_ASSERT( cuboid->isValid(V3D( 0.05,-0.10, 0.20)) );
+    TS_ASSERT( cuboid->isValid(V3D( 0.05,-0.10,-0.20)) );
+    TS_ASSERT( cuboid->isValid(V3D(-0.05, 0.10, 0.20)) );
+    TS_ASSERT( cuboid->isValid(V3D(-0.05, 0.10,-0.20)) );
+    TS_ASSERT( cuboid->isValid(V3D(-0.05,-0.10, 0.20)) );
+    TS_ASSERT( cuboid->isValid(V3D(-0.05,-0.10,-0.20)) );
+
+    TS_ASSERT( !cuboid->isValid(V3D( 0.06, 0.11, 0.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 0.06, 0.11,-0.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 0.06,-0.11, 0.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D( 0.06,-0.11,-0.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D(-0.06, 0.11, 0.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D(-0.06, 0.11,-0.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D(-0.06,-0.11, 0.21)) );
+    TS_ASSERT( !cuboid->isValid(V3D(-0.06,-0.11,-0.21)) );
+  }
+
   void testRelayShapeXML()
   {
     //Create a cuboid.
@@ -172,6 +269,30 @@ public:
     TS_ASSERT( !shape_sptr->isValid(V3D(-0.8,2.1,9.1)) );
     TS_ASSERT( !shape_sptr->isValid(V3D(7.1,2.1,9.1)) );
 	}
+
+  void testSphereWithDefaultCentre()
+  {
+    std::string xmlShape = "<sphere id=\"shape\"> ";
+    xmlShape +=	"<radius val=\"1.0\" /> " ;
+    xmlShape +=	"</sphere>";
+    xmlShape +=	"<algebra val=\"shape\" /> "; 
+
+    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 0.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 1.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 0.0, 1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-1.0, 0.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0,-1.0, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 0.0,-1.0)) );
+    
+    TS_ASSERT( !shape_sptr->isValid(V3D( 1.1, 0.0, 0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 0.0, 1.1, 0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 0.0, 0.0, 1.1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(-1.1, 0.0, 0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 0.0,-1.1, 0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D( 0.0, 0.0,-1.1)) );
+  }
 
 	void testCylinder()
 	{

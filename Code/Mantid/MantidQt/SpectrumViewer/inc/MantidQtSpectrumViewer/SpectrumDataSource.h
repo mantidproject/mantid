@@ -1,9 +1,11 @@
 #ifndef SPECTRUM_DATA_SOURCE_H
 #define SPECTRUM_DATA_SOURCE_H
 
+#include <boost/shared_ptr.hpp>
 #include <cstddef>
 #include <vector>
 #include <string>
+#include "MantidAPI/Workspace.h"
 #include "MantidQtSpectrumViewer/DataArray.h"
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
@@ -53,6 +55,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDataSource
 			size_t total_rows, size_t total_cols );
 
     virtual ~SpectrumDataSource();
+
+    virtual bool hasData(const std::string& wsName,
+                         const boost::shared_ptr<Mantid::API::Workspace> ws) = 0;
 
     /// Get the smallest 'x' value covered by the data
     virtual double GetXMin();

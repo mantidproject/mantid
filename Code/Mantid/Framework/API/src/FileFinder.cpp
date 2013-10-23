@@ -360,15 +360,15 @@ namespace Mantid
      *  this argument is ignored.
      * @return The full path to the file or empty string if not found
      */
-    std::string FileFinderImpl::findRun(const std::string& hintstr, const std::set<std::string> *exts) const
+    std::string FileFinderImpl::findRun(const std::string& hintstr, const std::set<std::string> &exts) const
     {
       std::string hint = Kernel::Strings::strip(hintstr);
-      g_log.debug() << "set findRun(\'" << hintstr << "\', exts[" << exts->size() << "])\n";
+      g_log.debug() << "set findRun(\'" << hintstr << "\', exts[" << exts.size() << "])\n";
       if (hint.empty())
         return "";
       std::vector<std::string> exts_v;
-      if (exts != NULL && exts->size() > 0)
-        exts_v.assign(exts->begin(), exts->end());
+      if (!exts.empty())
+        exts_v.assign(exts.begin(), exts.end());
 
       return this->findRun(hint, exts_v);
     }

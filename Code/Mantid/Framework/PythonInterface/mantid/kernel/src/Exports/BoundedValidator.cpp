@@ -1,4 +1,5 @@
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidPythonInterface/kernel/IsNone.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -21,11 +22,11 @@ namespace
   BoundedValidator<T> * createBoundedValidator(object lower = object(), object upper = object())
   {
     BoundedValidator<T> * validator = new BoundedValidator<T>();
-    if(!lower.is_none())
+    if(!Mantid::PythonInterface::isNone(lower))
     {
       validator->setLower(extract<T>(lower));
     }
-    if(!upper.is_none())
+    if(!Mantid::PythonInterface::isNone(upper))
     {
       validator->setUpper(extract<T>(upper));
     }

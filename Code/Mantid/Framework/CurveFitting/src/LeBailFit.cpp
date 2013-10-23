@@ -129,7 +129,7 @@ namespace CurveFitting
     this->declareProperty(tablewsprop1, "Input table workspace containing the parameters required by LeBail fit. ");
 
     // Single peak: Reflection (HKL) Workspace, PeaksWorkspace
-    this->declareProperty(new WorkspaceProperty<TableWorkspace>("InputHKLWorkspace", "", Direction::InOut),
+    this->declareProperty(new WorkspaceProperty<TableWorkspace>("InputHKLWorkspace", "", Direction::Input),
                           "Input table workspace containing the list of reflections (HKL). ");
 
     // Bragg peaks profile parameter output table workspace
@@ -156,6 +156,7 @@ namespace CurveFitting
     // Peak type
     vector<string> peaktypes;
     peaktypes.push_back("ThermalNeutronBk2BkExpConvPVoigt");
+    peaktypes.push_back("NeutronBk2BkExpConvPVoigt");
     auto peaktypevalidator = boost::make_shared<StringListValidator>(peaktypes);
     declareProperty("PeakType", "ThermalNeutronBk2BkExpConvPVoigt", peaktypevalidator, "Peak profile type.");
 
@@ -420,18 +421,15 @@ namespace CurveFitting
     bool resultphysical = calculateDiffractionPattern(m_dataWS->readX(m_wsIndex), m_dataWS->readY(m_wsIndex),
                                                       true, true, emptyvec, vecY, rfactor);
 
-    if (!resultphysical)
-    {
-      g_log.warning() << "Input parameters are unable to generate peaks that are physical." << ".\n";
-      return;
-    }
-
+    size_t numpts = vecY.size();
     // Calculate background
     MantidVec& vec_bkgd = m_outputWS->dataY(INPUTBKGDINDEX);
     m_lebailFunction->function(vec_bkgd, vecX, false, true);
+    for (size_t i = 0; i < numpts; ++i)
+      m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] = m_outputWS->readY(OBSDATAINDEX)[i] -
+          m_outputWS->readY(INPUTBKGDINDEX)[i];
 
     // Set up output workspaces
-    size_t numpts = vecY.size();
     for (size_t i = 0; i < numpts; ++i)
     {
       m_outputWS->dataY(DATADIFFINDEX)[i] = m_outputWS->readY(OBSDATAINDEX)[i] - m_outputWS->readY(CALDATAINDEX)[i];
@@ -456,6 +454,11 @@ namespace CurveFitting
     m_funcParameters["Rwp"] = par_rwp;
 
     g_log.notice() << "Rwp = " << rfactor.Rwp << ", Rp = " << rfactor.Rp << "\n";
+
+    if (!resultphysical)
+    {
+      g_log.warning() << "Input parameters are unable to generate peaks that are physical." << ".\n";
+    }
 
     return;
   }
@@ -2069,13 +2072,6 @@ namespace CurveFitting
       peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX, vecY, values);
     }
 
-    if (!peaksvalid)
-    {
-      g_log.information("There are some peaks that have unphysical height!");
-      rfactor = badR;
-      return false;
-    }
-
     // Calculate Le Bail function
     if (values.size() != vecY.size())
     {
@@ -2120,6 +2116,13 @@ namespace CurveFitting
         std::transform(values.begin(), values.end(), veccalbkgd.begin(), caldata.begin(), std::plus<double>());
       }
       rfactor = getRFactor(m_dataWS->readY(m_wsIndex), caldata, m_dataWS->readE(m_wsIndex));
+    }
+
+    if (!peaksvalid)
+    {
+      g_log.information("LeBailFit: Some peaks have unphysical peak value. ");
+      rfactor = badR;
+      return false;
     }
 
     return true;

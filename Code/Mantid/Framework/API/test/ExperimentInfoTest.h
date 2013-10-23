@@ -538,11 +538,13 @@ public:
         {
           if (it1 != it2)
           {
-            if ( it2->second.from == it1->second.from )
-            {
-              // some more intelligent stuff here later
-              TS_ASSERT_EQUALS("Two IDFs for one instrument have equal valid-from dates", "0");
-            }
+            // some more intelligent stuff here later
+            std::stringstream messageBuffer;
+            messageBuffer << "Two IDFs for one instrument have equal valid-from dates" << 
+              "IDFs are: " << it1->first << " and " << it2->first <<
+              " Date One: "<< it1->second.from.toFormattedString() <<
+              " Date Two: "<< it2->second.from.toFormattedString();
+            TSM_ASSERT_DIFFERS(messageBuffer.str(), it2->second.from, it1->second.from);
           }
         }
 

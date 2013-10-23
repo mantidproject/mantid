@@ -33,6 +33,7 @@ public slots:
 
 private slots:
   void setDefaultAccumulationMethod(const QString&);
+  void accept();
 
 private:
   /// Initialize the layout
@@ -57,9 +58,6 @@ private:
 
   /// The algorithm for processing the accumulated workspace
   Mantid::API::Algorithm_sptr m_postProcessingAlg;
-
-  /// History of the inputs to the processing algorithms
-  //MantidQt::API::AlgorithmInputHistoryImpl * m_inputHistory;
 
 };
 

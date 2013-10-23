@@ -146,7 +146,17 @@ namespace Mantid
     {
       double diff = fabs(a-b);
       if (diff > m_tolerance)
-        throw CompareFailsException(message + " " + versus(a,b) );
+      {
+        double pa=fabs(a); double pb = fabs(b);
+        if( (pa>2*m_tolerance) ||(pb >2*m_tolerance))
+        {
+          diff=0.5*diff/(pa+pb);
+          if (diff > m_tolerance)
+              throw CompareFailsException(message + " " + versus(a,b) );
+        }
+        else
+           throw CompareFailsException(message + " " + versus(a,b) );
+      }
     }
 
 

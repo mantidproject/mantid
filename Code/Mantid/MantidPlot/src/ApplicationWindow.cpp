@@ -83,7 +83,6 @@
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
-#include "CommandLineInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "TableStatistics.h"
 #include "Fit.h"
@@ -500,10 +499,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  m_scriptInterpreter = new CommandLineInterpreter(*scriptingEnv(), m_interpreterDock);
   delete m_interpreterDock->widget();
-  m_interpreterDock->setWidget(m_scriptInterpreter);
   m_iface_script = NULL;
+  runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
   loadCustomActions();
 
   // Print a warning message if the scripting language is set to muParser
@@ -512,8 +510,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     logWindow->show();
     g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
-
-  actionIPythonConsole->setVisible(testForIPython());
 
   // Need to show first time setup dialog?
   using Mantid::Kernel::ConfigServiceImpl;
@@ -1108,7 +1104,6 @@ void ApplicationWindow::initMainMenu()
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
   view->addAction(actionShowScriptInterpreter);
-  view->addAction(actionIPythonConsole);
   view->insertSeparator();
 
   mantidUI->addMenuItems(view);
@@ -1686,20 +1681,16 @@ void ApplicationWindow::disableToolbars()
   plotTools->setEnabled(false);
 }
 
-void ApplicationWindow::hideToolbars()
+/**
+ * Show/hide MantidPlot toolbars.
+ * @param visible If true, make toolbar visible, if false - hidden
+ */
+void ApplicationWindow::setToolbarsVisible(bool visible)
 {
-  standardTools->setVisible(false);
-  displayBar->setVisible(false);
-  plotTools->setVisible(false);
-  formatToolBar->setVisible(false);
-}
-
-void ApplicationWindow::showToolbars()
-{
-  standardTools->setVisible(true);
-  displayBar->setVisible(true);
-  plotTools->setVisible(true);
-  formatToolBar->setVisible(true);
+  standardTools->setVisible(visible);
+  displayBar->setVisible(visible);
+  plotTools->setVisible(visible);
+  formatToolBar->setVisible(visible);
 }
 
 void ApplicationWindow::plot3DRibbon()
@@ -3391,29 +3382,23 @@ void ApplicationWindow::convertTableToWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
-  {
-    mt = convertTableToTableWorkspace(t);
-  }
+  convertTableToTableWorkspace(t);
 }
 
 /**
- * Convert Table in the active window to a TableWorkspace
+ * Convert Table in the active window to a MatrixWorkspace
  */
 void ApplicationWindow::convertTableToMatrixWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
+  if(auto *mt = dynamic_cast<MantidTable*>(t))
   {
     mt = convertTableToTableWorkspace(t);
+    QMap<QString,QString> params;
+    params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+    mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
   }
-  if ( !mt ) return;
-  QMap<QString,QString> params;
-  params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-  mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
 }
 
 /**
@@ -3490,8 +3475,7 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
   {
     Mantid::API::AnalysisDataService::Instance().add(wsName,tws);
   }
-  MantidTable* mt = new MantidTable(scriptingEnv(), tws, t->objectName(), this);
-  return mt;
+  return new MantidTable(scriptingEnv(), tws, t->objectName(), this);
 }
 
 Matrix* ApplicationWindow::tableToMatrix(Table* t)
@@ -5635,8 +5619,6 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/KeepAspect", d_keep_plot_aspect);
   settings.endGroup(); // ExportImage
 
-
-  if(m_scriptInterpreter ) m_scriptInterpreter->saveSettings();
   settings.beginGroup("/ScriptWindow");
   // Geometry is applied by the app window
   settings.setValue("/size", d_script_win_size);
@@ -8282,11 +8264,6 @@ void ApplicationWindow::copySelection()
     info->copy();
     return;
   }
-  else if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->copy();
-    return;
-  }
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -8386,12 +8363,6 @@ void ApplicationWindow::copyMarker()
 
 void ApplicationWindow::pasteSelection()
 {  
-  if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->paste();
-    return;
-  }
-
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -9461,13 +9432,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-  // don't ask the closing sub-windows: the answer will be ignored
-  MDIWindowList windows = getAllWindows();
-  foreach(MdiSubWindow* w,windows)
-  {
-    w->confirmClose(false);
-  }
-
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
     if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
@@ -9489,6 +9453,14 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
       ce->ignore();
       return;
     }
+  }
+
+  // Close all the MDI windows
+  MDIWindowList windows = getAllWindows();
+  foreach(MdiSubWindow* w,windows)
+  {
+    w->confirmClose(false);
+    w->close();
   }
 
   mantidUI->shutdown();
@@ -9514,7 +9486,6 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   //Save the settings and exit
   saveSettings();
-  m_scriptInterpreter->shutdown();
   scriptingEnv()->finalize();
 
   // Help window
@@ -13225,14 +13196,6 @@ void ApplicationWindow::createActions()
 #endif
   actionShowScriptInterpreter->setToggleAction(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
-
-  actionIPythonConsole = new QAction(getQPixmap("python_xpm"), tr("Launch IPython Console"), this);
-#ifdef __APPLE__
-  actionIPythonConsole->setShortcut(tr("Ctrl+5")); // F4 is used by the window manager on Mac
-#else
-  actionIPythonConsole->setShortcut(tr("F5"));
-#endif
-  connect(actionIPythonConsole, SIGNAL(activated()), this, SLOT(launchIPythonConsole()));
 #endif
 
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
@@ -16147,31 +16110,11 @@ void ApplicationWindow::showScriptInterpreter()
   { 
     m_interpreterDock->show();
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
-    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
-    m_scriptInterpreter->setFocus();
+    m_interpreterDock->setFocusProxy(m_interpreterDock->widget());
+    m_interpreterDock->setFocus();
     m_interpreterDock->activateWindow();
-     
   }
 
-}
-
-bool ApplicationWindow::testForIPython()
-{
-#ifdef _WIN32
-  // We have an issue with clashing MSVCR90 libraries on 32-bit windows. When this method
-  // is run at startup it raises a dialog box warning about an invalid load of the C runtime library.
-  // It seems to have picked up MSCRV90 from the CMake bin directory. Clicking OK allows
-  // Mantid to load and then running IPython seesm fine, also without CMake in the PATH it is okay.
-  // We will have to assume that this is always here on Windows.
-  return true;
-#else
-  return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
-#endif
-}
-
-void ApplicationWindow::launchIPythonConsole()
-{
-  runPythonScript("from ipython_plugin import MantidPlot_IPython\nMantidPlot_IPython().launch_console()",false, true,false);
 }
 
 /**
@@ -16452,6 +16395,9 @@ bool ApplicationWindow::validFor2DPlot(Table *table)
   if (!table->selectedYColumns().count()){
     QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Please select a Y column to plot!"));//Mantid
     return false;
+  } else if (table->selectedXColumns().count() > 1){
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Can't plot using multiple X columns!"));//Mantid
+    return false;
   } else if (table->numCols()<2) {
     QMessageBox::critical(this, tr("MantidPlot - Error"),tr("You need at least two columns for this operation!"));//Mantid
     return false;
@@ -16474,7 +16420,7 @@ MultiLayer* ApplicationWindow::generate2DGraph(Graph::CurveType type)
       return 0;
 
     Q3TableSelection sel = table->getSelection();
-    return multilayerPlot(table, table->drawableColumnSelection(), type, sel.topRow(), sel.bottomRow());
+    return multilayerPlot(table, table->selectedColumns(), type, sel.topRow(), sel.bottomRow());
   } else if (w->isA("Matrix")){
     Matrix *m = static_cast<Matrix *>(w);
     return plotHistogram(m);
@@ -17001,28 +16947,12 @@ else
   MantidQt::API::UserSubWindow *user_interface = interfaceManager.createSubWindow(action_data, usr_win);
   if(user_interface)
   {
-    connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
-    connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
     setGeometry(usr_win,user_interface);
-    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
-        SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
-    if(user_interface->interfaceName() == "Muon Analysis")
-    {
-      // Re-emits the signal caught from the muon analysis
-      connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
-      // Closes the active graph
-      connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
-      // Hides the graph
-      connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
-      // Shows the graph
-      connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
-      // Activate Peak Picker tool on the requested plot
-      connect(user_interface, SIGNAL(activatePPTool(const QString&)), 
-                        this, SLOT(activatePPTool(const QString&)));
-      // Update the used fit property browser
-      connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
-                    mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
-    } 
+    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), 
+                      this, SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
+    // Update the used fit property browser
+    connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
+                  mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
     user_interface->initializeLocalPython();
   }
   else
@@ -17035,174 +16965,6 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
-
-/**
- * Searches for the plot with a specified name and then attaches Peak Picker tool to it. Disables 
- * the tool from all the other plots.
- * 
- * @param plotName The name of the plot we want to attach the tool to.
- */
-void ApplicationWindow::activatePPTool(const QString& plotName)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-
-      QList<Graph *> layers = plot->layersList();
-
-      if (w->objectName() == plotName)
-      {
-        foreach(Graph *g, layers)
-        {
-          PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, true);
-          g->setActiveTool(ppicker);
-        }
-      }
-      else
-      {
-        foreach(Graph *g, layers)
-          g->disableTools();
-      }
-    }
-  }
-}
-
-
-/**
-* Close a given graph
-*
-* @params wsName :: The name of the graph to delete.
-*/
-void ApplicationWindow::closeGraph(const QString & wsName)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() == wsName)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->close();
-        break;
-      }
-    }
-  }
-}
-
-
-/**
-* Hide all the graphs apart from the exception. Default not to have exception.
-*
-* @params exception :: The workspace not to be hidden. Default is no exception ("").
-*/
-void ApplicationWindow::hideGraphs(const QString & exception)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() != exception)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->setHidden();
-      }
-    }
-  }
-}
-
-
-/**
-* Show all the graphs that are hidden
-*/
-void ApplicationWindow::showGraphs()
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-      activateWindow(w);
-  }
-}
-
-
-/**
-* Makes sure that it is dealing with a graph and then tells the plotDialog class 
-* to change the plot style
-*
-* @params plotDetails :: This includes all details of the plot [wsName, connectType, plotType, Errors, Color]
-*/
-void ApplicationWindow::setPlotType(const QStringList & plotDetails)
-{
-  if (plotDetails.size() == 0)
-  {
-    QMessageBox::information(this, "Mantid - Error", "Plot type or workspace name is missing. Please contact a Mantid team member.");
-  }
-  else
-  {
-    if (plotDetails.size() > 3)
-    {
-      int connectType = plotDetails[1].toInt();
-      QList<MdiSubWindow *> windows = windowsList();
-      foreach (MdiSubWindow *w, windows) 
-      {
-        if (w->isA("MultiLayer"))
-        {
-          MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-          {
-            // Check to see if graph is the new one by comparing the names
-            if (w->objectName() == plotDetails[0] + "-1")
-            {
-              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this, plot);
-              //pd->setMultiLayer(plot);
-              Graph *g = plot->activeGraph();
-              if (g)
-              {
-                int curveNum(-1);
-
-                if (plotDetails[2] == "Data")
-                {
-                  curveNum = g->curveIndex(plotDetails[0]); //workspaceName
-                  if (plotDetails[3] == "AllErrors") // if all errors, display all errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(true, true);
-                  }
-                  else // don't show errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(false, false);
-                  }
-                }
-                if (curveNum > -1) // If one of the curves has been changed 
-                {
-                  // line(0) scatter(1) line+symbol(2)
-                  if (connectType >= 0 && connectType <= 2)
-                  {
-                    if (plotDetails.size() > 4)
-                      pd->setPlotType(connectType, curveNum, plotDetails[4]);
-                    else
-                      pd->setPlotType(connectType, curveNum);            
-                  }
-                  g->replot();
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 
 void ApplicationWindow::loadCustomActions()
 {

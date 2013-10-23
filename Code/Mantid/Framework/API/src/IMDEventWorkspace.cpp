@@ -72,6 +72,8 @@ namespace API
       os << stats[i] << "\n";
     }
 
+    os << MultipleExperimentInfos::toString() << "\n";
+
     os << "Events: " << getNPoints() << "\n";
     return os.str();
   }

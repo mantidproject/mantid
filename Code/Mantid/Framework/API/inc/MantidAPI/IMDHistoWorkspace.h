@@ -78,6 +78,8 @@ namespace API
     virtual double & operator [](const size_t & index) = 0;
 
     virtual void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
+  protected:
+    virtual const std::string toString() const;
   };
 
   /// Shared pointer to the IMDWorkspace base class

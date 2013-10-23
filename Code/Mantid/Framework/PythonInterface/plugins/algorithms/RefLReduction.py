@@ -16,7 +16,6 @@ sys.path.insert(0,os.path.dirname(__file__))
 import sfCalculator
 sys.path.pop(0)
 
-
 from mantid.kernel import *
 
 class RefLReduction(PythonAlgorithm):
@@ -74,6 +73,7 @@ class RefLReduction(PythonAlgorithm):
         self.declareProperty("SlitsWidthFlag", True, 
                              doc="Looking for perfect match of slits width when using Scaling Factor file")
         self.declareProperty("IncidentMediumSelected", "", doc="Incident medium used for those runs")
+        self.declareProperty("GeometryCorrectionFlag", False, doc="Use or not the geometry correction")
 
     def PyExec(self):   
         
@@ -93,9 +93,6 @@ class RefLReduction(PythonAlgorithm):
             if _mt.find('_reflectivity') != -1:
                 DeleteWorkspace(_mt)
 
-        bDebug = True
-        if bDebug:
-            print '====== Running in mode DEBUGGING ======='
 
         # retrieve settings from GUI
         print '-> Retrieving settings from GUI'
@@ -135,11 +132,12 @@ class RefLReduction(PythonAlgorithm):
             TOFrange = self.getProperty("TOFRange").value #microS
         else:
             TOFrange = [0, 200000]
-#         TOFsteps = 200.0 # TOF binnng
-                
         # TOF binning parameters
         binTOFrange = [0, 200000]
         binTOFsteps = 50
+
+        # geometry correction
+        geometryCorrectionFlag = self.getProperty("GeometryCorrectionFlag").value
 
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
@@ -179,11 +177,15 @@ class RefLReduction(PythonAlgorithm):
         [dMD, dSD] = wks_utility.getDistances(ws_event_data)
         # get theta
         theta = wks_utility.getTheta(ws_event_data, angleOffsetDeg)
-                
+        # get proton charge
+        pc = wks_utility.getProtonCharge(ws_event_data)
+        error_0 = 1. / pc
+
         # rebin data
         ws_histo_data = wks_utility.rebinNeXus(ws_event_data,
                               [binTOFrange[0], binTOFsteps, binTOFrange[1]],
                               'data')
+        
         # get q range
         q_range = wks_utility.getQrange(ws_histo_data, theta, dMD, qMin, qStep)
 
@@ -195,13 +197,21 @@ class RefLReduction(PythonAlgorithm):
                                       TOFrange[0],
                                       TOFrange[1],
                                       'data')
+        
         # normalize by current proton charge
         ws_histo_data = wks_utility.normalizeNeXus(ws_histo_data, 'data')
+        
         # integrate over low resolution range
         [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,
                                                             dataLowResRange,
                                                             'data')
 
+#        #DEBUG ONLY
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_file_after_low_resolution_integration.txt',
+#                                         data_tof_axis,
+#                                         data_y_axis,
+#                                         data_y_error_axis)
+        
         tof_axis = data_tof_axis[0:-1].copy()
         tof_axis_full = data_tof_axis.copy()
 
@@ -215,36 +225,37 @@ class RefLReduction(PythonAlgorithm):
                                                                            dataPeakRange,
                                                                            dataBackFlag,
                                                                            dataBackRange,
+                                                                           error_0, 
                                                                            'data')
-        
-#         wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Dropbox/temporary/data_file_not_integrated.txt',
-#                                      data_tof_axis,
-#                                      data_y_axis,
-#                                      data_y_error_axis)
-         
-# #         ## DEBUGGING ONLY
-#         [inte_data_y_axis, inte_data_y_error_axis] = wks_utility.integratedOverPixelDim(data_y_axis, data_y_error_axis)          
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/' + name_output_ws + '.txt'
-#         wks_utility.ouput_ascii_file(fileName,
-#                                      data_tof_axis,
-#                                      inte_data_y_axis, 
-#                                      inte_data_y_error_axis)
+#        #DEBUG ONLY
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_file_back_sub_not_integrated.txt',
+#                                         data_tof_axis,
+#                                         data_y_axis,
+#                                         data_y_error_axis)
 
         # work with normalization        
+        
         # load normalization
         ws_event_norm = wks_utility.loadNeXus(int(normalizationRunNumber), 'normalization')        
+        
+        # get proton charge
+        pc = wks_utility.getProtonCharge(ws_event_norm)
+        error_0 = 1. / pc
+
         # rebin normalization
         ws_histo_norm = wks_utility.rebinNeXus(ws_event_norm,
                               [binTOFrange[0], binTOFsteps, binTOFrange[1]],
                               'normalization')
+        
         # keep only TOF range
         ws_histo_norm = wks_utility.cropTOF(ws_histo_norm, 
                                       TOFrange[0],
                                       TOFrange[1],
                                       'normalization')
+        
         # normalize by current proton charge
         ws_histo_norm = wks_utility.normalizeNeXus(ws_histo_norm, 'normalization')
+        
         # integrate over low resolution range
         [norm_tof_axis, norm_y_axis, norm_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_norm,
                                                             normLowResRange,
@@ -257,111 +268,29 @@ class RefLReduction(PythonAlgorithm):
                                                         normPeakRange,
                                                         normBackFlag,
                                                         normBackRange,
+                                                        error_0, 
                                                         'normalization') 
-
-        # get average mean of peak region for each TOF
-#         [av_norm, av_norm_error] = wks_utility.meanOfRange(norm_y_axis, 
-#                                                            norm_y_error_axis)
 
         [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis, 
                                                            norm_y_error_axis)
 
-#         ## DEBUGGING ONLY
-#         wks_utility.ouput_ascii_file('/mnt/hgfs/j35/Dropbox/temporary/norm_file.txt',
-#                                      norm_tof_axis,
-#                                      av_norm, 
-#                                      av_norm_error)
+#        ## DEBUGGING ONLY
+#        wks_utility.ouput_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/norm_file_back_sub_not_integrated.txt',
+#                                     norm_tof_axis, 
+#                                     av_norm, 
+#                                     av_norm_error)        
 
-#         ## DEBUGGING ONLY
-#         [inte_data_y_axis, inte_data_y_error_axis] = wks_utility.integratedOverPixelDim(data_y_axis, data_y_error_axis)          
-#         [final_data, final_data_error] = wks_utility.divideData1DbyNormalization(inte_data_y_axis,
-#                                                                                    inte_data_y_error_axis,
-#                                                                                    av_norm,
-#                                                                                    av_norm_error)
-#         ## DEBUGGING ONLY
-#         wks_utility.ouput_ascii_file('/mnt/hgfs/j35/Dropbox/temporary/data_over_norm_file.txt',
-#                                      norm_tof_axis,
-#                                      final_data, 
-#                                      final_data_error)
-        
-        ## up to here, works perfectly !!!
-
-        # divide data by normalization
-        #print data_y_axis.shape #(7,62) = (nbr_pixels, nbr_tof)
-        
-        
-        
         [final_data_y_axis, final_data_y_error_axis] = wks_utility.divideDataByNormalization(data_y_axis,
                                                                                              data_y_error_axis,
                                                                                              av_norm,
-                                                                                             av_norm_error)
-
-#         ## DEBUGGING ONLY
-#         my_x_axis = zeros((17,240))
-#         for i in range(17):
-#             my_x_axis[i,:] = data_tof_axis[0:-1]
-# 
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/justAfterNormalization_' + name_output_ws + '.txt'
-#         wks_utility.ouput_big_Q_ascii_file(fileName,
-#                                            my_x_axis, 
-#                                            final_data_y_axis, 
-#                                            final_data_y_error_axis)
+                                                                                             av_norm_error)        
         
-        # cleanup data
-        [final_data_y_axis, final_data_y_error_axis] = wks_utility.cleanupData(final_data_y_axis,
-                                                                               final_data_y_error_axis)
-
-            
-
-#         ## debugging only
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/justAfterNormalization_' + name_output_ws + '.txt'
-#         wks_utility.ouput_big_Q_ascii_file(fileName,
-#                                            my_x_axis, 
-#                                            final_data_y_axis, 
-#                                            final_data_y_error_axis)
-
-
-#         ## for debugging only, create ascii file of data
-#         # integrate data_y_axis over range of peak
-#          
-#         ## for degbugging only
-#         size = final_data_y_axis.shape
-#         nbr_tof = size[1]
-#         final_data = zeros(nbr_tof)
-#         final_data_error = zeros(nbr_tof)
-#         for t in range(nbr_tof):
-#             [data, error] = wks_utility.sumWithError(final_data_y_axis[:,t], 
-#                                                      final_data_y_error_axis[:,t])
-#             final_data[t] = data
-#             final_data_error[t] = error
-#   
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/' + name_output_ws + '.txt'
-#         wks_utility.ouput_ascii_file(fileName,
-#                                          norm_tof_axis,
-#                                          final_data, 
-#                                          final_data_error)
-
-
-
-#        
-#         ## DEBUGGING ONLY
-#         wks_utility.ouput_ascii_file('/mnt/hgfs/j35/Dropbox/temporary/data_over_norm_file.txt',
-#                                      norm_tof_axis,
-#                                      final_data, 
-#                                      final_data_error)
-
-# 
-#         ## DEBUGGING ONLY
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/' + name_output_ws + '.txt'
-#         wks_utility.ouput_ascii_file(fileName,
-#                                      final_x_axis,
-#                                      final_y_axis,
-#                                      final_error_axis)
-
+#        #DEBUG ONLY
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_divided_by_norm_not_integrated.txt',
+#                                         data_tof_axis,
+#                                         final_data_y_axis,
+#                                         final_data_y_error_axis)
+        
         # apply Scaling factor    
         [tof_axis_full, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis_full, 
                                                                                final_data_y_axis, 
@@ -371,51 +300,42 @@ class RefLReduction(PythonAlgorithm):
                                                                                slitsValuePrecision,
                                                                                slitsWidthFlag)
         
-#         ## DEBUGGING ONLY
-#         wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Dropbox/temporary/data_before_convertToQ_not_integrated.txt',
-#                                      tof_axis,
-#                                      y_axis, 
-#                                      y_error_axis)
+#        #DEBUG ONLY
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/after_applying_scaling_factor.txt',
+#                                         data_tof_axis,
+#                                         y_axis,
+#                                         y_error_axis)
         
+        if geometryCorrectionFlag: # convert To Q with correction
+            [q_axis, y_axis, y_error_axis] = wks_utility.convertToQ(tof_axis_full,
+                                                                    y_axis, 
+                                                                    y_error_axis,
+                                                                    peak_range = dataPeakRange,  
+                                                                    central_pixel = data_central_pixel,
+                                                                    source_to_detector_distance = dMD,
+                                                                    sample_to_detector_distance = dSD,
+                                                                    theta = theta,
+                                                                    first_slit_size = first_slit_size,
+                                                                    last_slit_size = last_slit_size)
         
-#         # convert to Q without correction
-#         [q_axis, y_axis, y_error_axis] = wks_utility.convertToQWithoutCorrection(tof_axis_full,
-#                                                                 y_axis, 
-#                                                                 y_error_axis,
-#                                                                 peak_range = dataPeakRange,  
-#                                                                 central_pixel = data_central_pixel,
-#                                                                 source_to_detector_distance = dMD,
-#                                                                 sample_to_detector_distance = dSD,
-#                                                                 theta = theta,
-#                                                                 first_slit_size = first_slit_size,
-#                                                                 last_slit_size = last_slit_size)
+        else: # convert to Q without correction
+        
+            [q_axis, y_axis, y_error_axis] = wks_utility.convertToQWithoutCorrection(tof_axis_full,
+                                                                                     y_axis, 
+                                                                                     y_error_axis,
+                                                                                     peak_range = dataPeakRange,  
+                                                                                     central_pixel = data_central_pixel,
+                                                                                     source_to_detector_distance = dMD,
+                                                                                     sample_to_detector_distance = dSD,
+                                                                                     theta = theta,
+                                                                                     first_slit_size = first_slit_size,
+                                                                                     last_slit_size = last_slit_size)
 
-        # convert To Q with correction
-        [q_axis, y_axis, y_error_axis] = wks_utility.convertToQ(tof_axis_full,
-                                                                y_axis, 
-                                                                y_error_axis,
-                                                                peak_range = dataPeakRange,  
-                                                                central_pixel = data_central_pixel,
-                                                                source_to_detector_distance = dMD,
-                                                                sample_to_detector_distance = dSD,
-                                                                theta = theta,
-                                                                first_slit_size = first_slit_size,
-                                                                last_slit_size = last_slit_size)
-
-#         ## debugging only
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/beforeRebin_' + name_output_ws + '.txt'
-#         wks_utility.ouput_big_Q_ascii_file(fileName,
-#                                            q_axis,
-#                                            y_axis, 
-#                                            y_error_axis)
-        
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/beforeRebin_' + name_output_ws + '.txt'
-#         wks_utility.ouput_big_Q_ascii_file(fileName,
-#                                            q_axis,
-#                                            y_axis, 
-#                                            y_error_axis)
+            
+#            wks_utility.ouput_big_Q_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/after_conversion_to_q.txt',
+#                                         q_axis,
+#                                         y_axis,
+#                                         y_error_axis)
          
         sz = q_axis.shape
         nbr_pixel = sz[0]
@@ -423,64 +343,23 @@ class RefLReduction(PythonAlgorithm):
         # create workspace
         q_workspace = wks_utility.createQworkspace(q_axis, y_axis, y_error_axis)
 
-#         q_workspace = SumSpectra(q_workspace)
-
-#         import time
-#         _time = int(time.time())
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
         q_rebin = Rebin(InputWorkspace=q_workspace,
                         Params=q_range,         
                         PreserveEvents=True)
         
-        ## debugging only
-#         q_axis = q_rebin.readX(0)[:]
-#         x_axis = zeros((nbr_pixel,len(q_axis)))
-#         y_axis = zeros((nbr_pixel,len(q_axis)))
-#         y_error_axis = zeros((nbr_pixel,len(q_axis)))
-#         
-#         print 'nbr_pixel: ' , nbr_pixel
-#         
-#         for i in range(nbr_pixel):
-#             x_axis[i,:] = q_axis[:]
-#             y_axis[i,:] = q_rebin.readY(i)[:]
-#             y_error_axis[i,:] = q_rebin.readE(i)[:]
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/afterRebin_' + name_output_ws + '.txt'
-# 
-#         print x_axis.shape
-#         print y_axis.shape
-# 
-#         wks_utility.ouput_big_Q_ascii_file(fileName,
-#                                            x_axis,
-#                                            y_axis, 
-#                                            y_error_axis)
-
-
-# #         
         # keep only the q values that have non zero counts
         nonzero_q_rebin_wks = wks_utility.cropAxisToOnlyNonzeroElements(q_rebin, 
                                                                         dataPeakRange)
         new_q_axis = nonzero_q_rebin_wks.readX(0)[:]
                   
-#         integrate spectra (normal mean) and remove first and last Q value
+        # integrate spectra (normal mean) and remove first and last Q value
         [final_x_axis, final_y_axis, final_error_axis] = wks_utility.integrateOverPeakRange(nonzero_q_rebin_wks, dataPeakRange)
          
                   
-        # for debugging only, only work with TOF 
-        
-#         [final_y_axis, final_error_axis] = wks_utility.weightedMeanOfRange(y_axis, y_error_axis)
-#         final_x_axis = tof_axis.copy()    
-# 
-#         ## DEBUGGING ONLY
-#         name_output_ws = self.getPropertyValue("OutputWorkspace")
-#         fileName = '/mnt/hgfs/j35/Dropbox/temporary/' + name_output_ws + '.txt'
-#         wks_utility.ouput_ascii_file(fileName,
-#                                      final_x_axis,
-#                                      final_y_axis,
-#                                      final_error_axis)
-                     
-        
+        # cleanup data
+        [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis,
+                                                                        final_error_axis)
+
         
         # create final workspace
         import time
@@ -489,48 +368,9 @@ class RefLReduction(PythonAlgorithm):
         name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
         final_workspace = wks_utility.createFinalWorkspace(final_x_axis, 
                                                            final_y_axis, 
-                                                           final_error_axis,
+                                                           final_y_error_axis,
                                                            name_output_ws)
-         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-                
-                
-                
-                
-#         dataX = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-#         dataY = [1,2,3,4,5,6,7,8,9,10,11,12]
-#         dataE = dataY
-#         tmpOutputWks = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4, UnitX="Wavelength")
-                       
+                                
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
            
         

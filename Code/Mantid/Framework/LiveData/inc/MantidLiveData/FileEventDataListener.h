@@ -58,15 +58,18 @@ namespace Mantid
       ILiveListener::RunStatus runStatus();
 
     private:
-      const std::string m_filename;   ///< The file to read
+      std::string m_filename;         ///< The file to read
       std::string m_tempWSname;       ///< The name of the hidden workspace that holds the next chunk
       int m_numChunks;                ///< The number of pieces to divide the file into
       int m_nextChunk;                ///< The number of the next chunk to be loaded
+      std::string m_filePropName;     ///< The file property name for the loader
+      std::string m_loaderName;       ///< The loader that will do the work
+      bool m_canLoadMonitors;         ///< A flag to turn off monitor loading for loaders that can
 
       /// Future that holds the result of the latest call to LoadEventPreNexus
       Poco::ActiveResult<bool> * m_chunkload;
       void loadChunk();
-      /// Shared pointer to the LoadEventPreNexus instance - it needs to be kept alive.
+      /// Shared pointer to the correct file loader instance - it needs to be kept alive.
       API::Algorithm_sptr m_loader;
       /// Flag indicating whether we're using LoadPreNexus (true) or LoadEventPreNexus (false)
       bool m_preNexus;

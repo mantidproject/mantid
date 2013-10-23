@@ -49,10 +49,10 @@ def GetXYE(inWS,n,array_len):
 	E=PadArray(Ein,array_len)
 	return N,X,Y,E
 
-def GetResNorm(ngrp):
+def GetResNorm(resnormWS,ngrp):
 	if ngrp == 0:                                # read values from WS
-		dtnorm = mtd['ResNorm_1'].readY(0)
-		xscale = mtd['ResNorm_2'].readY(0)
+		dtnorm = mtd[resnormWS+'_Intensity'].readY(0)
+		xscale = mtd[resnormWS+'_Stretch'].readY(0)
 	else:                                        # constant values
 		dtnorm = []
 		xscale = []
@@ -63,15 +63,15 @@ def GetResNorm(ngrp):
 	xsc=PadArray(xscale,51)
 	return dtn,xsc
 	
-def ReadNormFile(o_res,nsam,Verbose):            # get norm & scale values
-	if o_res == 1:                     # use ResNorm file option=o_res
-		Xin = mtd['ResNorm_1'].readX(0)
+def ReadNormFile(readRes,resnormWS,nsam,Verbose):            # get norm & scale values
+	if readRes:                   # use ResNorm file option=o_res
+		Xin = mtd[resnormWS+'_Intensity'].readX(0)
 		nrm = len(Xin)						# no. points from length of x array
 		if nrm == 0:				
 			error = 'ResNorm file has no dtnorm points'			
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-		Xin = mtd['ResNorm_2'].readX(0)					# no. points from length of x array
+		Xin = mtd[resnormWS+'_Stretch'].readX(0)					# no. points from length of x array
 		if len(Xin) == 0:				
 			error = 'ResNorm file has no xscale points'			
 			logger.notice('ERROR *** ' + error)
@@ -81,41 +81,60 @@ def ReadNormFile(o_res,nsam,Verbose):            # get norm & scale values
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
 		else:
-			dtn,xsc = GetResNorm(0)
-	if o_res == 0:                     # do not use ResNorm file option=o_res
-		dtn,xsc = GetResNorm(nsam)
+			dtn,xsc = GetResNorm(resnormWS,0)
+	else:
+		# do not use ResNorm file
+		dtn,xsc = GetResNorm(resnormWS,nsam)
 	return dtn,xsc
 
-def ReadWidthFile(op_w1,wfile,ngrp,Verbose):                       # reads width file ASCII
-	workdir = config['defaultsave.directory']
-	if op_w1 == 1:                               # use width1 data  option=o_w1
-		if Verbose:
-			w_path = os.path.join(workdir, wfile)					# path name for nxs file
-			logger.notice('Width file is ' + w_path)
-		handle = open(w_path, 'r')
-		asc = []
-		for line in handle:
-			line = line.rstrip()
-			asc.append(line)
-		handle.close()
-		lasc = len(asc)
-		if lasc == 0:
+#Reads in a width ASCII file
+def ReadWidthFile(readWidth,widthFile,numSampleGroups,Verbose):
+	widthY = []
+	widthE = []
+
+	if readWidth:
+
+		if Verbose:	
+			logger.notice('Width file is ' + widthFile)
+
+		# read ascii based width file 
+		try:
+			wfPath = FileFinder.getFullPath(widthFile)
+			handle = open(wfPath, 'r')
+			asc = []
+
+			for line in handle:
+				line = line.rstrip()
+				asc.append(line)
+			handle.close()
+
+		except Exception, e:
+			error = 'Failed to read width file'	
+			logger.notice('ERROR *** ' + error)
+			sys.exit(error)
+
+		numLines = len(asc)
+		
+		if numLines == 0:
 			error = 'No groups in width file'	
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-		if lasc != ngrp:				# check that no. groups are the same
-			error = 'Width groups (' +str(lasc) + ') not = Sample (' +str(ngrp) +')'	
+		
+		if numLines != numSampleGroups:				# check that no. groups are the same
+			error = 'Width groups (' +str(numLines) + ') not = Sample (' +str(numSampleGroups) +')'	
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-	else:                                           # constant values
-		Wy = []
-		We = []
-		for m in range(0,ngrp):
-			Wy.append(0.0)
-			We.append(0.0)
-	Wy=PadArray(Wy,51)                             # pad for Fortran call
-	We=PadArray(We,51)
-	return Wy,We
+
+	else: 
+	 	# no file: just use constant values
+	 	widthY = np.zeros(numSampleGroups)
+	 	widthE = np.zeros(numSampleGroups)
+
+	# pad for Fortran call
+	widthY = PadArray(widthY,51)
+	widthE = PadArray(widthE,51)
+
+	return widthY, widthE
 
 def CheckBinning(nbins):
 	nbin = nbins[0]
@@ -134,43 +153,73 @@ def CheckBinning(nbins):
 	return nbin,nrbin
 
 # QLines programs
-def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,Save):
+def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Save):
 	StartTime(program)
+
+	#expand fit options
+	elastic, background, width, resnorm = Fit
+	
+	#convert true/false to 1/0 for fortran
+	o_el = 1 if elastic else 0
+	o_w1 = 1 if width else 0
+	o_res = 1 if resnorm else 0
+
+	#fortran code uses background choices defined using the following numbers
+	if background == 'Sloping':
+		o_bgd = 2
+	elif background == 'Flat':
+		o_bgd = 1
+	elif background == 'Zero':
+		o_bgd = 0
+
+	fitOp = [o_el, o_bgd, o_w1, o_res]
+
 	workdir = config['defaultsave.directory']
 	facility = config['default.facility']
 	array_len = 4096						   # length of array in Fortran
 	CheckXrange(erange,'Energy')
 	nbin,nrbin = CheckBinning(nbins)
+
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
+
 	if facility == 'ISIS':
 		CheckAnalysers(samWS,resWS,Verbose)
 		efix = getEfixed(samWS)
 		theta,Q = GetThetaQ(samWS)
+
 	nsam,ntc = CheckHistZero(samWS)
+
+	totalNoSam = nsam
+	
+	#check if we're performing a sequential fit
 	if Loop != True:
 		nsam = 1
+
 	nres,ntr = CheckHistZero(resWS)
+	
 	if program == 'QL':
 		if nres == 1:
 			prog = 'QLr'						# res file
 		else:
 			prog = 'QLd'						# data file
 			CheckHistSame(samWS,'Sample',resWS,'Resolution')
-	if program == 'QSe':
+	elif program == 'QSe':
 		if nres == 1:
 			prog = 'QSe'						# res file
 		else:
-			error = 'Stretched Exp ONLY works with RES file'			
-			logger.notice('ERROR *** ' + error)
+			error = 'Stretched Exp ONLY works with RES file'
 			sys.exit(error)
+
 	if Verbose:
 		logger.notice('Version is ' +prog)
 		logger.notice(' Number of spectra = '+str(nsam))
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
-	Wy,We = ReadWidthFile(fitOp[2],wfile,nsam,Verbose)
-	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
+
+	Wy,We = ReadWidthFile(width,wfile,totalNoSam,Verbose)
+	dtn,xsc = ReadNormFile(resnorm,resnormWS,totalNoSam,Verbose)
+
 	fname = samWS[:-4] + '_'+ prog
 	probWS = fname + '_Prob'
 	fitWS = fname + '_Fit'
@@ -300,13 +349,19 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 		yProb = np.append(yProb,yPr2)
 		CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
 			Nspec=3, UnitX='MomentumTransfer')
-		C2Fw(samWS[:-4],fname)
+		outWS = C2Fw(samWS[:-4],fname)
 		if (Plot != 'None'):
 			QLPlotQL(fname,Plot,res_plot,Loop)
 	if program == 'QSe':
-		C2Se(fname)
+		outWS = C2Se(fname)
 		if (Plot != 'None'):
 			QLPlotQSe(fname,Plot,res_plot,Loop)
+
+	#Add some sample logs to the output workspace
+	AddSampleLog(Workspace=outWS, LogName="Fit Program", LogType="String", LogText=prog)
+	AddSampleLog(Workspace=outWS, LogName="Energy min", LogType="Number", LogText=str(erange[0]))
+	AddSampleLog(Workspace=outWS, LogName="Energy max", LogType="Number", LogText=str(erange[1]))
+
 	if Save:
 		fit_path = os.path.join(workdir,fitWS+'.nxs')
 		SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
@@ -369,117 +424,67 @@ def LorBlock(a,first,nl):                                 #read Ascii block of I
 		fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
 	first += 1
 	return first,Q,int0,fw,int                                      #values as list
-	
-def ReadQlFile(prog,sname,nl):
-	workdir = config['defaultsave.directory']
-	fname = sname
-	file = fname + '.ql' +str(nl)
-	handle = open(os.path.join(workdir, file), 'r')
-	asc = []
-	for line in handle:
-		line = line.rstrip()
-		asc.append(line)
-	handle.close()
-	lasc = len(asc)
-	var = asc[3].split()							#split line on spaces
-	nspec = var[0]
-	ndat = var[1]
-	var = ExtractInt(asc[6])
-	first = 7
-	Xout = []
-	Yf1 = []
-	Ef1 = []
-	Yf2 = []
-	Ef2 = []
-	Yf3 = []
-	Ef3 = []
-	Yi1 = []
-	Ei1 = []
-	Yi2 = []
-	Ei2 = []
-	Yi3 = []
-	Ei3 = []
-	ns = int(nspec)
-	for m in range(0,ns):
-		if nl == 1:
-			first,Q,int0,fw,it = LorBlock(asc,first,1)
-			Xout.append(Q)
-			Yf1.append(fw[0])
-			Ef1.append(fw[1])
-			Yi1.append(it[0])
-			Ei1.append(it[1])
-		if nl == 2:
-			first,Q,int0,fw,it = LorBlock(asc,first,2)
-			Xout.append(Q)
-			Yf1.append(fw[0])
-			Ef1.append(fw[2])
-			Yf2.append(fw[1])
-			Ef2.append(fw[3])
-			Yi1.append(it[0])
-			Ei1.append(it[2])
-			Yi2.append(it[1])
-			Ei2.append(it[3])
-		if nl == 3:
-			first,Q,int0,fw,it = LorBlock(asc,first,3)
-			Xout.append(Q)
-			Yf1.append(fw[0])
-			Ef1.append(fw[3])
-			Yf2.append(fw[1])
-			Ef2.append(fw[4])
-			Yf3.append(fw[2])
-			Ef3.append(fw[5])
-			Yi1.append(it[0])
-			Ei1.append(it[3])
-			Yi2.append(it[1])
-			Ei2.append(it[4])
-			Yi3.append(it[2])
-			Ei3.append(it[5])
-	if nl == 1:
-		CreateWorkspace(OutputWorkspace=fname+'_FW11', DataX=Xout, DataY=Yf1, DataE=Ef1,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_IT11', DataX=Xout, DataY=Yi1, DataE=Ei1,
-			Nspec=1, UnitX='MomentumTransfer')
-	if nl == 2:
-		CreateWorkspace(OutputWorkspace=fname+'_FW21', DataX=Xout, DataY=Yf1, DataE=Ef1,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_FW22', DataX=Xout, DataY=Yf2, DataE=Ef2,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_IT21', DataX=Xout, DataY=Yi1, DataE=Ei1,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_IT22', DataX=Xout, DataY=Yi2, DataE=Ei2,
-			Nspec=1, UnitX='MomentumTransfer')
-	if nl == 3:
-		CreateWorkspace(OutputWorkspace=fname+'_FW31', DataX=Xout, DataY=Yf1, DataE=Ef1,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_FW32', DataX=Xout, DataY=Yf2, DataE=Ef2,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_FW33', DataX=Xout, DataY=Yf3, DataE=Ef3,	
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_IT31', DataX=Xout, DataY=Yi1, DataE=Ei1,	
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_IT32', DataX=Xout, DataY=Yi2, DataE=Ei2,
-			Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_IT33', DataX=Xout, DataY=Yi3, DataE=Ei3,
-			Nspec=1, UnitX='MomentumTransfer')
 
 def C2Fw(prog,sname):
 	workdir = config['defaultsave.directory']
-	fname = sname
-	ReadQlFile(prog,sname,1)
-	ReadQlFile(prog,sname,2)
-	ReadQlFile(prog,sname,3)
-	group2 = fname + '_FW21,'+ fname + '_FW22'
-	group3 = fname + '_FW31,'+ fname + '_FW32,'+ fname + '_FW33'
-	group = fname + '_FW11,'+  group2 +','+  group3
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_FwHm')
-	group2 = fname + '_IT21,'+ fname + '_IT22'
-	group3 = fname + '_IT31,'+ fname + '_IT32,'+ fname + '_IT33'
-	group = fname + '_IT11,'+ group2 +','+ group3
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Inty')
-	group = fname + '_FwHm,'+ fname + '_Inty'
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Parameters')
-	opath = os.path.join(workdir,fname+'_Parameters.nxs')
-	SaveNexusProcessed(InputWorkspace=fname+'_Parameters', Filename=opath)
+	outWS = sname+'_Workspace'
+	Vaxis = []
+
+	dataX = np.array([])
+	dataY = np.array([])
+	dataE = np.array([])
+
+	nhist = 0
+	for nl in range(1,4):
+		file = sname + '.ql' +str(nl)
+		handle = open(os.path.join(workdir, file), 'r')
+		asc = []
+		for line in handle:
+			line = line.rstrip()
+			asc.append(line)
+		handle.close()
+		lasc = len(asc)
+		var = asc[3].split()							#split line on spaces
+		nspec = var[0]
+		ndat = var[1]
+		var = ExtractInt(asc[6])
+		first = 7
+		Xout = []
+
+		ns = int(nspec)
+
+		YData = [[] for i in range(6)]
+		EData = [[] for i in range(6)]
+
+		for m in range(0,ns):
+			first,Q,i0,fw,it = LorBlock(asc,first,nl)
+			Xout.append(Q)
+
+			for i in range(0,nl):
+				#collect amplitude and width data
+				YData[i*2].append(fw[i])
+				YData[i*2+1].append(it[i])
+				EData[i*2].append(fw[nl+i])
+				EData[i*2+1].append(it[nl+i])
+
+		nhist += nl*2
+		
+		for i in range(0,nl):
+			#append amplitude
+			dataX = np.append(dataX, np.array(Xout))
+			dataY = np.append(dataY, np.array(YData[i*2+1]))
+			dataE = np.append(dataE, np.array(EData[i*2+1]))
+			Vaxis.append('ampl.'+str(nl)+'.'+str(i+1))
+
+			#append width
+			dataX = np.append(dataX, np.array(Xout))
+			dataY = np.append(dataY, np.array(YData[i*2]))
+			dataE = np.append(dataE, np.array(EData[i*2]))
+			Vaxis.append('width.'+str(nl)+'.'+str(i+1))
+
+	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
+		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+	return outWS
 
 def SeBlock(a,first):                                 #read Ascii block of Integers
 	line1 = a[first]
@@ -515,9 +520,8 @@ def SeBlock(a,first):                                 #read Ascii block of Integ
 def C2Se(sname):
 	workdir = config['defaultsave.directory']
 	prog = 'QSe'
-	fname = sname
-	file = fname + '.qse'
-	handle = open(os.path.join(workdir, file), 'r')
+	outWS = sname+'_Workspace'
+	handle = open(os.path.join(workdir, sname+'.qse'), 'r')
 	asc = []
 	for line in handle:
 		line = line.rstrip()
@@ -537,6 +541,11 @@ def C2Se(sname):
 	Yb = []
 	Eb = []
 	ns = int(nspec)
+
+	dataX = np.array([])
+	dataY = np.array([])
+	dataE = np.array([])
+
 	for m in range(0,ns):
 		first,Q,int0,fw,it,be = SeBlock(asc,first)
 		Xout.append(Q)
@@ -546,40 +555,64 @@ def C2Se(sname):
 		Ei.append(it[1])
 		Yb.append(be[0])
 		Eb.append(be[1])
-	CreateWorkspace(OutputWorkspace=fname+'_FwHm', DataX=Xout, DataY=Yf, DataE=Ef,
-		Nspec=1, UnitX='MomentumTransfer')
-	CreateWorkspace(OutputWorkspace=fname+'_Inty', DataX=Xout, DataY=Yi, DataE=Ei,
-		Nspec=1, UnitX='MomentumTransfer')
-	CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=Xout, DataY=Yb, DataE=Eb,
-		Nspec=1, UnitX='MomentumTransfer')
-	group = fname + '_FwHm,'+ fname + '_Inty,'+ fname + '_Beta'
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Parameters')
-	opath = os.path.join(workdir,fname+'_Parameters.nxs')
-	SaveNexusProcessed(InputWorkspace=fname+'_Parameters', Filename=opath)
+	Vaxis = []
+
+	dataX = np.append(dataX,np.array(Xout))
+	dataY = np.append(dataY,np.array(Yi))
+	dataE = np.append(dataE,np.array(Ei))
+	nhist = 1
+	Vaxis.append('ampl')
+
+	dataX = np.append(dataX, np.array(Xout))
+	dataY = np.append(dataY, np.array(Yf))
+	dataE = np.append(dataE, np.array(Ef))
+	nhist += 1
+	Vaxis.append('width')
+
+	dataX = np.append(dataX,np.array(Xout))
+	dataY = np.append(dataY,np.array(Yb))
+	dataE = np.append(dataE,np.array(Eb))
+	nhist += 1
+	Vaxis.append('beta')
+
+	logger.notice('Vaxis=' + str(Vaxis))
+	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
+		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+	return outWS
 
 def QLPlotQL(inputWS,Plot,res_plot,Loop):
 	if Loop:
 		if (Plot == 'Prob' or Plot == 'All'):
 			pWS = inputWS+'_Prob'
 			p_plot=mp.plotSpectrum(pWS,[1,2],False)
-		if (Plot == 'Intensity' or Plot == 'All'):
-			iWS = [inputWS+'_IT11', inputWS+'_IT21', inputWS+'_IT22']
-			i_plot=mp.plotSpectrum(iWS,0,True)
 		if (Plot == 'FwHm' or Plot == 'All'):
-			wWS = [inputWS+'_FW11', inputWS+'_FW21', inputWS+'_FW22']
-			w_plot=mp.plotSpectrum(wWS,0,True)
+			ilist = [1,3,5]
+			i_plot=mp.plotSpectrum(inputWS+'_Workspace',ilist,True)
+			i_layer = i_plot.activeLayer()
+			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
+		if (Plot == 'Intensity' or Plot == 'All'):
+			wlist = [0,2,4]
+			w_plot=mp.plotSpectrum(inputWS+'_Workspace',wlist,True)
+			w_layer = w_plot.activeLayer()
+			w_layer.setAxisTitle(mp.Layer.Left,'Full width half maximum (meV)')
 	if (Plot == 'Fit' or Plot == 'All'):
 		fWS = inputWS+'_Result_0'
 		f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
 def QLPlotQSe(inputWS,Plot,res_plot,Loop):
 	if Loop:
-		if (Plot == 'Intensity' or Plot == 'All'):
-			i_plot=mp.plotSpectrum(inputWS+'_Inty',0,True)
 		if (Plot == 'FwHm' or Plot == 'All'):
-			w_plot=mp.plotSpectrum(inputWS+'_FwHm',0,True)
+			i_plot=mp.plotSpectrum(inputWS+'_Workspace',1,True)
+			i_layer = i_plot.activeLayer()
+			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
+		if (Plot == 'Intensity' or Plot == 'All'):
+			w_plot=mp.plotSpectrum(inputWS+'_Workspace',0,True)
+			w_layer = w_plot.activeLayer()
+			w_layer.setAxisTitle(mp.Layer.Left,'Full width half maximum (meV)')
 		if (Plot == 'Beta' or Plot == 'All'):
-			s_plot=mp.plotSpectrum(inputWS+'_Beta',0,True)
+			b_plot=mp.plotSpectrum(inputWS+'_Workspace',2,True)
+			b_layer = b_plot.activeLayer()
+			b_layer.setAxisTitle(mp.Layer.Left,'Beta')
 	if (Plot == 'Fit' or Plot == 'All'):
 		fWS = inputWS+'_Result_0'
 		f_plot=mp.plotSpectrum(fWS,res_plot,False)
@@ -607,8 +640,11 @@ def CheckBetSig(nbs):
 		sys.exit(error)
 	return Nbet,Nsig
 
-def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
+def QuestRun(samWS,resWS,rsname,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	StartTime('Quest')
+
+	resnorm = (Fit[:3] == 1)
+
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
 	CheckXrange(erange,'Energy')
@@ -620,6 +656,20 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
 	nsam,ntc = CheckHistZero(samWS)
 	if Loop != True:
 		nsam = 1
+	if Fit[0]:
+		elastic = True
+		o_el = 1
+	else:
+		elastic = False
+		o_el = 0
+	if Fit[1] == 'Sloping':
+		o_bgd = 2
+	if Fit[1] == 'Flat':
+		o_bgd = 1
+	if Fit[1] == 'Zero':
+		o_bgd = 0
+	background = Fit[1]
+	fitOp = [o_el, o_bgd, 0, 0]
 	efix = getEfixed(samWS)
 	theta,Q = GetThetaQ(samWS)
 	nres,ntr = CheckHistZero(resWS)
@@ -632,7 +682,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
 	if Verbose:
 		logger.notice(' Number of spectra = '+str(nsam))
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
-	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
+	dtn,xsc = ReadNormFile(resnorm,rsname,nsam,Verbose)
 	fname = samWS[:-4] + '_'+ prog
 	wrks=workdir + samWS[:-4]
 	if Verbose:

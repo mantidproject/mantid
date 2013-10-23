@@ -7,7 +7,7 @@
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Divide("w1","w2","output")
+ output = Divide("w1","w2")
  w3 = w1 / w2
  w1 /= w2  # Perform "in-place"
  # Using a scalar
@@ -54,6 +54,7 @@ namespace Mantid
       (void) lhsX; //Avoid compiler warning
 
       const int bins = static_cast<int>(lhsE.size());
+
       for (int j=0; j<bins; ++j)
       {
         // Get references to the input Y's
@@ -65,7 +66,7 @@ namespace Mantid
         // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
         // = (Sa 1/b)2 + (Sb (a/b2))2
         // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
-        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY*rhsE[j]/rightY, 2) )/rightY;
+        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY*rhsE[j]/rightY, 2) )/fabs(rightY);
 
         // Copy the result last in case one of the input workspaces is also any output
         YOut[j] = leftY/rightY;;
@@ -76,7 +77,10 @@ namespace Mantid
                                         const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
     {
       (void) lhsX; //Avoid compiler warning
-      if (rhsY == 0) g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero." << std::endl;
+
+      if (rhsY == 0)
+        g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero."
+                        << "\n";
 
       // Do the right-hand part of the error calculation just once
       const double rhsFactor = pow(rhsE/rhsY,2);
@@ -87,7 +91,7 @@ namespace Mantid
         const double leftY = lhsY[j];
 
         // see comment in the function above for the error formula
-        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY, 2)*rhsFactor )/rhsY;
+        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY, 2)*rhsFactor )/fabs(rhsY);
         // Copy the result last in case one of the input workspaces is also any output
         YOut[j] = leftY/rhsY;
       }

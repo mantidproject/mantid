@@ -13,7 +13,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
-                   src/CommandLineInterpreter.cpp
                    src/ColorMapDialog.cpp
                    src/Cone3D.cpp
                    src/ConfigDialog.cpp
@@ -216,6 +215,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
                    src/Mantid/InstrumentWidget/RotationSurface.cpp
+                   src/Mantid/InstrumentWidget/PanelsSurface.cpp
                    src/Mantid/InstrumentWidget/ProjectionSurface.cpp
                    src/Mantid/InstrumentWidget/Projection3D.cpp
                    src/Mantid/InstrumentWidget/PeakMarker2D.cpp
@@ -242,7 +242,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
-                   src/CommandLineInterpreter.h
                    src/ColorMapDialog.h
                    src/Cone3D.h
                    src/ConfigDialog.h
@@ -448,6 +447,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/RotationSurface.h
                    src/Mantid/InstrumentWidget/PeakMarker2D.h
                    src/Mantid/InstrumentWidget/PeakOverlay.h
+                   src/Mantid/InstrumentWidget/PanelsSurface.h
                    src/Mantid/InstrumentWidget/ProjectionSurface.h
                    src/Mantid/InstrumentWidget/Projection3D.h
                    src/Mantid/InstrumentWidget/RectF.h
@@ -544,7 +544,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AxesDialog.h
                         src/CanvasPicker.h
                         src/ColorMapDialog.h
-                        src/CommandLineInterpreter.h
                         src/ConfigDialog.h
                         src/ContourLinesEditor.h
                         src/Convolution.h
@@ -732,38 +731,6 @@ qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
-
-###########################################################################
-# Files specific to the remote job submission code
-###########################################################################
-if(MAKE_REMOTE_JOBS)
-# Add the algorithms for managing remote job submission
-  LIST(APPEND MANTID_SRCS
-	src/Mantid/Remote/JobStatusDialog.cpp
-	src/Mantid/Remote/MantidRemoteCluster.cpp
-	src/Mantid/Remote/NewClusterDialog.cpp
-  )
-
-  LIST(APPEND MANTID_HDRS
-	src/Mantid/Remote/JobStatusDialog.h
-	src/Mantid/Remote/MantidRemoteCluster.h
-	src/Mantid/Remote/NewClusterDialog.h
-  )
-
-  LIST(APPEND MANTID_MOC_FILES
-	src/Mantid/Remote/JobStatusDialog.h
-	src/Mantid/Remote/MantidRemoteCluster.h
-	src/Mantid/Remote/NewClusterDialog.h
-  )
-
-  LIST(APPEND UI_FILES
-	src/Mantid/Remote/JobStatusDialog.ui
-	src/Mantid/Remote/NewClusterDialog.ui
-  )
-
-endif(MAKE_REMOTE_JOBS)
-
-
 ###########################################################################
 # Internal icon links
 ###########################################################################
@@ -860,12 +827,11 @@ copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
 # IPython scripts
 set( IPY_FILES 
   __init__.py
-  internal_ipkernel.py
-  ipython_plugin.py
+  mantid_ipython_widget.py
 )
 copy_python_files_to_dir ( "${IPY_FILES}" 
-                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_plugin 
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_plugin 
+                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_widget
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget 
                             IPYTHON_INSTALL_FILES )
 
 ###########################################################################
@@ -875,7 +841,7 @@ copy_python_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp 
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} 
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
 )
 
 # Library dependencies
@@ -1009,7 +975,7 @@ foreach(PY_FILE ${MTDPLOTPY_FILES} )
   install ( FILES mantidplotpy/${PY_FILE} DESTINATION ${BIN_DIR}/mantidplotpy )
 endforeach()
 foreach(PY_FILE ${IPY_FILES} )
-  install ( FILES ipython_plugin/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_plugin )
+  install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
 endforeach()
 
 if ( APPLE )

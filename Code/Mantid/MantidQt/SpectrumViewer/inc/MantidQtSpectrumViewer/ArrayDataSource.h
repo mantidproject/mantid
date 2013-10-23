@@ -53,6 +53,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSou
 
     ~ArrayDataSource();
 
+    virtual bool hasData(const std::string& wsName,
+                         const boost::shared_ptr<Mantid::API::Workspace> ws);
+
     /// Get DataArray covering full range of data in x, and y directions
     DataArray * GetDataArray( bool is_log_x );
 

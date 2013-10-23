@@ -65,6 +65,7 @@ set ( EXPORT_FILES
 
 # Files containing additional helper code that are not related to exporting class/functions
 set ( SRC_FILES
+  src/Algorithms/RunPythonScript.cpp
   src/FitFunctions/IFunctionAdapter.cpp
   src/FitFunctions/IFunction1DAdapter.cpp
   src/FitFunctions/IPeakFunctionAdapter.cpp
@@ -74,6 +75,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+  ${HEADER_DIR}/api/Algorithms/RunPythonScript.h
   ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IFunction1DAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h

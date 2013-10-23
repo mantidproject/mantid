@@ -295,6 +295,13 @@ namespace CurveFitting
       int k = hkl[1];
       int l = hkl[2];
       IPowderDiffPeakFunction_sptr newpeak = generatePeak(h, k, l);
+      if (!newpeak)
+      {
+        g_log.error("Unable to generate peak. ");
+        throw runtime_error("Unable to generate peak.");
+      }
+
+
       double tofh = newpeak->centre();
       if (tofh < m_minTOFPeakCentre || tofh > m_maxTOFPeakCentre)
       {
