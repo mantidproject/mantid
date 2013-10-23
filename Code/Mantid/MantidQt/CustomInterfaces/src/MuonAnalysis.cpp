@@ -199,10 +199,6 @@ void MuonAnalysis::initLayout()
   // file input
   connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(inputFileChanged_MWRunFiles()));
 
-  // Input check for First Good Data
-  connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this,
-    SLOT(runFirstGoodBinFront()));
-
   // load previous saved values
   loadAutoSavedValues(m_settingsGroup);
 
@@ -263,30 +259,6 @@ void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
   if ( index >= 0 )
     updateFront();
 }
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysis::runFirstGoodBinFront()
-{
-  try
-  {
-    boost::lexical_cast<double>(m_uiForm.firstGoodBinFront->text().toStdString());
-    
-    // if this value updated then also update 'Start at" Plot option if "Start at First Good Data" set
-    if (m_uiForm.timeComboBox->currentIndex() == 0 )
-    {
-      m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
-    }
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in First Good Data (ms)' input box. Reset to 0.3.");
-    m_uiForm.firstGoodBinFront->setText("0.3");
-  }
-}
-
 
 /**
 * Front plot button (slot)
@@ -1203,9 +1175,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     // so that later I can check if user has altered it
     m_nexusTimeZero = boost::lexical_cast<double>(m_uiForm.timeZeroFront->text().toStdString());
     m_uiForm.firstGoodBinFront->setText(QString::number(firstGoodData-timeZero,'g',2));
-
-    // since content of first-good-bin changed run this slot
-    runFirstGoodBinFront();
 
     std::string infoStr("");
     
@@ -2857,8 +2826,9 @@ void MuonAnalysis::startUpLook()
   m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
 
-  // Only allow numbers in the time zero text box
-  m_uiForm.timeZeroFront->setValidator(new QDoubleValidator(m_uiForm.timeZeroFront));
+  // Set validators for number-only boxes
+  m_uiForm.timeZeroFront->setValidator(createDoubleValidator(m_uiForm.timeZeroFront));
+  m_uiForm.firstGoodBinFront->setValidator(createDoubleValidator(m_uiForm.firstGoodBinFront));
 
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
@@ -3691,7 +3661,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
-  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(firstPeriodSelectionChanged()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
@@ -3910,6 +3880,17 @@ void MuonAnalysis::deadTimeFileSelected()
   homeTabUpdatePlot();
 }
 
+/**
+ * Creates new double validator which accepts numbers in standard notation only.
+ * @param parent :: Parent of the new validator
+ * @return New created validator
+ */
+QDoubleValidator* MuonAnalysis::createDoubleValidator(QObject* parent)
+{
+  QDoubleValidator* newValidator = new QDoubleValidator(parent);
+  newValidator->setNotation(QDoubleValidator::StandardNotation);
+  return newValidator;
+}
 
 }//namespace MantidQT
 }//namespace CustomInterfaces
