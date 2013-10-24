@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
         self.incidentEnergyValue = QtGui.QLineEdit(self.centralwidget)
         self.incidentEnergyValue.setGeometry(QtCore.QRect(22, 40, 171, 20))
         self.incidentEnergyValue.setText(_fromUtf8(""))
-        self.incidentEnergyValue.setPlaceholderText(_fromUtf8(""))
+        #self.incidentEnergyValue.setPlaceholderText(_fromUtf8(""))
         self.incidentEnergyValue.setObjectName(_fromUtf8("incidentEnergyValue"))
         self.label = QtGui.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(30, 10, 141, 20))
