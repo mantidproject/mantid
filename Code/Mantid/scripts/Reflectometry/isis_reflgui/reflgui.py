@@ -18,8 +18,8 @@ from PyQt4.QtGui import QFont
 from mantid.simpleapi import *  # New API
 from mantidplot import *
 # import qti as qti
-from quick import *
-from combineMulti import *
+from isis_reflectometry.quick import *
+from isis_reflectometry.combineMulti import *
 from mantid.api import WorkspaceGroup
 
 currentTable = ' '
