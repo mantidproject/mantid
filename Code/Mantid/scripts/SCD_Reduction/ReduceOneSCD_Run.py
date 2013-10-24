@@ -49,52 +49,53 @@ run              = sys.argv[2]
 #
 params_dictionary = ReduceDictionary.LoadDictionary( config_file_name )
 
-instrument_name           = params_dictionary[ "instrument_name" ]
-calibration_file_1        = params_dictionary[ "calibration_file_1" ]
-calibration_file_2        = params_dictionary[ "calibration_file_2" ]
-data_directory            = params_dictionary[ "data_directory" ]
-output_directory          = params_dictionary[ "output_directory" ]
-min_tof                   = params_dictionary[ "min_tof" ] 
-max_tof                   = params_dictionary[ "max_tof" ] 
-min_monitor_tof           = params_dictionary[ "min_monitor_tof" ] 
-max_monitor_tof           = params_dictionary[ "max_monitor_tof" ] 
-monitor_index             = params_dictionary[ "monitor_index" ] 
-cell_type                 = params_dictionary[ "cell_type" ] 
-centering                 = params_dictionary[ "centering" ]
-num_peaks_to_find         = params_dictionary[ "num_peaks_to_find" ]
-min_d                     = params_dictionary[ "min_d" ]
-max_d                     = params_dictionary[ "max_d" ]
-max_Q                     = params_dictionary[ "max_Q" ]
-tolerance                 = params_dictionary[ "tolerance" ]
-integrate_predicted_peaks = params_dictionary[ "integrate_predicted_peaks" ]
-min_pred_wl               = params_dictionary[ "min_pred_wl" ]
-max_pred_wl               = params_dictionary[ "max_pred_wl" ]
-min_pred_dspacing         = params_dictionary[ "min_pred_dspacing" ]
-max_pred_dspacing         = params_dictionary[ "max_pred_dspacing" ]
+instrument_name           = params_dictionary.get('instrument_name', "TOPAZ")
+calibration_file_1        = params_dictionary.get('calibration_file_1', None)
+calibration_file_2        = params_dictionary.get('calibration_file_2', None)
+data_directory            = params_dictionary.get('data_directory', None)
+output_directory          = params_dictionary.get('output_directory', None)
+min_tof                   = params_dictionary.get('min_tof', 400) 
+max_tof                   = params_dictionary.get('max_tof', 16666) 
+min_monitor_tof           = params_dictionary.get('min_monitor_tof', 1000) 
+max_monitor_tof           = params_dictionary.get('max_monitor_tof', 12500) 
+monitor_index             = params_dictionary.get('monitor_index', 0) 
+cell_type                 = params_dictionary.get('cell_type', None) 
+centering                 = params_dictionary.get('centering', None)
+num_peaks_to_find         = params_dictionary.get('num_peaks_to_find', 500)
+min_d                     = params_dictionary.get('min_d', 4)
+max_d                     = params_dictionary.get('max_d', 8)
+max_Q                     = params_dictionary.get('max_Q', 50)
+tolerance                 = params_dictionary.get('tolerance', 0.12)
+integrate_predicted_peaks = params_dictionary.get('integrate_predicted_peaks', False)
+min_pred_wl               = params_dictionary.get('min_pred_wl', 0.25)
+max_pred_wl               = params_dictionary.get('max_pred_wl', 3.5)
+min_pred_dspacing         = params_dictionary.get('min_pred_dspacing', 0.2)
+max_pred_dspacing         = params_dictionary.get('max_pred_dspacing', 2.5)
 
-use_sphere_integration    = params_dictionary[ "use_sphere_integration" ]
-use_cylinder_integration    = params_dictionary[ "use_cylinder_integration" ]
-use_ellipse_integration   = params_dictionary[ "use_ellipse_integration" ]
-use_fit_peaks_integration = params_dictionary[ "use_fit_peaks_integration" ]
+use_sphere_integration    = params_dictionary.get('use_sphere_integration', True)
+use_cylinder_integration    = params_dictionary.get('use_cylinder_integration', False)
+use_ellipse_integration   = params_dictionary.get('use_ellipse_integration', False)
+use_fit_peaks_integration = params_dictionary.get('use_fit_peaks_integration', False)
 
-peak_radius               = params_dictionary[ "peak_radius" ]
-bkg_inner_radius          = params_dictionary[ "bkg_inner_radius" ]
-bkg_outer_radius          = params_dictionary[ "bkg_outer_radius" ]
-integrate_if_edge_peak    = params_dictionary[ "integrate_if_edge_peak" ]
+peak_radius               = params_dictionary.get('peak_radius', 0.18)
+bkg_inner_radius          = params_dictionary.get('bkg_inner_radius', 0.18)
+bkg_outer_radius          = params_dictionary.get('bkg_outer_radius', 0.23)
+integrate_if_edge_peak    = params_dictionary.get('integrate_if_edge_peak', True)
 
-cylinder_length    = params_dictionary[ "cylinder_length" ]
-cylinder_percent_bkg    = params_dictionary[ "cylinder_percent_bkg" ]
-cylinder_profile_fit    = params_dictionary[ "cylinder_profile_fit" ]
+cylinder_length           = params_dictionary.get('cylinder_length', 0)
+cylinder_percent_bkg      = params_dictionary.get('cylinder_percent_bkg', 0)
+cylinder_int_option       = params_dictionary.get('cylinder_int_option', "GaussianQuadrature")
+cylinder_profile_fit      = params_dictionary.get('cylinder_profile_fit', "Gaussian")
 
-rebin_step                = params_dictionary[ "rebin_step" ]
-preserve_events           = params_dictionary[ "preserve_events" ] 
-use_ikeda_carpenter       = params_dictionary[ "use_ikeda_carpenter" ]
-n_bad_edge_pixels         = params_dictionary[ "n_bad_edge_pixels" ]
+rebin_step                = params_dictionary.get('rebin_step', -0.004)
+preserve_events           = params_dictionary.get('preserve_events', True) 
+use_ikeda_carpenter       = params_dictionary.get('use_ikeda_carpenter', False)
+n_bad_edge_pixels         = params_dictionary.get('n_bad_edge_pixels', 10)
 
-rebin_params = min_tof + "," + rebin_step + "," + max_tof
+rebin_params = min_tof + ',' + rebin_step + ',' + max_tof
 
-ellipse_region_radius     = params_dictionary[ "ellipse_region_radius" ]
-ellipse_size_specified    = params_dictionary[ "ellipse_size_specified" ]
+ellipse_region_radius     = params_dictionary.get('ellipse_region_radius', 0.45)
+ellipse_size_specified    = params_dictionary.get('ellipse_size_specified', False)
 
 #
 # Get the fully qualified input run file name, either from a specified data 
@@ -232,12 +233,13 @@ elif use_cylinder_integration:
 
   peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
                   CoordinatesToUse="Q (sample frame)",
-	          BackgroundOuterRadius=bkg_outer_radius, 
+	              BackgroundOuterRadius=bkg_outer_radius, 
                   BackgroundInnerRadius=bkg_inner_radius,
-	          PeaksWorkspace=peaks_ws, 
+	              PeaksWorkspace=peaks_ws, 
                   IntegrateIfOnEdge=integrate_if_edge_peak, 
-                  Cylinder=True,CylinderLength=cylinder_length,
+                  Cylinder=use_cylinder_integration,CylinderLength=cylinder_length,
                   PercentBackground=cylinder_percent_bkg,
+                  IntegrationOption=cylinder_int_option,
                   ProfileFunction=cylinder_profile_fit)
 
 elif use_fit_peaks_integration:
