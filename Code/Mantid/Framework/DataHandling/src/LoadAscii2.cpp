@@ -110,7 +110,7 @@ namespace Mantid
       m_lastBins = 0;
       m_curBins = 0;
       m_spectraStart = true;
-      m_specIDs = 0;
+      m_spectrumIDcount = 0;
 
       int lineNo = 0;
       m_spectra.clear();
@@ -159,7 +159,7 @@ namespace Mantid
         if (cols > 4 || cols < 0)
         {
           //there were more separators than there should have been, which isn't right, or something went rather wrong
-          throw std::runtime_error("Line " + std::to_string(lineNo) + ": Sets of values must have between 1 and 3 delimiters");
+          throw std::runtime_error("Line " + boost::lexical_cast<std::string>(lineNo) + ": Sets of values must have between 1 and 3 delimiters");
         }
         else if (cols == 1)
         {
@@ -167,14 +167,14 @@ namespace Mantid
           newSpectra();
 
           //at this point both vectors should be the same size (or the ID counter should be 0, but as we're here then that's out the window),
-          if (m_spectra.size() == m_specIDs)
+          if (m_spectra.size() == m_spectrumIDcount)
           {
-            m_specIDs++;
+            m_spectrumIDcount++;
           }
           else
           {
             //if not then they've ommitted IDs in the the file previously and just decided to include one (which is wrong and confuses everything)
-            throw std::runtime_error("Line " + std::to_string(lineNo) + ": Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. "
+            throw std::runtime_error("Line " + boost::lexical_cast<std::string>(lineNo) + ": Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. "
               "Check for blank lines, as they symbolize the end of one spectra and the start of another. Also check for spectra IDs with no associated bins.");
           }
           m_curSpectra->setSpectrumNo(boost::lexical_cast<int>(*(columns.begin())));
@@ -190,12 +190,12 @@ namespace Mantid
       }
       else if (badLine(line))
       {
-        throw std::runtime_error("Line " + std::to_string(lineNo) + ": Unexpected character found at beggining of line. Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
+        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(lineNo) + ": Unexpected character found at beggining of line. Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
       }
       else
       {
         //strictly speaking this should never be hit, but just being sure
-        throw std::runtime_error("Line " + std::to_string(lineNo) + ": Unknown format at line. Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
+        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(lineNo) + ": Unknown format at line. Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
       }
     }
 
@@ -230,7 +230,7 @@ namespace Mantid
           //DX in file
           localWorkspace->dataDx(i) = m_spectra[i].readDx();
         }
-        if (m_specIDs!= 0)
+        if (m_spectrumIDcount!= 0)
         {
           localWorkspace->getSpectrum(i)->setSpectrumNo(m_spectra[i].getSpectrumNo());
         }
@@ -262,7 +262,7 @@ namespace Mantid
             if (cols > 4 || cols < 1)
             {
               //there were more separators than there should have been, which isn't right, or something went rather wrong
-              throw std::runtime_error("Sets of values must have between 1 and 3 delimiters. Found " + std::to_string(cols) + ".");
+              throw std::runtime_error("Sets of values must have between 1 and 3 delimiters. Found " + boost::lexical_cast<std::string>(cols) + ".");
             }
             else if (cols != 1)
             {
@@ -338,7 +338,7 @@ namespace Mantid
       //is this the first bin in the spectra? if not this check has already been done for this spectra
       //If the ID vector is completly empty then it's ok we're assigning them later
       //if there are equal or less IDs than there are spectra, then there's been no ID assigned to this spectra and there should be
-      if (m_spectraStart && m_specIDs != 0 && !(m_spectra.size() < m_specIDs))
+      if (m_spectraStart && m_spectrumIDcount != 0 && !(m_spectra.size() < m_spectrumIDcount))
       {
         throw std::runtime_error("Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs."
           " Check for blank lines, as they symbolize the end of one spectra and the start of another.");
@@ -538,13 +538,14 @@ namespace Mantid
         throw std::invalid_argument("Separators cannot contain numeric characters, plus signs, hyphens or 'e'");
       }
 
-      m_comment = getProperty("CommentIndicator");
+      std::string tempcomment = getProperty("CommentIndicator");
 
-      if (!boost::regex_match(m_comment.begin(), m_comment.end(), boost::regex("[^0-9e"+ m_columnSep +"+-]+", boost::regex::perl)))
+      if (!boost::regex_match(tempcomment.begin(), tempcomment.end(), boost::regex("[^0-9e"+ m_columnSep +"+-]+", boost::regex::perl)))
       {
         throw std::invalid_argument("Comment markers cannot contain numeric characters, plus signs, hyphens,"
           " 'e' or the selected separator character");
       }
+      m_comment = tempcomment;
 
       // Process the header information.
       //processHeader(file);

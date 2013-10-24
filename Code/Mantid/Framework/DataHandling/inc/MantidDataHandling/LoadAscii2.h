@@ -99,12 +99,12 @@ namespace Mantid
       /// Map the separator options to their string equivalents
       std::map<std::string,std::string> m_separatorIndex;
       std::string m_comment;
-      int m_baseCols;
+      size_t m_baseCols;
       int m_specNo;
-      int m_lastBins;
-      int m_curBins;
+      size_t m_lastBins;
+      size_t m_curBins;
       bool m_spectraStart;
-      int m_specIDs;
+      size_t m_spectrumIDcount;
       std::vector<DataObjects::Histogram1D> m_spectra;
       DataObjects::Histogram1D *m_curSpectra;
     };
