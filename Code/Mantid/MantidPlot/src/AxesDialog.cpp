@@ -1149,18 +1149,15 @@ void AxesDialog::updateGrid()
       }
       for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end(); gridItr++)
       {
-        if ((*gridItr)->modified())
+        QList<Graph *> layers = plot->layersList();
+        foreach(Graph *g, layers)
         {
-          QList<Graph *> layers = plot->layersList();
-          foreach(Graph *g, layers)
+          if (g->isPiePlot())
           {
-            if (g->isPiePlot())
-            {
-              continue;
-            }
-            (*gridItr)->apply(g->plotWidget()->grid(),antiAlias);
-            g->replot();
+            continue;
           }
+          (*gridItr)->apply(g->plotWidget()->grid(),antiAlias);
+          g->replot();
         }
       }
       plot->applicationWindow()->modifiedProject();
@@ -1174,25 +1171,22 @@ void AxesDialog::updateGrid()
       }
       for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end(); gridItr++)
       {
-        if ((*gridItr)->modified())
+        QList<MdiSubWindow *> windows = m_app->windowsList();
+        for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end(); gridItr++)
         {
-          QList<MdiSubWindow *> windows = m_app->windowsList();
-          for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end(); gridItr++)
+          foreach(MdiSubWindow *w, windows)
           {
-            foreach(MdiSubWindow *w, windows)
+            if (w->isA("MultiLayer"))
             {
-              if (w->isA("MultiLayer"))
+              QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
+              foreach(Graph *g, layers)
               {
-                QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
-                foreach(Graph *g, layers)
+                if (g->isPiePlot())
                 {
-                  if (g->isPiePlot())
-                  {
-                    continue;
-                  }
-                  (*gridItr)->apply(g->plotWidget()->grid(),antiAlias);
-                  g->replot();
+                  continue;
                 }
+                (*gridItr)->apply(g->plotWidget()->grid(),antiAlias);
+                g->replot();
               }
             }
           }

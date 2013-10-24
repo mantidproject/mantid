@@ -399,7 +399,10 @@ void AxisDetails::apply()
     else if (type == ScaleDraw::Time || type == ScaleDraw::Date)
     {
       QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis)).split(";", QString::SkipEmptyParts);
-      lst.push_back(m_cmbFormat->currentText());
+      if ((int)lst.count() >= 2)
+      {
+        lst[1] = m_cmbFormat->currentText();
+      }
       formatInfo = lst.join(";");
     }
     else if (type == ScaleDraw::ColHeader)
