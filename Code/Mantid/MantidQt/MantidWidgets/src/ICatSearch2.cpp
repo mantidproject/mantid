@@ -206,10 +206,6 @@ namespace MantidQt
       table->setSortingEnabled(false);
       table->verticalHeader()->setVisible(false);
 
-      // Sort by endDate with the most recent being first.
-      table->sortByColumn(4,Qt::DescendingOrder);
-      table->setSortingEnabled(true);
-
       // Set the height on each row to 20 for UX improvement.
       for (size_t i = 0; i < numOfRows; ++i)
       {
@@ -703,6 +699,10 @@ namespace MantidQt
 
       // Show only a portion of the title as they can be quite long.
       resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
+
+      // Sort by endDate with the most recent being first.
+      resultsTable->setSortingEnabled(true);
+      resultsTable->sortByColumn(4,Qt::DescendingOrder);
     }
 
     /**
