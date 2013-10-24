@@ -196,6 +196,12 @@ private slots:
   /// Change to the dead time file, make sure graph is updated next time it is plotted.
   void deadTimeFileSelected();
 
+  /// Updates the enabled-state and value of Time Zero using "auto" check-box state
+  void setTimeZeroState(int checkBoxState);
+
+  /// Updates the enabled-state and value of First Good Data using "auto" check-box state
+  void setFirstGoodDataState(int checkBoxState);
+
 
 private:
   /// Initialize local Python environment
@@ -445,10 +451,11 @@ private:
   /// handles result table tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab* m_resultTableTab;
 
-  /// Time zero as stored in Nexus file. Need this because when loading Muon data
-  /// the x-axis has already been adjusted to that nexus time zero so if user select
-  /// a different time zero need to adjust the relative offset to this value
-  double m_nexusTimeZero;
+  /// Time Zero as loaded from Data file
+  double m_dataTimeZero;
+
+  /// First Good Data time as loaded from Data file
+  double m_dataFirstGoodData;
 
   static const QString NOT_AVAILABLE;
 

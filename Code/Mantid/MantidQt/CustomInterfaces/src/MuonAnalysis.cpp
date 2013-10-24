@@ -83,7 +83,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(), 
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
-  m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
+  m_deadTimesChanged(false), m_textToDisplay(""), m_dataTimeZero(0.2), m_dataFirstGoodData(0.3)
 {}
 
 /**
@@ -217,6 +217,9 @@ void MuonAnalysis::initLayout()
 
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
   connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
+
+  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this, SLOT(setTimeZeroState(int)));
+  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this, SLOT(setFirstGoodDataState(int)));
 }
 
 /**
@@ -1196,14 +1199,21 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     str << " to muon polarisation";
     m_uiForm.instrumentDescription->setText(str.str().c_str());
 
-    m_uiForm.timeZeroFront->setText(QString::number(timeZero, 'g',2));
-    // I want the nexus time to equal exactly how it is stored in time zero text box
-    // so that later I can check if user has altered it
-    m_nexusTimeZero = boost::lexical_cast<double>(m_uiForm.timeZeroFront->text().toStdString());
-    m_uiForm.firstGoodBinFront->setText(QString::number(firstGoodData-timeZero,'g',2));
+    if(instrumentChanged)
+    {
+      // When instrument changes we use information from data no matter what user has chosen before
+      m_uiForm.timeZeroAuto->setCheckState(Qt::Checked);
+      m_uiForm.firstGoodDataAuto->setCheckState(Qt::Checked);
+    }
 
-    // since content of first-good-bin changed run this slot
-    runFirstGoodBinFront();
+    m_dataTimeZero = timeZero;
+    m_dataFirstGoodData = firstGoodData - timeZero;
+
+    if(m_uiForm.timeZeroAuto->isChecked())
+      m_uiForm.timeZeroFront->setText(QString::number(m_dataTimeZero, 'g', 2));
+
+    if(m_uiForm.firstGoodDataAuto->isChecked())
+      m_uiForm.firstGoodBinFront->setText(QString::number(m_dataFirstGoodData, 'g', 2));
 
     std::string infoStr("");
     
@@ -1876,10 +1886,10 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
 {
   m_loaded = true;
   // adjust for time zero if necessary
-  if ( m_nexusTimeZero != timeZero())
+  if ( m_dataTimeZero != timeZero())
   {
     try {
-      double shift = m_nexusTimeZero - timeZero();
+      double shift = m_dataTimeZero - timeZero();
       Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("ChangeBinOffset");
       rebinAlg->setPropertyValue("InputWorkspace", inputWS);
       rebinAlg->setPropertyValue("OutputWorkspace", outWS);
@@ -1892,7 +1902,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
   }
 
   Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
-  if ( m_nexusTimeZero != timeZero() )
+  if ( m_dataTimeZero != timeZero() )
     cropAlg->setPropertyValue("InputWorkspace", outWS);
   else 
     cropAlg->setPropertyValue("InputWorkspace", inputWS);
@@ -3909,6 +3919,42 @@ void MuonAnalysis::deadTimeFileSelected()
   homeTabUpdatePlot();
 }
 
+
+/**
+ * Updates the enabled-state and value of Time Zero using "auto" check-box state.
+ * @param checkBoxState :: State of the "auto" check-box
+ */
+void MuonAnalysis::setTimeZeroState(int checkBoxState)
+{
+  if(checkBoxState == Qt::Checked) // From data file
+  {
+    m_uiForm.timeZeroFront->setEnabled(false);
+    m_uiForm.timeZeroFront->setText(QString::number(m_dataTimeZero, 'g', 2));
+    homeTabUpdatePlot(); // Auto-update
+  }
+  else // Custom
+  {
+    m_uiForm.timeZeroFront->setEnabled(true);
+  }
+}
+
+/**
+ * Updates the enabled-state and value of First Good Data using "auto" check-box state.
+ * @param checkBoxState :: State of the "auto" check-box
+ */
+void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
+{
+  if(checkBoxState == Qt::Checked) // From data file
+  {
+    m_uiForm.firstGoodBinFront->setEnabled(false);
+    m_uiForm.firstGoodBinFront->setText(QString::number(m_dataFirstGoodData, 'g', 2));
+    homeTabUpdatePlot(); // Auto-update
+  }
+  else // Custom
+  {
+    m_uiForm.firstGoodBinFront->setEnabled(true);
+  }
+}
 
 }//namespace MantidQT
 }//namespace CustomInterfaces
