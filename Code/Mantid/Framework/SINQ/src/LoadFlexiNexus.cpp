@@ -205,7 +205,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin)
 	// need to locate y-axis data too.....
 	std::vector<double> yData;
 	if((it = dictionary.find("y-axis")) == dictionary.end()){
-		yData.reserve(nSpectra);
+		yData.resize(nSpectra);
 		for(int i = 0; i < nSpectra; i++){
 			yData[i] = (double)i;
 		}
