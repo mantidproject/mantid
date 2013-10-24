@@ -2455,13 +2455,10 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, c
   int rowcount(loglines.count());
   Table* t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), 0);
   if( !t ) return;
-  //t->askOnCloseEvent(false);
-  //Have to replace "_" since the legend widget uses them to separate things
   QString label;
   label = logName;
   formatLogName(label, wsName);
 
-  //appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
   appWindow()->initTable(t, appWindow()->generateUniqueName(label + "-"));
   t->setColName(0, "Time");
   t->setColumnType(0, Table::Time);
@@ -2487,7 +2484,6 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, c
   //Show table
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
     (QMIN(10,rowcount)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
-  // t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
 }
