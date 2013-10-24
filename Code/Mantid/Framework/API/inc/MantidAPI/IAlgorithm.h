@@ -79,6 +79,16 @@ public:
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
 
+  /** @name Algorithms As Methods */
+  ///@{
+  /// Returns a name that will be used when attached as a workspace method. Empty string indicates do not attach
+  virtual const std::string workspaceMethodName() const = 0;
+  /// Returns a set of class names that will have the method attached. Empty list indicates all types
+  virtual const std::vector<std::string> workspaceMethodOn() const = 0;
+  /// Returns the name of the input workspace property used by the calling object
+  virtual const std::string workspaceMethodInputProperty() const = 0;
+  ///@}
+
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
   virtual AlgorithmID getAlgorithmID()const = 0;
 

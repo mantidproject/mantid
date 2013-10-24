@@ -83,7 +83,6 @@
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
-#include "CommandLineInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "TableStatistics.h"
 #include "Fit.h"
@@ -191,6 +190,7 @@
 #include "MantidQtAPI/Message.h"
 
 #include "MantidQtMantidWidgets/ICatSearch.h"
+#include "MantidQtMantidWidgets/ICatSearch2.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -500,11 +500,13 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  m_scriptInterpreter = new CommandLineInterpreter(*scriptingEnv(), m_interpreterDock);
   delete m_interpreterDock->widget();
-  m_interpreterDock->setWidget(m_scriptInterpreter);
   m_iface_script = NULL;
+  runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
   loadCustomActions();
+
+  // Nullify icatsearch
+  icatsearch = NULL;
 
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser")
@@ -512,8 +514,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     logWindow->show();
     g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
-
-  actionIPythonConsole->setVisible(testForIPython());
 
   // Need to show first time setup dialog?
   using Mantid::Kernel::ConfigServiceImpl;
@@ -1108,7 +1108,6 @@ void ApplicationWindow::initMainMenu()
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
   view->addAction(actionShowScriptInterpreter);
-  view->addAction(actionIPythonConsole);
   view->insertSeparator();
 
   mantidUI->addMenuItems(view);
@@ -1231,9 +1230,10 @@ void ApplicationWindow::initMainMenu()
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
   icat->addAction(actionICatLogin);//Login menu item
-  icat->addAction(actionMydataSearch);// my data search menu item
-  icat->addAction(actionICatSearch);//search menu item
-  icat->addAction(actionAdvancedSearch); //advanced search menu item
+//  icat->addAction(actionMydataSearch);// my data search menu item
+//  icat->addAction(actionICatSearch);//search menu item
+  icat->addAction(actionICatSearch2); // new ICAT GUI menu item
+//  icat->addAction(actionAdvancedSearch); //advanced search menu item
   icat->addAction(actionICatLogout);//logout menu item
   disableActions();
 }
@@ -5624,8 +5624,6 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/KeepAspect", d_keep_plot_aspect);
   settings.endGroup(); // ExportImage
 
-
-  if(m_scriptInterpreter ) m_scriptInterpreter->saveSettings();
   settings.beginGroup("/ScriptWindow");
   // Geometry is applied by the app window
   settings.setValue("/size", d_script_win_size);
@@ -8271,11 +8269,6 @@ void ApplicationWindow::copySelection()
     info->copy();
     return;
   }
-  else if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->copy();
-    return;
-  }
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -8375,12 +8368,6 @@ void ApplicationWindow::copyMarker()
 
 void ApplicationWindow::pasteSelection()
 {  
-  if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->paste();
-    return;
-  }
-
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -9483,6 +9470,13 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   mantidUI->shutdown();
 
+  if (icatsearch)
+  {
+    icatsearch->disconnect();
+    delete icatsearch;
+    icatsearch = NULL;
+  }
+
   if( scriptingWindow )
   {
     scriptingWindow->disconnect();
@@ -9504,7 +9498,6 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   //Save the settings and exit
   saveSettings();
-  m_scriptInterpreter->shutdown();
   scriptingEnv()->finalize();
 
   // Help window
@@ -13215,14 +13208,6 @@ void ApplicationWindow::createActions()
 #endif
   actionShowScriptInterpreter->setToggleAction(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
-
-  actionIPythonConsole = new QAction(getQPixmap("python_xpm"), tr("Launch IPython Console"), this);
-#ifdef __APPLE__
-  actionIPythonConsole->setShortcut(tr("Ctrl+5")); // F4 is used by the window manager on Mac
-#else
-  actionIPythonConsole->setShortcut(tr("F5"));
-#endif
-  connect(actionIPythonConsole, SIGNAL(activated()), this, SLOT(launchIPythonConsole()));
 #endif
 
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
@@ -13316,6 +13301,10 @@ void ApplicationWindow::createActions()
   actionICatLogin  = new QAction("Login",this);
   actionICatLogin->setToolTip(tr("Catalog Login"));
   connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
+
+  actionICatSearch2 = new QAction("Search",this);
+  actionICatSearch2->setToolTip(tr("Search data in archives."));
+  connect(actionICatSearch2, SIGNAL(activated()), this, SLOT(ICatSearch2()));
 
   actionICatSearch=new QAction("Basic Search",this);
   actionICatSearch->setToolTip(tr("Catalog Basic Search"));
@@ -16137,31 +16126,11 @@ void ApplicationWindow::showScriptInterpreter()
   { 
     m_interpreterDock->show();
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
-    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
-    m_scriptInterpreter->setFocus();
+    m_interpreterDock->setFocusProxy(m_interpreterDock->widget());
+    m_interpreterDock->setFocus();
     m_interpreterDock->activateWindow();
-     
   }
 
-}
-
-bool ApplicationWindow::testForIPython()
-{
-#ifdef _WIN32
-  // We have an issue with clashing MSVCR90 libraries on 32-bit windows. When this method
-  // is run at startup it raises a dialog box warning about an invalid load of the C runtime library.
-  // It seems to have picked up MSCRV90 from the CMake bin directory. Clicking OK allows
-  // Mantid to load and then running IPython seesm fine, also without CMake in the PATH it is okay.
-  // We will have to assume that this is always here on Windows.
-  return true;
-#else
-  return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
-#endif
-}
-
-void ApplicationWindow::launchIPythonConsole()
-{
-  runPythonScript("from ipython_plugin import MantidPlot_IPython\nMantidPlot_IPython().launch_console()",false, true,false);
 }
 
 /**
@@ -16206,7 +16175,7 @@ ApplicationWindow::~ApplicationWindow()
   delete hiddenWindows;
   delete scriptingWindow;
   delete d_text_editor;
-
+  delete icatsearch;
   while(!d_user_menus.isEmpty())
   {
     QMenu *menu = d_user_menus.takeLast();
@@ -17339,6 +17308,21 @@ void ApplicationWindow::panOnPlot()
 void ApplicationWindow::ICatLogin()
 {
   mantidUI->executeAlgorithm("CatalogLogin",1);
+}
+
+void ApplicationWindow::ICatSearch2()
+{
+  if ( icatsearch == NULL || icatsearch)
+  {
+    // Only one ICAT GUI will appear, and that the previous one will be overridden.
+    // E.g. if a user opens the ICAT GUI without being logged into ICAT they will need to
+    // login in and then click "Search" again.
+    delete icatsearch;
+    icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
+
+    icatsearch->show();
+    icatsearch->raise();
+  }
 }
 
 void ApplicationWindow::ICatIsisSearch()

@@ -18,8 +18,8 @@ from PyQt4.QtGui import QFont
 from mantid.simpleapi import *  # New API
 from mantidplot import *
 # import qti as qti
-from quick import *
-from combineMulti import *
+from isis_reflectometry.quick import *
+from isis_reflectometry.combineMulti import *
 from mantid.api import WorkspaceGroup
 
 currentTable = ' '
@@ -413,11 +413,12 @@ class Ui_MainWindow(object):
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
         self.menuFile = QtGui.QMenu(self.menuBar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
+        
         MainWindow.setMenuBar(self.menuBar)
         self.statusBar = QtGui.QStatusBar(MainWindow)
         self.statusBar.setObjectName(_fromUtf8("statusBar"))
         MainWindow.setStatusBar(self.statusBar)
-
+        
         self.actionInter = QtGui.QAction(MainWindow)
         self.actionInter.setObjectName(_fromUtf8("actionInter"))
         self.actionSURF = QtGui.QAction(MainWindow)
@@ -432,6 +433,7 @@ class Ui_MainWindow(object):
         self.actionSave_table.setObjectName(_fromUtf8("actionSave_table"))
         self.actionSave_table.setShortcut('Ctrl+S')
         self.actionLoad_table = QtGui.QAction(MainWindow)
+        
         self.actionLoad_table.setObjectName(_fromUtf8("actionLoad_table"))
         self.actionLoad_table.setShortcut('Ctrl+O')
         self.actionReLoad_table = QtGui.QAction(MainWindow)
@@ -445,6 +447,11 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionReLoad_table)
         self.menuFile.addAction(self.actionSaveDialog)
         self.menuBar.addAction(self.menuFile.menuAction())
+        
+        self.helpMenu = self.menuBar.addMenu("&Help")
+        self.actionHelp_page = QtGui.QAction("Mantid Help", MainWindow)
+        self.actionHelp_page.setShortcut('Ctrl+H')
+        self.helpMenu.addAction(self.actionHelp_page)
 
 
         self.retranslateUi(MainWindow)
@@ -462,6 +469,7 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.actionLoad_table, QtCore.SIGNAL(_fromUtf8("triggered()")), self.loadDialog)
         QtCore.QObject.connect(self.actionReLoad_table, QtCore.SIGNAL(_fromUtf8("triggered()")), self.ReloadDialog)
         QtCore.QObject.connect(self.actionSaveDialog, QtCore.SIGNAL(_fromUtf8("triggered()")), self.saveWksp)
+        QtCore.QObject.connect(self.actionHelp_page, QtCore.SIGNAL(_fromUtf8("triggered()")), self.showHelp)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -608,6 +616,10 @@ class Ui_MainWindow(object):
             else:
                 self.tableWidget.cellWidget(row, 17).setCheckState(False)
             # self.tableWidget.setCellWidget(row, 17, item)
+
+    def showHelp(self):
+        import webbrowser
+        webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
 #--------- If "Process" button pressed, convert raw files to IvsLam and IvsQ and combine if checkbox ticked -------------
     def buttonClickHandler1(self):

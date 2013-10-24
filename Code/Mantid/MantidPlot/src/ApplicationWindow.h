@@ -121,7 +121,6 @@ namespace MantidQt
 //Mantid
 class MantidUI;
 class ScriptingWindow;
-class CommandLineInterpreter;
 
 /**
 * \brief QtiPlot's main window.
@@ -748,8 +747,6 @@ public slots:
   void showScriptWindow(bool forceVisible = false, bool quitting = false);
   void saveScriptWindowGeometry();
   void showScriptInterpreter();
-  bool testForIPython();
-  void launchIPythonConsole();
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
@@ -1173,6 +1170,8 @@ private:
   void ICatLogin();
   /// Handler for ICat search menu
   void ICatIsisSearch();
+  /// Handler for NEW ICat search GUI (ICatSearch2)
+  void ICatSearch2();
   /// Handler for ICatMyData serch menu
   void ICatMyDataSearch();
   // Handler for ICat CatalogLogout
@@ -1345,6 +1344,8 @@ public:
   //! The scripting language to use for new projects.
   QString defaultScriptingLang;
 
+  QDockWidget *m_interpreterDock;
+
 private:
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow* getActiveWindow() const;
@@ -1381,8 +1382,6 @@ private:
   QTranslator *appTranslator, *qtTranslator;
   QDockWidget *explorerWindow, *undoStackWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
-  QDockWidget *m_interpreterDock;
-  CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
 
   QToolBar *standardTools, *plotTools, *displayBar;
@@ -1390,6 +1389,8 @@ private:
   QToolButton *btnResults;
   QWidgetList *hiddenWindows;
   QLineEdit *info;
+
+  QWidget* icatsearch;
 
   QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
@@ -1405,7 +1406,7 @@ private:
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
+  QAction *actionICatLogin,*actionICatSearch,*actionICatSearch2,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
@@ -1449,7 +1450,7 @@ private:
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;
-  QAction *actionShowScriptWindow, *actionShowScriptInterpreter, *actionIPythonConsole;
+  QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
   QAction *btnCursor, /* *btnSelect,*/ *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
