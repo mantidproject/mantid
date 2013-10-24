@@ -24,9 +24,6 @@ namespace CustomInterfaces
 namespace Muon
 {
 
-  /// Add Greek letter to label from code 
-  void createMicroSecondsLabels(Ui::MuonAnalysis& m_uiForm);
-
 }
 }
 }

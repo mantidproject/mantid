@@ -2,7 +2,6 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
-#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
@@ -122,7 +121,6 @@ void MuonAnalysis::initLayout()
 
   // Further set initial look
   startUpLook();
-  createMicroSecondsLabels(m_uiForm);
   m_uiForm.mwRunFiles->readSettings(m_settingsGroup + "mwRunFilesBrowse");
 
   connect(m_uiForm.previousRun, SIGNAL(clicked()), this, SLOT(checkAppendingPreviousRun()));
@@ -3378,11 +3376,10 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
 
+  changeDeadTimeType(deadTimeTypeIndex);
+
   QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
   m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
-
-  if (deadTimeTypeIndex != 2)
-    m_uiForm.mwRunDeadTimeFile->setVisible(false);
 }
 
 
@@ -3877,12 +3874,14 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
+    m_uiForm.dtcFileLabel->setVisible(false);
     homeTabUpdatePlot();
   }
   else // choice must be from workspace
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
     m_uiForm.mwRunDeadTimeFile->setUserInput("");
+    m_uiForm.dtcFileLabel->setVisible(true);
   }
 
   QSettings group;
