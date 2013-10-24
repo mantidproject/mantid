@@ -224,6 +224,14 @@ def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.Volu
     workspace_names = __getWorkspaceNames(source)
     if len(workspace_names) == 0:
         raise ValueError("No workspace names given to plot")
+    for name in workspace_names:
+        if not mantid.api.mtd.doesExist(name):
+            raise ValueError("%s does not exist in the workspace list" % name)
+        if not isinstance(mantid.api.mtd[name], mantid.api.IMDWorkspace):
+            raise ValueError("%s is not an IMDWorkspace" % name)
+        non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
+        if not len(non_integrated_dims) == 1:
+            raise ValueError("%s must have a single non-integrated dimension in order to be rendered via plotMD" % name)
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization, error_bars))
     return graph
 
