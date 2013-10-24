@@ -197,10 +197,10 @@ private slots:
   void deadTimeFileSelected();
 
   /// Updates the enabled-state and value of Time Zero using "auto" check-box state
-  void setTimeZeroState(int checkBoxState);
+  void setTimeZeroState(int checkBoxState = -1);
 
   /// Updates the enabled-state and value of First Good Data using "auto" check-box state
-  void setFirstGoodDataState(int checkBoxState);
+  void setFirstGoodDataState(int checkBoxState = -1);
 
 
 private:

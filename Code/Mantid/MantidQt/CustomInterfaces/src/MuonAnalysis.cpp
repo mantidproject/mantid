@@ -200,6 +200,10 @@ void MuonAnalysis::initLayout()
   // Input check for First Good Data
   connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this,
     SLOT(runFirstGoodBinFront()));
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this, SLOT(runFirstGoodBinFront()));
+
+  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this, SLOT(setTimeZeroState(int)));
+  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this, SLOT(setFirstGoodDataState(int)));
 
   // load previous saved values
   loadAutoSavedValues(m_settingsGroup);
@@ -216,10 +220,7 @@ void MuonAnalysis::initLayout()
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
-
-  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this, SLOT(setTimeZeroState(int)));
-  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this, SLOT(setFirstGoodDataState(int)));
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );  
 }
 
 /**
@@ -1199,6 +1200,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     str << " to muon polarisation";
     m_uiForm.instrumentDescription->setText(str.str().c_str());
 
+    // Save loaded values
+    m_dataTimeZero = timeZero;
+    m_dataFirstGoodData = firstGoodData - timeZero;
+
     if(instrumentChanged)
     {
       // When instrument changes we use information from data no matter what user has chosen before
@@ -1206,14 +1211,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       m_uiForm.firstGoodDataAuto->setCheckState(Qt::Checked);
     }
 
-    m_dataTimeZero = timeZero;
-    m_dataFirstGoodData = firstGoodData - timeZero;
-
-    if(m_uiForm.timeZeroAuto->isChecked())
-      m_uiForm.timeZeroFront->setText(QString::number(m_dataTimeZero, 'g', 2));
-
-    if(m_uiForm.firstGoodDataAuto->isChecked())
-      m_uiForm.firstGoodBinFront->setText(QString::number(m_dataFirstGoodData, 'g', 2));
+    // Update boxes, as values have been changed
+    setTimeZeroState();
+    setFirstGoodDataState();
 
     std::string infoStr("");
     
@@ -3922,10 +3922,13 @@ void MuonAnalysis::deadTimeFileSelected()
 
 /**
  * Updates the enabled-state and value of Time Zero using "auto" check-box state.
- * @param checkBoxState :: State of the "auto" check-box
+ * @param checkBoxState :: State of "auto" check-box. If -1 will retrieve it from the form
  */
 void MuonAnalysis::setTimeZeroState(int checkBoxState)
 {
+  if(checkBoxState == -1)
+    checkBoxState = m_uiForm.timeZeroAuto->checkState();
+
   if(checkBoxState == Qt::Checked) // From data file
   {
     m_uiForm.timeZeroFront->setEnabled(false);
@@ -3940,10 +3943,13 @@ void MuonAnalysis::setTimeZeroState(int checkBoxState)
 
 /**
  * Updates the enabled-state and value of First Good Data using "auto" check-box state.
- * @param checkBoxState :: State of the "auto" check-box
+ * @param checkBoxState :: State of "auto" check-box. If -1 will retrieve it from the form
  */
 void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
 {
+  if(checkBoxState == -1)
+    checkBoxState = m_uiForm.firstGoodDataAuto->checkState();
+
   if(checkBoxState == Qt::Checked) // From data file
   {
     m_uiForm.firstGoodBinFront->setEnabled(false);
