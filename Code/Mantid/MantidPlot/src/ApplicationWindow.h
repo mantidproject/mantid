@@ -1132,6 +1132,7 @@ private:
   void tableMenuAboutToShow();
   void windowsMenuAboutToShow();
   void windowsMenuActivated( int id );
+  void interfaceMenuAboutToShow();
 
   //! \name Font Format Functions
   //@{
@@ -1150,6 +1151,7 @@ private:
   //@}
 
   void showCustomActionDialog();
+  void showInterfaceCategoriesDialog();
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
 
@@ -1329,8 +1331,6 @@ public:
   QStringList renamedTables;
   // List of removed interfaces
   QStringList removed_interfaces;
-  // Map PyQt interfaces that are to be added to the Interfaces menu to their respective categories.
-  QMap<QString, QSet<QString>> m_pyQtInterfaceToCategoriesMap;
 
   //! \name variables used when user copy/paste markers
   //@{
@@ -1345,7 +1345,18 @@ public:
   //! The scripting language to use for new projects.
   QString defaultScriptingLang;
 
+  QSet<QString> allCategories() const { return m_allCategories; }
+
 private:
+  // A collection of the names of each interface as they appear in the menu and also "data"
+  // relating to how each interface can be opened.  Elsewhere, the data is expected to be a
+  // python file name, or else just the name of the interface as known to the InterfaceManager.
+  QList<QPair<QString, QString>> m_interfaceNameDataPairs;
+  // Keeping track of all unique categories.
+  QSet<QString> m_allCategories;
+  // Map interfaces to their categories.
+  QMap<QString, QSet<QString>> m_interfaceCategories;
+
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow* getActiveWindow() const;
   void setActiveWindow(MdiSubWindow* w);

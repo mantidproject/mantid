@@ -166,6 +166,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InputHistory.cpp
                    src/Mantid/LoadDAEDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
+                   src/Mantid/ManageInterfaceCategories.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
                    src/Mantid/MantidCurve.cpp
@@ -396,6 +397,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InputHistory.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
+                   src/Mantid/ManageInterfaceCategories.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
                    src/Mantid/MantidCurve.h
@@ -663,6 +665,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
                        src/Mantid/ManageCustomMenus.h
+                       src/Mantid/ManageInterfaceCategories.h
                        src/Mantid/MantidAbout.h
                        src/Mantid/MantidApplication.h
                        src/Mantid/MantidCurve.h
@@ -711,6 +714,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/RemoveErrorsDialog.ui
                src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
+               src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
 )
 
