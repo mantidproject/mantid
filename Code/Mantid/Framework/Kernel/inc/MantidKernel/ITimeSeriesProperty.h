@@ -44,6 +44,8 @@ public:
   virtual int realSize() const = 0;
   /// Deletes the series of values in the property
   virtual void clear() = 0;
+  /// Deletes all but the 'last entry' in the property
+  virtual void clearOutdated() = 0;
 
   /// Virtual destructor
   virtual ~ITimeSeriesProperty() {}

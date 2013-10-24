@@ -1090,14 +1090,6 @@ namespace Mantid
           filelocation=*response.return_->location;
         }
       }
-      std::basic_string <char>::iterator iter;
-      for(iter=filelocation.begin();iter!=filelocation.end();++iter)
-      {
-        if((*iter)=='\\')
-        {
-          (*iter)='/';
-        }
-      }
     }
 
 

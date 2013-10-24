@@ -115,6 +115,41 @@
       </xs:element>
     </xs:choice>
   </xs:complexType>
+
+  <!-- Use complexContent and extension to expand the existing parameters. -->
+  <xs:complexType name="cuboid-parameters">
+    <xs:complexContent>
+      <xs:extension base="point-parameters">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name ="height">
+            <xs:complexType>
+              <xs:attribute name="val"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name ="width">
+            <xs:complexType>
+              <xs:attribute name="val"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name ="depth">
+            <xs:complexType>
+              <xs:attribute name="val"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name ="centre">
+            <xs:complexType>
+              <xs:attributeGroup ref="cartesian"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name ="axis">
+            <xs:complexType>
+              <xs:attributeGroup ref="cartesian"/>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   
   <!-- Define <parameter> Type-->
   <xs:complexType name="parameterType">
@@ -479,7 +514,7 @@
                   <xs:element name="cuboid">
                     <xs:complexType>
                       <xs:complexContent>
-                        <xs:extension base="point-parameters">
+                        <xs:extension base="cuboid-parameters">
                           <xs:attribute name ="id"/>
                         </xs:extension>
                       </xs:complexContent>

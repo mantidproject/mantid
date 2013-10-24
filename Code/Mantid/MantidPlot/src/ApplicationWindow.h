@@ -121,7 +121,6 @@ namespace MantidQt
 //Mantid
 class MantidUI;
 class ScriptingWindow;
-class CommandLineInterpreter;
 
 /**
 * \brief QtiPlot's main window.
@@ -748,8 +747,6 @@ public slots:
   void showScriptWindow(bool forceVisible = false, bool quitting = false);
   void saveScriptWindowGeometry();
   void showScriptInterpreter();
-  bool testForIPython();
-  void launchIPythonConsole();
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
@@ -1345,6 +1342,8 @@ public:
   //! The scripting language to use for new projects.
   QString defaultScriptingLang;
 
+  QDockWidget *m_interpreterDock;
+
 private:
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow* getActiveWindow() const;
@@ -1381,8 +1380,6 @@ private:
   QTranslator *appTranslator, *qtTranslator;
   QDockWidget *explorerWindow, *undoStackWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
-  QDockWidget *m_interpreterDock;
-  CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
 
   QToolBar *standardTools, *plotTools, *displayBar;
@@ -1449,7 +1446,7 @@ private:
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;
-  QAction *actionShowScriptWindow, *actionShowScriptInterpreter, *actionIPythonConsole;
+  QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
   QAction *btnCursor, /* *btnSelect,*/ *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;

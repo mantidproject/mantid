@@ -352,10 +352,21 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         ename = first[:-1]
     else:
         ename = first+'to_'+last
+    
     elfWS = ename+'_elf'    # interchange Q & T
+
+    #check if temp was increasing of decreasing
+    if(datTx[0] > datTx[-1]):
+        # if so reverse data to follow natural ordering
+    	datTx = datTx[::-1]
+        datTy = datTy[::-1]
+        datTe = datTe[::-1]
+    
     CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
         Nspec=nQ, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=q1)
     DeleteWorkspace('__elf')
+    label = unit[0]+' / '+unit[1]
+    AddSampleLog(Workspace=elfWS, LogName="Vaxis", LogType="String", LogText=label)
     e1WS = ename+'_eq1'
     CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
         Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
@@ -365,6 +376,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
         Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
     AddSampleLog(Workspace=e2WS, LogName="Vaxis", LogType="String", LogText=label)
+
     if unit[0] == 'Temperature':
         nT = len(Tvalue)
         if Tvalue[0] < Tvalue[nT-1]:
@@ -381,6 +393,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
             Scale(InputWorkspace=e1WS, OutputWorkspace=e1WS, Factor=normFactor, Operation='Multiply')
             AddSampleLog(Workspace=e1WS, LogName="Temperature value", LogType="Number", LogText=str(Tvalue[0]))
             if Verbose:
+                text = 'Temperature range : '+str(Tvalue[lo])+' to '+str(Tvalue[hi])
                 logger.notice(text)
                 logger.notice('Normalised eq1 by scale factor : '+str(normFactor))
 
@@ -401,15 +414,19 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         e1_path = os.path.join(workdir, e1WS+'.nxs')					# path name for nxs file
         e2_path = os.path.join(workdir, e2WS+'.nxs')					# path name for nxs file
         elf_path = os.path.join(workdir, elfWS+'.nxs')					# path name for nxs file
+
         if Verbose:
             logger.notice('Creating file : '+e1_path)
             logger.notice('Creating file : '+e2_path)
             logger.notice('Creating file : '+elf_path)
+
         SaveNexusProcessed(InputWorkspace=e1WS, Filename=e1_path)
         SaveNexusProcessed(InputWorkspace=e2WS, Filename=e2_path)
         SaveNexusProcessed(InputWorkspace=elfWS, Filename=elf_path)
+
     if Plot:
         elwinPlot(e1WS,e2WS,elfWS)
+
     EndTime('Elwin')
     return e1WS,e2WS
 

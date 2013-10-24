@@ -18,7 +18,11 @@ set ( SRC_FILES
 	src/IndirectBayesTab.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
-	src/JumpFit.cpp
+  src/IndirectLoadAscii.cpp
+  src/IndirectLoadAsciiTab.cpp
+  src/IndirectNeutron.cpp
+  src/IndirectMolDyn.cpp
+  src/JumpFit.cpp
     src/MSDFit.cpp
 	src/MuonAnalysis.cpp
 	src/MuonAnalysisFitDataTab.cpp
@@ -57,7 +61,7 @@ set ( INC_FILES
     inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
     inc/MantidQtCustomInterfaces/DllConfig.h
     inc/MantidQtCustomInterfaces/Elwin.h
-	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h	
+	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
     inc/MantidQtCustomInterfaces/Fury.h
     inc/MantidQtCustomInterfaces/FuryFit.h
 	inc/MantidQtCustomInterfaces/Homer.h
@@ -68,7 +72,11 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
-	inc/MantidQtCustomInterfaces/JumpFit.h
+  inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
+  inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
+  inc/MantidQtCustomInterfaces/IndirectNeutron.h
+  inc/MantidQtCustomInterfaces/IndirectMolDyn.h
+  inc/MantidQtCustomInterfaces/JumpFit.h
     inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
@@ -115,6 +123,10 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 								inc/MantidQtCustomInterfaces/IndirectBayesTab.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+                inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
+                inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
+                inc/MantidQtCustomInterfaces/IndirectNeutron.h
+                inc/MantidQtCustomInterfaces/IndirectMolDyn.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
@@ -139,6 +151,9 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
+               inc/MantidQtCustomInterfaces/IndirectLoadAscii.ui
+               inc/MantidQtCustomInterfaces/IndirectNeutron.ui
+               inc/MantidQtCustomInterfaces/IndirectMolDyn.ui
                inc/MantidQtCustomInterfaces/JumpFit.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
@@ -155,6 +170,7 @@ set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 WorkspaceMementoTest.h
                 WorkspaceInADSTest.h
                 RawFileMementoTest.h
+                IO_MuonGroupingTest.h
 )
 
 include_directories ( inc )

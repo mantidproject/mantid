@@ -1126,6 +1126,12 @@ public:
 
   MDIWindowList windowsList() /PyName=windows/;
 
+  // Required for setting the IPython console
+  QDockWidget _getInterpreterDock();
+%MethodCode
+  sipRes = sipCpp->m_interpreterDock;
+%End
+
   // folders
   Folder *activeFolder();
 %MethodCode
