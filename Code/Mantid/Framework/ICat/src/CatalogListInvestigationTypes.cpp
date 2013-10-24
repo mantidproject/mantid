@@ -59,7 +59,7 @@ namespace Mantid
       {
         catalog_sptr->listInvestigationTypes(investTypes);
       }
-      catch(std::runtime_error& e)
+      catch(std::runtime_error&)
       {
         setProperty("IsValid",false);
         throw std::runtime_error("Please login to the information catalog using the login dialog provided.");

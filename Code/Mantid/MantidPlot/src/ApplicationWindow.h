@@ -1170,6 +1170,8 @@ private:
   void ICatLogin();
   /// Handler for ICat search menu
   void ICatIsisSearch();
+  /// Handler for NEW ICat search GUI (ICatSearch2)
+  void ICatSearch2();
   /// Handler for ICatMyData serch menu
   void ICatMyDataSearch();
   // Handler for ICat CatalogLogout
@@ -1388,6 +1390,8 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
+  QWidget* icatsearch;
+
   QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
@@ -1402,7 +1406,7 @@ private:
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
+  QAction *actionICatLogin,*actionICatSearch,*actionICatSearch2,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
