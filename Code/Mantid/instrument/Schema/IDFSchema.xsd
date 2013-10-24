@@ -116,6 +116,39 @@
     </xs:choice>
   </xs:complexType>
 
+  <!-- Tapered Guide Parameters -->
+  <xs:complexType name="tapered-guide-parameters">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="axis">
+        <xs:complexType>
+          <xs:attributeGroup ref="cartesian"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="centre">
+        <xs:complexType>
+          <xs:attributeGroup ref="cartesian"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="aperture-start">
+        <xs:complexType>
+          <xs:attribute name="height"/>
+          <xs:attribute name="width"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="aperture-end">
+        <xs:complexType>
+          <xs:attribute name="height"/>
+          <xs:attribute name="width"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="length">
+        <xs:complexType>
+          <xs:attribute name="val"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+    
   <!-- Use complexContent and extension to expand the existing parameters. -->
   <xs:complexType name="cuboid-parameters">
     <xs:complexContent>
@@ -524,6 +557,15 @@
                     <xs:complexType>
                       <xs:complexContent>
                         <xs:extension base="point-parameters">
+                          <xs:attribute name ="id"/>
+                        </xs:extension>
+                      </xs:complexContent>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="tapered-guide">
+                    <xs:complexType>
+                      <xs:complexContent>
+                        <xs:extension base="tapered-guide-parameters">
                           <xs:attribute name ="id"/>
                         </xs:extension>
                       </xs:complexContent>
