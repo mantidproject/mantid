@@ -332,7 +332,7 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
-      outputws->addColumn("str","Investigation id");
+      outputws->addColumn("long64","Investigation id");
       outputws->addColumn("str","Title");
       outputws->addColumn("str","Instrument");
       outputws->addColumn("str","Run range");
@@ -352,7 +352,7 @@ namespace Mantid
           {
             API::TableRow table = outputws->appendRow();
             // Now add the relevant investigation data to the table.
-            savetoTableWorkspace(investigation->name, table);
+            savetoTableWorkspace(investigation->id, table);
             savetoTableWorkspace(investigation->title, table);
             savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
             // Verify that the run parameters vector exist prior to doing anything.
@@ -470,18 +470,8 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::ostringstream temp;
-      temp << investigationId;
-      std::string name = temp.str();
-
-      std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + name + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + boost::lexical_cast<std::string>(investigationId) + "']";
       request.query     = &query;
-
-      // If the investigation name is not valid.
-      if(name == "0" || name.empty())
-      {
-        throw std::runtime_error("Invalid investigation ID supplied.");
-      }
 
       int result = icat.search(&request, &response);
 
