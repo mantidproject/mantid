@@ -516,7 +516,7 @@ void ScaleDetails::radiosSwitched()
     m_dspnStep->setEnabled(true);
     m_spnMajorValue->setEnabled(false);
   }
-  else if (m_radStep->isChecked())
+  else if (m_radMajor->isChecked())
   {
     m_dspnStep->setEnabled(false);
     m_spnMajorValue->setEnabled(true);

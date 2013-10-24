@@ -31,7 +31,7 @@ GridDetails::GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QW
   m_graph = graph;
   m_initialised = false;
   m_alignment = alignment;
-  if (m_alignment != 0 || m_alignment != 1)
+  if (m_alignment != 0 && m_alignment != 1)
   {
     m_alignment = 0;
   }
