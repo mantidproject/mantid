@@ -26,7 +26,7 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    //DECLARE_ALGORITHM(SaveAscii2)
+    DECLARE_ALGORITHM(SaveAscii2)
 
     /// Sets documentation strings for this algorithm
     void SaveAscii2::initDocs()

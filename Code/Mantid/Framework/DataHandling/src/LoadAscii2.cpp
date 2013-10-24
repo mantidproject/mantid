@@ -47,7 +47,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    //DECLARE_FILELOADER_ALGORITHM(LoadAscii2);
+    DECLARE_FILELOADER_ALGORITHM(LoadAscii2);
 
     /// Sets documentation strings for this algorithm
     void LoadAscii2::initDocs()
@@ -254,9 +254,11 @@ namespace Mantid
       {
         if (!line.empty())
         {
-          if (std::isdigit(line.at(0)))
+        std::string templine = line;
+          boost::trim(templine);
+          if (std::isdigit(templine.at(0)))
           {
-            const int cols = splitIntoColumns(columns, line);
+            const int cols = splitIntoColumns(columns, templine);
             //we might have the first set of values but there can't be more than 3 commas if it is
             //int values = std::count(line.begin(), line.end(), ',');
             if (cols > 4 || cols < 1)
