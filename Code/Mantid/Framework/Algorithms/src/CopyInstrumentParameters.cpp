@@ -107,7 +107,7 @@ void CopyInstrumentParameters::checkProperties()
   // Check that both workspaces have the same instrument name
   if( baseInstRec != baseInstGiv )
   {
-      throw std::invalid_argument("The base instrument in the output workspace is not the same as the base instrument in the input workspace.");
+    g_log.warning() << "The base instrument in the output workspace is not the same as the base instrument in the input workspace."<< std::endl;
   }
 
 }
