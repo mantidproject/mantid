@@ -101,7 +101,7 @@ public:
 		MantidVec& X = data->dataX(0);
 		MantidVec& Y = data->dataY(0);
 		double dSum = .0;
-		for(int i = 0; i < Y.size(); i++){
+		for(size_t i = 0; i < Y.size(); i++){
 		  dSum += Y[i];
 		} 
 		TS_ASSERT_EQUALS(dSum,198812);
