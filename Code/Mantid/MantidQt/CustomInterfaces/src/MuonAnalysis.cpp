@@ -216,6 +216,8 @@ void MuonAnalysis::initLayout()
 
   connectAutoUpdate();
 
+  connectAutoSave();
+
   // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
@@ -3390,6 +3392,12 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
   m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
+
+  // Load values saved using saveWidgetValue()
+  loadWidgetValue(m_uiForm.timeZeroFront, 0.2);
+  loadWidgetValue(m_uiForm.firstGoodBinFront, 0.3);
+  loadWidgetValue(m_uiForm.timeZeroAuto, Qt::Checked);
+  loadWidgetValue(m_uiForm.firstGoodDataAuto, Qt::Checked);
 }
 
 
@@ -3718,6 +3726,82 @@ void MuonAnalysis::connectAutoUpdate()
 
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
   connect(m_optionTab, SIGNAL(plotStyleChanged()), this, SLOT(updateCurrentPlotStyle()));
+}
+
+/**
+ * Connect widgets to saveWidgetValue() slot so their values are automatically saved when they are
+ * getting changed.
+ */
+void MuonAnalysis::connectAutoSave()
+{
+  connect(m_uiForm.timeZeroFront, SIGNAL(textChanged(const QString&)), this, SLOT(saveWidgetValue()));
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)), this, SLOT(saveWidgetValue()));
+
+  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this, SLOT(saveWidgetValue()));
+  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this, SLOT(saveWidgetValue()));
+}
+
+/**
+ * Saves the value of the widget which called the slot.
+ */
+void MuonAnalysis::saveWidgetValue()
+{
+  // Get the widget which called the slot
+  QWidget* sender = qobject_cast<QWidget*>(QObject::sender());
+
+  if(!sender)
+    throw std::runtime_error("Unable to save value of non-widget QObject");
+
+  QString name = sender->objectName();
+
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup + "SavedWidgetValues");
+
+  // Save value for QLineEdit
+  if(QLineEdit* w = qobject_cast<QLineEdit*>(sender))
+  {
+    settings.setValue(name, w->text());
+  }
+  // Save value for QCheckBox
+  else if(QCheckBox* w = qobject_cast<QCheckBox*>(sender))
+  {
+    settings.setValue(name, static_cast<int>(w->checkState()));
+  }
+  // ... add more as neccessary
+  else
+    throw std::runtime_error("Value saving for this widget type is not supported");
+
+  settings.endGroup();
+}
+
+/**
+ * Load previously saved value for the widget.
+ * @param       target :: Widget where the value will be loaded to
+ * @param defaultValue :: Values which will be set if there is no saved value
+ */
+void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue)
+{
+  QString name = target->objectName();
+
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup + "SavedWidgetValues");
+
+
+  // Load value for QLineEdit
+  if(QLineEdit* w = qobject_cast<QLineEdit*>(target))
+  {
+    w->setText(settings.value(name, defaultValue).toString());
+  }
+  // Load value for QCheckBox
+  else if(QCheckBox* w = qobject_cast<QCheckBox*>(target))
+  {
+    w->setCheckState(static_cast<Qt::CheckState>(settings.value(name, defaultValue).toInt()));
+  }
+  // ... add more as neccessary
+  else
+    throw std::runtime_error("Value loading for this widget type is not supported");
+
+  settings.endGroup();
 }
 
 void MuonAnalysis::changeHomeFunction()

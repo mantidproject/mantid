@@ -202,6 +202,9 @@ private slots:
   /// Updates the enabled-state and value of First Good Data using "auto" check-box state
   void setFirstGoodDataState(int checkBoxState = -1);
 
+  /// Saves the value of the widget which called the slot
+  void saveWidgetValue();
+
 
 private:
   /// Initialize local Python environment
@@ -443,6 +446,12 @@ private:
 
   /// Setup the signals for updating
   void connectAutoUpdate();
+
+  /// Setup connects for saving values using QSettings
+  void connectAutoSave();
+
+  /// Saves the value of the widget which called the slot
+  void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
 
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
