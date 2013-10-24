@@ -48,18 +48,21 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogDownloadDataFiles::initDocs()
     {
-      this->setWikiSummary("Obtains a list of file paths to the data files the user wants to download from the archives, or has downloaded and saved locally.");
+      this->setWikiSummary("Downloads the given data files from the data server ");
+      this->setOptionalMessage("Downloads the given data files from the data server");
     }
+
 
     /// declaring algorithm properties
     void CatalogDownloadDataFiles::init()
     {
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
       declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
-      declareProperty(new ArrayProperty<std::string>("Filelocations",std::vector<std::string>(),
+      declareProperty("DownloadPath","", "The path to save the files to download to.");
+      declareProperty(new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(), 
                                                      boost::make_shared<NullValidator>(),
                                                      Direction::Output),
-                      "A list of file locations to the ICAT datafiles.");
+                      "A list of file locations to the catalog datafiles.");
     }
 
     /// Raise an error concerning catalog searching
@@ -127,7 +130,7 @@ namespace Mantid
         std::ifstream hasAccessToArchives(fileLocation.c_str());
         if(hasAccessToArchives)
         {
-          g_log.information() << "File (" << *fileName << ") located in archives." << std::endl;
+          g_log.information() << "File (" << *fileName << ") located in archives (" << fileLocation << ")." << std::endl;
 
           fileLocations.push_back(fileLocation);
         }
@@ -143,7 +146,6 @@ namespace Mantid
 
           progress(prog,"downloading over internet...");
 
-          // Download file from the data server to the machine where Mantid is installed
           std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*fileName);
 
           fileLocations.push_back(fullPathDownloadedFile);
@@ -183,6 +185,7 @@ namespace Mantid
         std::string newURL = URL; // Need to convert to none const to perform replacement.
         boost::replace_first(newURL, "https", "http");
         URI uri(newURL);
+
         std::string path(uri.getPathAndQuery());
         if (path.empty())
         {
@@ -224,8 +227,9 @@ namespace Mantid
      */
     std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream& rs,const std::string& fileName)
     {
-      Poco::Path defaultSaveDir(Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-      Poco::Path path(defaultSaveDir, fileName);
+      std::string downloadPath = getProperty("DownloadPath");
+      Poco::Path defaultSaveDir(downloadPath);
+      Poco::Path path(downloadPath, fileName);
       std::string filepath = path.toString();
 
       std::ios_base::openmode mode = isBinary(rs) ? std::ios_base::binary : std::ios_base::out;
