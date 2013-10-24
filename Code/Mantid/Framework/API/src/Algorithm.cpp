@@ -36,6 +36,12 @@ namespace Mantid
 {
   namespace API
   {
+    namespace
+    {
+      /// Separator for workspace types in workspaceMethodOnTypes member
+      const std::string WORKSPACE_TYPES_SEPARATOR = ";";
+    }
+
     // Doxygen can't handle member specialization at the moment: https://bugzilla.gnome.org/show_bug.cgi?id=406027
     // so we have to ignore them
     ///@cond
@@ -213,7 +219,7 @@ namespace Mantid
       Poco::StringTokenizer tokenizer(category(), categorySeparator(),
           Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
       Poco::StringTokenizer::Iterator h = tokenizer.begin();
-
+      
       for (; h != tokenizer.end(); ++h)
       {
         res.push_back(*h);
@@ -225,6 +231,40 @@ namespace Mantid
         res.push_back("Deprecated");
       }
       return res;
+    }
+
+    /**
+     * @return A string giving the method name that should be attached to a workspace
+     */
+    const std::string Algorithm::workspaceMethodName() const
+    {
+      return "";
+    }
+
+    /**
+     *
+     * @return A list of workspace class names that should have the workspaceMethodName attached
+     */
+    const std::vector<std::string> Algorithm::workspaceMethodOn() const
+    {
+      Poco::StringTokenizer tokenizer(this->workspaceMethodOnTypes(), WORKSPACE_TYPES_SEPARATOR,
+                                      Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+      std::vector<std::string> res;
+      res.reserve(tokenizer.count());
+      for( auto iter = tokenizer.begin(); iter != tokenizer.end(); ++iter )
+      {
+        res.push_back(*iter);
+      }      
+
+      return res;
+    }
+
+    /**
+     * @return The name of the property that the calling object will be passed to.
+     */
+    const std::string Algorithm::workspaceMethodInputProperty() const
+    {
+      return "";
     }
 
 

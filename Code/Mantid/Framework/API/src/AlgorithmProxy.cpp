@@ -184,6 +184,33 @@ namespace Mantid
     }
 
     /**
+     * @return A string giving the method name that should be attached to a workspace
+     */
+    const std::string AlgorithmProxy::workspaceMethodName() const
+    {
+      if(m_alg) return m_alg->workspaceMethodName();
+      else return "";
+    }
+
+    /**
+     * @return A set of workspace class names that should have the workspaceMethodName attached
+     */
+    const std::vector<std::string> AlgorithmProxy::workspaceMethodOn() const
+    {
+      if(m_alg) return m_alg->workspaceMethodOn();
+      else return std::vector<std::string>();
+    }
+
+    /**
+     * @return The name of the property that the calling object will be passed to
+     */
+    const std::string AlgorithmProxy::workspaceMethodInputProperty() const
+    {
+      if(m_alg) return m_alg->workspaceMethodInputProperty();
+      else return "";
+    }
+
+    /**
     * Override setPropertyValue
     * @param name The name of the property
     * @param value The value of the property as a string
