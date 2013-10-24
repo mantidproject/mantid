@@ -125,8 +125,8 @@ namespace Mantid
       bool queryDataset = false;
 
       // Format the timestamps in order to compare them.
-      std::string startDate = formatDateTime(inputs.getStartDate());
-      std::string endDate   = formatDateTime(inputs.getEndDate());
+      std::string startDate = formatDateTime(inputs.getStartDate(), "%F %T");
+      std::string endDate   = formatDateTime(inputs.getEndDate(), "%F %T");
 
       // Investigation startDate if endDate is not selected
       if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0)
@@ -232,7 +232,22 @@ namespace Mantid
       // We then append the required includes to output related data, such as instrument name and run parameters.
       if (!query.empty())
       {
-        query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> ");
+        // If the user wants to search through their data in their archive.
+        if (inputs.getMyData())
+        {
+          query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user] <-> ");
+        }
+        // Otherwise, we search the entire archive.
+        else
+        {
+          query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> ");
+        }
+      }
+
+      // If the user has only selected the "My data only" button (E.g. they want to display all their "My data").
+      if (query.empty() && inputs.getMyData())
+      {
+        query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]");
       }
 
       g_log.debug() << "Query: { " << query << " }" << std::endl;
@@ -252,8 +267,7 @@ namespace Mantid
 
       if (query.empty())
       {
-        // Would be better to open a dialog box in the GUI for the user to visually see what's wrong.
-        throw std::runtime_error("You have not selected any inputs to search for!");
+        throw std::runtime_error("You have not input any terms to search for.");
       }
 
       ICATPortBindingProxy icat;
@@ -314,10 +328,12 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
-      outputws->addColumn("str","Investigation Number");
+      outputws->addColumn("str","Investigation id");
       outputws->addColumn("str","Title");
       outputws->addColumn("str","Instrument");
-      outputws->addColumn("str","Run Range");
+      outputws->addColumn("str","Run range");
+      outputws->addColumn("str","Start date");
+      outputws->addColumn("str","End date");
 
       // Add data to each row in the output workspace.
       std::vector<xsd__anyType*>::const_iterator iter;
@@ -332,7 +348,7 @@ namespace Mantid
           {
             API::TableRow table = outputws->appendRow();
             // Now add the relevant investigation data to the table.
-            savetoTableWorkspace(investigation->name, table); // Investigation number
+            savetoTableWorkspace(investigation->name, table);
             savetoTableWorkspace(investigation->title, table);
             savetoTableWorkspace(investigation->instrument->name, table);
             // Verify that the run parameters vector exist prior to doing anything.
@@ -341,7 +357,17 @@ namespace Mantid
             {
               savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
             }
-
+            // Again, we need to check first if start and end date exist prior to insertion.
+            if (investigation->startDate)
+            {
+              std::string startDate = formatDateTime(*investigation->startDate, "%d-%m-%y");
+              savetoTableWorkspace(&startDate, table);
+            }
+            if (investigation->endDate)
+            {
+              std::string endDate = formatDateTime(*investigation->endDate, "%d-%m-%y");
+              savetoTableWorkspace(&endDate, table);
+            }
           }
           catch(std::runtime_error& exception)
           {
@@ -475,6 +501,7 @@ namespace Mantid
       outputws->addColumn("str","Location");
       outputws->addColumn("str","Create Time");
       outputws->addColumn("long64","Id");
+      outputws->addColumn("str","File size");
 
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
@@ -489,10 +516,12 @@ namespace Mantid
             savetoTableWorkspace(datafile->name, table);
             savetoTableWorkspace(datafile->location, table);
 
-            std::string createDate = formatDateTime(*(datafile->createTime));
+            std::string createDate = formatDateTime(*datafile->createTime, "%F %T");
             savetoTableWorkspace(&createDate, table);
 
             savetoTableWorkspace(datafile->id, table);
+            std::string fileSize = bytesToString(*datafile->fileSize);
+            savetoTableWorkspace(&fileSize, table);
           }
           catch(std::runtime_error& exception)
           {
@@ -617,7 +646,6 @@ namespace Mantid
           if(datafile->location)
           {
             fileLocation = *(datafile->location);
-            g_log.debug() << "Filelocation: { " << fileLocation << " }" << std::endl;
           }
         }
         else
@@ -704,14 +732,36 @@ namespace Mantid
     }
 
     /**
+     * Convert a file size to human readable file format.
+     * @param size    :: The size in bytes of the file.
+     * @return string :: A human readable file format (e.g. 5MB).
+     */
+    std::string ICat4Catalog::bytesToString(int64_t &fileSize)
+    {
+      const char* args[] = {"B", "KB", "MB", "GB"};
+      std::vector<std::string> units(args, args + 4);
+
+      unsigned order = 0;
+
+      while (fileSize >= 1024 && order + 1 < units.size())
+      {
+          order++;
+          fileSize = fileSize / 1024;
+      }
+
+      return boost::lexical_cast<std::string>(fileSize) + units.at(order);
+    }
+
+    /**
      * Formats a given timestamp to human readable datetime.
      * @param timestamp :: Unix timestamp.
-     * @return string   :: Formatted Unix timestamp in the format "%F %T" ("2011-12-25 00:00:00")
+     * @param format    :: The desired format to output.
+     * @return string   :: Formatted Unix timestamp.
      */
-    std::string ICat4Catalog::formatDateTime(time_t timestamp)
+    std::string ICat4Catalog::formatDateTime(const time_t &timestamp, const std::string &format)
     {
       auto dateTime = DateAndTime(boost::posix_time::from_time_t(timestamp));
-      return (dateTime.toFormattedString("%F %T"));
+      return (dateTime.toFormattedString(format));
     }
 
   }

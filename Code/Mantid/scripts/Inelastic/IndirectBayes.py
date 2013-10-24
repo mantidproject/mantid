@@ -11,8 +11,6 @@ if is_supported_f2py_platform():
     Qse     = import_f2py("QLse")
     Que     = import_f2py("Quest")
     resnorm = import_f2py("ResNorm")
-    cefit   = import_f2py("CEfit")
-    ssfit   = import_f2py("SSfit")
 else:
     unsupported_message()
 

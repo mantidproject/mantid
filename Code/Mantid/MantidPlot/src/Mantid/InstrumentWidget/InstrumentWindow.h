@@ -26,6 +26,7 @@ class InstrumentWindowTab;
 class XIntegrationControl;
 class SimpleWidget;
 class ProjectionSurface;
+class InstrumentWindowRenderTab;
 
 // Qt forward declarations
 class QPushButton;
@@ -197,6 +198,7 @@ private:
   QTabWidget*  mControlsTab;
   /// Control tabs
   QList<InstrumentWindowTab *> m_tabs;
+  InstrumentWindowRenderTab *m_renderTab;
   XIntegrationControl * m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget* m_InstrumentDisplay;

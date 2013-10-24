@@ -663,26 +663,4 @@
   <id start="12470001" end="12471024" />
   <id start="12480001" end="12481024" />
  </idlist>
-
-  <!-- DETECTOR PARAMETERS -->
-  <component-link name="monitors">
-   <parameter name="DelayTime">
-      <value units="microseconds" val="0"/>
-   </parameter>
-  </component-link>
-
-  <!-- Set the same across the reset of the instrument -->
-  <component-link name = "LET">
-    <parameter name="TubePressure">
-      <value units="atm" val="10.0"/>
-    </parameter>
-    <parameter name="TubeThickness">
-      <value units="metre" val="0.0008"/>
-    </parameter>
-    <parameter name="DelayTime">
-      <value units="microseconds" val="-5.3"/>
-    </parameter>
-  </component-link>
-
-
  </instrument>
