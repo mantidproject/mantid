@@ -83,7 +83,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(), 
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
-  m_deadTimesChanged(false), m_textToDisplay(""), m_dataTimeZero(0.2), m_dataFirstGoodData(0.3)
+  m_deadTimesChanged(false), m_textToDisplay(""), m_dataTimeZero(0.0), m_dataFirstGoodData(0.0)
 {}
 
 /**
