@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2013-10-24 14:48:48.333791" valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2013-10-21 00:00:01">
+<instrument last-modified="2013-10-24 18:11:53.506758" valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2013-10-21 00:00:01">
   <!-- Created by Stuart Campbell -->
   <defaults>
     <length unit="metre"/>
@@ -24,265 +24,245 @@
     <location/>
   </component>
   <type name="elastic-backscattering">
-    <component type="bank15">
-      <component type="bank15-tube1">
-        <location/>
-      </component>
-      <component type="bank15-tube2">
-        <location/>
-      </component>
-      <component type="bank15-tube3">
-        <location/>
-      </component>
-      <component type="bank15-tube4">
-        <location/>
-      </component>
-      <component type="bank15-tube5">
-        <location/>
-      </component>
-      <component type="bank15-tube6">
-        <location/>
-      </component>
-      <component type="bank15-tube7">
-        <location/>
-      </component>
-      <component type="bank15-tube8">
-        <location/>
-      </component>
+    <component type="bank15-tube1">
+      <location/>
     </component>
-    <component type="bank16">
-      <component type="bank16-tube9">
-        <location/>
-      </component>
-      <component type="bank16-tube10">
-        <location/>
-      </component>
-      <component type="bank16-tube11">
-        <location/>
-      </component>
-      <component type="bank16-tube12">
-        <location/>
-      </component>
-      <component type="bank16-tube13">
-        <location/>
-      </component>
-      <component type="bank16-tube14">
-        <location/>
-      </component>
-      <component type="bank16-tube15">
-        <location/>
-      </component>
-      <component type="bank16-tube16">
-        <location/>
-      </component>
+    <component type="bank15-tube2">
+      <location/>
     </component>
-    <component type="bank17">
-      <component type="bank17-tube17">
-        <location/>
-      </component>
-      <component type="bank17-tube18">
-        <location/>
-      </component>
-      <component type="bank17-tube19">
-        <location/>
-      </component>
-      <component type="bank17-tube20">
-        <location/>
-      </component>
-      <component type="bank17-tube21">
-        <location/>
-      </component>
-      <component type="bank17-tube22">
-        <location/>
-      </component>
-      <component type="bank17-tube23">
-        <location/>
-      </component>
-      <component type="bank17-tube24">
-        <location/>
-      </component>
+    <component type="bank15-tube3">
+      <location/>
     </component>
-    <component type="bank18">
-      <component type="bank18-tube25">
-        <location/>
-      </component>
-      <component type="bank18-tube26">
-        <location/>
-      </component>
-      <component type="bank18-tube27">
-        <location/>
-      </component>
-      <component type="bank18-tube28">
-        <location/>
-      </component>
-      <component type="bank18-tube29">
-        <location/>
-      </component>
-      <component type="bank18-tube30">
-        <location/>
-      </component>
-      <component type="bank18-tube31">
-        <location/>
-      </component>
-      <component type="bank18-tube32">
-        <location/>
-      </component>
+    <component type="bank15-tube4">
+      <location/>
     </component>
-    <component type="bank19">
-      <component type="bank19-tube33">
-        <location/>
-      </component>
-      <component type="bank19-tube34">
-        <location/>
-      </component>
-      <component type="bank19-tube35">
-        <location/>
-      </component>
-      <component type="bank19-tube36">
-        <location/>
-      </component>
-      <component type="bank19-tube37">
-        <location/>
-      </component>
-      <component type="bank19-tube38">
-        <location/>
-      </component>
-      <component type="bank19-tube39">
-        <location/>
-      </component>
-      <component type="bank19-tube40">
-        <location/>
-      </component>
+    <component type="bank15-tube5">
+      <location/>
     </component>
-    <component type="bank20">
-      <component type="bank20-tube41">
-        <location/>
-      </component>
-      <component type="bank20-tube42">
-        <location/>
-      </component>
-      <component type="bank20-tube43">
-        <location/>
-      </component>
-      <component type="bank20-tube44">
-        <location/>
-      </component>
-      <component type="bank20-tube45">
-        <location/>
-      </component>
-      <component type="bank20-tube46">
-        <location/>
-      </component>
-      <component type="bank20-tube47">
-        <location/>
-      </component>
-      <component type="bank20-tube48">
-        <location/>
-      </component>
+    <component type="bank15-tube6">
+      <location/>
     </component>
-    <component type="bank21">
-      <component type="bank21-tube49">
-        <location/>
-      </component>
-      <component type="bank21-tube50">
-        <location/>
-      </component>
-      <component type="bank21-tube51">
-        <location/>
-      </component>
-      <component type="bank21-tube52">
-        <location/>
-      </component>
-      <component type="bank21-tube53">
-        <location/>
-      </component>
-      <component type="bank21-tube54">
-        <location/>
-      </component>
-      <component type="bank21-tube55">
-        <location/>
-      </component>
-      <component type="bank21-tube56">
-        <location/>
-      </component>
+    <component type="bank15-tube7">
+      <location/>
     </component>
-    <component type="bank22">
-      <component type="bank22-tube57">
-        <location/>
-      </component>
-      <component type="bank22-tube58">
-        <location/>
-      </component>
-      <component type="bank22-tube59">
-        <location/>
-      </component>
-      <component type="bank22-tube60">
-        <location/>
-      </component>
-      <component type="bank22-tube61">
-        <location/>
-      </component>
-      <component type="bank22-tube62">
-        <location/>
-      </component>
-      <component type="bank22-tube63">
-        <location/>
-      </component>
-      <component type="bank22-tube64">
-        <location/>
-      </component>
+    <component type="bank15-tube8">
+      <location/>
     </component>
-    <component type="bank23">
-      <component type="bank23-tube65">
-        <location/>
-      </component>
-      <component type="bank23-tube66">
-        <location/>
-      </component>
-      <component type="bank23-tube67">
-        <location/>
-      </component>
-      <component type="bank23-tube68">
-        <location/>
-      </component>
-      <component type="bank23-tube69">
-        <location/>
-      </component>
-      <component type="bank23-tube70">
-        <location/>
-      </component>
-      <component type="bank23-tube71">
-        <location/>
-      </component>
-      <component type="bank23-tube72">
-        <location/>
-      </component>
+    <component type="bank16-tube9">
+      <location/>
     </component>
-    <component type="bank24">
-      <component type="bank24-tube73">
-        <location/>
-      </component>
-      <component type="bank24-tube74">
-        <location/>
-      </component>
-      <component type="bank24-tube75">
-        <location/>
-      </component>
-      <component type="bank24-tube76">
-        <location/>
-      </component>
-      <component type="bank24-tube77">
-        <location/>
-      </component>
-      <component type="bank24-tube78">
-        <location/>
-      </component>
-      <component type="bank24-tube79">
-        <location/>
-      </component>
-      <component type="bank24-tube80">
-        <location/>
-      </component>
+    <component type="bank16-tube10">
+      <location/>
+    </component>
+    <component type="bank16-tube11">
+      <location/>
+    </component>
+    <component type="bank16-tube12">
+      <location/>
+    </component>
+    <component type="bank16-tube13">
+      <location/>
+    </component>
+    <component type="bank16-tube14">
+      <location/>
+    </component>
+    <component type="bank16-tube15">
+      <location/>
+    </component>
+    <component type="bank16-tube16">
+      <location/>
+    </component>
+    <component type="bank17-tube17">
+      <location/>
+    </component>
+    <component type="bank17-tube18">
+      <location/>
+    </component>
+    <component type="bank17-tube19">
+      <location/>
+    </component>
+    <component type="bank17-tube20">
+      <location/>
+    </component>
+    <component type="bank17-tube21">
+      <location/>
+    </component>
+    <component type="bank17-tube22">
+      <location/>
+    </component>
+    <component type="bank17-tube23">
+      <location/>
+    </component>
+    <component type="bank17-tube24">
+      <location/>
+    </component>
+    <component type="bank18-tube25">
+      <location/>
+    </component>
+    <component type="bank18-tube26">
+      <location/>
+    </component>
+    <component type="bank18-tube27">
+      <location/>
+    </component>
+    <component type="bank18-tube28">
+      <location/>
+    </component>
+    <component type="bank18-tube29">
+      <location/>
+    </component>
+    <component type="bank18-tube30">
+      <location/>
+    </component>
+    <component type="bank18-tube31">
+      <location/>
+    </component>
+    <component type="bank18-tube32">
+      <location/>
+    </component>
+    <component type="bank19-tube33">
+      <location/>
+    </component>
+    <component type="bank19-tube34">
+      <location/>
+    </component>
+    <component type="bank19-tube35">
+      <location/>
+    </component>
+    <component type="bank19-tube36">
+      <location/>
+    </component>
+    <component type="bank19-tube37">
+      <location/>
+    </component>
+    <component type="bank19-tube38">
+      <location/>
+    </component>
+    <component type="bank19-tube39">
+      <location/>
+    </component>
+    <component type="bank19-tube40">
+      <location/>
+    </component>
+    <component type="bank20-tube41">
+      <location/>
+    </component>
+    <component type="bank20-tube42">
+      <location/>
+    </component>
+    <component type="bank20-tube43">
+      <location/>
+    </component>
+    <component type="bank20-tube44">
+      <location/>
+    </component>
+    <component type="bank20-tube45">
+      <location/>
+    </component>
+    <component type="bank20-tube46">
+      <location/>
+    </component>
+    <component type="bank20-tube47">
+      <location/>
+    </component>
+    <component type="bank20-tube48">
+      <location/>
+    </component>
+    <component type="bank21-tube49">
+      <location/>
+    </component>
+    <component type="bank21-tube50">
+      <location/>
+    </component>
+    <component type="bank21-tube51">
+      <location/>
+    </component>
+    <component type="bank21-tube52">
+      <location/>
+    </component>
+    <component type="bank21-tube53">
+      <location/>
+    </component>
+    <component type="bank21-tube54">
+      <location/>
+    </component>
+    <component type="bank21-tube55">
+      <location/>
+    </component>
+    <component type="bank21-tube56">
+      <location/>
+    </component>
+    <component type="bank22-tube57">
+      <location/>
+    </component>
+    <component type="bank22-tube58">
+      <location/>
+    </component>
+    <component type="bank22-tube59">
+      <location/>
+    </component>
+    <component type="bank22-tube60">
+      <location/>
+    </component>
+    <component type="bank22-tube61">
+      <location/>
+    </component>
+    <component type="bank22-tube62">
+      <location/>
+    </component>
+    <component type="bank22-tube63">
+      <location/>
+    </component>
+    <component type="bank22-tube64">
+      <location/>
+    </component>
+    <component type="bank23-tube65">
+      <location/>
+    </component>
+    <component type="bank23-tube66">
+      <location/>
+    </component>
+    <component type="bank23-tube67">
+      <location/>
+    </component>
+    <component type="bank23-tube68">
+      <location/>
+    </component>
+    <component type="bank23-tube69">
+      <location/>
+    </component>
+    <component type="bank23-tube70">
+      <location/>
+    </component>
+    <component type="bank23-tube71">
+      <location/>
+    </component>
+    <component type="bank23-tube72">
+      <location/>
+    </component>
+    <component type="bank24-tube73">
+      <location/>
+    </component>
+    <component type="bank24-tube74">
+      <location/>
+    </component>
+    <component type="bank24-tube75">
+      <location/>
+    </component>
+    <component type="bank24-tube76">
+      <location/>
+    </component>
+    <component type="bank24-tube77">
+      <location/>
+    </component>
+    <component type="bank24-tube78">
+      <location/>
+    </component>
+    <component type="bank24-tube79">
+      <location/>
+    </component>
+    <component type="bank24-tube80">
+      <location/>
     </component>
   </type>
   <type name="bank15-tube1">
