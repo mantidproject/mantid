@@ -9492,6 +9492,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   {
     icatsearch->disconnect();
     delete icatsearch;
+    icatsearch = NULL;
   }
 
   if( scriptingWindow )
