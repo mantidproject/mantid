@@ -50,7 +50,7 @@ private:
    void loadDimensions();
    void doSpecialDim();
    void readHMData(Mantid::API::IMDHistoWorkspace_sptr ws);
-   void recurseDim(int *data, Mantid::API::IMDHistoWorkspace_sptr ws, size_t currentDim, Mantid::coord_t *idx);
+   void recurseDim(int *data, Mantid::API::IMDHistoWorkspace_sptr ws, int currentDim, Mantid::coord_t *idx);
    int calculateCAddress(Mantid::coord_t *pos);
 
    ILiveListener::RunStatus oldStatus;

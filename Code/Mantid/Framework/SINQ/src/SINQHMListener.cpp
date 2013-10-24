@@ -230,7 +230,7 @@ int SINQHMListener::calculateCAddress(coord_t *pos)
 	}
 	return result;
 }
-void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws, size_t currentDim, coord_t *idx)
+void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws, int currentDim, coord_t *idx)
 {
 	if(currentDim == rank){
 		int Cindex = calculateCAddress(idx);

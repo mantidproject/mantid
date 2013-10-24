@@ -49,10 +49,10 @@ void SliceMDHisto::init()
 void SliceMDHisto::exec()
 {
 	IMDHistoWorkspace_sptr inWS = IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
-	rank = inWS->getNumDims();
-	for(int i = 0; i < rank; i++){
+	rank = static_cast<unsigned int>(inWS->getNumDims());
+	for(unsigned int i = 0; i < rank; i++){
 		boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(i);
-		dim.push_back(arDim->getNBins());
+		dim.push_back(static_cast<int>(arDim->getNBins()));
 	}
 
     std::vector<int> start = getProperty("Start");
@@ -62,7 +62,7 @@ void SliceMDHisto::exec()
     if(start.size() < rank || end.size() < rank){
     	throw std::runtime_error("Start and end need to be given for each dimension of the dataset");
     }
-    for(int i = 0; i < rank; i++){
+    for(unsigned int i = 0; i < rank; i++){
     	if(start[i] < 0) {
     		start[i] = 0;
     	}
@@ -82,7 +82,7 @@ void SliceMDHisto::exec()
 
     // create the new dadaset
     std::vector<MDHistoDimension_sptr> dimensions;
-    for(int k = 0; k < rank; ++k)
+    for(unsigned int k = 0; k < rank; ++k)
     {
   	  boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(k);
       dimensions.push_back(MDHistoDimension_sptr(
@@ -105,7 +105,7 @@ void SliceMDHisto::exec()
 void SliceMDHisto::cutData(Mantid::API::IMDHistoWorkspace_sptr inWS,
 		  Mantid::API::IMDHistoWorkspace_sptr outWS,
 		  Mantid::coord_t *sourceDim, Mantid::coord_t *targetDim,
-		  std::vector<int> start, std::vector<int> end, int dim)
+		  std::vector<int> start, std::vector<int> end, unsigned int dim)
 {
 	int length;
 	signal_t val;

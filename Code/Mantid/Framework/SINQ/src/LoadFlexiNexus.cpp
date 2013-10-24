@@ -473,7 +473,7 @@ int LoadFlexiNexus::safeOpenpath(NeXus::File *fin, std::string path)
 {
 	try {
 		fin->openPath(path);
-	} catch(NeXus::Exception & ne){
+	} catch(NeXus::Exception &){
 		getLogger().error("NeXus path " + path + " kaputt");
 		return 0;
 	}
