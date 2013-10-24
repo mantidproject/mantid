@@ -123,8 +123,10 @@ namespace Mantid
         std::string fileLocation;
         catalog->getFileLocation(*fileID,fileLocation);
 
+        g_log.debug() << "CatalogDownloadDataFiles -> File location before transform is: " << fileLocation << std::endl;
         // Transform the archive path to the path of the user's operating system.
         fileLocation = catalogInfo.transformArchivePath(fileLocation);
+        g_log.debug() << "CatalogDownloadDataFiles -> File location after transform is:  " << fileLocation << std::endl;
 
         // Can we open the file (Hence, have access to the archives?)
         std::ifstream hasAccessToArchives(fileLocation.c_str());
