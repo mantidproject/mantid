@@ -1,4 +1,3 @@
-import mantid
 from mantid.simpleapi import *
 import os
 import string
@@ -70,7 +69,7 @@ def mark_as_loaded(filename):
         logger.notice("Marking %s as loaded." % filename)
         _loaded_data.append(data_name)
 
-def load_runs(inst_name, runs, sum=True, calibration=None):
+def load_runs(runs, sum=True):
     """
     Loads a list of files, summing if the required.    
     """
@@ -89,17 +88,21 @@ def load_runs(inst_name, runs, sum=True, calibration=None):
         else:
             loaded = []
             for r in runs:
-                loaded.append(load_run(inst_name,r,calibration))
+                loaded.append(load_run(r))
             if len(loaded) == 1:
                 return loaded[0]
             else:
                 return loaded
     else:
         # Try a single run
-        return load_run(inst_name, runs, calibration)
+        return load_run(runs)
 
-def load_run(inst_name, run_number, calibration=None, force=False):
+def load_run(run_number, force=False):
     """Loads run into the given workspace. 
+    
+    The AddSampleLog algorithm is used to add a Filename property
+    to the resulting workspace so that it can be retrieved later
+    in the reduction chain
 
     If force is true then the file is loaded regardless of whether
     its workspace exists already.
@@ -107,52 +110,44 @@ def load_run(inst_name, run_number, calibration=None, force=False):
     # If a workspace with this name exists, then assume it is to be used in place of a file
     if str(run_number) in mtd:
         logger.notice("%s already loaded as workspace." % str(run_number))
-        if type(run_number) == str:
-            loaded_ws = mtd[run_number]
-        else:
-            loaded_ws = run_number
+        if type(run_number) == str: return mtd[run_number]
+        else: return run_number
+
+    # If it doesn't exists as a workspace assume we have to try and load a file
+    if type(run_number) == int: 
+        filename = find_file(run_number)
+    elif type(run_number) == list:
+        raise TypeError('load_run() cannot handle run lists')
     else:
-        # If it doesn't exists as a workspace assume we have to try and load a file
-        if type(run_number) == int: 
-            filename = find_file(run_number)
-        elif type(run_number) == list:
-            raise TypeError('load_run() cannot handle run lists')
+        # Check if it exists, else tell Mantid to try and 
+        # find it
+        if os.path.exists(run_number):
+            filename = run_number
         else:
-            # Check if it exists, else tell Mantid to try and 
-            # find it
-            if os.path.exists(run_number):
-                filename = run_number
-            else:
-                filename = find_file(run_number)
-        # The output name 
-        output_name = create_dataname(filename)
-        if (not force) and (output_name in mtd):
-            logger.notice("%s already loaded" % filename)
-            return mtd[output_name]
-    
-        loaded_ws = Load(Filename=filename, OutputWorkspace=output_name)
-        logger.notice("Loaded %s" % filename)
+            filename = find_file(run_number)
+       
+    # The output name 
+    output_name = create_dataname(filename)
+    if (not force) and (output_name in mtd):
+        logger.notice("%s already loaded" % filename)
+        return mtd[output_name]
 
-    ######## Now we have the workspace
-    apply_calibration(inst_name, loaded_ws, calibration)
-    return loaded_ws
+    ext = os.path.splitext(filename)[1]
+    if filename.endswith("_event.nxs"):
+        LoadEventNexus(Filename=filename, OutputWorkspace=output_name) 
+    elif ext.startswith(".n"):
+        LoadNexus(Filename=filename,OutputWorkspace=output_name)
+    elif filename.endswith("_event.dat"):
+        #load the events
+        LoadEventPreNexus(EventFilename=filename, OutputWorkspace=output_name)       
+    else:
+        LoadRaw(Filename=filename,OutputWorkspace=output_name)
+        #LoadDetectorInfo(output_name, filename)
 
-def apply_calibration(inst_name, loaded_ws, calibration):
-    if loaded_ws.run().hasProperty("calibrated"):
-        return
-    if type(calibration) == str or type(calibration) == int:
-        logger.debug('load_data: Moving detectors to positions specified in cal file "%s"' % str(calibration))
-        filename = calibration
-        skip_lines = None
-        if type(filename) == int: # assume run number
-            filename = inst_name + str(filename)
-        UpdateInstrumentFromFile(Workspace=loaded_ws,Filename=filename,
-                                 MoveMonitors=False, IgnorePhi=False)
-        AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(calibration))
-    elif isinstance(calibration, mantid.api.Workspace):
-        logger.debug('load_data: Copying detectors positions from workspace "%s": ' % calibration.name())
-        CopyInstrumentParameters(InputWorkspace=calibration,OutputWorkspace=loaded_ws)
-        AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(calibration))
+    # Attach the filename to the workspace so that it can be retrieved later in the reduction chain
+    AddSampleLog(Workspace=output_name,LogName="Filename",LogText=filename)
+    logger.notice("Loaded %s" % filename)
+    return mtd[output_name]
 
 def sum_files(accumulator, files, file_type):
     """
