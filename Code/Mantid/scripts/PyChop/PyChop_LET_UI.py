@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'd:\Data\Mantid_GIT\Code\Mantid\scripts\PyChop\PyChop_LET_UI.ui'
+# Form implementation generated from reading ui file 'C:\Mantid\Code\Mantid\scripts\PyChop\PyChop_LET_UI.ui'
 #
-# Created: Thu Jul 11 16:38:26 2013
+# Created: Thu Oct 24 17:42:22 2013
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,6 @@ class Ui_MainWindow(object):
         self.incidentEnergyValue = QtGui.QLineEdit(self.centralwidget)
         self.incidentEnergyValue.setGeometry(QtCore.QRect(22, 40, 171, 20))
         self.incidentEnergyValue.setText(_fromUtf8(""))
-        #self.incidentEnergyValue.setPlaceholderText(_fromUtf8(""))
         self.incidentEnergyValue.setObjectName(_fromUtf8("incidentEnergyValue"))
         self.label = QtGui.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(30, 10, 141, 20))
