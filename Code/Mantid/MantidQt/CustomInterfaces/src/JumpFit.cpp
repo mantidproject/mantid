@@ -89,7 +89,7 @@ namespace MantidQt
 			QString pyInput = 
 				"from IndirectJumpFit import JumpRun\n";
 
-			pyInput += "JumpRun("+sample+","+fitFunction+","+widthTxt+","+QMin+","+QMax+","
+			pyInput += "JumpRun('"+sample+"','"+fitFunction+"',"+widthTxt+","+QMin+","+QMax+","
 									"Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
 
 			runPythonScript(pyInput);

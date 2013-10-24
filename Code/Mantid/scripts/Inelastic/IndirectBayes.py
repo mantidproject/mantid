@@ -631,10 +631,25 @@ def CheckBetSig(nbs):
 		sys.exit(error)
 	return Nbet,Nsig
 
-def QuestRun(samWS,resWS,rsname,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
+def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	StartTime('Quest')
+	#expand fit options
+	elastic, background, width, resnorm = Fit
+	
+	#convert true/false to 1/0 for fortran
+	o_el = 1 if elastic else 0
+	o_w1 = 1 if width else 0
+	o_res = 1 if resnorm else 0
 
-	resnorm = (Fit[:3] == 1)
+	#fortran code uses background choices defined using the following numbers
+	if background == 'Sloping':
+		o_bgd = 2
+	elif background == 'Flat':
+		o_bgd = 1
+	elif background == 'Zero':
+		o_bgd = 0
+
+	fitOp = [o_el, o_bgd, o_w1, o_res]
 
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
@@ -645,22 +660,10 @@ def QuestRun(samWS,resWS,rsname,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 		logger.notice('Resolution is ' + resWS)
 	CheckAnalysers(samWS,resWS,Verbose)
 	nsam,ntc = CheckHistZero(samWS)
+	
 	if Loop != True:
 		nsam = 1
-	if Fit[0]:
-		elastic = True
-		o_el = 1
-	else:
-		elastic = False
-		o_el = 0
-	if Fit[1] == 'Sloping':
-		o_bgd = 2
-	if Fit[1] == 'Flat':
-		o_bgd = 1
-	if Fit[1] == 'Zero':
-		o_bgd = 0
-	background = Fit[1]
-	fitOp = [o_el, o_bgd, 0, 0]
+
 	efix = getEfixed(samWS)
 	theta,Q = GetThetaQ(samWS)
 	nres,ntr = CheckHistZero(resWS)
@@ -673,8 +676,6 @@ def QuestRun(samWS,resWS,rsname,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	if Verbose:
 		logger.notice(' Number of spectra = '+str(nsam))
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
-
-	dtn,xsc = ReadNormFile(resnorm,rsname,nsam,Verbose)
 
 	fname = samWS[:-4] + '_'+ prog
 	wrks=workdir + samWS[:-4]

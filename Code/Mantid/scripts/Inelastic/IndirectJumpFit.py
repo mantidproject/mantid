@@ -71,4 +71,4 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	EndTime('Jump fit : '+jumpFunc+' ; ')
 
 def JumpPlot(inputWS):
-    j_plot=mp.plotSpectrum(inputWS,[0,1,2],True)
+    mp.plotSpectrum(inputWS,[0,1,2],True)
