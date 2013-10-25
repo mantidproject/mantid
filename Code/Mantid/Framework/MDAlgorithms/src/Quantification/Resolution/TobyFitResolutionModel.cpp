@@ -57,7 +57,7 @@ namespace Mantid
      */
     TobyFitResolutionModel::TobyFitResolutionModel(const API::IFunctionMD & fittedFunction,
                                                                      const std::string & fgModel)
-      : MDResolutionConvolution(fittedFunction, fgModel), m_randomNumbers(),
+      : MDResolutionConvolution(fittedFunction, fgModel), m_randomNumbers(1, NULL),
         m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4), m_mcRelErrorTol(1e-5),
         m_foregroundOnly(false), m_mosaicActive(true),
         m_bmatrix(1), m_yvector(1), m_etaInPlane(1,0.0), m_etaOutPlane(1,0.0), m_deltaQE(1,std::vector<double>(4, 0.0)),
@@ -542,7 +542,7 @@ namespace Mantid
       {
         delete *it; // Delete pointer at given iterator location. vector stays same size
       }
-      m_randomNumbers.clear();
+      // Leave the vector at the size it was
     }
 
   }
