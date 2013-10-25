@@ -27,7 +27,7 @@ namespace MantidQt
       /// The name of the interface as registered into the factory
       static std::string name() { return "Create MD Workspace"; }
       // This interface's categories.
-      static QString categoryInfo() { return "Indirect"; }
+      static QString categoryInfo() { return "Direct;Diffraction"; }
       /// Default Constructor
       CreateMDWorkspace(QWidget *parent = 0);
       /// Destructor
