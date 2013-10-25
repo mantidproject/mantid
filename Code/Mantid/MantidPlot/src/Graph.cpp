@@ -5027,11 +5027,11 @@ void Graph::guessUniqueCurveLayout(int& colorIndex, int& symbolIndex)
     }
   }
   if (n_curves > 1)
-    colorIndex = (++colorIndex)%ColorBox::numPredefinedColors();
+    colorIndex = (colorIndex+1)%ColorBox::numPredefinedColors();
   if (ColorBox::color(colorIndex) == Qt::white) //avoid white invisible curves
     ++colorIndex;
 
-  symbolIndex = (++symbolIndex)%15;
+  symbolIndex = (symbolIndex+1)%15;
   if (symbolIndex == 0)
     ++symbolIndex;
 }
