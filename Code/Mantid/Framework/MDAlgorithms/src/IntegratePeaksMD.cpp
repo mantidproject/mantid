@@ -282,6 +282,8 @@ namespace MDAlgorithms
 		std::string outFile = getProperty("InputWorkspace");
 		outFile.append(profileFunction);
 		outFile.append(".dat");
+		std::string save_path =  ConfigService::Instance().getString("defaultsave.directory");
+		outFile = save_path + outFile;
 		out.open(outFile.c_str(), std::ofstream::out);
     }
 //
