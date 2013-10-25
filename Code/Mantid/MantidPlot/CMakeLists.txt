@@ -518,7 +518,7 @@ set( SRC_UNITY_IGNORE_FILES )
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}/../MantidQt/Python ${PYQT4_SIP_FLAGS}
-                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
+                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
                      DEPENDS src/qti.sip ${SIP_HDRS}
                      COMMENT "Generating python bindings using sip"
