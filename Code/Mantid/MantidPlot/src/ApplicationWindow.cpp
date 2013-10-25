@@ -129,6 +129,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cassert>
 
 #include <qwt_scale_engine.h>
 #include <QFileDialog>
@@ -166,11 +167,14 @@
 #include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
+#include <QPair>
+#include <QtAlgorithms>
 #include <zlib.h>
 
 #include <gsl/gsl_sort.h>
 
 #include <boost/regex.hpp>
+#include <boost/scoped_ptr.hpp>
 
 //Mantid
 #include "ScriptingWindow.h"
@@ -179,6 +183,7 @@
 #include "Mantid/MantidAbout.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
+#include "Mantid/ManageInterfaceCategories.h"
 #include "Mantid/FirstTimeSetup.h"
 #include "Mantid/SetUpParaview.h"
 
@@ -450,9 +455,66 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   scriptingWindow = NULL;
   d_text_editor = NULL;
 
-  // List of registered PyQt interfaces
-  QString pyqt_interfaces_as_str = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces"));
-  pyqt_interfaces = QStringList::split(" ", pyqt_interfaces_as_str);
+  const QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
+
+  // Parse the list of registered PyQt interfaces and their respective categories.
+  QString pyQtInterfacesProperty = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces"));
+  foreach(const QString pyQtInterfaceInfo, QStringList::split(" ", pyQtInterfacesProperty))
+  {
+    QString pyQtInterfaceFile;
+    QSet<QString> pyQtInterfaceCategories;
+    const QStringList tokens = QStringList::split("/", pyQtInterfaceInfo);
+
+    if( tokens.size() == 0 ) // Empty token - ignore.
+    {
+      continue;
+    }
+    else if( tokens.size() == 1 ) // Assume missing category.
+    {
+      pyQtInterfaceCategories += "Uncatagorised";
+      pyQtInterfaceFile = tokens[0];
+    }
+    else if( tokens.size() == 2 ) // Assume correct interface name and categories.
+    {
+      pyQtInterfaceCategories += QStringList::split(";", tokens[0]).toSet();
+      pyQtInterfaceFile = tokens[1];
+    }
+    else // Too many forward slashes, or no space between two interfaces.  Warn user and move on.
+    {
+      g_log.warning() << "The mantidqt.python_interfaces property contains an unparsable value: "
+                      << pyQtInterfaceInfo.toStdString();
+      continue;
+    }
+
+    const QString scriptPath = scriptsDir + '/' + pyQtInterfaceFile;
+
+    if( QFileInfo(scriptPath).exists() )
+    {
+      const QString pyQtInterfaceName = QFileInfo(scriptPath).baseName().replace("_", " ");
+      m_interfaceNameDataPairs.append(qMakePair(pyQtInterfaceName, scriptPath));
+
+      // Keep track of the interface's categories as we go.
+      m_interfaceCategories[pyQtInterfaceName] = pyQtInterfaceCategories;
+      m_allCategories += pyQtInterfaceCategories;
+    }
+    else
+    {
+      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
+      g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
+    }
+  }
+  
+  MantidQt::API::InterfaceManager interfaceManager;
+  // Add all interfaces inherited from UserSubWindow.
+  foreach(const QString userSubWindowName, interfaceManager.getUserSubWindowKeys())
+  {
+    m_interfaceNameDataPairs.append(qMakePair(userSubWindowName, userSubWindowName));
+
+    const QSet<QString> categories = UserSubWindowFactory::Instance().getInterfaceCategories(userSubWindowName);
+
+    m_interfaceCategories[userSubWindowName] = categories;
+    m_allCategories += categories;
+  }
 
   renamedTables = QStringList();
   if (!factorySettings)
@@ -1202,6 +1264,10 @@ void ApplicationWindow::initMainMenu()
   windowsMenu->setCheckable(true);
   connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(windowsMenuAboutToShow()));
 
+  interfaceMenu = new QMenu(this);
+  interfaceMenu->setObjectName("interfaceMenu");
+  connect(interfaceMenu, SIGNAL(aboutToShow()), this, SLOT(interfaceMenuAboutToShow()));
+
   foldersMenu = new QMenu(this);
   foldersMenu->setCheckable(true);
 
@@ -1513,44 +1579,10 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   }
 
   myMenuBar()->insertItem(tr("&Catalog"),icat);
-
-  // Interface menu. Build the interface from the user sub windows list.
-  // Modifications will be done through the ManageCustomMenus dialog and
-  // remembered through QSettings.
-  MantidQt::API::InterfaceManager interfaceManager;
-  QStringList user_windows = interfaceManager.getUserSubWindowKeys();
-  QStringListIterator itr(user_windows);
-  QString menuName = "&Interfaces";
-  addUserMenu(menuName);
-  while( itr.hasNext() )
-  {
-      QString itemName = itr.next();
-      // Check whether the menu item was flagged in the QSettings.
-      if (getMenuSettingsFlag(itemName))
-          addUserMenuAction( menuName, itemName, itemName);
-  }
-
-  // Go through PyQt interfaces
-  QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
-  QStringListIterator pyqt_itr(pyqt_interfaces);
-  while( pyqt_itr.hasNext() )
-  {
-    QString itemName = pyqt_itr.next();
-    QString scriptPath = scriptsDir + '/' + itemName;
-
-    if( QFileInfo(scriptPath).exists() ) {
-      QString baseName = QFileInfo(scriptPath).baseName();
-      // Need to use "nice" name to check if scripts has been removed by user.
-      QString niceName = baseName.replace("_", " ");
-      if (getMenuSettingsFlag(niceName))
-        addUserMenuAction(menuName, baseName, scriptPath);
-    }
-    else
-    {
-      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
-      g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
-    }
-  }
+  
+  // -- INTERFACE MENU --
+  myMenuBar()->insertItem(tr("&Interfaces"), interfaceMenu);
+  interfaceMenuAboutToShow();
 
   myMenuBar()->insertItem(tr("&Help"), help );
 
@@ -5269,7 +5301,7 @@ void ApplicationWindow::readSettings()
   // Mantid
 
   bool warning_shown = settings.value("/DuplicationDialogShown", false).toBool();
-
+  
   //Check for user defined scripts in settings and create menus for them
   //Top level scripts group
   settings.beginGroup("CustomScripts");
@@ -5283,17 +5315,24 @@ void ApplicationWindow::readSettings()
 
   foreach(QString menu, settings.childGroups())
   {
+    // Specifically disallow the use of the Interfaces menu to users looking to
+    // customise their own menus, since it is managed separately.  Also, there
+    // may well be some left-over QSettings values from previous installations
+    // that we do not want used.
+    if( menu == "Interfaces" || menu == "&Interfaces" )
+      continue;
+  
     addUserMenu(menu);
     settings.beginGroup(menu);
     foreach(QString keyName, settings.childKeys())
     {
       QFileInfo fi(settings.value(keyName).toString());
       QString baseName = fi.fileName();
-      if (pyqt_interfaces.contains(baseName))
+      const QStringList pyQtInterfaces = m_interfaceCategories.keys();
+      if (pyQtInterfaces.contains(baseName))
         continue;
 
-      if ( menu.contains("Interfaces")==0 &&
-          (user_windows.grep(keyName).size() > 0 || pyqt_interfaces.grep(keyName).size() > 0) )
+      if ( user_windows.grep(keyName).size() > 0 || pyQtInterfaces.grep(keyName).size() > 0 )
       {
         duplicated_custom_menu.append(menu+"/"+keyName);
       }
@@ -9267,6 +9306,62 @@ void ApplicationWindow::windowsMenuAboutToShow()
     windowsMenu->insertItem(tr("More windows..."),this, SLOT(showMoreWindows()));
   }
   reloadCustomActions();
+}
+
+void ApplicationWindow::interfaceMenuAboutToShow()
+{
+  interfaceMenu->clear();
+  m_interfaceActions.clear();
+
+  // Create a submenu for each category.  Make sure submenus are in alphabetical order,
+  // and ignore any hidden categories.
+  const QString hiddenProp = QString::fromStdString(
+    Mantid::Kernel::ConfigService::Instance().getString("interfaces.categories.hidden")
+  );
+  auto hiddenCategories = hiddenProp.split(";", QString::SkipEmptyParts).toSet();
+  QMap<QString, QMenu *> categoryMenus;
+  auto sortedCategories = m_allCategories.toList();
+  qSort(sortedCategories);
+  foreach(const QString category, sortedCategories)
+  {
+    if( hiddenCategories.contains(category) )
+      continue;
+    QMenu * categoryMenu = new QMenu(interfaceMenu);
+    categoryMenu->setObjectName(category + "Menu");
+    interfaceMenu->insertItem(tr(category), categoryMenu);
+    categoryMenus[category] = categoryMenu;
+  }
+
+  // Turn the name/data pairs into QActions with which we populate the menus.
+  foreach(const auto interfaceNameDataPair, m_interfaceNameDataPairs)
+  {
+    const QString name = interfaceNameDataPair.first;
+    const QString data = interfaceNameDataPair.second;
+
+    foreach(const QString category, m_interfaceCategories[name])
+    {
+      if(!categoryMenus.contains(category))
+        continue;
+      QAction * openInterface = new QAction(tr(name), interfaceMenu);
+      openInterface->setData(data);
+      categoryMenus[category]->addAction(openInterface);
+
+      // Update separate list containing all interface actions.
+      m_interfaceActions.append(openInterface);
+    }
+  }
+
+  foreach( auto categoryMenu, categoryMenus.values() )
+  {
+    connect(categoryMenu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
+  }
+
+  interfaceMenu->insertSeparator();
+
+  // Allow user to customise categories.
+  QAction * customiseCategoriesAction = new QAction(tr("Add/Remove Categories"), this);
+  connect(customiseCategoriesAction, SIGNAL(activated()), this, SLOT(showInterfaceCategoriesDialog()));
+  interfaceMenu->addAction(customiseCategoriesAction);
 }
 
 void ApplicationWindow::showMarkerPopupMenu()
@@ -16852,6 +16947,20 @@ void ApplicationWindow::showCustomActionDialog()
   ad->setFocus();
 }
 
+void ApplicationWindow::showInterfaceCategoriesDialog()
+{
+  auto existingWindow = this->findChild<ManageInterfaceCategories *>();
+  if( !existingWindow )
+  {
+    auto * diag = new ManageInterfaceCategories(this);
+    diag->setAttribute(Qt::WA_DeleteOnClose);
+    diag->show();
+    diag->setFocus();
+  }
+  else
+    existingWindow->activateWindow();
+}
+
 void ApplicationWindow::showUserDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
@@ -16917,7 +17026,7 @@ void ApplicationWindow::removeCustomAction(QAction *action)
 
 void ApplicationWindow::performCustomAction(QAction *action)
 {
-  if (!action || !d_user_actions.contains(action))
+  if (!action || !(d_user_actions.contains(action) || m_interfaceActions.contains(action)))
     return;
 #ifdef SCRIPTING_PYTHON
 QString action_data = action->data().toString();
@@ -16946,12 +17055,12 @@ if( QFileInfo(action_data).exists() )
 }
 else
 {
-  //First search for an existing window
-  foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
+  // Check to see if the window is already open.  If so, just show it to the user.
+  foreach( auto userSubWindow, this->findChildren<UserSubWindow *>() )
   {
-    if( sub_win->widget()->objectName() == action_data )
+    if( userSubWindow->objectName() == action_data )
     {
-      sub_win->widget()->show();
+      userSubWindow->activateWindow();
       return;
     }
   }

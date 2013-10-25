@@ -62,6 +62,8 @@ class MuonAnalysis : public MantidQt::API::UserSubWindow
 public:
   /// Name of the interface
   static std::string name() { return "Muon Analysis"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "Muon"; }
 
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
