@@ -300,19 +300,6 @@ namespace Mantid
 
       //start from the top again, this time filling in the list
       file.seekg(0,std::ios_base::beg);
-
-      //move to the first bit of valid data, skipping over headers
-      /*
-      if (lastSpecID !=0)
-      {
-        lineno = lastSpecID;
-      }
-
-      for (int i = 0; i < (lineno - 1); i++)
-      {
-        getline(file,line);
-      }
-      */
       processHeader(file);
     }
 
@@ -337,7 +324,6 @@ namespace Mantid
         while( getline(file,line) )
         {
           ++row;
-          //int nchars = (int)line.length(); TODO dead code?
           boost::trim(line);
           if( skipLine(line,true) )
           {
@@ -358,7 +344,6 @@ namespace Mantid
           }
           }
           if( numCols < 0 ) numCols = lineCols;
-          //if( lineCols == numCols || (lineCols == 1))
           if( lineCols == m_baseCols || (lineCols == 1))
           {
             ++matchingRows;
