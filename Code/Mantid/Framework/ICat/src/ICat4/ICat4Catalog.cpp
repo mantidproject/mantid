@@ -127,18 +127,20 @@ namespace Mantid
       bool queryDataset = false;
 
       // Format the timestamps in order to compare them.
-      std::string startDate = formatDateTime(inputs.getStartDate(), "%F %T");
-      std::string endDate   = formatDateTime(inputs.getEndDate(), "%F %T");
+      std::string startDate;
+      std::string endDate;
 
       // Investigation startDate if endDate is not selected
       if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0)
       {
+        startDate = formatDateTime(inputs.getStartDate(), "%F %T");
         investigationWhere.push_back("startDate >= '" + startDate + "'");
       }
 
       // Investigation endDate if startdate is not selected
       if (inputs.getEndDate() != 0 && inputs.getStartDate() == 0)
       {
+        endDate   = formatDateTime(inputs.getEndDate(), "%F %T");
         investigationWhere.push_back("endDate <= '" + endDate + "'");
       }
 
