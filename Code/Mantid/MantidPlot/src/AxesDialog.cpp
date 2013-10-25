@@ -1169,25 +1169,22 @@ void AxesDialog::updateGrid()
       {
         return;
       }
-      for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end(); gridItr++)
+      QList<MdiSubWindow *> windows = m_app->windowsList();
+      foreach(MdiSubWindow *w, windows)
       {
-        QList<MdiSubWindow *> windows = m_app->windowsList();
-        for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end(); gridItr++)
+        if (w->isA("MultiLayer"))
         {
-          foreach(MdiSubWindow *w, windows)
+          QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
+          foreach(Graph *g, layers)
           {
-            if (w->isA("MultiLayer"))
+            if (g->isPiePlot())
             {
-              QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
-              foreach(Graph *g, layers)
-              {
-                if (g->isPiePlot())
-                {
-                  continue;
-                }
-                (*gridItr)->apply(g->plotWidget()->grid(),antiAlias);
-                g->replot();
-              }
+              continue;
+            }
+            for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end(); gridItr++)
+            {
+              (*gridItr)->apply(g->plotWidget()->grid(),antiAlias,true);
+              g->replot();
             }
           }
         }

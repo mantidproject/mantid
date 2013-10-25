@@ -47,7 +47,7 @@ public:
   virtual ~GridDetails();
   void initWidgets();
   bool modified(){return m_modified;}
-  void apply(Grid *grid, bool antialias);
+  void apply(Grid *grid, bool antialias, bool multirun = false);
 public slots:
   void setModified();
 

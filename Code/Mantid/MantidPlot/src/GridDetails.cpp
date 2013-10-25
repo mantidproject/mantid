@@ -214,10 +214,13 @@ void GridDetails::setModified()
 
 /** Applies the grid paremeters to the graphs
 *
+@param grid :: the gird to apply this formatting to
+@bool antialias :: apply antialias to this formatting or not
+@bool multirun :: this will run multiple times for this dialog, and forces even if no modified
 */
-void GridDetails::apply(Grid *grid, bool antialias)
+void GridDetails::apply(Grid *grid, bool antialias, bool multirun)
 {
-  if (m_modified && grid)
+  if ((m_modified || multirun) && grid)
   {
     if (m_alignment == 1)
     {
