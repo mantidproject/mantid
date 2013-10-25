@@ -114,7 +114,7 @@ namespace API{
     
     std::string ignorePatterns(void); 
 
-    void setAutoUpdate(const std::string & path, bool option = true);
+    int setAutoUpdate(const std::string & path, bool option = true);
 
     /// @deprecated Should avoid this, it is not in the design file.
     std::string localRepository() const {return local_repository;  }
@@ -180,6 +180,9 @@ namespace API{
     std::string ignoreregex;    
 
     bool getProxyConfig(std::string&, unsigned short&); 
+
+    std::string getParentFolder(const std::string & entry );
+
   };
   
 }; // namespace API

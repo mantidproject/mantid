@@ -1239,8 +1239,8 @@ namespace LiveData
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp, false);
 
-    // Clear out the old logs
-    temp->mutableRun().clearTimeSeriesLogs();
+    // Clear out the old logs, except for the most recent entry
+    temp->mutableRun().clearOutdatedTimeSeriesLogValues();
 
     // Lock the mutex and swap the workspaces
     {

@@ -2,8 +2,8 @@
 #define MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATE_H_
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/ComptonProfile.h"
+#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid
@@ -58,11 +58,20 @@ namespace CurveFitting
 
     /// Cache reference to workspace for use in setupForFit
     void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
-    /// Cache ptrs to the individial profiles
-    void cacheComptonProfiles();
+    /// Cache ptrs to the individual profiles and their parameters
+    void cacheFunctions();
+    /// Cache ptr to the individual profile and its parameters
+    void cacheComptonProfile(const boost::shared_ptr<ComptonProfile> & profile,
+                             const size_t paramsOffset);
+    /// Cache parameters positions for background function
+    void cacheBackground(const API::IFunction1D_sptr & profile,
+                         const size_t paramsOffset);
     /// Set up the constraint matrices
-    void createConstraintMatrices();
-
+    void createConstraintMatrices(const MantidVec & xValues);
+    /// Set up positivity constraint matrix
+    void createPositivityCM(const MantidVec & xValues);
+    /// Set up equality constraint matrix
+    void createEqualityCM(const size_t nmasses);
     
     /// Holder for non-owning functions cast as ComptonProfiles
     std::vector<ComptonProfile*> m_profiles;
@@ -72,11 +81,17 @@ namespace CurveFitting
     mutable Kernel::DblMatrix m_cmatrix;
     /// Intensity equality constraints
     Kernel::DblMatrix m_eqMatrix;
+    /// Name of order attribute on background function
+    std::string m_bkgdOrderAttr;
+    /// The order of the background
+    int m_bkgdPolyN;
     /// Errors on the data
     std::vector<double>  m_errors;
     /// Ratio of data & errors
     std::vector<double> m_dataErrorRatio;
   };
+
+
 
 } // namespace CurveFitting
 } // namespace Mantid

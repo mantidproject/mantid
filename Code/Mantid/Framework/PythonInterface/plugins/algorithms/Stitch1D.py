@@ -2,6 +2,7 @@
 
 Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputing a stitched Matrix Workspace. This algorithm is a wrapper over [[Stitch1DMD]].
 
+The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
 *WIKI*"""
 from mantid.simpleapi import *
 
@@ -18,12 +19,15 @@ class Stitch1D(PythonAlgorithm):
 	    return "Stitch1D"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("LHSWorkspace", "", Direction.Input), "Input workspace")
-        self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input), "Input workspace")
+        
+        histogram_validator = HistogramValidator()
+        
+        self.declareProperty(MatrixWorkspaceProperty("LHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
+        self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")
         
         overlap_validator = FloatMandatoryValidator() 
-
+        
         self.declareProperty(name="StartOverlap", defaultValue=-1.0, validator=overlap_validator, doc="Overlap in Q.")
         self.declareProperty(name="EndOverlap", defaultValue=-1.0, validator=overlap_validator, doc="End overlap in Q.")
         self.declareProperty(FloatArrayProperty(name="Params", values=[0.1]), doc="Rebinning Parameters. See Rebin for format.")

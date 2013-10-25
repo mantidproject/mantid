@@ -20,7 +20,7 @@ The same syntax as for [[Rebin]]
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- InterpolatingRebin("InWS2","OutWS","x1,dx1,x2")
+ OutWS = InterpolatingRebin("InWS2","x1,dx1,x2")
 
 *WIKI_USAGE*/
 //----------------------------------------------------------------------

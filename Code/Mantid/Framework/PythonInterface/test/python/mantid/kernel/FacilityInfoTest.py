@@ -17,12 +17,10 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertEquals(test_facility.delimiter(), "")
         self.assertEquals(len(test_facility.extensions()), 7)
         self.assertEquals(test_facility.preferredExtension(), ".nxs")
-        self.assertEquals(test_facility.getSoapEndPoint(), "https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT")
         self.assertEquals(len(test_facility.archiveSearch()), 1)
         self.assertEquals(len(test_facility.instruments()), 32)
         self.assertEquals(len(test_facility.instruments("Neutron Diffraction")), 11)
         self.assertTrue(isinstance(test_facility.instrument("WISH"), InstrumentInfo))
-        self.assertEquals(test_facility.catalogName(), "ICat3Catalog")
         self.assertEquals(test_facility.liveListener(), "ISISHistoDataListener")
 
 if __name__ == '__main__':

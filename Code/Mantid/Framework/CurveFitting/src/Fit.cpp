@@ -342,9 +342,10 @@ namespace CurveFitting
     auto mdf = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
     if (mdf)
     {
-      m_workspacePropertyNames.resize(mdf->nFunctions());
+        size_t ndom = mdf->getMaxIndex() + 1;
+      m_workspacePropertyNames.resize( ndom );
       m_workspacePropertyNames[0] = "InputWorkspace";
-      for(size_t i = 1; i < mdf->nFunctions(); ++i)
+      for(size_t i = 1; i < ndom; ++i)
       {
         std::string workspacePropertyName = "InputWorkspace_"+boost::lexical_cast<std::string>(i);
         m_workspacePropertyNames[i] = workspacePropertyName;
