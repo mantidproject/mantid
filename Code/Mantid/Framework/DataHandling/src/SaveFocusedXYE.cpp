@@ -19,6 +19,7 @@
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Exception.h"
 #include <Poco/File.h>
 #include <fstream>
 #include <iomanip>
@@ -128,7 +129,7 @@ void SaveFocusedXYE::exec()
         {
             getFocusedPos(inputWS, i, l1, l2, tth );
         }
-        catch(...)
+        catch(Kernel::Exception::NotFoundError &)
         {
             // if detector not found or there was an error skip this spectrum
             g_log.warning() << "Skipped spectrum " << i << std::endl;
