@@ -1780,7 +1780,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       if (givenVersionNumber == targetVersionNumber)
       {
         isAvailable = true;
-        this->g_log.notice("ParaView is available");
+        this->g_log.information("ParaView is available");
         // Now set the plugin path.
         this->setParaViewPluginPath();
       }
@@ -1789,7 +1789,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
         std::stringstream messageStream;
         messageStream << "The compatible version of ParaView is " << targetVersionNumber << " but the installed version is " << givenVersionNumber;
         this->g_log.debug(messageStream.str());
-        this->g_log.notice("ParaView is not available");
+        this->g_log.information("ParaView is not available");
       }
     }
     else
@@ -1797,13 +1797,13 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       std::stringstream messageStream;
       messageStream << "ParaView version query failed with code: " << rc;
       this->g_log.debug(messageStream.str());
-      this->g_log.notice("ParaView is not available");
+      this->g_log.information("ParaView is not available");
     }
   }
   catch(Poco::SystemException &e)
   {
     this->g_log.debug(e.what());
-    this->g_log.notice("ParaView is not available");
+    this->g_log.information("ParaView is not available");
   }
   return isAvailable; 
 }

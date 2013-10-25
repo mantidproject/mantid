@@ -17995,6 +17995,7 @@ void ApplicationWindow::about2Start(){
     // there is no reason to trigger UpdataScriptRepository if it has never been installed
     Mantid::API::IAlgorithm_sptr update_script_repo = mantidUI->createAlgorithm("UpdateScriptRepository");
     update_script_repo->initialize(); 
+    update_script_repo->setLoggingOffset(1);
     mantidUI->executeAlgorithmAsync(update_script_repo);
   }
 }
