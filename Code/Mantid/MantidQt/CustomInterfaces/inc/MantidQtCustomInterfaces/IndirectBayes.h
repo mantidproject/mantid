@@ -64,6 +64,8 @@ namespace MantidQt
       ~IndirectBayes();
       /// Interface name
       static std::string name() { return "Indirect Bayes"; }
+      // This interface's categories.
+      static QString categoryInfo() { return "Indirect"; }
       virtual void initLayout();
 
     private slots:
