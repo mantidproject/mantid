@@ -105,9 +105,9 @@ class QLines(PythonAlgorithm):
 		if verbOp:
 			logger.notice(Smessage)
 			logger.notice(Rmessage)
-		if fitOp[3] == 1:
-			path = os.path.join(workdir, rsname+'.nxs')	# path name for resnnrm nxs file
-			LoadNexusProcessed(Filename=path, OutputWorkspace='ResNorm')
+
+		rsname = rsname[:-6]
+
 		Main.QLRun(prog,sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,verbOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(QLines)         # Register algorithm with Mantid
