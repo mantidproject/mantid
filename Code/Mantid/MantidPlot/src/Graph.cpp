@@ -5015,27 +5015,25 @@ void Graph::guessUniqueCurveLayout(int& colorIndex, int& symbolIndex)
     }
   }
 
-  for (int i=0; i<n_curves; i++){
+  for (int i=0; i<n_curves; ++i)
+  {
     const PlotCurve *c = dynamic_cast<PlotCurve *>(curve(i));
-    if (c){
-      int index = ColorBox::colorIndex(c->pen().color());
-      if (index > colorIndex)
-        colorIndex = index;
+    if (c)
+    {
+      colorIndex = std::max(ColorBox::colorIndex(c->pen().color()), colorIndex);
 
       QwtSymbol symb = c->symbol();
-      index = SymbolBox::symbolIndex(symb.style());
-      if (index > symbolIndex)
-        symbolIndex = index;
+      symbolIndex = std::max(SymbolBox::symbolIndex(symb.style()), symbolIndex);
     }
   }
   if (n_curves > 1)
-    colorIndex = (colorIndex+1)%16;
-  if (colorIndex == 15) //avoid white invisible curves
-    colorIndex = 0;
+    colorIndex = (++colorIndex)%ColorBox::numPredefinedColors();
+  if (ColorBox::color(colorIndex) == Qt::white) //avoid white invisible curves
+    ++colorIndex;
 
-  symbolIndex = (symbolIndex+1)%15;
-  if (!symbolIndex)
-    symbolIndex = 1;
+  symbolIndex = (++symbolIndex)%15;
+  if (symbolIndex == 0)
+    ++symbolIndex;
 }
 
 void Graph::addFitCurve(QwtPlotCurve *c)
