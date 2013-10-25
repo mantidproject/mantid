@@ -92,7 +92,12 @@ RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
                                               double           peak_radius,
                                               double           inner_radius,
                                               double           outer_radius,
-                                              bool             integrate_edge )
+                                              bool             integrate_edge,
+                                              bool          use_cylinder_integration,
+                                              double        cylinder_length,
+                                              double        cylinder_percent_bkg,
+                                        const std::string & cylinder_profile_fit)
+
 { 
   this->worker         = worker;
   this->peaks_ws_name  = peaks_ws_name;
@@ -101,6 +106,10 @@ RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
   this->inner_radius   = inner_radius;
   this->outer_radius   = outer_radius;
   this->integrate_edge = integrate_edge;
+  this->use_cylinder_integration = use_cylinder_integration;
+  this->cylinder_length = cylinder_length;
+  this->cylinder_percent_bkg = cylinder_percent_bkg;
+  this->cylinder_profile_fit = cylinder_profile_fit;
 }
 
 
@@ -111,7 +120,9 @@ void RunSphereIntegrate::run()
 { 
   worker->sphereIntegrate( peaks_ws_name, event_ws_name,
                            peak_radius, inner_radius, outer_radius,
-                           integrate_edge );
+                           integrate_edge, use_cylinder_integration,
+                           cylinder_length, cylinder_percent_bkg,
+                           cylinder_profile_fit);
 }
 
 
@@ -352,6 +363,8 @@ void MantidEV::initLayout()
    m_uiForm.PeakRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakRadius_ledt));
    m_uiForm.BackgroundInnerRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundInnerRadius_ledt));
    m_uiForm.BackgroundOuterRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundOuterRadius_ledt));
+   m_uiForm.CylinderLength_ledt->setValidator( new QDoubleValidator(m_uiForm.CylinderLength_ledt));
+   m_uiForm.CylinderPercentBkg_ledt->setValidator( new QDoubleValidator(m_uiForm.CylinderPercentBkg_ledt));
    m_uiForm.NBadEdgePixels_ledt->setValidator( new QDoubleValidator(m_uiForm.NBadEdgePixels_ledt));
    m_uiForm.RegionRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.RegionRadius_ledt));
    m_uiForm.PeakSize_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakSize_ledt));
@@ -440,7 +453,11 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.PeakRadius_ledt->setText("0.18");
    m_uiForm.BackgroundInnerRadius_ledt->setText("0.18");
    m_uiForm.BackgroundOuterRadius_ledt->setText("0.23");
+   m_uiForm.CylinderLength_ledt->setText("0.40");
+   m_uiForm.CylinderPercentBkg_ledt->setText("20.0");
    m_uiForm.IntegrateEdge_ckbx->setChecked(true);
+   m_uiForm.Cylinder_ckbx->setChecked(false);
+   m_uiForm.CylinderProfileFit_cmbx->setCurrentIndex(5);
    m_uiForm.TwoDFitIntegration_rbtn->setChecked(false);
    m_uiForm.FitRebinParams_ledt->setText("1000,-0.004,16000");
    m_uiForm.NBadEdgePixels_ledt->setText("5");
@@ -1035,12 +1052,16 @@ void MantidEV::integratePeaks_slot()
    bool sphere_integrate    = m_uiForm.SphereIntegration_rbtn->isChecked();
    bool fit_integrate       = m_uiForm.TwoDFitIntegration_rbtn->isChecked();
    bool ellipsoid_integrate = m_uiForm.EllipsoidIntegration_rbtn->isChecked();
+   bool use_cylinder_integration = true; //m_uiForm.use_cylinder_integration_ckbx->isChecked();
 
-   if ( sphere_integrate )
+   if ( sphere_integrate || use_cylinder_integration)
    {
      double peak_radius    = 0.20;
      double inner_radius   = 0.20;
      double outer_radius   = 0.25;
+     double cylinder_length = 0.0;
+     double cylinder_percent_bkg = 0.0;
+
      if ( !getPositiveDouble( m_uiForm.PeakRadius_ledt, peak_radius ) )
        return;
 
@@ -1052,10 +1073,22 @@ void MantidEV::integratePeaks_slot()
 
      bool integrate_edge = m_uiForm.IntegrateEdge_ckbx->isChecked();
 
+     bool use_cylinder_integration = m_uiForm.Cylinder_ckbx->isChecked();
+
+     if ( !getPositiveDouble(m_uiForm.CylinderLength_ledt, cylinder_length))
+            return;
+
+     if ( !getPositiveDouble(m_uiForm.CylinderPercentBkg_ledt, cylinder_percent_bkg))
+            return;
+
+     std::string cylinder_profile_fit = m_uiForm.CylinderProfileFit_cmbx->currentText().toStdString();
+
      RunSphereIntegrate * runner = new RunSphereIntegrate( worker,
                                         peaks_ws_name, event_ws_name,
                                         peak_radius, inner_radius, outer_radius,
-                                        integrate_edge );
+                                        integrate_edge, use_cylinder_integration,
+                                        cylinder_length, cylinder_percent_bkg,
+                                        cylinder_profile_fit);
 
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
@@ -1647,6 +1680,10 @@ void MantidEV::setEnabledSphereIntParams_slot( bool on )
   m_uiForm.BackgroundOuterRadius_lbl->setEnabled( on );
   m_uiForm.BackgroundOuterRadius_ledt->setEnabled( on );
   m_uiForm.IntegrateEdge_ckbx->setEnabled( on );
+  m_uiForm.Cylinder_ckbx->setEnabled( on );
+  m_uiForm.CylinderLength_ledt->setEnabled( on );
+  m_uiForm.CylinderPercentBkg_ledt->setEnabled( on );
+  m_uiForm.CylinderProfileFit_cmbx->setEnabled( on );
 }
 
 
@@ -1955,7 +1992,11 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("PeakRadius_ledt",m_uiForm.PeakRadius_ledt->text());
   state->setValue("BackgroundInnerRadius_ledt",m_uiForm.BackgroundInnerRadius_ledt->text());
   state->setValue("BackgroundOuterRadius_ledt",m_uiForm.BackgroundOuterRadius_ledt->text());
+  state->setValue("CylinderLength_ledt",m_uiForm.CylinderLength_ledt->text());
+  state->setValue("CylinderPercentBkg_ledt",m_uiForm.CylinderPercentBkg_ledt->text());
   state->setValue("IntegrateEdge_ckbx",m_uiForm.IntegrateEdge_ckbx->isChecked());
+  state->setValue("Cylinder_ckbx",m_uiForm.Cylinder_ckbx->isChecked());
+  state->setValue("CylinderProfileFit_cmbx",m_uiForm.CylinderProfileFit_cmbx->currentIndex());
   state->setValue("TwoDFitIntegration_rbtn",m_uiForm.TwoDFitIntegration_rbtn->isChecked());
   state->setValue("FitRebinParams_ledt",m_uiForm.FitRebinParams_ledt->text());
   state->setValue("NBadEdgePixels_ledt",m_uiForm.NBadEdgePixels_ledt->text());
@@ -2057,7 +2098,11 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "PeakRadius_ledt", m_uiForm.PeakRadius_ledt );
   restore( state, "BackgroundInnerRadius_ledt", m_uiForm.BackgroundInnerRadius_ledt );
   restore( state, "BackgroundOuterRadius_ledt", m_uiForm.BackgroundOuterRadius_ledt );
+  restore( state, "CylinderLength_ledt", m_uiForm.CylinderLength_ledt );
+  restore( state, "CylinderPercentBkg_ledt", m_uiForm.CylinderPercentBkg_ledt );
   restore( state, "IntegrateEdge_ckbx", m_uiForm.IntegrateEdge_ckbx );
+  restore( state, "Cylinder_ckbx", m_uiForm.Cylinder_ckbx );
+  restore( state, "CylinderProfileFit_cmbx", m_uiForm.CylinderProfileFit_cmbx);
   restore( state, "TwoDFitIntegration_rbtn", m_uiForm.TwoDFitIntegration_rbtn );
   restore( state, "FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt );
   restore( state, "NBadEdgePixels_ledt", m_uiForm.NBadEdgePixels_ledt );

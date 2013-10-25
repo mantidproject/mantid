@@ -82,8 +82,8 @@ bkg_inner_radius          = params_dictionary.get('bkg_inner_radius', "0.18")
 bkg_outer_radius          = params_dictionary.get('bkg_outer_radius', "0.23")
 integrate_if_edge_peak    = params_dictionary.get('integrate_if_edge_peak', True)
 
-cylinder_length           = params_dictionary.get('cylinder_length', "0")
-cylinder_percent_bkg      = params_dictionary.get('cylinder_percent_bkg', "0")
+cylinder_length           = params_dictionary.get('cylinder_length', "0.4")
+cylinder_percent_bkg      = params_dictionary.get('cylinder_percent_bkg', "20.0")
 cylinder_int_option       = params_dictionary.get('cylinder_int_option', "GaussianQuadrature")
 cylinder_profile_fit      = params_dictionary.get('cylinder_profile_fit', "Gaussian")
 

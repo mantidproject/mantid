@@ -99,7 +99,11 @@ class RunSphereIntegrate : public QRunnable
                             double           peak_radius,
                             double           inner_radius,
                             double           outer_radius,
-                            bool             integrate_edge );
+                            bool             integrate_edge,
+                            bool             use_cylinder_integration,
+                            double           cylinder_length,
+                            double           cylinder_percent_bkg,
+                      const std::string &    cylinder_profile_fit);
 
   /// Calls worker->sphereIntegrate from a separate thread
   void run();
@@ -112,6 +116,10 @@ class RunSphereIntegrate : public QRunnable
     double           inner_radius; 
     double           outer_radius; 
     bool             integrate_edge; 
+    bool             use_cylinder_integration;
+    double           cylinder_length;
+    double           cylinder_percent_bkg;
+    std::string      cylinder_profile_fit;
 };
 
 

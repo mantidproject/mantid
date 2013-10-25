@@ -57,7 +57,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -1512,7 +1512,7 @@
        <property name="geometry">
         <rect>
          <x>430</x>
-         <y>520</y>
+         <y>580</y>
          <width>115</width>
          <height>28</height>
         </rect>
@@ -1537,14 +1537,14 @@
         <string>Apply the IntegratePeaksMD&lt;br&gt; algorithm to integrate the current list of peaks, using spherical regions around the peaks in reciprocal space.  This is the fastest of the integration methods. See the algorithm documentation for more details.</string>
        </property>
        <property name="text">
-        <string>Spherical Integration</string>
+        <string>Spherical or Cylindrical Integration</string>
        </property>
       </widget>
       <widget class="QRadioButton" name="TwoDFitIntegration_rbtn">
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>160</y>
+         <y>280</y>
          <width>311</width>
          <height>27</height>
         </rect>
@@ -1560,7 +1560,7 @@
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>280</y>
+         <y>400</y>
          <width>481</width>
          <height>27</height>
         </rect>
@@ -1576,7 +1576,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>310</y>
+         <y>430</y>
          <width>271</width>
          <height>21</height>
         </rect>
@@ -1589,7 +1589,7 @@
        <property name="geometry">
         <rect>
          <x>390</x>
-         <y>310</y>
+         <y>430</y>
          <width>81</width>
          <height>21</height>
         </rect>
@@ -1605,7 +1605,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>370</y>
+         <y>490</y>
          <width>231</width>
          <height>24</height>
         </rect>
@@ -1618,7 +1618,7 @@
        <property name="geometry">
         <rect>
          <x>390</x>
-         <y>370</y>
+         <y>490</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1634,7 +1634,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>340</y>
+         <y>460</y>
          <width>271</width>
          <height>21</height>
         </rect>
@@ -1650,7 +1650,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>400</y>
+         <y>520</y>
          <width>281</width>
          <height>24</height>
         </rect>
@@ -1663,7 +1663,7 @@
        <property name="geometry">
         <rect>
          <x>390</x>
-         <y>400</y>
+         <y>520</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1679,7 +1679,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>430</y>
+         <y>550</y>
          <width>281</width>
          <height>31</height>
         </rect>
@@ -1692,7 +1692,7 @@
        <property name="geometry">
         <rect>
          <x>390</x>
-         <y>430</y>
+         <y>550</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1708,7 +1708,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>190</y>
+         <y>310</y>
          <width>201</width>
          <height>21</height>
         </rect>
@@ -1721,7 +1721,7 @@
        <property name="geometry">
         <rect>
          <x>280</x>
-         <y>190</y>
+         <y>310</y>
          <width>251</width>
          <height>21</height>
         </rect>
@@ -1737,7 +1737,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>220</y>
+         <y>340</y>
          <width>291</width>
          <height>24</height>
         </rect>
@@ -1750,7 +1750,7 @@
        <property name="geometry">
         <rect>
          <x>390</x>
-         <y>220</y>
+         <y>340</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1766,7 +1766,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>250</y>
+         <y>370</y>
          <width>271</width>
          <height>23</height>
         </rect>
@@ -1880,6 +1880,143 @@
        <property name="text">
         <string>Integrate if on Edge</string>
        </property>
+      </widget>
+      <widget class="QCheckBox" name="Cylinder_ckbx">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>160</y>
+         <width>271</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>If true, cylinder instead of sphere</string>
+       </property>
+       <property name="text">
+        <string>Cylinder Integration</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="CylinderPercentBkg_ledt">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>220</y>
+         <width>81</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Percent background for cylinder</string>
+       </property>
+       <property name="text">
+        <string>20.0</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="CylinderLength_ledt">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>190</y>
+         <width>81</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Length of cylinder</string>
+       </property>
+       <property name="text">
+        <string>0.4</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="CylinderPercentBkg_lbl">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>220</y>
+         <width>311</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cylinder Percent Background</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="CylinderLength_lbl">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>190</y>
+         <width>311</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cylinder Length</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="CylinderProfileFit_cmbx">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>240</y>
+         <width>151</width>
+         <height>32</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Fit for Cylinder Profile</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>BackToBackExponential</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bk2BKExpConvPV</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>DeltaFunction</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ElasticDiffSphere</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ExamplePeakFunction</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Gaussian</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>IkedaCarpenterPV</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Lorentzian</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>NoFit</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Voigt</string>
+        </property>
+       </item>
       </widget>
      </widget>
      <widget class="QWidget" name="PointInfo_tab">
