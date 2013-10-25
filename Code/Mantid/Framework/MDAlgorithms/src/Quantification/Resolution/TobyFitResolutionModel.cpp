@@ -41,12 +41,13 @@ namespace Mantid
      * Default constructor
      */
     TobyFitResolutionModel::TobyFitResolutionModel()
-      : MDResolutionConvolution(), m_randomNumbers(),
+      : MDResolutionConvolution(), m_randomNumbers(1, NULL),
         m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4),m_mcRelErrorTol(1e-5),
         m_foregroundOnly(false), m_mosaicActive(true),
         m_bmatrix(1), m_yvector(1), m_etaInPlane(1, 0.0), m_etaOutPlane(1, 0.0), m_deltaQE(1,std::vector<double>(4, 0.0)),
         m_exptCache()
     {
+      setupRandomNumberGenerator();
     }
 
     /**
@@ -62,6 +63,7 @@ namespace Mantid
         m_bmatrix(1), m_yvector(1), m_etaInPlane(1,0.0), m_etaOutPlane(1,0.0), m_deltaQE(1,std::vector<double>(4, 0.0)),
         m_exptCache()
     {
+      setupRandomNumberGenerator();
     }
 
     /**
@@ -69,6 +71,9 @@ namespace Mantid
      */
     TobyFitResolutionModel::~TobyFitResolutionModel()
     {
+      deleteRandomNumberGenerator();
+
+      // Remove experiment cache
       auto iter = m_exptCache.begin();
       while(iter != m_exptCache.end())
       {
@@ -196,7 +201,6 @@ namespace Mantid
       }
       else
       {
-        std::cerr << "Setting attribute on TobyFitYVector " << name << "\n";
         for(auto iter = m_yvector.begin(); iter != m_yvector.end(); ++iter)
         {
           iter->setAttribute(name, value);
@@ -303,6 +307,7 @@ namespace Mantid
       const double dqlab0 = (L00*xVec3 + L01*xVec4 + L02*xVec5)/determinant;
       const double dqlab1 = (L10*xVec3 + L11*xVec4 + L12*xVec5)/determinant;
       const double dqlab2 = (L20*xVec3 + L21*xVec4 + L22*xVec5)/determinant;
+
       std::vector<double> & deltaQE = m_deltaQE[PARALLEL_THREAD_NUMBER];
       deltaQE[0] = (xVec0 - dqlab0);
       deltaQE[1] = (xVec1 - dqlab1);
@@ -467,9 +472,9 @@ namespace Mantid
     void TobyFitResolutionModel::setNThreads(int nthreads)
     {
       if(nthreads <= 0) nthreads = 1; // Ensure we have a sensible number
-      if(nthreads == 1 ) return;
+      if(nthreads == 1 ) return; // done on construction
 
-      m_randomNumbers = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads);
+      m_randomNumbers = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads, NULL);
       m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, m_bmatrix[0]); // Initialize with copy of current
       m_yvector = std::vector<TobyFitYVector>(nthreads, m_yvector[0]);
       m_etaInPlane = std::vector<double>(nthreads, 0.0);
@@ -501,9 +506,11 @@ namespace Mantid
        *  3 - As above for 2,4. Generator is NOT restarted but two sets must
        *      be used to ensure partial derivatives use the same set of deviates
        */
-      const unsigned int nrand = m_yvector[0].requiredRandomNums() + 2; // Extra 2 for mosaic
+      // Clear out any old ones
+      deleteRandomNumberGenerator();
 
-      const size_t nthreads(m_randomNumbers.size());
+      const unsigned int nrand = m_yvector[0].requiredRandomNums() + 2; // Extra 2 for mosaic
+      const size_t ngenerators(m_yvector.size());
       if(m_mcType % 2 == 0)// Pseudo-random
       {
         size_t seed(0);
@@ -511,18 +518,31 @@ namespace Mantid
         else if(m_mcType == 4) seed = static_cast<size_t>(Poco::Timestamp().epochMicroseconds());
 
         typedef NDPseudoRandomNumberGenerator<MersenneTwister> NDMersenneTwister;
-        for(size_t i = 0; i < nthreads; ++i)
+        for(size_t i = 0; i < ngenerators; ++i)
         {
           m_randomNumbers[i] = new NDMersenneTwister(nrand, seed, 0.0, 1.0);
         }
       }
       else //Quasi-random
       {
-        for(size_t i = 0; i < nthreads; ++i)
+        for(size_t i = 0; i < ngenerators; ++i)
         {
           m_randomNumbers[i] = new Kernel::SobolSequence(nrand);
         }
       }
+    }
+
+    /**
+     */
+    void TobyFitResolutionModel::deleteRandomNumberGenerator()
+    {
+      // Delete random number generator(s)
+      auto iend = m_randomNumbers.end();
+      for(auto it = m_randomNumbers.begin(); it != iend; ++it)
+      {
+        delete *it; // Delete pointer at given iterator location. vector stays same size
+      }
+      m_randomNumbers.clear();
     }
 
   }
