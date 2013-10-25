@@ -972,25 +972,21 @@ double getPositiveMin(const MantidQwtWorkspaceData& curveData, const double from
  */
 void LineViewer::setupScaleEngine(MantidQwtWorkspaceData& curveData)
 {
-  double from = curveData.y(0);
-  double yPositiveMin = from;
-  double to = curveData.y(curveData.size() - 1);
-
   QwtScaleEngine* engine = NULL;
+  auto from = curveData.getYMin();
+  auto to = curveData.getYMax();
+
   if (m_lineOptions->isLogScaledY())
   {
     engine = new QwtLog10ScaleEngine();
-    yPositiveMin = getPositiveMin(curveData, std::max(to, from));
-    curveData.saveLowestPositiveValue(yPositiveMin);
+    curveData.saveLowestPositiveValue(from);
   }
   else
   {
     engine = new QwtLinearScaleEngine();
   }
-
-  double stepSize;
-  engine->autoScale(100, yPositiveMin, to, stepSize);
   m_plot->setAxisScaleEngine(QwtPlot::yLeft, engine);
+  m_plot->setAxisScale(QwtPlot::yLeft, from, to);
 }
 
 //-----------------------------------------------------------------------------
