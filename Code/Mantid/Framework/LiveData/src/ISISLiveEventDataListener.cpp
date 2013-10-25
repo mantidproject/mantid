@@ -262,9 +262,9 @@ void ISISLiveEventDataListener::run()
             while( nread < events.head_n.nevents )
             {
                 int ntoread = m_socket.available() / static_cast<int>(sizeof(TCPStreamEventNeutron));
-                if ( ntoread > (events.head_n.nevents - nread) )
+                if ( ntoread > static_cast<int>(events.head_n.nevents - nread) )
                 {
-                    ntoread = events.head_n.nevents - nread;
+                    ntoread = static_cast<int>(events.head_n.nevents - nread);
                 }
                 if (ntoread > 0)
                 {
