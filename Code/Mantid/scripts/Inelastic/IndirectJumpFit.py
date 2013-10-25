@@ -54,7 +54,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 		return
 
 	#run fit function
-	fitWS = samWS[:-9] +'_'+ jumpFunc +'fit'
+	fitWS = samWS[:-10] +'_'+ jumpFunc +'fit'
 	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fitWS)
 
 	#process output options
