@@ -163,7 +163,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 	array_len = 4096						   # length of array in Fortran
 	CheckXrange(erange,'Energy')
 
-	nbin,nrbin = nbins
+	nbin,nrbin = nbins[0], nbins[1]
 
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
