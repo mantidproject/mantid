@@ -27,9 +27,9 @@ public:
 
   SaveAscii2Test()
   {
-    m_filename = "SaveAsciiTestFile.dat";
-    m_filename_nohead = "SaveAsciiTestFileWithoutHeader.dat";
-    m_name = "SaveAsciiWS";
+    m_filename = "SaveAscii2TestFile.dat";
+    m_filename_nohead = "SaveAsciiTest2FileWithoutHeader.dat";
+    m_name = "SaveAscii2WS";
   }
   ~SaveAscii2Test()
   {
