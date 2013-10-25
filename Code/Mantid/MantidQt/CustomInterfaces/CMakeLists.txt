@@ -23,7 +23,6 @@ set ( SRC_FILES
     src/MSDFit.cpp
 	src/MuonAnalysis.cpp
 	src/MuonAnalysisFitDataTab.cpp
-	src/MuonAnalysisHelper.cpp
 	src/MuonAnalysisOptionTab.cpp
 	src/MuonAnalysisResultTableTab.cpp
 	src/QtWorkspaceMementoModel.cpp
@@ -71,7 +70,6 @@ set ( INC_FILES
     inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
-	inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
