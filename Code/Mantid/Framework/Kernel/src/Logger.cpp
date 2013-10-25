@@ -30,9 +30,8 @@ namespace Kernel
   /** Constructor
    * @param name :: The class name invoking this logger
    */
-  Logger::Logger(const std::string& name) : m_enabled(true)
+  Logger::Logger(const std::string& name) : m_enabled(true), m_name(name), m_levelOffset(0)
   {
-    m_name = name;
     m_log=&Poco::Logger::get(m_name);
     m_logStream = new Mantid::Kernel::ThreadSafeLogStream(*m_log);
   }
@@ -226,14 +225,7 @@ namespace Kernel
    */
   std::ostream& Logger::fatal()
   {
-    if (m_enabled)
-    {
-      return m_logStream->fatal();
-    }
-    else
-    {
-      return *m_nullStream;
-    }
+    return getLogStream(Priority::PRIO_FATAL);
   }
 
   /** This class implements an ostream interface to the Logger for error messages.
@@ -245,14 +237,7 @@ namespace Kernel
    */
   std::ostream& Logger::error()
   {
-    if (m_enabled)
-    {
-      return m_logStream->error();
-    }
-    else
-    {
-      return *m_nullStream;
-    }
+    return getLogStream(Priority::PRIO_ERROR);
   }
 
   /** This class implements an ostream interface to the Logger for warning messages.
@@ -264,14 +249,7 @@ namespace Kernel
    */
   std::ostream& Logger::warning()
   {
-    if (m_enabled)
-    {
-      return m_logStream->warning();
-    }
-    else
-    {
-      return *m_nullStream;
-    }
+    return getLogStream(Priority::PRIO_WARNING);
   }
 
   /** This class implements an ostream interface to the Logger for notice messages.
@@ -283,14 +261,7 @@ namespace Kernel
    */
   std::ostream& Logger::notice()
   {
-    if (m_enabled)
-    {
-      return m_logStream->notice();
-    }
-    else
-    {
-      return *m_nullStream;
-    }
+    return getLogStream(Priority::PRIO_NOTICE);
   }
 
   /** This class implements an ostream interface to the Logger for information messages.
@@ -302,14 +273,7 @@ namespace Kernel
    */
   std::ostream& Logger::information()
   {
-    if (m_enabled)
-    {
-      return m_logStream->information();
-    }
-    else
-    {
-      return *m_nullStream;
-    }
+    return getLogStream(Priority::PRIO_INFORMATION);
   }
 
   /** This class implements an ostream interface to the Logger for debug messages.
@@ -321,14 +285,7 @@ namespace Kernel
    */
   std::ostream& Logger::debug()
   {
-    if (m_enabled)
-    {
-      return m_logStream->debug();
-    }
-    else
-    {
-      return *m_nullStream;
-    }
+     return getLogStream(Priority::PRIO_DEBUG);
   }
 
   /** releases resources and deletes this object.
@@ -463,9 +420,11 @@ namespace Kernel
 
     try
     {
-      switch( priority )
+      switch( applyLevelOffset(priority) )
       {
       case Poco::Message::PRIO_FATAL: m_log->fatal(message);
+      break;
+      case Poco::Message::PRIO_CRITICAL: m_log->critical(message);
       break;
       case Poco::Message::PRIO_ERROR: m_log->error(message);
       break;
@@ -477,6 +436,8 @@ namespace Kernel
       break;
       case Poco::Message::PRIO_DEBUG: m_log->debug(message);
       break;
+      case Poco::Message::PRIO_TRACE: m_log->trace(message);
+      break;
       default:
         break;
       }
@@ -487,7 +448,85 @@ namespace Kernel
       std::cerr << "Error in logging framework: " << e.what();
     }
   }
+
+   /**
+   * Log a given message at a given priority
+   * @param message :: The message to log
+   * @param priority :: The priority level
+   */
+  std::ostream& Logger::getLogStream(Logger::Priority priority)
+  {
+    if( !m_enabled ) return *m_nullStream;
+
+    switch( applyLevelOffset(priority) )
+    {
+    case Poco::Message::PRIO_FATAL: return m_logStream->fatal();
+    break;
+    case Poco::Message::PRIO_CRITICAL:  return m_logStream->critical();
+    break;
+    case Poco::Message::PRIO_ERROR: return m_logStream->error();
+    break;
+    case Poco::Message::PRIO_WARNING: return m_logStream->warning();
+    break;
+    case Poco::Message::PRIO_NOTICE: return m_logStream->notice();
+    break;
+    case Poco::Message::PRIO_INFORMATION:return m_logStream->information();
+    break;
+    case Poco::Message::PRIO_DEBUG:  return m_logStream->debug();
+    break;
+    default:
+      return *m_nullStream;
+    }
+
+  }
+
+  /**
+   * Adjust a log priority level based off the m_levelOffset
+   * @param proposedLevel :: The proposed level
+   * @returns The offseted level
+   */
+  Logger::Priority Logger::applyLevelOffset(Logger::Priority proposedLevel) 
+  {
+    int retVal = proposedLevel;
+    //fast exit is offset is 0
+    if (m_levelOffset==0)
+    {
+      return proposedLevel;
+    }
+    else
+    {
+      retVal += m_levelOffset;
+      if (retVal < static_cast<int>(Priority::PRIO_FATAL))
+      {
+        retVal = Priority::PRIO_FATAL;
+      }
+      else if (retVal > static_cast<int>(Priority::PRIO_TRACE))
+      {
+        retVal = Priority::PRIO_TRACE;
+      }
+    }
+    //Logger::Priority p(retVal);
+    return static_cast<Logger::Priority>(retVal);
+  }
   
+    
+  /**
+   * Sets the Logger's log offset level.
+   * @param level :: The  level offset to use
+   */
+   void Logger::setLevelOffset(int level)
+   {
+     m_levelOffset = level;
+   }
+
+   /**
+   * Gets the Logger's log offset level.
+   * @returns The offset level
+   */ /// Gets the Logger's log offset level.
+   int Logger::getLevelOffset()
+   {
+     return m_levelOffset;
+   }
 
 } // namespace Kernel
 } // Namespace Mantid
