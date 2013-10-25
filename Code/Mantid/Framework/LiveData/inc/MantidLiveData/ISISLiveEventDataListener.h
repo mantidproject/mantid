@@ -127,7 +127,7 @@ namespace Mantid
       // Initialize the event buffer
       void initEventBuffer(const TCPStreamEventDataSetup& setup);
       // Save received event data in the buffer workspace
-      void saveEvents(const std::vector<TCPStreamEventNeutron>& data, const Mantid::Kernel::DateAndTime& pulseTime);
+      void saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Kernel::DateAndTime &pulseTime, const size_t period);
       // Set the spectra-detector map
       void loadSpectraMap();
       // Load the instrument
@@ -151,7 +151,7 @@ namespace Mantid
       boost::shared_ptr<std::runtime_error> m_backgroundException;
 
       /// Used to buffer events between calls to extractData()
-      DataObjects::EventWorkspace_sptr m_eventBuffer;
+      std::vector<DataObjects::EventWorkspace_sptr> m_eventBuffer;
       /// Protects m_eventBuffer
       Poco::FastMutex m_mutex;
       /// Run start time

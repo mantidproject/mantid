@@ -165,28 +165,45 @@ void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime)
 // return a workspace with collected events
 boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData()
 {
-    if ( !m_eventBuffer )
+    if ( !m_eventBuffer[0] )
     {
         throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
     }
 
-    //Make a brand new EventWorkspace
-    DataObjects::EventWorkspace_sptr temp = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
+    Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
 
-    //Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp, false);
-
-    // Clear out the old logs
-    temp->mutableRun().clearTimeSeriesLogs();
-
-    // Lock the mutex and swap the workspaces
+    std::vector<DataObjects::EventWorkspace_sptr> outWorkspaces(m_numberOfPeriods);
+    for(size_t i = 0; i < static_cast<size_t>(m_numberOfPeriods); ++i)
     {
-      Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
-      std::swap(m_eventBuffer, temp);
-    }  // mutex automatically unlocks here
 
-    return temp;
+        //Make a brand new EventWorkspace
+        DataObjects::EventWorkspace_sptr temp = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+            API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer[i]->getNumberHistograms(), 2, 1));
+
+        //Copy geometry over.
+        API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer[i], temp, false);
+
+        // Clear out the old logs
+        temp->mutableRun().clearTimeSeriesLogs();
+
+        // Swap the workspaces
+        std::swap(m_eventBuffer[i], temp);
+
+        outWorkspaces[i] = temp;
+    }
+
+    if ( m_numberOfPeriods > 1 )
+    {
+        // create a workspace group in case the data are multiperiod
+        auto workspaceGroup = API::WorkspaceGroup_sptr( new API::WorkspaceGroup );
+        for(size_t i = 0; i < static_cast<size_t>(m_numberOfPeriods); ++i)
+        {
+            workspaceGroup->addWorkspace( outWorkspaces[i] );
+        }
+        return workspaceGroup;
+    }
+
+    return outWorkspaces[0];
 }
 
 bool ISISLiveEventDataListener::isConnected()
@@ -236,7 +253,7 @@ void ISISLiveEventDataListener::run()
             Mantid::Kernel::DateAndTime pulseTime = m_startTime + static_cast<double>( events.head_n.frame_time_zero );
             // Save the pulse charge in the logs
             double protons = static_cast<double>( events.head_n.protons );
-            m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( PROTON_CHARGE_PROPERTY)
+            m_eventBuffer[0]->mutableRun().getTimeSeriesProperty<double>( PROTON_CHARGE_PROPERTY)
                           ->addValue( pulseTime, protons );
 
             events.data.resize(events.head_n.nevents);
@@ -265,7 +282,7 @@ void ISISLiveEventDataListener::run()
             }
 
             // store the events
-            saveEvents( events.data, pulseTime );
+            saveEvents( events.data, pulseTime, events.head_n.period );
         }
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
@@ -306,15 +323,17 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
     // Create an event workspace for the output
     auto workspace = API::WorkspaceFactory::Instance().create( "EventWorkspace", m_numberOfSpectra, 2, 1 );
 
+    m_eventBuffer.resize(m_numberOfPeriods);
+
     // save this workspace as the event buffer
-    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>( workspace );
-    if ( !m_eventBuffer )
+    m_eventBuffer[0] = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>( workspace );
+    if ( !m_eventBuffer[0] )
     {
         throw std::runtime_error("Failed to create an event workspace");
     }
     // Set the units
-    m_eventBuffer->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
-    m_eventBuffer->setYUnit( "Counts");
+    m_eventBuffer[0]->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+    m_eventBuffer[0]->setYUnit( "Counts");
 
     // Set the spectra-detector maping
     loadSpectraMap();
@@ -325,24 +344,37 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
 
     // Set the run number
     std::string run_num = boost::lexical_cast<std::string>( setup.head_setup.run_number );
-    m_eventBuffer->mutableRun().addLogData( new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY, run_num) );
+    m_eventBuffer[0]->mutableRun().addLogData( new Mantid::Kernel::PropertyWithValue<std::string>(RUN_NUMBER_PROPERTY, run_num) );
 
     // Add the proton charge property
-    m_eventBuffer->mutableRun().addLogData( new Mantid::Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY) );
+    m_eventBuffer[0]->mutableRun().addLogData( new Mantid::Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY) );
+
+    if ( m_numberOfPeriods > 1 )
+    {
+        for(size_t i = 1; i < static_cast<size_t>(m_numberOfPeriods); ++i)
+        {
+            // create an event workspace for each period
+            m_eventBuffer[i] = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+                API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer[0]->getNumberHistograms(), 2, 1));
+
+            //Copy geometry over.
+            API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer[0], m_eventBuffer[i], false);
+        }
+    }
 }
 
 /**
  * Save received event data in the buffer workspace.
  * @param data :: A vector with events.
  */
-void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Kernel::DateAndTime &pulseTime)
+void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Kernel::DateAndTime &pulseTime, const size_t period)
 {
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
     for(auto it = data.begin(); it != data.end(); ++it)
     {
         Mantid::DataObjects::TofEvent event( it->time_of_flight, pulseTime );
-        m_eventBuffer->getEventList( it->spectrum ).addEventQuickly( event );
+        m_eventBuffer[period]->getEventList( it->spectrum ).addEventQuickly( event );
     }
 }
 
@@ -364,11 +396,11 @@ void ISISLiveEventDataListener::loadSpectraMap()
     if ( ndet < nspec ) nspec = ndet;
     for(size_t i = 0; i < static_cast<size_t>(nspec); ++i)
     {
-        m_eventBuffer->getSpectrum(i)->setSpectrumNo( spec[i] );
+        m_eventBuffer[0]->getSpectrum(i)->setSpectrumNo( spec[i] );
     }
 
     // set up the mapping
-    m_eventBuffer->updateSpectraUsing(API::SpectrumDetectorMapping(spec, udet));
+    m_eventBuffer[0]->updateSpectraUsing(API::SpectrumDetectorMapping(spec, udet));
 }
 
 /**
@@ -380,7 +412,7 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
     API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument",-1);
     alg->initialize();
     alg->setPropertyValue("InstrumentName",instrName);
-    alg->setProperty("Workspace", m_eventBuffer);
+    alg->setProperty("Workspace", m_eventBuffer[0]);
     alg->setProperty("RewriteSpectraMap", false);
     alg->setChild(true);
     alg->execute();
