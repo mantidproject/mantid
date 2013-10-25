@@ -30,7 +30,7 @@ namespace Kernel
   /** Constructor
    * @param name :: The class name invoking this logger
    */
-  Logger::Logger(const std::string& name) : m_enabled(true), m_name(name), m_levelOffset(0)
+  Logger::Logger(const std::string& name) : m_name(name), m_levelOffset(0), m_enabled(true) 
   {
     m_log=&Poco::Logger::get(m_name);
     m_logStream = new Mantid::Kernel::ThreadSafeLogStream(*m_log);
