@@ -567,6 +567,10 @@ void UnwrappedSurface::setFlippedView(bool on)
     {
         m_flippedView = on;
         m_viewRect.xFlip();
+        for(int i = 0;i < m_zoomStack.size(); ++i)
+        {
+            m_zoomStack[i].xFlip();
+        }
     }
 }
 

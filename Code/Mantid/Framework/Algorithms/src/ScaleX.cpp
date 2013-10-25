@@ -1,8 +1,7 @@
 /*WIKI* 
 
-Scales the X axis of the input workspace by the amount requested. The amount can be specified either as:
-* an absolute numerical value via the "Factor" argument or
-* an detector parameter name whose value is retrieved from the instrument.
+Scales the X axis of the input workspace by the amount requested. 
+
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -35,10 +34,7 @@ void ScaleX::initDocs()
 /**
  * Default constructor
  */
-ScaleX::ScaleX() : API::Algorithm(), m_progress(NULL), m_algFactor(1.0),
-                   m_parname(), m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1)
-{
-}
+ScaleX::ScaleX() : API::Algorithm(), m_progress(NULL) {}
 
 /**
  * Destructor
@@ -58,7 +54,7 @@ void ScaleX::init()
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace");
   auto isDouble = boost::make_shared<BoundedValidator<double> >();
-  declareProperty("Factor", m_algFactor, isDouble, "The value by which to scale the input workspace. Default is 1.0");
+  declareProperty("Factor", 1.0, isDouble, "The value by which to scale the input workspace. Default is 1.0");
   std::vector<std::string> op(2);
   op[0] = "Multiply";
   op[1] = "Add";
@@ -67,11 +63,6 @@ void ScaleX::init()
   mustBePositive->setLower(0);
   declareProperty("IndexMin", 0, mustBePositive, "The workspace index of the first spectrum to scale. Only used if IndexMax is set.");
   declareProperty("IndexMax", Mantid::EMPTY_INT(), mustBePositive, "The workspace index of the last spectrum to scale. Only used if explicitly set.");
-  //Add InstrumentParameter property here so as not to mess with the parameter order for current scripts
-  declareProperty("InstrumentParameter", m_parname, "The name of an instrument parameter whose value is used to scale as the input factor");
-  declareProperty("Combine", m_combine, "If true, combine the value given in the Factor property with the value "
-                  "obtained from the instrument parameter. The factors are combined using the operation specified "
-                  "in the Operation parameter");
 }
 
 /**
@@ -81,31 +72,24 @@ void ScaleX::exec()
 {
   //Get input workspace and offset
   const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
-  m_algFactor = getProperty("Factor");
-  m_parname = getPropertyValue("InstrumentParameter");
-  m_combine = getProperty("Combine");
-  if(m_combine && m_parname.empty())
-  {
-    throw std::invalid_argument("Combine behaviour requested but the InstrumentParameter argument is blank.");
-  }
-
+  factor = getProperty("Factor");
   const std::string op = getPropertyValue("Operation");
   API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
   //Get number of histograms
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
   m_progress = new API::Progress(this, 0.0, 1.0, histnumber+1);
   m_progress->report("Scaling X");
-  m_wi_min = 0;
-  m_wi_max = histnumber-1;
+  wi_min = 0;
+  wi_max = histnumber-1;
   //check if workspace indexes have been set
   int tempwi_min = getProperty("IndexMin");
   int tempwi_max = getProperty("IndexMax");
   if ( tempwi_max != Mantid::EMPTY_INT() )
   {
-    if ((m_wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= m_wi_max))
+    if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= wi_max))
     {
-      m_wi_min = tempwi_min;
-      m_wi_max = tempwi_max;
+      wi_min = tempwi_min;
+      wi_max = tempwi_max;
     }
     else
     {
@@ -113,11 +97,6 @@ void ScaleX::exec()
       throw std::invalid_argument("Inconsistent properties defined");
     }
   }
-  // Setup appropriate binary function
-  const bool multiply = (op=="Multiply");
-  if(multiply) m_binOp = std::multiplies<double>();
-  else m_binOp = std::plus<double>();
-
   //Check if its an event workspace
   EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (eventWS != NULL)
@@ -125,45 +104,42 @@ void ScaleX::exec()
     this->execEvent();
     return;
   }
-
   // do the shift in X
   PARALLEL_FOR2(inputW, outputW)
-  for (int i = 0; i < histnumber; ++i)
+  for (int i=0; i < histnumber; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-
-    //Copy y and e data
-    auto & outY = outputW->dataY(i);
-    outY = inputW->dataY(i);
-    auto & outE = outputW->dataE(i);
-    outE = inputW->dataE(i);
-
-    auto & outX = outputW->dataX(i);
-    const auto & inX = inputW->readX(i);
-    //Change bin value by offset
-    if ((i >= m_wi_min) && (i <= m_wi_max))
+    //Do the offsetting
+    for (int j=0; j <  static_cast<int>(inputW->readX(i).size()); ++j)
     {
-      double factor = getScaleFactor(inputW, i);
-      // Do the offsetting
-      std::transform(inX.begin(), inX.end(), outX.begin(), std::bind2nd(m_binOp, factor));
-      // reverse the vector if multiplicative factor was negative
-      if(multiply && factor < 0.0)
+      //Change bin value by offset
+      if ((i >= wi_min) && (i <= wi_max))
       {
-        std::reverse( outX.begin(), outX.end() );
-        std::reverse( outY.begin(), outY.end() );
-        std::reverse( outE.begin(), outE.end() );
+        if(op=="Multiply")
+        {
+          outputW->dataX(i)[j] = inputW->readX(i)[j] * factor;
+        }
+        else if(op=="Add")
+        {
+          outputW->dataX(i)[j] = inputW->readX(i)[j] + factor;
+        }
       }
+      else outputW->dataX(i)[j] = inputW->readX(i)[j];
     }
-    else
+    //Copy y and e data
+    outputW->dataY(i) = inputW->dataY(i);
+    outputW->dataE(i) = inputW->dataE(i);
+    // reverse the vector if multiplicative factor was negative
+    if( (i >= wi_min) && (i <= wi_max) && op=="Multiply" && factor<0 )
     {
-      outX = inX; //copy
+      std::reverse( outputW->dataX(i).begin(), outputW->dataX(i).end() );
+      std::reverse( outputW->dataY(i).begin(), outputW->dataY(i).end() );
+      std::reverse( outputW->dataE(i).begin(), outputW->dataE(i).end() );
     }
     m_progress->report("Scaling X");
-
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
   // Copy units
   if (outputW->getAxis(0)->unit().get())
     outputW->getAxis(0)->unit() = inputW->getAxis(0)->unit();
@@ -179,6 +155,18 @@ void ScaleX::exec()
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",outputW);
 }
+
+API::MatrixWorkspace_sptr ScaleX::createOutputWS(API::MatrixWorkspace_sptr input)
+{
+  //Check whether input = output to see whether a new workspace is required.
+  MatrixWorkspace_sptr output = getProperty("OutputWorkspace");
+  if ( input != output )
+  {
+    //Create new workspace for output from old
+    output = API::WorkspaceFactory::Instance().create(input);
+  }
+  return output;
+ }
 
 void ScaleX::execEvent()
 {
@@ -209,19 +197,19 @@ void ScaleX::execEvent()
   {
     PARALLEL_START_INTERUPT_REGION
     //Do the offsetting
-    if ((i >= m_wi_min) && (i <= m_wi_max))
+    if ((i >= wi_min) && (i <= wi_max))
     {
       if(op=="Multiply")
       {
-        outputWS->getEventList(i).scaleTof(getScaleFactor(inputWS, i));
-        if( m_algFactor < 0 )
+        outputWS->getEventList(i).scaleTof(factor);
+        if( factor < 0 )
         {
           outputWS->getEventList(i).reverse();
         }
       }
       else if(op=="Add")
       {
-        outputWS->getEventList(i).addTof(getScaleFactor(inputWS, i));
+        outputWS->getEventList(i).addTof(factor);
       }
     }
     m_progress->report("Scaling X");
@@ -230,66 +218,6 @@ void ScaleX::execEvent()
   PARALLEL_CHECK_INTERUPT_REGION
   outputWS->clearMRU();
 }
-
-API::MatrixWorkspace_sptr ScaleX::createOutputWS(const API::MatrixWorkspace_sptr & input)
-{
-  //Check whether input = output to see whether a new workspace is required.
-  MatrixWorkspace_sptr output = getProperty("OutputWorkspace");
-  if ( input != output )
-  {
-    //Create new workspace for output from old
-    output = API::WorkspaceFactory::Instance().create(input);
-  }
-  return output;
- }
-
-
-/**
- * If the InstrumentParameter property is set then it attempts to retrieve the parameter
- * from the component, else it returns the value of the Factor property
- * @param inputWS A pointer to the input workspace
- * @param index The current index to inspect
- * @return Value for the scale factor
- */
-double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr & inputWS, const size_t index)
-{
-  if(m_parname.empty()) return m_algFactor;
-
-  // Try and get factor from component. If we see a DetectorGroup use this will use the first component
-  Geometry::IDetector_const_sptr det;
-  auto inst = inputWS->getInstrument();
-
-  auto *spec = inputWS->getSpectrum(index);
-  const auto & ids = spec->getDetectorIDs();
-  const size_t ndets(ids.size());
-  if(ndets > 0)
-  {
-    try
-    {
-      det = inst->getDetector(*ids.begin());
-    }
-    catch(Exception::NotFoundError&)
-    {
-      return 0.0;
-    }
-  }
-  else return 0.0;
-
-  const auto & pmap = inputWS->constInstrumentParameters();
-  auto par = pmap.getRecursive(det->getComponentID(), m_parname);
-  if(par)
-  {
-    if(!m_combine) return par->value<double>();
-    else return m_binOp(m_algFactor,par->value<double>());
-  }
-  else
-  {
-    std::ostringstream os;
-    os << "Spectrum at index '" << index << "' has no parameter named '" << m_parname << "'\n";
-    throw std::runtime_error(os.str());
-  }
-}
-
 
 } // namespace Algorithm
 } // namespace Mantid

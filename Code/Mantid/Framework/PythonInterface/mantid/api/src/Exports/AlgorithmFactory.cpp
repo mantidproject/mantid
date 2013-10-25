@@ -1,5 +1,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
@@ -90,7 +91,10 @@ GCC_DIAG_OFF(cast-qual)
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
     // Takes ownership of instantiator and replaces any existing algorithm
-    self.subscribe(new PythonObjectInstantiator<Algorithm>(classType), AlgorithmFactoryImpl::OverwriteCurrent);
+    auto descr = self.subscribe(new PythonObjectInstantiator<Algorithm>(classType), AlgorithmFactoryImpl::OverwriteCurrent);
+
+    // Python algorithms cannot yet act as loaders so remove any registered ones from the FileLoaderRegistry
+    FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
   }
 
   ///@endcond

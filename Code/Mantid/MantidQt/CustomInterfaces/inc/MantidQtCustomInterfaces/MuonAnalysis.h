@@ -137,9 +137,6 @@ private slots:
 
   /// Link to the wiki for the grouping tab.
   void muonAnalysisHelpGroupingClicked();
-  
-  ///
-  void runFirstGoodBinFront();
 
   /// Check to see if the user want to append the previous run and set accordingly
   void checkAppendingPreviousRun();
@@ -456,6 +453,9 @@ private:
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
+
+  /// Creates new double validator which accepts numbers in standard notation only.
+  static QDoubleValidator* createDoubleValidator(QObject* parent);
 };
 
 }

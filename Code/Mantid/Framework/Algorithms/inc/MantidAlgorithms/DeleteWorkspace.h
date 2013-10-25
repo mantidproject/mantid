@@ -55,6 +55,8 @@ namespace Mantid
       /// Overridden exec
       void exec();
 
+      const std::string workspaceMethodName() const { return "delete"; }
+      const std::string workspaceMethodInputProperty() const { return "Workspace"; }
     };
 
   } // namespace Algorithm

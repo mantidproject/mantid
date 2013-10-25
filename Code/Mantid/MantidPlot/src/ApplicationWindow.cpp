@@ -195,6 +195,7 @@
 #include "MantidQtAPI/Message.h"
 
 #include "MantidQtMantidWidgets/ICatSearch.h"
+#include "MantidQtMantidWidgets/ICatSearch2.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -565,6 +566,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   m_iface_script = NULL;
   runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
   loadCustomActions();
+
+  // Nullify icatsearch
+  icatsearch = NULL;
 
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser")
@@ -1292,9 +1296,10 @@ void ApplicationWindow::initMainMenu()
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
   icat->addAction(actionICatLogin);//Login menu item
-  icat->addAction(actionMydataSearch);// my data search menu item
-  icat->addAction(actionICatSearch);//search menu item
-  icat->addAction(actionAdvancedSearch); //advanced search menu item
+//  icat->addAction(actionMydataSearch);// my data search menu item
+//  icat->addAction(actionICatSearch);//search menu item
+  icat->addAction(actionICatSearch2); // new ICAT GUI menu item
+//  icat->addAction(actionAdvancedSearch); //advanced search menu item
   icat->addAction(actionICatLogout);//logout menu item
   disableActions();
 }
@@ -9560,6 +9565,13 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   mantidUI->shutdown();
 
+  if (icatsearch)
+  {
+    icatsearch->disconnect();
+    delete icatsearch;
+    icatsearch = NULL;
+  }
+
   if( scriptingWindow )
   {
     scriptingWindow->disconnect();
@@ -13385,6 +13397,10 @@ void ApplicationWindow::createActions()
   actionICatLogin->setToolTip(tr("Catalog Login"));
   connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
 
+  actionICatSearch2 = new QAction("Search",this);
+  actionICatSearch2->setToolTip(tr("Search data in archives."));
+  connect(actionICatSearch2, SIGNAL(activated()), this, SLOT(ICatSearch2()));
+
   actionICatSearch=new QAction("Basic Search",this);
   actionICatSearch->setToolTip(tr("Catalog Basic Search"));
   connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
@@ -16254,7 +16270,7 @@ ApplicationWindow::~ApplicationWindow()
   delete hiddenWindows;
   delete scriptingWindow;
   delete d_text_editor;
-
+  delete icatsearch;
   while(!d_user_menus.isEmpty())
   {
     QMenu *menu = d_user_menus.takeLast();
@@ -17401,6 +17417,21 @@ void ApplicationWindow::panOnPlot()
 void ApplicationWindow::ICatLogin()
 {
   mantidUI->executeAlgorithm("CatalogLogin",1);
+}
+
+void ApplicationWindow::ICatSearch2()
+{
+  if ( icatsearch == NULL || icatsearch)
+  {
+    // Only one ICAT GUI will appear, and that the previous one will be overridden.
+    // E.g. if a user opens the ICAT GUI without being logged into ICAT they will need to
+    // login in and then click "Search" again.
+    delete icatsearch;
+    icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
+
+    icatsearch->show();
+    icatsearch->raise();
+  }
 }
 
 void ApplicationWindow::ICatIsisSearch()

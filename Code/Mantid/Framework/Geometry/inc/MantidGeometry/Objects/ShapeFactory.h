@@ -93,6 +93,7 @@ namespace Mantid
       std::string parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseHexahedron(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
+      std::string parseTaperedGuide(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseTorus(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
