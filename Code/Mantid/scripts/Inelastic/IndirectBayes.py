@@ -163,7 +163,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 	array_len = 4096						   # length of array in Fortran
 	CheckXrange(erange,'Energy')
 
-	nbin,nrbin = CheckBinning(nbins)
+	nbin,nrbin = nbins
 
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
@@ -759,12 +759,12 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	EndTime('Quest')
 
 def QuestPlot(inputWS,Plot):
-	if (Plot == 'Sigma' or Plot == 'All'):
+	if (Plot == 'Sigma'):
 		sig_plot=mp.plotSpectrum(inputWS+'_Sigma',0,True)
-	if (Plot == 'Beta' or Plot == 'All'):
+	if (Plot == 'Beta'):
 		beta_plot = mp.plotSpectrum(inputWS+'_Beta',0,True)
 	if(Plot == 'All'):
-		mp.mergePlots(sig_plot,beta_plot)
+		mp.plotSpectrum([inputWS+'_Sigma',inputWS+'_Beta'], 0, True)
 
 # ResNorm programs
 def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):

@@ -29,7 +29,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 			val = log.value
 			logger.notice('Fit program was : '+val)
 
-		logger.notice('Parameters in ' + samWs)
+		logger.notice('Parameters in ' + samWS)
 
 	x = mtd[samWS].readX(0)
 	xmax = x[len(x)-1]
@@ -54,13 +54,13 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 		return
 
 	#run fit function
-	fitWS = samWS +'_'+jumpFunc +'fit'
+	fitWS = samWS[:-9] +'_'+ jumpFunc +'fit'
 	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fitWS)
 
 	#process output options
 	if Save:
-		fit_path = os.path.join(workdir,fitWS+'.nxs')
-		SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
+		fit_path = os.path.join(workdir,fitWS+'_Workspace.nxs')
+		SaveNexusProcessed(InputWorkspace=fitWS+'_Workspace', Filename=fit_path)
 		
 		if Verbose:
 			logger.notice('Fit file is ' + fit_path)
