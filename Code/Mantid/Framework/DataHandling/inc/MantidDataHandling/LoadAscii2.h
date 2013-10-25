@@ -64,7 +64,7 @@ namespace Mantid
       /// Read the data from the file
       virtual API::Workspace_sptr readData(std::ifstream & file);
       /// Return true if the line is to be skipped
-      bool skipLine(const std::string & line) const;
+      bool skipLine(const std::string & line, bool header = false) const;
       /// Return true if the line doesn't start with a valid character
       bool badLine(const std::string & line) const;
       /// check and configure flags and values relating to starting a new spectra
@@ -85,6 +85,8 @@ namespace Mantid
       void setcolumns(std::ifstream & file, std::string & line, std::list<std::string> & columns);
       //wirte the spectra to the workspace
       void writeToWorkspace(API::MatrixWorkspace_sptr & localWorkspace, const size_t & numSpectra) const;
+      //Process the header information. This implementation just skips it entirely.
+      void processHeader(std::ifstream & file) const;
       /// The column separator
       std::string m_columnSep;
 

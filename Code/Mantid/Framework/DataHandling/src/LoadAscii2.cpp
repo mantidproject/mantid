@@ -101,7 +101,6 @@ namespace Mantid
     */
     API::Workspace_sptr LoadAscii2::readData(std::ifstream & file)
     {
-      //there should be no need for processheader now as this will now skip blanks and comment lines and throw on anything unusual
       //it's probably more stirct versus version 1, but then this is a format change and we don't want any bad data getting into the workspace
       //there is still flexibility, but the format should jsut make more sense in general
 
@@ -123,15 +122,17 @@ namespace Mantid
 
       while( getline(file,line) )
       {
+        std::string templine = line;
         lineNo++;
-        if (line.empty())
+        boost::trim(templine);
+        if (templine.empty())
         {
           //the line is empty, treat as a break before a new spectra
           newSpectra();
         }
-        else if (!skipLine(line))
+        else if (!skipLine(templine))
         {
-          parseLine(line, columns, lineNo);
+          parseLine(templine, columns, lineNo);
         }
       }
 
@@ -242,20 +243,25 @@ namespace Mantid
     }
 
     /**
-    * Check the start of the file for the first data set, then set the number of columns that hsould be expected thereafter
+    * Check the start of the file for the first data set, then set the number of columns that should be expected thereafter
+    * This will also place the file marker at the first spectrum ID or data line, inoring any header information at the moment.
     * @param[in] file : The file stream
     * @param[in] line : The current line of data
     * @param[in] columns : the columns of values in the current line of data
     */
     void LoadAscii2::setcolumns(std::ifstream & file, std::string & line, std::list<std::string> & columns)
     {
+      size_t lineno = 0;
+      size_t lastSpecID = 0;
+      std::vector<double> values;
       //first find the first data set and set that as the template for the number of data collumns we expect from this file
       while( getline(file,line) && m_baseCols == 0)
       {
-        if (!line.empty())
-        {
+        lineno++;
         std::string templine = line;
-          boost::trim(templine);
+        boost::trim(templine);
+        if (!templine.empty())
+        {
           if (std::isdigit(templine.at(0)))
           {
             const int cols = splitIntoColumns(columns, templine);
@@ -268,8 +274,20 @@ namespace Mantid
             }
             else if (cols != 1)
             {
+              try
+              {
+                fillInputValues(values, columns);
+              }
+              catch(boost::bad_lexical_cast&)
+              {
+                continue;
+              }
               //a size of 1 is most likely a spectra ID so ignore it, a value of 2, 3 or 4 is a valid data set
               m_baseCols = cols;
+            }
+            else if (cols == 1)
+            {
+              lastSpecID = lineno;
             }
           }
         }
@@ -282,7 +300,99 @@ namespace Mantid
 
       //start from the top again, this time filling in the list
       file.seekg(0,std::ios_base::beg);
+
+      //move to the first bit of valid data, skipping over headers
+      /*
+      if (lastSpecID !=0)
+      {
+        lineno = lastSpecID;
+      }
+
+      for (int i = 0; i < (lineno - 1); i++)
+      {
+        getline(file,line);
+      }
+      */
+      processHeader(file);
     }
+
+    /**
+    * Process the header information. This implementation just skips it entirely. 
+    * @param file :: A reference to the file stream
+    */
+    void LoadAscii2::processHeader(std::ifstream & file) const
+    {
+
+      // Most files will have some sort of header. If we've haven't been told how many lines to 
+      // skip then try and guess 
+      int numToSkip = getProperty("SkipNumLines");
+      if( numToSkip == EMPTY_INT() )
+      {
+        const int rowsToMatch(5);
+        // Have a guess where the data starts. Basically say, when we have say "rowsToMatch" lines of pure numbers
+        // in a row then the line that started block is the top of the data
+        int numCols(-1), matchingRows(0), row(0);
+        std::string line;
+        std::vector<double> values;
+        while( getline(file,line) )
+        {
+          ++row;
+          //int nchars = (int)line.length(); TODO dead code?
+          boost::trim(line);
+          if( skipLine(line,true) )
+          {
+            continue;
+          }
+
+          std::list<std::string> columns;
+          int lineCols = this->splitIntoColumns(columns, line);
+          if (lineCols != 1)
+          {
+          try
+          {
+            fillInputValues(values, columns);
+          }
+          catch(boost::bad_lexical_cast&)
+          {
+            continue;
+          }
+          }
+          if( numCols < 0 ) numCols = lineCols;
+          //if( lineCols == numCols || (lineCols == 1))
+          if( lineCols == m_baseCols || (lineCols == 1))
+          {
+            ++matchingRows;
+            if( matchingRows == rowsToMatch ) break;
+          }
+          else
+          {
+            numCols = lineCols;
+            matchingRows = 1;
+          }
+        }
+        // if the file does not have more than rowsToMatch + skipped lines, it will stop 
+        // and raise the EndOfFile, this may cause problems for small workspaces.
+        // In this case clear the flag
+        if (file.eof()){
+          file.clear(file.eofbit);
+        }
+        // Seek the file pointer back to the start.
+        // NOTE: Originally had this as finding the stream position of the data and then moving the file pointer
+        // back to the start of the data. This worked when a file was read on the same platform it was written
+        // but failed when read on a different one due to underlying differences in the stream translation.
+        file.seekg(0,std::ios::beg);
+        // We've read the header plus the number of rowsToMatch
+        numToSkip = row - rowsToMatch;
+      }
+      int i(0);
+      std::string line;
+      while( i < numToSkip && getline(file, line) )
+      {
+        ++i;
+      }
+      g_log.information() << "Skipped " << numToSkip << " line(s) of header information()\n";
+    }
+
 
     /**
     * Check if the file has been found to inconsistantly include spectra IDs
@@ -388,11 +498,11 @@ namespace Mantid
     * @param[in] line :: The line to be checked
     * @return True if the line should be skipped
     */
-    bool LoadAscii2::skipLine(const std::string & line) const
+    bool LoadAscii2::skipLine(const std::string & line, bool header) const
     {
       // Comments are skipped, Empty actually means somehting and shouldn't be skipped
       //just checking the comment's first character should be ok as comment cahracters can't be numeric at all, so they can't really be confused
-      return (line.at(0) == m_comment.at(0));
+      return ((line.empty() && header) || line.at(0) == m_comment.at(0));
     }
 
     /**
@@ -490,9 +600,11 @@ namespace Mantid
       units.insert(units.begin(),"Dimensionless");
       declareProperty("Unit","Energy", boost::make_shared<StringListValidator>(units),
         "The unit to assign to the X axis (anything known to the [[Unit Factory]] or \"Dimensionless\")");
-
+        
       auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
+      declareProperty("SkipNumLines", EMPTY_INT(), mustBePosInt,
+        "If given, skip this number of lines at the start of the file.");
     }
 
     /** 
