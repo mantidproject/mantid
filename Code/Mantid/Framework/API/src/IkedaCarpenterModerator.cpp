@@ -193,7 +193,7 @@ namespace Mantid
     }
 
     /**
-     * Return the value of time interpolated from the given time using the cached table
+     * Return the value of time interpolated from the given area using the cached table
      * @param area The value of the area to interpolate from
      * @return The time corresponding to this area linearly interpolated from the cached table
      */
@@ -460,12 +460,12 @@ namespace Mantid
       {
         if(m_tau_f != 0.0)
         {
-          static const double c3 = 1.6666666666666666667e-01, c4 =-1.2500000000000000000e-01,
-                              c5 = 5.0000000000000000000e-02, c6 =-1.3888888888888888889e-02,
-                              c7 = 2.9761904761904761905e-03, c8 =-5.2083333333333333333e-04,
-                              c9 = 7.7160493827160493827e-05, c10 =-9.9206349206349206349e-06,
-                              c11= 1.1273448773448773449e-06, c12 =-1.1482216343327454439e-07,
-                              c13 = 1.0598968932302265636e-08;
+          const double c3 = 1.6666666666666666667e-01, c4 =-1.2500000000000000000e-01,
+                       c5 = 5.0000000000000000000e-02, c6 =-1.3888888888888888889e-02,
+                       c7 = 2.9761904761904761905e-03, c8 =-5.2083333333333333333e-04,
+                       c9 = 7.7160493827160493827e-05, c10 =-9.9206349206349206349e-06,
+                       c11= 1.1273448773448773449e-06, c12 =-1.1482216343327454439e-07,
+                       c13 = 1.0598968932302265636e-08;
 
           const double ax=x/m_tau_f;
           double funAx;
