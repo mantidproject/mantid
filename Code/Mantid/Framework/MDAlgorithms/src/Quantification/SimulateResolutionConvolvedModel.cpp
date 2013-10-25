@@ -100,11 +100,14 @@ namespace Mantid
     void SimulateResolutionConvolvedModel::exec()
     {
       m_inputWS = getProperty("InputWorkspace");
+      // First estimate of progress calls
+      API::Progress progress(this,0.0,1.0, m_inputWS->getNPoints());
+      progress.report("Caching simulation input");
       auto resolution = createFunction();
       createDomains();
 
       // Do the real work
-      API::Progress progress(this,0.0,1.0, resolution->estimateNoProgressCalls());
+      progress.setNumSteps(resolution->estimateNoProgressCalls());
       resolution->setProgressReporter(&progress);
       resolution->function(*m_domain, *m_calculatedValues);
 
