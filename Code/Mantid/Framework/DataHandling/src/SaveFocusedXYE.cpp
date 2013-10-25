@@ -19,6 +19,7 @@
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Exception.h"
 #include <Poco/File.h>
 #include <fstream>
 #include <iomanip>
@@ -111,15 +112,32 @@ void SaveFocusedXYE::exec()
     m_headerType = MAUD;
   }
 
-
-
   Progress progress(this, 0.0, 1.0, nHist);
   for (size_t i = 0; i < nHist; i++)
   {
     const MantidVec& X = inputWS->readX(i);
     const MantidVec& Y = inputWS->readY(i);
     const MantidVec& E = inputWS->readE(i);
-    if (split == "False" && i == 0) // Assign only one file
+
+    double l1 = 0;
+    double l2 = 0;
+    double tth = 0;
+    if (headers)
+    {
+        // try to get detector information
+        try
+        {
+            getFocusedPos(inputWS, i, l1, l2, tth );
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {
+            // if detector not found or there was an error skip this spectrum
+            g_log.warning() << "Skipped spectrum " << i << std::endl;
+            continue;
+        }
+    }
+
+    if (split == "False" && out) // Assign only one file
     {
       const std::string file(filename + '.' + ext);
       Poco::File fileObj(file);
@@ -140,31 +158,27 @@ void SaveFocusedXYE::exec()
         writeHeaders(out, inputWS);
     }
 
-    { // New scope
-      if (!out.is_open())
-      {
-        g_log.information("Could not open filename: " + filename);
-        throw std::runtime_error("Could not open filename: " + filename);
-      }
-      if (headers)
-      {
-        double l1 = 0;
-        double l2 = 0;
-        double tth = 0;
-        getFocusedPos(inputWS, i, l1, l2, tth );
-        writeSpectraHeader(out, 
-          i + startingbank, 
-          inputWS->getSpectrum( i )->getSpectrumNo(), 
-          l1 + l2, 
-          tth, 
+    if (!out.is_open())
+    {
+      g_log.information("Could not open filename: " + filename);
+      throw std::runtime_error("Could not open filename: " + filename);
+    }
+
+    if (headers)
+    {
+        writeSpectraHeader(out,
+          i + startingbank,
+          inputWS->getSpectrum( i )->getSpectrumNo(),
+          l1 + l2,
+          tth,
           inputWS->getAxis(0)->unit()->caption() );
         //out << "# Data for spectra :" << i + startingbank << std::endl;
         //out << "# " << inputWS->getAxis(0)->unit()->caption() << "              Y                 E"
         //    << std::endl;
-      }
-      const size_t datasize = Y.size();
-      for (size_t j = 0; j < datasize; j++)
-      {
+    }
+    const size_t datasize = Y.size();
+    for (size_t j = 0; j < datasize; j++)
+    {
         double xvalue(0.0);
         if (isHistogram)
         {
@@ -177,8 +191,7 @@ void SaveFocusedXYE::exec()
         out << std::fixed << std::setprecision(5) << std::setw(15) << xvalue << std::fixed
             << std::setprecision(8) << std::setw(18) << Y[j] << std::fixed << std::setprecision(8)
             << std::setw(18) << E[j] << "\n";
-      }
-    } // End separate scope
+    }
     //Close at each iteration
     if (split == "True")
     {
