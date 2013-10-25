@@ -43,24 +43,31 @@ namespace Mantid
     void CatalogSearch::init()
     {
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+      auto isDate = boost::make_shared<DateValidator>();
       mustBePositive->setLower(0.0);
 
+      declareProperty("InvestigationName", "", "The name of the investigation to search.");
+      declareProperty("Instrument","","The name of the instrument used for investigation search.");
+      declareProperty("RunRange","","The range of runs to search for related investigations.");
+      declareProperty("StartDate","", isDate, "The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
+      declareProperty("EndDate","", isDate, "The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
+      declareProperty("Keywords","","An option to search investigations data");
+
+      declareProperty("MyData",false, "Boolean option to do my data only search.");
+
+      // NOTE: This has changed in ICAT4 to simply "investigator's name". Will need fixed when ICAT3 is removed.
+      declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
+
+      declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
+      declareProperty("InvestigationAbstract", "", "The abstract of the investigation to search.");
+      declareProperty("InvestigationType", "", "The type  of the investigation to search.");
+
+      // Note: These are ICAT3 specific, and can be removed when ICAT3 is.
+      // Will need to update header documentation upon removal.
+      // Moreover, their relevant getters/setters in CatalogSearchParam can to.
       declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
       declareProperty("EndRun",0.0,mustBePositive,"The end run number for the range of investigations to be searched.");
-      declareProperty("Instrument","","The name of the instrument used for investigation search.");
-      auto isDate = boost::make_shared<DateValidator>();
-      declareProperty("StartDate","", isDate,
-                      "The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-      declareProperty("EndDate","", isDate,
-                      "The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-      declareProperty("Keywords","","An option to search investigations data");
       declareProperty("CaseSensitive", false, "Boolean option to do case sensitive ICat investigations search.");
-
-      declareProperty("InvestigationName", "", "The name of the investigation to search.");
-      declareProperty("InvestigationType", "", "The type  of the investigation to search.");
-      declareProperty("InvestigationAbstract", "", "The abstract of the investigation to search.");
-      declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
-      declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
       declareProperty("DataFileName","", "The name of the data file to search.");
 
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
@@ -70,11 +77,10 @@ namespace Mantid
     /// Execution method.
     void CatalogSearch::exec()
     {
-      ICatalog_sptr catalog_sptr;
+      ICatalog_sptr catalog;
       try
       {
-        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-
+        catalog = CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
       }
       catch(Kernel::Exception::NotFoundError&)
       {
@@ -84,20 +90,20 @@ namespace Mantid
         ss << "The facilities.xml file may need updating. Contact the Mantid Team for help." << std::endl;
         throw std::runtime_error(ss.str());
       }
-      if(!catalog_sptr)
+      if(!catalog)
       {
         throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
       }
 
-      //get the inputs
       CatalogSearchParam params;
+      // Get the user input search terms to search for.
       getInputProperties(params);
-      //create output workspace
-      ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      // search for investigations
-      catalog_sptr->search(params,ws_sptr);
-      //set output workspace
-      setProperty("OutputWorkspace",ws_sptr);
+      // Create output workspace.
+      ITableWorkspace_sptr workspace = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      // Search for investigations in the archives.
+      catalog->search(params,workspace);
+      // Search for investigations with user specific search inputs.
+      setProperty("OutputWorkspace",workspace);
 
     }
 
@@ -107,6 +113,7 @@ namespace Mantid
     void CatalogSearch::getInputProperties(CatalogSearchParam& params)
     {
       double dstartRun=getProperty("StartRun");
+      // NOTE: This is for ICAT3 support, and can be removed when it's removed. (startRun, endRun, and lowercase
       if(dstartRun<0)
       {
         throw std::runtime_error("Invalid Start Run Number.Enter a valid run number to do investigations search");
@@ -120,13 +127,31 @@ namespace Mantid
       {
         throw std::runtime_error("Run end number cannot be lower than run start number");
       }
+
+      // Need to set them here for ICAT3 support. They don't exist in ICAT4, and will therefore be empty.
       params.setRunStart(dstartRun);
       params.setRunEnd(dendRun);
 
-      std::string instrument = getPropertyValue("Instrument");
-      // as ICat API is expecting instrument name in uppercase
-      std::transform(instrument.begin(),instrument.end(),instrument.begin(),toupper);
+      // Obtain the ICAT4 runRange input text.
+      std::string runRange = getProperty("runRange");
 
+      // A container to hold the range of run numbers.
+      std::vector<std::string> runNumbers;
+      // Split the input text by "-" and add contents to runNumbers.
+      boost::split(runNumbers,runRange,boost::is_any_of("-"));
+
+      // Has the user input a runRange?
+      if (!runRange.empty())
+      {
+        params.setRunStart(boost::lexical_cast<double>(runNumbers.at(0)));
+        params.setRunEnd( boost::lexical_cast<double>(runNumbers.at(1)));
+      }
+
+      std::string instrument = getPropertyValue("Instrument");
+      // As ICat API is expecting instrument name in uppercase
+      // NOTE: This is no longer needed for ICAT4, and can be removed when ICAT3 is.
+      std::transform(instrument.begin(),instrument.end(),instrument.begin(),toupper);
+      // NOTE: This is not needed in ICAT4 as our search query searches all instruments if empty.
       if(!instrument.empty())
       {
         params.setInstrument(instrument);
@@ -173,7 +198,8 @@ namespace Mantid
       std::string dataFileName=getPropertyValue("DataFileName");
       params.setDatafileName(dataFileName);
 
-
+      bool mydata = boost::lexical_cast<bool>(getPropertyValue("MyData"));
+      params.setMyData(mydata);
     }
 
 

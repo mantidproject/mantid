@@ -62,6 +62,8 @@ class MuonAnalysis : public MantidQt::API::UserSubWindow
 public:
   /// Name of the interface
   static std::string name() { return "Muon Analysis"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "Muon"; }
 
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
@@ -135,9 +137,6 @@ private slots:
 
   /// Link to the wiki for the grouping tab.
   void muonAnalysisHelpGroupingClicked();
-  
-  ///
-  void runFirstGoodBinFront();
 
   /// Check to see if the user want to append the previous run and set accordingly
   void checkAppendingPreviousRun();
@@ -227,10 +226,6 @@ private:
 
   /// is grouping set
   bool isGroupingSet();
-
-  /// Apply grouping specified in xml file to workspace
-  bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
-    const std::string& filename);
 
   /// create WS contained the data for a plot
   void createPlotWS(const std::string& groupName, 
@@ -344,9 +339,6 @@ private:
   /// List of current group names 
   std::vector<std::string> m_groupNames;
 
-  /// name for file to temperary store grouping
-  std::string m_groupingTempFilename;
-
   /// Deal with input file changes.
   void handleInputFileChanges();
 
@@ -412,6 +404,9 @@ private:
   /// Boolean to show whether the gui is being updated
   bool m_updating;
 
+  /// Flag to indicate that grouping table is being updated
+  bool m_updatingGrouping;
+
   /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
   bool m_loaded;
 
@@ -458,6 +453,9 @@ private:
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
+
+  /// Creates new double validator which accepts numbers in standard notation only.
+  static QDoubleValidator* createDoubleValidator(QObject* parent);
 };
 
 }

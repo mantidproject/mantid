@@ -64,11 +64,17 @@ public:
   virtual const std::string alias() const { return "rebin"; }
 
 protected:
+
+  const std::string workspaceMethodName() const { return "rebin"; }
+  const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace"; }
+  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
+
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   virtual void exec();
+
   
   void propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist);
 };

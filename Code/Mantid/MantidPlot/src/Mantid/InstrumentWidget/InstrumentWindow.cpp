@@ -8,6 +8,7 @@
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
 #include "Projection3D.h"
+#include "PanelsSurface.h"
 #include "SimpleWidget.h"
 #include "DetXMLFile.h"
 #include "../MantidUI.h"
@@ -309,22 +310,6 @@ void InstrumentWindow::setSurfaceType(int type)
     QApplication::setOverrideCursor(Qt::WaitCursor);
     m_surfaceType = SurfaceType(type);
     if (!m_instrumentActor) return;
-    Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
-    Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
-    Mantid::Kernel::V3D sample_pos = sample->getPos();
-    Mantid::Kernel::V3D axis;
-    if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
-    {
-      axis = Mantid::Kernel::V3D(0,1,0);
-    }
-    else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
-    {
-      axis = Mantid::Kernel::V3D(0,0,1);
-    }
-    else // SPHERICAL_X || CYLINDRICAL_X
-    {
-      axis = Mantid::Kernel::V3D(1,0,0);
-    }
 
     ProjectionSurface* surface = getSurface().get();
     int peakLabelPrecision = 6;
@@ -344,19 +329,52 @@ void InstrumentWindow::setSurfaceType(int type)
       showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",true).toBool();
     }
 
-    // create a new surface
-    if (m_surfaceType == FULL3D)
+
+    // Surface factory
     {
-      surface = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
+        Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
+        Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+        Mantid::Kernel::V3D sample_pos = sample->getPos();
+        Mantid::Kernel::V3D axis;
+        // define the axis
+        if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
+        {
+          axis = Mantid::Kernel::V3D(0,1,0);
+        }
+        else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
+        {
+          axis = Mantid::Kernel::V3D(0,0,1);
+        }
+        else if (m_surfaceType == SPHERICAL_X || m_surfaceType == CYLINDRICAL_X)
+        {
+          axis = Mantid::Kernel::V3D(1,0,0);
+        }
+        else // SIDE_BY_SIDE
+        {
+            axis = Mantid::Kernel::V3D(0,0,1);
+        }
+
+        // create the surface
+        if (m_surfaceType == FULL3D)
+        {
+          surface = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
+        }
+        else if (m_surfaceType <= CYLINDRICAL_Z)
+        {
+          surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
+        }
+        else if (m_surfaceType <= SPHERICAL_Z)
+        {
+          surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
+        }
+        else // SIDE_BY_SIDE
+        {
+            surface = new PanelsSurface(m_instrumentActor,sample_pos,axis);
+        }
     }
-    else if (m_surfaceType <= CYLINDRICAL_Z)
-    {
-      surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
-    }
-    else // SPHERICAL
-    {
-      surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
-    }
+    // end Surface factory
+
+
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
@@ -414,6 +432,10 @@ void InstrumentWindow::setSurfaceType(const QString& typeStr)
   else if ( upperCaseStr == "SPHERICAL_Z" )
   {
     typeIndex = 6;
+  }
+  else if ( upperCaseStr == "SIDE_BY_SIDE" )
+  {
+    typeIndex = 7;
   }
   setSurfaceType( typeIndex );
 }
@@ -1170,6 +1192,11 @@ void InstrumentWindow::setSurface(ProjectionSurface* surface)
     m_simpleDisplay->setSurface(sharedSurface);
     m_simpleDisplay->update();
   }
+  UnwrappedSurface *unwrappedSurface = dynamic_cast<UnwrappedSurface*>( surface );
+  if ( unwrappedSurface )
+  {
+    m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
+  }
 }
 
 /// Return the width of the instrunemt display
@@ -1273,11 +1300,11 @@ bool InstrumentWindow::isGLEnabled() const
 void InstrumentWindow::createTabs(QSettings& settings)
 {
     //Render Controls
-    InstrumentWindowRenderTab *renderTab = new InstrumentWindowRenderTab(this);
-    connect(renderTab,SIGNAL(setAutoscaling(bool)),this,SLOT(setColorMapAutoscaling(bool)));
-    connect(renderTab,SIGNAL(rescaleColorMap()),this,SLOT(setupColorMap()));
-    mControlsTab->addTab( renderTab, QString("Render"));
-    renderTab->loadSettings(settings);
+    m_renderTab = new InstrumentWindowRenderTab(this);
+    connect(m_renderTab,SIGNAL(setAutoscaling(bool)),this,SLOT(setColorMapAutoscaling(bool)));
+    connect(m_renderTab,SIGNAL(rescaleColorMap()),this,SLOT(setupColorMap()));
+    mControlsTab->addTab( m_renderTab, QString("Render"));
+    m_renderTab->loadSettings(settings);
 
     // Pick controls
     InstrumentWindowPickTab *pickTab = new InstrumentWindowPickTab(this);
@@ -1297,6 +1324,6 @@ void InstrumentWindow::createTabs(QSettings& settings)
 
     connect(mControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
 
-    m_tabs << renderTab << pickTab << maskTab << treeTab;
+    m_tabs << m_renderTab << pickTab << maskTab << treeTab;
 
 }

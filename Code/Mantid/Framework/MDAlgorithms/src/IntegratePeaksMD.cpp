@@ -83,6 +83,8 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_integration.h>
 #include <fstream>
@@ -175,14 +177,12 @@ namespace MDAlgorithms
 
     declareProperty(new PropertyWithValue<double>("PercentBackground",0.0,Direction::Input),
         "Percent of CylinderLength that is background (20 is 20%)");
-    std::vector<std::string> fitFunction(4);
-    fitFunction[0] = "Gaussian";
-    fitFunction[1] = "ConvolutionBackToBackGaussian";
-    fitFunction[2] = "NoFit";
-    //fitFunction[1] = "ConvolutionExpGaussian";
-    auto fitvalidator = boost::make_shared<StringListValidator>(fitFunction);
-    declareProperty("ProfileFunction", "Gaussian", fitvalidator, "Fitting function for profile "
-                    "used only with Cylinder integration.");
+
+    std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+    peakNames.push_back("NoFit");
+    declareProperty("ProfileFunction", "Gaussian", boost::make_shared<StringListValidator>(peakNames),
+    				"Fitting function for profile that is used only with Cylinder integration.");
+
     std::vector<std::string> integrationOptions(2);
     integrationOptions[0] = "Sum";
     integrationOptions[1] = "GaussianQuadrature";
@@ -230,6 +230,9 @@ namespace MDAlgorithms
     size_t numSteps = 0;
     bool cylinderBool = getProperty("Cylinder");
     bool adaptiveQRadius = getProperty("AdaptiveQRadius");
+    std::vector<double> PeakRadiusVector(peakWS->getNumberPeaks(),PeakRadius);
+    std::vector<double> BackgroundInnerRadiusVector(peakWS->getNumberPeaks(),BackgroundInnerRadius);
+    std::vector<double> BackgroundOuterRadiusVector(peakWS->getNumberPeaks(),BackgroundOuterRadius);
     if (cylinderBool)
     {
         numSteps = 100;
@@ -351,6 +354,9 @@ namespace MDAlgorithms
 				}
 				lenQpeak = std::sqrt(lenQpeak);
 			}
+			PeakRadiusVector[i] = lenQpeak*PeakRadius;
+			BackgroundInnerRadiusVector[i] = lenQpeak*BackgroundInnerRadius;
+			BackgroundOuterRadiusVector[i] = lenQpeak*BackgroundOuterRadius;
 			CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
 			// Perform the integration into whatever box is contained within.
@@ -482,85 +488,69 @@ namespace MDAlgorithms
 				}
 			}
 
-			IAlgorithm_sptr fit_alg;
-			try
-			{
-			 fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-			} catch (Exception::NotFoundError&)
-			{
-			 g_log.error("Can't locate Fit algorithm");
-			 throw ;
-			}
-
-			const Mantid::MantidVec& yValues = wsProfile2D->readY(i);
-                        MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
-                        const double peakHeight = *it;
-                        const double Centre = wsProfile2D->readX(i)[it - yValues.begin()];
-			size_t iStep;
-			for (iStep=0; iStep < numSteps; iStep++)
-			{
-				if(((yValues[iStep]-peakHeight*0.75)*(yValues[iStep+1]-peakHeight*0.75))<0.)break;
-			}
-			double Sigma = fabs(Centre-wsProfile2D->dataX(i)[iStep]);
-
-			std::ostringstream fun_str, plot_str;
-			plot_str << "FitPeak" << i;
-			if (profileFunction.compare("Gaussian") == 0)
-			{
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=Gaussian,Height="<<peakHeight<<",Sigma="<<Sigma<<",PeakCentre="<<Centre;
-			}
-			else if (profileFunction.compare("ConvolutionExpGaussian") == 0)
-			{
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=1.0,B=0.0,X0="<<Centre<<",S="<<Sigma;
-				fit_alg->setProperty("Ties", "f1.B=0.0");
-			}
-			else if (profileFunction.compare("ConvolutionBackToBackGaussian") == 0)
-			{
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=1.0,B=1.0,X0="<<Centre<<",S="<<Sigma;
-			}
 			if (profileFunction.compare("NoFit") != 0)
 			{
-				fit_alg->setPropertyValue("Function", fun_str.str());
-				fit_alg->setProperty("InputWorkspace", wsProfile2D);
-				fit_alg->setProperty("WorkspaceIndex", i);
-				fit_alg->setProperty("CreateOutput", true);
-				fit_alg->setProperty("Output", plot_str.str());
+			    API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
+			    findpeaks->setProperty("InputWorkspace", wsProfile2D);
+			    findpeaks->setProperty<int>("FWHM",7);
+			    findpeaks->setProperty<int>("Tolerance",4);
+			    // FindPeaks will do the checking on the validity of WorkspaceIndex
+			    findpeaks->setProperty("WorkspaceIndex",static_cast<int>(i));
 
-				try
-				{
-					fit_alg->executeAsChildAlg();
-				} catch (...)
-				{
-				 g_log.error("Can't execute Fit algorithm");
-				 continue;
-				}
-				MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
-				API::ITableWorkspace_sptr paramws = fit_alg->getProperty("OutputParameters");
-	            std::vector<std::string> paramsName;
-	            std::vector<double> paramsValue, paramsError;
-	            size_t numrows = paramws->rowCount();
-	            for (size_t j = 0; j < numrows; ++j)
+			    //Get the specified peak positions, which is optional
+			    findpeaks->setProperty<std::string>("PeakFunction", profileFunction);
+			    // FindPeaks will use linear or flat if they are better
+			    findpeaks->setProperty<std::string>("BackgroundType", "Quadratic");
+			    findpeaks->setProperty<bool>("HighBackground", true);
+			    findpeaks->setProperty<bool>("RawPeakParameters", true);
+			    std::vector<double> peakPosToFit;
+			    peakPosToFit.push_back(static_cast<double>(numSteps/2));
+			    findpeaks->setProperty("PeakPositions",peakPosToFit);
+			    findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
+			    findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
+			    try
+			    {
+			    	findpeaks->executeAsChildAlg();
+			    } catch (...)
+			    {
+			    	g_log.error("Can't execute FindPeaks algorithm");
+			    	continue;
+			    }
+
+
+				API::ITableWorkspace_sptr paramws = findpeaks->getProperty("PeaksList");
+				if(paramws->rowCount() < 1) continue;
+				std::ostringstream fun_str;
+				fun_str << "name="<<profileFunction;
+
+				size_t numcols = paramws->columnCount();
+	            std::vector<std::string> paramsName = paramws->getColumnNames();
+	            std::vector<double> paramsValue;
+	            API::TableRow row = paramws->getRow(0);
+	            int spectrum;
+	            row >> spectrum;
+	            for (size_t j = 1; j < numcols; ++j)
 	            {
-	              API::TableRow row = paramws->getRow(j);
-	              std::string parname;
-	              double parvalue, parerror;
-	              row >> parname >> parvalue >> parerror;
-	              paramsName.push_back(parname);
+	              double parvalue;
+	              row >> parvalue;
+	              if (j == numcols-4)fun_str << ";name=Quadratic";
+	              //erase f0. or f1.
+	              if (j > 0 && j < numcols-1) fun_str << "," << paramsName[j].erase(0,3) <<"="<<parvalue;
 	              paramsValue.push_back(parvalue);
-	              paramsError.push_back(parerror);
 	            }
 	            if (i == 0)
 	            {
-	                out << std::setw( 6 ) << "Peak";
-	            	for (size_t j = 0; j < numrows; ++j)out << std::setw( 20 ) << paramsName[j] <<" " ;
+	            	for (size_t j = 0; j < numcols; ++j)out << std::setw( 20 ) << paramsName[j] <<" " ;
 	            	out << "\n";
 	            }
-				out << std::setw( 6 ) << i;
-				for (size_t j = 0; j < numrows; ++j)out << std::setw( 20 ) << std::fixed << std::setprecision( 10 ) << paramsValue[j] << " " ;
+				out << std::setw( 20 ) << i;
+				for (size_t j = 0; j < numcols-1; ++j)out << std::setw( 20 ) << std::fixed << std::setprecision( 10 ) << paramsValue[j] << " " ;
 				out << "\n";
 
+
 				//Evaluate fit at points
-				IFunction_sptr ifun = fit_alg->getProperty("Function");
+
+				IFunction_sptr ifun = FunctionFactory::Instance().createInitialized(fun_str.str());
 				boost::shared_ptr<const CompositeFunction> fun = boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
 				const Mantid::MantidVec& x = wsProfile2D->readX(i);
 				wsFit2D->dataX(i) = x;
@@ -568,6 +558,7 @@ namespace MDAlgorithms
 				FunctionDomain1DVector domain(x);
 				FunctionValues yy(domain);
 				fun->function(domain, yy);
+				const Mantid::MantidVec& yValues = wsProfile2D->readY(i);
 				for (size_t j = 0; j < numSteps; j++)
 				{
 					wsFit2D->dataY(i)[j] = yy[j];
@@ -600,7 +591,7 @@ namespace MDAlgorithms
 				// Get background counts
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					double background = paramsValue[1] * x[j] + paramsValue[0];
+					double background = paramsValue[numcols-2] * x[j] * x[j] + paramsValue[numcols-3] * x[j] + paramsValue[numcols-4];
 					if (yy[j] > background)
 						background_total = background_total + background;
 				}
@@ -622,9 +613,9 @@ namespace MDAlgorithms
     // This flag is used by the PeaksWorkspace to evaluate whether it has been integrated.
     peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true); 
     // These flags are specific to the algorithm.
-    peakWS->mutableRun().addProperty("PeakRadius", PeakRadius, true);
-    peakWS->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadius, true);
-    peakWS->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadius, true);
+    peakWS->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
+    peakWS->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
+    peakWS->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
 
     // save profiles in peaks file
     const std::string outfile = getProperty("ProfilesFile");

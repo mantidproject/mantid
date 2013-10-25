@@ -3,6 +3,7 @@ set ( SRC_FILES
 	#	src/SCDPanelErrors.cpp
 	# src/ChebyshevPolynomialBackground.cpp
 	src/Abragam.cpp
+	src/AugmentedLagrangianOptimizer.cpp
 	src/BFGS_Minimizer.cpp
 	src/BSpline.cpp
 	src/BackToBackExponential.cpp
@@ -16,6 +17,7 @@ set ( SRC_FILES
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
+	src/CostFuncRwp.cpp
 	src/CubicSpline.cpp
 	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
@@ -32,6 +34,7 @@ set ( SRC_FILES
 	src/FitMW.cpp
 	src/FitPowderDiffPeaks.cpp
 	src/FlatBackground.cpp
+	src/FullprofPolynomial.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
 	src/GausDecay.cpp
@@ -97,6 +100,7 @@ set ( INC_FILES
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/Abragam.h
+	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BSpline.h
 	inc/MantidCurveFitting/BackToBackExponential.h
@@ -111,6 +115,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
+	inc/MantidCurveFitting/CostFuncRwp.h
 	inc/MantidCurveFitting/CubicSpline.h
 	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
@@ -129,6 +134,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FitPowderDiffPeaks.h
 	inc/MantidCurveFitting/FlatBackground.h
+	inc/MantidCurveFitting/FullprofPolynomial.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -196,6 +202,7 @@ set ( TEST_FILES
 	#DiffSphereTest.h
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
+	AugmentedLagrangianOptimizerTest.h
 	BFGSTest.h
 	BSplineTest.h
 	BackToBackExponentialTest.h
@@ -218,6 +225,7 @@ set ( TEST_FILES
 	FitMWTest.h
 	FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
+	FullprofPolynomialTest.h
 	FunctionFactoryConstraintTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h

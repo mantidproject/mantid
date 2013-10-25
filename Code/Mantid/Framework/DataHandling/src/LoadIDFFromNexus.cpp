@@ -6,16 +6,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadIDFFromNexus.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidNexus/MuonNexusReader.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
-
-#include <fstream>
-
 
 namespace Mantid
 {
@@ -48,10 +41,12 @@ void LoadIDFFromNexus::init()
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace in which to attach the imported instrument" );
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-		  "The name (including its full or relative path) of the Nexus file to "
-		  "attempt to load the instrument from. The file extension must either be "
-		  ".nxs or .NXS" );
+  std::vector<std::string> exts;
+  exts.push_back(".nxs");
+  exts.push_back(".nxs.h5");
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+                  "The name (including its full or relative path) of the Nexus file to "
+                  "attempt to load the instrument from.");
 
   declareProperty("InstrumentParentPath",std::string(""),"Path name within the Nexus tree of the folder containing the instrument folder."
       "For example it is 'raw_data_1' for an ISIS raw Nexus file and 'mantid_workspace_1' for a processed nexus file."
@@ -66,7 +61,7 @@ void LoadIDFFromNexus::init()
 void LoadIDFFromNexus::exec()
 {
   // Retrieve the filename from the properties
-  m_filename = getPropertyValue("Filename");
+  const std::string filename = getPropertyValue("Filename");
 
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
@@ -75,19 +70,34 @@ void LoadIDFFromNexus::exec()
   std::string instrumentParentPath = getPropertyValue("InstrumentParentPath");
 
   // Get the instrument group in the Nexus file
-   ::NeXus::File nxfile(m_filename);
+  ::NeXus::File nxfile(filename);
   // Assume one level in instrument path
-   nxfile.openPath(instrumentParentPath);
-  // Open the instrument
-  // nxfile.openGroup("instrument", "NXinstrument");
+  nxfile.openPath(instrumentParentPath);
 
-  // Will this work?
-   std::string parameterString;
-   localWorkspace->loadExperimentInfoNexus( &nxfile, parameterString );
-   localWorkspace->readParameterMap(parameterString);
+  std::string parameterString;
+  localWorkspace->loadExperimentInfoNexus( &nxfile, parameterString );
+  localWorkspace->readParameterMap(parameterString);
 
+  runLoadParameterFile(localWorkspace);
 
   return;
+}
+
+void LoadIDFFromNexus::runLoadParameterFile(const MatrixWorkspace_sptr & workspace)
+{
+  const std::string directory = ConfigService::Instance().getString("parameterDefinition.directory");
+  const std::string instrumentName = workspace->getInstrument()->getName();
+  const std::string paramFile = directory + instrumentName + "_Parameters.xml";
+
+  try {
+    LoadParameterFile::execManually(paramFile, workspace);
+  } catch ( std::runtime_error& ex) {
+    g_log.notice() << "File " << paramFile << " not found or un-parsable. "
+                       "However, the instrument has been loaded successfully.\n";
+    // This next function needs to have been called. If LoadParameterFile succeeds then it will have been called inside that.
+    workspace->populateInstrumentParameters();
+  }
+
 }
 
 

@@ -86,6 +86,10 @@ public:
   const std::string name() const { return "StubbedWorkspaceAlgorithm2";}
   int version() const  { return 1;}
   const std::string category() const { return "Cat;Leopard;Mink";}
+  const std::string workspaceMethodName() const { return "methodname"; }
+  const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
+  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
+  
   void init()
   {
     declareProperty("PropertyA", 12);
@@ -240,6 +244,30 @@ public:
     alg.setProperty("PropertyB", 15);
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
+  }
+
+  void test_WorkspaceMethodFunctionsReturnEmptyByDefault()
+  {
+    StubbedWorkspaceAlgorithm alg;
+
+    TS_ASSERT_EQUALS("", alg.workspaceMethodName());
+    TS_ASSERT_EQUALS(std::vector<std::string>(), alg.workspaceMethodOn());
+    TS_ASSERT_EQUALS("", alg.workspaceMethodInputProperty());
+  }
+
+  void test_WorkspaceMethodsReturnTypesCorrectly()
+  {
+    AlgorithmWithValidateInputs alg;
+
+    TS_ASSERT_EQUALS("methodname", alg.workspaceMethodName());
+    auto types = alg.workspaceMethodOn();
+    TS_ASSERT_EQUALS(2, types.size());
+    if(types.size() == 2)
+    {
+      TS_ASSERT_EQUALS("MatrixWorkspace", types[0]);
+      TS_ASSERT_EQUALS("ITableWorkspace", types[1]);
+    }
+    TS_ASSERT_EQUALS("InputWorkspace", alg.workspaceMethodInputProperty());
   }
 
   void testStringization()

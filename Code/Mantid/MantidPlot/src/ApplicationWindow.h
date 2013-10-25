@@ -121,7 +121,6 @@ namespace MantidQt
 //Mantid
 class MantidUI;
 class ScriptingWindow;
-class CommandLineInterpreter;
 
 /**
 * \brief QtiPlot's main window.
@@ -748,8 +747,6 @@ public slots:
   void showScriptWindow(bool forceVisible = false, bool quitting = false);
   void saveScriptWindowGeometry();
   void showScriptInterpreter();
-  bool testForIPython();
-  void launchIPythonConsole();
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
@@ -1132,6 +1129,7 @@ private:
   void tableMenuAboutToShow();
   void windowsMenuAboutToShow();
   void windowsMenuActivated( int id );
+  void interfaceMenuAboutToShow();
 
   //! \name Font Format Functions
   //@{
@@ -1150,6 +1148,7 @@ private:
   //@}
 
   void showCustomActionDialog();
+  void showInterfaceCategoriesDialog();
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
 
@@ -1173,6 +1172,8 @@ private:
   void ICatLogin();
   /// Handler for ICat search menu
   void ICatIsisSearch();
+  /// Handler for NEW ICat search GUI (ICatSearch2)
+  void ICatSearch2();
   /// Handler for ICatMyData serch menu
   void ICatMyDataSearch();
   // Handler for ICat CatalogLogout
@@ -1329,8 +1330,6 @@ public:
   QStringList renamedTables;
   // List of removed interfaces
   QStringList removed_interfaces;
-  // List of PyQt interfaces to be added to the Interfaces menu
-  QStringList pyqt_interfaces;
 
   //! \name variables used when user copy/paste markers
   //@{
@@ -1345,7 +1344,20 @@ public:
   //! The scripting language to use for new projects.
   QString defaultScriptingLang;
 
+  QDockWidget *m_interpreterDock;
+  
+  QSet<QString> allCategories() const { return m_allCategories; }
+
 private:
+  // A collection of the names of each interface as they appear in the menu and also "data"
+  // relating to how each interface can be opened.  Elsewhere, the data is expected to be a
+  // python file name, or else just the name of the interface as known to the InterfaceManager.
+  QList<QPair<QString, QString>> m_interfaceNameDataPairs;
+  // Keeping track of all unique categories.
+  QSet<QString> m_allCategories;
+  // Map interfaces to their categories.
+  QMap<QString, QSet<QString>> m_interfaceCategories;
+
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow* getActiveWindow() const;
   void setActiveWindow(MdiSubWindow* w);
@@ -1381,8 +1393,6 @@ private:
   QTranslator *appTranslator, *qtTranslator;
   QDockWidget *explorerWindow, *undoStackWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
-  QDockWidget *m_interpreterDock;
-  CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
 
   QToolBar *standardTools, *plotTools, *displayBar;
@@ -1391,7 +1401,10 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
+  QWidget* icatsearch;
+
+  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
+  
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
   QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
@@ -1405,7 +1418,7 @@ private:
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
+  QAction *actionICatLogin,*actionICatSearch,*actionICatSearch2,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
@@ -1449,7 +1462,7 @@ private:
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;
-  QAction *actionShowScriptWindow, *actionShowScriptInterpreter, *actionIPythonConsole;
+  QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
   QAction *btnCursor, /* *btnSelect,*/ *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
@@ -1472,6 +1485,8 @@ private:
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
+  
+  QList<QAction *> m_interfaceActions;
 
   QUndoView *d_undo_view;
   /// list of mantidmatrix windows opened from project file.

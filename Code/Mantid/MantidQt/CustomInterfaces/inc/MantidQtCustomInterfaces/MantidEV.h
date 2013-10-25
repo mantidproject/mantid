@@ -196,6 +196,8 @@ public:
 
   /// The name of the interface as registered into the factory
   static std::string name() { return "SCD Event Data Reduction"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "Diffraction"; }
 
 public slots:
   /// Slot for Q-Point selection notification
@@ -292,6 +294,9 @@ private slots:
 
   /// Slot to enable/disable the find UB using FFT controls
   void setEnabledFindUBFFTParams_slot( bool on );
+
+  /// Slot to enable/disable the find UB using Indexed Peaks controls
+  void setEnabledFindUBUsingIndexedPeaksParams_slot( bool on );
 
   /// Slot to enable/disable the load UB controls
   void setEnabledLoadUBParams_slot( bool on );

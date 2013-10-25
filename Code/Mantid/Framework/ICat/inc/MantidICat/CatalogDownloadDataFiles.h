@@ -82,18 +82,12 @@ namespace Mantid
       void exec();
       /// get location of data file  or download method
       int doDownload( ICATPortBindingProxy & icat);
-
-      /// If the extn of the file .raw it returns true
-      bool isDataFile(const std::string& fileName);
-
-      /// This method saves the downloaded file to disc
+      /// True if the stream is considered binary, false otherwise
+      bool isBinary(std::istream& stream);
+      /// Saves the downloaded file to disc
       std::string saveFiletoDisk(std::istream& rs,const std::string &fileName);
-
-      /// This method saves downloaded file to local disk
+      /// Saves downloaded file to local disk
       std::string doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
-
-      /// This method replaces backwardslash with forward slashes - for linux
-      void replaceBackwardSlash(std::string& inputString);
 
     private:
       /// progress indicator

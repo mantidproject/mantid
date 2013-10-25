@@ -3,6 +3,7 @@
 # SANS data reduction scripts
 ########################################################
 from mantid.simpleapi import *
+from mantid.api import IEventWorkspace
 import math
 
 def GetInstrumentDetails(instrum):
@@ -380,6 +381,72 @@ class RunDetails(object):
 ##END REMOVED
 	def getSuffix(self):
 		return self._suffix
+
+def getWorkspaceReference(ws_pointer):
+    if isinstance(ws_pointer, str):
+        ws_pointer = mtd[ws_pointer]
+    if str(ws_pointer) not in mtd:
+        raise RuntimeError("Invalid workspace name input: " + str(ws_pointer))
+    return ws_pointer
+    
+def isEventWorkspace(ws_reference):
+    return isinstance(getWorkspaceReference(ws_reference),IEventWorkspace)
+
+def getBinsBoundariesFromWorkspace(ws_reference):
+    ws_reference = getWorkspaceReference(ws_reference)
+    Xvalues = ws_reference.dataX(0)
+    binning = str(Xvalues[0])
+    binGap = Xvalues[1] - Xvalues[0]
+    binning = binning + ',' + str(binGap)
+    for j in range(2, len(Xvalues)):
+        nextBinGap = Xvalues[j] - Xvalues[j-1]
+        if nextBinGap != binGap:
+            binGap = nextBinGap
+            binning = binning + ',' + str(Xvalues[j-1]) + ',' + str(binGap)
+    binning = binning + "," + str(Xvalues[-1])
+    return binning
+
+def loadMonitorsFromFile(fileName, monitor_ws_name='monitor_ws'):
+    monitor = LoadNexus(fileName, SpectrumMax=8, OutputWorkspace=monitor_ws_name)
+    return monitor
+
+def getFilePathFromWorkspace(ws):
+    ws_pointer = getWorkspaceReference(ws)
+    file_path = None
+
+    try:
+        for hist in ws_pointer.getHistory():
+            try:
+                if 'Load' in hist.name():
+                    file_path = hist.getPropertyValue('Filename')
+            except:
+                pass
+    except:
+        try:
+            hist = ws_pointer.getHistory().lastAlgorithm()
+            file_path = hist.getPropertyValue('Filename')
+        except:
+            raise RuntimeError("Failed while looking for file in workspace: " + str(ws))
+
+    if not file_path:
+        raise RuntimeError("Can not find the file name for workspace " + str(ws))
+    return file_path
+
+def fromEvent2Histogram(ws_event, ws_monitor = None):
+    if not ws_monitor:
+        file_path = getFilePathFromWorkspace(ws_event)
+        ws_monitor =  loadMonitorsFromFile(file_path)
+    
+    bins_option = getBinsBoundariesFromWorkspace(ws_monitor)
+    
+    aux_hist = Rebin(ws_event, bins_option, False)
+    
+    monitor_ws_name = ws_monitor.name()
+    ConjoinWorkspaces(ws_monitor, aux_hist, CheckOverlapping=True)
+    
+    ws_hist = RenameWorkspace(monitor_ws_name, OutputWorkspace=str(ws_event))
+
+    return ws_hist
 		
   
 if __name__ == '__main__':

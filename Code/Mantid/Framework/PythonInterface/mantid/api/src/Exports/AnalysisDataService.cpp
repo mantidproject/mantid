@@ -77,7 +77,7 @@ void export_AnalysisDataService()
 
   class_<AnalysisDataServiceImpl,boost::noncopyable>("AnalysisDataServiceImpl", no_init)
     .def("add", &AnalysisDataServiceImpl::add, "Adds the given object to the service with the given name. If the name/object exists it will raise an error.")
-    .def("addOrReplace", &AnalysisDataServiceImpl::add, "Adds the given object to the service with the given name. The the name exists the object is replaced.")
+    .def("addOrReplace", &AnalysisDataServiceImpl::addOrReplace, "Adds the given object to the service with the given name. The the name exists the object is replaced.")
     .def("doesExist", &AnalysisDataServiceImpl::doesExist, "Returns True if the object is found in the service.")
     .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::DowncastReturnedValue>(),
          "Retrieve the named object. Raises an exception if the name does not exist")

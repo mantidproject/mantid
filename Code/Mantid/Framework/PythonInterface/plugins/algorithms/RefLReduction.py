@@ -138,7 +138,6 @@ class RefLReduction(PythonAlgorithm):
 
         # geometry correction
         geometryCorrectionFlag = self.getProperty("GeometryCorrectionFlag").value
-        print 'geometryCorrectionFlag: ' , geometryCorrectionFlag
 
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
@@ -178,11 +177,15 @@ class RefLReduction(PythonAlgorithm):
         [dMD, dSD] = wks_utility.getDistances(ws_event_data)
         # get theta
         theta = wks_utility.getTheta(ws_event_data, angleOffsetDeg)
-                
+        # get proton charge
+        pc = wks_utility.getProtonCharge(ws_event_data)
+        error_0 = 1. / pc
+
         # rebin data
         ws_histo_data = wks_utility.rebinNeXus(ws_event_data,
                               [binTOFrange[0], binTOFsteps, binTOFrange[1]],
                               'data')
+        
         # get q range
         q_range = wks_utility.getQrange(ws_histo_data, theta, dMD, qMin, qStep)
 
@@ -194,13 +197,21 @@ class RefLReduction(PythonAlgorithm):
                                       TOFrange[0],
                                       TOFrange[1],
                                       'data')
+        
         # normalize by current proton charge
         ws_histo_data = wks_utility.normalizeNeXus(ws_histo_data, 'data')
+        
         # integrate over low resolution range
         [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,
                                                             dataLowResRange,
                                                             'data')
 
+#        #DEBUG ONLY
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_file_after_low_resolution_integration.txt',
+#                                         data_tof_axis,
+#                                         data_y_axis,
+#                                         data_y_error_axis)
+        
         tof_axis = data_tof_axis[0:-1].copy()
         tof_axis_full = data_tof_axis.copy()
 
@@ -214,13 +225,23 @@ class RefLReduction(PythonAlgorithm):
                                                                            dataPeakRange,
                                                                            dataBackFlag,
                                                                            dataBackRange,
+                                                                           error_0, 
                                                                            'data')
-        
+#        #DEBUG ONLY
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_file_back_sub_not_integrated.txt',
+#                                         data_tof_axis,
+#                                         data_y_axis,
+#                                         data_y_error_axis)
+
         # work with normalization        
         
         # load normalization
         ws_event_norm = wks_utility.loadNeXus(int(normalizationRunNumber), 'normalization')        
         
+        # get proton charge
+        pc = wks_utility.getProtonCharge(ws_event_norm)
+        error_0 = 1. / pc
+
         # rebin normalization
         ws_histo_norm = wks_utility.rebinNeXus(ws_event_norm,
                               [binTOFrange[0], binTOFsteps, binTOFrange[1]],
@@ -247,16 +268,29 @@ class RefLReduction(PythonAlgorithm):
                                                         normPeakRange,
                                                         normBackFlag,
                                                         normBackRange,
+                                                        error_0, 
                                                         'normalization') 
 
         [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis, 
                                                            norm_y_error_axis)
 
+#        ## DEBUGGING ONLY
+#        wks_utility.ouput_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/norm_file_back_sub_not_integrated.txt',
+#                                     norm_tof_axis, 
+#                                     av_norm, 
+#                                     av_norm_error)        
+
         [final_data_y_axis, final_data_y_error_axis] = wks_utility.divideDataByNormalization(data_y_axis,
                                                                                              data_y_error_axis,
                                                                                              av_norm,
-                                                                                             av_norm_error)
-
+                                                                                             av_norm_error)        
+        
+#        #DEBUG ONLY
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_divided_by_norm_not_integrated.txt',
+#                                         data_tof_axis,
+#                                         final_data_y_axis,
+#                                         final_data_y_error_axis)
+        
         # apply Scaling factor    
         [tof_axis_full, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis_full, 
                                                                                final_data_y_axis, 
@@ -266,6 +300,11 @@ class RefLReduction(PythonAlgorithm):
                                                                                slitsValuePrecision,
                                                                                slitsWidthFlag)
         
+#        #DEBUG ONLY
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/after_applying_scaling_factor.txt',
+#                                         data_tof_axis,
+#                                         y_axis,
+#                                         y_error_axis)
         
         if geometryCorrectionFlag: # convert To Q with correction
             [q_axis, y_axis, y_error_axis] = wks_utility.convertToQ(tof_axis_full,
@@ -292,6 +331,11 @@ class RefLReduction(PythonAlgorithm):
                                                                                      first_slit_size = first_slit_size,
                                                                                      last_slit_size = last_slit_size)
 
+            
+#            wks_utility.ouput_big_Q_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/after_conversion_to_q.txt',
+#                                         q_axis,
+#                                         y_axis,
+#                                         y_error_axis)
          
         sz = q_axis.shape
         nbr_pixel = sz[0]

@@ -83,7 +83,6 @@
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
-#include "CommandLineInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "TableStatistics.h"
 #include "Fit.h"
@@ -130,6 +129,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cassert>
 
 #include <qwt_scale_engine.h>
 #include <QFileDialog>
@@ -167,11 +167,14 @@
 #include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
+#include <QPair>
+#include <QtAlgorithms>
 #include <zlib.h>
 
 #include <gsl/gsl_sort.h>
 
 #include <boost/regex.hpp>
+#include <boost/scoped_ptr.hpp>
 
 //Mantid
 #include "ScriptingWindow.h"
@@ -180,6 +183,7 @@
 #include "Mantid/MantidAbout.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
+#include "Mantid/ManageInterfaceCategories.h"
 #include "Mantid/FirstTimeSetup.h"
 #include "Mantid/SetUpParaview.h"
 
@@ -191,6 +195,7 @@
 #include "MantidQtAPI/Message.h"
 
 #include "MantidQtMantidWidgets/ICatSearch.h"
+#include "MantidQtMantidWidgets/ICatSearch2.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -450,9 +455,66 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   scriptingWindow = NULL;
   d_text_editor = NULL;
 
-  // List of registered PyQt interfaces
-  QString pyqt_interfaces_as_str = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces"));
-  pyqt_interfaces = QStringList::split(" ", pyqt_interfaces_as_str);
+  const QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
+
+  // Parse the list of registered PyQt interfaces and their respective categories.
+  QString pyQtInterfacesProperty = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces"));
+  foreach(const QString pyQtInterfaceInfo, QStringList::split(" ", pyQtInterfacesProperty))
+  {
+    QString pyQtInterfaceFile;
+    QSet<QString> pyQtInterfaceCategories;
+    const QStringList tokens = QStringList::split("/", pyQtInterfaceInfo);
+
+    if( tokens.size() == 0 ) // Empty token - ignore.
+    {
+      continue;
+    }
+    else if( tokens.size() == 1 ) // Assume missing category.
+    {
+      pyQtInterfaceCategories += "Uncatagorised";
+      pyQtInterfaceFile = tokens[0];
+    }
+    else if( tokens.size() == 2 ) // Assume correct interface name and categories.
+    {
+      pyQtInterfaceCategories += QStringList::split(";", tokens[0]).toSet();
+      pyQtInterfaceFile = tokens[1];
+    }
+    else // Too many forward slashes, or no space between two interfaces.  Warn user and move on.
+    {
+      g_log.warning() << "The mantidqt.python_interfaces property contains an unparsable value: "
+                      << pyQtInterfaceInfo.toStdString();
+      continue;
+    }
+
+    const QString scriptPath = scriptsDir + '/' + pyQtInterfaceFile;
+
+    if( QFileInfo(scriptPath).exists() )
+    {
+      const QString pyQtInterfaceName = QFileInfo(scriptPath).baseName().replace("_", " ");
+      m_interfaceNameDataPairs.append(qMakePair(pyQtInterfaceName, scriptPath));
+
+      // Keep track of the interface's categories as we go.
+      m_interfaceCategories[pyQtInterfaceName] = pyQtInterfaceCategories;
+      m_allCategories += pyQtInterfaceCategories;
+    }
+    else
+    {
+      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
+      g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
+    }
+  }
+  
+  MantidQt::API::InterfaceManager interfaceManager;
+  // Add all interfaces inherited from UserSubWindow.
+  foreach(const QString userSubWindowName, interfaceManager.getUserSubWindowKeys())
+  {
+    m_interfaceNameDataPairs.append(qMakePair(userSubWindowName, userSubWindowName));
+
+    const QSet<QString> categories = UserSubWindowFactory::Instance().getInterfaceCategories(userSubWindowName);
+
+    m_interfaceCategories[userSubWindowName] = categories;
+    m_allCategories += categories;
+  }
 
   renamedTables = QStringList();
   if (!factorySettings)
@@ -500,11 +562,13 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  m_scriptInterpreter = new CommandLineInterpreter(*scriptingEnv(), m_interpreterDock);
   delete m_interpreterDock->widget();
-  m_interpreterDock->setWidget(m_scriptInterpreter);
   m_iface_script = NULL;
+  runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
   loadCustomActions();
+
+  // Nullify icatsearch
+  icatsearch = NULL;
 
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser")
@@ -512,8 +576,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     logWindow->show();
     g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
-
-  actionIPythonConsole->setVisible(testForIPython());
 
   // Need to show first time setup dialog?
   using Mantid::Kernel::ConfigServiceImpl;
@@ -1108,7 +1170,6 @@ void ApplicationWindow::initMainMenu()
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
   view->addAction(actionShowScriptInterpreter);
-  view->addAction(actionIPythonConsole);
   view->insertSeparator();
 
   mantidUI->addMenuItems(view);
@@ -1203,6 +1264,10 @@ void ApplicationWindow::initMainMenu()
   windowsMenu->setCheckable(true);
   connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(windowsMenuAboutToShow()));
 
+  interfaceMenu = new QMenu(this);
+  interfaceMenu->setObjectName("interfaceMenu");
+  connect(interfaceMenu, SIGNAL(aboutToShow()), this, SLOT(interfaceMenuAboutToShow()));
+
   foldersMenu = new QMenu(this);
   foldersMenu->setCheckable(true);
 
@@ -1231,9 +1296,10 @@ void ApplicationWindow::initMainMenu()
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
   icat->addAction(actionICatLogin);//Login menu item
-  icat->addAction(actionMydataSearch);// my data search menu item
-  icat->addAction(actionICatSearch);//search menu item
-  icat->addAction(actionAdvancedSearch); //advanced search menu item
+//  icat->addAction(actionMydataSearch);// my data search menu item
+//  icat->addAction(actionICatSearch);//search menu item
+  icat->addAction(actionICatSearch2); // new ICAT GUI menu item
+//  icat->addAction(actionAdvancedSearch); //advanced search menu item
   icat->addAction(actionICatLogout);//logout menu item
   disableActions();
 }
@@ -1513,44 +1579,10 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   }
 
   myMenuBar()->insertItem(tr("&Catalog"),icat);
-
-  // Interface menu. Build the interface from the user sub windows list.
-  // Modifications will be done through the ManageCustomMenus dialog and
-  // remembered through QSettings.
-  MantidQt::API::InterfaceManager interfaceManager;
-  QStringList user_windows = interfaceManager.getUserSubWindowKeys();
-  QStringListIterator itr(user_windows);
-  QString menuName = "&Interfaces";
-  addUserMenu(menuName);
-  while( itr.hasNext() )
-  {
-      QString itemName = itr.next();
-      // Check whether the menu item was flagged in the QSettings.
-      if (getMenuSettingsFlag(itemName))
-          addUserMenuAction( menuName, itemName, itemName);
-  }
-
-  // Go through PyQt interfaces
-  QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
-  QStringListIterator pyqt_itr(pyqt_interfaces);
-  while( pyqt_itr.hasNext() )
-  {
-    QString itemName = pyqt_itr.next();
-    QString scriptPath = scriptsDir + '/' + itemName;
-
-    if( QFileInfo(scriptPath).exists() ) {
-      QString baseName = QFileInfo(scriptPath).baseName();
-      // Need to use "nice" name to check if scripts has been removed by user.
-      QString niceName = baseName.replace("_", " ");
-      if (getMenuSettingsFlag(niceName))
-        addUserMenuAction(menuName, baseName, scriptPath);
-    }
-    else
-    {
-      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
-      g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
-    }
-  }
+  
+  // -- INTERFACE MENU --
+  myMenuBar()->insertItem(tr("&Interfaces"), interfaceMenu);
+  interfaceMenuAboutToShow();
 
   myMenuBar()->insertItem(tr("&Help"), help );
 
@@ -3387,29 +3419,23 @@ void ApplicationWindow::convertTableToWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
-  {
-    mt = convertTableToTableWorkspace(t);
-  }
+  convertTableToTableWorkspace(t);
 }
 
 /**
- * Convert Table in the active window to a TableWorkspace
+ * Convert Table in the active window to a MatrixWorkspace
  */
 void ApplicationWindow::convertTableToMatrixWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
+  if(auto *mt = dynamic_cast<MantidTable*>(t))
   {
     mt = convertTableToTableWorkspace(t);
+    QMap<QString,QString> params;
+    params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+    mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
   }
-  if ( !mt ) return;
-  QMap<QString,QString> params;
-  params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-  mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
 }
 
 /**
@@ -3486,8 +3512,7 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
   {
     Mantid::API::AnalysisDataService::Instance().add(wsName,tws);
   }
-  MantidTable* mt = new MantidTable(scriptingEnv(), tws, t->objectName(), this);
-  return mt;
+  return new MantidTable(scriptingEnv(), tws, t->objectName(), this);
 }
 
 Matrix* ApplicationWindow::tableToMatrix(Table* t)
@@ -5276,7 +5301,7 @@ void ApplicationWindow::readSettings()
   // Mantid
 
   bool warning_shown = settings.value("/DuplicationDialogShown", false).toBool();
-
+  
   //Check for user defined scripts in settings and create menus for them
   //Top level scripts group
   settings.beginGroup("CustomScripts");
@@ -5290,17 +5315,24 @@ void ApplicationWindow::readSettings()
 
   foreach(QString menu, settings.childGroups())
   {
+    // Specifically disallow the use of the Interfaces menu to users looking to
+    // customise their own menus, since it is managed separately.  Also, there
+    // may well be some left-over QSettings values from previous installations
+    // that we do not want used.
+    if( menu == "Interfaces" || menu == "&Interfaces" )
+      continue;
+  
     addUserMenu(menu);
     settings.beginGroup(menu);
     foreach(QString keyName, settings.childKeys())
     {
       QFileInfo fi(settings.value(keyName).toString());
       QString baseName = fi.fileName();
-      if (pyqt_interfaces.contains(baseName))
+      const QStringList pyQtInterfaces = m_interfaceCategories.keys();
+      if (pyQtInterfaces.contains(baseName))
         continue;
 
-      if ( menu.contains("Interfaces")==0 &&
-          (user_windows.grep(keyName).size() > 0 || pyqt_interfaces.grep(keyName).size() > 0) )
+      if ( user_windows.grep(keyName).size() > 0 || pyQtInterfaces.grep(keyName).size() > 0 )
       {
         duplicated_custom_menu.append(menu+"/"+keyName);
       }
@@ -5631,8 +5663,6 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/KeepAspect", d_keep_plot_aspect);
   settings.endGroup(); // ExportImage
 
-
-  if(m_scriptInterpreter ) m_scriptInterpreter->saveSettings();
   settings.beginGroup("/ScriptWindow");
   // Geometry is applied by the app window
   settings.setValue("/size", d_script_win_size);
@@ -8278,11 +8308,6 @@ void ApplicationWindow::copySelection()
     info->copy();
     return;
   }
-  else if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->copy();
-    return;
-  }
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -8382,12 +8407,6 @@ void ApplicationWindow::copyMarker()
 
 void ApplicationWindow::pasteSelection()
 {  
-  if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->paste();
-    return;
-  }
-
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -9289,6 +9308,62 @@ void ApplicationWindow::windowsMenuAboutToShow()
   reloadCustomActions();
 }
 
+void ApplicationWindow::interfaceMenuAboutToShow()
+{
+  interfaceMenu->clear();
+  m_interfaceActions.clear();
+
+  // Create a submenu for each category.  Make sure submenus are in alphabetical order,
+  // and ignore any hidden categories.
+  const QString hiddenProp = QString::fromStdString(
+    Mantid::Kernel::ConfigService::Instance().getString("interfaces.categories.hidden")
+  );
+  auto hiddenCategories = hiddenProp.split(";", QString::SkipEmptyParts).toSet();
+  QMap<QString, QMenu *> categoryMenus;
+  auto sortedCategories = m_allCategories.toList();
+  qSort(sortedCategories);
+  foreach(const QString category, sortedCategories)
+  {
+    if( hiddenCategories.contains(category) )
+      continue;
+    QMenu * categoryMenu = new QMenu(interfaceMenu);
+    categoryMenu->setObjectName(category + "Menu");
+    interfaceMenu->insertItem(tr(category), categoryMenu);
+    categoryMenus[category] = categoryMenu;
+  }
+
+  // Turn the name/data pairs into QActions with which we populate the menus.
+  foreach(const auto interfaceNameDataPair, m_interfaceNameDataPairs)
+  {
+    const QString name = interfaceNameDataPair.first;
+    const QString data = interfaceNameDataPair.second;
+
+    foreach(const QString category, m_interfaceCategories[name])
+    {
+      if(!categoryMenus.contains(category))
+        continue;
+      QAction * openInterface = new QAction(tr(name), interfaceMenu);
+      openInterface->setData(data);
+      categoryMenus[category]->addAction(openInterface);
+
+      // Update separate list containing all interface actions.
+      m_interfaceActions.append(openInterface);
+    }
+  }
+
+  foreach( auto categoryMenu, categoryMenus.values() )
+  {
+    connect(categoryMenu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
+  }
+
+  interfaceMenu->insertSeparator();
+
+  // Allow user to customise categories.
+  QAction * customiseCategoriesAction = new QAction(tr("Add/Remove Categories"), this);
+  connect(customiseCategoriesAction, SIGNAL(activated()), this, SLOT(showInterfaceCategoriesDialog()));
+  interfaceMenu->addAction(customiseCategoriesAction);
+}
+
 void ApplicationWindow::showMarkerPopupMenu()
 {
   MultiLayer *plot = dynamic_cast<MultiLayer*>(activeWindow(MultiLayerWindow));
@@ -9457,13 +9532,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-  // don't ask the closing sub-windows: the answer will be ignored
-  MDIWindowList windows = getAllWindows();
-  foreach(MdiSubWindow* w,windows)
-  {
-    w->confirmClose(false);
-  }
-
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
     if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
@@ -9487,7 +9555,22 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     }
   }
 
+  // Close all the MDI windows
+  MDIWindowList windows = getAllWindows();
+  foreach(MdiSubWindow* w,windows)
+  {
+    w->confirmClose(false);
+    w->close();
+  }
+
   mantidUI->shutdown();
+
+  if (icatsearch)
+  {
+    icatsearch->disconnect();
+    delete icatsearch;
+    icatsearch = NULL;
+  }
 
   if( scriptingWindow )
   {
@@ -9510,7 +9593,6 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   //Save the settings and exit
   saveSettings();
-  m_scriptInterpreter->shutdown();
   scriptingEnv()->finalize();
 
   // Help window
@@ -13221,14 +13303,6 @@ void ApplicationWindow::createActions()
 #endif
   actionShowScriptInterpreter->setToggleAction(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
-
-  actionIPythonConsole = new QAction(getQPixmap("python_xpm"), tr("Launch IPython Console"), this);
-#ifdef __APPLE__
-  actionIPythonConsole->setShortcut(tr("Ctrl+5")); // F4 is used by the window manager on Mac
-#else
-  actionIPythonConsole->setShortcut(tr("F5"));
-#endif
-  connect(actionIPythonConsole, SIGNAL(activated()), this, SLOT(launchIPythonConsole()));
 #endif
 
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
@@ -13322,6 +13396,10 @@ void ApplicationWindow::createActions()
   actionICatLogin  = new QAction("Login",this);
   actionICatLogin->setToolTip(tr("Catalog Login"));
   connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
+
+  actionICatSearch2 = new QAction("Search",this);
+  actionICatSearch2->setToolTip(tr("Search data in archives."));
+  connect(actionICatSearch2, SIGNAL(activated()), this, SLOT(ICatSearch2()));
 
   actionICatSearch=new QAction("Basic Search",this);
   actionICatSearch->setToolTip(tr("Catalog Basic Search"));
@@ -16143,31 +16221,11 @@ void ApplicationWindow::showScriptInterpreter()
   { 
     m_interpreterDock->show();
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
-    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
-    m_scriptInterpreter->setFocus();
+    m_interpreterDock->setFocusProxy(m_interpreterDock->widget());
+    m_interpreterDock->setFocus();
     m_interpreterDock->activateWindow();
-     
   }
 
-}
-
-bool ApplicationWindow::testForIPython()
-{
-#ifdef _WIN32
-  // We have an issue with clashing MSVCR90 libraries on 32-bit windows. When this method
-  // is run at startup it raises a dialog box warning about an invalid load of the C runtime library.
-  // It seems to have picked up MSCRV90 from the CMake bin directory. Clicking OK allows
-  // Mantid to load and then running IPython seesm fine, also without CMake in the PATH it is okay.
-  // We will have to assume that this is always here on Windows.
-  return true;
-#else
-  return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
-#endif
-}
-
-void ApplicationWindow::launchIPythonConsole()
-{
-  runPythonScript("from ipython_plugin import MantidPlot_IPython\nMantidPlot_IPython().launch_console()",false, true,false);
 }
 
 /**
@@ -16212,7 +16270,7 @@ ApplicationWindow::~ApplicationWindow()
   delete hiddenWindows;
   delete scriptingWindow;
   delete d_text_editor;
-
+  delete icatsearch;
   while(!d_user_menus.isEmpty())
   {
     QMenu *menu = d_user_menus.takeLast();
@@ -16889,6 +16947,20 @@ void ApplicationWindow::showCustomActionDialog()
   ad->setFocus();
 }
 
+void ApplicationWindow::showInterfaceCategoriesDialog()
+{
+  auto existingWindow = this->findChild<ManageInterfaceCategories *>();
+  if( !existingWindow )
+  {
+    auto * diag = new ManageInterfaceCategories(this);
+    diag->setAttribute(Qt::WA_DeleteOnClose);
+    diag->show();
+    diag->setFocus();
+  }
+  else
+    existingWindow->activateWindow();
+}
+
 void ApplicationWindow::showUserDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
@@ -16954,7 +17026,7 @@ void ApplicationWindow::removeCustomAction(QAction *action)
 
 void ApplicationWindow::performCustomAction(QAction *action)
 {
-  if (!action || !d_user_actions.contains(action))
+  if (!action || !(d_user_actions.contains(action) || m_interfaceActions.contains(action)))
     return;
 #ifdef SCRIPTING_PYTHON
 QString action_data = action->data().toString();
@@ -16983,12 +17055,12 @@ if( QFileInfo(action_data).exists() )
 }
 else
 {
-  //First search for an existing window
-  foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
+  // Check to see if the window is already open.  If so, just show it to the user.
+  foreach( auto userSubWindow, this->findChildren<UserSubWindow *>() )
   {
-    if( sub_win->widget()->objectName() == action_data )
+    if( userSubWindow->objectName() == action_data )
     {
-      sub_win->widget()->show();
+      userSubWindow->activateWindow();
       return;
     }
   }
@@ -17345,6 +17417,21 @@ void ApplicationWindow::panOnPlot()
 void ApplicationWindow::ICatLogin()
 {
   mantidUI->executeAlgorithm("CatalogLogin",1);
+}
+
+void ApplicationWindow::ICatSearch2()
+{
+  if ( icatsearch == NULL || icatsearch)
+  {
+    // Only one ICAT GUI will appear, and that the previous one will be overridden.
+    // E.g. if a user opens the ICAT GUI without being logged into ICAT they will need to
+    // login in and then click "Search" again.
+    delete icatsearch;
+    icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
+
+    icatsearch->show();
+    icatsearch->raise();
+  }
 }
 
 void ApplicationWindow::ICatIsisSearch()

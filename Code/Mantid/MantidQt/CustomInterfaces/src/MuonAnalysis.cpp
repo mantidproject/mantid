@@ -85,27 +85,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
   m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
-{
-  try
-  {
-    Poco::File tempFile(ConfigService::Instance().getInstrumentDirectory());
-
-    // If the instrument directory can't be written to... (linux problem)
-    if (tempFile.exists() && !tempFile.canWrite() ) 
-    {
-      g_log.information() << "Instrument directory is read only, writing temp grouping to system temp.\n";
-      m_groupingTempFilename = ConfigService::Instance().getTempDir()+"tempMuonAnalysisGrouping.xml";
-    }
-    else
-    {
-      m_groupingTempFilename = ConfigService::Instance().getInstrumentDirectory()+"Grouping/tempMuonAnalysisGrouping.xml";
-    }
-  }
-  catch(...)
-  {
-    g_log.debug() << "Problem writing temp grouping file";
-  }
-}
+{}
 
 /**
  * Initialize local Python environmnet. 
@@ -219,10 +199,6 @@ void MuonAnalysis::initLayout()
   // file input
   connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(inputFileChanged_MWRunFiles()));
 
-  // Input check for First Good Data
-  connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this,
-    SLOT(runFirstGoodBinFront()));
-
   // load previous saved values
   loadAutoSavedValues(m_settingsGroup);
 
@@ -283,30 +259,6 @@ void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
   if ( index >= 0 )
     updateFront();
 }
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysis::runFirstGoodBinFront()
-{
-  try
-  {
-    boost::lexical_cast<double>(m_uiForm.firstGoodBinFront->text().toStdString());
-    
-    // if this value updated then also update 'Start at" Plot option if "Start at First Good Data" set
-    if (m_uiForm.timeComboBox->currentIndex() == 0 )
-    {
-      m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
-    }
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in First Good Data (ms)' input box. Reset to 0.3.");
-    m_uiForm.firstGoodBinFront->setText("0.3");
-  }
-}
-
 
 /**
 * Front plot button (slot)
@@ -405,7 +357,9 @@ void MuonAnalysis::runSaveGroupButton()
 
   if( ! groupingFile.isEmpty() )
   {
-    saveGroupingTabletoXML(m_uiForm, groupingFile.toStdString());
+    Grouping groupingToSave;
+    parseGroupingTable(m_uiForm, groupingToSave);
+    saveGroupingToXML(groupingToSave, groupingFile.toStdString());
     
     QString directory = QFileInfo(groupingFile).path();
     prevValues.setValue("dir", directory);
@@ -438,19 +392,22 @@ void MuonAnalysis::runLoadGroupButton()
   QString directory = QFileInfo(groupingFile).path();
   prevValues.setValue("dir", directory);
 
-  saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-  clearTablesAndCombo();
+  Grouping loadedGrouping;
 
   try
   {
-    loadGroupingXMLtoTable(m_uiForm, groupingFile.toStdString());
+    loadGroupingFromXML(groupingFile.toStdString(), loadedGrouping);
   }
   catch (Exception::FileError& e)
   {
+    g_log.error("Unable to load grouping. Data left unchanged");
     g_log.error(e.what());
-    g_log.error("Revert to previous grouping");
-    loadGroupingXMLtoTable(m_uiForm, m_groupingTempFilename);
+    m_updating = false;
+    return;
   }
+
+  clearTablesAndCombo();
+  fillGroupingTable(loadedGrouping, m_uiForm);
 
   // add number of detectors column to group table
   int numRows = m_uiForm.groupTable->rowCount();
@@ -1201,8 +1158,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size()));
 
     if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
-      // TODO: applyGroupingToWS shows it's own messages as well. Should make it throw exceptions 
-      //       instead.
       throw std::runtime_error("Couldn't apply grouping");
 
     // Populate instrument fields
@@ -1220,9 +1175,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     // so that later I can check if user has altered it
     m_nexusTimeZero = boost::lexical_cast<double>(m_uiForm.timeZeroFront->text().toStdString());
     m_uiForm.firstGoodBinFront->setText(QString::number(firstGoodData-timeZero,'g',2));
-
-    // since content of first-good-bin changed run this slot
-    runFirstGoodBinFront();
 
     std::string infoStr("");
     
@@ -1259,6 +1211,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     infoStr += matrix_workspace->getComment();
     
     const Run& runDetails = matrix_workspace->run();
+
     Mantid::Kernel::DateAndTime start, end;
 
     // Add the start time for the run
@@ -1266,7 +1219,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     if ( runDetails.hasProperty("run_start") )
     {
       start = runDetails.getProperty("run_start")->value();
-      infoStr += runDetails.getProperty("run_start")->value();
+      infoStr += start.toSimpleString();
     }
 
     // Add the end time for the run
@@ -1274,7 +1227,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     if ( runDetails.hasProperty("run_end") )
     {
       end = runDetails.getProperty("run_end")->value();
-      infoStr += runDetails.getProperty("run_end")->value();
+      infoStr += end.toSimpleString();
     }
 
     // Add counts to run information
@@ -2611,63 +2564,86 @@ bool MuonAnalysis::isGroupingSet()
 }
 
 /**
- * Apply grouping specified in xml file to workspace
- *
- * @param inputWS :: The input workspace to apply grouping
- * @param outputWS :: The resulting workspace
- * @param filename :: Name of grouping file
- */
-bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS,
-   const std::string& filename)
-{
-  if ( AnalysisDataService::Instance().doesExist(inputWS) )
-  {
-    AnalysisDataService::Instance().remove(outputWS);
-
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", inputWS);
-    alg->setPropertyValue("OutputWorkspace", outputWS);
-    alg->setPropertyValue("MapFile", filename);
-    try
-    {
-      alg->execute();
-      return true;
-    }
-    catch(...)
-    {
-      m_optionTab->noDataAvailable();
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
-      return false;
-    }
-  }
-  return false;
-}
-
-/**
  * Apply whatever grouping is specified in GUI tables to workspace.
  */
-bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS)
+bool MuonAnalysis::applyGroupingToWS( const std::string& inputWsName,  const std::string& outputWsName)
 {
-  if ( isGroupingSet() && AnalysisDataService::Instance().doesExist(inputWS) )
+  if (!isGroupingSet() || !AnalysisDataService::Instance().doesExist(inputWsName))
+    return false;
+
+  std::string complaint = isGroupingAndDataConsistent();
+  if (!( complaint.empty() ) )
   {
-
-    std::string complaint = isGroupingAndDataConsistent();
-    if (!( complaint.empty() ) )
-    {
-      if (m_uiForm.frontPlotButton->isEnabled() )
-        QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
-      m_optionTab->noDataAvailable();
-      return false;
-    }
-    {
-      if (!m_uiForm.frontPlotButton->isEnabled() )
-        m_optionTab->nowDataAvailable();
-    }
-
-    saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
-    return applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
+    if (m_uiForm.frontPlotButton->isEnabled() )
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", complaint.c_str());
+    m_optionTab->noDataAvailable();
+    return false;
   }
-  return false;
+  else
+  {
+    if (!m_uiForm.frontPlotButton->isEnabled() )
+      m_optionTab->nowDataAvailable();
+  }
+
+  // If output workspace exists, remove explicitly, so even if something goes wrong - old data 
+  // is not used
+  if(AnalysisDataService::Instance().doesExist(outputWsName))
+  {
+    // Using DeleteWorkspace algorithm so if outputWs is a group - it is fully removed
+    Mantid::API::IAlgorithm_sptr rmWs = AlgorithmManager::Instance().create("DeleteWorkspace");
+    rmWs->initialize();
+    rmWs->setPropertyValue("Workspace", outputWsName);
+    rmWs->execute();
+  }
+
+  Grouping tableGrouping;
+  parseGroupingTable(m_uiForm, tableGrouping);
+
+  // Retrieve input workspace
+  Workspace_sptr inputWs = AnalysisDataService::Instance().retrieve(inputWsName);
+
+  Workspace_sptr outputWs;
+
+  try // ... to group
+  {
+    // Single workspace
+    if(MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWs))
+    {
+      outputWs = groupWorkspace(ws, tableGrouping);
+    }
+    // Workspace group
+    else if(WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWs))
+    { 
+      // Create output group
+      WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+  
+      for(size_t i = 0; i < group->size(); i++)
+      {
+        if(MatrixWorkspace_sptr member = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i)))
+        {
+          MatrixWorkspace_sptr groupedMember = groupWorkspace(member, tableGrouping);
+
+          outputGroup->addWorkspace(groupedMember);
+        }
+        else
+          throw std::invalid_argument("Group contains unsupported workspace type");
+      }
+
+      outputWs = outputGroup;
+    }
+    else
+      throw std::invalid_argument("Unsupported workspace type");
+  }
+  catch(std::exception& e)
+  {
+    m_optionTab->noDataAvailable();
+    g_log.error(e.what());
+    return false;
+  }
+
+  AnalysisDataService::Instance().add(outputWsName, outputWs);
+
+  return true;
 }
 
 /**
@@ -2850,8 +2826,9 @@ void MuonAnalysis::startUpLook()
   m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
 
-  // Only allow numbers in the time zero text box
-  m_uiForm.timeZeroFront->setValidator(new QDoubleValidator(m_uiForm.timeZeroFront));
+  // Set validators for number-only boxes
+  m_uiForm.timeZeroFront->setValidator(createDoubleValidator(m_uiForm.timeZeroFront));
+  m_uiForm.firstGoodBinFront->setValidator(createDoubleValidator(m_uiForm.firstGoodBinFront));
 
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
@@ -2878,13 +2855,11 @@ void MuonAnalysis::startUpLook()
   }
 }
 
-
 /**
 * set grouping in table from information from nexus raw file
 */
 void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 {
-  // for now do try to set grouping from nexus file if it is already set
   if ( isGroupingSet() )
     return;
 
@@ -3086,15 +3061,20 @@ void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, Mat
 
   if ( groupFile.size() == 1 )
   {
+    Grouping loadedGrouping;
+
     try
     {
-      loadGroupingXMLtoTable(m_uiForm, directoryName+groupFile[0]);
+      loadGroupingFromXML(directoryName+groupFile[0], loadedGrouping);
     }
     catch (...)
     {
-      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", QString("Can't load default grouping file in IDF.\n")
-        + "with name: " + groupFile[0].c_str());
+      QMessageBox::warning(this, "MantidPlot - MuonAnalysis", 
+        QString("Can't load default grouping file in IDF. \n With name: ") + groupFile[0].c_str());
+      return;
     }
+
+    fillGroupingTable(loadedGrouping, m_uiForm);
   }
 }
 
@@ -3133,17 +3113,35 @@ QString MuonAnalysis::firstGoodBin()
  */
 double MuonAnalysis::plotFromTime()
 {
-  double retVal;
-  try
+  QLineEdit* startTimeBox;
+  double defaultValue;
+
+  // If is first good bin used - we use a different box
+  if(m_uiForm.timeComboBox->currentIndex() == 0)
   {
-    retVal = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
+    startTimeBox = m_uiForm.firstGoodBinFront;
+    defaultValue = 0.3;
   }
-  catch (...)
+  else
   {
-    retVal = 0.0;
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ms)' input box. Plot from time zero.");
+    startTimeBox = m_uiForm.timeAxisStartAtInput;
+    defaultValue = 0.0;
   }
-  return retVal;
+
+  bool ok;
+  double returnValue = startTimeBox->text().toDouble(&ok);
+
+  if(!ok)
+  {
+    returnValue = defaultValue;
+
+    startTimeBox->setText(QString::number(defaultValue));
+
+    QMessageBox::warning(this, "Mantid - MuonAnalysis", 
+      QString("Start time number not recognized. Reset to default of %1").arg(defaultValue));
+  }
+  
+  return returnValue;
 }
 
 
@@ -3366,6 +3364,10 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
+
+  QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
+  m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
+
   if (deadTimeTypeIndex != 2)
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
 }
@@ -3676,7 +3678,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
-  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(firstPeriodSelectionChanged()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
@@ -3858,6 +3860,7 @@ void MuonAnalysis::setToolbarsHidden(bool hidden)
 void MuonAnalysis::changeDeadTimeType(int choice)
 {
   m_deadTimesChanged = true;
+
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
@@ -3865,8 +3868,8 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   }
   else // choice must be from workspace
   {
-    m_uiForm.mwRunDeadTimeFile->setText("");
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
+    m_uiForm.mwRunDeadTimeFile->setUserInput("");
   }
 
   QSettings group;
@@ -3882,10 +3885,29 @@ void MuonAnalysis::changeDeadTimeType(int choice)
 */
 void MuonAnalysis::deadTimeFileSelected()
 {
+  if(!m_uiForm.mwRunDeadTimeFile->isValid())
+    return;
+
+  // Remember the filename for the next time interface is opened
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "DeadTimeOptions");
+  group.setValue("deadTimeFile", m_uiForm.mwRunDeadTimeFile->getText());
+
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
 }
 
+/**
+ * Creates new double validator which accepts numbers in standard notation only.
+ * @param parent :: Parent of the new validator
+ * @return New created validator
+ */
+QDoubleValidator* MuonAnalysis::createDoubleValidator(QObject* parent)
+{
+  QDoubleValidator* newValidator = new QDoubleValidator(parent);
+  newValidator->setNotation(QDoubleValidator::StandardNotation);
+  return newValidator;
+}
 
 }//namespace MantidQT
 }//namespace CustomInterfaces

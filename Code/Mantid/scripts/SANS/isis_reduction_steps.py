@@ -13,7 +13,9 @@ sanslog = sans_reduction_steps.sanslog
 
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace
-import SANSUtility
+from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
+                         isEventWorkspace, fromEvent2Histogram, 
+                         getFilePathFromWorkspace, getWorkspaceReference)
 import isis_instrument
 import os
 import math
@@ -83,8 +85,6 @@ class LoadRun(object):
                             OutputWorkspace=workspace,
                             **extra_options)
 
-            alg = outWs.getHistory().lastAlgorithm()
-            self._data_file = alg.getPropertyValue("Filename")
             LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
 
             workspace = self._leaveSinglePeriod(workspace, period)
@@ -94,8 +94,6 @@ class LoadRun(object):
             outWs = LoadNexus(Filename=self._data_file, 
                               OutputWorkspace=workspace,
                               **extra_options)
-            alg = outWs.getHistory().lastAlgorithm()            
-            self._data_file = alg.getPropertyValue("Filename")
 
         SANS2D_log_file = mtd[workspace]
        
@@ -159,9 +157,9 @@ class LoadRun(object):
         ws_pointer = self._data_file
 
         try:
-            _file_path = ws_pointer.getHistory().getAlgorithm(0).getPropertyValue("Filename")
+            _file_path = getFilePathFromWorkspace(ws_pointer)
         except:
-            raise RuntimeError("Failed to retrieve information to reloade this workspace " + str(self._data_file))
+            raise RuntimeError("Failed to retrieve information to reload this workspace " + str(self._data_file))
         self._data_file = _file_path
         if self._reload:
             # give to _assignHelper the responsibility of loading this data.
@@ -181,6 +179,9 @@ class LoadRun(object):
         if 'Algorithm: Move' in hist_str or 'Algorithm: Rotate' in hist_str:
             raise RuntimeError('Moving components needs to be made compatible with not reloading the sample')
         
+        if isEventWorkspace(ws_pointer):
+            ws_pointer = fromEvent2Histogram(ws_pointer)
+
         return True, self._extract_log_info(ws_pointer, reducer.instrument)
         
 
@@ -208,7 +209,7 @@ class LoadRun(object):
         spectrum_limits = dict()
         if self._is_trans:
             if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
-                dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
+                dimension = GetInstrumentDetails(reducer.instrument)[0]
                 spec_min = dimension*dimension*2
                 spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
 
@@ -296,7 +297,8 @@ class LoadRun(object):
         return numPeriods
 
     def _getHistory(self, wk_name):
-
+        ws = getWorkspaceReference(wk_name)
+        
         if isinstance(wk_name, Workspace):
             ws_h = wk_name.getHistory()
         else:
@@ -834,15 +836,15 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         if detector.isAlias('rear'):
             self.spec_list = self._ConvertToSpecList(self.spec_mask_r, detector)
             #Time mask
-            SANSUtility.MaskByBinRange(workspace,self.time_mask_r)
-            SANSUtility.MaskByBinRange(workspace,self.time_mask)
+            MaskByBinRange (workspace,self.time_mask_r)
+            MaskByBinRange(workspace,self.time_mask)
 
         if detector.isAlias('front'):
             #front specific masking
             self.spec_list = self._ConvertToSpecList(self.spec_mask_f, detector)
             #Time mask
-            SANSUtility.MaskByBinRange(workspace,self.time_mask_f)
-            SANSUtility.MaskByBinRange(workspace,self.time_mask)
+            MaskByBinRange(workspace,self.time_mask_f)
+            MaskByBinRange(workspace,self.time_mask)
 
         #reset the xml, as execute can be run more than once
         self._xml = []

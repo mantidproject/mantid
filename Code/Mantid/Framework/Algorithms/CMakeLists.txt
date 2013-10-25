@@ -102,9 +102,9 @@ set ( SRC_FILES
 	src/FindCenterOfMassPosition2.cpp
 	src/FindDeadDetectors.cpp
 	src/FindDetectorsOutsideLimits.cpp
-	src/FindPeakBackground.cpp
 	src/FindPeaks.cpp
-	src/FlatBackground.cpp
+	src/FindPeakBackground.cpp
+	src/FitPeak.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
 	src/GenerateEventsFilter.cpp
@@ -327,9 +327,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindCenterOfMassPosition2.h
 	inc/MantidAlgorithms/FindDeadDetectors.h
 	inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
-	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FindPeaks.h
-	inc/MantidAlgorithms/FlatBackground.h
+	inc/MantidAlgorithms/FindPeakBackground.h
+	inc/MantidAlgorithms/FitPeak.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
@@ -556,9 +556,9 @@ set ( TEST_FILES
 	FindCenterOfMassPositionTest.h
 	FindDeadDetectorsTest.h
 	FindDetectorsOutsideLimitsTest.h
-	FindPeakBackgroundTest.h
 	FindPeaksTest.h
-	FlatBackgroundTest.h
+	FindPeakBackgroundTest.h
+	FitPeakTest.h
 	FlatPlateAbsorptionTest.h
 	GenerateEventsFilterTest.h
 	GeneratePeaksTest.h

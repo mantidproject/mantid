@@ -23,6 +23,12 @@ This algorithm is designed to work with other algorithms to do Le Bail fit.  The
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+
+#include <boost/algorithm/string.hpp>
+#include <Poco/File.h>
+
 #include <iomanip>
 #include <fstream>
 
@@ -54,6 +60,7 @@ namespace DataHandling
   {
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Wiki docs
     */
   void SaveFullprofResolution::initDocs()
@@ -62,6 +69,7 @@ namespace DataHandling
     this->setOptionalMessage("Save a Table workspace, which contains peak profile parameters' values, to a Fullprof resolution (.irf) file.");
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Init to define parameters
     */
   void SaveFullprofResolution::init()
@@ -71,46 +79,117 @@ namespace DataHandling
 
     std::vector<std::string> exts;
     exts.push_back(".irf");
-    this->declareProperty(new API::FileProperty("OutputFile", "fp.irf", API::FileProperty::Save, exts),
+    this->declareProperty(new API::FileProperty("OutputFilename", "fp.irf", API::FileProperty::Save, exts),
                           "Name of the output .irf file.");
 
-    this->declareProperty("Bank", 1, "Bank number of the parameters belonged to. ");
+    boost::shared_ptr<BoundedValidator<int> > bankboundval = boost::make_shared<BoundedValidator<int> >();
+    bankboundval->setLower(0);
+    this->declareProperty("Bank", EMPTY_INT(), "Bank number of the parameters belonged to. ");
+
+    vector<string> supportedfunctions;
+    supportedfunctions.push_back("Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+    supportedfunctions.push_back("Jason Hodge's function (profile 10)");
+    auto funcvalidator = boost::make_shared<StringListValidator>(supportedfunctions);
+    declareProperty("ProfileFunction", "Jason Hodge's function (profile 10)", funcvalidator,
+                    "Profile number defined in Fullprof.");
+
+    declareProperty("Append", false, "If true and the output file exists, the bank will be appended to the existing one.");
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Main execution body
     */
   void SaveFullprofResolution::exec()
   {
-    // 1. Get input parameters
-    inpWS = getProperty("InputWorkspace");
-    std::string irffilename = getProperty("OutputFile");
-    int bankid = getProperty("Bank");
+    // Get input parameters
+    processProperties();
 
-    // 2. Parse the input
+    // Parse the input
     parseTableWorkspace();
 
-    // 3. Generate the string for the file to write
-    std::string filestr = toProf10IrfString(bankid);
+    // Generate the string for the file to write
+    std::string filestr;
+    switch (m_fpProfileNumber)
+    {
+      case 9:
+        filestr = toProf9IrfString();
+        break;
 
-    // 4. Write to file
+      case 10:
+        filestr = toProf10IrfString();
+        break;
+
+      default:
+        throw runtime_error("Profile number is not supported yet.");
+
+    }
+
+    // Write to file
     std::ofstream ofile;
-    ofile.open(irffilename.c_str());
+    // Make it work!
+    if (m_append)
+    {
+      ofile.open(m_outIrfFilename.c_str(), std::ofstream::out | std::ofstream::app);
+    }
+    else
+    {
+      ofile.open(m_outIrfFilename.c_str(), std::ofstream::out | std::ofstream::trunc);
+    }
     ofile << filestr;
     ofile.close();
 
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Process properties
+    */
+  void SaveFullprofResolution::processProperties()
+  {
+    // Parameter table
+    m_profileTableWS = getProperty("InputWorkspace");
+
+    // Output file and operation
+    m_outIrfFilename = getPropertyValue("OutputFilename");
+    m_append = getProperty("Append");
+    if (m_append)
+    {
+      // Set append flag to false if file does not exist
+      bool fileexist = Poco::File(m_outIrfFilename).exists();
+      if (!fileexist)
+        m_append = false;
+    }
+
+    // Bank to write out
+    m_bankID = getProperty("Bank");
+
+    // Profile function
+    string proffunction = getProperty("ProfileFunction");
+    if (proffunction == "Back-to-back exponential convoluted with pseudo-voigt (profile 9)")
+      m_fpProfileNumber = 9;
+    else if (proffunction == "Jason Hodge's function (profile 10)")
+      m_fpProfileNumber = 10;
+    else
+    {
+      stringstream errmsg;
+      errmsg << "It is impossible to have profile function " << proffunction << " input. ";
+      g_log.error(errmsg.str());
+      throw runtime_error(errmsg.str());
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Parse the table workspace to a map of parameters (name and value)
     * to look up
     */
   void SaveFullprofResolution::parseTableWorkspace()
   {
-    // 1. Clear the parameter
-    mParameters.clear();
+    // Check the table workspace
+    std::vector<std::string> colnames = m_profileTableWS->getColumnNames();
+    size_t numcols = colnames.size();
 
-    // 2. Check the table workspace
-    std::vector<std::string> colnames = inpWS->getColumnNames();
     stringstream dbmsgss("Input table's column names: ");
     for (size_t i = 0; i < colnames.size(); ++i)
     {
@@ -118,139 +197,333 @@ namespace DataHandling
     }
     g_log.debug(dbmsgss.str());
 
-    // FIXME - The order of the column name can be flexible in future
-    if (colnames.size() < 2 || colnames[0].compare("Name") || colnames[1].compare("Value"))
+    if (colnames[0] != "Name")
+      throw runtime_error("First colunm must be 'Name'");
+
+    // Read out a list of parameter names
+    size_t numpars = m_profileTableWS->rowCount();
+    vector<string> vec_parnames(numpars);
+    int rowbankindex = -1;
+    for (size_t i = 0; i < numpars; ++i)
     {
-      std::stringstream errmsg;
-      errmsg << "Input parameter workspace is not supported or recoganizable.  Possible reason is " << std::endl;
-      errmsg << "(1) too few columns.  (2) first and second column are not Name and Value.";
-      g_log.error() << errmsg.str() << std::endl;
-      throw std::invalid_argument(errmsg.str());
+      string parname = m_profileTableWS->cell<string>(i, 0);
+      vec_parnames[i] = parname;
+      if (parname == "BANK")
+        rowbankindex = static_cast<int>(i);
     }
 
-    // 3. Parse
-    size_t numrows = inpWS->rowCount();
-    for (size_t ir = 0; ir < numrows; ++ir)
+    // Locate the column number to pass parameters
+    int colindex = -1;
+    if (rowbankindex < 0)
     {
-      const API::TableRow& row = inpWS->getRow(ir);
-      std::string parname;
-      double parvalue;
-      row >> parname >> parvalue;
-      mParameters.insert(std::make_pair(parname, parvalue));
+      // If there is NO 'BANK', locate first (from left) column starting with 'Value'
+      for (size_t i = 1; i < numcols; ++i)
+      {
+        if (boost::starts_with(colnames[i], "Value"))
+        {
+          colindex = static_cast<int>(i);
+          break;
+        }
+      }
+    }
+    else
+    {
+      // If there is BANK, Locate first (from left) column starting with 'Value' and BANK matches
+      for (size_t i = 1; i < numcols; ++i)
+      {
+        if (boost::starts_with(colnames[i], "Value"))
+        {
+          int bankid = static_cast<int>(m_profileTableWS->cell<double>(rowbankindex, i)+0.5);
+          if (bankid == m_bankID)
+          {
+            colindex = static_cast<int>(i);
+            break;
+          }
+        }
+      }
     }
 
-    // 4. Debug output
+    if (colindex < 0)
+    {
+      throw runtime_error("Unable to find column");
+    }
+    else if (colindex >= static_cast<int>(m_profileTableWS->columnCount()))
+    {
+      throw runtime_error("Impossible to have this situation.");
+    }
+
+    // Clear the parameter
+    m_profileParamMap.clear();
+
+    // Parse
+    for (size_t ir = 0; ir < numpars; ++ir)
+    {
+      double parvalue = m_profileTableWS->cell<double>(ir, static_cast<size_t>(colindex));
+      m_profileParamMap.insert(std::make_pair(vec_parnames[ir], parvalue));
+    }
+
+    // Debug output
     stringstream dbss("Imported Parameter Table: \n");
     map<string, double>::iterator mit;
-    for (mit = mParameters.begin(); mit != mParameters.end(); ++mit)
+    for (mit = m_profileParamMap.begin(); mit != m_profileParamMap.end(); ++mit)
       dbss << setw(20) << mit->first << " = " << setprecision(5) << mit->second << endl;
-    cout << dbss.str();
+    g_log.debug(dbss.str());
 
     return;
   }
 
 
+  //----------------------------------------------------------------------------------------------
   /**  Convert the parameters to Fullprof resolution file string
     */
-  std::string SaveFullprofResolution::toProf10IrfString(int bankid)
+  std::string SaveFullprofResolution::toProf10IrfString()
   {
-    // 1. Get all parameter values
-    double tofmin = mParameters["tof-min"];
-    double tofmax = mParameters["tof-max"];
-    double zero = mParameters["Zero"];
-    double zerot = mParameters["Zerot"];
-    double tofstep = mParameters["step"];
-    double dtt1 = mParameters["Dtt1"];
-    double dtt1t = mParameters["Dtt1t"];
-    double dtt2t = mParameters["Dtt2t"];
-    double xcross = mParameters["Tcross"];
-    double width = mParameters["Width"];
-    double sig2 = mParameters["Sig2"];
-    double sig1 = mParameters["Sig1"];
-    double sig0 = mParameters["Sig0"];
-    double gam2 = mParameters["Gam2"];
-    double gam1 = mParameters["Gam1"];
-    double gam0 = mParameters["Gam0"];
-    double alph0 = mParameters["Alph0"];
-    double alph1 = mParameters["Alph1"];
-    double alph0t = mParameters["Alph0t"];
-    double alph1t = mParameters["Alph1t"];
-    double beta0 = mParameters["Beta0"];
-    double beta1 = mParameters["Beta1"];
-    double beta0t = mParameters["Beta0t"];
-    double beta1t = mParameters["Beta1t"];
-    int profindex = static_cast<int>(floor(mParameters["Profile"] + 0.5));
-    double twotheta = mParameters["twotheta"];
+    // Get all parameter values
+    double tofmin = m_profileParamMap["tof-min"];
+    double tofmax = m_profileParamMap["tof-max"];
+    double zero = m_profileParamMap["Zero"];
+    double zerot = m_profileParamMap["Zerot"];
+    double tofstep = m_profileParamMap["step"];
+    double dtt1 = m_profileParamMap["Dtt1"];
+    double dtt1t = m_profileParamMap["Dtt1t"];
+    double dtt2t = m_profileParamMap["Dtt2t"];
+    double xcross = m_profileParamMap["Tcross"];
+    double width = m_profileParamMap["Width"];
+    double sig2 = m_profileParamMap["Sig2"];
+    double sig1 = m_profileParamMap["Sig1"];
+    double sig0 = m_profileParamMap["Sig0"];
+    double gam2 = m_profileParamMap["Gam2"];
+    double gam1 = m_profileParamMap["Gam1"];
+    double gam0 = m_profileParamMap["Gam0"];
+    double alph0 = m_profileParamMap["Alph0"];
+    double alph1 = m_profileParamMap["Alph1"];
+    double alph0t = m_profileParamMap["Alph0t"];
+    double alph1t = m_profileParamMap["Alph1t"];
+    double beta0 = m_profileParamMap["Beta0"];
+    double beta1 = m_profileParamMap["Beta1"];
+    double beta0t = m_profileParamMap["Beta0t"];
+    double beta1t = m_profileParamMap["Beta1t"];
+    int profindex = static_cast<int>(floor(m_profileParamMap["Profile"] + 0.5));
+    double twotheta = m_profileParamMap["twotheta"];
 
-    // 2. Deal with profile index
+    // Check with profile index
     if (profindex == 0)
     {
       profindex = 10;
     }
+    else if (profindex != 10)
+    {
+      stringstream errmsg;
+      errmsg << "This column in table has profile number " << profindex << " other than 10.";
+      g_log.error(errmsg.str());
+      throw runtime_error(errmsg.str());
+    }
 
-    // 3. Write out
-    std::stringstream content;
-
+    stringstream content;
     content << fixed;
-    content << "  Instrumental resolution function for POWGEN/SNS  J.P. Hodges  2011-09-02  ireso: 6" << std::endl;
-    content << "! To be used with function NPROF=" << profindex << " in FullProf  (Res=6)" << std::endl;
-    content << "! ----------------------------------------------  Bank " << bankid << "  CWL =   0.5330A" << std::endl;
-    content << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt" << std::endl;
-    content << "NPROF " << profindex << std::endl;
 
-    content << "!       Tof-min(us)    step      Tof-max(us)" << std::endl;
+    // Write header
+    if (!m_append)
+    {
+      content << "  Instrumental resolution function for POWGEN/SNS  ireso: 6" << "\n";
+      content << "! To be used with function NPROF=" << profindex << " in FullProf  (Res=6)" << "\n";
+    }
+
+    // Write bank information
+    content << "! ----------------------------------------------  Bank " << m_bankID << "  ";
+    if (has_key(m_profileParamMap, "CWL"))
+    {
+      double cwl = m_profileParamMap["CWL"];
+      if (cwl > 0)
+        content << "CWL =   " << setprecision(4) << cwl << "A" << "\n";
+      else
+        content << "\n";
+    }
+    else
+    {
+      content << "\n";
+    }
+
+    // Write profile parameter
+    content << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt" << "\n";
+    content << "NPROF " << profindex << "\n";
+
+    content << "!       Tof-min(us)    step      Tof-max(us)" << "\n";
     content << "TOFRG   "
             << setprecision(3) << tofmin << " "
             << setw(16) << setprecision(5) << tofstep << " "
-            << setw(16) << setprecision(3) << tofmax << std::endl;
+            << setw(16) << setprecision(3) << tofmax << "\n";
 
-    content << "!       Zero   Dtt1" << std::endl;
+    content << "!       Zero   Dtt1" << "\n";
     content << "ZD2TOF     "
-            << setprecision(5) << zero
-            << setw(16) << setprecision(5) << dtt1 << std::endl;
+            << setw(16) << setprecision(5) << zero
+            << setw(16) << setprecision(5) << dtt1 << "\n";
 
-    content << "!       Zerot    Dtt1t       Dtt2t    x-cross    Width" << std::endl;
+    content << "!       Zerot    Dtt1t       Dtt2t    x-cross    Width" << "\n";
     content << "ZD2TOT    "
             << setprecision(5) << zerot
             << setw(16) << setprecision(5) << dtt1t
             << setw(16) << setprecision(5) << dtt2t
             << setw(16) << setprecision(10) << xcross
-            << setw(16) << setprecision(5) << width << std::endl;
+            << setw(16) << setprecision(5) << width << "\n";
 
-    content << "!     TOF-TWOTH of the bank" << std::endl;
-    content << "TWOTH    " << setprecision(3) << twotheta << std::endl;
+    content << "!     TOF-TWOTH of the bank" << "\n";
+    content << "TWOTH    " << setprecision(3) << twotheta << "\n";
 
     // Note that sig0, sig1 and sig2 used in LeBail/Mantid framework are of the definition in manual.
     // In .irf file, Sig-0, Sig-1 and Sig-2 are the squared values;
-    content << "!       Sig-2     Sig-1     Sig-0" << std::endl;
+    content << "!       Sig-2     Sig-1     Sig-0" << "\n";
     content << "SIGMA  "
             << setprecision(6) << sig2*sig2
             << setw(16) << setprecision(6) << sig1*sig1
-            << setw(16) << setprecision(6) << sig0*sig0 << std::endl;
+            << setw(16) << setprecision(6) << sig0*sig0 << "\n";
 
-    content << "!       Gam-2     Gam-1     Gam-0" << std::endl;
+    content << "!       Gam-2     Gam-1     Gam-0" << "\n";
     content << "GAMMA  "
             << setw(16) << setprecision(6) << gam2 << " "
             << setw(16) << setprecision(6) << gam1 << " "
             << setw(16) << setprecision(6) << gam0 << "\n";
 
-    content << "!          alph0       beta0       alph1       beta1" << std::endl;
+    content << "!          alph0       beta0       alph1       beta1" << "\n";
     content << "ALFBE        "
             << setprecision(6) << alph0 << " " <<
                setw(16) << setprecision(6) << beta0 << " " <<
                setw(16) << setprecision(6) << alph1 << " " <<
-               setw(16) << setprecision(6) << beta1 << std::endl;
+               setw(16) << setprecision(6) << beta1 << "\n";
 
-    content << "!         alph0t      beta0t      alph1t      beta1t" << std::endl;
+    content << "!         alph0t      beta0t      alph1t      beta1t" << "\n";
     content << "ALFBT       "
             << setprecision(6) << alph0t << " "
             << setw(16) << setprecision(6) << beta0t << " "
             << setw(16) << setprecision(6) << alph1t << " "
-            << setw(16) << setprecision(6) << beta1t << std::endl;
-    content << "END" << std::endl;
+            << setw(16) << setprecision(6) << beta1t << "\n";
+    content << "END" << "\n";
 
     return content.str();
 
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Write out the string for Fullprof profile 9
+    */
+  std::string SaveFullprofResolution::toProf9IrfString()
+  {
+    // Get all parameter values
+    double tofmin = m_profileParamMap["tof-min"];
+    double tofmax = m_profileParamMap["tof-max"];
+    double zero = m_profileParamMap["Zero"];
+    double tofstep = m_profileParamMap["step"];
+    double dtt1 = m_profileParamMap["Dtt1"];
+    double dtt2 = m_profileParamMap["Dtt2"];
+    double sig2 = m_profileParamMap["Sig2"];
+    double sig1 = m_profileParamMap["Sig1"];
+    double sig0 = m_profileParamMap["Sig0"];
+    double gam2 = m_profileParamMap["Gam2"];
+    double gam1 = m_profileParamMap["Gam1"];
+    double gam0 = m_profileParamMap["Gam0"];
+    double alph0 = m_profileParamMap["Alph0"];
+    double alph1 = m_profileParamMap["Alph1"];
+    double beta0 = m_profileParamMap["Beta0"];
+    double beta1 = m_profileParamMap["Beta1"];
+    int profindex = static_cast<int>(floor(m_profileParamMap["Profile"] + 0.5));
+    double twotheta = m_profileParamMap["twotheta"];
+    if (twotheta < 0)
+      twotheta += 360.;
+
+    // Check with profile index
+    if (profindex == 0)
+    {
+      profindex = 9;
+    }
+    else if (profindex != 9)
+    {
+      stringstream errmsg;
+      errmsg << "This column in table has profile number " << profindex << " other than 9.";
+      g_log.error(errmsg.str());
+      throw runtime_error(errmsg.str());
+    }
+
+    stringstream content;
+    content << fixed;
+
+    // Write header
+    if (!m_append)
+    {
+      content << "Instrumental resolution function for HRPD/ISIS L. Chapon 12/2003  ireso: 5" << "\n";
+      content << "! To be used with function NPROF=" << profindex << " in FullProf  (Res=5)" << "\n";
+    }
+
+    // Write bank information
+    content << "! ----------------------------------------------  Bank " << m_bankID << "  ";
+    if (has_key(m_profileParamMap, "CWL"))
+    {
+      double cwl = m_profileParamMap["CWL"];
+      if (cwl > 0.)
+        content << "CWL =   " << setprecision(4) << cwl << "A" << "\n";
+      else
+        content << "\n";
+    }
+    else
+    {
+      content << "\n";
+    }
+
+    // Write profile parameters
+    content << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt" << "\n";
+    content << "NPROF " << profindex << "\n";
+    content << "!       Tof-min(us)    step      Tof-max(us)" << "\n";
+    content << "TOFRG   "
+            << setprecision(3) << tofmin << " "
+            << setw(16) << setprecision(5) << tofstep << " "
+            << setw(16) << setprecision(3) << tofmax << "\n";
+
+    content << "!        Dtt1           Dtt2       Zero" << "\n";
+    content << "D2TOF     "
+            << setw(16) << setprecision(5) << dtt1
+            << setw(16) << setprecision(5) << dtt2
+            << setw(16) << setprecision(5) << zero << "\n";
+
+    content << "!     TOF-TWOTH of the bank" << "\n";
+    content << "TWOTH    " << setprecision(3) << twotheta << "\n";
+
+    // Note that sig0, sig1 and sig2 used in LeBail/Mantid framework are of the definition in manual.
+    // In .irf file, Sig-0, Sig-1 and Sig-2 are the squared values;
+    content << "!       Sig-2     Sig-1     Sig-0" << "\n";
+    content << "SIGMA  "
+            << setprecision(6) << sig2*sig2
+            << setw(16) << setprecision(6) << sig1*sig1
+            << setw(16) << setprecision(6) << sig0*sig0 << "\n";
+
+    content << "!       Gam-2     Gam-1     Gam-0" << "\n";
+    content << "GAMMA  "
+            << setw(16) << setprecision(6) << gam2 << " "
+            << setw(16) << setprecision(6) << gam1 << " "
+            << setw(16) << setprecision(6) << gam0 << "\n";
+
+    content << "!          alph0       beta0       alph1       beta1" << "\n";
+    content << "ALFBE        "
+            << setprecision(6) << alph0 << " " <<
+               setw(16) << setprecision(6) << beta0 << " " <<
+               setw(16) << setprecision(6) << alph1 << " " <<
+               setw(16) << setprecision(6) << beta1 << "\n";
+
+    content << "END" << "\n";
+
+    return content.str();
+  }
+
+  //
+  /** Check wether a profile parameter map has the parameter
+    */
+  bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap, std::string key)
+  {
+    map<string, double>::iterator fiter;
+    fiter = profmap.find(key);
+    bool exist = true;
+    if (fiter == profmap.end())
+      exist = false;
+
+    return exist;
   }
   
 

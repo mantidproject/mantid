@@ -27,15 +27,11 @@
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location name="monitor1">
-        <parameter name="z">
-          <logfile id="-0.879475"/>
-        </parameter>
+      <location z="-0.879475" name="monitor1">
+        <neutronic z="-0.879475"/>
       </location>
-      <location name="monitor2">
-        <parameter name="z">
-          <logfile id="5.748782"/>
-        </parameter>
+      <location z="5.748782" name="monitor2">
+        <neutronic z="5.748782"/>
       </location>
     </component>
   </type>
