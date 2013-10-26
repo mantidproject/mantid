@@ -304,9 +304,9 @@ namespace Mantid
                    L10(D02*D21 - D01*D22), L11(D00*D22 - D02*D20), L12(D20*D01 - D00*D21),
                    L20(D01*D12 - D02*D11), L21(D02*D10 - D00*D12), L22(D00*D11 - D01*D10);
       
-      const double dqlab0 = (L00*xVec3 + L01*xVec4 + L02*xVec5)/determinant;
-      const double dqlab1 = (L10*xVec3 + L11*xVec4 + L12*xVec5)/determinant;
-      const double dqlab2 = (L20*xVec3 + L21*xVec4 + L22*xVec5)/determinant;
+      const double dqlab0 = (L22*xVec3 + L02*xVec4 + L12*xVec5)/determinant;
+      const double dqlab1 = (L20*xVec3 + L00*xVec4 + L10*xVec5)/determinant;
+      const double dqlab2 = (L21*xVec3 + L01*xVec4 + L11*xVec5)/determinant;
 
       std::vector<double> & deltaQE = m_deltaQE[PARALLEL_THREAD_NUMBER];
       deltaQE[0] = (xVec0 - dqlab0);
