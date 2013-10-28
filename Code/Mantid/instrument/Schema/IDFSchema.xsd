@@ -2,7 +2,8 @@
 
   <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
   xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"
-  targetNamespace="http://www.mantidproject.org/IDF/1.0">
+  targetNamespace="http://www.mantidproject.org/IDF/1.0" xmlns:idf="http://www.mantidproject.org/IDF/1.0">
+
   <!--Define customDate Type-->
   <xs:simpleType name="customDate">
     <xs:restriction base="xs:string">
@@ -32,28 +33,28 @@
   <!-- Define recursive ROT element-->
   <xs:complexType name="rotType">
     <xs:choice maxOccurs="unbounded" minOccurs="0">
-      <xs:element name="rot" type="rotType"/>
+      <xs:element name="rot" type="idf:rotType"/>
       <xs:element name="trans">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
-          <xs:attributeGroup ref="spherical"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
+          <xs:attributeGroup ref="idf:spherical"/>
         </xs:complexType>
       </xs:element>
     </xs:choice>
     <xs:attribute name="val"/>
-    <xs:attributeGroup ref="axes"/>
+    <xs:attributeGroup ref="idf:axes"/>
   </xs:complexType>
   <!-- Cone Parameters-->
   <xs:complexType name="cone-parameters">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="tip-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="axis">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="angle">
@@ -74,42 +75,42 @@
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="left-front-bottom-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="left-front-top-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="left-back-bottom-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="left-back-top-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="right-front-bottom-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="right-front-top-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="right-back-bottom-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="right-back-top-point">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
     </xs:choice>
@@ -120,12 +121,12 @@
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="axis">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="centre">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="aperture-start">
@@ -151,7 +152,7 @@
   <!-- Use complexContent and extension to expand the existing parameters. -->
   <xs:complexType name="cuboid-parameters">
     <xs:complexContent>
-      <xs:extension base="point-parameters">
+      <xs:extension base="idf:point-parameters">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element name="height">
             <xs:complexType>
@@ -170,12 +171,12 @@
           </xs:element>
           <xs:element name="centre">
             <xs:complexType>
-              <xs:attributeGroup ref="cartesian"/>
+              <xs:attributeGroup ref="idf:cartesian"/>
             </xs:complexType>
           </xs:element>
           <xs:element name="axis">
             <xs:complexType>
-              <xs:attributeGroup ref="cartesian"/>
+              <xs:attributeGroup ref="idf:cartesian"/>
             </xs:complexType>
           </xs:element>
         </xs:choice>
@@ -245,20 +246,20 @@
   <!-- Define <location> Type-->
   <xs:complexType name="locationType">
     <xs:choice maxOccurs="unbounded" minOccurs="0">
-      <xs:element name="parameter" type="parameterType"/>
+      <xs:element name="parameter" type="idf:parameterType"/>
       <xs:element name="facing">
         <xs:complexType>
           <xs:attribute name="val"/>
-          <xs:attributeGroup ref="cartesian"/>
-          <xs:attributeGroup ref="spherical"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
+          <xs:attributeGroup ref="idf:spherical"/>
           <xs:attribute name="rot"/>
         </xs:complexType>
       </xs:element>
-      <xs:element name="rot" type="rotType"/>
+      <xs:element name="rot" type="idf:rotType"/>
       <xs:element name="trans">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
-          <xs:attributeGroup ref="spherical"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
+          <xs:attributeGroup ref="idf:spherical"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="exclude">
@@ -266,20 +267,20 @@
           <xs:attribute name="sub-part"/>
         </xs:complexType>
       </xs:element>
-      <xs:element name="neutronic" type="locationType"/>
+      <xs:element name="neutronic" type="idf:locationType"/>
     </xs:choice>
     <xs:attribute name="ang"/>
-    <xs:attributeGroup ref="cartesian"/>
-    <xs:attributeGroup ref="spherical"/>
+    <xs:attributeGroup ref="idf:cartesian"/>
+    <xs:attributeGroup ref="idf:spherical"/>
     <xs:attribute name="name"/>
     <xs:attribute name="rot"/>
-    <xs:attributeGroup ref="axes"/>
+    <xs:attributeGroup ref="idf:axes"/>
   </xs:complexType>
 
   <!-- Define <component> Type  -->
   <xs:complexType name="componentType">
     <xs:choice maxOccurs="unbounded">
-      <xs:element name="parameter" type="parameterType"/>
+      <xs:element name="parameter" type="idf:parameterType"/>
       <xs:element name="description">
         <xs:complexType>
           <xs:simpleContent>
@@ -300,8 +301,8 @@
       </xs:element>
       <xs:element name="locations">
         <xs:complexType>
-          <xs:attributeGroup ref="cartesian"/>
-          <xs:attributeGroup ref="spherical"/>
+          <xs:attributeGroup ref="idf:cartesian"/>
+          <xs:attributeGroup ref="idf:spherical"/>
           <xs:attribute name="name"/>
           <xs:attribute name="rot"/>
           <xs:attribute name="x-end"/>
@@ -315,7 +316,7 @@
         </xs:complexType>
       </xs:element>
       <!--LOCATION ELEMENT-->
-      <xs:element name="location" type="locationType" maxOccurs="unbounded" minOccurs="1"/>
+      <xs:element name="location" type="idf:locationType" maxOccurs="unbounded" minOccurs="1"/>
     </xs:choice>
     <xs:attribute name="type" use="required"/>
     <xs:attribute name="name"/>
@@ -345,17 +346,17 @@
         <xs:element name="defaults">
           <xs:complexType>
             <xs:choice maxOccurs="unbounded" minOccurs="0">
-              <xs:element name="parameter" type="parameterType"/>
+              <xs:element name="parameter" type="idf:parameterType"/>
               <xs:element name="default-view">
                 <xs:complexType>
                   <xs:attribute name="view"/>
                   <xs:attribute name="axis-view"/>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="location" type="locationType"/>
+              <xs:element name="location" type="idf:locationType"/>
               <xs:element name="components-are-facing">
                 <xs:complexType>
-                  <xs:attributeGroup ref="cartesian"/>
+                  <xs:attributeGroup ref="idf:cartesian"/>
                 </xs:complexType>
               </xs:element>
               <xs:element name="offsets">
@@ -419,7 +420,7 @@
                   <xs:choice maxOccurs="unbounded">
                     <xs:element name="centre">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="radius">
@@ -436,13 +437,13 @@
                   <xs:choice maxOccurs="unbounded">
                     <xs:element name="centre-of-bottom-base">
                       <xs:complexType>
-                        <xs:attributeGroup ref="spherical"/>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:spherical"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="axis">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="radius">
@@ -464,12 +465,12 @@
                   <xs:choice maxOccurs="unbounded">
                     <xs:element name="centre">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="axis">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="radius">
@@ -511,7 +512,7 @@
               <xs:element name="cone">
                 <xs:complexType>
                   <xs:complexContent>
-                    <xs:extension base="cone-parameters">
+                    <xs:extension base="idf:cone-parameters">
                       <xs:attribute name="id"/>
                     </xs:extension>
                   </xs:complexContent>
@@ -520,7 +521,7 @@
               <xs:element name="infinite-cone">
                 <xs:complexType>
                   <xs:complexContent>
-                    <xs:extension base="cone-parameters">
+                    <xs:extension base="idf:cone-parameters">
                       <xs:attribute name="id"/>
                     </xs:extension>
                   </xs:complexContent>
@@ -531,12 +532,12 @@
                   <xs:choice maxOccurs="unbounded">
                     <xs:element name="point-in-plane">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="normal-to-plane">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                   </xs:choice>
@@ -546,7 +547,7 @@
               <xs:element name="cuboid">
                 <xs:complexType>
                   <xs:complexContent>
-                    <xs:extension base="cuboid-parameters">
+                    <xs:extension base="idf:cuboid-parameters">
                       <xs:attribute name="id"/>
                     </xs:extension>
                   </xs:complexContent>
@@ -555,7 +556,7 @@
               <xs:element name="hexahedron">
                 <xs:complexType>
                   <xs:complexContent>
-                    <xs:extension base="point-parameters">
+                    <xs:extension base="idf:point-parameters">
                       <xs:attribute name="id"/>
                     </xs:extension>
                   </xs:complexContent>
@@ -564,7 +565,7 @@
               <xs:element name="tapered-guide">
                 <xs:complexType>
                   <xs:complexContent>
-                    <xs:extension base="tapered-guide-parameters">
+                    <xs:extension base="idf:tapered-guide-parameters">
                       <xs:attribute name="id"/>
                     </xs:extension>
                   </xs:complexContent>
@@ -575,12 +576,12 @@
                   <xs:choice maxOccurs="unbounded">
                     <xs:element name="centre">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="axis">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="radius-from-centre-to-tube">
@@ -634,8 +635,8 @@
                 </xs:complexType>
               </xs:element>
               <!-- End 3D Shapes-->
-              <xs:element name="component" type="componentType"/>
-              <xs:element name="parameter" type="parameterType"/>
+              <xs:element name="component" type="idf:componentType"/>
+              <xs:element name="parameter" type="idf:parameterType"/>
               <xs:element name="combine-components-into-one-shape"/>
               <xs:element name="properties">
                 <xs:complexType>
@@ -670,7 +671,7 @@
           </xs:complexType>
         </xs:element>
         <!--<COMPONENT> ELEMENT-->
-        <xs:element name="component" type="componentType"/>
+        <xs:element name="component" type="idf:componentType"/>
         <!--IDLIST ELEMENT-->
         <xs:element name="idlist">
           <xs:complexType>
@@ -691,23 +692,23 @@
         <xs:element name="component-link">
           <xs:complexType>
             <xs:choice maxOccurs="unbounded" minOccurs="0">
-              <xs:element name="parameter" type="parameterType"/>
+              <xs:element name="parameter" type="idf:parameterType"/>
               <xs:element name="location">
                 <xs:complexType>
                   <xs:choice maxOccurs="unbounded" minOccurs="0">
                     <xs:element name="facing">
                       <xs:complexType>
                         <xs:attribute name="val"/>
-                        <xs:attributeGroup ref="cartesian"/>
-                        <xs:attributeGroup ref="spherical"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
+                        <xs:attributeGroup ref="idf:spherical"/>
                         <xs:attribute name="rot"/>
                       </xs:complexType>
                     </xs:element>
-                    <xs:element name="rot" type="rotType"/>
+                    <xs:element name="rot" type="idf:rotType"/>
                     <xs:element name="trans">
                       <xs:complexType>
-                        <xs:attributeGroup ref="cartesian"/>
-                        <xs:attributeGroup ref="spherical"/>
+                        <xs:attributeGroup ref="idf:cartesian"/>
+                        <xs:attributeGroup ref="idf:spherical"/>
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="exclude">
@@ -715,14 +716,14 @@
                         <xs:attribute name="sub-part"/>
                       </xs:complexType>
                     </xs:element>
-                    <xs:element name="neutronic" type="locationType"/>
+                    <xs:element name="neutronic" type="idf:locationType"/>
                   </xs:choice>
                   <xs:attribute name="ang"/>
-                  <xs:attributeGroup ref="cartesian"/>
-                  <xs:attributeGroup ref="spherical"/>
+                  <xs:attributeGroup ref="idf:cartesian"/>
+                  <xs:attributeGroup ref="idf:spherical"/>
                   <xs:attribute name="name"/>
                   <xs:attribute name="rot"/>
-                  <xs:attributeGroup ref="axes"/>
+                  <xs:attributeGroup ref="idf:axes"/>
                 </xs:complexType>
               </xs:element>
             </xs:choice>
@@ -730,11 +731,11 @@
             <xs:attribute name="type"/>
           </xs:complexType>
         </xs:element>
-        <xs:element name="parameter" type="parameterType"/>
+        <xs:element name="parameter" type="idf:parameterType"/>
       </xs:choice>
       <xs:attribute name="name"/>
-      <xs:attribute name="valid-from" use="required" type="customDate"/>
-      <xs:attribute name="valid-to" type="customDate"/>
+      <xs:attribute name="valid-from" use="required" type="idf:customDate"/>
+      <xs:attribute name="valid-to" type="idf:customDate"/>
       <xs:attribute name="last-modified"/>
     </xs:complexType>
   </xs:element>
