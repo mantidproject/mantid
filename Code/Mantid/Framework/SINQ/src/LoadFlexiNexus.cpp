@@ -70,21 +70,13 @@ void LoadFlexiNexus::init()
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "A NeXus file");
-
       std::vector<std::string> exts2;
       exts2.push_back(".txt");
       exts2.push_back(".dic");
       exts2.push_back("");
-
       declareProperty(new FileProperty("Dictionary", "", FileProperty::Load, exts2),
         "A Dictionary for controlling NeXus loading");
-
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
-
-      /**
-       * bloody hack to set the workspace name from python.....
-       */
-      declareProperty("WSName", "NULL","Optional WS Name");
 
 }
 
@@ -104,17 +96,6 @@ void LoadFlexiNexus::exec()
   }
   */
   
-  /*
-   * This is a bloody hack to get the output workspace name into the
-   * parameter list to be used from python.
-   */
-  std::string wName = getProperty("WSName");
-  if(wName != "NULL"){
-	Property *p = getPointerToProperty("OutputWorkspace");
-	p->setValue(wName);
-  }
-
-
   File fin(filename);
   readData(&fin);
 

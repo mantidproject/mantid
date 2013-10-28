@@ -17,10 +17,10 @@ from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileActi
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
 from mantid import config
-
+import os.path
 
 #--------- place to look for dictionary files
-dictsearch=config['instrumentDefinition.directory']+"/nexusdictionaries/"
+
 
 class LoadSINQFile(PythonAlgorithm):
     def category(self):
@@ -35,106 +35,46 @@ class LoadSINQFile(PythonAlgorithm):
                              StringListValidator(instruments),
                              "Choose Instrument",direction=Direction.Input)
         self.declareProperty(FileProperty(name="Filename",defaultValue="",
-                                          action=FileAction.Load, extensions=["h5","hdf"]))
-        self.declareProperty("OutputWorkspace","nexus")
-        dictsearch = ConfigServiceImpl.Instance().getInstrumentDirectory() + '/nexusdictionaries'
+                                          action=FileAction.Load, extensions=[".h5",".hdf"]))
+        self.declareProperty(WorkspaceProperty("OutputWorkspace","",direction=Direction.Output))
 
     def PyExec(self):
         inst=self.getProperty('Instrument').value
-        fname =self.getProperty('Filename').value
-        self.log().error('Running LoadSINQFile for ' + inst)
+        fname = self.getProperty('Filename').value
 
+        diclookup = {\
+            "AMOR":"mantidamor.dic",
+            "BOA":"mantidboa.dic",
+            "DMC":"mantiddmc.dic",
+            "FOCUS":"mantidfocus.dic",
+            "HRPT":"mantidhrpt.dic",
+            "MARSI":"mantidmarsin.dic",
+            "MARSE":"mantidmarse.dic",
+            "POLDI":"mantidpoldi.dic",
+            "RITA-2":"mantidrita.dic",
+            "SANS":"mantidsans.dic",
+            "SANS2":"mantidsans.dic",
+            "TRICS":"mantidtrics.dic"
+        }
+        dictsearch = os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries")
+        dicname = os.path.join(dictsearch, diclookup[inst])
+        wname = "__tmp"
+        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
 
-        if inst =="AMOR":
-            self.doAmor()
-        elif inst == "BOA":
-            self.doBoa()
-        elif inst == "DMC":
-            self.doDMC()
-        elif inst == "FOCUS":
-            self.doFocus()
-        elif inst == "HRPT":
-            self.doHRPT()
-        elif inst == "MARSI":
-            self.doMarsInelastic()
-        elif inst == "MARSE":
-            self.doMarsElastic()
-        elif inst == "POLDI":
-            self.doPoldi()
-        elif inst == "RITA-2":
-            self.doRITA()
-        elif inst == "SANS":
-            self.doSANS()
-        elif inst == "SANS2":
-            self.doSANS()
+        if inst == "POLDI":
+            config.appendDataSearchDir(config['groupingFiles.directory'])
+            grp_file = "POLDI_Grouping_800to400.xml"
+            ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
+                                                 OutputWorkspace=wname,
+                                                 MapFile=grp_file, Behaviour="Sum")
         elif inst == "TRICS":
-            self.doTRICS()
-        else: 
-            pass
-        
-    def doAmor(self):
-        dicname = dictsearch +"/mantidamor.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-    def doBoa(self):
-        dicname = dictsearch +"/mantidboa.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-    def doDMC(self):
-        dicname = dictsearch +"/mantiddmc.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-    def doHRPT(self):
-        dicname = dictsearch +"/mantidhrpt.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-    def doFocus(self):
-        dicname = dictsearch +"/mantidfocus.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-    def doMarsInelastic(self):
-        dicname = dictsearch +"/mantidmarsin.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-    def doMarsElastic(self):
-        dicname = dictsearch +"/mantidmarse.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-    def doPoldi(self):
-        dicname = dictsearch +"/mantidpoldi.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-        config.appendDataSearchDir(config['groupingFiles.directory'])
-        grp_file = "POLDI_Grouping_800to400.xml"
-        mantid.simpleapi.GroupDetectors(InputWorkspace=ws, 
-                           OutputWorkspace=ws,
-                           MapFile=grp_file, Behaviour="Sum")        
-    def doSANS(self):
-        dicname = dictsearch +"/mantidsans.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-    def doTRICS(self):
-        dicname = dictsearch +"/mantidtrics.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,'tmp')
-        exec(wname + '= mantid.simpleapi.SINQTranspose3D(\'tmp\',\'TRICS\')')
-        mantid.simpleapi.DeleteWorkspace('tmp')
-    def doRITA(self):
-        dicname = dictsearch +"/mantidrita.dic"
-        fname =self.getProperty('Filename').value 
-        wname =self.getProperty('OutputWorkspace').value
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-         
+            ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
+            ws = mantid.simpleapi.SINQTranspose3D(ws,OutputWorkspace=wname)
+
+        # Attach workspace to the algorithm property
+        self.setProperty("OutputWorkspace", ws)
+        # delete temporary reference
+        mantid.simpleapi.DeleteWorkspace(wname,EnableLogging=False)
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQFile)

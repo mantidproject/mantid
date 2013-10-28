@@ -42,15 +42,14 @@ class LoadSINQ(PythonAlgorithm):
         now = datetime.datetime.now()
         self.declareProperty("Year",now.year,"Choose year",direction=Direction.Input)
         self.declareProperty('Numor',0,'Choose file number',direction=Direction.Input)
-        self.declareProperty("OutputWorkspace","nexus")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace","",direction=Direction.Output))
         self.setWikiSummary("SINQ data file loader")
 
     def PyExec(self):
         inst=self.getProperty('Instrument').value
         year=self.getProperty('Year').value
         num=self.getProperty('Numor').value
-        self.log().error('Running LoadSINQ for ' + inst + " Y= " + str(year) + " N= " +str(num))
-        out=self.getProperty('OutputWorkspace').value
+        self.log().information('Running LoadSINQ for ' + inst + " Y= " + str(year) + " N= " +str(num))
 
         instmap = {}
         instmap['AMOR'] = 'amor'
@@ -69,18 +68,21 @@ class LoadSINQ(PythonAlgorithm):
         hun=math.floor(num/1000.)
         filename= '%03d/%s%04dn%06d.hdf' % (hun,instmap[inst],year,num)
         fullpath= '%s/%04d/%s/%s' % (datapath,year,instmap[inst],filename)
+        wname = "__tmp" #hidden
         if os.path.exists(fullpath):
-            mantid.simpleapi.LoadSINQFile(fullpath,inst,out)
+            ws = mantid.simpleapi.LoadSINQFile(fullpath,inst,OutputWorkspace=wname)
         else:
             searchDirs = ConfigServiceImpl.Instance().getDataSearchDirs()
             filename= '%s%04dn%06d.hdf' % (instmap[inst],year,num)
             for entry in searchDirs:
                 fullpath = '%s/%s' % (entry, filename)
                 if os.path.exists(fullpath):
-                    mantid.simpleapi.LoadSINQFile(fullpath,inst,out)
+                    ws = mantid.simpleapi.LoadSINQFile(fullpath,inst,OutputWorkspace=wname)
                     return
             raise Exception('File %s NOT found!' % filename)
 
+        self.setProperty("OutputWorkspace",ws)
+        mantid.simpleapi.DeleteWorkspace(wname)
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQ)
