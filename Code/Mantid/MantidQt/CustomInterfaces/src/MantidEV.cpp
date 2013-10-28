@@ -23,36 +23,33 @@ using namespace Mantid::API;
 
 
 /**
- *  Class to call loadAndConvertToMD in a separate thread.
+ *  Class to call loadEvents in a separate thread.
  */
-RunLoadAndConvertToMD::RunLoadAndConvertToMD(       MantidEVWorker * worker,
-                                              const std::string    & file_name,
-                                              const std::string    & ev_ws_name,
-                                              const std::string    & md_ws_name,
-                                                    double           maxQ,
-                                                    bool             do_lorentz_corr,
-                                                    bool             load_det_cal,
-                                              const std::string    & det_cal_file,
-                                              const std::string    & det_cal_file2  )
+RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker * worker,
+                                             const std::string & file_name,
+                                             const std::string & ev_ws_name,
+                                             const std::string & md_ws_name,
+                                             const double        minQ,
+                                             const double        maxQ,
+                                             const bool          do_lorentz_corr,
+                                             const bool          load_data,
+                                             const bool          load_det_cal,
+                                             const std::string & det_cal_file,
+                                             const std::string & det_cal_file2 ) :
+  worker(worker),
+  file_name(file_name), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name),
+  minQ(minQ), maxQ(maxQ), do_lorentz_corr(do_lorentz_corr),
+  load_data(load_data), load_det_cal(load_det_cal),
+  det_cal_file(det_cal_file), det_cal_file2(det_cal_file2)
 {
-  this->worker          = worker;
-  this->file_name       = file_name;
-  this->ev_ws_name      = ev_ws_name;
-  this->md_ws_name      = md_ws_name;
-  this->maxQ            = maxQ;
-  this->do_lorentz_corr = do_lorentz_corr;
-  this->load_det_cal    = load_det_cal;
-  this->det_cal_file    = det_cal_file;
-  this->det_cal_file2   = det_cal_file2;
 }
 
 void RunLoadAndConvertToMD::run()
 {
-  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name, 
-                              maxQ, do_lorentz_corr,
+  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name,
+                              minQ, maxQ, do_lorentz_corr, load_data,
                               load_det_cal, det_cal_file, det_cal_file2 );
 }
-
 
 /**
  * Class to call findPeaks in a separate thread.
@@ -222,9 +219,12 @@ void MantidEV::initLayout()
                           // connect the apply buttons to the code that
                           // gathers the parameters and will call a method
                           // to carry out the requested action
-   QObject::connect( m_uiForm.ApplySelectData_btn, SIGNAL(clicked()),
+
+  // apply button on "Select Data" tab
+  QObject::connect( m_uiForm.ApplySelectData_btn, SIGNAL(clicked()),
                     this, SLOT(selectWorkspace_slot()) );
 
+   // browse button for event filename
    QObject::connect( m_uiForm.SelectEventFile_btn, SIGNAL(clicked()),
                      this, SLOT(loadEventFile_slot()) );
 
@@ -291,10 +291,10 @@ void MantidEV::initLayout()
 
                            // connect the slots for enabling and disabling
                            // various subsets of widgets
-   QObject::connect( m_uiForm.LoadEventFile_rbtn, SIGNAL(toggled(bool)),
+   QObject::connect( m_uiForm.   convertToMDGroupBox, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadEventFileParams_slot(bool) ) );
 
-   QObject::connect( m_uiForm.LoadDetCal_ckbx, SIGNAL(clicked()),
+    QObject::connect( m_uiForm.LoadDetCal_ckbx, SIGNAL(clicked()),
                      this, SLOT( setEnabledLoadCalFiles_slot() ) );
 
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
@@ -376,11 +376,11 @@ void MantidEV::setDefaultState_slot()
                                                     // Select Data tab
    m_uiForm.SelectEventWorkspace_ledt->setText("");
    m_uiForm.MDworkspace_ledt->setText("");
-   m_uiForm.LoadEventFile_rbtn->setChecked(true);
+   m_uiForm.convertToMDGroupBox->setChecked(true);
+   m_uiForm.loadDataGroupBox->setChecked(true);
    m_uiForm.EventFileName_ledt->setText(""); 
    m_uiForm.MaxMagQ_ledt->setText("25");
    m_uiForm.LorentzCorrection_ckbx->setChecked(true);
-   m_uiForm.UseExistingWorkspaces_rbtn->setChecked(false);
    setEnabledLoadEventFileParams_slot(true);
    m_uiForm.LoadDetCal_ckbx->setChecked(false);
    setEnabledLoadCalFiles_slot();
@@ -501,43 +501,51 @@ void MantidEV::selectWorkspace_slot()
      return;
    }
 
-   if ( m_uiForm.LoadEventFile_rbtn->isChecked() )  // load file and
-   {                                                // convert to MD workspace
+   if (m_uiForm.convertToMDGroupBox->isChecked())
+   {
+     if (!m_uiForm.loadDataGroupBox->isChecked())
+     {
+       if ( !worker->isEventWorkspace( ev_ws_name ) )
+       {
+         errorMessage("Requested Event Workspace is NOT a valid Event workspace");
+         return;
+       }
+     }
+
      std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
-     if ( file_name.length() == 0 )
+     if (file_name.empty())
      {
        errorMessage("Specify the name of an event file to load.");
        return;
      }
 
+     double minQ;
+     getDouble( m_uiForm.MinMagQ_ledt, minQ );
+
      double maxQ;
      getDouble( m_uiForm.MaxMagQ_ledt, maxQ );
-     if ( maxQ <= 0 )
-     {
-       errorMessage("Max |Q| to Map to MD MUST BE POSITIVE.");
-       return;
-     }
 
      std::string det_cal_file  = m_uiForm.CalFileName_ledt->text().trimmed().toStdString();
      std::string det_cal_file2 = m_uiForm.CalFileName2_ledt->text().trimmed().toStdString();
      bool        load_det_cal  = m_uiForm.LoadDetCal_ckbx->isChecked();
      if ( load_det_cal && det_cal_file.length() == 0 )
      {
-       errorMessage("Specify the name of a .DetCal file if Load ISAW Detector Calibration is selected"); 
+       errorMessage("Specify the name of a .DetCal file if Load ISAW Detector Calibration is selected");
        return;
      }
 
      RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD(worker,file_name,
-                                                       ev_ws_name, md_ws_name,
-                                                       maxQ,
-                                                       m_uiForm.LorentzCorrection_ckbx->isChecked(),
-                                                       load_det_cal, det_cal_file, det_cal_file2 );
+                                                               ev_ws_name, md_ws_name,
+                                                               minQ, maxQ,
+                                                               m_uiForm.LorentzCorrection_ckbx->isChecked(),
+                                                               m_uiForm.loadDataGroupBox->isChecked(),
+                                                               load_det_cal, det_cal_file, det_cal_file2 );
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
        errorMessage( "Failed to start Load and ConvertToMD thread...previous operation not complete" );
    }
-   else if ( m_uiForm.UseExistingWorkspaces_rbtn->isChecked() )// check existing
-   {                                                           // workspaces
+   else // check existing workspaces
+   {
      if ( !worker->isEventWorkspace( ev_ws_name ) )
      {
        errorMessage("Requested Event Workspace is NOT a valid Event workspace");
@@ -1438,14 +1446,7 @@ void MantidEV::showUB_slot()
  */
 void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
 {
-  m_uiForm.EventFileName_lbl->setEnabled( on );
-  m_uiForm.EventFileName_ledt->setEnabled( on );
-  m_uiForm.SelectEventFile_btn->setEnabled( on );
-  m_uiForm.MaxMagQ_lbl->setEnabled( on );
-  m_uiForm.MaxMagQ_ledt->setEnabled( on );
-  m_uiForm.LorentzCorrection_ckbx->setEnabled( on );
-  m_uiForm.LoadDetCal_ckbx->setEnabled( on );
-  setEnabledLoadCalFiles_slot();
+  m_uiForm.loadDataGroupBox->setEnabled(on);
 }
 
 
@@ -1458,26 +1459,13 @@ void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
  */
 void MantidEV::setEnabledLoadCalFiles_slot()
 {
-  bool load_events = m_uiForm.LoadEventFile_rbtn->isChecked();
-  bool load_cal    = m_uiForm.LoadDetCal_ckbx->isChecked();
-  if ( load_events && load_cal )
-  {
-    m_uiForm.CalFileName_lbl->setEnabled( true );
-    m_uiForm.CalFileName_ledt->setEnabled( true );
-    m_uiForm.SelectCalFile_btn->setEnabled( true );
-    m_uiForm.CalFileName2_lbl->setEnabled( true );
-    m_uiForm.CalFileName2_ledt->setEnabled( true );
-    m_uiForm.SelectCalFile2_btn->setEnabled( true );
-  }
-  else
-  {
-    m_uiForm.CalFileName_lbl->setEnabled( false );
-    m_uiForm.CalFileName_ledt->setEnabled( false );
-    m_uiForm.SelectCalFile_btn->setEnabled( false );
-    m_uiForm.CalFileName2_lbl->setEnabled( false );
-    m_uiForm.CalFileName2_ledt->setEnabled( false );
-    m_uiForm.SelectCalFile2_btn->setEnabled( false );
-  }
+  bool enabled = m_uiForm.LoadDetCal_ckbx->isChecked();
+  m_uiForm.CalFileName_lbl->setEnabled( enabled );
+  m_uiForm.CalFileName_ledt->setEnabled( enabled );
+  m_uiForm.SelectCalFile_btn->setEnabled( enabled );
+  m_uiForm.CalFileName2_lbl->setEnabled( enabled );
+  m_uiForm.CalFileName2_ledt->setEnabled( enabled );
+  m_uiForm.SelectCalFile2_btn->setEnabled( enabled );
 }
 
 
@@ -1744,7 +1732,14 @@ bool MantidEV::getDouble( std::string str, double &value )
 bool MantidEV::getDouble( QLineEdit *ledt,
                           double    &value )
 {
-  if ( getDouble( ledt->text().toStdString(), value ) )
+  std::string strValue = ledt->text().trimmed().toStdString();
+  if (strValue.empty())
+  {
+    value = Mantid::EMPTY_DBL();
+    return true;
+  }
+
+  if ( getDouble( strValue, value ) )
   {
     return true;
   }
@@ -1900,14 +1895,14 @@ void MantidEV::saveSettings( const std::string & filename )
                                                 // Save Tab 1, Select Data
   state->setValue("SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt->text());
   state->setValue("MDworkspace_ledt", m_uiForm.MDworkspace_ledt->text());
-  state->setValue("LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn->isChecked());
+  state->setValue("LoadEventFile_rbtn", m_uiForm.loadDataGroupBox->isChecked());
   state->setValue("EventFileName_ledt", m_uiForm.EventFileName_ledt->text());
   state->setValue("MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt->text());
   state->setValue("LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx->isChecked());
   state->setValue("LoadDetCal_ckbx", m_uiForm.LoadDetCal_ckbx->isChecked());
   state->setValue("CalFileName_ledt", m_uiForm.CalFileName_ledt->text());
   state->setValue("CalFileName2_ledt", m_uiForm.CalFileName2_ledt->text());
-  state->setValue("UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn->isChecked());
+  state->setValue("ConvertToMD_rbtn", m_uiForm.convertToMDGroupBox->isChecked());
 
                                                 // Save Tab 2, Find Peaks
   state->setValue("PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt->text());
@@ -2001,7 +1996,7 @@ void MantidEV::loadSettings( const std::string & filename )
                                                   // Load Tab 1, Select Data 
   restore( state, "SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt );
   restore( state, "MDworkspace_ledt", m_uiForm.MDworkspace_ledt );
-  restore( state, "LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn );
+  m_uiForm.loadDataGroupBox->setChecked( state->value("LoadEventFile_rbtn", false).toBool() );
   restore( state, "EventFileName_ledt", m_uiForm.EventFileName_ledt );
   restore( state, "MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt );
   restore( state, "LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx );
@@ -2009,7 +2004,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "CalFileName_ledt", m_uiForm.CalFileName_ledt );
   restore( state, "CalFileName2_ledt", m_uiForm.CalFileName2_ledt );
   setEnabledLoadCalFiles_slot();
-  restore( state, "UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn );
+  m_uiForm.convertToMDGroupBox->setChecked( state->value("ConvertToMD_rbtn", false).toBool() );
                                                   // Load Tab 2, Find Peaks
   restore( state, "PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt );
   restore( state, "FindPeaks_rbtn", m_uiForm.FindPeaks_rbtn );
