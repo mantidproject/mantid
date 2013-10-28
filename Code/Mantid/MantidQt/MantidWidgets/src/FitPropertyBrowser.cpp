@@ -1543,8 +1543,7 @@ void FitPropertyBrowser::doFit(int maxIterations)
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function",funStr);
-    //alg->setPropertyValue("InputWorkspace",wsName);
-    alg->setProperty("InputWorkspace",getWorkspace());
+    alg->setPropertyValue("InputWorkspace",wsName);
     alg->setProperty("WorkspaceIndex",workspaceIndex());
     alg->setProperty("StartX",startX());
     alg->setProperty("EndX",endX());
