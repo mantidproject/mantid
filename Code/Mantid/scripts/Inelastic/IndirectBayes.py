@@ -230,6 +230,8 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 	xProb = np.append(xProb,xQ)
 	xProb = np.append(xProb,xQ)
 	eProb = np.zeros(3*nsam)
+
+	group = ''
 	for m in range(0,nsam):
 		if Verbose:
 			logger.notice('Group ' +str(m)+ ' at angle '+ str(theta[m]))
@@ -300,19 +302,20 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 			prob0.append(yprob[0])
 			prob1.append(yprob[1])
 			prob2.append(yprob[2])
+
+		# create result workspace
 		fitWS = fname+'_Result'
-		if nsam > 1:
-			fout = fitWS +'_'+ str(m)
-		else:
-			fout = fitWS
+		fout = fitWS +'_'+ str(m)
+
 		CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
 			Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
-		if m == 0:
-			group = fout
-		else:
-			group += ',' + fout
-	if nsam > 1:
-		GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+		
+		# append workspace to list of results
+		group += fout + ','
+
+	
+	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+
 	if program == 'QL':
 		yPr0 = np.array([prob0[0]])
 		yPr1 = np.array([prob1[0]])
@@ -744,8 +747,8 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 		Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 	group = fname + '_Sigma,'+ fname + '_Beta'
 	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Fit')	
-	if Loop:
-		GroupWorkspaces(InputWorkspaces=groupZ,OutputWorkspace=fname+'_Contour')
+	GroupWorkspaces(InputWorkspaces=groupZ,OutputWorkspace=fname+'_Contour')
+
 	if Save:
 		fpath = os.path.join(workdir,fname+'_Fit.nxs')
 		SaveNexusProcessed(InputWorkspace=fname+'_Fit', Filename=fpath)
