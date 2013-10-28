@@ -127,20 +127,19 @@ namespace Mantid
       bool queryDataset = false;
 
       // Format the timestamps in order to compare them.
-      std::string startDate;
-      std::string endDate;
+      std::string startDate = formatDateTime(inputs.getStartDate() + 60*60, "%Y-%m-%d %H:%M:%S"); // 2 hours
+      std::string endDate   = formatDateTime(inputs.getEndDate() + (24*60*60) + (59*60) + 59, "%Y-%m-%d %H:%M:%S"); // A day, 59 mins & 59 secs.
+
 
       // Investigation startDate if endDate is not selected
       if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0)
       {
-        startDate = formatDateTime(inputs.getStartDate(), "%F %T");
         investigationWhere.push_back("startDate >= '" + startDate + "'");
       }
 
       // Investigation endDate if startdate is not selected
       if (inputs.getEndDate() != 0 && inputs.getStartDate() == 0)
       {
-        endDate   = formatDateTime(inputs.getEndDate(), "%F %T");
         investigationWhere.push_back("endDate <= '" + endDate + "'");
       }
 
@@ -514,7 +513,7 @@ namespace Mantid
             savetoTableWorkspace(datafile->name, table);
             savetoTableWorkspace(datafile->location, table);
 
-            std::string createDate = formatDateTime(*datafile->createTime, "%F %T");
+            std::string createDate = formatDateTime(*datafile->createTime, "%Y-%m-%d %H:%M:%S");
             savetoTableWorkspace(&createDate, table);
 
             savetoTableWorkspace(datafile->id, table);
