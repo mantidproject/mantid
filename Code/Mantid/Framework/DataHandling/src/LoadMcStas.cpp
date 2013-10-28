@@ -550,14 +550,10 @@ namespace DataHandling
 		  {
 			  auto firstIt = entries.begin();
 			  file.openGroup(firstIt->first,firstIt->second);
-			  file.openGroup("simulation", "NXsimulation");
-			  file.openData("information");
-
+			  file.openGroup("simulation", "NXnote");
 			  std::string nameAttrValue;
-			  file.getAttr("name", nameAttrValue);
-			  //if(boost::iequals(nameAttrValue, "mcstas")) confidence = 80;
+        file.readData("name", nameAttrValue);
 			  if(boost::iequals(nameAttrValue, "mcstas")) confidence = 98;
-			  file.closeData();
 			  file.closeGroup();
 			  file.closeGroup();
 		  }

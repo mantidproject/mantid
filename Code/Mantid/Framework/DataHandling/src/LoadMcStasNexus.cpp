@@ -76,7 +76,7 @@ namespace DataHandling
 
 			  std::string nameAttrValue;
 			  file.getAttr("name", nameAttrValue);
-			  if(boost::iequals(nameAttrValue, "mcstas")) confidence = 80;
+			  if(boost::iequals(nameAttrValue, "mcstas")) confidence = 97;
 
 			  file.closeData();
 			  file.closeGroup();
