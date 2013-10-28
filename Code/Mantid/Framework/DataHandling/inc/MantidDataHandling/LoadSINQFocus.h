@@ -1,10 +1,11 @@
-#ifndef MANTID_DATAHANDLING_LOADSINQ_H_
-#define MANTID_DATAHANDLING_LOADSINQ_H_
+#ifndef MANTID_DATAHANDLING_LOADSINQFOCUS_H_
+#define MANTID_DATAHANDLING_LOADSINQFOCUS_H_
 
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 
@@ -41,18 +42,15 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadSINQ: public API::IFileLoader<Kernel::NexusDescriptor>
+  class DLLExport LoadSINQFocus: public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
-	LoadSINQ();
-	virtual ~LoadSINQ();
+	LoadSINQFocus();
+	virtual ~LoadSINQFocus();
 
 	virtual const std::string name() const;
 	virtual int version() const;
 	virtual const std::string category() const;
-
-	/// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
 	virtual void initDocs();
@@ -86,4 +84,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADSINQ_H_ */
+#endif  /* MANTID_DATAHANDLING_LOADSINQFOCUS_H_ */

@@ -3,47 +3,47 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadSINQ.h"
+#include "MantidDataHandling/LoadSINQFocus.h"
 
 using namespace Mantid::API;
-using Mantid::DataHandling::LoadSINQ;
+using Mantid::DataHandling::LoadSINQFocus;
 
-class LoadSINQTest: public CxxTest::TestSuite {
+class LoadSINQFocusTest: public CxxTest::TestSuite {
 public:
 	// This pair of boilerplate methods prevent the suite being created statically
 	// This means the constructor isn't called when running other tests
-	static LoadSINQTest *createSuite() {
-		return new LoadSINQTest();
+	static LoadSINQFocusTest *createSuite() {
+		return new LoadSINQFocusTest();
 	}
-	static void destroySuite(LoadSINQTest *suite) {
+	static void destroySuite(LoadSINQFocusTest *suite) {
 		delete suite;
 	}
 
-	LoadSINQTest() :
+	LoadSINQFocusTest() :
 			m_testFile("focus2010n000468.hdf") {
 	}
 	void testName() {
-		LoadSINQ alg;
-		TS_ASSERT_EQUALS(alg.name(), "LoadSINQ");
+		LoadSINQFocus alg;
+		TS_ASSERT_EQUALS(alg.name(), "LoadSINQFocus");
 	}
 
 	void testVersion() {
-		LoadSINQ alg;
+		LoadSINQFocus alg;
 		TS_ASSERT_EQUALS(alg.version(), 1);
 	}
 
 	void test_Init() {
-		LoadSINQ alg;
+		LoadSINQFocus alg;
 		TS_ASSERT_THROWS_NOTHING(alg.initialize())
 		TS_ASSERT(alg.isInitialized())
 	}
 
 	void test_exec() {
-		LoadSINQ loader;
+		LoadSINQFocus loader;
 		loader.initialize();
 		loader.setPropertyValue("Filename", m_testFile);
 
-		std::string outputSpace = "LoadSINQTest_out";
+		std::string outputSpace = "LoadSINQFocusTest_out";
 		loader.setPropertyValue("OutputWorkspace", outputSpace);
 		TS_ASSERT_THROWS_NOTHING(loader.execute());
 
