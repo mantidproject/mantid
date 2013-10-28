@@ -307,20 +307,20 @@ class PoldiProjectRun(PythonAlgorithm):
         bad_wires_threshold  = self.getProperty("BadWiresThreshold").value
         peak_detect_threshold  = self.getProperty("PeakDetectionThreshold").value
         
-        self.log().error('Poldi run with parameters')
-        self.log().error('      -  wlen_min : %s' %(wlen_min))
-        self.log().error('      -  wlen_max : %s' %(wlen_max))
-        self.log().error('      -  bad_wires_threshold   : %s' %(bad_wires_threshold))
-        self.log().error('      -  peak_detect_threshold : %s' %(peak_detect_threshold))
+        self.log().information('Poldi run with parameters')
+        self.log().information('      -  wlen_min : %s' %(wlen_min))
+        self.log().information('      -  wlen_max : %s' %(wlen_max))
+        self.log().information('      -  bad_wires_threshold   : %s' %(bad_wires_threshold))
+        self.log().information('      -  peak_detect_threshold : %s' %(peak_detect_threshold))
         
         dictsearch=os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries","poldi.dic")
-        self.log().error('Poldi instr folder -  %s' %(dictsearch))
+        self.log().information('Poldi instr folder -  %s' %(dictsearch))
         
         firstOne=""               
                 
         self.log().debug('Poldi - load data')
         nb_of_sample = sample_info_ws.rowCount()
-        self.log().error('Poldi -  %d samples listed' %(nb_of_sample))
+        self.log().information('Poldi -  %d samples listed' %(nb_of_sample))
                 
         for sample in range(nb_of_sample):
             sampleName      = sample_info_ws.column("spl Name")[sample]
@@ -328,7 +328,7 @@ class PoldiProjectRun(PythonAlgorithm):
             sampleNameLog   = sample_info_ws.column("spl log")[sample]
             sampleDeadWires = sample_info_ws.column("spl dead wires")[sample]
                 
-            self.log().error('Poldi - sample %s' %(sampleName))
+            self.log().information('Poldi - sample %s' %(sampleName))
             LoadSINQFile(Instrument="POLDI", 
                          Filename=filePath, 
                          OutputWorkspace=sampleName)
@@ -367,7 +367,7 @@ class PoldiProjectRun(PythonAlgorithm):
         
         
         nb_of_ipp = sample_ipp_ws.rowCount()
-        self.log().error('Poldi -  %d ipp listed' %(nb_of_ipp))
+        self.log().information('Poldi -  %d ipp listed' %(nb_of_ipp))
         
         for ipp in range(nb_of_ipp):
             ex_of_sample    = sample_ipp_ws.column("spl Name")[ipp]
