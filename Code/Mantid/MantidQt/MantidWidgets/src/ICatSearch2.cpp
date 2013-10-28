@@ -702,7 +702,7 @@ namespace MantidQt
 
       // Sort by endDate with the most recent being first.
       resultsTable->setSortingEnabled(true);
-      resultsTable->sortByColumn(4,Qt::DescendingOrder);
+      resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),Qt::DescendingOrder);
     }
 
     /**
@@ -849,9 +849,9 @@ namespace MantidQt
       // Populate the "Filter type..." combo-box with all possible file extensions.
       populateDataFileType(extensions);
 
-      // Sort by endDate with the most recent being first.
+      // Sort by create time with the most recent being first.
       dataFileTable->setSortingEnabled(true);
-      dataFileTable->sortByColumn(2,Qt::DescendingOrder);
+      dataFileTable->sortByColumn(headerIndexByName(dataFileTable, "Name"),Qt::DescendingOrder);
     }
 
     /**
