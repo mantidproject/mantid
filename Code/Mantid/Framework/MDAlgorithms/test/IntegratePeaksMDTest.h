@@ -112,6 +112,7 @@ public:
 
     MDEventWorkspace3Lean::sptr mdews =
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMDTest_MDEWS");
+    mdews->setCoordinateSystem(Mantid::API::HKL);
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
@@ -359,6 +360,10 @@ public:
     // Add a uniform, random background.
     FrameworkManager::Instance().exec("FakeMDEventData", 4,
         "InputWorkspace", "IntegratePeaksMDTest_MDEWS", "UniformParams", "100000");
+
+    MDEventWorkspace3Lean::sptr mdews =
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMDTest_MDEWS");
+    mdews->setCoordinateSystem(Mantid::API::HKL);
 
 
     // Make a fake instrument - doesn't matter, we won't use it really

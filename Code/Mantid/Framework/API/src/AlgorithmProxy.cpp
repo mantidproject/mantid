@@ -25,7 +25,7 @@ namespace Mantid
     PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
       m_name(alg->name()),m_category(alg->category()), m_categorySeparator(alg->categorySeparator()),
       m_alias(alg->alias()), m_version(alg->version()), m_alg(alg),
-      m_isExecuted(),m_isLoggingEnabled(true), m_rethrow(false),
+      m_isExecuted(),m_isLoggingEnabled(true), m_loggingOffset(0), m_rethrow(false),
       m_isChild(false)
     {
       if (!alg)

@@ -159,7 +159,11 @@ public:
   ///Logging can be disabled by passing a value of false
   virtual void setLogging(const bool value) = 0;
   ///returns the status of logging, True = enabled
-  virtual bool isLogging() const = 0;
+  virtual bool isLogging() const = 0;  
+  ///gets the logging priority offset
+  virtual void setLoggingOffset(const int value) = 0;
+  ///returns the logging priority offset
+  virtual int getLoggingOffset() const = 0;
   ///setting the child start progress
   virtual void setChildStartProgress(const double startProgress)const = 0;
   /// setting the child end progress
