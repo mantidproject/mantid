@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/MonitorLiveData.cpp
 	src/SNSLiveEventDataListener.cpp
 	src/StartLiveData.cpp
+  src/ISISLiveEventDataListener.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -33,6 +34,8 @@ set ( INC_FILES
 	inc/MantidLiveData/MonitorLiveData.h
 	inc/MantidLiveData/SNSLiveEventDataListener.h
 	inc/MantidLiveData/StartLiveData.h
+  inc/MantidLiveData/ISISLiveEventDataListener.h
+  inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 )
 
 set ( TEST_FILES

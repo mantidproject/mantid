@@ -15,7 +15,7 @@
 
 namespace Mantid
 {
-namespace ISISLiveData
+namespace LiveData
 {
   
 /// @file TCPEventStreamDefs.h Definitions for an ISIS Event Stream
