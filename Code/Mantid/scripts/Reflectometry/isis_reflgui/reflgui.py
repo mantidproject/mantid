@@ -16,11 +16,13 @@ from PyQt4 import QtCore, QtGui, uic
 from PyQt4.QtGui import QFont
 # from mantidsimple import *
 from mantid.simpleapi import *  # New API
-from mantidplot import *
+
 # import qti as qti
 from isis_reflectometry.quick import *
 from isis_reflectometry.combineMulti import *
 from mantid.api import WorkspaceGroup
+from settings import *
+from latest_isis_runs import *
 
 currentTable = ' '
 
@@ -28,8 +30,13 @@ try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
-
-
+    
+canMantidPlot = True
+try:
+    from mantidplot import *
+except ImportError:
+    canMantidPlot = False
+    
 class Ui_SaveWindow(object):
     def setupUi(self, SaveWindow):
         SaveWindow.setObjectName(_fromUtf8("SaveWindow"))
@@ -128,18 +135,16 @@ class Ui_SaveWindow(object):
         names = mtd.getObjectNames()
         for ws in names:
             self.listWidget.addItem(ws)
-        # try to get correct user directory
-        currentInstrument = config['default.instrument']
+        try:
+            instrumentRuns =  LatestISISRuns(instrument=config['default.instrument'])
+            runs = instrumentRuns.getJournalRuns()
+            for run in runs:    
+                    self.listWidget.addItem(run)
+                  
+        except Exception as ex:
+            logger.notice("Could not list archive runs")
+            logger.notice(str(ex))
         
-        tree1 = xml.parse(r'\\isis\inst$\NDX' + currentInstrument + '\Instrument\logs\journal\journal_main.xml')
-        root1 = tree1.getroot()
-        currentJournal = root1[len(root1) - 1].attrib.get('name')
-        tree = xml.parse(r'\\isis\inst$\NDX' + currentInstrument + '\Instrument\logs\journal\\' + currentJournal)
-        root = tree.getroot()
-        # for entry in root:#910252
-            # if (entry[4].text ==self.RBEdit.text()):
-             #   runno=str(int(entry[6].text))
-        # path=root[0]
         
         
         
@@ -161,6 +166,9 @@ class Ui_SaveWindow(object):
         
 
 class Ui_MainWindow(object):
+    
+    __instrumentRuns = None
+    
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("ISIS Reflectometry"))
         MainWindow.resize(1300, 400)
@@ -221,8 +229,10 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderItem(16, item)
         item = QtGui.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(17, item)
-
-
+        
+        self.cycleWidget = QtGui.QComboBox(self.centralWidget)
+        self.gridLayout.addWidget(self.cycleWidget, 0, 1)
+        QtCore.QObject.connect(self.cycleWidget, QtCore.SIGNAL(_fromUtf8("activated(QString)")), self.on_cycle_changed)
 
 # RB number label and edit field
         self.RBLabel = QtGui.QLabel("RB: ", self.centralWidget)
@@ -471,7 +481,50 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.actionSaveDialog, QtCore.SIGNAL(_fromUtf8("triggered()")), self.saveWksp)
         QtCore.QObject.connect(self.actionHelp_page, QtCore.SIGNAL(_fromUtf8("triggered()")), self.showHelp)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
+        
+        
+    def populateList(self, selected_cycle=None):
+        # Clear existing
+        self.listWidget.clear()
+        # Fill with ADS workspaces
+        self.__populateListADSWorkspaces()
+        try:
+            selectedInstrument = config['default.instrument'].strip().upper()
+            if not self.__instrumentRuns:
+                self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
+            elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
+                    self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
+            self.__populateListCycle(selected_cycle)
+        except Exception as ex:
+            self.cycleWidget.setVisible(False)
+            logger.notice("Could not list archive runs")
+            logger.notice(str(ex))
+        
+    def __populateListCycle(self, selected_cycle=None):  
+        runs = self.__instrumentRuns.getJournalRuns(cycle=selected_cycle)
+        for run in runs:
+            self.listWidget.addItem(run)
+            
+        # Get possible cycles for this instrument.            
+        cycles = self.__instrumentRuns.getCycles() 
+        # Setup the list of possible cycles. And choose the latest as the default
+        if not selected_cycle: 
+            cycle_count = 0
+            self.cycleWidget.clear()
+            for cycle in cycles:
+                self.cycleWidget.addItem(cycle)
+                if cycle == self.__instrumentRuns.getLatestCycle():
+                    self.cycleWidget.setCurrentIndex(cycle_count)
+                cycle_count+=1
+        # Ensure that the cycle widget is shown.
+        self.cycleWidget.setVisible(True)
+     
+    def __populateListADSWorkspaces(self):
+        names = mtd.getObjectNames()
+        for ws in names:
+            self.listWidget.addItem(ws)
+              
+    
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("ISIS Reflectometry", "ISIS Reflectometry", None, QtGui.QApplication.UnicodeUTF8))
         self.tableWidget.horizontalHeaderItem(0).setText(QtGui.QApplication.translate("ISIS Reflectometry", "Run(s)", None, QtGui.QApplication.UnicodeUTF8))
@@ -513,28 +566,10 @@ class Ui_MainWindow(object):
 
 
     def readJournal(self):
-        self.listWidget.clear()
-        currentInstrument = config['default.instrument']
-        t = 0
-        l = 0
-        while (t == 0 and l < 15 and self.RBEdit.text() != ''):
-            l = l + 1
-            tree1 = xml.parse(r'\\isis\inst$\NDX' + currentInstrument + '\Instrument\logs\journal\journal_main.xml')
-            root1 = tree1.getroot()
-            currentJournal = root1[len(root1) - l].attrib.get('name')
-            tree = xml.parse(r'\\isis\inst$\NDX' + currentInstrument + '\Instrument\logs\journal\\' + currentJournal)
-            root = tree.getroot()
-            t = 0
-            for entry in root:  # 910252
-                if (entry[4].text == self.RBEdit.text()):
-                    t = t + 1
-                    runno = str(int(entry[6].text)) 
-                    # print "RB",entry[3].text, runno, entry[0].text
-                    journalentry = runno + ": " + entry[0].text
-                    self.listWidget.addItem(journalentry)
-        self.listWidget.setMaximumWidth(self.listWidget.sizeHintForColumn(0) + 100)
-        spacerItem0 = QtGui.QSpacerItem(self.listWidget.sizeHintForColumn(0) - 100, 20, QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Minimum)
-        self.gridLayout.addItem(spacerItem0, 0, 1, 1, 1)
+        self.populateList()
+        
+    def on_cycle_changed(self, cycle):
+        self.populateList(selected_cycle=cycle)
 
 
     def initTable(self): 
@@ -599,9 +634,18 @@ class Ui_MainWindow(object):
         while (self.tableWidget.item(row, 0).text() != ''):
             row = row + 1
         for idx in self.listWidget.selectedItems():
-            runno = idx.text().split(':')[0]
+            contents = str(idx.text()).strip()
+            first_contents = contents.split(':')[0]
+            runnumber = None
+            if mtd.doesExist(first_contents):
+                runnumber = groupGet(mtd[first_contents], "samp", "run_number")
+            else:
+                temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
+                runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
+                DeleteWorkspace(temp)
+            
             item = QtGui.QTableWidgetItem()
-            item.setText(runno)
+            item.setText(runnumber)
             self.tableWidget.setItem(row, col, item)
             item = QtGui.QTableWidgetItem()
             item.setText(self.transRunEdit.text())
@@ -715,15 +759,16 @@ class Ui_MainWindow(object):
                     wsb = getWorkspace(ws_name_binned)
                     Imin = min(wsb.readY(0))
                     Imax = max(wsb.readY(0))
-                    g[i] = plotSpectrum(ws_name_binned, 0, True)
-                    titl = groupGet(ws_name_binned, 'samp', 'run_title')
-                    if (i > 0):
-                        mergePlots(g[0], g[i])
-                    if (type(titl) == str):
-                        g[0].activeLayer().setTitle(titl)
-                    g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
-                    g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-                    g[0].activeLayer().setAutoScale()
+                    if canMantidPlot:
+                        g[i] = plotSpectrum(ws_name_binned, 0, True)
+                        titl = groupGet(ws_name_binned, 'samp', 'run_title')
+                        if (i > 0):
+                            mergePlots(g[0], g[i])
+                        if (type(titl) == str):
+                            g[0].activeLayer().setTitle(titl)
+                        g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
+                        g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                        g[0].activeLayer().setAutoScale()
                 if (self.tableWidget.cellWidget(row, 17).checkState() > 0):
                     if (len(runno) == 1):
                         print "Nothing to combine!"
@@ -747,11 +792,12 @@ class Ui_MainWindow(object):
                         Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableWidget.item(row, 16).text()))
                     Qmin = getWorkspace(outputwksp).readX(0)[0]
                     Qmax = max(getWorkspace(outputwksp).readX(0))
-                    gcomb = plotSpectrum(outputwksp, 0, True)
-                    titl = groupGet(outputwksp, 'samp', 'run_title')
-                    gcomb.activeLayer().setTitle(titl)
-                    gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
-                    gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                    if canMantidPlot:
+                        gcomb = plotSpectrum(outputwksp, 0, True)
+                        titl = groupGet(outputwksp, 'samp', 'run_title')
+                        gcomb.activeLayer().setTitle(titl)
+                        gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
+                        gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
 
     def dorun(self, runno, row, which):
         g = ['g1', 'g2', 'g3']
@@ -775,6 +821,7 @@ class Ui_MainWindow(object):
     def on_comboBox_Activated(self, instrument):
         config['default.instrument'] = str(instrument)
         print "Instrument is now: ", str(instrument)
+        self.readJournal()
 
     def saveDialog(self):
         filename = QtGui.QFileDialog.getSaveFileName() 

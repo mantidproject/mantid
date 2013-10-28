@@ -1,7 +1,11 @@
 import xml.etree.ElementTree as XML
 import os.path
+from mantid.simpleapi import *
 
-class Config(object):
+class MissingSettings(Exception):
+    pass
+
+class Settings(object):
 
     __contents = None
     __filename = None
@@ -9,7 +13,7 @@ class Config(object):
     def __init__(self, filename = None):
         self.__filename = filename
         if not filename:
-            filename = os.path.join( os.path.dirname(os.path.realpath(__file__)), "config.xml")
+            filename = os.path.join( os.path.dirname(os.path.realpath(__file__)), "settings.xml")
             
         self.__check_file(filename)
         
@@ -17,10 +21,11 @@ class Config(object):
         try:
             tree = XML.parse(filename)
             doc = tree.getroot()
+            self.__extract_to_dictionary(doc)
         except:
-            raise ValueError("The file does not contain valid XML")
+            raise ValueError("The file %s does not contain valid XML" % filename)
         
-        self.__extract_to_dictionary(doc)
+        
         
     def __check_file(self, filename):
         path, extension = os.path.splitext(filename)
@@ -28,13 +33,13 @@ class Config(object):
             raise ValueError("Wrong file extension. *.xml expected not %s." % extension)
         if not os.path.isfile(filename):
             ''' Deliberately swallow and re-throw at this point. Consise reinterpreted error, will be much nicer for client code.'''
-            raise ValueError("File does not exist filename %s" % filename) 
+            raise MissingSettings("Settings file %s does not exist so no manual settings will be applied."  % filename) 
         
     def __extract_to_dictionary(self, doc):
         temp = dict()
         for elem in doc:
-            key = elem.attrib.get('name')
-            value = elem.text
+            key = elem.attrib.get('name').strip()
+            value = elem.text.strip()
             if not key:
                 raise ValueError("Missing name attribute on Setting element")
             if not value:
