@@ -311,10 +311,11 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 			Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
 		
 		# append workspace to list of results
-		group += ',' + fout
+		group += fout + ','
 
-	if nsam > 1:
-		GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+	
+	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+
 	if program == 'QL':
 		yPr0 = np.array([prob0[0]])
 		yPr1 = np.array([prob1[0]])
