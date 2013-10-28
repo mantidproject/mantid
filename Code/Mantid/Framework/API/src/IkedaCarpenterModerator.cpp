@@ -212,7 +212,11 @@ namespace Mantid
       const unsigned int nsteps = (m_lookupSize - 1);
       const unsigned int indexBelow = static_cast<unsigned int>(std::floor(area*nsteps));
       const double step = area*nsteps - indexBelow;
-      return m_areaToTimeLookup[indexBelow]*(1.0 - step) + m_areaToTimeLookup[indexBelow + 1]*step;
+      if(indexBelow < nsteps )
+        return m_areaToTimeLookup[indexBelow]*(1.0 - step) + m_areaToTimeLookup[indexBelow + 1]*step;
+      else
+        return m_areaToTimeLookup[indexBelow]; // last edge value
+
     }
 
 
