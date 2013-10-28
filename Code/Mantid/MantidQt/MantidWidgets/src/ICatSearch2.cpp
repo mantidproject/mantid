@@ -848,6 +848,10 @@ namespace MantidQt
 
       // Populate the "Filter type..." combo-box with all possible file extensions.
       populateDataFileType(extensions);
+
+      // Sort by endDate with the most recent being first.
+      dataFileTable->setSortingEnabled(true);
+      dataFileTable->sortByColumn(2,Qt::DescendingOrder);
     }
 
     /**
