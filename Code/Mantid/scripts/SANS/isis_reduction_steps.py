@@ -1229,7 +1229,18 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         # apply the propertis to self.fit_settings
         for prop in self.fit_props:
             self.fit_settings[select+prop] = sel_settings[prop]
+        
+        # When both is given, it is necessary to clean the specific settings for the individual selectors
+        if select == 'both::':            
+            for selector_ in ['sample::','can::']:
+                for prop_ in self.fit_props:
+                    prop_name = selector_+prop_
+                    if self.fit_settings.has_key(prop_name):
+                        del self.fit_settings[prop_name]
 
+    def isSeparate(self):
+        """ Returns true if the can or sample was given and false if just both was used"""
+        return self.fit_settings.has_key('sample::fit_method') or self.fit_settings.has_key('can::fit_method')
 
     def setup_wksp(self, inputWS, inst, wavbining, pre_monitor, post_monitor):
         """
@@ -1433,9 +1444,14 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def lambdaMax(self, selector):
         return self._get_fit_property(selector.lower(), 'lambda_max')
     def fitMethod(self, selector):
+        """It will return LINEAR, LOGARITHM, POLYNOMIALx for x in 2,3,4,5"""
         resp = self._get_fit_property(selector.lower(), 'fit_method')
         if 'POLYNOMIAL' == resp:
             resp += str(self._get_fit_property(selector.lower(), 'order'))
+        if resp  in ['LIN','STRAIGHT'] :
+            resp = 'LINEAR'
+        if resp in ['YLOG','LOG']:
+            resp = 'LOGARITHMIC'
         return resp
 
 class AbsoluteUnitsISIS(ReductionStep):
@@ -1853,7 +1869,7 @@ class UserFile(ReductionStep):
                 else:
                     raise 1
                 reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
-                                                              fit_method=fit_type, override=False, 
+                                                              fit_method=fit_type, override=True, 
                                                               selector=selector)
             except:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
