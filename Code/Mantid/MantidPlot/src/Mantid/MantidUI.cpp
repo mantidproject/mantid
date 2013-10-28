@@ -3156,7 +3156,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     QApplication::restoreOverrideCursor();
     return NULL;
   }
-  connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
+  connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+  
   appWindow()->setPreferences(g);
   g->newLegend("");
   MantidMatrixCurve* mc(NULL);
