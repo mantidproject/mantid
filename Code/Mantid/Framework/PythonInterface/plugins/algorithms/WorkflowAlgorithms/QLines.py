@@ -20,7 +20,7 @@ class QLines(PythonAlgorithm):
 		self.declareProperty(name='ResType',defaultValue='Res',validator=StringListValidator(['Res','Data']), doc='Format of Resolution file')
 		self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
 		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (*_red.nxs) or Workspace')
-		self.declareProperty(name='ResNormNumber',defaultValue='',validator=StringMandatoryValidator(), doc='ResNorm run number')
+		self.declareProperty(name='ResNormNumber',defaultValue='', doc='ResNorm run number')
 		self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']), doc='Form of background to fit')
 		self.declareProperty(name='ElasticOption',defaultValue=True, doc='Include elastic peak in fit')
 		self.declareProperty(name='FixWidth',defaultValue=False, doc='Fix one of the widths')
