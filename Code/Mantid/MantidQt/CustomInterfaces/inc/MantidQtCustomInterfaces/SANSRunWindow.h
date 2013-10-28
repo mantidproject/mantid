@@ -254,8 +254,8 @@ private slots:
   /// Adds a warning message to the tab title
   void setLoggerTabTitleToWarn();
   /// Handle selection of the transmission
-  void transSelectorChanged(int ); 
-
+  void transSelectorChanged(int );
+  void loadTransmissionSettings();
   
 private:
   /// used to specify the range of validation to do
