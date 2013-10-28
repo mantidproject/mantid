@@ -209,7 +209,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 	probWS = fname + '_Prob'
 	fitWS = fname + '_Fit'
 	datWS = fname + '_Data'
-	wrks=workdir + samWS[:-4]
+	wrks=os.path.join(workdir, samWS[:-4])
 	if Verbose:
 		logger.notice(' lptfile : '+wrks+'_'+prog+'.lpt')
 	lwrk=len(wrks)
@@ -678,7 +678,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
 	fname = samWS[:-4] + '_'+ prog
-	wrks=workdir + samWS[:-4]
+	wrks=os.path.join(workdir, samWS[:-4])
 	if Verbose:
 		logger.notice(' lptfile : ' + wrks +'_Qst.lpt')
 	lwrk=len(wrks)
@@ -781,7 +781,7 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	Ndat = nout[0]
 	Imin = nout[1]
 	Imax = nout[2]
-	wrks=workdir + vname[:-4]
+	wrks=os.path.join(workdir, vname[:-4])
 	if Verbose:
 		logger.notice(' Number of spectra = '+str(nvan))
 		logger.notice(' lptfile : ' + wrks +'_resnrm.lpt')
