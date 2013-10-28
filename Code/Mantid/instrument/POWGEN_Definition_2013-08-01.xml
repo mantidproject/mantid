@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2013-08-16 11:37:23.203751" valid-to="2100-01-31 23:59:59" name="PG3" valid-from="2013-08-01 00:00:01">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd 
+ last-modified="2013-08-16 11:37:23.203751" valid-to="2100-01-31 23:59:59" name="PG3" valid-from="2013-08-01 00:00:01">
   <!--Created by Stuart Campbell, Vickie Lynch, Peter Peterson, Janik Zikovsky-->
   <!--DEFAULTS-->
   <defaults>
