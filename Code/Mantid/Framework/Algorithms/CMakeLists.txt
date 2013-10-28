@@ -47,6 +47,7 @@ set ( SRC_FILES
 	src/ConvertUnits.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopySample.cpp
+	src/CopyLogs.cpp
 	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
@@ -264,6 +265,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertUnits.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopySample.h
+	inc/MantidAlgorithms/CopyLogs.h
 	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
@@ -493,6 +495,7 @@ set ( TEST_FILES
 	ConvertUnitsTest.h
 	CopyInstrumentParametersTest.h
 	CopySampleTest.h
+	CopyLogsTest.h
 	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
