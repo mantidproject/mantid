@@ -43,18 +43,18 @@ class LoadSINQFile(PythonAlgorithm):
         fname = self.getProperty('Filename').value
 
         diclookup = {\
-            "AMOR":"mantidamor.dic",
-            "BOA":"mantidboa.dic",
-            "DMC":"mantiddmc.dic",
-            "FOCUS":"mantidfocus.dic",
-            "HRPT":"mantidhrpt.dic",
-            "MARSI":"mantidmarsin.dic",
-            "MARSE":"mantidmarse.dic",
-            "POLDI":"mantidpoldi.dic",
-            "RITA-2":"mantidrita.dic",
-            "SANS":"mantidsans.dic",
-            "SANS2":"mantidsans.dic",
-            "TRICS":"mantidtrics.dic"
+            "AMOR":"amor.dic",
+            "BOA":"boa.dic",
+            "DMC":"dmc.dic",
+            "FOCUS":"focus.dic",
+            "HRPT":"hrpt.dic",
+            "MARSI":"marsin.dic",
+            "MARSE":"marse.dic",
+            "POLDI":"poldi.dic",
+            "RITA-2":"rita.dic",
+            "SANS":"sans.dic",
+            "SANS2":"sans.dic",
+            "TRICS":"trics.dic"
         }
         dictsearch = os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries")
         dicname = os.path.join(dictsearch, diclookup[inst])

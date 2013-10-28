@@ -226,7 +226,7 @@ from mantid.simpleapi import (LoadSINQFile,
                               PoldiLoadIPP,
                               PoldiAutoCorrelation,
                               PoldiPeakDetection)
-
+import os.path
 
 
 
@@ -313,8 +313,7 @@ class PoldiProjectRun(PythonAlgorithm):
         self.log().error('      -  bad_wires_threshold   : %s' %(bad_wires_threshold))
         self.log().error('      -  peak_detect_threshold : %s' %(peak_detect_threshold))
         
-#         dictsearch='/home/christophe/poldi/dev/mantid-2.3.2-Source/PSIScripts'+"/mantidpoldi.dic"
-        dictsearch=config['instrumentDefinition.directory']+"nexusdictionaries/mantidpoldi.dic"
+        dictsearch=os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries","poldi.dic")
         self.log().error('Poldi instr folder -  %s' %(dictsearch))
         
         firstOne=""               
