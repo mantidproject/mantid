@@ -395,7 +395,6 @@ namespace DataHandling
 	void LoadMcStas::readHistogramData(const std::map<std::string, std::string>& histogramEntries, WorkspaceGroup_sptr& outputGroup, ::NeXus::File& nxFile)
 	{	
 
-
 		std::string nameAttrValueYLABEL;
 
 		for(auto eit = histogramEntries.begin(); eit != histogramEntries.end(); ++eit)
@@ -405,6 +404,10 @@ namespace DataHandling
 
  			// open second level entry
  			nxFile.openGroup(dataName,dataType);
+
+      // grap title to use to e.g. create workspace name
+      std::string nameAttrValueTITLE;
+      nxFile.getAttr("title", nameAttrValueTITLE);
 
 			if ( nxFile.hasAttr("ylabel") )
 			{
@@ -505,9 +508,15 @@ namespace DataHandling
 				}
 				axis2->setValue(wsIndex, axis2Values[wsIndex]);
 			} 
-			      
+			
+      // set the workspace title
+      ws->setTitle(nameAttrValueTITLE);	
+
+      // use the workspace title to create the workspace name
+      std::replace(nameAttrValueTITLE.begin(), nameAttrValueTITLE.end(), ' ', '_');
+
       // ensure that specified name is given to workspace (eventWS) when added to outputGroup
-      std::string nameUserSee = dataName;
+      std::string nameUserSee = nameAttrValueTITLE; 
       std::string extraProperty = "Outputworkspace_dummy_" + boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
       declareProperty(new WorkspaceProperty<Workspace> (extraProperty, nameUserSee, Direction::Output));
       setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
