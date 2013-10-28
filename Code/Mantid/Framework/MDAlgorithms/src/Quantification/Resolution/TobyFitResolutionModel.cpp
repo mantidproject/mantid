@@ -229,13 +229,13 @@ namespace Mantid
                                       const QOmegaPoint & eventPoint) const
     {
       const std::vector<double> & randomNums = generateRandomNumbers();
-      const size_t nvars = m_yvector[PARALLEL_THREAD_NUMBER].recalculate(randomNums, observation, eventPoint);
+      const size_t nRandUsed = m_yvector[PARALLEL_THREAD_NUMBER].recalculate(randomNums, observation, eventPoint);
 
       // Calculate crystal mosaic contribution
       if(m_mosaicActive)
       {
-        const double & r1 = randomNums[nvars];
-        const double & r2 = randomNums[nvars+1];
+        const double r1 = randomNums[nRandUsed];
+        const double r2 = randomNums[nRandUsed+1];
         const double small(1e-20);
         const double fwhhToStdDev = M_PI/180./std::sqrt(log(256.0)); // degrees FWHH -> st.dev. in radians
 
@@ -322,6 +322,7 @@ namespace Mantid
       {
         const double & etaInPlane = m_etaInPlane[PARALLEL_THREAD_NUMBER];
         const double & etaOutPlane = m_etaOutPlane[PARALLEL_THREAD_NUMBER];
+
         const double qx(qOmega.qx + deltaQE[1]),qy(qOmega.qy + deltaQE[2]),qz(qOmega.qz + deltaQE[0]);
         const double qipmodSq = qy*qy + qz*qz;
         const double qmod = std::sqrt(qx*qx + qipmodSq);
@@ -509,7 +510,11 @@ namespace Mantid
       // Clear out any old ones
       deleteRandomNumberGenerator();
 
-      const unsigned int nrand = m_yvector[0].requiredRandomNums() + 2; // Extra 2 for mosaic
+      unsigned int nrand = m_yvector[0].requiredRandomNums();
+      if(m_mosaicActive)
+      {
+        nrand += 2; // Extra 2 for mosaic
+      }
       const size_t ngenerators(m_yvector.size());
       if(m_mcType % 2 == 0)// Pseudo-random
       {
