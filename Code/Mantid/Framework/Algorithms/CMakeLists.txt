@@ -156,6 +156,7 @@ set ( SRC_FILES
 	src/Q1DWeighted.cpp
 	src/Qhelper.cpp
 	src/Qxy.cpp
+	src/RadiusSum.cpp
 	src/RayTracerTester.cpp
 	src/ReadGroupsFromFile.cpp
 	src/RealFFT.cpp
@@ -375,6 +376,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qhelper.h
 	inc/MantidAlgorithms/Qxy.h
+	inc/MantidAlgorithms/RadiusSum.h
 	inc/MantidAlgorithms/RayTracerTester.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
 	inc/MantidAlgorithms/RealFFT.h
@@ -590,6 +592,7 @@ set ( TEST_FILES
 	Q1D2Test.h
 	Q1DWeightedTest.h
 	QxyTest.h
+	RadiusSumTest.h
 	RayTracerTesterTest.h
 	ReadGroupsFromFileTest.h
 	RealFFTTest.h
