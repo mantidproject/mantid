@@ -36,6 +36,11 @@
                       <xs:attribute name="url" type="xs:string"/>
                     </xs:complexType>
                   </xs:element>
+                  <xs:element name="externaldownload">
+                    <xs:complexType>
+                      <xs:attribute name="url" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
                   <xs:element name="filelocation">
                     <xs:complexType>
                       <xs:element name="prefix">

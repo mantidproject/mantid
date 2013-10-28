@@ -6,8 +6,9 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
   
-  <catalog name="ICat3Catalog">
-    <soapendpoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT"></soapendpoint>
+  <catalog name="ICat4Catalog">
+    <soapendpoint url="​https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
+    <externaldownload url="http://cloud089.gridpp.rl.ac.uk:8080/ids/"></externaldownload>
     <filelocation>
       <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
       <windows replacement=""></windows>

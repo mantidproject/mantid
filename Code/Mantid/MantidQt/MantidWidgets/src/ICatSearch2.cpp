@@ -809,7 +809,7 @@ namespace MantidQt
       if (workspace->rowCount() == 0)
       {
         clearDataFileFrame();
-        m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) + " 0 datafiles found.");
+        m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) + " datafiles found.");
         return;
       }
 
