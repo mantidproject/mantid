@@ -16,7 +16,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadLogsFromSNSNexus.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <Poco/File.h>

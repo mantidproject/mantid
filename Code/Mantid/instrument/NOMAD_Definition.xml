@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2012-09-14 09:09:15.855742" valid-to="2100-01-31 23:59:59" name="NOMAD" valid-from="2012-08-01 00:00:01">
+<instrument last-modified="2013-10-24 11:23:56.045220" valid-to="2100-01-31 23:59:59" name="NOMAD" valid-from="2012-08-01 00:00:01">
   <!-- Created by Peter Peterson and Vickie Lynch-->
   <!--DEFAULTS-->
   <defaults>
@@ -27,15 +27,11 @@
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location name="monitor1">
-        <parameter name="z">
-          <logfile id="-0.879475"/>
-        </parameter>
+      <location z="-0.879475" name="monitor1">
+        <neutronic z="-0.879475"/>
       </location>
-      <location name="monitor2">
-        <parameter name="z">
-          <logfile id="5.748782"/>
-        </parameter>
+      <location z="5.748782" name="monitor2">
+        <neutronic z="5.748782"/>
       </location>
     </component>
   </type>
@@ -985,7 +981,7 @@
   <!--TODO: Update to real shape-->
   <type is="monitor" name="monitor">
     <cylinder id="cyl-approx">
-      <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>
       <radius val="0.01"/>
       <height val="0.03"/>

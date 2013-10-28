@@ -85,7 +85,6 @@ class LoadRun(object):
                             OutputWorkspace=workspace,
                             **extra_options)
 
-            self._data_file = getFilePathFromWorkspace(outWs)
             LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
 
             workspace = self._leaveSinglePeriod(workspace, period)
@@ -95,7 +94,6 @@ class LoadRun(object):
             outWs = LoadNexus(Filename=self._data_file, 
                               OutputWorkspace=workspace,
                               **extra_options)
-            self._data_file = getFilePathFromWorkspace(outWs)
 
         SANS2D_log_file = mtd[workspace]
        

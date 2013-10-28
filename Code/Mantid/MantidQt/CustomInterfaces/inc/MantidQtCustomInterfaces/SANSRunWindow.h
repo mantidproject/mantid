@@ -71,6 +71,8 @@ class SANSRunWindow : public MantidQt::API::UserSubWindow
 public:
   /// Name of the interface
   static std::string name() { return "SANS ISIS"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "SANS"; }
 
   ///Stores the batch or single run mode selection
   enum States {
