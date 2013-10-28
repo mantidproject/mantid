@@ -10,6 +10,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/EmptyValues.h"
 #include <exception>
 
 namespace MantidQt
@@ -155,36 +156,45 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
 bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
                                          const std::string & md_ws_name,
-                                               double        maxQ,
-                                               bool          do_lorentz_corr,
-                                               bool          load_det_cal,
+                                         const double        minQ,
+                                         const double        maxQ,
+                                         const bool          do_lorentz_corr,
+                                         const bool          load_data,
+                                         const bool          load_det_cal,
                                          const std::string & det_cal_file,
-                                         const std::string & det_cal_file2  )
+                                         const std::string & det_cal_file2 )
 {
   try
   {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
-    alg->setProperty("Filename",file_name);
-    alg->setProperty("OutputWorkspace",ev_ws_name);
-    alg->setProperty("Precount",true);
-    alg->setProperty("LoadMonitors",true);
-
-    if ( !alg->execute() )
-      return false;
-
-    if ( load_det_cal )
+    IAlgorithm_sptr alg;
+    if (load_data)
     {
-      alg = AlgorithmManager::Instance().create("LoadIsawDetCal");
-      alg->setProperty( "InputWorkspace", ev_ws_name );
-      alg->setProperty( "Filename", det_cal_file );
-      alg->setProperty( "Filename2", det_cal_file2 );
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
+      alg->setProperty("Filename",file_name);
+      alg->setProperty("OutputWorkspace",ev_ws_name);
+      alg->setProperty("Precount",true);
+      alg->setProperty("LoadMonitors",true);
 
       if ( !alg->execute() )
         return false;
+
+      if ( load_det_cal )
+      {
+        alg = AlgorithmManager::Instance().create("LoadIsawDetCal");
+        alg->setProperty( "InputWorkspace", ev_ws_name );
+        alg->setProperty( "Filename", det_cal_file );
+        alg->setProperty( "Filename2", det_cal_file2 );
+
+        if ( !alg->execute() )
+          return false;
+      }
     }
 
     std::ostringstream min_str;
-    min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
+    if (minQ != Mantid::EMPTY_DBL())
+      min_str << minQ << "," << minQ << "," << minQ;
+    else
+      min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
 
     std::ostringstream max_str;
     max_str << maxQ << "," << maxQ << "," << maxQ;
