@@ -364,12 +364,12 @@ namespace Mantid
             // Again, we need to check first if start and end date exist prior to insertion.
             if (investigation->startDate)
             {
-              std::string startDate = formatDateTime(*investigation->startDate, "%d-%m-%y");
+              std::string startDate = formatDateTime(*investigation->startDate, "%Y-%m-%d");
               savetoTableWorkspace(&startDate, table);
             }
             if (investigation->endDate)
             {
-              std::string endDate = formatDateTime(*investigation->endDate, "%d-%m-%y");
+              std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
               savetoTableWorkspace(&endDate, table);
             }
           }
