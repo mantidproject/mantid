@@ -8,8 +8,9 @@ mp = import_mantidplot()
 # Jump programs
 def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	StartTime('Jump fit : '+jumpFunc+' ; ')
-	workdir = config['defaultsave.directory']
-	
+
+	workdir = getDefaultWorkingDirectory()
+
 	#select the width we wish to fit
 	spectumWs = "__" + samWS
 	ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=spectumWs, WorkspaceIndex=width)
