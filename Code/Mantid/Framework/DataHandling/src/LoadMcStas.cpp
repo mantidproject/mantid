@@ -377,7 +377,8 @@ namespace DataHandling
 		eventWS->setAllX(axis);
 
     // ensure that specified name is given to workspace (eventWS) when added to outputGroup
-    std::string nameUserSee = "EventData";
+    std::string nameOfGroupWS = getProperty("OutputWorkspace");
+    std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
     std::string extraProperty = "Outputworkspace_dummy_" + boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
     declareProperty(new WorkspaceProperty<Workspace> (extraProperty, nameUserSee, Direction::Output));
     setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
@@ -516,7 +517,8 @@ namespace DataHandling
       std::replace(nameAttrValueTITLE.begin(), nameAttrValueTITLE.end(), ' ', '_');
 
       // ensure that specified name is given to workspace (eventWS) when added to outputGroup
-      std::string nameUserSee = nameAttrValueTITLE; 
+      std::string nameOfGroupWS = getProperty("OutputWorkspace");
+      std::string nameUserSee = nameAttrValueTITLE + "_" + nameOfGroupWS; 
       std::string extraProperty = "Outputworkspace_dummy_" + boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
       declareProperty(new WorkspaceProperty<Workspace> (extraProperty, nameUserSee, Direction::Output));
       setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
