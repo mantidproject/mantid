@@ -604,9 +604,8 @@ namespace LiveData
       // Add the run_number property
       if ( haveRunNumber )
       {
-        // Same problem as the run_start property above:  run_number should not exist
-        // at this point, and if it does, we can't do much about it.
-        g_log.error() << "run_number property already exists.  Current value will be ignored."  << std::endl
+        // run_number should not exist at this point, and if it does, we can't do much about it.
+        g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
                       << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
       }
       else
