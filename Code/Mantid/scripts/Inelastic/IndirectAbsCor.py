@@ -119,7 +119,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     acscWS = name + '_acsc'
     accWS = name + '_acc'
     fname = name +'_Abs'
-    wrk = workdir + run_name
+    wrk = os.path.join(workdir, run_name)
     wrk.ljust(120,' ')
     for n in range(0,ndet):
         if geom == 'flt':
