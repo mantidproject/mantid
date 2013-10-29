@@ -10,6 +10,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ArrowMarker.cpp
                    src/AssociationsDialog.cpp
                    src/AxesDialog.cpp
+                   src/AxisDetails.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
@@ -46,6 +47,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
+                   src/GridDetails.cpp
                    src/ImageDialog.cpp
                    src/ImageExportDialog.cpp
                    src/ImageMarker.cpp
@@ -96,6 +98,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/QwtPieCurve.cpp
                    src/RangeSelectorTool.cpp
                    src/RenameWindowDialog.cpp
+                   src/ScaleDetails.cpp
                    src/ScaleDraw.cpp
                    src/ScalePicker.cpp
                    src/ScreenPickerTool.cpp
@@ -240,6 +243,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ArrowMarker.h
                    src/AssociationsDialog.h
                    src/AxesDialog.h
+                   src/AxisDetails.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
@@ -279,6 +283,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Graph3D.h
                    src/Graph.h
                    src/Grid.h
+                   src/GridDetails.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
                    src/ImageMarker.h
@@ -334,6 +339,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/RangeSelectorTool.h
                    src/RenameWindowDialog.h
                    src/resource.h
+                   src/ScaleDetails.h
                    src/ScaleDraw.h
                    src/ScalePicker.h
                    src/ScreenPickerTool.h
@@ -544,6 +550,7 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AssociationsDialog.h
                         src/AxesDialog.h
+                        src/AxisDetails.h
                         src/CanvasPicker.h
                         src/ColorMapDialog.h
                         src/ConfigDialog.h
@@ -574,6 +581,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/Graph3D.h
                         src/Graph.h
                         src/Grid.h
+                        src/GridDetails.h
                         src/ImageDialog.h
                         src/ImageExportDialog.h
                         src/ImportASCIIDialog.h
@@ -614,6 +622,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/QwtPieCurve.h
                         src/RangeSelectorTool.h
                         src/RenameWindowDialog.h
+                   	src/ScaleDetails.h
                         src/ScalePicker.h
                         src/ScreenPickerTool.h
                         src/Script.h

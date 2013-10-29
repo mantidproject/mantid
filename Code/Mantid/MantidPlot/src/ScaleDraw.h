@@ -45,13 +45,13 @@ public:
 	enum NumericFormat{Automatic, Decimal, Scientific, Superscripts};
 	enum NameFormat{ShortName, LongName, Initial};
 
-    //! Constructs a new scale draw which is a clone of sd.
-    ScaleDraw(Plot *plot, ScaleDraw *sd);
+  //! Constructs a new scale draw which is a clone of sd.
+  ScaleDraw(Plot *plot, ScaleDraw *sd);
 	ScaleDraw(Plot *plot, const QString& formula = QString::null);
 	ScaleDraw(Plot *plot, const QStringList& labels, const QString& format, ScaleType type = Text);
 
-    QString formatString();
-    QString format(){return d_format_info;};
+  QString formatString();
+  QString format(){return d_format_info;};
 
 	QString formula() {return d_formula;};
 	void setFormula(const QString& formula) {d_formula = formula;};
