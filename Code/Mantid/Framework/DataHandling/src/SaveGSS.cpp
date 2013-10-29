@@ -59,10 +59,7 @@ namespace Mantid
           "The input workspace, which must be in time-of-flight");
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
           "The filename to use for the saved data");
-      std::vector<std::string> Split(2);
-      Split[0] = "True";
-      Split[1] = "False";
-      declareProperty("SplitFiles", "True", boost::make_shared<Kernel::StringListValidator>(Split),
+      declareProperty("SplitFiles", true,
           "Whether to save each spectrum into a separate file ('true') or not ('false'). Note that this is a string, not a boolean property.");
       declareProperty("Append", true, "If true and Filename already exists, append, else overwrite ");
       declareProperty(
@@ -132,8 +129,7 @@ namespace Mantid
 
       const int bank = getProperty("Bank");
       const bool MultiplyByBinWidth = getProperty("MultiplyByBinWidth");
-      std::string split_string = getProperty("SplitFiles");
-      bool split = (split_string == "True");
+      const bool split = getProperty("SplitFiles");
       std::string outputFormat = getProperty("Format");
 
       m_useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
