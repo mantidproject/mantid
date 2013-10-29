@@ -9,6 +9,7 @@
 #include "MantidDataHandling/LoadSINQFocus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -25,7 +26,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_ALGORITHM(LoadSINQFocus);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus);
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -33,8 +34,8 @@ DECLARE_ALGORITHM(LoadSINQFocus);
 LoadSINQFocus::LoadSINQFocus() {
 	m_instrumentName = "";
 	m_supportedInstruments.push_back("FOCUS");
-        this->useAlgorithm("CalculateFlatBackground");
-        this->deprecatedDate("2013-05-21");
+    this->useAlgorithm("LoadSINQ");
+    this->deprecatedDate("2013-10-28");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,8 +65,23 @@ const std::string LoadSINQFocus::category() const {
 //----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm
 void LoadSINQFocus::initDocs() {
-	this->setWikiSummary("Loads PSI nexus file.");
-	this->setOptionalMessage("Loads PSI nexus file.");
+	this->setWikiSummary("Loads a FOCUS nexus file from the PSI");
+	this->setOptionalMessage("Loads a FOCUS nexus file from the PSI");
+}
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadSINQFocus::confidence(Kernel::NexusDescriptor & descriptor) const {
+
+    // fields existent only at the SINQ (to date Loader only valid for focus)
+    if (descriptor.pathExists("/entry1/FOCUS/SINQ") ){
+            return 80;
+    } else {
+            return 0;
+    }
 }
 
 //-----------------------------------------1-----------------------------------------------------
