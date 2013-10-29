@@ -939,12 +939,12 @@ class SNSPowderReduction(PythonAlgorithm):
             if "pdfgetn" in self._outTypes:
                 pdfwksp = str(wksp)+"_norm"
                 pdfwksp = api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
-                api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles="False", Append=False,
+                api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles=False, Append=False,
                         MultiplyByBinWidth=False, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
                 api.DeleteWorkspace(pdfwksp)
             return # don't do the other bits of saving
         if "gsas" in self._outTypes:
-            api.SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, 
+            api.SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles=False, Append=False, 
                     MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
             api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".dat")          
