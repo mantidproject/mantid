@@ -1,16 +1,18 @@
-#ifndef MANTID_DATAHANDLING_LOADMCSTASEVENTNEXUS_H_
-#define MANTID_DATAHANDLING_LOADMCSTASEVENTNEXUS_H_
+#ifndef MANTID_DATAHANDLING_LOADMCSTAS_H_
+#define MANTID_DATAHANDLING_LOADMCSTAS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
+
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace Mantid
 {
 namespace DataHandling
 {
 
-  /** LoadMcStasEventNexus : TODO: DESCRIPTION
+  /** LoadMcStas : TODO: DESCRIPTION
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -32,11 +34,11 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMcStasEventNexus  : public API::IFileLoader<Kernel::NexusDescriptor>
+  class DLLExport LoadMcStas  : public API::IFileLoader<Kernel::NexusDescriptor>
   {
   public:
-    LoadMcStasEventNexus();
-    virtual ~LoadMcStasEventNexus();
+    LoadMcStas();
+    virtual ~LoadMcStas();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -49,10 +51,16 @@ namespace DataHandling
     virtual void initDocs();
     void init();
     void exec();
+
+    void readEventData(const std::map<std::string, std::string>& eventEntries, API::WorkspaceGroup_sptr& outputGroup, ::NeXus::File& nxFile);
+    void readHistogramData(const std::map<std::string, std::string>& histogramEntries, API::WorkspaceGroup_sptr& outputGroup, ::NeXus::File& nxFile);   
+ 
+    // used as part of given useful names to workspaces added to output groupworkspace
+    size_t m_countNumWorkspaceAdded; 
   };
 
 
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADMCSTASEVENTNEXUS_H_ */
+#endif  /* MANTID_DATAHANDLING_LoadMcStas_H_ */

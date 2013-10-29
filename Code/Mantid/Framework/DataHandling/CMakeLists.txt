@@ -48,7 +48,7 @@ set ( SRC_FILES
 	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
-	src/LoadMcStasEventNexus.cpp
+	src/LoadMcStas.cpp
 	src/LoadMcStasNexus.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
@@ -177,7 +177,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
-	inc/MantidDataHandling/LoadMcStasEventNexus.h
+	inc/MantidDataHandling/LoadMcStas.h
 	inc/MantidDataHandling/LoadMcStasNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
@@ -298,7 +298,7 @@ set ( TEST_FILES
 	LoadLogTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
-	LoadMcStasEventNexusTest.h
+	LoadMcStasTest.h
 	LoadMcStasNexusTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
