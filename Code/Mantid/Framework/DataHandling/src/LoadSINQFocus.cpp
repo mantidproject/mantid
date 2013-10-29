@@ -6,10 +6,9 @@
 
  *WIKI*/
 
-#include "MantidDataHandling/LoadSINQ.h"
+#include "MantidDataHandling/LoadSINQFocus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -26,66 +25,53 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQ);
+DECLARE_ALGORITHM(LoadSINQFocus);
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadSINQ::LoadSINQ() {
+LoadSINQFocus::LoadSINQFocus() {
 	m_instrumentName = "";
 	m_supportedInstruments.push_back("FOCUS");
+        this->useAlgorithm("CalculateFlatBackground");
+        this->deprecatedDate("2013-05-21");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadSINQ::~LoadSINQ() {
+LoadSINQFocus::~LoadSINQFocus() {
 }
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadSINQ::name() const {
-	return "LoadSINQ";
+const std::string LoadSINQFocus::name() const {
+	return "LoadSINQFocus";
 }
 ;
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadSINQ::version() const {
+int LoadSINQFocus::version() const {
 	return 1;
 }
 ;
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadSINQ::category() const {
+const std::string LoadSINQFocus::category() const {
 	return "DataHandling";
 }
 
 //----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm
-void LoadSINQ::initDocs() {
+void LoadSINQFocus::initDocs() {
 	this->setWikiSummary("Loads PSI nexus file.");
 	this->setOptionalMessage("Loads PSI nexus file.");
-}
-
-/**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not be used
- */
-int LoadSINQ::confidence(Kernel::NexusDescriptor & descriptor) const {
-
-	// fields existent only at the SINQ (to date Loader only valid for focus)
-	if (descriptor.pathExists("/entry1/FOCUS/SINQ") ){
-		return 80;
-	} else {
-		return 0;
-	}
 }
 
 //-----------------------------------------1-----------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void LoadSINQ::init() {
+void LoadSINQFocus::init() {
 	std::vector<std::string> exts;
 	exts.push_back(".nxs");
 	exts.push_back(".hdf");
@@ -99,7 +85,7 @@ void LoadSINQ::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadSINQ::exec() {
+void LoadSINQFocus::exec() {
 
 	std::string filename = getPropertyValue("Filename");
 	NXRoot root(filename);
@@ -125,7 +111,7 @@ void LoadSINQ::exec() {
  * Note that the instrument in the nexus file is of the form "FOCUS at SINQ"
  *
  */
-void LoadSINQ::setInstrumentName(NeXus::NXEntry& entry) {
+void LoadSINQFocus::setInstrumentName(NeXus::NXEntry& entry) {
 
 	m_instrumentPath = m_loader.findInstrumentNexusPath(entry);
 
@@ -137,7 +123,7 @@ void LoadSINQ::setInstrumentName(NeXus::NXEntry& entry) {
 	m_instrumentName = m_instrumentName.substr(0, pos);
 }
 
-void LoadSINQ::initWorkSpace(NeXus::NXEntry& entry) {
+void LoadSINQFocus::initWorkSpace(NeXus::NXEntry& entry) {
 
 	// read in the data
 	NXData dataGroup = entry.openNXData("merged");
@@ -170,7 +156,7 @@ void LoadSINQ::initWorkSpace(NeXus::NXEntry& entry) {
 
 }
 
-void LoadSINQ::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
+void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 
 	// read in the data
 	NXData dataGroup = entry.openNXData("merged");
@@ -195,7 +181,7 @@ void LoadSINQ::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 			// Assign Error
 			MantidVec& E = m_localWorkspace->dataE(spec);
 			std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-					LoadSINQ::calculateError);
+					LoadSINQFocus::calculateError);
 			++spec;
 			progress.report();
 		}
@@ -203,7 +189,7 @@ void LoadSINQ::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	g_log.debug() << "Data loading into WS done...." << std::endl;
 }
 
-void LoadSINQ::loadRunDetails(NXEntry & entry) {
+void LoadSINQFocus::loadRunDetails(NXEntry & entry) {
 
 	API::Run & runDetails = m_localWorkspace->mutableRun();
 
@@ -238,7 +224,7 @@ void LoadSINQ::loadRunDetails(NXEntry & entry) {
  *
  * @param entry :: The Nexus entry
  */
-void LoadSINQ::loadExperimentDetails(NXEntry & entry) {
+void LoadSINQFocus::loadExperimentDetails(NXEntry & entry) {
 
 	std::string name = boost::lexical_cast<std::string>(
 			entry.getFloat("sample/name"));
@@ -249,7 +235,7 @@ void LoadSINQ::loadExperimentDetails(NXEntry & entry) {
 /**
  * Run the Child Algorithm LoadInstrument.
  */
-void LoadSINQ::runLoadInstrument() {
+void LoadSINQFocus::runLoadInstrument() {
 
 	IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

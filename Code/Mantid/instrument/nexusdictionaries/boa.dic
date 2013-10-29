@@ -1,0 +1,4 @@
+data=/entry/data/data
+z-axis=/entry/embl/time_binning
+z-axis-name=TOF
+title=/entry/title
