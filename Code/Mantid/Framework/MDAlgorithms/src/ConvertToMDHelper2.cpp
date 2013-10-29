@@ -1,4 +1,16 @@
 /*WIKI*
+Helper algorithm to calculate min-max input values for ConvertToMD algorithm, using ConvertToMD algorithm factory. 
+
+Buils simplified matrix workspace, which contains min-max X values of the input workspace and the instrument, attached to the input workspace,
+converts this workspace into MD using correspondent convertToMD plugin and returns the min-max values of the final transformation. 
+If the min input workspace X values < 0 and max values > 0 algorithm also adds 0 X-values to the input workspace and verifies 
+if min-max transformation results are achieved on at 0 values too.
+
+For example, given input workspace in the units of energy transfer with some instrument and requesting |Q| inelastic transformation, the algorithm extracts looks through 
+all spectra of the input workspace and identifies minimal, maximal and 0 energy transfer for the input spectras. Then it builds the workspace with the same detectors as the
+input workspace but all spectras consisting of just 3 values namely min, 0 and max energy transfer, converts this workspace into |Q| dE, looks through all 
+spectra of the transformed workspace to identify |Q|_min, |Q|_max and dE_min and dE_max and returns these values. 
+
 
 *WIKI*/
 
