@@ -285,8 +285,9 @@ namespace Algorithms
 
       // Generate one of the output workspaces & Copy geometry over. But we don't copy the data.
       DataObjects::EventWorkspace_sptr optws = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-          API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
+            API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
       API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws, false);
+      m_outputWS.insert(std::make_pair(wsgroup, optws));
 
       // Add information, including title and comment, to output workspace
       if (mWithInfo)
@@ -321,7 +322,6 @@ namespace Algorithms
         propertyname << "OutputWorkspace_" << wsgroup;
 
         // Inserted this pair to map
-        m_outputWS.insert(std::make_pair(wsgroup, optws));
         m_wsNames.push_back(wsname.str());
 
         // Set (property) to output workspace and set to ADS
@@ -453,7 +453,7 @@ namespace Algorithms
     std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
     // Loop over the histograms (detector spectra) to do split from 1 event list to N event list
-    g_log.information() << "[FilterEvents F1206] Number of spectra = " << numberOfSpectra << ".\n";
+    g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
 
     // FIXME Make it parallel
     // PARALLEL_FOR_NO_WSP_CHECK()

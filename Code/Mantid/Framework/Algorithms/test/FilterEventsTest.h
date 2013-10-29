@@ -38,7 +38,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test initialization
     */
-  void Ptest_Initialization()
+  void test_Initialization()
   {
     FilterEvents alg;
     alg.initialize();
@@ -55,7 +55,7 @@ public:
     * (4) Within one pulse, two consecutive events/neutrons is apart for 10*1000*1000 seconds
     * (5) "Experiment": 5 pulse times.  10 events in each pulse
     */
-  void Ptest_CreatedEventWorskpaceAndSplitter()
+  void test_CreatedEventWorskpaceAndSplitter()
   {
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100*1000*1000;
@@ -90,7 +90,7 @@ public:
    *  (1) Leave correction table workspace empty
    *  (2) Count events in each output including "-1", the excluded/unselected events
    */
-  void Ptest_FilterWOCorrection()
+  void test_FilterWOCorrection()
   {
     // 1. Create EventWorkspace and SplittersWorkspace    
     int64_t runstart_i64 = 20000000000;
@@ -117,6 +117,9 @@ public:
     TS_ASSERT(filter.isExecuted());
 
     // 4. Get output
+    int numsplittedws = filter.getProperty("NumberOutputWorkspace");
+    TS_ASSERT_EQUALS(numsplittedws, 4);
+
     // 4.1 Workspace group 0
     DataObjects::EventWorkspace_sptr filteredws0 = boost::dynamic_pointer_cast
         <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
@@ -150,6 +153,7 @@ public:
     // 5. Clean up
     AnalysisDataService::Instance().remove("Test02");
     AnalysisDataService::Instance().remove("Splitter02");
+    AnalysisDataService::Instance().remove("FilteredWS01_unfiltered");
     AnalysisDataService::Instance().remove("FilteredWS01_0");
     AnalysisDataService::Instance().remove("FilteredWS01_1");
     AnalysisDataService::Instance().remove("FilteredWS01_2");
@@ -199,7 +203,7 @@ public:
 
     // Get output
     int numsplittedws = filter.getProperty("NumberOutputWorkspace");
-    TS_ASSERT_EQUALS(numsplittedws, 0);
+    TS_ASSERT_EQUALS(numsplittedws, 3);
 
     // 4.1 Workspace group 0
     DataObjects::EventWorkspace_sptr filteredws0 = boost::dynamic_pointer_cast
@@ -244,7 +248,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
     */
-  void Ptest_FilterWithCorrection()
+  void test_FilterWithCorrection()
   {
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
