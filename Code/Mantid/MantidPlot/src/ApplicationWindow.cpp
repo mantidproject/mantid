@@ -416,16 +416,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
 
-  // Interpreter
-  m_interpreterDock = new QDockWidget(this);
-  m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
-  m_interpreterDock->setWindowTitle("Script Interpreter");
-  addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
-  // This is a temporary widget so that when the settings are read the dock's visible state is correct.
-  // It gets replaced with the script widget after the scripting language has been read and set
-  m_interpreterDock->setWidget(new QTextEdit);
-  m_interpreterDock->hide();
-
   undoStackWindow = new QDockWidget(this);
   undoStackWindow->setObjectName("undoStackWindow"); // this is needed for QMainWindow::restoreState()
   undoStackWindow->setWindowTitle(tr("Undo Stack"));
@@ -562,9 +552,18 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  delete m_interpreterDock->widget();
   m_iface_script = NULL;
+
+  m_interpreterDock = new QDockWidget(this);
+  m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
+  m_interpreterDock->setWindowTitle("Script Interpreter");
   runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
+  if ( ! restoreDockWidget(m_interpreterDock))
+  {
+    // Restoring the widget fails if the settings aren't found or read. Therefore, add it manually.
+    addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
+  }
+
   loadCustomActions();
 
   // Nullify icatsearch
