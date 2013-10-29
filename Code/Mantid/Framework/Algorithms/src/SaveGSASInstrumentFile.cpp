@@ -36,6 +36,7 @@ There are 2 places in this algorithm that can set the value of  <math>L_1</math>
 *WIKI*/
 
 #include "MantidAlgorithms/SaveGSASInstrumentFile.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -351,7 +352,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
     */
   void SaveGSASInstrumentFile::init()
   {
-    declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
                     "Name of the table workspace containing the parameters.");
 
     vector<string> infileexts;
@@ -428,6 +429,25 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
 
     // Convert to GSAS
     convertToGSAS(m_vecBankID2File, m_gsasFileName, bankprofileparammap);
+
+    // Fix?
+    Mantid::API::FrameworkManager::Instance();
+    IAlgorithm_sptr fit;
+    try
+    {
+      // Fitting the candidate peaks to a Gaussian
+      fit = createChildAlgorithm("FixGSASInstrumentFile", -1, -1, true);
+      fit->initialize();
+      fit->setProperty("InputFilename", m_gsasFileName);
+      fit->setProperty("OutputFilename", m_gsasFileName);
+      fit->execute();
+    }
+    catch (Exception::NotFoundError &)
+    {
+      std::string errorstr("FindPeaks algorithm requires the CurveFitting library");
+      g_log.error(errorstr);
+      throw std::runtime_error(errorstr);
+    }
 
     return;
   }
@@ -551,7 +571,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
   //----------------------------------------------------------------------------------------------
   /** Parse profile table workspace to a map (the new ...
     */
-  void SaveGSASInstrumentFile::parseProfileTableWorkspace(TableWorkspace_sptr ws,
+  void SaveGSASInstrumentFile::parseProfileTableWorkspace(ITableWorkspace_sptr ws,
                                                           map<unsigned int, map<string, double> >& profilemap)
   {
     size_t numbanks = ws->columnCount()-1;
@@ -959,7 +979,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
       throw runtime_error(errss.str());
     }
 
-    fprintf(pFile, "INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
+    fprintf(pFile, "INS %2d ICONS%10.3f%10.3f%10.3f          %10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero, 0.0, 0, 0.0);
     fprintf(pFile, "INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
 
     fprintf(pFile, "INS %2dBAKGD     1    4    Y    0    Y\n", bankid);
