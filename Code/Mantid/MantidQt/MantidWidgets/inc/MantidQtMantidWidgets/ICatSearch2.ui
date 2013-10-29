@@ -1062,6 +1062,28 @@
            </spacer>
           </item>
           <item>
+           <widget class="QLabel" name="filterType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="text">
+             <string>Filter type:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QComboBox" name="dataFileFilterCombo">
             <property name="font">
              <font>
@@ -1074,7 +1096,7 @@
             </property>
             <item>
              <property name="text">
-              <string>Filter type...</string>
+              <string>None</string>
              </property>
             </item>
            </widget>
