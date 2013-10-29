@@ -396,7 +396,10 @@ void StepScan::runStepScanAlg()
   }
   else  // Offline data
   {
-    if ( m_dataReloadNeeded ) loadFile(false); // Reload if workspace isn't fresh
+    // Check just in case the user has deleted the loaded workspace
+    if ( ! AnalysisDataService::Instance().doesExist(m_inputWSName) ) m_dataReloadNeeded = true;
+    // Reload also needed if the workspace isn't fresh, as well as if the line above triggers
+    if ( m_dataReloadNeeded ) loadFile(false);
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
     algSuccessful = stepScan->execute();
   }
