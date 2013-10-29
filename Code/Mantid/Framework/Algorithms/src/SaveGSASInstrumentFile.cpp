@@ -352,7 +352,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
     */
   void SaveGSASInstrumentFile::init()
   {
-    declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<ITableWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
                     "Name of the table workspace containing the parameters.");
 
     vector<string> infileexts;
@@ -571,7 +571,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
   //----------------------------------------------------------------------------------------------
   /** Parse profile table workspace to a map (the new ...
     */
-  void SaveGSASInstrumentFile::parseProfileTableWorkspace(TableWorkspace_sptr ws,
+  void SaveGSASInstrumentFile::parseProfileTableWorkspace(ITableWorkspace_sptr ws,
                                                           map<unsigned int, map<string, double> >& profilemap)
   {
     size_t numbanks = ws->columnCount()-1;
