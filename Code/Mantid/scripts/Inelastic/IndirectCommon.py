@@ -71,12 +71,13 @@ def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
     return inst.getNumberParameter("efixed-val")[0]
 
+# Get the default save directory and check it's valid
 def getDefaultWorkingDirectory():
     workdir = config['defaultsave.directory']
     
-    if !os.path.isdir(workdir):
+    if not os.path.isdir(workdir):
         error = "Default save directory is not a valid path!"
-        sys.error(error)
+        sys.exit(error)
 
     return workdir
 
