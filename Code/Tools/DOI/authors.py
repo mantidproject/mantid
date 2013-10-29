@@ -74,7 +74,8 @@ _translations = {
 # entry would suffice in such an instance.
 _blacklist = [
     '',
-    'unknown'
+    'unknown',
+    'Yao, Marie',
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
@@ -82,8 +83,11 @@ _blacklist = [
 # "main" DOI only.
 whitelist = [
     'Cottrell, Stephen',
+    'Dillow, David',
+    'Granroth, Garrett',
     'Hagen, Mark',
     'Hillier, Adrian',
+    'Heller, William',
     'Howells, Spencer',
     'McGreevy, Robert',
     'Pascal, Manuel',
