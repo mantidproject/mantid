@@ -116,8 +116,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>738</width>
-            <height>633</height>
+            <width>500</width>
+            <height>500</height>
            </rect>
           </property>
           <property name="minimumSize">
@@ -616,8 +616,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>738</width>
-            <height>633</height>
+            <width>372</width>
+            <height>330</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -981,8 +981,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>738</width>
-            <height>633</height>
+            <width>429</width>
+            <height>526</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -1576,8 +1576,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>738</width>
-            <height>633</height>
+            <width>345</width>
+            <height>280</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -2131,8 +2131,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>738</width>
-            <height>633</height>
+            <width>389</width>
+            <height>188</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -2387,8 +2387,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>738</width>
-            <height>633</height>
+            <width>720</width>
+            <height>635</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -2398,7 +2398,7 @@
               <string>Apply the IntegratePeaksMD&lt;br&gt; algorithm to integrate the current list of peaks, using spherical regions around the peaks in reciprocal space.  This is the fastest of the integration methods. See the algorithm documentation for more details.</string>
              </property>
              <property name="text">
-              <string>Spherical Integration</string>
+              <string>Spherical or Cylindrical Integration</string>
              </property>
             </widget>
            </item>
@@ -2556,6 +2556,159 @@
                </property>
                <property name="text">
                 <string>Integrate if on Edge</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="Cylinder_ckbx">
+               <property name="toolTip">
+                <string>If true, cylinder instead of sphere..</string>
+               </property>
+               <property name="text">
+                <string>Integrate with cylinder</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="CylinderProfileFit_cmbx">
+               <property name="toolTip">
+                <string>Fit cylinder profile with function</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>BackToBackExponential</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Bk2BKExpConvPV</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>DeltaFunction</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>ElasticDiffSphere</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>ExamplePeakFunction</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Gaussian</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>IkedaCarpenterPV</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Lorentzian</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>NoFit</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Voigt</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_53a">
+             <item>
+              <spacer name="horizontalSpacer_61a">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="CylinderLength_lbl">
+               <property name="text">
+                <string>Cylinder Length (A^-1)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="CylinderLength_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Length of the cylinder used for integration.</string>
+               </property>
+               <property name="text">
+                <string>0.4</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_53b">
+             <item>
+              <spacer name="horizontalSpacer_61b">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="CylinderPercentBkg_lbl">
+               <property name="text">
+                <string>Percent of cylinder length that is background.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="CylinderPercentBkg_ledt">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Radius of the outer surface&lt;br&gt; of the spherical shell that will be used for the background estimate.</string>
+               </property>
+               <property name="text">
+                <string>0.25</string>
                </property>
               </widget>
              </item>
