@@ -192,7 +192,7 @@ def process_frame(frame):
 
 #-------------------------------------------------------------------------------
 
-def lhs_info(output_type='both'):
+def lhs_info(output_type='both', frame=None):
     """Returns the number of arguments on the left of assignment along 
     with the names of the variables.
 
@@ -213,18 +213,21 @@ def lhs_info(output_type='both'):
                                                       variable names 
                                     output_type = 'both' : A tuple containing both of
                                                       the above
+    frame                         A frame object that points to the frame containing a variable assignment.
+                                  Default = inspect.currentframe().f_back.f_back
 
     Outputs:
     =========     
     Depends on the value of the argument. See above.
 
     """
-    # Two frames back so that we get the callers' caller, i.e. this should only
-    # be called from within a function
-    try:
-        frame = inspect.currentframe().f_back.f_back
-    except AttributeError:
-        raise RuntimeError("lhs_info cannot be used on the command line, only within a function")
+    if not frame:
+        try:
+            # Two frames back so that we get the callers' caller, i.e. this should only
+            # be called from within a function
+            frame = inspect.currentframe().f_back.f_back
+        except AttributeError:
+            raise RuntimeError("lhs_info cannot be used on the command line, only within a function")
 
     # Process the frame noting the advice here:
     # http://docs.python.org/library/inspect.html#the-interpreter-stack

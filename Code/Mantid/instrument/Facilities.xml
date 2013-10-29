@@ -6,8 +6,9 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
   
-  <catalog name="ICat3Catalog">
-    <soapendpoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT"></soapendpoint>
+  <catalog name="ICat4Catalog">
+    <soapendpoint url="​https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
+    <externaldownload url="http://cloud089.gridpp.rl.ac.uk:8080/ids/"></externaldownload>
     <filelocation>
       <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
       <windows replacement=""></windows>
@@ -346,17 +347,11 @@
     <livedata address="hyspec-sms1.sns.gov:31415" />
   </instrument> 
   
-  <!-- This is a virtual temp instrument for testing ADARA -->
-  <instrument name="HYSPECA" shortname="HYSA" beamline="14BS"> 
-    <technique>Neutron Spectroscopy</technique>
-    <technique>TOF Direct Geometry Spectroscopy</technique>
-    <livedata address="hyspec-sms1.sns.gov:31415" />
-  </instrument> 
-
   <instrument name="VISION" shortname="VIS" beamline="16B">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
+    <livedata address="vision-sms.sns.gov:31415" />
   </instrument>
 
    <instrument name="SEQUOIA" shortname="SEQ" beamline="17"> 

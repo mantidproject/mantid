@@ -228,6 +228,7 @@ the algorithm will have these additional properties:
 #include "MantidCurveFitting/CostFuncFitting.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
+#include "MantidCurveFitting/Convolution.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
@@ -342,9 +343,10 @@ namespace CurveFitting
     auto mdf = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
     if (mdf)
     {
-      m_workspacePropertyNames.resize(mdf->nFunctions());
+        size_t ndom = mdf->getMaxIndex() + 1;
+      m_workspacePropertyNames.resize( ndom );
       m_workspacePropertyNames[0] = "InputWorkspace";
-      for(size_t i = 1; i < mdf->nFunctions(); ++i)
+      for(size_t i = 1; i < ndom; ++i)
       {
         std::string workspacePropertyName = "InputWorkspace_"+boost::lexical_cast<std::string>(i);
         m_workspacePropertyNames[i] = workspacePropertyName;
@@ -360,6 +362,7 @@ namespace CurveFitting
     {
       m_workspacePropertyNames.resize(1,"InputWorkspace");
     }
+
   }
 
   /**
@@ -553,6 +556,9 @@ namespace CurveFitting
       "(default is false)." );
     declareProperty("OutputCompositeMembers",false,
         "If true and CreateOutput is true then the value of each member of a Composite Function is also output.");
+    declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
+      "If true and OutputCompositeMembers is true members of any Convolution are output convolved\n"
+      "with corresponding resolution");
   }
 
   /** Executes the algorithm
@@ -789,7 +795,12 @@ namespace CurveFitting
       setProperty("OutputParameters",result);
 
       const bool unrollComposites = getProperty("OutputCompositeMembers");
-      m_domainCreator->separateCompositeMembersInOutput(unrollComposites);
+      bool convolveMembers = existsProperty("ConvolveMembers");
+      if ( convolveMembers )
+      {
+          convolveMembers = getProperty("ConvolveMembers");
+      }
+      m_domainCreator->separateCompositeMembersInOutput(unrollComposites,convolveMembers);
       m_domainCreator->createOutputWorkspace(baseName,m_function,domain,values);
 
     }

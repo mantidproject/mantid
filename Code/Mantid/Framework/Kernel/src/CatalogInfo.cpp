@@ -6,6 +6,7 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
@@ -19,12 +20,13 @@ namespace Mantid
      */
     CatalogInfo::CatalogInfo(const Poco::XML::Element* element)
     {
-      m_catalogName   = getAttribute(element, "catalog", "name");
-      m_soapEndPoint  = getAttribute(element, "soapendpoint", "url");
-      m_catalogPrefix = getAttribute(element, "prefix", "regex");
-      m_windowsPrefix = getAttribute(element, "windows", "replacement");
-      m_macPrefix     = getAttribute(element, "mac", "replacement");
-      m_linuxPrefix   = getAttribute(element, "linux", "replacement");
+      m_catalogName         = getAttribute(element, "catalog", "name");
+      m_soapEndPoint        = getAttribute(element, "soapendpoint", "url");
+      m_externalDownloadURL = getAttribute(element, "externaldownload", "url");
+      m_catalogPrefix       = getAttribute(element, "prefix", "regex");
+      m_windowsPrefix       = getAttribute(element, "windows", "replacement");
+      m_macPrefix           = getAttribute(element, "mac", "replacement");
+      m_linuxPrefix         = getAttribute(element, "linux", "replacement");
     }
 
     /**
@@ -41,6 +43,14 @@ namespace Mantid
     const std::string CatalogInfo::soapEndPoint() const
     {
       return (m_soapEndPoint);
+    }
+
+    /**
+     * Obtain catalog name from the facility file.
+     */
+    const std::string CatalogInfo::externalDownloadURL() const
+    {
+      return (m_externalDownloadURL);
     }
 
     /**
@@ -147,7 +157,7 @@ namespace Mantid
      */
     std::string CatalogInfo::getAttribute(const Poco::XML::Element* element, const std::string &tagName, const std::string &attributeName)
     {
-      Poco::XML::NodeList* elementTag = element->getElementsByTagName(tagName);
+      Poco::AutoPtr<Poco::XML::NodeList> elementTag = element->getElementsByTagName(tagName);
 
       // If the tag exists in the XML file.
       if (elementTag->length() == 1)
@@ -157,7 +167,6 @@ namespace Mantid
         // If the item does exist, then we want to return it.
         if(!item->getAttribute(attributeName).empty())
         {
-          elementTag->release();
           return (item->getAttribute(attributeName));
         }
       }

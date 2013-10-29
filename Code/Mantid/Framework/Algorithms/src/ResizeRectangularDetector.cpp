@@ -117,7 +117,7 @@ namespace Algorithms
     pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
     pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
 
-    pmap.clearPositionSensitiveCaches();
+    pmap.clearCache();
   }
 
 

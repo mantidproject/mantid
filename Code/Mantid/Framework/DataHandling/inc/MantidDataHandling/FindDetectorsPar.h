@@ -112,6 +112,9 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
+    // predefine class, used to cashe precalculated detector's parameters
+    class DetParameters;
+
     class DLLExport FindDetectorsPar : public API::Algorithm
     {
     public:
@@ -127,12 +130,12 @@ namespace Mantid
       /// the accessors, used to return algorithm results when called as Child Algorithm, without setting the properties;
       std::vector<double>const & getAzimuthal()const{return azimuthal;}
       std::vector<double>const & getPolar()const{return polar;}
-      std::vector<double>const & getAzimWidth()const{return azimuthal_width;}
-      std::vector<double>const & getPolarWidth()const{return polar_width;}
-      std::vector<double>const & getFlightPath()const{return secondary_flightpath;}
-      std::vector<size_t>const & getDetID()const{return det_ID;}
+      std::vector<double>const & getAzimWidth()const{return azimuthalWidth;}
+      std::vector<double>const & getPolarWidth()const{return polarWidth;}
+      std::vector<double>const & getFlightPath()const{return secondaryFlightpath;}
+      std::vector<size_t>const& getDetID()const{return detID;}
       /// number of real detectors, calculated by algorithm
-      size_t getNDetectors()const{return nDetectors;}
+      size_t getNDetectors()const{return m_nDetectors;}
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
@@ -141,36 +144,29 @@ namespace Mantid
       void exec();
       /**  the variable defines if algorithm needs to calculate linear ranges for the detectors (dX,dY)
        *    instead of azimuthal_width and polar_width */
-      bool return_linear_ranges;
-      // number of real (not monitors)detectors, processed by algorithm;
-      size_t nDetectors;
+      bool m_SizesAreLinear;
+      
+      // numner of real(valid and non-monitor) detectors calculated by the alvorithm
+      size_t m_nDetectors;
+      // the vectors which represent detector's parameters as linear structure
       std::vector<double> azimuthal;
       std::vector<double> polar;
-      std::vector<double> azimuthal_width;
-      std::vector<double> polar_width;
-      std::vector<double> secondary_flightpath;
-      std::vector<double> width;
-      std::vector<double> height;
-      std::vector<size_t> det_ID;
+      std::vector<double> azimuthalWidth;
+      std::vector<double> polarWidth;
+      std::vector<double> secondaryFlightpath;
+      std::vector<size_t> detID;
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
 
-      /// calculates par values for a detectors ring;
-      void calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,
-          const Geometry::IObjComponent_const_sptr sample,
-          const Kernel::V3D &groupCentre,
-          double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
-      /// calculates par values for a detectors block or a detector;
-      void calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
-          const Geometry::IDetector_const_sptr spDet,
-          const Geometry::IObjComponent_const_sptr sample,
-          const Kernel::V3D &groupCentre,
-          double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
+      // calculate generic detectors parameters:
+      void calcDetPar(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &GroupCenter,DetParameters &Detector);
 
       /// if ASCII file is selected as the datasource, this structure describes the type of this file.
       FileTypeDescriptor current_ASCII_file;
       /// internal function which sets the output table according to the algorithms properties
-      void set_output_table();
+      void setOutputTable();
+      /// extract valid detectors parameters into vectors above 
+      void extractAndLinearize(const std::vector<DetParameters> &detPar);
       /// functions used to populate data from the phx or par file
       void   populate_values_from_file(const API::MatrixWorkspace_sptr & inputWS);
       /// load data from par or phx file;
@@ -186,6 +182,51 @@ namespace Mantid
       /// load PAR or PHX file
       void load_plain(std::ifstream &stream,std::vector<double> &Data,FileTypeDescriptor const &FILE_TYPE);
     };
+
+/**Small helper class-holder used to precalculate the detectors parameters in spherical coordinate system */
+class DetParameters
+{
+public:
+  /// azimuthal detector's angle in spherical coordinate system alighned with the beam
+  double azimutAngle;
+  /// polar detector's angle in spherical coordinate system alighned with the beam
+  double polarAngle;
+  /// scattering source -- detector' distance
+  double secondaryFlightPath;
+  /// linear or angular size of the bounding box encapsulating detector and alighned tangentially to the constant scattering angle circle 
+  double azimWidth,polarWidth;
+  /// the detector's ID
+  int64_t detID;
+  // default detector ID -- -1 means undefined
+  DetParameters():detID(-1){}
+
+};
+
+/** helper class-collection to keep together the parameters, which characterize average composite detector 
+    and help to calculate these parameters*/
+class AvrgDetector
+{
+  double m_AzimutSum;
+  double m_PolarSum;
+  double m_FlightPathSum;
+  // if azimuthal and polar sizes expressed in angular or linear units
+  bool m_useSphericalSizes;
+  double m_AzimMin,m_PolarMin,m_AzimMax,m_PolarMax;
+  /// numbr of primary detectors, contributing into this detector
+  size_t m_nComponents;
+public:
+  AvrgDetector():m_AzimutSum(0),m_PolarSum(0),m_FlightPathSum(0),
+                 m_useSphericalSizes(false),
+                 m_AzimMin(FLT_MAX),m_PolarMin(FLT_MAX),m_AzimMax(-FLT_MAX),m_PolarMax(-FLT_MAX),
+                 m_nComponents(0)
+  {}
+  void addDetInfo(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &Observer);
+  void returnAvrgDetPar(DetParameters &det);
+
+  void setUseSpherical(bool shouldWe=true)
+  {m_useSphericalSizes = shouldWe;}
+
+};
 
 
   } //end namespace DataHandling

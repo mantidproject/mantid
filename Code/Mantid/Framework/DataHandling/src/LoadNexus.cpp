@@ -145,7 +145,7 @@ namespace Mantid
           g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
           throw Exception::FileError("Unable to read File:" , m_filename);
         }
-        runLoadSNSNexus();
+        runLoadTOFRawNexus();
       }
       return;
     }
@@ -337,9 +337,9 @@ namespace Mantid
       }
     }
 
-    void LoadNexus::runLoadSNSNexus()
+    void LoadNexus::runLoadTOFRawNexus()
     {
-      IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadSNSNexus",0.,1.);
+      IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadTOFRawNexus",0.,1.);
       // Pass through the same input filename
       loadNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property
@@ -364,9 +364,9 @@ namespace Mantid
       }
       catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully run LoadSNSNexus Child Algorithm");
+        g_log.error("Unable to successfully run LoadTOFRawNexus Child Algorithm");
       }
-      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadSNSNexus Child Algorithm");
+      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadTOFRawNexus Child Algorithm");
       // Get pointer to the workspace created
       Workspace_sptr localWorkspace = loadNexusPro->getProperty(outputWorkspace); 
       setProperty(outputWorkspace,localWorkspace);

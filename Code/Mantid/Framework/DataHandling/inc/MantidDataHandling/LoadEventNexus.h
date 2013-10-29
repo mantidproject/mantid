@@ -197,7 +197,8 @@ namespace Mantid
           const std::string & top_entry_name, Algorithm * alg);
 
       /// Load instrument for Nexus file
-      static bool runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg);
+      static bool runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                      const std::string & top_entry_name, Algorithm * alg);
 
       /// Load instrument from IDF file specified by Nexus file
       static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,

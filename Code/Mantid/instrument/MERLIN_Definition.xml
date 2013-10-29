@@ -2874,26 +2874,5 @@
     <id start="9370001" end="9371024" />
     <id start="9380001" end="9381024" />    
   </idlist>   
-
-  <!-- DETECTOR PARAMETERS -->
-  <component-link name="monitors">
-   <parameter name="DelayTime">
-      <value units="microseconds" val="0"/>
-   </parameter>
-  </component-link>
-
-  <!-- Set the same across the reset of the instrument -->
-  <component-link name = "MERLIN">
-    <parameter name="TubePressure">
-      <value units="atm" val="10.0"/>
-    </parameter>
-    <parameter name="TubeThickness">
-      <value units="metre" val="0.0008"/>
-    </parameter>
-    <parameter name="DelayTime">
-      <value units="microseconds" val="-5.3"/>
-    </parameter>
-  </component-link>
-
   
 </instrument>

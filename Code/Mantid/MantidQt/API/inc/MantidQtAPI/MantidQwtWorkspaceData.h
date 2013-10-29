@@ -14,6 +14,8 @@ public:
   virtual size_t esize() const = 0;
   virtual double e(size_t i)const = 0;
   virtual double ex(size_t i)const = 0;
+  virtual double getYMin() const = 0;
+  virtual double getYMax() const = 0;
 protected:
   // Assignment operator (virtualized).
   MantidQwtWorkspaceData& operator=(const MantidQwtWorkspaceData&);

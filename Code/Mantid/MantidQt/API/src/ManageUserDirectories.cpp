@@ -1,6 +1,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidKernel/ConfigService.h"
 #include <QtGui>
+#include <QDir>
 
 using namespace MantidQt::API;
 
@@ -219,15 +220,17 @@ void ManageUserDirectories::selectSaveDir()
   if ( lastDirectory.trimmed() == "" )
     lastDirectory = settings.value("ManageUserSettings/last_directory", "").toString();
 
-  QString newDir = QFileDialog::getExistingDirectory(this,
+  const QString newDir = QFileDialog::getExistingDirectory(this,
     tr("Select New Default Save Directory"),
     lastDirectory,
     QFileDialog::ShowDirsOnly );
 
   if ( newDir != "" )
   {
-    settings.setValue("ManageUserSettings/last_directory", newDir);
-    m_uiForm.leDefaultSave->setText(newDir);
+    QString path = newDir + QDir::separator();
+    path.replace('\\', '/');
+    settings.setValue("ManageUserSettings/last_directory", path );
+    m_uiForm.leDefaultSave->setText(path);
   }
 
 }

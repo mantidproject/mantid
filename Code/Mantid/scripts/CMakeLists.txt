@@ -1,7 +1,7 @@
 
 set ( TEST_PY_FILES 
-      test/ConfigTest.py
       test/ReducerTest.py
+      test/SettingsTest.py
       test/DgreduceTest.py
       test/DirectEnergyConversionTest.py
       test/ReflectometryQuickAuxiliaryTest.py 

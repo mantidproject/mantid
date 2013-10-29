@@ -102,6 +102,36 @@ size_t MantidQwtMatrixWorkspaceData::esize() const
   return m_E.size();
 }
 
+/**
+ * Depending upon whether the log options have been set.
+ * @return the lowest y value.
+ */
+double MantidQwtMatrixWorkspaceData::getYMin() const
+{
+  auto it = std::min_element(m_Y.begin(), m_Y.end());
+  double temp = *it;
+  if (m_logScale && temp <= 0.)
+  {
+    temp = m_minPositive;
+  }
+  return temp;
+}
+
+/**
+ * Depending upon whether the log options have been set.
+ * @return the highest y value.
+ */
+double MantidQwtMatrixWorkspaceData::getYMax() const
+{
+  auto it = std::max_element(m_Y.begin(), m_Y.end());
+  double temp = *it;
+  if (m_logScale && temp <= 0.)
+  {
+    temp = m_minPositive;
+  }
+  return temp;
+}
+
 void MantidQwtMatrixWorkspaceData::setLogScale(bool on)
 {
   m_logScale = on;

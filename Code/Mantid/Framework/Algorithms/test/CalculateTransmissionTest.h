@@ -7,7 +7,6 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidCurveFitting/Linear.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
