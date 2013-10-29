@@ -158,7 +158,8 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 
 	fitOp = [o_el, o_bgd, o_w1, o_res]
 
-	workdir = config['defaultsave.directory']
+	workdir = getDefaultWorkingDirectory()
+
 	facility = config['default.facility']
 	array_len = 4096						   # length of array in Fortran
 	CheckXrange(erange,'Energy')
@@ -654,7 +655,8 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 
 	fitOp = [o_el, o_bgd, o_w1, o_res]
 
-	workdir = config['defaultsave.directory']
+	workdir = getDefaultWorkingDirectory()
+
 	array_len = 4096                           # length of array in Fortran
 	CheckXrange(erange,'Energy')
 	nbin,nrbin = nbins[0],nbins[1]
@@ -772,7 +774,9 @@ def QuestPlot(inputWS,Plot):
 # ResNorm programs
 def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	StartTime('ResNorm')
-	workdir = config['defaultsave.directory']
+	
+	workdir = getDefaultWorkingDirectory()
+
 	array_len = 4096                                    # length of Fortran array
 	CheckXrange(erange,'Energy')
 	CheckAnalysers(vname,rname,Verbose)

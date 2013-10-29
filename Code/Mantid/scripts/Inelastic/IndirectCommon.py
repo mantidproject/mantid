@@ -71,6 +71,15 @@ def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
     return inst.getNumberParameter("efixed-val")[0]
 
+def getDefaultWorkingDirectory():
+    workdir = config['defaultsave.directory']
+    
+    if !os.path.isdir(workdir):
+        error = "Default save directory is not a valid path!"
+        sys.error(error)
+
+    return workdir
+
 def getRunTitle(workspace):
     ws = mtd[workspace]
     title = ws.getRun()['run_title'].value.strip()
