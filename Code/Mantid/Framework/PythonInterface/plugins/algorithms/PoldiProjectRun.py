@@ -236,7 +236,7 @@ class PoldiProjectRun(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "Poldi"
+        return "SINQ\\Poldi"
 
     def name(self):
         """ Mantid required
