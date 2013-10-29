@@ -57,8 +57,8 @@ namespace Algorithms
   }
   
   void FilterEvents::initDocs()
-  {
-
+  {    
+    setWikiSummary("Filter events from an [[EventWorkspace]] to one or multiple [[EventWorkspace]]s according to a series of splitters.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -66,8 +66,6 @@ namespace Algorithms
    */
   void FilterEvents::init()
   {
-    this->setWikiSummary("Filter events from an [[EventWorkspace]] to one or multiple [[EventWorkspace]]s according to a series of splitters.");
-
     declareProperty(
           new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input),
           "An input event workspace" );
@@ -90,6 +88,10 @@ namespace Algorithms
 
     this->declareProperty("GroupWorkspaces", false,
         "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
+
+    declareProperty("OutputWorkspaceIndexedFrom1", false, "If selected, the minimum output workspace is indexed from 1 and continuous. ");
+
+    declareProperty("NumberOutputWorkspace", 0, "Number of output output workspace splitted. ", Direction::Output);
 
     return;
   }
@@ -246,26 +248,47 @@ namespace Algorithms
       }
     }
 
+    // Determine the minimum group index number
+    int minwsgroup = INT_MAX;
+    for (set<int>::iterator groupit = m_workGroupIndexes.begin(); groupit != m_workGroupIndexes.end(); ++groupit)
+    {
+      int wsgroup = *groupit;
+      if (wsgroup < minwsgroup && wsgroup >= 0)
+        minwsgroup = wsgroup;
+    }
+    g_log.debug() << "[DB] Min WS Group = " << minwsgroup << "\n";
+
+    bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
+    int delta_wsindex = 0;
+    if (from1)
+    {
+      delta_wsindex = 1-minwsgroup;
+    }
+
     // Set up new workspaces
     std::set<int>::iterator groupit;
+    int numoutputws = 0;
     for (groupit = m_workGroupIndexes.begin(); groupit != m_workGroupIndexes.end(); ++groupit)
     {
-      // 1. Get workspace name
+      // Generate new workspace name
+      bool add2output = true;
       int wsgroup = *groupit;
       std::stringstream wsname;
       if (wsgroup >= 0)
-        wsname << outputwsnamebase << "_" << wsgroup;
+        wsname << outputwsnamebase << "_" << (wsgroup+delta_wsindex);
       else
+      {
         wsname << outputwsnamebase << "_unfiltered";
-      std::stringstream parname;
-      parname << "OutputWorkspace_" << wsgroup;
+        if (from1)
+          add2output = false;
+      }
 
-      // 2. Generate one of the output workspaces & Copy geometry over. But we don't copy the data.
+      // Generate one of the output workspaces & Copy geometry over. But we don't copy the data.
       DataObjects::EventWorkspace_sptr optws = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
           API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
       API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws, false);
 
-      //    Add information
+      // Add information, including title and comment, to output workspace
       if (mWithInfo)
       {
         std::string info;
@@ -290,21 +313,32 @@ namespace Algorithms
         optws->setTitle(info);
       }
 
-      // 3. Set to map
-      m_outputWS.insert(std::make_pair(wsgroup, optws));
+      // Add to output properties.  There shouldn't be any workspace (non-unfiltered) skipped from group index
+      if (add2output)
+      {
+        // Generate output property name
+        std::stringstream propertyname;
+        propertyname << "OutputWorkspace_" << wsgroup;
 
-      // 4. Set to output workspace
-      this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
-                              parname.str(), wsname.str(), Direction::Output), "Output");
-      this->setProperty(parname.str(), optws);
-      m_wsNames.push_back(wsname.str());
-      AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+        // Inserted this pair to map
+        m_outputWS.insert(std::make_pair(wsgroup, optws));
+        m_wsNames.push_back(wsname.str());
 
-      g_log.debug() << "DB9141  Output Workspace:  Group = " << wsgroup << "  Property Name = " << parname.str() <<
-          " Workspace name = " << wsname.str() <<
-          " with Number of events = " << optws->getNumberEvents() << std::endl;
+        // Set (property) to output workspace and set to ADS
+        declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
+                          propertyname.str(), wsname.str(), Direction::Output), "Output");
+        setProperty(propertyname.str(), optws);
+        AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+
+        ++ numoutputws;
+
+        g_log.debug() << "DB9141  Output Workspace:  Group = " << wsgroup << "  Property Name = " << propertyname.str() <<
+                         " Workspace name = " << wsname.str() <<
+                         " with Number of events = " << optws->getNumberEvents() << std::endl;
+      }
     } // ENDFOR
 
+    setProperty("NumberOutputWorkspace", numoutputws);
 
     return;
   }
