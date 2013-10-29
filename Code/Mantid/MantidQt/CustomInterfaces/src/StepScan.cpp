@@ -360,14 +360,34 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
   return stepScan;
 }
 
+// Small class to handle disabling mouse clicks and showing the busy cursor in an RAII manner.
+// Used in the runStepScanAlg below to ensure these things are unset when the method is exited.
+class DisableGUI_RAII
+{
+public:
+  DisableGUI_RAII(StepScan * gui) : the_gui(gui)
+  {
+    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
+  }
+
+  ~DisableGUI_RAII()
+  {
+    QApplication::restoreOverrideCursor();
+    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents, false );
+  }
+
+private:
+  StepScan * const the_gui;
+};
+
 void StepScan::runStepScanAlg()
 {
   IAlgorithm_sptr stepScan = setupStepScanAlg();
   if ( !stepScan ) return;
 
-  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-  // Block mouse clicks while the algorithms runs. Have to be sure to unset this below.
-  setAttribute( Qt::WA_TransparentForMouseEvents );
+  // Block mouse clicks while the algorithm runs. Also set the busy cursor.
+  DisableGUI_RAII _blockclicks(this);
 
   bool algSuccessful;
   if ( m_uiForm.mWRunFiles->liveButtonIsChecked() )  // Live data
@@ -383,8 +403,6 @@ void StepScan::runStepScanAlg()
 
   if ( !algSuccessful )
   {
-    QApplication::restoreOverrideCursor();
-    setAttribute( Qt::WA_TransparentForMouseEvents, false );
     return;
   }
 
@@ -396,8 +414,6 @@ void StepScan::runStepScanAlg()
            SLOT(updateForNormalizationChange()) );
   // Create the plot for the first time
   generateCurve( m_uiForm.plotVariable->currentText() );
-  QApplication::restoreOverrideCursor();
-  setAttribute( Qt::WA_TransparentForMouseEvents, false );
 }
 
 bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
