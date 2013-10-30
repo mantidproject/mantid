@@ -447,7 +447,7 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
   auto result = startLiveData->executeAsync();
   while ( !result.available() )
   {
-    Poco::Thread::sleep(100);
+    QApplication::processEvents();
   }
   if ( ! startLiveData->isExecuted() ) return false;
 
