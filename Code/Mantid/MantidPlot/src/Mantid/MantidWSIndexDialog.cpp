@@ -127,7 +127,7 @@ void MantidWSIndexDialog::plotAll()
 
 void MantidWSIndexDialog::editedWsField()
 {
-  if(m_spectra) {
+  if(usingSpectraIDs()) {
     m_spectraField->lineEdit()->clear();
     m_spectraField->setError(""); 
   }
@@ -178,7 +178,9 @@ void MantidWSIndexDialog::initSpectraBox()
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
   m_spectraBox->add(m_orMessage);
-  if(m_spectra) m_outer->addItem(m_spectraBox);
+  
+  if( usingSpectraIDs() )
+    m_outer->addItem(m_spectraBox);
 
   connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
 }
@@ -187,7 +189,7 @@ void MantidWSIndexDialog::initButtons()
 {
   m_buttonBox = new QHBoxLayout;
   
-  m_okButton = new QPushButton("Ok");
+  m_okButton = new QPushButton("OK");
   m_cancelButton = new QPushButton("Cancel");
   m_plotAllButton = new QPushButton("Plot All");
 
@@ -256,53 +258,35 @@ void MantidWSIndexDialog::generateWsIndexIntervals()
 
 void MantidWSIndexDialog::generateSpectraIdIntervals()
 {
-  // Get the list of available intervals for each of the workspaces, and then
-  // present the user with intervals which are the INTERSECTION of each of
-  // those lists of intervals.
-  QList<QString>::const_iterator it = m_wsNames.constBegin();
-  
-  // Cycle through the workspaces ...
-  for ( ; it != m_wsNames.constEnd(); ++it )
+  bool firstWs = true;
+  foreach( const QString wsName, m_wsNames )
   {
-    Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
-    if ( NULL == ws ) continue;
+    Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    if( !ws ) continue; // Belt and braces.
+
     const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
-    
-    Mantid::spec2index_map::const_iterator last = spec2index.end();
-    --last;
-    Mantid::spec2index_map::const_iterator first = spec2index.begin();
-    
-    const int startSpectrum = static_cast<int> (first->first);
-    const int endSpectrum = static_cast<int> (last->first);
-    const int size = static_cast<int> (spec2index.size());
-    if(size == (1 + endSpectrum - startSpectrum))
+
+    IntervalList spectraIntervalList;
+    for( auto pair = spec2index.begin(); pair != spec2index.end(); ++pair )
     {
-      // Here we make the assumption (?) that the spectra IDs are sorted, and so
-      // are a list of ints from startSpectrum to endSpectrum without any gaps.
-      Interval interval(startSpectrum, endSpectrum);
-      if(it == m_wsNames.constBegin())
-        m_spectraIdIntervals.addInterval(interval);
-      else
-        m_spectraIdIntervals.setIntervalList(IntervalList::intersect(m_spectraIdIntervals,interval));
+      spectraIntervalList.addInterval(static_cast<int>(pair->first));
+    }
+
+    if( firstWs )
+    {
+      m_spectraIdIntervals = spectraIntervalList;
+      firstWs = false;
     }
     else
     {
-      // The spectra IDs do not appear to be an uninterrupted list of numbers,
-      // and so we must go through each one and construct the intervals that way.
-      // TODO - is this at all feasible for large workspaces, and/or many workspaces?
-      ++last;
-      for ( ; first != last; ++first) 
-      {
-        const int spectraId = static_cast<int> (first->first);
-        
-        Interval interval(spectraId);
-        if(it == m_wsNames.constBegin())
-          m_spectraIdIntervals.addInterval(interval);
-        else
-          m_spectraIdIntervals.setIntervalList(IntervalList::intersect(m_spectraIdIntervals,interval));
-      }
+      m_spectraIdIntervals.setIntervalList(IntervalList::intersect(m_spectraIdIntervals, spectraIntervalList));
     }
   }
+}
+
+bool MantidWSIndexDialog::usingSpectraIDs() const
+{
+  return m_spectra && m_spectraIdIntervals.getList().size() > 0;
 }
 
 //----------------------------------
@@ -732,122 +716,14 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
 {
   IntervalList output;
 
-  const QList<Interval> aList = a.getList();
-  const QList<Interval> bList = b.getList();
+  const std::set<int> aInts = a.getIntSet();
+  const std::set<int> bInts = b.getIntSet();
 
-  QList<Interval>::const_iterator aIt = aList.constBegin();
-  QList<Interval>::const_iterator bIt = bList.constBegin();
-
-  QList<Interval>::const_iterator aItEnd = aList.constEnd();
-  QList<Interval>::const_iterator bItEnd = bList.constEnd();
-
-  bool a_open = false;
-  bool b_open = false;
-
-  int start = 0;
-  int end = 0;
-
-  // This looks atrocious, but is probably one of the quickest available methods
-  // to find the intersections of two lists of Intervals.  An easier (but much 
-  // less effecient way) would be to define Interval::intersect(Interval a, Interval b)
-  // for the Interval class, and then use that method to intersect two lists.  
-
-  // Plus, this is probably overkill anyway: who is going to spend time typing 
-  // in an interval list big enough to slow a computer down?
-  while(aIt != aItEnd && bIt != bItEnd)
+  for( auto aInt = aInts.begin(); aInt != aInts.end(); ++aInt )
   {
-    if(!a_open && !b_open)
-    {
-      if((*aIt).start() < (*bIt).start())
-      {
-        a_open = true;
-      } 
-      else if((*aIt).start() > (*bIt).start())
-      {
-        b_open = true;
-      }
-      else
-      {
-        a_open = true;
-        b_open = true;
-        start = (*aIt).start();
-      }
-    }
-    else if(a_open && !b_open)
-    {
-      if((*aIt).end() < (*bIt).start())
-      {
-        a_open = false;
-        ++aIt;
-      } 
-      else if((*aIt).end() > (*bIt).start())
-      {
-        b_open = true;
-        start = (*bIt).start();
-      }
-      else
-      {
-        a_open = false;
-        b_open = true;
-        start = (*aIt).end();
-        end = (*bIt).start();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++aIt;
-      }
-    }
-    else if(!a_open && b_open)
-    {
-      if((*bIt).end() < (*aIt).start())
-      {
-        b_open = false;
-        ++bIt;
-      } 
-      else if((*aIt).end() > (*bIt).start())
-      {
-        a_open = true;
-        start = (*aIt).start();
-      }
-      else
-      {
-        b_open = false;
-        a_open = true;
-        start = (*bIt).end();
-        end = (*aIt).start();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++bIt;
-      }
-    }
-    else
-    {
-      if((*aIt).end() < (*bIt).end())
-      {
-        a_open = false;
-        end = (*aIt).end();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++aIt;
-      } 
-      else if((*aIt).end() > (*bIt).end())
-      {
-        b_open = false;
-        end = (*bIt).end();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++bIt;
-      }
-      else
-      {
-        a_open = false;
-        b_open = false;
-        end = (*aIt).end();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++aIt;
-        ++bIt;
-      }
-    }
+    const bool inIntervalListB = bInts.find(*aInt) != bInts.end();
+    if( inIntervalListB )
+      output.addInterval(*aInt);
   }
 
   return output;
