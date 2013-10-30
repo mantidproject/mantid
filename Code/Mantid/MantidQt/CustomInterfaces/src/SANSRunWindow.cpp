@@ -233,9 +233,6 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.q_rebin->setToolTip("Any string allowed by the Rebin algorithm may be used");
   
  
-  //Listen for Workspace delete signals
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
-
   makeValidator(m_uiForm.wavRanVal_lb, m_uiForm.wavRanges, m_uiForm.tab_2,
              "A comma separated list of numbers is required here");
 
