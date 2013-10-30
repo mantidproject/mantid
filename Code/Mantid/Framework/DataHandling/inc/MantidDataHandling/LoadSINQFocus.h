@@ -4,8 +4,8 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 
@@ -42,7 +42,8 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-  class DLLExport LoadSINQFocus: public API::Algorithm, public API::DeprecatedAlgorithm
+  class DLLExport LoadSINQFocus: public API::IFileLoader<Kernel::NexusDescriptor>,
+                                 public API::DeprecatedAlgorithm
 {
 public:
 	LoadSINQFocus();
@@ -51,6 +52,9 @@ public:
 	virtual const std::string name() const;
 	virtual int version() const;
 	virtual const std::string category() const;
+
+    /// Returns a confidence value that this algorithm can load a file
+    virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
 	virtual void initDocs();
