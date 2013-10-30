@@ -314,7 +314,8 @@ void ViewBase::checkView()
  */
 void ViewBase::checkViewOnSwitch()
 {
-  if (this->isMDHistoWorkspace(this->origSrc))
+  if (this->hasWorkspaceType("MDHistoWorkspace") ||
+      this->hasFilter("MantidRebinning"))
   {
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
@@ -671,6 +672,38 @@ pqPipelineSource *ViewBase::hasWorkspace(const QString &name)
     }
   }
   return NULL;
+}
+
+/**
+ * This function looks through all pipeline sources for one containing the given
+ * workspace typename.
+ * @param wsTypeName : The workspace typename (Id) to look for.
+ * @return : True if a source is found with the workspace type.
+ */
+bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
+{
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  QList<pqPipelineSource *>::Iterator source;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+  bool hasWsType = false;
+  for (source = sources.begin(); source != sources.end(); ++source)
+  {
+    QString wsType(vtkSMPropertyHelper((*source)->getProxy(),
+                                       "WorkspaceTypeName", true).GetAsString());
+    // This must be a Mantid rebinner filter if the property is empty.
+    if (wsType.isEmpty())
+    {
+      wsType = (*source)->getSMName();
+    }
+    hasWsType = wsType.contains(wsTypeName);
+    if (hasWsType)
+    {
+      break;
+    }
+  }
+  return hasWsType;
 }
 
 } // namespace SimpleGui
