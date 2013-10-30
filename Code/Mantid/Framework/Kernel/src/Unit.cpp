@@ -348,6 +348,13 @@ double Wavelength::singleToTOF(const double x) const
     tof += sfpTo;
   return tof;
 }
+double Wavelength::conversionTOFMin()const
+{
+  double range(0);
+  if( emode == 1 || emode == 2 )
+    range=sfpTo;
+  return range;
+}
 
 double Wavelength::singleFromTOF(const double tof) const
 {
@@ -403,6 +410,11 @@ double Energy::singleToTOF(const double x) const
   double temp = x;
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
+}
+
+double Energy::conversionTOFMin()const
+{
+  return 0.;
 }
 
 double Energy::singleFromTOF(const double tof) const
@@ -461,6 +473,11 @@ double Energy_inWavenumber::singleToTOF(const double x) const
   return factorTo / sqrt(temp);
 }
 
+double Energy_inWavenumber::conversionTOFMin()const
+{
+  return 0;
+}
+
 double Energy_inWavenumber::singleFromTOF(const double tof) const
 {
   double temp = tof;
@@ -507,6 +524,11 @@ void dSpacing::init()
 double dSpacing::singleToTOF(const double x) const
 {
   return x*factorTo;
+}
+
+double dSpacing::conversionTOFMin()const
+{
+  return 0;
 }
 
 double dSpacing::singleFromTOF(const double tof) const
@@ -558,6 +580,10 @@ double MomentumTransfer::singleToTOF(const double x) const
   double temp = x;
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / temp;
+}
+double MomentumTransfer::conversionTOFMin()const
+{
+  return 0;
 }
 
 double MomentumTransfer::singleFromTOF(const double tof) const
@@ -611,6 +637,12 @@ double QSquared::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
 }
+
+double QSquared::conversionTOFMin()const
+{
+  return 0;
+}
+
 
 double QSquared::singleFromTOF(const double tof) const
 {
@@ -736,6 +768,14 @@ double DeltaE::singleFromTOF(const double tof) const
     return DBL_MAX;
 }
 
+double DeltaE::conversionTOFMin()const
+{
+  double range(DBL_MAX); // impossible for elastic
+  if (emode == 1 || emode == 2)
+    range = t_otherFrom;
+  return range;
+}
+
 Unit * DeltaE::clone() const
 {
   return new DeltaE(*this);
@@ -770,6 +810,12 @@ DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE()
 {
   addConversion("DeltaE",1/PhysicalConstants::meVtoWavenumber,1.);
 }
+
+double DeltaE_inWavenumber::conversionTOFMin()const
+{
+  return DeltaE::conversionTOFMin();
+}
+
 
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
@@ -866,6 +912,15 @@ double Momentum::singleToTOF(const double ki) const
     tof += sfpTo;
   return tof;
 }
+double Momentum::conversionTOFMin()const
+{
+  double range(DBL_MAX);
+  range=0;
+  if (emode == 1 || emode == 2)
+    range = sfpTo;
+  return range;
+}
+
 
 double Momentum::singleFromTOF(const double tof) const
 {
@@ -915,6 +970,12 @@ double SpinEchoLength::singleToTOF(const double x) const
   return tof;
 }
 
+double SpinEchoLength::conversionTOFMin()const
+{
+  return 0;
+}
+
+
 double SpinEchoLength::singleFromTOF(const double tof) const
 {
   double wavelength = Wavelength::singleFromTOF(tof);
@@ -956,6 +1017,10 @@ double SpinEchoTime::singleToTOF(const double x) const
   double wavelength = pow(x/efixed,1.0/3.0);
   double tof = Wavelength::singleToTOF(wavelength);
   return tof;
+}
+double SpinEchoTime::conversionTOFMin()const
+{
+  return 0;
 }
 
 double SpinEchoTime::singleFromTOF(const double tof) const

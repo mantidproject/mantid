@@ -74,8 +74,11 @@ class DLLExport UnitsConversionHelper
 public:
     UnitsConversionHelper():m_pTwoThetas(NULL),m_pL2s(NULL){};
     void initialize(const MDWSDescription &targetWSDescr,const std::string &units_to);
+    void initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode);
     void updateConversion(size_t i);
     double convertUnits(double val);
+    Kernel::Unit *const getTargetUnitPtr()const{return m_TargetUnit.get();}
+    Kernel::Unit *const getSourceUnitPtr()const{return m_TargetUnit.get();}
     // copy constructor
     UnitsConversionHelper(const UnitsConversionHelper &another);
 protected: // for testing
