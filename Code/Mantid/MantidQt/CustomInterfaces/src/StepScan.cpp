@@ -465,6 +465,12 @@ void StepScan::updateForNormalizationChange()
 
 void StepScan::generateCurve( const QString& var )
 {
+  if ( ! AnalysisDataService::Instance().doesExist(m_tableWSName) )
+  {
+    QMessageBox::critical(this,"Unable to generate plot","Table workspace "+ QString::fromStdString(m_tableWSName) +"\nhas been deleted!");
+    return;
+  }
+
   // Create a matrix workspace out of the variable that's asked for
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
   alg->setLogging(false); // Don't log this algorithm
