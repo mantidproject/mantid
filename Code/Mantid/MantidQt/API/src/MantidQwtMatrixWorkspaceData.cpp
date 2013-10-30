@@ -109,7 +109,11 @@ size_t MantidQwtMatrixWorkspaceData::esize() const
 double MantidQwtMatrixWorkspaceData::getYMin() const
 {
   auto it = std::min_element(m_Y.begin(), m_Y.end());
-  double temp = *it;
+  double temp = 0;
+  if(it != m_Y.end())
+  {
+    temp = *it;
+  }
   if (m_logScale && temp <= 0.)
   {
     temp = m_minPositive;
@@ -124,7 +128,11 @@ double MantidQwtMatrixWorkspaceData::getYMin() const
 double MantidQwtMatrixWorkspaceData::getYMax() const
 {
   auto it = std::max_element(m_Y.begin(), m_Y.end());
-  double temp = *it;
+  double temp = 0;
+  if(it != m_Y.end())
+  {
+    temp = *it;
+  }
   if (m_logScale && temp <= 0.)
   {
     temp = m_minPositive;
