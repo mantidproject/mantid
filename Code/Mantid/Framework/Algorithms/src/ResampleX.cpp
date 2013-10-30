@@ -310,6 +310,33 @@ namespace Algorithms
     if (!error.empty())
       throw std::runtime_error(error);
 
+    bool common_limits = true;
+    {
+      double xmin_common = xmins[0];
+      double xmax_common = xmaxs[0];
+      for (size_t i = 1; i < xmins.size(); ++i)
+      {
+        if (xmins[i] != xmin_common)
+        {
+          common_limits = false;
+          break;
+        }
+        if (xmaxs[i] != xmax_common)
+        {
+          common_limits = false;
+          break;
+        }
+      }
+    }
+    if (common_limits)
+    {
+      g_log.debug() << "Common limits between all spectra\n";
+    }
+    else
+    {
+      g_log.debug() << "Does not have common limits between all spectra\n";
+    }
+
     // start doing actual work
     EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
     if (inputEventWS != NULL)
@@ -334,22 +361,33 @@ namespace Algorithms
           outputEventWS->copyDataFrom( (*inputEventWS) );
         }
 
-        // initialize progress reporting.
-        Progress prog(this,0.0,1.0, numSpectra);
-
-        // do the rebinning
-        PARALLEL_FOR2(inputEventWS, outputWS)
-        for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex)
+        if (common_limits)
         {
-          PARALLEL_START_INTERUPT_REGION
-          MantidVec xValues;
-          double delta = this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
-          g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
-          outputEventWS->getSpectrum(wkspIndex)->setX(xValues);
-          prog.report(name()); //Report progress
-          PARALLEL_END_INTERUPT_REGION
+          // get the delta from the first since they are all the same
+          MantidVecPtr xValues;
+          double delta = this->determineBinning(xValues.access(), xmins[0], xmaxs[0]);
+          g_log.debug() << "delta = " << delta << "\n";
+          outputEventWS->setAllX(xValues);
         }
-        PARALLEL_CHECK_INTERUPT_REGION
+        else
+        {
+          // initialize progress reporting.
+          Progress prog(this,0.0,1.0, numSpectra);
+
+          // do the rebinning
+          PARALLEL_FOR2(inputEventWS, outputWS)
+              for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex)
+          {
+            PARALLEL_START_INTERUPT_REGION
+            MantidVec xValues;
+            double delta = this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
+            g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
+            outputEventWS->getSpectrum(wkspIndex)->setX(xValues);
+            prog.report(name()); //Report progress
+            PARALLEL_END_INTERUPT_REGION
+          }
+          PARALLEL_CHECK_INTERUPT_REGION
+        }
 
         this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputEventWS));
       } // end if (m_preserveEvents)
@@ -363,7 +401,6 @@ namespace Algorithms
         // The Workspace2D is created with an EMPTY CONSTRUCTOR
         outputWS = WorkspaceFactory::Instance().create("Workspace2D",numSpectra,m_numBins,m_numBins-1);
         WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
-
         //Initialize progress reporting.
         Progress prog(this,0.0,1.0, numSpectra);
 

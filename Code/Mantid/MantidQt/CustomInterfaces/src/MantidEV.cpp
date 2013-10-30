@@ -23,36 +23,33 @@ using namespace Mantid::API;
 
 
 /**
- *  Class to call loadAndConvertToMD in a separate thread.
+ *  Class to call loadEvents in a separate thread.
  */
-RunLoadAndConvertToMD::RunLoadAndConvertToMD(       MantidEVWorker * worker,
-                                              const std::string    & file_name,
-                                              const std::string    & ev_ws_name,
-                                              const std::string    & md_ws_name,
-                                                    double           maxQ,
-                                                    bool             do_lorentz_corr,
-                                                    bool             load_det_cal,
-                                              const std::string    & det_cal_file,
-                                              const std::string    & det_cal_file2  )
+RunLoadAndConvertToMD::RunLoadAndConvertToMD(MantidEVWorker * worker,
+                                             const std::string & file_name,
+                                             const std::string & ev_ws_name,
+                                             const std::string & md_ws_name,
+                                             const double        minQ,
+                                             const double        maxQ,
+                                             const bool          do_lorentz_corr,
+                                             const bool          load_data,
+                                             const bool          load_det_cal,
+                                             const std::string & det_cal_file,
+                                             const std::string & det_cal_file2 ) :
+  worker(worker),
+  file_name(file_name), ev_ws_name(ev_ws_name), md_ws_name(md_ws_name),
+  minQ(minQ), maxQ(maxQ), do_lorentz_corr(do_lorentz_corr),
+  load_data(load_data), load_det_cal(load_det_cal),
+  det_cal_file(det_cal_file), det_cal_file2(det_cal_file2)
 {
-  this->worker          = worker;
-  this->file_name       = file_name;
-  this->ev_ws_name      = ev_ws_name;
-  this->md_ws_name      = md_ws_name;
-  this->maxQ            = maxQ;
-  this->do_lorentz_corr = do_lorentz_corr;
-  this->load_det_cal    = load_det_cal;
-  this->det_cal_file    = det_cal_file;
-  this->det_cal_file2   = det_cal_file2;
 }
 
 void RunLoadAndConvertToMD::run()
 {
-  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name, 
-                              maxQ, do_lorentz_corr,
+  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name,
+                              minQ, maxQ, do_lorentz_corr, load_data,
                               load_det_cal, det_cal_file, det_cal_file2 );
 }
-
 
 /**
  * Class to call findPeaks in a separate thread.
@@ -92,7 +89,12 @@ RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
                                               double           peak_radius,
                                               double           inner_radius,
                                               double           outer_radius,
-                                              bool             integrate_edge )
+                                              bool             integrate_edge,
+                                              bool          use_cylinder_integration,
+                                              double        cylinder_length,
+                                              double        cylinder_percent_bkg,
+                                        const std::string & cylinder_profile_fit)
+
 { 
   this->worker         = worker;
   this->peaks_ws_name  = peaks_ws_name;
@@ -101,6 +103,10 @@ RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
   this->inner_radius   = inner_radius;
   this->outer_radius   = outer_radius;
   this->integrate_edge = integrate_edge;
+  this->use_cylinder_integration = use_cylinder_integration;
+  this->cylinder_length = cylinder_length;
+  this->cylinder_percent_bkg = cylinder_percent_bkg;
+  this->cylinder_profile_fit = cylinder_profile_fit;
 }
 
 
@@ -111,7 +117,9 @@ void RunSphereIntegrate::run()
 { 
   worker->sphereIntegrate( peaks_ws_name, event_ws_name,
                            peak_radius, inner_radius, outer_radius,
-                           integrate_edge );
+                           integrate_edge, use_cylinder_integration,
+                           cylinder_length, cylinder_percent_bkg,
+                           cylinder_profile_fit);
 }
 
 
@@ -222,9 +230,12 @@ void MantidEV::initLayout()
                           // connect the apply buttons to the code that
                           // gathers the parameters and will call a method
                           // to carry out the requested action
-   QObject::connect( m_uiForm.ApplySelectData_btn, SIGNAL(clicked()),
+
+  // apply button on "Select Data" tab
+  QObject::connect( m_uiForm.ApplySelectData_btn, SIGNAL(clicked()),
                     this, SLOT(selectWorkspace_slot()) );
 
+   // browse button for event filename
    QObject::connect( m_uiForm.SelectEventFile_btn, SIGNAL(clicked()),
                      this, SLOT(loadEventFile_slot()) );
 
@@ -291,10 +302,10 @@ void MantidEV::initLayout()
 
                            // connect the slots for enabling and disabling
                            // various subsets of widgets
-   QObject::connect( m_uiForm.LoadEventFile_rbtn, SIGNAL(toggled(bool)),
+   QObject::connect( m_uiForm.   convertToMDGroupBox, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadEventFileParams_slot(bool) ) );
 
-   QObject::connect( m_uiForm.LoadDetCal_ckbx, SIGNAL(clicked()),
+    QObject::connect( m_uiForm.LoadDetCal_ckbx, SIGNAL(clicked()),
                      this, SLOT( setEnabledLoadCalFiles_slot() ) );
 
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
@@ -352,6 +363,8 @@ void MantidEV::initLayout()
    m_uiForm.PeakRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakRadius_ledt));
    m_uiForm.BackgroundInnerRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundInnerRadius_ledt));
    m_uiForm.BackgroundOuterRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundOuterRadius_ledt));
+   m_uiForm.CylinderLength_ledt->setValidator( new QDoubleValidator(m_uiForm.CylinderLength_ledt));
+   m_uiForm.CylinderPercentBkg_ledt->setValidator( new QDoubleValidator(m_uiForm.CylinderPercentBkg_ledt));
    m_uiForm.NBadEdgePixels_ledt->setValidator( new QDoubleValidator(m_uiForm.NBadEdgePixels_ledt));
    m_uiForm.RegionRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.RegionRadius_ledt));
    m_uiForm.PeakSize_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakSize_ledt));
@@ -376,11 +389,11 @@ void MantidEV::setDefaultState_slot()
                                                     // Select Data tab
    m_uiForm.SelectEventWorkspace_ledt->setText("");
    m_uiForm.MDworkspace_ledt->setText("");
-   m_uiForm.LoadEventFile_rbtn->setChecked(true);
+   m_uiForm.convertToMDGroupBox->setChecked(true);
+   m_uiForm.loadDataGroupBox->setChecked(true);
    m_uiForm.EventFileName_ledt->setText(""); 
    m_uiForm.MaxMagQ_ledt->setText("25");
    m_uiForm.LorentzCorrection_ckbx->setChecked(true);
-   m_uiForm.UseExistingWorkspaces_rbtn->setChecked(false);
    setEnabledLoadEventFileParams_slot(true);
    m_uiForm.LoadDetCal_ckbx->setChecked(false);
    setEnabledLoadCalFiles_slot();
@@ -440,7 +453,11 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.PeakRadius_ledt->setText("0.18");
    m_uiForm.BackgroundInnerRadius_ledt->setText("0.18");
    m_uiForm.BackgroundOuterRadius_ledt->setText("0.23");
+   m_uiForm.CylinderLength_ledt->setText("0.40");
+   m_uiForm.CylinderPercentBkg_ledt->setText("20.0");
    m_uiForm.IntegrateEdge_ckbx->setChecked(true);
+   m_uiForm.Cylinder_ckbx->setChecked(false);
+   m_uiForm.CylinderProfileFit_cmbx->setCurrentIndex(5);
    m_uiForm.TwoDFitIntegration_rbtn->setChecked(false);
    m_uiForm.FitRebinParams_ledt->setText("1000,-0.004,16000");
    m_uiForm.NBadEdgePixels_ledt->setText("5");
@@ -501,43 +518,51 @@ void MantidEV::selectWorkspace_slot()
      return;
    }
 
-   if ( m_uiForm.LoadEventFile_rbtn->isChecked() )  // load file and
-   {                                                // convert to MD workspace
+   if (m_uiForm.convertToMDGroupBox->isChecked())
+   {
+     if (!m_uiForm.loadDataGroupBox->isChecked())
+     {
+       if ( !worker->isEventWorkspace( ev_ws_name ) )
+       {
+         errorMessage("Requested Event Workspace is NOT a valid Event workspace");
+         return;
+       }
+     }
+
      std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
-     if ( file_name.length() == 0 )
+     if (file_name.empty())
      {
        errorMessage("Specify the name of an event file to load.");
        return;
      }
 
+     double minQ;
+     getDouble( m_uiForm.MinMagQ_ledt, minQ );
+
      double maxQ;
      getDouble( m_uiForm.MaxMagQ_ledt, maxQ );
-     if ( maxQ <= 0 )
-     {
-       errorMessage("Max |Q| to Map to MD MUST BE POSITIVE.");
-       return;
-     }
 
      std::string det_cal_file  = m_uiForm.CalFileName_ledt->text().trimmed().toStdString();
      std::string det_cal_file2 = m_uiForm.CalFileName2_ledt->text().trimmed().toStdString();
      bool        load_det_cal  = m_uiForm.LoadDetCal_ckbx->isChecked();
      if ( load_det_cal && det_cal_file.length() == 0 )
      {
-       errorMessage("Specify the name of a .DetCal file if Load ISAW Detector Calibration is selected"); 
+       errorMessage("Specify the name of a .DetCal file if Load ISAW Detector Calibration is selected");
        return;
      }
 
      RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD(worker,file_name,
-                                                       ev_ws_name, md_ws_name,
-                                                       maxQ,
-                                                       m_uiForm.LorentzCorrection_ckbx->isChecked(),
-                                                       load_det_cal, det_cal_file, det_cal_file2 );
+                                                               ev_ws_name, md_ws_name,
+                                                               minQ, maxQ,
+                                                               m_uiForm.LorentzCorrection_ckbx->isChecked(),
+                                                               m_uiForm.loadDataGroupBox->isChecked(),
+                                                               load_det_cal, det_cal_file, det_cal_file2 );
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
        errorMessage( "Failed to start Load and ConvertToMD thread...previous operation not complete" );
    }
-   else if ( m_uiForm.UseExistingWorkspaces_rbtn->isChecked() )// check existing
-   {                                                           // workspaces
+   else // check existing workspaces
+   {
      if ( !worker->isEventWorkspace( ev_ws_name ) )
      {
        errorMessage("Requested Event Workspace is NOT a valid Event workspace");
@@ -1035,12 +1060,16 @@ void MantidEV::integratePeaks_slot()
    bool sphere_integrate    = m_uiForm.SphereIntegration_rbtn->isChecked();
    bool fit_integrate       = m_uiForm.TwoDFitIntegration_rbtn->isChecked();
    bool ellipsoid_integrate = m_uiForm.EllipsoidIntegration_rbtn->isChecked();
+   bool use_cylinder_integration = true; //m_uiForm.use_cylinder_integration_ckbx->isChecked();
 
-   if ( sphere_integrate )
+   if ( sphere_integrate || use_cylinder_integration)
    {
      double peak_radius    = 0.20;
      double inner_radius   = 0.20;
      double outer_radius   = 0.25;
+     double cylinder_length = 0.0;
+     double cylinder_percent_bkg = 0.0;
+
      if ( !getPositiveDouble( m_uiForm.PeakRadius_ledt, peak_radius ) )
        return;
 
@@ -1052,10 +1081,22 @@ void MantidEV::integratePeaks_slot()
 
      bool integrate_edge = m_uiForm.IntegrateEdge_ckbx->isChecked();
 
+     bool use_cylinder_integration = m_uiForm.Cylinder_ckbx->isChecked();
+
+     if ( !getPositiveDouble(m_uiForm.CylinderLength_ledt, cylinder_length))
+            return;
+
+     if ( !getPositiveDouble(m_uiForm.CylinderPercentBkg_ledt, cylinder_percent_bkg))
+            return;
+
+     std::string cylinder_profile_fit = m_uiForm.CylinderProfileFit_cmbx->currentText().toStdString();
+
      RunSphereIntegrate * runner = new RunSphereIntegrate( worker,
                                         peaks_ws_name, event_ws_name,
                                         peak_radius, inner_radius, outer_radius,
-                                        integrate_edge );
+                                        integrate_edge, use_cylinder_integration,
+                                        cylinder_length, cylinder_percent_bkg,
+                                        cylinder_profile_fit);
 
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
@@ -1438,14 +1479,7 @@ void MantidEV::showUB_slot()
  */
 void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
 {
-  m_uiForm.EventFileName_lbl->setEnabled( on );
-  m_uiForm.EventFileName_ledt->setEnabled( on );
-  m_uiForm.SelectEventFile_btn->setEnabled( on );
-  m_uiForm.MaxMagQ_lbl->setEnabled( on );
-  m_uiForm.MaxMagQ_ledt->setEnabled( on );
-  m_uiForm.LorentzCorrection_ckbx->setEnabled( on );
-  m_uiForm.LoadDetCal_ckbx->setEnabled( on );
-  setEnabledLoadCalFiles_slot();
+  m_uiForm.loadDataGroupBox->setEnabled(on);
 }
 
 
@@ -1458,26 +1492,13 @@ void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
  */
 void MantidEV::setEnabledLoadCalFiles_slot()
 {
-  bool load_events = m_uiForm.LoadEventFile_rbtn->isChecked();
-  bool load_cal    = m_uiForm.LoadDetCal_ckbx->isChecked();
-  if ( load_events && load_cal )
-  {
-    m_uiForm.CalFileName_lbl->setEnabled( true );
-    m_uiForm.CalFileName_ledt->setEnabled( true );
-    m_uiForm.SelectCalFile_btn->setEnabled( true );
-    m_uiForm.CalFileName2_lbl->setEnabled( true );
-    m_uiForm.CalFileName2_ledt->setEnabled( true );
-    m_uiForm.SelectCalFile2_btn->setEnabled( true );
-  }
-  else
-  {
-    m_uiForm.CalFileName_lbl->setEnabled( false );
-    m_uiForm.CalFileName_ledt->setEnabled( false );
-    m_uiForm.SelectCalFile_btn->setEnabled( false );
-    m_uiForm.CalFileName2_lbl->setEnabled( false );
-    m_uiForm.CalFileName2_ledt->setEnabled( false );
-    m_uiForm.SelectCalFile2_btn->setEnabled( false );
-  }
+  bool enabled = m_uiForm.LoadDetCal_ckbx->isChecked();
+  m_uiForm.CalFileName_lbl->setEnabled( enabled );
+  m_uiForm.CalFileName_ledt->setEnabled( enabled );
+  m_uiForm.SelectCalFile_btn->setEnabled( enabled );
+  m_uiForm.CalFileName2_lbl->setEnabled( enabled );
+  m_uiForm.CalFileName2_ledt->setEnabled( enabled );
+  m_uiForm.SelectCalFile2_btn->setEnabled( enabled );
 }
 
 
@@ -1647,6 +1668,10 @@ void MantidEV::setEnabledSphereIntParams_slot( bool on )
   m_uiForm.BackgroundOuterRadius_lbl->setEnabled( on );
   m_uiForm.BackgroundOuterRadius_ledt->setEnabled( on );
   m_uiForm.IntegrateEdge_ckbx->setEnabled( on );
+  m_uiForm.Cylinder_ckbx->setEnabled( on );
+  m_uiForm.CylinderLength_ledt->setEnabled( on );
+  m_uiForm.CylinderPercentBkg_ledt->setEnabled( on );
+  m_uiForm.CylinderProfileFit_cmbx->setEnabled( on );
 }
 
 
@@ -1744,7 +1769,14 @@ bool MantidEV::getDouble( std::string str, double &value )
 bool MantidEV::getDouble( QLineEdit *ledt,
                           double    &value )
 {
-  if ( getDouble( ledt->text().toStdString(), value ) )
+  std::string strValue = ledt->text().trimmed().toStdString();
+  if (strValue.empty())
+  {
+    value = Mantid::EMPTY_DBL();
+    return true;
+  }
+
+  if ( getDouble( strValue, value ) )
   {
     return true;
   }
@@ -1900,14 +1932,14 @@ void MantidEV::saveSettings( const std::string & filename )
                                                 // Save Tab 1, Select Data
   state->setValue("SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt->text());
   state->setValue("MDworkspace_ledt", m_uiForm.MDworkspace_ledt->text());
-  state->setValue("LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn->isChecked());
+  state->setValue("LoadEventFile_rbtn", m_uiForm.loadDataGroupBox->isChecked());
   state->setValue("EventFileName_ledt", m_uiForm.EventFileName_ledt->text());
   state->setValue("MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt->text());
   state->setValue("LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx->isChecked());
   state->setValue("LoadDetCal_ckbx", m_uiForm.LoadDetCal_ckbx->isChecked());
   state->setValue("CalFileName_ledt", m_uiForm.CalFileName_ledt->text());
   state->setValue("CalFileName2_ledt", m_uiForm.CalFileName2_ledt->text());
-  state->setValue("UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn->isChecked());
+  state->setValue("ConvertToMD_rbtn", m_uiForm.convertToMDGroupBox->isChecked());
 
                                                 // Save Tab 2, Find Peaks
   state->setValue("PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt->text());
@@ -1955,7 +1987,11 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("PeakRadius_ledt",m_uiForm.PeakRadius_ledt->text());
   state->setValue("BackgroundInnerRadius_ledt",m_uiForm.BackgroundInnerRadius_ledt->text());
   state->setValue("BackgroundOuterRadius_ledt",m_uiForm.BackgroundOuterRadius_ledt->text());
+  state->setValue("CylinderLength_ledt",m_uiForm.CylinderLength_ledt->text());
+  state->setValue("CylinderPercentBkg_ledt",m_uiForm.CylinderPercentBkg_ledt->text());
   state->setValue("IntegrateEdge_ckbx",m_uiForm.IntegrateEdge_ckbx->isChecked());
+  state->setValue("Cylinder_ckbx",m_uiForm.Cylinder_ckbx->isChecked());
+  state->setValue("CylinderProfileFit_cmbx",m_uiForm.CylinderProfileFit_cmbx->currentIndex());
   state->setValue("TwoDFitIntegration_rbtn",m_uiForm.TwoDFitIntegration_rbtn->isChecked());
   state->setValue("FitRebinParams_ledt",m_uiForm.FitRebinParams_ledt->text());
   state->setValue("NBadEdgePixels_ledt",m_uiForm.NBadEdgePixels_ledt->text());
@@ -2001,7 +2037,7 @@ void MantidEV::loadSettings( const std::string & filename )
                                                   // Load Tab 1, Select Data 
   restore( state, "SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt );
   restore( state, "MDworkspace_ledt", m_uiForm.MDworkspace_ledt );
-  restore( state, "LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn );
+  m_uiForm.loadDataGroupBox->setChecked( state->value("LoadEventFile_rbtn", false).toBool() );
   restore( state, "EventFileName_ledt", m_uiForm.EventFileName_ledt );
   restore( state, "MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt );
   restore( state, "LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx );
@@ -2009,7 +2045,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "CalFileName_ledt", m_uiForm.CalFileName_ledt );
   restore( state, "CalFileName2_ledt", m_uiForm.CalFileName2_ledt );
   setEnabledLoadCalFiles_slot();
-  restore( state, "UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn );
+  m_uiForm.convertToMDGroupBox->setChecked( state->value("ConvertToMD_rbtn", false).toBool() );
                                                   // Load Tab 2, Find Peaks
   restore( state, "PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt );
   restore( state, "FindPeaks_rbtn", m_uiForm.FindPeaks_rbtn );
@@ -2057,7 +2093,11 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "PeakRadius_ledt", m_uiForm.PeakRadius_ledt );
   restore( state, "BackgroundInnerRadius_ledt", m_uiForm.BackgroundInnerRadius_ledt );
   restore( state, "BackgroundOuterRadius_ledt", m_uiForm.BackgroundOuterRadius_ledt );
+  restore( state, "CylinderLength_ledt", m_uiForm.CylinderLength_ledt );
+  restore( state, "CylinderPercentBkg_ledt", m_uiForm.CylinderPercentBkg_ledt );
   restore( state, "IntegrateEdge_ckbx", m_uiForm.IntegrateEdge_ckbx );
+  restore( state, "Cylinder_ckbx", m_uiForm.Cylinder_ckbx );
+  restore( state, "CylinderProfileFit_cmbx", m_uiForm.CylinderProfileFit_cmbx);
   restore( state, "TwoDFitIntegration_rbtn", m_uiForm.TwoDFitIntegration_rbtn );
   restore( state, "FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt );
   restore( state, "NBadEdgePixels_ledt", m_uiForm.NBadEdgePixels_ledt );

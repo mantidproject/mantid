@@ -223,6 +223,12 @@ public:
   void setLogging(const bool value){g_log.setEnabled(value);}
   ///returns the status of logging, True = enabled
   bool isLogging() const {return g_log.getEnabled();}
+
+  ///sets the logging priority offset
+  void setLoggingOffset(const int value) {g_log.setLevelOffset(value);}
+  ///returns the logging priority offset
+  int getLoggingOffset() const {return g_log.getLevelOffset();}
+
   /// Returns a reference to the logger.
   Kernel::Logger& getLogger() const { return g_log; }
 

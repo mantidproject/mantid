@@ -139,8 +139,7 @@ namespace MDAlgorithms
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
     declareProperty("CoordinatesToUse", "Q (lab frame)",boost::make_shared<StringListValidator>(propOptions),
-      "Which coordinates of the peak center do you wish to use to integrate the peak? This should match the InputWorkspace's dimensions."
-       );
+       "Deprecated:  algorithm uses the InputWorkspace's coordinates.");
 
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
         "Fixed radius around each peak position in which to integrate (in the same units as the workspace).");
@@ -214,9 +213,15 @@ namespace MDAlgorithms
       peakWS = inPeakWS->clone();
 
     /// Value of the CoordinatesToUse property.
-    std::string CoordinatesToUse = getPropertyValue("CoordinatesToUse");
-
-    // TODO: Confirm that the coordinates requested match those in the MDEventWorkspace
+    std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
+    int CoordinatesToUse =  ws->getSpecialCoordinateSystem();
+    g_log.warning() << " Warning"<< CoordinatesToUse<<std::endl;
+    if (CoordinatesToUse == 1 && CoordinatesToUseStr != "Q (lab frame)")
+      g_log.warning() << "Warning: used Q (lab frame) coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
+    else if (CoordinatesToUse == 2 && CoordinatesToUseStr != "Q (sample frame)")
+      g_log.warning() << "Warning: used Q (sample frame) coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
+    else if (CoordinatesToUse == 3 && CoordinatesToUseStr != "HKL")
+      g_log.warning() << "Warning: used HKL coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
 
     /// Radius to use around peaks
     double PeakRadius = getProperty("PeakRadius");
@@ -282,6 +287,8 @@ namespace MDAlgorithms
 		std::string outFile = getProperty("InputWorkspace");
 		outFile.append(profileFunction);
 		outFile.append(".dat");
+		std::string save_path =  ConfigService::Instance().getString("defaultsave.directory");
+		outFile = save_path + outFile;
 		out.open(outFile.c_str(), std::ofstream::out);
     }
 //
@@ -301,11 +308,11 @@ namespace MDAlgorithms
 
       // Get the peak center as a position in the dimensions of the workspace
       V3D pos;
-      if (CoordinatesToUse == "Q (lab frame)")
+      if (CoordinatesToUse == 1) //"Q (lab frame)"
         pos = p.getQLabFrame();
-      else if (CoordinatesToUse == "Q (sample frame)")
+      else if (CoordinatesToUse == 2) //"Q (sample frame)"
         pos = p.getQSampleFrame();
-      else if (CoordinatesToUse == "HKL")
+      else if (CoordinatesToUse == 3) //"HKL"
         pos = p.getHKL();
 
       // Get the instrument and its detectors

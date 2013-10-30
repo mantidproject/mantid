@@ -951,6 +951,7 @@ namespace Mantid
       copyPropertiesFrom(proxy);
       m_algorithmID = proxy.getAlgorithmID();
       setLogging(proxy.isLogging());
+      setLoggingOffset(proxy.getLoggingOffset());
       setChild(proxy.isChild());
     }
 

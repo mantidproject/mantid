@@ -300,29 +300,67 @@ namespace LiveData
     // Choose the appropriate algorithm to add chunks
     std::string algoName = "PlusMD";
     MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
-    if (mws) algoName = "Plus";
+    // ISIS multi-period data come in workspace groups
+    WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
+    if (mws || gws) algoName = "Plus";
 
-    IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
-    alg->setProperty("LHSWorkspace", m_accumWS);
-    alg->setProperty("RHSWorkspace", chunkWS);
-    alg->setProperty("OutputWorkspace", m_accumWS);
-    alg->execute();
-    if (!alg->isExecuted())
+    if ( gws )
     {
-      throw std::runtime_error("Error when calling " + alg->name() + " to add the chunk of live data. See log.");
+        WorkspaceGroup_sptr accum_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+        if ( !accum_gws )
+        {
+            throw std::runtime_error("Two workspace groups are expected.");
+        }
+        if ( accum_gws->getNumberOfEntries() != gws->getNumberOfEntries() )
+        {
+            throw std::runtime_error("Accumulation and chunk workspace groups are expected to have the same size.");
+        }
+        // binary operations cannot handle groups passed by pointers, so add members one by one
+        for(size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries()); ++i)
+        {
+            addMatrixWSChunk( algoName, accum_gws->getItem(i), gws->getItem(i) );
+        }
     }
     else
     {
-      // Get the output as the generic Workspace type
-      Property * prop = alg->getProperty("OutputWorkspace");
-      IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
-      if (!wsProp)
-        throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
-      Workspace_sptr temp = wsProp->getWorkspace();
-      m_accumWS = temp;
+        // just add the chunk
+        addMatrixWSChunk( algoName, m_accumWS, chunkWS );
     }
-    // And sort the events, if any
-    doSortEvents(m_accumWS);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Add a matrix workspace to the accumulation workspace.
+   *
+   * @param algoName :: Name of algorithm which will be adding the workspaces.
+   * @param accumWS :: accumulation matrix workspace
+   * @param chunkWS :: processed live data chunk matrix workspace
+   */
+  void LoadLiveData::addMatrixWSChunk(const std::string& algoName, Workspace_sptr accumWS, Workspace_sptr chunkWS)
+  {
+      IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
+      alg->setProperty("LHSWorkspace", accumWS);
+      alg->setProperty("RHSWorkspace", chunkWS);
+      alg->setProperty("OutputWorkspace", accumWS);
+      alg->execute();
+      if (!alg->isExecuted())
+      {
+        throw std::runtime_error("Error when calling " + alg->name() + " to add the chunk of live data. See log.");
+      }
+      else
+      {
+        // Is this really necessary?
+
+        // Get the output as the generic Workspace type
+        Property * prop = alg->getProperty("OutputWorkspace");
+        IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+        if (!wsProp)
+          throw std::runtime_error("The " + alg->name() + " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
+        Workspace_sptr temp = wsProp->getWorkspace();
+        accumWS = temp;
+        // And sort the events, if any
+        doSortEvents(accumWS);
+      }
   }
 
 

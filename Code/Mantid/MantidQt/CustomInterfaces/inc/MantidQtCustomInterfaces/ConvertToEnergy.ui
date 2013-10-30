@@ -56,7 +56,7 @@
          </item>
          <item>
           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst">
-           <property name="techniques">
+           <property name="techniques" stdset="0">
             <stringlist>
              <string>TOF Direct Geometry Spectroscopy</string>
              <string>TOF Indirect Geometry Spectroscopy</string>
@@ -172,7 +172,7 @@
                  <number>6</number>
                 </property>
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles" native="true">
                   <property name="label" stdset="0">
                    <string>Runs          </string>
                   </property>
@@ -188,7 +188,7 @@
                </layout>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile">
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile" native="true">
                 <property name="findRunFiles" stdset="0">
                  <bool>false</bool>
                 </property>
@@ -207,7 +207,7 @@
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile">
+               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" native="true">
                 <property name="label" stdset="0">
                  <string>Detector Vanadium</string>
                 </property>
@@ -228,7 +228,7 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
                   <item>
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles">
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_runFiles" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -244,7 +244,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile">
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_calibFile" native="true">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>
@@ -266,7 +266,7 @@
                     <property name="optional" stdset="0">
                      <bool>true</bool>
                     </property>
-                    <property name="fileExtensions">
+                    <property name="fileExtensions" stdset="0">
                      <stringlist>
                       <string>_calib.nxs</string>
                      </stringlist>
@@ -375,7 +375,7 @@
                   <widget class="QWidget" name="page_11">
                    <layout class="QHBoxLayout" name="horizontalLayout_5">
                     <item>
-                     <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile">
+                     <widget class="MantidQt::MantidWidgets::MWRunFiles" name="ind_mapFile" native="true">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -394,7 +394,7 @@
                       <property name="algorithmAndProperty" stdset="0">
                        <string/>
                       </property>
-                      <property name="fileExtensions">
+                      <property name="fileExtensions" stdset="0">
                        <stringlist>
                         <string>.map</string>
                        </stringlist>
@@ -1720,7 +1720,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
            <item row="0" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_33">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="cal_leRunNo" native="true">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1736,7 +1736,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
                <property name="algorithmAndProperty" stdset="0">
                 <string/>
                </property>
-               <property name="fileExtensions">
+               <property name="fileExtensions" stdset="0">
                 <stringlist>
                  <string>.raw</string>
                 </stringlist>
@@ -1783,6 +1783,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
                </property>
                <property name="text">
                 <string>1.0</string>
+               </property>
+               <property name="placeholderText">
+                <string/>
                </property>
               </widget>
              </item>
@@ -1879,8 +1882,37 @@ Later steps in the process (saving, renaming) will not be done.</string>
          <item>
           <layout class="QVBoxLayout" name="cal_treeRes">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_21">
-             <item>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="cal_ckResScale">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Scale RES:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="cal_leResScale">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>1.0</string>
+               </property>
+               <property name="placeholderText">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" colspan="2">
               <widget class="QCheckBox" name="cal_ckRES">
                <property name="toolTip">
                 <string>Create RES file</string>
@@ -1989,7 +2021,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_36">
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_inputFile" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -2005,7 +2037,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
               <property name="multipleFiles" stdset="0">
                <bool>true</bool>
               </property>
-              <property name="fileExtensions">
+              <property name="fileExtensions" stdset="0">
                <stringlist>
                 <string>.raw</string>
                </stringlist>
@@ -2031,7 +2063,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
              </widget>
             </item>
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="slice_calibFile" native="true">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -2053,7 +2085,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
               <property name="optional" stdset="0">
                <bool>true</bool>
               </property>
-              <property name="fileExtensions">
+              <property name="fileExtensions" stdset="0">
                <stringlist>
                 <string>_calib.nxs</string>
                </stringlist>
@@ -2126,11 +2158,11 @@ Later steps in the process (saving, renaming) will not be done.</string>
        <item>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="1">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile" native="true">
            <property name="label" stdset="0">
             <string/>
            </property>
-           <property name="fileExtensions">
+           <property name="fileExtensions" stdset="0">
             <stringlist>
              <string>.raw</string>
             </stringlist>
@@ -2138,11 +2170,11 @@ Later steps in the process (saving, renaming) will not be done.</string>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile" native="true">
            <property name="label" stdset="0">
             <string/>
            </property>
-           <property name="fileExtensions">
+           <property name="fileExtensions" stdset="0">
             <stringlist>
              <string>.raw</string>
             </stringlist>
@@ -2308,7 +2340,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
               <widget class="QWidget" name="page_13">
                <layout class="QVBoxLayout" name="verticalLayout_21">
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="sqw_inputFile" native="true">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -2327,7 +2359,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
                   <property name="algorithmAndProperty" stdset="0">
                    <string/>
                   </property>
-                  <property name="fileExtensions">
+                  <property name="fileExtensions" stdset="0">
                    <stringlist>
                     <string>_red.nxs</string>
                    </stringlist>
@@ -2361,7 +2393,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
-                    <property name="WorkspaceTypes">
+                    <property name="WorkspaceTypes" stdset="0">
                      <stringlist/>
                     </property>
                     <property name="Suffix" stdset="0">
@@ -2902,14 +2934,14 @@ p, li { white-space: pre-wrap; }
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_31">
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles">
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" native="true">
             <property name="label" stdset="0">
              <string>Abs Units Vanadium</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile">
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile" native="true">
             <property name="findRunFiles" stdset="0">
              <bool>false</bool>
             </property>
@@ -2928,7 +2960,7 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile">
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" native="true">
             <property name="label" stdset="0">
              <string>Detector Vanadium (Abs Units)</string>
             </property>

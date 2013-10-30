@@ -1129,6 +1129,7 @@ private:
   void tableMenuAboutToShow();
   void windowsMenuAboutToShow();
   void windowsMenuActivated( int id );
+  void interfaceMenuAboutToShow();
 
   //! \name Font Format Functions
   //@{
@@ -1147,6 +1148,7 @@ private:
   //@}
 
   void showCustomActionDialog();
+  void showInterfaceCategoriesDialog();
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
 
@@ -1328,8 +1330,6 @@ public:
   QStringList renamedTables;
   // List of removed interfaces
   QStringList removed_interfaces;
-  // List of PyQt interfaces to be added to the Interfaces menu
-  QStringList pyqt_interfaces;
 
   //! \name variables used when user copy/paste markers
   //@{
@@ -1345,8 +1345,19 @@ public:
   QString defaultScriptingLang;
 
   QDockWidget *m_interpreterDock;
+  
+  QSet<QString> allCategories() const { return m_allCategories; }
 
 private:
+  // A collection of the names of each interface as they appear in the menu and also "data"
+  // relating to how each interface can be opened.  Elsewhere, the data is expected to be a
+  // python file name, or else just the name of the interface as known to the InterfaceManager.
+  QList<QPair<QString, QString>> m_interfaceNameDataPairs;
+  // Keeping track of all unique categories.
+  QSet<QString> m_allCategories;
+  // Map interfaces to their categories.
+  QMap<QString, QSet<QString>> m_interfaceCategories;
+
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow* getActiveWindow() const;
   void setActiveWindow(MdiSubWindow* w);
@@ -1392,7 +1403,8 @@ private:
 
   QWidget* icatsearch;
 
-  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
+  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
+  
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
   QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
@@ -1473,6 +1485,8 @@ private:
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
+  
+  QList<QAction *> m_interfaceActions;
 
   QUndoView *d_undo_view;
   /// list of mantidmatrix windows opened from project file.

@@ -16,7 +16,6 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include "MantidAPI/ICatalog.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/FileDescriptor.h"
 
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
@@ -123,8 +122,10 @@ namespace Mantid
         std::string fileLocation;
         catalog->getFileLocation(*fileID,fileLocation);
 
+        g_log.debug() << "CatalogDownloadDataFiles -> File location before transform is: " << fileLocation << std::endl;
         // Transform the archive path to the path of the user's operating system.
         fileLocation = catalogInfo.transformArchivePath(fileLocation);
+        g_log.debug() << "CatalogDownloadDataFiles -> File location after transform is:  " << fileLocation << std::endl;
 
         // Can we open the file (Hence, have access to the archives?)
         std::ifstream hasAccessToArchives(fileLocation.c_str());
@@ -157,13 +158,25 @@ namespace Mantid
     }
 
     /**
-     * Checks to see if the file to be downloaded is a datafile.
-     * @param stream ::  input stream
-     * @returns True if the stream is not considered ASCII (e.g. binary), false otherwise
-     */
-    bool CatalogDownloadDataFiles::isBinary(std::istream& stream)
+    * Checks to see if the file to be downloaded is a datafile.
+    * @param fileName :: Name of data file to download.
+    * @returns True if the file is a data file.
+    */
+    bool CatalogDownloadDataFiles::isDataFile(const std::string & fileName)
     {
-      return !FileDescriptor::isAscii(stream);
+      std::string extension = Poco::Path(fileName).getExtension();
+      std::transform(extension.begin(),extension.end(),extension.begin(),tolower);
+
+      std::cerr << "The extension of this file is: " << extension << "\n";
+
+      if (extension.compare("raw") == 0 || extension.compare("nxs") == 0)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
     }
 
     /**
@@ -232,7 +245,7 @@ namespace Mantid
       Poco::Path path(downloadPath, fileName);
       std::string filepath = path.toString();
 
-      std::ios_base::openmode mode = isBinary(rs) ? std::ios_base::binary : std::ios_base::out;
+      std::ios_base::openmode mode = isDataFile(fileName) ? std::ios_base::binary : std::ios_base::out;
 
       std::ofstream ofs(filepath.c_str(), mode);
       if ( ofs.rdstate() & std::ios::failbit )
