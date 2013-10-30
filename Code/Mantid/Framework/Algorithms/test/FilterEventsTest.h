@@ -117,7 +117,7 @@ public:
     TS_ASSERT(filter.isExecuted());
 
     // 4. Get output
-    int numsplittedws = filter.getProperty("NumberOutputWorkspace");
+    int numsplittedws = filter.getProperty("NumberOutputWS");
     TS_ASSERT_EQUALS(numsplittedws, 4);
 
     // 4.1 Workspace group 0
@@ -202,7 +202,7 @@ public:
     TS_ASSERT(filter.isExecuted());
 
     // Get output
-    int numsplittedws = filter.getProperty("NumberOutputWorkspace");
+    int numsplittedws = filter.getProperty("NumberOutputWS");
     TS_ASSERT_EQUALS(numsplittedws, 3);
 
     // 4.1 Workspace group 0

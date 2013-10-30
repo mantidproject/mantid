@@ -91,7 +91,7 @@ namespace Algorithms
 
     declareProperty("OutputWorkspaceIndexedFrom1", false, "If selected, the minimum output workspace is indexed from 1 and continuous. ");
 
-    declareProperty("NumberOutputWorkspace", 0, "Number of output output workspace splitted. ", Direction::Output);
+    declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
 
     return;
   }
@@ -338,7 +338,7 @@ namespace Algorithms
       }
     } // ENDFOR
 
-    setProperty("NumberOutputWorkspace", numoutputws);
+    setProperty("NumberOutputWS", numoutputws);
 
     return;
   }
