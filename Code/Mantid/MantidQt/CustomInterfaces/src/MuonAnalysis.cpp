@@ -1939,28 +1939,16 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
   }
 
   // Make group to display more organised in Mantidplot workspace list
-  if ( !AnalysisDataService::Instance().doesExist(groupName) )
-  {
-    QString rubbish = "boevsMoreBoevs";
-    QString groupStr = rubbish + QString("=CloneWorkspace(InputWorkspace='") + outWS.c_str() + "')\n";
-    groupStr += groupName.c_str() + QString("=GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + rubbish
-      + "')\n";
-    runPythonCode( groupStr ).trimmed();
-    AnalysisDataService::Instance().remove(rubbish.toStdString());
-  }
-  else
-  {
-    QString groupStr = QString(groupName.c_str()) + QString("=GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + groupName.c_str()
-      + "')\n";
-    runPythonCode( groupStr ).trimmed();
-  }
+  std::vector<std::string> wsToGroup;
+  
+  wsToGroup.push_back(outWS);
+  wsToGroup.push_back(outWS + "_Raw");
+ 
+  if (AnalysisDataService::Instance().doesExist(groupName))
+    // So that all the previous group members leave remain in the group
+    wsToGroup.push_back(groupName);
 
-
-  // Group the raw workspace
-  std::vector<std::string> groupWorkspaces;
-  groupWorkspaces.push_back(groupName);
-  groupWorkspaces.push_back(outWS + "_Raw");
-  m_fitDataTab->groupWorkspaces(groupWorkspaces, groupName);
+  m_fitDataTab->groupWorkspaces(wsToGroup, groupName);
 }
 
 
