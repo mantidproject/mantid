@@ -83,6 +83,7 @@
                     <xs:element name="livedata">
                       <xs:complexType>
                         <xs:attribute name ="address" type="xs:string" use="required"/>
+                        <xs:attribute name="listener" type="xs:string" use="optional"/>
                       </xs:complexType>
                     </xs:element>
                   </xs:choice>
