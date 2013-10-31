@@ -48,10 +48,11 @@ namespace LiveData
 
     int runNumber() const;
 
+    void exec();
+
   private:
     virtual void initDocs();
     void init();
-    void exec();
 
     Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess);
     Mantid::API::Workspace_sptr processChunk(Mantid::API::Workspace_sptr chunkWS);
