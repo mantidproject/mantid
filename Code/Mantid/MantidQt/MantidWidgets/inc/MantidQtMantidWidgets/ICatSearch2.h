@@ -113,8 +113,6 @@ namespace MantidQt
       std::set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
       /// Add the list of file extensions to the "Filter type..." drop-down.
       void populateDataFileType(std::set<std::string> extensions);
-      /// Allow the user to select multiple files to download in the table.
-      bool eventFilter(QObject* watched, QEvent* event);
 
     private slots:
       /// Selects/deselects ALL rows in dataFile table.
@@ -175,6 +173,10 @@ namespace MantidQt
       void downloadDataFiles();
       /// Loads the selected dataFiles into workspaces.
       void loadDataFiles();
+      /// Select/Deselect row when a checkbox is selected
+      void dataFileCheckboxSelected(QTableWidgetItem* item);
+      /// Select/Deselect row & check-box when a row is selected.
+      void dataFileRowSelected();
 
     private:
       /// The custom table header with checkbox functionality.

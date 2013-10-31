@@ -90,13 +90,15 @@ namespace MantidQt
       connect(m_icatUiForm.dataFileDownloadBtn,SIGNAL(clicked()),this,SLOT(downloadDataFiles()));
       // When the user clicks the "load" button then load their selected datafiles into a workspace.
       connect(m_icatUiForm.dataFileLoadBtn,SIGNAL(clicked()),this,SLOT(loadDataFiles()));
+      // When a checkbox is selected in a row we want to select (highlight) the entire row.
+      connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(itemClicked(QTableWidgetItem*)),this,SLOT(dataFileCheckboxSelected(QTableWidgetItem*)));
+      // When several rows are selected we want to check the related checkboxes.
+      connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(itemSelectionChanged()),this,SLOT(dataFileRowSelected()));
+
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
       // Although this is an advanced option performing it here allows it to be performed once only.
       populateInvestigationTypeBox();
-
-      // Through this we can obtain clicks from the rows in the table.
-      m_icatUiForm.dataFileResultsTbl->viewport()->installEventFilter(this);
 
       // As the methods have been created, and elements are in GUI I have opted to hide
       // these elements for testing purposes as multiple facilities or paging has not yet been implemented.
@@ -952,39 +954,6 @@ namespace MantidQt
       }
     }
 
-    /**
-     * Checks the checkboxes the user has selected in the dataFile table.
-     * @param object :: The object to watch the events occuring on.
-     * @param event  :: The event to handle.
-     * @return True if event was handled, otherwise false.
-     */
-    bool ICatSearch2::eventFilter(QObject* watched, QEvent* event)
-    {
-      UNUSED_ARG(watched);
-      if (event->type() == QEvent::MouseButtonRelease)
-      {
-        QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
-
-        // Enable or disable download & load buttons if a user has selected (or not) row(s).
-        enableDownloadButtons();
-
-        for (int row = 0; row < table->rowCount(); ++row)
-        {
-          // We Uncheck here to prevent previously selected items staying selected.
-          table->item(row, 0)->setCheckState(Qt::Unchecked);
-
-          QTableWidgetItem *item = table->item(row,0);
-
-          if (item->isSelected())
-          {
-            item->setCheckState(Qt::Checked);
-          }
-        }
-        return true;
-      }
-      return false;
-    }
-
     ///////////////////////////////////////////////////////////////////////////////
     // SLOTS for: "DataFile information"
     ///////////////////////////////////////////////////////////////////////////////
@@ -1110,6 +1079,61 @@ namespace MantidQt
         loadAlgorithm->setPropertyValue("OutputWorkspace", Poco::Path(Poco::Path(filePaths.at(i)).getFileName()).getBaseName());
         loadAlgorithm->execute();
       }
+    }
+
+    /**
+     * Select/Deselect row when related checkbox is selected.
+     * @param item :: The item from the table the user has selected.
+     */
+    void ICatSearch2::dataFileCheckboxSelected(QTableWidgetItem* item)
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+
+      QTableWidgetItem *checkbox = table->item(item->row(), 0);
+
+      for(int col = 0 ; col < table->columnCount(); col++)
+      {
+        for(int row = 0; row < table->rowCount(); ++row)
+        {
+          if (checkbox->checkState())
+          {
+            table->item(item->row(), 0)->setCheckState(Qt::Checked);
+            table->item(item->row(), col)->setSelected(true);
+          }
+          else
+          {
+            table->item(item->row(), 0)->setCheckState(Qt::Unchecked);
+            // There is no easier way to deselect an item...
+            table->item(item->row(), col)->setSelected(false);
+          }
+        }
+      }
+    }
+
+    /**
+     * Select/Deselect row & check-box when a row is selected.
+     */
+    void ICatSearch2::dataFileRowSelected()
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+
+      for (int row = 0; row < table->rowCount(); ++row)
+      {
+        // We Uncheck here to prevent previously selected items staying selected
+        // and to allow dataFileCheckboxSelected() to function correctly.
+        if (!table->item(row, 0)->isSelected())
+        {
+          table->item(row, 0)->setCheckState(Qt::Unchecked);
+        }
+      }
+
+      QModelIndexList indexes = table->selectionModel()->selectedRows();
+
+      for (int i = 0; i < indexes.count(); ++i)
+      {
+        table->item(indexes.at(i).row(), 0)->setCheckState(Qt::Checked);
+      }
+      enableDownloadButtons();
     }
 
   } // namespace MantidWidgets
