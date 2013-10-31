@@ -19,7 +19,7 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertEquals(test_facility.preferredExtension(), ".nxs")
         self.assertEquals(len(test_facility.archiveSearch()), 1)
         self.assertTrue(len(test_facility.instruments()) > 30)
-        self.assertEquals(len(test_facility.instruments("Neutron Diffraction")), 11)
+        self.assertTrue(len(test_facility.instruments("Neutron Diffraction"))> 10)
         self.assertTrue(isinstance(test_facility.instrument("WISH"), InstrumentInfo))
         self.assertEquals(test_facility.liveListener(), "ISISHistoDataListener")
 
