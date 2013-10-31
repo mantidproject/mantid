@@ -1071,8 +1071,6 @@ namespace MantidQt
      */
     void ICatSearch2::downloadDataFiles()
     {
-      std::vector<std::pair<int64_t, std::string>> dataFiles = selectedDataFileNames();
-
       QString downloadSavePath = QFileDialog::getExistingDirectory(this, tr("Select a directory to save data files."), m_downloadSaveDir, QFileDialog::ShowDirsOnly);
 
       // The user has clicked "Open" and changed the path (and not clicked cancel).
@@ -1083,7 +1081,7 @@ namespace MantidQt
         // Save settings to store for use next time.
         saveSettings();
         // Download the selected dataFiles to the chosen directory.
-        m_icatHelper->downloadDataFiles(dataFiles, m_downloadSaveDir.toStdString());
+        m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
       }
     }
 
@@ -1092,13 +1090,11 @@ namespace MantidQt
      */
     void ICatSearch2::loadDataFiles()
     {
-      std::vector<std::pair<int64_t, std::string>> dataFiles = selectedDataFileNames();
-
       // Get the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
-      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(dataFiles, m_downloadSaveDir.toStdString());
+      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
 
       // Create & initialize the load algorithm we will use to load the file by path to a workspace.
-      Mantid::API::Algorithm_sptr loadAlgorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      auto loadAlgorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
       loadAlgorithm->initialize();
 
       // For all the files downloaded (or in archive) we want to load them.
@@ -1108,7 +1104,12 @@ namespace MantidQt
         loadAlgorithm->setPropertyValue("Filename", filePaths.at(i));
         // Sets the output workspace to be the name of the file.
         loadAlgorithm->setPropertyValue("OutputWorkspace", Poco::Path(Poco::Path(filePaths.at(i)).getFileName()).getBaseName());
-        loadAlgorithm->execute();
+
+        Poco::ActiveResult<bool> result(loadAlgorithm->executeAsync());
+        while( !result.available() )
+        {
+          QCoreApplication::processEvents();
+        }
       }
     }
 
