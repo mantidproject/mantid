@@ -129,6 +129,8 @@ namespace LiveData
     DateAndTime lastTime = DateAndTime::getCurrentTime();
 
     m_chunkNumber = 0;
+    int runNumber = 0;
+
     std::string AccumulationWorkspace = this->getPropertyValue("AccumulationWorkspace");
     std::string OutputWorkspace = this->getPropertyValue("OutputWorkspace");
 
@@ -144,8 +146,7 @@ namespace LiveData
       Poco::Thread::sleep(50);
 
       DateAndTime now = DateAndTime::getCurrentTime();
-      double seconds;
-      seconds = DateAndTime::secondsFromDuration( now - lastTime );
+      double seconds = DateAndTime::secondsFromDuration( now - lastTime );
       if (seconds > UpdateEvery)
       {
         lastTime = now;
@@ -175,15 +176,15 @@ namespace LiveData
 
         NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
 
+        if ( runNumber == 0 )
+        {
+          runNumber = loadAlg->runNumber();
+          g_log.debug() << "Run number set to " << runNumber << std::endl;
+        }
+
         // Did we just hit the end of a run?
         if (listener->runStatus() == ILiveListener::EndRun)
         {
-          // Find the run number, if that is possible.
-          int runNumber = 0;
-          MatrixWorkspace_sptr OutputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OutputWorkspace);
-          if (OutputWS)
-            runNumber = OutputWS->getRunNumber();
-
           std::stringstream message;
           message << "Run";
           if ( runNumber != 0 ) message << " #" << runNumber;
@@ -210,6 +211,8 @@ namespace LiveData
             if (!AccumulationWorkspace.empty())
               doClone(AccumulationWorkspace, AccumulationWorkspace + postFix);
           }
+
+          runNumber = 0;
         }
 
         m_chunkNumber++;

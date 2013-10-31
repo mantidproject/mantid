@@ -46,11 +46,13 @@ namespace LiveData
     virtual const std::string category() const;
     virtual int version() const;
 
+    int runNumber() const;
+
+  private:
     virtual void initDocs();
     void init();
     void exec();
 
-  private:
     Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess);
     Mantid::API::Workspace_sptr processChunk(Mantid::API::Workspace_sptr chunkWS);
     void runPostProcessing();
@@ -68,6 +70,7 @@ namespace LiveData
     /// The final output = the post-processed accumulation workspace
     Mantid::API::Workspace_sptr m_outputWS;
 
+    int m_runNumber; ///< The run number stored in the extracted workspace 'chunk', if any.
   };
 
 
