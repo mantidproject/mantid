@@ -143,8 +143,27 @@ namespace Mantid
       // Has the user input a runRange?
       if (!runRange.empty())
       {
-        params.setRunStart(boost::lexical_cast<double>(runNumbers.at(0)));
-        params.setRunEnd( boost::lexical_cast<double>(runNumbers.at(1)));
+        double leftSide, rightSide;
+        if (!runNumbers.at(0).empty())
+        {
+          leftSide = boost::lexical_cast<double>(runNumbers.at(0));
+        }
+        else if (runNumbers.at(0).empty() && !runNumbers.at(1).empty())
+        {
+          leftSide = boost::lexical_cast<double>(runNumbers.at(1)) - 100;
+        }
+
+        if (!runNumbers.at(1).empty())
+        {
+          rightSide = boost::lexical_cast<double>(runNumbers.at(1));
+        }
+        else if (runNumbers.at(1).empty() && !runNumbers.at(0).empty())
+        {
+          rightSide = boost::lexical_cast<double>(runNumbers.at(0)) + 100;
+        }
+
+        params.setRunStart(leftSide);
+        params.setRunEnd(rightSide);
       }
 
       std::string instrument = getPropertyValue("Instrument");
