@@ -84,7 +84,7 @@ void  MDWSTransform::checkTargetFrame(const MDEvents::MDWSDescription &TargWSDes
         if(!TargWSDescription.hasLattice())
             throw std::invalid_argument(" HKL frame needs UB matrix defined on the workspace ");
         if(!TargWSDescription.hasGoniometer())
-            throw std::invalid_argument(" HKL frame needs goniometer to be defined on the workspace ");
+           g_Log.warning()<<"  HKL frame does not have goniometer defined on the workspace. Assuming unit goniometer matrix\n";
         return;
     default:
         throw std::runtime_error(" Unexpected argument in MDWSTransform::checkTargetFrame");
@@ -142,7 +142,11 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
     {
       TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID,false);
    // Obtain the transformation matrix to Cartezian related to Crystal
-      mat = TargWSDescription.getGoniometerMatr()*TargWSDescription.m_Wtransf;
+      if(TargWSDescription.hasGoniometer())
+        mat = TargWSDescription.getGoniometerMatr()*TargWSDescription.m_Wtransf;
+      else
+        mat = TargWSDescription.m_Wtransf;
+
      break;
     }
  default:

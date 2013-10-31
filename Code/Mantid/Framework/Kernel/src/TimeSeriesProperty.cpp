@@ -665,9 +665,19 @@ namespace Mantid
     template<typename TYPE>
     double TimeSeriesProperty<TYPE>::timeAverageValue() const
     {
-      TimeSplitterType filter;
-      filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
-      return this->averageValueInFilter(filter);
+      double retVal = 0.0;
+      try
+      {
+        TimeSplitterType filter;
+        filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
+        retVal = this->averageValueInFilter(filter);
+      }
+      catch (exception)
+      {
+        //just return nan
+         retVal = std::numeric_limits<double>::quiet_NaN();
+      }
+      return retVal;
     }
 
     /** Function specialization for TimeSeriesProperty<std::string>
@@ -1066,6 +1076,23 @@ namespace Mantid
 
       m_propSortedFlag = false;
       m_filterApplied = false;
+    }
+
+    /** Clears out all but the last value in the property.
+     *  The last value is the last entry in the m_values vector - no sorting is
+     *  done or checked for to ensure that the last value is the most recent in time.
+     *  It is up to the client to call sort() first if this is a requirement.
+     */
+    template<typename TYPE>
+    void TimeSeriesProperty<TYPE>::clearOutdated()
+    {
+      if ( realSize() > 1 )
+      {
+        auto lastValue = m_values.back();
+        clear();
+        m_values.push_back(lastValue);
+        m_size = 1;
+      }
     }
 
     /**

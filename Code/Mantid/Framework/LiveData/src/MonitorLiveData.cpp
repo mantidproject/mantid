@@ -184,21 +184,24 @@ namespace LiveData
           if (OutputWS)
             runNumber = OutputWS->getRunNumber();
 
-          g_log.notice();
+          std::stringstream message;
+          message << "Run";
+          if ( runNumber != 0 ) message << " #" << runNumber;
+          message << " ended. ";
           std::string EndRunBehavior = this->getPropertyValue("EndRunBehavior");
           if (EndRunBehavior == "Stop")
           {
-            g_log.notice() << "Run #" << runNumber << " ended. Stopping live data monitoring." << std::endl;
+            g_log.notice() << message.str() << "Stopping live data monitoring.\n";
             break;
           }
           else if (EndRunBehavior == "Restart")
           {
-            g_log.notice() << "Run #" << runNumber << " ended. Clearing existing workspace." << std::endl;
+            g_log.notice() << message.str() << "Clearing existing workspace.\n";
             NextAccumulationMethod = "Replace";
           }
           else if (EndRunBehavior == "Rename")
           {
-            g_log.notice() << "Run #" << runNumber << " ended. Renaming existing workspace." << std::endl;
+            g_log.notice() << message.str() << "Renaming existing workspace.\n";
             NextAccumulationMethod = "Replace";
 
             // Now we clone the existing workspaces

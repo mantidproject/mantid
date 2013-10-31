@@ -22,6 +22,7 @@ void RotationSurface::init()
     // the actor calls this->callback for each detector
     m_unwrappedDetectors.clear();
     m_assemblies.clear();
+    m_u_correction = 0.0;
 
     size_t ndet = m_instrActor->ndetectors();
     m_unwrappedDetectors.resize(ndet);

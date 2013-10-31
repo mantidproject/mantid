@@ -49,9 +49,12 @@ namespace Algorithms
     void setOptions(const int numBins, const bool useLogBins, const bool isDist);
 
   private:
+    const std::string workspaceMethodName() const { return ""; } // Override the one from Rebin to ignore us
+
     virtual void initDocs();
     void init();
     void exec();
+
     std::map<std::string, std::string> validateInputs();
     bool m_useLogBinning;
     bool m_preserveEvents;

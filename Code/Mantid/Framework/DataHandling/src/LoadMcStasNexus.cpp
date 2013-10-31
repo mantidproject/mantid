@@ -59,33 +59,9 @@ namespace DataHandling
    */
   int LoadMcStasNexus::confidence(Kernel::NexusDescriptor & descriptor) const
   {
-    using namespace ::NeXus;
-	  // We will look at the first entry and check for a
-	  // simulation class that contains a name attribute with the value=mcstas
+    UNUSED_ARG(descriptor)
+	  // To ensure that this loader is somewhat hitten return 0
 	  int confidence(0);
-	  try
-	  {
-		  ::NeXus::File file = ::NeXus::File(descriptor.filename());
-		  auto entries = file.getEntries();
-		  if(!entries.empty())
-		  {
-			  auto firstIt = entries.begin();
-			  file.openGroup(firstIt->first,firstIt->second);
-			  file.openGroup("simulation", "NXsimulation");
-			  file.openData("information");
-
-			  std::string nameAttrValue;
-			  file.getAttr("name", nameAttrValue);
-			  if(boost::iequals(nameAttrValue, "mcstas")) confidence = 80;
-
-			  file.closeData();
-			  file.closeGroup();
-			  file.closeGroup();
-		  }
-	  }
-	  catch(::NeXus::Exception&)
-	  {
-	  }
 	  return confidence;
   }
 

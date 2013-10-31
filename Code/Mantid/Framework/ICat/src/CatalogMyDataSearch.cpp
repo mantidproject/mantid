@@ -42,8 +42,7 @@ namespace Mantid
       ICatalog_sptr catalog_sptr;
       try
       {
-        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-
+        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
       }
       catch(Kernel::Exception::NotFoundError&)
       {
@@ -59,7 +58,7 @@ namespace Mantid
       {
         catalog_sptr->myData(outputws);
       }
-      catch(std::runtime_error& e)
+      catch(std::runtime_error&)
       {
         setProperty("IsValid",false);
         throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
