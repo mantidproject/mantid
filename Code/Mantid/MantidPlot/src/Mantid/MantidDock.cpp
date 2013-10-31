@@ -1044,10 +1044,25 @@ void MantidDockWidget::plotSpectraDistributionErr()
 void MantidDockWidget::drawColorFillPlot()
 {
   // Get the selected workspaces
-  QStringList wsNames = m_tree->getSelectedWorkspaceNames();
+  const QStringList wsNames = m_tree->getSelectedWorkspaceNames();
   if( wsNames.empty() ) return;
-  m_mantidUI->drawColorFillPlots(wsNames);
 
+  // Extract child workspace names from any WorkspaceGroups selected.
+  QSet<QString> allWsNames;
+  foreach( const QString wsName, wsNames )
+  {
+    const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
+    if( wsGroup )
+    {
+      const auto children = wsGroup->getNames();
+      for( auto childWsName = children.begin(); childWsName != children.end(); ++childWsName )
+        allWsNames.insert(QString::fromStdString(*childWsName));
+    }
+    else
+      allWsNames.insert(wsName);
+  }
+
+  m_mantidUI->drawColorFillPlots(allWsNames.toList());
 }
 
 void MantidDockWidget::treeSelectionChanged()
