@@ -34,6 +34,8 @@ namespace MantidQt
       Mantid::API::IAlgorithm_sptr createCatalogAlgorithm(const std::string& algName);
       /// Obtain the documentation for a given name from the given algorithm properties.
       const std::string propertyDocumentation(const std::vector<Mantid::Kernel::Property*> &properties, const std::string &name);
+      /// Execute the given algorithm asynchronously.
+      void executeAsynchronously(Mantid::API::IAlgorithm_sptr algorithm);
 
     };
   } // namespace MantidWidgets

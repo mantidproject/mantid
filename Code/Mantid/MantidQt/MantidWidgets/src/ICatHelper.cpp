@@ -16,7 +16,7 @@ namespace MantidQt
     std::vector<std::string> ICatHelper::getInstrumentList()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
-      catalogAlgorithm->execute();
+      executeAsynchronously(catalogAlgorithm);
       // return the vector containing the list of instruments available.
       return (catalogAlgorithm->getProperty("InstrumentList"));
     }
@@ -28,7 +28,7 @@ namespace MantidQt
     std::vector<std::string> ICatHelper::getInvestigationTypeList()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
-      catalogAlgorithm->execute();
+      executeAsynchronously(catalogAlgorithm);
       // return the vector containing the list of investigation types available.
       return (catalogAlgorithm->getProperty("InvestigationTypes"));
     }
@@ -57,11 +57,7 @@ namespace MantidQt
         }
       }
       // Allow asynchronous execution to update label while search is being carried out.
-      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
-      while( !result.available() )
-      {
-        QCoreApplication::processEvents();
-      }
+      executeAsynchronously(catalogAlgorithm);
     }
 
     /**
@@ -78,11 +74,7 @@ namespace MantidQt
       catalogAlgorithm->setPropertyValue("OutputWorkspace","__dataFileResults");
 
       // Allow asynchronous execution to update label(s) while search is being carried out.
-      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
-      while( !result.available() )
-      {
-        QCoreApplication::processEvents();
-      }
+      executeAsynchronously(catalogAlgorithm);
     }
 
     /**
@@ -115,13 +107,7 @@ namespace MantidQt
       catalogAlgorithm->setProperty("FileNames",fileNames);
       catalogAlgorithm->setProperty("DownloadPath",downloadPath);
 
-      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
-      while( !result.available() )
-      {
-        //TODO: Inform the user where the file was saved to depending on result, e.g:
-        // (You do not have access to the archives. Downloading requested file over Internet...)
-        QCoreApplication::processEvents();
-      }
+      executeAsynchronously(catalogAlgorithm);
       // Return a vector containing the file paths to the files to download.
       return (catalogAlgorithm->getProperty("FileLocations"));
     }
@@ -167,7 +153,7 @@ namespace MantidQt
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
 
-      catalogAlgorithm->execute();
+      executeAsynchronously(catalogAlgorithm);
 
       if (catalogAlgorithm->getProperty("IsValid"))
       {
@@ -189,7 +175,7 @@ namespace MantidQt
 
       if(loginDialog->exec() == QDialog::Accepted)
       {
-        catalogAlgorithm->execute();
+        executeAsynchronously(catalogAlgorithm);
       }
     }
 
@@ -220,6 +206,19 @@ namespace MantidQt
     {
       // If there is an exception we want it to be thrown.
       return Mantid::API::AlgorithmManager::Instance().create(algName);
+    }
+
+    /**
+     * Execute the given algorithm asynchronously.
+     * @param algorithm :: The algorithm to execute.
+     */
+    void ICatHelper::executeAsynchronously(Mantid::API::IAlgorithm_sptr algorithm)
+    {
+      Poco::ActiveResult<bool> result(algorithm->executeAsync());
+      while(!result.available())
+      {
+        QCoreApplication::processEvents();
+      }
     }
 
   } // namespace MantidWidgets
