@@ -140,13 +140,11 @@ namespace Mantid
       command_map["BEGIN"] = BEGIN;
       command_map["RESUME"] = BEGIN;
       command_map["END_SE_WAIT"] = BEGIN;
-      command_map["START_COLLECTION"] = BEGIN;
       command_map["PAUSE"] = END;
       command_map["END"] = END;
       command_map["ABORT"] = END;
       command_map["UPDATE"] = END;
       command_map["START_SE_WAIT"] = END;
-      command_map["STOP_COLLECTION"] = END; 
       command_map["CHANGE"] = CHANGE_PERIOD;
       command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
       return command_map;
