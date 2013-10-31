@@ -74,7 +74,8 @@ _translations = {
 # entry would suffice in such an instance.
 _blacklist = [
     '',
-    'unknown'
+    'unknown',
+    'Yao, Marie',
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
@@ -82,8 +83,11 @@ _blacklist = [
 # "main" DOI only.
 whitelist = [
     'Cottrell, Stephen',
+    'Dillow, David',
+    'Granroth, Garrett',
     'Hagen, Mark',
     'Hillier, Adrian',
+    'Heller, William',
     'Howells, Spencer',
     'McGreevy, Robert',
     'Pascal, Manuel',
@@ -136,6 +140,10 @@ def _clean_up_author_list(author_list):
 
     # Translate all remaining names.
     result = [_translations[a] for a in result]
+
+    # Another check for any blacklisted names, in case we want to remove the
+    # translated name.
+    result = set(ifilterfalse(_blacklist.__contains__, result))
 
     # Return the unique list of translated names.
     return sorted(set(result))
