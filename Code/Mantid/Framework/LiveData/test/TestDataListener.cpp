@@ -90,6 +90,8 @@ namespace LiveData
     // Load a fake instrument
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10, 0.1);
     m_buffer->setInstrument(inst);
+    // Set a run number
+    m_buffer->mutableRun().addProperty("run_number", std::string("999"));
   }
 
   boost::shared_ptr<Workspace> TestDataListener::extractData()
