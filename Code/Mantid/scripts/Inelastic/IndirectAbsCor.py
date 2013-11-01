@@ -320,4 +320,5 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
             A2.append(ASSC)
             A3.append(ACSC)
             A4.append(ACC)
-	return A1, A2, A3, A4
+
+    return A1, A2, A3, A4
