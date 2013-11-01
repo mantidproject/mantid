@@ -327,7 +327,7 @@ public:
       TSM_ASSERT("Mask should NOT applied Due to start marker", maskCollectStartStop->nthValue(0)) // Mask OFF
       TSM_ASSERT("Mask SHOULD applied Due to stop marker", !maskCollectStartStop->nthValue(1)) // Mask ON
       // Compare for consistency.
-      for(size_t i = 0; i < maskBeginEnd->size(); ++i)
+      for(int i = 0; i < maskBeginEnd->size(); ++i)
       {
         TS_ASSERT_EQUALS(maskBeginEnd->nthTime(i), maskCollectStartStop->nthTime(i));
         TS_ASSERT_EQUALS(maskBeginEnd->nthValue(i), maskCollectStartStop->nthValue(i));
