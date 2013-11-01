@@ -47,7 +47,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    //DECLARE_FILELOADER_ALGORITHM(LoadAscii2);
+    DECLARE_FILELOADER_ALGORITHM(LoadAscii2);
 
     /// Sets documentation strings for this algorithm
     void LoadAscii2::initDocs()
