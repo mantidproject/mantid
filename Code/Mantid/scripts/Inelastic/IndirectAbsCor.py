@@ -251,10 +251,9 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
 
     # tsec is the angle the scattered beam makes with the normal to the sample surface.
     tsec = theta1-tcan1
-    tsec = tsec*PICONV
-
+    
     sec1 = 1./math.cos(canAngle)
-    sec2 = 1./math.cos(tsec)
+    
 
     #vector version of fact
     vecFact = np.vectorize(Fact)
@@ -279,7 +278,9 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
         #default to 1 for everything
         return ass, assc, acsc, acc
     else:
-
+        tsec = tsec*PICONV
+        sec2 = 1./math.cos(tsec)
+        
         fs = vecFact(sampleXSection, samThickness, sec1, sec2)
         
         sampleSec1 = sampleXSection * samThickness * sec1
