@@ -167,10 +167,13 @@ public:
     bkgdparmap.insert(make_pair("A0", 0.001));
     bkgdparmap.insert(make_pair("A1", 0.));
     */
+    vector<string> vecbkgdparnames(2);
+    vecbkgdparnames[0] = "A0";
+    vecbkgdparnames[1] = "A1";
     vector<double> bkgdvec(2);
     bkgdvec[0] = 0.01;
     bkgdvec[1] = 0.;
-    lebailfunction.addBackgroundFunction("Polynomial", bkgdvec, vecX.front(), vecX.back());
+    lebailfunction.addBackgroundFunction("Polynomial", 2, vecbkgdparnames, bkgdvec, vecX.front(), vecX.back());
 
     lebailfunction.function(out, vecX, true, true);
 
