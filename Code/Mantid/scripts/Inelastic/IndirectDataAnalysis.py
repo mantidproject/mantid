@@ -1037,14 +1037,16 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     sam_name = getWSprefix(inputWS)
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
         EMode='Indirect', EFixed=efixed)
+
+    nameStem = corr[:-4]
     if canWS != '':
         (instr, can_run) = getInstrRun(canWS)
-        corrections = [corr+'_1', corr+'_2', corr+'_3', corr+'_4']
+        corrections = [nameStem+'_ass', nameStem+'_assc', nameStem+'_acsc', nameStem+'_acc']
         CorrectedWS = sam_name +'Correct_'+ can_run
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='Wavelength',
             EMode='Indirect', EFixed=efixed)
     else:
-        corrections = [corr+'_1']
+        corrections = [nameStem+'_ass']
         CorrectedWS = sam_name +'Corrected'
     nHist = mtd[inputWS].getNumberHistograms()
     # Check that number of histograms in each corrections workspace matches
