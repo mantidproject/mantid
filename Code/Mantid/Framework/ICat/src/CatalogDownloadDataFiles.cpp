@@ -17,7 +17,8 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
-#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/SSLException.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/StreamCopier.h>
@@ -26,7 +27,8 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include <fstream>
 #include <iomanip>
 
-using Poco::Net::HTTPClientSession;
+using Poco::Net::HTTPSClientSession;
+using Poco::Net::Context;
 using Poco::Net::HTTPRequest;
 using Poco::Net::HTTPResponse;
 using Poco::Net::HTTPMessage;
@@ -167,8 +169,6 @@ namespace Mantid
       std::string extension = Poco::Path(fileName).getExtension();
       std::transform(extension.begin(),extension.end(),extension.begin(),tolower);
 
-      std::cerr << "The extension of this file is: " << extension << "\n";
-
       if (extension.compare("raw") == 0 || extension.compare("nxs") == 0)
       {
         return true;
@@ -193,11 +193,7 @@ namespace Mantid
       //use HTTP  Get method to download the data file from the server to local disk
       try
       {
-        // Temporary fix (can be removed when ICAT3 disabled) as URL returned is HTTPS, which will cause the
-        // HTTPResponse below to fail the download. We can replace HTTPS with HTTP and download as expected.
-        std::string newURL = URL; // Need to convert to none const to perform replacement.
-        boost::replace_first(newURL, "https", "http");
-        URI uri(newURL);
+        URI uri(URL);
 
         std::string path(uri.getPathAndQuery());
         if (path.empty())
@@ -206,12 +202,16 @@ namespace Mantid
         }
         start=clock();
 
-        HTTPClientSession session(uri.getHost(), uri.getPort());
-        HTTPRequest req(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
-        session.sendRequest(req);
+        // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
+        const Context::Ptr context = new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
+        HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
+
+        HTTPRequest request(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
+        session.sendRequest(request);
 
         HTTPResponse res;
         std::istream& rs = session.receiveResponse(res);
+
         //save file to local disk
         retVal_FullPath = saveFiletoDisk(rs,fileName);
 
@@ -220,14 +220,15 @@ namespace Mantid
         g_log.information()<<"Time taken to download file "<< fileName<<" is "<<std::fixed << std::setprecision(2) << diff <<" seconds" << std::endl;
 
       }
-      catch(Poco::SyntaxException&)
+      catch(Poco::Net::SSLException& error)
       {
-        throw std::runtime_error("Error when downloading the data file"+ fileName);
+        throw std::runtime_error(error.displayText());
       }
-      catch(Poco::Exception&)
-      {
-        throw std::runtime_error("Can not download the file "+fileName +". Path is invalid for the file.");
-      }
+      // A strange error occurs (what returns: {I/O error}, while message returns: { 9: The BIO reported an error }.
+      // This bug has been fixed in POCO 1.4 and is noted - http://sourceforge.net/p/poco/bugs/403/
+      // I have opted to catch the exception and do nothing as this allows the load/download functionality to work.
+      // However, the port the user used to download the file will be left open.
+      catch(Poco::Exception&) {}
 
       return retVal_FullPath;
     }
@@ -252,6 +253,7 @@ namespace Mantid
       {
         throw Mantid::Kernel::Exception::FileError("Error on creating File",fileName);
       }
+
       //copy the input stream to a file.
       StreamCopier::copyStream(rs, ofs);
 
