@@ -1223,6 +1223,9 @@ namespace CurveFitting
       double parvalue;
       row >> parname >> parvalue;
 
+      // Remove extra white spaces
+      boost::algorithm::trim(parname);
+
       if (parname.size() > 0 && (parname[0] == 'A' || parname == "Bkpos"))
       {
         // Insert parameter name starting with A or Bkpos (special case for FullprofPolynomial)
