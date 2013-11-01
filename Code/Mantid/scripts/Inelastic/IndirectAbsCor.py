@@ -277,7 +277,7 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
     # case where tsec is close to 90 degrees. CALCULATION IS UNRELIABLE
     if (abs(abs(tsec)-90.0) < 1.0):
         #default to 1 for everything
-        return np.ones((4,nlam))
+        return ass, assc, acsc, acc
     else:
 
         fs = vecFact(sampleXSection, samThickness, sec1, sec2)
