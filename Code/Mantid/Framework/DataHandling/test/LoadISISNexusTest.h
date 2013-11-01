@@ -120,7 +120,7 @@ public:
 
         blog = dynamic_cast<TimeSeriesProperty<bool>*>(ws->run().getLogData("running"));
         TS_ASSERT(blog);
-        TS_ASSERT_EQUALS(blog->size(),2);
+        TS_ASSERT_EQUALS(blog->size(),5);
 
         TS_ASSERT_EQUALS(ws->sample().getName(),"PMMA_SAN25_1.5%_TRANS_150");
         
