@@ -20,8 +20,8 @@ This algorithm searches for the investigations and stores the search results in 
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/ICatalog.h"
 
-
-#include<limits>
+#include <boost/algorithm/string/regex.hpp>
+#include <limits>
 
 namespace Mantid
 {
@@ -135,16 +135,48 @@ namespace Mantid
       // Obtain the ICAT4 runRange input text.
       std::string runRange = getProperty("runRange");
 
-      // A container to hold the range of run numbers.
-      std::vector<std::string> runNumbers;
-      // Split the input text by "-" and add contents to runNumbers.
-      boost::split(runNumbers,runRange,boost::is_any_of("-"));
-
       // Has the user input a runRange?
       if (!runRange.empty())
       {
-        params.setRunStart(boost::lexical_cast<double>(runNumbers.at(0)));
-        params.setRunEnd( boost::lexical_cast<double>(runNumbers.at(1)));
+        // A container to hold the range of run numbers.
+        std::vector<std::string> runNumbers;
+        // Split the input text by "-",":" or "," and add contents to runNumbers.
+        boost::algorithm::split_regex(runNumbers, runRange, boost::regex("-|:"));
+
+        double startRange = 0;
+        double endRange   = 0;
+
+        // If the user has only input a start range ("4444" or "4444-").
+        if (!runNumbers.at(0).empty())
+        {
+          startRange = boost::lexical_cast<double>(runNumbers.at(0));
+          // We set the end range to be equal now, so we do not have to do a check if it exists later.
+          endRange = boost::lexical_cast<double>(runNumbers.at(0));
+        }
+
+        // If the user has input a start and end range, or just an end range ("4444-4449" or "-4449").
+        if (runNumbers.size() == 2)
+        {
+          // Has the user input an end range...
+          if (!runNumbers.at(1).empty())
+          {
+            endRange = boost::lexical_cast<double>(runNumbers.at(1));
+
+            // If they have not chosen a start range ("-4449");
+            if (startRange == 0)
+            {
+              startRange = boost::lexical_cast<double>(runNumbers.at(1));
+            }
+          }
+        }
+
+        if (startRange > endRange)
+        {
+          throw std::runtime_error("Run end number cannot be lower than run start number.");
+        }
+
+        params.setRunStart(startRange);
+        params.setRunEnd(endRange);
       }
 
       std::string instrument = getPropertyValue("Instrument");

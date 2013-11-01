@@ -421,11 +421,17 @@
           </item>
           <item row="2" column="1">
            <widget class="QLineEdit" name="RunRange">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a start range, end range, or both seperated by a hyphen (-) or colon (:).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="inputMethodHints">
+             <set>Qt::ImhDigitsOnly</set>
+            </property>
             <property name="inputMask">
-             <string>99999-99999; </string>
+             <string/>
             </property>
             <property name="text">
-             <string>-</string>
+             <string/>
             </property>
            </widget>
           </item>

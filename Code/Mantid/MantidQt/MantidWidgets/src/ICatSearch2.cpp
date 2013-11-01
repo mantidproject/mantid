@@ -113,6 +113,10 @@ namespace MantidQt
       m_icatUiForm.resPageTxt->hide();
       m_icatUiForm.resPreviousTxt->hide();
 
+      // Limit input to: A number, 1 hyphen or colon followed by another number. E.g. 444-444, -444, 444-
+      QRegExp re("[0-9]*(-|:){1}[0-9]*");
+      m_icatUiForm.RunRange->setValidator(new QRegExpValidator(re, this));
+
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
     }
