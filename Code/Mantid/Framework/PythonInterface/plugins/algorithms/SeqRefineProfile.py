@@ -59,7 +59,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	self.declareProperty("FunctionOption", "Refine-Levenberg", StringListValidator(funcoptions), "Options of functionality")
 
 	refoptions = ["Levenberg-Marquardt", "Random Walk", "Single Peak Fit"]
-	self.declareProperty("RefinementOption", "Refine-Levenberg", StringListValidator(funcoptions), 
+	self.declareProperty("RefinementOption", "Refine-Levenberg", StringListValidator(refoptions),
 	    "Options of algorithm to refine. ")
 
 	self.declareProperty(StringArrayProperty("Parameters2Refine", values=[], direction=Direction.Input),
@@ -67,7 +67,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 
 	self.declareProperty("NumRefineCycles", 1, "Number of refinement cycles.")
 
-	bkgdtypes = ["Polynomial", "Chebyshev"]
+	bkgdtypes = ["Polynomial", "Chebyshev", "FullprofPolynomial"]
 	self.declareProperty("BackgroundType", "Polynomial", StringListValidator(bkgdtypes),
 	    "Type of background function.")
 
@@ -81,7 +81,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	self._processInputProperties()
 
 	# Instantiaze sequential refinement 
-	seqrefine = SeqRefineProfile("IDx890", globalfilename)
+	seqrefine = SeqRefineProfile("IDx890")
 
 	# Execute 
 	if self.functionoption == "Setup": 
@@ -111,7 +111,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	self.startx = self.getProperty("StartX").value
 	self.endx = self.getProperty("EndX").value
 
-	self.functionoption = slef.getProperty("FunctionOption").value
+	self.functionoption = self.getProperty("FunctionOption").value
 	if self.functionoption == "Setup":
 	    self.bkgdtype = self.getProperty("BackgroundType").value
 	    self.bkgdparws = self.getProperty("InputBackgroundParameterWorkspace").value
@@ -588,3 +588,5 @@ class RefineProfileParameters:
     
         return
 
+# Register algorithm with Mantid
+AlgorithmFactory.subscribe(RefinePowderDiffProfileSeq)
