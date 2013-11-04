@@ -3,7 +3,6 @@
 import platform, sys
 from IndirectImport import *
 if is_supported_f2py_platform():
-    fltabs = import_f2py("fltabs")
     cylabs = import_f2py("cylabs")
 else:
     unsupported_message()
@@ -120,13 +119,13 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     acscWS = name + '_acsc'
     accWS = name + '_acc'
     fname = name +'_Abs'
-    wrk = workdir + run_name
+    wrk = os.path.join(workdir, run_name)
     wrk.ljust(120,' ')
     for n in range(0,ndet):
         if geom == 'flt':
             angles = [avar, det[n]]
-            kill, A1, A2, A3, A4 = fltabs.fltabs(ncan, size, density, sigs,
-                siga, angles, waves, n, wrk, 0)
+            (A1,A2,A3,A4) = FlatAbs(ncan, size, density, sigs, siga, angles, waves)	
+            kill = 0
         if geom == 'cyl':
             astep = avar
             if (astep) < 1e-5:
@@ -203,3 +202,123 @@ def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
     if ( plotOpt == 'Angle' or plotOpt == 'Both' ):
         graph = mp.plotTimeBin(workspaces, 0)
         graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
+
+
+# FlatAbs - CALCULATE FLAT PLATE ABSORPTION FACTORS
+#
+#  Input parameters :
+#  sigs - list of scattering  cross-sections
+#  siga - list of absorption cross-sections
+#  density - list of density
+#  ncan - =0 no can, >1 with can
+#  thick - list of thicknesses ts,t1,t2
+#  angles - list of angles
+#  waves - list of wavelengths
+#  Output parameters :
+#  A1 - Ass ; A2 - Assc ; A3 - Acsc ; A4 - Acc
+
+def Fact(AMU,T,SEC1,SEC2):
+    S = AMU*T*(SEC1-SEC2)
+    F = 1.0
+    if (S == 0.):
+        F = T
+    else:
+        S = (1-math.exp(-S))/S
+        F = T*S
+    return F
+
+def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
+    PICONV = math.pi/180.
+    ssigs = sigs[0]                             #sam scatt x-sect
+    ssiga = siga[0]                             #sam abs x-sect
+    rhos = density[0]                           #sam density
+    TS = thick[0]                               #sam thicknes
+    T1 = thick[1]                               #can thickness 1
+    T2 = thick[2]                               #can thickness 2
+    csigs = sigs[1]                             #can scatt x-sect
+    csiga = siga[1]                             #can abs x-sect
+    rhoc = density[1]                           #can density
+    TCAN1 = angles[0]                           #angle can to beam
+    TCAN = TCAN1*PICONV
+    THETA1 = angles[1]                          #THETAB value - detector angle
+    THETA = PICONV*THETA1
+
+    AmuS1 = []                                # sample & can cross sections
+    AmuC1 = []
+    nlam = len(waves)
+    for n in range(0,nlam):
+       AS1 = ssigs + ssiga*waves[n]/1.8
+       AmuS1.append(AS1*rhos)
+    if (ncan > 1):
+        for n in range(0,nlam):
+            AC1 = csigs + csiga*waves[n]/1.8
+            AmuC1.append(AC1*rhoc)
+    else:
+        rhoc=0.
+
+    SEC1 = 1./math.cos(TCAN)
+    TSEC=THETA1-TCAN1    # TSEC IS THE ANGLE THE SCATTERED BEAM MAKES WITH THE NORMAL TO THE SAMPLE SURFACE.
+    A1 = []
+    A2 = []
+    A3 = []
+    A4 = []
+    if (abs(abs(TSEC)-90.0) < 1.0):            # case where TSEC is close to 90. CALCULATION IS UNRELIABLE
+        ASS = 1.0
+        for n in range(0,nlam):                #start loop over wavelengths
+            A1.append(ASS)
+            A2.append(ASS)
+            A3.append(ASS)
+            A4.append(ASS)
+    else:
+        TSEC = TSEC*PICONV
+        SEC2 = 1./math.cos(TSEC)
+        for n in range(0,nlam):                   #start loop over wavelengths
+            AMUS = AmuS1[n]
+            FS = Fact(AMUS,TS,SEC1,SEC2)
+            ES1=AMUS*TS*SEC1
+            ES2=AMUS*TS*SEC2
+            if (ncan > 1):
+                AMUC = AmuC1[n]
+                F1 = Fact(AMUC,T1,SEC1,SEC2)
+                F2 = Fact(AMUC,T2,SEC1,SEC2)
+                E11 = AMUC*T1*SEC1
+                E12 = AMUC*T1*SEC2
+                E21 = AMUC*T2*SEC1
+                E22 = AMUC*T2*SEC2
+            if (SEC2 < 0.):
+                ASS=FS/TS
+                if(ncan > 1):
+                    ASSC = ASS*math.exp(-(E11-E12))
+                    ACC1 = F1
+                    ACC2 = F2*math.exp(-(E11-E12))
+                    ACSC1 = ACC1
+                    ACSC2 = ACC2*math.exp(-(ES1-ES2))
+                else:
+                    ASSC = 1.0
+                    ACSC = 1.0
+                    ACC = 1.0
+            else:
+                ASS=math.exp(-ES2)*FS/TS
+                if(ncan > 1):
+                    ASSC = math.exp(-(E11+E22))*ASS
+                    ACC1 = math.exp(-(E12+E22))*F1
+                    ACC2 = math.exp(-(E11+E22))*F2
+                    ACSC1 = ACC1*math.exp(-ES2)
+                    ACSC2 = ACC2*math.exp(-ES1)
+                else:
+                    ASSC = 1.0
+                    ACSC = 1.0
+                    ACC = 1.0
+            tsum = T1+T2
+            if(tsum > 0.):
+                ACC = (ACC1+ACC2)/tsum
+                ACSC = (ACSC1+ACSC2)/tsum
+            else:
+                ACC = 1.0
+                ACSC = 1.0
+            A1.append(ASS)
+            A2.append(ASSC)
+            A3.append(ACSC)
+            A4.append(ACC)
+
+    return A1, A2, A3, A4

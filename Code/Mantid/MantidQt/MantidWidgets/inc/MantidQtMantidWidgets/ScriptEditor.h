@@ -97,11 +97,21 @@ public:
 
 public:
   /// Constructor
-  ScriptEditor(QWidget* parent = 0, QsciLexer* lexer = NULL);
+  ScriptEditor(QWidget* parent = 0, QsciLexer* lexer = NULL,
+               const QString & settingsGroup = "");
   ///Destructor
   ~ScriptEditor();
 
-  // Set a new code lexer for this object
+  /// Set the name of the group to save the settings for
+  void setSettingsGroup(const QString & name);
+  /// Settings group
+  QString settingsGroup() const;
+  /// Read settings from persistent store
+  void readSettings();
+  /// Write settings from persistent store
+  void writeSettings();
+
+  /// Set a new code lexer for this object
   void setLexer(QsciLexer *);
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
@@ -165,20 +175,18 @@ public slots:
   /// Raise find replace dialog
   virtual void showFindReplaceDialog();
 
-  /// Override the zoomIn slot
-  virtual void zoomIn();
-  /// Override the zoomIn slot
-  virtual void zoomIn(int level);
-  /// Override the zoomOut slot
-  virtual void zoomOut();
-  /// Override the zoomOut slot
-  virtual void zoomOut(int level);
+  /// Override zoomTo slot
+  virtual void zoomTo(int level);
 
 signals:
   /// Inform observers that undo information is available
   void undoAvailable(bool);
   /// Inform observers that redo information is available
   void redoAvailable(bool);
+  /// Emitted when a zoom in is requested
+  void textZoomedIn();
+  /// Emitted when a zoom in is requested
+  void textZoomedOut();
 
 protected:
   /// Write to the given device
@@ -187,12 +195,6 @@ protected:
 private slots:
 
 private:
-  /// Settings group
-  QString settingsGroup() const;
-  /// Read settings from persistent store
-  void readSettings();
-  /// Write settings from persistent store
-  void writeSettings();
   /// Forward a KeyPress event to QsciScintilla base class. Necessary due to bug in QsciScintilla
   void forwardKeyPressToBase(QKeyEvent *event);
 
@@ -211,10 +213,10 @@ private:
   static QColor g_error_colour;
   /// previous key
   int m_previousKey;
-  /// How many times the zoom level is changed
-  int m_zoomLevel;
   /// A pointer to the find replace dialog
   FindReplaceDialog *m_findDialog;
+  /// Name of group that the settings are stored under
+  QString m_settingsGroup;
 };
 
 

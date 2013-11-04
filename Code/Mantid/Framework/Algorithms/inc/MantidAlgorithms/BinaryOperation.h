@@ -73,12 +73,13 @@ namespace Mantid
        * Index into vector: workspace index in the lhs;
        * Value at that index: workspace index of the rhs to apply to the WI in the lhs. -1 if not found.
        */
-      typedef std::vector< int64_t >  BinaryOperationTable;
+      typedef std::vector< int64_t>  BinaryOperationTable;
+      typedef boost::shared_ptr<BinaryOperationTable>  BinaryOperationTable_sptr;
 
-      static BinaryOperationTable * buildBinaryOperationTable(API::MatrixWorkspace_const_sptr lhs, API::MatrixWorkspace_const_sptr rhs);
+      static BinaryOperationTable_sptr
+        buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr & lhs, const API::MatrixWorkspace_const_sptr & rhs);
 
 
-    //protected:
     private:
       // Overridden Algorithm methods
       void init();

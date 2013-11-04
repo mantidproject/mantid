@@ -248,14 +248,20 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 dataY.append(2); dataE.append(2)
             else:
                 dataY.append(1); dataE.append(1)
-                
-        # Create scalar from data and use to scale result.
-        CreateWorkspace(OutputWorkspace="scaling", DataX=dataX, DataY=dataY, DataE=dataE, UnitX="dSpacing")
-        scalar = mtd["scaling"]
-        Divide(LHSWorkspace=result, RHSWorkspace=scalar, OutputWorkspace=result)
+        
+        # apply scalar data to result workspace
+        for i in range(0, result.getNumberHistograms()):
+            resultY = result.dataY(i)
+            resultE = result.dataE(i)
+
+            resultY = resultY / dataY
+            resultE = resultE / dataE
+
+            result.setY(i,resultY)
+            result.setE(i,resultE)
         
         # Delete all workspaces we've created, except the result.
-        for ws in self._vanMap.getMap().values() + [scalar]:
+        for ws in self._vanMap.getMap().values():
             DeleteWorkspace(Workspace=ws)
         
         self.setProperty("OutputWorkspace", result)

@@ -4,8 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFuncRwp.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
 #include "MantidCurveFitting/BFGS_Minimizer.h"
+#include "MantidCurveFitting/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -48,6 +50,37 @@ public:
     fun->setParameter("b",2.2);
 
     boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    costFun->setFittingFunction(fun,domain,values);
+
+    SimplexMinimizer s;
+    s.initialize(costFun);
+    TS_ASSERT(s.minimize());
+    TS_ASSERT_DELTA(costFun->val(),0.0000,0.0001);
+    TS_ASSERT_DELTA(fun->getParameter("a"),3.3,0.01);
+    TS_ASSERT_DELTA(fun->getParameter("b"),4.4,0.01);
+    TS_ASSERT_EQUALS(s.getError(),"success");
+  }
+
+  void test_With_Simplex_Rwp()
+  {
+    std::vector<double> x(10),y(10), sqrty(10);
+    for(size_t i = 0; i < x.size(); ++i)
+    {
+      x[i] = 0.1 * double(i);
+      y[i] = 3.3 * x[i] + 4.4;
+      sqrty[i] = sqrt(fabs(y[i]));
+    }
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitData(y);
+    values->setFitWeights(sqrty);
+
+    boost::shared_ptr<UserFunction> fun(new UserFunction);
+    fun->setAttributeValue("Formula","a*x+b");
+    fun->setParameter("a",1.1);
+    fun->setParameter("b",2.2);
+
+    boost::shared_ptr<CostFuncRwp> costFun(new CostFuncRwp);
     costFun->setFittingFunction(fun,domain,values);
 
     SimplexMinimizer s;
@@ -196,6 +229,40 @@ public:
 
     TS_ASSERT_DELTA(fun->getParameter("Height"),7.6,0.01);
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"),1.0,1e-9);
+    TS_ASSERT_EQUALS(s.getError(),"success");
+
+  }
+
+  void test_With_LM_Rwp()
+  {
+    std::vector<double> x(10),y(10), e(10);
+    for(size_t i = 0; i < x.size(); ++i)
+    {
+      x[i] = 0.1 * double(i);
+      y[i] =  9.9 * exp( -(x[i])/0.5 );
+      e[i] = 1./sqrt(y[i]);
+    }
+    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitData(y);
+    values->setFitWeights(e);
+
+    API::IFunction_sptr fun(new ExpDecay);
+    fun->setParameter("Height", 19.);
+    fun->setParameter("Lifetime", 0.1);
+
+    boost::shared_ptr<CostFuncRwp> costFun(new CostFuncRwp);
+    costFun->setFittingFunction(fun,domain,values);
+
+    LevenbergMarquardtMDMinimizer s;
+    s.initialize(costFun);
+
+    TS_ASSERT_DELTA(costFun->val(),0.64, 0.05);
+    TS_ASSERT(s.minimize());
+    TS_ASSERT_DELTA(costFun->val(),0.0000, 0.00001);
+
+    TS_ASSERT_DELTA(fun->getParameter("Height"), 9.9,0.01);
+    TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 0.5,1e-9);
     TS_ASSERT_EQUALS(s.getError(),"success");
 
   }

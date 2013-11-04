@@ -198,6 +198,12 @@ namespace Crystal
       double rho =  sampleMaterial.numberDensity();
       if (smu == EMPTY_DBL()) smu =  sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
       if (amu == EMPTY_DBL()) amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+      g_log.notice() << "Sample number density = " << rho << " atoms/Angstrom^3\n";
+      g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
+                     << "    Coherent = "   << sampleMaterial.cohScatterXSection() << " barns\n"
+                     << "    Incoherent = " << sampleMaterial.incohScatterXSection() << " barns\n"
+                     << "    Total = "      << sampleMaterial.totalScatterXSection() << " barns\n"
+                     << "    Absorption = " << sampleMaterial.absorbXSection() << " barns\n";
     }
     else  //Save input in Sample with wrong atomic number and name
     {
@@ -206,6 +212,10 @@ namespace Crystal
       Material mat("SetInAnvredCorrection", neutron, 1.0);
       ws->mutableSample().setMaterial(mat);
     }
+    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
+                   << "LinearAbsorptionCoef = "   << amu << " 1/cm\n"
+                   << "Radius = " << radius << " cm\n"
+    			   << "Power Lorentz corrections = " << power_th << " \n";
     API::Run & run = ws->mutableRun();
     if ( run.hasProperty("Radius") )
     {

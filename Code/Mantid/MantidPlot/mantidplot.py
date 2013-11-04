@@ -15,6 +15,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 import os
 import time
+import mantid.api
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
@@ -208,6 +209,31 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
+    
+def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.VolumeNormalization, error_bars = False):
+    """Open a 1D plot of a MDWorkspace.
+    
+    Args:
+        source: Workspace(s) to plot
+        plot_axis: Index of the plot axis (defaults to auto-select)
+        normalization: Type of normalization required (defaults to volume)
+        error_bars: Flag for error bar plotting.
+    Returns:
+        A handle to the matrix containing the image data.
+    """
+    workspace_names = __getWorkspaceNames(source)
+    if len(workspace_names) == 0:
+        raise ValueError("No workspace names given to plot")
+    for name in workspace_names:
+        if not mantid.api.mtd.doesExist(name):
+            raise ValueError("%s does not exist in the workspace list" % name)
+        if not isinstance(mantid.api.mtd[name], mantid.api.IMDWorkspace):
+            raise ValueError("%s is not an IMDWorkspace" % name)
+        non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
+        if not len(non_integrated_dims) == 1:
+            raise ValueError("%s must have a single non-integrated dimension in order to be rendered via plotMD" % name)
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization, error_bars))
+    return graph
 
 def fitBrowser():
     """

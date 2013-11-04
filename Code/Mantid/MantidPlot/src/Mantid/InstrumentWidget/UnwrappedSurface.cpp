@@ -15,6 +15,7 @@
 #include <QMouseEvent>
 #include <QApplication>
 #include <QMessageBox>
+#include <QTransform>
 
 #include <cfloat>
 #include <limits>
@@ -566,6 +567,10 @@ void UnwrappedSurface::setFlippedView(bool on)
     {
         m_flippedView = on;
         m_viewRect.xFlip();
+        for(int i = 0;i < m_zoomStack.size(); ++i)
+        {
+            m_zoomStack[i].xFlip();
+        }
     }
 }
 
@@ -640,6 +645,16 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
 
     paint.fillRect(u - iw/2, v - ih/2, iw, ih, color);
 
+  }
+
+  // draw custom stuff
+  if ( !picking )
+  {
+      // TODO: this transform should be done for drawing the detectors
+      QTransform transform;
+      m_viewRect.findTransform( transform, QRectF(0, 0, vwidth, vheight) );
+      paint.setTransform(transform);
+      drawCustom(&paint);
   }
 }
 

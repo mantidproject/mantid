@@ -92,6 +92,8 @@ public:
   virtual bool hasFilter(const QString &name);
   /// Check if pipeline has given workspace.
   virtual pqPipelineSource *hasWorkspace(const QString &name);
+  /// Check if pipeline has a given workspace type.
+  virtual bool hasWorkspaceType(const QString &wsTypeName);
   /// Check if file/workspace is a MDHistoWorkspace.
   virtual bool isMDHistoWorkspace(pqPipelineSource *src);
   /// Check if file/workspace is a Peaks one.

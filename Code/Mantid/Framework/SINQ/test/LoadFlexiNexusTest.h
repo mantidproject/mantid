@@ -1,0 +1,130 @@
+#ifndef __LOADFLEXINEXUSTEST
+#define  __LOADFLEXINEXUSTEST
+
+#include <cxxtest/TestSuite.h>
+#include "MantidSINQ/LoadFlexiNexus.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/cow_ptr.h"
+
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
+using namespace Mantid;
+
+
+class LoadFlexiNexusTest: public CxxTest::TestSuite {
+public:
+
+
+	void testName() {
+		LoadFlexiNexus loader;
+		TS_ASSERT_EQUALS( loader.name(), "LoadFlexiNexus");
+	}
+
+	void testInit() {
+		LoadFlexiNexus loader;
+		TS_ASSERT_THROWS_NOTHING( loader.initialize());
+		TS_ASSERT( loader.isInitialized());
+	}
+
+	void testExec3D() {
+		LoadFlexiNexus loader;
+		loader.initialize();
+		loader.setPropertyValue("Filename", "amor2013n000366.hdf");
+		loader.setPropertyValue("Dictionary", "mantidamor.dic");
+		std::string outputSpace = "LoadFlexiNexusTest_out";
+		loader.setPropertyValue("OutputWorkspace", outputSpace);
+		TS_ASSERT_THROWS_NOTHING( loader.execute());
+
+		// test data 
+		IMDHistoWorkspace_sptr data =  
+		  AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
+			outputSpace);
+		long nBin = data->getNPoints();
+		long sum = 0;
+		double *sdata = data->getSignalArray();
+		for(long i = 0; i < nBin; i++){
+		  sum += (long)sdata[i];
+                }
+		TS_ASSERT_EQUALS(sum,18816);
+
+		// test dimensions
+		boost::shared_ptr<const IMDDimension> dimi = data->getDimension(0);
+		TS_ASSERT_EQUALS(dimi->getNBins(),360);
+		TS_ASSERT_DELTA(dimi->getMinimum(),32471.4,.1);
+		TS_ASSERT_DELTA(dimi->getMaximum(),194590.43,.1);
+
+		dimi = data->getDimension(1);
+		TS_ASSERT_EQUALS(dimi->getNBins(),256);
+		TS_ASSERT_DELTA(dimi->getMinimum(),-95,.1);
+		TS_ASSERT_DELTA(dimi->getMaximum(),94.25,.1);
+
+		dimi = data->getDimension(2);
+		TS_ASSERT_EQUALS(dimi->getNBins(),128);
+		TS_ASSERT_DELTA(dimi->getMinimum(),-86,.1);
+		TS_ASSERT_DELTA(dimi->getMaximum(),84.65,.1);
+
+		// test some meta data
+		std::string title = data->getTitle();
+		size_t found = title.find("Selene");
+		TS_ASSERT_DIFFERS(found,std::string::npos);
+
+		ExperimentInfo_sptr info;
+		info = data->getExperimentInfo(0);
+		const Run r = info->run();
+		Mantid::Kernel::Property *p = r.getProperty("chopper_detector_distance"); 
+		std::string cd = p->value();
+		found = cd.find("6423");
+		TS_ASSERT_DIFFERS(found,std::string::npos);
+		  
+		AnalysisDataService::Instance().clear();
+	}
+
+	void testExec1D() {
+		LoadFlexiNexus loader;
+		loader.initialize();
+		loader.setPropertyValue("Filename", "amor2013n000366.hdf");
+		loader.setPropertyValue("Dictionary", "mantidamors1.dic");
+		std::string outputSpace = "LoadFlexiNexusTest_out";
+		loader.setPropertyValue("OutputWorkspace", outputSpace);
+		TS_ASSERT_THROWS_NOTHING( loader.execute());
+
+		// test data 
+		MatrixWorkspace_sptr data =  
+		  AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+			outputSpace);
+		TS_ASSERT_EQUALS(data->getNumberHistograms(),1);
+		MantidVec& X = data->dataX(0);
+		MantidVec& Y = data->dataY(0);
+		double dSum = .0;
+		for(size_t i = 0; i < Y.size(); i++){
+		  dSum += Y[i];
+		} 
+		TS_ASSERT_EQUALS(dSum,198812);
+
+		// test X
+		TS_ASSERT_EQUALS(X.size(),360);
+		TS_ASSERT_DELTA(X[0],32471.4,.1);
+		TS_ASSERT_DELTA(X[X.size()-1],194590.43,.1);
+		
+
+		// test some meta data
+		std::string title = data->getTitle();
+		size_t found = title.find("Selene");
+		TS_ASSERT_DIFFERS(found,std::string::npos);
+
+		const Run r = data->run();
+		Mantid::Kernel::Property *p = r.getProperty("chopper_detector_distance"); 
+		std::string cd = p->value();
+		found = cd.find("6423");
+		TS_ASSERT_DIFFERS(found,std::string::npos);
+		  
+		AnalysisDataService::Instance().clear();
+	}
+
+};
+#endif

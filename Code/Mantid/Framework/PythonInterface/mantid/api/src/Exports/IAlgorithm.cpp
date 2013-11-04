@@ -7,6 +7,7 @@
 #endif
 #include "MantidKernel/Strings.h"
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <Poco/Thread.h>
 
@@ -19,6 +20,7 @@ using Mantid::Kernel::Property;
 using Mantid::Kernel::Direction;
 using Mantid::API::IAlgorithm;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
 
 namespace
@@ -219,6 +221,12 @@ void export_ialgorithm()
     .def("version", &IAlgorithm::version, "Returns the version number of the algorithm")
     .def("category", &IAlgorithm::category, "Returns the category containing the algorithm")
     .def("categories", &IAlgorithm::categories, "Returns the list of categories this algorithm belongs to")
+    .def("workspaceMethodName",&IAlgorithm::workspaceMethodName, 
+         "Returns a name that will be used when attached as a workspace method. Empty string indicates do not attach")
+    .def("workspaceMethodOn", &IAlgorithm::workspaceMethodOn, return_value_policy<VectorToNumpy>(), // creates a list for strings
+         "Returns a set of class names that will have the method attached. Empty list indicates all types")
+    .def("workspaceMethodInputProperty", &IAlgorithm::workspaceMethodInputProperty,
+         "Returns the name of the input workspace property used by the calling object")
     .def("getOptionalMessage", &IAlgorithm::getOptionalMessage, "Returns the optional user message attached to the algorithm")
     .def("getWikiSummary", &IAlgorithm::getWikiSummary, "Returns the summary found on the wiki page")
     .def("getWikiDescription", &IAlgorithm::getWikiDescription, "Returns the description found on the wiki page using wiki markup")

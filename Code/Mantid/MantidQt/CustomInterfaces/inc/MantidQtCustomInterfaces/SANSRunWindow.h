@@ -71,6 +71,8 @@ class SANSRunWindow : public MantidQt::API::UserSubWindow
 public:
   /// Name of the interface
   static std::string name() { return "SANS ISIS"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "SANS"; }
 
   ///Stores the batch or single run mode selection
   enum States {
@@ -252,8 +254,8 @@ private slots:
   /// Adds a warning message to the tab title
   void setLoggerTabTitleToWarn();
   /// Handle selection of the transmission
-  void transSelectorChanged(int ); 
-
+  void transSelectorChanged(int );
+  void loadTransmissionSettings();
   
 private:
   /// used to specify the range of validation to do

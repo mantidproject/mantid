@@ -13,6 +13,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidTestHelpers/FacilityHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::LiveData;
@@ -22,11 +23,17 @@ using namespace Mantid::Kernel;
 
 class MonitorLiveDataTest : public CxxTest::TestSuite
 {
+private:
+  FacilityHelper::ScopedFacilities loadTESTFacility;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static MonitorLiveDataTest *createSuite() { return new MonitorLiveDataTest(); }
   static void destroySuite( MonitorLiveDataTest *suite ) { delete suite; }
+
+  MonitorLiveDataTest() : loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST")
+  {}
 
   void setUp()
   {
@@ -198,8 +205,8 @@ public:
     // Cancel the algo before exiting test (avoids segfault)
     alg1->cancel();
 
-    // The first workspace got cloned to a new name
-    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_0");
+    // The first workspace got cloned to a new name (the suffix is set in the TestDataListener)
+    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_999");
     TS_ASSERT_EQUALS( ws1->getNumberEvents(), 4*200);
 
     // And this is the current run

@@ -148,14 +148,16 @@ namespace Mantid
           }
         }
 
-        if (!m_filename.empty())
+        if ( m_filename.empty() )
         {
-          // Remove the path from the filename for use with the InstrumentDataService
-          const std::string::size_type stripPath = m_filename.find_last_of("\\/");
-          std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
-          // Strip off "_Definition.xml"
-          m_instName = instrumentFile.substr(0,instrumentFile.find("_Def"));
+          throw Exception::NotFoundError("Unable to find an Instrument Definition File for",m_instName);
         }
+
+        // Remove the path from the filename for use with the InstrumentDataService
+        const std::string::size_type stripPath = m_filename.find_last_of("\\/");
+        std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
+        // Strip off "_Definition.xml"
+        m_instName = instrumentFile.substr(0,instrumentFile.find("_Def"));
 
         // Initialize the parser with the the XML text loaded from the IDF file
         parser.initialize(m_filename, m_instName, Strings::loadFile(m_filename));
@@ -168,8 +170,8 @@ namespace Mantid
       // Check whether the instrument is already in the InstrumentDataService
       if ( InstrumentDataService::Instance().doesExist(instrumentNameMangled) )
       {
-          // If it does, just use the one from the one stored there
-          instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+        // If it does, just use the one from the one stored there
+        instrument = InstrumentDataService::Instance().retrieve(instrumentNameMangled);
       }
       else
       {

@@ -57,6 +57,9 @@ public:
   virtual const std::string category() const { return "Utility\\Workspaces"; }
 
 private:
+  const std::string workspaceMethodName() const { return "clone"; }
+  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
+
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   /// Initialisation code

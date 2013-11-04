@@ -20,10 +20,12 @@ set ( TEST_PY_FILES
   SANSWideAngleCorrectionTest.py
   SortXAxisTest.py
   Stitch1DTest.py
+  Stitch1DManyTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
+  #FixGSASInstrumentFileTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

@@ -598,15 +598,15 @@ namespace CurveFitting
       if (omega <= NEG_DBL_MAX || omega >= DBL_MAX || omega != omega)
       {
         stringstream errss;
-        errss << "Find omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << "\n";
+        errss << "Peak (" << mH << mK << mL << "): TOF = " << m_centre << ", dX = " << x << ", (" << x/m_fwhm << " FWHM) ";
+        errss << "Omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << "\n";
         errss << "  u = " << u << ", v = " << v << ", erfc(y) = " << gsl_sf_erfc(y)
               << ", erfc(z) = " << gsl_sf_erfc(z) << "\n";
-        errss << "  alpha = " << alpha << ", x = " << x << " sigma2 = " << sigma2
+        errss << "  alpha = " << alpha << ", beta = " << beta << " sigma2 = " << sigma2
               << ", N = " << N << "\n";
         g_log.warning(errss.str());
       }
     }
-
     g_log.debug() << "[DB] Final Value of Omega = " << omega << ".\n";
 
     return omega;
