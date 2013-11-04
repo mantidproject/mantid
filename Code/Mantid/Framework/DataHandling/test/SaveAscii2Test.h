@@ -69,7 +69,7 @@ public:
     std::getline(in,binlines);
 
     boost::split(binstr, binlines,boost::is_any_of(","));
-    for (int i = 0; i < binstr.size(); i++)
+    for (size_t i = 0; i < binstr.size(); i++)
     {
       bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
     }
@@ -80,7 +80,7 @@ public:
     std::getline(in,binlines);
     bins.clear();
     boost::split(binstr, binlines,boost::is_any_of(","));
-    for (int i = 0; i < binstr.size(); i++)
+    for (size_t i = 0; i < binstr.size(); i++)
     {
       bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
     }
@@ -145,7 +145,7 @@ public:
     std::getline(in,binlines);
 
     boost::split(binstr, binlines,boost::is_any_of(","));
-    for (int i = 0; i < binstr.size(); i++)
+    for (size_t i = 0; i < binstr.size(); i++)
     {
       bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
     }
@@ -156,7 +156,7 @@ public:
     std::getline(in,binlines);
     bins.clear();
     boost::split(binstr, binlines,boost::is_any_of(","));
-    for (int i = 0; i < binstr.size(); i++)
+    for (size_t i = 0; i < binstr.size(); i++)
     {
       bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
     }

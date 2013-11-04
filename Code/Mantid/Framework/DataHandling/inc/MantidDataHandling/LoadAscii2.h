@@ -78,7 +78,7 @@ namespace Mantid
       //write the values in the current line to teh end fo teh current spectra
       void addToCurrentSpectra(std::list<std::string> & columns);
       //check that the nubmer of columns in the current line match the number found previously
-      void checkLineColumns(const int & cols) const;
+      void checkLineColumns(const size_t & cols) const;
       //interpret a line that has been deemed valid enough to look at.
       void parseLine(const std::string & line, std::list<std::string> & columns, const int & lineNo);
       //find the number of collums we should expect from now on

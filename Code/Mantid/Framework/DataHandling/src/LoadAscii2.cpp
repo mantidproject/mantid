@@ -331,7 +331,7 @@ namespace Mantid
           }
 
           std::list<std::string> columns;
-          int lineCols = this->splitIntoColumns(columns, line);
+          size_t lineCols = this->splitIntoColumns(columns, line);
           if (lineCols != 1)
           {
           try
@@ -416,7 +416,7 @@ namespace Mantid
     * Check if the file has been found to incosistantly include spectra IDs
     * @param[in] cols : the number of columns in the current line of data
     */
-    void LoadAscii2::checkLineColumns(const int & cols) const
+    void LoadAscii2::checkLineColumns(const size_t & cols) const
     {
       //a size of 2, 3 or 4 is a valid data set, but first see if it's the same as the first observed one
       if (m_baseCols != cols)
