@@ -1523,9 +1523,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   // --------- Loading only one bank ? ----------------------------------
   std::string onebank = getProperty("BankName");
-  bool doOneBank = (onebank != "");
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
-  if (doOneBank && !monitors)
+  if ((!onebank.empty()) && (!monitors))
   {
     bool foundIt = false;
     for (std::vector<string>::iterator it=bankNames.begin(); it!= bankNames.end(); ++it)
