@@ -432,7 +432,6 @@ namespace Algorithms
       {
         // Find the value of the log at the time of this event
         const double logValue = log->getSingleValue( pulseTimes[eventIndex] );
-        // TODO: Refactor getBinIndex to use a binary search and allow out-of-range values
         if ( logValue >= XValues.front() && logValue < XValues.back() )
         {
           PARALLEL_ATOMIC
@@ -445,7 +444,7 @@ namespace Algorithms
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    // For now, the errors are the sqrt of the counts. TODO: change as part of weighted event handling
+    // The errors are the sqrt of the counts so long as we don't deal with weighted events.
     std::transform( Y.begin(),Y.end(),outputWorkspace->dataE(0).begin(), (double(*)(double)) std::sqrt );
 
     setProperty("OutputWorkspace",outputWorkspace);
