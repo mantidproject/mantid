@@ -345,7 +345,10 @@ namespace Mantid
             continue;
           }
           }
-          if( numCols < 0 ) numCols = lineCols;
+          if( numCols == 0 )
+          {
+          numCols = lineCols;
+          }
           if( lineCols == m_baseCols || (lineCols == 1))
           {
             ++matchingRows;
