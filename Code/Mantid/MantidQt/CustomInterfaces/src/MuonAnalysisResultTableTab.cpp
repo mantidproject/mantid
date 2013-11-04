@@ -279,9 +279,15 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 */
 void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& fittedWsList)
 {
+  const std::string RUN_NO_LOG = "run_number";
+  const std::string RUN_NO_TITLE = "Run Number";
+
   // Clear the logs if not empty and then repopulate.
   QVector<QString> logsToDisplay;
   
+  // Add run number explicitly as it is the only non-timeseries log value we are using 
+  logsToDisplay.push_back(RUN_NO_TITLE.c_str());
+
   for (int i=0; i<fittedWsList.size(); i++)
   { 
     QMap<QString, double> allLogs;
@@ -295,7 +301,14 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 
     const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
     std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
-    
+
+    // Try to get a run number for the workspace
+    if (ws->run().hasProperty(RUN_NO_LOG))
+    {
+      std::string runNumber = ws->run().getLogData(RUN_NO_LOG)->value();
+      allLogs[RUN_NO_TITLE.c_str()] = boost::lexical_cast<double>(runNumber);
+    }
+
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
 
@@ -550,8 +563,7 @@ void MuonAnalysisResultTableTab::createTable()
   {
     // Create the results table
     Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    table->addColumn("str","Run Number");
-    table->getColumn(table->columnCount()-1)->setPlotType(6);
+
     for(int i=0; i<logsSelected.size(); ++i)
     {
       table->addColumn("double", logsSelected[i].toStdString());
@@ -600,19 +612,8 @@ void MuonAnalysisResultTableTab::createTable()
       {
         if (wsSelected[i] == itr.key())
         {
-          //Add new row and add run number
+          // Add new row
           Mantid::API::TableRow row = table->appendRow();
-          QString run(itr.key().left(itr.key().find(';')));
-        
-          for (int j=0; j<run.size(); ++j)
-          {
-            if(run[j].isNumber())
-            {
-              run = run.right(run.size() - j);
-              break;
-            }
-          }
-          row << run.toStdString();
 
           // Add log values
           QMap<QString, double> logsAndValues = itr.value();
