@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
   DakotaChiSquaredTest.py
+  FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
