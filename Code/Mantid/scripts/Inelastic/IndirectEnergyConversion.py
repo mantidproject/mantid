@@ -85,57 +85,84 @@ def resolution(files, iconOpt, rebinParam, bground,
             graph = mp.plotSpectrum(iconWS, 0)
         return iconWS
 
-def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=True,
-        Plot=False):
+def sliceReadRawFile(fname, spectra, Verbose):
+
+    if Verbose:
+        logger.notice('Reading file :'+fname)
+
+    #Load the raw file
+    (dir, filename) = os.path.split(fname)
+    (root, ext) = os.path.splitext(filename)
+    
+    Load(Filename=fname, OutputWorkspace=root, SpectrumMin=spectra[0], SpectrumMax=spectra[1],
+        LoadLogFiles=False)
+
+    return root
+
+def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=True, Plot=False):
+
     StartTime('Slice')
+
+    CheckXrange(xRange,'Time')
+
     workdir = config['defaultsave.directory']
+
     outWSlist = []
-    CheckXrange(xrange,'Time')
+    useTwoRanges = (len(xRange) != 2)
+    useCalib = (calib != '')
     calib_wsname = None
-    if calib != '':
-        calib_wsname = '__calibration'
-        Load(Filename=calib,OutputWorkspace=calib_wsname)
+
+    #Load algorithm requires conversion from zero based spectra
+    spec = [x+1 for x in spec]
+
+    #load the calibration file
+    if useCalib:
+        calib_wsname = Load(Filename=calib, OutputWorkspace='__calibration', SpectrumMin=spec[0], SpectrumMax=spec[1])
+
     for file in inputfiles:
-        if Verbose:
-            logger.notice('Reading file :'+file)
-        (direct, filename) = os.path.split(file)
-        (root, ext) = os.path.splitext(filename)
-        if spec == [0, 0]:
-            Load(Filename=file, OutputWorkspace=root, LoadLogFiles=False)
-        else:
-            Load(Filename=file, OutputWorkspace=root, SpectrumMin=spec[0], SpectrumMax=spec[1],
-                LoadLogFiles=False)
-        nhist,ntc = CheckHistZero(root)
-        if calib != '':
+        
+        rawFile = sliceReadRawFile(file, spec, Verbose)
+        nhist,ntc = CheckHistZero(rawFile)
+
+        #use calibration file is desired
+        if useCalib:
+
             if Verbose:
                 logger.notice('Using Calibration file :'+calib)
-            useCalib(detectors=root)
-        run = mtd[root].getRun().getLogData("run_number").value
-        sfile = root[:3].lower() + run + '_' + suffix + '_slice'
-        if (len(xrange) == 2):
-            Integration(InputWorkspace=root, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
+
+            Divide(LHSWorkspace=rawFile, RHSWorkspace=calib_wsname, OutputWorkspace=rawFile)
+
+        #construct output workspace name
+        run = mtd[rawFile].getRun().getLogData("run_number").value
+        sfile = rawFile[:3].lower() + run + '_' + suffix + '_slice'
+
+        if not useTwoRanges:
+            Integration(InputWorkspace=rawFile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
                 StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
         else:
-            CalculateFlatBackground(InputWorkspace=root, OutputWorkspace=sfile, StartX=xrange[2], EndX=xrange[3], 
+            CalculateFlatBackground(InputWorkspace=rawFile, OutputWorkspace=sfile, StartX=xRange[2], EndX=xRange[3], 
                     Mode='Mean')
-            Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
+            Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
                 StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
+
         if Save:
-            o_path = os.path.join(workdir, sfile+'.nxs')					# path name for nxs file
+            # path name for nxs file
+            o_path = os.path.join(workdir, sfile+'.nxs')
             SaveNexusProcessed(InputWorkspace=sfile, Filename=o_path)
+
             if Verbose:
                 logger.notice('Output file :'+o_path)
+
         outWSlist.append(sfile)
-        DeleteWorkspace(root)
+        DeleteWorkspace(rawFile)
+
     if Plot:
         graph = mp.plotBin(outWSlist, 0)
+
     if calib_wsname is not None:
         DeleteWorkspace(Workspace=calib_wsname)
+
     EndTime('Slice')
-        
-def useCalib(detectors):
-    Divide(LHSWorkspace=detectors, RHSWorkspace='__calibration', OutputWorkspace=detectors)
-    return detectors
     
 def getInstrumentDetails(instrument):
     instr_name = '__empty_' + instrument
