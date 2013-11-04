@@ -2219,7 +2219,7 @@ void Table::setHeader(QStringList header)
 int Table::colIndex(const QString& name)
 {
 //  std::cout << "Col " << name.toStdString() << std::endl;
-  int pos = name.find("_",false);
+  int pos = name.lastIndexOf("_");
   QString label = name.right(name.length()-pos-1);
   return col_label.findIndex(label);
 //  return col_label.findIndex(name);
