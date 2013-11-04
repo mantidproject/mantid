@@ -8,7 +8,7 @@ set ( SRC_FILES
 	src/FitPropertyBrowser.cpp
 	src/FunctionBrowser.cpp
 	src/ICatSearch2.cpp
-	src/ICatHelper.cpp
+	src/CatalogHelper.cpp
 	src/InstrumentSelector.cpp
 	src/MessageDisplay.cpp
 	src/MWDiag.cpp
@@ -46,7 +46,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/ICatSearch2.h
-    inc/MantidQtMantidWidgets/ICatHelper.h
+    inc/MantidQtMantidWidgets/CatalogHelper.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h

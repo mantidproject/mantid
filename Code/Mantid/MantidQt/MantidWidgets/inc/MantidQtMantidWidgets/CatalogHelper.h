@@ -1,5 +1,5 @@
-#ifndef MANTIDQTWIDGETS_ICATHELPER_H_
-#define MANTIDQTWIDGETS_ICATHELPER_H_
+#ifndef MANTIDQTWIDGETS_CATALOGHELPER_H_
+#define MANTIDQTWIDGETS_CATALOGHELPER_H_
 
 #include "MantidAPI/AlgorithmManager.h"
 #include <QWidget>
@@ -8,7 +8,7 @@ namespace MantidQt
 {
   namespace MantidWidgets
   {
-    class ICatHelper
+    class CatalogHelper
     {
 
     public:
@@ -38,4 +38,4 @@ namespace MantidQt
     };
   } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTWIDGETS_ICATHELPER_H_
+#endif // MANTIDQTWIDGETS_CATALOGHELPER_H_

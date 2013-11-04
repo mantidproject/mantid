@@ -3,7 +3,7 @@
 
 #include "ui_ICatSearch2.h"
 #include "WidgetDllOption.h"
-#include "MantidQtMantidWidgets/ICatHelper.h"
+#include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtMantidWidgets/CheckboxHeader.h"
 
 #include <QCalendarWidget>
@@ -186,7 +186,7 @@ namespace MantidQt
       /// The calendar widget that will allow the user to select start and end date/times.
       QCalendarWidget * m_calendar;
       /// The helper class that accesses ICAT algorithmic functionality.
-      ICatHelper * m_icatHelper;
+      CatalogHelper * m_icatHelper;
       /// The directory to save the downloaded dataFiles.
       QString m_downloadSaveDir;
     };
