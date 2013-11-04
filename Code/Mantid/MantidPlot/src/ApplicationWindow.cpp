@@ -197,7 +197,6 @@
 #include "MantidQtMantidWidgets/ICatSearch.h"
 #include "MantidQtMantidWidgets/ICatSearch2.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
-#include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
@@ -1298,7 +1297,6 @@ void ApplicationWindow::initMainMenu()
 //  icat->addAction(actionMydataSearch);// my data search menu item
 //  icat->addAction(actionICatSearch);//search menu item
   icat->addAction(actionICatSearch2); // new ICAT GUI menu item
-//  icat->addAction(actionAdvancedSearch); //advanced search menu item
   icat->addAction(actionICatLogout);//logout menu item
   disableActions();
 }
@@ -13412,10 +13410,6 @@ void ApplicationWindow::createActions()
   actionICatLogout->setToolTip(tr("Catalog Logout"));
   connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
 
-  actionAdvancedSearch = new QAction("Advanced Search",this);
-  actionAdvancedSearch->setToolTip(tr("Catalog Advanced Search"));
-  connect(actionAdvancedSearch, SIGNAL(activated()), this, SLOT(ICatAdvancedSearch()));
-
   actionWaterfallPlot = new QAction(QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
   connect(actionWaterfallPlot, SIGNAL(activated()), this, SLOT(waterfallPlot()));
 
@@ -17461,20 +17455,7 @@ void ApplicationWindow::ICatMyDataSearch()
     delete usr_win;
   }
 }
-void ApplicationWindow ::ICatAdvancedSearch()
-{
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* advanced_search = new MantidQt::MantidWidgets::ICatAdvancedSearch(usr_win);
-  if(advanced_search)
-  {
-    setGeometry(usr_win,advanced_search);
-  }
-  else
-  {
-    delete usr_win;
-  }
-}
+
 void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interface)
 {   
   QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(),

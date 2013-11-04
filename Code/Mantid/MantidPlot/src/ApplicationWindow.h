@@ -1179,7 +1179,6 @@ private:
   // Handler for ICat CatalogLogout
   void ICatLogout();
 
-  void ICatAdvancedSearch();
 
   /// method to create widgets from mantid qt;
   void setGeometry(MdiSubWindow* usr_win,QWidget* user_interface);
@@ -1418,7 +1417,7 @@ private:
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch,*actionICatSearch2,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
+  QAction *actionICatLogin,*actionICatSearch,*actionICatSearch2,*actionMydataSearch,*actionICatLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
