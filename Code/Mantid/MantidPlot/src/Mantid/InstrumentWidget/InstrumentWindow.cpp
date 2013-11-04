@@ -1192,6 +1192,11 @@ void InstrumentWindow::setSurface(ProjectionSurface* surface)
     m_simpleDisplay->setSurface(sharedSurface);
     m_simpleDisplay->update();
   }
+  UnwrappedSurface *unwrappedSurface = dynamic_cast<UnwrappedSurface*>( surface );
+  if ( unwrappedSurface )
+  {
+    m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
+  }
 }
 
 /// Return the width of the instrunemt display
@@ -1295,11 +1300,11 @@ bool InstrumentWindow::isGLEnabled() const
 void InstrumentWindow::createTabs(QSettings& settings)
 {
     //Render Controls
-    InstrumentWindowRenderTab *renderTab = new InstrumentWindowRenderTab(this);
-    connect(renderTab,SIGNAL(setAutoscaling(bool)),this,SLOT(setColorMapAutoscaling(bool)));
-    connect(renderTab,SIGNAL(rescaleColorMap()),this,SLOT(setupColorMap()));
-    mControlsTab->addTab( renderTab, QString("Render"));
-    renderTab->loadSettings(settings);
+    m_renderTab = new InstrumentWindowRenderTab(this);
+    connect(m_renderTab,SIGNAL(setAutoscaling(bool)),this,SLOT(setColorMapAutoscaling(bool)));
+    connect(m_renderTab,SIGNAL(rescaleColorMap()),this,SLOT(setupColorMap()));
+    mControlsTab->addTab( m_renderTab, QString("Render"));
+    m_renderTab->loadSettings(settings);
 
     // Pick controls
     InstrumentWindowPickTab *pickTab = new InstrumentWindowPickTab(this);
@@ -1319,6 +1324,6 @@ void InstrumentWindow::createTabs(QSettings& settings)
 
     connect(mControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
 
-    m_tabs << renderTab << pickTab << maskTab << treeTab;
+    m_tabs << m_renderTab << pickTab << maskTab << treeTab;
 
 }

@@ -95,8 +95,8 @@ namespace Mantid
       /// run LoadNexusProcessed
       void runLoadNexusProcessed();
 
-        /// run LoadSNSNexus
-      void runLoadSNSNexus();
+        /// run LoadTOFRawNexus
+      void runLoadTOFRawNexus();
     };
   } // namespace DataHandling
 } // namespace Mantid

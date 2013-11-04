@@ -224,6 +224,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         Reducer.log('one2one map selected')
 
     
+          
     if  Reducer.det_cal_file != None : 
         if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
             Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
@@ -232,6 +233,12 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     else:
         Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 
+    
+    if mtd.doesExist(str(sample_run))==True and Reducer.det_cal_file == None:
+        Reducer.log('For data input type: workspace detector calibration must be specified','error')
+        Reducer.log('use Keyword det_cal_file with a valid detctor file or run number','error')
+        return
+              
     # check if reducer can find all non-run files necessary for the reduction before starting long run. 
     Reducer.check_necessary_files(monovan_run);
     
@@ -242,8 +249,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
         #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workpsace        
         sumfilename=Reducer.instr_name+str(sample_run[0])+'.raw'
-        sample_run =sum_files(Reducer.instr_name,sumfilename, sample_run)
-        common.apply_calibration(Reducer.instr_name,sample_run,Reducer.det_cal_file)
+        sample_run =sum_files(sumfilename, sample_run)
 
         #sample_run = RenameWorkspace(InputWorkspace=accum,OutputWorkspace=inst_name+str(sample_run[0])+'.raw')
 
@@ -648,7 +654,7 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
 
 
 
-def sum_files(inst_name, accumulator, files):
+def sum_files(accumulator, files):
     """ Custom sum for multiple runs
 
         Left for compartibility as internal summation had some unspecified problems. 
@@ -664,7 +670,7 @@ def sum_files(inst_name, accumulator, files):
 
          for filename in files:
               print 'Summing run ',filename,' to workspace ',accumulator
-              temp = common.load_run(inst_name,filename, force=False)
+              temp = common.load_run(filename, force=False)
 
               if accum_name in mtd: # add current workspace to the existing one
                   if not isinstance(accumulator,api.Workspace):
@@ -677,7 +683,7 @@ def sum_files(inst_name, accumulator, files):
 
          return accumulator
     else:
-        temp = common.load_run(inst_name,files, force=False)
+        temp = common.load_run(files, force=False)
         accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
         return accumulator;
 

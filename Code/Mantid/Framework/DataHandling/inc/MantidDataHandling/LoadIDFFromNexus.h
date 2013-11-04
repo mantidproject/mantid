@@ -8,14 +8,6 @@
 
 namespace Mantid
 {
-
-  namespace Geometry
-  {
-    class CompAssembly;
-    class Component;
-    class Instrument;
-  }
-
   namespace DataHandling
   {
     /** @class LoadIDFFromNexus LoadInstrumentFromNexus.h DataHandling/LoadIDFFromNexus.h
@@ -36,10 +28,7 @@ namespace Mantid
     <LI> Workspace - The name of the workspace in which to use as a basis for any data to be added.</LI>
     </UL>
 
-    @author Karl Palmen, ISIS, RAL (LoadInstrumentFromRaw)
-
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -68,10 +57,10 @@ namespace Mantid
       virtual ~LoadIDFFromNexus() {}
 
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "LoadIDFFromNexus";};
+      virtual const std::string name() const { return "LoadIDFFromNexus";}
 
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 1;};
+      virtual int version() const { return 1;}
 
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Instrument";}
@@ -79,15 +68,12 @@ namespace Mantid
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
-
       /// Overwrites Algorithm method. Does nothing at present
       void init();
-
       /// Overwrites Algorithm method
       void exec();
 
-      /// The name and path of the input file
-      std::string m_filename;
+      void runLoadParameterFile(const API::MatrixWorkspace_sptr & workspace);
     };
 
   } // namespace DataHandling

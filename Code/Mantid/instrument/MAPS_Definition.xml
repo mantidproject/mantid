@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="MAPS" valid-from   ="1900-01-31 23:59:59"
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="MAPS" valid-from   ="1900-01-31 23:59:59"
                         valid-to     ="2100-01-31 23:59:59"
 		        last-modified="2011-09-30 13:30:00">
 
@@ -2113,25 +2114,4 @@
     <id start="909418001" end="909418256" />             
   </idlist>   
   
-  <!-- DETECTOR PARAMETERS -->
-  <component-link name="monitors">
-   <parameter name="DelayTime">
-      <value units="microseconds" val="0"/>
-   </parameter>
-  </component-link>
-
-  <!-- Set the same across the reset of the instrument -->
-  <component-link name = "MAPS">
-    <parameter name="TubePressure">
-      <value units="atm" val="10.0"/>
-    </parameter>
-    <parameter name="TubeThickness">
-      <value units="metre" val="0.0008"/>
-    </parameter>
-    <parameter name="DelayTime">
-      <value units="microseconds" val="-9.5"/>
-    </parameter>
-  </component-link>
-
 </instrument>
-

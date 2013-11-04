@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="MARI" valid-from   ="1900-01-31 23:59:59"
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="MARI" valid-from   ="1900-01-31 23:59:59"
                         valid-to     ="2100-01-31 23:59:59"
 		        last-modified="2009-09-15 00:00:00">
 
@@ -1333,37 +1334,5 @@
   
   <idlist idname="monitor">
     <id start="1" end="3" />   
-  </idlist>
-  
-  <!--DETECTOR PARAMETERS-->
-  <component-link name="monitor">
-   <parameter name="DelayTime">
-      <value units="microseconds" val="0"/>
-   </parameter>
-  </component-link>
-
-  <component-link name="low angle bank">
-    <parameter name="TubePressure">
-      <value units="atm" val="10.0"/>
-    </parameter>
-    <parameter name="TubeThickness">
-      <value units="metre" val="0.0008"/>
-    </parameter>
-    <parameter name="DelayTime">
-      <value units="microseconds" val="-3.9"/>
-    </parameter>
-  </component-link>
-
-  <component-link name="wide angle bank">
-    <parameter name="TubePressure">
-      <value units="atm" val="10.0"/>
-    </parameter>
-    <parameter name="TubeThickness">
-      <value units="metre" val="0.0008"/>
-    </parameter>
-    <parameter name="DelayTime">
-      <value units="microseconds" val="-3.9"/>
-    </parameter>
-  </component-link>
-
+  </idlist>  
 </instrument>

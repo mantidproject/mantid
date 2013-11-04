@@ -66,14 +66,16 @@ public:
   bool isEventWorkspace( const std::string & event_ws_name );
 
   /// Load and event file and convert to MD workspace
-  bool loadAndConvertToMD( const std::string & file_name,
-                           const std::string & ev_ws_name,
-                           const std::string & md_ws_name,
-                                 double        maxQ,
-                                 bool          do_lorentz_corr,
-                                 bool          load_det_cal,
-                           const std::string & det_cal_file,
-                           const std::string & det_cal_file2 );
+  bool loadAndConvertToMD(const std::string & file_name,
+                          const std::string & ev_ws_name,
+                          const std::string & md_ws_name,
+                          const double        minQ,
+                          const double        maxQ,
+                          const bool          do_lorentz_corr,
+                          const bool          load_data,
+                          const bool          load_det_cal,
+                          const std::string & det_cal_file,
+                          const std::string & det_cal_file2 );
 
   /// Find peaks in MD workspace and set peaks into peaks workspace
   bool findPeaks( const std::string & md_ws_name, 
@@ -98,7 +100,7 @@ public:
                        double              tolerance );
 
   /// Index the peaks using the indexing of the peaks in the peaks workspace
-  bool findUBUsingIndexedPeaks( const std::string & peaks_ws_name );
+  bool findUBUsingIndexedPeaks(const std::string & peaks_ws_name, double tolerance );
 
   /// Load the UB matrix from a file
   bool loadIsawUB( const std::string & peaks_ws_name,
@@ -143,7 +145,11 @@ public:
                               double        peak_radius,
                               double        inner_radius,
                               double        outer_radius,
-                              bool          integrate_edge );
+                              bool          integrate_edge,
+                              bool          use_cylinder_integration,
+                              double        cylinder_length,
+                              double        cylinder_percent_bkg,
+                        const std::string & cylinder_profile_fit);
 
   /// Integrate an event workspace using 2-D peak fitting integration 
   bool fitIntegrate( const std::string & peaks_ws_name,

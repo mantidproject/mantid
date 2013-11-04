@@ -76,6 +76,8 @@ public:
   virtual const std::string alias() const { return ""; }
 
 protected:
+  const std::string workspaceMethodName() const { return ""; } // Override the one from Rebin to ignore us
+
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods

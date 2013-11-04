@@ -513,6 +513,110 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
 
 }
 
+  void test_auto_update_cascade(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
+    std::vector<string> list_of_files;
+    TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
+    TS_ASSERT (list_of_files.size() == 5);
+    std::string folder_name = "TofConv";
+    std::string file_name_readme = folder_name+"/README.txt";
+    std::string file_name_conv = folder_name+"/TofConverter.py";
+    // before downloading the file is REMOTE_ONLY
+    TS_ASSERT(repo->fileStatus(file_name_readme) == Mantid::API::REMOTE_ONLY);
+
+    // do download
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_name_readme));
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_name_conv));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+
+    // after downloading the file is BOTH_UNCHANGED
+    TS_ASSERT(repo->fileStatus(file_name_readme) == Mantid::API::BOTH_UNCHANGED);
+    TS_ASSERT(repo->fileStatus(file_name_conv) == Mantid::API::BOTH_UNCHANGED);
+
+    TS_ASSERT(repo->setAutoUpdate(file_name_readme, true) == 1);
+
+    // set this file for AutoUpdate (return 3: cascaded to 3 entries)
+    TS_ASSERT(repo->setAutoUpdate(folder_name, true) == 3);
+    TS_ASSERT(repo->fileInfo(folder_name).auto_update == true);
+    TS_ASSERT(repo->fileInfo(file_name_readme).auto_update == true);
+    TS_ASSERT(repo->fileInfo(file_name_conv).auto_update == true);
+
+
+    // remove the folder
+    {
+    	std::string path_to_folder = std::string(local_rep).append(folder_name);
+    	Poco::File f(path_to_folder);
+    	f.remove(true);
+    }
+
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+    TS_ASSERT(repo->fileInfo(folder_name).auto_update == false);
+    TS_ASSERT(repo->fileInfo(file_name_readme).auto_update == false);
+    TS_ASSERT(repo->fileInfo(file_name_conv).auto_update == false);
+
+    // download recursively
+    TS_ASSERT_THROWS_NOTHING(repo->download(folder_name));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+
+
+    TS_ASSERT(repo->fileInfo(folder_name).auto_update == false);
+    TS_ASSERT(repo->fileInfo(file_name_readme).auto_update == false);
+    TS_ASSERT(repo->fileInfo(file_name_conv).auto_update == false);
+
+  }
+
+
+  void test_auto_update_cascade_remove_all_internal_files(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
+    std::vector<string> list_of_files;
+    TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles());
+    TS_ASSERT (list_of_files.size() == 5);
+    std::string folder_name = "TofConv";
+    TS_ASSERT_THROWS_NOTHING(repo->download(folder_name));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+    TS_ASSERT(repo->setAutoUpdate(folder_name, true) == 3);
+
+
+
+    std::string file_name_readme = folder_name+"/README.txt";
+    std::string file_name_conv = folder_name+"/TofConverter.py";
+
+
+    // remove the folder
+    std::cout << "Removing children files" << std::endl;
+    {
+
+    	{
+    		std::string path_to_readme = std::string(local_rep).append(file_name_readme);
+    		Poco::File f(path_to_readme);
+    		f.remove();
+    	}
+    	{
+    		std::string path_to_conv = std::string(local_rep).append(file_name_conv);
+    		Poco::File f(path_to_conv);
+    		f.remove();
+    	}
+    }
+    std::cout << "children files removed" << std::endl;
+
+    // without internal files, the folder should lose the auto_update flag.
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+    TS_ASSERT(repo->fileInfo(folder_name).auto_update == false);
+    TS_ASSERT(repo->fileInfo(file_name_readme).auto_update == false);
+    TS_ASSERT(repo->fileInfo(file_name_conv).auto_update == false);
+
+    // download recursively
+    TS_ASSERT_THROWS_NOTHING(repo->download(folder_name));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+
+
+    TS_ASSERT(repo->fileInfo(folder_name).auto_update == false);
+    TS_ASSERT(repo->fileInfo(file_name_readme).auto_update == false);
+    TS_ASSERT(repo->fileInfo(file_name_conv).auto_update == false);
+
+  }
+
+
 
 
 
