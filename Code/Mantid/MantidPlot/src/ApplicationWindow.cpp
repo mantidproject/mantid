@@ -196,7 +196,6 @@
 
 #include "MantidQtMantidWidgets/ICatSearch.h"
 #include "MantidQtMantidWidgets/ICatSearch2.h"
-#include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
@@ -1294,7 +1293,6 @@ void ApplicationWindow::initMainMenu()
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
   icat->addAction(actionICatLogin);//Login menu item
-//  icat->addAction(actionMydataSearch);// my data search menu item
 //  icat->addAction(actionICatSearch);//search menu item
   icat->addAction(actionICatSearch2); // new ICAT GUI menu item
   icat->addAction(actionICatLogout);//logout menu item
@@ -13402,10 +13400,6 @@ void ApplicationWindow::createActions()
   actionICatSearch->setToolTip(tr("Catalog Basic Search"));
   connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
 
-  actionMydataSearch=new QAction("My Data Search",this);
-  actionMydataSearch->setToolTip(tr("Catalog MyData Search"));
-  connect(actionMydataSearch, SIGNAL(activated()), this, SLOT(ICatMyDataSearch()));
-
   actionICatLogout=new QAction("Logout",this);
   actionICatLogout->setToolTip(tr("Catalog Logout"));
   connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
@@ -17435,20 +17429,6 @@ void ApplicationWindow::ICatIsisSearch()
   if(icatsearch_interface)
   {
     setGeometry(usr_win,icatsearch_interface);
-  }
-  else
-  {
-    delete usr_win;
-  }
-}
-void ApplicationWindow::ICatMyDataSearch()
-{	
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* mydatsearch = new MantidQt::MantidWidgets::ICatMyDataSearch(usr_win);
-  if(mydatsearch)
-  {
-    setGeometry(usr_win,mydatsearch);
   }
   else
   {
