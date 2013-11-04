@@ -318,7 +318,9 @@ namespace Mantid
         const int rowsToMatch(5);
         // Have a guess where the data starts. Basically say, when we have say "rowsToMatch" lines of pure numbers
         // in a row then the line that started block is the top of the data
-        int numCols(-1), matchingRows(0), row(0);
+        int matchingRows = 0;
+        int row = 0;
+        size_t numCols = 0;
         std::string line;
         std::vector<double> values;
         while( getline(file,line) )
