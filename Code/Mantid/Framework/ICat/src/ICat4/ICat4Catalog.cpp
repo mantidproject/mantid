@@ -181,13 +181,6 @@ namespace Mantid
         querySegments.push_back("InvestigationUser <-> User[name LIKE '%" + inputs.getInvestigatorSurName() + "%']");
       }
 
-      // Datafile name
-      if(!inputs.getDatafileName().empty())
-      {
-        querySegments.push_back("Dataset <-> Datafile[name = '" + inputs.getDatafileName() + "']");
-        queryDataset = true;
-      }
-
       // Run start and end
       if(inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)
       {

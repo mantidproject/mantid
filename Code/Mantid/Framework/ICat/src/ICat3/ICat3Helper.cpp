@@ -799,6 +799,12 @@ namespace Mantid
       // request object
       boost::shared_ptr<ns1__searchByAdvanced> req_sptr(new ns1__searchByAdvanced );
 
+      if (inputs.getMyData())
+      {
+        doMyDataSearch(outputws);
+        return;
+      }
+
       //session id
       boost::shared_ptr<std::string > sessionId_sptr(new std::string);
       req_sptr->sessionId=sessionId_sptr.get();
@@ -835,8 +841,6 @@ namespace Mantid
         req_sptr->advancedSearchDetails->dateRangeEnd =  enddate_sptr.get();
         *req_sptr->advancedSearchDetails->dateRangeEnd = inputs.getEndDate();
       }
-
-      req_sptr->advancedSearchDetails->caseSensitive=inputs.getCaseSensitive();
 
       // investigation include
       boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
@@ -886,14 +890,6 @@ namespace Mantid
       if(!inputs.getInvestigatorSurName().empty())
       {
         req_sptr->advancedSearchDetails->investigators.push_back(inputs.getInvestigatorSurName());
-      }
-
-      //datafile name
-      boost::shared_ptr<std::string > datafilename_sptr(new std::string);
-      if(!inputs.getDatafileName().empty())
-      {
-        req_sptr->advancedSearchDetails->datafileName = datafilename_sptr.get();
-        *req_sptr->advancedSearchDetails->datafileName = inputs.getDatafileName();
       }
 
       //rb number

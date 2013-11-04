@@ -56,10 +56,6 @@ namespace Mantid
        * @param endDate :: end date for search
        */
       void setEndDate(const time_t& endDate);
-      /**This method  sets the CaseSensitive
-       *@param bCase :: flag to do case sensitive  search
-       */
-      void setCaseSensitive(bool bCase);
 
       /**This method  sets the keywords
        *@param keywords :: the key words used for searching investigations
@@ -96,11 +92,6 @@ namespace Mantid
        */
       void setInvestigationType(const std::string& invstType);
 
-      /**This method  sets datafileName
-       *@param datafileName :: data file name used for search
-       */
-      void setDatafileName(const std::string& datafileName );
-
       /**
        * Sets the "My data only" checkbox.
        * @param flag :: Flag to search in "My data" only.
@@ -128,10 +119,6 @@ namespace Mantid
        *@returns end date for investigations serch
        */
       const time_t& getEndDate() const;
-      /**This method  returns case sensitive flag
-       *@returns  case sensitive flag
-       */
-      bool getCaseSensitive() const;
 
       /**This method  returns keywords used for searching
        *@returns keywords
@@ -168,11 +155,6 @@ namespace Mantid
        */
       const std::string& getInvestigationType() const;
 
-      /**This method  returns datafileName
-       *@returns m_datafileName
-       */
-      const std::string& getDatafileName() const;
-
       /**This method returns the time_t value for a Date which is in "DD/MM/YYYY" format
        *@param sDate :: input date string
        */
@@ -193,8 +175,6 @@ namespace Mantid
       std::string m_instrName;
       /// search keywords
       std::string m_keywords;
-      /// case sensitive
-      bool m_caseSensitive;
       /// start date
       time_t m_startDate;
       /// end date
@@ -211,8 +191,6 @@ namespace Mantid
       std::string m_RbNumber;
       /// investigation type
       std::string m_investigationType;
-      /// data file name
-      std::string m_datafileName;
       /// My data checkbox
       bool m_myData;
     };

@@ -6,9 +6,8 @@ namespace Mantid
   namespace ICat
   {
     /// constructor
-    CatalogSearchParam::CatalogSearchParam():m_startRun(0),m_endRun(0),m_caseSensitive(false),
-        m_startDate(0),m_endDate(0)
-    {}
+    CatalogSearchParam::CatalogSearchParam() : m_startRun(0),m_endRun(0), m_myData(false),
+        m_startDate(0),m_endDate(0) {}
     /// Destructor
     CatalogSearchParam::~CatalogSearchParam(){}
     /** This method  sets start date
@@ -31,10 +30,6 @@ namespace Mantid
      *  @param endDate end date for search
      */
     void CatalogSearchParam::setEndDate(const time_t& endDate){m_endDate=endDate;}
-    /** This method  sets the CaseSensitive
-     *  @param bCase  flag to do case sensitive  search
-     */
-    void CatalogSearchParam::setCaseSensitive(bool bCase){m_caseSensitive=bCase;}
 
     /** This method  sets the InvestigationInclude
      *  @param keywords keywords used for search
@@ -70,12 +65,6 @@ namespace Mantid
      * @param invstType type of investigation
      */
     void CatalogSearchParam::setInvestigationType(const std::string& invstType){m_investigationType = invstType;}
-
-    /** This method  sets datafileName
-     *@param datafileName name of the file
-     */
-    void CatalogSearchParam::setDatafileName(const std::string& datafileName ){ m_datafileName =datafileName;}
-
     /**
      * Sets the "My data only" checkbox.
      * @param flag :: Flag to search in "My data" only.
@@ -104,10 +93,6 @@ namespace Mantid
      */
     const time_t& CatalogSearchParam::getEndDate()const{return m_endDate;}
 
-    /** This method  returns case sensitive flag
-     *  @returns  case sensitive flag
-     */
-    bool CatalogSearchParam::getCaseSensitive()const{return m_caseSensitive;}
     /** This method  returns the enum for data search in icat db
      *  @returns  investigation include
      */
@@ -143,11 +128,6 @@ namespace Mantid
         @ returns type of the investigation
      */
     const std::string& CatalogSearchParam::getInvestigationType()const{return m_investigationType;}
-
-    /** This method  returns datafileName
-     * @returns name of the data file
-     */
-    const std::string& CatalogSearchParam::getDatafileName()const{return m_datafileName;}
 
     /**This method saves the date components to C library struct tm
      *@param sDate :: string containing the date
