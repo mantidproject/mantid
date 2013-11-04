@@ -45,7 +45,8 @@ public:
     {
         mkICP();
         mkGood();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_good.path(),"good");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -93,7 +94,8 @@ public:
     {
         mkICP();
         mkLate();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_late.path(),"late");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -128,7 +130,8 @@ public:
     {
         mkICP();
         mkEarly();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_early.path(),"early");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -162,7 +165,8 @@ public:
     {
         mkICP();
         mkSingle();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_single.path(),"single");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -185,7 +189,8 @@ public:
     {
         mkICP();
         mkStr();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_str.path(),"str");
         TS_ASSERT(p1);
         TimeSeriesProperty<std::string>* tp1 = dynamic_cast<TimeSeriesProperty<std::string>*>(p1);
@@ -217,7 +222,8 @@ public:
     void testConstructionFromFileUsingICPVariant_CHANGE_PERIOD()
     {
       mkICPVariant();
-      LogParser lp(icp_file.path());
+      Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+      LogParser lp(icp_log);
       const Property * prop = lp.createAllPeriodsLog();
       const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
       TS_ASSERT(timeseriesprop);
@@ -397,7 +403,8 @@ public:
     {
       if ( icp_file.exists() ) icp_file.remove();
         mkGood();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_good.path(),"good");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);

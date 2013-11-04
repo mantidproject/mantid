@@ -63,8 +63,6 @@ namespace Mantid
       static Kernel::Property* createLogProperty(const std::string& logFName, const std::string& name);
 
     public:
-      /// Create given the icpevent file name
-      LogParser(const std::string& eventFName);
       /// Create given the icpevent log property
       LogParser(const Kernel::Property* log);
       /// Destructor

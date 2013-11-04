@@ -193,63 +193,6 @@ namespace Mantid
       }
     }
 
-    /** 
-    * Constructor.
-    * @param eventFName :: ICPevent file name.
-    */
-    LogParser::LogParser(const std::string& eventFName)
-      :m_nOfPeriods(1)
-    {
-      Kernel::TimeSeriesProperty<int>* periods = new Kernel::TimeSeriesProperty<int> (periodsLogName());
-      Kernel::TimeSeriesProperty<bool>* status = new Kernel::TimeSeriesProperty<bool> (statusLogName());
-      m_periods.reset( periods );
-      m_status.reset( status );
-
-      std::ifstream file(eventFName.c_str());
-      if (!file)
-      {
-        periods->addValue(Kernel::DateAndTime() + Kernel::DateAndTimeHelpers::oneSecond, 1);
-        status->addValue(Kernel::DateAndTime() + Kernel::DateAndTimeHelpers::oneSecond,true);
-        g_log.warning()<<"Cannot open ICPevent file "<<eventFName<<". Period 1 assumed for all data.\n";
-        return;
-      }
-
-      // Command map. BEGIN means start recording, END is stop recording, CHANGE_PERIOD - the period changed
-      CommandMap command_map = createCommandMap();
-
-      std::string str,start_time;
-      m_nOfPeriods = 1;
-
-      while(Mantid::Kernel::extractToEOL(file,str))
-      {
-        std::string stime,sdata;
-        stime = str.substr(0,19);
-        sdata = str.substr(19);
-        if (start_time.empty()) start_time = stime;
-
-        std::string scom;
-        std::istringstream idata(sdata);
-        idata >> scom;
-        commands com = command_map[scom];
-        if (com == CHANGE_PERIOD)
-        {
-          tryParsePeriod(scom, DateAndTime(stime), idata, periods);
-        }
-        else if (com == BEGIN)
-        {
-          status->addValue(stime,true);
-        }
-        else if (com == END)
-        {
-          status->addValue(stime,false);
-        }
-      };
-
-      if (periods->size() == 0) periods->addValue(start_time,1);
-      if (status->size() == 0) status->addValue(start_time,true);
-
-    }
-
     /** Create given the icpevent log property.
     *  @param log :: A pointer to the property
     */
