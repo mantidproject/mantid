@@ -7,7 +7,7 @@ set ( SRC_FILES
 	src/FindDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/FunctionBrowser.cpp
-	src/ICatSearch2.cpp
+	src/CatalogSearch.cpp
 	src/CatalogHelper.cpp
 	src/InstrumentSelector.cpp
 	src/MessageDisplay.cpp
@@ -45,7 +45,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
-    inc/MantidQtMantidWidgets/ICatSearch2.h
+    inc/MantidQtMantidWidgets/CatalogSearch.h
     inc/MantidQtMantidWidgets/CatalogHelper.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
@@ -77,7 +77,7 @@ set ( INC_FILES
 # QtDesigner UI files to process
 set ( UI_FILES 
 	inc/MantidQtMantidWidgets/DataSelector.ui
-    inc/MantidQtMantidWidgets/ICatSearch2.ui
+    inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui

@@ -194,7 +194,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
-#include "MantidQtMantidWidgets/ICatSearch2.h"
+#include "MantidQtMantidWidgets/CatalogSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
@@ -563,8 +563,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 
   loadCustomActions();
 
-  // Nullify icatsearch
-  icatsearch = NULL;
+  // Nullify catalogSearch
+  catalogSearch = NULL;
 
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser")
@@ -1291,9 +1291,9 @@ void ApplicationWindow::initMainMenu()
 
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
-  icat->addAction(actionICatLogin);//Login menu item
-  icat->addAction(actionICatSearch2); // new ICAT GUI menu item
-  icat->addAction(actionICatLogout);//logout menu item
+  icat->addAction(actionCatalogLogin);//Login menu item
+  icat->addAction(actionCatalogSearch); // ICAT GUI menu item
+  icat->addAction(actionCatalogLogout);//logout menu item
   disableActions();
 }
 
@@ -9558,11 +9558,11 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   mantidUI->shutdown();
 
-  if (icatsearch)
+  if (catalogSearch)
   {
-    icatsearch->disconnect();
-    delete icatsearch;
-    icatsearch = NULL;
+    catalogSearch->disconnect();
+    delete catalogSearch;
+    catalogSearch = NULL;
   }
 
   if( scriptingWindow )
@@ -13386,17 +13386,17 @@ void ApplicationWindow::createActions()
   actionPanPlot = new QAction(QIcon(":/panning.png"), tr("Panning tool"), this);
   connect(actionPanPlot, SIGNAL(activated()), this, SLOT(panOnPlot()));
 
-  actionICatLogin  = new QAction("Login",this);
-  actionICatLogin->setToolTip(tr("Catalog Login"));
-  connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
+  actionCatalogLogin  = new QAction("Login",this);
+  actionCatalogLogin->setToolTip(tr("Catalog Login"));
+  connect(actionCatalogLogin, SIGNAL(activated()), this, SLOT(CatalogLogin()));
 
-  actionICatSearch2 = new QAction("Search",this);
-  actionICatSearch2->setToolTip(tr("Search data in archives."));
-  connect(actionICatSearch2, SIGNAL(activated()), this, SLOT(ICatSearch2()));
+  actionCatalogSearch = new QAction("Search",this);
+  actionCatalogSearch->setToolTip(tr("Search data in archives."));
+  connect(actionCatalogSearch, SIGNAL(activated()), this, SLOT(CatalogSearch()));
 
-  actionICatLogout=new QAction("Logout",this);
-  actionICatLogout->setToolTip(tr("Catalog Logout"));
-  connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
+  actionCatalogLogout = new QAction("Logout",this);
+  actionCatalogLogout->setToolTip(tr("Catalog Logout"));
+  connect(actionCatalogLogout, SIGNAL(activated()), this, SLOT(CatalogLogout()));
 
   actionWaterfallPlot = new QAction(QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
   connect(actionWaterfallPlot, SIGNAL(activated()), this, SLOT(waterfallPlot()));
@@ -16251,7 +16251,7 @@ ApplicationWindow::~ApplicationWindow()
   delete hiddenWindows;
   delete scriptingWindow;
   delete d_text_editor;
-  delete icatsearch;
+  delete catalogSearch;
   while(!d_user_menus.isEmpty())
   {
     QMenu *menu = d_user_menus.takeLast();
@@ -17395,23 +17395,23 @@ void ApplicationWindow::panOnPlot()
   g->enablePanningMagnifier();
 }
 /// Handler for ICat Login Menu
-void ApplicationWindow::ICatLogin()
+void ApplicationWindow::CatalogLogin()
 {
   mantidUI->executeAlgorithm("CatalogLogin",1);
 }
 
-void ApplicationWindow::ICatSearch2()
+void ApplicationWindow::CatalogSearch()
 {
-  if ( icatsearch == NULL || icatsearch)
+  if (catalogSearch == NULL || catalogSearch)
   {
     // Only one ICAT GUI will appear, and that the previous one will be overridden.
     // E.g. if a user opens the ICAT GUI without being logged into ICAT they will need to
     // login in and then click "Search" again.
-    delete icatsearch;
-    icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
+    delete catalogSearch;
+    catalogSearch = new MantidQt::MantidWidgets::CatalogSearch();
 
-    icatsearch->show();
-    icatsearch->raise();
+    catalogSearch->show();
+    catalogSearch->raise();
   }
 }
 
@@ -17426,7 +17426,8 @@ void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interfac
   usr_win->setName(user_interface->windowTitle());
   addMdiSubWindow(usr_win);
 }
-void ApplicationWindow::ICatLogout()
+
+void ApplicationWindow::CatalogLogout()
 {
   mantidUI->executeICatLogout(-1);
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <author>Jay Rainey</author>
- <class>ICatSearch2</class>
- <widget class="QWidget" name="ICatSearch2">
+ <class>CatalogSearch</class>
+ <widget class="QWidget" name="CatalogSearch">
   <property name="geometry">
    <rect>
     <x>0</x>

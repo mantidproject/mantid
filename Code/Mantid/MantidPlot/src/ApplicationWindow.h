@@ -1168,13 +1168,12 @@ private:
   /// for zooming the selected graph using mouse drag tool
   void panOnPlot();
 
-  /// Handler for ICat login menu 
-  void ICatLogin();
-  /// Handler for NEW ICat search GUI (ICatSearch2)
-  void ICatSearch2();
-  // Handler for ICat CatalogLogout
-  void ICatLogout();
-
+  /// Handler for catalog login.
+  void CatalogLogin();
+  /// Handler for catalog search.
+  void CatalogSearch();
+  // Handler for catalog logout.
+  void CatalogLogout();
 
   /// method to create widgets from mantid qt;
   void setGeometry(MdiSubWindow* usr_win,QWidget* user_interface);
@@ -1396,7 +1395,7 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QWidget* icatsearch;
+  QWidget* catalogSearch;
 
   QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
   
@@ -1413,7 +1412,7 @@ private:
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch2,*actionICatLogout;
+  QAction *actionCatalogLogin,*actionCatalogSearch,*actionCatalogLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
