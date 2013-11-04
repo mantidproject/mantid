@@ -23,7 +23,7 @@ namespace Mantid
     <li>Unit      - the unit to assign to the X axis (default: Energy).</li>
     </ul>
 
-@author Keith Brown, ISIS, Placement student from the University of Derby
+    @author Keith Brown, ISIS, Placement student from the University of Derby
     @date 10/10/13
 
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

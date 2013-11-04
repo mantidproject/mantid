@@ -336,18 +336,18 @@ namespace Mantid
           size_t lineCols = this->splitIntoColumns(columns, line);
           if (lineCols != 1)
           {
-          try
-          {
-            fillInputValues(values, columns);
-          }
-          catch(boost::bad_lexical_cast&)
-          {
-            continue;
-          }
+            try
+            {
+              fillInputValues(values, columns);
+            }
+            catch(boost::bad_lexical_cast&)
+            {
+              continue;
+            }
           }
           if( numCols == 0 )
           {
-          numCols = lineCols;
+            numCols = lineCols;
           }
           if( lineCols == m_baseCols || (lineCols == 1))
           {
@@ -590,7 +590,7 @@ namespace Mantid
       units.insert(units.begin(),"Dimensionless");
       declareProperty("Unit","Energy", boost::make_shared<StringListValidator>(units),
         "The unit to assign to the X axis (anything known to the [[Unit Factory]] or \"Dimensionless\")");
-        
+
       auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("SkipNumLines", EMPTY_INT(), mustBePosInt,

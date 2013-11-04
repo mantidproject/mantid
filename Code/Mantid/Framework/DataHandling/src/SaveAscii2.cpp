@@ -129,7 +129,7 @@ namespace Mantid
       if(m_sep.empty())
       {
         g_log.notice() << "\"UserDefined\" has been selected, but no custom separator has been entered."
-        " Using default instead.";
+          " Using default instead.";
         m_sep = ",";
       }
 
@@ -144,7 +144,7 @@ namespace Mantid
       if (comment.at(0) == m_sep.at(0)||!boost::regex_match(comment.begin(), comment.end(), boost::regex("[^0-9e" + m_sep + "+-]+", boost::regex::perl)))
       {
         throw std::invalid_argument("Comment markers cannot contain numeric characters, plus signs, hyphens,"
-        " 'e' or the selected separator character");
+          " 'e' or the selected separator character");
       }
 
       // Create an spectra index list for output
