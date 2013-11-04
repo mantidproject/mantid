@@ -155,12 +155,19 @@ public:
   /// @return true if the unit was initialized and so can use singleToTOF()
   bool isInitialized() const
   { return initialized; }
-  /// some units can be converted into TOF only in some range of values;
-  /// This function returns minimal TOF value still convertable into reasonable unit
+  /// some units can be converted into TOF only in some range of values or have ranges where the conversion is ;
+  /// This function returns minimal TOF value still convertable into reasonable unit. Max TOF range is always +Inf for all units
   virtual double conversionTOFMin()const
   {
     return -DBL_MAX;
   };
+  /**The range where conversion to TOF from given units is monotonic */
+  virtual std::vector<double> conversionRange()const
+  {
+    double tmp[]={-DBL_MAX,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
+  }
+
 protected:
   // Add a 'quick conversion' for a unit pair
   void addConversion(std::string to, const double& factor, const double& power = 1.0) const;
@@ -286,6 +293,7 @@ public:
   virtual Unit * clone() const;
 
   virtual double conversionTOFMin()const;  
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   Wavelength();
   /// Destructor
@@ -314,6 +322,7 @@ public:
   virtual Unit * clone() const;
 
   virtual double conversionTOFMin()const;  
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   Energy();
   /// Destructor
@@ -338,6 +347,7 @@ public:
   virtual void init();
   virtual Unit * clone() const;
   virtual double conversionTOFMin()const;  
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   Energy_inWavenumber();
   /// Destructor
@@ -362,6 +372,7 @@ public:
   virtual void init();
   virtual Unit * clone() const;
   virtual double conversionTOFMin()const;  
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   dSpacing();
   /// Destructor
@@ -386,6 +397,7 @@ public:
   virtual void init();
   virtual Unit * clone() const;
   virtual double conversionTOFMin()const;  
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   MomentumTransfer();
   /// Destructor
@@ -410,6 +422,7 @@ public:
   virtual void init();
   virtual Unit * clone() const;
   virtual double conversionTOFMin()const;  
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   QSquared();
   /// Destructor
@@ -435,6 +448,7 @@ public:
   virtual Unit * clone() const;
 
   virtual double conversionTOFMin()const;
+  virtual std::vector<double> conversionRange()const;
  
   /// Constructor
   DeltaE();
@@ -461,6 +475,7 @@ public:
   virtual void init();
   virtual Unit * clone() const;
   virtual double conversionTOFMin()const;  
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   DeltaE_inWavenumber();
   /// Destructor
@@ -506,6 +521,7 @@ public:
   virtual void init();
   virtual Unit * clone() const;
   virtual double conversionTOFMin()const;  
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   Momentum();
   /// Destructor
@@ -533,6 +549,7 @@ public:
   virtual void init();
   virtual Unit * clone() const;
   virtual double conversionTOFMin()const;
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   SpinEchoLength();
   /// Destructor
@@ -553,7 +570,8 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
-  virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMin()const;
+  virtual std::vector<double> conversionRange()const;
   /// Constructor
   SpinEchoTime();
   /// Destructor

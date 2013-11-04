@@ -364,6 +364,12 @@ double Wavelength::singleFromTOF(const double tof) const
   x *= factorFrom;
   return x;
 }
+std::vector<double> Wavelength::conversionRange()const
+{
+    double tmp[]={-DBL_MAX,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
+}
+
 
 Unit * Wavelength::clone() const
 {
@@ -416,6 +422,12 @@ double Energy::conversionTOFMin()const
 {
   return 0.;
 }
+std::vector<double> Energy::conversionRange()const
+{
+    double tmp[]={0,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
+}
+
 
 double Energy::singleFromTOF(const double tof) const
 {
@@ -477,6 +489,12 @@ double Energy_inWavenumber::conversionTOFMin()const
 {
   return 0;
 }
+std::vector<double> Energy_inWavenumber::conversionRange()const
+{
+    double tmp[]={0,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
+}
+
 
 double Energy_inWavenumber::singleFromTOF(const double tof) const
 {
@@ -530,6 +548,12 @@ double dSpacing::conversionTOFMin()const
 {
   return 0;
 }
+std::vector<double> dSpacing::conversionRange()const
+{
+    double tmp[]={-DBL_MAX,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
+}
+
 
 double dSpacing::singleFromTOF(const double tof) const
 {
@@ -585,6 +609,13 @@ double MomentumTransfer::conversionTOFMin()const
 {
   return 0;
 }
+std::vector<double> MomentumTransfer::conversionRange()const
+{
+    double tmp[]={0,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
+}
+
+
 
 double MomentumTransfer::singleFromTOF(const double tof) const
 {
@@ -638,9 +669,15 @@ double QSquared::singleToTOF(const double x) const
   return factorTo / sqrt(temp);
 }
 
+
 double QSquared::conversionTOFMin()const
 {
   return 0;
+}
+std::vector<double> QSquared::conversionRange()const
+{
+    double tmp[]={DBL_MIN,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
 }
 
 
@@ -776,6 +813,25 @@ double DeltaE::conversionTOFMin()const
   return range;
 }
 
+std::vector<double> DeltaE::conversionRange()const
+{
+    double tmp[]={DBL_MAX,DBL_MAX};
+    std::vector<double> range(tmp,tmp+2);
+    if(emode==1)
+    {
+      range[0]=-DBL_MAX;
+      range[1]=efixed;
+    }
+    else if (emode == 2)
+    {
+      range[0]=-efixed;
+      range[1]= DBL_MAX;
+    }
+
+    return range;
+}
+
+
 Unit * DeltaE::clone() const
 {
   return new DeltaE(*this);
@@ -816,6 +872,24 @@ double DeltaE_inWavenumber::conversionTOFMin()const
   return DeltaE::conversionTOFMin();
 }
 
+std::vector<double> DeltaE_inWavenumber::conversionRange()const
+{
+
+    double tmp[]={DBL_MAX,DBL_MAX};
+    std::vector<double> range(tmp,tmp+2);
+    if(emode==1)
+    {
+      range[0]=-DBL_MAX;
+      range[1]=efixed*unitScaling;
+    }
+    else if (emode == 2)
+    {
+      range[0]=-efixed*unitScaling;
+      range[1]= DBL_MAX;
+    }
+
+    return range;
+}
 
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
@@ -920,7 +994,11 @@ double Momentum::conversionTOFMin()const
     range = sfpTo;
   return range;
 }
-
+std::vector<double> Momentum::conversionRange()const
+{
+    double tmp[]={DBL_MIN,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
+}
 
 double Momentum::singleFromTOF(const double tof) const
 {
@@ -975,6 +1053,11 @@ double SpinEchoLength::conversionTOFMin()const
   return 0;
 }
 
+std::vector<double> SpinEchoLength::conversionRange()const
+{
+    double tmp[]={DBL_MIN,DBL_MAX};
+    return std::vector<double>(tmp,tmp+2);
+}
 
 double SpinEchoLength::singleFromTOF(const double tof) const
 {
