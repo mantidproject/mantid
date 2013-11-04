@@ -3,6 +3,8 @@
 
 #include <cstring>
 #include <stdint.h>
+#include <time.h>
+#include <vector>
 
 // to ignore warnings when comparing header versions
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))

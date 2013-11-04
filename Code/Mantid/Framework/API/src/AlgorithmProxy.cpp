@@ -25,7 +25,7 @@ namespace Mantid
     PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
       m_name(alg->name()),m_category(alg->category()), m_categorySeparator(alg->categorySeparator()),
       m_alias(alg->alias()), m_version(alg->version()), m_alg(alg),
-      m_isExecuted(),m_isLoggingEnabled(true), m_rethrow(false),
+      m_isExecuted(),m_isLoggingEnabled(true), m_loggingOffset(0), m_rethrow(false),
       m_isChild(false)
     {
       if (!alg)
@@ -181,6 +181,33 @@ namespace Mantid
     {
       this->m_rethrow = rethrow;
       if(m_alg) m_alg->setRethrows(rethrow);
+    }
+
+    /**
+     * @return A string giving the method name that should be attached to a workspace
+     */
+    const std::string AlgorithmProxy::workspaceMethodName() const
+    {
+      if(m_alg) return m_alg->workspaceMethodName();
+      else return "";
+    }
+
+    /**
+     * @return A set of workspace class names that should have the workspaceMethodName attached
+     */
+    const std::vector<std::string> AlgorithmProxy::workspaceMethodOn() const
+    {
+      if(m_alg) return m_alg->workspaceMethodOn();
+      else return std::vector<std::string>();
+    }
+
+    /**
+     * @return The name of the property that the calling object will be passed to
+     */
+    const std::string AlgorithmProxy::workspaceMethodInputProperty() const
+    {
+      if(m_alg) return m_alg->workspaceMethodInputProperty();
+      else return "";
     }
 
     /**

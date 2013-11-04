@@ -229,6 +229,83 @@ public:
     fit.setProperty("InputWorkspace_1",ws1);
   }
 
+  void test_fit_one_function_to_two_parts_of_workspace()
+  {
+
+      const double A0 = 1, A1 = 100;
+      const double B0 = 2;
+
+      // Set up a workspace which is divided into 3 parts: 0 <= x < 10, 10 <= x < 20, 20 <= x < 30
+      // The first and last parts have their data on line A0 + B0 * x, and the middle part has
+      // constant value A1
+
+      MatrixWorkspace_sptr ws = boost::shared_ptr<MatrixWorkspace>(new WorkspaceTester);
+      ws->initialize(1,30,30);
+      {
+        const double dx = 1.0;
+        Mantid::MantidVec& x = ws->dataX(0);
+        Mantid::MantidVec& y = ws->dataY(0);
+        for(size_t i = 0; i < 10; ++i)
+        {
+          x[i] =  dx * double(i);
+          y[i] =  A0 + B0 * x[i];
+        }
+        for(size_t i = 10; i < 20; ++i)
+        {
+          x[i] =  dx * double(i);
+          y[i] =  A1;
+        }
+        for(size_t i = 20; i < 30; ++i)
+        {
+          x[i] =  dx * double(i);
+          y[i] =  A0 + B0 * x[i];
+        }
+      }
+
+      // Set up a multi-domain function and Fit algorithm to fit a single function to two
+      // parts of the workspace
+
+      boost::shared_ptr<MultiDomainFunction> mf = boost::make_shared<MultiDomainFunction>();
+      mf->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
+      mf->setParameter(0,0.0);
+      mf->setParameter(1,0.0);
+      std::vector<size_t> ind(2);
+      ind[0] = 0;
+      ind[1] = 1;
+      mf->setDomainIndices(0,ind);
+      TS_ASSERT_EQUALS( mf->getMaxIndex(), 1 );
+
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+      Mantid::API::IAlgorithm& fit = *alg;
+      fit.initialize();
+      fit.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(mf));
+      // at this point Fit knows the number of domains and creates additional properties InputWorkspace_#
+      TS_ASSERT( fit.existsProperty("InputWorkspace_1") );
+
+      fit.setProperty("InputWorkspace",ws);
+      fit.setProperty("WorkspaceIndex",0);
+      fit.setProperty("StartX",0.0);
+      fit.setProperty("EndX",9.9999);
+      fit.setProperty("InputWorkspace_1",ws);
+
+      // at this point Fit knows the type of InputWorkspace_1 (MatrixWorkspace) and creates additional
+      // properties for it
+      TS_ASSERT( fit.existsProperty("WorkspaceIndex_1") );
+      TS_ASSERT( fit.existsProperty("StartX_1") );
+      TS_ASSERT( fit.existsProperty("EndX_1") );
+
+      fit.setProperty("WorkspaceIndex_1",0);
+      fit.setProperty("StartX_1",20.0);
+      fit.setProperty("EndX_1",30.0);
+
+      fit.execute();
+      TS_ASSERT( fit.isExecuted() );
+
+      IFunction_sptr fun = fit.getProperty("Function");
+      TS_ASSERT_DELTA( fun->getParameter(0), 1.0, 1e-15 ); // == A0
+      TS_ASSERT_DELTA( fun->getParameter(1), 2.0, 1e-15 ); // == B0
+  }
+
 private:
   boost::shared_ptr<MultiDomainFunction> multi;
   boost::shared_ptr<JointDomain> domain;

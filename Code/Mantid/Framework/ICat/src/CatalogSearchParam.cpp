@@ -76,6 +76,12 @@ namespace Mantid
      */
     void CatalogSearchParam::setDatafileName(const std::string& datafileName ){ m_datafileName =datafileName;}
 
+    /**
+     * Sets the "My data only" checkbox.
+     * @param flag :: Flag to search in "My data" only.
+     */
+    void CatalogSearchParam::setMyData(bool flag) { m_myData = flag;}
+
     /** This method  returns the start run number
      *  @returns  run start number
      */
@@ -214,5 +220,10 @@ namespace Mantid
       return std::mktime (&timeinfo );
     }
 
+    /**
+     * Is "My data only" selected?
+     * @returns true if my data checkbox is selected.
+     */
+    bool CatalogSearchParam::getMyData() const { return (m_myData); }
   }
 }

@@ -10,6 +10,7 @@
 #include <Poco/Net/NameValueCollection.h>
 #include <Poco/URI.h>
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
@@ -36,7 +37,7 @@ RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
     throw std::runtime_error("Compute Resources must have a name attribute");
   }
 
-  Poco::XML::NodeList* nl = elem->getElementsByTagName("baseURL");
+  Poco::AutoPtr<Poco::XML::NodeList> nl = elem->getElementsByTagName("baseURL");
   if (nl->length() != 1)
   {
     g_log.error("HTTP Compute Resources must have exactly one baseURL tag");

@@ -6,6 +6,7 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
@@ -147,7 +148,7 @@ namespace Mantid
      */
     std::string CatalogInfo::getAttribute(const Poco::XML::Element* element, const std::string &tagName, const std::string &attributeName)
     {
-      Poco::XML::NodeList* elementTag = element->getElementsByTagName(tagName);
+      Poco::AutoPtr<Poco::XML::NodeList> elementTag = element->getElementsByTagName(tagName);
 
       // If the tag exists in the XML file.
       if (elementTag->length() == 1)
@@ -157,7 +158,6 @@ namespace Mantid
         // If the item does exist, then we want to return it.
         if(!item->getAttribute(attributeName).empty())
         {
-          elementTag->release();
           return (item->getAttribute(attributeName));
         }
       }

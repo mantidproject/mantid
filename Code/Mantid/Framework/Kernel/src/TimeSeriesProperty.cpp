@@ -665,9 +665,19 @@ namespace Mantid
     template<typename TYPE>
     double TimeSeriesProperty<TYPE>::timeAverageValue() const
     {
-      TimeSplitterType filter;
-      filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
-      return this->averageValueInFilter(filter);
+      double retVal = 0.0;
+      try
+      {
+        TimeSplitterType filter;
+        filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
+        retVal = this->averageValueInFilter(filter);
+      }
+      catch (exception)
+      {
+        //just return nan
+         retVal = std::numeric_limits<double>::quiet_NaN();
+      }
+      return retVal;
     }
 
     /** Function specialization for TimeSeriesProperty<std::string>

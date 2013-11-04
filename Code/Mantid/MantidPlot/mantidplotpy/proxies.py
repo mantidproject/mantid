@@ -29,6 +29,7 @@ class CrossThreadCall(QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.moveToThread(QtGui.qApp.thread())
         self.__callable = callable
+        self.__call__.__func__.__doc__ = callable.__doc__
         
     def dispatch(self, *args, **kwargs):
         """Dispatches a call to callable with
@@ -162,6 +163,9 @@ class QtProxyObject(QtCore.QObject):
         """
         callable = getattr(self._getHeldObject(), attr)
         return CrossThreadCall(callable)
+
+    def __dir__(self):
+        return dir(self._getHeldObject())
 
     def __str__(self):
         """

@@ -2,7 +2,6 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
-#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
@@ -84,7 +83,7 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(), 
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
-  m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
+  m_deadTimesChanged(false), m_textToDisplay(""), m_dataTimeZero(0.0), m_dataFirstGoodData(0.0)
 {}
 
 /**
@@ -122,7 +121,6 @@ void MuonAnalysis::initLayout()
 
   // Further set initial look
   startUpLook();
-  createMicroSecondsLabels(m_uiForm);
   m_uiForm.mwRunFiles->readSettings(m_settingsGroup + "mwRunFilesBrowse");
 
   connect(m_uiForm.previousRun, SIGNAL(clicked()), this, SLOT(checkAppendingPreviousRun()));
@@ -199,9 +197,8 @@ void MuonAnalysis::initLayout()
   // file input
   connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(inputFileChanged_MWRunFiles()));
 
-  // Input check for First Good Data
-  connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this,
-    SLOT(runFirstGoodBinFront()));
+  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this, SLOT(setTimeZeroState(int)));
+  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this, SLOT(setFirstGoodDataState(int)));
 
   // load previous saved values
   loadAutoSavedValues(m_settingsGroup);
@@ -214,11 +211,13 @@ void MuonAnalysis::initLayout()
 
   connectAutoUpdate();
 
+  connectAutoSave();
+
   // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );  
 }
 
 /**
@@ -263,30 +262,6 @@ void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
   if ( index >= 0 )
     updateFront();
 }
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysis::runFirstGoodBinFront()
-{
-  try
-  {
-    boost::lexical_cast<double>(m_uiForm.firstGoodBinFront->text().toStdString());
-    
-    // if this value updated then also update 'Start at" Plot option if "Start at First Good Data" set
-    if (m_uiForm.timeComboBox->currentIndex() == 0 )
-    {
-      m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
-    }
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in First Good Data (ms)' input box. Reset to 0.3.");
-    m_uiForm.firstGoodBinFront->setText("0.3");
-  }
-}
-
 
 /**
 * Front plot button (slot)
@@ -1198,14 +1173,20 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     str << " to muon polarisation";
     m_uiForm.instrumentDescription->setText(str.str().c_str());
 
-    m_uiForm.timeZeroFront->setText(QString::number(timeZero, 'g',2));
-    // I want the nexus time to equal exactly how it is stored in time zero text box
-    // so that later I can check if user has altered it
-    m_nexusTimeZero = boost::lexical_cast<double>(m_uiForm.timeZeroFront->text().toStdString());
-    m_uiForm.firstGoodBinFront->setText(QString::number(firstGoodData-timeZero,'g',2));
+    // Save loaded values
+    m_dataTimeZero = timeZero;
+    m_dataFirstGoodData = firstGoodData - timeZero;
 
-    // since content of first-good-bin changed run this slot
-    runFirstGoodBinFront();
+    if(instrumentChanged)
+    {
+      // When instrument changes we use information from data no matter what user has chosen before
+      m_uiForm.timeZeroAuto->setCheckState(Qt::Checked);
+      m_uiForm.firstGoodDataAuto->setCheckState(Qt::Checked);
+    }
+
+    // Update boxes, as values have been changed
+    setTimeZeroState();
+    setFirstGoodDataState();
 
     std::string infoStr("");
     
@@ -1878,10 +1859,10 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
 {
   m_loaded = true;
   // adjust for time zero if necessary
-  if ( m_nexusTimeZero != timeZero())
+  if ( m_dataTimeZero != timeZero())
   {
     try {
-      double shift = m_nexusTimeZero - timeZero();
+      double shift = m_dataTimeZero - timeZero();
       Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("ChangeBinOffset");
       rebinAlg->setPropertyValue("InputWorkspace", inputWS);
       rebinAlg->setPropertyValue("OutputWorkspace", outWS);
@@ -1894,7 +1875,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
   }
 
   Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
-  if ( m_nexusTimeZero != timeZero() )
+  if ( m_dataTimeZero != timeZero() )
     cropAlg->setPropertyValue("InputWorkspace", outWS);
   else 
     cropAlg->setPropertyValue("InputWorkspace", inputWS);
@@ -2857,8 +2838,9 @@ void MuonAnalysis::startUpLook()
   m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
 
-  // Only allow numbers in the time zero text box
-  m_uiForm.timeZeroFront->setValidator(new QDoubleValidator(m_uiForm.timeZeroFront));
+  // Set validators for number-only boxes
+  m_uiForm.timeZeroFront->setValidator(createDoubleValidator(m_uiForm.timeZeroFront));
+  m_uiForm.firstGoodBinFront->setValidator(createDoubleValidator(m_uiForm.firstGoodBinFront));
 
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
@@ -2884,7 +2866,6 @@ void MuonAnalysis::startUpLook()
     }
   }
 }
-
 
 /**
 * set grouping in table from information from nexus raw file
@@ -3144,17 +3125,35 @@ QString MuonAnalysis::firstGoodBin()
  */
 double MuonAnalysis::plotFromTime()
 {
-  double retVal;
-  try
+  QLineEdit* startTimeBox;
+  double defaultValue;
+
+  // If is first good bin used - we use a different box
+  if(m_uiForm.timeComboBox->currentIndex() == 0)
   {
-    retVal = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
+    startTimeBox = m_uiForm.firstGoodBinFront;
+    defaultValue = 0.3;
   }
-  catch (...)
+  else
   {
-    retVal = 0.0;
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ms)' input box. Plot from time zero.");
+    startTimeBox = m_uiForm.timeAxisStartAtInput;
+    defaultValue = 0.0;
   }
-  return retVal;
+
+  bool ok;
+  double returnValue = startTimeBox->text().toDouble(&ok);
+
+  if(!ok)
+  {
+    returnValue = defaultValue;
+
+    startTimeBox->setText(QString::number(defaultValue));
+
+    QMessageBox::warning(this, "Mantid - MuonAnalysis", 
+      QString("Start time number not recognized. Reset to default of %1").arg(defaultValue));
+  }
+  
+  return returnValue;
 }
 
 
@@ -3378,11 +3377,16 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
 
+  changeDeadTimeType(deadTimeTypeIndex);
+
   QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
   m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
 
-  if (deadTimeTypeIndex != 2)
-    m_uiForm.mwRunDeadTimeFile->setVisible(false);
+  // Load values saved using saveWidgetValue()
+  loadWidgetValue(m_uiForm.timeZeroFront, 0.2);
+  loadWidgetValue(m_uiForm.firstGoodBinFront, 0.3);
+  loadWidgetValue(m_uiForm.timeZeroAuto, Qt::Checked);
+  loadWidgetValue(m_uiForm.firstGoodDataAuto, Qt::Checked);
 }
 
 
@@ -3691,7 +3695,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
-  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(firstPeriodSelectionChanged()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
@@ -3711,6 +3715,82 @@ void MuonAnalysis::connectAutoUpdate()
 
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
   connect(m_optionTab, SIGNAL(plotStyleChanged()), this, SLOT(updateCurrentPlotStyle()));
+}
+
+/**
+ * Connect widgets to saveWidgetValue() slot so their values are automatically saved when they are
+ * getting changed.
+ */
+void MuonAnalysis::connectAutoSave()
+{
+  connect(m_uiForm.timeZeroFront, SIGNAL(textChanged(const QString&)), this, SLOT(saveWidgetValue()));
+  connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)), this, SLOT(saveWidgetValue()));
+
+  connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this, SLOT(saveWidgetValue()));
+  connect(m_uiForm.firstGoodDataAuto, SIGNAL(stateChanged(int)), this, SLOT(saveWidgetValue()));
+}
+
+/**
+ * Saves the value of the widget which called the slot.
+ */
+void MuonAnalysis::saveWidgetValue()
+{
+  // Get the widget which called the slot
+  QWidget* sender = qobject_cast<QWidget*>(QObject::sender());
+
+  if(!sender)
+    throw std::runtime_error("Unable to save value of non-widget QObject");
+
+  QString name = sender->objectName();
+
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup + "SavedWidgetValues");
+
+  // Save value for QLineEdit
+  if(QLineEdit* w = qobject_cast<QLineEdit*>(sender))
+  {
+    settings.setValue(name, w->text());
+  }
+  // Save value for QCheckBox
+  else if(QCheckBox* w = qobject_cast<QCheckBox*>(sender))
+  {
+    settings.setValue(name, static_cast<int>(w->checkState()));
+  }
+  // ... add more as neccessary
+  else
+    throw std::runtime_error("Value saving for this widget type is not supported");
+
+  settings.endGroup();
+}
+
+/**
+ * Load previously saved value for the widget.
+ * @param       target :: Widget where the value will be loaded to
+ * @param defaultValue :: Values which will be set if there is no saved value
+ */
+void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue)
+{
+  QString name = target->objectName();
+
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup + "SavedWidgetValues");
+
+
+  // Load value for QLineEdit
+  if(QLineEdit* w = qobject_cast<QLineEdit*>(target))
+  {
+    w->setText(settings.value(name, defaultValue).toString());
+  }
+  // Load value for QCheckBox
+  else if(QCheckBox* w = qobject_cast<QCheckBox*>(target))
+  {
+    w->setCheckState(static_cast<Qt::CheckState>(settings.value(name, defaultValue).toInt()));
+  }
+  // ... add more as neccessary
+  else
+    throw std::runtime_error("Value loading for this widget type is not supported");
+
+  settings.endGroup();
 }
 
 void MuonAnalysis::changeHomeFunction()
@@ -3877,12 +3957,14 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
+    m_uiForm.dtcFileLabel->setVisible(false);
     homeTabUpdatePlot();
   }
   else // choice must be from workspace
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
     m_uiForm.mwRunDeadTimeFile->setUserInput("");
+    m_uiForm.dtcFileLabel->setVisible(true);
   }
 
   QSettings group;
@@ -3910,6 +3992,59 @@ void MuonAnalysis::deadTimeFileSelected()
   homeTabUpdatePlot();
 }
 
+/**
+ * Creates new double validator which accepts numbers in standard notation only.
+ * @param parent :: Parent of the new validator
+ * @return New created validator
+ */
+QDoubleValidator* MuonAnalysis::createDoubleValidator(QObject* parent)
+{
+  QDoubleValidator* newValidator = new QDoubleValidator(parent);
+  newValidator->setNotation(QDoubleValidator::StandardNotation);
+  return newValidator;
+}
+
+/**
+ * Updates the enabled-state and value of Time Zero using "auto" check-box state.
+ * @param checkBoxState :: State of "auto" check-box. If -1 will retrieve it from the form
+ */
+void MuonAnalysis::setTimeZeroState(int checkBoxState)
+{
+  if(checkBoxState == -1)
+    checkBoxState = m_uiForm.timeZeroAuto->checkState();
+
+  if(checkBoxState == Qt::Checked) // From data file
+  {
+    m_uiForm.timeZeroFront->setEnabled(false);
+    m_uiForm.timeZeroFront->setText(QString::number(m_dataTimeZero, 'g', 2));
+    homeTabUpdatePlot(); // Auto-update
+  }
+  else // Custom
+  {
+    m_uiForm.timeZeroFront->setEnabled(true);
+  }
+}
+
+/**
+ * Updates the enabled-state and value of First Good Data using "auto" check-box state.
+ * @param checkBoxState :: State of "auto" check-box. If -1 will retrieve it from the form
+ */
+void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
+{
+  if(checkBoxState == -1)
+    checkBoxState = m_uiForm.firstGoodDataAuto->checkState();
+
+  if(checkBoxState == Qt::Checked) // From data file
+  {
+    m_uiForm.firstGoodBinFront->setEnabled(false);
+    m_uiForm.firstGoodBinFront->setText(QString::number(m_dataFirstGoodData, 'g', 2));
+    homeTabUpdatePlot(); // Auto-update
+  }
+  else // Custom
+  {
+    m_uiForm.firstGoodBinFront->setEnabled(true);
+  }
+}
 
 }//namespace MantidQT
 }//namespace CustomInterfaces

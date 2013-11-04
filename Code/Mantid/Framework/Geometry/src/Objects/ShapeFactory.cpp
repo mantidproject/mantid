@@ -1,6 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/Quat.h"
+
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
@@ -11,6 +13,8 @@
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Torus.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
+
+#include "MantidKernel/Quat.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -30,12 +34,19 @@ using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 using Poco::XML::DOMWriter;
 
+
 namespace Mantid
 {
 namespace Geometry
 {
 
 using namespace Kernel;
+
+namespace
+{
+  const V3D DEFAULT_CENTRE(0, 0, 0);
+  const V3D DEFAULT_AXIS(0, 0, 1);
+}
 
 Logger& ShapeFactory::g_log = Logger::get("ShapeFactory");
 
@@ -207,6 +218,11 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
             idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);  
             numPrimitives++;
           }
+          else if ( !primitiveName.compare("tapered-guide"))
+          {
+            idMatching[idFromUser] = parseTaperedGuide(pE, primitives, l_id);  
+            numPrimitives++;
+          }
           else if ( !primitiveName.compare("torus"))
           {
             idMatching[idFromUser] = parseTorus(pE, primitives, l_id);  
@@ -339,11 +355,9 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, S
   const double radius = getDoubleAttribute(pElemRadius,"val");
   
   // create sphere
+  const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
   Sphere* pSphere = new Sphere;
-  if( pElemCentre )
-    pSphere->setCentre(parsePosition(pElemCentre));
-  else
-    pSphere->setCentre(V3D(0, 0, 0));
+  pSphere->setCentre(centre);
   pSphere->setRadius(radius);
   prim[l_id] = pSphere;
 
@@ -525,6 +539,96 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element* pElem, std:
   return retAlgebraMatch.str();
 }
 
+/**
+ * Get the four corners of a cuboid from an XML element.  The XML may consist
+ * of one of the two available syntaxes.  We disallow a mixture of syntaxes.
+ *
+ * @param pElem :: XML 'cuboid' element from instrument definition file.
+ * @return The four corners of the cuboid.
+ *
+ * @throw std::invalid_argument if XML string is invalid.
+ */
+CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element* pElem)
+{
+  // Users have two syntax options when defining cuboids:
+
+  // A - "Point" syntax.
+  Element* pElem_lfb = getOptionalShapeElement(pElem, "left-front-bottom-point");
+  Element* pElem_lft = getOptionalShapeElement(pElem, "left-front-top-point");
+  Element* pElem_lbb = getOptionalShapeElement(pElem, "left-back-bottom-point");
+  Element* pElem_rfb = getOptionalShapeElement(pElem, "right-front-bottom-point");
+  
+  // B - "Alternate" syntax.
+  Element* pElem_height = getOptionalShapeElement(pElem, "height");
+  Element* pElem_width  = getOptionalShapeElement(pElem, "width");
+  Element* pElem_depth  = getOptionalShapeElement(pElem, "depth");
+  Element* pElem_centre = getOptionalShapeElement(pElem, "centre");
+  Element* pElem_axis   = getOptionalShapeElement(pElem, "axis");
+
+  const bool usingPointSyntax = pElem_lfb && pElem_lft && pElem_lbb && pElem_rfb;
+  const bool usingAlternateSyntax = pElem_height && pElem_width && pElem_depth;
+
+  const bool usedPointSyntaxField = pElem_lfb || pElem_lft || pElem_lbb || pElem_rfb;
+  const bool usedAlternateSyntaxField = pElem_height || pElem_width || pElem_depth || pElem_centre || pElem_axis;
+
+  const std::string SYNTAX_ERROR_MSG = "XML element: <" + pElem->tagName() +
+      "> may contain EITHER corner points (LFB, LFT, LBB and RFB) OR " +
+      "height, width, depth, centre and axis values.";
+
+  CuboidCorners result;
+
+  if( usingPointSyntax && !usingAlternateSyntax )
+  {
+    if( usedAlternateSyntaxField )
+      throw std::invalid_argument(SYNTAX_ERROR_MSG);
+
+    result.lfb = parsePosition(pElem_lfb);
+    result.lft = parsePosition(pElem_lft);
+    result.lbb = parsePosition(pElem_lbb);
+    result.rfb = parsePosition(pElem_rfb);
+  }
+  else if( usingAlternateSyntax && !usingPointSyntax )
+  {
+    if( usedPointSyntaxField )
+      throw std::invalid_argument(SYNTAX_ERROR_MSG);
+    
+    const double deltaH = getDoubleAttribute(pElem_height, "val") / 2;
+    const double deltaW = getDoubleAttribute(pElem_width, "val") / 2;
+    const double deltaD = getDoubleAttribute(pElem_depth, "val") / 2;
+    
+    const V3D centre = pElem_centre ? parsePosition(pElem_centre) : DEFAULT_CENTRE;
+
+    result.lfb = V3D(-deltaW,-deltaH,-deltaD);
+    result.lft = V3D(-deltaW, deltaH,-deltaD);
+    result.lbb = V3D(-deltaW,-deltaH, deltaD);
+    result.rfb = V3D( deltaW,-deltaH,-deltaD);
+    
+    if( pElem_axis )
+    {
+      // Use a quarternion to do a rotation for us, with respect to the default
+      // axis.  Our "Quat" implementation requires that the vectors passed to
+      // it be normalised.
+      V3D axis = parsePosition(pElem_axis);
+      axis.normalize();
+      const Quat rotation(DEFAULT_AXIS, axis);
+
+      rotation.rotate(result.lfb);
+      rotation.rotate(result.lft);
+      rotation.rotate(result.lbb);
+      rotation.rotate(result.rfb);
+    }
+
+    result.lfb += centre;
+    result.lft += centre;
+    result.lbb += centre;
+    result.rfb += centre;
+  }
+  else
+    throw std::invalid_argument(SYNTAX_ERROR_MSG);
+
+  return result;
+}
+
 /** Parse XML 'cuboid' element
  *
  *  @param pElem :: XML 'cuboid' element from instrument def. file
@@ -536,22 +640,14 @@ std::string ShapeFactory::parseSegmentedCylinder(Poco::XML::Element* pElem, std:
  */
 std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
-  Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point"); 
-  Element* pElem_lft = getShapeElement(pElem, "left-front-top-point"); 
-  Element* pElem_lbb = getShapeElement(pElem, "left-back-bottom-point"); 
-  Element* pElem_rfb = getShapeElement(pElem, "right-front-bottom-point"); 
+  auto corners = parseCuboid(pElem);
 
-  V3D lfb = parsePosition(pElem_lfb);  // left front bottom
-  V3D lft = parsePosition(pElem_lft);  // left front top
-  V3D lbb = parsePosition(pElem_lbb);  // left back bottom
-  V3D rfb = parsePosition(pElem_rfb);  // right front bottom
-
-  V3D pointTowardBack = lbb-lfb;
+  V3D pointTowardBack = corners.lbb-corners.lfb;
   pointTowardBack.normalize();
 
   // add front plane cutoff
   Plane* pPlaneFrontCutoff = new Plane();
-  pPlaneFrontCutoff->setPlane(lfb, pointTowardBack); 
+  pPlaneFrontCutoff->setPlane(corners.lfb, pointTowardBack); 
   prim[l_id] = pPlaneFrontCutoff;
 
   std::stringstream retAlgebraMatch;
@@ -560,43 +656,43 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, S
 
   // add back plane cutoff
   Plane* pPlaneBackCutoff = new Plane();
-  pPlaneBackCutoff->setPlane(lbb, pointTowardBack); 
+  pPlaneBackCutoff->setPlane(corners.lbb, pointTowardBack); 
   prim[l_id] = pPlaneBackCutoff;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
 
-  V3D pointTowardRight = rfb-lfb;
+  V3D pointTowardRight = corners.rfb-corners.lfb;
   pointTowardRight.normalize();
 
   // add left plane cutoff
   Plane* pPlaneLeftCutoff = new Plane();
-  pPlaneLeftCutoff->setPlane(lfb, pointTowardRight); 
+  pPlaneLeftCutoff->setPlane(corners.lfb, pointTowardRight); 
   prim[l_id] = pPlaneLeftCutoff;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
   // add right plane cutoff
   Plane* pPlaneRightCutoff = new Plane();
-  pPlaneRightCutoff->setPlane(rfb, pointTowardRight); 
+  pPlaneRightCutoff->setPlane(corners.rfb, pointTowardRight); 
   prim[l_id] = pPlaneRightCutoff;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
 
-  V3D pointTowardTop = lft-lfb;
+  V3D pointTowardTop = corners.lft-corners.lfb;
   pointTowardTop.normalize();
 
   // add bottom plane cutoff
   Plane* pPlaneBottomCutoff = new Plane();
-  pPlaneBottomCutoff->setPlane(lfb, pointTowardTop); 
+  pPlaneBottomCutoff->setPlane(corners.lfb, pointTowardTop); 
   prim[l_id] = pPlaneBottomCutoff;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
   // add top plane cutoff
   Plane* pPlaneTopCutoff = new Plane();
-  pPlaneTopCutoff->setPlane(lft, pointTowardTop); 
+  pPlaneTopCutoff->setPlane(corners.lft, pointTowardTop); 
   prim[l_id] = pPlaneTopCutoff;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;
@@ -702,6 +798,98 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Sur
   return retAlgebraMatch.str();
 }
 
+namespace // anonymous
+{
+  struct Hexahedron
+  {
+    V3D lfb; // left front bottom
+    V3D lft; // left front top
+    V3D lbb; // left back bottom
+    V3D lbt; // left back top
+    V3D rfb; // right front bottom
+    V3D rft; // right front top
+    V3D rbb; // right back bottom
+    V3D rbt; // right back top
+  };
+
+  /**
+   * The "tapered-guide" shape is actually a special case of hexahedron; once we have
+   * the 8 points that make up either shape, the process of parsing them can be
+   * exactly the same in both cases.
+   */
+  std::string parseHexahedronFromStruct(Hexahedron & hex, std::map<int, Surface*>& prim, int& l_id)
+  {
+    V3D pointTowardBack = hex.lbb-hex.lfb;
+    pointTowardBack.normalize();
+
+    V3D normal;
+
+    // add front face
+    Plane* pPlaneFrontCutoff = new Plane();
+    normal = (hex.rfb-hex.lfb).cross_prod(hex.lft-hex.lfb);
+  
+   // V3D jjj = (normal*(rfb-rbb));
+    if ( normal.scalar_prod(hex.rfb-hex.rbb) < 0 )
+      normal *= -1.0;
+    pPlaneFrontCutoff->setPlane(hex.lfb, normal); 
+    prim[l_id] = pPlaneFrontCutoff;
+    std::stringstream retAlgebraMatch;
+    retAlgebraMatch << "(-" << l_id << " ";
+    l_id++;
+
+    // add back face
+    Plane* pPlaneBackCutoff = new Plane();
+    normal = (hex.rbb-hex.lbb).cross_prod(hex.lbt-hex.lbb);
+    if ( normal.scalar_prod(hex.rfb-hex.rbb) < 0 )
+      normal *= -1.0;  
+    pPlaneBackCutoff->setPlane(hex.lbb, normal); 
+    prim[l_id] = pPlaneBackCutoff;
+    retAlgebraMatch << "" << l_id << " ";
+    l_id++;
+
+    // add left face
+    Plane* pPlaneLeftCutoff = new Plane();
+    normal = (hex.lbb-hex.lfb).cross_prod(hex.lft-hex.lfb);
+    if ( normal.scalar_prod(hex.rfb-hex.lfb) < 0 )
+      normal *= -1.0; 
+    pPlaneLeftCutoff->setPlane(hex.lfb, normal); 
+    prim[l_id] = pPlaneLeftCutoff;
+    retAlgebraMatch << "" << l_id << " ";
+    l_id++;
+
+    // add right face
+    Plane* pPlaneRightCutoff = new Plane();
+    normal = (hex.rbb-hex.rfb).cross_prod(hex.rft-hex.rfb);
+    if ( normal.scalar_prod(hex.rfb-hex.lfb) < 0 )
+      normal *= -1.0; 
+    pPlaneRightCutoff->setPlane(hex.rfb, normal); 
+    prim[l_id] = pPlaneRightCutoff;
+    retAlgebraMatch << "-" << l_id << " ";
+    l_id++;
+
+    // add top face
+    Plane* pPlaneTopCutoff = new Plane();
+    normal = (hex.rft-hex.lft).cross_prod(hex.lbt-hex.lft);
+    if ( normal.scalar_prod(hex.rft-hex.rfb) < 0 )
+      normal *= -1.0; 
+    pPlaneTopCutoff->setPlane(hex.lft, normal); 
+    prim[l_id] = pPlaneTopCutoff;
+    retAlgebraMatch << "-" << l_id << " ";
+    l_id++;
+
+    // add bottom face
+    Plane* pPlaneBottomCutoff = new Plane();
+    normal = (hex.rfb-hex.lfb).cross_prod(hex.lbb-hex.lfb);
+    if ( normal.scalar_prod(hex.rft-hex.rfb) < 0 )
+      normal *= -1.0; 
+    pPlaneBottomCutoff->setPlane(hex.lfb, normal); 
+    prim[l_id] = pPlaneBottomCutoff;
+    retAlgebraMatch << "" << l_id << ")";
+    l_id++;
+
+    return retAlgebraMatch.str();
+  }
+} // anonymous namespace
 
 /** Parse XML 'hexahedron' element
  *
@@ -723,86 +911,90 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
   Element* pElem_rbb = getShapeElement(pElem, "right-back-bottom-point"); 
   Element* pElem_rbt = getShapeElement(pElem, "right-back-top-point"); 
 
-  V3D lfb = parsePosition(pElem_lfb);  // left front bottom
-  V3D lft = parsePosition(pElem_lft);  // left front top
-  V3D lbb = parsePosition(pElem_lbb);  // left back bottom
-  V3D lbt = parsePosition(pElem_lbt);  // left back top
-  V3D rfb = parsePosition(pElem_rfb);  // right front bottom
-  V3D rft = parsePosition(pElem_rft);  // right front top
-  V3D rbb = parsePosition(pElem_rbb);  // right back bottom
-  V3D rbt = parsePosition(pElem_rbt);  // right back top
+  Hexahedron hex;
+  hex.lfb = parsePosition(pElem_lfb);
+  hex.lft = parsePosition(pElem_lft);
+  hex.lbb = parsePosition(pElem_lbb);
+  hex.lbt = parsePosition(pElem_lbt);
+  hex.rfb = parsePosition(pElem_rfb);
+  hex.rft = parsePosition(pElem_rft);
+  hex.rbb = parsePosition(pElem_rbb);
+  hex.rbt = parsePosition(pElem_rbt);
 
-  V3D pointTowardBack = lbb-lfb;
-  pointTowardBack.normalize();
-
-  V3D normal;
-
-  // add front face
-  Plane* pPlaneFrontCutoff = new Plane();
-  normal = (rfb-lfb).cross_prod(lft-lfb);
-  
- // V3D jjj = (normal*(rfb-rbb));
-  if ( normal.scalar_prod(rfb-rbb) < 0 )
-    normal *= -1.0;
-  pPlaneFrontCutoff->setPlane(lfb, normal); 
-  prim[l_id] = pPlaneFrontCutoff;
-  std::stringstream retAlgebraMatch;
-  retAlgebraMatch << "(-" << l_id << " ";
-  l_id++;
-
-  // add back face
-  Plane* pPlaneBackCutoff = new Plane();
-  normal = (rbb-lbb).cross_prod(lbt-lbb);
-  if ( normal.scalar_prod(rfb-rbb) < 0 )
-    normal *= -1.0;  
-  pPlaneBackCutoff->setPlane(lbb, normal); 
-  prim[l_id] = pPlaneBackCutoff;
-  retAlgebraMatch << "" << l_id << " ";
-  l_id++;
-
-  // add left face
-  Plane* pPlaneLeftCutoff = new Plane();
-  normal = (lbb-lfb).cross_prod(lft-lfb);
-  if ( normal.scalar_prod(rfb-lfb) < 0 )
-    normal *= -1.0; 
-  pPlaneLeftCutoff->setPlane(lfb, normal); 
-  prim[l_id] = pPlaneLeftCutoff;
-  retAlgebraMatch << "" << l_id << " ";
-  l_id++;
-
-  // add right face
-  Plane* pPlaneRightCutoff = new Plane();
-  normal = (rbb-rfb).cross_prod(rft-rfb);
-  if ( normal.scalar_prod(rfb-lfb) < 0 )
-    normal *= -1.0; 
-  pPlaneRightCutoff->setPlane(rfb, normal); 
-  prim[l_id] = pPlaneRightCutoff;
-  retAlgebraMatch << "-" << l_id << " ";
-  l_id++;
-
-  // add top face
-  Plane* pPlaneTopCutoff = new Plane();
-  normal = (rft-lft).cross_prod(lbt-lft);
-  if ( normal.scalar_prod(rft-rfb) < 0 )
-    normal *= -1.0; 
-  pPlaneTopCutoff->setPlane(lft, normal); 
-  prim[l_id] = pPlaneTopCutoff;
-  retAlgebraMatch << "-" << l_id << " ";
-  l_id++;
-
-  // add bottom face
-  Plane* pPlaneBottomCutoff = new Plane();
-  normal = (rfb-lfb).cross_prod(lbb-lfb);
-  if ( normal.scalar_prod(rft-rfb) < 0 )
-    normal *= -1.0; 
-  pPlaneBottomCutoff->setPlane(lfb, normal); 
-  prim[l_id] = pPlaneBottomCutoff;
-  retAlgebraMatch << "" << l_id << ")";
-  l_id++;
-
-  return retAlgebraMatch.str();
+  return parseHexahedronFromStruct(hex, prim, l_id);
 }
 
+/** Parse XML 'tapered-guide' element, which is a special case of the XML 'hexahedron' element.
+ *
+ *  @param pElem :: XML 'hexahedron' element from instrument def. file
+ *  @param prim :: To add shapes to
+ *  @param l_id :: When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseTaperedGuide(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
+{
+  Element* pElemApertureStart = getShapeElement(pElem, "aperture-start");
+  Element* pElemLength = getShapeElement(pElem, "length");
+  Element* pElemApertureEnd = getShapeElement(pElem, "aperture-end");
+  Element* pElemCentre = getOptionalShapeElement(pElem, "centre");
+  Element* pElemAxis = getOptionalShapeElement(pElem, "axis");
+
+  // For centre and axis we allow defaults.
+  const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
+  V3D axis = pElemAxis ? parsePosition(pElemAxis) : DEFAULT_AXIS;
+  axis.normalize(); // Quat requires normalised axes.
+
+  const double apertureStartWidth = getDoubleAttribute(pElemApertureStart, "width");
+  const double apertureStartHeight = getDoubleAttribute(pElemApertureStart, "height");
+  const double length = getDoubleAttribute(pElemLength, "val");
+  const double apertureEndWidth = getDoubleAttribute(pElemApertureEnd, "width");
+  const double apertureEndHeight = getDoubleAttribute(pElemApertureEnd, "height");
+
+  const double halfSW = apertureStartWidth / 2;
+  const double halfSH = apertureStartHeight / 2;
+  const double halfEW = apertureEndWidth / 2;
+  const double halfEH = apertureEndHeight / 2;
+
+  // Build the basic shape.
+  Hexahedron hex;
+  hex.lfb = V3D(-halfSW, -halfSH, 0     );
+  hex.lft = V3D(-halfSW,  halfSH, 0     );
+  hex.lbb = V3D(-halfEW, -halfEH, length);
+  hex.lbt = V3D(-halfEW,  halfEH, length);
+  hex.rfb = V3D( halfSW, -halfSH, 0     );
+  hex.rft = V3D( halfSW,  halfSH, 0     );
+  hex.rbb = V3D( halfEW, -halfEH, length);
+  hex.rbt = V3D( halfEW,  halfEH, length);
+
+  // Point it along the defined axis.
+  if( axis != DEFAULT_AXIS)
+  {
+    const Quat q(DEFAULT_AXIS, axis);
+
+    q.rotate(hex.lfb);
+    q.rotate(hex.lft);
+    q.rotate(hex.lbb);
+    q.rotate(hex.lbt);
+    q.rotate(hex.rfb);
+    q.rotate(hex.rft);
+    q.rotate(hex.rbb);
+    q.rotate(hex.rbt);
+  }
+  
+  // Move it to the defined centre.
+  hex.lfb += centre;
+  hex.lft += centre;
+  hex.lbb += centre;
+  hex.lbt += centre;
+  hex.rfb += centre;
+  hex.rft += centre;
+  hex.rbb += centre;
+  hex.rbt += centre;
+  
+  return parseHexahedronFromStruct(hex, prim, l_id);
+}
 
 /** Parse XML 'torus' element
  *
@@ -1050,16 +1242,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
   {
     boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
     Obj->setGeometryHandler(handler);
-    Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
-    Element* pElem_lft = getShapeElement(pElem, "left-front-top-point");
-    Element* pElem_lbb = getShapeElement(pElem, "left-back-bottom-point");
-    Element* pElem_rfb = getShapeElement(pElem, "right-front-bottom-point");
-
-    V3D lfb = parsePosition(pElem_lfb);  // left front bottom
-    V3D lft = parsePosition(pElem_lft);  // left front top
-    V3D lbb = parsePosition(pElem_lbb);  // left back bottom
-    V3D rfb = parsePosition(pElem_rfb);  // right front bottom
-    ((GluGeometryHandler*)(handler.get()))->setCuboid(lfb,lft,lbb,rfb);
+    auto corners = parseCuboid(pElem);
+    ((GluGeometryHandler*)(handler.get()))->setCuboid(corners.lfb,corners.lft,corners.lbb,corners.rfb);
   }
   else if(pElem->tagName()=="sphere")
   {

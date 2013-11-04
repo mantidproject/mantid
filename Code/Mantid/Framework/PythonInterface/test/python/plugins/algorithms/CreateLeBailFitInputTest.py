@@ -14,7 +14,6 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         """
         # Set up
         alg_test = run_algorithm("CreateLeBailFitInput", 
-                Instrument              = "POWGEN",
                 ReflectionsFile         = "LB4853b2.hkl",
                 FullprofParameterFile   = "2011B_HR60b2.irf",
                 Bank                    = 2,
@@ -62,7 +61,6 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         """
         # Set up
         alg_test = run_algorithm("CreateLeBailFitInput", 
-                Instrument              = "POWGEN",
                 ReflectionsFile         = "",
                 MaxHKL                  = "12,12,12",
                 FullprofParameterFile   = "2011B_HR60b2.irf",

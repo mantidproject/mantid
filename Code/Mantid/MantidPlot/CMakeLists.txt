@@ -13,7 +13,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
-                   src/CommandLineInterpreter.cpp
                    src/ColorMapDialog.cpp
                    src/Cone3D.cpp
                    src/ConfigDialog.cpp
@@ -166,6 +165,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InputHistory.cpp
                    src/Mantid/LoadDAEDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
+                   src/Mantid/ManageInterfaceCategories.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
                    src/Mantid/MantidCurve.cpp
@@ -243,7 +243,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
-                   src/CommandLineInterpreter.h
                    src/ColorMapDialog.h
                    src/Cone3D.h
                    src/ConfigDialog.h
@@ -396,6 +395,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InputHistory.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
+                   src/Mantid/ManageInterfaceCategories.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
                    src/Mantid/MantidCurve.h
@@ -520,7 +520,7 @@ set( SRC_UNITY_IGNORE_FILES )
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}/../MantidQt/Python ${PYQT4_SIP_FLAGS}
-                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
+                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
                      DEPENDS src/qti.sip ${SIP_HDRS}
                      COMMENT "Generating python bindings using sip"
@@ -546,7 +546,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AxesDialog.h
                         src/CanvasPicker.h
                         src/ColorMapDialog.h
-                        src/CommandLineInterpreter.h
                         src/ConfigDialog.h
                         src/ContourLinesEditor.h
                         src/Convolution.h
@@ -663,6 +662,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
                        src/Mantid/ManageCustomMenus.h
+                       src/Mantid/ManageInterfaceCategories.h
                        src/Mantid/MantidAbout.h
                        src/Mantid/MantidApplication.h
                        src/Mantid/MantidCurve.h
@@ -711,6 +711,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/RemoveErrorsDialog.ui
                src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
+               src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
 )
 
@@ -830,12 +831,11 @@ copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
 # IPython scripts
 set( IPY_FILES 
   __init__.py
-  internal_ipkernel.py
-  ipython_plugin.py
+  mantid_ipython_widget.py
 )
 copy_python_files_to_dir ( "${IPY_FILES}" 
-                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_plugin 
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_plugin 
+                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_widget
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget 
                             IPYTHON_INSTALL_FILES )
 
 ###########################################################################
@@ -845,7 +845,7 @@ copy_python_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp 
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} 
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
 )
 
 # Library dependencies
@@ -979,7 +979,7 @@ foreach(PY_FILE ${MTDPLOTPY_FILES} )
   install ( FILES mantidplotpy/${PY_FILE} DESTINATION ${BIN_DIR}/mantidplotpy )
 endforeach()
 foreach(PY_FILE ${IPY_FILES} )
-  install ( FILES ipython_plugin/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_plugin )
+  install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
 endforeach()
 
 if ( APPLE )

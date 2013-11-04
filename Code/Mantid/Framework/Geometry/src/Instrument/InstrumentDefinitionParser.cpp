@@ -173,12 +173,12 @@ namespace Geometry
     else if (pDoc != NULL)
     {
       std::string lastModified = pRootElem->getAttribute("last-modified");
-      if (lastModified.length() == 0)
+      if (lastModified.empty())
       {
         g_log.warning() << "The IDF that you are using doesn't contain a 'last-modified' field. ";
         g_log.warning() << "You may not get the correct definition file loaded." << std::endl ;
       }
-      return m_xmlFile->getFileNameOnly() + lastModified;
+      return m_instName + lastModified;
     }
     else
     {

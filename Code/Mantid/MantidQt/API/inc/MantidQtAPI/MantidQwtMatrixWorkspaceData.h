@@ -49,6 +49,9 @@ public:
   /// Number of error bars to plot
   size_t esize()const;
 
+  double getYMin() const;
+  double getYMax() const;
+
   bool isHistogram()const{return m_isHistogram;}
 
   /// Inform the data that it is to be plotted on a log y scale

@@ -62,6 +62,8 @@ class MuonAnalysis : public MantidQt::API::UserSubWindow
 public:
   /// Name of the interface
   static std::string name() { return "Muon Analysis"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "Muon"; }
 
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
@@ -135,9 +137,6 @@ private slots:
 
   /// Link to the wiki for the grouping tab.
   void muonAnalysisHelpGroupingClicked();
-  
-  ///
-  void runFirstGoodBinFront();
 
   /// Check to see if the user want to append the previous run and set accordingly
   void checkAppendingPreviousRun();
@@ -195,6 +194,15 @@ private slots:
 
   /// Change to the dead time file, make sure graph is updated next time it is plotted.
   void deadTimeFileSelected();
+
+  /// Updates the enabled-state and value of Time Zero using "auto" check-box state
+  void setTimeZeroState(int checkBoxState = -1);
+
+  /// Updates the enabled-state and value of First Good Data using "auto" check-box state
+  void setFirstGoodDataState(int checkBoxState = -1);
+
+  /// Saves the value of the widget which called the slot
+  void saveWidgetValue();
 
 
 private:
@@ -438,6 +446,12 @@ private:
   /// Setup the signals for updating
   void connectAutoUpdate();
 
+  /// Setup connects for saving values using QSettings
+  void connectAutoSave();
+
+  /// Saves the value of the widget which called the slot
+  void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -445,15 +459,19 @@ private:
   /// handles result table tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab* m_resultTableTab;
 
-  /// Time zero as stored in Nexus file. Need this because when loading Muon data
-  /// the x-axis has already been adjusted to that nexus time zero so if user select
-  /// a different time zero need to adjust the relative offset to this value
-  double m_nexusTimeZero;
+  /// Time Zero as loaded from Data file
+  double m_dataTimeZero;
+
+  /// First Good Data time as loaded from Data file
+  double m_dataFirstGoodData;
 
   static const QString NOT_AVAILABLE;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
+
+  /// Creates new double validator which accepts numbers in standard notation only.
+  static QDoubleValidator* createDoubleValidator(QObject* parent);
 };
 
 }

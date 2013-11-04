@@ -6,7 +6,7 @@ from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'), lowMem=False, binning='Monitors'):
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors'):
   #check if there is at least one file in the list
   if len(runs) < 1 : return
 
