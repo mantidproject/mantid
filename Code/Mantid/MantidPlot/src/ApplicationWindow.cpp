@@ -194,7 +194,6 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
-#include "MantidQtMantidWidgets/ICatSearch.h"
 #include "MantidQtMantidWidgets/ICatSearch2.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
@@ -1293,7 +1292,6 @@ void ApplicationWindow::initMainMenu()
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
   icat->addAction(actionICatLogin);//Login menu item
-//  icat->addAction(actionICatSearch);//search menu item
   icat->addAction(actionICatSearch2); // new ICAT GUI menu item
   icat->addAction(actionICatLogout);//logout menu item
   disableActions();
@@ -13396,10 +13394,6 @@ void ApplicationWindow::createActions()
   actionICatSearch2->setToolTip(tr("Search data in archives."));
   connect(actionICatSearch2, SIGNAL(activated()), this, SLOT(ICatSearch2()));
 
-  actionICatSearch=new QAction("Basic Search",this);
-  actionICatSearch->setToolTip(tr("Catalog Basic Search"));
-  connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
-
   actionICatLogout=new QAction("Logout",this);
   actionICatLogout->setToolTip(tr("Catalog Logout"));
   connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
@@ -17418,21 +17412,6 @@ void ApplicationWindow::ICatSearch2()
 
     icatsearch->show();
     icatsearch->raise();
-  }
-}
-
-void ApplicationWindow::ICatIsisSearch()
-{	
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearch(usr_win);
-  if(icatsearch_interface)
-  {
-    setGeometry(usr_win,icatsearch_interface);
-  }
-  else
-  {
-    delete usr_win;
   }
 }
 

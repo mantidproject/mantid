@@ -1170,8 +1170,6 @@ private:
 
   /// Handler for ICat login menu 
   void ICatLogin();
-  /// Handler for ICat search menu
-  void ICatIsisSearch();
   /// Handler for NEW ICat search GUI (ICatSearch2)
   void ICatSearch2();
   // Handler for ICat CatalogLogout
@@ -1415,7 +1413,7 @@ private:
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch,*actionICatSearch2,*actionICatLogout;
+  QAction *actionICatLogin,*actionICatSearch2,*actionICatLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
