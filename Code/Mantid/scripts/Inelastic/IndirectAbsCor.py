@@ -289,11 +289,10 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
     #can angle and detector angle
     tcan1, theta1 = angles
     canAngle = tcan1*PICONV
-    theta = PICONV*theta1
+    theta = theta1*PICONV
 
     # tsec is the angle the scattered beam makes with the normal to the sample surface.
     tsec = theta1-tcan1
-    tsec = tsec*PICONV
 
     nlam = len(waves)
 
@@ -316,6 +315,8 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
         #thickness of the sample and can
         samThickness, canThickness1, canThickness2 = thick
         
+        tsec = tsec*PICONV
+
         sec1 = 1./math.cos(canAngle)
         sec2 = 1./math.cos(tsec)
 
