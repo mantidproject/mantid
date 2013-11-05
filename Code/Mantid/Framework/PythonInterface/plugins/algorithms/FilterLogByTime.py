@@ -18,6 +18,7 @@ class FilterLogByTime(PythonAlgorithm):
         self.declareProperty(name="LogName", defaultValue="", direction=Direction.Input, validator=log_validator, doc="Log name to filter by")
         self.declareProperty(name="StartTime", defaultValue=sys.float_info.min, validator=FloatBoundedValidator(), direction=Direction.Input, doc="Start time for filtering")
         self.declareProperty(name="EndTime", defaultValue=sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="Start time for filtering")
+        self.declareProperty(name="Method",defaultValue="mean", validator=StringListValidator(["mean","min", "max", "median", "mode"]), doc="Statistical method to use to generate ResultStatistic output")
         self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output), doc="Output stitched workspace")
         self.declareProperty(name="ResultStatistic", defaultValue=0.0, direction=Direction.Output, doc="Requested statistic")
     
@@ -26,6 +27,7 @@ class FilterLogByTime(PythonAlgorithm):
         log_name = self.getProperty("LogName").value
         start_time = self.getProperty("StartTime").value
         end_time = self.getProperty("EndTime").value
+        method = self.getProperty("Method").value
         if start_time == sys.float_info.min:
             start_time = None
         if end_time == sys.float_info.max:
@@ -34,7 +36,7 @@ class FilterLogByTime(PythonAlgorithm):
             raise ValueError("StartTime > EndTime, %s > %s" % (str(start_time), str(end_time)))
         
         values = self.__filter(in_ws, log_name, start_time, end_time)
-        stats = self.__statistics(values)
+        stats = self.__statistics(values, method)
         self.setProperty("FilteredResult", values)
         self.setProperty("ResultStatistic", float(stats))
 
@@ -56,7 +58,7 @@ class FilterLogByTime(PythonAlgorithm):
         filteredvalues = values[mask]
         return filteredvalues
     
-    def __statistics(self, values, operation='mean'):
+    def __statistics(self, values, operation):
         op = getattr(numpy, operation)
         return op(values)
     
