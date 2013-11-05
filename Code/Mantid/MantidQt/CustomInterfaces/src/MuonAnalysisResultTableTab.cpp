@@ -31,6 +31,8 @@ namespace Muon
   using namespace Mantid::Kernel;
   using namespace MantidQt::MantidWidgets;
 
+  const std::string MuonAnalysisResultTableTab::RUN_NO_LOG = "run_number";
+  const std::string MuonAnalysisResultTableTab::RUN_NO_TITLE = "Run Number";
 /**
 * Constructor
 */
@@ -262,6 +264,16 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
       selectAllFittings(true);
     }
 
+    // If we have Run Number log value, we want to select it by default.
+    auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
+    if(!found.empty())
+    {
+      int r = found[0]->row();
+
+      if(QCheckBox* cb = dynamic_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(r, 1)))
+        cb->setCheckState(Qt::Checked); 
+    }
+
     applyUserSettings();
   }
   else
@@ -279,9 +291,6 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 */
 void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& fittedWsList)
 {
-  const std::string RUN_NO_LOG = "run_number";
-  const std::string RUN_NO_TITLE = "Run Number";
-
   // Clear the logs if not empty and then repopulate.
   QVector<QString> logsToDisplay;
   
