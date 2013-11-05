@@ -1992,19 +1992,6 @@ void Indirect::slicePlotRaw()
 
     // Replot
     m_sltPlot->replot();
-
-    //Update the spectra min/max
-    int nhist = static_cast<int>(input->getNumberHistograms()-1);
-
-    m_sltDblMng->setValue(m_sltProp["SpecMin"], 0);
-    m_sltDblMng->setValue(m_sltProp["SpecMax"], nhist);
-
-    //set bounds for spectra as we have access to the data
-    m_sltDblMng->setMinimum(m_sltProp["SpecMin"], 0);
-    m_sltDblMng->setMaximum(m_sltProp["SpecMin"], nhist);
-
-    m_sltDblMng->setMinimum(m_sltProp["SpecMax"], 0);
-    m_sltDblMng->setMaximum(m_sltProp["SpecMax"], nhist);
   }
   else
   {

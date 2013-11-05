@@ -112,24 +112,24 @@ def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=True, Plo
     useCalib = (calib != '')
     calib_wsname = None
 
-    #Load algorithm requires conversion from zero based spectra
-    spec = [x+1 for x in spec]
-
     #load the calibration file
     if useCalib:
-        calib_wsname = Load(Filename=calib, OutputWorkspace='__calibration', SpectrumMin=spec[0], SpectrumMax=spec[1])
+        calib_wsname = Load(Filename=calib, OutputWorkspace='__calibration')
+        nhist = calib_wsname.getNumberHistograms()
 
     for file in inputfiles:
         
         rawFile = sliceReadRawFile(file, spec, Verbose)
         nhist,ntc = CheckHistZero(rawFile)
 
-        #use calibration file is desired
+        #use calibration file if desired
         if useCalib:
 
             if Verbose:
                 logger.notice('Using Calibration file :'+calib)
 
+            CropWorkspace(InputWorkspace=calib_wsname, OutputWorkspace=calib_wsname, 
+                StartWorkspaceIndex=spec[0], EndWorkspaceIndex=spec[1])
             Divide(LHSWorkspace=rawFile, RHSWorkspace=calib_wsname, OutputWorkspace=rawFile)
 
         #construct output workspace name
