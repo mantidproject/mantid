@@ -1,3 +1,12 @@
+'''
+*WIKI*
+Filters out logs that do not sit between StartTime and EndTime. The algorithm also applied a 'Method' to those filtered results and returns the statistic.
+A workspace must be provided containing logs. The log name provided must refer to a FloatTimeSeries log.
+
+Unless specified, StartTime is taken to be run_start. StartTime and EndTime filtering is inclusive of the limits provided.
+*WIKI*
+'''
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -16,11 +25,12 @@ class FilterLogByTime(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input), "Input workspace")
         log_validator = StringMandatoryValidator() 
         self.declareProperty(name="LogName", defaultValue="", direction=Direction.Input, validator=log_validator, doc="Log name to filter by")
-        self.declareProperty(name="StartTime", defaultValue=sys.float_info.min, validator=FloatBoundedValidator(), direction=Direction.Input, doc="Start time for filtering")
-        self.declareProperty(name="EndTime", defaultValue=sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="Start time for filtering")
+        self.declareProperty(name="StartTime", defaultValue=-sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="Start time for filtering. Seconds after run start")
+        self.declareProperty(name="EndTime", defaultValue=sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="End time for filtering. Seconds after run start")
         self.declareProperty(name="Method",defaultValue="mean", validator=StringListValidator(["mean","min", "max", "median", "mode"]), doc="Statistical method to use to generate ResultStatistic output")
         self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output), doc="Output stitched workspace")
         self.declareProperty(name="ResultStatistic", defaultValue=0.0, direction=Direction.Output, doc="Requested statistic")
+        self.setWikiSummary("Filters a log between time intervals and applies a user defined operation to the result.")
     
     def PyExec(self):
         in_ws = self.getProperty("InputWorkspace").value
@@ -28,7 +38,7 @@ class FilterLogByTime(PythonAlgorithm):
         start_time = self.getProperty("StartTime").value
         end_time = self.getProperty("EndTime").value
         method = self.getProperty("Method").value
-        if start_time == sys.float_info.min:
+        if start_time == -sys.float_info.max:
             start_time = None
         if end_time == sys.float_info.max:
             end_time = None
@@ -39,6 +49,8 @@ class FilterLogByTime(PythonAlgorithm):
         stats = self.__statistics(values, method)
         self.setProperty("FilteredResult", values)
         self.setProperty("ResultStatistic", float(stats))
+        self.log().information("Stats %s" % str(stats))
+        self.log().information("Time filtered results %s" % str(values))
 
     def __filter(self, ws, logname, starttime=None, endtime=None):
         run = ws.getRun()
@@ -51,6 +63,9 @@ class FilterLogByTime(PythonAlgorithm):
         if  endtime:
             tend = runstart + (endtime * nanosecond)
         log = run.getLogData(logname)
+        if not isinstance(log, FloatTimeSeriesProperty):
+            raise ValueError("log called %s is not a FloatTimeSeries log" % logname)
+
         times = numpy.array(map(lambda t: t.total_nanoseconds(), log.times))
         
         values = numpy.array(log.value)
