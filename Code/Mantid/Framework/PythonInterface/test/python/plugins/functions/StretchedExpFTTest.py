@@ -52,17 +52,24 @@ class StretchedExpFTTest(unittest.TestCase):
             self.fail('Could not create StretchedExpFT function: %s' % str(exc))
             
     def test_fit(self):
+        parms={'height':0.83, 'tau':2.45, 'beta':0.43}
         AlgorithmFactory.subscribe(_InternalMakeSEFTData)
-        alg = testhelpers.run_algorithm('_InternalMakeSEFTData', height=0.83, tau=2.45, beta=0.43,
-                                        nhalfbins=4000, OutputWorkspace='_test_seft_data')
+        alg = testhelpers.run_algorithm('_InternalMakeSEFTData', nhalfbins=4000,
+                                         OutputWorkspace='_test_seft_data', **parms)
         input_ws = alg.getProperty('OutputWorkspace').value
         
-        func_string='name=StretechedExpFT,height=1.0,tau=0.9,beta=0.5'
+        func_string = 'name=StretechedExpFT,' + ','.join( '{}={}'.format(key,val) for key,val in parms.items() )
         Fit(Function=func_string, InputWorkspace='_test_data',
             StartX=-1, EndX=1, CreateOutput=1, MaxIterations=20)
         
-        mtd['_test_seft_data_Parameters']
-        
+        ws = mtd['_test_seft_data_Parameters']
+        for (index, name) in enumerate(ws.column(0)):
+            if name in parms.keys():
+                target = parms[name]
+                value = ws.column(1)[index]
+                delta = 0.05 * target # 5% error
+                self.assertAlmostEqual(value, target, delta=delta)
+
         mtd.remove('_test_seft_data')
         mtd.remove('_test_seft_data_NormalisedCovarianceMatrix')
         mtd.remove('_test_seft_data_Parameters')
