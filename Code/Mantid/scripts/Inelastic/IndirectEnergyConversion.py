@@ -85,7 +85,11 @@ def resolution(files, iconOpt, rebinParam, bground,
             graph = mp.plotSpectrum(iconWS, 0)
         return iconWS
 
-def sliceReadRawFile(fname, spectra, Verbose):
+##############################################################################
+# Slice Functions
+##############################################################################
+
+def sliceReadRawFile(fname, Verbose):
 
     if Verbose:
         logger.notice('Reading file :'+fname)
@@ -94,10 +98,95 @@ def sliceReadRawFile(fname, spectra, Verbose):
     (dir, filename) = os.path.split(fname)
     (root, ext) = os.path.splitext(filename)
     
-    Load(Filename=fname, OutputWorkspace=root, SpectrumMin=spectra[0], SpectrumMax=spectra[1],
-        LoadLogFiles=False)
+    Load(Filename=fname, OutputWorkspace=root, LoadLogFiles=False)
 
     return root
+
+# returns the number of monitors
+# and if they're at the start or end of the file
+def countMonitors(rawFile):
+    rawFile = mtd[rawFile]
+    nhist = rawFile.getNumberHistograms()
+    detector = rawFile.getDetector(0)
+    monCount = 1
+    
+    if detector.isMonitor():
+        #monitors are at the start
+        for i in range(1,nhist):
+            detector = rawFile.getDetector(i)
+
+            if detector.isMonitor():
+                monCount += 1
+            else:
+                break
+        
+        return monCount, True
+    else:
+        #monitors are at the end
+        detector = rawFile.getDetector(nhist)
+
+        if not detector.isMonitor():
+            #if it's not, we don't have any monitors!
+            return 0, True
+        
+        for i in range(nhist,0,-1):
+            detector = rawFile.getDetector(i)
+
+            if detector.isMonitor():
+                monCount += 1
+            else:
+                break
+
+        return monCount, False
+
+# Run the calibration file with the raw file workspace
+def sliceProcessCalib(rawFile, calibWsName, spec):
+    calibSpecMin, calibSpecMax = spec
+
+    if calibSpecMax-calibSpecMin > mtd[calibWsName].getNumberHistograms():
+        raise IndexError("Number of spectra used is greater than the number of spectra in the calibration file.")
+
+    #offset cropping range to account for monitors
+    (monCount, atStart) = countMonitors(rawFile)
+
+    if atStart: 
+        calibSpecMin -= monCount+1
+        calibSpecMax -= monCount+1
+
+    #Crop the calibration workspace, excluding the monitors
+    CropWorkspace(InputWorkspace=calibWsName, OutputWorkspace=calibWsName, 
+        StartWorkspaceIndex=calibSpecMin, EndWorkspaceIndex=calibSpecMax)
+
+def sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, spec, suffix, Verbose):
+    
+    #Crop the raw file to use the desired number of spectra
+    #less one because CropWorkspace is zero based
+    CropWorkspace(InputWorkspace=rawFile, OutputWorkspace=rawFile,
+        StartWorkspaceIndex=spec[0]-1, EndWorkspaceIndex=spec[1]-1)
+
+    nhist,ntc = CheckHistZero(rawFile)
+
+    #use calibration file if desired
+    if useCalib:
+        if Verbose:
+            logger.notice('Using Calibration file :'+calib)
+
+        Divide(LHSWorkspace=rawFile, RHSWorkspace=calibWsName, OutputWorkspace=rawFile)
+
+    #construct output workspace name
+    run = mtd[rawFile].getRun().getLogData("run_number").value
+    sfile = rawFile[:3].lower() + run + '_' + suffix + '_slice'
+
+    if not useTwoRanges:
+        Integration(InputWorkspace=rawFile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
+            StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
+    else:
+        CalculateFlatBackground(InputWorkspace=rawFile, OutputWorkspace=sfile, StartX=xRange[2], EndX=xRange[3], 
+                Mode='Mean')
+        Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
+            StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
+
+    return sfile
 
 def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=True, Plot=False):
 
@@ -110,40 +199,23 @@ def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=True, Plo
     outWSlist = []
     useTwoRanges = (len(xRange) != 2)
     useCalib = (calib != '')
-    calib_wsname = None
-
+    calibWsName = '__calibration'
+    
     #load the calibration file
     if useCalib:
-        calib_wsname = Load(Filename=calib, OutputWorkspace='__calibration')
-        nhist = calib_wsname.getNumberHistograms()
+        Load(Filename=calib, OutputWorkspace=calibWsName)
 
-    for file in inputfiles:
-        
-        rawFile = sliceReadRawFile(file, spec, Verbose)
-        nhist,ntc = CheckHistZero(rawFile)
+    for index, file in enumerate(inputfiles):
+        rawFile = sliceReadRawFile(file, Verbose)
 
-        #use calibration file if desired
-        if useCalib:
+        #only need to process the calib file once
+        if(index == 0 and useCalib):
+            sliceProcessCalib(rawFile, calibWsName, spec)
 
-            if Verbose:
-                logger.notice('Using Calibration file :'+calib)
+        sfile = sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, spec, suffix, Verbose)
 
-            CropWorkspace(InputWorkspace=calib_wsname, OutputWorkspace=calib_wsname, 
-                StartWorkspaceIndex=spec[0], EndWorkspaceIndex=spec[1])
-            Divide(LHSWorkspace=rawFile, RHSWorkspace=calib_wsname, OutputWorkspace=rawFile)
-
-        #construct output workspace name
-        run = mtd[rawFile].getRun().getLogData("run_number").value
-        sfile = rawFile[:3].lower() + run + '_' + suffix + '_slice'
-
-        if not useTwoRanges:
-            Integration(InputWorkspace=rawFile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
-                StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
-        else:
-            CalculateFlatBackground(InputWorkspace=rawFile, OutputWorkspace=sfile, StartX=xRange[2], EndX=xRange[3], 
-                    Mode='Mean')
-            Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
-                StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
+        outWSlist.append(sfile)
+        DeleteWorkspace(rawFile)
 
         if Save:
             # path name for nxs file
@@ -153,14 +225,11 @@ def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=True, Plo
             if Verbose:
                 logger.notice('Output file :'+o_path)
 
-        outWSlist.append(sfile)
-        DeleteWorkspace(rawFile)
+    if useCalib:
+        DeleteWorkspace(Workspace=calibWsName)
 
     if Plot:
         graph = mp.plotBin(outWSlist, 0)
-
-    if calib_wsname is not None:
-        DeleteWorkspace(Workspace=calib_wsname)
 
     EndTime('Slice')
     
