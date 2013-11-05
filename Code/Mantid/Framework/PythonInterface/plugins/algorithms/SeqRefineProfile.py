@@ -13,6 +13,7 @@
 #
 ######################################################################
 
+from mantid.api import *
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -39,6 +40,9 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	""" Declare properties
 	"""
 	self.setWikiSummary("""Refine powder diffractomer profile parameters sequentially.""")
+
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional), 
+                "Name of data workspace containing the diffraction pattern in .prf file. ")
 
 	self.declareProperty(ITableWorkspaceProperty("SeqControlInfoWorkspace", "", Direction.InOut, PropertyMode.Optional),
 	    "Name of table workspace containing sequential refinement information.")
@@ -81,7 +85,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	self._processInputProperties()
 
 	# Instantiaze sequential refinement 
-	seqrefine = SeqRefineProfile("IDx890")
+	seqrefine = SeqRefineProfile("IDx890", self.log())
 
 	# Execute 
 	if self.functionoption == "Setup": 
@@ -89,7 +93,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	    if seqrefine.isSetup() is True:
 		raise NotImplementedError("Impossible to have it set up already.")
 
-	    seqrefine.initSetup(self.profilews, self.braggpeakws, self.bkgdtype, self.bkgdparws, 
+	    seqrefine.initSetup(self.dataws, self.profilews, self.braggpeakws, self.bkgdtype, self.bkgdparws, 
 		self.startx, self.endx)
 
 	elif self.functionoption == "Refine": 
@@ -108,6 +112,9 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
     def _processInputProperties(self):
 	""" Process input properties
 	"""
+        self.dataws = self.getProperty("InputWorkspace").value
+        self.datawsname = str(self.dataws)
+
 	self.startx = self.getProperty("StartX").value
 	self.endx = self.getProperty("EndX").value
 
@@ -136,19 +143,27 @@ class SeqRefineProfile:
     4. If no further instruction, only need to set up parameters to refine
        the input/starting values should be from the last
     """
-    def __init__(self, ID):
+    def __init__(self, ID, glog):
 	""" 
 	"""
 	self._ID = str(ID)
+        self.glog = glog
+        self.glog.information("SeqRefineProfile is initialized with ID = %s" % (str(ID)))
 	
 	self._recordwsname = "Record%sTable" % (str(ID))
 
+        self._isSetup = False
+        self._lastrowinvalid = False
+
 	return
 
-    def initSetup(self, profilews, braggpeakws, bkgdtype, bkgdparws, startx, endx):
+    def initSetup(self, dataws, profilews, braggpeakws, bkgdtype, bkgdparws, startx, endx):
 	""" Set up the properties for LeBailFit as the first time
 	including profilews, braggpeakws, and etc
 	"""
+        # Data
+        self._datawsname = str(dataws)
+
 	# Profile 
 	self._profileWS = profilews
 	self._braggpeakws = braggpeakws
@@ -159,30 +174,38 @@ class SeqRefineProfile:
 	self._genRecordTable()
 
 	# Check input parameters, i.e., verification/examine input parameters
-	runner = RefineProfileParameters()
+	runner = RefineProfileParameters(self.glog)
 
         runner.startx =  startx
         runner.endx   =  endx
 
-	runner.inprofilewsname = self._profileWS
-	runner.inreflectionwsname = self._braggpeakws
+	# runner.inprofilewsname = self._profileWS
+	# runner.inreflectionwsname = self._braggpeakws
 
-	runner.bkgdtype = self._bkgdtype
-	runner.bkgdtablewsname = self._bkgdparws
+	# runner.bkgdtype = self._bkgdtype
+	# runner.bkgdtablewsname = self._bkgdparws
 
-	runner.outprofilewsname = self._profileWS
-	runner.outreflectionwsname = self._braggpeakws
+	# runner.outprofilewsname = self._profileWS
+	# runner.outreflectionwsname = self._braggpeakws
+
+        outwsname = "InitTemp"
+
+        runner.setInputs(self._datawsname, self._profileWS, self._braggpeakws, self._bkgdtype,  self._bkgdparws)
+        # FIXME - Need to verify whether input and output background parameter ws name can be same
+        runner.setOutputs(outwsname, self._profileWS, self._braggpeakws, self._bkgdparws)
 
 	self._recordPreRefineInfo(runner)
-	runner.calculate()
+	runner.calculate(runner.startx, runner.endx)
 	self._recordPostRefineInfo(runner)
+
+        self._isSetup = True
 
 	return
 
     def refine(self, parametersToFit, numcycles, startx, endx):
 	""" Refine parameters
 	"""
-	runner = RefineProfileParameters(self._globalFilename)
+	runner = RefineProfileParameters(self.glog)
 
 	# Locate refinement record table
 	profilewsname, braggpeakwsname, bkgdtype, bkgdparamwsname = self._parseRecordTable()
@@ -194,29 +217,38 @@ class SeqRefineProfile:
         runner.startx =  startx
         runner.endx   =  endx
 
-	runner.inprofilewsname = profilewsname
-	runner.inreflectionwsname = braggpeakwsname
-
-	runner.bkgdtype = bkgdtype
-	runner.bkgdtablewsname = bkgdparamwsname
+	# runner.inprofilewsname = profilewsname
+	# runner.inreflectionwsname = braggpeakwsname
+	# runner.bkgdtype = bkgdtype
+	# runner.bkgdtablewsname = bkgdparamwsname
 	
+	outwsname, outprofilewsname, outbraggpeakwsname = self._genOutputWorkspace(runner.datawsname, profilewsname, braggpeakwsname)
+        # runner.outwsname = outwsname
+        # runner.outprofilewsname = outprofilewsname
+	# runner.outreflectionwsname = outbraggpeakwsname
+
+        # Set up input and output
+        runner.setInputs(self._datawsname, profilewsname, braggpeakwsname, bkgdtype,  bkgdparamwsname)
+        # FIXME - Need to verify whether input and output background parameter ws name can be same
+        runner.setOutputs(outwsname, outprofilewsname, outbraggpeakwsname, bkgdparamwsname)
+
 	# Refine
 	self._recordPreRefineInfo(runner)
 	
-	outwsname, outprofilewsname, outbraggpeakwsname = self._genOutputWorkspace(runner.datawsname, profilewsname, braggpeakwsname)
-        runner.outwsname = outwsname
-        runner.outprofilewsname = outprofilewsname
-	runner.outreflectionwsname = outbraggpeakwsname
-
 	runner.refine()
 	self._recordPostRefineInfo(runner)
 
 	return
 
+    def isSetup(self):
+        """ Status whether refinement is set up.
+        """
+        return self._isSetup
+
     def _genRecordTable(self):
 	""" Generate record table
 	"""
-	tablews = CreateEmptyTableWorkspace(OutputWorkspace=self._recordwsname)
+	tablews = api.CreateEmptyTableWorkspace(OutputWorkspace=self._recordwsname)
 
 	tablews.addColumn("int", "Step")
 	tablews.addColumn("str", "OutProfile")
@@ -284,12 +316,14 @@ class SeqRefineProfile:
             self._currstep = numrows-1
             laststep = self._currstep-1
 
+        # print "*** Record workspace has %d rows. current step = %d. " % (rectablews.rowCount(), self._currstep)
+
         if len(refiner.paramToFit) > 0: 
             rectablews.setCell(self._currstep,  5, str(refiner.paramToFit))
-        rectablews.setCell(self._currstep,  9, refiner.inprofilewsname)
-        rectablews.setCell(self._currstep, 10, refiner.inreflectionwsname)
-        rectablews.setCell(self._currstep, 11, refiner.bkgdtype)
-        rectablews.setCell(self._currstep, 12, refiner.bkgdtablewsname)
+        rectablews.setCell(self._currstep,  9, str(refiner.inprofilewsname))
+        rectablews.setCell(self._currstep, 10, str(refiner.inreflectionwsname))
+        rectablews.setCell(self._currstep, 11, str(refiner.bkgdtype))
+        rectablews.setCell(self._currstep, 12, str(refiner.bkgdtablewsname))
         
 	return
 
@@ -297,7 +331,10 @@ class SeqRefineProfile:
         """ Record post-refinement information, i.e., refinement result
         """
         # Parse profile table workspace
-        outprofilews = mtd[refiner.outprofilewsname]
+        # FIXME - do I need to call AnalysisDataService? 
+        # print "****** outprofilews type = ", type(refiner.outprofilewsname)
+        outprofilews = AnalysisDataService.retrieve(str(refiner.outprofilewsname))
+        # outprofilews = api.mtd[refiner.outprofilewsname]
         # FIXME - Use Name[0], Value[1] as default
         numpars = outprofilews.rowCount()
         rwp = None
@@ -312,10 +349,10 @@ class SeqRefineProfile:
         numrows = rectablews.rowCount()
         # currstep = numrows-1
 
-        rectablews.setCell(self._currstep, 1, refiner.outprofilewsname)
-        rectablews.setCell(self._currstep, 2, refiner.outreflectionwsname)
-        rectablews.setCell(self._currstep, 3, refiner.bkgdtype)
-        rectablews.setCell(self._currstep, 4, refiner.bkgdtablewsname)
+        rectablews.setCell(self._currstep, 1, str(refiner.outprofilewsname))
+        rectablews.setCell(self._currstep, 2, str(refiner.outreflectionwsname))
+        rectablews.setCell(self._currstep, 3, str(refiner.bkgdtype))
+        rectablews.setCell(self._currstep, 4, str(refiner.bkgdtablewsname))
         if rwp is not None: 
             rectablews.setCell(self._currstep, 6, rwp)
         
@@ -421,7 +458,7 @@ def resetParametersGroups(tablews):
 class RefineProfileParameters:
     """ Class to refine profile parameters ONE step
     """
-    def __init__(self):
+    def __init__(self, glog):
         """ Initialization
         """
         # bankid, calibDict = importCalibrationInformation(globalsfname)
@@ -460,6 +497,8 @@ class RefineProfileParameters:
    
         # Output
         self.outwsname = None
+
+        self.glog = glog
 
         self.numsteps = 0
 
@@ -501,10 +540,13 @@ class RefineProfileParameters:
     def calculate(self, startx, endx):
         """ Do Le bail calculation
         """
-	if (self._inputIsSetup and self.outputIsSetup) is False:
-	    raise NotImplementedError("Either input or output is not setup.")
+	if (self._inputIsSetup and self._outputIsSetup) is False:
+            raise NotImplementedError("Either input or output is not setup: inputIsStepUp = %s, outputIsSetup = %s" % 
+                    (str(self._inputIsSetup), str(self._outputIsSetup)))
 
-        LeBailFit( 
+        self.glog.information("Calculate: DataWorksapce = %s" % (str(self.datawsname)))
+
+        api.LeBailFit( 
                 Function                =   'Calculation',
                 InputWorkspace          =   self.datawsname, 
                 OutputWorkspace         =   self.outwsname,
@@ -526,7 +568,7 @@ class RefineProfileParameters:
         """ Main execution body (doStep4)
         """
 	# Check validity
-	if (self._inputIsSetup and self.outputIsSetup) is False:
+	if (self._inputIsSetup and self._outputIsSetup) is False:
 	    raise NotImplementedError("Either input or output is not setup.")
 
 	# Update parameters' fit table
