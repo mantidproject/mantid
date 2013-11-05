@@ -305,8 +305,8 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
     // Try to get a run number for the workspace
     if (ws->run().hasProperty(RUN_NO_LOG))
     {
-      std::string runNumber = ws->run().getLogData(RUN_NO_LOG)->value();
-      allLogs[RUN_NO_TITLE.c_str()] = boost::lexical_cast<double>(runNumber);
+      // Set run number as a string, as we don't want it to be formatted like double.
+      allLogs[RUN_NO_TITLE.c_str()] = QString(ws->run().getLogData(RUN_NO_LOG)->value().c_str());
     }
 
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
@@ -562,10 +562,30 @@ void MuonAnalysisResultTableTab::createTable()
     // Create the results table
     Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
-    for(int i=0; i<logsSelected.size(); ++i)
+    // Add columns for log values 
+    foreach(QString log, logsSelected)
     {
-      Mantid::API::Column_sptr newColumn = table->addColumn("double", logsSelected[i].toStdString());
-      newColumn->setPlotType(1);
+      std::string columnTypeName;
+      int columnPlotType;
+
+      // We use values of the first workspace to determine the type of the column to add. It seems reasonable to assume
+      // that log values with the same name will have same types.
+      QString typeName = m_logValues[wsSelected[0]][log].typeName();
+      if (typeName == "double")
+      {
+        columnTypeName = "double";
+        columnPlotType = 1;
+      }
+      else if(typeName == "QString")
+      {
+        columnTypeName = "str";
+        columnPlotType = 6;
+      }
+      else
+        throw std::runtime_error("Couldn't find appropriate column type for value with type " + typeName.toStdString());
+        
+      Mantid::API::Column_sptr newColumn = table->addColumn(columnTypeName, log.toStdString());
+      newColumn->setPlotType(columnPlotType);
     }
 
     // Get param information
@@ -612,11 +632,21 @@ void MuonAnalysisResultTableTab::createTable()
           // Add new row
           Mantid::API::TableRow row = table->appendRow();
 
-          // Add log values
-          auto wsLogValues = itr.value();
-          for(int j=0; j<logsSelected.size(); ++j)
+          // Add log values to the row
+          QMap<QString, QVariant>& logValues = itr.value();
+
+          for(int j = 0; j < logsSelected.size(); j++)
           {
-            row << wsLogValues[logsSelected[j]].toDouble();
+            Mantid::API::Column_sptr c = table->getColumn(j);
+            QVariant& v = logValues[logsSelected[j]];
+            
+            if(c->isType<double>())
+              row << v.toDouble();
+            else if(c->isType<std::string>())
+              row << v.toString().toStdString();
+            else
+              throw std::runtime_error("Log value with name '" + logsSelected[j].toStdString() + "' in '" 
+                + wsSelected[i].toStdString() + "' has unexpected type.");
           }
 
           // Add param values (presume params the same for all workspaces)
