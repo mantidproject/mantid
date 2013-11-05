@@ -892,15 +892,6 @@ namespace Mantid
         req_sptr->advancedSearchDetails->investigators.push_back(inputs.getInvestigatorSurName());
       }
 
-      //rb number
-      boost::shared_ptr<std::string > RbNumber_sptr(new std::string);
-      if(!inputs.getRbNumber().empty())
-      {
-        req_sptr->advancedSearchDetails->experimentNumber = RbNumber_sptr.get();
-        *req_sptr->advancedSearchDetails->experimentNumber = inputs.getRbNumber();
-      }
-
-
       //response object
       ns1__searchByAdvancedResponse response;
       // do  search

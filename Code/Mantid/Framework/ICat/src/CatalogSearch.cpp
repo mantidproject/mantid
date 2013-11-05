@@ -91,6 +91,7 @@ namespace Mantid
       params.setEndDate(params.getTimevalue(getPropertyValue("EndDate")));
       params.setKeywords(getPropertyValue("Keywords"));
       params.setInvestigationName(getPropertyValue("InvestigationName"));
+      params.setInvestigatorSurName(getPropertyValue("InvestigatorSurname"));
       params.setSampleName(getPropertyValue("SampleName"));
       params.setInvestigationAbstract(getPropertyValue("InvestigationAbstract"));
       params.setInvestigationType(getPropertyValue("InvestigationType"));

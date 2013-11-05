@@ -6,132 +6,232 @@ namespace Mantid
   namespace ICat
   {
     /// constructor
-    CatalogSearchParam::CatalogSearchParam() : m_startRun(0),m_endRun(0), m_myData(false),
-        m_startDate(0),m_endDate(0) {}
+    CatalogSearchParam::CatalogSearchParam() : m_startRun(0),m_endRun(0),
+        m_startDate(0),m_endDate(0), m_myData(false) {}
+
     /// Destructor
-    CatalogSearchParam::~CatalogSearchParam(){}
-    /** This method  sets start date
-     *  @param startRun start run number
-     */
-    void CatalogSearchParam::setRunStart(const double& startRun){m_startRun=startRun;}
-    /** This method  sets end date
-     *  @param endRun  end run number
-     */
-    void CatalogSearchParam::setRunEnd(const double& endRun){m_endRun=endRun;}
-    /** This method  sets isntrument name
-     *  @param instrName  name of the instrument
-     */
-    void CatalogSearchParam::setInstrument(const std::string& instrName){m_instrName=instrName;}
-    /** This method  sets the start date
-     *  @param startDate  start date for search
-     */
-    void CatalogSearchParam::setStartDate(const time_t& startDate){m_startDate=startDate;}
-    /** This method  sets the end date
-     *  @param endDate end date for search
-     */
-    void CatalogSearchParam::setEndDate(const time_t& endDate){m_endDate=endDate;}
+    CatalogSearchParam::~CatalogSearchParam() {}
 
-    /** This method  sets the InvestigationInclude
-     *  @param keywords keywords used for search
+    /**
+     * This method sets start date
+     * @param startRun :: start run number
      */
-    void CatalogSearchParam::setKeywords(const std::string& keywords){m_keywords=keywords;}
+    void CatalogSearchParam::setRunStart(const double& startRun)
+    {
+      m_startRun = startRun;
+    }
 
-    /** This method  sets investigationName used for searching
-     *  @param instName  name of the investigation
+    /**
+     * This method sets end date
+     * @param endRun :: end run number
      */
-    void  CatalogSearchParam::setInvestigationName(const std::string& instName){ m_investigationName = instName;}
+    void CatalogSearchParam::setRunEnd(const double& endRun)
+    {
+      m_endRun = endRun;
+    }
 
-    /** This method  sets investigationAbstract used for searching
-     *  @param invstabstract  abstract of the investigation
+    /**
+     * This method sets instrument name
+     * @param instrName :: name of the instrument
      */
-    void CatalogSearchParam::setInvestigationAbstract(const std::string& invstabstract){ m_investigationAbstract=invstabstract;}
+    void CatalogSearchParam::setInstrument(const std::string& instrName)
+    {
+      m_instrName = instrName;
+    }
 
-    /** This method  sets sample used for searching
-     *  @param sampleName name of the sample
+    /**
+     * This method sets the start date
+     * @param startDate :: start date for search
      */
-    void CatalogSearchParam::setSampleName(const std::string& sampleName){ m_sampleName = sampleName;}
+    void CatalogSearchParam::setStartDate(const time_t& startDate)
+    {
+      m_startDate = startDate;
+    }
 
-    /** This method  sets Investigator surname
-     *@param investigatorName  surname of the investigator
+    /**
+     * This method sets the end date
+     * @param endDate :: end date for search
      */
-    void  CatalogSearchParam::setInvestigatorSurName(const std::string& investigatorName){m_investigatorSurname = investigatorName;}
+    void CatalogSearchParam::setEndDate(const time_t& endDate)
+    {
+      m_endDate = endDate;
+    }
 
-    /** This method  sets Rb Number
-     *@param RbNumber rutherford board number
+    /**
+     * This method sets the keywords to search for
+     * @param keywords :: keywords used for search
      */
-    void CatalogSearchParam::setRbNumber(const std::string& RbNumber){m_RbNumber = RbNumber;}
+    void CatalogSearchParam::setKeywords(const std::string& keywords)
+    {
+      m_keywords = keywords;
+    }
 
-    /** This method  sets Investigation Type
-     * @param invstType type of investigation
+    /**
+     * This method sets investigationName used for searching
+     * @param instName :: name of the investigation
      */
-    void CatalogSearchParam::setInvestigationType(const std::string& invstType){m_investigationType = invstType;}
+    void CatalogSearchParam::setInvestigationName(const std::string& instName)
+    {
+      m_investigationName = instName;
+    }
+
+    /**
+     * This method  sets investigationAbstract used for searching
+     * @param invstabstract :: abstract of the investigation
+     */
+    void CatalogSearchParam::setInvestigationAbstract(const std::string& invstabstract)
+    {
+      m_investigationAbstract = invstabstract;
+    }
+
+    /**
+     * This method  sets sample used for searching
+     * @param sampleName :: name of the sample
+     */
+    void CatalogSearchParam::setSampleName(const std::string& sampleName)
+    {
+      m_sampleName = sampleName;
+    }
+
+    /**
+     * This method  sets Investigator name
+     * @param investigatorName :: name of the investigator
+     */
+    void CatalogSearchParam::setInvestigatorSurName(const std::string& investigatorName)
+    {
+      m_investigatorSurname = investigatorName;
+    }
+
+    /**
+     * This method sets Investigation Type
+     * @param invstType :: type of investigation
+     */
+    void CatalogSearchParam::setInvestigationType(const std::string& invstType)
+    {
+      m_investigationType = invstType;
+    }
+
     /**
      * Sets the "My data only" checkbox.
      * @param flag :: Flag to search in "My data" only.
      */
-    void CatalogSearchParam::setMyData(bool flag) { m_myData = flag;}
+    void CatalogSearchParam::setMyData(bool flag)
+    {
+      m_myData = flag;
+    }
 
-    /** This method  returns the start run number
-     *  @returns  run start number
+    /**
+     * This method returns the start run number
+     * @return Run start number
      */
-    const double& CatalogSearchParam::getRunStart()const {return m_startRun; }
-    /** This method  returns the end run number
-     *  @returns  run end number
-     */
-    const double& CatalogSearchParam::getRunEnd() const {return m_endRun;}
-    /** This method  returns the instrument name
-     *  @returns  instrument name
-     */
-    const std::string& CatalogSearchParam::getInstrument() const{return m_instrName;}
-    /**This method  returns the start date
-     * @returns  start date
-     */
+    const double& CatalogSearchParam::getRunStart() const
+    {
+      return m_startRun;
+    }
 
-    const time_t& CatalogSearchParam::getStartDate()const{return m_startDate;}
-    /** This method  returns the end date
-     *  @returns end date for investigations serch
+    /**
+     * Gets the input from the investigation name field.
+     * @return Run end number
      */
-    const time_t& CatalogSearchParam::getEndDate()const{return m_endDate;}
+    const double& CatalogSearchParam::getRunEnd() const
+    {
+      return m_endRun;
+    }
 
-    /** This method  returns the enum for data search in icat db
-     *  @returns  investigation include
+    /**
+     * Gets the input from the instrument name field.
+     * @return Instrument name
      */
+    const std::string& CatalogSearchParam::getInstrument() const
+    {
+      return m_instrName;
+    }
 
-    const std::string& CatalogSearchParam::getKeywords()const{return m_keywords;}
-
-    /** This method  returns investigationName used for searching
-     *  @ returns investigation name
+    /**
+     * Gets the input from the start date name field.
+     * @return Start date
      */
-    const std::string& CatalogSearchParam::getInvestigationName()const{return m_investigationName;}
+    const time_t& CatalogSearchParam::getStartDate() const
+    {
+      return m_startDate;
+    }
 
-    /** This method  returns investigationAbstract used for searching
-     *  @returns investigation abstract
+    /**
+     * Gets the input from the end date name field.
+     * @return End date for investigations search
      */
-    const std::string&  CatalogSearchParam::getInvestigationAbstract()const{return m_investigationAbstract;}
+    const time_t& CatalogSearchParam::getEndDate() const
+    {
+      return m_endDate;
+    }
 
-    /** This method  returns sample used for searching
-     *  @returns samplename
+    /**
+     * Gets the input from the keywords name field.
+     * @return Investigation include
      */
-    const std::string& CatalogSearchParam::getSampleName()const{return m_sampleName;}
+    const std::string& CatalogSearchParam::getKeywords() const
+    {
+      return m_keywords;
+    }
 
-    /** This method  returns Investigator surname
-     *@returns surname of the investigator
+    /**
+     * Gets the input from the investigation name field.
+     * @return Investigation name
      */
-    const std::string& CatalogSearchParam::getInvestigatorSurName()const{return m_investigatorSurname;}
+    const std::string& CatalogSearchParam::getInvestigationName() const
+    {
+      return m_investigationName;
+    }
 
-    /** This method  returns Rb Number
-     * @returns Rb number
+    /**
+     * Gets the input from the investigation abstract field.
+     * @return Investigation abstract
      */
-    const std::string& CatalogSearchParam::getRbNumber()const{return m_RbNumber;}
+    const std::string&  CatalogSearchParam::getInvestigationAbstract() const
+    {
+      return m_investigationAbstract;
+    }
 
-    /** This method  returns Investigation Type
-        @ returns type of the investigation
+    /**
+     * Gets the input from the sample name field.
+     * @return Samplename
      */
-    const std::string& CatalogSearchParam::getInvestigationType()const{return m_investigationType;}
+    const std::string& CatalogSearchParam::getSampleName() const
+    {
+      return m_sampleName;
+    }
 
-    /**This method saves the date components to C library struct tm
-     *@param sDate :: string containing the date
-     *@return time_t value of date
+    /**
+     * Gets the input from the investigator name field.
+     * @return Surname of the investigator
+     */
+    const std::string& CatalogSearchParam::getInvestigatorSurName() const
+    {
+      return m_investigatorSurname;
+    }
+
+    /**
+     * Gets the input from the investigation type field.
+     * @return Type of the investigation
+     */
+    const std::string& CatalogSearchParam::getInvestigationType() const
+    {
+      return m_investigationType;
+    }
+
+    /**
+     * Is "My data only" selected?
+     * @returns true if my data checkbox is selected.
+     */
+    bool CatalogSearchParam::getMyData() const
+    {
+      return m_myData;
+    }
+
+    /**
+     * This method saves the date components to C library struct tm
+     * @param sDate :: string containing the date
+     * @return time_t value of date
      */
     time_t CatalogSearchParam::getTimevalue(const std::string& sDate)
     {
@@ -200,10 +300,5 @@ namespace Mantid
       return std::mktime (&timeinfo );
     }
 
-    /**
-     * Is "My data only" selected?
-     * @returns true if my data checkbox is selected.
-     */
-    bool CatalogSearchParam::getMyData() const { return (m_myData); }
   }
 }
