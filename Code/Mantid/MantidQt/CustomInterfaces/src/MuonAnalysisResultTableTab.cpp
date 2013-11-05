@@ -290,7 +290,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 
   for (int i=0; i<fittedWsList.size(); i++)
   { 
-    QMap<QString, double> allLogs;
+    QMap<QString, QVariant> allLogs;
 
     // Get log information
     Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString()));
@@ -378,12 +378,10 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
   QVector<int> toRemove;
   for(int i=0; i<logsToDisplay.size(); ++i)
   {
-    QMap<QString,QMap<QString, double> >::Iterator itr; 
-    for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+    for (auto itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
     { 
-      QMap<QString, double> logsAndValues = itr.value();
-
-      if (!(logsAndValues.contains(logsToDisplay[i])))
+      auto wsLogValues = itr.value();
+      if (!wsLogValues.contains(logsToDisplay[i]))
       {      
         toRemove.push_back(i);
         break;
@@ -605,8 +603,7 @@ void MuonAnalysisResultTableTab::createTable()
     }
 
     // Add data to table
-    QMap<QString,QMap<QString, double> >::Iterator itr; 
-    for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+    for (auto itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
     { 
       for(int i=0; i<wsSelected.size(); ++i)
       {
@@ -616,10 +613,10 @@ void MuonAnalysisResultTableTab::createTable()
           Mantid::API::TableRow row = table->appendRow();
 
           // Add log values
-          QMap<QString, double> logsAndValues = itr.value();
+          auto wsLogValues = itr.value();
           for(int j=0; j<logsSelected.size(); ++j)
           {
-            row << logsAndValues.find(logsSelected[j]).value();
+            row << wsLogValues[logsSelected[j]].toDouble();
           }
 
           // Add param values (presume params the same for all workspaces)

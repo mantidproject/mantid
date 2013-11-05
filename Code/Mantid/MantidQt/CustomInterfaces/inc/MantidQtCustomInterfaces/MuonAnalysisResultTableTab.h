@@ -78,7 +78,9 @@ private:
   
   Ui::MuonAnalysis& m_uiForm;
   int m_numLogsdisplayed;
-  QMap<QString, QMap<QString, double> > m_tableValues;
+  
+  // Log values for all the fitted workspaces  
+  QMap<QString, QMap<QString, QVariant> > m_tableValues;
 
   QList<QString> m_selectedLogs;
   QList<QString> m_unselectedFittings;
