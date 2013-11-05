@@ -61,6 +61,8 @@ namespace Mantid
       /// Creates a TimeSeriesProperty of either double or string type depending on the log data
       /// Returns a pointer to the created property
       static Kernel::Property* createLogProperty(const std::string& logFName, const std::string& name);
+      /// Check if the icp log commands are in the new style
+      static bool isICPEventLogNewStyle( const std::multimap<Kernel::DateAndTime, std::string> &logm );
 
     public:
       /// Create given the icpevent log property
@@ -84,6 +86,16 @@ namespace Mantid
       Kernel::TimeSeriesProperty<bool>* createRunningLog() const;
 
     private:
+
+      /// Parse the icp event log with old style commands
+      void parseOldStyleCommands( const std::multimap<Kernel::DateAndTime, std::string> &logm,
+                                  Kernel::TimeSeriesProperty<int>* periods,
+                                  Kernel::TimeSeriesProperty<bool>* status );
+
+      /// Parse the icp event log with new style commands
+      void parseNewStyleCommands( const std::multimap<Kernel::DateAndTime, std::string> &logm,
+                                  Kernel::TimeSeriesProperty<int>* periods,
+                                  Kernel::TimeSeriesProperty<bool>* status );
 
       /// Available commands.
       enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};

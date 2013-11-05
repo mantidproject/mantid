@@ -11,6 +11,10 @@
 #include <limits>
 #include <sstream>
 
+// constants for the new style icp event commands
+const char* START_COLLECTION = "START_COLLECTION";
+const char* STOP_COLLECTION = "STOP_COLLECTION";
+
 using std::size_t;
 
 namespace Mantid
@@ -213,33 +217,15 @@ namespace Mantid
         return;
       }
 
-      /// Command map. BEGIN means start recording, END is stop recording, CHANGE_PERIOD - the period changed
-      CommandMap command_map = createCommandMap();
-
-      m_nOfPeriods = 1;
-
-      std::map<Kernel::DateAndTime, std::string> logm = icpLog->valueAsMap();
-      std::map<Kernel::DateAndTime, std::string>::const_iterator it = logm.begin();
-
-      for(;it!=logm.end();++it)
+      std::multimap<Kernel::DateAndTime, std::string> logm = icpLog->valueAsMultiMap();
+      if ( LogParser::isICPEventLogNewStyle(logm) )
       {
-        std::string scom;
-        std::istringstream idata(it->second);
-        idata >> scom;
-        commands com = command_map[scom];
-        if (com == CHANGE_PERIOD)
-        {
-          tryParsePeriod(scom, it->first, idata, periods);
-        }
-        else if (com == BEGIN)
-        {
-          status->addValue(it->first,true);
-        }
-        else if (com == END)
-        {
-          status->addValue(it->first,false);
-        }
-      };
+          parseNewStyleCommands( logm, periods, status );
+      }
+      else
+      {
+          parseOldStyleCommands( logm, periods, status );
+      }
 
       if (periods->size() == 0) periods->addValue(icpLog->firstTime(),1);
       if (status->size() == 0) status->addValue(icpLog->firstTime(),true);
@@ -287,7 +273,92 @@ namespace Mantid
     /// Creates a TimeSeriesProperty<bool> with running status
     Kernel::TimeSeriesProperty<bool>* LogParser::createRunningLog() const
     {
-      return m_status->clone();
+        return m_status->clone();
+    }
+
+    /**
+      * Parse the icp event log with old style commands.
+      * @param logm :: A log map created from a icp-event log.
+      */
+    void LogParser::parseOldStyleCommands(const std::multimap<Kernel::DateAndTime, std::string> &logm,
+                                          Kernel::TimeSeriesProperty<int>* periods,
+                                          Kernel::TimeSeriesProperty<bool>* status)
+    {
+        /// Command map. BEGIN means start recording, END is stop recording, CHANGE_PERIOD - the period changed
+        CommandMap command_map = createCommandMap();
+
+        m_nOfPeriods = 1;
+
+        std::map<Kernel::DateAndTime, std::string>::const_iterator it = logm.begin();
+
+        for(;it!=logm.end();++it)
+        {
+          std::string scom;
+          std::istringstream idata(it->second);
+          idata >> scom;
+          commands com = command_map[scom];
+          if (com == CHANGE_PERIOD)
+          {
+            tryParsePeriod(scom, it->first, idata, periods);
+          }
+          else if (com == BEGIN)
+          {
+            status->addValue(it->first,true);
+          }
+          else if (com == END)
+          {
+            status->addValue(it->first,false);
+          }
+        };
+
+    }
+
+    /**
+      * Parse the icp event log with new style commands.
+      * @param logm :: A log map created from a icp-event log.
+      */
+    void LogParser::parseNewStyleCommands(const std::multimap<Kernel::DateAndTime, std::string> &logm,
+                                          Kernel::TimeSeriesProperty<int>* periods,
+                                          Kernel::TimeSeriesProperty<bool>* status)
+    {
+        m_nOfPeriods = 1;
+        for(auto it = logm.begin(); it != logm.end(); ++it)
+        {
+          std::string scom;
+          std::istringstream idata(it->second);
+          idata >> scom;
+          if ( scom.find(START_COLLECTION) != std::string::npos )
+          {
+            status->addValue(it->first,true);
+            int period;
+            idata >> scom >> period;
+            periods->addValue(it->first,period);
+            if ( period > m_nOfPeriods ) m_nOfPeriods = period;
+          }
+          else if ( scom.find(STOP_COLLECTION) != std::string::npos )
+          {
+            status->addValue(it->first,false);
+          }
+        }
+    }
+
+    /**
+      * Check if the icp log commands are in the new style. The new style is the one that
+      * uses START_COLLECTION and STOP_COLLECTION commands for changing periods and running status.
+      * @param logm :: A log map created from a icp-event log.
+      */
+    bool LogParser::isICPEventLogNewStyle(const std::multimap<Kernel::DateAndTime, std::string> &logm)
+    {
+        struct hasNewStyleCommands
+        {
+            bool operator()(const std::pair<Kernel::DateAndTime, std::string> &p)
+            {
+                return p.second.find(START_COLLECTION) != std::string::npos ||
+                       p.second.find(STOP_COLLECTION) != std::string::npos;
+            }
+        };
+
+        return std::find_if( logm.begin(), logm.end(), hasNewStyleCommands() ) != logm.end();
     }
 
 

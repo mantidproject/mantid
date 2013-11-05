@@ -473,6 +473,111 @@ public:
         TS_ASSERT_DELTA( timeMean(log), 666, 1e-3);
     }
 
+    void test_isICPEventLogNewStyle_works()
+    {
+        TimeSeriesProperty<std::string> * oldlog = new TimeSeriesProperty<std::string>("MyOldICPevent");
+        TS_ASSERT_THROWS_NOTHING( oldlog->addValue("2012-07-19T20:00:00", "START") );
+        TS_ASSERT_THROWS_NOTHING( oldlog->addValue("2012-07-19T20:00:01", "BEGIN") );
+        TS_ASSERT_THROWS_NOTHING( oldlog->addValue("2012-07-19T20:00:02", "PAUSE") );
+
+        auto logm = oldlog->valueAsMultiMap();
+        TS_ASSERT( !LogParser::isICPEventLogNewStyle(logm) );
+        delete oldlog;
+
+        TimeSeriesProperty<std::string> * newlog = new TimeSeriesProperty<std::string>("MyNewICPevent");
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:00", "START") );
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:01", "START_COLLECTION PERIOD 1") );
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:02", "PAUSE") );
+
+        logm = newlog->valueAsMultiMap();
+        TS_ASSERT( LogParser::isICPEventLogNewStyle(logm) );
+        delete newlog;
+
+        newlog = new TimeSeriesProperty<std::string>("MyNewICPevent1");
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:00", "START") );
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:01", "STOP_COLLECTION PERIOD 1") );
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:02", "PAUSE") );
+
+        logm = newlog->valueAsMultiMap();
+        TS_ASSERT( LogParser::isICPEventLogNewStyle(logm) );
+        delete newlog;
+    }
+
+    void test_new_style_command_parsing()
+    {
+        TimeSeriesProperty<std::string> * log = new TimeSeriesProperty<std::string>("MyICPevent");
+        log->addValue("2013-10-16T19:04:47", "CHANGE_PERIOD 1");
+        log->addValue("2013-10-16T19:04:48", "RESUME");
+        log->addValue("2013-10-16T19:04:48", "START_COLLECTION PERIOD 1 GF 60015 RF 75039 GUAH 69.875610");
+        log->addValue("2013-10-16T19:06:53", "STOP_COLLECTION PERIOD 1 GF 65024 RF 81303 GUAH 75.712013 DUR 125");
+        log->addValue("2013-10-16T19:06:53", "PAUSE");
+        log->addValue("2013-10-16T19:06:53", "CHANGE_PERIOD 2");
+        log->addValue("2013-10-16T19:06:53", "RESUME");
+        log->addValue("2013-10-16T19:06:53", "START_COLLECTION PERIOD 2 GF 65024 RF 81303 GUAH 75.712013");
+        log->addValue("2013-10-16T19:08:58", "STOP_COLLECTION PERIOD 2 GF 70033 RF 87567 GUAH 81.547050 DUR 125");
+        log->addValue("2013-10-16T19:08:58", "PAUSE");
+        log->addValue("2013-10-16T19:08:58", "CHANGE_PERIOD 1");
+        log->addValue("2013-10-16T19:08:59", "RESUME");
+        log->addValue("2013-10-16T19:08:59", "START_COLLECTION PERIOD 1 GF 70033 RF 87567 GUAH 81.547050");
+        log->addValue("2013-10-16T19:11:03", "STOP_COLLECTION PERIOD 1 GF 75005 RF 93784 GUAH 87.339035 DUR 124");
+        log->addValue("2013-10-16T19:11:03", "PAUSE");
+        log->addValue("2013-10-16T19:11:03", "CHANGE_PERIOD 2");
+        log->addValue("2013-10-16T19:11:04", "RESUME");
+        log->addValue("2013-10-16T19:11:04", "START_COLLECTION PERIOD 2 GF 75005 RF 93784 GUAH 87.339035");
+        log->addValue("2013-10-16T19:13:09", "STOP_COLLECTION PERIOD 2 GF 80016 RF 100049 GUAH 93.174751 DUR 125");
+        log->addValue("2013-10-16T19:13:09", "PAUSE");
+        log->addValue("2013-10-16T19:13:09", "CHANGE_PERIOD 1");
+        log->addValue("2013-10-16T19:13:09", "RESUME");
+
+        std::vector< std::pair<std::string,int> > checkPeriod(4);
+        checkPeriod[0] = std::make_pair("2013-10-16T19:04:48", 1 );
+        checkPeriod[1] = std::make_pair("2013-10-16T19:06:53", 2 );
+        checkPeriod[2] = std::make_pair("2013-10-16T19:08:59", 1 );
+        checkPeriod[3] = std::make_pair("2013-10-16T19:11:04", 2 );
+
+        std::vector< std::pair<std::string,bool> > checkRunning(8);
+        checkRunning[0] = std::make_pair("2013-10-16T19:04:48", true );
+        checkRunning[1] = std::make_pair("2013-10-16T19:06:53", false );
+        checkRunning[2] = std::make_pair("2013-10-16T19:06:53", true );
+        checkRunning[3] = std::make_pair("2013-10-16T19:08:58", false );
+        checkRunning[4] = std::make_pair("2013-10-16T19:08:59", true );
+        checkRunning[5] = std::make_pair("2013-10-16T19:11:03", false );
+        checkRunning[6] = std::make_pair("2013-10-16T19:11:04", true );
+        checkRunning[7] = std::make_pair("2013-10-16T19:13:09", false );
+
+        LogParser logparser( log );
+
+        const Property *prop = logparser.createAllPeriodsLog();
+        const auto *allPeriodsProp = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
+        TS_ASSERT(allPeriodsProp);
+
+        TS_ASSERT_EQUALS(4, allPeriodsProp->size());
+        auto logm = allPeriodsProp->valueAsMultiMap();
+        size_t i = 0;
+        for(auto it = logm.begin(); it != logm.end(); ++it)
+        {
+            TS_ASSERT_EQUALS( it->first.toISO8601String(), checkPeriod[i].first );
+            TS_ASSERT_EQUALS( it->second, checkPeriod[i].second );
+            ++i;
+        }
+
+        prop = logparser.createRunningLog();
+        const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool>*>(prop);
+        TS_ASSERT(runningProp);
+
+        TS_ASSERT_EQUALS(8, runningProp->size());
+        auto logm1 = runningProp->valueAsMultiMap();
+        i = 0;
+        for(auto it = logm1.begin(); it != logm1.end(); ++it)
+        {
+            TS_ASSERT_EQUALS( it->first.toISO8601String(), checkRunning[i].first );
+            TS_ASSERT_EQUALS( it->second, checkRunning[i].second );
+            ++i;
+        }
+
+
+    }
+
 //*/
 private:
 

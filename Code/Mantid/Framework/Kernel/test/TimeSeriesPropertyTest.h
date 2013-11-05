@@ -1127,6 +1127,7 @@ public:
     TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",1.00) );
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",3.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",1.99) ); // this one is ignored
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",2.00) );
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",4.00) );
 
@@ -1159,6 +1160,46 @@ public:
     delete p;
 
     return;
+  }
+
+  void test_valueAsMultiMap()
+  {
+    // 1. Create property
+    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",1.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",3.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",1.99) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",2.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",4.00) );
+
+    // 2. Get multimap
+    std::multimap<Mantid::Kernel::DateAndTime, double> tmap = p->valueAsMultiMap();
+
+    // 3. Check
+    std::vector<Mantid::Kernel::DateAndTime> times;
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
+    std::vector<double> values;
+    values.push_back(1.00);
+    values.push_back(1.99);
+    values.push_back(2.00);
+    values.push_back(3.00);
+    values.push_back(4.00);
+
+
+    size_t index = 0;
+    for (auto it=tmap.begin(); it!=tmap.end(); ++it)
+    {
+      TS_ASSERT_EQUALS(it->first, times[index]);
+      TS_ASSERT_DELTA(it->second, values[index], 1.0E-9);
+      index ++;
+    }
+
+    // -1 Clean
+    delete p;
   }
 
 
