@@ -80,7 +80,7 @@ private:
   int m_numLogsdisplayed;
   
   // Log values for all the fitted workspaces  
-  QMap<QString, QMap<QString, QVariant> > m_tableValues;
+  QMap<QString, QMap<QString, QVariant> > m_logValues;
 
   QList<QString> m_selectedLogs;
   QList<QString> m_unselectedFittings;

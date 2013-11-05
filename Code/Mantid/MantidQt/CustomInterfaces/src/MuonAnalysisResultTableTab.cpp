@@ -202,7 +202,7 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
   storeUserSettings();
   
   // Clear the previous table values
-  m_tableValues.clear();
+  m_logValues.clear();
   QVector<QString> fittedWsList;
   // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
   for (int i(0); i<wsList.size(); ++i)
@@ -370,7 +370,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
     }
 
     // Add all data collected from one workspace to another map. Will be used when creating table.
-    m_tableValues[fittedWsList[i]] = allLogs;
+    m_logValues[fittedWsList[i]] = allLogs;
 
   } // End loop over all workspace's log information and param information
 
@@ -378,7 +378,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
   QVector<int> toRemove;
   for(int i=0; i<logsToDisplay.size(); ++i)
   {
-    for (auto itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+    for (auto itr = m_logValues.begin(); itr != m_logValues.end(); itr++)
     { 
       auto wsLogValues = itr.value();
       if (!wsLogValues.contains(logsToDisplay[i]))
@@ -540,7 +540,7 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QVector<QStr
 */
 void MuonAnalysisResultTableTab::createTable()
 {  
-  if (m_tableValues.size() == 0)
+  if (m_logValues.size() == 0)
   {
     QMessageBox::information(this, "Mantid - Muon Analysis", "No workspace found with suitable fitting.");
     return;
@@ -564,8 +564,8 @@ void MuonAnalysisResultTableTab::createTable()
 
     for(int i=0; i<logsSelected.size(); ++i)
     {
-      table->addColumn("double", logsSelected[i].toStdString());
-      table->getColumn(table->columnCount()-1)->setPlotType(1);
+      Mantid::API::Column_sptr newColumn = table->addColumn("double", logsSelected[i].toStdString());
+      newColumn->setPlotType(1);
     }
 
     // Get param information
@@ -603,7 +603,7 @@ void MuonAnalysisResultTableTab::createTable()
     }
 
     // Add data to table
-    for (auto itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+    for (auto itr = m_logValues.begin(); itr != m_logValues.end(); itr++)
     { 
       for(int i=0; i<wsSelected.size(); ++i)
       {
@@ -704,7 +704,7 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsLi
 QVector<QString> MuonAnalysisResultTableTab::getSelectedWs()
 {
   QVector<QString> wsSelected;
-  for (int i = 0; i < m_tableValues.size(); i++)
+  for (int i = 0; i < m_logValues.size(); i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(i,1));
     if (includeCell->isChecked())
