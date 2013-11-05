@@ -33,6 +33,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_array.hpp>
 
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
@@ -1031,7 +1032,7 @@ void LoadEventNexus::init()
     "Optional: Name of the NXentry to load if it's not the default.");
 
   declareProperty(
-      new PropertyWithValue<string>("BankName", "", Direction::Input),
+      new ArrayProperty<string>("BankName", Direction::Input),
     "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
 
   declareProperty(
@@ -1522,33 +1523,42 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
 
   // --------- Loading only one bank ? ----------------------------------
-  std::string onebank = getProperty("BankName");
-  bool doOneBank = (onebank != "");
+  std::vector<std::string> someBanks = getProperty("BankName");
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
-  if (doOneBank && !monitors)
+  if ((!someBanks.empty()) && (!monitors))
   {
-    bool foundIt = false;
-    for (std::vector<string>::iterator it=bankNames.begin(); it!= bankNames.end(); ++it)
+    // check that all of the requested banks are in the file
+    for (auto someBank = someBanks.begin(); someBank != someBanks.end(); ++someBank)
     {
-      if (*it == ( onebank + "_events") )
+      bool foundIt = false;
+      for (auto bankName = bankNames.begin(); bankName != bankNames.end(); ++bankName)
       {
-        foundIt = true;
-        break;
+        if ((*bankName) == (*someBank)+"_events")
+        {
+          foundIt = true;
+          break;
+        }
+      }
+      if (!foundIt)
+      {
+        throw std::invalid_argument("No entry named '" + (*someBank) + "' was found in the .NXS file.\n");
       }
     }
-    if (!foundIt)
-    {
-      throw std::invalid_argument("No entry named '" + onebank + "_events'" + " was found in the .NXS file.\n");
-    }
+
+    // change the number of banks to load
     bankNames.clear();
-    bankNames.push_back( onebank + "_events" );
+    for (auto someBank = someBanks.begin(); someBank != someBanks.end(); ++someBank)
+      bankNames.push_back((*someBank) + "_events");
+
+    // how many events are in a bank
     bankNumEvents.clear();
-    bankNumEvents.push_back(1);
-    if( !SingleBankPixelsOnly ) onebank = ""; // Marker to load all pixels 
+    bankNumEvents.assign(someBanks.size(), 1); // TODO this equally weights the banks
+
+    if( !SingleBankPixelsOnly ) someBanks.clear(); // Marker to load all pixels
   }
   else
   {
-    onebank = "";
+    someBanks.clear();
   }
 
   prog->report("Initializing all pixels");
@@ -1556,7 +1566,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (WS->getInstrument()->hasParameter("remove-unused-banks")) deleteBanks(WS, bankNames);
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
-  createSpectraMapping(m_filename, monitors, onebank);
+  createSpectraMapping(m_filename, monitors, someBanks);
 
   //This map will be used to find the workspace index
   if( this->event_id_is_spec )
@@ -2132,33 +2142,41 @@ void LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace, std::vecto
  * with the associated spectra axis)
  * @param nxsfile :: The name of a nexus file to load the mapping from
  * @param monitorsOnly :: Load only the monitors is true
- * @param bankName :: An optional bank name for loading a single bank
+ * @param bankNames :: An optional bank name for loading specified banks
  */
-void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, 
-    const bool monitorsOnly, const std::string & bankName)
+void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
+    const bool monitorsOnly, const std::vector<std::string> &bankNames)
 {
   bool spectramap = false;
-  if( !monitorsOnly && !bankName.empty() )
+  // set up the
+  if( !monitorsOnly && !bankNames.empty() )
   {
-    // Only build the map for the single bank
-    std::vector<IDetector_const_sptr> dets;
-    WS->getInstrument()->getDetectorsInBank(dets, bankName);
-    if (!dets.empty())
+    std::vector<IDetector_const_sptr> allDets;
+
+    for (auto name = bankNames.begin(); name != bankNames.end(); ++name)
     {
-      WS->resizeTo(dets.size());
+      // Only build the map for the single bank
+      std::vector<IDetector_const_sptr> dets;
+      WS->getInstrument()->getDetectorsInBank(dets, (*name));
+      if (dets.empty())
+        throw std::runtime_error("Could not find the bank named '" + (*name) +
+                                 "' as a component assembly in the instrument tree; or it did not contain any detectors."
+                                 " Try unchecking SingleBankPixelsOnly.");
+      allDets.insert(allDets.end(), dets.begin(), dets.end());
+    }
+    if (!allDets.empty())
+    {
+      WS->resizeTo(allDets.size());
       // Make an event list for each.
-      for(size_t wi=0; wi < dets.size(); wi++)
+      for(size_t wi=0; wi < allDets.size(); wi++)
       {
-        const detid_t detID = dets[wi]->getID();
+        const detid_t detID = allDets[wi]->getID();
         WS->getSpectrum(wi)->setDetectorID(detID);
       }
       spectramap = true;
-      g_log.debug() << "Populated spectra map for single bank " << bankName << "\n";
+      g_log.debug() << "Populated spectra map for select banks\n";
     }
-    else
-      throw std::runtime_error("Could not find the bank named " + bankName +
-          " as a component assembly in the instrument tree; or it did not contain any detectors."
-          " Try unchecking SingleBankPixelsOnly.");
+
   }
   else
   {
