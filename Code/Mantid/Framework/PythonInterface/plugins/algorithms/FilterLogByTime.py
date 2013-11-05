@@ -30,27 +30,29 @@ class FilterLogByTime(PythonAlgorithm):
             start_time = None
         if end_time == sys.float_info.max:
             end_time = None
-        if start_time > end_time:
-            raise ValueError("StartTime > EndTime")
+        if start_time and end_time and (start_time > end_time):
+            raise ValueError("StartTime > EndTime, %s > %s" % (str(start_time), str(end_time)))
         
-        values = self.__filter(in_ws, log_name)
+        values = self.__filter(in_ws, log_name, start_time, end_time)
         stats = self.__statistics(values)
         self.setProperty("FilteredResult", values)
         self.setProperty("ResultStatistic", float(stats))
 
     def __filter(self, ws, logname, starttime=None, endtime=None):
         run = ws.getRun()
-        tstart = run.startTime()
-        tend = run.endTime()
+        runstart = run.startTime().total_nanoseconds()
+        tstart = runstart
+        tend = run.endTime().total_nanoseconds()
         nanosecond = int(1e9)
         if starttime:
-            tstart = tstart + (starttime * nanosecond)
+            tstart = runstart + (starttime * nanosecond)
         if  endtime:
-            tend = tend + (endtime * nanosecond)
+            tend = runstart + (endtime * nanosecond)
         log = run.getLogData(logname)
-        times = numpy.array(log.times)
+        times = numpy.array(map(lambda t: t.total_nanoseconds(), log.times))
+        
         values = numpy.array(log.value)
-        mask = (tstart < times) & (times < tend) # Get times between filter start and end.
+        mask = (tstart <= times) & (times <= tend) # Get times between filter start and end.
         filteredvalues = values[mask]
         return filteredvalues
     

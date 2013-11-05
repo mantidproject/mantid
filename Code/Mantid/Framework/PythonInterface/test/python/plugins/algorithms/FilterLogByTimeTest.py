@@ -55,8 +55,7 @@ class FilterLogByTimeTest(unittest.TestCase):
         except RuntimeError:
             pass
         
-    def test_without_limits(self):
-        
+    def xtest_without_limits(self):
         AddSampleLog(Workspace=self.__ws,LogName='run_start',LogText='1900-Jan-01 00:00:00')
         AddSampleLog(Workspace=self.__ws,LogName='run_end',LogText='2100-Jan-02 00:00:00')
         
@@ -66,6 +65,40 @@ class FilterLogByTimeTest(unittest.TestCase):
         expected_size = self.__ws.getRun().getLogData('height').size()
         actual_size = results.size
         self.assertEqual(expected_size, actual_size, "Nothing filtered out")
+        
+    def xtest_with_start_limit(self):
+        AddSampleLog(Workspace=self.__ws,LogName='run_start',LogText='2008-06-17T11:10:44')
+        AddSampleLog(Workspace=self.__ws,LogName='run_end',LogText='2100-Jan-02 00:00:00')
+        
+        results, stats = FilterLogByTime(InputWorkspace=self.__ws, LogName='height', StartTime=1)
+        self.assertTrue(isinstance(results, numpy.ndarray), "Should give back an array")
+        self.assertTrue(isinstance(stats, float), "Should give back a single result")
+        expected_size = self.__ws.getRun().getLogData('height').size() - 1
+        actual_size = results.size
+        self.assertEqual(expected_size, actual_size, "Should filter one out expected_size %s, actual_size %s" % (str(expected_size), str(actual_size)))
+        
+    def xtest_with_end_limit(self):
+        AddSampleLog(Workspace=self.__ws,LogName='run_start',LogText='2008-06-17T11:10:44')
+        AddSampleLog(Workspace=self.__ws,LogName='run_end',LogText='2100-Jan-02 00:00:00')
+        
+        results, stats = FilterLogByTime(InputWorkspace=self.__ws, LogName='height', EndTime=0.99)
+        self.assertTrue(isinstance(results, numpy.ndarray), "Should give back an array")
+        self.assertTrue(isinstance(stats, float), "Should give back a single result")
+        expected_size = 1
+        actual_size = results.size
+        self.assertEqual(expected_size, actual_size, "Expected_size %s, actual_size %s" % (str(expected_size), str(actual_size)))
+        
+    def test_with_both_limits(self):
+        AddSampleLog(Workspace=self.__ws,LogName='run_start',LogText='2008-06-17T11:10:44')
+        AddSampleLog(Workspace=self.__ws,LogName='run_end',LogText='2100-Jan-02 00:00:00')
+        
+        results, stats = FilterLogByTime(InputWorkspace=self.__ws, LogName='height', StartTime=1.001, EndTime=3)
+        self.assertTrue(isinstance(results, numpy.ndarray), "Should give back an array")
+        self.assertTrue(isinstance(stats, float), "Should give back a single result")
+        expected_size = 1
+        actual_size = results.size
+        self.assertEqual(expected_size, actual_size, "Should filter one out expected_size %s, actual_size %s" % (str(expected_size), str(actual_size)))
+        
         
         
 if __name__ == '__main__':
