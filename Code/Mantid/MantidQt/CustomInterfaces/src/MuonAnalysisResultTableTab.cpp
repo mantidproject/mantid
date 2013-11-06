@@ -37,7 +37,7 @@ namespace Muon
 * Constructor
 */
 MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
-  : m_uiForm(uiForm), m_numLogsdisplayed(0), m_selectedLogs(), m_unselectedFittings()
+  : m_uiForm(uiForm), m_numLogsdisplayed(0), m_savedLogsState(), m_unselectedFittings()
 {  
   // Connect the help button to the wiki page.
   connect(m_uiForm.muonAnalysisHelpResults, SIGNAL(clicked()), this, SLOT(helpResultsClicked()));
@@ -127,17 +127,19 @@ void MuonAnalysisResultTableTab::selectAllFittings(bool state)
  */
 void MuonAnalysisResultTableTab::storeUserSettings()
 {
+  m_savedLogsState.clear();
+
   // Find which logs have been selected by the user.
   for (int row = 0; row < m_uiForm.valueTable->rowCount(); ++row)
   {
-    QTableWidgetItem * temp = m_uiForm.valueTable->item(row,0);
-    if( temp )
+    if(QTableWidgetItem* log = m_uiForm.valueTable->item(row,0))
     {
-      QCheckBox* logChoice = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
-      if( logChoice->isChecked() )
-        m_selectedLogs += temp->text();
+      QCheckBox* logCheckBox = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
+      m_savedLogsState[log->text()] = logCheckBox->checkState();
     }
   }
+
+  m_unselectedFittings.clear();
 
   // Find which fittings have been deselected by the user.
   for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); ++row)
@@ -159,19 +161,18 @@ void MuonAnalysisResultTableTab::applyUserSettings()
 {
   // If we're just starting the tab for the first time (and there are no user choices),
   // then don't bother.
-  if( m_selectedLogs.isEmpty() && m_unselectedFittings.isEmpty() )
+  if( m_savedLogsState.isEmpty() && m_unselectedFittings.isEmpty() )
     return;
   
   // If any of the logs have previously been selected by the user, select them again.
   for (int row = 0; row < m_uiForm.valueTable->rowCount(); ++row)
   {
-    QTableWidgetItem * temp = m_uiForm.valueTable->item(row,0);
-    if( temp )
+    if(QTableWidgetItem * log = m_uiForm.valueTable->item(row,0))
     {
-      if( m_selectedLogs.contains(temp->text()) )
+      if( m_savedLogsState.contains(log->text()) )
       {
-        QCheckBox* logChoice = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
-        logChoice->setChecked(true);
+        QCheckBox* logCheckBox = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
+        logCheckBox->setCheckState(m_savedLogsState[log->text()]);
       }
     }
   }

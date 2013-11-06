@@ -84,8 +84,11 @@ private:
   
   // Log values for all the fitted workspaces  
   QMap<QString, QMap<QString, QVariant> > m_logValues;
+  
+  // Saved states of log value check-boxes. Used to remember what user has chosen when
+  // re-creating the table
+  QMap<QString, Qt::CheckState> m_savedLogsState;
 
-  QList<QString> m_selectedLogs;
   QList<QString> m_unselectedFittings;
 };
 
