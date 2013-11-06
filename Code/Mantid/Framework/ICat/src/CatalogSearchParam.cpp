@@ -1,7 +1,6 @@
 #include "MantidICat/CatalogSearchParam.h"
 #include "MantidKernel/DateAndTime.h"
 #include <boost/algorithm/string/regex.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
