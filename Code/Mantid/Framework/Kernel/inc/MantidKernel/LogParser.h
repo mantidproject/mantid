@@ -115,8 +115,8 @@ namespace Mantid
       /// static reference to the logger class
       static Kernel::Logger& g_log;
 
-      /// Creates a map of all available commands.
-      CommandMap createCommandMap() const;
+      /// Creates a map of all available old-style commands.
+      CommandMap createCommandMap(bool newStyle) const;
 
       /// Try to parse period data.
       void tryParsePeriod(const std::string& com, const DateAndTime& time, std::istringstream& idata, Kernel::TimeSeriesProperty<int>* const periods);

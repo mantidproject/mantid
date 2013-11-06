@@ -311,56 +311,6 @@ public:
       delete log;
     }
     
-    void test_begin_end_treated_same_as_start_collection_stop_collection()
-    {
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICPBeginEnd(new TimeSeriesProperty<std::string>("ICPLog1"));
-      TS_ASSERT_THROWS_NOTHING( logICPBeginEnd->addValue("2000-01-01T00:00:00", "BEGIN") );
-      TS_ASSERT_THROWS_NOTHING( logICPBeginEnd->addValue("2000-01-01T01:00:00", "END") );
-      
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICPCollectStartStop(new TimeSeriesProperty<std::string>("ICPLog2"));
-      TS_ASSERT_THROWS_NOTHING( logICPCollectStartStop->addValue("2000-01-01T00:00:00", "START_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICPCollectStartStop->addValue("2000-01-01T01:00:00", "STOP_COLLECTION") );
-      
-      LogParser logParserBeginEnd(logICPBeginEnd.get());
-      TimeSeriesProperty<bool>* maskBeginEnd = logParserBeginEnd.createRunningLog();
-      
-      LogParser logParserCollectStartStop(logICPCollectStartStop.get());
-      TimeSeriesProperty<bool>* maskCollectStartStop = logParserCollectStartStop.createRunningLog();
-      
-      TSM_ASSERT_EQUALS("Should have 2 entries", 2, maskCollectStartStop->size());
-      TSM_ASSERT_EQUALS("Masks should be equal length", maskBeginEnd->size(), maskCollectStartStop->size());
-      
-      TSM_ASSERT("Mask should NOT applied Due to start marker", maskCollectStartStop->nthValue(0)) // Mask OFF
-      TSM_ASSERT("Mask SHOULD applied Due to stop marker", !maskCollectStartStop->nthValue(1)) // Mask ON
-      // Compare for consistency.
-      for(int i = 0; i < maskBeginEnd->size(); ++i)
-      {
-        TS_ASSERT_EQUALS(maskBeginEnd->nthTime(i), maskCollectStartStop->nthTime(i));
-        TS_ASSERT_EQUALS(maskBeginEnd->nthValue(i), maskCollectStartStop->nthValue(i));
-      }
-    }
-    
-    void test_mixed_start_stop_begin_end()
-    {
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICP(new TimeSeriesProperty<std::string>("ICPLog"));
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:00:00", "BEGIN") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:00:00", "START_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:10:00", "STOP_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:20:00", "START_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T01:30:00", "STOP_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T01:30:00", "END") );
-      
-      LogParser logParser(logICP.get());
-      TimeSeriesProperty<bool>* mask = logParser.createRunningLog();
-
-      TSM_ASSERT_EQUALS("Should have 4 entries, 2 of the 6 are duplicates", 4, mask->size()); 
-      int increment = 0;
-      TSM_ASSERT("Mask OFF", mask->nthValue(increment++));
-      TSM_ASSERT("Mask ON", !mask->nthValue(increment++));
-      TSM_ASSERT("Mask OFF", mask->nthValue(increment++));
-      TSM_ASSERT("Mask ON", !mask->nthValue(increment));
-    }
-    
     void testCreatesCurrentPeriodLog()
     {
       //Check it with a few expected period numbers.
@@ -499,11 +449,12 @@ public:
         log->addValue("2013-10-16T19:13:09", "CHANGE_PERIOD 1");
         log->addValue("2013-10-16T19:13:09", "RESUME");
 
-        std::vector< std::pair<std::string,int> > checkPeriod(4);
-        checkPeriod[0] = std::make_pair("2013-10-16T19:04:48", 1 );
+        std::vector< std::pair<std::string,int> > checkPeriod(5);
+        checkPeriod[0] = std::make_pair("2013-10-16T19:04:47", 1 );
         checkPeriod[1] = std::make_pair("2013-10-16T19:06:53", 2 );
-        checkPeriod[2] = std::make_pair("2013-10-16T19:08:59", 1 );
-        checkPeriod[3] = std::make_pair("2013-10-16T19:11:04", 2 );
+        checkPeriod[2] = std::make_pair("2013-10-16T19:08:58", 1 );
+        checkPeriod[3] = std::make_pair("2013-10-16T19:11:03", 2 );
+        checkPeriod[4] = std::make_pair("2013-10-16T19:13:09", 1 );
 
         std::vector< std::pair<std::string,bool> > checkRunning(8);
         checkRunning[0] = std::make_pair("2013-10-16T19:04:48", true );
@@ -521,7 +472,7 @@ public:
         const auto *allPeriodsProp = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
         TS_ASSERT(allPeriodsProp);
 
-        TS_ASSERT_EQUALS(4, allPeriodsProp->size());
+        TS_ASSERT_EQUALS(5, allPeriodsProp->size());
         auto logm = allPeriodsProp->valueAsMultiMap();
         size_t i = 0;
         for(auto it = logm.begin(); it != logm.end(); ++it)

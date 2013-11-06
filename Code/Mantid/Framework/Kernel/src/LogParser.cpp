@@ -136,23 +136,33 @@ namespace Mantid
     /**
     Common creational method for generating a command map.
     Better ensures that the same command mapping is available for any constructor.
+    @param newStyle Command style selector.
     @return fully constructed command map.
     */
-    LogParser::CommandMap LogParser::createCommandMap() const
+    LogParser::CommandMap LogParser::createCommandMap( bool newStyle ) const
     {
       CommandMap command_map;
-      command_map["BEGIN"] = BEGIN;
-      command_map["RESUME"] = BEGIN;
-      command_map["END_SE_WAIT"] = BEGIN;
-      command_map["START_COLLECTION"] = BEGIN;
-      command_map["PAUSE"] = END;
-      command_map["END"] = END;
-      command_map["ABORT"] = END;
-      command_map["UPDATE"] = END;
-      command_map["START_SE_WAIT"] = END;
-      command_map["STOP_COLLECTION"] = END; 
-      command_map["CHANGE"] = CHANGE_PERIOD;
-      command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
+
+      if ( newStyle )
+      {
+          command_map["START_COLLECTION"] = BEGIN;
+          command_map["STOP_COLLECTION"] = END;
+          command_map["CHANGE"] = CHANGE_PERIOD;
+          command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
+      }
+      else
+      {
+          command_map["BEGIN"] = BEGIN;
+          command_map["RESUME"] = BEGIN;
+          command_map["END_SE_WAIT"] = BEGIN;
+          command_map["PAUSE"] = END;
+          command_map["END"] = END;
+          command_map["ABORT"] = END;
+          command_map["UPDATE"] = END;
+          command_map["START_SE_WAIT"] = END;
+          command_map["CHANGE"] = CHANGE_PERIOD;
+          command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
+      }
       return command_map;
     }
 
@@ -218,14 +228,31 @@ namespace Mantid
       }
 
       std::multimap<Kernel::DateAndTime, std::string> logm = icpLog->valueAsMultiMap();
-      if ( LogParser::isICPEventLogNewStyle(logm) )
+      CommandMap command_map = createCommandMap( LogParser::isICPEventLogNewStyle(logm) );
+
+      m_nOfPeriods = 1;
+
+      std::map<Kernel::DateAndTime, std::string>::const_iterator it = logm.begin();
+
+      for(;it!=logm.end();++it)
       {
-          parseNewStyleCommands( logm, periods, status );
-      }
-      else
-      {
-          parseOldStyleCommands( logm, periods, status );
-      }
+        std::string scom;
+        std::istringstream idata(it->second);
+        idata >> scom;
+        commands com = command_map[scom];
+        if (com == CHANGE_PERIOD)
+        {
+          tryParsePeriod(scom, it->first, idata, periods);
+        }
+        else if (com == BEGIN)
+        {
+          status->addValue(it->first,true);
+        }
+        else if (com == END)
+        {
+          status->addValue(it->first,false);
+        }
+      };
 
       if (periods->size() == 0) periods->addValue(icpLog->firstTime(),1);
       if (status->size() == 0) status->addValue(icpLog->firstTime(),true);
@@ -274,72 +301,6 @@ namespace Mantid
     Kernel::TimeSeriesProperty<bool>* LogParser::createRunningLog() const
     {
         return m_status->clone();
-    }
-
-    /**
-      * Parse the icp event log with old style commands.
-      * @param logm :: A log map created from a icp-event log.
-      */
-    void LogParser::parseOldStyleCommands(const std::multimap<Kernel::DateAndTime, std::string> &logm,
-                                          Kernel::TimeSeriesProperty<int>* periods,
-                                          Kernel::TimeSeriesProperty<bool>* status)
-    {
-        /// Command map. BEGIN means start recording, END is stop recording, CHANGE_PERIOD - the period changed
-        CommandMap command_map = createCommandMap();
-
-        m_nOfPeriods = 1;
-
-        std::map<Kernel::DateAndTime, std::string>::const_iterator it = logm.begin();
-
-        for(;it!=logm.end();++it)
-        {
-          std::string scom;
-          std::istringstream idata(it->second);
-          idata >> scom;
-          commands com = command_map[scom];
-          if (com == CHANGE_PERIOD)
-          {
-            tryParsePeriod(scom, it->first, idata, periods);
-          }
-          else if (com == BEGIN)
-          {
-            status->addValue(it->first,true);
-          }
-          else if (com == END)
-          {
-            status->addValue(it->first,false);
-          }
-        };
-
-    }
-
-    /**
-      * Parse the icp event log with new style commands.
-      * @param logm :: A log map created from a icp-event log.
-      */
-    void LogParser::parseNewStyleCommands(const std::multimap<Kernel::DateAndTime, std::string> &logm,
-                                          Kernel::TimeSeriesProperty<int>* periods,
-                                          Kernel::TimeSeriesProperty<bool>* status)
-    {
-        m_nOfPeriods = 1;
-        for(auto it = logm.begin(); it != logm.end(); ++it)
-        {
-          std::string scom;
-          std::istringstream idata(it->second);
-          idata >> scom;
-          if ( scom.find(START_COLLECTION) != std::string::npos )
-          {
-            status->addValue(it->first,true);
-            int period;
-            idata >> scom >> period;
-            periods->addValue(it->first,period);
-            if ( period > m_nOfPeriods ) m_nOfPeriods = period;
-          }
-          else if ( scom.find(STOP_COLLECTION) != std::string::npos )
-          {
-            status->addValue(it->first,false);
-          }
-        }
     }
 
     namespace
