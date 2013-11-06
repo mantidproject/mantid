@@ -13,7 +13,7 @@ namespace MantidQt
      * Obtain the list of instruments from the ICAT Catalog algorithm.
      * @return A vector containing the list of all instruments available.
      */
-    std::vector<std::string> ICatHelper::getInstrumentList()
+    const std::vector<std::string> ICatHelper::getInstrumentList()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
       executeAsynchronously(catalogAlgorithm);
@@ -25,7 +25,7 @@ namespace MantidQt
      * Obtain the list of investigation types from the ICAT Catalog algorithm.
      * @return A vector containing the list of all investigation types available.
      */
-    std::vector<std::string> ICatHelper::getInvestigationTypeList()
+    const std::vector<std::string> ICatHelper::getInvestigationTypeList()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
       executeAsynchronously(catalogAlgorithm);
@@ -37,7 +37,7 @@ namespace MantidQt
      * Search the archive with the user input terms provided and save them to a workspace ("searchResults").
      * @param userInputFields :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
      */
-    void ICatHelper::executeSearch(std::map<std::string, std::string> userInputFields)
+    void ICatHelper::executeSearch(const std::map<std::string, std::string> &userInputFields)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
@@ -46,7 +46,7 @@ namespace MantidQt
 
       // Iterate over the provided map of user input fields. For each field that isn't empty (e.g. a value was input by the user)
       // then we will set the algorithm property with the key and value of that specific value.
-      for ( std::map<std::string, std::string>::const_iterator it = userInputFields.begin(); it != userInputFields.end(); it++)
+      for (auto it = userInputFields.begin(); it != userInputFields.end(); it++)
       {
         std::string value = it->second;
         // If the user has input any search terms.
@@ -64,7 +64,7 @@ namespace MantidQt
      * Search the archives for all dataFiles related to an "investigation id" then save results to workspace ("dataFileResults").
      * @param investigationId :: The investigation id to use for the search.
      */
-    void ICatHelper::executeGetDataFiles(int64_t investigationId)
+    void ICatHelper::executeGetDataFiles(const int64_t &investigationId)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
 
@@ -83,7 +83,7 @@ namespace MantidQt
      * @param downloadPath      :: The location to save the datafile(s).
      * @return A vector containing the paths to the file(s) the user wants.
      */
-    std::vector<std::string> ICatHelper::downloadDataFiles(std::vector<std::pair<int64_t, std::string>> userSelectedFiles, std::string downloadPath)
+    const std::vector<std::string> ICatHelper::downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,const std::string &downloadPath)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogDownloadDataFiles");
 
@@ -94,7 +94,7 @@ namespace MantidQt
       std::vector<std::string> fileNames;
 
       // For each pair in userSelectedFiles we want to add them to their related vector to pass to the algorithm.
-      for (std::vector<std::pair<int64_t,std::string>>::iterator it = userSelectedFiles.begin(); it != userSelectedFiles.end(); ++it)
+      for (auto it = userSelectedFiles.begin(); it != userSelectedFiles.end(); ++it)
       {
         fileIDs.push_back(it->first);
         fileNames.push_back(it->second);
@@ -117,7 +117,7 @@ namespace MantidQt
      * @param inputFields :: The name of the input field and value of the field (key => "StartDate", value => "00/00/0000").
      * @return The name of the input field(s) marker to update and related error to throw.
      */
-    std::map<std::string, std::string> ICatHelper::validateProperties(std::map<std::string, std::string> &inputFields)
+    const std::map<std::string, std::string> ICatHelper::validateProperties(const std::map<std::string, std::string> &inputFields)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
@@ -202,7 +202,7 @@ namespace MantidQt
      * @param algName :: The name of the algorithm to create.
      * @return A shared pointer to the algorithm created.
      */
-    Mantid::API::IAlgorithm_sptr ICatHelper::createCatalogAlgorithm(const std::string& algName)
+    Mantid::API::IAlgorithm_sptr ICatHelper::createCatalogAlgorithm(const std::string &algName)
     {
       // If there is an exception we want it to be thrown.
       return Mantid::API::AlgorithmManager::Instance().create(algName);
@@ -212,7 +212,7 @@ namespace MantidQt
      * Execute the given algorithm asynchronously.
      * @param algorithm :: The algorithm to execute.
      */
-    void ICatHelper::executeAsynchronously(Mantid::API::IAlgorithm_sptr algorithm)
+    void ICatHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
     {
       Poco::ActiveResult<bool> result(algorithm->executeAsync());
       while(!result.available())
