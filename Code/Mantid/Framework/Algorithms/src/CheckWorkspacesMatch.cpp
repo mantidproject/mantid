@@ -337,21 +337,24 @@ bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_spt
   // actual time-of flight is 50 nanoseconds
   if ((ews1->getAxis(0)->unit()->label() == "microsecond")
       || (ews2->getAxis(0)->unit()->label() == "microsecond"))
+  {
     ToleranceTOF = 0.05;
+  }
 
   bool mismatchedEvent = false;
   int mismatchedEventWI = 0;
-  //PARALLEL_FOR2(ews1, ews2)
-  for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
+  PARALLEL_FOR2(ews1, ews2)
+  for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    prog->report("EventLists");
+    prog->report();
     if (!mismatchedEvent) // This guard will avoid checking unnecessarily
     {
       const EventList &el1 = ews1->getEventList(i);
       const EventList &el2 = ews2->getEventList(i);
       if (!el1.equals(el2, ToleranceTOF, Tolerance, 1))
       {
+        PARALLEL_CRITICAL(mismatch)
         mismatchedEvent = true;
         mismatchedEventWI = i;
       }
