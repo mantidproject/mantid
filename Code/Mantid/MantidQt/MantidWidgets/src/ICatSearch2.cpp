@@ -65,6 +65,11 @@ namespace MantidQt
       m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
       m_icatUiForm.dataFileLoadBtn->setEnabled(false);
 
+      // We create the calendar here to allow only one instance of it to occur.
+      m_calendar = new QCalendarWidget(qobject_cast<QWidget*>(this->parent()));
+
+      // When the user has selected a date from the calendar we want to set the related date input field.
+      connect(m_calendar,SIGNAL(clicked(QDate)),this,SLOT(dateSelected(QDate)));
       // Show related help page when a user clicks on the "Help" button.
       connect(m_icatUiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
       // Show "Search" frame when user clicks "Catalog search" check box.
@@ -369,26 +374,6 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Updates text field depending on button picker selected.
-     * @param buttonName :: The name of the text field is derived from the buttonName.
-     */
-    void ICatSearch2::dateSelected(std::string buttonName)
-    {
-      if (buttonName.compare("startDatePicker") == 0)
-      {
-        // Since the user wants to select a startDate we disable the endDate button to prevent any issues.
-        m_icatUiForm.endDatePicker->setEnabled(false);
-        // Update the text field and re-enable the button.
-        connect(m_calendar, SIGNAL(selectionChanged()),this, SLOT(updateStartDate()));
-      }
-      else
-      {
-        m_icatUiForm.startDatePicker->setEnabled(false);
-        connect(m_calendar, SIGNAL(selectionChanged()),this, SLOT(updateEndDate()));
-      }
-    }
-
-    /**
      * Populates the "Instrument" list-box
      */
     void ICatSearch2::populateInstrumentBox()
@@ -478,10 +463,6 @@ namespace MantidQt
      */
     void ICatSearch2::openCalendar()
     {
-      // Pop the m_calendar out into it's own window.
-      QWidget* parent = qobject_cast<QWidget*>(this->parent());
-      m_calendar = new QCalendarWidget(parent);
-
       // Set min/max dates to prevent user selecting unusual dates.
       m_calendar->setMinimumDate(QDate(1950, 1, 1));
       m_calendar->setMaximumDate(QDate(2050, 1, 1));
@@ -494,31 +475,27 @@ namespace MantidQt
       m_calendar->setWindowTitle("Calendar picker");
       m_calendar->show();
 
-      // Uses the previously clicked button (startDatePicker or endDatePicker) to determine which
-      // text field that the opened m_calendar is coordinating with (e.g. the one we want to write date to).
-      dateSelected(sender()->name());
+      // Set the name of the date button the user pressed to open the calendar with.
+      m_dateButtonName = sender()->name();
     }
 
     /**
-     * Update startDate text field when startDatePicker is used and date is selected.
+     * Update text field when date is selected.
+     * @param date :: The date the user has selected.
      */
-    void ICatSearch2::updateStartDate()
+    void ICatSearch2::dateSelected(QDate date)
     {
-      // Update the text field with the user selected date then close the m_calendar.
-      m_icatUiForm.StartDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
+      // As openCalendar slot is used for both start and end date we need to perform a check
+      // to see which button was pressed, and then updated the related input field.
+      if (m_dateButtonName.compare("startDatePicker") == 0)
+      {
+        m_icatUiForm.StartDate->setText(date.toString("dd/MM/yyyy"));
+      }
+      else
+      {
+        m_icatUiForm.EndDate->setText(date.toString("dd/MM/yyyy"));
+      }
       m_calendar->close();
-      // Re-enable the button to allow the user to select an endDate if they wish.
-      m_icatUiForm.endDatePicker->setEnabled(true);
-    }
-
-    /**
-     * Update endDate text field when endDatePicker is used and date is selected.
-     */
-    void ICatSearch2::updateEndDate()
-    {
-      m_icatUiForm.EndDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
-      m_calendar->close();
-      m_icatUiForm.startDatePicker->setEnabled(true);
     }
 
     /**
