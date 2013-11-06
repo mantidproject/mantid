@@ -796,7 +796,7 @@ namespace IDA
     QString ftype = fitTypeString();
     QString bg = backgroundString();
 
-    Mantid::API::CompositeFunction_sptr func = createFunction();
+    Mantid::API::CompositeFunction_sptr func = createFunction(uiForm().confit_ckTieCentres->isChecked());
     std::string function = std::string(func->asString());
     QString stX = m_cfProp["StartX"]->valueText();
     QString enX = m_cfProp["EndX"]->valueText();

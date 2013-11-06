@@ -50,34 +50,7 @@ def getConvFitOption(ftype, bgd, Verbose):
 
 ##############################################################################
 
-def createConvFitFun(options, par, file):
-    bgd_fun = 'name=LinearBackground,A0='
-    if options[0] == 'FixF':
-        bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A0='+str(par[0])+',A1=0.0)'
-    if options[0] == 'FitF':
-        bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A1=0.0)'
-    if options[0] == 'FitL':
-        bgd_fun = bgd_fun +str(par[0])+',A1='+str(par[1])
-    if options[1]:
-        ip = 3
-    else:
-        ip = 2
-    pk_1 = '(composite=Convolution;name=Resolution, FileName="'+file+'"'
-    if  options[2] >= 1:
-        lor_fun = 'name=Lorentzian,Amplitude='+str(par[ip])+',PeakCentre='+str(par[ip+1])+',HWHM='+str(par[ip+2])
-    if options[2] == 2:
-        funcIndex = 1 if options[1] else 0
-        lor_2 = 'name=Lorentzian,Amplitude='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',HWHM='+str(par[ip+5])
-        lor_fun = lor_fun +';'+ lor_2 +';ties=(f'+str(funcIndex)+'.PeakCentre=f'+str(funcIndex+1)+'.PeakCentre)'
-    if options[1]:
-        delta_fun = 'name=DeltaFunction,Height='+str(par[2])
-        lor_fun = delta_fun +';' + lor_fun
-    func = bgd_fun +';'+ pk_1 +';('+ lor_fun +'))'
-    return func
-
-##############################################################################
-
-def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, Verbose):
+def getConvFitResult(inputWS, resFile, func, outNm, ftype, bgd, specMin, specMax, Verbose):
     options = getConvFitOption(ftype, bgd[:-2], Verbose)   
     params = mtd[outNm+'_Parameters']
     A0 = params.column(1)     #bgd A0 value
@@ -108,7 +81,7 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, Verb
             paras.append(H2[i])
             paras.append(C2[i])
             paras.append(W2[i])
-        func = createConvFitFun(options, paras, resFile)
+
         if Verbose:
             logger.notice('Fit func : '+func)      
         fitWS = outNm + '_Result_'
@@ -214,7 +187,7 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
     AddSampleLog(Workspace=wsname, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
 
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
-    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, Verbose)
+    getConvFitResult(inputWS, resFile, func, outNm, ftype, bgd, specMin, specMax, Verbose)
     if Save:
         o_path = os.path.join(workdir, wsname+'.nxs')                    # path name for nxs file
         if Verbose:
