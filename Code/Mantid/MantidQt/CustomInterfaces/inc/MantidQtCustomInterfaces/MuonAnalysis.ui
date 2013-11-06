@@ -1332,7 +1332,7 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="DataAnalysis">
       <attribute name="title">
        <string>Data Analysis</string>
       </attribute>
@@ -1391,7 +1391,7 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="ResultsTable">
       <attribute name="title">
        <string>Results Table</string>
       </attribute>
@@ -1659,7 +1659,7 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="PlotOptions">
+     <widget class="QWidget" name="Settings">
       <attribute name="title">
        <string>Settings</string>
       </attribute>
