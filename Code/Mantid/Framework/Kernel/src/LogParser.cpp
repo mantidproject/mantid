@@ -358,7 +358,9 @@ namespace Mantid
             }
         };
 
-        return std::find_if( logm.begin(), logm.end(), hasNewStyleCommands() ) != logm.end();
+        hasNewStyleCommands checker;
+
+        return std::find_if( logm.begin(), logm.end(), checker ) != logm.end();
     }
 
 

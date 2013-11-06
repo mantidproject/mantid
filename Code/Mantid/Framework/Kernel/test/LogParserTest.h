@@ -361,36 +361,6 @@ public:
       TSM_ASSERT("Mask ON", !mask->nthValue(increment));
     }
     
-    void test_multiple_starts_ok()
-    {
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICP(new TimeSeriesProperty<std::string>("ICPLog"));
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:00:00", "BEGIN") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:10:00", "START_COLLECTION") );
-      
-      LogParser logParser(logICP.get());
-      TimeSeriesProperty<bool>* mask = logParser.createRunningLog();
-      
-      TSM_ASSERT_EQUALS("Should have 2 entries", 2, mask->size()); 
-      int increment = 0;
-      TSM_ASSERT("Mask OFF", mask->nthValue(increment++)); // BEGIN
-      TSM_ASSERT("Mask should still be OFF", mask->nthValue(increment++)); // START COLLECT
-    }
-    
-    void test_multiple_ends_ok()
-    {
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICP(new TimeSeriesProperty<std::string>("ICPLog"));
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:00:00", "STOP_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:10:00", "END") );
-      
-      LogParser logParser(logICP.get());
-      TimeSeriesProperty<bool>* mask = logParser.createRunningLog();
-      
-      TSM_ASSERT_EQUALS("Should have 2 entries", 2, mask->size()); 
-      int increment = 0;
-      TSM_ASSERT("Mask ON", !mask->nthValue(increment++)); // STOP COLLECT
-      TSM_ASSERT("Mask should still be ON", !mask->nthValue(increment++)); // END
-    }
-
     void testCreatesCurrentPeriodLog()
     {
       //Check it with a few expected period numbers.
