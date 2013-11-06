@@ -342,6 +342,19 @@ namespace Mantid
         }
     }
 
+    namespace
+    {
+        /// Define operator for checking for new-style icp events
+        struct hasNewStyleCommands
+        {
+            bool operator()(const std::pair<Mantid::Kernel::DateAndTime, std::string> &p)
+            {
+                return p.second.find(START_COLLECTION) != std::string::npos ||
+                       p.second.find(STOP_COLLECTION) != std::string::npos;
+            }
+        };
+    }
+
     /**
       * Check if the icp log commands are in the new style. The new style is the one that
       * uses START_COLLECTION and STOP_COLLECTION commands for changing periods and running status.
@@ -349,15 +362,6 @@ namespace Mantid
       */
     bool LogParser::isICPEventLogNewStyle(const std::multimap<Kernel::DateAndTime, std::string> &logm)
     {
-        struct hasNewStyleCommands
-        {
-            bool operator()(const std::pair<Kernel::DateAndTime, std::string> &p)
-            {
-                return p.second.find(START_COLLECTION) != std::string::npos ||
-                       p.second.find(STOP_COLLECTION) != std::string::npos;
-            }
-        };
-
         hasNewStyleCommands checker;
 
         return std::find_if( logm.begin(), logm.end(), checker ) != logm.end();
