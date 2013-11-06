@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <stdexcept>
 
 namespace MantidQt
@@ -9,7 +10,7 @@ namespace MantidQt
     Constructor
     */
     CompositePeaksPresenter::CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget, PeaksPresenter_sptr defaultPresenter) : m_zoomablePlottingWidget(zoomablePlottingWidget),  
-      m_default(defaultPresenter)
+      m_default(defaultPresenter), m_proxy(NULL), m_owner(NULL)
     {
       if(m_zoomablePlottingWidget == NULL)
       {
@@ -408,6 +409,55 @@ namespace MantidQt
         }
       }
       return result;
+    }
+
+    class MatchWorkspaceName : public std::unary_function<SetPeaksWorkspaces::value_type, bool>
+    {
+    private:
+      const QString m_wsName;
+    public:
+      MatchWorkspaceName(const QString& name) : m_wsName(name)
+      {
+      }
+      bool operator() (SetPeaksWorkspaces::value_type ws)
+      {
+        const std::string wsName = ws->name();
+        const std::string toMatch = m_wsName.toStdString();
+        const bool result = (wsName == toMatch);
+        return result;
+      }
+    };
+
+    PeaksPresenter* CompositePeaksPresenter::getPeaksPresenter(const QString& name)
+    {
+      MatchWorkspaceName comparitor(name);
+      SubjectContainer::iterator presenterFound = m_subjects.end();
+      for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
+          ++presenterIterator)
+      {
+        auto wsOfSubject = (*presenterIterator)->presentedWorkspaces();
+        SetPeaksWorkspaces::iterator iteratorFound = std::find_if(wsOfSubject.begin(), wsOfSubject.end(), comparitor);
+        if (iteratorFound != wsOfSubject.end())
+        {
+          presenterFound = presenterIterator;
+          break;
+        }
+      }
+      if(presenterFound == m_subjects.end())
+      {
+        throw std::invalid_argument("Cannot find peaks workspace called :" + name.toStdString());
+      }
+      return (*presenterFound).get();
+    }
+
+    void CompositePeaksPresenter::registerProxy(UpdateableOnDemand* proxy)
+    {
+      m_proxy = proxy;
+    }
+
+    void CompositePeaksPresenter::registerOwningPresenter(UpdateableOnDemand* owner)
+    {
+      m_owner = owner;
     }
 
   }

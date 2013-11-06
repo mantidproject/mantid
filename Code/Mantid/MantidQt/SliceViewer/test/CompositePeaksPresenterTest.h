@@ -623,6 +623,44 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
   }
 
+  void test_getPeaksPresenter_throws_if_unknown_name()
+  {
+    CompositePeaksPresenter composite(&_fakeZoomableView);
+    TSM_ASSERT_THROWS("Search should fail to find any presenters, as there are none.", composite.getPeaksPresenter(QString("x")), std::invalid_argument&);
+  }
+
+  void test_lookup_presenters_via_workspace_names_using_getPeaksPresenter()
+  {
+    using namespace Mantid::API;
+
+    //One nested presenter. Create setup environment.
+    IPeaksWorkspace_sptr peaksWS_1 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+    IPeaksWorkspace_sptr peaksWS_2 = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+    AnalysisDataService::Instance().add("ws1", peaksWS_1);
+    AnalysisDataService::Instance().add("ws2", peaksWS_2);
+    SetPeaksWorkspaces set;
+    set.insert(peaksWS_1);
+    set.insert(peaksWS_2);
+    MockPeaksPresenter* pPresenter = new MockPeaksPresenter;
+    PeaksPresenter_sptr presenter(pPresenter);
+    EXPECT_CALL(*pPresenter, presentedWorkspaces()).WillRepeatedly(Return(set));
+
+    // Create the composite.
+    CompositePeaksPresenter composite(&_fakeZoomableView);
+    composite.addPeaksPresenter(presenter);
+
+    // Now perform searches
+    PeaksPresenter* foundPresenter = composite.getPeaksPresenter(QString("ws1"));
+    TS_ASSERT_EQUALS(foundPresenter, pPresenter)
+    foundPresenter = composite.getPeaksPresenter(QString("ws2"));
+    TS_ASSERT_EQUALS(foundPresenter, pPresenter)
+
+    // Clean up.
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pPresenter));
+    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("ws2");
+  }
+
 };
 
 #endif

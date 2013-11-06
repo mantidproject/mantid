@@ -5,6 +5,7 @@
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include <vector>
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
@@ -76,6 +77,12 @@ namespace MantidQt
       void zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex);
       /// Sort the peaks workspace.
       void sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending);
+      /// Get the named peaks presenter.
+      PeaksPresenter* getPeaksPresenter(const QString& name);
+      /// Register a proxy to this instance
+      void registerProxy(UpdateableOnDemand* proxy);
+      /// Register any owning presenter
+      virtual void registerOwningPresenter(UpdateableOnDemand* owner);
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
@@ -93,6 +100,10 @@ namespace MantidQt
       ZoomablePeaksView* const m_zoomablePlottingWidget;
       /// Default behaviour 
       PeaksPresenter_sptr m_default;
+      /// Proxy to this.
+      UpdateableOnDemand* m_proxy;
+      /// Owning presenter
+      UpdateableOnDemand* m_owner;
     };
   }
 }

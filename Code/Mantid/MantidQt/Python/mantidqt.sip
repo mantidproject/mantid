@@ -480,6 +480,40 @@ int LineViewer::getPlotAxis()
 
 };
 
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class PeaksPresenter 
+{
+%TypeHeaderCode
+#include "MantidQtSliceViewer/PeaksPresenter.h"
+%End
+private:
+    PeaksPresenter();
+    PeaksPresenter(const MantidQt::SliceViewer::PeaksPresenter&);
+public:
+    virtual void setForegroundColour(const QColor) = 0;
+    virtual void setBackgroundColour(const QColor) = 0;
+    virtual void showBackgroundRadius(const bool shown) = 0;
+    virtual void setShown(const bool shown) = 0;
+    virtual double getPeakSizeOnProjection() const = 0;
+    virtual double getPeakSizeIntoProjection() const = 0;
+};
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class ProxyCompositePeaksPresenter 
+{
+%TypeHeaderCode
+#include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
+%End
+public:
+  MantidQt::SliceViewer::PeaksPresenter* getPeaksPresenter(const QString& name);
+};
+
 
 /***************************************************************************/
 /***************************************************************************/
@@ -1072,7 +1106,7 @@ void SliceViewer::refreshRebin()
    
 %End
 
-  void setPeaksWorkspaces(const QStringList&);
+  MantidQt::SliceViewer::ProxyCompositePeaksPresenter* setPeaksWorkspaces(const QStringList&);
 %Docstring
 void SliceViewer::setPeaksWorkspaces(const QStringList&)
 --------------------------------

@@ -25,6 +25,7 @@ namespace SliceViewer
   class PeakOverlayViewFactory;
   class PeakTransform;
   class PeakOverlayView;
+  class UpdateableOnDemand;
 
   // Alias
   typedef std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace> > SetPeaksWorkspaces;
@@ -55,6 +56,7 @@ namespace SliceViewer
     virtual void setPeakSizeIntoProjection(const double fraction) = 0;
     virtual double getPeakSizeOnProjection() const = 0;
     virtual double getPeakSizeIntoProjection() const = 0;
+    virtual void registerOwningPresenter(UpdateableOnDemand* owner) = 0;
     virtual ~PeaksPresenter(){};
   };
 

@@ -9,6 +9,7 @@
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidAPI/IPeak.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
@@ -54,6 +55,7 @@ namespace
     MOCK_METHOD1(setPeakSizeIntoProjection, void(const double));
     MOCK_CONST_METHOD0(getPeakSizeOnProjection, double());
     MOCK_CONST_METHOD0(getPeakSizeIntoProjection, double());
+    MOCK_METHOD1(registerOwningPresenter, void(UpdateableOnDemand*));
     virtual ~MockPeaksPresenter(){}
   };
 

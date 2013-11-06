@@ -79,6 +79,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
+	inc/MantidQtSliceViewer/UpdateableOnDemand.h
 	inc/MantidQtSliceViewer/XYLimitsDialog.h
 	inc/MantidQtSliceViewer/ZoomablePeaksView.h
 )

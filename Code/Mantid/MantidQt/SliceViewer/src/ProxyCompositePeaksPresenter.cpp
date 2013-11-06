@@ -7,7 +7,13 @@ namespace MantidQt
     /**
     Constructor
     */
-    ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter(boost::shared_ptr<CompositePeaksPresenter> composite) : m_compositePresenter(composite)
+    ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter(boost::shared_ptr<CompositePeaksPresenter> composite) : m_compositePresenter(composite),
+        m_updateableView(NULL)
+    {
+      m_compositePresenter->registerProxy(this);
+    }
+
+    ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter()
     {
     }
 
@@ -104,5 +110,22 @@ namespace MantidQt
     {
       m_compositePresenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
     }
+
+    PeaksPresenter* ProxyCompositePeaksPresenter::getPeaksPresenter(const QString& name)
+    {
+      return m_compositePresenter->getPeaksPresenter(name);
+    }
+
+    void ProxyCompositePeaksPresenter::performUpdate()
+    {
+      if(m_updateableView)
+        m_updateableView->performUpdate();
+    }
+
+    void ProxyCompositePeaksPresenter::registerView(UpdateableOnDemand* updateableView)
+    {
+      m_updateableView = updateableView;
+    }
+
   }
 }

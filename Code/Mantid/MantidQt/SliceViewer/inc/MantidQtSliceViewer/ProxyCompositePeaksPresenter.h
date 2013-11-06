@@ -4,6 +4,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
+#include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt
@@ -16,11 +17,12 @@ namespace MantidQt
     Proxy wrapper of the CompositePeaksPresenter. Allows the CompositePeaksPresenter to 
     be used in suituations where diluted power, via a restricted API is required.
     ----------------------------------------------------------*/
-    class DLLExport ProxyCompositePeaksPresenter 
+    class DLLExport ProxyCompositePeaksPresenter : public UpdateableOnDemand
     {
     public:
 
       ProxyCompositePeaksPresenter(boost::shared_ptr<CompositePeaksPresenter> compositePresenter);
+      ProxyCompositePeaksPresenter();
       ~ProxyCompositePeaksPresenter();
       size_t size() const;
       void update();
@@ -46,10 +48,17 @@ namespace MantidQt
       void zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex);
       /// sort the peaks workspace.
       void sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending);
-
+      /// Get the named peaks presenter
+      PeaksPresenter* getPeaksPresenter(const QString& name);
+      /// Perform a requested update.
+      void performUpdate();
+      /// Register an updateable view
+      void registerView(UpdateableOnDemand* view);
     private:
       /// Wrapped composite to delegate to.
       boost::shared_ptr<CompositePeaksPresenter> m_compositePresenter;
+      /// Register an assoicated view.
+      UpdateableOnDemand* m_updateableView;
     };
   }
 }

@@ -31,6 +31,7 @@ namespace MantidQt
       virtual void setPeakSizeIntoProjection(const double){/*Do Nothing*/}
       virtual double getPeakSizeOnProjection() const {return 0;}
       virtual double getPeakSizeIntoProjection() const {return 0;}
+      virtual void registerOwningPresenter(UpdateableOnDemand*) {};
     };
 
   }

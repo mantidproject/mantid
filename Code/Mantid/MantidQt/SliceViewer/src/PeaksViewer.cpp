@@ -43,6 +43,7 @@ namespace MantidQt
     void PeaksViewer::setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter) 
     {
       m_presenter = presenter;
+      m_presenter->registerView(this);
       
       // Configure the entire control using the managed workspaces.
       auto workspaces = m_presenter->presentedWorkspaces();
@@ -167,6 +168,14 @@ namespace MantidQt
     void PeaksViewer::onPeaksSorted(const std::string& columnToSortBy, const bool sortedAscending, Mantid::API::IPeaksWorkspace_const_sptr peaksWS)
     {
       m_presenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
+    }
+
+    /**
+     * Peform an update based on the proxy composite. Re-fetch data.
+     */
+    void PeaksViewer::performUpdate()
+    {
+      // TODO.
     }
 
     /**

@@ -48,6 +48,7 @@ namespace MantidQt
       virtual void setPeakSizeIntoProjection(const double fraction);
       virtual double getPeakSizeOnProjection() const;
       virtual double getPeakSizeIntoProjection() const;
+      virtual void registerOwningPresenter(UpdateableOnDemand* owner);
     private:
       /// Peak overlay view.
       PeakOverlayView_sptr m_viewPeaks;
@@ -65,6 +66,8 @@ namespace MantidQt
       Mantid::Kernel::Logger & g_log;
       /// Viewable Peaks
       std::vector<bool> m_viewablePeaks;
+      /// Owning presenter.
+      UpdateableOnDemand* m_owningPresenter;
       /// Configurre peak transformations
       bool configureMappingTransform();
       /// Hide all views
