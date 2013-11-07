@@ -33,6 +33,8 @@ namespace MantidQt
       virtual double getPeakSizeIntoProjection() const {return 0;}
       virtual bool getShowBackground() const {return false;}
       virtual void registerOwningPresenter(UpdateableOnDemand*) {};
+      virtual void zoomToPeak(const int){};
+      virtual bool isHidden() const {return true;}
     };
 
   }

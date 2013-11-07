@@ -339,6 +339,8 @@ namespace MantidQt
       subjectPresenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
       // We want to zoom out now, because any currently selected peak will be wrong.
       m_zoomablePlottingWidget->resetView();
+      m_zoomedPeakIndex.reset();
+      m_zoomedPresenter.reset();
     }
 
     /**
@@ -374,6 +376,10 @@ namespace MantidQt
       }
     }
 
+    /**
+     * Get the peak size on the projection plane
+     * @return size
+     */
     double CompositePeaksPresenter::getPeakSizeOnProjection() const
     {
       if (useDefault())
@@ -393,6 +399,10 @@ namespace MantidQt
       return result;
     }
 
+    /**
+     * Get peak size into the projection
+     * @return size
+     */
     double CompositePeaksPresenter::getPeakSizeIntoProjection() const
     {
       if (useDefault())
@@ -412,6 +422,11 @@ namespace MantidQt
       return result;
     }
 
+    /**
+     * Determine if the background is to be shown for a particular workspace.
+     * @param ws
+     * @return
+     */
     bool CompositePeaksPresenter::getShowBackground(
         boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
     {
@@ -424,6 +439,9 @@ namespace MantidQt
       return (*iterator)->getShowBackground();
     }
 
+    /**
+     * Helper Comparitor class.
+     */
     class MatchWorkspaceName : public std::unary_function<SetPeaksWorkspaces::value_type, bool>
     {
     private:
@@ -441,6 +459,11 @@ namespace MantidQt
       }
     };
 
+    /**
+     * Get the peaks presenter correspoinding to a peaks workspace name.
+     * @param name
+     * @return Peaks presenter.
+     */
     PeaksPresenter* CompositePeaksPresenter::getPeaksPresenter(const QString& name)
     {
       MatchWorkspaceName comparitor(name);
@@ -463,11 +486,18 @@ namespace MantidQt
       return (*presenterFound).get();
     }
 
+    /**
+     * Register an owning presenter for this object.
+     * @param owner
+     */
     void CompositePeaksPresenter::registerOwningPresenter(UpdateableOnDemand* owner)
     {
       m_owner = owner;
     }
 
+    /**
+     * Perform steps associated with an update. Driven by nested presenters.
+     */
     void CompositePeaksPresenter::performUpdate()
     {
       for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
@@ -483,6 +513,59 @@ namespace MantidQt
           m_owner->performUpdate();
         }
       }
+    }
+
+    /**
+     * Zoom to a peak
+     * @param presenter: Holds the peaks workspace.
+     * @param peakIndex: The peak index.
+     */
+    void CompositePeaksPresenter::zoomToPeak(PeaksPresenter* const presenter, const int peakIndex)
+    {
+      m_zoomedPeakIndex = peakIndex;
+      m_zoomedPresenter = *m_subjects.begin(); // HACK
+      const PeakBoundingBox& box = presenter->getBoundingBox(peakIndex);
+      m_zoomablePlottingWidget->zoomToRectangle(box);
+      m_owner->performUpdate();
+    }
+
+    /**
+     * Determine if the presenter is hidden.
+     * @param peaksWS to use to find the right presenter.
+     * @return True if hidden.
+     */
+    bool CompositePeaksPresenter::getIsHidden(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const
+    {
+      auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+      auto subjectPresenter = *iterator;
+      return subjectPresenter->isHidden();
+    }
+
+    /**
+     * Reset the zoom.
+     * Forget any optional zoom extents.
+     */
+    void CompositePeaksPresenter::resetZoom()
+    {
+      m_zoomedPeakIndex.reset();
+      m_zoomedPresenter.reset();
+      m_owner->performUpdate(); // This tells any 'listening GUIs' to sort themselves out.
+    }
+
+    /**
+     * @return an optional zoomed peak presenter.
+     */
+    boost::optional<PeaksPresenter_sptr> CompositePeaksPresenter::getZoomedPeakPresenter() const
+    {
+      return m_zoomedPresenter;
+    }
+
+    /**
+     * @return an optional zoomed peak index.
+     */
+    boost::optional<int> CompositePeaksPresenter::getZoomedPeakIndex() const
+    {
+      return m_zoomedPeakIndex;
     }
 
   }

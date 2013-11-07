@@ -7,6 +7,7 @@
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include <set>
+#include <QObject>
 
 namespace Mantid
 {
@@ -37,8 +38,9 @@ namespace SliceViewer
   whithout having to perform fragile null checks.
 
   ----------------------------------------------------------*/
-  class DLLExport PeaksPresenter
+  class DLLExport PeaksPresenter: public QObject
   {
+    Q_OBJECT
   public:
     virtual void update() = 0;
     virtual void updateWithSlicePoint(const PeakBoundingBox&) = 0;
@@ -60,6 +62,8 @@ namespace SliceViewer
     virtual void registerOwningPresenter(UpdateableOnDemand* owner) = 0;
     virtual QColor getBackgroundColor() const {throw std::runtime_error("PeaksPresenter getBackgroundColour() is not implemented");}
     virtual QColor getForegroundColor() const {throw std::runtime_error("PeaksPresenter getForegroundColour() is not implemented");}
+    virtual void zoomToPeak(const int peakIndex) = 0;
+    virtual bool isHidden() const = 0;
     virtual ~PeaksPresenter(){};
   };
 

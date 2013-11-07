@@ -232,5 +232,17 @@ namespace MantidQt
       ui.ckShowBackground->setChecked(showBackground);
     }
 
+    void PeaksWorkspaceWidget::setShown(bool isShown)
+    {
+      ui.btnHide->setChecked(isShown);
+    }
+
+    void PeaksWorkspaceWidget::setSelectedPeak(int index)
+    {
+      ui.tblPeaks->clearSelection();
+      ui.tblPeaks->setCurrentIndex(ui.tblPeaks->model()->index(index, 0));
+
+    }
+
   } // namespace
 }

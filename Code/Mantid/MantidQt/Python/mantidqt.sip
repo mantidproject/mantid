@@ -483,7 +483,7 @@ int LineViewer::getPlotAxis()
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
-class PeaksPresenter 
+class PeaksPresenter : QObject
 {
 %TypeHeaderCode
 #include "MantidQtSliceViewer/PeaksPresenter.h"
@@ -498,18 +498,22 @@ public:
     virtual void setShown(const bool shown) = 0;
     virtual double getPeakSizeOnProjection() const = 0;
     virtual double getPeakSizeIntoProjection() const = 0;
+    virtual void zoomToPeak(const int index) = 0;
 };
 
 
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
-class ProxyCompositePeaksPresenter 
+class ProxyCompositePeaksPresenter :  QObject
 {
 %TypeHeaderCode
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 %End
+private:
+    ProxyCompositePeaksPresenter();
+    ProxyCompositePeaksPresenter(const MantidQt::SliceViewer::ProxyCompositePeaksPresenter&);
 public:
   MantidQt::SliceViewer::PeaksPresenter* getPeaksPresenter(const QString& name);
 };

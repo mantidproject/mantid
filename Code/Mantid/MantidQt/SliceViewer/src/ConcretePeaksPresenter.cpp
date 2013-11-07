@@ -1,5 +1,6 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
+#include "MantidQtSliceViewer/ZoomableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -101,7 +102,7 @@ namespace MantidQt
     ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
         boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) : m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
             transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
-            g_log(Mantid::Kernel::Logger::get("PeaksPresenter")), m_owningPresenter(NULL)
+            g_log(Mantid::Kernel::Logger::get("PeaksPresenter")), m_owningPresenter(NULL), m_isHidden(false)
     {
       // Check that the workspaces appear to be compatible. Log if otherwise.
       checkWorkspaceCompatibilities(mdWS);
@@ -328,6 +329,7 @@ namespace MantidQt
 
     void ConcretePeaksPresenter::setShown(const bool shown)
     {
+      m_isHidden = shown;
       if(m_viewPeaks!=NULL)
       {
        if (shown)
@@ -342,6 +344,15 @@ namespace MantidQt
       }
       // For the case that this has been performed outside the GUI.
       informOwnerUpdate();
+    }
+
+    /**
+     * Determine whether the presenter is hidden or not.
+     * @return
+     */
+    bool ConcretePeaksPresenter::isHidden() const
+    {
+      return m_isHidden;
     }
 
     /**
@@ -435,6 +446,14 @@ namespace MantidQt
     bool ConcretePeaksPresenter::getShowBackground() const
     {
       return m_viewPeaks->isBackgroundShown();
+    }
+
+    void ConcretePeaksPresenter::zoomToPeak(const int peakIndex)
+    {
+      if(auto zoomable = dynamic_cast<ZoomableOnDemand*>(m_owningPresenter))
+      {
+        zoomable->zoomToPeak(this, peakIndex);
+      }
     }
 
   }

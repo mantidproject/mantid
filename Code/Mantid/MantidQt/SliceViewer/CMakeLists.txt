@@ -81,6 +81,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/UpdateableOnDemand.h
 	inc/MantidQtSliceViewer/XYLimitsDialog.h
+	inc/MantidQtSliceViewer/ZoomableOnDemand.h
 	inc/MantidQtSliceViewer/ZoomablePeaksView.h
 )
 
@@ -98,9 +99,11 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
+	inc/MantidQtSliceViewer/PeaksPresenter.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
+	inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/XYLimitsDialog.h
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
 )

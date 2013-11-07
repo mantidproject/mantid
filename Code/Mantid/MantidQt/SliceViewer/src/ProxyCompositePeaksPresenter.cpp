@@ -129,9 +129,24 @@ namespace MantidQt
       }
     }
 
+    bool ProxyCompositePeaksPresenter::getIsHidden(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const
+    {
+      return m_compositePresenter->getIsHidden(peaksWS);
+    }
+
     void ProxyCompositePeaksPresenter::registerView(UpdateableOnDemand* updateableView)
     {
       m_updateableView = updateableView;
+    }
+
+    boost::optional<PeaksPresenter_sptr> ProxyCompositePeaksPresenter::getZoomedPeakPresenter() const
+    {
+      return m_compositePresenter->getZoomedPeakPresenter();
+    }
+
+    boost::optional<int> ProxyCompositePeaksPresenter::getZoomedPeakIndex() const
+    {
+      return m_compositePresenter->getZoomedPeakIndex();
     }
 
   }

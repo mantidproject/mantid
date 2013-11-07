@@ -52,6 +52,8 @@ namespace MantidQt
       virtual bool getShowBackground() const;
       virtual QColor getBackgroundColor() const;
       virtual QColor getForegroundColor() const;
+      virtual void zoomToPeak(const int index);
+      virtual bool isHidden() const;
     private:
       /// Peak overlay view.
       PeakOverlayView_sptr m_viewPeaks;
@@ -71,7 +73,9 @@ namespace MantidQt
       std::vector<bool> m_viewablePeaks;
       /// Owning presenter.
       UpdateableOnDemand* m_owningPresenter;
-      /// Configurre peak transformations
+      /// Flag to indicate that this is hidden.
+      bool m_isHidden;
+      /// Configure peak transformations
       bool configureMappingTransform();
       /// Hide all views
       void hideAll();

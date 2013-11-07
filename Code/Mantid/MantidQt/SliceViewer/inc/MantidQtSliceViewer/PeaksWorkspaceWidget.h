@@ -22,6 +22,8 @@ namespace SliceViewer
     void setBackgroundColor(const QColor& backgroundColor);
     void setForegroundColor(const QColor& foregroundColor);
     void setShowBackground(bool showBackground);
+    void setShown(bool isShown);
+    void setSelectedPeak(int index);
   signals:
     void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
     void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);

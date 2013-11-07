@@ -715,15 +715,19 @@ class SliceViewerWindowProxy(QtProxyObject):
         # Return the proxy to the LineViewer widget        
         return liner
         
-
-
+class ProxyCompositePeaksPresenter(QtProxyObject):
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self,toproxy)
+        
+    def getPeaksPresenter(self, name):
+        return new_proxy(QtProxyObject, self._getHeldObject().getPeaksPresenter, name)
 
 #-----------------------------------------------------------------------------
 class SliceViewerProxy(QtProxyObject):
     """Proxy for a C++ SliceViewer widget.
     """
     # These are the exposed python method names
-    slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "getImage", "saveImage", "copyImageToClipboard", "setFastRender", "getFastRender", "toggleLineMode", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice", "setColorMapBackground", "setTransparentZeros", "setNormalization", "getNormalization", "setRebinThickness", "setRebinNumBins", "setRebinMode", "refreshRebin"]
+    slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "getImage", "saveImage", "copyImageToClipboard", "setFastRender", "getFastRender", "toggleLineMode", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice", "setColorMapBackground", "setTransparentZeros", "setNormalization", "getNormalization", "setRebinThickness", "setRebinNumBins", "setRebinMode", "setPeaksWorkspaces", "refreshRebin"]
     
     def __init__(self, toproxy):
         QtProxyObject.__init__(self, toproxy)
@@ -731,6 +735,9 @@ class SliceViewerProxy(QtProxyObject):
     def __dir__(self):
         """Returns the list of attributes for this object.   """
         return self.slicer_methods()
+    
+    def setPeaksWorkspaces(self, listofworkspaces):
+        return new_proxy(ProxyCompositePeaksPresenter, self._getHeldObject().setPeaksWorkspaces, listofworkspaces)
     
 
 #-----------------------------------------------------------------------------
@@ -754,3 +761,5 @@ class FitBrowserProxy(QtProxyObject):
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
+        
+        

@@ -57,6 +57,8 @@ namespace
     MOCK_CONST_METHOD0(getPeakSizeIntoProjection, double());
     MOCK_METHOD1(registerOwningPresenter, void(UpdateableOnDemand*));
     MOCK_CONST_METHOD0(getShowBackground, bool());
+    MOCK_METHOD1(zoomToPeak, void(const int));
+    MOCK_CONST_METHOD(isHidden(), bool());
     virtual ~MockPeaksPresenter(){}
   };
 

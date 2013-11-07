@@ -182,6 +182,9 @@ namespace MantidQt
         QColor backgroundColor = m_presenter->getBackgroundColour(ws);
         QColor foregroundColor = m_presenter->getForegroundColour(ws);
         bool showBackground = m_presenter->getShowBackground(ws);
+        bool isHidden = m_presenter->getIsHidden(ws);
+        auto optionalZoomedPresenter = m_presenter->getZoomedPeakPresenter();
+        auto optionalZoomedIndex = m_presenter->getZoomedPeakIndex();
 
         // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
         QList<PeaksWorkspaceWidget*> children = qFindChildren<PeaksWorkspaceWidget*>(this);
@@ -196,6 +199,15 @@ namespace MantidQt
             candidateWidget->setBackgroundColor(backgroundColor);
             candidateWidget->setForegroundColor(foregroundColor);
             candidateWidget->setShowBackground(showBackground);
+            candidateWidget->setShown(!isHidden);
+            if( optionalZoomedIndex.is_initialized() && optionalZoomedPresenter.is_initialized() )
+            {
+              // Is the zoomed peaks workspace the current workspace.
+              if (optionalZoomedPresenter.get().get() == m_presenter->getPeaksPresenter(ws->name().c_str()))
+              {
+                candidateWidget->setSelectedPeak(optionalZoomedIndex.get());
+              }
+            }
           }
         }
       }

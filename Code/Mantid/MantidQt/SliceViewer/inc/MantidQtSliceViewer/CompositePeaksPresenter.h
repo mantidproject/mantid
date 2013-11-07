@@ -6,9 +6,11 @@
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
+#include "MantidQtSliceViewer/ZoomableOnDemand.h"
 #include <vector>
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 namespace MantidQt
 {
@@ -20,7 +22,7 @@ namespace MantidQt
     Composite implmentation of the Peaks presenter. Holds 0 - N nested PeaksPresenters.
     Note that it's default behaviour is identical to that of the NullPeaksPresenter.
     ----------------------------------------------------------*/
-    class DLLExport CompositePeaksPresenter : public PeaksPresenter, public UpdateableOnDemand
+    class DLLExport CompositePeaksPresenter : public PeaksPresenter, public UpdateableOnDemand, public ZoomableOnDemand
     {
     public:
       
@@ -37,8 +39,9 @@ namespace MantidQt
       virtual PeakBoundingBox getBoundingBox(const int peakIndex) const {return m_default->getBoundingBox(peakIndex);}
       virtual void sortPeaksWorkspace(const std::string&, const bool){ /*Do Nothing*/}
       virtual bool getShowBackground() const {return m_default->getShowBackground();}
-
+      virtual void zoomToPeak(const int) {/* Do nothing */ }
       virtual std::string getTransformName() const;
+      virtual bool isHidden() const {return m_default->isHidden();}
       
       /// Constructor
       CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget,  PeaksPresenter_sptr defaultPresenter = PeaksPresenter_sptr(new NullPeaksPresenter));
@@ -84,8 +87,18 @@ namespace MantidQt
       PeaksPresenter* getPeaksPresenter(const QString& name);
       /// Register any owning presenter
       virtual void registerOwningPresenter(UpdateableOnDemand* owner);
+      /// Is the presenter hidden.
+      bool getIsHidden(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const;
       /// Perform update on demand
       virtual void performUpdate();
+      /// Zoom to the rectangle
+      virtual void zoomToPeak(PeaksPresenter* const presenter, const int peakIndex);
+      /// Forget zoom
+      void resetZoom();
+      /// Get optional zoomed peak presenter.
+      boost::optional<PeaksPresenter_sptr> getZoomedPeakPresenter() const;
+      /// Get optional zoomed peak index.
+      boost::optional<int> getZoomedPeakIndex() const;
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
@@ -105,6 +118,10 @@ namespace MantidQt
       PeaksPresenter_sptr m_default;
       /// Owning presenter
       UpdateableOnDemand* m_owner;
+      /// Presenter zoomed in on.
+      boost::optional<PeaksPresenter_sptr> m_zoomedPresenter;
+      /// index of peak zoomed in on.
+      boost::optional<int> m_zoomedPeakIndex;
     };
   }
 }
