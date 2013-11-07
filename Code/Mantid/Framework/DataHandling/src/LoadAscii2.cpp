@@ -102,7 +102,7 @@ namespace Mantid
     API::Workspace_sptr LoadAscii2::readData(std::ifstream & file)
     {
       //it's probably more stirct versus version 1, but then this is a format change and we don't want any bad data getting into the workspace
-      //there is still flexibility, but the format should jsut make more sense in general
+      //there is still flexibility, but the format should just make more sense in general
 
       m_baseCols = 0;
       m_specNo = 0;
@@ -111,7 +111,6 @@ namespace Mantid
       m_spectraStart = true;
       m_spectrumIDcount = 0;
 
-      int lineNo = 0;
       m_spectra.clear();
       m_curSpectra = new DataObjects::Histogram1D();
       std::string line;
@@ -123,7 +122,7 @@ namespace Mantid
       while( getline(file,line) )
       {
         std::string templine = line;
-        lineNo++;
+        m_lineNo++;
         boost::trim(templine);
         if (templine.empty())
         {
@@ -132,7 +131,7 @@ namespace Mantid
         }
         else if (!skipLine(templine))
         {
-          parseLine(templine, columns, lineNo);
+          parseLine(templine, columns);
         }
       }
 
@@ -152,15 +151,15 @@ namespace Mantid
     * @param[in] columns : the columns of values in the current line of data
     * @param[in] lineNo : the current line number
     */
-    void LoadAscii2::parseLine(const std::string & line, std::list<std::string> & columns, const int & lineNo)
+    void LoadAscii2::parseLine(const std::string & line, std::list<std::string> & columns)
     {
-      if (std::isdigit(line.at(0)))
+      if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+')
       {
         const int cols = splitIntoColumns(columns, line);
         if (cols > 4 || cols < 0)
         {
           //there were more separators than there should have been, which isn't right, or something went rather wrong
-          throw std::runtime_error("Line " + boost::lexical_cast<std::string>(lineNo) + ": Sets of values must have between 1 and 3 delimiters");
+          throw std::runtime_error("Line " + boost::lexical_cast<std::string>(m_lineNo) + ": Sets of values must have between 1 and 3 delimiters");
         }
         else if (cols == 1)
         {
@@ -175,7 +174,7 @@ namespace Mantid
           else
           {
             //if not then they've ommitted IDs in the the file previously and just decided to include one (which is wrong and confuses everything)
-            throw std::runtime_error("Line " + boost::lexical_cast<std::string>(lineNo) + ": Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. "
+            throw std::runtime_error("Line " + boost::lexical_cast<std::string>(m_lineNo) + ": Inconsistent inclusion of spectra IDs. All spectra must have IDs or all spectra must not have IDs. "
               "Check for blank lines, as they symbolize the end of one spectra and the start of another. Also check for spectra IDs with no associated bins.");
           }
           m_curSpectra->setSpectrumNo(boost::lexical_cast<int>(*(columns.begin())));
@@ -191,12 +190,12 @@ namespace Mantid
       }
       else if (badLine(line))
       {
-        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(lineNo) + ": Unexpected character found at beggining of line. Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
+        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(m_lineNo) + ": Unexpected character found at beginning of line. Lines must either be a single integer, a list of numeric values, blank, or a text line beginning with the specified comment indicator:" + m_comment +".");
       }
       else
       {
         //strictly speaking this should never be hit, but just being sure
-        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(lineNo) + ": Unknown format at line. Lines muct either be a single integer, a list of numeric values, blank, or a text line beggining with the specified comment indicator:" + m_comment +".");
+        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(m_lineNo) + ": Unknown format at line. Lines must either be a single integer, a list of numeric values, blank, or a text line beginning with the specified comment indicator:" + m_comment +".");
       }
     }
 
@@ -300,14 +299,15 @@ namespace Mantid
 
       //start from the top again, this time filling in the list
       file.seekg(0,std::ios_base::beg);
-      processHeader(file);
+      
+      m_lineNo = processHeader(file);
     }
 
     /**
     * Process the header information. This implementation just skips it entirely. 
     * @param file :: A reference to the file stream
     */
-    void LoadAscii2::processHeader(std::ifstream & file) const
+    int LoadAscii2::processHeader(std::ifstream & file) const
     {
 
       // Most files will have some sort of header. If we've haven't been told how many lines to 
@@ -381,6 +381,7 @@ namespace Mantid
         ++i;
       }
       g_log.information() << "Skipped " << numToSkip << " line(s) of header information()\n";
+      return numToSkip;
     }
 
 
@@ -602,6 +603,7 @@ namespace Mantid
     */
     void LoadAscii2::exec()
     {
+      m_lineNo = 0;
       std::string filename = getProperty("Filename");
       std::ifstream file(filename.c_str());
       if (!file)

@@ -80,13 +80,13 @@ namespace Mantid
       //check that the nubmer of columns in the current line match the number found previously
       void checkLineColumns(const size_t & cols) const;
       //interpret a line that has been deemed valid enough to look at.
-      void parseLine(const std::string & line, std::list<std::string> & columns, const int & lineNo);
+      void parseLine(const std::string & line, std::list<std::string> & columns);
       //find the number of collums we should expect from now on
       void setcolumns(std::ifstream & file, std::string & line, std::list<std::string> & columns);
       //wirte the spectra to the workspace
       void writeToWorkspace(API::MatrixWorkspace_sptr & localWorkspace, const size_t & numSpectra) const;
       //Process the header information. This implementation just skips it entirely.
-      void processHeader(std::ifstream & file) const;
+      int processHeader(std::ifstream & file) const;
       /// The column separator
       std::string m_columnSep;
 
@@ -102,11 +102,12 @@ namespace Mantid
       std::map<std::string,std::string> m_separatorIndex;
       std::string m_comment;
       size_t m_baseCols;
-      int m_specNo;
+      size_t m_specNo;
       size_t m_lastBins;
       size_t m_curBins;
       bool m_spectraStart;
       size_t m_spectrumIDcount;
+      size_t m_lineNo;
       std::vector<DataObjects::Histogram1D> m_spectra;
       DataObjects::Histogram1D *m_curSpectra;
     };
