@@ -228,7 +228,8 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
 	std::vector<int> cumulatedSumOfSpectras(m_numberOfChannels, 0);
 	for (size_t i = 0; i < m_numberOfTubes; i++) {
 		float* data_p = &data(static_cast<int>(i), 0);
-		std::vector<int> thisSpectrum(data_p, data_p + m_numberOfChannels);
+		int data_p_int = static_cast<int>(*data_p);
+		std::vector<int> thisSpectrum(data_p_int, data_p_int + static_cast<int>(m_numberOfChannels));
 		// sum spectras
 		std::transform(thisSpectrum.begin(), thisSpectrum.end(),
 				cumulatedSumOfSpectras.begin(), cumulatedSumOfSpectras.begin(),
