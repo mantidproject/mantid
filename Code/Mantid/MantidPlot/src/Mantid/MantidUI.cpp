@@ -2309,7 +2309,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set
 
 MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList, bool errors, Graph::CurveType style)
 {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
    MantidMatrix* m = getMantidMatrix(wsName);
    if( !m )
    {
@@ -2331,11 +2331,24 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    t->confirmClose(false);
    t->setAttribute(Qt::WA_QuitOnClose);
 
-   // TODO: Use the default style instead of a line if nothing is passed into this method
-   MultiLayer *ml = appWindow()->multilayerPlot(t,t->colNames(),style);
-   if(!ml) return NULL;
-   m->setBinGraph(ml,t);
+   MultiLayer *ml = appWindow()->newGraph("Graph");
    ml->confirmClose(false);
+
+   Graph *g = ml->activeGraph();
+
+   // TODO: Use the default style instead of a line if nothing is passed into this method
+   g->addCurves(t, t->colNames(), style);
+
+   appWindow()->polishGraph(g, style);
+
+   // Autoscale the graph
+   g->setAutoScale();
+   if(!appWindow()->autoscale2DPlots)
+     g->enableAutoscaling(false);
+
+   // Associate the graph with the bin table
+   m->setBinGraph(ml,t);
+
    QApplication::restoreOverrideCursor();
    return ml;
 }
