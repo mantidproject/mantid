@@ -34,6 +34,8 @@ namespace MantidQt
       QColor getForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
       /// Get the background colour corresponding to the workspace
       QColor getBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+      /// Determine wheter the background is shown or not.
+      bool getShowBackground(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
       /// Get references to all presented workspaces.
       SetPeaksWorkspaces presentedWorkspaces() const;
       /// Gets the transform name.

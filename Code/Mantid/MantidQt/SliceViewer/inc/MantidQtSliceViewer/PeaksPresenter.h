@@ -56,7 +56,10 @@ namespace SliceViewer
     virtual void setPeakSizeIntoProjection(const double fraction) = 0;
     virtual double getPeakSizeOnProjection() const = 0;
     virtual double getPeakSizeIntoProjection() const = 0;
+    virtual bool getShowBackground() const = 0;
     virtual void registerOwningPresenter(UpdateableOnDemand* owner) = 0;
+    virtual QColor getBackgroundColor() const {throw std::runtime_error("PeaksPresenter getBackgroundColour() is not implemented");}
+    virtual QColor getForegroundColor() const {throw std::runtime_error("PeaksPresenter getForegroundColour() is not implemented");}
     virtual ~PeaksPresenter(){};
   };
 

@@ -196,5 +196,41 @@ namespace MantidQt
       emit peaksSorted(columnToSortBy, sortAscending, this->m_ws);
     }
 
+    /**
+     * Get the workspace model.
+     * @return workspace around which this is built.
+     */
+    Mantid::API::IPeaksWorkspace_const_sptr PeaksWorkspaceWidget::getPeaksWorkspace() const
+    {
+      return m_ws;
+    }
+
+    /**
+     * Set the background color
+     * @param backgroundColor
+     */
+    void PeaksWorkspaceWidget::setBackgroundColor(const QColor& backgroundColor)
+    {
+      ui.btnBackgroundColor->setBackgroundColor(backgroundColor);
+    }
+
+    /**
+     * Set the foreground color
+     * @param foregroundColor
+     */
+    void PeaksWorkspaceWidget::setForegroundColor(const QColor& foregroundColor)
+    {
+      ui.btnPeakColor->setBackgroundColor(foregroundColor);
+    }
+
+    /**
+     * Set show/hide background
+     * @param showBackground
+     */
+    void PeaksWorkspaceWidget::setShowBackground(bool showBackground)
+    {
+      ui.ckShowBackground->setChecked(showBackground);
+    }
+
   } // namespace
 }

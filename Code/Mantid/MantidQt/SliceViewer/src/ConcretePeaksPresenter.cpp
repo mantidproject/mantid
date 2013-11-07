@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
+#include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -274,6 +275,16 @@ namespace MantidQt
       return workspaces;
     }
 
+    QColor ConcretePeaksPresenter::getBackgroundColor() const
+    {
+      return m_viewPeaks->getBackgroundColour();
+    }
+
+    QColor ConcretePeaksPresenter::getForegroundColor() const
+    {
+      return m_viewPeaks->getForegroundColour();
+    }
+
     void ConcretePeaksPresenter::setForegroundColour(const QColor colour)
     {
       // Change foreground colours
@@ -282,6 +293,8 @@ namespace MantidQt
         m_viewPeaks->changeForegroundColour(colour);
         m_viewPeaks->updateView();
       }
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     void ConcretePeaksPresenter::setBackgroundColour(const QColor colour)
@@ -292,6 +305,8 @@ namespace MantidQt
         m_viewPeaks->changeBackgroundColour(colour);
         m_viewPeaks->updateView();
       }
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     std::string ConcretePeaksPresenter::getTransformName() const
@@ -307,6 +322,8 @@ namespace MantidQt
         m_viewPeaks->showBackgroundRadius(show);
         doFindPeaksInRegion();
       }
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     void ConcretePeaksPresenter::setShown(const bool shown)
@@ -323,6 +340,8 @@ namespace MantidQt
           }
           m_viewPeaks->updateView();
       }
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     /**
@@ -368,13 +387,16 @@ namespace MantidQt
     {
       m_viewPeaks->changeOccupancyInView(fraction);
       m_viewPeaks->updateView();
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
     {
       m_viewPeaks->changeOccupancyIntoView(fraction);
       doFindPeaksInRegion();
-      //m_viewPeaks->updateView();
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     double ConcretePeaksPresenter::getPeakSizeOnProjection() const
@@ -400,6 +422,19 @@ namespace MantidQt
     void ConcretePeaksPresenter::registerOwningPresenter(UpdateableOnDemand* owner)
     {
       m_owningPresenter = owner;
+    }
+
+    void ConcretePeaksPresenter::informOwnerUpdate()
+    {
+      if(m_owningPresenter)
+      {
+        m_owningPresenter->performUpdate();
+      }
+    }
+
+    bool ConcretePeaksPresenter::getShowBackground() const
+    {
+      return m_viewPeaks->isBackgroundShown();
     }
 
   }

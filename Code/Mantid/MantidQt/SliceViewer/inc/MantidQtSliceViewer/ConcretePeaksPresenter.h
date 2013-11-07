@@ -49,6 +49,9 @@ namespace MantidQt
       virtual double getPeakSizeOnProjection() const;
       virtual double getPeakSizeIntoProjection() const;
       virtual void registerOwningPresenter(UpdateableOnDemand* owner);
+      virtual bool getShowBackground() const;
+      virtual QColor getBackgroundColor() const;
+      virtual QColor getForegroundColor() const;
     private:
       /// Peak overlay view.
       PeakOverlayView_sptr m_viewPeaks;
@@ -84,6 +87,8 @@ namespace MantidQt
       void checkWorkspaceCompatibilities(boost::shared_ptr<Mantid::API::MDGeometry> mdWS);
       /// Find peaks interacting with the slice and update the view.
       void doFindPeaksInRegion();
+      /// make owner update.
+      void informOwnerUpdate();
     };
 
   }

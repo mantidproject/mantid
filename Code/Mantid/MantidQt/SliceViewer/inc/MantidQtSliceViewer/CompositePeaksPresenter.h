@@ -20,7 +20,7 @@ namespace MantidQt
     Composite implmentation of the Peaks presenter. Holds 0 - N nested PeaksPresenters.
     Note that it's default behaviour is identical to that of the NullPeaksPresenter.
     ----------------------------------------------------------*/
-    class DLLExport CompositePeaksPresenter : public PeaksPresenter
+    class DLLExport CompositePeaksPresenter : public PeaksPresenter, public UpdateableOnDemand
     {
     public:
       
@@ -36,6 +36,7 @@ namespace MantidQt
       void setShown(const bool){/*Do nothing*/}
       virtual PeakBoundingBox getBoundingBox(const int peakIndex) const {return m_default->getBoundingBox(peakIndex);}
       virtual void sortPeaksWorkspace(const std::string&, const bool){ /*Do Nothing*/}
+      virtual bool getShowBackground() const {return m_default->getShowBackground();}
 
       virtual std::string getTransformName() const;
       
@@ -65,6 +66,8 @@ namespace MantidQt
       QColor getForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
       /// Get the background colour corresponding to the workspace
       QColor getBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+      /// Determine if the background is shown or not.
+      bool getShowBackground(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
       /// Get a copy of the palette in its current state.
       PeakPalette getPalette() const;
       /// Setter for indicating whether the background radius will be shown.
@@ -79,10 +82,10 @@ namespace MantidQt
       void sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending);
       /// Get the named peaks presenter.
       PeaksPresenter* getPeaksPresenter(const QString& name);
-      /// Register a proxy to this instance
-      void registerProxy(UpdateableOnDemand* proxy);
       /// Register any owning presenter
       virtual void registerOwningPresenter(UpdateableOnDemand* owner);
+      /// Perform update on demand
+      virtual void performUpdate();
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
@@ -100,8 +103,6 @@ namespace MantidQt
       ZoomablePeaksView* const m_zoomablePlottingWidget;
       /// Default behaviour 
       PeaksPresenter_sptr m_default;
-      /// Proxy to this.
-      UpdateableOnDemand* m_proxy;
       /// Owning presenter
       UpdateableOnDemand* m_owner;
     };

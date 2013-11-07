@@ -10,7 +10,7 @@ namespace MantidQt
     ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter(boost::shared_ptr<CompositePeaksPresenter> composite) : m_compositePresenter(composite),
         m_updateableView(NULL)
     {
-      m_compositePresenter->registerProxy(this);
+      m_compositePresenter->registerOwningPresenter(this);
     }
 
     ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter()
@@ -70,6 +70,11 @@ namespace MantidQt
       return m_compositePresenter->getForegroundColour(ws);
     }
 
+    bool ProxyCompositePeaksPresenter::getShowBackground(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
+    {
+      return m_compositePresenter->getShowBackground(ws);
+    }
+
     /**
     Get all the presented workspaces.
     */
@@ -119,7 +124,9 @@ namespace MantidQt
     void ProxyCompositePeaksPresenter::performUpdate()
     {
       if(m_updateableView)
+      {
         m_updateableView->performUpdate();
+      }
     }
 
     void ProxyCompositePeaksPresenter::registerView(UpdateableOnDemand* updateableView)

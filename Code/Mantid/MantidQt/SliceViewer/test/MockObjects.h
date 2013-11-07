@@ -56,6 +56,7 @@ namespace
     MOCK_CONST_METHOD0(getPeakSizeOnProjection, double());
     MOCK_CONST_METHOD0(getPeakSizeIntoProjection, double());
     MOCK_METHOD1(registerOwningPresenter, void(UpdateableOnDemand*));
+    MOCK_CONST_METHOD0(getShowBackground, bool());
     virtual ~MockPeaksPresenter(){}
   };
 
@@ -121,6 +122,9 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_CONST_METHOD0(getOccupancyIntoView, double());
     MOCK_CONST_METHOD0(positionOnly, bool());
     MOCK_CONST_METHOD0(getRadius, double());
+    MOCK_CONST_METHOD0(isBackgroundShown, bool());
+    MOCK_CONST_METHOD0(getForegroundColour, QColor());
+    MOCK_CONST_METHOD0(getBackgroundColour, QColor());
     ~MockPeakOverlayView(){}
   };
 

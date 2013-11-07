@@ -175,8 +175,32 @@ namespace MantidQt
      */
     void PeaksViewer::performUpdate()
     {
-      // TODO.
+      auto allWS = m_presenter->presentedWorkspaces();
+      for(auto it = allWS.begin(); it != allWS.end(); ++it)
+      {
+        auto ws = *it;
+        QColor backgroundColor = m_presenter->getBackgroundColour(ws);
+        QColor foregroundColor = m_presenter->getForegroundColour(ws);
+        bool showBackground = m_presenter->getShowBackground(ws);
+
+        // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
+        QList<PeaksWorkspaceWidget*> children = qFindChildren<PeaksWorkspaceWidget*>(this);
+        Mantid::API::IPeaksWorkspace_sptr targetPeaksWorkspace;
+        for(int i = 0; i < children.size(); ++i)
+        {
+          PeaksWorkspaceWidget* candidateWidget = children.at(i);
+          Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace = candidateWidget->getPeaksWorkspace();
+          if(candidateWorkspace == ws)
+          {
+            // We have the right widget to update.
+            candidateWidget->setBackgroundColor(backgroundColor);
+            candidateWidget->setForegroundColor(foregroundColor);
+            candidateWidget->setShowBackground(showBackground);
+          }
+        }
+      }
     }
+
 
     /**
      * Slot called when the user wants to see the dialog for selecting

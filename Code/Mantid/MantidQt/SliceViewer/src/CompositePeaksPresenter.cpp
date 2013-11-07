@@ -10,7 +10,7 @@ namespace MantidQt
     Constructor
     */
     CompositePeaksPresenter::CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget, PeaksPresenter_sptr defaultPresenter) : m_zoomablePlottingWidget(zoomablePlottingWidget),  
-      m_default(defaultPresenter), m_proxy(NULL), m_owner(NULL)
+      m_default(defaultPresenter), m_owner(NULL)
     {
       if(m_zoomablePlottingWidget == NULL)
       {
@@ -118,6 +118,7 @@ namespace MantidQt
       if(result_it == m_subjects.end())
       {
         m_subjects.push_back(presenter);
+        presenter->registerOwningPresenter(this);
       }
     }
 
@@ -411,6 +412,18 @@ namespace MantidQt
       return result;
     }
 
+    bool CompositePeaksPresenter::getShowBackground(
+        boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
+    {
+      if (useDefault())
+      {
+        throw std::runtime_error(
+            "Get show background cannot be fetched until nested presenters are added.");
+      }
+      SubjectContainer::const_iterator iterator = getPresenterIteratorFromWorkspace(ws);
+      return (*iterator)->getShowBackground();
+    }
+
     class MatchWorkspaceName : public std::unary_function<SetPeaksWorkspaces::value_type, bool>
     {
     private:
@@ -450,14 +463,26 @@ namespace MantidQt
       return (*presenterFound).get();
     }
 
-    void CompositePeaksPresenter::registerProxy(UpdateableOnDemand* proxy)
-    {
-      m_proxy = proxy;
-    }
-
     void CompositePeaksPresenter::registerOwningPresenter(UpdateableOnDemand* owner)
     {
       m_owner = owner;
+    }
+
+    void CompositePeaksPresenter::performUpdate()
+    {
+      for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
+          ++presenterIterator)
+      {
+        auto presenter = (*presenterIterator);
+        const int pos = static_cast<int>(std::distance(m_subjects.begin(), presenterIterator));
+        m_palette.setBackgroundColour(pos, presenter->getBackgroundColor());
+        m_palette.setForegroundColour(pos, presenter->getForegroundColor());
+
+        if (m_owner)
+        {
+          m_owner->performUpdate();
+        }
+      }
     }
 
   }
