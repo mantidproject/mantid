@@ -52,7 +52,8 @@ class StretchedExpFTTest(unittest.TestCase):
             self.fail('Could not create StretchedExpFT function: %s' % str(exc))
             
     def test_fit(self):
-        parms={'height':0.83, 'tau':2.45, 'beta':0.43}
+        from random import random
+        parms={'height':10*random(), 'tau':0.1+random(), 'beta':0.1+2*random()}
         AlgorithmFactory.subscribe(_InternalMakeSEFTData)
         alg = testhelpers.run_algorithm('_InternalMakeSEFTData', nhalfbins=4000,
                                          OutputWorkspace='_test_seft_data', **parms)
@@ -63,12 +64,18 @@ class StretchedExpFTTest(unittest.TestCase):
             StartX=-1, EndX=1, CreateOutput=1, MaxIterations=20)
         
         ws = mtd['_test_seft_data_Parameters']
-        for (index, name) in enumerate(ws.column(0)):
-            if name in parms.keys():
-                target = parms[name]
-                value = ws.column(1)[index]
-                delta = 0.05 * target # 5% error
-                self.assertAlmostEqual(value, target, delta=delta)
+        fitted=''
+        for irow in range( ws.rowCount() ):
+            row = ws.row(irow)
+            name = row['Name']
+            if name == 'Cost function value':
+                value = row['Value']
+            elif name in parms.keys():
+                fitted += '{}={}'.format(name, row['Value'])
+        
+        target = ','.join( '{}={}'.format(key,val) for key,val in parms.items() )       
+        msg='Cost function {} too high. Targets were {} but obtained {}'.format(value,target,fitted)
+        self.assertLess(value, 5, msg)
 
         mtd.remove('_test_seft_data')
         mtd.remove('_test_seft_data_NormalisedCovarianceMatrix')
