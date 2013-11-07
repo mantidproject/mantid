@@ -199,6 +199,8 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
         error_bars: bool, set to True to add error bars.
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
+    Returns:
+        A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
@@ -250,7 +252,7 @@ def fitBrowser():
     return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
 
 #-----------------------------------------------------------------------------
-def plotBin(source, indices, error_bars = False, graph_type = 0):
+def plotBin(source, indices, error_bars = False, graph_type = 0, window = None, clearWindow = False):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
     
     This puts the spectrum number as the X variable, and the
@@ -263,25 +265,30 @@ def plotBin(source, indices, error_bars = False, graph_type = 0):
         source: workspace or name of a workspace
         indices: bin number(s) to plot
         error_bars: bool, set to True to add error bars.
-
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
-        A handle to the created Graph widget.
+        A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
-    def _callPlotBin(workspace, indexes, errors, graph_type):
+    def _callPlotBin(workspace, indexes, errors, graph_type, window, clearWindow):
         if isinstance(workspace, str):
             wkspname = workspace
         else:
             wkspname = workspace.getName()
         if type(indexes) == int:
             indexes = [indexes]
-        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors,graph_type)
+
+        if window != None:
+          window = window._getHeldObject()
+
+        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors, graph_type, window, clearWindow)
 
     if isinstance(source, list) or isinstance(source, tuple):
         if len(source) > 1:
             raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
         else:
             source = source[0]
-    return _callPlotBin(source, indices, error_bars, graph_type)
+    return _callPlotBin(source, indices, error_bars, graph_type, window, clearWindow)
 
 #-----------------------------------------------------------------------------
 def stemPlot(source, index, power=None, startPoint=None, endPoint=None):

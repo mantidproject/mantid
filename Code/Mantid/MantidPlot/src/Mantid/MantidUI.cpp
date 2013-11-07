@@ -2307,7 +2307,17 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set
   return plotSpectraList(wsName, spec, false);
 }
 
-MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList, bool errors, Graph::CurveType style)
+/** Plots the list of bins for the given workspace.
+@param wsName :: Name of the workspace to use
+@param binsList :: List of bin indexes to use
+@param errors :: Whether to include errors
+@param style :: Style of the resulting curve
+@param plotWindow :: Window to use for plotting. If NULL a new one will be created
+@param clearWindow :: Whether to clean the plotWindow before plotting.Ignored if plotWindow == NULL
+@return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
+*/
+MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList, bool errors, 
+  Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
 {
    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
    MantidMatrix* m = getMantidMatrix(wsName);
@@ -3106,6 +3116,7 @@ MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<i
 @param distr :: if true, workspace is a distribution
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlot, bool errs, bool distr,
   MultiLayer* plotWindow, bool clearWindow)
@@ -3134,6 +3145,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlo
 @param distr :: if true, workspace is a distribution
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, 
   bool distr, MultiLayer* plotWindow, bool clearWindow)
@@ -3158,6 +3170,7 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 @param style :: curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, 
   Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)

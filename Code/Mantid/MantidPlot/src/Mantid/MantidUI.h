@@ -277,7 +277,8 @@ public:
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
 
-  MultiLayer* plotBin(const QString& wsName, const QList<int> & bins, bool errors = false, Graph::CurveType style = Graph::Line);
+  MultiLayer* plotBin(const QString& wsName, const QList<int> & bins, bool errors = false, 
+    Graph::CurveType style = Graph::Line, MultiLayer* plotWindow = NULL, bool clearWindow = false);
   void setIsRunning(bool running);
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
 				 const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled);
