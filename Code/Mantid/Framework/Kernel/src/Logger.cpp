@@ -350,7 +350,11 @@ namespace Kernel
         m_nullStream=0;
       }
       // Finally delete the mutex
-      delete mutexLoggerList;
+      if (mutexLoggerList)
+      {
+        delete mutexLoggerList;
+        mutexLoggerList = 0;
+      }
     }
     catch (std::exception& e)
     {
