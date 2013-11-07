@@ -257,9 +257,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1" alignment="Qt::AlignVCenter">
-           <widget class="QLineEdit" name="InvestigationAbstract"/>
-          </item>
           <item row="0" column="3">
            <spacer name="searchGridSpacer">
             <property name="orientation">
@@ -275,6 +272,9 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="4" column="1" alignment="Qt::AlignVCenter">
+           <widget class="QLineEdit" name="DataFileName"/>
           </item>
           <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
            <widget class="QLabel" name="Instrument_err">
@@ -625,7 +625,7 @@
            </widget>
           </item>
           <item row="4" column="0">
-           <widget class="QLabel" name="advAbstractLbl">
+           <widget class="QLabel" name="advDatafileLbl">
             <property name="font">
              <font>
               <weight>75</weight>
@@ -633,7 +633,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Investigation abstract:</string>
+             <string>Datafile name:</string>
             </property>
            </widget>
           </item>
@@ -1195,7 +1195,7 @@
   <tabstop>Keywords</tabstop>
   <tabstop>InvestigatorSurname</tabstop>
   <tabstop>SampleName</tabstop>
-  <tabstop>InvestigationAbstract</tabstop>
+  <tabstop>DataFileName</tabstop>
   <tabstop>InvestigationType</tabstop>
   <tabstop>advSearchCbox</tabstop>
   <tabstop>myDataCbox</tabstop>

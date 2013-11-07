@@ -53,8 +53,8 @@ namespace Mantid
       void setKeywords(const std::string& keywords);
       /// Set the investigation name to search for.
       void setInvestigationName(const std::string& instName);
-      /// Set the investigation abstract to search for.
-      void setInvestigationAbstract(const std::string& invstabstract);
+      /// Set the datafile name to search for.
+      void setDatafileName(const std::string& datafileName);
       /// Set the sample name to search for.
       void setSampleName(const std::string& sampleName);
       /// Set the investigators name to search for.
@@ -78,8 +78,8 @@ namespace Mantid
       const std::string& getKeywords() const;
       /// Get the name of the investigation to search for.
       const std::string& getInvestigationName() const;
-      /// Get the investigation abstract.
-      const std::string& getInvestigationAbstract() const;
+      /// Get the datafile name.
+      const std::string& getDatafileName() const;
       /// Get the sample name.
       const std::string& getSampleName() const;
       /// Get the investigators name.
@@ -106,8 +106,8 @@ namespace Mantid
       time_t m_endDate;
       /// investigation anme
       std::string m_investigationName;
-      /// investigation abstract
-      std::string m_investigationAbstract;
+      /// Datafile name
+      std::string m_datafileName;
       /// sample name
       std::string m_sampleName;
       /// investigator surname

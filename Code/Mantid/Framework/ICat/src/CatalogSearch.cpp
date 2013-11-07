@@ -52,7 +52,7 @@ namespace Mantid
       declareProperty("Keywords","","An option to search investigations data");
       declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
       declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
-      declareProperty("InvestigationAbstract", "", "The abstract of the investigation to search.");
+      declareProperty("DataFileName","", "The name of the data file to search.");
       declareProperty("InvestigationType", "", "The type  of the investigation to search.");
       declareProperty("MyData",false, "Boolean option to do my data only search.");
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
@@ -93,7 +93,7 @@ namespace Mantid
       params.setInvestigationName(getPropertyValue("InvestigationName"));
       params.setInvestigatorSurName(getPropertyValue("InvestigatorSurname"));
       params.setSampleName(getPropertyValue("SampleName"));
-      params.setInvestigationAbstract(getPropertyValue("InvestigationAbstract"));
+      params.setDatafileName(getPropertyValue("DataFileName"));
       params.setInvestigationType(getPropertyValue("InvestigationType"));
       params.setMyData(boost::lexical_cast<bool>(getPropertyValue("MyData")));
     }

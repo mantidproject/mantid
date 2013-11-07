@@ -76,16 +76,16 @@ namespace Mantid
     }
 
     /**
-     * This method  sets investigationAbstract used for searching
-     * @param invstabstract :: abstract of the investigation
+     * This method sets data file name used for searching
+     * @param datafileName :: data file name to search for
      */
-    void CatalogSearchParam::setInvestigationAbstract(const std::string& invstabstract)
+    void CatalogSearchParam::setDatafileName(const std::string& datafileName)
     {
-      m_investigationAbstract = invstabstract;
+      m_datafileName = datafileName;
     }
 
     /**
-     * This method  sets sample used for searching
+     * This method sets sample used for searching
      * @param sampleName :: name of the sample
      */
     void CatalogSearchParam::setSampleName(const std::string& sampleName)
@@ -94,7 +94,7 @@ namespace Mantid
     }
 
     /**
-     * This method  sets Investigator name
+     * This method sets Investigator name
      * @param investigatorName :: name of the investigator
      */
     void CatalogSearchParam::setInvestigatorSurName(const std::string& investigatorName)
@@ -184,12 +184,12 @@ namespace Mantid
     }
 
     /**
-     * Gets the input from the investigation abstract field.
-     * @return Investigation abstract
+     * Gets the input from the datafile name field.
+     * @return Datafile name
      */
-    const std::string&  CatalogSearchParam::getInvestigationAbstract() const
+    const std::string& CatalogSearchParam::getDatafileName() const
     {
-      return m_investigationAbstract;
+      return m_datafileName;
     }
 
     /**

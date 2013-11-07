@@ -866,16 +866,13 @@ namespace Mantid
         *req_sptr->advancedSearchDetails->investigationName = inputs.getInvestigationName();
       }
 
-      //invetigation abstarct
-      boost::shared_ptr<std::string > investAbstract_sptr(new std::string);
-      if(!inputs.getInvestigationAbstract().empty())
+      //datafile name
+      boost::shared_ptr<std::string > datafilename_sptr(new std::string);
+      if(!inputs.getDatafileName().empty())
       {
-        req_sptr->advancedSearchDetails->investigationAbstract = investAbstract_sptr.get();
-        *req_sptr->advancedSearchDetails->investigationAbstract = inputs.getInvestigationAbstract();
+        req_sptr->advancedSearchDetails->datafileName = datafilename_sptr.get();
+        *req_sptr->advancedSearchDetails->datafileName = inputs.getDatafileName();
       }
-      std::string invstType=inputs.getInvestigationType();
-      req_sptr->advancedSearchDetails->investigationType = &invstType;
-
 
       //sample name
       boost::shared_ptr<std::string > sample_sptr(new std::string);
