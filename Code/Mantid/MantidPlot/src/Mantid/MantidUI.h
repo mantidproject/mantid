@@ -203,10 +203,18 @@ public:
 
 public slots:
   // Create a 1d graph form specified spectra in a MatrixWorkspace
-  MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, bool distr=false);
-  MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs=false, bool distr=false);
+  MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true,
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, 
+    bool distr=false, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false, 
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs=false, bool distr=false,
+    MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
   /// Draw a color fill plot for each of the listed workspaces
   void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
   /// Draw a color fill plot for the named workspace

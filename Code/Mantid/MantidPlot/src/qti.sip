@@ -1599,7 +1599,9 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-  MultiLayer* plotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* plotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, 
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* window = NULL, bool clearWindow = false);
+
   MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showErrors);
   MultiLayer* plotBin(const QString&,const QList<int>&,bool = false,Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);

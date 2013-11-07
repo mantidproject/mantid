@@ -187,7 +187,7 @@ def plot(source, *args, **kwargs):
         return plotSpectrum(source, *args, **kwargs)
         
 #-----------------------------------------------------------------------------
-def plotSpectrum(source, indices, error_bars = False, type = -1):
+def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Open a 1D Plot of a spectrum in a workspace.
     
     This plots one or more spectra, with X as the bin boundaries,
@@ -197,6 +197,8 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         source: workspace or name of a workspace
         indices: workspace index, or tuple or list of workspace indices to plot
         error_bars: bool, set to True to add error bars.
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
     """
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
@@ -204,7 +206,12 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         raise ValueError("No workspace names given to plot")
     if len(index_list) == 0:
         raise ValueError("No indices given to plot")
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type))
+
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
+
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type, window, clearWindow))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:

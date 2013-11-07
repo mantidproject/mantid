@@ -3056,8 +3056,8 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 /**
 * Plots the spectra from the given workspaces
 */
-MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<int>& spec_list,
-                                      bool errs, Graph::CurveType style)
+MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<int>& spec_list, bool errs, 
+  Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -3079,10 +3079,11 @@ MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<i
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs,false,style);
+  return plotSpectraList(pairs,errs,false,style,plotWindow, clearWindow);
 }
 
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlot, bool errs, bool distr)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlot, bool errs, bool distr,
+  MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -3098,7 +3099,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlo
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs,distr);
+  return plotSpectraList(pairs,errs,distr,Graph::Unspecified,plotWindow, clearWindow);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
@@ -3107,7 +3108,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlo
 @param errs :: If true include the errors on the graph
 @param distr :: if true, workspace is a distribution
 */
-MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, bool distr)
+MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, 
+  bool distr, MultiLayer* plotWindow, bool clearWindow)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -3119,7 +3121,7 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs,distr);
+  return plotSpectraList(pairs,errs,distr,Graph::Unspecified,plotWindow, clearWindow);
 }
 
 /** Create a 1d graph form a set of workspace-spectrum pairs
@@ -3128,10 +3130,13 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 @param distr :: if true, workspace is a distribution
 @param style :: curve style for plot
 */
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, Graph::CurveType style)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, 
+  Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
 {
-  UNUSED_ARG(errs);
+  UNUSED_ARG(clearWindow);
+
   if(toPlot.size() == 0) return NULL;
+
   if (toPlot.size() > 10)
   {
     QMessageBox ask(appWindow());
@@ -3147,21 +3152,46 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor)); 
 
   const QString& firstWorkspace = toPlot.constBegin().key();
-  MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
-  //ml->askOnCloseEvent(false);
-  ml->setCloseOnEmpty(true);
-  Graph *g = ml->activeGraph();
+
+  bool isWindowSpecified = (plotWindow != NULL);
+
+  MultiLayer* ml; // MultiLayer (plot window) to use
+
+  if(!isWindowSpecified)
+  {
+    // If plot window is not specified, create a new one
+    ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
+    ml->setCloseOnEmpty(true);
+  }
+  else
+  {
+    // Otherwise, used specified plot window
+    ml = plotWindow;
+  }
+
+  Graph *g = ml->activeGraph(); // We use active graph only. No support for proper _multi_ layers yet.
+
   if (!g)
   {
+    // TODO: need to add
     QApplication::restoreOverrideCursor();
     return NULL;
   }
-  connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
-  
-  appWindow()->setPreferences(g);
-  g->newLegend("");
-  MantidMatrixCurve* mc(NULL);
 
+  if(!isWindowSpecified)
+  {
+    // If window was not specified, we've created a new one and now need to do some
+    // initialization
+    connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+    appWindow()->setPreferences(g);
+    g->newLegend("");
+    g->setTitle(tr("Workspace ")+firstWorkspace);
+  }
+
+  // TODO: If window clearing requested, remove previous curves
+
+  // Try to add curves to the plot
+  MantidMatrixCurve* mc;
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
     try {
@@ -3185,53 +3215,60 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     QApplication::restoreOverrideCursor();
     return NULL;
   }
-  Mantid::API::MatrixWorkspace_sptr workspace =
-    boost::dynamic_pointer_cast<MatrixWorkspace>(
-    AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString())
-    );
 
-  g->setTitle(tr("Workspace ")+firstWorkspace);
-  Mantid::API::Axis* ax;
-  ax = workspace->getAxis(0);
-  std::string xTitle;
-  std::string xUnits;
-  if (ax->unit() && ax->unit()->unitID() != "Empty" )
+  if(!isWindowSpecified)
   {
-    xTitle = ax->unit()->caption();
-    if ( !ax->unit()->label().empty() )
+    // If new window, we update plot axis
+
+    auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString()));
+
+    Mantid::API::Axis* ax = workspace->getAxis(0);
+    std::string xTitle, xUnits;
+    if (ax->unit() && ax->unit()->unitID() != "Empty" )
     {
-      xUnits = ax->unit()->label();
-      xTitle += " / " + xUnits;
+      xTitle = ax->unit()->caption();
+      if ( !ax->unit()->label().empty() )
+      {
+        xUnits = ax->unit()->label();
+        xTitle += " / " + xUnits;
+      }
     }
-  }
-  else if (!ax->title().empty())
-  {
-    xTitle = ax->title();
+    else if (!ax->title().empty())
+    {
+      xTitle = ax->title();
+    }
+    else
+    {
+      xTitle = "X axis";
+    }
+    g->setXAxisTitle(tr(xTitle.c_str()));
+
+    std::string yTitle = workspace->YUnitLabel();
+    if (distr)
+    {
+      yTitle += " / " + xUnits;
+    }
+    g->setYAxisTitle(tr(yTitle.c_str()));
+
+    g->setAntialiasing(false);
+    g->setAutoScale();
+    /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
+     * data points. However, this has the side-effect suggested by its name: all the axes become
+     * auto-scaling if the data changes. If, in the plot preferences, autoscaling has been disabled
+     * the the next line re-fixes the axes
+     */
+    if ( ! appWindow()->autoscale2DPlots )
+      g->enableAutoscaling(false);
+
+    // This deals with the case where the X-values are not in order. In general, this shouldn't
+    // happen, but it does apparently with some muon analyses.
+    g->checkValuesInAxisRange(mc);
   }
   else
   {
-    xTitle = "X axis";
+    g->replot();
   }
-  g->setXAxisTitle(tr(xTitle.c_str()));
-
-  std::string yTitle = workspace->YUnitLabel();
-  if (distr)
-  {
-    yTitle += " / " + xUnits;
-  }
-  g->setYAxisTitle(tr(yTitle.c_str()));
-  g->setAntialiasing(false);
-  g->setAutoScale();
-  /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
-   * data points. However, this has the side-effect suggested by its name: all the axes become
-   * auto-scaling if the data changes. If, in the plot preferences, autoscaling has been disabled
-   * the the next line re-fixes the axes
-   */
-  if ( ! appWindow()->autoscale2DPlots ) g->enableAutoscaling(false);
-
-  // This deals with the case where the X-values are not in order. In general, this shouldn't
-  // happen, but it does apparently with some muon analyses.
-  g->checkValuesInAxisRange(mc);
 
   QApplication::restoreOverrideCursor();
   return ml;
