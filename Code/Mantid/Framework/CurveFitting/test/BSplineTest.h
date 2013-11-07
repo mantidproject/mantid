@@ -330,6 +330,21 @@ public:
         }
     }
 
+    void test_nonpositive_order()
+    {
+        BSpline bsp;
+        TS_ASSERT_THROWS( bsp.setAttributeValue("Order",-3), std::invalid_argument );
+        TS_ASSERT_THROWS( bsp.setAttributeValue("Order",0), std::invalid_argument );
+    }
+
+    void test_nbreak_too_small()
+    {
+        BSpline bsp;
+        TS_ASSERT_THROWS( bsp.setAttributeValue("NBreak",1), std::invalid_argument );
+        TS_ASSERT_THROWS( bsp.setAttributeValue("NBreak",0), std::invalid_argument );
+        TS_ASSERT_THROWS( bsp.setAttributeValue("NBreak",-3), std::invalid_argument );
+    }
+
 private:
 
     double fit(boost::shared_ptr<IFunction> bsp, std::string func)

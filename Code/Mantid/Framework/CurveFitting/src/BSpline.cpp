@@ -209,6 +209,14 @@ namespace Mantid
     {
         int order = getAttribute("Order").asInt();
         int nbreak = getAttribute("NBreak").asInt();
+        if ( order <= 0 )
+        {
+            throw std::invalid_argument("BSpline: Order must be greater than zero.");
+        }
+        if ( nbreak < 2 )
+        {
+            throw std::invalid_argument("BSpline: NBreak must be at least 2.");
+        }
         gsl_bspline_workspace *ws = gsl_bspline_alloc ( static_cast<size_t>(order), static_cast<size_t>(nbreak) );
         m_bsplineWorkspace = boost::shared_ptr<gsl_bspline_workspace>( ws, ReleaseBSplineWorkspace() );
         m_bsplineDerivWorkspace.reset();
