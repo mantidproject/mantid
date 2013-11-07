@@ -79,7 +79,7 @@ namespace Mantid
       /// Should we auto detecte dead wires?
       bool m_runAutoDetectDW;
       /// threshold for dead wires auto detection
-      bool m_defautDWThreshold;
+      double m_defautDWThreshold;
 
 
       /// The number of spectra in the raw file
