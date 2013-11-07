@@ -28,7 +28,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 from mantid.api import IFunction1D, FunctionFactory #, BoundaryConstraint
 from mantid import logger
 import numpy as np
-from scipy.fftpack import (fft, fftfreq, fftshift)
+from scipy.fftpack import fft
 from scipy.interpolate import interp1d
 import copy
 
@@ -75,7 +75,7 @@ class StretchedExpFT(IFunction1D):
                 Fourier{ height * exp( - |t/tau|**beta ) }
         
         Given a time step dt and M=2*N+1 time points (N negative, one at zero, N positive),
-        then fftfreq will sample frequencies [0, 1/(M*dt), N/(M*dt), -N/(M*dt), (-N+1)/(M*dt),..,1/(M*dt)].
+        then fft will sample frequencies [0, 1/(M*dt), N/(M*dt), -N/(M*dt), (-N+1)/(M*dt),..,1/(M*dt)].
         
         Given xvals, let:
             1/(M*dt) = xvals[1]-xvals[0]
