@@ -3169,15 +3169,16 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   const QString& firstWorkspace = toPlot.constBegin().key();
 
-  bool isWindowSpecified = (plotWindow != NULL);
+  bool newGraphCreated = false;
 
   MultiLayer* ml; // MultiLayer (plot window) to use
 
-  if(!isWindowSpecified)
+  if(plotWindow == NULL)
   {
     // If plot window is not specified, create a new one
     ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
     ml->setCloseOnEmpty(true);
+    newGraphCreated = true;
   }
   else
   {
@@ -3185,26 +3186,28 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     ml = plotWindow;
   }
 
-  Graph *g = ml->activeGraph(); // We use active graph only. No support for proper _multi_ layers yet.
-
-  if (!g)
+  if(clearWindow)
   {
-    // TODO: need to add
-    QApplication::restoreOverrideCursor();
-    return NULL;
+    // Remove all layers if requested
+    ml->setLayersNumber(0);
   }
 
-  if(!isWindowSpecified)
+  if (ml->isEmpty())
+  { // This will add a new layer in two situations: when we've cleared the window manually,
+    // or when the window specified didn't actually have any layers
+    ml->addLayer();
+    newGraphCreated = true;
+  }
+
+  Graph *g = ml->activeGraph(); // We use active graph only. No support for proper _multi_ layers yet.
+
+  if(newGraphCreated)
   {
-    // If window was not specified, we've created a new one and now need to do some
-    // initialization
     connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
     appWindow()->setPreferences(g);
     g->newLegend("");
     g->setTitle(tr("Workspace ")+firstWorkspace);
   }
-
-  // TODO: If window clearing requested, remove previous curves
 
   // Try to add curves to the plot
   MantidMatrixCurve* mc;
@@ -3232,10 +3235,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     return NULL;
   }
 
-  if(!isWindowSpecified)
+  if(newGraphCreated)
   {
-    // If new window, we update plot axis
-
     auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString()));
 
@@ -3281,10 +3282,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     // happen, but it does apparently with some muon analyses.
     g->checkValuesInAxisRange(mc);
   }
-  else
-  {
-    g->replot();
-  }
+
+  g->replot();
 
   QApplication::restoreOverrideCursor();
   return ml;
