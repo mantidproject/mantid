@@ -142,7 +142,7 @@ void loadGroupingFromXML(const std::string& filename, Grouping& g)
 
   for (size_t ig = 0; ig < groups->length(); ig++)
   {
-    Element* pGroupElem = static_cast<Element*>(groups->item(ig));
+    Element* pGroupElem = static_cast<Element*>(groups->item(static_cast<long>(ig)));
 
     if (!pGroupElem->hasAttribute("name"))
       throw Mantid::Kernel::Exception::FileError("Group element without name" , filename);
@@ -169,7 +169,7 @@ void loadGroupingFromXML(const std::string& filename, Grouping& g)
 
   for (size_t ip = 0; ip < pairs->length(); ip++)
   {
-    Element* pPairElem = static_cast<Element*>(pairs->item(ip));
+    Element* pPairElem = static_cast<Element*>(pairs->item(static_cast<long>(ig)));
 
     if ( !pPairElem->hasAttribute("name") )
       throw Mantid::Kernel::Exception::FileError("Pair element without name" , filename);
