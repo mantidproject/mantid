@@ -3054,7 +3054,13 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 }
 
 /**
-* Plots the spectra from the given workspaces
+Plots the spectra from the given workspaces
+@param ws_name :: List of ws names to plot
+@param spec_list :: List of spectra indices to plot for each workspace
+@param errs :: If true include the errors on the graph
+@param style :: Curve style for plot
+@param plotWindow :: Window to plot to. If NULL a new one will be created
+@param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 */
 MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<int>& spec_list, bool errs, 
   Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
@@ -3081,7 +3087,13 @@ MultiLayer* MantidUI::plotSpectraList(const QStringList& ws_names, const QList<i
   // Pass over to the overloaded method
   return plotSpectraList(pairs,errs,false,style,plotWindow, clearWindow);
 }
-
+/** Create a 1D graph from the specified list of workspaces/spectra.
+@param toPlot :: Map of form ws -> [spectra_list]
+@param errs :: If true include the errors on the graph
+@param distr :: if true, workspace is a distribution
+@param plotWindow :: Window to plot to. If NULL a new one will be created
+@param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+*/
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlot, bool errs, bool distr,
   MultiLayer* plotWindow, bool clearWindow)
 {
@@ -3107,6 +3119,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString, set<int> >& toPlo
 @param indexList :: A list of spectra indices to be shown in the graph
 @param errs :: If true include the errors on the graph
 @param distr :: if true, workspace is a distribution
+@param plotWindow :: Window to plot to. If NULL a new one will be created
+@param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 */
 MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, 
   bool distr, MultiLayer* plotWindow, bool clearWindow)
@@ -3125,10 +3139,12 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 }
 
 /** Create a 1d graph form a set of workspace-spectrum pairs
-@param toPlot :: A list of spectra indices to be shown in the graph
+@param toPlot :: A list of workspace/spectra to be shown in the graph
 @param errs :: If true include the errors to the graph
 @param distr :: if true, workspace is a distribution
 @param style :: curve style for plot
+@param plotWindow :: Window to plot to. If NULL a new one will be created
+@param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
 */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, 
   Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
