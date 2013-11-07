@@ -21,17 +21,15 @@ namespace Mantid
     Kernel::Logger& LogParser::g_log = Mantid::Kernel::Logger::get("LogParser");
 
     /// @returns the name of the log created that defines the status during a run
-    const std::string & LogParser::statusLogName()
+    const std::string LogParser::statusLogName()
     {
-      static std::string logname("running");
-      return logname;
+      return std::string("running");
     }
 
     /// @returns the name of the log that contains all of the periods
-    const std::string & LogParser::periodsLogName()
+    const std::string LogParser::periodsLogName()
     {
-      static std::string logname("periods");
-      return logname;
+      return std::string("periods");
     }
 
     /**  Reads in log data from a log file and stores them in a TimeSeriesProperty.

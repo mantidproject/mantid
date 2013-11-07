@@ -228,6 +228,8 @@ public:
       TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:08").toSimpleString(), timeseriesprop->nthTime(1).toSimpleString());
       TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:22").toSimpleString(), timeseriesprop->nthTime(2).toSimpleString());
       TS_ASSERT_EQUALS(DateAndTime("2000-09-05T12:23:37").toSimpleString(), timeseriesprop->nthTime(3).toSimpleString());
+
+      delete prop;
     }
 
     void testConstructionFromPropertyUsingICPVariant_CHANGE_PERIOD()
@@ -253,6 +255,7 @@ public:
       TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00").toSimpleString(), timeseriesprop->nthTime(3).toSimpleString());
 
       delete log;
+      delete prop;
     }
 
     void testConstructionFromPropertyUsingICPVariant_CHANGE_SPACE_PERIOD()
@@ -278,6 +281,7 @@ public:
       TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:18:00").toSimpleString(), timeseriesprop->nthTime(3).toSimpleString());
 
       delete log;
+      delete prop;
     }
 
     // Check that periods that don't have a full "CHANGE PERIOD" flag are not added.
@@ -303,6 +307,7 @@ public:
       TS_ASSERT_EQUALS(DateAndTime("2007-11-30T16:17:00").toSimpleString(), timeseriesprop->nthTime(2).toSimpleString());
 
       delete log;
+      delete prop;
     }
     
     void test_begin_end_treated_same_as_start_collection_stop_collection()
@@ -332,6 +337,9 @@ public:
         TS_ASSERT_EQUALS(maskBeginEnd->nthTime(i), maskCollectStartStop->nthTime(i));
         TS_ASSERT_EQUALS(maskBeginEnd->nthValue(i), maskCollectStartStop->nthValue(i));
       }
+
+      delete maskBeginEnd;
+      delete maskCollectStartStop;
     }
     
     void test_mixed_start_stop_begin_end()
@@ -353,6 +361,7 @@ public:
       TSM_ASSERT("Mask ON", !mask->nthValue(increment++));
       TSM_ASSERT("Mask OFF", mask->nthValue(increment++));
       TSM_ASSERT("Mask ON", !mask->nthValue(increment));
+      delete mask;
     }
     
     void test_multiple_starts_ok()
@@ -368,6 +377,7 @@ public:
       int increment = 0;
       TSM_ASSERT("Mask OFF", mask->nthValue(increment++)); // BEGIN
       TSM_ASSERT("Mask should still be OFF", mask->nthValue(increment++)); // START COLLECT
+      delete mask;
     }
     
     void test_multiple_ends_ok()
@@ -383,6 +393,7 @@ public:
       int increment = 0;
       TSM_ASSERT("Mask ON", !mask->nthValue(increment++)); // STOP COLLECT
       TSM_ASSERT("Mask should still be ON", !mask->nthValue(increment++)); // END
+      delete mask;
     }
 
     void testCreatesCurrentPeriodLog()
@@ -444,6 +455,7 @@ public:
       TS_ASSERT_EQUALS( log->realSize(), 11);
 
       TS_ASSERT_DELTA(timeMean(log), 6.0, 1e-3);
+      delete log;
     }
 
     void test_timeMean_one_Value()
@@ -453,6 +465,7 @@ public:
       TS_ASSERT_EQUALS( log->realSize(), 1);
 
       TS_ASSERT_DELTA(timeMean(log), 56.0, 1e-3);
+      delete log;
     }
 
     /// Tests to see if we can cope with duplicate log values that have the same time.
@@ -464,6 +477,7 @@ public:
         TS_ASSERT_THROWS_NOTHING( log->addValue("2012-07-19T20:00:00", 666) );
         TS_ASSERT_EQUALS( log->realSize(), 2);
         TS_ASSERT_DELTA( timeMean(log), 666, 1e-3);
+        delete log;
     }
 
 //*/
