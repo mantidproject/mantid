@@ -76,6 +76,7 @@
 
   <instrument name="LARMOR">
     <technique>Small Angle Scattering</technique>
+    <zeropadding size="8"/>
     <livedata address="NDXLARMOR:6789" />
   </instrument>
 
