@@ -715,6 +715,59 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                  the UB matrix can't be calculated or if
                                  UB is a singular matrix.
 */
+double IndexingUtils::Optimize_UB(      std::vector<double> & lattice_parameters,
+                                        DblMatrix         & UB,
+                                  const std::vector<V3D>  & hkl_vectors,
+                                  const std::vector<V3D>  & q_vectors )
+{
+  DblMatrix A(3,3);
+  for( int i=0;i<3;i++) A[0][i] = lattice_parameters[i];
+  for( int i=0;i<3;i++) A[1][i] = lattice_parameters[i+3];
+  for( int i=0;i<3;i++) A[2][i] = 0.0;
+  DblMatrix UBA = UB * A;
+  OrientedLattice u;
+  u.setUB(UBA);
+  DblMatrix U1 = u.getU();
+    
+  UB = U1 * A.Invert();
+  double result = Optimize_UB( UB, hkl_vectors,q_vectors);
+  return result;
+}
+/** 
+  STATIC method Optimize_UB: Calculates the matrix that most nearly maps
+  the specified hkl_vectors to the specified q_vectors.  The calculated
+  UB minimizes the sum squared differences between UB*(h,k,l) and the
+  corresponding (qx,qy,qz) for all of the specified hkl and Q vectors.
+  The sum of the squares of the residual errors is returned.  This method is
+  used to optimize the UB matrix once an initial indexing has been found.
+  
+  @param  UB           3x3 matrix that will be set to the UB matrix
+  @param  hkl_vectors  std::vector of V3D objects that contains the 
+                       list of hkl values
+  @param  q_vectors    std::vector of V3D objects that contains the list of 
+                       q_vectors that are indexed by the corresponding hkl
+                       vectors.
+  @param  sigabc      error in the crystal lattice parameter values if length
+                      is at least 6. NOTE: Calculation of these errors is based on
+                      SCD FORTRAN code base at IPNS. Contributors to the least
+                      squares application(1979) are J.Marc Overhage, G.Anderson,
+                      P. C. W. Leung, R. G. Teller, and  A. J. Schultz
+  NOTE: The number of hkl_vectors and q_vectors must be the same, and must
+        be at least 3.
+
+  @return  This will return the sum of the squares of the residual differences
+           between the Q vectors provided and the UB*hkl values, in
+           reciprocal space.
+
+  @throws  std::invalid_argument exception if there are not at least 3
+                                 hkl and q vectors, or if the numbers of
+                                 hkl and q vectors are not the same, or if
+                                 the UB matrix is not a 3x3 matrix.
+
+  @throws  std::runtime_error    exception if the QR factorization fails or
+                                 the UB matrix can't be calculated or if
+                                 UB is a singular matrix.
+*/
 double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
                                   const std::vector<V3D>  & hkl_vectors,
                                   const std::vector<V3D>  & q_vectors ,
