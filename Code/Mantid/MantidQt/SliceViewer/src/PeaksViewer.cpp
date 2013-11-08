@@ -171,7 +171,7 @@ namespace MantidQt
     }
 
     /**
-     * Peform an update based on the proxy composite. Re-fetch data.
+     * Perform an update based on the proxy composite. Re-fetch data.
      */
     void PeaksViewer::performUpdate()
     {

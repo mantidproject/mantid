@@ -16,7 +16,7 @@ namespace MantidQt
     ProxyCompositePeaksPresenter
 
     Proxy wrapper of the CompositePeaksPresenter. Allows the CompositePeaksPresenter to 
-    be used in suituations where diluted power, via a restricted API is required.
+    be used in situations where diluted power, via a restricted API is required.
     ----------------------------------------------------------*/
     class DLLExport ProxyCompositePeaksPresenter : public QObject, public UpdateableOnDemand
     {
