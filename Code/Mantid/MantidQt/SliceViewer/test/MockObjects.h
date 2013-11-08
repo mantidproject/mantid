@@ -44,8 +44,8 @@ namespace
     MOCK_METHOD0(changeShownDim, bool());
     MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string&));
     MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
-    MOCK_METHOD1(setForegroundColour, void(const QColor));
-    MOCK_METHOD1(setBackgroundColour, void(const QColor));
+    MOCK_METHOD1(setForegroundColor, void(const QColor));
+    MOCK_METHOD1(setBackgroundColor, void(const QColor));
     MOCK_CONST_METHOD0(getTransformName, std::string());
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
     MOCK_METHOD1(setShown, void(const bool));

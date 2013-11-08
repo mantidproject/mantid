@@ -38,8 +38,8 @@ namespace MantidQt
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
       SetPeaksWorkspaces presentedWorkspaces() const;
-      void setForegroundColour(const QColor);
-      void setBackgroundColour(const QColor);
+      void setForegroundColor(const QColor);
+      void setBackgroundColor(const QColor);
       std::string getTransformName() const;
       void setShown(const bool shown);
       virtual PeakBoundingBox getBoundingBox(const int) const;

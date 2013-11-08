@@ -492,8 +492,9 @@ private:
     PeaksPresenter();
     PeaksPresenter(const MantidQt::SliceViewer::PeaksPresenter&);
 public:
-    virtual void setForegroundColour(const QColor) = 0;
-    virtual void setBackgroundColour(const QColor) = 0;
+    
+    virtual void setForegroundColor(const QColor) = 0;
+    virtual void setBackgroundColor(const QColor) = 0;
     virtual void showBackgroundRadius(const bool shown) = 0;
     virtual void setShown(const bool shown) = 0;
     virtual double getPeakSizeOnProjection() const = 0;

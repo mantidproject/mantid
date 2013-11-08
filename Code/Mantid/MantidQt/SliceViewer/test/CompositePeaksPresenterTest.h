@@ -353,7 +353,7 @@ public:
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
-    EXPECT_CALL(*pSubject, setBackgroundColour(newColour)).Times(1);
+    EXPECT_CALL(*pSubject, setBackgroundColor(newColour)).Times(1);
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
     // Set a background colour on the composite.
@@ -380,7 +380,7 @@ public:
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     PeaksPresenter_sptr subject(pSubject);
-    EXPECT_CALL(*pSubject, setForegroundColour(newColour)).Times(1);
+    EXPECT_CALL(*pSubject, setForegroundColor(newColour)).Times(1);
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
     // Set a background colour on the composite.

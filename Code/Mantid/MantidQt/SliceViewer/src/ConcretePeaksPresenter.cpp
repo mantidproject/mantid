@@ -286,7 +286,7 @@ namespace MantidQt
       return m_viewPeaks->getForegroundColour();
     }
 
-    void ConcretePeaksPresenter::setForegroundColour(const QColor colour)
+    void ConcretePeaksPresenter::setForegroundColor(const QColor colour)
     {
       // Change foreground colours
       if(m_viewPeaks!=NULL)
@@ -298,7 +298,7 @@ namespace MantidQt
       informOwnerUpdate();
     }
 
-    void ConcretePeaksPresenter::setBackgroundColour(const QColor colour)
+    void ConcretePeaksPresenter::setBackgroundColor(const QColor colour)
     {
       // Change background colours
       if(m_viewPeaks!=NULL)

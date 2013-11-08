@@ -160,7 +160,7 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         peaksPresenter = allPeaksPresenters.getPeaksPresenter(pw.name())
         
         # Set the Foreground Colour
-        peaksPresenter.setForegroundColour(QtGui.QColor(255, 0, 0, 255))
+        peaksPresenter.setForegroundColor(QtGui.QColor(255, 0, 0, 255))
         
         # Zoom in on peak. 
         peaksPresenter.zoomToPeak(0)

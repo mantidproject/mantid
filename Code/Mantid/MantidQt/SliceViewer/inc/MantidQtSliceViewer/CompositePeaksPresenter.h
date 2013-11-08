@@ -32,8 +32,8 @@ namespace MantidQt
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
       SetPeaksWorkspaces presentedWorkspaces() const;
-      void setForegroundColour(const QColor){/*Do nothing*/}
-      void setBackgroundColour(const QColor){/*Do nothing*/}
+      void setForegroundColor(const QColor){/*Do nothing*/}
+      void setBackgroundColor(const QColor){/*Do nothing*/}
       void showBackgroundRadius(const bool){/*Do nothing*/}
       void setShown(const bool){/*Do nothing*/}
       virtual PeakBoundingBox getBoundingBox(const int peakIndex) const {return m_default->getBoundingBox(peakIndex);}

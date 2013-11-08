@@ -198,7 +198,7 @@ namespace MantidQt
       m_palette.setForegroundColour(pos, colour);
 
       // Apply the foreground colour
-      (*iterator)->setForegroundColour(colour);
+      (*iterator)->setForegroundColor(colour);
     }
 
     /**
@@ -215,7 +215,7 @@ namespace MantidQt
       m_palette.setBackgroundColour(pos, colour);
 
       // Apply the background colour
-      (*iterator)->setBackgroundColour(colour);
+      (*iterator)->setBackgroundColor(colour);
     }
 
     /**
