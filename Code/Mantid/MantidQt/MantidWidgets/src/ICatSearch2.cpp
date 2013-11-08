@@ -767,7 +767,7 @@ namespace MantidQt
       m_icatUiForm.dataFileFrame->show();
       // Have to clear the combo-box in order to prevent the user from seeing the extensions of previous search.
       m_icatUiForm.dataFileFilterCombo->clear();
-      m_icatUiForm.dataFileFilterCombo->addItem("Filter type...");
+      m_icatUiForm.dataFileFilterCombo->addItem("No filter");
 
       // Inform the user that the search is in progress.
       m_icatUiForm.dataFileLbl->setText("searching for related datafiles...");
