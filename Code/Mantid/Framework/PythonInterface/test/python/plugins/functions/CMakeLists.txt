@@ -5,7 +5,7 @@
 set ( TEST_PY_FILES
   Example1DFunctionTest.py
   ExamplePeakFunctionTest.py
-  StretchedExpFTTest.py
+#  StretchedExpFTTest.py  # comment until scipy installed on the MAC
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
