@@ -6,10 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/BackgroundFunction.h"
 
-#include <boost/scoped_array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_bspline.h>
-#include <valarray>
 
 namespace Mantid
 {
@@ -72,7 +71,8 @@ namespace Mantid
       void getGSLBreakPoints( std::vector<double>& bp) const;
 
       /// structure used by GSL internally
-      gsl_bspline_workspace *m_bsplineWorkspace;
+      boost::shared_ptr<gsl_bspline_workspace> m_bsplineWorkspace;
+      mutable boost::shared_ptr<gsl_bspline_deriv_workspace> m_bsplineDerivWorkspace;
     };
 
   } // namespace CurveFitting
