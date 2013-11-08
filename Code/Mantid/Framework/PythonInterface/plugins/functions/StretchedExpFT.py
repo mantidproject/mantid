@@ -1,6 +1,11 @@
-'''
-Provide the Fourier Transform of the Symmetrized Stretched Exponential Function
-  Fourier{ height * exp( - |t/tau|**beta ) }
+'''*WIKI* 
+
+Provides the Fourier Transform of the Symmetrized Stretched Exponential Function
+<math> S(Q,E) = Fourier{ height(Q) \cdot e^{-|\frac{x}{tau(Q)}|^{beta(Q)} }</math>
+
+If the energy units of energy are micro-eV, then tau is expressed in pico-seconds. If E-units are micro-eV then
+tau is expressed in nano-seconds.
+*WIKI*
     
 @author Jose Borreguero, NScD
 @date October 06, 2013
@@ -25,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
+
 from mantid.api import IFunction1D, FunctionFactory #, BoundaryConstraint
 from mantid import logger
 import numpy as np
