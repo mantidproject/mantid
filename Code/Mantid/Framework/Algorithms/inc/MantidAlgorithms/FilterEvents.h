@@ -93,6 +93,13 @@ namespace Algorithms
     void generateSplitters(int wsindex, Kernel::TimeSplitterType& splitters);
 
     void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters);
+
+    /// Flag to do TOF correction
+    bool m_doTOFCorrection;
+    /// Flag to generate TOF correction
+    bool m_genTOFCorrection;
+
+
   };
 
 

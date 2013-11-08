@@ -91,6 +91,9 @@ namespace Algorithms
     this->declareProperty("GroupWorkspaces", false,
         "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
 
+    declareProperty("GenerateTOFCorrection", false, "If this option is true and user does not specify DetectorTOFCorrectionWorkspacel, "
+                    "then the correction will be generated automatically by the instrument geometry. ");
+
     return;
   }
 
@@ -99,7 +102,7 @@ namespace Algorithms
    */
   void FilterEvents::exec()
   {
-    // 1. Get inputs
+    // Process algorithm properties
     m_eventWS = this->getProperty("InputWorkspace");
     if (!m_eventWS)
     {
@@ -116,53 +119,56 @@ namespace Algorithms
     m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
 
-    if (!mInformationWS)
+    // Do correction or not?
+    m_doTOFCorrection = true;
+    m_genTOFCorrection = getProperty("GenerateTOFCorrection");
+    if (m_detCorrectWorkspace)
     {
-      mWithInfo = false;
+      // User specify detector TOF correction, then no need to generate TOF correction
+      m_genTOFCorrection = false;
+    }
+    else if (m_genTOFCorrection)
+    {
+      // If no detector TOF correction workspace is specified but specified to go generate TOF
+      m_doTOFCorrection = true;
     }
     else
     {
-      mWithInfo = true;
+      // No correction is needed
+      m_doTOFCorrection = false;
     }
 
-    // 2. Process inputs
+    // Informatin workspace is specified?
+    if (!mInformationWS)
+      mWithInfo = false;    
+    else    
+      mWithInfo = true;
+
+    // Parse splitters
     mProgress = 0.0;
     progress(mProgress, "Processing SplittersWorkspace.");
     processSplittersWorkspace();
 
+    // Create output workspaces
     mProgress = 0.1;
     progress(mProgress, "Create Output Workspaces.");
     createOutputWorkspaces(outputwsnamebase);
 
-    /*
-    DateAndTime splitter_t0 = m_splitters[0].start();
-    DateAndTime splitter_tf = m_splitters.back().stop();
-    Kernel::TimeSeriesProperty<double>* protonchargelog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double>* >(mEventWorkspace->run().getProperty("proton_charge"));
-    DateAndTime startime = mEventWorkspace->getFirstPulseTime();
-    DateAndTime endtime = protonchargelog->lastTime();
-
-    int64_t diff_start = splitter_t0.totalNanoseconds()-startime.totalNanoseconds();
-    int64_t diff_end = endtime.totalNanoseconds() - splitter_tf.totalNanoseconds();
-
-    stringstream dbinfo;
-    dbinfo << "1st splitter starts " << diff_start << " (ns) from first pulse time. "
-           << "Last splitter ends " << diff_end << " (ns) before last proton charge log time.";
-    g_log.notice(dbinfo.str());
-    */
-
-    progress(0.2);
-    importDetectorTOFCalibration();
-
-    // 3. Filter Events
+    // Optionall import corrections
     mProgress = 0.20;
+    progress(mProgress, "Importing TOF corrections. ");
+    if (m_doTOFCorrection)
+      importDetectorTOFCalibration();
+
+    // Filter Events
+    mProgress = 0.30;
     progress(mProgress, "Filter Events.");
     filterEventsBySplitters();
 
     mProgress = 1.0;
     progress(mProgress);
 
-    // 4. Optional to group detector
+    // Optional to group detector
     bool togroupws = this->getProperty("GroupWorkspaces");
     if (togroupws)
     {
@@ -441,9 +447,16 @@ namespace Algorithms
       const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
 
       // Perform the filtering (using the splitting function and just one output)
-      input_el.splitByFullTime(m_splitters, outputs, m_detTofOffsets[iws]);
+      if (m_doTOFCorrection)
+      {
+        input_el.splitByFullTime(m_splitters, outputs, m_detTofOffsets[iws], m_doTOFCorrection);
+      }
+      else
+      {
+        input_el.splitByFullTime(m_splitters, outputs, 1.0, m_doTOFCorrection);
+      }
 
-      mProgress = 0.2+0.8*double(iws)/double(numberOfSpectra);
+      mProgress = 0.3+0.7*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
       progress(mProgress);
 
       // FIXME - Turn on parallel
