@@ -103,7 +103,7 @@ class StretchedExpFTTest(unittest.TestCase):
         
         target = ', '.join( '{0}={1}'.format(key,val) for key,val in parms.items() )       
         msg='Cost function {0} too high\nTargets were {1},\nbut obtained {2}'.format(value,target,fitted)
-        self.assertLess(value, 5, msg)
+        self.assertTrue(value < 5.0, msg)
         msg='Cost function {0}\nStarted with height=0.1, tau=100, beta=1\nTargets were {1},\nobtained {2}'.format(value,target,fitted)
         
         mtd.remove('_test_seft_data')
