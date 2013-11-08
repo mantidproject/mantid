@@ -54,9 +54,9 @@ set_target_properties ( SINQ PROPERTIES OUTPUT_NAME MantidSINQ
 # Add to the 'Framework' group in VS
 set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc ../CurveFitting/inc ) # todo: Need to remove CurveFitting link
+include_directories ( inc ../MDEvents/inc )
 
-target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents CurveFitting )
+target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents )
 
 # Add the unit tests directory
 add_subdirectory ( test )

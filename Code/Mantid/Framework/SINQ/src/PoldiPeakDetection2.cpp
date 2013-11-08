@@ -19,8 +19,7 @@ wiki page of [[PoldiProjectRun]].
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-
-#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidAPI/ConstraintFactory.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -252,12 +251,13 @@ bool PoldiPeakDetection2::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws
 	// 3. Constraint
 	double centerleftend = center-sigma*0.5;
 	double centerrightend = center+sigma*0.5;
-  auto * centerbound = new CurveFitting::BoundaryConstraint(gaussianpeak.get(), "PeakCentre", centerleftend, centerrightend, false); 
+	std::ostringstream os;
+	os << centerleftend << " < PeakCentre < " << centerrightend;
+	auto * centerbound = API::ConstraintFactory::Instance().createInitialized(gaussianpeak.get(), os.str(), false);
 	gaussianpeak->addConstraint(centerbound);
 
 	// 4. Fit
-    API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
-//	API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+	API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
 	fitalg->initialize();
 
 	fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
