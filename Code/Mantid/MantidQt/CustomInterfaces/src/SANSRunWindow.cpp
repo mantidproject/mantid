@@ -2601,6 +2601,8 @@ void SANSRunWindow::handleDefSaveClick()
           saveCommand += "'front-detector, rear-detector'";
         if ( matrix_workspace->getInstrument()->getName() == "LOQ" )
           saveCommand += "'HAB, main-detector-bank'";
+        if ( matrix_workspace->getInstrument()->getName() == "LARMOR")
+          saveCommand += "'" + m_uiForm.detbank_sel->currentText()+"'";
 
       /* From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
          reduced data. The name of workspaces of the Transmission are available at the 
