@@ -41,6 +41,62 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test whether background functions are supported
+   */
+  void test_addBckgroundFunctions()
+  {
+    LeBailFunction lebailfunction("NeutronBk2BkExpConvPVoigt");
+
+    // Add peak parameters
+    map<string, double> parammap;
+
+    parammap.insert(make_pair("Dtt1", 29671.7500));
+    parammap.insert(make_pair("Dtt2", 0.0));
+    parammap.insert(make_pair("Zero", 0.0));
+
+    parammap.insert(make_pair("Alph0", 4.026));
+    parammap.insert(make_pair("Alph1", 7.362));
+    parammap.insert(make_pair("Beta0", 3.489));
+    parammap.insert(make_pair("Beta1", 19.535));
+
+
+    parammap.insert(make_pair("Sig2",  sqrt(11.380)));
+    parammap.insert(make_pair("Sig1",  sqrt(9.901)));
+    parammap.insert(make_pair("Sig0",  sqrt(17.370)));
+
+    parammap.insert(make_pair("Gam0", 0.0));
+    parammap.insert(make_pair("Gam1", 0.0));
+    parammap.insert(make_pair("Gam2", 0.0));
+
+    parammap.insert(make_pair("LatticeConstant", 4.156890));
+
+    lebailfunction.setProfileParameterValues(parammap);
+
+    // Add background functions
+    std::vector<double> parvalues;
+    std::vector<std::string> parnames;
+    parnames.push_back("A0");  parvalues.push_back(1.0);
+    parnames.push_back("A1");  parvalues.push_back(1.0);
+    parnames.push_back("A2");  parvalues.push_back(1.0);
+    parnames.push_back("A3");  parvalues.push_back(1.0);
+
+    // Chebyshev
+    TS_ASSERT_THROWS_NOTHING(
+          lebailfunction.addBackgroundFunction("Chebyshev", 3, parnames, parvalues, 5000., 10000.));
+
+    // FullprofPolynomial
+    parnames.push_back("Bkpos"); parvalues.push_back(7000.);
+
+    LeBailFunction lebailfunction2("NeutronBk2BkExpConvPVoigt");
+    TS_ASSERT_THROWS_ANYTHING(
+          lebailfunction2.addBackgroundFunction("FullprofPolynomial", 4, parnames, parvalues, -1., -1.));
+    TS_ASSERT_THROWS_NOTHING(
+          lebailfunction2.addBackgroundFunction("FullprofPolynomial", 6, parnames, parvalues, -1., -1.));
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Goal: Test function() of LeBailFunction by plotting 2 adjacent peaks
    * Input
    * (1) Instrument geometry parameters Dtt1, Dtt1t, Zero, ... from .prf file;
