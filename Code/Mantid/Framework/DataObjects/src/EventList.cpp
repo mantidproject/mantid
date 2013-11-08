@@ -3760,7 +3760,7 @@ namespace DataObjects
    */
   template< class T >
   void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
-      typename std::vector<T> & events, double tofcorrection) const
+      typename std::vector<T> & events, double tofcorrection, bool docorrection) const
   {
     // 1. Prepare to Iterate through the splitter at the same time
 
@@ -3785,7 +3785,11 @@ namespace DataObjects
       EventList* myOutput = outputs[-1];
       while (itev != itev_end)
       {
-        int64_t fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000*tofcorrection);
+        int64_t fulltime;
+        if (docorrection)
+          fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000*tofcorrection);
+        else
+          fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000);
         if (fulltime < start)
         {
           // a1) Record to index = -1 space
@@ -3802,7 +3806,11 @@ namespace DataObjects
       // b) Go through all the events that are in the interval (if any)
       while (itev != itev_end)
       {
-        int64_t fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000*tofcorrection);
+        int64_t fulltime;
+        if (docorrection)
+          fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000*tofcorrection);
+        else
+          fulltime = itev->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(itev->m_tof*1000);
         if (fulltime < stop)
         {
           // b1) Copy the event into another
@@ -3839,8 +3847,9 @@ namespace DataObjects
    * @param outputs :: a map of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
    * @param tofcorrection:  a correction for each TOF to multiply with.
+   * @param docorrection :: a boolean to indiciate whether it is need to do correction
    */
-  void EventList::splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection) const
+  void EventList::splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection, bool docorrection) const
   {
     if (eventType == WEIGHTED_NOTIME)
       throw std::runtime_error("EventList::splitByTime() called on an EventList that no longer has time information.");
@@ -3873,10 +3882,10 @@ namespace DataObjects
       switch (eventType)
       {
       case TOF:
-        splitByFullTimeHelper(splitter, outputs, this->events, tofcorrection);
+        splitByFullTimeHelper(splitter, outputs, this->events, tofcorrection, docorrection);
         break;
       case WEIGHTED:
-        splitByFullTimeHelper(splitter, outputs, this->weightedEvents, tofcorrection);
+        splitByFullTimeHelper(splitter, outputs, this->weightedEvents, tofcorrection, docorrection);
         break;
       case WEIGHTED_NOTIME:
         break;
