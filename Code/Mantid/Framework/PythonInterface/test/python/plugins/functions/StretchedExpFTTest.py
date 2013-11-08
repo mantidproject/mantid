@@ -54,7 +54,7 @@ class _InternalMakeSEFTData(PythonAlgorithm):
         sign = np.random.random(nbins)
         sign = np.where(sign>0.5, 1, -1) # random sign
         # average noise is 6% of the signal local intensity
-        #tr()
+
         yvals = (1+0.1*noise*sign) * ynominal
         error = 0.2*noise*ynominal
         wspace.dataX(0)[:] = xvals
@@ -63,7 +63,7 @@ class _InternalMakeSEFTData(PythonAlgorithm):
         wspace.dataE(0)[:] = error
         
         self.setProperty('OutputWorkspace', wspace) # Stores the workspace as the given name
-
+            
 class StretchedExpFTTest(unittest.TestCase):
 
     def test_registered(self):
@@ -77,6 +77,7 @@ class StretchedExpFTTest(unittest.TestCase):
         variation = lambda x: x+x*(random()-0.5)  # range [-x/2, x/2]
         #Generate a data workspace using random parameters around {'height':0.1,'tau':100,'beta':1}
         parms={'height':variation(0.1), 'tau':variation(100), 'beta':variation(1)}
+
         Nh = 4000
         de = 0.0004
         AlgorithmFactory.subscribe(_InternalMakeSEFTData)
