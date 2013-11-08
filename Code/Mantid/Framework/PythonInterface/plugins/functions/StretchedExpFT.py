@@ -46,7 +46,7 @@ class StretchedExpFT(IFunction1D):
         '''declare some constants'''
         super(StretchedExpFT, self).__init__()
         self._meV2ps = 4.136
-        self._parmset = {'height','tau','beta'}
+        self._parmset = set(['height','tau','beta']) #valid syntaxfor python >= 2.6
         self._parm2index = {'height':0,'tau':1,'beta':2} #order in which they were defined
 
     def category(self):
