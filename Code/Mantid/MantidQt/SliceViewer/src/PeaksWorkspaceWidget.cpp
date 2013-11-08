@@ -28,7 +28,7 @@ namespace MantidQt
       connect(ui.btnBackgroundColor, SIGNAL(clicked()), this, SLOT(onBackgroundColourClicked()));
       connect(ui.btnPeakColor, SIGNAL(clicked()), this, SLOT(onForegroundColourClicked()));
       connect(ui.btnRemove, SIGNAL(clicked()), this, SLOT(onRemoveWorkspaceClicked()));
-      connect(ui.btnHide, SIGNAL(toggled(bool)), this, SLOT(onToggleHideInPlot(bool)));
+      connect(ui.btnHide, SIGNAL(clicked()), this, SLOT(onToggleHideInPlot()));
       connect(ui.tblPeaks, SIGNAL(clicked(const QModelIndex&)), this, SLOT(onTableClicked(const QModelIndex&)));
 
       // Override the styles for the colour buttons, because with some inherited styles, the button background colour will be hidden.
@@ -169,9 +169,9 @@ namespace MantidQt
     Handler to hide/show the widget on request.
     @param hidden: flag indicating what to do.
     */
-    void PeaksWorkspaceWidget::onToggleHideInPlot(bool hidden)
+    void PeaksWorkspaceWidget::onToggleHideInPlot()
     {
-      emit hideInPlot(this->m_ws, hidden);
+      emit hideInPlot(this->m_ws, ui.btnHide->isChecked());
     }
 
     /**
@@ -232,9 +232,9 @@ namespace MantidQt
       ui.ckShowBackground->setChecked(showBackground);
     }
 
-    void PeaksWorkspaceWidget::setShown(bool isShown)
+    void PeaksWorkspaceWidget::setHidden(bool isHidden)
     {
-      ui.btnHide->setChecked(isShown);
+      ui.btnHide->setChecked(isHidden);
     }
 
     void PeaksWorkspaceWidget::setSelectedPeak(int index)

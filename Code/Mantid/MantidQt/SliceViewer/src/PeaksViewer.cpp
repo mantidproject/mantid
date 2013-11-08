@@ -199,7 +199,7 @@ namespace MantidQt
             candidateWidget->setBackgroundColor(backgroundColor);
             candidateWidget->setForegroundColor(foregroundColor);
             candidateWidget->setShowBackground(showBackground);
-            candidateWidget->setShown(!isHidden);
+            candidateWidget->setHidden(isHidden);
             if( optionalZoomedIndex.is_initialized() && optionalZoomedPresenter.is_initialized() )
             {
               // Is the zoomed peaks workspace the current workspace.

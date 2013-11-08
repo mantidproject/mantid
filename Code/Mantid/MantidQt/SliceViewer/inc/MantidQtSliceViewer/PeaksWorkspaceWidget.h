@@ -22,7 +22,7 @@ namespace SliceViewer
     void setBackgroundColor(const QColor& backgroundColor);
     void setForegroundColor(const QColor& foregroundColor);
     void setShowBackground(bool showBackground);
-    void setShown(bool isShown);
+    void setHidden(bool isHidden);
     void setSelectedPeak(int index);
   signals:
     void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
@@ -53,7 +53,7 @@ namespace SliceViewer
       void onForegroundColourClicked();
       void onShowBackgroundChanged(bool);
       void onRemoveWorkspaceClicked();
-      void onToggleHideInPlot(bool);
+      void onToggleHideInPlot();
       void onTableClicked(const QModelIndex&);
       void onPeaksSorted(const std::string&, const bool);
   };

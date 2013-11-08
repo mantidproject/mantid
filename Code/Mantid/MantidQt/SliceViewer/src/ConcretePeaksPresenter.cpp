@@ -329,7 +329,7 @@ namespace MantidQt
 
     void ConcretePeaksPresenter::setShown(const bool shown)
     {
-      m_isHidden = shown;
+      m_isHidden = !shown;
       if(m_viewPeaks!=NULL)
       {
        if (shown)
