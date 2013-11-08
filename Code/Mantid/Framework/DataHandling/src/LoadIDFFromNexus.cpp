@@ -91,7 +91,7 @@ void LoadIDFFromNexus::runLoadParameterFile(const MatrixWorkspace_sptr & workspa
 
   try {
     LoadParameterFile::execManually(paramFile, workspace);
-  } catch ( std::runtime_error& ex) {
+  } catch ( std::runtime_error& ) {
     g_log.notice() << "File " << paramFile << " not found or un-parsable. "
                        "However, the instrument has been loaded successfully.\n";
     // This next function needs to have been called. If LoadParameterFile succeeds then it will have been called inside that.
