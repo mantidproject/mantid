@@ -396,17 +396,22 @@ namespace MantidQt
       // Obtain the list of instruments to display in the drop-box.
       std::vector<std::string> instrumentList = m_icatHelper->getInstrumentList();
 
-      std::vector<std::string>::const_iterator citr;
-      for (citr = instrumentList.begin(); citr != instrumentList.end(); ++citr)
-      {
-        // Add each instrument to the instrument box.
-        m_icatUiForm.Instrument->addItem(QString::fromStdString(*citr));
-      }
-      // Sort the drop-box by instrument name.
-      m_icatUiForm.Instrument->model()->sort(0);
-      // Make the default instrument empty so the user has to select one.
+      // This option allows the user to select no instruments (thus searching over them all).
       m_icatUiForm.Instrument->insertItem(-1,"");
       m_icatUiForm.Instrument->setCurrentIndex(0);
+
+      QString userInstrument = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getInstrument().name());
+
+      for (unsigned i = 0; i < instrumentList.size(); i++)
+      {
+        QString instrument = QString::fromStdString(instrumentList.at(i));
+        m_icatUiForm.Instrument->addItem(instrument);
+
+        if (userInstrument.compare(instrument) == 0)
+        {
+          m_icatUiForm.Instrument->setCurrentIndex(i + 1);
+        }
+      }
     }
 
     /**
