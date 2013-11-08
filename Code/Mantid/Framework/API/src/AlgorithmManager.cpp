@@ -159,6 +159,31 @@ namespace Mantid
       return IAlgorithm_sptr();
     }
 
+    /**
+     * Removes the given algorithm from the managed list
+     * @param id :: The ID of the algorithm
+     */
+    void AlgorithmManagerImpl::removeById(AlgorithmID id)
+    {
+      Mutex::ScopedLock _lock(this->m_managedMutex);
+      auto itend = m_managed_algs.end();
+      for(auto it = m_managed_algs.begin(); it != itend; ++it)
+      {
+        if((**it).getAlgorithmID() == id)
+        {
+          if(!(*it)->isRunning())
+          {
+            g_log.debug() << "Removing algorithm " << (*it)->name() << std::endl;
+            m_managed_algs.erase(it);
+          }
+          else
+          {
+            g_log.debug() << "Unable to remove algorithm " << (*it)->name() << ". The algorithm is running." << std::endl;
+          }
+          break;
+        }
+      }
+    }
 
     /** Called by an algorithm that is executing asynchronously
      * This sends out the notification.

@@ -68,6 +68,7 @@ public:
   void setMaxAlgorithms(int n);
 
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
+  void removeById(AlgorithmID id);
   IAlgorithm_sptr newestInstanceOf(const std::string& algorithmName) const;
   std::vector<IAlgorithm_const_sptr> runningInstancesOf(const std::string& algorithmName) const;
 

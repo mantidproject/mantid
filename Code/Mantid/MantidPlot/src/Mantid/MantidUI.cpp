@@ -1456,6 +1456,8 @@ void MantidUI::executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API:
   }
   else
   {
+    using Mantid::API::AlgorithmManager;
+    AlgorithmManager::Instance().removeById(alg->getAlgorithmID());
     delete dlg;
   }
 }
@@ -1656,54 +1658,30 @@ void MantidUI::renameWorkspace(QStringList wsName)
     }
   }
 
-  //determine the algorithm
-  std::string algName("RenameWorkspace"); 
-  if(wsName.size() > 1)
-  {
-     algName = std::string("RenameWorkspaces");
-  }
+  //Determine the algorithm
+  QString algName("RenameWorkspace"); 
+  if(wsName.size() > 1) algName = "RenameWorkspaces";
   int version=-1;
+  auto alg = createAlgorithm(algName, version);
+  if(!alg) return;
 
-  // execute the algorithm
-  Mantid::API::IAlgorithm_sptr alg;
-  try
-  {
-    alg = Mantid::API::AlgorithmManager::Instance().create(algName,version);
-  }
-  catch(...)
-  {
-    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+QString::fromStdString(algName)+" version "+QString::number(version));
-    return;
-  }
-  if (!alg)
-  {
-    return;
-  }
-  MantidQt::API::InterfaceManager interfaceManager;
   QHash<QString,QString> presets;
-
-  if(wsName.size() == 1)
+  if(wsName.size() > 1 )
   {
-    presets["InputWorkspace"] = wsName[0];
+    presets["InputWorkspaces"] =  wsName.join(",");
   }
   else
   {
-    presets["InputWorkspaces"] = wsName.join(",");
+    presets["InputWorkspace"] =  wsName[0];
   }
 
-  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow,false,presets);
-  if( !dlg ) return;
-  
-  if ( dlg->exec() == QDialog::Accepted)
-  {
-    delete dlg;
-    alg->execute();
-  }
-  else
-  {
-    delete dlg;
-  }
+  using namespace MantidQt::API;
+  InterfaceManager interfaceManager;
+  AlgorithmDialog *dialog =
+      interfaceManager.createDialog(alg.get(), m_appWindow, false, presets,
+                                    QString(alg->getOptionalMessage().c_str()));
 
+  executeAlgorithm(dialog,alg);
 }
 
 void MantidUI::setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser)
