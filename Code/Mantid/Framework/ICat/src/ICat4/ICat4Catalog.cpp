@@ -487,8 +487,8 @@ namespace Mantid
 
     /**
      * Saves result from "getDataFiles" to workspace.
-     * @param investigationId :: unique identifier of the investigation
-     * @param outputws        :: shared pointer to datasets
+     * @param response :: result response from the catalog.
+     * @param outputws :: shared pointer to datasets
      */
     void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
@@ -744,8 +744,7 @@ namespace Mantid
 
     /**
      * Convert a file size to human readable file format.
-     * @param size    :: The size in bytes of the file.
-     * @return string :: A human readable file format (e.g. 5MB).
+     * @param fileSize :: The size in bytes of the file.
      */
     std::string ICat4Catalog::bytesToString(int64_t &fileSize)
     {

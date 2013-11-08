@@ -201,7 +201,7 @@ namespace MantidQt
      * @param numOfRows    :: The number of rows in the workspace.
      * @param numOfColumns :: The number of columns in the workspace.
      */
-    void ICatSearch2::setupTable(QTableWidget* table, size_t numOfRows, size_t numOfColumns)
+    void ICatSearch2::setupTable(QTableWidget* table, const size_t &numOfRows, const size_t &numOfColumns)
     {
       table->setRowCount(static_cast<int>(numOfRows));
       table->setColumnCount(static_cast<int>(numOfColumns));
@@ -224,7 +224,7 @@ namespace MantidQt
      * @param table :: The table we want to setup.
      * @param workspace :: The workspace to obtain data information from.
      */
-    void ICatSearch2::populateTable(QTableWidget* table, Mantid::API::ITableWorkspace_sptr workspace)
+    void ICatSearch2::populateTable(QTableWidget* table, const Mantid::API::ITableWorkspace_sptr &workspace)
     {
       //NOTE: This method freezes up the ICAT search GUI. We will need to do this adding in another thread.
 
@@ -264,7 +264,7 @@ namespace MantidQt
      * @param table     :: The table to modify and remove previous results from.
      * @param workspace :: The workspace to remove.
      */
-    void ICatSearch2::clearSearch(QTableWidget* table, std::string & workspace)
+    void ICatSearch2::clearSearch(QTableWidget* table, const std::string &workspace)
     {
       // Remove workspace if it exists.
       if(Mantid::API::AnalysisDataService::Instance().doesExist(workspace))
@@ -372,7 +372,7 @@ namespace MantidQt
      * Updates text field depending on button picker selected.
      * @param buttonName :: The name of the text field is derived from the buttonName.
      */
-    void ICatSearch2::dateSelected(std::string buttonName)
+    void ICatSearch2::dateSelected(const std::string &buttonName)
     {
       if (buttonName.compare("startDatePicker") == 0)
       {
@@ -435,7 +435,7 @@ namespace MantidQt
      * Get the users' input for each search field.
      * @return A map containing all users' search fields - (key => FieldName, value => FieldValue).
      */
-    std::map<std::string, std::string> ICatSearch2::getSearchFields()
+    const std::map<std::string, std::string> ICatSearch2::getSearchFields()
     {
       std::map<std::string, std::string> searchFieldInput;
 
@@ -891,7 +891,7 @@ namespace MantidQt
      *
      * @return A vector containing the fileID and fileName of the datafile(s) to download.
      */
-    std::vector<std::pair<int64_t, std::string>> ICatSearch2::selectedDataFileNames()
+    const std::vector<std::pair<int64_t, std::string>> ICatSearch2::selectedDataFileNames()
     {
       QTableWidget* table =  m_icatUiForm.dataFileResultsTbl;
 
@@ -950,7 +950,7 @@ namespace MantidQt
     /**
      * Add the list of file extensions to the "Filter type..." drop-down.
      */
-    void ICatSearch2::populateDataFileType(std::set<std::string> extensions)
+    void ICatSearch2::populateDataFileType(const std::set<std::string> &extensions)
     {
       for( std::set<std::string>::const_iterator iter = extensions.begin(); iter != extensions.end(); ++iter)
       {
@@ -966,7 +966,7 @@ namespace MantidQt
      * If the user has checked "check all", then check and select ALL rows. Otherwise, deselect all.
      * @param toggled :: True if user has checked the checkbox in the dataFile table header.
      */
-    void ICatSearch2::selectAllDataFiles(bool toggled)
+    void ICatSearch2::selectAllDataFiles(const bool &toggled)
     {
       QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 
@@ -1016,7 +1016,7 @@ namespace MantidQt
     /**
      * Performs filter option for specified filer type.
      */
-    void ICatSearch2::doFilter(int index)
+    void ICatSearch2::doFilter(const int &index)
     {
       QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 
@@ -1044,8 +1044,6 @@ namespace MantidQt
      */
     void ICatSearch2::downloadDataFiles()
     {
-      std::vector<std::pair<int64_t, std::string>> dataFiles = selectedDataFileNames();
-
       QString downloadSavePath = QFileDialog::getExistingDirectory(this, tr("Select a directory to save data files."), m_downloadSaveDir, QFileDialog::ShowDirsOnly);
 
       // The user has clicked "Open" and changed the path (and not clicked cancel).
@@ -1056,7 +1054,7 @@ namespace MantidQt
         // Save settings to store for use next time.
         saveSettings();
         // Download the selected dataFiles to the chosen directory.
-        m_icatHelper->downloadDataFiles(dataFiles, m_downloadSaveDir.toStdString());
+        m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
       }
     }
 
@@ -1065,13 +1063,11 @@ namespace MantidQt
      */
     void ICatSearch2::loadDataFiles()
     {
-      std::vector<std::pair<int64_t, std::string>> dataFiles = selectedDataFileNames();
-
       // Get the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
-      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(dataFiles, m_downloadSaveDir.toStdString());
+      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
 
       // Create & initialize the load algorithm we will use to load the file by path to a workspace.
-      Mantid::API::Algorithm_sptr loadAlgorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      auto loadAlgorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
       loadAlgorithm->initialize();
 
       // For all the files downloaded (or in archive) we want to load them.
@@ -1081,7 +1077,12 @@ namespace MantidQt
         loadAlgorithm->setPropertyValue("Filename", filePaths.at(i));
         // Sets the output workspace to be the name of the file.
         loadAlgorithm->setPropertyValue("OutputWorkspace", Poco::Path(Poco::Path(filePaths.at(i)).getFileName()).getBaseName());
-        loadAlgorithm->execute();
+
+        Poco::ActiveResult<bool> result(loadAlgorithm->executeAsync());
+        while( !result.available() )
+        {
+          QCoreApplication::processEvents();
+        }
       }
     }
 
