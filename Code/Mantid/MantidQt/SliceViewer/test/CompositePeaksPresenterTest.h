@@ -58,7 +58,7 @@ public:
   {
     CompositePeaksPresenter presenter(&_fakeZoomableView);
     const size_t initialSize = presenter.size();
-    presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>() );
+    presenter.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >() );
     TSM_ASSERT_EQUALS("Expected one item to be added.", initialSize + 1, presenter.size());
   }
 
@@ -66,7 +66,7 @@ public:
   {
     CompositePeaksPresenter presenter(&_fakeZoomableView);
     const size_t initialSize = presenter.size();
-    auto presenterToAdd = boost::make_shared<MockPeaksPresenter>();
+    auto presenterToAdd = boost::make_shared<NiceMock<MockPeaksPresenter> >();
     presenter.addPeaksPresenter( presenterToAdd );
     presenter.addPeaksPresenter( presenterToAdd ); // Try to add it again.
     TSM_ASSERT_EQUALS("Should not be able to add the same item more than once.", initialSize + 1, presenter.size());
@@ -76,8 +76,8 @@ public:
   {
     CompositePeaksPresenter composite(&_fakeZoomableView);
     const size_t initialSize = composite.size();
-    composite.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>() ); // Add one subject
-    composite.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>() ); // Add another subject
+    composite.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >() ); // Add one subject
+    composite.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >() ); // Add another subject
 
     composite.clear();
 
@@ -117,6 +117,7 @@ public:
   {
     MockPeaksPresenter* mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
+    EXPECT_CALL(*mockPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*mockPresenter, updateWithSlicePoint(_)).Times(1); // Expect the method on the default to be called.
 
     // Create the composite.
@@ -145,6 +146,7 @@ public:
   {
     MockPeaksPresenter* mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
+    EXPECT_CALL(*mockPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*mockPresenter, getTransformName()).Times(1).WillOnce(Return("")); 
 
     // Create the composite.
@@ -180,6 +182,7 @@ public:
     MockPeaksPresenter* mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
     EXPECT_CALL(*mockPresenter, update()).Times(1); // Expect the method on the default to be called.
+    EXPECT_CALL(*mockPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
 
     // Create the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
@@ -197,13 +200,16 @@ public:
     SetPeaksWorkspaces setA;
     MockPeaksPresenter* pA = new MockPeaksPresenter;
     PeaksPresenter_sptr A(pA);
+    EXPECT_CALL(*pA, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pA, presentedWorkspaces()).WillOnce(Return(setA)); 
     
     //Another nested presenter
     SetPeaksWorkspaces setB;
     MockPeaksPresenter* pB = new MockPeaksPresenter;
     PeaksPresenter_sptr B(pB);
+    EXPECT_CALL(*pB, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pB, presentedWorkspaces()).WillOnce(Return(setB)); 
+
 
     // Create the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView);
@@ -224,8 +230,8 @@ public:
     
     CompositePeaksPresenter composite(&_fakeZoomableView);
     
-    MockPeaksPresenter* A = new MockPeaksPresenter;
-    MockPeaksPresenter* B = new MockPeaksPresenter;
+    MockPeaksPresenter* A = new NiceMock<MockPeaksPresenter>();
+    MockPeaksPresenter* B = new NiceMock<MockPeaksPresenter>();
     PeaksPresenter_sptr subjectA(A);
     PeaksPresenter_sptr subjectB(B);
 
@@ -272,8 +278,8 @@ public:
     
     CompositePeaksPresenter composite(&_fakeZoomableView);
     
-    MockPeaksPresenter* A = new MockPeaksPresenter;
-    MockPeaksPresenter* B = new MockPeaksPresenter;
+    MockPeaksPresenter* A = new NiceMock<MockPeaksPresenter>();
+    MockPeaksPresenter* B = new NiceMock<MockPeaksPresenter>();
     PeaksPresenter_sptr subjectA(A);
     PeaksPresenter_sptr subjectB(B);
 
@@ -320,10 +326,10 @@ public:
     const int limit = 10;
     for(int i = 0; i < limit; ++i)
     {
-     TS_ASSERT_THROWS_NOTHING(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()));
+     TS_ASSERT_THROWS_NOTHING(presenter.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >()));
     }
     // Add a peaksWS beyond the limit of allowed number of peaksWS.
-    TS_ASSERT_THROWS(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()), std::invalid_argument&);
+    TS_ASSERT_THROWS(presenter.addPeaksPresenter( boost::make_shared<NiceMock<MockPeaksPresenter> >()), std::invalid_argument&);
   }
 
   void test_default_palette()
@@ -346,6 +352,7 @@ public:
     set.insert(peaksWS);
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setBackgroundColour(newColour)).Times(1);
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
@@ -371,6 +378,7 @@ public:
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, setForegroundColour(newColour)).Times(1);
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
@@ -447,6 +455,7 @@ public:
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, setShown(expectedToShow)).Times(1);
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
@@ -526,6 +535,7 @@ public:
     set.insert(peaksWS);
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getBoundingBox(peakIndex)).Times(1).WillOnce(Return(PeakBoundingBox()));
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
@@ -549,6 +559,7 @@ public:
 
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setPeakSizeOnProjection(fraction)).Times(1);
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
@@ -564,6 +575,7 @@ public:
 
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setPeakSizeIntoProjection(fraction)).Times(1);
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
@@ -601,6 +613,7 @@ public:
   {
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getPeakSizeOnProjection()).WillOnce(Return(1));
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
@@ -614,6 +627,7 @@ public:
   {
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getPeakSizeIntoProjection()).WillOnce(Return(1));
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
@@ -643,6 +657,7 @@ public:
     set.insert(peaksWS_2);
     MockPeaksPresenter* pPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(pPresenter);
+    EXPECT_CALL(*pPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pPresenter, presentedWorkspaces()).WillRepeatedly(Return(set));
 
     // Create the composite.
