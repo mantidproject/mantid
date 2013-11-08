@@ -119,6 +119,8 @@ namespace Algorithms
     m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
 
+    bool togroupws = this->getProperty("GroupWorkspaces");
+
     // Do correction or not?
     m_doTOFCorrection = true;
     m_genTOFCorrection = getProperty("GenerateTOFCorrection");
@@ -163,15 +165,19 @@ namespace Algorithms
     // Filter Events
     mProgress = 0.30;
     progress(mProgress, "Filter Events.");
-    filterEventsBySplitters();
-
-    mProgress = 1.0;
-    progress(mProgress);
+    double progressamount;
+    if (togroupws)
+      progressamount = 0.6;
+    else
+      progressamount = 0.7;
+    filterEventsBySplitters(progressamount);
 
     // Optional to group detector
-    bool togroupws = this->getProperty("GroupWorkspaces");
     if (togroupws)
     {
+      mProgress = 0.9;
+      progress(mProgress, "Group workspaces");
+
       std::string groupname = outputwsnamebase;
       API::IAlgorithm_sptr groupws = createChildAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
       // groupws->initialize();
@@ -184,6 +190,9 @@ namespace Algorithms
         g_log.error() << "Grouping all output workspaces fails." << std::endl;
       }
     }
+
+    mProgress = 1.0;
+    progress(mProgress, "Completed");
 
     return;
   }
@@ -254,9 +263,12 @@ namespace Algorithms
 
     // Set up new workspaces
     std::set<int>::iterator groupit;
+    double numnewws = static_cast<double>(m_workGroupIndexes.size());
+    double wsgindex = 0.;
+
     for (groupit = m_workGroupIndexes.begin(); groupit != m_workGroupIndexes.end(); ++groupit)
     {
-      // 1. Get workspace name
+      // Get workspace name
       int wsgroup = *groupit;
       std::stringstream wsname;
       if (wsgroup >= 0)
@@ -266,12 +278,12 @@ namespace Algorithms
       std::stringstream parname;
       parname << "OutputWorkspace_" << wsgroup;
 
-      // 2. Generate one of the output workspaces & Copy geometry over. But we don't copy the data.
+      // Generate one of the output workspaces & Copy geometry over. But we don't copy the data.
       DataObjects::EventWorkspace_sptr optws = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
           API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
       API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws, false);
 
-      //    Add information
+      // Add information
       if (mWithInfo)
       {
         std::string info;
@@ -296,22 +308,27 @@ namespace Algorithms
         optws->setTitle(info);
       }
 
-      // 3. Set to map
+      // Insert to the workspace index/workspace map
       m_outputWS.insert(std::make_pair(wsgroup, optws));
 
-      // 4. Set to output workspace
+      // Set to output workspace
       this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
                               parname.str(), wsname.str(), Direction::Output), "Output");
       this->setProperty(parname.str(), optws);
       m_wsNames.push_back(wsname.str());
       AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
-      g_log.debug() << "DB9141  Output Workspace:  Group = " << wsgroup << "  Property Name = " << parname.str() <<
-          " Workspace name = " << wsname.str() <<
-          " with Number of events = " << optws->getNumberEvents() << std::endl;
+      g_log.debug() << "[DB9141] Created output Workspace of group = " << wsgroup << "  Property Name = "
+                    << parname.str() << " Workspace name = " << wsname.str() <<
+                       " with Number of events = " << optws->getNumberEvents() << "\n";
+
+      mProgress = 0.1 + 0.1*wsgindex/numnewws;
+      progress(mProgress, "Creating output workspace");
+
+      wsgindex += 1.;
     } // ENDFOR
 
-
+    g_log.information("Output workspaces are created. ");
     return;
   }
 
@@ -419,7 +436,7 @@ namespace Algorithms
   /** Main filtering method
     * Structure: per spectrum --> per workspace
    */
-  void FilterEvents::filterEventsBySplitters()
+  void FilterEvents::filterEventsBySplitters(double progressamount)
   {
     size_t numberOfSpectra = m_eventWS->getNumberHistograms();
     std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
@@ -456,8 +473,8 @@ namespace Algorithms
         input_el.splitByFullTime(m_splitters, outputs, 1.0, m_doTOFCorrection);
       }
 
-      mProgress = 0.3+0.7*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
-      progress(mProgress);
+      mProgress = 0.3+(progressamount-0.2)*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
+      progress(mProgress, "Filtering events");
 
       // FIXME - Turn on parallel
       // PARALLEL_END_INTERUPT_REGION
@@ -466,11 +483,15 @@ namespace Algorithms
     // PARALLEL_CHECK_INTERUPT_REGION
 
     // Finish (1) adding events and splitting the sample logs in each target workspace.
+    progress(0.1+progressamount, "Splitting logs");
+
     std::vector<std::string> lognames;
     this->getTimeSeriesLogNames(lognames);
     g_log.debug() << "[FilterEvents D1214]:  Number of TimeSeries Logs = " << lognames.size()
                   << " to " << m_outputWS.size() << " outptu workspaces. \n";
 
+    double numws = static_cast<double>(m_outputWS.size());
+    double outwsindex = 0.;
     for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++wsiter)
     {
       int wsindex = wsiter->first;
@@ -498,6 +519,9 @@ namespace Algorithms
         this->splitLog(opws, lognames[ilog], splitters);
       }
       opws->mutableRun().integrateProtonCharge();
+
+      progress(0.1+progressamount+outwsindex/numws*0.2, "Splitting logs");
+      outwsindex += 1.;
     }
 
     return;

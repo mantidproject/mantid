@@ -67,7 +67,7 @@ namespace Algorithms
 
     void importDetectorTOFCalibration();
 
-    void filterEventsBySplitters();
+    void filterEventsBySplitters(double progressamount);
 
     DataObjects::EventWorkspace_sptr m_eventWS;
     DataObjects::SplittersWorkspace_sptr mSplittersWorkspace;
