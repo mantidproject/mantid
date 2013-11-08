@@ -99,12 +99,12 @@ class StretchedExpFTTest(unittest.TestCase):
             if name == 'Cost function value':
                 value = row['Value']
             elif name in parms.keys():
-                fitted += '{}={}, '.format(name, row['Value'])
+                fitted += '{0}={1}, '.format(name, row['Value'])
         
-        target = ', '.join( '{}={}'.format(key,val) for key,val in parms.items() )       
-        msg='Cost function {} too high\nTargets were {},\nbut obtained {}'.format(value,target,fitted)
+        target = ', '.join( '{0}={1}'.format(key,val) for key,val in parms.items() )       
+        msg='Cost function {0} too high\nTargets were {1},\nbut obtained {2}'.format(value,target,fitted)
         self.assertLess(value, 5, msg)
-        msg='Cost function {}\nStarted with height=0.1, tau=100, beta=1\nTargets were {},\nobtained {}'.format(value,target,fitted)
+        msg='Cost function {0}\nStarted with height=0.1, tau=100, beta=1\nTargets were {1},\nobtained {2}'.format(value,target,fitted)
         
         mtd.remove('_test_seft_data')
         mtd.remove('_test_seft_data_NormalisedCovarianceMatrix')
