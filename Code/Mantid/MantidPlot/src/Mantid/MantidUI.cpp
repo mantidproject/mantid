@@ -2341,20 +2341,54 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    t->confirmClose(false);
    t->setAttribute(Qt::WA_QuitOnClose);
 
-   MultiLayer *ml = appWindow()->newGraph("Graph");
-   ml->confirmClose(false);
+   bool newGraphCreated = false;
+
+   MultiLayer *ml;
+
+   if(plotWindow == NULL)
+   {
+     // Create new graph window if none specified
+     ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName("Graph"));
+     ml->confirmClose(false);
+     newGraphCreated = true;
+   }
+   else
+   {
+     // If graph window specified - use it, clearing beforehand if requested
+     if(clearWindow)
+       plotWindow->setLayersNumber(0);
+
+     ml = plotWindow;
+   }
+
+   if(ml->isEmpty())
+   {
+     // If graph window has no layers, i.e. if it didn't have any or we cleared it, add a new one
+     ml->addLayer();
+     newGraphCreated = true;
+   }
 
    Graph *g = ml->activeGraph();
+
+   if(newGraphCreated)
+   {
+    connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+    appWindow()->setPreferences(g);
+    g->newLegend();
+   }  
 
    // TODO: Use the default style instead of a line if nothing is passed into this method
    g->addCurves(t, t->colNames(), style);
 
-   appWindow()->polishGraph(g, style);
+   if(newGraphCreated)
+   {
+     appWindow()->polishGraph(g, style);
 
-   // Autoscale the graph
-   g->setAutoScale();
-   if(!appWindow()->autoscale2DPlots)
-     g->enableAutoscaling(false);
+     // Autoscale the graph, but disable it afterwards if auto-scaling is disabled for 2D plots 
+     g->setAutoScale();
+     if(!appWindow()->autoscale2DPlots)
+       g->enableAutoscaling(false);
+   }
 
    // Associate the graph with the bin table
    m->setBinGraph(ml,t);
@@ -3175,8 +3209,6 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr, 
   Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
 {
-  UNUSED_ARG(clearWindow);
-
   if(toPlot.size() == 0) return NULL;
 
   if (toPlot.size() > 10)
