@@ -146,11 +146,11 @@ namespace MantidQt
     ITableWorkspace_sptr ICatInvestigation::executeGetdataFiles()
     {
       QString algName("CatalogGetDataFiles");
-      const int version=1;
       Mantid::API::ITableWorkspace_sptr  ws_sptr;
       Mantid::API::IAlgorithm_sptr alg;
       try
       {
+        const int version=1;
         alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
       }
       catch(...)
@@ -198,11 +198,11 @@ namespace MantidQt
     ITableWorkspace_sptr ICatInvestigation::executeGetdataSets()
     {
       QString algName("CatalogGetDataSets");
-      const int version=1;
       ITableWorkspace_sptr ws_sptr;
       Mantid::API::IAlgorithm_sptr alg;
       try
       {
+        const int version=1;
         alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
       }
       catch(...)

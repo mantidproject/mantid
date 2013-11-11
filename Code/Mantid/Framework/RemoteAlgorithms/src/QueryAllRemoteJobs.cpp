@@ -126,7 +126,7 @@ void QueryAllRemoteJobs::exec()
         completionDates.push_back( "");
       }
 
-      it++;
+      ++it;
     }
 
     setProperty( "JobId", jobIds);

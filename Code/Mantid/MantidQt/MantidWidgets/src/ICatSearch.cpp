@@ -238,9 +238,9 @@ namespace MantidQt
     {
       QString algName("CatalogSearch");
       Mantid::API::IAlgorithm_sptr alg;
-      const int version=-1;
       try
       {
+        const int version=-1;
         alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
       }
       catch(...)

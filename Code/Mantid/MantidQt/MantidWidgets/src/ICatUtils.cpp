@@ -189,10 +189,10 @@ namespace MantidQt
     std::vector<std::string> ICatUtils::executeListInstruments()
     {
       QString algName("CatalogListInstruments");
-      const int version=-1;
       Mantid::API::IAlgorithm_sptr alg;
       try
       {
+        const int version=-1;
         alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
       }
       catch(...)
@@ -256,10 +256,10 @@ namespace MantidQt
     bool ICatUtils::login()
     {
       QString algName("CatalogLogin");
-      const int version =-1;
       Mantid::API::IAlgorithm_sptr alg;
       try
       {
+        const int version =-1;
         alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
       }
       catch(...)

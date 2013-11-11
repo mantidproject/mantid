@@ -1543,7 +1543,6 @@ size_t IndexingUtils::FFTScanFor_Directions( std::vector<V3D>  & directions,
       int count = 0;
       while ( count < 5 )                // 5 iterations should be enough for
       {                                  // the optimization to stabilize
-        num_indexed = 0;
         Optimize_Direction( temp_dirs[dir_num], index_vals, indexed_qs );
 
         num_indexed = GetIndexedPeaks_1D( temp_dirs[dir_num],

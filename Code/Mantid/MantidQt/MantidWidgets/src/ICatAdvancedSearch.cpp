@@ -154,10 +154,10 @@ namespace MantidQt
     std::vector<std::string> ICatAdvancedSearch:: executeListInvestigationTypes()
     {
       QString algName("CatalogListInvestigationTypes");
-      const int version=-1;
       Mantid::API::IAlgorithm_sptr alg;
       try
       {
+        const int version=-1;
         alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
       }
       catch(...)
@@ -215,9 +215,9 @@ namespace MantidQt
     {
       QString algName("CatalogSearch");
       Mantid::API::IAlgorithm_sptr alg;
-      const int version=-1;
       try
       {
+        const int version=-1;
         alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
       }
       catch(...)

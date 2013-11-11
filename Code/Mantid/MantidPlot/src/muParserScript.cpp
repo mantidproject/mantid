@@ -103,7 +103,7 @@ double muParserScript::col(const QString &arg)
   }
   items << item;
 
-  Table *table = (Table*) const_cast<QObject*>(context());
+  Table *table = static_cast<Table*>(const_cast<QObject*>(context()));
   int col, row;
   Parser local_parser(rparser);
   if (items[0].startsWith("\"") && items[0].endsWith("\"")) {
@@ -164,7 +164,7 @@ double muParserScript::tablecol(const QString &arg)
   }
   items << item;
 
-  Table *this_table = (Table*) const_cast<QObject*>(context());
+  Table *this_table = static_cast<Table*>( const_cast<QObject*>(context()));
   int col, row;
   Parser local_parser(rparser);
   if (items.count() != 2)
@@ -204,7 +204,7 @@ double muParserScript::cell(int row, int col)
 {
   if (!context()->isA("Matrix"))
     throw Parser::exception_type(tr("cell() works only on tables and matrices!").ascii());
-  Matrix *matrix = (Matrix*) const_cast<QObject*>(context());
+  Matrix *matrix = static_cast<Matrix*>( const_cast<QObject*>(context()));
   if (row < 1 || row > matrix->numRows())
     throw Parser::exception_type(tr("There's no row %1 in matrix %2!").
         arg(row).arg(context()->name()).ascii());
@@ -221,7 +221,7 @@ double muParserScript::tableCell(int col, int row)
 {
   if (!context()->isA("Table"))
     throw Parser::exception_type(tr("cell() works only on tables and matrices!").ascii());
-  Table *table = (Table*) const_cast<QObject*>(context());
+  Table *table = static_cast<Table*>(const_cast<QObject*>(context()));
   if (row < 1 || row > table->numRows())
     throw Parser::exception_type(tr("There's no row %1 in table %2!").
         arg(row).arg(context()->name()).ascii());
@@ -394,10 +394,10 @@ bool muParserScript::compileImpl()
       muCodeLine += "col(";
       QString arg = "";
       int paren = 1;
-      for (i+=4; i < code.size() && paren > 0; i++)
+      for (i+=4; i < code.size() && paren > 0; ++i)
         if (code[i] == '"') {
           arg += "\"";
-          for (i++; code[i] != '"' && i < code.size(); i++)
+          for (++i; i < code.size() && code[i] != '"'; ++i)
             if (code[i] == '\\') {
               arg += "\\";
               arg += code[++i];
@@ -417,7 +417,7 @@ bool muParserScript::compileImpl()
       muCodeLine += ")";
       i--;
     } else if (code[i] == '#')
-      for (i++; code[i] != '\n' && i < code.size(); i++){;}
+      for (++i; i < code.size() && code[i] != '\n'; ++i){;}
     else if (code[i] == '\n') {
       muCodeLine = muCodeLine.stripWhiteSpace();
       if (!muCodeLine.isEmpty())

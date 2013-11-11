@@ -44,6 +44,8 @@
 #include "QwtHistogram.h"
 #include "QwtPieCurve.h"
 #include "VectorCurve.h"
+#include "FunctionCurve.h"
+#include "QwtErrorPlotCurve.h"
 #include "LegendWidget.h"
 #include "Grid.h"
 #include "ArrowMarker.h"
@@ -644,12 +646,12 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 					if(style==Graph::ErrorBars)
 					{
 						int flags=opj.curveSymbolType(g,l,c);
-						curve = (PlotCurve *)graph->addErrorBars(tableName + "_" + opj.curveXColName(g,l,c), mw->table(tableName), tableName + "_" + opj.curveYColName(g,l,c),
+						curve = graph->addErrorBars(tableName + "_" + opj.curveXColName(g,l,c), mw->table(tableName), tableName + "_" + opj.curveYColName(g,l,c),
 							((flags&0x10)==0x10?0:1), int(ceil(opj.curveLineWidth(g,l,c))), int(ceil(opj.curveSymbolSize(g,l,c))), QColor(Qt::black),
 							(flags&0x40)==0x40, (flags&2)==2, (flags&1)==1);
 					}
 					else if(style==Graph::Histogram)
-						curve = (PlotCurve *)graph->insertCurve(mw->table(tableName), tableName + "_" + opj.curveYColName(g,l,c), style);
+						curve = graph->insertCurve(mw->table(tableName), tableName + "_" + opj.curveYColName(g,l,c), style);
 					else if(style==Graph::Pie || style==Graph::Box)
 					{
 						QStringList names;
@@ -695,7 +697,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 						}
 					}
 					else
-						curve = (PlotCurve *)graph->insertCurve(mw->table(tableName), tableName + "_" + opj.curveXColName(g,l,c), tableName + "_" + opj.curveYColName(g,l,c), style);
+						curve = graph->insertCurve(mw->table(tableName), tableName + "_" + opj.curveXColName(g,l,c), tableName + "_" + opj.curveYColName(g,l,c), style);
 					break;
 				case 'F':
 					s=opj.functionIndex(data.right(data.length()-2).toStdString().c_str());
@@ -714,7 +716,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 						start = opj.functionBegin(s);
 						end = opj.functionEnd(s);
 					}
-					curve = (PlotCurve *)graph->addFunction(formulas, start, end, opj.functionPoints(s), "x", type, opj.functionName(s));
+					curve = graph->addFunction(formulas, start, end, opj.functionPoints(s), "x", type, opj.functionName(s));
 
 					mw->updateFunctionLists(type, formulas);
 					break;
@@ -722,7 +724,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 					continue;
 				}
 
-				//strange behavior of insert curve - legend added - need to roolback legend text
+				//strange behaviour of insert curve - legend added - need to rollback legend text
 				if(legend)
 				{
 					legend->setText(parseOriginText(QString::fromLocal8Bit(opj.layerLegend(g,l).txt.c_str())));
@@ -888,13 +890,13 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 				graph->updateCurveLayout(curve, &cl);
 				if (style == Graph::VerticalBars || style == Graph::HorizontalBars)
 				{
-					QwtBarCurve *b = (QwtBarCurve*)graph->curve(c);
+					QwtBarCurve *b = static_cast<QwtBarCurve*>(graph->curve(c));
 					if (b)
 						b->setGap(qRound(100-opj.curveSymbolSize(g,l,c)*10));
 				}
 				else if(style == Graph::Histogram)
 				{
-					QwtHistogram *h = (QwtHistogram*)graph->curve(c);
+					QwtHistogram *h = static_cast<QwtHistogram*>(graph->curve(c));
 					if (h)
 					{
 						vector<double> bin=opj.layerHistogram(g,l);
@@ -905,7 +907,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 				}
 				else if(style == Graph::Pie)
 				{
-					QwtPieCurve *p = (QwtPieCurve*)graph->curve(c);
+					QwtPieCurve *p = static_cast<QwtPieCurve*>(graph->curve(c));
 					switch (linestyle)
 					{
 					case OPJFile::Solid:
