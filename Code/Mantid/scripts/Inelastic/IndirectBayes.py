@@ -5,7 +5,6 @@
 #
 from IndirectImport import *
 if is_supported_f2py_platform():
-    Er      = import_f2py("erange")
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
@@ -20,24 +19,54 @@ from IndirectCommon import *
 import sys, platform, math, os.path, numpy as np
 mp = import_mantidplot()
 
-def CalcErange(inWS,ns,er,nbin):
-	rscl = 1.0
-	array_len = 4096                           # length of array in Fortran
-	N,X,Y,E = GetXYE(inWS,ns,array_len)        # get data
-	nout,bnorm,Xdat=Er.erange(N,X,Y,E,er,nbin,rscl)    # calculate energy range
-	if nout[0] == 0:
-		error = 'Erange - calculated points is Zero'			
-		logger.notice('ERROR *** ' + error)
+def CalcErange(inWS,ns,erange,nbin):
+	# length of array in Fortran
+	array_len = 4096
+	
+	nbin = int(nbin)
+	bnorm = 1.0/nbin
+
+	# get data from input workspace
+	N,X,Y,E = GetXYE(inWS,ns,array_len)
+	Xdata = mtd[inWS].readX(0)
+
+	#get all x values within the energy range
+	rangeMask = (Xdata > erange[0]) & (Xdata < erange[1])
+	Xin = Xdata[rangeMask]
+
+	#get elements on the edge of our data range
+	xInMin = Xin[0]
+	xInMax = Xin[-1]
+
+	#get indicies either side of energy range
+	minIndex = np.where(Xdata==xInMin)[0]-1
+	maxIndex = np.where(Xdata==xInMax)[0]+1
+
+	#check we're using a valid range
+	if nbin == 0:
+		error = 'Erange - calculated points is Zero'
 		sys.exit(error)
-	if nout[1] == 0:
-		error = 'Erange - calculated Imin is Zero'			
-		logger.notice('ERROR *** ' + error)
+
+	if minIndex <= 0:
+		error = 'Erange - calculated minIndex is Zero'
 		sys.exit(error)
-	if nout[2] == 0:
-		error = 'Erange - calculated Imax is Zero'			
-		logger.notice('ERROR *** ' + error)
+
+	if maxIndex <= 0:
+		error = 'Erange - calculated maxIndex is Zero'
 		sys.exit(error)
-	return nout,bnorm,Xdat,X,Y,E
+
+	#reshape array into sublists of bins
+	Xin = Xin.reshape(len(Xin)/nbin, nbin)
+
+	#sum and normalise values in bins
+	Xout = [sum(bin)*bnorm for bin in Xin]
+
+	#pad array for use in Fortran code
+	Xout = PadArray(Xout,array_len)
+
+ 	nout = [nbin, minIndex+1, maxIndex]
+
+	return nout,bnorm,Xout,X,Y,E
 
 def GetXYE(inWS,n,array_len):
 	Xin = mtd[inWS].readX(n)
