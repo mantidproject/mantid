@@ -2340,47 +2340,16 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    if(!t) return NULL;
    t->confirmClose(false);
    t->setAttribute(Qt::WA_QuitOnClose);
-
-   bool newGraphCreated = false;
-
-   MultiLayer *ml;
-
-   if(plotWindow == NULL)
-   {
-     // Create new graph window if none specified
-     ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName("Graph"));
-     ml->confirmClose(false);
-     newGraphCreated = true;
-   }
-   else
-   {
-     // If graph window specified - use it, clearing beforehand if requested
-     if(clearWindow)
-       plotWindow->setLayersNumber(0);
-
-     ml = plotWindow;
-   }
-
-   if(ml->isEmpty())
-   {
-     // If graph window has no layers, i.e. if it didn't have any or we cleared it, add a new one
-     ml->addLayer();
-     newGraphCreated = true;
-   }
+   
+   bool isGraphNew;
+   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, clearWindow);
 
    Graph *g = ml->activeGraph();
-
-   if(newGraphCreated)
-   {
-    connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
-    appWindow()->setPreferences(g);
-    g->newLegend();
-   }  
 
    // TODO: Use the default style instead of a line if nothing is passed into this method
    g->addCurves(t, t->colNames(), style);
 
-   if(newGraphCreated)
+   if(isGraphNew)
    {
      appWindow()->polishGraph(g, style);
 
@@ -3225,47 +3194,10 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor)); 
 
-  const QString& firstWorkspace = toPlot.constBegin().key();
+  bool isGraphNew;
+  MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, clearWindow);
 
-  bool newGraphCreated = false;
-
-  MultiLayer* ml; // MultiLayer (plot window) to use
-
-  if(plotWindow == NULL)
-  {
-    // If plot window is not specified, create a new one
-    ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
-    ml->setCloseOnEmpty(true);
-    newGraphCreated = true;
-  }
-  else
-  {
-    // Otherwise, used specified plot window
-    ml = plotWindow;
-  }
-
-  if(clearWindow)
-  {
-    // Remove all layers if requested
-    ml->setLayersNumber(0);
-  }
-
-  if (ml->isEmpty())
-  { // This will add a new layer in two situations: when we've cleared the window manually,
-    // or when the window specified didn't actually have any layers
-    ml->addLayer();
-    newGraphCreated = true;
-  }
-
-  Graph *g = ml->activeGraph(); // We use active graph only. No support for proper _multi_ layers yet.
-
-  if(newGraphCreated)
-  {
-    connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
-    appWindow()->setPreferences(g);
-    g->newLegend("");
-    g->setTitle(tr("Workspace ")+firstWorkspace);
-  }
+  Graph *g = ml->activeGraph();
 
   // Try to add curves to the plot
   MantidMatrixCurve* mc;
@@ -3285,19 +3217,21 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     }
   }
 
-  // If no spectra have been plotted, close the window (unfortunately it will flash up briefly)
-  if ( g->curves() == 0 )
+  if(isGraphNew)
   {
-    ml->close();
-    QApplication::restoreOverrideCursor();
-    return NULL;
-  }
+    // Set active layer title
+    const QString& firstWorkspace = toPlot.constBegin().key();
+    ml->activeGraph()->setTitle( "Workspace " + firstWorkspace );
 
-  if(newGraphCreated)
-  {
+    // Set plot window title
+    const QString& windowName = appWindow()->generateUniqueName( firstWorkspace + "-" );
+    ml->setName( windowName );
+    ml->setWindowTitle( windowName );
+ 
     auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString()));
 
+    // Deal with axis names
     Mantid::API::Axis* ax = workspace->getAxis(0);
     std::string xTitle, xUnits;
     if (ax->unit() && ax->unit()->unitID() != "Empty" )
