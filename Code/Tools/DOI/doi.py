@@ -149,7 +149,8 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     # "The version number of the resource." Suggested practice is to "register
     # a new identifier for a major version change."  We'll be ignoring this
     # as we're having a new DOI for every major/minor/patch release.
-    ET.SubElement(root, 'version').text = version_str
+    if version_str:
+        ET.SubElement(root, 'version').text = version_str
 
     # "Identifiers of related resources. These must be globally unique
     # identifiers."
@@ -383,7 +384,7 @@ def run(options):
         # In the case of the main DOI we need to add the whitelisted names too.
         creator_name_list = sorted(set(creator_name_list + authors.whitelist))
         
-        xml_form = build_xml_form(doi, {}, creator_name_list, version_str)
+        xml_form = build_xml_form(doi, {}, creator_name_list, None)
 
         create_or_update_metadata(xml_form, server_url_base, doi, options)
         create_or_update_doi(server_url_base, doi, destination, options)
