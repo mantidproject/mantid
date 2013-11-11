@@ -260,7 +260,7 @@ namespace Mantid
     */
     void AlgorithmProxy::stopped()
     {
-      dropWorkspaceReferences();
+      if(!isChild()) dropWorkspaceReferences();
       m_isExecuted = m_alg->isExecuted();
       m_alg.reset();
     }
