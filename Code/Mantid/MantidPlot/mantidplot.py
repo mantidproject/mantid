@@ -219,7 +219,8 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
     else:
         return graph
     
-def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.VolumeNormalization, error_bars = False):
+def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.VolumeNormalization, 
+  error_bars = False, window = None, clearWindow = False):
     """Open a 1D plot of a MDWorkspace.
     
     Args:
@@ -227,6 +228,8 @@ def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.Volu
         plot_axis: Index of the plot axis (defaults to auto-select)
         normalization: Type of normalization required (defaults to volume)
         error_bars: Flag for error bar plotting.
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
         A handle to the matrix containing the image data.
     """
@@ -241,7 +244,14 @@ def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.Volu
         non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
         if not len(non_integrated_dims) == 1:
             raise ValueError("%s must have a single non-integrated dimension in order to be rendered via plotMD" % name)
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization, error_bars))
+
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
+
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization,
+      error_bars, window, clearWindow))
+
     return graph
 
 def fitBrowser():
@@ -278,6 +288,7 @@ def plotBin(source, indices, error_bars = False, graph_type = 0, window = None, 
         if type(indexes) == int:
             indexes = [indexes]
 
+        # Unwrap the window object, if any specified
         if window != None:
           window = window._getHeldObject()
 

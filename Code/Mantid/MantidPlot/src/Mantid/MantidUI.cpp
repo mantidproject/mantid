@@ -567,7 +567,9 @@ void MantidUI::showMDPlot()
  * @param showErrors: True if errors are to be show
  * @return
  */
-MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showErrors)
+MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis, 
+  const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* plotWindow, 
+  bool clearWindow)
 {
   auto firstName = wsNames.at(0);
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstName));

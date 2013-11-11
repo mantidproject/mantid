@@ -198,8 +198,11 @@ public:
   void updateAlgorithms();
   /// Show the algorithm dock widget
   void showAlgWidget(bool on = true);
+
   /// Plot a 1D graph for an integrated mdworkspace
-  MultiLayer*  plotMDList(const QStringList& wsNames, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showError);
+  MultiLayer*  plotMDList(const QStringList& wsNames, const int plotAxis, 
+    const Mantid::API::MDNormalization normalization, const bool showError, MultiLayer* plotWindow = NULL,
+    bool clearWindow = false);
 
 public slots:
   // Create a 1d graph form specified spectra in a MatrixWorkspace

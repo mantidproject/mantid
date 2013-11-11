@@ -1605,7 +1605,11 @@ public:
   MultiLayer* plotBin(const QString&,const QList<int>&,bool = false,Graph::CurveType style = Graph::Unspecified,
     MultiLayer* window = NULL, bool clearWindow = false);
 
-  MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showErrors);
+  MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis, 
+    const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* window = NULL,
+    bool clearWindow = false);
+
+
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
 
