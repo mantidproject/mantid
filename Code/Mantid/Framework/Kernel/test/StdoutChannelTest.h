@@ -72,7 +72,6 @@ public:
       Poco::Logger::root().setChannel(rootChannel);
 
       // cleanup
-      Poco::Logger::shutdown();
       delete nullChannel;
       delete stdoutChannel;
   }
