@@ -38,7 +38,8 @@ public:
       Logger & log(Logger::get(""));
 
       //Test null channel first
-      Poco::Logger::root().setChannel(new Poco::NullChannel);
+      Poco::NullChannel* nullChannel = new Poco::NullChannel();
+      Poco::Logger::root().setChannel(nullChannel);
 
       log.error() << "Error Message 1" << std::endl;
       //cout and clog should be empty
@@ -48,7 +49,7 @@ public:
       lbuffer.str("");
 
       //Test console channel
-      Poco::Logger::root().setChannel(new Poco::ConsoleChannel);
+      Poco::Logger::root().setChannel(new Poco::ConsoleChannel());
       log.error() << "Error Message 2" << std::endl;
       //the error should be in std::clog (or std:err)
       TS_ASSERT_EQUALS(obuffer.str(),"");
@@ -57,7 +58,8 @@ public:
       lbuffer.str("");
 
       //Test std channel
-      Poco::Logger::root().setChannel(new Poco::StdoutChannel);
+      Poco::StdoutChannel* stdoutChannel = new Poco::StdoutChannel();
+      Poco::Logger::root().setChannel(stdoutChannel);
       log.error() << "Error Message 3" << std::endl;
       //the error should be in std::cout
       TS_ASSERT_EQUALS(obuffer.str(),"Error Message 3\n");
@@ -68,6 +70,11 @@ public:
       std::clog.rdbuf(lbuf);
       //set back the channel on root
       Poco::Logger::root().setChannel(rootChannel);
+
+      // cleanup
+      Poco::Logger::shutdown();
+      delete nullChannel;
+      delete stdoutChannel;
   }
 
 };
