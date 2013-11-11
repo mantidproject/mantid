@@ -205,7 +205,8 @@ namespace MantidQt
               // Is the zoomed peaks workspace the current workspace.
               if (optionalZoomedPresenter.get().get() == m_presenter->getPeaksPresenter(ws->name().c_str()))
               {
-                candidateWidget->setSelectedPeak(optionalZoomedIndex.get());
+                int index = optionalZoomedIndex.get();
+                candidateWidget->setSelectedPeak(index);
               }
             }
           }
