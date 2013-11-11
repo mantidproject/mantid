@@ -34,8 +34,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 from mantid.api import IFunction1D, FunctionFactory #, BoundaryConstraint
 from mantid import logger
 import numpy as np
-from scipy.fftpack import fft
-from scipy.interpolate import interp1d
 import copy
 
 from pdb import set_trace as tr
@@ -98,6 +96,9 @@ class StretchedExpFT(IFunction1D):
         an extra factor exp(i*pi*E/de) which amounts to alternating sign every
         time E increases by de, the energy bin width
         '''
+        from scipy.fftpack import fft
+        from scipy.interpolate import interp1d
+
         p=self.validateParams()
         # override parameter values with optparms (used for the numerical derivative)
         if optparms:
