@@ -1,9 +1,8 @@
 #ifndef MANTID_SLICEVIEWER_PEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_PEAKSPRESENTER_H_
 
-#include "MantidKernel/System.h"
+#include "DllOption.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include <set>
@@ -38,9 +37,8 @@ namespace SliceViewer
   whithout having to perform fragile null checks.
 
   ----------------------------------------------------------*/
-  class DLLExport PeaksPresenter: public QObject
+  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksPresenter: public QObject
   {
-    Q_OBJECT
   public:
     virtual void update() = 0;
     virtual void updateWithSlicePoint(const PeakBoundingBox&) = 0;

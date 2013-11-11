@@ -20,7 +20,6 @@ namespace MantidQt
     ----------------------------------------------------------*/
     class DLLExport ProxyCompositePeaksPresenter : public QObject, public UpdateableOnDemand
     {
-      Q_OBJECT
     public:
 
       ProxyCompositePeaksPresenter(boost::shared_ptr<CompositePeaksPresenter> compositePresenter);
