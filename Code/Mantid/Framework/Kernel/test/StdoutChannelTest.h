@@ -8,7 +8,7 @@
 #include <iostream>
 #include <Poco/Logger.h>
 #include <Poco/NullChannel.h>
-
+#include <Poco/AutoPtr.h>
 
 using namespace Mantid::Kernel;
 
@@ -38,7 +38,7 @@ public:
       Logger & log(Logger::get(""));
 
       //Test null channel first
-      Poco::NullChannel* nullChannel = new Poco::NullChannel();
+      Poco::AutoPtr<Poco::NullChannel> nullChannel(new Poco::NullChannel);
       Poco::Logger::root().setChannel(nullChannel);
 
       log.error() << "Error Message 1" << std::endl;
@@ -49,7 +49,8 @@ public:
       lbuffer.str("");
 
       //Test console channel
-      Poco::Logger::root().setChannel(new Poco::ConsoleChannel());
+      Poco::AutoPtr<Poco::ConsoleChannel> consoleChannel(new Poco::ConsoleChannel);
+      Poco::Logger::root().setChannel(consoleChannel);
       log.error() << "Error Message 2" << std::endl;
       //the error should be in std::clog (or std:err)
       TS_ASSERT_EQUALS(obuffer.str(),"");
@@ -58,7 +59,7 @@ public:
       lbuffer.str("");
 
       //Test std channel
-      Poco::StdoutChannel* stdoutChannel = new Poco::StdoutChannel();
+      Poco::AutoPtr<Poco::StdoutChannel> stdoutChannel(new Poco::StdoutChannel);
       Poco::Logger::root().setChannel(stdoutChannel);
       log.error() << "Error Message 3" << std::endl;
       //the error should be in std::cout
@@ -70,10 +71,6 @@ public:
       std::clog.rdbuf(lbuf);
       //set back the channel on root
       Poco::Logger::root().setChannel(rootChannel);
-
-      // cleanup
-      delete nullChannel;
-      delete stdoutChannel;
   }
 
 };
