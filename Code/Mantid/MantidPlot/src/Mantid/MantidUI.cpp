@@ -571,35 +571,31 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
   const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* plotWindow, 
   bool clearWindow)
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor)); 
+
   auto firstName = wsNames.at(0);
-  MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstName));
-  ml->setCloseOnEmpty(true);
+
+  bool isGraphNew;
+  MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, firstName, clearWindow);
+
   Graph *g = ml->activeGraph();
-  if (!g)
-  {
-    QApplication::restoreOverrideCursor();
-  }
   try
   {
-    connect(g, SIGNAL(curveRemoved()), ml, SLOT(maybeNeedToClose()));
-    appWindow()->setPreferences(g);
-    g->newLegend("");
-
     for (int i = 0; i < wsNames.size(); ++i)
     {
       // Create the curve with defaults
       auto wsName = wsNames.at(i);
       MantidMDCurve* curve = new MantidMDCurve(wsName, g, showErrors);
       MantidQwtIMDWorkspaceData * data = curve->mantidData();
+
       // Apply the settings
       data->setPreviewMode(false);
       data->setPlotAxisChoice(plotAxis);
       data->setNormalization(normalization);
 
       // Using information from the first graph
-      if (i == 0)
+      if( i == 0 && isGraphNew )
       {
-        g->setTitle(tr("Workspace ") + wsName);
         g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
         g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
         g->setAntialiasing(false);
@@ -607,23 +603,27 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
       }
     }
 
-  } catch (std::invalid_argument &e)
+  }
+  catch (std::invalid_argument &e)
   {
     g_log.warning() << e.what() << std::endl;
-  } catch (std::runtime_error &e)
+  }
+  catch (std::runtime_error &e)
   {
     g_log.warning() << e.what() << std::endl;
-  } catch (...)
-  {
   }
-  /*
-   This is not a good way of doing it. Taken from ::plotSpectraList.
-   */
-  if (g->curves() == 0)
-  {
-    ml->close();
-    QApplication::restoreOverrideCursor();
-  }
+  catch (...)
+  {}
+
+  if(!isGraphNew)
+    // Replot graph is we've added curves to existing one
+    g->replot();
+
+  // Check if window does not contain any curves and should be closed
+  ml->maybeNeedToClose();
+
+  QApplication::restoreOverrideCursor();
+
   return ml;
 }
 
