@@ -55,11 +55,11 @@ namespace MantidQt
       /// Make the headers in the provided table bold.
       void emboldenTableHeaders(QTableWidget* table);
       /// Setup table prior to adding data to it, such hiding vertical header.
-      void setupTable(QTableWidget* table, size_t numOfRows, size_t numOfColumns);
+      void setupTable(QTableWidget* table, const size_t &numOfRows, const size_t &numOfColumns);
       /// Populate the provided table with data from the provided workspace.
-      void populateTable(QTableWidget* table, Mantid::API::ITableWorkspace_sptr workspace);
+      void populateTable(QTableWidget* table, const Mantid::API::ITableWorkspace_sptr &workspace);
       /// Removes data associated with previous search.
-      void clearSearch(QTableWidget* table, std::string& workspace);
+      void clearSearch(QTableWidget* table, const std::string &workspace);
       ///  Clear the "search" frame when an investigation has been selected.
       void clearSearchFrame();
       /// Clear the "search results" frame if no results are returned from search.
@@ -74,17 +74,17 @@ namespace MantidQt
       void loadSettings();
 
       ///////////////////////////////////////////////////////////////////////////////
-      /// Methods for: "Catalog Search"
+      // Methods for: "Catalog Search"
       ///////////////////////////////////////////////////////////////////////////////
 
       /// Ensures the correct text box is updated when the date is selected on the calendar.
-      void dateSelected(std::string buttonName);
+      void dateSelected(const std::string &buttonName);
       /// Populate the instrument list-box.
       void populateInstrumentBox();
       /// Populate the investigation type list-box.
       void populateInvestigationTypeBox();
       /// Obtain the users' text input for each search field.
-      std::map<std::string, std::string> getSearchFields();
+      const std::map<std::string, std::string> getSearchFields();
 
       ///////////////////////////////////////////////////////////////////////////////
       // Methods for: "Search results"
@@ -106,17 +106,17 @@ namespace MantidQt
       /// Add a row of checkboxes to the first column of a table.
       void addCheckBoxColumn(QTableWidget* table);
       /// Obtain the file details (file ID and name) for the file to download. (Used in downloadDataFiles).
-      std::vector<std::pair<int64_t, std::string>> selectedDataFileNames();
+      const std::vector<std::pair<int64_t, std::string>> selectedDataFileNames();
       /// Updates the dataFile text boxes with relevant info about the selected dataFile.
       void updateDataFileLabels(QTableWidgetItem* item);
       /// Obtain all file extensions from the provided column (dataFileResults -> File name).
       std::set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
       /// Add the list of file extensions to the "Filter type..." drop-down.
-      void populateDataFileType(std::set<std::string> extensions);
+      void populateDataFileType(const std::set<std::string> &extensions);
 
     private slots:
       /// Selects/deselects ALL rows in dataFile table.
-      void selectAllDataFiles(bool toggled);
+      void selectAllDataFiles(const bool &toggled);
       /// When the facility login button is clicked
       void onFacilityLogin();
       /// When the help button is clicked.
@@ -129,7 +129,7 @@ namespace MantidQt
       void showDataFileInfo();
 
       ///////////////////////////////////////////////////////////////////////////////
-      /// SLOTS for: "Catalog Search"
+      // SLOTS for: "Catalog Search"
       ///////////////////////////////////////////////////////////////////////////////
 
       /// Open the DateTime Calendar to select date.
@@ -168,7 +168,7 @@ namespace MantidQt
       /// Enables the download & load button if user has selected a data file to download.
       void enableDownloadButtons();
       /// Performs filterDataFileType() for specified filer type.
-      void doFilter(int index);
+      void doFilter(const int &index);
       /// Downloads selected datFiles to a specified location.
       void downloadDataFiles();
       /// Loads the selected dataFiles into workspaces.

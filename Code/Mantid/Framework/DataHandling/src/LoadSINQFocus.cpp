@@ -135,7 +135,7 @@ void LoadSINQFocus::setInstrumentName(NeXus::NXEntry& entry) {
 		throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
 	}
 	m_instrumentName = m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
-	long unsigned int pos = m_instrumentName.find(" ");
+	size_t pos = m_instrumentName.find(" ");
 	m_instrumentName = m_instrumentName.substr(0, pos);
 }
 

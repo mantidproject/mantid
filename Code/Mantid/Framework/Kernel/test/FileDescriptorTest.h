@@ -96,7 +96,7 @@ public:
     FileDescriptor descr(filename);
 
     auto & stream = descr.data();
-    long int streamPos = stream.tellg();
+    std::streamoff streamPos = stream.tellg();
 
     TS_ASSERT_EQUALS(0, streamPos);
   }

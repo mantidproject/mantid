@@ -176,7 +176,7 @@ namespace Mantid
       /**This method returns the time_t value for a Date which is in "DD/MM/YYYY" format
        *@param sDate :: input date string
        */
-      time_t getTimevalue(const std::string& sDate);
+      time_t getTimevalue(const std::string& inputDate);
 
       /**
        * Is "My data only" selected?

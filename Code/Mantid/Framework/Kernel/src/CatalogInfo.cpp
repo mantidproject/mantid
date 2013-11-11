@@ -151,7 +151,8 @@ namespace Mantid
 
     /**
      * Obtain the attribute from a given element tag and attribute name.
-     * @param tagName :: The name of the tag to search for.
+     * @param element       :: The name of the element in the XML file.
+     * @param tagName       :: The name of the tag to search for.
      * @param attributeName :: The name of the attribute for the given tag.
      * @return The contents of the attribute from an XML element.
      */

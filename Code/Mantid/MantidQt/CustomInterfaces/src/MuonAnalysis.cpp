@@ -80,10 +80,11 @@ const QString MuonAnalysis::NOT_AVAILABLE("N/A");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(), 
-  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
-  m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
-  m_deadTimesChanged(false), m_textToDisplay(""), m_dataTimeZero(0.0), m_dataFirstGoodData(0.0)
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(),
+  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), m_currentTab(NULL),
+  m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
+  m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay(""), m_dataTimeZero(0.0), 
+  m_dataFirstGoodData(0.0)
 {}
 
 /**
@@ -218,6 +219,8 @@ void MuonAnalysis::initLayout()
 
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
   connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );  
+
+  m_currentTab = m_uiForm.tabWidget->currentWidget();
 }
 
 /**
@@ -3634,9 +3637,7 @@ void MuonAnalysis::getFullCode(int originalSize, QString & run)
  */
 void MuonAnalysis::changeTab(int newTabNumber)
 {
-  int oldTabNumber = m_tabNumber;
-
-  m_tabNumber = newTabNumber;
+  QWidget* newTab = m_uiForm.tabWidget->widget(newTabNumber);
 
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
@@ -3645,7 +3646,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
-  if(oldTabNumber == 3) // Closing DA tab
+  if(m_currentTab == m_uiForm.DataAnalysis) // Leaving DA tab
   {
     // Say MantidPlot to use default fit prop. browser
     emit setFitPropertyBrowser(NULL);
@@ -3658,7 +3659,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
                               this, SLOT(showPlot(const QString&)));
   }
 
-  if (newTabNumber == 3) // Opening DA tab
+  if(newTab == m_uiForm.DataAnalysis) // Entering DA tab
   {
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
@@ -3671,10 +3672,12 @@ void MuonAnalysis::changeTab(int newTabNumber)
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
                            this, SLOT(showPlot(const QString&)), Qt::QueuedConnection);
   }
-  else if(newTabNumber == 4) // Opening results table tab
+  else if(newTab == m_uiForm.ResultsTable)
   {
     m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
   }
+
+  m_currentTab = newTab;
 }
 
 /**
@@ -3783,7 +3786,7 @@ void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue
 
 void MuonAnalysis::changeHomeFunction()
 {
-  if (m_tabNumber == 0)
+  if (m_currentTab == m_uiForm.Home)
   {
     m_uiForm.groupTablePlotChoice->setCurrentIndex(m_uiForm.frontPlotFuncs->currentIndex());
     homeTabUpdatePlot();
@@ -3813,13 +3816,13 @@ void MuonAnalysis::secondPeriodSelectionChanged()
 
 void MuonAnalysis::homeTabUpdatePlot()
 {
-  if (isAutoUpdateEnabled() && m_tabNumber == 0 && m_loaded)
+  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.Home && m_loaded)
       runFrontPlotButton();
 }
 
 void MuonAnalysis::groupTabUpdateGroup()
 {
-  if (m_tabNumber == 1)
+  if (m_currentTab == m_uiForm.GroupingOptions)
   {
     if (m_uiForm.frontPlotFuncs->count() <= 1)
     {
@@ -3835,13 +3838,13 @@ void MuonAnalysis::groupTabUpdateGroup()
 
 void MuonAnalysis::groupTabUpdatePair()
 {
-  if (isAutoUpdateEnabled() && m_tabNumber == 1 && m_loaded == true)
+  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions && m_loaded == true)
     runPairTablePlotButton();
 }
 
 void MuonAnalysis::settingsTabUpdatePlot()
 {
-  if (isAutoUpdateEnabled() && m_tabNumber == 2 && m_loaded == true)
+  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.Settings && m_loaded == true)
     runFrontPlotButton();
 }
 
@@ -3886,7 +3889,7 @@ void MuonAnalysis::hideEvent(QHideEvent *e)
     setToolbarsHidden(false);
 
   // If closed while on DA tab, reassign fit property browser to default one
-  if(m_tabNumber == 3)
+  if(m_currentTab == m_uiForm.DataAnalysis)
     emit setFitPropertyBrowser(NULL);
 
   // Delete the peak picker tool because it is no longer needed.
