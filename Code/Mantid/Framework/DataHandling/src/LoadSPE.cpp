@@ -105,8 +105,12 @@ void LoadSPE::exec()
 
   // The first two numbers are the number of histograms and the number of bins
   size_t nhist=0, nbins=0;
-  int retval = fscanf(speFile,"%8u%8u\n",&nhist,&nbins);
+  unsigned int nhistTemp=0, nbinsTemp=0;
+  int retval = fscanf(speFile,"%8u%8u\n",&nhistTemp,&nbinsTemp);
   if ( retval != 2 ) reportFormatError("Header line");
+  //Cast from temp values to size_t values
+  nhist = static_cast<size_t>(nhistTemp);
+  nbins = static_cast<size_t>(nbinsTemp);
 
   // Next line should be comment line: "### Phi Grid" or "### Q Grid"
   char comment[100];
@@ -126,7 +130,7 @@ void LoadSPE::exec()
   }
 
   // Read in phi grid
-  for (int i = 0; i <= nhist; ++i)
+  for (size_t i = 0; i <= nhist; ++i)
   {
     double phi;
     retval = fscanf(speFile,"%10le",&phi);
