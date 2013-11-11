@@ -565,7 +565,9 @@ void MantidUI::showMDPlot()
  * @param plotAxis : Axis number to plot
  * @param normalization: Normalization option to use
  * @param showErrors: True if errors are to be show
- * @return
+ * @param plotWindow :: Window to use for plotting. If NULL a new one will be created
+ * @param clearWindow :: Whether to clean the plotWindow before plotting.Ignored if plotWindow == NULL
+ * @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
  */
 MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis, 
   const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* plotWindow, 
