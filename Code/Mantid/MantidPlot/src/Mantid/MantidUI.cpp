@@ -3214,7 +3214,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   Graph *g = ml->activeGraph();
 
   // Try to add curves to the plot
-  MantidMatrixCurve* mc;
+  MantidMatrixCurve* mc = NULL;
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
     try {
