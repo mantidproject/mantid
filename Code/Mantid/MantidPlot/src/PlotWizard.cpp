@@ -327,7 +327,7 @@ bool PlotWizard::noCurves()
 
 void PlotWizard::plot3DRibbon(const QStringList& lst)
 {
-    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+    ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
     if (!app)
         return;
 
@@ -360,7 +360,7 @@ void PlotWizard::plot3DRibbon(const QStringList& lst)
 
 void PlotWizard::plot3D(const QStringList& lst)
 {
-    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+    ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
     if (!app)
         return;
 

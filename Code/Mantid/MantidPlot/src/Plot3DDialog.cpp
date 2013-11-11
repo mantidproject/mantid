@@ -702,7 +702,7 @@ void Plot3DDialog::accept()
 
 void Plot3DDialog::changeZoom(int)
 {
-	if (generalDialog->currentPage() != (QWidget*)general)
+	if (generalDialog->currentPage() != static_cast<QWidget*>(general))
 		return;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -714,7 +714,7 @@ void Plot3DDialog::changeZoom(int)
 
 void Plot3DDialog::changeTransparency(int val)
 {
-	if (generalDialog->currentPage() != (QWidget*)colors)
+	if (generalDialog->currentPage() != static_cast<QWidget*>(colors))
 		return;
 
 	d_plot->changeTransparency(val*0.01);
@@ -726,14 +726,14 @@ bool Plot3DDialog::updatePlot()
 	if (!d_plot)
 		return false;
 
-    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+    ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
     if (!app)
         return false;
 
-	if (generalDialog->currentPage()==(QWidget*)bars){
+	if (generalDialog->currentPage()==static_cast<QWidget*>(bars)){
 		d_plot->setBarRadius(boxBarsRad->text().toDouble());
 		d_plot->setBarStyle();
-	} else if (generalDialog->currentPage() == (QWidget*)points){
+	} else if (generalDialog->currentPage() == static_cast<QWidget*>(points)){
 		if (boxPointStyle->currentIndex() == 0) {
 			d_plot->setDotOptions(boxSize->text().toDouble(), boxSmooth->isChecked());
 			d_plot->setDotStyle();
@@ -747,9 +747,9 @@ bool Plot3DDialog::updatePlot()
         }
 
         app->custom3DActions(d_plot);
-	} else if (generalDialog->currentPage()==(QWidget*)title){
+	} else if (generalDialog->currentPage()==static_cast<QWidget*>(title)){
 		d_plot->setTitle(boxTitle->text().remove("\n"), btnTitleColor->color(), titleFont);
-	} else if (generalDialog->currentPage()==(QWidget*)colors){
+	} else if (generalDialog->currentPage()==static_cast<QWidget*>(colors)){
 		d_plot->changeTransparency(boxTransparency->value()*0.01);
 		d_plot->setDataColors(btnFromColor->color(), btnToColor->color());
 		d_plot->setMeshColor(btnMesh->color());
@@ -758,7 +758,7 @@ bool Plot3DDialog::updatePlot()
 		d_plot->setLabelsColor(btnLabels->color());
 		d_plot->setBackgroundColor(btnBackground->color());
 		d_plot->setGridColor(btnGrid->color());
-	} else if (generalDialog->currentPage()==(QWidget*)general){
+	} else if (generalDialog->currentPage()==static_cast<QWidget*>(general)){
 		d_plot->showColorLegend(boxLegend->isChecked());
 		d_plot->setResolution(boxResolution->value());
 		d_plot->setMeshLineWidth(boxMeshLineWidth->value());
@@ -766,7 +766,7 @@ bool Plot3DDialog::updatePlot()
 		d_plot->setNumbersFont(numbersFont);
 		d_plot->setZoom(zoom*boxZoom->value()*0.01);
 		d_plot->setScale(xScale*boxXScale->value()*0.01, yScale*boxYScale->value()*0.01, zScale*boxZScale->value()*0.01);
-	} else if (generalDialog->currentPage()==(QWidget*)scale){
+	} else if (generalDialog->currentPage()==static_cast<QWidget*>(scale)){
 		int axis = axesList->currentRow();
 		QString from=boxFrom->text().lower();
 		QString to=boxTo->text().lower();
@@ -804,7 +804,7 @@ bool Plot3DDialog::updatePlot()
 
         d_plot->updateScale(axis, scaleOptions(axis, start, end, boxMajors->text(), boxMinors->text()));
         //d_plot->setScale(xsc,ysc,zsc*0.1);
-	} else if (generalDialog->currentPage()==(QWidget*)axes){
+	} else if (generalDialog->currentPage()==static_cast<QWidget*>(axes)){
 		int axis = axesList2->currentRow();
 		labels[axis] = boxLabel->text();
 

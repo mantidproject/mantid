@@ -1,5 +1,5 @@
 /***************************************************************************
-    File                 : PolynomialFit.cpp
+   File                 : PolynomialFit.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
     Copyright            : (C) 2006 by Ion Vasilief
@@ -149,7 +149,7 @@ void PolynomialFit::fit()
         return;
 
 	if (d_p > d_n){
-  		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
+  		QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Fit Error"),
   	    tr("You need at least %1 data points for this fit operation. Operation aborted!").arg(d_p));
   		return;
   	}
@@ -181,14 +181,14 @@ void PolynomialFit::fit()
 	if (show_legend)
 		showLegend();
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = static_cast<ApplicationWindow *>(parent());
 	if (app->writeFitResultsToLog)
 		app->updateLog(logFitInfo(0, 0));
 }
 
 QString PolynomialFit::legendInfo()
 {
-    ApplicationWindow *app = (ApplicationWindow *)parent();
+    ApplicationWindow *app = static_cast<ApplicationWindow *>(parent());
     QLocale locale = app->locale();
 	QString legend = "Y=" + locale.toString(d_results[0], 'g', d_prec);
 	for (int j = 1; j < d_p; j++){
@@ -268,7 +268,7 @@ void LinearFit::fit()
         return;
 
 	if (d_p > d_n){
-  		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
+  		QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Fit Error"),
   	    tr("You need at least %1 data points for this fit operation. Operation aborted!").arg(d_p));
   		return;
   	}
@@ -374,7 +374,7 @@ void LinearSlopeFit::fit()
         return;
 
 	if (d_p > d_n){
-  		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
+  		QMessageBox::critical(static_cast<ApplicationWindow *>(parent()), tr("MantidPlot - Fit Error"),
   	    tr("You need at least %1 data points for this fit operation. Operation aborted!").arg(d_p));
   		return;
   	}
@@ -390,7 +390,7 @@ void LinearSlopeFit::fit()
 	gsl_matrix_set(covar, 0, 0, cov11);
 	generateFitCurve();
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = static_cast<ApplicationWindow *>(parent());
 	if (app->writeFitResultsToLog)
 		app->updateLog(logFitInfo(0, 0));
 }

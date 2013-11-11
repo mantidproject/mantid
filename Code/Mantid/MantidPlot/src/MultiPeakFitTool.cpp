@@ -146,7 +146,7 @@ void MultiPeakFitTool::finalize()
 
 	d_graph->plotWidget()->replot();
     if (d_graph->activeTool() && d_graph->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector){
-        ((RangeSelectorTool *)d_graph->activeTool())->setEnabled();
+        (static_cast<RangeSelectorTool *>(d_graph->activeTool()))->setEnabled();
     } else
         d_graph->plotWidget()->canvas()->unsetCursor();
     delete this;

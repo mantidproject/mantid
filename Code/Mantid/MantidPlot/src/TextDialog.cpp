@@ -216,7 +216,7 @@ void TextDialog::setLegendWidget(LegendWidget *l)
 	if (!l)
 		return;
 
-	d_graph = (Graph *)(l->plot()->parent());
+	d_graph = static_cast<Graph *>((l->plot()->parent()));
 	d_legend = l;
 
 	setText(l->text());
@@ -304,7 +304,7 @@ void TextDialog::formatAllLabels()
 	QObjectList lst = plot->children();
 	foreach(QObject *o, lst){
 		if (o->inherits("LegendWidget")){
-			LegendWidget *l = (LegendWidget *)o;
+			LegendWidget *l = static_cast<LegendWidget *>(o);
         	l->setTextColor(tc);
 			l->setFont(selectedFont);
 			if(textType == TextMarker){
@@ -317,7 +317,7 @@ void TextDialog::formatAllLabels()
 	}
 
 	for (int i=0; i < QwtPlot::axisCnt; i++){
-		QwtScaleWidget *scale = (QwtScaleWidget *)plot->axisWidget(i);
+		QwtScaleWidget *scale = plot->axisWidget(i);
 		if (scale){
 			QwtText t = scale->title();
 			t.setColor(tc);
@@ -335,7 +335,7 @@ void TextDialog::formatAllLabels()
 
 void TextDialog::setDefaultValues()
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
 	if (!app)
 		return;
 

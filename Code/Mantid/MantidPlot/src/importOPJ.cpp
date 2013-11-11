@@ -104,7 +104,7 @@ bool ImportOPJ::createProjectTree(const OPJFile& opj)
 	tree<projectNode>::iterator root = projectTree->begin(projectTree->begin());
 	if(!root.node)
 		return false;
-	FolderListItem* item = (FolderListItem*)mw->folders->firstChild();
+	FolderListItem* item = static_cast<FolderListItem*>(mw->folders->firstChild());
 	item->setText(0, root->name.c_str());
 	item->folder()->setName(root->name.c_str());
 	Folder* projectFolder = mw->projectFolder();
