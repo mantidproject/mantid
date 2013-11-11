@@ -257,6 +257,7 @@ namespace Mantid
       parseMetadata(m_fileName);
 
       // Create a new output workspace.
+      // cppcheck-suppress constStatement
       MDEventWorkspace<MDEvent<4>,4>* pWs = new MDEventWorkspace<MDEvent<4>,4>;
       Mantid::API::IMDEventWorkspace_sptr ws(pWs);
 

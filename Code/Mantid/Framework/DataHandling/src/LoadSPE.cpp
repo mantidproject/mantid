@@ -104,7 +104,7 @@ void LoadSPE::exec()
   }
 
   // The first two numbers are the number of histograms and the number of bins
-  int nhist=0, nbins=0;
+  unsigned int nhist=0, nbins=0;
   int retval = fscanf(speFile,"%8u%8u\n",&nhist,&nbins);
   if ( retval != 2 ) reportFormatError("Header line");
 
@@ -150,7 +150,7 @@ void LoadSPE::exec()
   MantidVec& X = XValues.access();
   X.resize(nbins+1);
 
-  for (int i = 0; i <= nbins; ++i)
+  for (unsigned int i = 0; i <= nbins; ++i)
   {
     retval = fscanf(speFile,"%10le",&X[i]);
     if ( retval != 1 ) 

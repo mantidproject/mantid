@@ -89,13 +89,13 @@ private:
 	double m_positionX;
   double m_positionY;
 
-  //! The right side position in scale coordinates.
-	double d_x_right;
-  //! The bottom side position in scale coordinates.
-  double d_y_bottom;
-  //! The position in paint coordiantes.
-	QPoint d_pos;
-	//! The size (in paint coordinates) to which the bounding rect will be scaled in draw().
-	QSize d_size;
+  // cppcheck-suppress duplInheritedMember
+	double d_x_right;   //!< The right side position in scale coordinates.
+  // cppcheck-suppress duplInheritedMember
+  double d_y_bottom;  //!< The bottom side position in scale coordinates.
+  // cppcheck-suppress duplInheritedMember
+	QPoint d_pos;       //!< The position in paint coordinates.
+	// cppcheck-suppress duplInheritedMember
+	QSize d_size;       //!< The size (in paint coordinates) to which the bounding rect will be scaled in draw().
 };
 #endif

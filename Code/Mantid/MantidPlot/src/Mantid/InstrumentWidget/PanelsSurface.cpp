@@ -15,6 +15,16 @@
 
 using namespace Mantid::Geometry;
 
+/** Constructor
+* @param s The surface of the panel
+*/
+FlatBankInfo::FlatBankInfo(PanelsSurface *s):
+  surface(s),id(0),
+  rotation(Mantid::Kernel::Quat()),
+  startDetectorIndex(0),endDetectorIndex(0)
+{
+}
+
 /**
   * Translate the bank by a vector.
   * @param shift :: Translation vector.
@@ -31,6 +41,8 @@ void FlatBankInfo::translate(const QPointF &shift)
         udet.v += dv;
     }
 }
+
+
 
 Mantid::Kernel::Logger &PanelsSurface::g_log = Mantid::Kernel::Logger::get("PanelsSurface");
 

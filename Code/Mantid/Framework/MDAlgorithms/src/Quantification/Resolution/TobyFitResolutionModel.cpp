@@ -131,7 +131,9 @@ namespace Mantid
         // Add on this contribution to the average
         sumSigma += weight;
         sumSigmaSqr += weight*weight;
+        
         avgSigma = sumSigma/step;
+        // cppcheck-suppress zerodivcond
         if(checkForConvergence(step) && hasConverged(step, sumSigma, sumSigmaSqr, avgSigma))
         {
           break;
