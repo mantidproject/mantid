@@ -542,6 +542,8 @@ namespace MantidQt
       }
       const PeakBoundingBox& box = presenter->getBoundingBox(peakIndex);
       m_zoomablePlottingWidget->zoomToRectangle(box);
+      m_zoomedPresenter = *it;
+      m_zoomedPeakIndex = peakIndex;
       m_owner->performUpdate();
     }
 
