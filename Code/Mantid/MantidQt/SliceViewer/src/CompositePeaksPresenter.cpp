@@ -439,23 +439,19 @@ namespace MantidQt
       return (*iterator)->getShowBackground();
     }
 
-    /**
-     * Get the peaks presenter correspoinding to a peaks workspace name.
-     * @param name
-     * @return Peaks presenter.
-     */
-    PeaksPresenter* CompositePeaksPresenter::getPeaksPresenter(const QString& name)
+    namespace
     {
       // Helper comparitor type.
-      class MatchWorkspaceName : public std::unary_function<SetPeaksWorkspaces::value_type, bool>
+      class MatchWorkspaceName: public std::unary_function<SetPeaksWorkspaces::value_type, bool>
       {
       private:
         const QString m_wsName;
       public:
-        MatchWorkspaceName(const QString& name) : m_wsName(name)
+        MatchWorkspaceName(const QString& name) :
+            m_wsName(name)
         {
         }
-        bool operator() (SetPeaksWorkspaces::value_type ws)
+        bool operator()(SetPeaksWorkspaces::value_type ws)
         {
           const std::string wsName = ws->name();
           const std::string toMatch = m_wsName.toStdString();
@@ -463,7 +459,15 @@ namespace MantidQt
           return result;
         }
       };
+    }
 
+    /**
+     * Get the peaks presenter correspoinding to a peaks workspace name.
+     * @param name
+     * @return Peaks presenter.
+     */
+    PeaksPresenter* CompositePeaksPresenter::getPeaksPresenter(const QString& name)
+    {
       MatchWorkspaceName comparitor(name);
       SubjectContainer::iterator presenterFound = m_subjects.end();
       for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
@@ -513,6 +517,25 @@ namespace MantidQt
       }
     }
 
+    namespace
+    {
+      // Private helper class
+      class MatchPointer: public std::unary_function<bool, PeaksPresenter_sptr>
+      {
+      private:
+        PeaksPresenter* m_toFind;
+      public:
+        MatchPointer(PeaksPresenter* toFind) :
+            m_toFind(toFind)
+        {
+        }
+        bool operator()(PeaksPresenter_sptr candidate)
+        {
+          return candidate.get() == m_toFind;
+        }
+      };
+    }
+
     /**
      * Zoom to a peak
      * @param presenter: Holds the peaks workspace.
@@ -520,18 +543,6 @@ namespace MantidQt
      */
     void CompositePeaksPresenter::zoomToPeak(PeaksPresenter* const presenter, const int peakIndex)
     {
-      // Private helper class
-      class MatchPointer : public std::unary_function<bool, PeaksPresenter_sptr>
-      {
-      private:
-        PeaksPresenter* m_toFind;
-      public:
-        MatchPointer(PeaksPresenter* toFind) : m_toFind(toFind){}
-        bool operator()(PeaksPresenter_sptr candidate)
-        {
-          return candidate.get() == m_toFind;
-        }
-      };
 
       MatchPointer comparitor(presenter);
       m_zoomedPeakIndex = peakIndex;
