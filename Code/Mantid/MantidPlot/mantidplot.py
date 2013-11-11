@@ -218,9 +218,13 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
-    
-def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.VolumeNormalization, 
-  error_bars = False, window = None, clearWindow = False):
+
+# IPython couldn't correctly display complex enum value in doc pop-up, so we extract integer value
+# of enum manually.
+DEFAULT_MD_NORMALIZATION = int(mantid.api.MDNormalization.VolumeNormalization)
+
+def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error_bars = False, window = None,
+  clearWindow = False):
     """Open a 1D plot of a MDWorkspace.
     
     Args:
