@@ -2344,7 +2344,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    t->setAttribute(Qt::WA_QuitOnClose);
    
    bool isGraphNew;
-   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, clearWindow);
+   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, wsName, clearWindow);
 
    Graph *g = ml->activeGraph();
 
@@ -3196,8 +3196,10 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor)); 
 
+  const QString& firstWsName = toPlot.constBegin().key();
+
   bool isGraphNew;
-  MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, clearWindow);
+  MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, firstWsName, clearWindow);
 
   Graph *g = ml->activeGraph();
 
@@ -3221,17 +3223,9 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   if(isGraphNew)
   {
-    // Set active layer title
-    const QString& firstWorkspace = toPlot.constBegin().key();
-    ml->activeGraph()->setTitle( "Workspace " + firstWorkspace );
-
-    // Set plot window title
-    const QString& windowName = appWindow()->generateUniqueName( firstWorkspace + "-" );
-    ml->setName( windowName );
-    ml->setWindowTitle( windowName );
  
     auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString()));
+      AnalysisDataService::Instance().retrieve(firstWsName.toStdString()));
 
     // Deal with axis names
     Mantid::API::Axis* ax = workspace->getAxis(0);

@@ -2740,16 +2740,17 @@ MultiLayer* ApplicationWindow::newGraph(const QString& caption)
 /**
  * Prepares MultiLayer window for plotting - creates it if necessary, clears it, applies initial
  * settings etc.
- * @param isNew       :: Whether the Graph used for plotting was created, or the old one was used
- * @param window      :: Existing MultiLayer window. If NULL - a new one will be created
- * @param clearWindow :: Whether to clear existing window before plotting. Ignored if window is NULL
+ * @param isNew         :: Whether the Graph used for plotting was created, or the old one was used
+ * @param window        :: Existing MultiLayer window. If NULL - a new one will be created
+ * @param newWindowName :: Name of the new window if one is created
+ * @param clearWindow   :: Whether to clear existing window before plotting. Ignored if window is NULL
  * @return Pointer to created window if window == NULL, otherwise - window.
  */
-MultiLayer* ApplicationWindow::prepareMultiLayer(bool& isNew, MultiLayer* window, bool clearWindow) 
+MultiLayer* ApplicationWindow::prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName, bool clearWindow) 
 {
   if(window == NULL)
   { // If plot window is not specified, create a new one
-    window = multilayerPlot(generateUniqueName("Graph")); // Default name, could be changed later
+    window = multilayerPlot(generateUniqueName( newWindowName + "-"));
     window->setCloseOnEmpty(true);
     isNew = true;
   } 
@@ -2767,11 +2768,13 @@ MultiLayer* ApplicationWindow::prepareMultiLayer(bool& isNew, MultiLayer* window
 
   if(isNew)
   { // If new graph was created, need to set some initial stuff
+
     Graph *g = window->activeGraph(); // We use active graph only. No support for proper _multi_ layers yet.
 
     connect(g,SIGNAL(curveRemoved()),window,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
     setPreferences(g);
     g->newLegend();
+    g->setTitle( newWindowName );
   }
 
   return window; 
