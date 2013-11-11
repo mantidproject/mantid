@@ -56,8 +56,8 @@ public:
 
 //    delete task1;
 //    delete task2;
-//    delete mut1;
-//    delete mut2;
+    delete mut1;
+    delete mut2;
   }
 
   void test_queue()
@@ -130,9 +130,9 @@ public:
 //    delete task5;
 //    delete task6;
 //    delete task7;
-//    delete mut1;
-//    delete mut2;
-//    delete mut3;
+    delete mut1;
+    delete mut2;
+    delete mut3;
   }
 
   void test_clear()
@@ -172,7 +172,7 @@ public:
     //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), 0);
 
-//    delete mut1;
+    delete mut1;
   }
 
   void test_performance_lotsOfMutexes()
