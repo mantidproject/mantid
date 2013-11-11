@@ -2364,7 +2364,15 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    // Associate the graph with the bin table
    m->setBinGraph(ml,t);
 
+   if(!isGraphNew)
+     // Replot graph is we've added curves to existing one
+     g->replot();
+  
+   // Check if window does not contain any curves and should be closed
+   ml->maybeNeedToClose();
+
    QApplication::restoreOverrideCursor();
+
    return ml;
 }
 
@@ -3271,7 +3279,12 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     g->checkValuesInAxisRange(mc);
   }
 
-  g->replot();
+  if(!isGraphNew)
+    // Replot graph is we've added curves to existing one
+    g->replot();
+  
+  // Check if window does not contain any curves and should be closed
+  ml->maybeNeedToClose();
 
   QApplication::restoreOverrideCursor();
   return ml;
