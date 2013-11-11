@@ -154,7 +154,7 @@ void LoadSPE::exec()
   MantidVec& X = XValues.access();
   X.resize(nbins+1);
 
-  for (unsigned int i = 0; i <= nbins; ++i)
+  for (size_t i = 0; i <= nbins; ++i)
   {
     retval = fscanf(speFile,"%10le",&X[i]);
     if ( retval != 1 ) 
@@ -177,7 +177,7 @@ void LoadSPE::exec()
 
   // Now read in the data spectrum-by-spectrum
   Progress progress(this,0,1,nhist);
-  for (int j = 0; j < nhist; ++j)
+  for (size_t j = 0; j < nhist; ++j)
   {
     // Set the common X vector
     workspace->setX(j,XValues);
@@ -199,7 +199,7 @@ void LoadSPE::exec()
  *  @param workspace :: The output workspace
  *  @param index ::     The index of the current spectrum
  */
-void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, int index)
+void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, size_t index)
 {
   // First, there should be a comment line
   char comment[100];
