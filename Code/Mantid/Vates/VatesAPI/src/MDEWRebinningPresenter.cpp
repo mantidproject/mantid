@@ -244,6 +244,7 @@ namespace Mantid
      * This is for the BasisVector0... parameters
      *
     @param basis : basis vector.
+    @param totalNDims : total number of dimensions.
     @param length : length of vector?
     @param dimension : dimension to extract property value for.
     @return true available, false otherwise.
