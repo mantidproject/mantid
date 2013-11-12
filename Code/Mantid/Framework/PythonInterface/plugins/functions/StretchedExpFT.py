@@ -96,8 +96,8 @@ class StretchedExpFT(IFunction1D):
         an extra factor exp(i*pi*E/de) which amounts to alternating sign every
         time E increases by de, the energy bin width
         '''
-        from scipy.fftpack import fft
-        from scipy.interpolate import interp1d
+        import scipy.fftpack
+        import scipy.interpolate
 
         p=self.validateParams()
         # override parameter values with optparms (used for the numerical derivative)
@@ -112,9 +112,9 @@ class StretchedExpFT(IFunction1D):
         sampled_times = dt * np.arange(-N, N+1)
         exponent = -(np.abs(sampled_times)/p['tau'])**p['beta']
         freqs = de * np.arange(-N, N+1)
-        fourier = p['height']*np.abs( fft( np.exp(exponent) ).real )
+        fourier = p['height']*np.abs( scipy.fftpack.fft( np.exp(exponent) ).real )
         fourier = np.concatenate( (fourier[N+1:],fourier[0:N+1]) )
-        interpolator = interp1d(freqs, fourier)
+        interpolator = scipy.interpolate.interp1d(freqs, fourier)
         fourier = interpolator(xvals)
         return fourier
     
