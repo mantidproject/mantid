@@ -417,23 +417,25 @@ double lorentz_multi_peak_d (const gsl_vector * x, void *params) {
     double *xc = new double[peaks];
     double *w = new double[peaks];
     double offset = gsl_vector_get (x, p-1);
-    size_t i,j;
-    for (i = 0; i < peaks; i++) {
+    double val=0;
+    for (size_t i = 0; i < peaks; i++) {
         a[i] = gsl_vector_get(x, 3*i);
         xc[i] = gsl_vector_get(x, 3*i+1);
         w[i] = gsl_vector_get(x, 3*i+2);
     }
-    for (i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         double res = 0;
         for (j = 0; j < peaks; j++) {
             double diff = X[i]-xc[j];
             res += a[j]*w[j]/(4*diff*diff+w[j]*w[j]);
         }
+        double t = (M_2_PI*res + offset - Y[i])/sigma[i];
+        val += t*t;
     }
     delete[] a;
     delete[] xc;
     delete[] w;
-    return GSL_SUCCESS;
+    return val;
 }
 int lorentz_multi_peak_df (const gsl_vector * x, void *params, gsl_matrix * J) {
     size_t n = ((struct FitData *)params)->n;
