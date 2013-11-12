@@ -13,10 +13,10 @@ namespace MantidQt
      * Obtain the list of instruments from the ICAT Catalog algorithm.
      * @return A vector containing the list of all instruments available.
      */
-    std::vector<std::string> CatalogHelper::getInstrumentList()
+    const std::vector<std::string> CatalogHelper::getInstrumentList()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
-      catalogAlgorithm->execute();
+      executeAsynchronously(catalogAlgorithm);
       // return the vector containing the list of instruments available.
       return (catalogAlgorithm->getProperty("InstrumentList"));
     }
@@ -25,10 +25,10 @@ namespace MantidQt
      * Obtain the list of investigation types from the ICAT Catalog algorithm.
      * @return A vector containing the list of all investigation types available.
      */
-    std::vector<std::string> CatalogHelper::getInvestigationTypeList()
+    const std::vector<std::string> CatalogHelper::getInvestigationTypeList()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
-      catalogAlgorithm->execute();
+      executeAsynchronously(catalogAlgorithm);
       // return the vector containing the list of investigation types available.
       return (catalogAlgorithm->getProperty("InvestigationTypes"));
     }
@@ -37,7 +37,7 @@ namespace MantidQt
      * Search the archive with the user input terms provided and save them to a workspace ("searchResults").
      * @param userInputFields :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
      */
-    void CatalogHelper::executeSearch(std::map<std::string, std::string> userInputFields)
+    void CatalogHelper::executeSearch(const std::map<std::string, std::string> &userInputFields)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
@@ -46,7 +46,7 @@ namespace MantidQt
 
       // Iterate over the provided map of user input fields. For each field that isn't empty (e.g. a value was input by the user)
       // then we will set the algorithm property with the key and value of that specific value.
-      for ( std::map<std::string, std::string>::const_iterator it = userInputFields.begin(); it != userInputFields.end(); it++)
+      for (auto it = userInputFields.begin(); it != userInputFields.end(); it++)
       {
         std::string value = it->second;
         // If the user has input any search terms.
@@ -57,18 +57,14 @@ namespace MantidQt
         }
       }
       // Allow asynchronous execution to update label while search is being carried out.
-      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
-      while( !result.available() )
-      {
-        QCoreApplication::processEvents();
-      }
+      executeAsynchronously(catalogAlgorithm);
     }
 
     /**
      * Search the archives for all dataFiles related to an "investigation id" then save results to workspace ("dataFileResults").
      * @param investigationId :: The investigation id to use for the search.
      */
-    void CatalogHelper::executeGetDataFiles(int64_t investigationId)
+    void CatalogHelper::executeGetDataFiles(const int64_t &investigationId)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
 
@@ -78,11 +74,7 @@ namespace MantidQt
       catalogAlgorithm->setPropertyValue("OutputWorkspace","__dataFileResults");
 
       // Allow asynchronous execution to update label(s) while search is being carried out.
-      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
-      while( !result.available() )
-      {
-        QCoreApplication::processEvents();
-      }
+      executeAsynchronously(catalogAlgorithm);
     }
 
     /**
@@ -91,7 +83,7 @@ namespace MantidQt
      * @param downloadPath      :: The location to save the datafile(s).
      * @return A vector containing the paths to the file(s) the user wants.
      */
-    std::vector<std::string> CatalogHelper::downloadDataFiles(std::vector<std::pair<int64_t, std::string>> userSelectedFiles, std::string downloadPath)
+    const std::vector<std::string> CatalogHelper::downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,const std::string &downloadPath)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogDownloadDataFiles");
 
@@ -102,7 +94,7 @@ namespace MantidQt
       std::vector<std::string> fileNames;
 
       // For each pair in userSelectedFiles we want to add them to their related vector to pass to the algorithm.
-      for (std::vector<std::pair<int64_t,std::string>>::iterator it = userSelectedFiles.begin(); it != userSelectedFiles.end(); ++it)
+      for (auto it = userSelectedFiles.begin(); it != userSelectedFiles.end(); ++it)
       {
         fileIDs.push_back(it->first);
         fileNames.push_back(it->second);
@@ -115,13 +107,7 @@ namespace MantidQt
       catalogAlgorithm->setProperty("FileNames",fileNames);
       catalogAlgorithm->setProperty("DownloadPath",downloadPath);
 
-      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
-      while( !result.available() )
-      {
-        //TODO: Inform the user where the file was saved to depending on result, e.g:
-        // (You do not have access to the archives. Downloading requested file over Internet...)
-        QCoreApplication::processEvents();
-      }
+      executeAsynchronously(catalogAlgorithm);
       // Return a vector containing the file paths to the files to download.
       return (catalogAlgorithm->getProperty("FileLocations"));
     }
@@ -131,7 +117,7 @@ namespace MantidQt
      * @param inputFields :: The name of the input field and value of the field (key => "StartDate", value => "00/00/0000").
      * @return The name of the input field(s) marker to update and related error to throw.
      */
-    std::map<std::string, std::string> CatalogHelper::validateProperties(std::map<std::string, std::string> &inputFields)
+    const std::map<std::string, std::string> CatalogHelper::validateProperties(const std::map<std::string, std::string> &inputFields)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
@@ -167,7 +153,7 @@ namespace MantidQt
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
 
-      catalogAlgorithm->execute();
+      executeAsynchronously(catalogAlgorithm);
 
       if (catalogAlgorithm->getProperty("IsValid"))
       {
@@ -189,7 +175,7 @@ namespace MantidQt
 
       if(loginDialog->exec() == QDialog::Accepted)
       {
-        catalogAlgorithm->execute();
+        executeAsynchronously(catalogAlgorithm);
       }
     }
 
@@ -216,10 +202,23 @@ namespace MantidQt
      * @param algName :: The name of the algorithm to create.
      * @return A shared pointer to the algorithm created.
      */
-    Mantid::API::IAlgorithm_sptr CatalogHelper::createCatalogAlgorithm(const std::string& algName)
+    Mantid::API::IAlgorithm_sptr CatalogHelper::createCatalogAlgorithm(const std::string &algName)
     {
       // If there is an exception we want it to be thrown.
       return Mantid::API::AlgorithmManager::Instance().create(algName);
+    }
+
+    /**
+     * Execute the given algorithm asynchronously.
+     * @param algorithm :: The algorithm to execute.
+     */
+    void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
+    {
+      Poco::ActiveResult<bool> result(algorithm->executeAsync());
+      while(!result.available())
+      {
+        QCoreApplication::processEvents();
+      }
     }
 
   } // namespace MantidWidgets

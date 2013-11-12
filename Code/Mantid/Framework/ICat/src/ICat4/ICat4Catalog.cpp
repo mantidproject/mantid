@@ -127,8 +127,8 @@ namespace Mantid
       bool queryDataset = false;
 
       // Format the timestamps in order to compare them.
-      std::string startDate = formatDateTime(inputs.getStartDate() + 60*60, "%Y-%m-%d %H:%M:%S"); // 2 hours
-      std::string endDate   = formatDateTime(inputs.getEndDate() + (24*60*60) + (59*60) + 59, "%Y-%m-%d %H:%M:%S"); // A day, 59 mins & 59 secs.
+      std::string startDate = formatDateTime(inputs.getStartDate(), "%Y-%m-%d %H:%M:%S");
+      std::string endDate   = formatDateTime(inputs.getEndDate() + ((23*60*60) + (59*60) + 59), "%Y-%m-%d %H:%M:%S");
 
       // Investigation startDate if endDate is not selected
       if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0)
@@ -487,8 +487,8 @@ namespace Mantid
 
     /**
      * Saves result from "getDataFiles" to workspace.
-     * @param investigationId :: unique identifier of the investigation
-     * @param outputws        :: shared pointer to datasets
+     * @param response :: result response from the catalog.
+     * @param outputws :: shared pointer to datasets
      */
     void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
@@ -744,8 +744,7 @@ namespace Mantid
 
     /**
      * Convert a file size to human readable file format.
-     * @param size    :: The size in bytes of the file.
-     * @return string :: A human readable file format (e.g. 5MB).
+     * @param fileSize :: The size in bytes of the file.
      */
     std::string ICat4Catalog::bytesToString(int64_t &fileSize)
     {

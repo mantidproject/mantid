@@ -339,8 +339,8 @@ private:
   /// which pair table row has the user last clicked on
   int m_pairTableRowInFocus;
 
-  /// Index of the current tab.
-  int m_tabNumber;
+  /// Widget of the current tab
+  QWidget* m_currentTab;
 
   /// used to test that a new filename has been entered 
   QStringList m_previousFilenames;

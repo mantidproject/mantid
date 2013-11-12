@@ -183,7 +183,8 @@ namespace Mantid
 
       void loadEvents(API::Progress * const prog, const bool monitors);
       void createSpectraMapping(const std::string &nxsfile,
-                                const bool monitorsOnly, const std::string & bankName = "");
+                                const bool monitorsOnly,
+                                const std::vector<std::string> & bankNames = std::vector<std::string>());
       void deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames);
       bool hasEventMonitors();
       void runLoadMonitors();

@@ -45,7 +45,8 @@ public:
     {
         mkICP();
         mkGood();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_good.path(),"good");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -93,7 +94,8 @@ public:
     {
         mkICP();
         mkLate();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_late.path(),"late");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -128,7 +130,8 @@ public:
     {
         mkICP();
         mkEarly();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_early.path(),"early");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -162,7 +165,8 @@ public:
     {
         mkICP();
         mkSingle();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_single.path(),"single");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -185,7 +189,8 @@ public:
     {
         mkICP();
         mkStr();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_str.path(),"str");
         TS_ASSERT(p1);
         TimeSeriesProperty<std::string>* tp1 = dynamic_cast<TimeSeriesProperty<std::string>*>(p1);
@@ -217,7 +222,8 @@ public:
     void testConstructionFromFileUsingICPVariant_CHANGE_PERIOD()
     {
       mkICPVariant();
-      LogParser lp(icp_file.path());
+      Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+      LogParser lp(icp_log);
       const Property * prop = lp.createAllPeriodsLog();
       const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
       TS_ASSERT(timeseriesprop);
@@ -305,86 +311,6 @@ public:
       delete log;
     }
     
-    void test_begin_end_treated_same_as_start_collection_stop_collection()
-    {
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICPBeginEnd(new TimeSeriesProperty<std::string>("ICPLog1"));
-      TS_ASSERT_THROWS_NOTHING( logICPBeginEnd->addValue("2000-01-01T00:00:00", "BEGIN") );
-      TS_ASSERT_THROWS_NOTHING( logICPBeginEnd->addValue("2000-01-01T01:00:00", "END") );
-      
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICPCollectStartStop(new TimeSeriesProperty<std::string>("ICPLog2"));
-      TS_ASSERT_THROWS_NOTHING( logICPCollectStartStop->addValue("2000-01-01T00:00:00", "START_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICPCollectStartStop->addValue("2000-01-01T01:00:00", "STOP_COLLECTION") );
-      
-      LogParser logParserBeginEnd(logICPBeginEnd.get());
-      TimeSeriesProperty<bool>* maskBeginEnd = logParserBeginEnd.createRunningLog();
-      
-      LogParser logParserCollectStartStop(logICPCollectStartStop.get());
-      TimeSeriesProperty<bool>* maskCollectStartStop = logParserCollectStartStop.createRunningLog();
-      
-      TSM_ASSERT_EQUALS("Should have 2 entries", 2, maskCollectStartStop->size());
-      TSM_ASSERT_EQUALS("Masks should be equal length", maskBeginEnd->size(), maskCollectStartStop->size());
-      
-      TSM_ASSERT("Mask should NOT applied Due to start marker", maskCollectStartStop->nthValue(0)) // Mask OFF
-      TSM_ASSERT("Mask SHOULD applied Due to stop marker", !maskCollectStartStop->nthValue(1)) // Mask ON
-      // Compare for consistency.
-      for(int i = 0; i < maskBeginEnd->size(); ++i)
-      {
-        TS_ASSERT_EQUALS(maskBeginEnd->nthTime(i), maskCollectStartStop->nthTime(i));
-        TS_ASSERT_EQUALS(maskBeginEnd->nthValue(i), maskCollectStartStop->nthValue(i));
-      }
-    }
-    
-    void test_mixed_start_stop_begin_end()
-    {
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICP(new TimeSeriesProperty<std::string>("ICPLog"));
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:00:00", "BEGIN") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:00:00", "START_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:10:00", "STOP_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:20:00", "START_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T01:30:00", "STOP_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T01:30:00", "END") );
-      
-      LogParser logParser(logICP.get());
-      TimeSeriesProperty<bool>* mask = logParser.createRunningLog();
-
-      TSM_ASSERT_EQUALS("Should have 4 entries, 2 of the 6 are duplicates", 4, mask->size()); 
-      int increment = 0;
-      TSM_ASSERT("Mask OFF", mask->nthValue(increment++));
-      TSM_ASSERT("Mask ON", !mask->nthValue(increment++));
-      TSM_ASSERT("Mask OFF", mask->nthValue(increment++));
-      TSM_ASSERT("Mask ON", !mask->nthValue(increment));
-    }
-    
-    void test_multiple_starts_ok()
-    {
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICP(new TimeSeriesProperty<std::string>("ICPLog"));
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:00:00", "BEGIN") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:10:00", "START_COLLECTION") );
-      
-      LogParser logParser(logICP.get());
-      TimeSeriesProperty<bool>* mask = logParser.createRunningLog();
-      
-      TSM_ASSERT_EQUALS("Should have 2 entries", 2, mask->size()); 
-      int increment = 0;
-      TSM_ASSERT("Mask OFF", mask->nthValue(increment++)); // BEGIN
-      TSM_ASSERT("Mask should still be OFF", mask->nthValue(increment++)); // START COLLECT
-    }
-    
-    void test_multiple_ends_ok()
-    {
-      boost::scoped_ptr<TimeSeriesProperty<std::string> > logICP(new TimeSeriesProperty<std::string>("ICPLog"));
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:00:00", "STOP_COLLECTION") );
-      TS_ASSERT_THROWS_NOTHING( logICP->addValue("2000-01-01T00:10:00", "END") );
-      
-      LogParser logParser(logICP.get());
-      TimeSeriesProperty<bool>* mask = logParser.createRunningLog();
-      
-      TSM_ASSERT_EQUALS("Should have 2 entries", 2, mask->size()); 
-      int increment = 0;
-      TSM_ASSERT("Mask ON", !mask->nthValue(increment++)); // STOP COLLECT
-      TSM_ASSERT("Mask should still be ON", !mask->nthValue(increment++)); // END
-    }
-
     void testCreatesCurrentPeriodLog()
     {
       //Check it with a few expected period numbers.
@@ -397,7 +323,8 @@ public:
     {
       if ( icp_file.exists() ) icp_file.remove();
         mkGood();
-        LogParser lp(icp_file.path());
+        Property *icp_log = LogParser::createLogProperty(icp_file.path(),"icpevent");
+        LogParser lp(icp_log);
         Property* p1 = lp.createLogProperty(log_num_good.path(),"good");
         TS_ASSERT(p1);
         TimeSeriesProperty<double>* tp1 = dynamic_cast<TimeSeriesProperty<double>*>(p1);
@@ -464,6 +391,112 @@ public:
         TS_ASSERT_THROWS_NOTHING( log->addValue("2012-07-19T20:00:00", 666) );
         TS_ASSERT_EQUALS( log->realSize(), 2);
         TS_ASSERT_DELTA( timeMean(log), 666, 1e-3);
+    }
+
+    void test_isICPEventLogNewStyle_works()
+    {
+        TimeSeriesProperty<std::string> * oldlog = new TimeSeriesProperty<std::string>("MyOldICPevent");
+        TS_ASSERT_THROWS_NOTHING( oldlog->addValue("2012-07-19T20:00:00", "START") );
+        TS_ASSERT_THROWS_NOTHING( oldlog->addValue("2012-07-19T20:00:01", "BEGIN") );
+        TS_ASSERT_THROWS_NOTHING( oldlog->addValue("2012-07-19T20:00:02", "PAUSE") );
+
+        auto logm = oldlog->valueAsMultiMap();
+        TS_ASSERT( !LogParser::isICPEventLogNewStyle(logm) );
+        delete oldlog;
+
+        TimeSeriesProperty<std::string> * newlog = new TimeSeriesProperty<std::string>("MyNewICPevent");
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:00", "START") );
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:01", "START_COLLECTION PERIOD 1") );
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:02", "PAUSE") );
+
+        logm = newlog->valueAsMultiMap();
+        TS_ASSERT( LogParser::isICPEventLogNewStyle(logm) );
+        delete newlog;
+
+        newlog = new TimeSeriesProperty<std::string>("MyNewICPevent1");
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:00", "START") );
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:01", "STOP_COLLECTION PERIOD 1") );
+        TS_ASSERT_THROWS_NOTHING( newlog->addValue("2012-07-19T20:00:02", "PAUSE") );
+
+        logm = newlog->valueAsMultiMap();
+        TS_ASSERT( LogParser::isICPEventLogNewStyle(logm) );
+        delete newlog;
+    }
+
+    void test_new_style_command_parsing()
+    {
+        TimeSeriesProperty<std::string> * log = new TimeSeriesProperty<std::string>("MyICPevent");
+        log->addValue("2013-10-16T19:04:47", "CHANGE_PERIOD 1");
+        log->addValue("2013-10-16T19:04:48", "RESUME");
+        log->addValue("2013-10-16T19:04:48", "START_COLLECTION PERIOD 1 GF 60015 RF 75039 GUAH 69.875610");
+        log->addValue("2013-10-16T19:06:53", "STOP_COLLECTION PERIOD 1 GF 65024 RF 81303 GUAH 75.712013 DUR 125");
+        log->addValue("2013-10-16T19:06:53", "PAUSE");
+        log->addValue("2013-10-16T19:06:53", "CHANGE_PERIOD 2");
+        log->addValue("2013-10-16T19:06:53", "RESUME");
+        log->addValue("2013-10-16T19:06:53", "START_COLLECTION PERIOD 2 GF 65024 RF 81303 GUAH 75.712013");
+        log->addValue("2013-10-16T19:08:58", "STOP_COLLECTION PERIOD 2 GF 70033 RF 87567 GUAH 81.547050 DUR 125");
+        log->addValue("2013-10-16T19:08:58", "PAUSE");
+        log->addValue("2013-10-16T19:08:58", "CHANGE_PERIOD 1");
+        log->addValue("2013-10-16T19:08:59", "RESUME");
+        log->addValue("2013-10-16T19:08:59", "START_COLLECTION PERIOD 1 GF 70033 RF 87567 GUAH 81.547050");
+        log->addValue("2013-10-16T19:11:03", "STOP_COLLECTION PERIOD 1 GF 75005 RF 93784 GUAH 87.339035 DUR 124");
+        log->addValue("2013-10-16T19:11:03", "PAUSE");
+        log->addValue("2013-10-16T19:11:03", "CHANGE_PERIOD 2");
+        log->addValue("2013-10-16T19:11:04", "RESUME");
+        log->addValue("2013-10-16T19:11:04", "START_COLLECTION PERIOD 2 GF 75005 RF 93784 GUAH 87.339035");
+        log->addValue("2013-10-16T19:13:09", "STOP_COLLECTION PERIOD 2 GF 80016 RF 100049 GUAH 93.174751 DUR 125");
+        log->addValue("2013-10-16T19:13:09", "PAUSE");
+        log->addValue("2013-10-16T19:13:09", "CHANGE_PERIOD 1");
+        log->addValue("2013-10-16T19:13:09", "RESUME");
+
+        std::vector< std::pair<std::string,int> > checkPeriod(5);
+        checkPeriod[0] = std::make_pair("2013-10-16T19:04:47", 1 );
+        checkPeriod[1] = std::make_pair("2013-10-16T19:06:53", 2 );
+        checkPeriod[2] = std::make_pair("2013-10-16T19:08:58", 1 );
+        checkPeriod[3] = std::make_pair("2013-10-16T19:11:03", 2 );
+        checkPeriod[4] = std::make_pair("2013-10-16T19:13:09", 1 );
+
+        std::vector< std::pair<std::string,bool> > checkRunning(8);
+        checkRunning[0] = std::make_pair("2013-10-16T19:04:48", true );
+        checkRunning[1] = std::make_pair("2013-10-16T19:06:53", false );
+        checkRunning[2] = std::make_pair("2013-10-16T19:06:53", true );
+        checkRunning[3] = std::make_pair("2013-10-16T19:08:58", false );
+        checkRunning[4] = std::make_pair("2013-10-16T19:08:59", true );
+        checkRunning[5] = std::make_pair("2013-10-16T19:11:03", false );
+        checkRunning[6] = std::make_pair("2013-10-16T19:11:04", true );
+        checkRunning[7] = std::make_pair("2013-10-16T19:13:09", false );
+
+        LogParser logparser( log );
+
+        const Property *prop = logparser.createAllPeriodsLog();
+        const auto *allPeriodsProp = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
+        TS_ASSERT(allPeriodsProp);
+
+        TS_ASSERT_EQUALS(5, allPeriodsProp->size());
+        auto logm = allPeriodsProp->valueAsMultiMap();
+        size_t i = 0;
+        for(auto it = logm.begin(); it != logm.end(); ++it)
+        {
+            TS_ASSERT_EQUALS( it->first.toISO8601String(), checkPeriod[i].first );
+            TS_ASSERT_EQUALS( it->second, checkPeriod[i].second );
+            ++i;
+        }
+
+        prop = logparser.createRunningLog();
+        const auto *runningProp = dynamic_cast<const TimeSeriesProperty<bool>*>(prop);
+        TS_ASSERT(runningProp);
+
+        TS_ASSERT_EQUALS(8, runningProp->size());
+        auto logm1 = runningProp->valueAsMultiMap();
+        i = 0;
+        for(auto it = logm1.begin(); it != logm1.end(); ++it)
+        {
+            TS_ASSERT_EQUALS( it->first.toISO8601String(), checkRunning[i].first );
+            TS_ASSERT_EQUALS( it->second, checkRunning[i].second );
+            ++i;
+        }
+
+
     }
 
 //*/
