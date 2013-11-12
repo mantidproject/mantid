@@ -39,7 +39,7 @@ def CalcErange(inWS,ns,erange,nbin):
 	xInMax = Xin[-1]
 
 	#get indicies either side of energy range
-	minIndex = np.where(Xdata==xInMin)[0]-1
+	minIndex = np.where(Xdata==xInMin)[0]+1
 	maxIndex = np.where(Xdata==xInMax)[0]+1
 
 	#check we're using a valid range
@@ -64,7 +64,7 @@ def CalcErange(inWS,ns,erange,nbin):
 	#pad array for use in Fortran code
 	Xout = PadArray(Xout,array_len)
 
- 	nout = [nbin, minIndex+1, maxIndex]
+ 	nout = [nbin, minIndex, maxIndex]
 
 	return nout,bnorm,Xout,X,Y,E
 
