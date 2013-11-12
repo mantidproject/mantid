@@ -1127,7 +1127,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     catch(std::exception& e)
     {
       QString errorMsg(e.what());
-      errorMsg += "\n\nNo Dead Time correction applied.";
+      errorMsg += "\n\nNo Dead Time correction applied.\n\nReset to None.";
+
+      // Set DTC type to None
+      m_uiForm.deadTimeType->setCurrentIndex(0);
 
       QMessageBox::warning(this, "Mantid - MuonAnalysis", errorMsg);
     }
