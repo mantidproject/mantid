@@ -499,6 +499,32 @@ namespace MantidQt
     }
 
     /**
+     * Checks if start date is greater than end date.
+     * @returns true if start date is greater than end date.
+     */
+    bool ICatSearch2::validateDates()
+    {
+      std::string startDateInput = m_icatUiForm.StartDate->text().toStdString();
+      std::string endDateInput   = m_icatUiForm.EndDate->text().toStdString();
+
+      // Return false if the user has not input any dates. This prevents any null errors occurring.
+      if (startDateInput.size() <= 2 || endDateInput.size() <= 2) return false;
+
+      // If startDate > endDate we want to throw an error and inform the user (red star(*)).
+      if (m_icatHelper->getTimevalue(startDateInput) > m_icatHelper->getTimevalue(endDateInput))
+      {
+        m_icatUiForm.StartDate_err->setToolTip(QString::fromStdString("<span style=\"color: white;\">Start date cannot be greater than end date.</span>"));
+        m_icatUiForm.StartDate_err->show();
+        return true;
+      }
+      else
+      {
+        m_icatUiForm.StartDate_err->hide();
+        return false;
+      }
+    }
+
+    /**
      * Show or hide advanced options if "Advanced Search" checked.
      */
     void ICatSearch2::advancedSearchChecked()
@@ -541,8 +567,10 @@ namespace MantidQt
         std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
 
         // Has any errors occurred?
-        if (!errors.empty())
+        if (!errors.empty() || validateDates())
         {
+          // Clear form to prevent previous search results showing if an error occurs.
+          clearSearchResultFrame();
           showErrorLabels(errors);
           m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
           // Stop here to prevent the search being carried out below.

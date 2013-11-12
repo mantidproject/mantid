@@ -1,7 +1,9 @@
 #include "MantidQtMantidWidgets/ICatHelper.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidKernel/DateAndTime.h"
 
+#include <boost/algorithm/string/regex.hpp>
 #include <QCoreApplication>
 
 namespace MantidQt
@@ -191,6 +193,25 @@ namespace MantidQt
       {
         catalogAlgorithm->execute();
       }
+    }
+
+    /**
+    * Creates a time_t value from an input date ("23/06/2003") for comparison.
+    * @param inputDate :: string containing the date.
+    * @return time_t value of date
+    */
+    time_t ICatHelper::getTimevalue(const std::string& inputDate)
+    {
+      // Prevent any possible errors.
+      if(inputDate.empty()) return 0;
+      // A container to hold the segments of the date.
+      std::vector<std::string> dateSegments;
+      // Split input by "/" prior to rearranging the date
+      boost::algorithm::split_regex(dateSegments, inputDate, boost::regex("/"));
+      // Reorganise the date to be ISO format.
+      std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" + dateSegments.at(0) + " 0:00:00.000";
+      // Return the date as time_t value.
+      return Mantid::Kernel::DateAndTime(isoDate).to_time_t();
     }
 
     /**

@@ -83,6 +83,8 @@ namespace MantidQt
       void populateInvestigationTypeBox();
       /// Obtain the users' text input for each search field.
       std::map<std::string, std::string> getSearchFields();
+      /// Checks if start date is greater than end date.
+      bool validateDates();
 
       ///////////////////////////////////////////////////////////////////////////////
       // Methods for: "Search results"

@@ -28,6 +28,8 @@ namespace MantidQt
       bool validSession();
       /// Open the login dialog if user not logged in.
       void openLoginDialog(QWidget* window);
+      /// Creates a time_t value from an input date ("23/06/2003") for comparison.
+      time_t getTimevalue(const std::string& inputDate);
 
     private:
       /// Creates an algorithm with the name provided.
