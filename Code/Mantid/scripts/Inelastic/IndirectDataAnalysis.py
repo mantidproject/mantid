@@ -430,7 +430,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     unitx.setLabel(unit[0], unit[1])
 
     if Save:
-        elwinSaveWorkspaces(wsnames, workdir)
+        elwinSaveWorkspaces(wsnames, workdir, Verbose)
 
     if Plot:
         elwinPlot(label,e1WS,e2WS,elfWS,eltWS)
@@ -450,7 +450,7 @@ def elwinNormalizeToLowestTemp(eltWS):
         mtd[eltWS].setY(n, yscaled)
 
 # Write each of the created workspaces to file
-def elwinSaveWorkspaces(flist, dir):
+def elwinSaveWorkspaces(flist, dir, Verbose):
     for fname in flist:
         fpath = os.path.join(dir, fname+'.nxs')
 
