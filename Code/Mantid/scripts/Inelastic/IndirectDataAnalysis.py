@@ -346,7 +346,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
             datTx = np.append(datTx,Txa)
             datTy = np.append(datTy,iqa)
             datTe = np.append(datTe,eqa)
-    DeleteWorkspace(tempWS)
+
     DeleteWorkspace('__eq1')
     DeleteWorkspace('__eq2')
     DeleteWorkspace('__elf')
@@ -356,7 +356,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     else:
         ename = first+'to_'+last
 
-    #check if temp was increasing of decreasing
+    #check if temp was increasing or decreasing
     if(datTx[0] > datTx[-1]):
         # if so reverse data to follow natural ordering
     	datTx = datTx[::-1]
@@ -396,7 +396,12 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         CreateWorkspace(OutputWorkspace=wsname, DataX=x, DataY=y, DataE=e,
             Nspec=nspec, UnitX=xunit, VerticalAxisUnit=vunit, VerticalAxisValues=vvalue)
 
+        #add sample logs to new workspace
+        CopyLogs(InputWorkspace=tempWS, OutputWorkspace=wsname)
         addElwinLogs(wsname, label, eRange, Range2)
+
+    # remove the temp workspace now we've copied the logs
+    DeleteWorkspace(tempWS)
 
     if unit[0] == 'Temperature':
 
@@ -920,6 +925,14 @@ def msdfitParsToWS(Table, xData):
     dataY1 = map(lambda x : -x, yA1) 
     eA1 = ws.column(4)
     wsname = Table
+
+    #check if temp was increasing or decreasing
+    if(dataX[0] > dataX[-1]):
+        # if so reverse data to follow natural ordering
+        dataX = dataX[::-1]
+        dataY1 = dataY1[::-1]
+        eA1 = eA1[::-1]
+
     CreateWorkspace(OutputWorkspace=wsname+'_a0', DataX=dataX, DataY=yA0, DataE=eA0,
         Nspec=1, UnitX='')
     CreateWorkspace(OutputWorkspace=wsname+'_a1', DataX=dataX, DataY=dataY1, DataE=eA1,
@@ -957,8 +970,8 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
     ws_run = ws.getRun()
     vertAxisValues = ws.getAxis(1).extractValues()
     x_list = vertAxisValues
-    if 'Vaxis' in ws_run:
-        xlabel = ws_run.getLogData('Vaxis').value
+    if 'vert_axis' in ws_run:
+        xlabel = ws_run.getLogData('vert_axis').value
     for nr in range(0, nHist):
         nsam,ntc = CheckHistZero(root)
         lnWS = '__lnI_'+str(nr)
@@ -1013,6 +1026,12 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
         DeleteWorkspace(inWS)
         DeleteWorkspace('__data')
     GroupWorkspaces(InputWorkspaces=gro,OutputWorkspace=calcWS)
+
+    #add sample logs to output workspace
+    CopyLogs(InputWorkspace=root, OutputWorkspace=msdWS)
+    AddSampleLog(Workspace=msdWS, LogName="start_x", LogType="Number", LogText=str(startX))
+    AddSampleLog(Workspace=msdWS, LogName="end_x", LogType="Number", LogText=str(endX))
+    
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
         msdfitPlotFits(calcWS, 0)
