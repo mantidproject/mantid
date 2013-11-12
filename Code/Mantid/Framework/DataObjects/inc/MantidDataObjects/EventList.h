@@ -279,7 +279,7 @@ public:
 
   void splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const;
 
-  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection) const;
+  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection, bool docorrection) const;
 
   void multiply(const double value, const double error = 0.0);
   EventList& operator*=(const double value);
@@ -374,7 +374,7 @@ private:
   void splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const;
   template< class T >
   void splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, typename std::vector<T> & events,
-      double tofcorrection) const;
+      double tofcorrection, bool docorrection) const;
   template< class T>
   static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
   template<class T>
