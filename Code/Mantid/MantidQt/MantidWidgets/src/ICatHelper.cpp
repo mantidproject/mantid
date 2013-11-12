@@ -186,7 +186,7 @@ namespace MantidQt
     * @param inputDate :: string containing the date.
     * @return time_t value of date
     */
-    time_t ICatHelper::getTimevalue(const std::string& inputDate)
+    time_t CatalogHelper::getTimevalue(const std::string& inputDate)
     {
       // Prevent any possible errors.
       if(inputDate.empty()) return 0;
