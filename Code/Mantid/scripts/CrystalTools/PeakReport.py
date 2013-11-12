@@ -93,8 +93,7 @@ class PeakReport:
 			peaks_presenter.setForegroundColor(self.__foreground_color)
 		
 		image_files = []
-		#for i in range(peaks_workspace.rowCount()):
-		for i in range(5):
+		for i in range(peaks_workspace.rowCount()):
 			peaks_presenter.zoomToPeak(i)
 			filename = os.path.join(self.__out_location, str(i) + ".png")
 			# Add for clean-up later
