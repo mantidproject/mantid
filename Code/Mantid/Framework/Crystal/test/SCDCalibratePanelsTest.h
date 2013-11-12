@@ -9,25 +9,7 @@
 #define SCDCALIBRATEPANELSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidKernel/Quat.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidDataObjects/Workspace2D.h"
-//----------------------------------- For subtesting part of Calibrate Saving code------------------------
-#include <iostream>
-#include <fstream>
-#include "MantidKernel/Property.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -36,7 +18,6 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
-//------------------------------------------------
 
 
 class SCDCalibratePanelsTest : public CxxTest::TestSuite
@@ -44,51 +25,40 @@ class SCDCalibratePanelsTest : public CxxTest::TestSuite
 
 public:
 
-  void test_data()
-   {
-     FrameworkManager::Instance();
-     boost::shared_ptr< Algorithm > alg= AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
+  void test_TOPAZ_3007()
+  {
+    // load a peaks file
+    boost::shared_ptr< Algorithm > alg= AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
+    alg->initialize() ;
+    alg->setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    alg->setPropertyValue("OutputWorkspace", "TOPAZ_3007");
+    TS_ASSERT(alg->execute());
 
-     alg->initialize() ;
-     alg->setPropertyValue("Filename", "TOPAZ_3007.peaks");
-     alg->setPropertyValue("OutputWorkspace", "TOPAZ_3007");
+    // run the calibration
+    alg= AlgorithmFactory::Instance().create("SCDCalibratePanels", 1);
+    alg->initialize();
+    //Peakws->setName("PeaksWsp");
+    alg->setPropertyValue("PeakWorkspace", "TOPAZ_3007" );
+    alg->setProperty("a",14.0);
+    alg->setProperty("b",19.3);
+    alg->setProperty("c",  8.6);
+    alg->setProperty("alpha",90.0);
+    alg->setProperty("beta",105.0);
+    alg->setProperty("gamma",90.0);
+    alg->setProperty("RotateCenters", false);
+    alg->setProperty("PanelGroups","SpecifyGroups");
+    alg->setProperty("Grouping","26");
+    alg->setPropertyValue("ResultWorkspace","Result");
+    alg->setPropertyValue("QErrorWorkspace","QErrorResult");
+    TS_ASSERT(alg->execute());
 
-     alg->execute();
-
-     PeaksWorkspace_sptr Peakws =boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve("TOPAZ_3007") );
-     AnalysisDataService::Instance().remove("TOPAZ_3007");
-
-     alg= AlgorithmFactory::Instance().create("SCDCalibratePanels", 1);
-
-     alg->initialize();
-     //Peakws->setName("PeaksWsp");
-     alg->setProperty("PeakWorkspace", Peakws );
-
-     alg->setProperty("a",14.0);
-     alg->setProperty("b",19.3);
-     alg->setProperty("c",  8.6);
-     alg->setProperty("alpha",90.0);
-     alg->setProperty("beta",105.0);
-     alg->setProperty("gamma",90.0);
-
-     alg->setProperty("RotateCenters", false);
-     alg->setProperty("PanelGroups","SpecifyGroups");
-     alg->setProperty("Grouping","26");
-     alg->setPropertyValue("ResultWorkspace","Result");
-     alg->setPropertyValue("QErrorWorkspace","QErrorResult");
-
-     alg->execute();
-
-     alg->setPropertyValue("ResultWorkspace","Result");
-
-     boost::shared_ptr<ITableWorkspace> Results  =  alg->getProperty("ResultWorkspace");
-
-
-     TS_ASSERT_DELTA(-0.000561209,Results->cell<double>(3,1),.01);
-     TS_ASSERT_DELTA(6.6194e-06,Results->cell<double>(2,1),.01);
-     TS_ASSERT_DELTA(-4.99864,Results->cell<double>(9,1),.01);
-     TS_ASSERT_DELTA(18.0095,Results->cell<double>(8,1),.01);
+    // verify the results
+    ITableWorkspace_sptr results
+        = AnalysisDataService::Instance().retrieveWS< ITableWorkspace>("Result");
+    TS_ASSERT_DELTA(-0.000561209,results->cell<double>(3,1),.01);
+    TS_ASSERT_DELTA(6.6194e-06,results->cell<double>(2,1),.01);
+    TS_ASSERT_DELTA(-4.99864,results->cell<double>(9,1),.01);
+    TS_ASSERT_DELTA(18.0095,results->cell<double>(8,1),.01);
 
    }
 
