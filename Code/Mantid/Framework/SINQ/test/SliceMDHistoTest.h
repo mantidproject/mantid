@@ -49,7 +49,7 @@ public:
     IMDHistoWorkspace_sptr data =  
       AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
 								    outputSpace);
-    long nBin = data->getNPoints();
+    long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
     double *sdata = data->getSignalArray();
     for(long i = 0; i < nBin; i++){

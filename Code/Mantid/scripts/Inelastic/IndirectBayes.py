@@ -582,12 +582,12 @@ def QLPlotQL(inputWS,Plot,res_plot,Loop):
 			p_plot=mp.plotSpectrum(pWS,[1,2],False)
 
 		if (Plot == 'FwHm' or Plot == 'All'):
-			ilist = [1,3,5]
+			ilist = [0,2,4]
 			i_plot=mp.plotSpectrum(inputWS+'_Workspace',ilist,True)
 			i_layer = i_plot.activeLayer()
 			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
 		if (Plot == 'Intensity' or Plot == 'All'):
-			wlist = [0,2,4]
+			wlist = [1,3,5]
 			w_plot=mp.plotSpectrum(inputWS+'_Workspace',wlist,True)
 			w_layer = w_plot.activeLayer()
 			w_layer.setAxisTitle(mp.Layer.Left,'Full width half maximum (meV)')
