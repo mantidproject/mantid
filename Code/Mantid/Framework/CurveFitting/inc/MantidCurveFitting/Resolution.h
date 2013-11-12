@@ -4,10 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidKernel/System.h"
-#include <cmath>
+#include "MantidCurveFitting/TabulatedFunction.h"
 
 namespace Mantid
 {
@@ -39,67 +36,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Resolution : public API::ParamFunction, public API::IFunction1D
+class DLLExport Resolution : public TabulatedFunction
 {
 public:
   /// Constructor
-  Resolution():m_xStart(0),m_xEnd(0){}
-  /// Destructor
-  virtual ~Resolution() {};
+  Resolution();
 
   /// overwrite IFunction base class methods
   std::string name()const{return "Resolution";}
-  virtual const std::string category() const { return "General";}
-  void function1D(double* out, const double* xValues, const size_t nData)const;
-  ///  function derivatives
-  void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
-  {
-    (void) out; (void) xValues; (void) nData; //Avoid compiler warning
-  }
-
-  /// Returns the number of attributes associated with the function
-  size_t nAttributes()const{return 1;}
-  /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames()const;
-  /// Return a value of attribute attName
-  IFunction::Attribute getAttribute(const std::string& attName)const
-  {
-    UNUSED_ARG(attName);
-    return IFunction::Attribute(m_fileName, true);
-  }
-  /// Set a value to attribute attName
-  void setAttribute(const std::string& attName,const IFunction::Attribute& value);
-  /// Check if attribute attName exists
-  bool hasAttribute(const std::string& attName)const{return attName == "FileName";}
-
-private:
-
-  /// Call the appropriate load function
-  void load(const std::string& fname);
-
-  /// Load the resolution from an ASCII file
-  void loadAscii(const std::string& fname);
-
-  /// Load the resolution from a NeXuS file
-  void loadNexus(const std::string& fname);
-
-  /// Size of the data
-  size_t size()const{return m_yData.size();}
-
-  /// The file name
-  std::string m_fileName;
-
-  /// Stores x-values
-  std::vector<double> m_xData;
-
-  /// Stores y-values
-  std::vector<double> m_yData;
-
-  /// The first x
-  double m_xStart;
-
-  /// The lasst x
-  double m_xEnd;
 
 };
 

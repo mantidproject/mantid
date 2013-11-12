@@ -75,60 +75,49 @@ public:
   ///  function derivatives
   void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
-  /// Returns the number of attributes associated with the function
-  size_t nAttributes()const{return 2;}
-  /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames()const;
-  /// Return a value of attribute attName
-  IFunction::Attribute getAttribute(const std::string& attName)const;
   /// Set a value to attribute attName
   void setAttribute(const std::string& attName,const IFunction::Attribute& value);
-  /// Check if attribute attName exists
-  bool hasAttribute(const std::string& attName)const;
 
 private:
 
   /// Call the appropriate load function
   void load(const std::string& fname);
 
-  /// Load the points from an ASCII file
-  void loadAscii(const std::string& fname);
-
-  /// Load the points from a NeXuS file
-  void loadNexus(const std::string& fname);
+  /// Load the points from a MatrixWorkspace
+  void loadWorkspace(const std::string& wsName) const;
 
   /// Load the points from a MatrixWorkspace
-  void loadWorkspace(const std::string& wsName);
-
-  /// Load the points from a MatrixWorkspace
-  void loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws);
+  void loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) const;
 
   /// Size of the data
   size_t size()const{return m_yData.size();}
 
   /// Clear all data
-  void clear();
+  void clear() const;
 
   /// Evaluate the function for a list of arguments and given scaling factor
   void eval(double scaling, double* out, const double* xValues, const size_t nData)const;
 
-  /// The file name
-  std::string m_fileName;
+  /// Fill in the x and y value containers (m_xData and m_yData)
+  void setupData() const;
 
-  /// The workspace name
-  std::string m_wsName;
+  /// The default value for the workspace index
+  static const int defaultIndexValue;
+
+  /// Temporary workspace holder
+  mutable boost::shared_ptr<API::MatrixWorkspace> m_workspace;
 
   /// Stores x-values
-  std::vector<double> m_xData;
+  mutable std::vector<double> m_xData;
 
   /// Stores y-values
-  std::vector<double> m_yData;
+  mutable std::vector<double> m_yData;
 
-  /// The first x
-  double m_xStart;
+  /// Flag of setting workspace index explicitly
+  mutable bool m_indexSet;
 
-  /// The lasst x
-  double m_xEnd;
+  /// Flag of completing data setup
+  mutable bool m_setupFinished;
 
 };
 
