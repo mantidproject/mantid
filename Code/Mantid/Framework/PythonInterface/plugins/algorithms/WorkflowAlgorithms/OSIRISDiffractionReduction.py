@@ -72,17 +72,23 @@ def averageWsList(wsList):
     assert len(wsList) > 0, "getAverageWs: Trying to take an average of nothing."
     if len(wsList) == 1:
         return wsList[0]
+
+    #create set of unique workspace names
+    #so we don't count the same run twice
+    uniqueWorkspaces = list(set(wsList))
+    numWorkspaces = len(uniqueWorkspaces)
         
     # Generate the final name of the averaged workspace.
     avName = "avg"
-    for name in wsList:
+    for name in uniqueWorkspaces:
         avName += "_" + name
     
     # Compute the average and put into "__temp_avg".
-    __temp_avg = mtd[wsList[0]] + mtd[wsList[1]]
-    for i in range(2, len(wsList) ):
-        __temp_avg += mtd[wsList[i]]
-    __temp_avg /= len(wsList)
+    __temp_avg = mtd[uniqueWorkspaces[0]]
+    for i in range(1, numWorkspaces):
+        __temp_avg += mtd[uniqueWorkspaces[i]]
+        
+    __temp_avg /= numWorkspaces
         
     # Rename the average ws and return it.
     RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=avName)
@@ -240,6 +246,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         
         # Create scalar data to cope with where merge has combined overlapping data.
         intersections = getIntersectionsOfRanges(self._samMap.getMap().keys())
+        
         dataX = result.dataX(0)
         dataY = []; dataE = []
         for i in range(0, len(dataX)-1):
@@ -248,7 +255,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 dataY.append(2); dataE.append(2)
             else:
                 dataY.append(1); dataE.append(1)
-        
+
         # apply scalar data to result workspace
         for i in range(0, result.getNumberHistograms()):
             resultY = result.dataY(i)
