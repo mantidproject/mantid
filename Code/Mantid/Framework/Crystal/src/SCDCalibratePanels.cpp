@@ -114,22 +114,20 @@ namespace Mantid
 
     DECLARE_ALGORITHM(SCDCalibratePanels)
 
-   namespace{
+    namespace
+    {
       const double maxDetHWScale =1.15;
       const double minDetHWScale = .85;
     }
 
     SCDCalibratePanels::SCDCalibratePanels():API::Algorithm()
-
     {
-
       // g_log.setLevel(7);
     }
 
 
     SCDCalibratePanels::~SCDCalibratePanels()
     {
-
     }
 
     const std::string SCDCalibratePanels::name() const
@@ -396,7 +394,8 @@ namespace Mantid
             Groups.push_back( Group0 );
 
         }
-      }else
+      }
+      else
       {
         g_log.error("No mode " + Grouping + " defined yet");
         throw invalid_argument("No mode " + Grouping + " defined yet");
@@ -426,16 +425,12 @@ namespace Mantid
       if( preprocessCommand == "A)No PreProcessing")
         return instrument;
 
-      bool xml = false;
-      if( preprocessCommand == "C)Apply a LoadParameter.xml type file")
-        xml = true;
-
+      bool xml =
+          ( preprocessCommand == "C)Apply a LoadParameter.xml type file");
 
 
       boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
       boost::shared_ptr<ParameterMap> pmap1( new ParameterMap());
-
-
 
       for( vector< string >::iterator vit = AllBankNames.begin();
         vit != AllBankNames.end(); ++vit )
@@ -550,10 +545,10 @@ namespace Mantid
       Yoffset0 = change.Y();
       Zoffset0 = change.Z();
 
-      double scalexI = 1;
-      double scalexPre = 1;
-      double scaleyI = 1;
-      double scaleyPre = 1;
+      double scalexI = 1.;
+      double scalexPre = 1.;
+      double scaleyI = 1.;
+      double scaleyPre = 1.;
 
       vector< double > ScalexI = pmap->getDouble( bankName, "scalex");
       vector< double > ScalexPre = pmapPre->getDouble( bankName, "scalex");
@@ -794,13 +789,9 @@ namespace Mantid
           throw invalid_argument("No Rectangular detector bank " + banksVec[ 0 ] + " in instrument");
         }
 
-
-
-
         // if( it1 == (*itv).begin())
         CalcInitParams( bank_rect, instrument,  PreCalibinstrument, detWidthScale0
           ,detHeightScale0, Xoffset0, Yoffset0, Zoffset0, Xrot0, Yrot0, Zrot0);
-
 
         // --- set Function property ----------------------
 
@@ -827,10 +818,7 @@ namespace Mantid
         if( i == 0)
         {
           first = true;
-
         }
-
-
 
         if( !use_PanelWidth)
         {
@@ -841,8 +829,6 @@ namespace Mantid
 
           oss1 <<Gprefix<<"detWidthScale=" << fixed << detWidthScale0;
         }
-
-
 
         if( !use_PanelHeight)
         {
@@ -868,8 +854,6 @@ namespace Mantid
             Gprefix<<"Zoffset=" << Zoffset0;
         }
 
-
-
         if( ! use_PanelOrientation )
         {
           if( !first)
@@ -881,10 +865,6 @@ namespace Mantid
             <<Gprefix<<"Yrot=" << Yrot0<< ","
             <<Gprefix<<"Zrot=" << Zrot0;
         }
-
-
-
-
 
         //--------------- set Constraints Property  -------------------------------
 
@@ -910,7 +890,7 @@ namespace Mantid
       }//for vector< string > in Groups
 
 
-//Constraints for sample offsets
+      //Constraints for sample offsets
      maxXYOffset = getProperty("MaxSamplePositionChangeMeters");
 
      if( getProperty("AllowSampleShift"))
@@ -1435,80 +1415,26 @@ namespace Mantid
      * @param T0           -The time offset
      * @param FileName     -The name of the DetCal file to save the results to
      */
-    void SCDCalibratePanels::SaveIsawDetCal( boost::shared_ptr<const Instrument> &NewInstrument,
-         set<string> &AllBankName,double T0,string FileName)
+    void SCDCalibratePanels::SaveIsawDetCal( boost::shared_ptr<const Instrument> &instrument,
+         set<string> &AllBankName,double T0,string filename)
     {
-      double beamline_norm,L0=0.0;
-      V3D beamline,  samplePos;
-      filebuf fb;
-      fb.open(FileName.c_str(), ios::out);
-      ostream os(&fb);
-      os << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):" << endl;
-      os << "# Lengths are in centimeters." << endl;
-      os << "# Base and up give directions of unit vectors for a local " << endl;
-      os << "# x,y coordinate system on the face of the detector." << endl;
-      os << "#" << endl;
-      os << "#" << endl;
-      os << "#" << DateAndTime::getCurrentTime().toISO8601String() << endl;
-      os << "6         L1    T0_SHIFT" << endl;
+      // create a workspace to pass to SaveIsawDetCal
+      const size_t number_spectra = instrument->getNumberDetectors();
+      DataObjects::Workspace2D_sptr wksp =
+          boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D",number_spectra,2,1));
+      wksp->setInstrument(instrument);
+      wksp->rebuildSpectraMapping( true /* include monitors */);
 
+      // convert the bank names into a vector
+      std::vector<string> banknames(AllBankName.begin(), AllBankName.end());
 
-      NewInstrument->getInstrumentParameters(L0, beamline, beamline_norm, samplePos);
-      os << "7 " << setw(10);
-      os << setprecision(4) << fixed << (L0 * 100);
-      os << setw(12) << setprecision(3) << fixed;
-      // Time offset of 0.00 for now
-      os << setw(12) << setprecision(4) << T0 << endl;
-
-      os
-          << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ"
-          << endl;
-      for (set<string>::iterator it = AllBankName.begin(); it != AllBankName.end(); ++it)
-      {
-        string bankName = *it;
-        string::reverse_iterator rit = bankName.rbegin();
-        string S;
-        while (isdigit(*rit))
-        {
-          S = *rit +S;
-          ++rit;
-        }
-        int bankNum = boost::lexical_cast<int>(S);
-
-        boost::shared_ptr<const RectangularDetector> det = boost::dynamic_pointer_cast<
-            const RectangularDetector>(NewInstrument->getComponentByName(bankName));
-        if (!det)
-          continue;
-        V3D center = det->getPos();
-        double detd = (center - NewInstrument->getSample()->getPos()).norm();
-        // Base unit vector (along the horizontal, X axis)
-        V3D base = det->getAtXY(det->xpixels() - 1, 0)->getPos() - det->getAtXY(0, 0)->getPos();
-        base.normalize();
-        // Up unit vector (along the vertical, Y axis)
-        V3D up = det->getAtXY(0, det->ypixels() - 1)->getPos() - det->getAtXY(0, 0)->getPos();
-        up.normalize();
-
-        // Write the line
-        os << "5 " << setw(6) << right << bankNum << " " << setw(6) << right
-            << det->xpixels() << " " << setw(6) << right << det->ypixels() << " "
-            << setw(7) << right << fixed << setprecision(4) << 100.0 * det->xsize()
-            << " " << setw(7) << right << fixed << setprecision(4) << 100.0
-            * det->ysize() << " " << "  0.2000 " << setw(6) << right << fixed
-            << setprecision(2) << 100.0 * detd << " " << setw(9) << right << fixed
-            << setprecision(4) << 100.0 * center.X() << " " << setw(9) << right
-            << fixed << setprecision(4) << 100.0 * center.Y() << " " << setw(9)
-            << right << fixed << setprecision(4) << 100.0 * center.Z() << " "
-            << setw(8) << right << fixed << setprecision(5) << base.X() << " "
-            << setw(8) << right << fixed << setprecision(5) << base.Y() << " "
-            << setw(8) << right << fixed << setprecision(5) << base.Z() << " "
-            << setw(8) << right << fixed << setprecision(5) << up.X() << " "
-            << setw(8) << right << fixed << setprecision(5) << up.Y() << " "
-            << setw(8) << right << fixed << setprecision(5) << up.Z() << " "
-            << endl;
-
-      }
-
-      fb.close();
+      // call SaveIsawDetCal
+      API::IAlgorithm_sptr alg = createChildAlgorithm("SaveIsawDetCal");
+      alg->setProperty("InputWorkspace", wksp);
+      alg->setProperty("Filename", filename);
+      alg->setProperty("TimeOffset", T0);
+      alg->setProperty("BankNames", banknames);
+      alg->executeAsChildAlg();
     }
 
 

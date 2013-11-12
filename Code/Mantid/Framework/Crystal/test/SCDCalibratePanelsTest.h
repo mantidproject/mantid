@@ -50,6 +50,7 @@ public:
     alg->setProperty("Grouping","26");
     alg->setPropertyValue("ResultWorkspace","Result");
     alg->setPropertyValue("QErrorWorkspace","QErrorResult");
+    alg->setPropertyValue("DetCalFilename", "/tmp/topaz.detcal"); // deleteme
     TS_ASSERT(alg->execute());
 
     // verify the results
