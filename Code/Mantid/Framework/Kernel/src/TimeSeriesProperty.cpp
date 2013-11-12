@@ -740,6 +740,25 @@ namespace Mantid
     }
 
     /**
+      * Return the time series as a C++ multimap<DateAndTime, TYPE>. All values.
+      * This method is used in parsing the ISIS ICPevent log file: different commands
+      * can be recorded against the same time stamp but all must be present.
+      */
+    template<typename TYPE>
+    std::multimap<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMultiMap() const
+    {
+        std::multimap<DateAndTime, TYPE> asMultiMap;
+
+        if (m_values.size() > 0)
+        {
+          for (size_t i = 0; i < m_values.size(); i ++)
+            asMultiMap.insert( std::make_pair(m_values[i].time(), m_values[i].value()) );
+        }
+
+        return asMultiMap;
+    }
+
+    /**
      * Return the time series's times as a vector<DateAndTime>
      * @return A vector of DateAndTime objects
      */
