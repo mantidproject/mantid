@@ -42,7 +42,7 @@ public:
   /** Test calculation mode on calculating 2 peaks
    *  It is same as LeBailFunctionTest.test_CalculatePeakParameters()
    */
-  void test_CalculationSimpleMode()
+  void Ptest_CalculationSimpleMode()
   {
     // Create input workspaces
     API::MatrixWorkspace_sptr dataws;
@@ -91,6 +91,7 @@ public:
 
     lbfit.setProperty("Function", "Calculation");
 
+    lbfit.setProperty("PeakType", "ThermalNeutronBk2BkExpConvPVoigt");
     lbfit.setProperty("BackgroundType", "Polynomial");
     lbfit.setPropertyValue("BackgroundParameters", "0.0, 0.0, 0.0");
 
@@ -141,9 +142,114 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test calculation mode on calculating 1 peak using Fullprof #9 profile
+    * It is same as LeBailFunctionTest.test_calculateLeBailFunctionProf9()
+    * Task of this test is to make sure the workflow is correct.
+   */
+  void test_CalculationSimpleModeProfile9()
+  {
+    // Create input workspaces
+    API::MatrixWorkspace_sptr dataws;
+    dataws = createInputDataWorkspace(9);
+
+    //  Profile parameters from backgroundless setup
+    map<string, double> modmap;
+    DataObjects::TableWorkspace_sptr parameterws = createPeakParameterWorkspace(modmap, 9);
+
+    //  Add reflection (220)
+    DataObjects::TableWorkspace_sptr hklws;
+    double h220 = 660.0/0.0064;
+    std::vector<double> peakheights;
+    peakheights.push_back(h220);
+
+    std::vector<std::vector<int> > hkls;
+    std::vector<int> p220(3, 2);
+    p220[2] = 0;
+    hkls.push_back(p220);
+
+    hklws = createInputHKLWorkspace(hkls, peakheights);
+
+    AnalysisDataService::Instance().addOrReplace("Data", dataws);
+    AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
+    AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
+
+    // Initialize the algorithm
+    LeBailFit lbfit;
+
+    TS_ASSERT_THROWS_NOTHING(lbfit.initialize());
+    TS_ASSERT(lbfit.isInitialized());
+
+    // 3. Set properties
+    lbfit.setProperty("InputWorkspace", "Data");
+    lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
+
+    lbfit.setProperty("InputParameterWorkspace", "PeakParameters");
+    lbfit.setProperty("OutputParameterWorkspace", "PeakParameters");
+
+    lbfit.setProperty("InputHKLWorkspace", "Reflections");
+    lbfit.setProperty("OutputPeaksWorkspace", "PeakParameterWS");
+
+    lbfit.setProperty("WorkspaceIndex", 0);
+
+    lbfit.setProperty("Function", "Calculation");
+
+    lbfit.setProperty("PeakType", "NeutronBk2BkExpConvPVoigt");
+    lbfit.setProperty("BackgroundType", "Polynomial");
+    lbfit.setPropertyValue("BackgroundParameters", "0.0, 0.0, 0.0");
+
+    lbfit.setProperty("UseInputPeakHeights", false);
+    lbfit.setProperty("PeakRadius", 8);
+
+    lbfit.setProperty("PlotIndividualPeaks", true);
+
+    // 4. Execute
+    TS_ASSERT_THROWS_NOTHING(lbfit.execute());
+
+    TS_ASSERT(lbfit.isExecuted());
+
+    // 5. Get output
+    DataObjects::Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+          AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
+    TS_ASSERT(outws);
+    if (!outws)
+    {
+      return;
+    }
+
+    // 9 fixed + 2 individual peaks
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 10);
+
+    return;
+
+    /*
+    for (size_t i = 0; i < outws->dataY(0).size(); ++i)
+      std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t" << outws->dataY(1)[i] << std::endl;
+    */
+
+    // 4. Calcualte data
+    double y25 = 1366.40;
+    double y59 = 0.2857;
+    double y86 = 649.464;
+
+    TS_ASSERT_DELTA(outws->readY(1)[25], y25, 0.1);
+    TS_ASSERT_DELTA(outws->readY(1)[59], y59, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(1)[86], y86, 0.001);
+
+    // 5. Clean
+    AnalysisDataService::Instance().remove("Data");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("Reflections");
+    AnalysisDataService::Instance().remove("CalculatedPeaks");
+    AnalysisDataService::Instance().remove("PeakParameterWS");
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Test on peak calcualtion with non-trivial background
    */
-  void test_CalculationModeFull()
+  void Ptest_CalculationModeFull()
   {
     // 1. Create input workspace
     API::MatrixWorkspace_sptr dataws;
@@ -220,7 +326,7 @@ public:
     * Due to the strongly correlated peak parameters, only 1 parameter
     * has its value shifted from true value for unit test purpose
    */
-  void test_fit1Parameter()
+  void Ptest_fit1Parameter()
   {
     std::string testplan("zero");
 
@@ -623,6 +729,10 @@ public:
         genPeakParameterNomBank4(paramvaluemap);
         break;
 
+      case 9:
+        generateGPPDBank1(paramvaluemap);
+        break;
+
       default:
         // Unsupported
         stringstream errmsg;
@@ -798,6 +908,33 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Generate peak parameters for GPPD bank 1 from arg_si.pcr (Fullprof example)
+    */
+  void generateGPPDBank1(map<std::string, double>& parammap)
+  {
+    parammap.insert(make_pair("Dtt1", 16370.650));
+    parammap.insert(make_pair("Dtt2", 0.10));
+    parammap.insert(make_pair("Zero", 0.0));
+
+    parammap.insert(make_pair("Alph0", 1.0));
+    parammap.insert(make_pair("Alph1", 0.0));
+    parammap.insert(make_pair("Beta0", 0.109036));
+    parammap.insert(make_pair("Beta1", 0.009834));
+
+    parammap.insert(make_pair("Sig2",  sqrt(91.127)));
+    parammap.insert(make_pair("Sig1",  sqrt(1119.230)));
+    parammap.insert(make_pair("Sig0",  sqrt(0.0)));
+
+    parammap.insert(make_pair("Gam0", 0.0));
+    parammap.insert(make_pair("Gam1", 7.688));
+    parammap.insert(make_pair("Gam2", 0.0));
+
+    parammap.insert(make_pair("LatticeConstant", 5.431363));
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Create reflection table workspaces
    */
   DataObjects::TableWorkspace_sptr createInputHKLWorkspace(std::vector<std::vector<int> > hkls, std::vector<double> heights)
@@ -832,13 +969,14 @@ public:
       return hklws;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Create data workspace without background
    */
   API::MatrixWorkspace_sptr createInputDataWorkspace(int option)
   {    
     API::MatrixWorkspace_sptr dataws;
 
-    if (option == 1 || option == 2 || option == 3)
+    if (option != 4)
     {
       // Generate data
 
@@ -859,6 +997,10 @@ public:
 
         case 3:
           generate1PeakDataPlusBackground(vecX, vecY, vecE);
+          break;
+
+        case 9:
+          generateArgSiPeak220(vecX, vecY, vecE);
           break;
 
         default:
@@ -897,8 +1039,7 @@ public:
     else
     {
       // not supported
-      std::cout << "LeBailFitTest.createInputDataWorkspace() Option " << option << " is not supported. " << std::endl;
-      throw std::invalid_argument("Unsupported option. ");
+      throw std::invalid_argument("Logic error. ");
     }
 
     return dataws;
@@ -1160,6 +1301,44 @@ public:
     vecX.push_back(16862.77067); vecY.push_back( -0.00336791);      vecE.push_back( 0.00234414);
     vecX.push_back(16878.39104); vecY.push_back( -0.00327705);      vecE.push_back( 0.00234013);
     vecX.push_back(16894.02589); vecY.push_back( -0.00199679);      vecE.push_back( 0.00234771);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate backgroundless peak 220 from arg_si.dat (Fullprof example)
+    */
+  void generateArgSiPeak220(std::vector<double>& vecx, std::vector<double>& vecy, std::vector<double>& vece)
+  {
+    vecx.push_back(31019.30000);        vecy.push_back(0.02624178);         vece.push_back(0.00092672);
+    vecx.push_back(31050.40000);        vecy.push_back(0.02646138);         vece.push_back(0.00093232);
+    vecx.push_back(31081.40000);        vecy.push_back(0.02809566);         vece.push_back(0.00096305);
+    vecx.push_back(31112.50000);        vecy.push_back(0.02896440);         vece.push_back(0.00097980);
+    vecx.push_back(31143.60000);        vecy.push_back(0.02861105);         vece.push_back(0.00097545);
+    vecx.push_back(31174.80000);        vecy.push_back(0.03432836);         vece.push_back(0.00107344);
+    vecx.push_back(31205.90000);        vecy.push_back(0.03941826);         vece.push_back(0.00115486);
+    vecx.push_back(31237.10000);        vecy.push_back(0.05355697);         vece.push_back(0.00135755);
+    vecx.push_back(31268.40000);        vecy.push_back(0.09889440);         vece.push_back(0.00188719);
+    vecx.push_back(31299.60000);        vecy.push_back(0.20556772);         vece.push_back(0.00285447);
+    vecx.push_back(31330.90000);        vecy.push_back(0.43901506);         vece.push_back(0.00456425);
+    vecx.push_back(31362.30000);        vecy.push_back(0.81941730);         vece.push_back(0.00702201);
+    vecx.push_back(31393.60000);        vecy.push_back(1.33883897);         vece.push_back(0.01019324);
+    vecx.push_back(31425.00000);        vecy.push_back(1.74451085);         vece.push_back(0.01262540);
+    vecx.push_back(31456.50000);        vecy.push_back(1.83429503);         vece.push_back(0.01317582);
+    vecx.push_back(31487.90000);        vecy.push_back(1.53455479);         vece.push_back(0.01141480);
+    vecx.push_back(31519.40000);        vecy.push_back(1.03117425);         vece.push_back(0.00839135);
+    vecx.push_back(31550.90000);        vecy.push_back(0.52893114);         vece.push_back(0.00522327);
+    vecx.push_back(31582.50000);        vecy.push_back(0.23198354);         vece.push_back(0.00311024);
+    vecx.push_back(31614.10000);        vecy.push_back(0.10961397);         vece.push_back(0.00203244);
+    vecx.push_back(31645.70000);        vecy.push_back(0.06396058);         vece.push_back(0.00152266);
+    vecx.push_back(31677.30000);        vecy.push_back(0.04880334);         vece.push_back(0.00132322);
+    vecx.push_back(31709.00000);        vecy.push_back(0.03836045);         vece.push_back(0.00116918);
+    vecx.push_back(31740.70000);        vecy.push_back(0.03639256);         vece.push_back(0.00113951);
+    vecx.push_back(31772.50000);        vecy.push_back(0.03248324);         vece.push_back(0.00107658);
+    vecx.push_back(31804.20000);        vecy.push_back(0.03096179);         vece.push_back(0.00105191);
+
+    for (size_t i = 0; i < vecy.size(); ++i)
+      vecy[i] -= 0.02295189;
 
     return;
   }

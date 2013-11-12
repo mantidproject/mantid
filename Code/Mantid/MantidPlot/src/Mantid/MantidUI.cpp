@@ -554,8 +554,23 @@ void MantidUI::showMDPlot()
   // Extract the settings from the dialog opened earlier
   bool showErrors = dlg.showErrorBars();
   LinePlotOptions * opts = dlg.getLineOptionsWidget();
+  QStringList all;
+  all << wsName;
+  plotMDList(all, opts->getPlotAxis(), opts->getNormalization(), showErrors);
+}
 
-  MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName));
+/**
+ * Plots a curve showing intensities for MDWorkspaces
+ * @param wsNames : Names of the workspaces to plot
+ * @param plotAxis : Axis number to plot
+ * @param normalization: Normalization option to use
+ * @param showErrors: True if errors are to be show
+ * @return
+ */
+MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showErrors)
+{
+  auto firstName = wsNames.at(0);
+  MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstName));
   ml->setCloseOnEmpty(true);
   Graph *g = ml->activeGraph();
   if (!g)
@@ -564,44 +579,50 @@ void MantidUI::showMDPlot()
   }
   try
   {
-    connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));  
+    connect(g, SIGNAL(curveRemoved()), ml, SLOT(maybeNeedToClose()));
     appWindow()->setPreferences(g);
     g->newLegend("");
 
-    // Create the curve with defaults
-    MantidMDCurve* curve = new MantidMDCurve(wsName,g,showErrors);
-    MantidQwtIMDWorkspaceData * data = curve->mantidData();
-    // Apply the settings
-    data->setPreviewMode(false);
-    data->setPlotAxisChoice(opts->getPlotAxis());
-    data->setNormalization(opts->getNormalization());
+    for (int i = 0; i < wsNames.size(); ++i)
+    {
+      // Create the curve with defaults
+      auto wsName = wsNames.at(i);
+      MantidMDCurve* curve = new MantidMDCurve(wsName, g, showErrors);
+      MantidQwtIMDWorkspaceData * data = curve->mantidData();
+      // Apply the settings
+      data->setPreviewMode(false);
+      data->setPlotAxisChoice(plotAxis);
+      data->setNormalization(normalization);
 
-    // Set some of the labels on the plot
-    g->setTitle(tr("Workspace ")+wsName);
-    g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
-    g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
-    g->setAntialiasing(false);
-    g->setAutoScale();
-  }
-  catch (std::invalid_argument &e)
+      // Using information from the first graph
+      if (i == 0)
+      {
+        g->setTitle(tr("Workspace ") + wsName);
+        g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
+        g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
+        g->setAntialiasing(false);
+        g->setAutoScale();
+      }
+    }
+
+  } catch (std::invalid_argument &e)
   {
     g_log.warning() << e.what() << std::endl;
-  }
-  catch (std::runtime_error &e)
-  { 
+  } catch (std::runtime_error &e)
+  {
     g_log.warning() << e.what() << std::endl;
-  }
-  catch (...)
+  } catch (...)
   {
   }
   /*
-  This is not a good way of doing it. Taken from ::plotSpectraList.
-  */
-  if ( g->curves() == 0 )
+   This is not a good way of doing it. Taken from ::plotSpectraList.
+   */
+  if (g->curves() == 0)
   {
     ml->close();
     QApplication::restoreOverrideCursor();
   }
+  return ml;
 }
 
 /*
@@ -2306,17 +2327,13 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    }
 
    Table *t = createTableFromBins(wsName, ws, binsList, errors);
+   if(!t) return NULL;
    t->confirmClose(false);
    t->setAttribute(Qt::WA_QuitOnClose);
-   MultiLayer* ml(NULL);
-   if( !t )
-   {
-     QApplication::restoreOverrideCursor();
-     return ml;
-   }
 
    // TODO: Use the default style instead of a line if nothing is passed into this method
-   ml = appWindow()->multilayerPlot(t,t->colNames(),style);
+   MultiLayer *ml = appWindow()->multilayerPlot(t,t->colNames(),style);
+   if(!ml) return NULL;
    m->setBinGraph(ml,t);
    ml->confirmClose(false);
    QApplication::restoreOverrideCursor();
@@ -3139,7 +3156,8 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     QApplication::restoreOverrideCursor();
     return NULL;
   }
-  connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
+  connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+  
   appWindow()->setPreferences(g);
   g->newLegend("");
   MantidMatrixCurve* mc(NULL);

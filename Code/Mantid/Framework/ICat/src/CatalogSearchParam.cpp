@@ -1,5 +1,6 @@
 #include "MantidICat/CatalogSearchParam.h"
-#include <boost/lexical_cast.hpp> 
+#include "MantidKernel/DateAndTime.h"
+#include <boost/algorithm/string/regex.hpp>
 
 namespace Mantid
 {
@@ -76,6 +77,12 @@ namespace Mantid
      */
     void CatalogSearchParam::setDatafileName(const std::string& datafileName ){ m_datafileName =datafileName;}
 
+    /**
+     * Sets the "My data only" checkbox.
+     * @param flag :: Flag to search in "My data" only.
+     */
+    void CatalogSearchParam::setMyData(bool flag) { m_myData = flag;}
+
     /** This method  returns the start run number
      *  @returns  run start number
      */
@@ -143,76 +150,29 @@ namespace Mantid
      */
     const std::string& CatalogSearchParam::getDatafileName()const{return m_datafileName;}
 
-    /**This method saves the date components to C library struct tm
-     *@param sDate :: string containing the date
-     *@return time_t value of date
+    /**
+     * Creates a time_t value from an input date ("23/06/2003").
+     * @param inputDate :: string containing the date.
+     * @return time_t value of date
      */
-    time_t CatalogSearchParam::getTimevalue(const std::string& sDate)
+    time_t CatalogSearchParam::getTimevalue(const std::string& inputDate)
     {
-
-      if(!sDate.compare(""))
-      {
-        return 0;
-      }
-      struct tm  timeinfo;
-      std::basic_string <char>::size_type index,off=0;
-      int day,month,year;
-
-      //look for the first '/' to extract day part from the date string
-      index=sDate.find('/',off);
-      if(index == std::string::npos)
-      {
-        throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
-      }
-      //get day part of the date
-      try
-      {
-        day=boost::lexical_cast<int>(sDate.substr(off,index-off).c_str());
-      }
-      catch(boost::bad_lexical_cast&)
-      {
-        throw std::runtime_error("Invalid Date");
-      }
-      timeinfo.tm_mday=day;
-
-      //change the offset to the next position after "/"
-      off=index+1;
-      //look for 2nd '/' to get month part from  the date string
-      index=sDate.find('/',off);
-      if(index == std::string::npos)
-      {
-        throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
-      }
-      //now get the month part
-      try
-      {
-        month=boost::lexical_cast<int>(sDate.substr(off,index-off).c_str());
-      }
-      catch(boost::bad_lexical_cast&)
-      {
-        throw std::runtime_error("Invalid Date");
-      }
-      timeinfo.tm_mon=month-1;
-
-      //change the offset to the position after "/"
-      off=index+1;
-      //now get the year part from the date string
-      try
-      {
-        year=boost::lexical_cast<int>(sDate.substr(off,4).c_str());
-
-      }
-      catch(boost::bad_lexical_cast&)
-      {
-        throw std::runtime_error("Invalid Date");
-      }
-
-      timeinfo.tm_year=year-1900;
-      timeinfo.tm_min=0;
-      timeinfo.tm_sec=0;
-      timeinfo.tm_hour=0;
-      return std::mktime (&timeinfo );
+      // Prevent any possible errors.
+      if(inputDate.empty()) return 0;
+      // A container to hold the segments of the date.
+      std::vector<std::string> dateSegments;
+      // Split input by "/" prior to rearranging the date
+      boost::algorithm::split_regex(dateSegments, inputDate, boost::regex("/"));
+      // Reorganise the date to be ISO format.
+      std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" + dateSegments.at(0) + " 0:00:00.000";
+      // Return the date as time_t value.
+      return Kernel::DateAndTime(isoDate).to_time_t();
     }
 
+    /**
+     * Is "My data only" selected?
+     * @returns true if my data checkbox is selected.
+     */
+    bool CatalogSearchParam::getMyData() const { return (m_myData); }
   }
 }

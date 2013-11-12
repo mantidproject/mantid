@@ -183,7 +183,8 @@ namespace Mantid
 
       void loadEvents(API::Progress * const prog, const bool monitors);
       void createSpectraMapping(const std::string &nxsfile,
-                                const bool monitorsOnly, const std::string & bankName = "");
+                                const bool monitorsOnly,
+                                const std::vector<std::string> & bankNames = std::vector<std::string>());
       void deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames);
       bool hasEventMonitors();
       void runLoadMonitors();
@@ -197,7 +198,8 @@ namespace Mantid
           const std::string & top_entry_name, Algorithm * alg);
 
       /// Load instrument for Nexus file
-      static bool runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg);
+      static bool runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                      const std::string & top_entry_name, Algorithm * alg);
 
       /// Load instrument from IDF file specified by Nexus file
       static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,

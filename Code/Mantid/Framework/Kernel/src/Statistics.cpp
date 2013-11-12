@@ -8,7 +8,9 @@
 #include <numeric>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 #include <sstream>
+#include <cfloat>
 
 namespace Mantid
 {
@@ -253,16 +255,33 @@ namespace Mantid
         double weight = 1.0/(sigma*sigma);
         double diff = obs_i - cal_i;
 
-        sumrpnom += fabs(diff);
-        sumrpdenom += fabs(obs_i);
+        if (weight == weight && weight <= DBL_MAX)
+        {
+          // If weight is not NaN.
+          sumrpnom += fabs(diff);
+          sumrpdenom += fabs(obs_i);
 
-        sumnom += weight*diff*diff;
-        sumdenom += weight*obs_i*obs_i;
+          double tempnom = weight*diff*diff;
+          double tempden = weight*obs_i*obs_i;
+
+          sumnom += tempnom;
+          sumdenom += tempden;
+
+          if (tempnom != tempnom || tempden != tempden)
+          {
+            std::cout << "***** Error! ****** Data indexed " << i << " is NaN. "
+                      << "i = " << i << ": cal = " << calI[i] << ", obs = " << obs_i
+                      << ", weight = " << weight << ". \n";
+          }
+        }
       }
 
       Rfactor rfactor(0., 0.);
       rfactor.Rp = (sumrpnom/sumrpdenom);
       rfactor.Rwp = std::sqrt(sumnom/sumdenom);
+
+      if (rfactor.Rwp != rfactor.Rwp)
+        std::cout << "Rwp is NaN.  Denominator = " << sumnom << "; Nominator = " << sumdenom << ". \n";
 
       return rfactor;
     }

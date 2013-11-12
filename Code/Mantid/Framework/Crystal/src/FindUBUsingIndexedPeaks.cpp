@@ -11,6 +11,7 @@ Given a set of peaks at least three of which have been assigned Miller indices, 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <cstdio>
 
 namespace Mantid
@@ -65,6 +66,9 @@ namespace Crystal
   {
     this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
           "PeaksWorkspace","",Direction::InOut), "Input Peaks Workspace");
+    boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
+    mustBePositive->setLower(0.0);
+    this->declareProperty("Tolerance",0.1, mustBePositive, "Indexing Tolerance (0.1)");
   }
 
   //--------------------------------------------------------------------------
@@ -130,7 +134,7 @@ namespace Crystal
       {
         q_vectors.push_back( peaks[i].getQSampleFrame() );
       }
-      double tolerance = 0.1;
+      double tolerance   = this->getProperty("Tolerance");
       int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
 
       char logInfo[200];

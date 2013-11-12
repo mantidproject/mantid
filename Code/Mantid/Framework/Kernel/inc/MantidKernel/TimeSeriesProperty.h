@@ -182,6 +182,8 @@ namespace Mantid
       std::map<DateAndTime, TYPE> valueAsCorrectMap() const;
       ///  Return the time series's values as a vector<TYPE>
       std::vector<TYPE> valuesAsVector() const;
+      ///  Return the time series as a correct C++ multimap<DateAndTime, TYPE>. All values
+      std::multimap<DateAndTime, TYPE> valueAsMultiMap() const;
 
       /// Return the time series's times as a vector<DateAndTime>
       std::vector<DateAndTime> timesAsVector() const;
@@ -233,6 +235,8 @@ namespace Mantid
 
       /// Deletes the series of values in the property
       void clear();
+      /// Deletes all but the 'last entry' in the property
+      void clearOutdated();
       /// Clears and creates a TimeSeriesProperty from these parameters
       void create(const Kernel::DateAndTime &start_time, const std::vector<double> & time_sec, const std::vector<TYPE> & new_values);
       /// Clears and creates a TimeSeriesProperty from these parameters

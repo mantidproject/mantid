@@ -11,6 +11,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::Kernel;
 
@@ -966,17 +967,47 @@ public:
 
   void test_clear()
   {
-    TimeSeriesProperty<int> * p = new TimeSeriesProperty<int>("aProp");
+    boost::scoped_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
     p->addValue("2007-11-30T16:17:00",1);
 
     TS_ASSERT_EQUALS( p->size(), 1);
     TS_ASSERT_EQUALS( p->realSize(), 1);
 
-    ITimeSeriesProperty * pi = p;
+    ITimeSeriesProperty * pi = p.get();
     TS_ASSERT_THROWS_NOTHING( pi->clear() );
 
     TS_ASSERT_EQUALS( p->size(), 0);
     TS_ASSERT_EQUALS( p->realSize(), 0);
+  }
+
+  void test_clearOutdated()
+  {
+    boost::scoped_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
+    p->addValue("2007-11-30T16:17:00",99);
+
+    ITimeSeriesProperty * pi = p.get();
+    TS_ASSERT_THROWS_NOTHING( pi->clearOutdated() );
+    // No change
+    TS_ASSERT_EQUALS( p->size(), 1);
+    TS_ASSERT_EQUALS( p->realSize(), 1);
+    TS_ASSERT_EQUALS( p->lastValue(), 99);
+
+    DateAndTime t("2007-11-30T15:17:00");
+    p->addValue(t,88);
+    TS_ASSERT_EQUALS( p->size(), 2);
+
+    TS_ASSERT_THROWS_NOTHING( pi->clearOutdated() );
+    TS_ASSERT_EQUALS( p->size(), 1);
+    TS_ASSERT_EQUALS( p->realSize(), 1);
+    // Note that it kept the last-added entry even though its time is earlier
+    TS_ASSERT_EQUALS( p->lastTime(), t);
+    TS_ASSERT_EQUALS( p->firstValue(), 88);
+
+    TimeSeriesProperty<double> pp("empty");
+    TS_ASSERT_THROWS_NOTHING( pp.clearOutdated() );
+    // No change
+    TS_ASSERT_EQUALS( pp.size(), 0);
+    TS_ASSERT_EQUALS( pp.realSize(), 0);
   }
 
   /*
@@ -1096,6 +1127,7 @@ public:
     TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",1.00) );
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",3.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",1.99) ); // this one is ignored
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",2.00) );
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",4.00) );
 
@@ -1128,6 +1160,46 @@ public:
     delete p;
 
     return;
+  }
+
+  void test_valueAsMultiMap()
+  {
+    // 1. Create property
+    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",1.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",3.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",1.99) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",2.00) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",4.00) );
+
+    // 2. Get multimap
+    std::multimap<Mantid::Kernel::DateAndTime, double> tmap = p->valueAsMultiMap();
+
+    // 3. Check
+    std::vector<Mantid::Kernel::DateAndTime> times;
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
+    std::vector<double> values;
+    values.push_back(1.00);
+    values.push_back(1.99);
+    values.push_back(2.00);
+    values.push_back(3.00);
+    values.push_back(4.00);
+
+
+    size_t index = 0;
+    for (auto it=tmap.begin(); it!=tmap.end(); ++it)
+    {
+      TS_ASSERT_EQUALS(it->first, times[index]);
+      TS_ASSERT_DELTA(it->second, values[index], 1.0E-9);
+      index ++;
+    }
+
+    // -1 Clean
+    delete p;
   }
 
 

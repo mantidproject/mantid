@@ -1,0 +1,76 @@
+! L1=L2=4m, A1=20, A2=8, med b/s
+MASK/CLEAR
+MASK/CLEAR/TIME
+L/WAV 1.75 16.5 0.05/LOG
+! adjusted to suit weak scatter
+L/Q 0.005,0.001,0.008,-0.08,1.0
+! strong scatter
+!L/Q 0.0035 1.0 0.08/log
+L/QXY 0 0.15 .002/lin
+! note increase lower time limit here
+!BACK/MON/TIMES 85000 98000
+BACK/M2 85000 98000
+!check BACK/M4
+DET/REAR
+GRAVITY/ON
+!
+mask/rear h0
+mask/rear h190>h191
+mask/rear v0
+mask/rear v191
+mask/front h0
+mask/front h190>h191
+mask/front v0
+mask/front v191
+! dead wire near top
+mask/front h156>h159
+! spot on top b/s when hit meniscus ???
+mask h72>h75+v117>v122
+!
+mask/time 13000 15250
+!mask/time 5000 19200
+!masking off beamstop arm 12mm wide at 19 degrees
+PRINT not masking beam stop arm, M4 out
+!mask/line 13 19 
+!
+L/R 47 -1 3
+!L/SP 1 36864
+!MON/LENGTH=17.937 2
+!
+! use this for rear
+MON/DIRECT=DIRECT_11971_4m_Rear_09Mar12.dat
+! use for front, this command has to come second!
+MON/DIRECT/FRONT=DIRECT_6958_4m_rescaled_09Mar12.dat
+MON/TRANS/SPECTRUM=2/INTERPOLATE
+TRANS/TRANSPEC=4/SHIFT=-70
+!TRANS/TRANSPEC=3
+!  set monitor 2 to interpolate
+MON/SPECTRUM=2/INTERPOLATE
+!PRINT fitting transmissions from 4.1 to 16.5 angstrom
+FIT/TRANS/LOG 1.75 16.5
+!PRINT FIT/TRANS/OFF
+!FIT/TRANS/OFF
+!
+! 2/11/12 gdw 16176
+set centre 267.7 -164.7
+!
+! 2/11/12 gdw20 16176 8mm beam
+set scales 0.1782 1.0 1.0 1.0 1.0
+! correction to actual sample position, measured cryo at 320mm before shutter, notionally 81mm before shutter
+! DLS set up 81 - 132 =-34
+! normal changer offset +53
+SAMPLE/OFFSET 53
+! Correction to SANS2D encoders in mm 
+DET/CORR REAR X -16.0
+! note rear Z was 58, but needs change all masks 9/11 on to 47
+DET/CORR REAR Z 47.0
+! 7/8/12 front at 2.6m is at slightly too high Q values, was X -44
+DET/CORR FRONT X -24.0
+DET/CORR FRONT Y -20.0
+DET/CORR FRONT Z 47.0
+DET/CORR FRONT ROT 0.0
+! (cf 115D Perkins)  80 is just inside window, 386 instead of DT's 306, but seems to work? , 48 should be central grid
+DET/CORR FRONT RADIUS 48.0
+DET/CORR FRONT SIDE 0.0
+!
+!! 2/11/12 MASK123T 4m A1=20,S5=16mm,S6=med,A2=8 Xpress

@@ -606,7 +606,7 @@ namespace Mantid
       Kernel::Property* createSingleValueProperty();
       ///Parse a time series
       template<class TYPE>
-      Kernel::Property* parseTimeSeries(const std::string & logName, TYPE times, const std::string& time0 = "")
+      Kernel::Property* parseTimeSeries(const std::string & logName, const TYPE &times, const std::string& time0 = "")
       {
         std::string start_time = (!time0.empty()) ? time0 : times.attributes("start");
         if (start_time.empty())
@@ -676,7 +676,7 @@ namespace Mantid
       ///@param times :: the array of time offsets
       ///@returns a property pointer
       template<class NX_TYPE,class TIME_TYPE>
-      Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, Kernel::DateAndTime start_t,TIME_TYPE times)
+      Kernel::Property* loadValues(const std::string& logName, NX_TYPE & value, Kernel::DateAndTime start_t, const TIME_TYPE & times)
       {
           value.openLocal();
           Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);

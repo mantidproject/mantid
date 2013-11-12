@@ -1,7 +1,7 @@
 import unittest
 import numpy
 from mantid.simpleapi import *
-from isis_reflgui import quick
+from isis_reflectometry import quick
 
 class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
     

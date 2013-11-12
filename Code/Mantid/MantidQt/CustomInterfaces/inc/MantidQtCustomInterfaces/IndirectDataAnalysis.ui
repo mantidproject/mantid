@@ -107,7 +107,7 @@
          <item row="0" column="1">
           <widget class="QLineEdit" name="leLogName">
            <property name="text">
-            <string>sample</string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -1887,96 +1887,43 @@
       <attribute name="title">
        <string>Apply Corrections</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutApplyAbsCor">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="abscor_layoutInput">
-         <item>
-          <widget class="QLabel" name="abscor_lbSamInputType">
-           <property name="text">
-            <string>Input Type:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="abscor_cbSampleInputType">
-           <item>
-            <property name="text">
-             <string>File</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Workspace</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QStackedWidget" name="abscor_swSampleInput">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="currentIndex">
-            <number>0</number>
-           </property>
-           <widget class="QWidget" name="abscor_samFile">
-            <layout class="QVBoxLayout" name="verticalLayout_17">
-             <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_sample">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>41</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="label" stdset="0">
-                <string/>
-               </property>
-               <property name="multipleFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="fileExtensions">
-                <stringlist>
-                 <string>_red.nxs</string>
-                </stringlist>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="abscor_samWS">
-            <layout class="QHBoxLayout" name="horizontalLayout_31">
-             <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample">
-               <property name="WorkspaceTypes">
-                <stringlist/>
-               </property>
-               <property name="Suffix" stdset="0">
-                <stringlist>
-                 <string>_red</string>
-                </stringlist>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-         </item>
-        </layout>
+        <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsSample">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="autoLoad">
+          <bool>false</bool>
+         </property>
+         <property name="workspaceSuffixes" stdset="0">
+          <stringlist>
+           <string>_red</string>
+          </stringlist>
+         </property>
+         <property name="fileBrowserSuffixes" stdset="0">
+          <stringlist>
+           <string>_red.nxs</string>
+          </stringlist>
+         </property>
+         <property name="showLoad">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="abscor_layoutGeometry">
-         <item>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
           <widget class="QLabel" name="abscor_lbGeometry">
            <property name="text">
             <string>Geometry:</string>
            </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="1">
           <widget class="QComboBox" name="abscor_cbGeometry">
            <item>
             <property name="text">
@@ -1990,188 +1937,103 @@
            </item>
           </widget>
          </item>
-         <item>
-          <spacer name="horizontalSpacer_27">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="abscor_ckUseCorrections">
-         <property name="text">
-          <string>Use Corrections</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="abscor_ckUseCan">
-         <property name="text">
-          <string>Use Container</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_38">
-         <item>
-          <widget class="QCheckBox" name="abscor_ckScaleMultiplier">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="abscor_ckUseCan">
            <property name="text">
-            <string>Scale: Multiply Container by</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
+            <string>Use Can:</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QLineEdit" name="abscor_leScaleMultiplier">
+         <item row="1" column="1">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsContainer">
            <property name="enabled">
             <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>1.0</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_24">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_17">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_15">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="abscor_layoutContainer">
-         <item>
-          <widget class="QLabel" name="abscor_lbContainerInputType">
-           <property name="text">
-            <string>Input Type:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="abscor_cbContainerInputType">
-           <item>
-            <property name="text">
-             <string>File</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Workspace</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QStackedWidget" name="abscor_swContainerInput">
-           <property name="enabled">
-            <bool>true</bool>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="currentIndex">
-            <number>0</number>
+           <property name="autoLoad">
+            <bool>false</bool>
            </property>
-           <widget class="QWidget" name="abscor_conFile">
-            <layout class="QHBoxLayout" name="horizontalLayout_34">
-             <property name="margin">
-              <number>0</number>
+           <property name="workspaceSuffixes" stdset="0">
+            <stringlist>
+             <string>_red</string>
+            </stringlist>
+           </property>
+           <property name="fileBrowserSuffixes" stdset="0">
+            <stringlist>
+             <string>_red.nxs</string>
+            </stringlist>
+           </property>
+           <property name="showLoad">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QCheckBox" name="abscor_ckScaleMultiplier">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
-             <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_can">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>41</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="label" stdset="0">
-                <string/>
-               </property>
-               <property name="multipleFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="optional" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="fileExtensions">
-                <stringlist>
-                 <string>_red.nxs</string>
-                </stringlist>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="abscor_conWS">
-            <layout class="QHBoxLayout" name="horizontalLayout_35">
-             <property name="margin">
-              <number>0</number>
+             <property name="text">
+              <string>Scale Can By:</string>
              </property>
-             <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer">
-               <property name="Suffix" stdset="0">
-                <stringlist>
-                 <string>_red</string>
-                </stringlist>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="abscor_leScaleMultiplier">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>1.0</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0">
+          <widget class="QCheckBox" name="abscor_ckUseCorrections">
+           <property name="text">
+            <string>Use Corrections:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="abscor_dsCorrections">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="autoLoad">
+            <bool>false</bool>
+           </property>
+           <property name="workspaceSuffixes" stdset="0">
+            <stringlist>
+             <string>_flt_Abs</string>
+            </stringlist>
+           </property>
+           <property name="fileBrowserSuffixes" stdset="0">
+            <stringlist>
+             <string>_flt_Abs.nxs</string>
+            </stringlist>
+           </property>
+           <property name="showLoad">
+            <bool>false</bool>
+           </property>
           </widget>
          </item>
         </layout>
@@ -2190,131 +2052,140 @@
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_33">
-         <item>
-          <spacer name="horizontalSpacer_9">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="abscor_ckPlotContrib">
-           <property name="text">
-            <string>Plot Contributions</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_25">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="abscor_layoutPlotOutput">
-         <item>
-          <widget class="QCheckBox" name="abscor_ckVerbose">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Verbose</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_16">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="abscor_lbPlotOutput">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Plot Output:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="abscor_cbPlotOutput">
-           <item>
-            <property name="text">
-             <string>None</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Contour</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Spectra</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Both</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_26">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="abscor_ckSave">
-           <property name="text">
-            <string>Save Result</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Output Options</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_33">
+            <item>
+             <spacer name="horizontalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="abscor_ckPlotContrib">
+              <property name="text">
+               <string>Plot Contributions</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_25">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="abscor_layoutPlotOutput">
+            <item>
+             <widget class="QCheckBox" name="abscor_ckVerbose">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Verbose</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_16">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="abscor_lbPlotOutput">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Plot Output:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="abscor_cbPlotOutput">
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Contour</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Spectra</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Both</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_26">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="abscor_ckSave">
+              <property name="text">
+               <string>Save Result</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -2448,11 +2319,6 @@
   <tabstop>absp_lecansigs</tabstop>
   <tabstop>absp_lecansiga</tabstop>
   <tabstop>absp_cbPlotOutput</tabstop>
-  <tabstop>abscor_cbSampleInputType</tabstop>
-  <tabstop>abscor_cbGeometry</tabstop>
-  <tabstop>abscor_ckUseCorrections</tabstop>
-  <tabstop>abscor_ckUseCan</tabstop>
-  <tabstop>abscor_cbContainerInputType</tabstop>
   <tabstop>abscor_cbPlotOutput</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>

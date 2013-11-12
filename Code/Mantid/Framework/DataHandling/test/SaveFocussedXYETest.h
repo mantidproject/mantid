@@ -6,6 +6,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
@@ -47,7 +48,7 @@ public:
     std::string filename("focussed.test");
     saveXYE.setPropertyValue("Filename", filename);
     filename = saveXYE.getPropertyValue("Filename"); //absolute path
-    saveXYE.setPropertyValue("SplitFiles", "False");
+    saveXYE.setProperty("SplitFiles", false);
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
 
@@ -129,7 +130,7 @@ public:
     std::string filename("focussed.txt");
     saveXYE.setPropertyValue("Filename", filename);
     filename = saveXYE.getPropertyValue("Filename"); //get the absolute path
-    saveXYE.setPropertyValue("SplitFiles", "False");
+    saveXYE.setProperty("SplitFiles", false);
     saveXYE.setPropertyValue("Append", "0");
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
@@ -218,7 +219,7 @@ public:
     std::string filename("SaveGSS.txt");
     saveGSS.setPropertyValue("Filename", filename);
     filename = saveGSS.getPropertyValue("Filename"); //absolute path
-    saveGSS.setPropertyValue("SplitFiles", "False");
+    saveGSS.setProperty("SplitFiles", false);
     saveGSS.setPropertyValue("Append", "0");
     saveGSS.setPropertyValue("MultiplyByBinWidth", "1");
 
@@ -298,7 +299,7 @@ public:
     std::string filename("SaveGSS.txt");
     saveGSS.setPropertyValue("Filename", filename);
     filename = saveGSS.getPropertyValue("Filename"); //absolute path
-    saveGSS.setPropertyValue("SplitFiles", "False");
+    saveGSS.setProperty("SplitFiles", false);
     saveGSS.setPropertyValue("Append", "0");
     saveGSS.setPropertyValue("MultiplyByBinWidth", "0");
 
@@ -368,7 +369,7 @@ public:
     std::string filename("focussed.test");
     saveXYE.setPropertyValue("Filename", filename);
     filename = saveXYE.getPropertyValue("Filename"); //absolute path
-    saveXYE.setPropertyValue("SplitFiles", "False");
+    saveXYE.setProperty("SplitFiles", false);
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
 
@@ -401,6 +402,28 @@ public:
     filestrm.close();
     focusfile.remove();
     AnalysisDataService::Instance().remove(resultWS);
+  }
+
+  void test_doesnt_fail_on_missing_detectors()
+  {
+    Mantid::API::IAlgorithm_sptr load = Mantid::API::AlgorithmManager::Instance().create("Load");
+    load->setProperty("Filename","HRP38692a.nxs");
+    load->setProperty("OutputWorkspace","ws");
+    load->execute();
+
+    std::string filename("focussed.test");
+    Mantid::DataHandling::SaveFocusedXYE saveXYE;
+    saveXYE.initialize();
+    saveXYE.setPropertyValue("InputWorkspace","ws");
+    saveXYE.setPropertyValue("Filename",filename);
+    filename = saveXYE.getPropertyValue("Filename"); //absolute path
+    saveXYE.setProperty("SplitFiles", false);
+    saveXYE.execute();
+    TS_ASSERT( saveXYE.isExecuted() );
+    Poco::File focusfile(filename);
+    TS_ASSERT_EQUALS( focusfile.exists(), true );
+    if ( focusfile.exists() ) focusfile.remove();
+    Mantid::API::AnalysisDataService::Instance().clear();
   }
 
 private:

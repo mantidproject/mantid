@@ -10,8 +10,8 @@ class MantidPlotFoldersTest(unittest.TestCase):
     
     def setUp(self):
         # Make sure NOT to ask to close a folder. This hangs up tests
+        import _qti
         _qti.app.setConfirmFolderClose(False)
-        pass
     
     def tearDown(self):
         pass

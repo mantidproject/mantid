@@ -101,6 +101,10 @@ namespace Mantid
       void enableHistoryRecordingForChild(const bool) {};
       void setRethrows(const bool rethrow);
 
+      const std::string workspaceMethodName() const;
+      const std::vector<std::string> workspaceMethodOn() const;
+      const std::string workspaceMethodInputProperty() const;
+
       /** @name PropertyManager methods */
       //@{
       /// Set the property value
@@ -120,6 +124,11 @@ namespace Mantid
       void setLogging(const bool value) { m_isLoggingEnabled=value; }
       /// Is the algorithm have logging enabled
       bool isLogging() const { return m_isLoggingEnabled; }
+      
+      ///returns the logging priority offset
+      void setLoggingOffset(const int value)  { m_loggingOffset=value; }
+      ///returns the logging priority offset
+      int getLoggingOffset() const { return m_loggingOffset; }
 
       ///setting the child start progress
       void setChildStartProgress(const double startProgress)const;
@@ -162,6 +171,7 @@ namespace Mantid
       mutable boost::shared_ptr<Algorithm> m_alg;  ///< Shared pointer to a real algorithm. Created on demand
       bool m_isExecuted;     ///< Executed flag
       bool m_isLoggingEnabled;///< is the logging of the underlying algorithm enabled
+      int m_loggingOffset; ///< the logging priority offset
       bool m_rethrow; ///< Whether or not to rethrow exceptions.
       bool m_isChild; ///< Is this a child algo
 

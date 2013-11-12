@@ -1639,7 +1639,7 @@ namespace DataObjects
    */
 
   template<class T>
-  void EventList::compressEventsHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance)
+  inline void EventList::compressEventsHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance)
   {
     //Clear the output. We can't know ahead of time how much space to reserve :(
     out.clear();

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="IN13" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+		        last-modified="2010-10-07 00:00:00">
+<!-- modified by FD 7/10/2010 -->
+
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+  <offsets spherical="delta" />
+</defaults>
+
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+<!-- source and sample-position components -->
+
+<component type="moderator">
+  <location z="-36.41" />
+</component>
+
+<type name="moderator" is="Source">
+  <properties />
+</type>
+
+<component type="sample">
+  <location z="0.0" />
+</component>
+
+<type name="sample" is="SamplePos">
+  <cuboid id="shape">
+    <left-front-bottom-point x="0.02" y="-0.02" z="0.0"  />
+    <left-front-top-point  x="0.02" y="-0.02" z="0.02"  />
+    <left-back-bottom-point  x="-0.02" y="-0.02" z="0.0"  />
+    <right-front-bottom-point  x="0.02" y="0.02" z="0.0"  />
+  </cuboid>
+  <algebra val="shape" />
+</type>
+
+<!-- LIST OF DETECTORS AND MONITORS -->
+
+<!-- monitor components -->
+
+  <component type="monitor1" idlist="monitor1">
+    <location z="-0.335" />
+  </component>
+
+  <type name="monitor1" is="monitor">
+    <percent-transparency val="99.9" />
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
+      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
+      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
+      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>  
+
+  <idlist idname="monitor1">
+    <id val="8" />  
+  </idlist>
+  
+<!--  detector components -->
+
+<component type="CaF" idlist="CaF">
+  <properties />
+  <parameter name="Efixed"> <value val="16.45" /> </parameter>
+  <parameter name="efixed-val">	<value val="16.45" /></parameter>
+  <location  />
+</component>
+
+<type name="CaF">
+ <component type="pix1">
+  <location r="1.45" t="27.07" p="0" name="S1" />
+  <location r="1.45" t="29.70" p="0" name="S2" />
+  <location r="1.45" t="32.32" p="0" name="S3" />
+  <location r="1.45" t="34.95" p="0" name="S4" />
+  <location r="1.45" t="37.58" p="0" name="S5" />
+  <location r="1.45" t="40.21" p="0" name="S6" />
+  <location r="1.45" t="42.83" p="0" name="S7" />
+ </component>
+</type>
+
+<idlist idname="CaF">
+  <id start="1" end="7" />
+</idlist>
+
+<type name="pix1" is="detector">
+  <cuboid id="app-shape">
+    <left-front-bottom-point x="0.005" y="-0.1" z="0.0"  />
+    <left-front-top-point  x="0.005" y="-0.1" z="0.0002"  />
+    <left-back-bottom-point  x="-0.005" y="-0.1" z="0.0"  />
+    <right-front-bottom-point  x="0.005" y="0.1" z="0.0"  />
+  </cuboid>
+  <algebra val="app-shape" />
+</type>
+
+</instrument>

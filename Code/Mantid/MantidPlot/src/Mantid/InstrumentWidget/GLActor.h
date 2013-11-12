@@ -19,9 +19,11 @@
 
 #include <ostream>
 
+#include <QObject>
 #include <QList>
 
 class GLActorVisitor;
+class GLActorConstVisitor;
 
 namespace Mantid
 {
@@ -60,22 +62,31 @@ namespace Mantid
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class GLActor
+class GLActor: public QObject
 {
 public:
+  /// Rules for visitor propagation. If vistor's visit(...) method returns true
+  /// the propagation can be continued (VisitAll) or abandoned (Finish)
+  enum VisitorAcceptRule { VisitAll, Finish };
   GLActor():m_visible(true){}
   ///< Virtual destructor
   virtual ~GLActor();
   /// Toggle the visibility of the actor.
   virtual void setVisibility(bool on){m_visible = on;}
+  /// Toggle the visibility of the child actors (if exist).
+  virtual void setChildVisibility(bool on){setVisibility(on);}
+  /// Check if any child is visible
+  virtual bool hasChildVisible() const {return true;}
   /// Get the visibility status.
   bool isVisible()const{return m_visible;}
   /// Draw the actor in 3D.
   virtual void draw(bool picking = false)const = 0;
   /// Get the 3D bounding box of the actor
   virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const = 0;
-  /// Accept a visitor 
-  virtual bool accept(GLActorVisitor& visitor);
+  /// Accept a visitor
+  virtual bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  /// Accept a const visitor
+  virtual bool accept(GLActorConstVisitor &visitor, VisitorAcceptRule rule = VisitAll) const;
   /// Convert a "pick ID" to a colour to put into the pick image.
   static GLColor makePickColor(size_t pickID);
   /// Decode a pick colour and return corresponding "pick ID"

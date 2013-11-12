@@ -360,14 +360,34 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
   return stepScan;
 }
 
+// Small class to handle disabling mouse clicks and showing the busy cursor in an RAII manner.
+// Used in the runStepScanAlg below to ensure these things are unset when the method is exited.
+class DisableGUI_RAII
+{
+public:
+  DisableGUI_RAII(StepScan * gui) : the_gui(gui)
+  {
+    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
+  }
+
+  ~DisableGUI_RAII()
+  {
+    QApplication::restoreOverrideCursor();
+    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents, false );
+  }
+
+private:
+  StepScan * const the_gui;
+};
+
 void StepScan::runStepScanAlg()
 {
   IAlgorithm_sptr stepScan = setupStepScanAlg();
   if ( !stepScan ) return;
 
-  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-  // Block mouse clicks while the algorithms runs. Have to be sure to unset this below.
-  setAttribute( Qt::WA_TransparentForMouseEvents );
+  // Block mouse clicks while the algorithm runs. Also set the busy cursor.
+  DisableGUI_RAII _blockclicks(this);
 
   bool algSuccessful;
   if ( m_uiForm.mWRunFiles->liveButtonIsChecked() )  // Live data
@@ -376,15 +396,16 @@ void StepScan::runStepScanAlg()
   }
   else  // Offline data
   {
-    if ( m_dataReloadNeeded ) loadFile(false); // Reload if workspace isn't fresh
+    // Check just in case the user has deleted the loaded workspace
+    if ( ! AnalysisDataService::Instance().doesExist(m_inputWSName) ) m_dataReloadNeeded = true;
+    // Reload also needed if the workspace isn't fresh, as well as if the line above triggers
+    if ( m_dataReloadNeeded ) loadFile(false);
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
     algSuccessful = stepScan->execute();
   }
 
   if ( !algSuccessful )
   {
-    QApplication::restoreOverrideCursor();
-    setAttribute( Qt::WA_TransparentForMouseEvents, false );
     return;
   }
 
@@ -396,8 +417,6 @@ void StepScan::runStepScanAlg()
            SLOT(updateForNormalizationChange()) );
   // Create the plot for the first time
   generateCurve( m_uiForm.plotVariable->currentText() );
-  QApplication::restoreOverrideCursor();
-  setAttribute( Qt::WA_TransparentForMouseEvents, false );
 }
 
 bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
@@ -428,7 +447,7 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
   auto result = startLiveData->executeAsync();
   while ( !result.available() )
   {
-    Poco::Thread::sleep(100);
+    QApplication::processEvents();
   }
   if ( ! startLiveData->isExecuted() ) return false;
 
@@ -446,6 +465,12 @@ void StepScan::updateForNormalizationChange()
 
 void StepScan::generateCurve( const QString& var )
 {
+  if ( ! AnalysisDataService::Instance().doesExist(m_tableWSName) )
+  {
+    QMessageBox::critical(this,"Unable to generate plot","Table workspace "+ QString::fromStdString(m_tableWSName) +"\nhas been deleted!");
+    return;
+  }
+
   // Create a matrix workspace out of the variable that's asked for
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
   alg->setLogging(false); // Don't log this algorithm

@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidCurveFitting/Linear.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/MersenneTwister.h"
 #include <boost/lexical_cast.hpp>

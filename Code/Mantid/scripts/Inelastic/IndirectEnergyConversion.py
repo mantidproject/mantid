@@ -74,7 +74,6 @@ def resolution(files, iconOpt, rebinParam, bground,
         CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
-        DeleteWorkspace(iconWS)
             
         SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
             

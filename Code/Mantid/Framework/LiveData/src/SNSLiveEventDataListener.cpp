@@ -566,7 +566,6 @@ namespace LiveData
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
   {
-
     // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
     // Note that we need this value even if we otherwise ignore the packet
     if (m_workspaceInitialized == false)
@@ -587,6 +586,8 @@ namespace LiveData
     // have individual lock/unlocks every time we fiddle with a run property
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
+    const bool haveRunNumber = m_eventBuffer->run().hasProperty("run_number");
+
     if (pkt.status() == ADARA::RunStatus::NEW_RUN)
     {
       // Starting a new run:  update m_status and add the run_start & run_number properties
@@ -594,50 +595,22 @@ namespace LiveData
       if (m_status != NoRun)
       {
         // Previous status should have been NoRun.  Spit out a warning if it's not.
-        g_log.warning() << "Unexpected start of run.  Run status should have been "
+        g_log.debug() << "Unexpected start of run.  Run status should have been "
                         << NoRun << " (NoRun), but was " << m_status << std::endl;
       }
 
       m_status = BeginRun;
 
-      // Add the run_start property
-      if ( m_eventBuffer->mutableRun().hasProperty("run_start") )
-      {
-        // We should never hit this code.  And if we do, all we can really do is log
-        // the error - removing the property prior to adding the new value doesn't
-        // always work.  Depending on the value of the "Accumulation Method" in
-        // StartLiveData, the new run_start property may not actually be picked up.
-        g_log.error() << "run_start property already exists.  Current value will be ignored."  << std::endl
-                      << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
-      }
-      else
-      {
-
-        // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
-        time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
-
-        // Add the run_start property
-        char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
-        strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
-        // addProperty() wants the time as an ISO 8601 string
-
-        m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
-      }
-
       // Add the run_number property
-      if ( m_eventBuffer->mutableRun().hasProperty("run_number") )
+      if ( haveRunNumber )
       {
-        // Same problem as the run_start property above:  run_number should not exist
-        // at this point, and if it does, we can't do much about it.
-        g_log.error() << "run_snumber property already exists.  Current value will be ignored."  << std::endl
+        // run_number should not exist at this point, and if it does, we can't do much about it.
+        g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
                       << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
       }
       else
       {
-        // Oddly, the run number property needs to be a string....
-        std::ostringstream runNum;
-        runNum << pkt.runNumber();
-        m_eventBuffer->mutableRun().addProperty( "run_number", runNum.str());
+        setRunDetails(pkt);
       }
 
     }
@@ -651,7 +624,7 @@ namespace LiveData
         // Previous status should have been Running or BeginRun.  Spit out a
         // warning if it's not.  (If it's BeginRun, that's fine.  Itjust means
         // that the run ended before extractData() was called.)
-        g_log.warning() << "Unexpected end of run.  Run status should have been "
+        g_log.debug() << "Unexpected end of run.  Run status should have been "
                         << Running << " (Running), but was " << m_status << std::endl;
       }
       m_status = EndRun;
@@ -673,6 +646,16 @@ namespace LiveData
       // This flag will be cleared down in runStatus(), which is guaranteed to be called
       // after extractData().
       m_pauseNetRead = true;
+
+      // Set the run number & start time if we don't already have it
+      if ( ! haveRunNumber )
+      {
+        setRunDetails(pkt);
+      }
+    }
+    else if (pkt.status() == ADARA::RunStatus::STATE && !haveRunNumber)
+    {
+      setRunDetails(pkt);
     }
 
     // Note: all other possibilities for pkt.status() can be ignored
@@ -691,6 +674,21 @@ namespace LiveData
     // If we've set m_pauseNetRead, it means we want to stop processing packets.
     // In that case, we need to return true so that we'll break out of the read() loop
     // in the packet parser.
+  }
+
+  void SNSLiveEventDataListener::setRunDetails( const ADARA::RunStatusPkt& pkt )
+  {
+    m_eventBuffer->mutableRun().addProperty("run_number", Strings::toString<int>(pkt.runNumber()));
+    g_log.notice() << "Run number is " << pkt.runNumber() << std::endl;
+
+    // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
+    time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
+
+    // Add the run_start property
+    char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
+    strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
+    // addProperty() wants the time as an ISO 8601 string
+    m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
   }
 
   /// Parse a variable value packet
@@ -1239,8 +1237,8 @@ namespace LiveData
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp, false);
 
-    // Clear out the old logs
-    temp->mutableRun().clearTimeSeriesLogs();
+    // Clear out the old logs, except for the most recent entry
+    temp->mutableRun().clearOutdatedTimeSeriesLogValues();
 
     // Lock the mutex and swap the workspaces
     {

@@ -1,4 +1,4 @@
-from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, where, mean, sum
+from numpy import zeros, ones, arctan2, arange, shape, sqrt, fliplr, asfarray, where, mean, sum, empty, NAN
 from mantid.simpleapi import *
 # from MantidFramework import *
 import math
@@ -40,8 +40,8 @@ def getProtonCharge(st=None):
     if st is not None:
         mt_run = st.getRun()
         proton_charge_mtd_unit = mt_run.getProperty('gd_prtn_chrg').value
-        proton_charge = proton_charge_mtd_unit / 2.77777778e-10
-        return proton_charge
+#        proton_charge = proton_charge_mtd_unit / 2.77777778e-10
+        return proton_charge_mtd_unit
     return None  
 
 def getIndex(value, array):
@@ -1048,7 +1048,7 @@ def integrateOverLowResRange(mt1,
 
 def substractBackground(tof_axis, y_axis, y_error_axis,
                         peakRange, backFlag, backRange,
-                        type):
+                        error_0, type):
     """
     shape of y_axis : [256, nbr_tof]
     This routine will calculate the background, remove it from the peak
@@ -1072,11 +1072,7 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     # retrieve data
     _tofAxis = tof_axis
     nbrTof = len(_tofAxis)
-    
-    # by default, no space for background subtraction below and above peak
-    bMinBack = False
-    bMaxBack = False
-        
+            
     # size peak
     szPeak = peakMax - peakMin + 1
     
@@ -1086,27 +1082,32 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     maxBack = []
     maxBackError = []
     
-#     peakArray = zeros(nbrTof, szPeak)
-#     peakErrorArray = zeros(nbrTof, szPeak)
-
     final_y_axis = zeros((szPeak, nbrTof))
     final_y_error_axis = zeros((szPeak, nbrTof))
 
+#    final_y_axis = empty((szPeak, nbrTof))
+#    final_y_error_axis = empty((szPeak, nbrTof))
+#    final_y_axis[:] = NAN
+#    final_y_error_axis[:] = NAN
+
     for t in range(nbrTof):
+
+        # by default, no space for background subtraction below and above peak
+        bMinBack = False
+        bMaxBack = False
 
         if backMin < (peakMin):
             bMinBack = True
             _backMinArray = y_axis[backMin:peakMin, t]
             _backMinErrorArray = y_error_axis[backMin:peakMin, t]
             [_backMin, _backMinError] = weightedMean(_backMinArray,
-                                                          _backMinErrorArray)
+                                                          _backMinErrorArray, error_0)
              
         if (peakMax) < backMax:
             bMaxBack = True
             _backMaxArray = y_axis[peakMax+1:backMax+1, t]
-
             _backMaxErrorArray = y_error_axis[peakMax+1:backMax+1, t]
-            [_backMax, _backMaxError] = weightedMean(_backMaxArray, _backMaxErrorArray)    
+            [_backMax, _backMaxError] = weightedMean(_backMaxArray, _backMaxErrorArray, error_0)    
     
         # if no max background use min background
         if not bMaxBack:
@@ -1119,7 +1120,7 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
             background_error = _backMaxError
             
         if bMinBack and bMaxBack:
-            [background, background_error] = weightedMean([_backMin, _backMax], [_backMinError, _backMaxError])
+            [background, background_error] = weightedMean([_backMin, _backMax], [_backMinError, _backMaxError], error_0)
         
         # remove background for each pixel of the peak
         for x in range(szPeak):
@@ -1131,32 +1132,35 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     
     return [final_y_axis, final_y_error_axis]
 
-def weightedMean(data_array, error_array):
+def weightedMean(data_array, error_array, error_0):
     
     sz = len(data_array)
     
     # calculate the numerator of mean
     dataNum = 0;
     for i in range(sz):
-        if not (data_array[i] == 0):
-            tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
-            dataNum += tmpFactor
+        if (error_array[i] == 0):
+            error_array[i] = error_0
+            
+        tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
+        dataNum += tmpFactor
     
     # calculate denominator
     dataDen = 0;
     for i in range(sz):
-        if not (error_array[i] == 0):
-            tmpFactor = 1./float((pow(error_array[i],2)))
-            dataDen += tmpFactor
+        if (error_array[i] == 0):
+            error_array[i] = error_0
+        tmpFactor = 1./float((pow(error_array[i],2)))
+        dataDen += tmpFactor
 
     if dataDen == 0:
-        mean = 0
-        mean_error = 0
+        data_mean = NAN
+        mean_error = NAN
     else:            
-        mean = float(dataNum) / float(dataDen)
+        data_mean = float(dataNum) / float(dataDen)
         mean_error = math.sqrt(1/dataDen)     
 
-    return [mean, mean_error]
+    return [data_mean, mean_error]
 
 def weightedMeanOfRange(norm_y_axis, norm_y_error_axis):
     """
@@ -1277,6 +1281,10 @@ def fullSumWithError(data_y_axis, data_y_error_axis):
     
     final_data = zeros(nbr_tof)
     final_data_error = zeros(nbr_tof)
+#    final_data = empty(nbr_tof)
+#    final_data_error = empty(nbr_tof)
+#    final_data[:] = NAN
+#    final_data_error[:] = NAN
     for t in range(nbr_tof):
         [data, error] = sumWithError(data_y_axis[:,t], data_y_error_axis[:,t])
         final_data[t] = data
@@ -1324,11 +1332,6 @@ def ouput_big_Q_ascii_file(file_name,
                          x_axis,
                          y_axis,
                          y_error_axis):
-      
-    print x_axis.shape
-    print y_axis.shape
-    print y_error_axis.shape
-      
       
     f=open(file_name,'w')
       
@@ -1495,6 +1498,10 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
     nbr_tof = len(x_axis)-1
     x_axis_factors = zeros(nbr_tof)
     x_axis_factors_error = zeros(nbr_tof)
+#    x_axis_factors = empty(nbr_tof)
+#    x_axis_factors_error = empty(nbr_tof)
+#    x_axis_factors[:] = NAN
+#    x_axis_factors_error[:] = NAN
     for i in range(nbr_tof):
         _x_value = float(x_axis[i])
         _factor = _x_value * b + a
@@ -1504,8 +1511,13 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
 
     sz = y_data.shape
     nbr_pixel = sz[0]
+    
     final_y_data = zeros((nbr_pixel, nbr_tof))
     final_y_data_error = zeros((nbr_pixel, nbr_tof))
+#    final_y_data = empty((nbr_pixel, nbr_tof))
+#    final_y_data_error = empty((nbr_pixel, nbr_tof))
+#    final_y_data[:] = NAN
+#    final_y_data_error[:] = NAN
     for x in range(nbr_pixel):
         
         [ratio_array, ratio_array_error] = divideArrays(y_data[x,:], 
@@ -1690,6 +1702,10 @@ def convertToQ(tof_axis,
     # boxes
     _y_axis = zeros((y_size, len(tof_axis)-1))
     _y_error_axis = zeros((y_size, len(tof_axis)-1))
+#    _y_axis = empty((y_size, len(tof_axis)-1))
+#    _y_error_axis = empty((y_size, len(tof_axis)-1))
+#    _y_axis[:] = NAN
+#    _y_error_axis[:] = NAN
     
     # now determine the _y_axis and _y_error_axis
     for _y_index in range(y_size):
@@ -1821,6 +1837,10 @@ def integrateOverPeakRange(wks, dataPeakRange):
     nbrPixel = dataPeakRange[1] - dataPeakRange[0] + 1
     bigY = zeros((nbrPixel, nbr_q))
     bigE = zeros((nbrPixel, nbr_q))
+#    bigY = empty((nbrPixel, nbr_q))
+#    bigE = empty((nbrPixel, nbr_q))
+#    bigY[:]= NAN
+#    bigE[:]= NAN
     for x in range(nbrPixel):
         _tmp_y = wks.readY(x)[:]
         bigY[x,:] = _tmp_y
@@ -1829,10 +1849,16 @@ def integrateOverPeakRange(wks, dataPeakRange):
 
     final_y_axis = zeros(nbr_q)
     final_y_error_axis = zeros(nbr_q)
-    
+#    
+#    final_y_axis = empty(nbr_q)
+#    final_y_error_axis = empty(nbr_q)
+#    final_y_axis[:] = NAN
+#    final_y_error_axis[:] = NAN
+
     # range(nbr_q -2) + 1 to get rid of first and last q values (edge effect)
     rangeOfQ = range(nbr_q-1)
-    for q in rangeOfQ[1:-1]:
+#    for q in rangeOfQ[1:-1]:
+    for q in rangeOfQ:
         
         _tmp_y = bigY[:,q]
         _tmp_y_error = bigE[:,q]
@@ -1908,8 +1934,14 @@ def cropAxisToOnlyNonzeroElements(q_rebin, dataPeakRange):
     # crop data
     new_x_axis = x_axis[index_first_non_zero_value:index_last_non_zero_value+1]
     new_xrange = index_last_non_zero_value - index_first_non_zero_value + 1
+    
     new_y_axis = zeros((nbrPixel, new_xrange))
     new_y_error_axis = zeros((nbrPixel, new_xrange))
+#    new_y_axis = empty((nbrPixel, new_xrange))
+#    new_y_error_axis = empty((nbrPixel, new_xrange))
+#    new_y_axis[:] = NAN
+#    new_y_error_axis[:] = NAN
+    
     for x in range(nbrPixel):
         _tmp = q_rebin.readY(x)[:]
         _tmp_E = q_rebin.readE(x)[:]
@@ -1935,26 +1967,26 @@ def cleanupData(final_data_y_axis, final_data_y_error_axis):
     
     sz = final_data_y_axis.shape
     nbrPixel = sz[0]
-    nbrTof = sz[1]
+    nbrQ = sz[1]
     
     for x in range(nbrPixel):
-        for t in range(nbrTof):
+        for q in range(nbrQ):
             
-            _data = final_data_y_axis[x,t]
-            _error = final_data_y_error_axis[x,t]
+            _data = final_data_y_axis[x,q]
+            _error = final_data_y_error_axis[x,q]
             
             # if error is > value, remove point
             if _error >= _data:
                 _data = 0
-                _error = 0
+                _error = 1
             
             # if value is below 10^-12
             if _data < 1e-12:
                 _data = 0
-                _error = 0
+                _error = 1
                 
-            final_data_y_axis[x,t] = _data
-            final_data_y_error_axis[x,t] = _error
+            final_data_y_axis[x,q] = _data
+            final_data_y_error_axis[x,q] = _error
             
     return [final_data_y_axis, final_data_y_error_axis]
     
@@ -1971,17 +2003,21 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
         _error = final_data_y_error_axis[t]
             
         # if error is > value, remove point
-        if _error >= _data:
-            _data = 0
-            _error = 0
-            
+        if abs(_error) >= abs(_data):
+            _data_tmp = 0
+            _error_tmp = 1
+        elif (_data< 1e-12):
         # if value is below 10^-12
-        if _data < 1e-12:
-            _data = 0
-            _error = 0
+            _data_tmp = 0
+            _error_tmp = 1
+        else:
+            _data_tmp = _data
+            _error_tmp = _error
                 
-        final_data_y_axis[t] = _data
-        final_data_y_error_axis[t] = _error
+        final_data_y_axis[t] = _data_tmp
+        final_data_y_error_axis[t] = _error_tmp
+
+#        print 'final_data_y_axis[t]: ' , _data_tmp , ' final_data_y_error_axis[t]: ' , _error_tmp
             
     return [final_data_y_axis, final_data_y_error_axis]
     

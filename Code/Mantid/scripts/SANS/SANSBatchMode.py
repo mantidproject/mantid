@@ -34,6 +34,7 @@ from mantid.kernel import Logger
 sanslog = Logger.get("SANS")
 import copy
 import sys
+import re
 
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
@@ -257,7 +258,7 @@ def parse_run(run_num, ext):
     """
     if not run_num:
         return '', -1
-    parts = run_num.upper().split('P')
+    parts = re.split('[pP]', run_num)
     if len(parts) > 2:
         raise RuntimeError('Problem reading run number "'+run_num+'"')
     run_spec = parts[0]+ext

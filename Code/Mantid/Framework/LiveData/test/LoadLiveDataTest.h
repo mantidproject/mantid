@@ -83,6 +83,8 @@ public:
       alg.exec();
     TS_ASSERT( alg.isExecuted() );
 
+    TSM_ASSERT_LESS_THAN( "Run number should be non-zero", 0, alg.runNumber() );
+
     // Retrieve the workspace from data service.
     boost::shared_ptr<TYPE> ws;
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<TYPE>("fake") );

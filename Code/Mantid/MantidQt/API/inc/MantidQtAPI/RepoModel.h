@@ -261,6 +261,7 @@ private:
     private slots:
     // call back method executed after finishing the thread
     void uploadFinished();
+
   };
 
 }; // namespace API

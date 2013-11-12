@@ -28,6 +28,7 @@
 #include <Poco/Path.h>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
 #include <fstream>  
 //-----------------------------------------------------------------------------
 using namespace Poco::XML;
@@ -39,91 +40,79 @@ namespace CustomInterfaces
 namespace Muon
 {
 
-  using namespace Poco::XML;
-  using namespace MantidQt::API;
+using namespace Poco::XML;
+using namespace MantidQt::API;
 
 /**
- * save XML grouping file
+ * Save grouping to the XML file specified.
+ *
+ * @param        g :: Struct with grouping information
+ * @param filename :: XML filename where information will be saved
  */
-void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filename)
+void saveGroupingToXML(const Grouping& g, const std::string& filename)
 {
   std::ofstream outFile(filename.c_str());
   if (!outFile)
-  {
-    throw Mantid::Kernel::Exception::FileError("Unable to open file:", filename);
-  }
+    throw Mantid::Kernel::Exception::FileError("Unable to open output file", filename);
 
   DOMWriter writer;
   writer.setNewLine("\n");
   writer.setOptions(XMLWriter::PRETTY_PRINT);
 
   Poco::XML::Document* mDoc = new Document();
+
+  // Create root element with a description
   Element* rootElem = mDoc->createElement("detector-grouping");
-  rootElem->setAttribute("description", m_uiForm.groupDescription->text().toStdString());
+  rootElem->setAttribute("description", g.description);
   mDoc->appendChild(rootElem);
 
-  // loop over groups in table
-
-  std::vector<int> groupToRow;
-  whichGroupToWhichRow(m_uiForm, groupToRow);
-
-  int num = static_cast<int>(groupToRow.size());
-  for (int i = 0; i < num; i++)
+  // Create group elements
+  for (size_t gi = 0; gi < g.groups.size(); gi++)
   {
     Element* gElem = mDoc->createElement("group");
-    gElem->setAttribute("name", m_uiForm.groupTable->item(groupToRow[i],0)->text().toStdString());
+    gElem->setAttribute("name", g.groupNames[gi]);
     rootElem->appendChild(gElem);
+
     Element* idsElem = mDoc->createElement("ids");
-    idsElem->setAttribute("val", m_uiForm.groupTable->item(groupToRow[i],1)->text().toStdString());
+    idsElem->setAttribute("val", g.groups[gi]);
     gElem->appendChild(idsElem);
   }
 
-  // loop over pairs in pair table
-
-  num = m_uiForm.pairTable->rowCount();
-  for (int i = 0; i < num; i++)
+  // Create pair elements
+  for (size_t pi = 0; pi < g.pairs.size(); pi++)
   {
-    QTableWidgetItem *itemName = m_uiForm.pairTable->item(i,0);
-    if (!itemName)
-      break;
-    if ( itemName->text().isEmpty() )
-      break;
-    QTableWidgetItem *itemAlpha = m_uiForm.pairTable->item(i,3);
-    if (!itemAlpha)
-      break;
-    if ( itemAlpha->text().isEmpty() )
-      break;
-
-    QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
-    QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
-
     Element* gElem = mDoc->createElement("pair");
-    gElem->setAttribute("name", itemName->text().toStdString());
+    gElem->setAttribute("name", g.pairNames[pi]);
     rootElem->appendChild(gElem);
+
     Element* fwElem = mDoc->createElement("forward-group");
-    fwElem->setAttribute("val", qw1->currentText().toStdString());
+    fwElem->setAttribute("val", g.groupNames[g.pairs[pi].first]);
     gElem->appendChild(fwElem);
+
     Element* bwElem = mDoc->createElement("backward-group");
-    bwElem->setAttribute("val", qw2->currentText().toStdString());
+    bwElem->setAttribute("val", g.groupNames[g.pairs[pi].second]);
     gElem->appendChild(bwElem);
+
     Element* alphaElem = mDoc->createElement("alpha");
-    alphaElem->setAttribute("val", itemAlpha->text().toStdString());
+    alphaElem->setAttribute("val", boost::lexical_cast<std::string>(g.pairAlphas[pi]));
     gElem->appendChild(alphaElem);
   } 
 
-  // save default
-
+  // Create default group/pair name element
   Element* gElem = mDoc->createElement("default");
-  gElem->setAttribute("name", m_uiForm.frontGroupGroupPairComboBox->currentText().toStdString());
+  gElem->setAttribute("name", g.defaultName);
   rootElem->appendChild(gElem);
 
   writer.writeNode(outFile, mDoc);
 }
 
 /**
- * load XML grouping file. It is assumed that tables and combo box cleared before this method is called
+ * Loads grouping from the XML file specified.
+ *
+ * @param filename :: XML filename to load grouping information from
+ * @param        g :: Struct to store grouping information to
  */
-void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filename)
+void loadGroupingFromXML(const std::string& filename, Grouping& g)
 {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -134,173 +123,236 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
   }
   catch(...)
   {
-    throw Mantid::Kernel::Exception::FileError("Unable to parse File:" , filename);
+    throw Mantid::Kernel::Exception::FileError("Unable to parse File" , filename);
   }
+
   // Get pointer to root element
   Element* pRootElem = pDoc->documentElement();
-  if ( !pRootElem->hasChildNodes() )
+  if (!pRootElem->hasChildNodes())
+    throw Mantid::Kernel::Exception::FileError("No root element in XML grouping file" , filename);
+
+  // Parse information for groups
+  NodeList* groups = pRootElem->getElementsByTagName("group");
+  if (groups->length() == 0)
+    throw Mantid::Kernel::Exception::FileError("No groups specified in XML grouping file" , filename);
+
+  // Resize vectors
+  g.groupNames.resize(groups->length());
+  g.groups.resize(groups->length());
+
+  for (size_t ig = 0; ig < groups->length(); ig++)
   {
-    throw Mantid::Kernel::Exception::FileError("No root element in XML grouping file:" , filename);
-  }  
+    Element* pGroupElem = static_cast<Element*>(groups->item(static_cast<long>(ig)));
 
-  NodeList* pNL_group = pRootElem->getElementsByTagName("group");
-  if ( pNL_group->length() == 0 )
-  {
-    throw Mantid::Kernel::Exception::FileError("XML group file contains no group elements:" , filename);
-  }
-
-
-  // add content to group table
-
-  QStringList allGroupNames;  // used to populate combo boxes 
-  int numberGroups = static_cast<int>(pNL_group->length());
-  for (int iGroup = 0; iGroup < numberGroups; iGroup++)
-  {
-    Element* pGroupElem = static_cast<Element*>(pNL_group->item(iGroup));
-
-    if ( !pGroupElem->hasAttribute("name") )
+    if (!pGroupElem->hasAttribute("name"))
       throw Mantid::Kernel::Exception::FileError("Group element without name" , filename);
-    std::string gName = pGroupElem->getAttribute("name");
 
+    g.groupNames[ig] = pGroupElem->getAttribute("name");
 
     Element* idlistElement = pGroupElem->getChildElement("ids");
-    if (idlistElement)
-    {
-      std::string ids = idlistElement->getAttribute("val");
+    if (!idlistElement)
+      throw Mantid::Kernel::Exception::FileError("Group element without <ids>" , filename);
 
-      // add info to table
-      m_uiForm.groupTable->setItem(iGroup, 0, new QTableWidgetItem(gName.c_str()) );
-      m_uiForm.groupTable->setItem(iGroup,1, new QTableWidgetItem(ids.c_str()) );
-      allGroupNames.push_back( m_uiForm.groupTable->item(static_cast<int>(iGroup),0)->text() );
+    g.groups[ig] = idlistElement->getAttribute("val");
+  }
+
+  groups->release();
+  
+
+  // Parse information for pairs
+  NodeList* pairs = pRootElem->getElementsByTagName("pair");
+
+  // Resize vectors
+  g.pairNames.resize(pairs->length());
+  g.pairs.resize(pairs->length());
+  g.pairAlphas.resize(pairs->length());
+
+  for (size_t ip = 0; ip < pairs->length(); ip++)
+  {
+    Element* pPairElem = static_cast<Element*>(pairs->item(static_cast<long>(ip)));
+
+    if ( !pPairElem->hasAttribute("name") )
+      throw Mantid::Kernel::Exception::FileError("Pair element without name" , filename);
+
+    g.pairNames[ip] = pPairElem->getAttribute("name");
+
+    size_t fwdGroupId, bwdGroupId; // Ids of forward/backward groups
+
+    // Try to get id of the first group
+    if (Element* fwdElement = pPairElem->getChildElement("forward-group"))
+    {
+      if(!fwdElement->hasAttribute("val"))
+        throw Mantid::Kernel::Exception::FileError("Pair forward-group without <val>" , filename);
+      
+      // Find the group with the given name
+      auto it = std::find(g.groupNames.begin(), g.groupNames.end(), fwdElement->getAttribute("val"));
+
+      if(it == g.groupNames.end())
+        throw Mantid::Kernel::Exception::FileError("Pair forward-group name not recognized" , filename);
+
+      // Get index of the iterator
+      fwdGroupId = it - g.groupNames.begin();
     }
     else
     {
-      throw Mantid::Kernel::Exception::FileError("XML group file contains no <ids> elements:" , filename);
-    }   
-  }
-  pNL_group->release();
-  
-
-  // populate pair table combo boxes
-
-  int rowNum = m_uiForm.pairTable->rowCount();
-  for (int i = 0; i < rowNum; i++)
-  {
-    QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,1));
-    QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(i,2));
-
-    for (int ii = 0; ii < allGroupNames.size(); ii++)
-    {
-
-      qw1->addItem( allGroupNames[ii] );
-      qw2->addItem( allGroupNames[ii] );
+      throw Mantid::Kernel::Exception::FileError("Pair element without <forward-group>" , filename);
     }
-    
-    if ( qw2->count() > 1 )
-      qw2->setCurrentIndex(1);
-  }
 
-
-
-
-  // add content to pair table
-
-  QStringList allPairNames;  
-  NodeList* pNL_pair = pRootElem->getElementsByTagName("pair");
-  int nPairs = static_cast<int>(pNL_pair->length());
-  if ( pNL_pair->length() > 0 )
-  {
-    for (int iPair = 0; iPair < nPairs; iPair++)
+    // Try to get id of the second group
+    if(Element* bwdElement = pPairElem->getChildElement("backward-group"))
     {
-      Element* pGroupElem = static_cast<Element*>(pNL_pair->item(iPair));
+      if(!bwdElement->hasAttribute("val"))
+        throw Mantid::Kernel::Exception::FileError("Pair backward-group without <val>" , filename);
 
-      if ( !pGroupElem->hasAttribute("name") )
-        throw Mantid::Kernel::Exception::FileError("pair element without name" , filename);
-      std::string gName = pGroupElem->getAttribute("name");
-      m_uiForm.pairTable->setItem(iPair,0, new QTableWidgetItem(gName.c_str()) );
-      allPairNames.push_back(gName.c_str());
+      // Find the group with the given name
+      auto it = std::find(g.groupNames.begin(), g.groupNames.end(), bwdElement->getAttribute("val"));
 
-      Element* fwElement = pGroupElem->getChildElement("forward-group");
-      if (fwElement)
+      if(it == g.groupNames.end())
+        throw Mantid::Kernel::Exception::FileError("Pair backward-group name not recognized" , filename);
+
+      // Get index of the iterator
+      bwdGroupId = it - g.groupNames.begin();
+    }
+    else
+    {
+      throw Mantid::Kernel::Exception::FileError("Pair element without <backward-group>" , filename);
+    }
+
+    g.pairs[ip] = std::make_pair(fwdGroupId, bwdGroupId);
+
+    // Try to get alpha element
+    if (Element* aElement = pPairElem->getChildElement("alpha"))
+    {
+      if (!aElement->hasAttribute("val") )
+        throw Mantid::Kernel::Exception::FileError("Pair alpha element with no <val>" , filename);
+     
+      try // ... to convert value to double
       {
-        std::string ids = fwElement->getAttribute("val");
-        QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(iPair,1));
-        int comboIndex = qw1->findText(ids.c_str());
-        if ( comboIndex < 0 )
-          throw Mantid::Kernel::Exception::FileError("XML pair group contains forward-group with unrecognised group name" , filename);
-        qw1->setCurrentIndex(comboIndex);
+        g.pairAlphas[ip] = boost::lexical_cast<double>(aElement->getAttribute("val"));
       }
-      else
+      catch(boost::bad_lexical_cast&)
       {
-        throw Mantid::Kernel::Exception::FileError("XML pair group contains no <forward-group> elements:" , filename);
+        throw Mantid::Kernel::Exception::FileError("Pair alpha value is not a number" , filename);
       }   
-
-      Element* bwElement = pGroupElem->getChildElement("backward-group");
-      if (bwElement)
-      {
-        std::string ids = bwElement->getAttribute("val");
-        QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(iPair,2));
-        int comboIndex = qw2->findText(ids.c_str());
-        if ( comboIndex < 0 )
-          throw Mantid::Kernel::Exception::FileError("XML pair group contains backward-group with unrecognised group name" , filename);
-        qw2->setCurrentIndex(comboIndex);
-      }
-      else
-      {
-        throw Mantid::Kernel::Exception::FileError("XML pair group contains no <backward-group> elements:" , filename);
-      }
-
-      Element* element = pGroupElem->getChildElement("alpha");
-      if (element)
-      {
-        if ( element->hasAttribute("val") )
-        {
-          m_uiForm.pairTable->setItem(iPair,3, new QTableWidgetItem(element->getAttribute("val").c_str()));
-        }
-        else
-          throw Mantid::Kernel::Exception::FileError("XML pair group contains an <alpha> element with no 'val' attribute:" , filename);
-      }
-      // if alpha element not there for now just default it to 1.0
-      else 
-      {
-        m_uiForm.pairTable->setItem(iPair,3, new QTableWidgetItem(1.0));
-      }
-
     }
-  }
-  pNL_pair->release(); 
-
-
-  // populate front combobox
-
-  //m_uiForm.frontGroupGroupPairComboBox->addItems(allGroupNames);
-  //m_uiForm.frontGroupGroupPairComboBox->addItems(allPairNames);
-
-
-  if ( pRootElem->hasAttribute("description") )
-  {
-    m_uiForm.groupDescription->setText(pRootElem->getAttribute("description").c_str());
-  }
-  else
-  {
-    m_uiForm.groupDescription->setText("");
-  }
-
-  // reads default choice 
-
-  Element* element = pRootElem->getChildElement("default");
-  if (element)
-  {
-    if ( element->hasAttribute("name") )
+    // If alpha element not there, default it to 1.0
+    else 
     {
-      setGroupGroupPair(m_uiForm, element->getAttribute("name"));
+      g.pairAlphas[ip] = 1.0;
     }
+
+  }
+  
+  pairs->release(); 
+
+  // Try to get description
+  if (pRootElem->hasAttribute("description"))
+  {
+    g.description = pRootElem->getAttribute("description");
   }
 
+  // Try to get default group/pair name
+  if(Element* defaultElement = pRootElem->getChildElement("default"))
+  {
+    if(!defaultElement->hasAttribute("name"))
+      throw Mantid::Kernel::Exception::FileError("Default element with no <name>" , filename);
+    
+    g.defaultName = defaultElement->getAttribute("name");
+  }
 
   pDoc->release();
 }
 
+/**
+ * Parses information from the grouping table and saves to Grouping struct.
+ *
+ * @param form :: Muon Analysis UI containing table widgets
+ * @param    g :: Grouping struct to store parsed info to
+ */
+void parseGroupingTable(const Ui::MuonAnalysis& form, Grouping& g)
+{
+  // Parse description
+  g.description = form.groupDescription->text().toStdString();
+
+  // Parse grouping info
+  std::vector<int> groupToRow;
+  whichGroupToWhichRow(form, groupToRow);
+
+  // Resize group arrays
+  g.groupNames.resize(groupToRow.size());
+  g.groups.resize(groupToRow.size());
+
+  // Fill group arrays
+  for (size_t gi = 0; gi < groupToRow.size(); gi++)
+  {
+    g.groupNames[gi] = form.groupTable->item(groupToRow[gi],0)->text().toStdString();
+    g.groups[gi] = form.groupTable->item(groupToRow[gi],1)->text().toStdString();
+  }
+
+  // Parse pair info
+  std::vector<int> pairToRow;
+  whichPairToWhichRow(form, pairToRow);
+
+  // Resize pair arrays
+  g.pairNames.resize(pairToRow.size());
+  g.pairs.resize(pairToRow.size());
+  g.pairAlphas.resize(pairToRow.size());
+
+  // Fill pair arrays
+  for (size_t pi = 0; pi < pairToRow.size(); pi++)
+  {
+    g.pairNames[pi] = form.pairTable->item(pairToRow[pi],0)->text().toStdString();
+
+    QComboBox* fwd = static_cast<QComboBox*>(form.pairTable->cellWidget(pairToRow[pi],1));
+    QComboBox* bwd = static_cast<QComboBox*>(form.pairTable->cellWidget(pairToRow[pi],2));
+
+    g.pairs[pi] = std::make_pair(fwd->currentIndex(), bwd->currentIndex());
+
+    g.pairAlphas[pi] = form.pairTable->item(pairToRow[pi],3)->text().toDouble();
+  } 
+
+  // Use currently selected group/pair as default value
+  g.defaultName = form.frontGroupGroupPairComboBox->currentText().toStdString();
+}
+
+/**
+ * Fills in the grouping table using information from provided Grouping struct.
+ *
+ * @param    g :: Grouping struct to use for filling the table
+ * @param form :: Muon Analysis UI containing table widgets
+ */
+void fillGroupingTable(const Grouping& g, Ui::MuonAnalysis& form)
+{
+  // Add groups to a table
+  for(int gi = 0; gi < static_cast<int>(g.groups.size()); gi++)
+  {
+    form.groupTable->setItem(gi, 0, new QTableWidgetItem(g.groupNames[gi].c_str()));
+    form.groupTable->setItem(gi, 1, new QTableWidgetItem(g.groups[gi].c_str()));
+  }
+
+  // Add pairs to the table
+  for(int pi = 0; pi < static_cast<int>(g.pairs.size()); pi++)
+  {
+    // Set the name
+    form.pairTable->setItem(pi, 0, new QTableWidgetItem(g.pairNames[pi].c_str()));
+
+    // Set selected forward/backward groups
+    QComboBox* fwd = static_cast<QComboBox*>(form.pairTable->cellWidget(pi,1));
+    fwd->setCurrentIndex(static_cast<int>(g.pairs[pi].first));
+    QComboBox* bwd = static_cast<QComboBox*>(form.pairTable->cellWidget(pi,2));
+    bwd->setCurrentIndex(static_cast<int>(g.pairs[pi].second));
+
+    // Set alpha
+    form.pairTable->setItem(pi, 3, 
+      new QTableWidgetItem(boost::lexical_cast<std::string>(g.pairAlphas[pi]).c_str()));
+  }
+
+  // Set description
+  form.groupDescription->setText(g.description.c_str());
+
+  // Select default element
+  setGroupGroupPair(form, g.defaultName);
+}
 
 /**
  * Set Group / Group Pair name
@@ -321,7 +373,49 @@ void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name)
   }
 }
 
+/**
+ * Groups the workspace according to grouping provided.
+ *
+ * @param ws :: Workspace to group
+ * @param  g :: The grouping information
+ * @return Sptr to created grouped workspace
+ */
+MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_const_sptr ws, const Grouping& g)
+{
+  // As I couldn't specify multiple groups for GroupDetectors, I am going down quite a complicated
+  // route - for every group distinct grouped workspace is created using GroupDetectors. These
+  // workspaces are then merged into the output workspace.
 
+  // Create output workspace
+  MatrixWorkspace_sptr outWs =
+    WorkspaceFactory::Instance().create(ws, g.groups.size(), ws->readX(0).size(), ws->blocksize());
+
+  for(size_t gi = 0; gi < g.groups.size(); gi++)
+  {
+    Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().create("GroupDetectors");
+    alg->setChild(true); // So Output workspace is not added to the ADS
+    alg->initialize();
+    alg->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(ws));
+    alg->setPropertyValue("SpectraList", g.groups[gi]);
+    alg->setPropertyValue("OutputWorkspace", "grouped"); // Is not actually used, just to make validators happy
+    alg->execute();
+
+    MatrixWorkspace_sptr grouped = alg->getProperty("OutputWorkspace");
+
+    // Copy the spectrum
+    *(outWs->getSpectrum(gi)) = *(grouped->getSpectrum(0));
+
+    // Update spectrum number
+    outWs->getSpectrum(gi)->setSpectrumNo(static_cast<specid_t>(gi));
+
+    // Copy to the output workspace
+    outWs->dataY(gi) = grouped->readY(0);
+    outWs->dataX(gi) = grouped->readX(0);
+    outWs->dataE(gi) = grouped->readE(0);
+  }
+
+  return outWs;
+}
 
 /**
  * create 'map' relating group number to row number in group table
@@ -329,7 +423,7 @@ void setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, const std::string& name)
  * @param m_uiForm :: The UI form
  * @param groupToRow :: The 'map' returned
  */
-void whichGroupToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow)
+void whichGroupToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToRow)
 {
   groupToRow.clear();
 
@@ -369,7 +463,7 @@ void whichGroupToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToR
  * @param m_uiForm :: The UI form
  * @param pairToRow :: The 'map' returned
  */
-void whichPairToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow)
+void whichPairToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& pairToRow)
 {
   pairToRow.clear();
 

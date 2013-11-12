@@ -6,11 +6,16 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
   
-  <catalog name="ICat3Catalog">
+  <catalog name="ICat4Catalog">
+    <soapendpoint url="​https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
+    <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
+    <filelocation>
+      <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
+      <windows replacement=""></windows>
+      <linux replacement="/archive"></linux>
+      <mac replacement="/archive"></mac>
+    </filelocation>
   </catalog>
-
-  <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
-  </soapEndPoint>
   
   <instrument name="ALF">  
     <technique>Single Crystal Diffraction</technique>
@@ -26,6 +31,12 @@
     <zeropadding size="8"/>
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXENGINX:6789" />
+  </instrument>
+
+  <instrument name="ENGIN-X_EVENT" shortname="ENGINX" >
+    <zeropadding size="8"/>
+    <technique>Neutron Diffraction</technique>
+    <livedata address="NDXENGINX:10000" listener="ISISLiveEventDataListener" />
   </instrument>
 
   <instrument name="GEM">
@@ -91,6 +102,12 @@
     <livedata address="NDXMERLIN:6789" />
   </instrument>
 
+  <instrument name="MERLIN_EVENT" shortname="MER">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <livedata address="NDXMERLIN:10000" listener="ISISLiveEventDataListener" />
+  </instrument>
+
   <instrument name="OSIRIS" shortname="OSI" beamline="N6">
     <zeropadding size="8" startRunNumber="99780" prefix="OSIRIS"/>
     <technique>Neutron Diffraction</technique>
@@ -150,6 +167,13 @@
     <livedata address="NDXLET:6789" />
   </instrument>
 
+  <instrument name="LET_EVENT" shortname="LET">
+    <zeropadding size="8"/>
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <livedata address="NDXLET:10000" listener="ISISLiveEventDataListener" />
+  </instrument>
+
   <instrument name="NIMROD">
     <zeropadding size="8"/>
     <technique>Neutron Diffraction</technique>
@@ -161,6 +185,12 @@
     <zeropadding size="8"/>
     <technique>Reflectometry</technique>
     <livedata address="NDXOFFSPEC:6789" />
+  </instrument>
+
+  <instrument name="OFFSPEC_EVENT" shortname="OFFSPEC">
+    <zeropadding size="8"/>
+    <technique>Reflectometry</technique>
+    <livedata address="NDXOFFSPEC:10000" listener="ISISLiveEventDataListener" />
   </instrument>
 
   <instrument name="POLREF">
@@ -175,6 +205,12 @@
     <livedata address="NDXSANS2D:6789" />
   </instrument>
   
+  <instrument name="SANS2D_EVENT" shortname="SANS2D">
+    <zeropadding size="8"/>
+    <technique>Small Angle Scattering</technique>
+    <livedata address="NDXSANS2D:10000" listener="ISISLiveEventDataListener" />
+  </instrument>
+
   <instrument name="WISH">
     <zeropadding size="8"/>
     <technique>Neutron Diffraction</technique>
@@ -342,17 +378,11 @@
     <livedata address="hyspec-sms1.sns.gov:31415" />
   </instrument> 
   
-  <!-- This is a virtual temp instrument for testing ADARA -->
-  <instrument name="HYSPECA" shortname="HYSA" beamline="14BS"> 
-    <technique>Neutron Spectroscopy</technique>
-    <technique>TOF Direct Geometry Spectroscopy</technique>
-    <livedata address="hyspec-sms1.sns.gov:31415" />
-  </instrument> 
-
   <instrument name="VISION" shortname="VIS" beamline="16B">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
+    <livedata address="vision-sms.sns.gov:31415" />
   </instrument>
 
    <instrument name="SEQUOIA" shortname="SEQ" beamline="17"> 
