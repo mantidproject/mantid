@@ -63,7 +63,7 @@ class FilterLogByTime(PythonAlgorithm):
         if  endtime:
             tend = runstart + (endtime * nanosecond)
         log = run.getLogData(logname)
-        if not isinstance(log, FloatTimeSeriesProperty):
+        if not hasattr(log, "times"):
             raise ValueError("log called %s is not a FloatTimeSeries log" % logname)
 
         times = numpy.array(map(lambda t: t.total_nanoseconds(), log.times))
