@@ -427,7 +427,7 @@ namespace VATES
 
   /**
    * Set the time value.
-   * @param double : the time
+   * @param time : the time
    */
   void vtkSplatterPlotFactory::setTime(double time)
   {
