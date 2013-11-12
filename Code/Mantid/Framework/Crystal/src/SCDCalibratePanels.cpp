@@ -67,17 +67,6 @@ To do so select the workspace, which you have calibrated as the InputWorkspace a
 
 *WIKI*/
 
-
-/*
-* SCDCalibratePanels.cpp
-*
-*  Created on: Mar 12, 2012
-*      Author: ruth
-*/
-
-
-
-
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -109,7 +98,6 @@ To do so select the workspace, which you have calibrated as the InputWorkspace a
 #include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "../../API/inc/MantidAPI/WorkspaceHistory.h"
 
 using namespace Mantid::DataObjects;
 using namespace  Mantid::API;

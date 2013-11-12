@@ -58,7 +58,9 @@ that slowly build a UB with corrected sample orientations may be needed.
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::Geometry::IndexingUtils;
 using Mantid::Geometry::Instrument;
+using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Geometry::ParameterMap;
 
 namespace Mantid
@@ -573,7 +575,7 @@ namespace Mantid
     if( MapRunNum2GonMat.size()==1)//Only one RunNumber in this PeaksWorkspace
     {
       Matrix<double> GonMatrix = MapRunNum2GonMat[ OutPeaks->getPeak(0).getRunNumber()];
-      Goniometer Gon( GonMatrix);
+      Geometry::Goniometer Gon( GonMatrix);
       OutPeaks->mutableRun().setGoniometer( Gon , false);
 
     }
