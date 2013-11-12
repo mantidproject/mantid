@@ -10,6 +10,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -231,6 +232,31 @@ public:
     TS_ASSERT( fun.hasAttribute("FileName") );
     TS_ASSERT( fun.hasAttribute("Workspace") );
     TS_ASSERT( fun.hasAttribute("WorkspaceIndex") );
+  }
+
+  void test_factory_create_from_file()
+  {
+      std::string inif = "name=TabulatedFunction,FileName=\"" + m_nexusFileName + "\",WorkspaceIndex=17,Scaling=2";
+      auto funf = Mantid::API::FunctionFactory::Instance().createInitialized(inif);
+      TS_ASSERT( funf );
+      TS_ASSERT_EQUALS( funf->getAttribute("Workspace").asString(), "");
+      TS_ASSERT_EQUALS( funf->getAttribute("WorkspaceIndex").asInt(), 17);
+      TS_ASSERT_EQUALS( funf->getAttribute("FileName").asUnquotedString(), m_nexusFileName);
+      TS_ASSERT_EQUALS( funf->getParameter("Scaling"), 2.0);
+  }
+
+  void test_factory_create_from_workspace()
+  {
+      auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(Fun(),1,-5.0,5.0,0.1,false);
+      AnalysisDataService::Instance().add( "TABULATEDFUNCTIONTEST_WS", ws );
+      std::string inif = "name=TabulatedFunction,Workspace=TABULATEDFUNCTIONTEST_WS,WorkspaceIndex=71,Scaling=3.14";
+      auto funf = Mantid::API::FunctionFactory::Instance().createInitialized(inif);
+      TS_ASSERT( funf );
+      TS_ASSERT_EQUALS( funf->getAttribute("Workspace").asString(), "TABULATEDFUNCTIONTEST_WS");
+      TS_ASSERT_EQUALS( funf->getAttribute("WorkspaceIndex").asInt(), 71);
+      TS_ASSERT_EQUALS( funf->getAttribute("FileName").asUnquotedString(), "");
+      TS_ASSERT_EQUALS( funf->getParameter("Scaling"), 3.14);
+      AnalysisDataService::Instance().clear();
   }
 
 private:
