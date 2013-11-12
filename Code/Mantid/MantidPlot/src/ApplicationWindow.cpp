@@ -17443,53 +17443,6 @@ void ApplicationWindow::writeToLogWindow(const MantidQt::API::Message & msg)
   resultsLog->append(msg);
 }
 
-/* This method executes loadraw asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadRawAsynch(const QString& fileName,const QString& wsName )
-{
-  mantidUI->loadrawfromICatInterface(fileName,wsName);
-}
-
-/* This method executes loadnexus asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QString& wsName)
-{
-  mantidUI->loadnexusfromICatInterface(fileName,wsName);
-}
-
-/* This method executes loadnexus asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadAsynch(const QString& fileName,const QString& wsName)
-{
-  mantidUI->loadfromICatInterface(fileName,wsName);
-}
-
-/* This method executes Download data files algorithm
- * @param  filenames - list of the file names to download
- */
-void ApplicationWindow::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds)
-{
-  //getting the sender of the signal(it's ICatInvestigation object)
-  QObject* qsender= sender();
-  if(!qsender) return;
-
-  // connecting  filelocations signal to ICatInvestigation slot setfileLocations
-  // This is to send the filelocations vector  after  algorithm execution to ICatInvestigation object(which is MnatidQt) for further processing
-  connect(mantidUI,SIGNAL(fileLocations(const std::vector<std::string>&)),qsender,SLOT(setfileLocations(const std::vector<std::string>&)));
-  /// execute the algorithm
-  mantidUI->executeDownloadDataFiles(filenNames,fileIds);
-}
-
-void  ApplicationWindow::executeloadAlgorithm(const QString& algName,const QString& fileName, const QString& wsName)
-{
-  mantidUI->executeloadAlgorithm(algName,fileName,wsName);
-}
 
 MultiLayer* ApplicationWindow::waterfallPlot()
 {

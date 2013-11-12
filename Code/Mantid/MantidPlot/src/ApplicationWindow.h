@@ -1029,20 +1029,6 @@ public slots:
 
   //Slot for writing to log window
   void writeToLogWindow(const MantidQt::API::Message& message);
-  /// execute loadraw asynchronously
-  void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute loadnexus asynchronously
-  void executeLoadNexusAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute load asynchronously
-  void executeLoadAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute loadraw/nexus without popingup load dialogs.
-  void executeloadAlgorithm(const QString&, const QString&, const QString&);
-
-  /// slot to execute download datafiles algorithm - called  from ICat interface
-  void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
   /// Activate a subwindow (docked or floating) other than current active one
   void activateNewWindow();
