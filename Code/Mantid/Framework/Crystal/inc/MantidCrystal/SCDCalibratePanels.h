@@ -52,22 +52,13 @@ namespace Crystal
 
     virtual ~SCDCalibratePanels();
 
-    virtual const std::string name() const
-    {
-       return "SCDCalibratePanels";
-    }
+    virtual const std::string name() const;
 
      /// Algorithm's version for identification overriding a virtual method
-     virtual int version() const
-    {
-        return 1;
-    }
+     virtual int version() const;
 
      /// Algorithm's category for identification overriding a virtual method
-     virtual const std::string category() const
-     {
-       return "Crystal";
-     }
+     virtual const std::string category() const;
 
   /**
    *  Refactors a rotation Q as a Rotation in x dir by Rotx * a Rotation in the y dir by Roty

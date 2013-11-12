@@ -132,6 +132,20 @@ namespace Mantid
 
     }
 
+    const std::string SCDCalibratePanels::name() const
+    {
+       return "SCDCalibratePanels";
+    }
+
+    int SCDCalibratePanels::version() const
+    {
+      return 1;
+    }
+
+    const std::string SCDCalibratePanels::category() const
+    {
+      return "Crystal";
+    }
 
     /**
      * Converts a Quaternion to a corresponding matrix produce Rotx*Roty*Rotz, corresponding to the order
