@@ -30,6 +30,7 @@
 #include "Grid.h"
 #include "ScaleDraw.h"
 #include "SymbolBox.h"
+#include "Graph.h"
 #include "PatternBox.h"
 #include "plot2D/ScaleEngine.h"
 #include "Mantid/ErrorBarSettings.h"
@@ -52,7 +53,7 @@ PlotCurve::PlotCurve(const PlotCurve& c) : QObject(), QwtPlotCurve(c.title().tex
 QString PlotCurve::saveCurveLayout()
 {
   Plot *plot = static_cast<Plot *>(this->plot());
-  Graph *g = static_cast<Graph *>(plot->parent();
+  Graph *g = static_cast<Graph *>(plot->parent());
 
   int index = g->curveIndex(static_cast<QwtPlotCurve *>(this));
   int style = g->curveType(index);
@@ -550,7 +551,7 @@ void DataCurve::loadData()
   }
 
   if (!d_labels_list.isEmpty()){
-    (static_cast<Graph*>(*plot->parent()))->updatePlot();
+    (static_cast<Graph*>(plot->parent()))->updatePlot();
     loadLabels();
   }
 }

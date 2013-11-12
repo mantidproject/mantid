@@ -1580,13 +1580,12 @@ bool MantidUI::hasUB(const QString& wsName)
   Mantid::API::IAlgorithm_sptr alg;
   try
   {
-    const int version = -1;
+    
     alg = Mantid::API::AlgorithmManager::Instance().create(algName);
   } catch (...)
   {
     QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
-        "Cannot create algorithm " + QString::fromStdString(algName) + " version "
-            + QString::number(version));
+        "Cannot create algorithm " + QString::fromStdString(algName) );
     return false;
   }
   if (!alg)
