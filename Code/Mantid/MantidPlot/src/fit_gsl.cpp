@@ -425,7 +425,7 @@ double lorentz_multi_peak_d (const gsl_vector * x, void *params) {
     }
     for (size_t i = 0; i < n; i++) {
         double res = 0;
-        for (j = 0; j < peaks; j++) {
+        for (size_t j = 0; j < peaks; j++) {
             double diff = X[i]-xc[j];
             res += a[j]*w[j]/(4*diff*diff+w[j]*w[j]);
         }
