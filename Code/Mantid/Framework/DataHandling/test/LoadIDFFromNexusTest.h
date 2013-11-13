@@ -43,21 +43,21 @@ public:
   {
     if ( !loader.isInitialized() ) loader.initialize();
 
-    //create a workspace with some sample data
+    //Create a workspace with some sample data
     wsName = "LoadIDFFromNexusTest";
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
-    //put this workspace in the data service
+    //Put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    // set properties
+    // Set properties
     loader.setPropertyValue("Workspace", wsName);
     loader.setPropertyValue("Filename", "LOQ48127.nxs");
     loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
     inputFile = loader.getPropertyValue("Filename"); // get full pathname
     
-    // check properties
+    // Check properties
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
@@ -68,7 +68,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("InstrumentParentPath") )
     TS_ASSERT( ! result.compare("mantid_workspace_1"));
 
-    // execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
 
@@ -76,8 +76,10 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
+    // Test instrument name, source and sample
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS( i->getName(), "LOQ");
+
     boost::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "source");
     TS_ASSERT_DELTA( source->getPos().Z(), 0.0,0.01);
@@ -86,7 +88,7 @@ public:
     TS_ASSERT_EQUALS( samplepos->getName(),"some-sample-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Z(), 11.0,0.01);
 
-    // test third pixel in main detector bank, which has indices (2,0)
+    // Test third pixel in main detector bank, which has indices (2,0)
     boost::shared_ptr<const Detector> ptrDetMain = boost::dynamic_pointer_cast<const Detector>(i->getDetector(5));
     TS_ASSERT_EQUALS( ptrDetMain->getID(), 5);
     TS_ASSERT_EQUALS( ptrDetMain->getName(), "main-detector-bank(2,0)");
@@ -99,11 +101,11 @@ public:
 
     TS_ASSERT_EQUALS( ptrDetMain->type(), "RectangularDetectorPixel");
 
-    // also a few tests on a HAB pixel detector
+    // Test a HAB pixel detector
     boost::shared_ptr<const Detector> ptrDetHab = boost::dynamic_pointer_cast<const Detector>(i->getDetector(16734));
     TS_ASSERT_EQUALS( ptrDetHab->getID(), 16734);
     TS_ASSERT_EQUALS( ptrDetHab->getName(), "HAB-pixel");
-    // test a non-existant detector
+    // Test a non-existant detector
     TS_ASSERT_THROWS(i->getDetector(16735), Exception::NotFoundError);
 
     // Check the monitors are correctly marked
@@ -114,7 +116,7 @@ public:
     TS_ASSERT( ! i->getDetector(300)->isMonitor() )
     TS_ASSERT( ! i->getDetector(16500)->isMonitor() )
 
-	AnalysisDataService::Instance().remove(wsName);
+	  AnalysisDataService::Instance().remove(wsName);
   }
 
 
