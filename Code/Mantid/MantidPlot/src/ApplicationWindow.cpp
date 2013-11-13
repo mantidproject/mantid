@@ -2933,7 +2933,7 @@ void ApplicationWindow::setPreferences(Graph* g)
       g->enableAxis(i, show);
       if (show)
       {
-        ScaleDraw *sd = (ScaleDraw *)g->plotWidget()->axisScaleDraw (i);
+        ScaleDraw *sd = static_cast<ScaleDraw *>(g->plotWidget()->axisScaleDraw (i));
         sd->enableComponent(QwtAbstractScaleDraw::Labels, d_show_axes_labels[i]);
         sd->setSpacing(d_graph_tick_labels_dist);
         if (i == QwtPlot::yRight && !d_show_axes_labels[i])
@@ -11626,8 +11626,8 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
 
       int plotType = curve[3].toInt();
       Table *w = app->table(curve[2]);
-      PlotCurve *c = NULL;
       if (w){
+        PlotCurve *c = NULL;
         if(plotType == Graph::VectXYXY || plotType == Graph::VectXYAM){
           QStringList colsList;
           colsList<<curve[2]; colsList<<curve[20]; colsList<<curve[21];

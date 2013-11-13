@@ -144,10 +144,10 @@ namespace MDAlgorithms
 
     MatrixWorkspace_sptr ws=getProperty("InputWorkspace"),wstemp;
     DataObjects::EventWorkspace_sptr evWS;
-    double xmin,xmax;
 
     if (QDimension=="CopyToMD")
     {
+        double xmin,xmax;
         ws->getXMinMax(xmin,xmax);
         MinValues.push_back(xmin);
         MaxValues.push_back(xmax);

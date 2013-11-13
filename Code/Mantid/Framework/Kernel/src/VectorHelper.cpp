@@ -114,14 +114,14 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
   }
 
   size_t iold = 0, inew = 0;
-  double xo_low, xo_high, xn_low, xn_high, delta(0.0), width;
+  double  width;
 
   while ((inew < size_ynew) && (iold < size_yold))
   {
-    xo_low = xold[iold];
-    xo_high = xold[iold + 1];
-    xn_low = xnew[inew];
-    xn_high = xnew[inew + 1];
+    double xo_low = xold[iold];
+    double xo_high = xold[iold + 1];
+    double xn_low = xnew[inew];
+    double xn_high = xnew[inew + 1];
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
     else if (xo_high <= xn_low)
@@ -130,7 +130,7 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
     {
       //        delta is the overlap of the bins on the x axis
       //delta = std::min(xo_high, xn_high) - std::max(xo_low, xn_low);
-      delta = xo_high < xn_high ? xo_high : xn_high;
+      double delta = xo_high < xn_high ? xo_high : xn_high;
       delta -= xo_low > xn_low ? xo_low : xn_low;
       width = xo_high - xo_low;
       if ((delta <= 0.0) || (width <= 0.0))

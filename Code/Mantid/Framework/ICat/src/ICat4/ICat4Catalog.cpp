@@ -376,7 +376,7 @@ namespace Mantid
           catch(std::runtime_error& exception)
           {
             g_log.information("An error occurred when saving the ICat search results data to Workspace");
-            throw exception;
+            throw;
           }
         }
         else
@@ -449,7 +449,7 @@ namespace Mantid
         catch(std::runtime_error& exception)
         {
           g_log.information("An error occurred when saving file data to workspace.");
-          throw exception;
+          throw;
         }
       }
     }
@@ -522,7 +522,7 @@ namespace Mantid
           catch(std::runtime_error& exception)
           {
             g_log.information("An error occurred when saving file data to workspace.");
-            throw exception;
+            throw;
           }
         }
         else

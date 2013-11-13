@@ -1407,11 +1407,11 @@ size_t IndexingUtils::FFTScanFor_Directions( std::vector<V3D>  & directions,
   std::vector<V3D> full_list = MakeHemisphereDirections( num_steps );
 
                            // find the maximum magnitude of Q to set range
-  double mag_Q;            // needed for FFT
+                           // needed for FFT
   double max_mag_Q = 0;
   for ( size_t q_num = 1; q_num < q_vectors.size(); q_num++ )
   {
-    mag_Q = q_vectors[ q_num ].norm() / (2.0 * M_PI);
+    double mag_Q = q_vectors[ q_num ].norm() / (2.0 * M_PI);
     if ( mag_Q > max_mag_Q )
       max_mag_Q = mag_Q;
   }
@@ -1482,12 +1482,12 @@ size_t IndexingUtils::FFTScanFor_Directions( std::vector<V3D>  & directions,
 
   for ( size_t i = 0; i < temp_dirs.size(); i++ )
   {
-    max_mag_fft = GetMagFFT( q_vectors, 
-                             temp_dirs[i],
-                             N_FFT_STEPS,
-                             projections,
-                             index_factor,
-                             magnitude_fft );
+    GetMagFFT( q_vectors, 
+      temp_dirs[i],
+      N_FFT_STEPS,
+      projections,
+      index_factor,
+      magnitude_fft );
 
     double position = GetFirstMaxIndex(magnitude_fft, N_FFT_STEPS, threshold);
     if ( position > 0 )
@@ -1634,13 +1634,11 @@ double IndexingUtils::GetMagFFT( const std::vector<V3D> & q_vectors,
   }
                                                       // project onto direction
   V3D     q_vec;
-  double  dot_prod;
-  size_t  index;
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
     q_vec = q_vectors[ q_num ] / (2.0 * M_PI);
-    dot_prod = current_dir.scalar_prod( q_vec );
-    index = (size_t)fabs(index_factor * dot_prod);
+    double dot_prod = current_dir.scalar_prod( q_vec );
+    size_t index = static_cast<size_t>(fabs(index_factor * dot_prod));
     if ( index < N )
       projections[ index ] += 1;
     else
@@ -2033,7 +2031,6 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
   V3D next_dir;
   V3D zero_vec(0,0,0);
 
-  double current_length;
   double next_length;
   double length_diff;
   double angle; 
@@ -2044,7 +2041,7 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
   while ( dir_num < directions.size() )     // put sequence of similar vectors
   {                                         // in list temp
     current_dir    = directions[ dir_num ];
-    current_length = current_dir.norm();
+    double current_length = current_dir.norm();
     dir_num++;
 
     if ( current_length > 0 )                // skip any zero vectors
@@ -2083,11 +2080,11 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
       }
                                               // now scan through temp list to
       int max_indexed = 0;                    // find the one that indexes most
-      int num_indexed;
+
       int max_i = -1;
       for ( size_t i = 0; i < temp.size(); i++ )
       {
-        num_indexed = NumberIndexed_1D( temp[i],
+        int num_indexed = NumberIndexed_1D( temp[i],
                                         q_vectors,
                                         required_tolerance );
         if ( num_indexed > max_indexed )
@@ -2229,22 +2226,16 @@ double IndexingUtils::IndexingError( const DblMatrix         & UB,
                       "Different size hkl and q_vectors in IndexingError()");
   }
 
-  double h_error;
-  double k_error;
-  double l_error;
+
   double total_error = 0;
   V3D    hkl;
   for ( size_t i = 0; i < hkls.size(); i++ )
   {
     hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
-/*
-    h_error = fabs( hkl[0] - round(hkls[i][0]) );
-    k_error = fabs( hkl[1] - round(hkls[i][1]) );
-    l_error = fabs( hkl[2] - round(hkls[i][2]) );
-*/
-    h_error = fabs( hkl[0] - round(hkl[0]) );
-    k_error = fabs( hkl[1] - round(hkl[1]) );
-    l_error = fabs( hkl[2] - round(hkl[2]) );
+
+    double h_error = fabs( hkl[0] - round(hkl[0]) );
+    double k_error = fabs( hkl[1] - round(hkl[1]) );
+    double l_error = fabs( hkl[2] - round(hkl[2]) );
     total_error += h_error + k_error + l_error;
   }
 
@@ -2373,16 +2364,13 @@ int IndexingUtils::NumberIndexed_1D( const V3D               & direction,
   if ( direction.norm() == 0 )
     return 0;
 
-  double proj_value;
-  double error;
-  int    nearest_int;
   int    count = 0;
  
   for ( size_t i = 0; i < q_vectors.size(); i++ )
   {
-    proj_value = direction.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
-    nearest_int = round( proj_value );
-    error = fabs( proj_value - nearest_int );
+    double proj_value = direction.scalar_prod( q_vectors[i] ) / (2.0 * M_PI);
+    int nearest_int = round( proj_value );
+    double error = fabs( proj_value - nearest_int );
     if ( error <= tolerance )
     {
       count++;
@@ -2552,9 +2540,6 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
                                              std::vector<V3D> & indexed_qs,
                                              double           & fit_error )
 {
-  int     nearest_int;
-  double  proj_value;
-  double  error;
   int     num_indexed = 0;
   index_vals.clear();
   indexed_qs.clear();
@@ -2569,9 +2554,9 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    proj_value = direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
-    nearest_int = round( proj_value );
-    error = fabs( proj_value - nearest_int );
+    double proj_value = direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+    int nearest_int = round( proj_value );
+    double error = fabs( proj_value - nearest_int );
     if ( error < required_tolerance )
     {
       fit_error += error * error;
@@ -2629,15 +2614,6 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
                                              std::vector<V3D> & indexed_qs,
                                              double           & fit_error )
 {
-  double  projected_h;
-  double  projected_k;
-  double  projected_l;
-  double  h_error;
-  double  k_error;
-  double  l_error;
-  int     h_int;
-  int     k_int;
-  int     l_int;
   V3D     hkl;
   int     num_indexed = 0;
 
@@ -2651,21 +2627,21 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    projected_h = direction_1.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
-    projected_k = direction_2.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
-    projected_l = direction_3.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+    double projected_h = direction_1.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+    double projected_k = direction_2.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+    double projected_l = direction_3.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
 
     hkl( projected_h, projected_k, projected_l );
 
     if ( ValidIndex( hkl, required_tolerance ) )
     {
-      h_int = round( projected_h );
-      k_int = round( projected_k );
-      l_int = round( projected_l );
+      int h_int = round( projected_h );
+      int k_int = round( projected_k );
+      int l_int = round( projected_l );
 
-      h_error = fabs( projected_h - h_int );
-      k_error = fabs( projected_k - k_int );
-      l_error = fabs( projected_l - l_int );
+      double h_error = fabs( projected_h - h_int );
+      double k_error = fabs( projected_k - k_int );
+      double l_error = fabs( projected_l - l_int );
 
       fit_error += h_error*h_error + k_error*k_error + l_error*l_error;
 
@@ -2943,20 +2919,18 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
     throw std::invalid_argument("SelectDirection(): List of possible directions has zero length");
   }
 
-  double dot_product;
   int    nearest_int;
   double error;
-  double sum_sq_error;
   double min_sum_sq_error = 1.0e100;
 
   for ( size_t dir_num = 0; dir_num < direction_list.size(); dir_num++ )
   {
-    sum_sq_error = 0;
+    double sum_sq_error = 0;
     V3D direction = direction_list[ dir_num ];
     direction/=plane_spacing;
     for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
     {
-      dot_product = direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+      double dot_product = direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
       nearest_int = round( dot_product );
       error = fabs( dot_product - nearest_int );
       sum_sq_error += error * error;
@@ -2969,11 +2943,10 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
     }
   }
 
-  double proj_value  = 0;
   int    num_indexed = 0;
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    proj_value = best_direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
+    double proj_value = best_direction.scalar_prod( q_vectors[ q_num ] ) / (2.0 * M_PI);
     nearest_int = round( proj_value );
     error = fabs( proj_value - nearest_int );
     if ( error < required_tolerance )
@@ -3286,7 +3259,6 @@ bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
                                 // some tests with 5% noise
   double length_tol = 0.001;
   double total_length;
-  double next_length;
 
   std::vector<DblMatrix> short_list;
   short_list.push_back( UB_list[0] );
@@ -3298,7 +3270,7 @@ bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
   while ( i < UB_list.size() && !got_short_list )
   {
     GetABC( UB_list[i], v1, v2, v3 );
-    next_length = v1.norm() + v2.norm() + v3.norm();
+    double next_length = v1.norm() + v2.norm() + v3.norm();
     if ( fabs(next_length - total_length)/total_length < length_tol )
       short_list.push_back( UB_list[i] );
     else

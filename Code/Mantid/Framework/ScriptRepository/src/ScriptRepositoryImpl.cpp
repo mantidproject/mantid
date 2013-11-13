@@ -937,8 +937,7 @@ namespace API
 
       // analyze the answer from the server, to see if the file was removed or not. 
       std::string info; 
-      std::string detail;
-      std::string published_date;        
+      std::string detail;    
       ptree pt; 
       try{
         read_json(answer, pt); 

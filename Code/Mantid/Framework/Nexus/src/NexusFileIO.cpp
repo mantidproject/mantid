@@ -727,8 +727,6 @@ using namespace DataObjects;
    * */
   int NexusFileIO::writeEventList( const DataObjects::EventList & el, std::string group_name) const
   {
-    int dims_array[1];
-
     //write data entry
     NXstatus status=NXmakegroup(fileID, group_name.c_str(), "NXdata");
     if(status==NX_ERROR) return(2);
@@ -741,6 +739,7 @@ using namespace DataObjects;
     if (!dets.empty())
     {
       std::vector<detid_t> detectorIDs(dets.begin(),dets.end());
+      int dims_array[1];
       NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs.data()), false );
     }
 
