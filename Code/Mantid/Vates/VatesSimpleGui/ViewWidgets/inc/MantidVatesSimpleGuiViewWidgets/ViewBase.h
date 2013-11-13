@@ -141,7 +141,7 @@ public slots:
   /// Set color scaling for a view.
   void setColorsForView();
   /// Setup the animation controls.
-  void setTimeSteps(bool withUpdate = false);
+  void updateAnimationControls();
   /// Provide updates to UI.
   virtual void updateUI();
   /// Provide updates to View
@@ -197,7 +197,7 @@ private:
   /// Return the appropriate representation.
   pqPipelineRepresentation *getRep();
   /// Collect time information for animation controls.
-  void handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate);
+  void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
 };

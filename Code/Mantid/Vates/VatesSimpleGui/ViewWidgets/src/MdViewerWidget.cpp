@@ -490,7 +490,7 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->render();
   this->currentView->setColorsForView();
   this->currentView->checkView();
-  this->currentView->setTimeSteps();
+  this->currentView->updateAnimationControls();
 }
 
 /**
@@ -512,7 +512,7 @@ void MdViewerWidget::checkForUpdates()
     this->currentView->onAutoScale();
     this->currentView->setAxisScales();
     pqActiveObjects::instance().setActiveSource(src);
-    this->currentView->setTimeSteps(true);
+    this->currentView->updateAnimationControls();
     this->currentView->updateView();
     this->currentView->updateUI();
   }
