@@ -121,6 +121,10 @@ void MuonAnalysis::initLayout()
 
   const std::string userFacility = ConfigService::Instance().getFacility().name();
 
+  // Allow to load current run for ISIS only 
+  if ( userFacility != "ISIS" )
+    m_uiForm.loadCurrent->setDisabled(true);
+
   // If facility if not supported by the interface - show a warning, but still open it
   if ( supportedFacilities.find(userFacility) == supportedFacilities.end() )
   {
@@ -135,10 +139,6 @@ void MuonAnalysis::initLayout()
     const QString error = errorTemplate.arg( userFacility.c_str(), supportedFacilitiesStr.c_str() );
 
     QMessageBox::warning(this, "Unsupported facility", error);
-
-    // Not allow to load current run, as it causes weird problems when working with unsupported
-    // facility
-    m_uiForm.loadCurrent->setDisabled(true);
   }
 
   m_uiForm.fitBrowser->init();
