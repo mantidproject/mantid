@@ -76,6 +76,7 @@ To do so select the workspace, which you have calibrated as the InputWorkspace a
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/V3D.h"
@@ -116,8 +117,8 @@ namespace Mantid
 
     namespace
     {
-      const double MAX_DET_HW_SCALE =1.15;
-      const double MIN_DET_HW_SCALE = .85;
+      const double MAX_DET_HW_SCALE = 1.15;
+      const double MIN_DET_HW_SCALE = 0.85;
     }
 
     SCDCalibratePanels::SCDCalibratePanels():API::Algorithm()
@@ -597,28 +598,28 @@ namespace Mantid
     bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c, double alpha,
         double beta, double gamma, double tolerance)
     {
-      if (!peaksWs || a <= 0 || b <= 0 || c <= 0)
-        return false;
-
-      std::vector<V3D> hkl(peaksWs->getNumberPeaks());
-      std::vector<V3D> qVecs(peaksWs->getNumberPeaks());
+      // put together a list of indexed peaks
+      std::vector<V3D> hkl;
+      hkl.reserve(peaksWs->getNumberPeaks());
+      std::vector<V3D> qVecs;
+      qVecs.reserve(peaksWs->getNumberPeaks());
       for (int i = 0; i < peaksWs->getNumberPeaks(); i++)
       {
-        Peak & peak = peaksWs->getPeak(i);
-        V3D HKL1 = peak.getHKL();
-        if (IndexingUtils::ValidIndex(HKL1, tolerance))
+        const Peak & peak = peaksWs->getPeak(i);
+        if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance))
         {
           hkl.push_back(peak.getHKL());
           qVecs.push_back(peak.getQSampleFrame());
         }
       }
 
+      // determine the lattice constants
       Kernel::Matrix<double>UB(3,3);
       IndexingUtils::Optimize_UB( UB, hkl,qVecs);
       std::vector<double>lat(70);
       IndexingUtils::GetLatticeParameters( UB, lat);
 
-
+      // see if the lattice constants are no worse than 25% out
       if( fabs(lat[0]-a)/a >.25) return false;
       if( fabs(lat[1]-b)/b >.25) return false;
       if( fabs(lat[2]-c)/c >.25) return false;
@@ -1349,56 +1350,56 @@ namespace Mantid
 
             //Adjust pmap to the orientation of the panel
             V3D rX = V3D(base_x, base_y, base_z);
-                    rX.normalize();
-                    V3D rY = V3D(up_x, up_y, up_z);
-                    rY.normalize();
-                    //V3D rZ=rX.cross_prod(rY);
+            rX.normalize();
+            V3D rY = V3D(up_x, up_y, up_z);
+            rY.normalize();
+            //V3D rZ=rX.cross_prod(rY);
 
-                    //These are the original axes
-                    V3D oX = V3D(1.,0.,0.);
-                    V3D oY = V3D(0.,1.,0.);
-                    V3D oZ = V3D(0.,0.,1.);
+            //These are the original axes
+            V3D oX = V3D(1.,0.,0.);
+            V3D oY = V3D(0.,1.,0.);
+            V3D oZ = V3D(0.,0.,1.);
 
-                    //Axis that rotates X
-                    V3D ax1 = oX.cross_prod(rX);
-                    //Rotation angle from oX to rX
-                    double angle1 = oX.angle(rX);
-                    angle1 *=180.0/M_PI;
-                    //Create the first quaternion
-                    Quat Q1(angle1, ax1);
+            //Axis that rotates X
+            V3D ax1 = oX.cross_prod(rX);
+            //Rotation angle from oX to rX
+            double angle1 = oX.angle(rX);
+            angle1 *=180.0/M_PI;
+            //Create the first quaternion
+            Quat Q1(angle1, ax1);
 
-                    //Now we rotate the original Y using Q1
-                    V3D roY = oY;
-                    Q1.rotate(roY);
-                    //Find the axis that rotates oYr onto rY
-                    V3D ax2 = roY.cross_prod(rY);
-                    double angle2 = roY.angle(rY);
-                    angle2 *=180.0/M_PI;
-                    Quat Q2(angle2, ax2);
+            //Now we rotate the original Y using Q1
+            V3D roY = oY;
+            Q1.rotate(roY);
+            //Find the axis that rotates oYr onto rY
+            V3D ax2 = roY.cross_prod(rY);
+            double angle2 = roY.angle(rY);
+            angle2 *=180.0/M_PI;
+            Quat Q2(angle2, ax2);
 
-                    //Final = those two rotations in succession; Q1 is done first.
-                    Quat Rot = Q2 * Q1;
+            //Final = those two rotations in succession; Q1 is done first.
+            Quat Rot = Q2 * Q1;
 
-                    // Then find the corresponding relative position
-                   //boost::shared_ptr<const IComponent> comp = instrument->getComponentByName(detname);
-                    boost::shared_ptr<const IComponent> parent = det->getParent();
-                    if (parent)
-                    {
-                        Quat rot0 = parent->getRelativeRot();
-                        rot0.inverse();
-                        Rot = Rot * rot0;
-                    }
-                    boost::shared_ptr<const IComponent>grandparent = parent->getParent();
-                    if (grandparent)//Why this is not correct but most Rectangular detectors have no grandparent.
-                    {
-                        Quat rot0 = grandparent->getRelativeRot();
-                        rot0.inverse();
-                        Rot = Rot * rot0;
-                    }
+            // Then find the corresponding relative position
+            //boost::shared_ptr<const IComponent> comp = instrument->getComponentByName(detname);
+            boost::shared_ptr<const IComponent> parent = det->getParent();
+            if (parent)
+            {
+              Quat rot0 = parent->getRelativeRot();
+              rot0.inverse();
+              Rot = Rot * rot0;
+            }
+            boost::shared_ptr<const IComponent>grandparent = parent->getParent();
+            if (grandparent)//Why this is not correct but most Rectangular detectors have no grandparent.
+            {
+              Quat rot0 = grandparent->getRelativeRot();
+              rot0.inverse();
+              Rot = Rot * rot0;
+            }
 
 
-                    // Set or overwrite "rot" instrument parameter.
-                    pmap->addQuat(det.get(),"rot",Rot);
+            // Set or overwrite "rot" instrument parameter.
+            pmap->addQuat(det.get(),"rot",Rot);
 
 
        }//While reading thru file
@@ -1455,12 +1456,15 @@ namespace Mantid
       declareProperty("Grouping", "[ 1:20,22],[3,5,7]",
         "A bracketed([]) list of groupings( comma or :(for range) separated list of bank numbers");
 
-      declareProperty("a", 0.0, "Lattice Parameter a");
-      declareProperty("b", 0.0, "Lattice Parameter b");
-      declareProperty("c", 0.0, "Lattice Parameter c");
-      declareProperty("alpha", 0.0, "Lattice Parameter alpha in degrees");
-      declareProperty("beta", 0.0, "Lattice Parameter beta in degrees");
-      declareProperty("gamma", 0.0, "Lattice Parameter gamma in degrees");
+      auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+      mustBePositive->setLower(0.0);
+
+      declareProperty("a", 0.0, mustBePositive, "Lattice Parameter a");
+      declareProperty("b", 0.0, mustBePositive, "Lattice Parameter b");
+      declareProperty("c", 0.0, mustBePositive, "Lattice Parameter c");
+      declareProperty("alpha", 0.0, mustBePositive, "Lattice Parameter alpha in degrees");
+      declareProperty("beta",  0.0, mustBePositive, "Lattice Parameter beta in degrees");
+      declareProperty("gamma", 0.0, mustBePositive, "Lattice Parameter gamma in degrees");
 
       declareProperty("useL0", true, "Fit the L0(source to sample) distance");
       declareProperty("usetimeOffset", true, "Fit the time offset value");
@@ -1472,7 +1476,8 @@ namespace Mantid
       declareProperty("AllowSampleShift",false,"Allow and fit for a sample that is off center");
 
 
-      declareProperty("tolerance", .12, "offset of hkl values from integer for GOOD Peaks");
+      declareProperty("tolerance", .12, mustBePositive,
+                      "offset of hkl values from integer for GOOD Peaks");
 
       vector< string > exts;
       exts.push_back(".DetCal");
@@ -1644,15 +1649,12 @@ namespace Mantid
         pmap->addDouble(bank_const.get(), "y", pos.Y());
         pmap->addDouble(bank_const.get(), "z", pos.Z());
         pmap->addV3D(bank_const.get(), "pos", pos);
-
       }
 
       boost::shared_ptr< Parameter > rot = pmapSv->get(bank_const.get(),("rot"));
       if( rot)
       {
         pmap->addQuat(bank_const.get(), "rot",rot->value<Quat>());
-
-
       }
 
       vector< double > scalex = pmapSv->getDouble(bank_const->getName(),"scalex");
@@ -1660,7 +1662,6 @@ namespace Mantid
       if( !scalex.empty())
       {
         pmap->addDouble(bank_const.get(),"scalex", scalex[ 0 ]);
-
       }
       if( !scaley.empty())
       {
