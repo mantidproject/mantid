@@ -366,6 +366,8 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     elfWS = ename+'_elf'
     e1WS = ename+'_eq1'
     e2WS = ename+'_eq2'
+    #elt only created if we normalise
+    eltWS = None
 
     wsnames = [elfWS, e1WS, e2WS]
     
