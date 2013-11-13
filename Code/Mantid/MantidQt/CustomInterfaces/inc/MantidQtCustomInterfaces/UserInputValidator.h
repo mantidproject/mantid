@@ -3,9 +3,11 @@
 
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtMantidWidgets/DataSelector.h"
 
 using MantidQt::MantidWidgets::WorkspaceSelector;
 using MantidQt::MantidWidgets::MWRunFiles;
+using MantidQt::MantidWidgets::DataSelector;
 
 class QLineEdit;
 class QLabel;
@@ -59,6 +61,8 @@ namespace MantidQt
       void checkWorkspaceSelectorIsNotEmpty(const QString & name, WorkspaceSelector * workspaceSelector);
       /// Check that the given MWRunFiles widget has valid files.
       void checkMWRunFilesIsValid(const QString & name, MWRunFiles * widget);
+      /// Check that the given DataSelector widget has valid input.
+      void checkDataSelectorIsValid(const QString & name, DataSelector * widget);
       /// Check that the given start and end range is valid.
       void checkValidRange(const QString & name, std::pair<double, double> range);
       /// Check that the given ranges dont overlap.
