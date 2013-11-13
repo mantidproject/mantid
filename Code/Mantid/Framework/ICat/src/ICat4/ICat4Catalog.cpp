@@ -154,12 +154,6 @@ namespace Mantid
         investigationWhere.push_back("title LIKE '%" + inputs.getInvestigationName() + "%' ");
       }
 
-      // Investigation abstract
-      if(!inputs.getInvestigationAbstract().empty())
-      {
-        investigationWhere.push_back("summary = '" + inputs.getInvestigationAbstract() + "' ");
-      }
-
       // Iterate over query vector and append AND between inputs.
       std::string investigationResult = Strings::join(investigationWhere.begin(), investigationWhere.end(), " AND ");
 
@@ -184,7 +178,7 @@ namespace Mantid
       // Datafile name
       if(!inputs.getDatafileName().empty())
       {
-        querySegments.push_back("Dataset <-> Datafile[name = '" + inputs.getDatafileName() + "']");
+        querySegments.push_back("Dataset <-> Datafile[name LIKE '%" + inputs.getDatafileName() + "%']");
         queryDataset = true;
       }
 

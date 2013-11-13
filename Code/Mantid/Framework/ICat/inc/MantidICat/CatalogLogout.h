@@ -51,10 +51,7 @@ namespace Mantid
       virtual void initDocs();
       void init();
       void exec();
-      /// logout method
-      void doLogout();
     };
-
   }
 }
 
