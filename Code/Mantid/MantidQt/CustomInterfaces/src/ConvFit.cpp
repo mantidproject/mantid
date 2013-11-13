@@ -844,11 +844,11 @@ namespace IDA
     // Always want FWHM to display as positive.
     if ( val > peakCentre )
     {
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], val-peakCentre);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], val*2.0-peakCentre);
     }
     else
     {
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], peakCentre-val);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], peakCentre-val*2.0);
     }
   }
 
@@ -868,8 +868,8 @@ namespace IDA
   void ConvFit::hwhmUpdateRS(double val)
   {
     const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
-    m_cfHwhmRange->setMinimum(peakCentre-val);
-    m_cfHwhmRange->setMaximum(peakCentre+val);
+    m_cfHwhmRange->setMinimum(peakCentre-val/2);
+    m_cfHwhmRange->setMaximum(peakCentre+val/2);
   }
 
   void ConvFit::checkBoxUpdate(QtProperty* prop, bool checked)

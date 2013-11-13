@@ -5,6 +5,8 @@
 
 #include "MantidCurveFitting/Lorentzian.h"
 #include "MantidCurveFitting/Jacobian.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 
 #include <boost/make_shared.hpp>
 
@@ -48,6 +50,22 @@ public:
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "Peak" );
+  }
+
+  void test_FWHM()
+  {
+      double hwhm = 0.5;
+      Mantid::CurveFitting::Lorentzian lor;
+      lor.initialize();
+      lor.setParameter("Amplitude",1.0);
+      lor.setParameter("PeakCentre",0.0);
+      lor.setParameter("FWHM",hwhm*2);
+
+      Mantid::API::FunctionDomain1DVector x(0,hwhm,2);
+      Mantid::API::FunctionValues y(x);
+      lor.function(x,y);
+
+      TS_ASSERT_DELTA( y[1]/y[0], 0.5, 1e-15 );
   }
 
 private:
