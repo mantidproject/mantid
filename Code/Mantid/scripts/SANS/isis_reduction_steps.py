@@ -69,7 +69,7 @@ class LoadRun(object):
             @param inst: a reference to the current instrument
             @param iscan: set this to True for can runs
             @param extra_options: arguments to pass on to the Load Algorithm.
-            @return: log values, number of periods in the workspace
+            @return: number of periods in the workspace
         """
         if self._period > 1:
             workspace = self._get_workspace_name(self._period)
@@ -95,8 +95,6 @@ class LoadRun(object):
                               OutputWorkspace=workspace,
                               **extra_options)
 
-        SANS2D_log_file = mtd[workspace]
-       
         numPeriods  = self._find_workspace_num_periods(workspace)
         #deal with the difficult situation of not reporting the period of single period files
         if numPeriods > 1:
@@ -106,22 +104,9 @@ class LoadRun(object):
                 RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= period_definitely_inc)
                 workspace = period_definitely_inc 
         
-        log = self._extract_log_info(SANS2D_log_file, inst)
-        
         self.wksp_name = workspace 
-        return numPeriods, log        
+        self.periods_in_file = numPeriods
 
-    def _extract_log_info(self,wksp_pointer, inst):
-        log = None
-        if (not inst is None) and inst.name() == 'SANS2D':
-            #this instrument has logs to be loaded 
-            try:
-                log = inst.get_detector_log(wksp_pointer)
-            except:
-                #transmission workspaces, don't have logs 
-                if not self._is_trans:
-                    raise
-        return log
 
     def _get_workspace_name(self, entry_num=None):
         """
@@ -163,7 +148,7 @@ class LoadRun(object):
         self._data_file = _file_path
         if self._reload:
             # give to _assignHelper the responsibility of loading this data.
-            return False, None
+            return False
 
         #test if the sample details are already loaded:
         if not ws_pointer.sample().getGeometryFlag():
@@ -182,15 +167,15 @@ class LoadRun(object):
         if isEventWorkspace(ws_pointer):
             ws_pointer = fromEvent2Histogram(ws_pointer)
 
-        return True, self._extract_log_info(ws_pointer, reducer.instrument)
+        return True
         
 
     # Helper function
     def _assignHelper(self, reducer):
         if isinstance(self._data_file, Workspace):
-            loaded_flag, logs = self._loadFromWorkspace(reducer)
+            loaded_flag= self._loadFromWorkspace(reducer)
             if loaded_flag:
-                return logs
+                return
 
         if self._data_file == '' or self._data_file.startswith('.'):
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
@@ -215,13 +200,13 @@ class LoadRun(object):
 
         try:
             # the spectrum_limits is not the default only for transmission data
-            self.periods_in_file, logs = self._load(reducer.instrument, extra_options=spectrum_limits)
+            self._load(reducer.instrument, extra_options=spectrum_limits)
         except RuntimeError, details:
             sanslog.warning(str(details))
             self.wksp_name = ''
-            return '', -1
+            return 
         
-        return logs
+        return 
 
     def _leaveSinglePeriod(self, workspace, period):
         groupW = mtd[workspace]
@@ -380,14 +365,7 @@ class LoadTransmissions(ReductionStep):
                 raise RuntimeError('Transmission run set without direct run error')
  
         #transmission workspaces sometimes have monitor locations, depending on the instrument, load these locations
-        reducer.instrument.load_transmission_inst(self.trans.wksp_name)
-        reducer.instrument.load_transmission_inst(self.direct.wksp_name)
-        
-        if reducer.instrument.name() == 'SANS2D':        
-            beamcoords = reducer.get_beam_center()
-            reducer.instrument.move_components(self.trans.wksp_name, beamcoords[0], beamcoords[1]) 
-            if  self.trans.wksp_name != self.direct.wksp_name:
-              reducer.instrument.move_components(self.direct.wksp_name, beamcoords[0], beamcoords[1])                
+        reducer.instrument.load_transmission_inst(self.trans.wksp_name, self.direct.wksp_name, reducer.get_beam_center())
 
         return self.trans.wksp_name, self.direct.wksp_name
 
@@ -415,24 +393,15 @@ class CanSubtraction(ReductionStep):
         if not reducer.user_settings.executed:
             raise RuntimeError('User settings must be loaded before the can can be loaded, run UserFile() first')
     
-        logs = self.workspace._assignHelper(reducer)
+        self.workspace._assignHelper(reducer)
 
         if self.workspace.wksp_name == '':
             sanslog.warning('Unable to load SANS can run, cannot continue.')
             return '()'
           
-        if logs:
-            reducer.instrument.check_can_logs(logs)
-        else:
-            logs = ""
-            if reducer.instrument.name() == 'SANS2D':
-                _issueWarning("Can logs could not be loaded, using sample values.")
-                return "()"    
-        
-        beamcoords = reducer.get_beam_center()
-        reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
-
-        return logs
+        reducer.instrument.on_load_sample(self.workspace.wksp_name, 
+                                          reducer.get_beam_center(), 
+                                          isSample=False)
 
     def execute(self, reducer, workspace):
         """
@@ -994,7 +963,7 @@ class LoadSample(LoadRun, ReductionStep):
         # Code from AssignSample
         self._clearPrevious(self._scatter_sample)
         
-        logs = self._assignHelper(reducer)
+        self._assignHelper(reducer)
         if self._period != self.UNSET_PERIOD:
             self.entries  = [self._period]
         else:
@@ -1008,28 +977,8 @@ class LoadSample(LoadRun, ReductionStep):
         if isinstance(p_run_ws, WorkspaceGroup):
             p_run_ws = p_run_ws[0]
     
-        try:
-            run_num = p_run_ws.getRun().getLogData('run_number').value
-        except RuntimeError:
-            # if the run number is not stored in the workspace, try to take it from the filename
-            run_num = os.path.basename(self._data_file).split('.')[0].split('-')[0].split('0')[-1]
-            try:
-                dummy = int(run_num)
-            except ValueError:
-                logger.notice('Could not extract run number from file name ' + self._data_file)
-        
-        reducer.instrument.set_up_for_run(run_num)
+        reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), True)
 
-        if reducer.instrument.name() == 'SANS2D':
-            if logs == None:
-                DeleteWorkspace(self.wksp_name)
-                raise RuntimeError('Sample logs cannot be loaded, cannot continue')
-            reducer.instrument.apply_detector_logs(logs)           
-
-        beamcoords = reducer.get_beam_center()
-        reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
-
-        return logs
     
     def get_group_name(self):
         return self._get_workspace_name(self._period)

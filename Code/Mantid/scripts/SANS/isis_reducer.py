@@ -33,8 +33,6 @@ class Sample(object):
     def __init__(self):
         #will contain a LoadSample() object that converts the run number into a file name and loads that file  
         self.loader = None
-        #the logs from the run file
-        self.log = None
         #geometry that comes from the run and can be overridden by user settings
         self.geometry = sans_reduction_steps.GetSampleGeom()
         #record options for the set_run
@@ -64,7 +62,7 @@ class Sample(object):
         self.period_option = period
 
         self.loader = isis_reduction_steps.LoadSample(run, reload, period)
-        self.log = self.loader.execute(reducer, None)
+        self.loader.execute(reducer, None)
         
         self.geometry.execute(None, self.get_wksp_name())
         

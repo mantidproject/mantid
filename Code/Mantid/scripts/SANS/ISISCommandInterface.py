@@ -223,6 +223,20 @@ def TransWorkspace(sample, can = None):
     ReductionSingleton().transmission_calculator.calculated_samp = sample 
     ReductionSingleton().transmission_calculator.calculated_can = can 
 
+def _return_old_compatibility_assign_methods(ws_name):
+    """For backward compatibility, AssignCan and AssignSample returns a tuple
+    with workspace name and the log entry if available.
+    
+    In the future, those methods should return just workspace name
+    """
+    logs = ""
+    if isinstance(ReductionSingleton().instrument, isis_instrument.SANS2D):
+        try:
+            logs = ReductionSingleton().instrument.get_detector_log(ws_name)
+        except:            
+            pass        
+    return ws_name, logs
+
 def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
     """
         The can is a scattering run under the same conditions as the experimental run but the
@@ -249,9 +263,10 @@ def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSE
         isis_reduction_steps.CanSubtraction(
                                 can_run, reload=reload, period=period)
     #ideally this code should live in a separate load can object 
-    logs = ReductionSingleton().background_subtracter.assign_can(
+    ReductionSingleton().background_subtracter.assign_can(
         ReductionSingleton())
-    return ReductionSingleton().background_subtracter.workspace.wksp_name, logs
+    return _return_old_compatibility_assign_methods(
+        ReductionSingleton().background_subtracter.workspace.wksp_name)
 
 def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
     """
@@ -300,8 +315,7 @@ def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRu
     
     global LAST_SAMPLE
     LAST_SAMPLE = ReductionSingleton().get_sample().wksp_name
-    return ReductionSingleton().get_sample().wksp_name, \
-        ReductionSingleton().get_sample().log
+    return _return_old_compatibility_assign_methods(LAST_SAMPLE)
 
 def SetCentre(xcoord, ycoord, bank = 'rear'):
     """
