@@ -678,12 +678,6 @@ class LOQ(ISISInstrument):
         LoadInstrument(Workspace=ws_trans,Filename= trans_definition_file, RewriteSpectraMap=False)
         LoadInstrument(Workspace=ws_direct, Filename = trans_definition_file, RewriteSpectraMap=False)
 
-    def check_can_logs(self):
-        """
-            This function does nothing for LOQ
-        """
-        pass
-
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
         ws = mtd[ws_name]
