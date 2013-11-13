@@ -70,7 +70,7 @@ private:
     auto func = boost::make_shared<TestableLorentzian>();
     func->initialize();
     func->setParameter("Amplitude", 2.0);
-    func->setParameter("HWHM", 5);
+    func->setParameter("FWHM", 5);
     func->setParameter("PeakCentre", 2.0);
     return func;
   }
