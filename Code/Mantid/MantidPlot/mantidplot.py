@@ -187,7 +187,7 @@ def plot(source, *args, **kwargs):
         return plotSpectrum(source, *args, **kwargs)
         
 #-----------------------------------------------------------------------------
-def plotSpectrum(source, indices, error_bars = False, type = -1):
+def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Open a 1D Plot of a spectrum in a workspace.
     
     This plots one or more spectra, with X as the bin boundaries,
@@ -197,6 +197,10 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         source: workspace or name of a workspace
         indices: workspace index, or tuple or list of workspace indices to plot
         error_bars: bool, set to True to add error bars.
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
+    Returns:
+        A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
     workspace_names = __getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
@@ -204,13 +208,23 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         raise ValueError("No workspace names given to plot")
     if len(index_list) == 0:
         raise ValueError("No indices given to plot")
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type))
+
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
+
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type, window, clearWindow))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
-    
-def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.VolumeNormalization, error_bars = False):
+
+# IPython couldn't correctly display complex enum value in doc pop-up, so we extract integer value
+# of enum manually.
+DEFAULT_MD_NORMALIZATION = int(mantid.api.MDNormalization.VolumeNormalization)
+
+def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error_bars = False, window = None,
+  clearWindow = False):
     """Open a 1D plot of a MDWorkspace.
     
     Args:
@@ -218,6 +232,8 @@ def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.Volu
         plot_axis: Index of the plot axis (defaults to auto-select)
         normalization: Type of normalization required (defaults to volume)
         error_bars: Flag for error bar plotting.
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
         A handle to the matrix containing the image data.
     """
@@ -232,7 +248,14 @@ def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.Volu
         non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
         if not len(non_integrated_dims) == 1:
             raise ValueError("%s must have a single non-integrated dimension in order to be rendered via plotMD" % name)
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization, error_bars))
+
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
+
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization,
+      error_bars, window, clearWindow))
+
     return graph
 
 def fitBrowser():
@@ -243,7 +266,7 @@ def fitBrowser():
     return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
 
 #-----------------------------------------------------------------------------
-def plotBin(source, indices, error_bars = False, graph_type = 0):
+def plotBin(source, indices, error_bars = False, graph_type = 0, window = None, clearWindow = False):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
     
     This puts the spectrum number as the X variable, and the
@@ -256,25 +279,31 @@ def plotBin(source, indices, error_bars = False, graph_type = 0):
         source: workspace or name of a workspace
         indices: bin number(s) to plot
         error_bars: bool, set to True to add error bars.
-
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
-        A handle to the created Graph widget.
+        A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
-    def _callPlotBin(workspace, indexes, errors, graph_type):
+    def _callPlotBin(workspace, indexes, errors, graph_type, window, clearWindow):
         if isinstance(workspace, str):
             wkspname = workspace
         else:
             wkspname = workspace.getName()
         if type(indexes) == int:
             indexes = [indexes]
-        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors,graph_type)
+
+        # Unwrap the window object, if any specified
+        if window != None:
+          window = window._getHeldObject()
+
+        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors, graph_type, window, clearWindow)
 
     if isinstance(source, list) or isinstance(source, tuple):
         if len(source) > 1:
             raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
         else:
             source = source[0]
-    return _callPlotBin(source, indices, error_bars, graph_type)
+    return _callPlotBin(source, indices, error_bars, graph_type, window, clearWindow)
 
 #-----------------------------------------------------------------------------
 def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
