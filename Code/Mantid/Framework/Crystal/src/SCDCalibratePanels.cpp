@@ -116,8 +116,8 @@ namespace Mantid
 
     namespace
     {
-      const double maxDetHWScale =1.15;
-      const double minDetHWScale = .85;
+      const double MAX_DET_HW_SCALE =1.15;
+      const double MIN_DET_HW_SCALE = .85;
     }
 
     SCDCalibratePanels::SCDCalibratePanels():API::Algorithm()
@@ -172,7 +172,8 @@ namespace Mantid
         Rotx = (tx * 180 / M_PI);
         Roty = (ty * 180 / M_PI);
         Rotz = (tz * 180 / M_PI);
-      }else //roty = 90 0r 270 def
+      }
+      else //roty = 90 0r 270 def
       {
         double k= 1;
         if( Z[ 0 ] < 0 )
@@ -871,11 +872,11 @@ namespace Mantid
         ostringstream oss2 ( ostringstream::out);
 
         if( i == 0)
-          oss2 <<  (minDetHWScale*L0) << "<" <<  "l0<"  <<  (maxDetHWScale*L0 ) << ",-5<" <<  "t0<5" ;
+          oss2 <<  (MIN_DET_HW_SCALE*L0) << "<" <<  "l0<"  <<  (MAX_DET_HW_SCALE*L0 ) << ",-5<" <<  "t0<5" ;
 
         double MaxRotOffset = getProperty("MaxRotationChangeDegrees");
-        oss2 <<  "," << (minDetHWScale)*detWidthScale0 << "<" << Gprefix << "detWidthScale<" << (maxDetHWScale)*detWidthScale0
-          << "," << (minDetHWScale)*detHeightScale0 << "<" << Gprefix << "detHeightScale<" << (maxDetHWScale)*detHeightScale0
+        oss2 <<  "," << (MIN_DET_HW_SCALE)*detWidthScale0 << "<" << Gprefix << "detWidthScale<" << (MAX_DET_HW_SCALE)*detWidthScale0
+          << "," << (MIN_DET_HW_SCALE)*detHeightScale0 << "<" << Gprefix << "detHeightScale<" << (MAX_DET_HW_SCALE)*detHeightScale0
           <<","<< -maxXYOffset+Xoffset0 << "<" << Gprefix << "Xoffset<" << maxXYOffset+Xoffset0
           << "," << -maxXYOffset+Yoffset0 << "<" << Gprefix << "Yoffset<" << maxXYOffset+Yoffset0<<
           "," << -maxXYOffset+Zoffset0 << "<" << Gprefix << "Zoffset<" << maxXYOffset+Zoffset0<<","
@@ -1791,6 +1792,11 @@ namespace Mantid
       }//For @ bank
     }
 
+    void writeXmlParameter(ofstream &ostream, const string &name, const double value)
+    {
+      ostream << "  <parameter name =\"" << name << "\"><value val=\""
+              << value << "\" />" << endl;
+    }
 
     void SCDCalibratePanels::SaveXmlFile(string const FileName, vector<vector<string> > const Groups,
       Instrument_const_sptr const instrument)const
@@ -1798,13 +1804,16 @@ namespace Mantid
       if (FileName.empty())
         return;
 
+      // create the file and add the header
       ofstream oss3(FileName.c_str());
       oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
       oss3 << " <parameter-file instrument=\"" << instrument->getName() << "\" valid-from=\""
         << instrument->getValidFromDate().toISO8601String() << "\">" << endl;
       ParameterMap_sptr pmap = instrument->getParameterMap();
 
+      // write out the detector banks
       for (vector<vector<string> >::const_iterator it = Groups.begin(); it != Groups.end(); ++it)
+      {
         for( vector<string>::const_iterator it1=(*it).begin(); it1 !=(*it).end(); ++it1)
         {
           string bankName = (*it1);
@@ -1818,21 +1827,14 @@ namespace Mantid
           double rotx, roty, rotz;
 
           SCDCalibratePanels::Quat2RotxRotyRotz(RelRot, rotx, roty, rotz);
-
-          oss3 << "  <parameter name =\"rotx\"><value val=\"" << rotx << "\" /> </parameter>" << endl;
-          oss3 << "  <parameter name =\"roty\"><value val=\"" << roty << "\" /> </parameter>" << endl;
-          oss3 << "  <parameter name =\"rotz\"><value val=\"" << rotz << "\" /> </parameter>" << endl;
+          writeXmlParameter(oss3, "rotx", rotx);
+          writeXmlParameter(oss3, "roty", roty);
+          writeXmlParameter(oss3, "rotz", rotz);
 
           V3D pos1 = bank->getRelativePos();
-
-          oss3 << "  <parameter name =\"x\"><value val=\"" << pos1.X() << "\" /> </parameter>"
-            << endl;
-
-          oss3 << "  <parameter name =\"y\"><value val=\"" << pos1.Y() << "\" /> </parameter>"
-            << endl;
-
-          oss3 << "  <parameter name =\"z\"><value val=\"" << pos1.Z() << "\" /> </parameter>"
-            << endl;
+          writeXmlParameter(oss3, "x", pos1.X());
+          writeXmlParameter(oss3, "y", pos1.Y());
+          writeXmlParameter(oss3, "z", pos1.Z());
 
           vector<double> oldScalex = pmap->getDouble(bank->getName(), string("scalex"));
           vector<double> oldScaley = pmap->getDouble(bank->getName(), string("scaley"));
@@ -1841,44 +1843,38 @@ namespace Mantid
           if (!oldScalex.empty())
             scalex = oldScalex[0];
           else
-            scalex = 1;
+            scalex = 1.;
 
           if (!oldScaley.empty())
             scaley = oldScaley[0];
           else
-            scaley = 1;
+            scaley = 1.;
 
           oss3 << "  <parameter name =\"scalex\"><value val=\"" << scalex << "\" /> </parameter>"
             << endl;
           oss3 << "  <parameter name =\"scaley\"><value val=\"" << scaley << "\" /> </parameter>"
             << endl;
           oss3 << "</component-link>" << endl;
-        }//For @ bank
+        } // for each bank in the group
+      } // for each group
 
-        IObjComponent_const_sptr source = instrument->getSource();
+      // write out the source
+      IObjComponent_const_sptr source = instrument->getSource();
 
-        oss3 << "<component-link name=\"" << source->getName() << "\">" << endl;
-        IObjComponent_const_sptr sample = instrument->getSample();
-        V3D sourceRelPos = source->getRelativePos();
+      oss3 << "<component-link name=\"" << source->getName() << "\">" << endl;
+      IObjComponent_const_sptr sample = instrument->getSample();
+      V3D sourceRelPos = source->getRelativePos();
 
-        oss3 << "  <parameter name =\"x\"><value val=\"" << sourceRelPos.X() << "\" /> </parameter>" << endl;
+      writeXmlParameter(oss3, "x", sourceRelPos.X());
+      writeXmlParameter(oss3, "y", sourceRelPos.Y());
+      writeXmlParameter(oss3, "z", sourceRelPos.Z());
+      oss3 << "</component-link>" << endl;
+      oss3 << "</parameter-file>" << endl;
 
-        oss3 << "  <parameter name =\"y\"><value val=\"" << sourceRelPos.Y() << "\" /> </parameter>" << endl;
-
-        oss3 << "  <parameter name =\"z\"><value val=\"" << sourceRelPos.Z() << "\" /> </parameter>" << endl;
-
-        oss3 << "</component-link>" << endl;
-
-        oss3 << "</parameter-file>" << endl;
-
-        oss3.flush();
-        oss3.close();
-
+      // flush and close the file
+      oss3.flush();
+      oss3.close();
     }
-
-
-
-
 
   }//namespace Crystal
 }//namespace Mantid
