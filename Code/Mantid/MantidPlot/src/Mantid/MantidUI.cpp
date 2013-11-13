@@ -577,7 +577,7 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
 
   auto firstName = wsNames.at(0);
 
-  bool isGraphNew;
+  bool isGraphNew = false;
   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, firstName, clearWindow);
 
   Graph *g = ml->activeGraph();
@@ -2345,7 +2345,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    t->confirmClose(false);
    t->setAttribute(Qt::WA_QuitOnClose);
    
-   bool isGraphNew;
+   bool isGraphNew = false;
    MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, wsName, clearWindow);
 
    Graph *g = ml->activeGraph();
@@ -3208,7 +3208,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   const QString& firstWsName = toPlot.constBegin().key();
 
-  bool isGraphNew;
+  bool isGraphNew = false;
   MultiLayer* ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow, firstWsName, clearWindow);
 
   Graph *g = ml->activeGraph();

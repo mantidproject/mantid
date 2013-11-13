@@ -2748,6 +2748,8 @@ MultiLayer* ApplicationWindow::newGraph(const QString& caption)
  */
 MultiLayer* ApplicationWindow::prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName, bool clearWindow) 
 {
+  isNew = false;
+
   if(window == NULL)
   { // If plot window is not specified, create a new one
     window = multilayerPlot(generateUniqueName( newWindowName + "-"));
