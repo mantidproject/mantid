@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 
 This algorithm fits a series of spectra with the same function. Each spectrum is fit independently and the result is a table of fitting parameters unique for each spectrum. The sources for the spectra are defined in the Input property. The Input property expects a list of spectra identifiers separated by semicolons (;). An identifier is itself a comma-separated list of values. The first value is the name of the source. It can be either a workspace name or a name of a file (RAW or Nexus). If it is a name of a [[WorkspaceGroup]] all its members will be included in the fit. The second value selects a spectrum within the workspace or file. It is an integer number with a prefix defining the meaning of the number: "sp" for a spectrum number, "i" for a workspace index, or "v" for a range of values on the numeric axis associated with the workspace index. For example, sp12, i125, v0.5:2.3. If the data source is a file only the spectrum number option is accepted. The third value of the spectrum identifier is optional period number. It is used if the input file contains multiperiod data. In case of workspaces this third parameter is ignored. This are examples of  Input property
@@ -43,6 +43,7 @@ In this example a group of three Matrix workspaces were fitted with a [[Gaussian
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
@@ -101,6 +102,10 @@ namespace Mantid
         "If set to 'Sequential' every next fit starts with parameters returned by the previous fit. \n"
         "If set to 'Individual' each fit starts with the same initial values defined in the Function property.");
 
+      declareProperty("PassWSIndexToFunction", false,
+        "For each spectrum in Input pass its workspace index to all functions that"
+        "have attribute WorkspaceIndex." );
+
       std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
       declareProperty("Minimizer","Levenberg-Marquardt",boost::make_shared<StringListValidator>(minimizerOptions),
         "Minimizer to use for fitting. Minimizers available are 'Levenberg-Marquardt', 'Simplex', \n"
@@ -124,6 +129,7 @@ namespace Mantid
       //int wi = getProperty("WorkspaceIndex");
       std::string logName = getProperty("LogValue");
       bool sequential = getPropertyValue("FitType") == "Sequential";
+      bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
 
       bool isDataName = false; // if true first output column is of type string and is the data source name
       ITableWorkspace_sptr result = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -212,12 +218,16 @@ namespace Mantid
 
           try
           {
+            if ( passWSIndexToFunction )
+            {
+                setWorkspaceIndexAttribute( ifun, j );
+            }
+
             // Fit the function
             API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
             fit->initialize();
-            fit->setPropertyValue("Function",fun);
+            fit->setProperty("Function",ifun);
             fit->setProperty("InputWorkspace",data.ws);
-            //fit->setPropertyValue("InputWorkspace",data.ws->getName());
             fit->setProperty("WorkspaceIndex",j);
             fit->setPropertyValue("StartX",getPropertyValue("StartX"));
             fit->setPropertyValue("EndX",getPropertyValue("EndX"));
@@ -230,13 +240,13 @@ namespace Mantid
           }
           catch(...)
           {
-            g_log.error("Error in FitMW ChildAlgorithm");
+            g_log.error("Error in Fit ChildAlgorithm");
             throw;
           }
 
-          if (sequential)
+          if (!sequential)
           {
-            fun = ifun->asString();
+            ifun = FunctionFactory::Instance().createInitialized(fun);
           }
 
           // Extract the fitted parameters and put them into the result table
@@ -403,6 +413,27 @@ namespace Mantid
       }
 
       return out;
+    }
+
+    /**
+      * Set any WorkspaceIndex attributes in the fitting function. If the function is composite
+      * try all its members.
+      * @param fun :: The fitting function
+      * @param wsIndex :: Value for WorkspaceIndex attributes to set.
+      */
+    void PlotPeakByLogValue::setWorkspaceIndexAttribute(IFunction_sptr fun, int wsIndex) const
+    {
+        const std::string attName = "WorkspaceIndex";
+        if ( fun->hasAttribute(attName) )
+        {
+            fun->setAttributeValue(attName,wsIndex);
+        }
+
+        API::CompositeFunction_sptr cf = boost::dynamic_pointer_cast<API::CompositeFunction>( fun );
+        for(size_t i = 0; i < cf->nFunctions(); ++i)
+        {
+            setWorkspaceIndexAttribute( cf->getFunction(i), wsIndex );
+        }
     }
 
     /// Create a list of input workspace names
