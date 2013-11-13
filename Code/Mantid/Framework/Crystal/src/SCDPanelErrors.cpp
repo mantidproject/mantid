@@ -63,12 +63,6 @@ The theoretical values for the qx, qy and qz are found as follows:
 * The theoretical qx,qy,and qz can be obtained by multiplying the hkl for the peak by this matrix(/2&pi;)
 
  *WIKI*/
-/*
- * SCDPanelErrors.cpp
- *
- *  Created on: Feb 27, 2012
- *      Author: ruth
- */
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -83,11 +77,17 @@ The theoretical values for the qx, qy and qz are found as follows:
 #include <math.h>
 
 using namespace Mantid::API;
-using namespace std;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
+using std::invalid_argument;
+using std::logic_error;
+using std::map;
+using std::runtime_error;
+using std::setw;
+using std::string;
+using std::vector;
 
 //TODO: add const's and & to arguments.  PeaksWorkspace_ptr should be const_ptr
 
@@ -102,22 +102,48 @@ DECLARE_FUNCTION( SCDPanelErrors )
 // UB ified q's are below.
 Kernel::Logger& SCDPanelErrors::g_log = Kernel::Logger::get("SCDPanelErrors");
 
-
+namespace { // anonymous namespace
 static const double UBq2Q(2 * M_PI);
 static const double Q2UBq = 1 / UBq2Q;
 static int doMethod = 1;
+const string LATTICE_A("a");
+const string LATTICE_B("b");
+const string LATTICE_C("c");
+const string LATTICE_ALPHA("alpha");
+const string LATTICE_BETA("beta");
+const string LATTICE_GAMMA("gamma");
+}
 
 void CheckSizetMax( size_t v1, size_t v2, size_t v3,std::string ErrMess)
 {
+  // TODO this check stops "real" examples from working
   if( v1 > 32000 ||v2 > 32000 ||v3 > 32000 )
     throw std::invalid_argument("Size_t val very large "+ErrMess);
 }
 
+void initializeAttributeList(vector<string> &attrs)
+{
+  attrs.clear();
+  attrs.push_back(LATTICE_A);
+  attrs.push_back(LATTICE_B);
+  attrs.push_back(LATTICE_C);
+  attrs.push_back(LATTICE_ALPHA);
+  attrs.push_back(LATTICE_BETA);
+  attrs.push_back(LATTICE_GAMMA);
+  attrs.push_back("PeakWorkspaceName");
+  attrs.push_back("BankNames");
+  attrs.push_back("startX");
+  attrs.push_back("endX");
+  attrs.push_back("NGroups");
+  attrs.push_back("RotateCenters");
+  attrs.push_back("SampleOffsets");
+}
 
 SCDPanelErrors::SCDPanelErrors() :
   API::ParamFunction(), IFunction1D()
 {
-  NLatticeParametersSet = 0;
+  initializeAttributeList(m_attrNames);
+
   a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
       = startX_set = NGroups_set  = false;
 
@@ -148,26 +174,89 @@ SCDPanelErrors::~SCDPanelErrors()
 {
 }
 
+size_t SCDPanelErrors::nAttributes () const
+{
+  return m_attrNames.size();
+}
+
+std::vector< std::string >  SCDPanelErrors::getAttributeNames () const
+{
+  return m_attrNames;
+}
+
+IFunction::Attribute SCDPanelErrors::getAttribute(const std::string &attName) const
+{
+  if (!hasAttribute(attName))
+    throw std::invalid_argument("Not a valid attribute name \"" + attName + "\"");
+
+  if (attName == LATTICE_A)
+    return Attribute(a);
+  if (attName == LATTICE_B)
+    return Attribute(b);
+  if (attName == LATTICE_C)
+    return Attribute(c);
+  if (attName == LATTICE_ALPHA)
+    return Attribute(alpha);
+  if (attName == LATTICE_BETA)
+    return Attribute(beta);
+  if (attName == LATTICE_GAMMA)
+    return Attribute(gamma);
+
+  if (attName == ("BankNames"))
+    return Attribute(BankNames);
+  else if( attName == "PeakWorkspaceName")
+    return Attribute( PeakName );
+  else if( attName =="NGroups")
+    return Attribute(NGroups);
+  else if( attName == "RotateCenters")
+  {
+    if(RotateCenters)
+      return Attribute(1);
+    else
+      return Attribute(0);
+  }
+  else if( attName== "SampleOffsets")
+  {
+    if( SampleOffsets)
+
+      return Attribute(1);
+    else
+      return Attribute(0);
+  }
+  else if (attName == "startX")
+    return Attribute(startX);
+  else if (attName == "endX")
+    return Attribute(endX);
+
+
+  throw std::invalid_argument("Not a valid attribute name \"" + attName + "\"");
+}
+
+bool SCDPanelErrors::hasAttribute(const std::string &attName) const
+{
+  return (std::find(m_attrNames.begin(), m_attrNames.end(), attName) != m_attrNames.end());
+}
+
 SCDPanelErrors::SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::string& Component_name,
                                double ax, double bx, double cx, double alphax, double betax, double gammax, double tolerance1) :
   API::ParamFunction(), IFunction1D()
 {
+  initializeAttributeList(m_attrNames);
 
   peaks = pwk;
   BankNames = Component_name;
 
   tolerance = tolerance1;
   NGroups = 1;
-  NLatticeParametersSet = 0;
   a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
       = startX_set = NGroups_set   = false;
 
-  setAttribute("a", Attribute(ax));
-  setAttribute("b", Attribute(bx));
-  setAttribute("c", Attribute(cx));
-  setAttribute("alpha", Attribute(alphax));
-  setAttribute("beta", Attribute(betax));
-  setAttribute("gamma", Attribute(gammax));
+  setAttribute(LATTICE_A, Attribute(ax));
+  setAttribute(LATTICE_B, Attribute(bx));
+  setAttribute(LATTICE_C, Attribute(cx));
+  setAttribute(LATTICE_ALPHA, Attribute(alphax));
+  setAttribute(LATTICE_BETA, Attribute(betax));
+  setAttribute(LATTICE_GAMMA, Attribute(gammax));
 
   setAttribute("PeakWorkspaceName", Attribute("xxx"));
 
@@ -228,12 +317,12 @@ boost::shared_ptr<DataObjects::PeaksWorkspace> SCDPanelErrors::getPeaks() const
 
 void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData) const
 {
-  if (NLatticeParametersSet < (int) nAttributes()-2)
-  {
-    g_log.error("Not all lattice parameters have been set");
-    throw std::invalid_argument("Not all lattice parameters have been set");
-
-  }
+  // TODO need to error check this
+//  if (NLatticeParametersSet < (int) nAttributes()-2)
+//  {
+//    g_log.error("Not all lattice parameters have been set");
+//    throw std::invalid_argument("Not all lattice parameters have been set");
+//  }
 
   if (!pkwsp)
   {
@@ -268,20 +357,20 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double
   if (xValues[StartX] != floor(xValues[StartX]) )
   {
     g_log.error("Improper workspace set xVals must be integer");
-    throw invalid_argument("Improper workspace. xVals must be integer");
+    throw std::invalid_argument("Improper workspace. xVals must be integer");
   }
 
   if (xValues[StartX] < 0 || xValues[StartX] >= pkwsp->rowCount())
   {
 
     g_log.error("Improper workspace set");
-    throw invalid_argument("Improper workspace. xVals correspond to an index in the PeaksWorkspace");
+    throw std::invalid_argument("Improper workspace. xVals correspond to an index in the PeaksWorkspace");
   }
 
   if( (EndX-StartX+1)/3 < 4)
   {
     g_log.error("Not enough peaks to process banks "+ BankNames);
-    throw invalid_argument("Not enough peaks to process banks "+ BankNames);
+    throw std::invalid_argument("Not enough peaks to process banks "+ BankNames);
   }
 
 }
@@ -296,16 +385,12 @@ Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak & peak) const
   if (!instSave)
   {
     g_log.error(" Not all peaks have an instrument");
-    throw invalid_argument(" Not all peaks have an instrument");
+    throw std::invalid_argument(" Not all peaks have an instrument");
   }
   boost::shared_ptr<Geometry::Instrument> instChange(new Geometry::Instrument());
 
-
-
-
   if (!instSave->isParametrized())
   {
-
     boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
     boost::shared_ptr<Geometry::Instrument> Pinsta(new Geometry::Instrument(instSave, pmap));
 
@@ -407,7 +492,7 @@ Peak SCDPanelErrors::createNewPeak(const API::IPeak & peak_old,
 
 void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t nData) const
 {
-  g_log.debug()<<"Start function 1D"<<endl;
+  g_log.debug()<<"Start function 1D\n";
   size_t StartX;
   size_t EndX;
   V3D panelCenter_old;
@@ -439,7 +524,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t
     for( size_t i=0; i < nParams(); ++i)
       g_log.debug() << getParameter(i) << ",";
 
-    g_log.debug() << endl;
+    g_log.debug() << "\n";
 
     return;
   }
@@ -587,7 +672,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t
 
   //Get values for test program. TODO eliminate
   g_log.debug() << "  out[evenxx]=";
-  for (size_t i = 0; i < min<size_t> (nData, 30); ++i)
+  for (size_t i = 0; i < std::min<size_t> (nData, 30); ++i)
     g_log.debug() << out[i] << "  ";
 
   g_log.debug() << std::endl;
@@ -626,7 +711,7 @@ Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(Matrix<double> const& DerivQ,
     for (size_t i = 0; i < nParams(); ++i)
       g_log.debug() << getParameter(i) << ",";
 
-    g_log.debug() << endl;
+    g_log.debug() << "\n";
 
     throw std::invalid_argument(" Invalid initial data ");
   }
@@ -637,27 +722,27 @@ double SCDPanelErrors::checkForNonsenseParameters()const
 
   double Dwdth = getParameter(0);
   double Dhght = getParameter(1);
-  double x = getParameter(2);
-  double y = getParameter(3);
-  double z = getParameter(4);
-  double rx = getParameter(5);
-  double ry = getParameter(6);
-  double rz = getParameter(7);
-  double L0= getParameter(8);
-  double T0 = getParameter(9);
+  double x     = getParameter(2);
+  double y     = getParameter(3);
+  double z     = getParameter(4);
+  double rx    = getParameter(5);
+  double ry    = getParameter(6);
+  double rz    = getParameter(7);
+  double L0    = getParameter(8);
+  double T0    = getParameter(9);
 
-  double r =0;
-  if( L0 <1 )
-    r = 1-L0;
+  double r =0.;
+  if( L0 <1. )
+    r = 1.-L0;
 
-  if( fabs(T0) > 20)
-    r += (T0-20)*2;
+  if( fabs(T0) > 20.)
+    r += (T0-20.)*2.;
 
-  if( Dwdth < .5 || Dwdth > 2)
-    r += 3*fabs(1-Dwdth);
+  if( Dwdth < .5 || Dwdth > 2.)
+    r += 3.*fabs(1-Dwdth);
 
-  if( Dhght <.5 || Dhght >2)
-    r+=3*fabs(1-Dhght);
+  if( Dhght <.5 || Dhght >2.)
+    r+=3.*fabs(1.-Dhght);
 
   if( fabs(x) >.35 )
     r+= fabs(x)*.2;
@@ -668,18 +753,16 @@ double SCDPanelErrors::checkForNonsenseParameters()const
   if( fabs(z) >.35)
     r+= fabs(z)*.2;
 
-  if( fabs(rx) >15 )
+  if( fabs(rx) >15. )
     r+= fabs(rx)*.02;
 
-  if( fabs(ry) >15 )
+  if( fabs(ry) >15. )
     r+= fabs(ry)*.02;
 
-  if( fabs(rz) >15 )
+  if( fabs(rz) >15. )
     r+= fabs(ry)*.02;
 
-  return 5*r;
-
-
+  return 5.*r;
 }
 
 void updateDerivResult(PeaksWorkspace_sptr peaks,
@@ -725,11 +808,12 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   CheckSizetMax(StartPos, L0param, T0param, "Start deriv");
   if (nData <= 0)
     return;
-  if (NLatticeParametersSet < (int) nAttributes() - 2)
-  {
-    g_log.error("Not all lattice parameters have been set");
-    throw std::invalid_argument("Not all lattice parameters have been set");
-  }
+  // TODO error check
+//  if (NLatticeParametersSet < (int) nAttributes() - 2)
+//  {
+//    g_log.error("Not all lattice parameters have been set");
+//    throw std::invalid_argument("Not all lattice parameters have been set");
+//  }
 
   if (startX < 0 || endX < 0 || endX < startX)
   {
@@ -859,15 +943,15 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   {
 
     g_log.error("Not enough points to find Optimized UB1 =" + std::string(s.what()));
-    throw std::runtime_error("Not enough good points to find Optimized UB");
+    throw runtime_error("Not enough good points to find Optimized UB");
   } catch (char * s1)
   {
     g_log.error("Not enough points to find Optimized UB2=" + std::string(s1));
-    throw std::runtime_error("Not enough good points to find Optimized UB");
+    throw runtime_error("Not enough good points to find Optimized UB");
   } catch (...)
   {
     g_log.error("Not enough points to find Optimized UB3");
-    throw std::runtime_error("Not enough good points to find Optimized UB");
+    throw runtime_error("Not enough good points to find Optimized UB");
   }
 
   boost::split(Groups, BankNames, boost::is_any_of("!"));
@@ -1344,7 +1428,7 @@ DataObjects::Workspace2D_sptr SCDPanelErrors::calcWorkspace(DataObjects::PeaksWo
   Mantid::MantidVecPtr pX;
   if (tolerance < 0)
     tolerance = .5;
-  tolerance = min<double> (.5, tolerance);
+  tolerance = std::min<double> (.5, tolerance);
 
   Mantid::MantidVec& xRef = pX.access();
   Mantid::MantidVecPtr yvals;
@@ -1390,174 +1474,122 @@ DataObjects::Workspace2D_sptr SCDPanelErrors::calcWorkspace(DataObjects::PeaksWo
 void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & value)
 {
   if (!hasAttribute(attName))
-    throw std::invalid_argument("Not a valid attribute namee " + attName);
+    throw std::invalid_argument("Not a valid attribute name \"" + attName + "\"");
 
-  double x = 0;
-  if(!(attName == "PeakWorkspaceName" || attName=="BankNames" || attName =="startX"
-       || attName == "endX" || attName == "NGroups"||
-       attName=="RotateCenters"|| attName=="SampleOffsets"))
-    x =value.asDouble();
-
-  if (attName.compare("beta") < 0)
+  bool recalcB = false;
+  if (attName == LATTICE_A)
   {
-    if (attName.compare("a") == 0)
+    a = value.asDouble();
+    a_set = true;
+    recalcB = true;
+  }
+  else if (attName == LATTICE_B)
+  {
+    b = value.asDouble();
+    b_set = true;
+    recalcB = true;
+  }
+  else if (attName == LATTICE_C)
+  {
+    c = value.asDouble();
+    c_set = true;
+    recalcB = true;
+  }
+  else if (attName == LATTICE_ALPHA)
+  {
+    alpha = value.asDouble();
+    alpha_set = true;
+    recalcB = true;
+  }
+  else if (attName == LATTICE_BETA)
+  {
+    beta = value.asDouble();
+    beta_set = true;
+    recalcB = true;
+  }
+  else if (attName == LATTICE_GAMMA)
+  {
+    gamma = value.asDouble();
+    gamma_set = true;
+    recalcB = true;
+  }
+  else if (attName == ("BankNames"))
+  {
+    BankNames = value.asString();
+    BankNames_set = true;
+  }
+  else if( attName =="PeakWorkspaceName")
+  {
+    PeakName= value.asString();
+    PeakName_set = true;
+  }else if( attName == "NGroups")
+  {
+    if( NGroups_set )
     {
-      a = x;
-      if (!a_set)
-      {
-        a_set = true;
-        NLatticeParametersSet++;
-      }
+      g_log.error("Cannot set NGroups more than once");
+      throw new std::invalid_argument("Cannot set NGroups more than once");
     }
-    else if (attName == ("b"))
+    NGroups = value.asInt();
+    for (int k = 1; k < NGroups; ++k)
     {
-      b = x;
-      if (!b_set)
-      {
-        b_set = true;
-        NLatticeParametersSet++;
-      }
-    }
-    else if (attName == ("BankNames"))
-    {
-      BankNames = value.asString();
-      if (!BankNames_set)
-      {
-        BankNames_set = true;
-        NLatticeParametersSet++;
-      }
-    }
-    else if (attName == ("alpha"))
-    {
-      alpha = x;
-      if (!alpha_set)
-      {
-        alpha_set = true;
-        NLatticeParametersSet++;
-      }
-    }
-    else if( attName =="PeakWorkspaceName")
-    {
-      PeakName= value.asString();
+      std::string prefix = "f"+boost::lexical_cast< std::string >(k) + "_";
+      declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
+      declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
 
-      if( !PeakName_set)
-      {
-        PeakName_set = true;
-        NLatticeParametersSet++;
-      }
-    }else if( attName == "NGroups")
-    {
-      if( NGroups_set )
-      {
-        g_log.error("Cannot set NGroups more than once");
-        throw new std::invalid_argument("Cannot set NGroups more than once");
-      }
-      NGroups = value.asInt();
-      for (int k = 1; k < NGroups; ++k)
-      {
-        std::string prefix = "f"+boost::lexical_cast< std::string >(k) + "_";
-        declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
-        declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
+      declareParameter(prefix + "Xoffset", 0.0, "Panel Center x offset");
+      declareParameter(prefix + "Yoffset", 0.0, "Panel Center y offset");
+      declareParameter(prefix + "Zoffset", 0.0, "Panel Center z offset");
 
-        declareParameter(prefix + "Xoffset", 0.0, "Panel Center x offset");
-        declareParameter(prefix + "Yoffset", 0.0, "Panel Center y offset");
-        declareParameter(prefix + "Zoffset", 0.0, "Panel Center z offset");
-
-        declareParameter(prefix + "Xrot", 0.0, "Rotation(degrees) Panel Center in x axis direction");
-        declareParameter(prefix + "Yrot", 0.0, "Rotation(degrees) Panel Center in y axis direction");
-        declareParameter(prefix + "Zrot", 0.0, "Rotation(degrees) Panel Center in z axis direction");
-      }
-      if( !NGroups_set)
-      {
-        NGroups_set = true;
-        NLatticeParametersSet++;
-      }
+      declareParameter(prefix + "Xrot", 0.0, "Rotation(degrees) Panel Center in x axis direction");
+      declareParameter(prefix + "Yrot", 0.0, "Rotation(degrees) Panel Center in y axis direction");
+      declareParameter(prefix + "Zrot", 0.0, "Rotation(degrees) Panel Center in z axis direction");
     }
-    else if( attName == "RotateCenters")
-    {
-      int v= value.asInt();
-      if( v==0)
-        RotateCenters= false;
-      else
-        RotateCenters = true;
-
-    }
-    else if( attName== "SampleOffsets")
-    { int v= value.asInt();
-      if( v==0)
-        SampleOffsets= false;
-      else
-        SampleOffsets=true;
-      if(SampOffsetDeclareStatus== 1 && SampleOffsets)
-      {
-        declareParameter("SampleX", 0.0, "Sample x offset");
-        declareParameter("SampleY", 0.0, "Sample y offset");
-        declareParameter("SampleZ", 0.0, "Sample z offset");
-        SampOffsetDeclareStatus =2;
-      }
-
-    }
-
+    NGroups_set = true;
+  }
+  else if( attName == "RotateCenters")
+  {
+    int v= value.asInt();
+    if( v==0)
+      RotateCenters= false;
     else
-      throw std::invalid_argument("Not a valid attribute namef ");
+      RotateCenters = true;
 
   }
-  else if (attName == "beta")
-  {
-    beta = x;
-    if (!beta_set)
+  else if( attName== "SampleOffsets")
+  { int v= value.asInt();
+    if( v==0)
+      SampleOffsets= false;
+    else
+      SampleOffsets=true;
+    if(SampOffsetDeclareStatus== 1 && SampleOffsets)
     {
-      beta_set = true;
-      NLatticeParametersSet++;
-    }
-  }
-  else if (attName == "c")
-  {
-    c = x;
-    if (!c_set)
-    {
-      c_set = true;
-      NLatticeParametersSet++;
+      declareParameter("SampleX", 0.0, "Sample x offset");
+      declareParameter("SampleY", 0.0, "Sample y offset");
+      declareParameter("SampleZ", 0.0, "Sample z offset");
+      SampOffsetDeclareStatus =2;
     }
   }
   else if (attName == "startX")
   {
     startX =(size_t)value.asInt();
-    if (!startX_set)
-    {
-      startX_set = true;
-      NLatticeParametersSet++;
-    }
-
+    startX_set = true;
   }
   else if (attName == "endX")
   {
     endX = (size_t)value.asInt();
-    if (!endX_set)
-    {
-      endX_set = true;
-      NLatticeParametersSet++;
-    }
-
+    endX_set = true;
   }
-  else if (attName == "gamma")
+  else
+    throw std::invalid_argument("Not a valid attribute name \""+attName + "\"");
+
+
+  if (recalcB)
   {
-    gamma = x;
-    if (!gamma_set)
+    if (a_set && b_set && c_set && alpha_set && beta_set && gamma_set)
     {
-      gamma_set = true;
-      NLatticeParametersSet++;
+      Geometry::UnitCell lat(a, b, c, alpha, beta, gamma);
+      B0 = lat.getB();
     }
-
-  }else
-    throw std::invalid_argument("Not a valid attribute name "+attName);
-
-
-  if (NLatticeParametersSet >= (int)nAttributes()-2)
-  {
-
-    Geometry::UnitCell lat(a, b, c, alpha, beta, gamma);
-    B0 = lat.getB();
   }
 }
 
