@@ -236,7 +236,6 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws)
 {
 	int *data = NULL, length = 1;
 	coord_t *idx;
-	long dataSum = 0;
 
 	for(int i = 0; i < rank; i++){
 		length *= dim[i];
