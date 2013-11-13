@@ -294,9 +294,13 @@ def read_run(runs, run_role, format):
             return
 
     run_file, period = parse_run(run_file, format)
-    run_ws = eval(COMMAND[run_role] + 'run_file, period=period)[0]')
+    run_ws = eval(COMMAND[run_role] + 'run_file, period=period)')    
     if not run_ws:
         raise SkipReduction('Cannot load ' + run_role + ' run "' + run_file + '"')
+
+    #AssignCan and AssignSample will change signature for: ws_name = AssignCan 
+    if isinstance(run_ws, tuple):
+        return run_ws[0]
     return run_ws
 
 def read_trans_runs(runs, sample_or_can, format):

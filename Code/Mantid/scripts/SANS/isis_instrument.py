@@ -720,7 +720,7 @@ class SANS2D(ISISInstrument):
         #as spectrum numbers of the first detector have changed we'll move those in the second too  
         second.place_after(first)
 
-    def _getDetValues(self, ws_name):
+    def getDetValues(self, ws_name):
         """
         Retrive the values of Front_Det_Z, Front_Det_X, Front_Det_Rot, Rear_Det_Z and Rear_Det_X from
         the workspace. If it does not find the value at the run info, it takes as default value the
@@ -761,7 +761,7 @@ class SANS2D(ISISInstrument):
         frontDet = self.getDetector('front')
         rearDet = self.getDetector('rear')
 
-        FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self._getDetValues(ws)
+        FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self.getDetValues(ws)
 
         # Deal with front detector
         # 9/1/2  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
