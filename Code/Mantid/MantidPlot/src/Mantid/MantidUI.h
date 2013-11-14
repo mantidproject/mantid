@@ -222,9 +222,6 @@ public slots:
   // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
   Table* createTableDetectors(MantidMatrix *m);
 
-  //
-  bool executeICatLogout(int version);
-
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
   /// Create the instrument detector table from a MatrixWorkspace

@@ -17429,7 +17429,8 @@ void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interfac
 
 void ApplicationWindow::CatalogLogout()
 {
-  mantidUI->executeICatLogout(-1);
+  auto alg = mantidUI->createAlgorithm("CatalogLogout", -1);
+  Poco::ActiveResult<bool> result(alg->executeAsync());
 }
 
 /**

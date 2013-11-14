@@ -1772,16 +1772,6 @@ bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const boo
   }
 }
 
-bool MantidUI::executeICatLogout(int version)
-{
-  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("CatalogLogout", version);
-  if( !alg ) return false;
-  Poco::ActiveResult<bool> result(alg->executeAsync());
-  return result.failed();
-
-}
-
-
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf)
 {
   std::string wsNAme = pNf->algorithm()->getProperty("OutputWorkspace");
