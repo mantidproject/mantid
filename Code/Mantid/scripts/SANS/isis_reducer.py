@@ -220,6 +220,18 @@ class ISISReducer(SANSReducer):
         else:
             return self.get_can()
 
+    def get_transmissions(self):
+        """ Get the transmission and direct workspace if they were given
+        for the can and for the sample"""
+        if self._process_can:
+            loader = self.can_trans_load
+        else:
+            loader = self.samp_trans_load
+        if loader:
+            return loader.trans.wksp_name, loader.direct.wksp_name
+        else:
+            return "", ""
+
     def get_can(self):
         if self._can_run.loader and self._can_run.wksp_name:
             return self._can_run
@@ -398,13 +410,11 @@ class ISISReducer(SANSReducer):
         self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload=reload)
         self.samp_trans_load.set_trans(sample, period_t)
         self.samp_trans_load.set_direc(direct, period_d)
-        self.transmission_calculator.samp_loader = self.samp_trans_load
 
     def set_trans_can(self, can, direct, reload = True, period_t = -1, period_d = -1):
         self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True, reload=reload)
         self.can_trans_load.set_trans(can, period_t)
         self.can_trans_load.set_direc(direct, period_d)
-        self.transmission_calculator.can_loader = self.can_trans_load
 
     def set_monitor_spectrum(self, specNum, interp=False, override=True):
         if override:

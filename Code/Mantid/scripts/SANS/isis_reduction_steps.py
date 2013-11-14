@@ -1061,10 +1061,6 @@ class TransmissionCalc(ReductionStep):
         self.fit_settings = dict()
         for prop in self.fit_props:
             self.fit_settings['both::'+prop] = None
-        # An optional LoadTransmissions object that contains the names of the transmission and direct workspaces for the sample
-        self.samp_loader = None
-        # An optional LoadTransmissions objects for the can's transmission and direct workspaces
-        self.can_loader = None
         # this contains the spectrum number of the monitor that comes after the sample from which the transmission calculation is done 
         self._trans_spec = None
         # use InterpolatingRebin 
@@ -1079,19 +1075,6 @@ class TransmissionCalc(ReductionStep):
         self.loq_removePromptPeakMax = 20500.0       
         
         
-    def _loader(self, reducer):
-        """
-            Returns the transmission loader objects for either the sample or the can depending
-            on the reduction object passed
-            @param reducer: the reduction chain of interest
-            @return: information on the transmission workspaces if these were loaded 
-        """ 
-        if reducer.is_can():
-            return self.can_loader
-        else:
-            return self.samp_loader
-
-
     def set_trans_fit(self, fit_method, min_=None, max_=None, override=True, selector='both'):
         """
             Set how the transmission fraction fit is calculated, the range of wavelengths
@@ -1238,11 +1221,7 @@ class TransmissionCalc(ReductionStep):
             of the transmission
             @return: post_sample pre_sample workspace names
         """  
-        loader = self._loader(reducer)
-        if (not loader) or (not loader.trans.wksp_name):
-            return '', ''
-        else:
-            return loader.trans.wksp_name, loader.direct.wksp_name
+        return reducer.get_transmissions()
 
     def calculate(self, reducer):
         LAMBDAMIN = 'lambda_min'
