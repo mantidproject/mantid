@@ -395,15 +395,13 @@ class ISISReducer(SANSReducer):
         self.transmission_calculator.set_trans_fit(fit_method, lambda_min, lambda_max, override=True, selector=selector)
         
     def set_trans_sample(self, sample, direct, reload=True, period_t = -1, period_d = -1):
-        if not issubclass(self.samp_trans_load.__class__, sans_reduction_steps.BaseTransmission):
-            self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload=reload)
+        self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload=reload)
         self.samp_trans_load.set_trans(sample, period_t)
         self.samp_trans_load.set_direc(direct, period_d)
         self.transmission_calculator.samp_loader = self.samp_trans_load
 
     def set_trans_can(self, can, direct, reload = True, period_t = -1, period_d = -1):
-        if not issubclass(self.can_trans_load.__class__, sans_reduction_steps.BaseTransmission):
-            self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True, reload=reload)
+        self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True, reload=reload)
         self.can_trans_load.set_trans(can, period_t)
         self.can_trans_load.set_direc(direct, period_d)
         self.transmission_calculator.can_loader = self.can_trans_load

@@ -1028,7 +1028,7 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             r_alg = 'Rebin'
         reducer.to_wavelen.execute(reducer, self.output_wksp, bin_alg=r_alg)
 
-class TransmissionCalc(sans_reduction_steps.BaseTransmission):
+class TransmissionCalc(ReductionStep):
     """
         Calculates the proportion of neutrons that are transmitted through the sample
         as a function of wavelength. The results are stored as a workspace
