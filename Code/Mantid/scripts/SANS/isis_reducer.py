@@ -139,8 +139,6 @@ class ISISReducer(SANSReducer):
 
         #except self.prep_normalize all the steps below are used by the reducer
         self.crop_detector =   isis_reduction_steps.CropDetBank(crop_sample=True)
-        self.samp_trans_load = None
-        self.can_trans_load =  None
         self.mask =self._mask= isis_reduction_steps.Mask_ISIS()
         self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
         self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
@@ -168,8 +166,6 @@ class ISISReducer(SANSReducer):
     def __init__(self):
         SANSReducer.__init__(self)
         self._dark_current_subtracter_class = None
-        self._sample_run = Sample()
-        self._can_run = Can()
         self.output_wksp = None
         self.full_trans_wav = False
         self._monitor_set = False
@@ -197,6 +193,14 @@ class ISISReducer(SANSReducer):
         self.__transmission_sample = ""
         # register the value of transmission can
         self.__transmission_can = ""
+        self.clean_loaded_data()
+
+
+    def clean_loaded_data(self):
+        self._sample_run = Sample()
+        self._can_run = Can()
+        self.samp_trans_load = None
+        self.can_trans_load = None
 
     def set_sample(self, run, reload, period):
         """
@@ -205,6 +209,8 @@ class ISISReducer(SANSReducer):
             @param reload: if this sample should be reloaded before the first reduction  
             @param period: the period within the sample to be analysed
         """
+        # ensure that when you set sample, you start with no can, transmission previously used.
+        self._clean_loaded_data()
         self._sample_run.set_run(run, reload, period, self)
         
     def set_can(self, run, reload, period):

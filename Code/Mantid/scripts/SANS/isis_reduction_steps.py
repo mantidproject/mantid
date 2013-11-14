@@ -239,12 +239,6 @@ class LoadRun(object):
         DeleteWorkspace(groupW.getName())
         return newName
     
-    def _clearPrevious(self, inWS, others = []):
-        if inWS != None:
-            if inWs in mtd and (not inWS in others):
-                DeleteWorkspace(inWs)
-                
-
     def _extract_run_details(self, run_string):
         """
             Takes a run number and file type and generates the filename, workspace name and log name
