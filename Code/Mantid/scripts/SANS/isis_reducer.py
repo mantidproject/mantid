@@ -163,6 +163,12 @@ class ISISReducer(SANSReducer):
 
         self.set_Q_output_type(self.to_Q.output_type)
 	
+    def _clean_loaded_data(self):
+        self._sample_run = Sample()
+        self._can_run = Can()
+        self.samp_trans_load = None
+        self.can_trans_load = None
+
     def __init__(self):
         SANSReducer.__init__(self)
         self._dark_current_subtracter_class = None
@@ -176,6 +182,7 @@ class ISISReducer(SANSReducer):
         #all workspaces created by this reducer
         self._workspace = [self._temporys, self._outputs] 
 
+        self._clean_loaded_data()
         self._init_steps()
         
         #process the background (can) run instead of the sample 
@@ -193,14 +200,7 @@ class ISISReducer(SANSReducer):
         self.__transmission_sample = ""
         # register the value of transmission can
         self.__transmission_can = ""
-        self.clean_loaded_data()
 
-
-    def clean_loaded_data(self):
-        self._sample_run = Sample()
-        self._can_run = Can()
-        self.samp_trans_load = None
-        self.can_trans_load = None
 
     def set_sample(self, run, reload, period):
         """
