@@ -201,9 +201,8 @@ namespace Crystal
        boost::shared_ptr<Geometry::ParameterMap> pmap,
        boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
-  void SaveIsawDetCal(boost::shared_ptr<const Geometry::Instrument> &instrument,
-                        std::set<std::string> &AllBankName,
-                        double T0, std::string filename);
+
+
 
   void LoadISawDetCal(
            boost::shared_ptr<const Geometry::Instrument> &instrument,
@@ -211,6 +210,13 @@ namespace Crystal
            double &L0, std::string filename,
            std::string bankPrefixName);
   private:
+    void saveIsawDetCal(boost::shared_ptr<const Geometry::Instrument> &instrument,
+                        std::set<std::string> &AllBankName,
+                        double T0, std::string filename);
+
+    void createResultWorkspace(const int numGroups, const std::vector<std::string> &names,
+                               const std::vector<double> &params, const std::vector<double> &errs);
+
     void exec ();
 
     void  init ();
@@ -307,7 +313,7 @@ namespace Crystal
      *
      * @param instrument   The instrument with the new values for the banks in Groups
      */
-    void SaveXmlFile(std::string const FileName, std::vector<std::vector< std::string > >const Groups,
+    void saveXmlFile(std::string const FileName, std::vector<std::vector< std::string > >const Groups,
            Geometry::Instrument_const_sptr const instrument) const;
 
   };

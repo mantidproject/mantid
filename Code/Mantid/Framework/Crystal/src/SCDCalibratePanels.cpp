@@ -119,6 +119,7 @@ namespace Mantid
     {
       const double MAX_DET_HW_SCALE = 1.15;
       const double MIN_DET_HW_SCALE = 0.85;
+      const double RAD_TO_DEG = 180. / M_PI;
     }
 
     SCDCalibratePanels::SCDCalibratePanels():API::Algorithm()
@@ -170,9 +171,9 @@ namespace Mantid
         double tz = atan2(-Y[ 0 ], X[ 0 ]);
         double cosy = Z[ 2 ] / cos(tx);
         double ty = atan2(Z[ 0 ], cosy);
-        Rotx = (tx * 180 / M_PI);
-        Roty = (ty * 180 / M_PI);
-        Rotz = (tz * 180 / M_PI);
+        Rotx = (tx * RAD_TO_DEG);
+        Roty = (ty * RAD_TO_DEG);
+        Rotz = (tz * RAD_TO_DEG);
       }
       else //roty = 90 0r 270 def
       {
@@ -183,12 +184,11 @@ namespace Mantid
         double rotx=0;
         double rotz= atan2(X[ 2 ],Y[ 2 ]);
 
-        Rotx = (rotx * 180 / M_PI);
-        Roty = (roty * 180 / M_PI);
-        Rotz = (rotz * 180 / M_PI);
+        Rotx = (rotx * RAD_TO_DEG);
+        Roty = (roty * RAD_TO_DEG);
+        Rotz = (rotz * RAD_TO_DEG);
       }
     }
-
 
     /**
      * Creates the Workspace that will be supplied to the SCDPanelErrors Fit function
@@ -203,57 +203,45 @@ namespace Mantid
       double tolerance, vector< int >&bounds)
     {
       int N=0;
-      Mantid::MantidVecPtr pX;
       if( tolerance < 0)
         tolerance = .5;
       tolerance = min< double >(.5, tolerance);
 
+      Mantid::MantidVecPtr pX;
       Mantid::MantidVec& xRef = pX.access();
       Mantid::MantidVecPtr yvals;
-      Mantid::MantidVecPtr errs;
       Mantid::MantidVec &yvalB = yvals.access();
+      Mantid::MantidVecPtr errs;
       Mantid::MantidVec &errB = errs.access();
       bounds.clear();
       bounds.push_back(0);
 
       for (size_t k = 0; k < bankNames.size(); ++k)
       {
-        for (size_t j = 0; j < (size_t)pwks->getNumberPeaks(); ++j)
+        for (int j = 0; j < pwks->getNumberPeaks(); ++j)
         {
           API::IPeak& peak = pwks->getPeak((int) j);
-
-          if (peak.getBankName().compare(bankNames[ k ]) == 0)
-            if (peak.getH() != 0 || peak.getK() != 0 || peak.getK() != 0)
-              if (peak.getH() - floor(peak.getH()) < tolerance || floor(peak.getH() + 1) - peak.getH()
-                < tolerance)
-                if (peak.getK() - floor(peak.getK()) < tolerance || floor(peak.getK() + 1) - peak.getK()
-                  < tolerance)
-                  if (peak.getL() - floor(peak.getL()) < tolerance || floor(peak.getL() + 1)
-                    - peak.getL() < tolerance)
-                  {
-                    N += 3;
-                    xRef.push_back((double) j);
-                    xRef.push_back((double) j);
-                    xRef.push_back((double) j);
-                    yvalB.push_back(0.0);
-                    yvalB.push_back(0.0);
-                    yvalB.push_back(0.0);
-                    errB.push_back(1.0);
-                    errB.push_back(1.0);
-                    errB.push_back(1.0);
-
-                  }
+          if (std::find(bankNames.begin(), bankNames.end(), peak.getBankName()) != bankNames.end())
+            if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance))
+            {
+              N += 3;
+              for (size_t i = 0; i < 3; ++i)
+              {
+                xRef.push_back((double) j);
+                yvalB.push_back(0.0);
+                errB.push_back(1.0);
+              }
+            }
         }//for @ peak
         bounds.push_back(N);
       }//for @ bank name
 
-      MatrixWorkspace_sptr mwkspc;
-
       if( N < 4)//If not well indexed
         return boost::shared_ptr<DataObjects::Workspace2D>(new DataObjects::Workspace2D);
 
-      std::cout<<"Number indexed peaks used="<<N<<std::endl;
-      mwkspc= API::WorkspaceFactory::Instance().create("Workspace2D",(size_t)3,3*N,3*N);
+      std::cout<<"Number indexed peaks used="<<(N/3)<<std::endl;
+      MatrixWorkspace_sptr mwkspc
+          = API::WorkspaceFactory::Instance().create("Workspace2D",(size_t)3,3*N,3*N);
 
       mwkspc->setX(0, pX);
       mwkspc->setX(1, pX);
@@ -1053,85 +1041,8 @@ namespace Mantid
       }
 
       //--------------------- Create Result Table Workspace-------------------
-      int nn(0);
-      if( getProperty("AllowSampleShift"))
-        nn=3;
-      TableWorkspace_sptr Result( new TableWorkspace( 2*(10 + nn)));
-
-      Result->addColumn( "str","Field");
-
-      for( int g = 0; g < NGroups; ++g )
-      {
-
-        string GroupName = string("Group") + boost::lexical_cast<string>(g);
-        Result->addColumn( "double",GroupName);
-      }
-
-
-      vector<string>TableFieldNames;
-      for( int p=0; p <(int) names.size(); ++p)
-      {
-        string fieldName = names[p];
-        size_t dotPos = fieldName.find('_');
-        if (dotPos >= fieldName.size())
-          dotPos = 0;
-        else
-          dotPos++;
-        string Field = fieldName.substr(dotPos);
-        int it;
-        for(  it=0;  it< (int)TableFieldNames.size(); it++)
-        {
-          if( TableFieldNames[it]==Field)
-            break;
-        }
-        if( it >= (int)TableFieldNames.size())
-          TableFieldNames.push_back(Field);
-      }
-      for( int p=0; p< (int)TableFieldNames.size(); p++)
-        Result->cell< string >( p,0) =  TableFieldNames[p];
-     // Result->cell<string>(TableFieldNames.size(),0)="Errors";
-      for( int p=0; p< (int)TableFieldNames.size(); p++)
-        Result->cell<string>(TableFieldNames.size()+p,0)="Err_"+TableFieldNames[p];
-
-
-      for( int p = 0; p < (int)names.size(); ++p )
-      {
-        string fieldName = names[ p ];
-        size_t dotPos = fieldName.find( '_');
-        if( dotPos >= fieldName.size())
-          dotPos = 0;
-        else
-          dotPos++;
-        string Field = fieldName.substr( dotPos);
-        int FieldNum=0;
-        int it=0;
-        bool foundIt = false;
-        for( it=0;it < (int)TableFieldNames.size() ; it++)
-        {
-          if( TableFieldNames[it] == Field)
-          {
-            foundIt = true;
-            break;
-          }
-          FieldNum++;
-        }
-        if(foundIt == false)
-          continue;
-        int col=1;
-        if( dotPos !=0)
-        {
-          col = atoi( fieldName.substr( 1,dotPos).c_str())+1;
-        }
-        Result->cell<double>(FieldNum,col)=params[p];
-        Result->cell<double>(FieldNum+10+nn,col)=errs[p];
-
-
-      }
-
-      setProperty( "ResultWorkspace", Result);
-
-      Result->setComment(string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
-
+      this->progress(.92, "Creating Results table");
+      createResultWorkspace(NGroups, names, params, errs);
 
       //---------------- Create new instrument with ------------------------
       //--------------new parameters to SAVE to files---------------------
@@ -1178,22 +1089,18 @@ namespace Mantid
 
       //---------------------- Save new instrument to DetCal-------------
       //-----------------------or xml(for LoadParameterFile) files-----------
+      this->progress(.94, "Saving detcal file");
       string DetCalFileName = getProperty( "DetCalFilename");
+      saveIsawDetCal( NewInstrument,AllBankNames, result[ "t0" ], DetCalFileName);
+
+      this->progress(.96, "Saving xml param file");
       string XmlFileName = getProperty( "XmlFilename");
-      if( !DetCalFileName.empty() )
-      {
-
-        SaveIsawDetCal( NewInstrument,AllBankNames, result[ "t0" ], DetCalFileName);
-        g_log.notice()<<"Saved DetCal file in "<<DetCalFileName<< endl;
-
-      }
-
-      SaveXmlFile(  XmlFileName, Groups,NewInstrument);
-
+      saveXmlFile(  XmlFileName, Groups,NewInstrument);
 
       //----------------- Calculate & Create Qerror table------------------
-
-      TableWorkspace_sptr QErrTable( new TableWorkspace(ws->dataX(0).size()/3));
+      this->progress(.98, "Creating Qerror table");
+      ITableWorkspace_sptr QErrTable
+          = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       QErrTable->addColumn("int","Bank Number");
       QErrTable->addColumn("int","Peak Number");
       QErrTable->addColumn("int","Peak Row");
@@ -1219,7 +1126,6 @@ namespace Mantid
 
       string prevBankName ="";
       int BankNumDef = 200;
-      int TableRow = 0;
       for (size_t q = 0; q < nData; q += 3)
       {
         int pk = (int) xVals[q];
@@ -1239,26 +1145,13 @@ namespace Mantid
           bankNum = BankNumDef;
         }
 
-        QErrTable->cell<int> (TableRow, 0) = bankNum ;
-        QErrTable->cell<int> (TableRow, 1) = pk;
-        QErrTable->cell<int> (TableRow, 2) = peak.getRow();
-        QErrTable->cell<int> (TableRow, 4) = peak.getCol();
-        QErrTable->cell<double> (TableRow, 3) = sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] + out[q
-          + 2] * out[q + 2]);
-        //chiSq += out[q] * out[q] + out[q + 1] * out[q + 1] + out[q + 2] * out[q + 2];
-
-        QErrTable->cell<int>(TableRow,5) = peak.getRunNumber();
-        QErrTable->cell<double>(TableRow,6) = peak.getWavelength();
-        QErrTable->cell<double>(TableRow,7) = peak.getTOF();
-        QErrTable->cell<double>(TableRow,8) = peak.getDSpacing();
-
-        QErrTable->cell<double>(TableRow,9) = peak.getL2();
-        QErrTable->cell<double>(TableRow,10) = peak.getScattering();
-        QErrTable->cell<double>(TableRow,11) = peak.getDetPos().Y();
-
-        TableRow++;
+        Mantid::API::TableRow row = QErrTable->appendRow();
+        row << bankNum << pk << peak.getRow()
+            << sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] + out[q + 2] * out[q + 2])
+            << peak.getCol() << peak.getRunNumber()
+            << peak.getWavelength() << peak.getTOF() << peak.getDSpacing()
+            << peak.getL2() << peak.getScattering() << peak.getDetPos().Y();
       }
-
 
       QErrTable->setComment(string("Errors in Q for each Peak"));
       setProperty("QErrorWorkspace", QErrTable);
@@ -1405,6 +1298,82 @@ namespace Mantid
        }//While reading thru file
     }
 
+    void SCDCalibratePanels::createResultWorkspace(const int numGroups, const vector<string>& names,
+                                                   const vector<double> &params,
+                                                   const vector<double> &errs)
+    {
+      // create the results table
+      ITableWorkspace_sptr Result
+          = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+      // column for the field names
+      Result->addColumn( "str","Field");
+      // and one for each group
+      for( int g = 0; g < numGroups; ++g )
+      {
+        string GroupName = string("Group") + boost::lexical_cast<string>(g);
+        Result->addColumn( "double",GroupName);
+      }
+
+      // determine the field names, the leading '_' is the break point
+      vector<string>TableFieldNames;
+      for( size_t p=0; p < names.size(); ++p)
+      {
+        string fieldName = names[p];
+
+        size_t dotPos = fieldName.find('_');
+        if (dotPos < fieldName.size())
+          fieldName = fieldName.substr(dotPos+1);
+
+        if (std::find(TableFieldNames.begin(), TableFieldNames.end(), fieldName) == TableFieldNames.end())
+          TableFieldNames.push_back(fieldName);
+      }
+
+      // make the tabel the corect size
+      int nn(0);
+      if( getProperty("AllowSampleShift"))
+        nn=3;
+      Result->setRowCount( 2*(10 + nn));
+
+      // create the row labels
+      for( size_t p=0; p < TableFieldNames.size(); p++)
+      {
+        Result->cell< string >( p,0) =  TableFieldNames[p];
+        Result->cell<string>(TableFieldNames.size()+p,0)="Err_"+TableFieldNames[p];
+      }
+
+      // put in the data
+      for( size_t p = 0; p < names.size(); ++p )
+      {
+        // get the column to update and the name of the field
+        string fieldName = names[ p ];
+        size_t dotPos = fieldName.find( '_');
+        int colNum=1;
+        if (dotPos < fieldName.size())
+        {
+          // the 1 is to skip the leading 'f'
+          colNum = atoi( fieldName.substr( 1,dotPos).c_str())+1;
+          // everything after is the field name
+          fieldName  = fieldName.substr(dotPos+1);
+        }
+
+        // find the row
+        int rowNum=0;
+        auto fieldIter = std::find(TableFieldNames.begin(), TableFieldNames.end(), fieldName);
+        if (fieldIter != TableFieldNames.end())
+        {
+          rowNum = static_cast<int>(fieldIter-TableFieldNames.begin());
+        }
+
+        // fill in the values
+        Result->cell<double>(rowNum,colNum)=params[p];
+        Result->cell<double>(rowNum+10+nn,colNum)=errs[p];
+      }
+
+      Result->setComment(string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
+
+      setProperty( "ResultWorkspace", Result);
+    }
 
     /**
      * Really this is the operator SaveIsawDetCal but only the results of the given
@@ -1417,9 +1386,15 @@ namespace Mantid
      * @param T0           -The time offset
      * @param FileName     -The name of the DetCal file to save the results to
      */
-    void SCDCalibratePanels::SaveIsawDetCal( boost::shared_ptr<const Instrument> &instrument,
+    void SCDCalibratePanels::saveIsawDetCal( boost::shared_ptr<const Instrument> &instrument,
          set<string> &AllBankName,double T0,string filename)
     {
+      // having a filename triggers doing the work
+      if (filename.empty())
+        return;
+
+      g_log.notice()<<"Saved DetCal file in " << filename << "\n";
+
       // create a workspace to pass to SaveIsawDetCal
       const size_t number_spectra = instrument->getNumberDetectors();
       DataObjects::Workspace2D_sptr wksp =
@@ -1799,7 +1774,7 @@ namespace Mantid
               << value << "\" />" << endl;
     }
 
-    void SCDCalibratePanels::SaveXmlFile(string const FileName, vector<vector<string> > const Groups,
+    void SCDCalibratePanels::saveXmlFile(string const FileName, vector<vector<string> > const Groups,
       Instrument_const_sptr const instrument)const
     {
       if (FileName.empty())
