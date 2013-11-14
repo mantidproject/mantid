@@ -10,7 +10,7 @@ namespace MantidQt
     Constructor
     */
     CompositePeaksPresenter::CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget, PeaksPresenter_sptr defaultPresenter) : m_zoomablePlottingWidget(zoomablePlottingWidget),  
-      m_default(defaultPresenter), m_owner(NULL)
+      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1)
     {
       if(m_zoomablePlottingWidget == NULL)
       {
@@ -339,7 +339,7 @@ namespace MantidQt
       subjectPresenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
       // We want to zoom out now, because any currently selected peak will be wrong.
       m_zoomablePlottingWidget->resetView();
-      m_zoomedPeakIndex.reset();
+      m_zoomedPeakIndex = -1;
       m_zoomedPresenter.reset();
     }
 
@@ -576,7 +576,7 @@ namespace MantidQt
      */
     void CompositePeaksPresenter::resetZoom()
     {
-      m_zoomedPeakIndex.reset();
+      m_zoomedPeakIndex = -1;
       m_zoomedPresenter.reset();
       m_owner->performUpdate(); // This tells any 'listening GUIs' to sort themselves out.
     }
@@ -590,9 +590,9 @@ namespace MantidQt
     }
 
     /**
-     * @return an optional zoomed peak index.
+     * @return a zoomed peak index.
      */
-    boost::optional<int> CompositePeaksPresenter::getZoomedPeakIndex() const
+    int CompositePeaksPresenter::getZoomedPeakIndex() const
     {
       return m_zoomedPeakIndex;
     }

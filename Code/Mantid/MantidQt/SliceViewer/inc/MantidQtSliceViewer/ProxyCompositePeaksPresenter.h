@@ -62,7 +62,7 @@ namespace MantidQt
       /// Get optional zoomed peak presenter.
       boost::optional<PeaksPresenter_sptr> getZoomedPeakPresenter() const;
       /// Get optional zoomed peak index.
-      boost::optional<int> getZoomedPeakIndex() const;
+      int getZoomedPeakIndex() const;
     private:
       /// Wrapped composite to delegate to.
       boost::shared_ptr<CompositePeaksPresenter> m_compositePresenter;

@@ -144,7 +144,7 @@ namespace MantidQt
       return m_compositePresenter->getZoomedPeakPresenter();
     }
 
-    boost::optional<int> ProxyCompositePeaksPresenter::getZoomedPeakIndex() const
+    int ProxyCompositePeaksPresenter::getZoomedPeakIndex() const
     {
       return m_compositePresenter->getZoomedPeakIndex();
     }

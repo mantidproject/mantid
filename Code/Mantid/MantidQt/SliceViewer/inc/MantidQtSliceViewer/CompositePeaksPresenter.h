@@ -98,7 +98,7 @@ namespace MantidQt
       /// Get optional zoomed peak presenter.
       boost::optional<PeaksPresenter_sptr> getZoomedPeakPresenter() const;
       /// Get optional zoomed peak index.
-      boost::optional<int> getZoomedPeakIndex() const;
+      int getZoomedPeakIndex() const;
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
@@ -121,7 +121,7 @@ namespace MantidQt
       /// Presenter zoomed in on.
       boost::optional<PeaksPresenter_sptr> m_zoomedPresenter;
       /// index of peak zoomed in on.
-      boost::optional<int> m_zoomedPeakIndex;
+      int m_zoomedPeakIndex;
     };
   }
 }
