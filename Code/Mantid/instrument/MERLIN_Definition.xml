@@ -480,7 +480,7 @@
   </type>
         
   <type name="straight-through-beam-tube" outline="yes">
-    <component type="standard-pixel">
+    <component type="straight-through-beam-pixel">
       <locations y="0" y-end="1.22879882812501" n-elements="1024" />
     </component>
   </type>
