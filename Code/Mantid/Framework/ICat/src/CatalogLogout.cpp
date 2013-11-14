@@ -26,8 +26,7 @@ namespace Mantid
     /// execute the algorithm
     void CatalogLogout::exec()
     {
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
-      catalog->logout();
+      CatalogAlgorithmHelper().createCatalog()->logout();
     }
   }
 }

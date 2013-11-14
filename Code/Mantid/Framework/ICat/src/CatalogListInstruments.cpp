@@ -35,9 +35,8 @@ namespace Mantid
     /// exec method
     void CatalogListInstruments::exec()
     {
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
       std::vector<std::string> intruments;
-      catalog->listInstruments(intruments);
+      CatalogAlgorithmHelper().createCatalog()->listInstruments(intruments);
       setProperty("InstrumentList",intruments);
     }
 

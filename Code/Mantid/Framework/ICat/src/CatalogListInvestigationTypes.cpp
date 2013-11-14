@@ -35,9 +35,8 @@ namespace Mantid
     /// exec method
     void CatalogListInvestigationTypes::exec()
     {
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
       std::vector<std::string> investTypes;
-      catalog->listInvestigationTypes(investTypes);
+      CatalogAlgorithmHelper().createCatalog()->listInvestigationTypes(investTypes);
       setProperty("InvestigationTypes",investTypes);
     }
 

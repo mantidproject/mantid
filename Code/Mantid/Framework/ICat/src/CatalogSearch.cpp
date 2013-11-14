@@ -63,16 +63,14 @@ namespace Mantid
     /// Execution method.
     void CatalogSearch::exec()
     {
-      // Create and use the catalog the user has specified in Facilities.xml
-      ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
       // Obtains the inputs from the search interface.
       CatalogSearchParam params;
       // Get the user input search terms to search for.
       getInputProperties(params);
       // Create output workspace.
-      ITableWorkspace_sptr workspace = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      auto workspace = WorkspaceFactory::Instance().createTable("TableWorkspace");
       // Search for investigations in the archives.
-      catalog->search(params,workspace);
+      CatalogAlgorithmHelper().createCatalog()->search(params,workspace);
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
     }
