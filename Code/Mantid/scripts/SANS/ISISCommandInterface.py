@@ -331,6 +331,11 @@ def GetMismatchedDetList():
     return ReductionSingleton().instrument.get_marked_dets()
 
 def _setUpPeriod(i):
+    # it first get the reference to the loaders, then it calls the AssignSample 
+    # (which get rid of the reducer objects (see clean_loaded_data())
+    # but because we still get the reference, we can use it to query the data file and method.
+    # ideally, we should not use this _setUpPeriod in the future.
+    
     trans_samp = ReductionSingleton().samp_trans_load
     can = ReductionSingleton().get_can()
     trans_can = ReductionSingleton().can_trans_load
