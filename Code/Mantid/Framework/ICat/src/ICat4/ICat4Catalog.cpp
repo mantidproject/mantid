@@ -234,7 +234,7 @@ namespace Mantid
         query    = select + from + join + where + orderBy + includes;
       }
 
-      g_log.debug() << "Query: { " << query << " }" << std::endl;
+      g_log.debug() << "ICat4Catalog::getSearchQuery: { " << query << " }" << std::endl;
 
       return (query);
     }
@@ -387,6 +387,8 @@ namespace Mantid
       std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + boost::lexical_cast<std::string>(investigationId) + "']";
       request.query     = &query;
 
+      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
+
       int result = icat.search(&request, &response);
 
       if (result == 0)
@@ -454,6 +456,8 @@ namespace Mantid
 
       std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + boost::lexical_cast<std::string>(investigationId) + "']";
       request.query     = &query;
+
+      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -658,7 +662,7 @@ namespace Mantid
       // Add all the REST pieces to the URL.
       urlToBuild += ("getData?" + session + datafile + outname + "&zip=false");
 
-      g_log.debug() << "External URL is: " << urlToBuild << std::endl;
+      g_log.debug() << "ICat4Catalog::getDownloadURL -> { " << urlToBuild << " }" << std::endl;
 
       url = urlToBuild;
     }
