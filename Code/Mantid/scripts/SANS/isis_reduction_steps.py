@@ -316,7 +316,7 @@ class LoadRun(object):
             raise RuntimeError('There is a mismatch in the number of periods (entries) in the file between the sample and another run')
 
 
-class LoadTransmissions(ReductionStep):
+class LoadTransmissions():
     """
         Loads the file used to apply the transmission correction to the
         sample or can 
@@ -330,7 +330,6 @@ class LoadTransmissions(ReductionStep):
             @param is_can: if this is to correct the can (default false i.e. it's for the sample)
             @param reload: setting this to false will mean the workspaces aren't reloaded if they already exist (default True i.e. reload)
         """
-        super(LoadTransmissions, self).__init__()
         self.trans = None
         self.direct = None
         self._reload = reload
@@ -918,14 +917,13 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             '    front time mask: ', str(self.time_mask_f)+'\n'
 
 
-class LoadSample(LoadRun, ReductionStep):
+class LoadSample(LoadRun):
     """
         Handles loading the sample run, this is the main experimental run with data
         about the sample of interest
     """
     def __init__(self, sample=None, reload=True, entry=-1):
         LoadRun.__init__(self, sample, reload=reload, entry=entry)
-        ReductionStep.__init__(self)
         self._scatter_sample = None
         self._SAMPLE_RUN = None
         
