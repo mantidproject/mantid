@@ -430,9 +430,12 @@ namespace Mantid
         }
 
         API::CompositeFunction_sptr cf = boost::dynamic_pointer_cast<API::CompositeFunction>( fun );
-        for(size_t i = 0; i < cf->nFunctions(); ++i)
+        if ( cf )
         {
-            setWorkspaceIndexAttribute( cf->getFunction(i), wsIndex );
+            for(size_t i = 0; i < cf->nFunctions(); ++i)
+            {
+                setWorkspaceIndexAttribute( cf->getFunction(i), wsIndex );
+            }
         }
     }
 
