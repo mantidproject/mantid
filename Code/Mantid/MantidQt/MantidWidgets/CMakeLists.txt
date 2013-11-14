@@ -30,11 +30,6 @@ set ( SRC_FILES
 	src/pythonCalc.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES 
-    src/ICatAdvancedSearch.cpp
-    src/ICatSearch.cpp
-)
-
 # Header files with Q_OBJECT that qmake will "moc"
 set ( MOC_FILES 
 	inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
