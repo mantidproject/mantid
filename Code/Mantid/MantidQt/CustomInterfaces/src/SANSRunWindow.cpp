@@ -1826,7 +1826,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     else
     {
       is_loaded &= assignDetBankRun(*(m_uiForm.scatCan), "AssignCan");
-      readNumberOfEntries("background_subtracter", m_uiForm.scatCan);
+      readNumberOfEntries("get_can().loader", m_uiForm.scatCan);
     }
     if ( ( ! m_uiForm.transmis->isEmpty() ) && ( ! m_uiForm.direct->isEmpty() ) )
     {
