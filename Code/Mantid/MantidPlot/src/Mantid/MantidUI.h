@@ -181,18 +181,6 @@ public:
   // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
   MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true, bool distr = false);
 
-  /// This method executes loadraw algorithm from  ICatInterface
-  void loadrawfromICatInterface(const QString& fileName,const QString& wsName);
-  
-  /// This method executes loadnexus algorithm from ICatInterface
-  void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
-
-  /// This method executes load algorithm from ICatInterface
-  void loadfromICatInterface(const QString& fileName,const QString& wsName);
-  
-  /// This method is to execute download data files algorithm from ICat
-  void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds);
-
   AlgorithmMonitor* getAlgMonitor(){return m_algMonitor;}
   /// updates the algorithms tree
   void updateAlgorithms();
@@ -244,9 +232,6 @@ public slots:
 
   // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
   Table* createTableDetectors(MantidMatrix *m);
-
-  //
-  bool executeICatLogout(int version);
 
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
@@ -305,16 +290,11 @@ public:
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
 
-  //This is anoverloaded method toexecute load raw/nexus and  called from Icat interface
-  void executeloadAlgorithm(const QString&, const QString&, const QString&);
-
 signals:
   //A signal to indicate that we want a script to produce a dialog
   void showPropertyInputDialog(const QString & algName);
   // Broadcast that an algorithm is about to be created
   void algorithmAboutToBeCreated();
-  // a signal for getting the file locations from ICat downloaddatafiles algorithm
-  void fileLocations(const std::vector<std::string>&);
 
 public:
 

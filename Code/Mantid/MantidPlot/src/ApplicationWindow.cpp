@@ -194,10 +194,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
-#include "MantidQtMantidWidgets/ICatSearch.h"
-#include "MantidQtMantidWidgets/ICatSearch2.h"
-#include "MantidQtMantidWidgets/ICatMyDataSearch.h"
-#include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
+#include "MantidQtMantidWidgets/CatalogSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
@@ -566,8 +563,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 
   loadCustomActions();
 
-  // Nullify icatsearch
-  icatsearch = NULL;
+  // Nullify catalogSearch
+  catalogSearch = NULL;
 
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser")
@@ -1294,12 +1291,9 @@ void ApplicationWindow::initMainMenu()
 
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
-  icat->addAction(actionICatLogin);//Login menu item
-//  icat->addAction(actionMydataSearch);// my data search menu item
-//  icat->addAction(actionICatSearch);//search menu item
-  icat->addAction(actionICatSearch2); // new ICAT GUI menu item
-//  icat->addAction(actionAdvancedSearch); //advanced search menu item
-  icat->addAction(actionICatLogout);//logout menu item
+  icat->addAction(actionCatalogLogin);//Login menu item
+  icat->addAction(actionCatalogSearch); // ICAT GUI menu item
+  icat->addAction(actionCatalogLogout);//logout menu item
   disableActions();
 }
 
@@ -9609,11 +9603,11 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   mantidUI->shutdown();
 
-  if (icatsearch)
+  if (catalogSearch)
   {
-    icatsearch->disconnect();
-    delete icatsearch;
-    icatsearch = NULL;
+    catalogSearch->disconnect();
+    delete catalogSearch;
+    catalogSearch = NULL;
   }
 
   if( scriptingWindow )
@@ -13437,29 +13431,17 @@ void ApplicationWindow::createActions()
   actionPanPlot = new QAction(QIcon(":/panning.png"), tr("Panning tool"), this);
   connect(actionPanPlot, SIGNAL(activated()), this, SLOT(panOnPlot()));
 
-  actionICatLogin  = new QAction("Login",this);
-  actionICatLogin->setToolTip(tr("Catalog Login"));
-  connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
+  actionCatalogLogin  = new QAction("Login",this);
+  actionCatalogLogin->setToolTip(tr("Catalog Login"));
+  connect(actionCatalogLogin, SIGNAL(activated()), this, SLOT(CatalogLogin()));
 
-  actionICatSearch2 = new QAction("Search",this);
-  actionICatSearch2->setToolTip(tr("Search data in archives."));
-  connect(actionICatSearch2, SIGNAL(activated()), this, SLOT(ICatSearch2()));
+  actionCatalogSearch = new QAction("Search",this);
+  actionCatalogSearch->setToolTip(tr("Search data in archives."));
+  connect(actionCatalogSearch, SIGNAL(activated()), this, SLOT(CatalogSearch()));
 
-  actionICatSearch=new QAction("Basic Search",this);
-  actionICatSearch->setToolTip(tr("Catalog Basic Search"));
-  connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
-
-  actionMydataSearch=new QAction("My Data Search",this);
-  actionMydataSearch->setToolTip(tr("Catalog MyData Search"));
-  connect(actionMydataSearch, SIGNAL(activated()), this, SLOT(ICatMyDataSearch()));
-
-  actionICatLogout=new QAction("Logout",this);
-  actionICatLogout->setToolTip(tr("Catalog Logout"));
-  connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
-
-  actionAdvancedSearch = new QAction("Advanced Search",this);
-  actionAdvancedSearch->setToolTip(tr("Catalog Advanced Search"));
-  connect(actionAdvancedSearch, SIGNAL(activated()), this, SLOT(ICatAdvancedSearch()));
+  actionCatalogLogout = new QAction("Logout",this);
+  actionCatalogLogout->setToolTip(tr("Catalog Logout"));
+  connect(actionCatalogLogout, SIGNAL(activated()), this, SLOT(CatalogLogout()));
 
   actionWaterfallPlot = new QAction(QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
   connect(actionWaterfallPlot, SIGNAL(activated()), this, SLOT(waterfallPlot()));
@@ -16314,7 +16296,7 @@ ApplicationWindow::~ApplicationWindow()
   delete hiddenWindows;
   delete scriptingWindow;
   delete d_text_editor;
-  delete icatsearch;
+  delete catalogSearch;
   while(!d_user_menus.isEmpty())
   {
     QMenu *menu = d_user_menus.takeLast();
@@ -17458,68 +17440,26 @@ void ApplicationWindow::panOnPlot()
   g->enablePanningMagnifier();
 }
 /// Handler for ICat Login Menu
-void ApplicationWindow::ICatLogin()
+void ApplicationWindow::CatalogLogin()
 {
   mantidUI->executeAlgorithm("CatalogLogin",1);
 }
 
-void ApplicationWindow::ICatSearch2()
+void ApplicationWindow::CatalogSearch()
 {
-  if ( icatsearch == NULL || icatsearch)
+  if (catalogSearch == NULL || catalogSearch)
   {
     // Only one ICAT GUI will appear, and that the previous one will be overridden.
     // E.g. if a user opens the ICAT GUI without being logged into ICAT they will need to
     // login in and then click "Search" again.
-    delete icatsearch;
-    icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
+    delete catalogSearch;
+    catalogSearch = new MantidQt::MantidWidgets::CatalogSearch();
 
-    icatsearch->show();
-    icatsearch->raise();
+    catalogSearch->show();
+    catalogSearch->raise();
   }
 }
 
-void ApplicationWindow::ICatIsisSearch()
-{	
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearch(usr_win);
-  if(icatsearch_interface)
-  {
-    setGeometry(usr_win,icatsearch_interface);
-  }
-  else
-  {
-    delete usr_win;
-  }
-}
-void ApplicationWindow::ICatMyDataSearch()
-{	
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* mydatsearch = new MantidQt::MantidWidgets::ICatMyDataSearch(usr_win);
-  if(mydatsearch)
-  {
-    setGeometry(usr_win,mydatsearch);
-  }
-  else
-  {
-    delete usr_win;
-  }
-}
-void ApplicationWindow ::ICatAdvancedSearch()
-{
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* advanced_search = new MantidQt::MantidWidgets::ICatAdvancedSearch(usr_win);
-  if(advanced_search)
-  {
-    setGeometry(usr_win,advanced_search);
-  }
-  else
-  {
-    delete usr_win;
-  }
-}
 void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interface)
 {   
   QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(),
@@ -17531,9 +17471,11 @@ void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interfac
   usr_win->setName(user_interface->windowTitle());
   addMdiSubWindow(usr_win);
 }
-void ApplicationWindow::ICatLogout()
+
+void ApplicationWindow::CatalogLogout()
 {
-  mantidUI->executeICatLogout(-1);
+  auto logout = mantidUI->createAlgorithm("CatalogLogout");
+  mantidUI->executeAlgorithmAsync(logout);
 }
 
 /**
@@ -17547,53 +17489,6 @@ void ApplicationWindow::writeToLogWindow(const MantidQt::API::Message & msg)
   resultsLog->append(msg);
 }
 
-/* This method executes loadraw asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadRawAsynch(const QString& fileName,const QString& wsName )
-{
-  mantidUI->loadrawfromICatInterface(fileName,wsName);
-}
-
-/* This method executes loadnexus asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QString& wsName)
-{
-  mantidUI->loadnexusfromICatInterface(fileName,wsName);
-}
-
-/* This method executes loadnexus asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadAsynch(const QString& fileName,const QString& wsName)
-{
-  mantidUI->loadfromICatInterface(fileName,wsName);
-}
-
-/* This method executes Download data files algorithm
- * @param  filenames - list of the file names to download
- */
-void ApplicationWindow::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds)
-{
-  //getting the sender of the signal(it's ICatInvestigation object)
-  QObject* qsender= sender();
-  if(!qsender) return;
-
-  // connecting  filelocations signal to ICatInvestigation slot setfileLocations
-  // This is to send the filelocations vector  after  algorithm execution to ICatInvestigation object(which is MnatidQt) for further processing
-  connect(mantidUI,SIGNAL(fileLocations(const std::vector<std::string>&)),qsender,SLOT(setfileLocations(const std::vector<std::string>&)));
-  /// execute the algorithm
-  mantidUI->executeDownloadDataFiles(filenNames,fileIds);
-}
-
-void  ApplicationWindow::executeloadAlgorithm(const QString& algName,const QString& fileName, const QString& wsName)
-{
-  mantidUI->executeloadAlgorithm(algName,fileName,wsName);
-}
 
 MultiLayer* ApplicationWindow::waterfallPlot()
 {

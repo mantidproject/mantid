@@ -1033,20 +1033,6 @@ public slots:
 
   //Slot for writing to log window
   void writeToLogWindow(const MantidQt::API::Message& message);
-  /// execute loadraw asynchronously
-  void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute loadnexus asynchronously
-  void executeLoadNexusAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute load asynchronously
-  void executeLoadAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute loadraw/nexus without popingup load dialogs.
-  void executeloadAlgorithm(const QString&, const QString&, const QString&);
-
-  /// slot to execute download datafiles algorithm - called  from ICat interface
-  void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
   /// Activate a subwindow (docked or floating) other than current active one
   void activateNewWindow();
@@ -1172,18 +1158,12 @@ private:
   /// for zooming the selected graph using mouse drag tool
   void panOnPlot();
 
-  /// Handler for ICat login menu 
-  void ICatLogin();
-  /// Handler for ICat search menu
-  void ICatIsisSearch();
-  /// Handler for NEW ICat search GUI (ICatSearch2)
-  void ICatSearch2();
-  /// Handler for ICatMyData serch menu
-  void ICatMyDataSearch();
-  // Handler for ICat CatalogLogout
-  void ICatLogout();
-
-  void ICatAdvancedSearch();
+  /// Handler for catalog login.
+  void CatalogLogin();
+  /// Handler for catalog search.
+  void CatalogSearch();
+  // Handler for catalog logout.
+  void CatalogLogout();
 
   /// method to create widgets from mantid qt;
   void setGeometry(MdiSubWindow* usr_win,QWidget* user_interface);
@@ -1405,7 +1385,7 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QWidget* icatsearch;
+  QWidget* catalogSearch;
 
   QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
   
@@ -1422,7 +1402,7 @@ private:
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch,*actionICatSearch2,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
+  QAction *actionCatalogLogin,*actionCatalogSearch,*actionCatalogLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
