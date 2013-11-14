@@ -115,16 +115,8 @@ namespace Mantid
      */
     std::string ICat4Catalog::getSearchQuery(const CatalogSearchParam& inputs)
     {
-      // This will hold strings for each table of the query. Each segment will be joined together (<->).
-      std::vector<std::string> querySegments;
-
-      // The investigation segment will be stored here as it makes up for several inputs.
-      // It will be converted to a string, joined and then added to the querySegments.
-      std::vector<std::string> investigationWhere;
-
-      // In ICat4.2 `Dataset` and `Sample` cannot be in the same query (due to restriction with join).
-      // As such, we will query for sample only when dataset inputs are not used.
-      bool queryDataset = false;
+      // Contain the related where and join clauses for the search query based on user-input.
+      std::vector<std::string> whereClause, joinClause;
 
       // Format the timestamps in order to compare them.
       std::string startDate = formatDateTime(inputs.getStartDate(), "%Y-%m-%d %H:%M:%S");
@@ -133,117 +125,113 @@ namespace Mantid
       // Investigation startDate if endDate is not selected
       if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0)
       {
-        investigationWhere.push_back("startDate >= '" + startDate + "'");
+        whereClause.push_back("inves.startDate >= '" + startDate + "'");
       }
 
       // Investigation endDate if startdate is not selected
       if (inputs.getEndDate() != 0 && inputs.getStartDate() == 0)
       {
-        investigationWhere.push_back("endDate <= '" + endDate + "'");
+        whereClause.push_back("inves.endDate <= '" + endDate + "'");
       }
 
       // Investigation Start and end date if both selected
       if(inputs.getStartDate() != 0 && inputs.getEndDate() != 0)
       {
-        investigationWhere.push_back("startDate BETWEEN '" + startDate + "' AND '" + endDate + "'");
+        whereClause.push_back("inves.startDate BETWEEN '" + startDate + "' AND '" + endDate + "'");
       }
 
       // Investigation name (title)
       if(!inputs.getInvestigationName().empty())
       {
-        investigationWhere.push_back("title LIKE '%" + inputs.getInvestigationName() + "%' ");
-      }
-
-      // Iterate over query vector and append AND between inputs.
-      std::string investigationResult = Strings::join(investigationWhere.begin(), investigationWhere.end(), " AND ");
-
-      // Add the investigation result to the query if it exists.
-      if (!investigationResult.empty())
-      {
-        querySegments.push_back("Investigation[" + investigationResult + "]");
+        whereClause.push_back("inves.title LIKE '%" + inputs.getInvestigationName() + "%'");
       }
 
       // Investigation type
       if(!inputs.getInvestigationType().empty())
       {
-        querySegments.push_back("InvestigationType[name IN ('" + inputs.getInvestigationType() + "')]");
-      }
-
-      // Investigator's surname
-      if(!inputs.getInvestigatorSurName().empty())
-      {
-        querySegments.push_back("InvestigationUser <-> User[name LIKE '%" + inputs.getInvestigatorSurName() + "%']");
-      }
-
-      // Datafile name
-      if(!inputs.getDatafileName().empty())
-      {
-        querySegments.push_back("Dataset <-> Datafile[name LIKE '%" + inputs.getDatafileName() + "%']");
-        queryDataset = true;
-      }
-
-      // Run start and end
-      if(inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)
-      {
-        // Convert the start and end runs to string.
-        std::string runStart = Strings::toString(inputs.getRunStart());
-        std::string runEnd   = Strings::toString(inputs.getRunEnd());
-
-        // To be able to use DatafileParameter we need to have access to Dataset and Datafile.
-        // If queryDataset is true, then we can rest assured that the relevant access is possible.
-        if (queryDataset)
-        {
-          querySegments.push_back("DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
-        }
-        else
-        {
-          // Otherwise we directly include them ourselves.
-          querySegments.push_back("Dataset <-> Datafile <-> DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
-          // We then set queryDataset to true since Sample can not be included if a dataset is.
-          queryDataset = true;
-        }
+        joinClause.push_back("JOIN inves.type itype");
+        whereClause.push_back("itype.name = '" + inputs.getInvestigationType() + "'");
       }
 
       // Instrument name
       if(!inputs.getInstrument().empty())
       {
-        querySegments.push_back("InvestigationInstrument <-> Instrument[name = '" + inputs.getInstrument() + "']");
+        joinClause.push_back("JOIN inves.investigationInstruments invInst");
+        joinClause.push_back("JOIN invInst.instrument inst");
+        whereClause.push_back("inst.name = '" + inputs.getInstrument() + "'");
       }
 
       // Keywords
       if(!inputs.getKeywords().empty())
       {
-        querySegments.push_back("Keyword[name IN ('" + inputs.getKeywords() + "')]");
+        joinClause.push_back("JOIN inves.keywords keywords");
+        whereClause.push_back("keywords.name IN ('" + inputs.getKeywords() + "')");
       }
 
       // Sample name
-      if(!inputs.getSampleName().empty() && !queryDataset)
+      if(!inputs.getSampleName().empty())
       {
-        querySegments.push_back("Sample[name = '" + inputs.getSampleName() + "']");
+        joinClause.push_back("JOIN inves.samples sample");
+        whereClause.push_back("sample.name = LIKE '%" + inputs.getSampleName() + "%'");
       }
 
-      // Now we build the query from the segments. For each segment, we append a join ("<->").
-      std::string query = Strings::join(querySegments.begin(), querySegments.end(), " <-> ");
-
-      // We then append the required includes to output related data, such as instrument name and run parameters.
-      if (!query.empty())
+      // If the user has input an investigator's name or selected my data then we want to JOIN
+      // the specific tables. We check OR as this prevents using a bool.
+      if(!inputs.getInvestigatorSurName().empty() || inputs.getMyData())
       {
-        // If the user wants to search through their data in their archive.
+        joinClause.push_back("JOIN inves.investigationUsers iusers");
+        joinClause.push_back("JOIN iusers.user usr");
+
+        // If the user has selected the "My data only" button.
+        // (E.g. they want to display or search through all the data they have access to.
         if (inputs.getMyData())
         {
-          query.insert(0, "DISTINCT Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user] <-> ");
+          whereClause.push_back("usr.name = :user ");
         }
-        // Otherwise, we search the entire archive.
-        else
+
+        // We then check what specific item was input (or both) and create the related WHERE clause.
+        if (!inputs.getInvestigatorSurName().empty())
         {
-          query.insert(0, "DISTINCT Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> ");
+          whereClause.push_back("usr.fullName LIKE '%" + inputs.getInvestigatorSurName() + "%'");
         }
       }
 
-      // If the user has only selected the "My data only" button (E.g. they want to display all their "My data").
-      if (query.empty() && inputs.getMyData())
+      // Similar to above. We check if either has been input,
+      // join the related table and add the specific WHERE clause.
+      if(!inputs.getDatafileName().empty() || (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0))
       {
-        query.insert(0, "DISTINCT Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]");
+        joinClause.push_back("JOIN inves.datasets dataset");
+        joinClause.push_back("JOIN dataset.datafiles datafile");
+
+        if (!inputs.getDatafileName().empty())
+        {
+          whereClause.push_back("datafile.name LIKE '%" + inputs.getDatafileName() + "%'");
+        }
+
+        if (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)
+        {
+          joinClause.push_back("JOIN datafile.parameters datafileparameters");
+          joinClause.push_back("JOIN datafileparameters.type dtype");
+          whereClause.push_back("dtype.name='run_number' AND datafileparameters.numericValue BETWEEN "
+              + Strings::toString(inputs.getRunStart()) + " AND " + Strings::toString(inputs.getRunEnd()) + "");
+        }
+      }
+
+      std::string query;
+
+      // This prevents the user searching the entire archive (E.g. there is no "default" query).
+      if (!whereClause.empty() || !joinClause.empty())
+      {
+        std::string select, from, join, where, orderBy, includes;
+
+        select   = "SELECT DISTINCT inves";
+        from     = " FROM Investigation inves ";
+        join     = Strings::join(joinClause.begin(), joinClause.end(), " ");
+        where    = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
+        where.insert(0, " WHERE ");
+        orderBy  = " ORDER BY inves.id ASC";
+        includes = " INCLUDE inves.investigationInstruments.instrument, inves.parameters";
+        query    = select + from + join + where + orderBy + includes;
       }
 
       g_log.debug() << "Query: { " << query << " }" << std::endl;
