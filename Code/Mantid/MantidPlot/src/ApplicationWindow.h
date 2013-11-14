@@ -609,6 +609,10 @@ public slots:
   //! Creates a new empty multilayer plot
   MultiLayer* newGraph(const QString& caption = tr("Graph"));
 
+  /// Prepares MultiLayer for plotting - creates if necessary, clears, applies initial settings 
+  MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph", 
+    bool clearWindow = false);
+
   //! \name Reading from a Project File
   //@{
 

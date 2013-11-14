@@ -64,15 +64,6 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
-      /// do datafile search
-      API::ITableWorkspace_sptr doDataFilesSearch();
-      /// This method returns true if  the given file name is raw file or nexus file otherwise false
-      bool isDataFile(const std::string& fileName);
-
-      /// This method filters the log files from the workspace
-      void filterLogFiles(API::ITableWorkspace_sptr& ws_sptr);
-
-
     };
   }
 }

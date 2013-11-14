@@ -2737,6 +2737,51 @@ MultiLayer* ApplicationWindow::newGraph(const QString& caption)
   return ml;
 }
 
+/**
+ * Prepares MultiLayer window for plotting - creates it if necessary, clears it, applies initial
+ * settings etc.
+ * @param isNew         :: Whether the Graph used for plotting was created, or the old one was used
+ * @param window        :: Existing MultiLayer window. If NULL - a new one will be created
+ * @param newWindowName :: Name of the new window if one is created
+ * @param clearWindow   :: Whether to clear existing window before plotting. Ignored if window is NULL
+ * @return Pointer to created window if window == NULL, otherwise - window.
+ */
+MultiLayer* ApplicationWindow::prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName, bool clearWindow) 
+{
+  isNew = false;
+
+  if(window == NULL)
+  { // If plot window is not specified, create a new one
+    window = multilayerPlot(generateUniqueName( newWindowName + "-"));
+    window->setCloseOnEmpty(true);
+    isNew = true;
+  } 
+  else if(clearWindow)
+  { 
+    window->setLayersNumber(0); // Clear by removing all the layers
+  }
+
+  if (window->isEmpty())
+  { // This will add a new layer in two situations: when we've cleared the window manually,
+    // or when the window specified didn't actually have any layers
+    window->addLayer();
+    isNew = true;
+  }
+
+  if(isNew)
+  { // If new graph was created, need to set some initial stuff
+
+    Graph *g = window->activeGraph(); // We use active graph only. No support for proper _multi_ layers yet.
+
+    connect(g,SIGNAL(curveRemoved()),window,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+    setPreferences(g);
+    g->newLegend();
+    g->setTitle( newWindowName );
+  }
+
+  return window; 
+}
+
 MultiLayer* ApplicationWindow::multilayerPlot(Table* w, const QStringList& colList, int style, int startRow, int endRow)
 {//used when plotting selected columns
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
