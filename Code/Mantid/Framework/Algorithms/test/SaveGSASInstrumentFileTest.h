@@ -56,10 +56,10 @@ public:
     saver.execute();
     TS_ASSERT(saver.isExecuted());
 
-    // Check the output file's existence and size;
-    TS_ASSERT(Poco::File("test.iparm").exists());
+    // Check the output file's existence and size
+    std:string filename = saver.getProperty("OutputFilename"); // get full pathname
+    TS_ASSERT(Poco::File(filename).exists());
  
-    string filename("test.iparm");
     vector<size_t> veclineindextoread;
     veclineindextoread.push_back(5);
     veclineindextoread.push_back(20);
@@ -77,7 +77,7 @@ public:
 
     // Clean
     AnalysisDataService::Instance().remove("PG3ProfileTable");
-    Poco::File("test.iparm").remove();
+    Poco::File(filename).remove();
 
     return;
   }
