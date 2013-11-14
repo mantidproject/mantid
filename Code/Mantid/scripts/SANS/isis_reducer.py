@@ -156,8 +156,7 @@ class ISISReducer(SANSReducer):
         self.to_Q =            isis_reduction_steps.ConvertToQISIS(
                                                         self.prep_normalize)
         self._background_subtracter = isis_reduction_steps.CanSubtraction()
-        self.geometry_correcter =       sans_reduction_steps.SampleGeomCor(
-                                                self._sample_run.geometry)
+        self.geometry_correcter =       sans_reduction_steps.SampleGeomCor()
 #        self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
         self._rem_nans =      sans_reduction_steps.StripEndNans()
 
