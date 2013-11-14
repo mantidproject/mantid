@@ -57,7 +57,7 @@ public:
     TS_ASSERT(saver.isExecuted());
 
     // Check the output file's existence and size
-    std:string filename = saver.getProperty("OutputFilename"); // get full pathname
+    std::string filename = saver.getProperty("OutputFilename"); // get full pathname
     TS_ASSERT(Poco::File(filename).exists());
  
     vector<size_t> veclineindextoread;
