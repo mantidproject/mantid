@@ -24,10 +24,6 @@ namespace MantidQt
       const std::vector<std::string> downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles, const std::string &downloadPath);
       /// Validate each input field against the related algorithm property.
       const std::map<std::string, std::string> validateProperties(const std::map<std::string, std::string> &inputFields);
-      /// Using a property (isValid) in the list instruments algorithm verify if the session is valid.
-      bool validSession();
-      /// Open the login dialog if user not logged in.
-      void openLoginDialog(QWidget* window);
 
     private:
       /// Creates an algorithm with the name provided.
