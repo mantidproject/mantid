@@ -114,6 +114,7 @@ public:
     TS_ASSERT(saver.isExecuted());
 
     // Check existence of file
+    prmfilename = saver.getProperty("OutputFilename");
     TS_ASSERT(Poco::File(prmfilename).exists());
 
     string filename("test3bank.iparm");
