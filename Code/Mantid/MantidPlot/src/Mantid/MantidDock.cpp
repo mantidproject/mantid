@@ -1146,6 +1146,53 @@ MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
 {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
+  setAcceptDrops(true);
+}
+
+void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de)
+{
+    // The event needs to be accepted here
+    de->accept();
+}
+ 
+void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *event)
+{
+    // Set the drop action to be the proposed action.
+    event->acceptProposedAction();
+}
+ 
+void MantidTreeWidget::dropEvent(QDropEvent *de)
+{
+    QStringList filenames;
+    const QMimeData *mimeData = de->mimeData();  
+    if (mimeData->hasUrls()) 
+    {
+      QList<QUrl> urlList = mimeData->urls();
+      for (int i = 0; i < urlList.size(); ++i) 
+      {
+            QString fName = urlList[i].toLocalFile();
+            filenames.append(fName);
+      }
+    }
+    de->acceptProposedAction();
+
+    for (int i = 0; i < filenames.size(); ++i) 
+    {
+      try
+      {
+        QFileInfo fi(filenames[i]);
+        QString basename = fi.baseName();
+        IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("Load");
+        alg->initialize();
+        alg->setProperty("Filename",filenames[i].toStdString());
+        alg->setProperty("OutputWorkspace",basename.toStdString());
+        m_mantidUI->executeAlgorithmAsync(alg,true);
+      }
+      catch (std::logic_error& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }
+    }
 }
 
 void MantidTreeWidget::mousePressEvent (QMouseEvent *e)
