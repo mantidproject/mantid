@@ -172,7 +172,7 @@ namespace Mantid
       if(!inputs.getSampleName().empty())
       {
         joinClause.push_back("JOIN inves.samples sample");
-        whereClause.push_back("sample.name = LIKE '%" + inputs.getSampleName() + "%'");
+        whereClause.push_back("sample.name LIKE '%" + inputs.getSampleName() + "%'");
       }
 
       // If the user has input an investigator's name or selected my data then we want to JOIN
@@ -186,7 +186,7 @@ namespace Mantid
         // (E.g. they want to display or search through all the data they have access to.
         if (inputs.getMyData())
         {
-          whereClause.push_back("usr.name = :user ");
+          whereClause.push_back("usr.name = :user");
         }
 
         // We then check what specific item was input (or both) and create the related WHERE clause.
