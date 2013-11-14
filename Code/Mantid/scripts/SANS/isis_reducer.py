@@ -30,6 +30,7 @@ __version__ = '0.0'
 current_settings = None
 
 class Sample(object):
+    ISSAMPLE = True
     def __init__(self):
         #will contain a LoadSample() object that converts the run number into a file name and loads that file  
         self.loader = None
@@ -62,14 +63,21 @@ class Sample(object):
         self.period_option = period
 
         self.loader = isis_reduction_steps.LoadSample(run, reload, period)
-        self.loader.execute(reducer, None)
-        
-        self.geometry.execute(None, self.get_wksp_name())
+        self.loader.execute(reducer, self.ISSAMPLE)
+        if self.ISSAMPLE:
+            self.geometry.execute(None, self.get_wksp_name())
         
     def get_wksp_name(self):
         return self.loader.wksp_name
     
+    def get_periods_in_file(self):
+        return self.loader.periods_in_file
+
     wksp_name = property(get_wksp_name, None, None, None)
+    periods_in_file = property(get_periods_in_file, None, None, None)
+
+class Can(Sample):
+    ISSAMPLE = False
 
 class ISISReducer(SANSReducer):
     """
@@ -110,7 +118,7 @@ class ISISReducer(SANSReducer):
         proc_wav.append(self._corr_and_scale)
         proc_wav.append(self.geometry_correcter)
 
-        self._can = [self.background_subtracter]
+        self._can = [self._background_subtracter]
         
 #        self._tidy = [self._zero_error_flags]
         self._tidy = [self._rem_nans]
@@ -149,7 +157,7 @@ class ISISReducer(SANSReducer):
 
         self.to_Q =            isis_reduction_steps.ConvertToQISIS(
                                                         self.prep_normalize)
-        self.background_subtracter = None
+        self._background_subtracter = isis_reduction_steps.CanSubtraction()
         self.geometry_correcter =       sans_reduction_steps.SampleGeomCor(
                                                 self._sample_run.geometry)
 #        self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
@@ -161,6 +169,7 @@ class ISISReducer(SANSReducer):
         SANSReducer.__init__(self)
         self._dark_current_subtracter_class = None
         self._sample_run = Sample()
+        self._can_run = Can()
         self.output_wksp = None
         self.full_trans_wav = False
         self._monitor_set = False
@@ -197,6 +206,9 @@ class ISISReducer(SANSReducer):
             @param period: the period within the sample to be analysed
         """
         self._sample_run.set_run(run, reload, period, self)
+        
+    def set_can(self, run, reload, period):
+        self._can_run.set_run(run, reload, period, self)
 
     def get_sample(self):
         """
@@ -206,7 +218,17 @@ class ISISReducer(SANSReducer):
         if not self._process_can:
             return self._sample_run
         else:
-            return self.background_subtracter
+            return self.get_can()
+
+    def get_can(self):
+        if self._can_run.loader and self._can_run.wksp_name:
+            return self._can_run
+        else:
+            return None
+
+    # for compatibility reason, previously, background_subtracter was used to
+    # query if the can was provided and for the can reduction.
+    background_subtracter = property(get_can, None, None, None)
         
     def get_out_ws_name(self, show_period=True):
         """

@@ -374,40 +374,17 @@ class CanSubtraction(ReductionStep):
         Apply the same corrections to the can that were applied to the sample and
         then subtracts this can from the sample.
     """
-    def __init__(self, can_run, reload = True, period = -1):
-        """
-            @param can_run: the run number followed by dot and the extension 
-            @param reload: if set to true (default) the workspace is replaced if it already exists
-            @param period: for multiple entry workspaces this is the period number
-        """
+    def __init__(self):
         super(CanSubtraction, self).__init__()
-        #contains the workspace with the background (can) data
-        self.workspace = LoadRun(can_run, reload=reload, entry=period)
-
-    def assign_can(self, reducer):
-        """
-            Loads the can workspace into Mantid and reads any log file
-            @param reducer: the reduction chain
-            @return: the logs object  
-        """
-        if not reducer.user_settings.executed:
-            raise RuntimeError('User settings must be loaded before the can can be loaded, run UserFile() first')
-    
-        self.workspace._assignHelper(reducer)
-
-        if self.workspace.wksp_name == '':
-            sanslog.warning('Unable to load SANS can run, cannot continue.')
-            return '()'
-          
-        reducer.instrument.on_load_sample(self.workspace.wksp_name, 
-                                          reducer.get_beam_center(), 
-                                          isSample=False)
 
     def execute(self, reducer, workspace):
         """
             Apply same corrections as for sample workspace then subtract from data
         """        
-        #remain the sample workspace, its name will be restored to the original once the subtraction has been done 
+        if reducer.get_can() is None:
+            return
+
+        #rename the sample workspace, its name will be restored to the original once the subtraction has been done 
         tmp_smp = workspace+"_sam_tmp"
         RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= tmp_smp)
 
@@ -956,13 +933,10 @@ class LoadSample(LoadRun, ReductionStep):
         #is set to the entry (period) number in the sample to be run
         self.entries = []
     
-    def execute(self, reducer, workspace):
+    def execute(self, reducer, isSample):
         if not reducer.user_settings.executed:
             raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
 
-        # Code from AssignSample
-        self._clearPrevious(self._scatter_sample)
-        
         self._assignHelper(reducer)
         if self._period != self.UNSET_PERIOD:
             self.entries  = [self._period]
@@ -972,13 +946,7 @@ class LoadSample(LoadRun, ReductionStep):
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
-        p_run_ws = mtd[self.wksp_name]
-        
-        if isinstance(p_run_ws, WorkspaceGroup):
-            p_run_ws = p_run_ws[0]
-    
-        reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), True)
-
+        reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
     
     def get_group_name(self):
         return self._get_workspace_name(self._period)
