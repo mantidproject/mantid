@@ -354,7 +354,7 @@ void PanelsSurface::addObjCompAssemblies(ComponentID bankId)
     {
         return;
     }
-    int ndetectors = 0;
+
     QList<ComponentID> objCompAssemblies;
     // normal to the plane, undefined at first
     Mantid::Kernel::V3D normal(0,0,0);
@@ -414,7 +414,6 @@ void PanelsSurface::addObjCompAssemblies(ComponentID bankId)
                 return;
             }
         }
-        ndetectors += objCompAssembly->nelements();
         objCompAssemblies << objCompAssembly->getComponentID();
     }
     if ( !objCompAssemblies.isEmpty() )

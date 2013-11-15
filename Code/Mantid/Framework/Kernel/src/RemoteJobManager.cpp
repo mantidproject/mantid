@@ -137,7 +137,7 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
     postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
-    it++;
+    ++it;
   }
 
   // file data is treated the same as post data, except that we set the filename field
@@ -152,7 +152,7 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
     postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
-    it++;
+    ++it;
   }
 
   postBody << finalBoundaryLine;

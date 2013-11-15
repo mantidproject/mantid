@@ -175,9 +175,7 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
                                                    // required range of 
                                                    // spectrum indexes 
   double y_step = (ymax - ymin) / (double)n_rows;
-  double mid_y;
   double d_y_index;
-  size_t source_row;
 
   MantidVec y_vals;
   MantidVec err;
@@ -186,10 +184,10 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
   size_t index = 0;
   for ( size_t i = 0; i < n_rows; i++ )
   {
-    mid_y = ymin + ((double)i + 0.5) * y_step;
+    double mid_y = ymin + ((double)i + 0.5) * y_step;
     SVUtils::Interpolate( total_ymin, total_ymax, mid_y,
                                  0.0, (double)total_rows, d_y_index );
-    source_row = (size_t)d_y_index;
+    size_t source_row = (size_t)d_y_index;
     y_vals.clear();
     err.clear();
     y_vals.resize(n_cols,0);
@@ -269,12 +267,11 @@ void MatrixWSDataSource::GetInfoList( double x,
     SVUtils::PushNameValue( x_label, 8, 3, x, list );
   }
 
-  double d_id = 0;
   std::set<detid_t> ids = spec->getDetectorIDs();
   if ( !ids.empty() )
   {
     std::set<detid_t>::iterator it = ids.begin();
-    d_id = (double)*it;
+    double d_id = (double)*it;
     SVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
   }
 

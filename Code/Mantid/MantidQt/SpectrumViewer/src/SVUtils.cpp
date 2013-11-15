@@ -101,12 +101,11 @@ bool SVUtils::FindValidInterval( const QVector<double>  & values,
                                        double           & min,
                                        double           & max )
 {
-  double val;
   min = values[0];
   max = min;
   for ( int i = 1; i < (int)values.size(); i++ )
   {
-    val = values[i];
+    double val = values[i];
     if ( min > val )
       min = val;
     if ( max < val )

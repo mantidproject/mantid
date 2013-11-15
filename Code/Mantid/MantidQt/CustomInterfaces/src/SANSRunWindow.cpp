@@ -1425,9 +1425,7 @@ void SANSRunWindow::applyMask(const QString& wsName,bool time_pixel)
 void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QString & can_logs)
 {
   resetGeometryDetailsBox();
-
-  double unit_conv(1000.);
-  
+    
   QString workspace_name = m_experWksp;
   if( workspace_name.isEmpty() ) return;
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
@@ -1462,6 +1460,8 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   try
   {
     Mantid::Geometry::IDetector_const_sptr detector = instr->getDetector(*dets.begin());
+    
+    double unit_conv(1000.);
     dist_mm = detector->getDistance(*source) * unit_conv;
   }
   catch(std::runtime_error&)

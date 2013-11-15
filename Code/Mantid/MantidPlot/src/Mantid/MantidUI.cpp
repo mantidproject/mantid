@@ -1156,12 +1156,11 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       if(calcQ)
       {
 
-        double efixed(0.0), usignTheta(0.0);
         try
         {
           // Get unsigned theta and efixed value
-          efixed = ws->getEFixed(det);
-          usignTheta = ws->detectorTwoTheta(det)/2.0;
+          double efixed = ws->getEFixed(det);
+          double usignTheta = ws->detectorTwoTheta(det)/2.0;
 
           double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
           colValues << QVariant(q);
@@ -1495,16 +1494,15 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 bool MantidUI::hasUB(const QString& wsName)
 {
   const std::string algName("HasUB");
-  const int version = -1;
   Mantid::API::IAlgorithm_sptr alg;
   try
   {
+    
     alg = Mantid::API::AlgorithmManager::Instance().create(algName);
   } catch (...)
   {
     QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
-        "Cannot create algorithm " + QString::fromStdString(algName) + " version "
-            + QString::number(version));
+        "Cannot create algorithm " + QString::fromStdString(algName) );
     return false;
   }
   if (!alg)

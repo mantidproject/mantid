@@ -401,7 +401,7 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
 		 */
 		Run& r = info->mutableRun();
 		std::set<std::string> specialMap = populateSpecialMap();
-		for(it = dictionary.begin(); it != dictionary.end(); it++){
+		for(it = dictionary.begin(); it != dictionary.end(); ++it){
 			if(specialMap.find(it->first) == specialMap.end()){
 				// not in specials!
 				if(it->second.find('/') == it->second.npos){

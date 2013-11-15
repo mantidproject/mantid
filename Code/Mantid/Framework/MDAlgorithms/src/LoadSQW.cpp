@@ -887,7 +887,7 @@ namespace LoadSQWHelper
    { // we do not need this header  at the moment -> just calculating its length; or may be we do soon?
       std::vector<char> data_buffer(8);
 
-    // cppcheck-suppress redundantAssignment
+      // cppcheck-suppress redundantAssignment
       std::streamoff end_location = start_location;
       std::streamoff shift = start_location-dataStream.tellg();
       // move to specified location, which should be usually 0;
@@ -946,7 +946,7 @@ namespace LoadSQWHelper
       std::vector<char> data_buffer(8);
 
       // cppcheck-suppress redundantAssignment
-    std::streamoff end_location = start_location;
+      std::streamoff end_location = start_location;
       std::streamoff shift = start_location-dataStream.tellg();
       // move to specified location, which should be usually 0;
       dataStream.seekg(shift,std::ios_base::cur);              

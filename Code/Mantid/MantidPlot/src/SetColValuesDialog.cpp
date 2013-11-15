@@ -204,7 +204,7 @@ QSize SetColValuesDialog::sizeHint() const
 void SetColValuesDialog::customEvent(QEvent *e)
 {
 	if (e->type() == SCRIPTING_CHANGE_EVENT)
-		scriptingChangeEvent((ScriptingChangeEvent*)e);
+		scriptingChangeEvent(static_cast<ScriptingChangeEvent*>(e));
 }
 
 bool SetColValuesDialog::apply()
