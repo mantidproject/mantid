@@ -2032,6 +2032,22 @@ void MantidUI::enableSaveNexus(const QString& wsName)
   appWindow()->enablesaveNexus(wsName);
 }
 
+/**
+ * Executes the catalog login algorithm.
+ * Returns true if login was a success.
+ */
+bool MantidUI::isValidCatalogLogin()
+{
+  auto catalogAlgorithm = this->createAlgorithm("CatalogLogin");
+  auto loginDialog      = this->createAlgorithmDialog(catalogAlgorithm);
+
+  if(loginDialog->exec() == QDialog::Accepted)
+  {
+    if (catalogAlgorithm->execute()) return true;
+  }
+  return false;
+}
+
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
 *  saves the names of all the workspaces loaded into mantid workspace tree
 *  into a string and calls save nexus on each workspace to save the data to a nexus file.

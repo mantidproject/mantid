@@ -1292,8 +1292,6 @@ void ApplicationWindow::initMainMenu()
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
   icat->addAction(actionCatalogLogin);//Login menu item
-  icat->addAction(actionCatalogSearch); // ICAT GUI menu item
-  icat->addAction(actionCatalogLogout);//logout menu item
   disableActions();
 }
 
@@ -17442,7 +17440,12 @@ void ApplicationWindow::panOnPlot()
 /// Handler for ICat Login Menu
 void ApplicationWindow::CatalogLogin()
 {
-  mantidUI->executeAlgorithm("CatalogLogin",1);
+  // Executes the catalog login algorithm, and returns true if user can login.
+  if (mantidUI->isValidCatalogLogin())
+  {
+    icat->addAction(actionCatalogSearch);
+    icat->addAction(actionCatalogLogout);
+  }
 }
 
 void ApplicationWindow::CatalogSearch()
@@ -17460,6 +17463,14 @@ void ApplicationWindow::CatalogSearch()
   }
 }
 
+void ApplicationWindow::CatalogLogout()
+{
+  auto logout = mantidUI->createAlgorithm("CatalogLogout");
+  mantidUI->executeAlgorithmAsync(logout);
+  icat->removeAction(actionCatalogSearch);
+  icat->removeAction(actionCatalogLogout);
+}
+
 void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interface)
 {   
   QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(),
@@ -17470,12 +17481,6 @@ void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interfac
   usr_win->setGeometry(iface_geom);
   usr_win->setName(user_interface->windowTitle());
   addMdiSubWindow(usr_win);
-}
-
-void ApplicationWindow::CatalogLogout()
-{
-  auto logout = mantidUI->createAlgorithm("CatalogLogout");
-  mantidUI->executeAlgorithmAsync(logout);
 }
 
 /**
