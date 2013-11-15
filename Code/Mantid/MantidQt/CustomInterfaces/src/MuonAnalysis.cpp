@@ -2169,6 +2169,9 @@ void MuonAnalysis::selectMultiPeak(const QString& wsName)
 {
   disableAllTools();
 
+  if( ! plotExists(wsName) )
+    plotSpectrum(wsName, 0, getPlotStyleParams(wsName, 0));
+
   QString code;
 
   code += "g = graph('" + wsName + "-1')\n"
@@ -2216,36 +2219,6 @@ void MuonAnalysis::showAllPlotWindows()
   runPythonCode(code);
 }
 
-/**
- * Show a plot for a given workspace. Closes previous plot if exists.
- * @param wsName The name of workspace to be plotted. Should exist in ADS.
- */
-void MuonAnalysis::showPlot(const QString& wsName)
-{
-  // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
-  //       only one groups)
-
-  // If empty -> no workspaces available to choose (e.g. all were deleted)
-  if(wsName.isEmpty())
-  {
-    setCurrentDataName(NOT_AVAILABLE);
-  }
-  // Just in case, check if exists. Shouldn't happen normally.
-  // TODO: can happen if currently connected ws gets deleted. Observe deletion event and do 
-  //       something in that case
-  else if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-  {
-    g_log.warning("Can't show workspace which doesn't exist.");
-  }
-  else
-  {
-    setCurrentDataName(wsName);
-
-    plotSpectrum(m_currentDataName, 0, getPlotStyleParams(m_currentDataName, 0));
-
-    selectMultiPeak(m_currentDataName);
-  }
-}
 
 /**
  * Plot group
@@ -3639,7 +3612,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
     // Disconnect to avoid problems when filling list of workspaces in fit prop. browser
     disconnect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                              this, SLOT(showPlot(const QString&)));
+                              this, SLOT(selectMultiPeak(const QString&)));
   }
 
   if(newTab == m_uiForm.DataAnalysis) // Entering DA tab
@@ -3649,11 +3622,11 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
     // Show connected plot and attach PP tool to it (if has been assigned)
     if(m_currentDataName != NOT_AVAILABLE)
-      showPlot(m_currentDataName);
+      selectMultiPeak(m_currentDataName);
     
     // In future, when workspace gets changed, show its plot and attach PP tool to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                           this, SLOT(showPlot(const QString&)), Qt::QueuedConnection);
+                           this, SLOT(selectMultiPeak(const QString&)), Qt::QueuedConnection);
   }
   else if(newTab == m_uiForm.ResultsTable)
   {
