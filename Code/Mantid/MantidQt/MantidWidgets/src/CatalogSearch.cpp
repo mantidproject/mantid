@@ -496,11 +496,7 @@ namespace MantidQt
       m_calendar->setMaximumDate(QDate(2050, 1, 1));
 
       // Centre the calendar on screen.
-      QRect rect = QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,this->window()->size(),QDesktopWidget().availableGeometry());
-      // Make the calendar wide and tall enough to see all dates.
-      rect.setWidth(445);
-      rect.setHeight(205);
-      m_calendar->setGeometry(rect);
+      m_calendar->setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,QSize(445,205),QDesktopWidget().availableGeometry()));
 
       // Improve UX, then display the m_calendar.
       m_calendar->setGridVisible(true);
