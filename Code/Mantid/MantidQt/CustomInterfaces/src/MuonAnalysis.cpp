@@ -115,6 +115,32 @@ void MuonAnalysis::initLayout()
 {
   m_uiForm.setupUi(this);
 
+  std::set<std::string> supportedFacilities;
+  supportedFacilities.insert("ISIS");
+  supportedFacilities.insert("SmuS");
+
+  const std::string userFacility = ConfigService::Instance().getFacility().name();
+
+  // Allow to load current run for ISIS only 
+  if ( userFacility != "ISIS" )
+    m_uiForm.loadCurrent->setDisabled(true);
+
+  // If facility if not supported by the interface - show a warning, but still open it
+  if ( supportedFacilities.find(userFacility) == supportedFacilities.end() )
+  {
+    const std::string supportedFacilitiesStr = Strings::join(supportedFacilities.begin(), 
+      supportedFacilities.end(), ", ");
+
+    const QString errorTemplate = 
+      "Your facility (%1) is not supported by MuonAnalysis, so you will not be able to load any files. \n\n"
+      "Supported facilities are: %2. \n\n" 
+      "Please use Preferences -> Mantid -> Instrument to update your facility information.";
+
+    const QString error = errorTemplate.arg( userFacility.c_str(), supportedFacilitiesStr.c_str() );
+
+    QMessageBox::warning(this, "Unsupported facility", error);
+  }
+
   m_uiForm.fitBrowser->init();
 
   // alow appending files
@@ -3907,18 +3933,6 @@ void MuonAnalysis::hideEvent(QHideEvent *e)
  */
 void MuonAnalysis::showEvent(QShowEvent *e)
 {
-  const std::string facility = ConfigService::Instance().getFacility().name();
-  if (facility != "ISIS")
-  {
-    QMessageBox::critical(this, "Unsupported facility", QString("Only the ISIS facility is supported by this interface.\n")
-                         + "Select ISIS as your default facility in View->Preferences...->Mantid to continue.");
-    m_uiForm.loadCurrent->setDisabled(true);
-  }
-  else
-  {
-    m_uiForm.loadCurrent->setDisabled(false);
-  }
-
   // Hide the toolbars
   if (m_uiForm.hideToolbars->isChecked() )
     setToolbarsHidden(true);
