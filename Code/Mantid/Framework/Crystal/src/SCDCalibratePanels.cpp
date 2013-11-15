@@ -617,6 +617,22 @@ namespace Mantid
       return true;
     }
 
+    /**
+     * Adds a tie to the IFunction.
+     * @param iFunc The function to add the tie to.
+     * @param tie Whether or not to actually do it.
+     * @param parName The name of the parameter to tie.
+     * @param value The value to tie it to.
+     */
+    static inline void tie(IFunction_sptr & iFunc, const bool tie, const string &parName, const double value)
+    {
+      if (!tie) return;
+      std::ostringstream ss;
+      ss << std::fixed << value;
+      std::cout << "Tying " << parName << " = " << value << std::endl; // REMOVE
+      iFunc->tie(parName, ss.str());
+    }
+
     void  SCDCalibratePanels::exec ()
     {
       PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
@@ -700,10 +716,7 @@ namespace Mantid
         AnalysisDataService::Instance().addOrReplace("xxx",peaksWs );
       }
 
-      string Constraints("");
-      string TiesArgument;
       int nbanksSoFar = 0;
-
       bool first = false;
       int NGroups = (int)Groups.size();
       double detWidthScale0,
@@ -760,8 +773,7 @@ namespace Mantid
       iFunc->setParameter("t0", T0);
 
       double maxXYOffset = getProperty("MaxPositionChange_meters");
-      ostringstream oss1 ( ostringstream::out);
-      oss1.precision( 4);
+      string Constraints("");
       int i = -1;//position in ParamResults Array.
       for(auto group = Groups.begin(); group !=Groups.end(); ++group)
       {
@@ -807,7 +819,7 @@ namespace Mantid
 
         nbanksSoFar = nbanksSoFar + static_cast<int>(group->size());
 
-        //---------- set Ties argument ----------------------------------
+        //---------- setup ties ----------------------------------
 
 
         if( i == 0)
@@ -815,54 +827,16 @@ namespace Mantid
           first = true;
         }
 
-        if( !use_PanelWidth)
-        {
-          if( !first)
-            oss1 << ",";
-
-          first = false;
-
-          oss1 <<paramPrefix<<"detWidthScale=" << fixed << detWidthScale0;
-        }
-
-        if( !use_PanelHeight)
-        {
-          if( !first)
-            oss1 << ",";
-
-          first = false;
-
-          oss1 <<  paramPrefix<<"detHeightScale=" << fixed << detHeightScale0;
-        }
-
-
-
-        if( !use_PanelPosition)
-        {
-          if( !first)
-            oss1 << ",";
-
-          first = false;
-
-          oss1 <<paramPrefix<<"Xoffset=" << Xoffset0 << "," <<
-            paramPrefix<<"Yoffset=" <<Yoffset0 << "," <<
-            paramPrefix<<"Zoffset=" << Zoffset0;
-        }
-
-        if( ! use_PanelOrientation )
-        {
-          if( !first)
-            oss1 << ",";
-
-          first = false;
-
-          oss1 << paramPrefix<<"Xrot=" << Xrot0 << ","
-            <<paramPrefix<<"Yrot=" << Yrot0<< ","
-            <<paramPrefix<<"Zrot=" << Zrot0;
-        }
+        tie(iFunc, !use_PanelWidth, paramPrefix+"detWidthScale", detWidthScale0);
+        tie(iFunc, !use_PanelHeight, paramPrefix+"detHeightScale", detHeightScale0);
+        tie(iFunc, !use_PanelPosition, paramPrefix+"Xoffset", Xoffset0);
+        tie(iFunc, !use_PanelPosition, paramPrefix+"Yoffset", Yoffset0);
+        tie(iFunc, !use_PanelPosition, paramPrefix+"Zoffset", Zoffset0);
+        tie(iFunc, !use_PanelOrientation, paramPrefix+"Xrot", Xrot0);
+        tie(iFunc, !use_PanelOrientation, paramPrefix+"Yrot", Yrot0);
+        tie(iFunc, !use_PanelOrientation, paramPrefix+"Zrot", Zrot0);
 
         //--------------- set Constraints Property  -------------------------------
-
         ostringstream oss2 ( ostringstream::out);
 
         if( i == 0)
@@ -906,25 +880,8 @@ namespace Mantid
        Constraints += oss2.str();
      }
 
-     if(!useL0)
-     {
-       if( !first)
-         oss1 << ",";
-
-       first = false;
-       oss1 <<"l0="<<fixed<<L0;
-     }
-
-     if(!useTimeOffset)
-     {
-       if( !first)
-         oss1 << ",";
-
-       //!! first = false;
-       oss1 <<"t0="<<fixed<<T0;
-
-     }
-     TiesArgument = oss1.str();
+     tie(iFunc, !useL0, "l0", L0);
+     tie(iFunc, !useTimeOffset, "t0", T0);
 
       //--------------------- Set up Fit Algorithm and Execute-------------------
       boost::shared_ptr< Algorithm > fit_alg = createChildAlgorithm( "Fit", .2, .9, true );
@@ -937,8 +894,6 @@ namespace Mantid
       int Niterations =  getProperty( "NumIterations");
       fit_alg->setProperty( "Function", iFunc);
       fit_alg->setProperty( "MaxIterations", Niterations );
-      if( !TiesArgument.empty())
-        fit_alg->setProperty( "Ties", TiesArgument);
       fit_alg->setProperty( "Constraints", Constraints);
       fit_alg->setProperty( "InputWorkspace", ws);
       fit_alg->setProperty( "CreateOutput",true);
@@ -1385,7 +1340,7 @@ namespace Mantid
       if (filename.empty())
         return;
 
-      g_log.notice()<<"Saved DetCal file in " << filename << "\n";
+      g_log.notice()<<"Saving DetCal file in " << filename << "\n";
 
       // create a workspace to pass to SaveIsawDetCal
       const size_t number_spectra = instrument->getNumberDetectors();
@@ -1771,6 +1726,8 @@ namespace Mantid
     {
       if (FileName.empty())
         return;
+
+      g_log.notice()<<"Saving parameter file as " << FileName << "\n";
 
       // create the file and add the header
       ofstream oss3(FileName.c_str());
