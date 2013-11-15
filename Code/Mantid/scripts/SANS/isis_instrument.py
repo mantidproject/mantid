@@ -3,6 +3,7 @@ import math
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
+import re
 sanslog = Logger.get("SANS")
 
 import sys
@@ -555,7 +556,7 @@ class ISISInstrument(instrument.Instrument):
             self._back_start = None
             self._back_end = None
 
-    def move_components(self, ws):
+    def move_all_components(self, ws):
         """
             Move the sample object to the location set in the logs or user settings file
             @param ws: the workspace containing the sample to move
@@ -573,10 +574,38 @@ class ISISInstrument(instrument.Instrument):
             MoveInstrumentComponent(Workspace=ws,ComponentName= component, Z = offset,
                                     RelativePosition=True)
 
+    def move_components(self, ws, beamX, beamY):
+        """Define how to move the bank to position beamX and beamY must be implemented"""
+        raise RuntimeError("Not Implemented")
+
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
         raise RuntimeError("Not Implemented")
 
+    def on_load_sample(self, ws_name, beamcentre, isSample):
+        """It will be called just after loading the workspace for sample and can
+        
+        It configures the instrument for the specific run of the workspace for handle historical changes in the instrument. 
+
+        It centralizes the detector bank to teh beamcentre (tuple of two values)        
+        """
+        ws_ref = mtd[str(ws_name)]
+        try:
+            run_num = ws_ref.getRun().getLogData('run_number').value
+        except:                
+            run_num = int(re.findall(r'\d+',run_string)[-1])
+
+        if isSample:
+            self.set_up_for_run(run_num)
+        
+        # centralize the bank to the centre
+        self.move_components(ws_name, beamcentre[0], beamcentre[1])
+
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
+        """
+        Called on loading of transmissions
+        """
+        pass
 
 
 class LOQ(ISISInstrument):
@@ -608,7 +637,7 @@ class LOQ(ISISInstrument):
             @param ybeam: y-position of the beam
             @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
-        super(LOQ, self).move_components(ws)
+        self.move_all_components(ws)
         
         xshift = (317.5/1000.) - xbeam
         yshift = (317.5/1000.) - ybeam
@@ -640,19 +669,14 @@ class LOQ(ISISInstrument):
         second.set_orien('Horizontal')
         second.place_after(first)
 
-    def load_transmission_inst(self, workspace):
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
             Loads information about the setup used for LOQ transmission runs
         """
         trans_definition_file = config.getString('instrumentDefinition.directory')
         trans_definition_file += '/'+self._NAME+'_trans_Definition.xml'
-        LoadInstrument(Workspace=workspace,Filename= trans_definition_file, RewriteSpectraMap=False)
-
-    def check_can_logs(self):
-        """
-            This function does nothing for LOQ
-        """
-        pass
+        LoadInstrument(Workspace=ws_trans,Filename= trans_definition_file, RewriteSpectraMap=False)
+        LoadInstrument(Workspace=ws_direct, Filename = trans_definition_file, RewriteSpectraMap=False)
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
@@ -720,7 +744,7 @@ class SANS2D(ISISInstrument):
         #as spectrum numbers of the first detector have changed we'll move those in the second too  
         second.place_after(first)
 
-    def _getDetValues(self, ws_name):
+    def getDetValues(self, ws_name):
         """
         Retrive the values of Front_Det_Z, Front_Det_X, Front_Det_Rot, Rear_Det_Z and Rear_Det_X from
         the workspace. If it does not find the value at the run info, it takes as default value the
@@ -761,7 +785,7 @@ class SANS2D(ISISInstrument):
         frontDet = self.getDetector('front')
         rearDet = self.getDetector('rear')
 
-        FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self._getDetValues(ws)
+        FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self.getDetValues(ws)
 
         # Deal with front detector
         # 9/1/2  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
@@ -801,7 +825,7 @@ class SANS2D(ISISInstrument):
         MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")    
             
             
-        super(SANS2D, self).move_components(ws)
+        self.move_all_components(ws)
         
         #this implements the TRANS/TRANSPEC=4/SHIFT=... line, this overrides any other monitor move
         if self.monitor_4_offset:
@@ -962,11 +986,87 @@ class SANS2D(ISISInstrument):
     def get_marked_dets(self):
         return self._marked_dets
     
-    def load_transmission_inst(self, workspace):
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
-            Not required for SANS2D
+        SANS2D requires the centralize the detectors of the transmission
+        as well as the sample and can.
         """
-        pass
+        self.move_components(ws_trans, beamcentre[0], beamcentre[1])
+        if ws_trans != ws_direct:
+            self.move_components(ws_direct, beamcentre[0], beamcentre[1])
+
+
+    def cur_detector_position(self, ws_name):
+        """Return the position of the center of the detector bank"""
+        ws = mtd[ws_name]
+        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        
+        return [-pos.getX(), -pos.getY()]
+
+    def on_load_sample(self, ws_name, beamcentre, isSample):
+        """For SANS2D in addition of the operations defines in on_load_sample of ISISInstrument
+        it has to deal with the log, which defines some offsets for the movement of the 
+        detector bank. 
+        """
+        ws_ref = mtd[str(ws_name)]
+        try:
+            log = self.get_detector_log(ws_ref)
+            if log == "":
+                raise "Invalid log"
+        except: 
+            if isSample:
+                raise RuntimeError('Sample logs cannot be loaded, cannot continue')
+            else: 
+                logger.warning("Can logs could not be loaded, using sample values.")
+
+
+        if isSample:
+            self.apply_detector_logs(log)
+        else:
+            self.check_can_logs(log)
+
+        
+        ISISInstrument.on_load_sample(self, ws_name, beamcentre,  isSample)
+
+
+class LARMOR(ISISInstrument):
+    _NAME = 'LARMOR'
+    WAV_RANGE_MIN = 2.2
+    WAV_RANGE_MAX = 10.0
+    def __init__(self):
+        super(LARMOR,self).__init__('LARMOR_Definition.xml')
+        self.monitor_names = dict()
+
+        for i in range(1,6):
+            self.monitor_names[i] = 'monitor'+str(i)
+            
+    def set_up_for_run(self, base_runno):
+        """
+            Needs to run whenever a sample is loaded
+        """
+        first = self.DETECTORS['low-angle']
+        second = self.DETECTORS['high-angle']
+
+        first.set_orien('Horizontal')
+        first.set_first_spec_num(10)
+        second.set_orien('Horizontal')
+        second.place_after(first)
+
+    def move_components(self, ws, xbeam, ybeam):
+        self.move_all_components(ws)
+
+        detBanch = self.getDetector('rear')
+
+        xshift = -xbeam
+        yshift = -ybeam
+        #zshift = ( detBanch.z_corr)/1000.
+        #zshift -= self.REAR_DET_DEFAULT_SD_M
+        zshift = 0
+        sanslog.notice("Setup move " + str(xshift*1000) + " " + str(yshift*1000) + " " + str(zshift*1000))
+        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift, 
+                                Y=yshift, Z=zshift)
+        # beam centre, translation
+        return [0.0, 0.0], [-xbeam, -ybeam]
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
