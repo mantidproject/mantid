@@ -386,8 +386,11 @@ private:
   /// time zero returned in ms
   double timeZero();
 
+  /// Whether overwrite option on the Settings tab is selected
+  bool isOverwriteEnabled();
+
   /// Get the new plot name
-  QString getNewPlotName(const QString & cropWSfirstPart);
+  QString getNewPlotName(const QString & firstPart);
 
   /// Get the dead times from the data and apply them.
   void getDeadTimeFromData(const std::vector<double> & deadTimes);

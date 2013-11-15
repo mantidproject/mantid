@@ -2523,31 +2523,45 @@ void MuonAnalysis::plotPair(const std::string& plotType)
   m_updating = false;
 }
 
-QString MuonAnalysis::getNewPlotName(const QString & cropWSfirstPart)
+/**
+ * Whether overwrite option on Settings tab is enabled.
+ * @return true is enabled, false otherwise
+ */
+bool MuonAnalysis::isOverwriteEnabled()
 {
-  // check if this workspace already exist to avoid replotting an existing workspace
-  QString cropWS("");
-  int plotNum = 1;
-  while (1==1)
-  {
-    cropWS = cropWSfirstPart + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
-    if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
-    {
-      if((m_uiForm.plotCreation->currentIndex() == 0) || (m_uiForm.plotCreation->currentIndex() == 2) )
-      {
-        closePlotWindow(cropWS);
-        AnalysisDataService::Instance().remove(cropWS.toStdString());
-        break;
-      }
-      else
-        plotNum++;
+  int choise = m_uiForm.plotCreation->currentIndex(); 
+
+  return (choise == 0) || (choise == 2); 
+}
+
+/**
+ * Get a name for a new plot. If overwrite is disabled, will return a unique name given the first
+ * part, otherwise will always return "firstPart; #1"
+ * @param firstPart :: First part of the name, i.e . instrument + run number + group/pair name.
+ * @return The name which can be used to create workspace/plot.
+ */
+QString MuonAnalysis::getNewPlotName(const QString & firstPart)
+{
+  const QString prefix(firstPart + "; #");
+
+  QString name;
+
+  if ( ! isOverwriteEnabled() )
+  { // Find the name which doesn't exist
+    int num = 1;
+
+    do 
+    { 
+      name = prefix + QString::number(num++);
     }
-    else
-    {
-      break;
-    }
+    while ( AnalysisDataService::Instance().doesExist(name.toStdString()) );
   }
-  return cropWS;
+  else
+  { // If overwrite enabled, just use the first one
+    name = prefix + "1";
+  }
+
+  return name;
 }
 
 /**
