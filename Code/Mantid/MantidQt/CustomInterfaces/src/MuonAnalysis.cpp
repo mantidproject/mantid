@@ -2040,24 +2040,30 @@ QStringList MuonAnalysis::getPeriodLabels() const
  */
 void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale)
 {
-    // create first part of plotting Python string
-    QString gNum = QString::number(wsIndex);
     QString pyS;
 
-    // Plot error bars by default. If not needed they will get hidden when plot style if applied.
-    pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ",True)\n";
+    // Try to find existing graph window
+    pyS = "w = graph('%1-1')\n";
 
-    // Add the objectName for the peakPickerTool to find
-    pyS += "gs.setObjectName(\"" + wsName + "\")\n"
-           "l = gs.activeLayer()\n"
-           "l.setCurveTitle(0, \"" + wsName + "\")\n"
-           "l.setTitle(\"" + m_title.c_str() + "\")\n";
+    // If doesn't exist - plot it
+    pyS += "if w == None:\n"
+           "  w = plotSpectrum('%1', %2, True)\n"
+           "  w.setObjectName('%1')\n"
+           "  l = w.activeLayer()\n"
+           "  l.setCurveTitle(0, '%1')\n"
+           "  l.setTitle('%3')\n";
 
+    // Set logarithmic scale if required
     if ( ylogscale )
       pyS += "l.logYlinX()\n";
 
-    // plot the spectrum
-    runPythonCode( pyS );
+    // If plot does exist already, it should've just been updated automatically, so we just
+    // need to make sure it is visible
+    pyS += "else:\n"
+          "  w.show()\n"
+          "  w.setFocus()\n";
+
+    runPythonCode( pyS.arg(wsName).arg(wsIndex).arg(m_title.c_str()) );
 }
 
 /**
@@ -2068,6 +2074,7 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
  */
 void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QString>& params)
 {
+
   QString code;
 
   // Get the active layer of the graph
