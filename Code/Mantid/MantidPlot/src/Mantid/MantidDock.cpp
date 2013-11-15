@@ -1173,7 +1173,10 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
       for (int i = 0; i < urlList.size(); ++i) 
       {
             QString fName = urlList[i].toLocalFile();
-            filenames.append(fName);
+            if (fName.size()>0)
+            {
+              filenames.append(fName);
+            }
       }
     }
     de->acceptProposedAction();
@@ -1191,6 +1194,10 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
         m_mantidUI->executeAlgorithmAsync(alg,true);
       }
       catch (std::runtime_error& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }      
+      catch (std::logic_error& error)
       {
         logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }
