@@ -725,9 +725,8 @@ bool SANSRunWindow::loadUserFile()
       "print i.ReductionSingleton().DQXY"), m_uiForm.qy_dqy,
       m_uiForm.qy_dqy_opt);
 
-  // The tramission line of the Limits section (read settings for sample and can)
-    transSelectorChanged(1); transSelectorChanged(0);
-
+  // The tramission line of the Limits section (read settings for sample and can) 
+  loadTransmissionSettings(); 
 
   // The front rescale/shift section
   m_uiForm.frontDetRescale->setText(runReduceScriptFunction(
@@ -3497,6 +3496,10 @@ void SANSRunWindow::transSelectorChanged(int currindex){
                       m_uiForm.trans_max_can, m_uiForm.trans_opt_can};
   for (size_t i = 0; i< 6; i++) wid[i]->setVisible(visible);
 
+}
+
+void SANSRunWindow::loadTransmissionSettings(){
+
   QString transMin = runReduceScriptFunction(
                   "print i.ReductionSingleton().transmission_calculator.lambdaMin('SAMPLE')").trimmed();
   if (transMin == "None")
@@ -3510,6 +3513,7 @@ void SANSRunWindow::transSelectorChanged(int currindex){
     m_uiForm.trans_max->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.lambdaMax('SAMPLE')").trimmed());
   }
+
   QString text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fitMethod('SAMPLE')").trimmed();
   int index = m_uiForm.trans_opt->findText(text, Qt::MatchFixedString);
@@ -3517,13 +3521,12 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   {
     m_uiForm.trans_opt->setCurrentIndex(index);
   }
-  if ( text == "Off" || text == "None" )
+  if ( text == "OFF" || text == "None" )
     m_uiForm.transFitOnOff->setChecked(false);
   else 
     m_uiForm.transFitOnOff->setChecked(true);
 
-  if (visible){
-    transMin = runReduceScriptFunction(
+  transMin = runReduceScriptFunction(
                   "print i.ReductionSingleton().transmission_calculator.lambdaMin('CAN')").trimmed();
   if (transMin == "None")
   {
@@ -3538,16 +3541,19 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   }
   text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fitMethod('CAN')").trimmed();
-  index = m_uiForm.trans_opt_can->findText(text, Qt::MatchCaseSensitive);
+  index = m_uiForm.trans_opt_can->findText(text, Qt::MatchFixedString);
   if( index >= 0 )
   {
     m_uiForm.trans_opt_can->setCurrentIndex(index);
   }
-  if ( text == "Off" || text == "None" )
+  if ( text == "OFF" || text == "None" )
     m_uiForm.transFitOnOff_can->setChecked(false);
   else 
     m_uiForm.transFitOnOff_can->setChecked(true);
-  }
+
+  bool separated = runReduceScriptFunction("print i.ReductionSingleton().transmission_calculator.isSeparate()").trimmed()=="True";
+  
+   m_uiForm.trans_selector_opt->setCurrentIndex(separated?1:0);
 
 
 }

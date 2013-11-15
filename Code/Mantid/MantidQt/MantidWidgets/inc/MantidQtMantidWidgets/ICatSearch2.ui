@@ -421,11 +421,17 @@
           </item>
           <item row="2" column="1">
            <widget class="QLineEdit" name="RunRange">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a start range, end range, or both seperated by a hyphen (-) or colon (:).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="inputMethodHints">
+             <set>Qt::ImhDigitsOnly</set>
+            </property>
             <property name="inputMask">
-             <string>99999-99999; </string>
+             <string/>
             </property>
             <property name="text">
-             <string>-</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -1062,6 +1068,28 @@
            </spacer>
           </item>
           <item>
+           <widget class="QLabel" name="filterType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="text">
+             <string>Filter type:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QComboBox" name="dataFileFilterCombo">
             <property name="font">
              <font>
@@ -1074,7 +1102,7 @@
             </property>
             <item>
              <property name="text">
-              <string>Filter type...</string>
+              <string>None</string>
              </property>
             </item>
            </widget>

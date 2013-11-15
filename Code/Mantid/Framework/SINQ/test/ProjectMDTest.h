@@ -50,7 +50,7 @@ public:
       AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
 								    outputSpace);
     TS_ASSERT_EQUALS(2,data->getNumDims());
-    long nBin = data->getNPoints();
+    long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
     double *sdata = data->getSignalArray();
     for(long i = 0; i < nBin; i++){
@@ -91,7 +91,7 @@ public:
       AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
 								    outputSpace);
     TS_ASSERT_EQUALS(2,data->getNumDims());
-    long nBin = data->getNPoints();
+    long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
     double *sdata = data->getSignalArray();
     for(long i = 0; i < nBin; i++){
@@ -132,7 +132,7 @@ public:
       AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
 								    outputSpace);
     TS_ASSERT_EQUALS(2,data->getNumDims());
-    long nBin = data->getNPoints();
+    long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
     double *sdata = data->getSignalArray();
     for(long i = 0; i < nBin; i++){
@@ -173,7 +173,7 @@ public:
       AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(
 								    outputSpace);
     TS_ASSERT_EQUALS(2,data->getNumDims());
-    long nBin = data->getNPoints();
+    long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
     double *sdata = data->getSignalArray();
     for(long i = 0; i < nBin; i++){

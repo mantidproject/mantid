@@ -85,7 +85,7 @@ namespace LiveData
   /** Constructor
    */
   LoadLiveData::LoadLiveData()
-  : LiveDataAlgorithm()
+  : LiveDataAlgorithm(), m_runNumber(0)
   {
   }
     
@@ -95,17 +95,19 @@ namespace LiveData
   LoadLiveData::~LoadLiveData()
   {
   }
-  
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string LoadLiveData::name() const { return "LoadLiveData";};
+  const std::string LoadLiveData::name() const { return "LoadLiveData";}
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string LoadLiveData::category() const { return "DataHandling\\LiveData\\Support";}
 
   /// Algorithm's version for identification. @see Algorithm::version
-  int LoadLiveData::version() const { return 1;};
+  int LoadLiveData::version() const { return 1;}
+
+  /// Returns the run number, if one is stored in the extracted chunk (returns 0 if not)
+  int LoadLiveData::runNumber() const { return m_runNumber; }
   
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
@@ -483,6 +485,10 @@ namespace LiveData
     // TODO: Have the ILiveListener tell me exactly the time stamp
     DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();
     this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
+
+    // Try and get the run number - will only work for a MatrixWorkspace
+    MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
+    if ( matrixWS ) m_runNumber = matrixWS->getRunNumber();
 
     // Now we process the chunk
     Workspace_sptr processed = this->processChunk(chunkWS);

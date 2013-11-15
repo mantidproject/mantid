@@ -123,7 +123,7 @@ namespace Mantid
       void loadTwoColumnLogFile(std::ifstream& logFileStream, std::string logFileName, API::Run& run);
 
       /// Returns the number of columns in the log file.
-      int countNumberColumns(std::ifstream& logFileStream);
+      int countNumberColumns(std::ifstream& logFileStream, const std::string& logFileName);
 
       /// TimeSeriesProperty<int> containing data periods. Created by LogParser
       boost::shared_ptr<Kernel::Property> m_periods;

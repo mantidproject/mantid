@@ -1044,10 +1044,25 @@ void MantidDockWidget::plotSpectraDistributionErr()
 void MantidDockWidget::drawColorFillPlot()
 {
   // Get the selected workspaces
-  QStringList wsNames = m_tree->getSelectedWorkspaceNames();
+  const QStringList wsNames = m_tree->getSelectedWorkspaceNames();
   if( wsNames.empty() ) return;
-  m_mantidUI->drawColorFillPlots(wsNames);
 
+  // Extract child workspace names from any WorkspaceGroups selected.
+  QSet<QString> allWsNames;
+  foreach( const QString wsName, wsNames )
+  {
+    const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
+    if( wsGroup )
+    {
+      const auto children = wsGroup->getNames();
+      for( auto childWsName = children.begin(); childWsName != children.end(); ++childWsName )
+        allWsNames.insert(QString::fromStdString(*childWsName));
+    }
+    else
+      allWsNames.insert(wsName);
+  }
+
+  m_mantidUI->drawColorFillPlots(allWsNames.toList());
 }
 
 void MantidDockWidget::treeSelectionChanged()
@@ -1188,40 +1203,20 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
   QTreeWidget::mouseDoubleClickEvent(e);
 }
 
-/** Returns a list of all selected workspaces
-*  (including members of groups if appropriate)
-*/
+/**
+ * Returns a list of all selected workspaces.  It does NOT
+ * extract child workspaces from groups - it only returns
+ * exactly what has been selected.
+ */
 QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 {
   QStringList names;
-  const QList<QTreeWidgetItem*> items = this->selectedItems();
-  QList<QTreeWidgetItem*>::const_iterator it;
-  // Need to look for workspace groups and add all children if found
-  for (it = items.constBegin(); it != items.constEnd(); ++it)
+  
+  foreach( const auto selectedItem, this->selectedItems() )
   {
-    /// This relies on the item descriptions being up-to-date
-    /// so ensure that they are or if something was
-    /// replaced then it might not be correct.
-    m_dockWidget->populateChildData(*it);
-
-    // Look for children (workspace groups)
-    QTreeWidgetItem *child = (*it)->child(0);
-    if ( child && child->text(0) == "WorkspaceGroup" )
-    {
-      // Have to populate the group's children if it hasn't been expanded
-      if (!(*it)->isExpanded()) m_dockWidget->populateChildData(*it);
-      const int count = (*it)->childCount();
-      for ( int i=1; i < count; ++i )
-      {
-        names.append((*it)->child(i)->text(0));
-      }
-    }
-    else
-    {
-      // Add entries that aren't groups
-      if (*it) names.append((*it)->text(0));
-    }
-  }//end of for loop for selected items
+    if( selectedItem )
+      names.append(selectedItem->text(0));
+  }
 
   return names;
 }
