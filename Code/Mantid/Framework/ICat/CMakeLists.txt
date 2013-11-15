@@ -47,6 +47,7 @@ set ( INC_FILES
 	inc/MantidICat/ICat4/GSoapGenerated/ICat4H.h
 	inc/MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h
 	inc/MantidICat/ICat4/GSoapGenerated/ICat4Stub.h
+	inc/MantidICat/ICat4/ICat4Catalog.h
 )
 
 set ( TEST_FILES
