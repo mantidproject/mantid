@@ -651,8 +651,8 @@ namespace MantidQt
         widget->clear();
       }
       // Clear all other elements.
-      m_icatUiForm.Instrument->clear();
-      m_icatUiForm.InvestigationType->clear();
+      m_icatUiForm.Instrument->setCurrentIndex(0);
+      m_icatUiForm.InvestigationType->setCurrentIndex(0);
       m_icatUiForm.advSearchCbox->setChecked(false);
       m_icatUiForm.myDataCbox->setChecked(false);
     }
