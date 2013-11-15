@@ -175,25 +175,22 @@ namespace Mantid
         whereClause.push_back("sample.name LIKE '%" + inputs.getSampleName() + "%'");
       }
 
-      // If the user has input an investigator's name or selected my data then we want to JOIN
-      // the specific tables. We check OR as this prevents using a bool.
-      if(!inputs.getInvestigatorSurName().empty() || inputs.getMyData())
+      // If the user has selected the "My data only" button.
+      // (E.g. they want to display or search through all the data they have access to.
+      if (inputs.getMyData())
       {
-        joinClause.push_back("JOIN inves.investigationUsers iusers");
-        joinClause.push_back("JOIN iusers.user usr");
+        joinClause.push_back("JOIN inves.investigationUsers users");
+        joinClause.push_back("JOIN users.user user");
+        whereClause.push_back("user.name = :user");
+      }
 
-        // If the user has selected the "My data only" button.
-        // (E.g. they want to display or search through all the data they have access to.
-        if (inputs.getMyData())
-        {
-          whereClause.push_back("usr.name = :user");
-        }
-
-        // We then check what specific item was input (or both) and create the related WHERE clause.
-        if (!inputs.getInvestigatorSurName().empty())
-        {
-          whereClause.push_back("usr.fullName LIKE '%" + inputs.getInvestigatorSurName() + "%'");
-        }
+      // Investigators complete name.
+      if (!inputs.getInvestigatorSurName().empty())
+      {
+        // We join another investigationUsers & user tables as we need two aliases.
+        joinClause.push_back("JOIN inves.investigationUsers usrs");
+        joinClause.push_back("JOIN usrs.user usr");
+        whereClause.push_back("usr.fullName LIKE '%" + inputs.getInvestigatorSurName() + "%'");
       }
 
       // Similar to above. We check if either has been input,
