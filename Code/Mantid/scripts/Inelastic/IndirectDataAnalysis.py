@@ -729,35 +729,59 @@ def furyfitPlotSeq(inputWS, Plot):
 
 def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False): 
     StartTime('FuryFit')
+    
     workdir = config['defaultsave.directory']
-    input = inputWS+',i0'
     nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(1,nHist):
-        input += ';'+inputWS+',i'+str(i)
+   
+    #name stem for generated workspace
     outNm = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
-    option = ftype[:-2]
+    
+    fitType = ftype[:-2]
     if Verbose:
-        logger.notice('Option: '+option)  
-        logger.notice(func)  
+        logger.notice('Option: '+fitType)  
+        logger.notice(func)
+
+    #build input string for PlotPeakByLogValue
+    input = [inputWS +',i' + str(i) for i in range(0,nHist)]
+    input = ';'.join(input)
+    
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startx, EndX=endx, FitType='Sequential')
-    fitWS = furyfitParsToWS(outNm, inputWS, option)
+    
+    fitWS = furyfitParsToWS(outNm, inputWS, fitType)
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm+"_Parameters")
     CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
-    getFurySeqResult(inputWS, outNm, option, Verbose)
-    if Save:
-        fpath = os.path.join(workdir, fitWS+'.nxs')
-        SaveNexusProcessed(InputWorkspace=fitWS, Filename=fpath)
-        rpath = os.path.join(workdir, outNm+'_Result.nxs')
-        SaveNexusProcessed(InputWorkspace=outNm+'_Result', Filename=rpath)
-        if Verbose:
-            logger.notice('Fit output file : '+fpath)  
-            logger.notice('Result output file : '+rpath)
+
+    getFurySeqResult(inputWS, outNm, fitType, Verbose)
+    
+    #process generated workspaces
+    wsnames = [fitWS, outNm+'_Result']
+    params = [startx, endx, fitType]
+    for ws in wsnames:
+        furyAddSampleLogs(inputWS, ws, params)
+
+        if Save:
+            #save workspace to default directory
+            fpath = os.path.join(workdir, ws+'.nxs')
+            SaveNexusProcessed(InputWorkspace=ws, Filename=fpath)
+
+            if Verbose:
+                logger.notice(ws + ' output to file : '+fpath)
 
     if ( Plot != 'None' ):
         furyfitPlotSeq(fitWS, Plot)
+
     EndTime('FuryFit')
+
     return mtd[fitWS]
+
+#Copy logs from sample and add some addtional ones
+def furyAddSampleLogs(inputWs, ws, params):
+    startx, endx, fitType = params
+    CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
+    AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
+    AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
+    AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
 
 def furyfitMultParsToWS(Table, Data):
 #   Q = createQaxis(Data)
