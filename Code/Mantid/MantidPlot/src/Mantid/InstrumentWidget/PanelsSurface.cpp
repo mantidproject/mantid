@@ -20,9 +20,9 @@ using namespace Mantid::Geometry;
 */
 FlatBankInfo::FlatBankInfo(PanelsSurface *s):
   id(0),
-  rotation(Mantid::Kernel::Quat()),
+  rotation(),
   startDetectorIndex(0),endDetectorIndex(0),
-  polygon(QPolygonF()),surface(s)
+  polygon(),surface(s)
 {
 }
 

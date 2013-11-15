@@ -66,12 +66,12 @@
 
 Matrix::Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
   : MdiSubWindow(parent, label, name, f), Scripted(env), 
-  d_matrix_model(NULL),m_bk_color(QColor()),d_stack(NULL),
-  d_table_view(NULL),imageLabel(NULL),formula_str(""),
-  txt_format(QChar()),num_precision(0),x_start(0.0),
+  d_matrix_model(NULL),m_bk_color(),d_stack(NULL),
+  d_table_view(NULL),imageLabel(NULL),formula_str(),
+  txt_format(),num_precision(0),x_start(0.0),
   x_end(0.0),y_start(0.0),y_end(0.0),
   d_view_type(ViewType::TableView),d_header_view_type(HeaderViewType::ColumnRow),
-  d_color_map(QwtLinearColorMap()),d_color_map_type(ColorMapType::Rainbow),
+  d_color_map(),d_color_map_type(ColorMapType::Rainbow),
   d_column_width(0),d_select_all_shortcut(NULL),
   d_undo_stack(NULL),d_workspace(NULL)
 {
@@ -81,12 +81,12 @@ Matrix::Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* paren
 
 Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
   : MdiSubWindow(parent, label, name, f), Scripted(env),
-  d_matrix_model(NULL),m_bk_color(QColor()),d_stack(NULL),
-  d_table_view(NULL),imageLabel(NULL),formula_str(""),
-  txt_format(QChar()),num_precision(0),x_start(0.0),
+  d_matrix_model(NULL),m_bk_color(),d_stack(NULL),
+  d_table_view(NULL),imageLabel(NULL),formula_str(),
+  txt_format(),num_precision(0),x_start(0.0),
   x_end(0.0),y_start(0.0),y_end(0.0),
   d_view_type(ViewType::TableView),d_header_view_type(HeaderViewType::ColumnRow),
-  d_color_map(QwtLinearColorMap()),d_color_map_type(ColorMapType::Rainbow),
+  d_color_map(),d_color_map_type(ColorMapType::Rainbow),
   d_column_width(0),d_select_all_shortcut(NULL),
   d_undo_stack(NULL),d_workspace(NULL)
 {
@@ -97,12 +97,12 @@ Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, Applicatio
 
 Matrix::Matrix(ScriptingEnv *env, const QImage& image, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
   : MdiSubWindow(parent, label, name, f), Scripted(env),
-  d_matrix_model(NULL),m_bk_color(QColor()),d_stack(NULL),
-  d_table_view(NULL),imageLabel(NULL),formula_str(""),
+  d_matrix_model(NULL),m_bk_color(),d_stack(NULL),
+  d_table_view(NULL),imageLabel(NULL),formula_str(),
   txt_format(QChar()),num_precision(0),x_start(0.0),
   x_end(0.0),y_start(0.0),y_end(0.0),
   d_view_type(ViewType::TableView),d_header_view_type(HeaderViewType::ColumnRow),
-  d_color_map(QwtLinearColorMap()),d_color_map_type(ColorMapType::Rainbow),
+  d_color_map(),d_color_map_type(ColorMapType::Rainbow),
   d_column_width(0),d_select_all_shortcut(NULL),
   d_undo_stack(NULL),d_workspace(NULL)
 {
