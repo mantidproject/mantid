@@ -40,7 +40,8 @@ namespace Mantid
       std::string username = getProperty("Username");
       std::string password = getProperty("Password");
 
-      g_log.notice() << "Verifying user credentials..." << std::endl;
+      g_log.notice() << "Attempting to verify user credentials against " <<
+          Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo().catalogName() << std::endl;
       progress(0.5, "Verifying user credentials...");
 
       catalog->login(username,password,"");
