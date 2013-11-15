@@ -68,7 +68,8 @@ class StretchedExpFT(IFunction1D):
             if value <=0:
                 message = 'Parameter {} in StretchedExpFT must be positive. Got {} instead'.format(name, str(value))
                 logger.error(message)
-                raise ValueError(message)
+                #raise ValueError(message)
+                return None
         return {'height':height, 'tau':tau, 'beta':beta}
        
     def function1D(self, xvals, **optparms):
@@ -100,6 +101,8 @@ class StretchedExpFT(IFunction1D):
         import scipy.interpolate
 
         p=self.validateParams()
+        if not p:
+            return np.zeros(len(xvals), dtype=float) # return zeros if parameters not valid
         # override parameter values with optparms (used for the numerical derivative)
         if optparms:
             if self._parmset.issubset( set(optparms.keys()) ):
