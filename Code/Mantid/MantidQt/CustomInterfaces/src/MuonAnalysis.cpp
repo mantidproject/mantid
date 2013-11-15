@@ -3811,19 +3811,14 @@ void MuonAnalysis::updateCurrentPlotStyle()
 {
   if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE)
   {
-    if(plotExists(m_currentDataName))
-    {
-      // Get selected group index
-      int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+    // Get selected group index
+    int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
-      // Check if pair is selected
-      if(index >= numGroups())
-        index = 0;
+    // Check if pair is selected
+    if(index >= numGroups())
+      index = 0;
 
-      plotSpectrum(m_currentDataName, index, getPlotStyleParams(m_currentDataName, index));
-    }
-    else
-      runFrontPlotButton();
+    plotSpectrum(m_currentDataName, index, getPlotStyleParams(m_currentDataName, index));
   }
 }
 
