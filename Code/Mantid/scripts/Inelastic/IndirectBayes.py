@@ -40,7 +40,7 @@ def CalcErange(inWS,ns,erange,binWidth):
 
 	#get indicies either side of energy range
 	minIndex = np.where(Xdata==xInMin)[0][0]+1
-	maxIndex = np.where(Xdata==xInMax)[0][0]
+	maxIndex = np.where(Xdata==xInMax)[0][0]+1
 
 	#check we're using a valid range
 	if binWidth == 0:
@@ -62,7 +62,7 @@ def CalcErange(inWS,ns,erange,binWidth):
 	Xout = [sum(bin)*bnorm for bin in Xin]
 
 	#count number of bins
-	nbins = len(Xout)-1
+	nbins = len(Xout)
 	
 	nout = [nbins, minIndex, maxIndex]
 
