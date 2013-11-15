@@ -34,9 +34,9 @@ namespace CurveFitting
     const int PEAKRADIUS = 8;
     const double PEAKRANGECONSTANT = 5.0;
 
-    const string Chebyshev("Chebyshev");
-    const string Polynomial("Polynomial");
-    const string FullprofPolynomial("FullprofPolynomial");
+    const string CHEBYSHEV_BACKGROUND("Chebyshev");
+    const string POLYNOMIAL_BACKGROUND("Polynomial");
+    const string FULLPROF_POLYNOMIAL_BACKGROUND("FullprofPolynomial");
   }
 
   // Get a reference to the logger
@@ -910,8 +910,8 @@ namespace CurveFitting
                                              const std::vector<double>& vecparvalues, double startx, double endx)
   {
     // Check
-    if (backgroundtype != Polynomial && backgroundtype != Chebyshev
-        && backgroundtype != FullprofPolynomial)
+    if (backgroundtype != POLYNOMIAL_BACKGROUND && backgroundtype != CHEBYSHEV_BACKGROUND
+        && backgroundtype != FULLPROF_POLYNOMIAL_BACKGROUND)
     {
       stringstream warnss;
       warnss << "Cliet specified background type " << backgroundtype << " may not be supported properly.";
@@ -938,13 +938,13 @@ namespace CurveFitting
       const string& parname = vecparnames[i];
       if (parname != "Bkpos")
         m_background->setParameter(parname, vecparvalues[i]);
-      else if (backgroundtype == FullprofPolynomial)
+      else if (backgroundtype == FULLPROF_POLYNOMIAL_BACKGROUND)
         m_background->setAttributeValue("Bkpos", vecparvalues[i]);
       else
         throw runtime_error("Bkpos should not be in the parameter list. ");
     }
 
-    if (backgroundtype == Chebyshev)
+    if (backgroundtype == CHEBYSHEV_BACKGROUND)
     {
       if (startx > 0.)
         m_background->setAttributeValue("StartX", startx);
