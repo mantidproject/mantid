@@ -2,7 +2,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidQtMantidWidgets/ICatSearch2.h"
+#include "MantidQtMantidWidgets/CatalogSearch.h"
 #include <Poco/Path.h>
 
 #include <QDesktopServices>
@@ -17,7 +17,7 @@ namespace MantidQt
     /**
      * Constructor
      */
-    ICatSearch2::ICatSearch2(QWidget* parent) : QWidget(parent)
+    CatalogSearch::CatalogSearch(QWidget* parent) : QWidget(parent)
     {
       if (!m_icatHelper->validSession())
       {
@@ -32,12 +32,12 @@ namespace MantidQt
     /**
      * Destructor
      */
-    ICatSearch2::~ICatSearch2(){}
+    CatalogSearch::~CatalogSearch(){}
 
     /**
      * Initialise the  default layout.
      */
-    void ICatSearch2::initLayout()
+    void CatalogSearch::initLayout()
     {
       // Draw the GUI from .ui header generated file.
       m_icatUiForm.setupUi(this);
@@ -65,6 +65,11 @@ namespace MantidQt
       m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
       m_icatUiForm.dataFileLoadBtn->setEnabled(false);
 
+      // We create the calendar here to allow only one instance of it to occur.
+      m_calendar = new QCalendarWidget(qobject_cast<QWidget*>(this->parent()));
+
+      // When the user has selected a date from the calendar we want to set the related date input field.
+      connect(m_calendar,SIGNAL(clicked(QDate)),this,SLOT(dateSelected(QDate)));
       // Show related help page when a user clicks on the "Help" button.
       connect(m_icatUiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
       // Show "Search" frame when user clicks "Catalog search" check box.
@@ -124,7 +129,7 @@ namespace MantidQt
     /**
      * Opens the login dialog to allow the user to log into another facility.
      */
-    void ICatSearch2::onFacilityLogin()
+    void CatalogSearch::onFacilityLogin()
     {
 
     }
@@ -132,7 +137,7 @@ namespace MantidQt
     /**
      * Sends the user to relevant search page on the Mantid project site.
      */
-    void ICatSearch2::helpClicked()
+    void CatalogSearch::helpClicked()
     {
       QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Catalog_Search"));
     }
@@ -140,7 +145,7 @@ namespace MantidQt
     /**
      * Shows/hides the "Catalog search" frame when search combo box is checked.
      */
-    void ICatSearch2::showCatalogSearch()
+    void CatalogSearch::showCatalogSearch()
     {
       if (m_icatUiForm.searchCbox->isChecked())
       {
@@ -155,7 +160,7 @@ namespace MantidQt
     /**
      * Shows/Hides the "Search results" frame when search results combo box is checked.
      */
-    void ICatSearch2::showSearchResults()
+    void CatalogSearch::showSearchResults()
     {
       if (m_icatUiForm.searchResultsCbox->isChecked())
       {
@@ -170,7 +175,7 @@ namespace MantidQt
     /**
      * Hides "Search results" frame when a result is double clicked.
      */
-    void ICatSearch2::showDataFileInfo()
+    void CatalogSearch::showDataFileInfo()
     {
       if (m_icatUiForm.dataFileCbox->isChecked())
       {
@@ -185,7 +190,7 @@ namespace MantidQt
     /**
      * Embolden the headers in the provided table.
      */
-    void ICatSearch2::emboldenTableHeaders(QTableWidget* table)
+    void CatalogSearch::emboldenTableHeaders(QTableWidget* table)
     {
       QFont font;
       font.setBold(true);
@@ -201,7 +206,7 @@ namespace MantidQt
      * @param numOfRows    :: The number of rows in the workspace.
      * @param numOfColumns :: The number of columns in the workspace.
      */
-    void ICatSearch2::setupTable(QTableWidget* table, const size_t &numOfRows, const size_t &numOfColumns)
+    void CatalogSearch::setupTable(QTableWidget* table, const size_t &numOfRows, const size_t &numOfColumns)
     {
       table->setRowCount(static_cast<int>(numOfRows));
       table->setColumnCount(static_cast<int>(numOfColumns));
@@ -224,7 +229,7 @@ namespace MantidQt
      * @param table :: The table we want to setup.
      * @param workspace :: The workspace to obtain data information from.
      */
-    void ICatSearch2::populateTable(QTableWidget* table, const Mantid::API::ITableWorkspace_sptr &workspace)
+    void CatalogSearch::populateTable(QTableWidget* table, const Mantid::API::ITableWorkspace_sptr &workspace)
     {
       //NOTE: This method freezes up the ICAT search GUI. We will need to do this adding in another thread.
 
@@ -264,7 +269,7 @@ namespace MantidQt
      * @param table     :: The table to modify and remove previous results from.
      * @param workspace :: The workspace to remove.
      */
-    void ICatSearch2::clearSearch(QTableWidget* table, const std::string &workspace)
+    void CatalogSearch::clearSearch(QTableWidget* table, const std::string &workspace)
     {
       // Remove workspace if it exists.
       if(Mantid::API::AnalysisDataService::Instance().doesExist(workspace))
@@ -280,7 +285,7 @@ namespace MantidQt
     /**
      * Clear the "search" frame when an investigation has been selected.
      */
-    void ICatSearch2::clearSearchFrame()
+    void CatalogSearch::clearSearchFrame()
     {
       m_icatUiForm.searchCbox->setChecked(false);
       m_icatUiForm.searchFrame->hide();
@@ -289,7 +294,7 @@ namespace MantidQt
     /**
      * Clear the "search results" frame if no results are returned from search.
      */
-    void ICatSearch2::clearSearchResultFrame()
+    void CatalogSearch::clearSearchResultFrame()
     {
       m_icatUiForm.searchResultsLbl->setText("0 investigations found.");
       m_icatUiForm.searchResultsCbox->setEnabled(false);
@@ -301,7 +306,7 @@ namespace MantidQt
     /**
      * Clear "dataFileFrame" when the user tries to search again.
      */
-    void ICatSearch2::clearDataFileFrame()
+    void CatalogSearch::clearDataFileFrame()
     {
       m_icatUiForm.dataFileCbox->setEnabled(false);
       m_icatUiForm.dataFileCbox->setChecked(false);
@@ -315,7 +320,7 @@ namespace MantidQt
      * @param searchFor :: The header name to search against.
      * @return The index of the column with the specified name.
      */
-    int ICatSearch2::headerIndexByName(QTableWidget* table, const std::string &searchFor)
+    int CatalogSearch::headerIndexByName(QTableWidget* table, const std::string &searchFor)
     {
       QAbstractItemModel *model = table->model();
 
@@ -336,7 +341,7 @@ namespace MantidQt
     /**
      * Save the current state of ICAT for next time
      */
-    void ICatSearch2::saveSettings()
+    void CatalogSearch::saveSettings()
     {
       QSettings settings;
       settings.beginGroup("/ICatSettings");
@@ -347,7 +352,7 @@ namespace MantidQt
     /**
      * Read the saved settings from the store.
      */
-    void ICatSearch2::loadSettings()
+    void CatalogSearch::loadSettings()
     {
       QSettings settings;
       settings.beginGroup("/ICatSettings");
@@ -369,29 +374,10 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Updates text field depending on button picker selected.
-     * @param buttonName :: The name of the text field is derived from the buttonName.
-     */
-    void ICatSearch2::dateSelected(const std::string &buttonName)
-    {
-      if (buttonName.compare("startDatePicker") == 0)
-      {
-        // Since the user wants to select a startDate we disable the endDate button to prevent any issues.
-        m_icatUiForm.endDatePicker->setEnabled(false);
-        // Update the text field and re-enable the button.
-        connect(m_calendar, SIGNAL(selectionChanged()),this, SLOT(updateStartDate()));
-      }
-      else
-      {
-        m_icatUiForm.startDatePicker->setEnabled(false);
-        connect(m_calendar, SIGNAL(selectionChanged()),this, SLOT(updateEndDate()));
-      }
-    }
-
-    /**
+    void CatalogSearch::dateSelected(const std::string &buttonName)
      * Populates the "Instrument" list-box
      */
-    void ICatSearch2::populateInstrumentBox()
+    void CatalogSearch::populateInstrumentBox()
     {
       // Obtain the list of instruments to display in the drop-box.
       std::vector<std::string> instrumentList = m_icatHelper->getInstrumentList();
@@ -417,7 +403,7 @@ namespace MantidQt
     /**
      * Populates the "Investigation type" list-box.
      */
-    void ICatSearch2::populateInvestigationTypeBox()
+    void CatalogSearch::populateInvestigationTypeBox()
     {
       // Obtain the list of investigation types to display in the list-box.
       std::vector<std::string> invesTypeList = m_icatHelper->getInvestigationTypeList();
@@ -440,7 +426,7 @@ namespace MantidQt
      * Get the users' input for each search field.
      * @return A map containing all users' search fields - (key => FieldName, value => FieldValue).
      */
-    const std::map<std::string, std::string> ICatSearch2::getSearchFields()
+    const std::map<std::string, std::string> CatalogSearch::getSearchFields()
     {
       std::map<std::string, std::string> searchFieldInput;
 
@@ -452,7 +438,7 @@ namespace MantidQt
         searchFieldInput.insert(std::pair<std::string, std::string>("RunRange", m_icatUiForm.RunRange->text().toStdString()));
       }
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigatorSurname", m_icatUiForm.InvestigatorSurname->text().toStdString()));
-      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationAbstract", m_icatUiForm.InvestigationAbstract->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("DataFileName", m_icatUiForm.DataFileName->text().toStdString()));
 
       // Right side of form.
       if (m_icatUiForm.StartDate->text().size() > 2)
@@ -481,12 +467,8 @@ namespace MantidQt
     /**
      * Opens the DateTime m_calendar box when start or end date selected.
      */
-    void ICatSearch2::openCalendar()
+    void CatalogSearch::openCalendar()
     {
-      // Pop the m_calendar out into it's own window.
-      QWidget* parent = qobject_cast<QWidget*>(this->parent());
-      m_calendar = new QCalendarWidget(parent);
-
       // Set min/max dates to prevent user selecting unusual dates.
       m_calendar->setMinimumDate(QDate(1950, 1, 1));
       m_calendar->setMaximumDate(QDate(2050, 1, 1));
@@ -499,44 +481,66 @@ namespace MantidQt
       m_calendar->setWindowTitle("Calendar picker");
       m_calendar->show();
 
-      // Uses the previously clicked button (startDatePicker or endDatePicker) to determine which
-      // text field that the opened m_calendar is coordinating with (e.g. the one we want to write date to).
-      dateSelected(sender()->name());
+      // Set the name of the date button the user pressed to open the calendar with.
+      m_dateButtonName = sender()->name();
     }
 
     /**
-     * Update startDate text field when startDatePicker is used and date is selected.
+     * Update text field when date is selected.
+     * @param date :: The date the user has selected.
      */
-    void ICatSearch2::updateStartDate()
+    void CatalogSearch::dateSelected(QDate date)
     {
-      // Update the text field with the user selected date then close the m_calendar.
-      m_icatUiForm.StartDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
+      // As openCalendar slot is used for both start and end date we need to perform a check
+      // to see which button was pressed, and then updated the related input field.
+      if (m_dateButtonName.compare("startDatePicker") == 0)
+      {
+        m_icatUiForm.StartDate->setText(date.toString("dd/MM/yyyy"));
+      }
+      else
+      {
+        m_icatUiForm.EndDate->setText(date.toString("dd/MM/yyyy"));
+      }
       m_calendar->close();
-      // Re-enable the button to allow the user to select an endDate if they wish.
-      m_icatUiForm.endDatePicker->setEnabled(true);
     }
 
     /**
-     * Update endDate text field when endDatePicker is used and date is selected.
+     * Checks if start date is greater than end date.
+     * @returns true if start date is greater than end date.
      */
-    void ICatSearch2::updateEndDate()
+    bool CatalogSearch::validateDates()
     {
-      m_icatUiForm.EndDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
-      m_calendar->close();
-      m_icatUiForm.startDatePicker->setEnabled(true);
+      std::string startDateInput = m_icatUiForm.StartDate->text().toStdString();
+      std::string endDateInput   = m_icatUiForm.EndDate->text().toStdString();
+
+      // Return false if the user has not input any dates. This prevents any null errors occurring.
+      if (startDateInput.size() <= 2 || endDateInput.size() <= 2) return false;
+
+      // If startDate > endDate we want to throw an error and inform the user (red star(*)).
+      if (m_icatHelper->getTimevalue(startDateInput) > m_icatHelper->getTimevalue(endDateInput))
+      {
+        m_icatUiForm.StartDate_err->setToolTip(QString::fromStdString("<span style=\"color: white;\">Start date cannot be greater than end date.</span>"));
+        m_icatUiForm.StartDate_err->show();
+        return true;
+      }
+      else
+      {
+        m_icatUiForm.StartDate_err->hide();
+        return false;
+      }
     }
 
     /**
      * Show or hide advanced options if "Advanced Search" checked.
      */
-    void ICatSearch2::advancedSearchChecked()
+    void CatalogSearch::advancedSearchChecked()
     {
       if (m_icatUiForm.advSearchCbox->isChecked())
       {
         m_icatUiForm.advNameLbl->show();
         m_icatUiForm.InvestigatorSurname->show();
-        m_icatUiForm.advAbstractLbl->show();
-        m_icatUiForm.InvestigationAbstract->show();
+        m_icatUiForm.advDatafileLbl->show();
+        m_icatUiForm.DataFileName->show();
         m_icatUiForm.advSampleLbl->show();
         m_icatUiForm.SampleName->show();
         m_icatUiForm.advTypeLbl->show();
@@ -546,8 +550,8 @@ namespace MantidQt
       {
         m_icatUiForm.advNameLbl->hide();
         m_icatUiForm.InvestigatorSurname->hide();
-        m_icatUiForm.advAbstractLbl->hide();
-        m_icatUiForm.InvestigationAbstract->hide();
+        m_icatUiForm.advDatafileLbl->hide();
+        m_icatUiForm.DataFileName->hide();
         m_icatUiForm.advSampleLbl->hide();
         m_icatUiForm.SampleName->hide();
         m_icatUiForm.advTypeLbl->hide();
@@ -558,7 +562,7 @@ namespace MantidQt
     /**
      * Hides the search frame, and shows search results frame when "Search" button pressed.
      */
-    void ICatSearch2::searchClicked()
+    void CatalogSearch::searchClicked()
     {
       if (m_icatUiForm.searchBtn)
       {
@@ -569,8 +573,10 @@ namespace MantidQt
         std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
 
         // Has any errors occurred?
-        if (!errors.empty())
+        if (!errors.empty() || validateDates())
         {
+          // Clear form to prevent previous search results showing if an error occurs.
+          clearSearchResultFrame();
           showErrorLabels(errors);
           m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
           // Stop here to prevent the search being carried out below.
@@ -604,7 +610,7 @@ namespace MantidQt
      * Show the error message labels, including the error message on the tooltips.
      * @param errors :: A map containing the error label names, and the related error message.
      */
-    void ICatSearch2::showErrorLabels(std::map<std::string, std::string> &errors)
+    void CatalogSearch::showErrorLabels(std::map<std::string, std::string> &errors)
     {
       for(auto iter = errors.begin(); iter != errors.end(); ++iter)
       {
@@ -622,7 +628,7 @@ namespace MantidQt
     /**
      * Hides the error message labels on the GUI.
      */
-    void ICatSearch2::hideErrorLabels()
+    void CatalogSearch::hideErrorLabels()
     {
       // Left side of form.
       m_icatUiForm.InvestigationName_err->setVisible(false);
@@ -643,7 +649,7 @@ namespace MantidQt
     /**
      * Reset all fields when the "Reset" button is pressed.
      */
-    void ICatSearch2::onReset()
+    void CatalogSearch::onReset()
     {
       // Clear the QLineEdit boxes.
       foreach(QLineEdit *widget, this->findChildren<QLineEdit*>())
@@ -664,7 +670,7 @@ namespace MantidQt
     /**
      * Outputs the results of the search into the "Search results" table.
      */
-    void ICatSearch2::populateResultTable()
+    void CatalogSearch::populateResultTable()
     {
       // Obtain a pointer to the "searchResults" workspace where the search results are saved if it exists.
       Mantid::API::ITableWorkspace_sptr workspace;
@@ -719,7 +725,7 @@ namespace MantidQt
     /**
      * Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
      */
-    void ICatSearch2::resultInfoUpdate()
+    void CatalogSearch::resultInfoUpdate()
     {
 
     }
@@ -727,7 +733,7 @@ namespace MantidQt
     /**
      * Updates the page numbers (e.g. m & n in: Page m of n )
      */
-    void ICatSearch2::pageNumberUpdate()
+    void CatalogSearch::pageNumberUpdate()
     {
 
     }
@@ -739,7 +745,7 @@ namespace MantidQt
     /**
      * Populate the result table, and update the page number.
      */
-    void ICatSearch2::nextPageClicked()
+    void CatalogSearch::nextPageClicked()
     {
 
     }
@@ -747,7 +753,7 @@ namespace MantidQt
     /**
      * Populate the result table, and update the page number.
      */
-    void ICatSearch2::prevPageClicked()
+    void CatalogSearch::prevPageClicked()
     {
 
     }
@@ -755,7 +761,7 @@ namespace MantidQt
     /**
      * Populate's result table depending page number input by user.
      */
-    void ICatSearch2::goToInputPage()
+    void CatalogSearch::goToInputPage()
     {
 
     }
@@ -763,7 +769,7 @@ namespace MantidQt
     /**
      * Hides the "search results" frame, and shows the "dataFiles" frame when an investigation is selected.
      */
-    void ICatSearch2::investigationSelected(QTableWidgetItem* item)
+    void CatalogSearch::investigationSelected(QTableWidgetItem* item)
     {
       clearSearchFrame();
       //
@@ -801,7 +807,7 @@ namespace MantidQt
     /**
      * Outputs related dataFiles (from selected investigation) into the "DataFile information" table.
      */
-    void ICatSearch2::populateDataFileTable()
+    void CatalogSearch::populateDataFileTable()
     {
       // Obtain a pointer to the "dataFileResults" workspace where the related datafiles for the user selected invesitgation exist.
       Mantid::API::ITableWorkspace_sptr workspace;
@@ -869,7 +875,7 @@ namespace MantidQt
      * Add a row of checkboxes to the first column of a table.
      * @param table :: The table to add the checkboxes to.
      */
-    void ICatSearch2::addCheckBoxColumn(QTableWidget* table)
+    void CatalogSearch::addCheckBoxColumn(QTableWidget* table)
     {
       // Add a new column checkbox column.
       table->insertColumn(0);
@@ -893,10 +899,9 @@ namespace MantidQt
 
     /**
      * Obtains the names of the selected dataFiles, in preparation for download.
-     *
      * @return A vector containing the fileID and fileName of the datafile(s) to download.
      */
-    const std::vector<std::pair<int64_t, std::string>> ICatSearch2::selectedDataFileNames()
+    const std::vector<std::pair<int64_t, std::string>> CatalogSearch::selectedDataFileNames()
     {
       QTableWidget* table =  m_icatUiForm.dataFileResultsTbl;
 
@@ -920,7 +925,7 @@ namespace MantidQt
     /**
      * Updates the dataFile text boxes with relevant info regarding the selected dataFile.
      */
-    void ICatSearch2::updateDataFileLabels(QTableWidgetItem* item)
+    void CatalogSearch::updateDataFileLabels(QTableWidgetItem* item)
     {
       // Set the "title" label using the data from the investigation results workspace.
       m_icatUiForm.dataFileTitleRes->setText(m_icatUiForm.searchResultsTbl->item(item->row(),1)->text());
@@ -937,7 +942,7 @@ namespace MantidQt
      * @param column :: The fileName column in the dataFile workspace.
      * @return A set containing all file extensions.
      */
-    std::set<std::string> ICatSearch2::getDataFileExtensions(Mantid::API::Column_sptr column)
+    std::set<std::string> CatalogSearch::getDataFileExtensions(Mantid::API::Column_sptr column)
     {
       std::set<std::string> extensions;
 
@@ -955,7 +960,7 @@ namespace MantidQt
     /**
      * Add the list of file extensions to the "Filter type..." drop-down.
      */
-    void ICatSearch2::populateDataFileType(const std::set<std::string> &extensions)
+    void CatalogSearch::populateDataFileType(const std::set<std::string> &extensions)
     {
       for( std::set<std::string>::const_iterator iter = extensions.begin(); iter != extensions.end(); ++iter)
       {
@@ -971,7 +976,7 @@ namespace MantidQt
      * If the user has checked "check all", then check and select ALL rows. Otherwise, deselect all.
      * @param toggled :: True if user has checked the checkbox in the dataFile table header.
      */
-    void ICatSearch2::selectAllDataFiles(const bool &toggled)
+    void CatalogSearch::selectAllDataFiles(const bool &toggled)
     {
       QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 
@@ -999,7 +1004,7 @@ namespace MantidQt
     /**
      * Enables the download & load button if user has selected a data file to download. Otherwise, disables them.
      */
-    void ICatSearch2::enableDownloadButtons()
+    void CatalogSearch::enableDownloadButtons()
     {
       QModelIndexList indexes = m_icatUiForm.dataFileResultsTbl->selectionModel()->selection().indexes();
 
@@ -1021,7 +1026,7 @@ namespace MantidQt
     /**
      * Performs filter option for specified filer type.
      */
-    void ICatSearch2::doFilter(const int &index)
+    void CatalogSearch::doFilter(const int &index)
     {
       QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 
@@ -1047,7 +1052,7 @@ namespace MantidQt
     /**
      * Downloads selected datFiles to a specified location.
      */
-    void ICatSearch2::downloadDataFiles()
+    void CatalogSearch::downloadDataFiles()
     {
       QString downloadSavePath = QFileDialog::getExistingDirectory(this, tr("Select a directory to save data files."), m_downloadSaveDir, QFileDialog::ShowDirsOnly);
 
@@ -1066,7 +1071,7 @@ namespace MantidQt
     /**
      * Loads the selected dataFiles into workspaces.
      */
-    void ICatSearch2::loadDataFiles()
+    void CatalogSearch::loadDataFiles()
     {
       // Get the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
       std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
@@ -1095,7 +1100,7 @@ namespace MantidQt
      * Select/Deselect row when related checkbox is selected.
      * @param item :: The item from the table the user has selected.
      */
-    void ICatSearch2::dataFileCheckboxSelected(QTableWidgetItem* item)
+    void CatalogSearch::dataFileCheckboxSelected(QTableWidgetItem* item)
     {
       QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 
@@ -1123,7 +1128,7 @@ namespace MantidQt
     /**
      * Select/Deselect row & check-box when a row is selected.
      */
-    void ICatSearch2::dataFileRowSelected()
+    void CatalogSearch::dataFileRowSelected()
     {
       QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 

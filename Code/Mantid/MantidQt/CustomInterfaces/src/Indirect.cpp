@@ -943,6 +943,9 @@ QString Indirect::validateSlice()
     uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
   }
 
+  auto specRange = std::make_pair(m_sltDblMng->value(m_sltProp["SpecMin"]), m_sltDblMng->value(m_sltProp["SpecMax"]));
+  uiv.checkValidRange("Spectra Range", specRange);
+
   return uiv.generateErrorMessage();
 }
 
@@ -1097,6 +1100,7 @@ void Indirect::setupSlice()
   m_sltProp["SpecMin"] = m_sltDblMng->addProperty("Spectra Min");
   m_sltProp["SpecMax"] = m_sltDblMng->addProperty("Spectra Max");
   m_sltDblMng->setDecimals(m_sltProp["SpecMin"], 0);
+  m_sltDblMng->setMinimum(m_sltProp["SpecMin"], 1);
   m_sltDblMng->setDecimals(m_sltProp["SpecMax"], 0);
 
   m_sltProp["R1S"] = m_sltDblMng->addProperty("Start");

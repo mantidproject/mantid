@@ -111,6 +111,7 @@ public:
     filter.setProperty("InputWorkspace", "Test02");
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
+    filter.setProperty("GenerateTOFCorrection", false);
 
     // 3. Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());

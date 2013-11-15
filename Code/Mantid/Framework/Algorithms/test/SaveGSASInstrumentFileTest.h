@@ -56,10 +56,10 @@ public:
     saver.execute();
     TS_ASSERT(saver.isExecuted());
 
-    // Check the output file's existence and size;
-    TS_ASSERT(Poco::File("test.iparm").exists());
+    // Check the output file's existence and size
+    std::string filename = saver.getProperty("OutputFilename"); // get full pathname
+    TS_ASSERT(Poco::File(filename).exists());
  
-    string filename("test.iparm");
     vector<size_t> veclineindextoread;
     veclineindextoread.push_back(5);
     veclineindextoread.push_back(20);
@@ -77,7 +77,7 @@ public:
 
     // Clean
     AnalysisDataService::Instance().remove("PG3ProfileTable");
-    Poco::File("test.iparm").remove();
+    Poco::File(filename).remove();
 
     return;
   }
@@ -89,7 +89,7 @@ public:
   {
     // Generate a 3-bank .irf file
     string irffilename("pg3_60hz_3b.irf");
-    string prmfilename("test3bank.iparm");
+    string prmfilename1("test3bank.iparm");
 
     generate3BankIrfFile(irffilename);
     TS_ASSERT(Poco::File(irffilename).exists());
@@ -100,7 +100,7 @@ public:
     TS_ASSERT(saver.isInitialized());
 
     saver.setProperty("InputFileName", irffilename);
-    saver.setProperty("OutputFilename", prmfilename);
+    saver.setProperty("OutputFilename", prmfilename1);
     saver.setPropertyValue("BankIDs", "1, 3-4");
     // saver.setProperty("Instrument", "PG3");
     saver.setPropertyValue("ChopperFrequency", "60");
@@ -114,6 +114,7 @@ public:
     TS_ASSERT(saver.isExecuted());
 
     // Check existence of file
+    std::string prmfilename = saver.getProperty("OutputFilename");
     TS_ASSERT(Poco::File(prmfilename).exists());
 
     string filename("test3bank.iparm");

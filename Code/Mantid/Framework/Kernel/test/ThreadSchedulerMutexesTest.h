@@ -30,7 +30,9 @@ public:
 
     /// Count # of times destructed in the destructor
     ~TaskWithMutex()
-    {ThreadSchedulerMutexesTest_timesDeleted++;}
+    {
+      ThreadSchedulerMutexesTest_timesDeleted++;
+    }
 
     void run()
     {
@@ -51,6 +53,11 @@ public:
     TS_ASSERT_EQUALS( sc.size(), 1);
     sc.push( task2 );
     TS_ASSERT_EQUALS( sc.size(), 2);
+
+//    delete task1;
+//    delete task2;
+    delete mut1;
+    delete mut2;
   }
 
   void test_queue()
@@ -116,6 +123,16 @@ public:
     TS_ASSERT_EQUALS( sc.size(), 0 );
     // (for this task, the thread pool would have to wait till the mutex is released)
 
+//    delete task1;
+//    delete task2;
+//    delete task3;
+//    delete task4;
+//    delete task5;
+//    delete task6;
+//    delete task7;
+    delete mut1;
+    delete mut2;
+    delete mut3;
   }
 
   void test_clear()
@@ -150,10 +167,12 @@ public:
     Timer tim1;
     for (size_t i=0; i < num; i++)
     {
-      sc.pop(0);
+      delete sc.pop(0);
     }
     //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), 0);
+
+    delete mut1;
   }
 
   void test_performance_lotsOfMutexes()
@@ -171,7 +190,7 @@ public:
     Timer tim1;
     for (size_t i=0; i < num; i++)
     {
-      sc.pop(0);
+      delete sc.pop(0);
     }
     //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), 0);

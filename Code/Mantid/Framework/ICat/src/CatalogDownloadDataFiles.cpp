@@ -5,17 +5,14 @@ if the data archive is not accessible, it downloads the files from the data serv
 
 *WIKI*/
 
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
+#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/CatalogFactory.h"
-#include "MantidAPI/ICatalog.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
 
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/SSLException.h>
@@ -26,16 +23,6 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include <Poco/URI.h>
 #include <fstream>
 #include <iomanip>
-
-using Poco::Net::HTTPSClientSession;
-using Poco::Net::Context;
-using Poco::Net::HTTPRequest;
-using Poco::Net::HTTPResponse;
-using Poco::Net::HTTPMessage;
-using Poco::StreamCopier;
-using Poco::Path;
-using Poco::URI;
-using Poco::Exception;
 
 namespace Mantid
 {
@@ -66,36 +53,11 @@ namespace Mantid
                       "A list of file locations to the catalog datafiles.");
     }
 
-    /// Raise an error concerning catalog searching
-    void CatalogDownloadDataFiles::throwCatalogError() const
-    {
-      const std::string facilityName = ConfigService::Instance().getFacility().name();
-      std::stringstream ss;
-      ss << "Your current Facility, " << facilityName << ", does not have ICAT catalog information. "
-          << std::endl;
-      ss << "The facilities.xml file may need updating. Contact the Mantid Team for help." << std::endl;
-      throw std::runtime_error(ss.str());
-    }
-
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
-      ICatalog_sptr catalog;
-
-      try
-      {
-        catalog = CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
-
-      }
-      catch(Kernel::Exception::NotFoundError&)
-      {
-        throwCatalogError();
-      }
-
-      if(!catalog)
-      {
-        throwCatalogError();
-      }
+      // Create and use the catalog the user has specified in Facilities.xml
+      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
 
       // Used in order to transform the archive path to the user's operating system.
       CatalogInfo catalogInfo = ConfigService::Instance().getFacility().catalogInfo();
@@ -193,7 +155,7 @@ namespace Mantid
       //use HTTP  Get method to download the data file from the server to local disk
       try
       {
-        URI uri(URL);
+        Poco::URI uri(URL);
 
         std::string path(uri.getPathAndQuery());
         if (path.empty())
@@ -203,13 +165,13 @@ namespace Mantid
         start=clock();
 
         // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
-        const Context::Ptr context = new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
-        HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
+        const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
+        Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
 
-        HTTPRequest request(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
         session.sendRequest(request);
 
-        HTTPResponse res;
+        Poco::Net::HTTPResponse res;
         std::istream& rs = session.receiveResponse(res);
 
         //save file to local disk
@@ -255,7 +217,7 @@ namespace Mantid
       }
 
       //copy the input stream to a file.
-      StreamCopier::copyStream(rs, ofs);
+      Poco::StreamCopier::copyStream(rs, ofs);
 
       return filepath;
     }

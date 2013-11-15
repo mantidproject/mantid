@@ -91,7 +91,7 @@ class RunTest(unittest.TestCase):
 
         runstart = run.startTime()
         runstartstr = str(runstart)
-        self.assertEquals(runstartstr, "2008-12-18T17:58:38")
+        self.assertEquals(runstartstr, "2008-12-18T17:58:38 ") # The space at the end is to get around an IPython bug (#8351)
         self.assertTrue(isinstance(runstart, DateAndTime))
 
     def test_endtime(self):
@@ -101,7 +101,7 @@ class RunTest(unittest.TestCase):
 
         runend = run.endTime()
         runendstr = str(runend)
-        self.assertEquals(runendstr, "2008-12-18T17:59:40")
+        self.assertEquals(runendstr, "2008-12-18T17:59:40 ") # The space at the end is to get around an IPython bug (#8351)
         self.assertTrue(isinstance(runend, DateAndTime))
 
 if __name__ == '__main__':

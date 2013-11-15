@@ -1,7 +1,9 @@
-#include "MantidQtMantidWidgets/ICatHelper.h"
+#include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidKernel/DateAndTime.h"
 
+#include <boost/algorithm/string/regex.hpp>
 #include <QCoreApplication>
 
 namespace MantidQt
@@ -13,7 +15,7 @@ namespace MantidQt
      * Obtain the list of instruments from the ICAT Catalog algorithm.
      * @return A vector containing the list of all instruments available.
      */
-    const std::vector<std::string> ICatHelper::getInstrumentList()
+    const std::vector<std::string> CatalogHelper::getInstrumentList()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
       executeAsynchronously(catalogAlgorithm);
@@ -25,7 +27,7 @@ namespace MantidQt
      * Obtain the list of investigation types from the ICAT Catalog algorithm.
      * @return A vector containing the list of all investigation types available.
      */
-    const std::vector<std::string> ICatHelper::getInvestigationTypeList()
+    const std::vector<std::string> CatalogHelper::getInvestigationTypeList()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
       executeAsynchronously(catalogAlgorithm);
@@ -37,7 +39,7 @@ namespace MantidQt
      * Search the archive with the user input terms provided and save them to a workspace ("searchResults").
      * @param userInputFields :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
      */
-    void ICatHelper::executeSearch(const std::map<std::string, std::string> &userInputFields)
+    void CatalogHelper::executeSearch(const std::map<std::string, std::string> &userInputFields)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
@@ -64,7 +66,7 @@ namespace MantidQt
      * Search the archives for all dataFiles related to an "investigation id" then save results to workspace ("dataFileResults").
      * @param investigationId :: The investigation id to use for the search.
      */
-    void ICatHelper::executeGetDataFiles(const int64_t &investigationId)
+    void CatalogHelper::executeGetDataFiles(const int64_t &investigationId)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
 
@@ -83,7 +85,7 @@ namespace MantidQt
      * @param downloadPath      :: The location to save the datafile(s).
      * @return A vector containing the paths to the file(s) the user wants.
      */
-    const std::vector<std::string> ICatHelper::downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,const std::string &downloadPath)
+    const std::vector<std::string> CatalogHelper::downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,const std::string &downloadPath)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogDownloadDataFiles");
 
@@ -117,7 +119,7 @@ namespace MantidQt
      * @param inputFields :: The name of the input field and value of the field (key => "StartDate", value => "00/00/0000").
      * @return The name of the input field(s) marker to update and related error to throw.
      */
-    const std::map<std::string, std::string> ICatHelper::validateProperties(const std::map<std::string, std::string> &inputFields)
+    const std::map<std::string, std::string> CatalogHelper::validateProperties(const std::map<std::string, std::string> &inputFields)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
@@ -149,7 +151,7 @@ namespace MantidQt
      * Using the list instruments algorithm verify if the session is valid.
      * @return True if session is valid, otherwise false.
      */
-    bool ICatHelper::validSession()
+    bool CatalogHelper::validSession()
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
 
@@ -166,7 +168,7 @@ namespace MantidQt
      * Open the login dialog if user not logged in.
      * @param window :: The window to open the dialog box in.
      */
-    void ICatHelper::openLoginDialog(QWidget* window)
+    void CatalogHelper::openLoginDialog(QWidget* window)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogLogin");
 
@@ -180,12 +182,31 @@ namespace MantidQt
     }
 
     /**
+    * Creates a time_t value from an input date ("23/06/2003") for comparison.
+    * @param inputDate :: string containing the date.
+    * @return time_t value of date
+    */
+    time_t CatalogHelper::getTimevalue(const std::string& inputDate)
+    {
+      // Prevent any possible errors.
+      if(inputDate.empty()) return 0;
+      // A container to hold the segments of the date.
+      std::vector<std::string> dateSegments;
+      // Split input by "/" prior to rearranging the date
+      boost::algorithm::split_regex(dateSegments, inputDate, boost::regex("/"));
+      // Reorganise the date to be ISO format.
+      std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" + dateSegments.at(0) + " 0:00:00.000";
+      // Return the date as time_t value.
+      return Mantid::Kernel::DateAndTime(isoDate).to_time_t();
+    }
+
+    /**
      * Obtain the algorithm documentation for the given property.
      * @param properties :: A list of properties for a provided algorithm.
      * @param name       :: The name of the property to search for.
      * @return The documentation for a given property name.
      */
-    const std::string ICatHelper::propertyDocumentation(const std::vector<Mantid::Kernel::Property*> &properties, const std::string &name)
+    const std::string CatalogHelper::propertyDocumentation(const std::vector<Mantid::Kernel::Property*> &properties, const std::string &name)
     {
       for (unsigned i = 0; i < properties.size(); i++)
       {
@@ -202,7 +223,7 @@ namespace MantidQt
      * @param algName :: The name of the algorithm to create.
      * @return A shared pointer to the algorithm created.
      */
-    Mantid::API::IAlgorithm_sptr ICatHelper::createCatalogAlgorithm(const std::string &algName)
+    Mantid::API::IAlgorithm_sptr CatalogHelper::createCatalogAlgorithm(const std::string &algName)
     {
       // If there is an exception we want it to be thrown.
       return Mantid::API::AlgorithmManager::Instance().create(algName);
@@ -212,7 +233,7 @@ namespace MantidQt
      * Execute the given algorithm asynchronously.
      * @param algorithm :: The algorithm to execute.
      */
-    void ICatHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
+    void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
     {
       Poco::ActiveResult<bool> result(algorithm->executeAsync());
       while(!result.available())

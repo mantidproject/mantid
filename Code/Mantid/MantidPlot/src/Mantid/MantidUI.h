@@ -181,32 +181,31 @@ public:
   // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
   MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true, bool distr = false);
 
-  /// This method executes loadraw algorithm from  ICatInterface
-  void loadrawfromICatInterface(const QString& fileName,const QString& wsName);
-  
-  /// This method executes loadnexus algorithm from ICatInterface
-  void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
-
-  /// This method executes load algorithm from ICatInterface
-  void loadfromICatInterface(const QString& fileName,const QString& wsName);
-  
-  /// This method is to execute download data files algorithm from ICat
-  void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds);
-
   AlgorithmMonitor* getAlgMonitor(){return m_algMonitor;}
   /// updates the algorithms tree
   void updateAlgorithms();
   /// Show the algorithm dock widget
   void showAlgWidget(bool on = true);
+
   /// Plot a 1D graph for an integrated mdworkspace
-  MultiLayer*  plotMDList(const QStringList& wsNames, const int plotAxis, const Mantid::API::MDNormalization normalization, const bool showError);
+  MultiLayer*  plotMDList(const QStringList& wsNames, const int plotAxis, 
+    const Mantid::API::MDNormalization normalization, const bool showError, MultiLayer* plotWindow = NULL,
+    bool clearWindow = false);
 
 public slots:
   // Create a 1d graph form specified spectra in a MatrixWorkspace
-  MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, bool distr=false);
-  MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs=false, bool distr=false);
+  MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true,
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, 
+    bool distr=false, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false, 
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs=false, bool distr=false,
+    MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
   /// Draw a color fill plot for each of the listed workspaces
   void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
   /// Draw a color fill plot for the named workspace
@@ -233,9 +232,6 @@ public slots:
 
   // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
   Table* createTableDetectors(MantidMatrix *m);
-
-  //
-  bool executeICatLogout(int version);
 
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
@@ -269,7 +265,8 @@ public:
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
 
-  MultiLayer* plotBin(const QString& wsName, const QList<int> & bins, bool errors = false, Graph::CurveType style = Graph::Line);
+  MultiLayer* plotBin(const QString& wsName, const QList<int> & bins, bool errors = false, 
+    Graph::CurveType style = Graph::Line, MultiLayer* plotWindow = NULL, bool clearWindow = false);
   void setIsRunning(bool running);
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
 				 const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled);
@@ -293,16 +290,14 @@ public:
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
 
-  //This is anoverloaded method toexecute load raw/nexus and  called from Icat interface
-  void executeloadAlgorithm(const QString&, const QString&, const QString&);
+  /// Verifies if the Catalog login was a success.
+  bool isValidCatalogLogin();
 
 signals:
   //A signal to indicate that we want a script to produce a dialog
   void showPropertyInputDialog(const QString & algName);
   // Broadcast that an algorithm is about to be created
   void algorithmAboutToBeCreated();
-  // a signal for getting the file locations from ICat downloaddatafiles algorithm
-  void fileLocations(const std::vector<std::string>&);
 
 public:
 

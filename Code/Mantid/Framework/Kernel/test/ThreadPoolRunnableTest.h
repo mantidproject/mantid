@@ -51,6 +51,8 @@ public:
     TS_ASSERT_EQUALS( ThreadPoolRunnableTest_value, 1234);
     // Nothing more in the queue.
     TS_ASSERT_EQUALS( sc->size(), 0 );
+    delete tpr;
+    delete sc;
   }
 
 
@@ -90,6 +92,8 @@ public:
     std::string what = e.what();
     TS_ASSERT_EQUALS(what, "Test exception from TaskThatThrows.");
 
+    delete tpr;
+    delete sc;
   }
 
 

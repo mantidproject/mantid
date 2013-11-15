@@ -154,12 +154,6 @@ namespace Mantid
         investigationWhere.push_back("title LIKE '%" + inputs.getInvestigationName() + "%' ");
       }
 
-      // Investigation abstract
-      if(!inputs.getInvestigationAbstract().empty())
-      {
-        investigationWhere.push_back("summary = '" + inputs.getInvestigationAbstract() + "' ");
-      }
-
       // Iterate over query vector and append AND between inputs.
       std::string investigationResult = Strings::join(investigationWhere.begin(), investigationWhere.end(), " AND ");
 
@@ -184,7 +178,7 @@ namespace Mantid
       // Datafile name
       if(!inputs.getDatafileName().empty())
       {
-        querySegments.push_back("Dataset <-> Datafile[name = '" + inputs.getDatafileName() + "']");
+        querySegments.push_back("Dataset <-> Datafile[name LIKE '%" + inputs.getDatafileName() + "%']");
         queryDataset = true;
       }
 
@@ -351,22 +345,36 @@ namespace Mantid
           try
           {
             API::TableRow table = outputws->appendRow();
-            // Now add the relevant investigation data to the table.
+            // Used to insert an empty string into the cell if value does not exist.
+            std::string emptyCell("");
+
+            // Now add the relevant investigation data to the table (They always exist).
             savetoTableWorkspace(investigation->id, table);
             savetoTableWorkspace(investigation->title, table);
             savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
+
             // Verify that the run parameters vector exist prior to doing anything.
             // Since some investigations may not have run parameters.
             if (!investigation->parameters.empty())
             {
               savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
             }
+            else
+            {
+              savetoTableWorkspace(&emptyCell, table);
+            }
+
             // Again, we need to check first if start and end date exist prior to insertion.
             if (investigation->startDate)
             {
               std::string startDate = formatDateTime(*investigation->startDate, "%Y-%m-%d");
               savetoTableWorkspace(&startDate, table);
             }
+            else
+            {
+              savetoTableWorkspace(&emptyCell, table);
+            }
+
             if (investigation->endDate)
             {
               std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
