@@ -337,21 +337,24 @@ bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_spt
   // actual time-of flight is 50 nanoseconds
   if ((ews1->getAxis(0)->unit()->label() == "microsecond")
       || (ews2->getAxis(0)->unit()->label() == "microsecond"))
+  {
     ToleranceTOF = 0.05;
+  }
 
   bool mismatchedEvent = false;
   int mismatchedEventWI = 0;
-  //PARALLEL_FOR2(ews1, ews2)
-  for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
+  PARALLEL_FOR2(ews1, ews2)
+  for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    prog->report("EventLists");
+    prog->report();
     if (!mismatchedEvent) // This guard will avoid checking unnecessarily
     {
       const EventList &el1 = ews1->getEventList(i);
       const EventList &el2 = ews2->getEventList(i);
       if (!el1.equals(el2, ToleranceTOF, Tolerance, 1))
       {
+        PARALLEL_CRITICAL(mismatch)
         mismatchedEvent = true;
         mismatchedEventWI = i;
       }
@@ -383,10 +386,9 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   const size_t numHists = ws1->getNumberHistograms();
   const size_t numBins = ws1->blocksize();
   const bool histogram = ws1->isHistogramData();
-  bool checkAllData=getProperty("CheckAllData");
+  const bool checkAllData = getProperty("CheckAllData");
+  const bool RelErr = getProperty("ToleranceRelErr");
 
-
-  
   // First check that the workspace are the same size
   if ( numHists != ws2->getNumberHistograms() || numBins != ws2->blocksize() )
   {
@@ -405,14 +407,14 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   bool resultBool = true;
 
   // Now check the data itself
-  //PARALLEL_FOR2(ws1, ws2)
+  PARALLEL_FOR2(ws1, ws2)
   for ( int i = 0; i < static_cast<int>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
-        prog->report("Histograms");
-    if (resultBool) // Avoid checking unnecessarily
-    {
+    prog->report();
 
+    if ( resultBool || checkAllData ) // Avoid checking unnecessarily
+    {
       // Get references to the current spectrum
       const MantidVec& X1 = ws1->readX(i);
       const MantidVec& Y1 = ws1->readY(i);
@@ -421,7 +423,6 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
       const MantidVec& Y2 = ws2->readY(i);
       const MantidVec& E2 = ws2->readE(i);
 
-      bool RelErr = getProperty("ToleranceRelErr");
       for ( int j = 0; j < static_cast<int>(numBins); ++j )
       {
         bool err;
@@ -457,22 +458,23 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
           g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
           g_log.debug() << " Difference (X,Y,E) = (" << std::fabs(X1[j] - X2[j]) << ","
                         << std::fabs(Y1[j] - Y2[j]) << "," << std::fabs(E1[j] - E2[j]) << ")\n";
-          result = "Data mismatch";
-          resultBool = checkAllData;
+          PARALLEL_CRITICAL(resultBool)
+          resultBool = false;
         }
       }
 
       // Extra one for histogram data
       if ( histogram && std::fabs(X1.back() - X2.back()) > tolerance )
       {
-        result = "Data mismatch";
-        resultBool = checkAllData;
+        PARALLEL_CRITICAL(resultBool)
+        resultBool = false;
       }
     }
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  if ( ! resultBool ) result = "Data mismatch";
   // If all is well, return true
   return resultBool;
 }
