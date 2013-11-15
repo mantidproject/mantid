@@ -8,7 +8,9 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QSettings>
+#include <QStyle>
 #include <QUrl>
+#include <QDesktopWidget>
 
 namespace MantidQt
 {
@@ -119,6 +121,8 @@ namespace MantidQt
 
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
+      // Centre the GUI on screen.
+      this->setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,this->window()->size(),QDesktopWidget().availableGeometry()));
     }
 
     /**
