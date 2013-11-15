@@ -603,9 +603,9 @@ void NormaliseToMonitor::normaliseBinByBin(const API::MatrixWorkspace_sptr& inpu
 
         // Calculate result and store in local variable to avoid overwriting original data if
         // output workspace is same as one of the input ones
+        // cppcheck-suppress zerodivcond
         const double newY = leftY/rightY;
 
-        // cppcheck-suppress zerodivcond
         if (fabs(rightY)>1.0e-12 && fabs(newY)>1.0e-12)
         {
           const double lhsFactor = (inE[k]<1.0e-12|| fabs(leftY)<1.0e-12) ? 0.0 : pow((inE[k]/leftY),2);
