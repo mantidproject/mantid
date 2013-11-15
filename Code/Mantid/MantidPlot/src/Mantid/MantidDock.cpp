@@ -1152,13 +1152,15 @@ MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
 void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de)
 {
     // The event needs to be accepted here
-    de->accept();
+    if (de->mimeData()->hasUrls())
+      de->accept();
 }
  
-void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *event)
+void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
 {
     // Set the drop action to be the proposed action.
-    event->acceptProposedAction();
+    if (de->mimeData()->hasUrls())
+        de->acceptProposedAction();
 }
  
 void MantidTreeWidget::dropEvent(QDropEvent *de)
@@ -1188,7 +1190,7 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
         alg->setProperty("OutputWorkspace",basename.toStdString());
         m_mantidUI->executeAlgorithmAsync(alg,true);
       }
-      catch (std::logic_error& error)
+      catch (std::runtime_error& error)
       {
         logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }
