@@ -132,8 +132,8 @@ namespace Mantid
         sumSigma += weight;
         sumSigmaSqr += weight*weight;
         
-        avgSigma = sumSigma/step;
         // cppcheck-suppress zerodivcond
+        avgSigma = sumSigma/step;
         if(checkForConvergence(step) && hasConverged(step, sumSigma, sumSigmaSqr, avgSigma))
         {
           break;
