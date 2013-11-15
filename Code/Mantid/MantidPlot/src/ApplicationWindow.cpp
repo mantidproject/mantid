@@ -17727,23 +17727,43 @@ QPoint ApplicationWindow::desktopTopLeft() const
   */
 QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 {
-  const int dlt = 40; // shift in x and y
-  const QPoint first(-1,-1);
-  static QPoint lastPoint(first);
+  const int yDelta = 40; 
+  const QPoint noPoint(-1,-1);
 
-  if (lastPoint == first)
-  {
+  static QPoint lastPoint(noPoint);
+
+  if ( lastPoint == noPoint || m_floatingWindows.isEmpty() )
+  { // If no other windows added - start from top-left corner
     lastPoint = desktopTopLeft();
-    return lastPoint;
   }
-
-  lastPoint += QPoint(dlt,dlt);
-
-  QWidget* desktop = QApplication::desktop()->screen();
-  if (lastPoint.x() + sz.width() > desktop->width() ||
-      lastPoint.y() + sz.height() > desktop->height())
+  else
   {
-    lastPoint = QPoint(0,0);
+    // Get window which was added last
+    FloatingWindow* lastWindow = m_floatingWindows.last();
+
+    if ( lastWindow->isVisible() )
+    { // If it is still visibile - can't use it's location, so need to find a new one
+
+      QPoint diff = lastWindow->pos() - lastPoint;
+
+      if ( abs(diff.x()) < 20 && abs(diff.y()) < 20 )
+      { // If window was moved far enough from it's previous location - can use it 
+
+        // Get a screen space which we can use
+        const QRect screen = QApplication::desktop()->availableGeometry(this);
+
+        // How mush we need to move in X so that cascading direction is diagonal according to
+        // screen size
+        int xDelta = static_cast<int>( yDelta * ( 1.0 * screen.width() / screen.height() ) );
+
+        lastPoint += QPoint(xDelta, yDelta);
+
+        const QRect newPlace = QRect(lastPoint, sz);
+        if ( newPlace.bottom() > screen.height() || newPlace.right() > screen.width() )
+          // If new window doesn't fit to the screen - start anew
+          lastPoint = desktopTopLeft();
+      }
+    }
   }
 
   return lastPoint;
