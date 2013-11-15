@@ -75,7 +75,6 @@ To do so select the workspace, which you have calibrated as the InputWorkspace a
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -701,14 +700,10 @@ namespace Mantid
         AnalysisDataService::Instance().addOrReplace("xxx",peaksWs );
       }
 
-      string FunctionArgument;
       string Constraints("");
       string TiesArgument;
-      int i = -1;//position in ParamResults Array.
       int nbanksSoFar = 0;
 
-
-      FrameworkManager::Instance();
       bool first = false;
       int NGroups = (int)Groups.size();
       double detWidthScale0,
@@ -723,8 +718,8 @@ namespace Mantid
 
       //------------------- For each Group set up Function, --------------------------
       //---------------Ties, and Constraint Properties for Fit algorithm--------------------
-      ostringstream oss (ostringstream::out);
-      oss.precision(4);
+
+      // set up the string for specifying groups
       string BankNameString = "";
       for(auto group = Groups.begin(); group !=Groups.end(); ++group)
       {
@@ -746,24 +741,34 @@ namespace Mantid
       if( getProperty("AllowSampleShift"))
         SampOffsets=1;
 
-      oss << "name=SCDPanelErrors, PeakWorkspaceName=\""<<PeakWSName<<"\",";
-      oss << "a=" << fixed << a << "," << "b=" << fixed << b << "," << "c=" << fixed << c << "," << "alpha=" << fixed << alpha << "," << "beta=" << fixed << beta
-        << "," << "gamma=" << fixed << gamma << ","<< "NGroups="<<NGroups<<",BankNames ="<<BankNameString<<","
-        <<"startX=-1,endX=-1,RotateCenters="<<RotGroups<<",SampleOffsets="<<SampOffsets<<",";
-      oss<<   "l0=" << fixed << L0 << "," << "t0=" << fixed << T0 ;
-
-      ostringstream oss1 ( ostringstream::out);
-
+      // first round of function setup
+      IFunction_sptr iFunc = FunctionFactory::Instance().createFunction("SCDPanelErrors");
+      iFunc->setAttributeValue("PeakWorkspaceName", PeakWSName);
+      iFunc->setAttributeValue("a", a);
+      iFunc->setAttributeValue("b", b);
+      iFunc->setAttributeValue("c", c);
+      iFunc->setAttributeValue("alpha", alpha);
+      iFunc->setAttributeValue("beta", beta);
+      iFunc->setAttributeValue("gamma", gamma);
+      iFunc->setAttributeValue("NGroups", NGroups);
+      iFunc->setAttributeValue("BankNames", BankNameString);
+      iFunc->setAttributeValue("startX", -1);
+      iFunc->setAttributeValue("endX", -1);
+      iFunc->setAttributeValue("RotateCenters", RotGroups);
+      iFunc->setAttributeValue("SampleOffsets", SampOffsets);
+      iFunc->setParameter("l0", L0);
+      iFunc->setParameter("t0", T0);
 
       double maxXYOffset = getProperty("MaxPositionChange_meters");
-
+      ostringstream oss1 ( ostringstream::out);
       oss1.precision( 4);
+      int i = -1;//position in ParamResults Array.
       for(auto group = Groups.begin(); group !=Groups.end(); ++group)
       {
         i++;
 
         boost::shared_ptr<const RectangularDetector> bank_rect;
-        string Gprefix ="f"+ boost::lexical_cast<string>(i)+"_";
+        string paramPrefix ="f"+ boost::lexical_cast<string>(i)+"_";
 
 
         string name = group->front();
@@ -782,12 +787,14 @@ namespace Mantid
           ,detHeightScale0, Xoffset0, Yoffset0, Zoffset0, Xrot0, Yrot0, Zrot0);
 
         // --- set Function property ----------------------
-
-        oss << "," <<  Gprefix<<"detWidthScale=" << fixed << detWidthScale0 << ","
-          << Gprefix<<"detHeightScale=" << fixed << detHeightScale0 << ","
-          <<Gprefix<<"Xoffset=" << Xoffset0 << "," <<Gprefix<< "Yoffset=" << Yoffset0 << "," << Gprefix<<"Zoffset=";
-
-        oss     << Zoffset0 << "," << Gprefix<<"Xrot=" << Xrot0 << "," << Gprefix<<"Yrot=" << Yrot0 << "," <<Gprefix<< "Zrot=" << Zrot0 ;
+        iFunc->setParameter(paramPrefix+"detWidthScale", detWidthScale0);
+        iFunc->setParameter(paramPrefix+"detHeightScale", detHeightScale0);
+        iFunc->setParameter(paramPrefix+"Xoffset", Xoffset0);
+        iFunc->setParameter(paramPrefix+"Yoffset", Yoffset0);
+        iFunc->setParameter(paramPrefix+"Zoffset", Zoffset0);
+        iFunc->setParameter(paramPrefix+"Xrot", Xrot0);
+        iFunc->setParameter(paramPrefix+"Yrot", Yrot0);
+        iFunc->setParameter(paramPrefix+"Zrot", Zrot0);
 
         int startX = bounds[ nbanksSoFar ];
         int endXp1 = bounds[ nbanksSoFar + group->size() ];
@@ -815,7 +822,7 @@ namespace Mantid
 
           first = false;
 
-          oss1 <<Gprefix<<"detWidthScale=" << fixed << detWidthScale0;
+          oss1 <<paramPrefix<<"detWidthScale=" << fixed << detWidthScale0;
         }
 
         if( !use_PanelHeight)
@@ -825,7 +832,7 @@ namespace Mantid
 
           first = false;
 
-          oss1 <<  Gprefix<<"detHeightScale=" << fixed << detHeightScale0;
+          oss1 <<  paramPrefix<<"detHeightScale=" << fixed << detHeightScale0;
         }
 
 
@@ -837,9 +844,9 @@ namespace Mantid
 
           first = false;
 
-          oss1 <<Gprefix<<"Xoffset=" << Xoffset0 << "," <<
-            Gprefix<<"Yoffset=" <<Yoffset0 << "," <<
-            Gprefix<<"Zoffset=" << Zoffset0;
+          oss1 <<paramPrefix<<"Xoffset=" << Xoffset0 << "," <<
+            paramPrefix<<"Yoffset=" <<Yoffset0 << "," <<
+            paramPrefix<<"Zoffset=" << Zoffset0;
         }
 
         if( ! use_PanelOrientation )
@@ -849,9 +856,9 @@ namespace Mantid
 
           first = false;
 
-          oss1 << Gprefix<<"Xrot=" << Xrot0 << ","
-            <<Gprefix<<"Yrot=" << Yrot0<< ","
-            <<Gprefix<<"Zrot=" << Zrot0;
+          oss1 << paramPrefix<<"Xrot=" << Xrot0 << ","
+            <<paramPrefix<<"Yrot=" << Yrot0<< ","
+            <<paramPrefix<<"Zrot=" << Zrot0;
         }
 
         //--------------- set Constraints Property  -------------------------------
@@ -862,13 +869,13 @@ namespace Mantid
           oss2 <<  (MIN_DET_HW_SCALE*L0) << "<" <<  "l0<"  <<  (MAX_DET_HW_SCALE*L0 ) << ",-5<" <<  "t0<5" ;
 
         double MaxRotOffset = getProperty("MaxRotationChangeDegrees");
-        oss2 <<  "," << (MIN_DET_HW_SCALE)*detWidthScale0 << "<" << Gprefix << "detWidthScale<" << (MAX_DET_HW_SCALE)*detWidthScale0
-          << "," << (MIN_DET_HW_SCALE)*detHeightScale0 << "<" << Gprefix << "detHeightScale<" << (MAX_DET_HW_SCALE)*detHeightScale0
-          <<","<< -maxXYOffset+Xoffset0 << "<" << Gprefix << "Xoffset<" << maxXYOffset+Xoffset0
-          << "," << -maxXYOffset+Yoffset0 << "<" << Gprefix << "Yoffset<" << maxXYOffset+Yoffset0<<
-          "," << -maxXYOffset+Zoffset0 << "<" << Gprefix << "Zoffset<" << maxXYOffset+Zoffset0<<","
-          << -MaxRotOffset<<"<" << Gprefix << "Xrot<"<<MaxRotOffset<<",-"<<MaxRotOffset<<"<"
-          << Gprefix << "Yrot<"<<MaxRotOffset<<",-"<<MaxRotOffset<< "<" << Gprefix << "Zrot<"<<MaxRotOffset
+        oss2 <<  "," << (MIN_DET_HW_SCALE)*detWidthScale0 << "<" << paramPrefix << "detWidthScale<" << (MAX_DET_HW_SCALE)*detWidthScale0
+          << "," << (MIN_DET_HW_SCALE)*detHeightScale0 << "<" << paramPrefix << "detHeightScale<" << (MAX_DET_HW_SCALE)*detHeightScale0
+          <<","<< -maxXYOffset+Xoffset0 << "<" << paramPrefix << "Xoffset<" << maxXYOffset+Xoffset0
+          << "," << -maxXYOffset+Yoffset0 << "<" << paramPrefix << "Yoffset<" << maxXYOffset+Yoffset0<<
+          "," << -maxXYOffset+Zoffset0 << "<" << paramPrefix << "Zoffset<" << maxXYOffset+Zoffset0<<","
+          << -MaxRotOffset<<"<" << paramPrefix << "Xrot<"<<MaxRotOffset<<",-"<<MaxRotOffset<<"<"
+          << paramPrefix << "Yrot<"<<MaxRotOffset<<",-"<<MaxRotOffset<< "<" << paramPrefix << "Zrot<"<<MaxRotOffset
           ;
 
 
@@ -883,56 +890,55 @@ namespace Mantid
 
      if( getProperty("AllowSampleShift"))
      {
+       // TODO the function should support setting the sample position even when it isn't be refined
+       iFunc->setAttributeValue("SampleX", samplePos.X());
+       iFunc->setAttributeValue("SampleY", samplePos.Y());
+       iFunc->setAttributeValue("SampleZ", samplePos.Z());
 
-        oss << ",SampleX=" << samplePos.X() << ",SampleY=" << samplePos.Y() << ",SampleZ="
-            << samplePos.Z();
+       ostringstream oss2(ostringstream::out);
+       if (!Constraints.empty())
+         oss2 << ",";
 
-        ostringstream oss2(ostringstream::out);
-        if (!Constraints.empty())
-          oss2 << ",";
-
-        oss2 << samplePos.X()-maxXYOffset << "<SampleX<" <<samplePos.X()+ maxXYOffset << "," <<
-            samplePos.Y()-maxXYOffset << "<SampleY<"
+       oss2 << samplePos.X()-maxXYOffset << "<SampleX<" <<samplePos.X()+ maxXYOffset << ","
+            << samplePos.Y()-maxXYOffset << "<SampleY<"
             << samplePos.Y()+maxXYOffset << "," << samplePos.Z()-maxXYOffset << "<SampleZ<" << samplePos.Z()+maxXYOffset;
 
-        Constraints += oss2.str();
-      }
+       Constraints += oss2.str();
+     }
 
-      if(!useL0)
-      {
-        if( !first)
-          oss1 << ",";
+     if(!useL0)
+     {
+       if( !first)
+         oss1 << ",";
 
-        first = false;
-        oss1 <<"l0="<<fixed<<L0;
+       first = false;
+       oss1 <<"l0="<<fixed<<L0;
+     }
 
-      }
+     if(!useTimeOffset)
+     {
+       if( !first)
+         oss1 << ",";
 
-      if(!useTimeOffset)
-      {
-        if( !first)
-          oss1 << ",";
+       //!! first = false;
+       oss1 <<"t0="<<fixed<<T0;
 
-        //!! first = false;
-        oss1 <<"t0="<<fixed<<T0;
+     }
+     TiesArgument = oss1.str();
 
-      }
-      FunctionArgument = oss.str();
-      TiesArgument = oss1.str();
       //--------------------- Set up Fit Algorithm and Execute-------------------
       boost::shared_ptr< Algorithm > fit_alg = createChildAlgorithm( "Fit", .2, .9, true );
 
       if( ! fit_alg)
         throw invalid_argument( "Cannot find Fit algorithm" );
-      g_log.debug()<<"Function="<<FunctionArgument<<endl;
-      g_log.debug()<<"Constraints="<<Constraints<<endl;
+      g_log.debug()<<"Constraints="<<Constraints<< "\n";
       fit_alg->initialize();
 
       int Niterations =  getProperty( "NumIterations");
-      fit_alg->setProperty( "Function",FunctionArgument);
-      fit_alg->setProperty( "MaxIterations",Niterations );
+      fit_alg->setProperty( "Function", iFunc);
+      fit_alg->setProperty( "MaxIterations", Niterations );
       if( !TiesArgument.empty())
-        fit_alg->setProperty( "Ties",TiesArgument);
+        fit_alg->setProperty( "Ties", TiesArgument);
       fit_alg->setProperty( "Constraints", Constraints);
       fit_alg->setProperty( "InputWorkspace", ws);
       fit_alg->setProperty( "CreateOutput",true);
