@@ -510,8 +510,6 @@ void MdViewerWidget::checkForUpdates()
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
     this->currentView->onAutoScale();
-    this->currentView->setAxisScales();
-    pqActiveObjects::instance().setActiveSource(src);
     this->currentView->updateAnimationControls();
     this->currentView->updateView();
     this->currentView->updateUI();

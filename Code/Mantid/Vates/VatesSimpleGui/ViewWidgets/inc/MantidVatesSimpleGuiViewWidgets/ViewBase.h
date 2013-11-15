@@ -108,8 +108,6 @@ public:
   virtual void resetCamera() = 0;
   /// This function resets the display(s) for the view(s).
   virtual void resetDisplay() = 0;
-  /// Setup axis scales
-  virtual void setAxisScales();
   /// Set the current color scale state
   virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
