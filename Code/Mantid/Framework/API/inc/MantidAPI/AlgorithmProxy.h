@@ -153,6 +153,7 @@ namespace Mantid
       void createConcreteAlg(bool initOnly = false);
       void stopped();
       void addObservers();
+      void dropWorkspaceReferences();
 
       /// Poco::ActiveMethod used to implement asynchronous execution.
       Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy> _executeAsync;

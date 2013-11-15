@@ -83,11 +83,10 @@ namespace Mantid
       }
       catch(...)
       {
-        m_alg.reset();
+        stopped();
         throw;
       }
       stopped();
-
       return m_isExecuted;
     }
 
@@ -117,7 +116,7 @@ namespace Mantid
       }
       catch(...)
       {
-        m_alg.reset(); // Release the concrete algorithm instance
+        stopped();
         throw;
       }
       stopped();
@@ -261,8 +260,24 @@ namespace Mantid
     */
     void AlgorithmProxy::stopped()
     {
+      dropWorkspaceReferences();
       m_isExecuted = m_alg->isExecuted();
       m_alg.reset();
+    }
+
+    /**
+     * Forces any workspace property to clear its internal workspace reference
+     */
+    void AlgorithmProxy::dropWorkspaceReferences()
+    {
+      const std::vector< Property*> &props = getProperties();
+      for (unsigned int i = 0; i < props.size(); ++i)
+      {
+        if(auto *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]))
+        {
+          wsProp->clear();
+        }
+      }
     }
 
     /**
