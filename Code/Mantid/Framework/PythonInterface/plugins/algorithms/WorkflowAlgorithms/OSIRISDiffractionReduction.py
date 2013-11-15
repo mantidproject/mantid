@@ -50,9 +50,7 @@ class DRangeToWsMap(object):
                 ", which has a time regime of " + str(timeRegime))
         
         # Add the workspace to the map, alongside its DRange.
-        if dRange in self._map:
-            self._map[dRange].append(wsname)
-        else:
+        if dRange not in self._map:
             self._map[dRange] = [wsname]
             
     def setItem(self, dRange, wsname):
@@ -72,21 +70,18 @@ def averageWsList(wsList):
     assert len(wsList) > 0, "getAverageWs: Trying to take an average of nothing."
     if len(wsList) == 1:
         return wsList[0]
-
-    #create set of unique workspace names
-    #so we don't count the same run twice
-    uniqueWorkspaces = list(set(wsList))
-    numWorkspaces = len(uniqueWorkspaces)
         
     # Generate the final name of the averaged workspace.
     avName = "avg"
-    for name in uniqueWorkspaces:
+    for name in wsList:
         avName += "_" + name
     
+    numWorkspaces = len(wsList)
+
     # Compute the average and put into "__temp_avg".
-    __temp_avg = mtd[uniqueWorkspaces[0]]
+    __temp_avg = mtd[wsList[0]]
     for i in range(1, numWorkspaces):
-        __temp_avg += mtd[uniqueWorkspaces[i]]
+        __temp_avg += mtd[wsList[i]]
         
     __temp_avg /= numWorkspaces
         
