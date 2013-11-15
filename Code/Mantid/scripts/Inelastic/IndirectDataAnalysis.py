@@ -96,7 +96,7 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, Verb
         C2 = params.column(ip+8)      #centre2 value
         W2 = params.column(ip+10)      #width2 value
 
-    for i in range(0,specMax-specMin):
+    for i in range(0,(specMax-specMin)+1):
         paras = [A0[i], A1[i]]
         if options[1]:
             paras.append(D1[i])
