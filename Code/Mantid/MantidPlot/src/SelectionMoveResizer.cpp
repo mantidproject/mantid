@@ -39,7 +39,6 @@
 #include "LegendWidget.h"
 #include "ArrowMarker.h"
 #include "ImageMarker.h"
-#include "PlotEnrichement.h"
 
 SelectionMoveResizer::SelectionMoveResizer(LegendWidget *target)
 	: QWidget(target->parentWidget())
@@ -110,9 +109,9 @@ void SelectionMoveResizer::add(ArrowMarker *target)
 	d_line_markers << target;
 
 	if (d_bounding_rect.isValid())
-		d_bounding_rect |= boundingRectOf(target);
+		d_bounding_rect |= target->rect();
 	else
-		d_bounding_rect = boundingRectOf(target);
+		d_bounding_rect = target->rect();
 
 	update();
 }
@@ -123,9 +122,9 @@ void SelectionMoveResizer::add(ImageMarker *target)
 	d_image_markers << target;
 
 	if (d_bounding_rect.isValid())
-		d_bounding_rect |= boundingRectOf(target);
+		d_bounding_rect |= target->rect();
 	else
-		d_bounding_rect = boundingRectOf(target);
+		d_bounding_rect = target->rect();
 
 	update();
 }
@@ -144,11 +143,6 @@ void SelectionMoveResizer::add(QWidget *target)
 		d_bounding_rect = target->frameGeometry();
 
 	update();
-}
-
-QRect SelectionMoveResizer::boundingRectOf(QwtPlotMarker *target) const
-{
-	return (static_cast<PlotEnrichement *>(target))->rect();
 }
 
 int SelectionMoveResizer::removeAll(LegendWidget *target)
@@ -201,15 +195,15 @@ void SelectionMoveResizer::recalcBoundingRect()
 	}
 	foreach(ArrowMarker *i, d_line_markers) {
 		if(d_bounding_rect.isValid())
-			d_bounding_rect |= boundingRectOf(i);
+			d_bounding_rect |= i->rect();
 		else
-			d_bounding_rect = boundingRectOf(i);
+			d_bounding_rect = i->rect();
 	}
 	foreach(ImageMarker *i, d_image_markers) {
 		if(d_bounding_rect.isValid())
-			d_bounding_rect |= boundingRectOf(i);
+			d_bounding_rect |= i->rect();
 		else
-			d_bounding_rect = boundingRectOf(i);
+			d_bounding_rect = i->rect();
 	}
 	foreach(QWidget *i, d_widgets) {
 		if(d_bounding_rect.isValid())

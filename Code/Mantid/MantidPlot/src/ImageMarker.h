@@ -30,8 +30,7 @@
 #define IMAGEMARKER_H
 
 #include <qwt_plot.h>
-#include "PlotEnrichement.h"
-
+#include <qwt_plot_marker.h>
 #include <QPixmap>
 
 /**\brief Draw images on a QwtPlot.
@@ -61,7 +60,7 @@
  *
  * \sa Legend, ArrowMarker
  */
-class ImageMarker: public PlotEnrichement
+class ImageMarker : public QwtPlotMarker
 {
 public:
 	//! Construct an image marker from a file name.

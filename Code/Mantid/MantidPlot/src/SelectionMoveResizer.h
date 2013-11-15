@@ -183,8 +183,6 @@ class SelectionMoveResizer : public QWidget
 		void operateOnTargets();
 		//! The initialization part common to all constructors.
 		void init();
-		//! Get the bounding rectangle of a marker in paint coordinates.
-		QRect boundingRectOf(QwtPlotMarker *target) const;
 
 		//! Target markers I'm handling.
 		QList <LegendWidget *> d_legend_markers;
