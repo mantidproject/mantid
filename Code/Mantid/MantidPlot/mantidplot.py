@@ -9,7 +9,7 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 import mantidplotpy.proxies as proxies
-from mantidplotpy.proxies import threadsafe_call, new_proxy
+from mantidplotpy.proxies import threadsafe_call, new_proxy, getWorkspaceNames
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
@@ -198,7 +198,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         indices: workspace index, or tuple or list of workspace indices to plot
         error_bars: bool, set to True to add error bars.
     """
-    workspace_names = __getWorkspaceNames(source)
+    workspace_names = getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
     if len(workspace_names) == 0:
         raise ValueError("No workspace names given to plot")
@@ -221,9 +221,9 @@ def plotMD(source, plot_axis=-2, normalization = mantid.api.MDNormalization.Volu
     Returns:
         A handle to the matrix containing the image data.
     """
-    workspace_names = __getWorkspaceNames(source)
+    workspace_names = getWorkspaceNames(source)
     if len(workspace_names) == 0:
-        raise ValueError("No workspace names given to plot")
+        raise ValueError("No workspace names given to plotMD")
     for name in workspace_names:
         if not mantid.api.mtd.doesExist(name):
             raise ValueError("%s does not exist in the workspace list" % name)
@@ -562,7 +562,7 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
         Use SliceViewerWindow.getSlicer() to get access to the functions of the
         SliceViewer, e.g. setting the view and slice point.
     """ 
-    workspace_names = __getWorkspaceNames(source)
+    workspace_names = getWorkspaceNames(source)
     try:
         import mantidqtpython
     except:
@@ -602,7 +602,7 @@ def getSliceViewer(source, label=""):
         a handle to the SliceViewerWindow object that was created before. 
     """
     import mantidqtpython
-    workspace_names = __getWorkspaceNames(source)
+    workspace_names = getWorkspaceNames(source)
     if len(workspace_names) != 1:
         raise Exception("Please specify only one workspace.")
     else:
@@ -654,48 +654,6 @@ Layer.Top = _qti.GraphOptions.Top
 #-----------------------------------------------------------------------------
 #--------------------------- "Private" functions -----------------------------
 #-----------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------
-def __getWorkspaceNames(source):
-    """Takes a "source", which could be a WorkspaceGroup, or a list
-    of workspaces, or a list of names, and converts
-    it to a list of workspace names.
-    
-    Args:
-        source :: input list or workspace group
-        
-    Returns:
-        list of workspace names 
-    """
-    ws_names = []
-    if isinstance(source, list) or isinstance(source,tuple):
-        for w in source:
-            names = __getWorkspaceNames(w)
-            ws_names += names
-    elif hasattr(source, 'getName'):
-        if hasattr(source, '_getHeldObject'):
-            wspace = source._getHeldObject()
-        else:
-            wspace = source
-        if wspace == None:
-            return []
-        if hasattr(wspace, 'getNames'):
-            grp_names = wspace.getNames()
-            for n in grp_names:
-                if n != wspace.getName():
-                    ws_names.append(n)
-        else:
-            ws_names.append(wspace.getName())
-    elif isinstance(source,str):
-        w = _get_analysis_data_service()[source]
-        if w != None:
-            names = __getWorkspaceNames(w)
-            for n in names:
-                ws_names.append(n)
-    else:
-        raise TypeError('Incorrect type passed as workspace argument "' + str(source) + '"')
-    return ws_names
     
 #-----------------------------------------------------------------------------
 def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,

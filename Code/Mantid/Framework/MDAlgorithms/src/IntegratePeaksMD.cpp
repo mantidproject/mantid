@@ -646,36 +646,43 @@ namespace MDAlgorithms
     setProperty("OutputWorkspace", peakWS);
 
   }
+
   /** Calculate if this Q is on a detector
    *
-   * @param QLabFrame of radius of integration
+   * @param QLabFrame. The Peak center.
    * @param r: Peak radius.
    */
   bool IntegratePeaksMD::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
   {
     bool in = true;
-    int nAngles = 8;
+    const int nAngles = 8;
     double dAngles = static_cast<coord_t>(nAngles);
     // check 64 points in theta and phi at outer radius
-    for (int i=0; i < nAngles; ++i)
+    for (int i = 0; i < nAngles; ++i)
     {
-      double theta = 6.28318531/dAngles * i;
-      for (int j=0; j < nAngles; ++j)
+      double theta = (2 * M_PI) / dAngles * i;
+      for (int j = 0; j < nAngles; ++j)
       {
-       double phi = 6.28318531/dAngles * j;
-         V3D edge = V3D(QLabFrame.X()+r*std::cos(theta)*std::sin(phi),
-           QLabFrame.Y()+r*std::sin(theta)*std::sin(phi), QLabFrame.Z()+r*std::cos(phi));
-         // Create the peak using the Q in the lab frame with all its info:
-         try
-         {
-       Peak p(inst, edge);
-       in = (in && p.findDetector());
-       if (!in) return in;
-         }
-         catch (...)
-         {
-           return false;
-         }
+        double phi = (2 * M_PI) / dAngles * j;
+        // Calculate an edge position at this point on the sphere surface. Spherical coordinates to cartesian.
+        V3D edge = V3D(
+            QLabFrame.X() + r * std::cos(theta) * std::sin(phi),
+            QLabFrame.Y() + r * std::sin(theta) * std::sin(phi),
+            QLabFrame.Z() + r * std::cos(phi));
+        // Create the peak using the Q in the lab frame with all its info:
+        try
+        {
+          Peak p(inst, edge);
+          in = (in && p.findDetector());
+          if (!in)
+          {
+            return in;
+          }
+        }
+        catch (...)
+        {
+          return false;
+        }
       }
     }
     return in;
