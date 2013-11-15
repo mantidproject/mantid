@@ -659,13 +659,11 @@ namespace Mantid
       CalculateGroups( AllBankNames, Grouping, bankPrefix, bankingCode, Groups );
 
       vector< string >banksVec;
-      vector<vector< string > >::iterator it;
-      for(  it = Groups.begin(); it != Groups.end(); ++it )
+      for(auto group = Groups.begin(); group != Groups.end(); ++group )
       {
-
-        for( vector< string >::iterator itt = (*it).begin(); itt!=(*it).end(); ++itt )
+        for( auto bankName = group->begin(); bankName!=group->end(); ++bankName )
         {
-          banksVec.push_back( (*itt) );
+          banksVec.push_back(*bankName);
         }
       }
 
@@ -728,16 +726,16 @@ namespace Mantid
       ostringstream oss (ostringstream::out);
       oss.precision(4);
       string BankNameString = "";
-      for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); ++itv)
+      for(auto group = Groups.begin(); group !=Groups.end(); ++group)
       {
-        if( itv != Groups.begin())
+        if( group != Groups.begin())
           BankNameString +="!";
-        for( vector< string >::iterator it1 = (*itv).begin(); it1 !=(*itv).end(); ++it1)
+        for(auto bank = group->begin(); bank !=group->end(); ++bank)
         {
-          if( it1 !=(*itv).begin())
+          if( bank != group->begin())
             BankNameString +="/";
 
-          BankNameString +=(*it1);
+          BankNameString += (*bank);
         }
       }
 
@@ -760,7 +758,7 @@ namespace Mantid
       double maxXYOffset = getProperty("MaxPositionChange_meters");
 
       oss1.precision( 4);
-      for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); ++itv)
+      for(auto group = Groups.begin(); group !=Groups.end(); ++group)
       {
         i++;
 
@@ -768,7 +766,7 @@ namespace Mantid
         string Gprefix ="f"+ boost::lexical_cast<string>(i)+"_";
 
 
-        string name=(*itv)[0];
+        string name = group->front();
         boost::shared_ptr<const IComponent> bank_cmp = instrument->getComponentByName(name);
         bank_rect =
           boost::dynamic_pointer_cast<const RectangularDetector>( bank_cmp);
@@ -792,7 +790,7 @@ namespace Mantid
         oss     << Zoffset0 << "," << Gprefix<<"Xrot=" << Xrot0 << "," << Gprefix<<"Yrot=" << Yrot0 << "," <<Gprefix<< "Zrot=" << Zrot0 ;
 
         int startX = bounds[ nbanksSoFar ];
-        int endXp1 = bounds[ nbanksSoFar + (*itv).size() ];
+        int endXp1 = bounds[ nbanksSoFar + group->size() ];
         if( endXp1-startX < 12)
         {
           g_log.error() << "Bank Group " <<  BankNameString  << " does not have enough peaks for fitting" << endl;
@@ -800,7 +798,7 @@ namespace Mantid
           throw  runtime_error("Group " + BankNameString +" does not have enough peaks");
         }
 
-        nbanksSoFar = nbanksSoFar + (int)(*itv).size();
+        nbanksSoFar = nbanksSoFar + static_cast<int>(group->size());
 
         //---------- set Ties argument ----------------------------------
 
@@ -925,37 +923,26 @@ namespace Mantid
       boost::shared_ptr< Algorithm > fit_alg = createChildAlgorithm( "Fit", .2, .9, true );
 
       if( ! fit_alg)
-      {
-        g_log.error( "Cannot find Fit algorithm");
         throw invalid_argument( "Cannot find Fit algorithm" );
-      }
       g_log.debug()<<"Function="<<FunctionArgument<<endl;
-
       g_log.debug()<<"Constraints="<<Constraints<<endl;
       fit_alg->initialize();
 
       int Niterations =  getProperty( "NumIterations");
-
       fit_alg->setProperty( "Function",FunctionArgument);
       fit_alg->setProperty( "MaxIterations",Niterations );
-
       if( !TiesArgument.empty())
         fit_alg->setProperty( "Ties",TiesArgument);
-
       fit_alg->setProperty( "Constraints", Constraints);
-
       fit_alg->setProperty( "InputWorkspace", ws);
-
       fit_alg->setProperty( "CreateOutput",true);
-
       fit_alg->setProperty( "Output","out");
-
       fit_alg->executeAsChildAlg();
 
-      g_log.debug()<<"Finished executing Fit algorithm"<<endl;
+      g_log.debug()<<"Finished executing Fit algorithm\n";
 
       string OutputStatus =fit_alg->getProperty("OutputStatus");
-      g_log.notice() <<"Output Status="<<OutputStatus<<endl;
+      g_log.notice() <<"Output Status="<<OutputStatus<< "\n";
 
       declareProperty(
         new API::WorkspaceProperty<API::ITableWorkspace>
@@ -963,20 +950,19 @@ namespace Mantid
         "The name of the TableWorkspace in which to store the final covariance matrix" );
 
 
-
       ITableWorkspace_sptr NormCov= fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
-
       // setProperty("OutputNormalisedCovarianceMatrix", NormCov);
-      AnalysisDataService::Instance().addOrReplace( string("CovarianceInfo"),NormCov);
+      AnalysisDataService::Instance().addOrReplace( string("CovarianceInfo"), NormCov);
       setPropertyValue("OutputNormalisedCovarianceMatrix",   string("CovarianceInfo"));
+
       //--------------------- Get and Process Results -----------------------
       double chisq = fit_alg->getProperty( "OutputChi2overDoF");
       setProperty("ChiSqOverDOF", chisq);
       if( chisq >1)
       {
-        g_log.warning()<<"************* This is a large chi squared value ************"<<std::endl;
-        g_log.warning()<<"    the indexing may have been using an incorrect "<<std::endl;
-        g_log.warning()<<"    orientation matrix, instrument geometry or goniometer info"<<std::endl;
+        g_log.warning()<<"************* This is a large chi squared value ************\n";
+        g_log.warning()<<"    the indexing may have been using an incorrect\n";
+        g_log.warning()<<"    orientation matrix, instrument geometry or goniometer info\n";
       }
       ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
       vector< double >params;
@@ -989,7 +975,7 @@ namespace Mantid
       string fieldBaseNames = ";l0;t0;detWidthScale;detHeightScale;Xoffset;Yoffset;Zoffset;Xrot;Yrot;Zrot;";
       if( getProperty("AllowSampleShift"))
         fieldBaseNames +="SampleX;SampleY;SampleZ;";
-      for( int prm = 0; prm < (int)RRes->rowCount(); ++prm )
+      for( size_t prm = 0; prm < RRes->rowCount(); ++prm )
       {
         string namee =RRes->getRef< string >( "Name", prm );
         size_t dotPos = namee.find('_');
@@ -1030,7 +1016,7 @@ namespace Mantid
       // g_log.notice() << "      nVars=" <<nVars<< endl;
       int NDof = ( (int)ws->dataX( 0).size()- nVars);
       setProperty("DOF",NDof);
-      g_log.notice() << "ChiSqoverDoF =" << chisq << " NDof =" << NDof << endl;
+      g_log.notice() << "ChiSqoverDoF =" << chisq << " NDof =" << NDof << "\n";
 
       map<string,double> result;
 
