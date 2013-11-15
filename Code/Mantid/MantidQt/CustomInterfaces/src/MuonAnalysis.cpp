@@ -2124,22 +2124,6 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, c
 }
 
 /**
- * Closes the window with the plot of the given ws.
- * @param wsName Name of the workspace which plot window to close
- */
-void MuonAnalysis::closePlotWindow(const QString& wsName)
-{
-  QString code;
-
-  code += "g = graph('"+ wsName + "-1')\n"
-          "if g != None:\n"
-          "  g.confirmClose(False)\n"
-          "  g.close()\n";
-
-  runPythonCode(code);
-}
-
-/**
  * Checks if the plot for the workspace does exist.
  * @param wsName Name of the workspace
  * @return True if exists, false if not

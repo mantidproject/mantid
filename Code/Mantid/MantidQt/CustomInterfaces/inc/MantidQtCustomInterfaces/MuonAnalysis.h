@@ -165,9 +165,6 @@ private slots:
   /// Checks whether plots should be auto-updated when some settings change.
   bool isAutoUpdateEnabled();
 
-  /// Closes the window with the plot of the given ws
-  void closePlotWindow(const QString& wsName);
-
   /// Checks if the plot for the workspace does exist.
   bool plotExists(const QString& wsName);
 
