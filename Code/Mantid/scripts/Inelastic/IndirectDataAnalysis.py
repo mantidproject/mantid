@@ -746,10 +746,14 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
     getFurySeqResult(inputWS, outNm, option, Verbose)
     if Save:
-        opath = os.path.join(workdir, fitWS+'.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=fitWS, Filename=opath)
+        fpath = os.path.join(workdir, fitWS+'.nxs')
+        SaveNexusProcessed(InputWorkspace=fitWS, Filename=fpath)
+        rpath = os.path.join(workdir, outNm+'_Result.nxs')
+        SaveNexusProcessed(InputWorkspace=outNm+'_Result', Filename=rpath)
         if Verbose:
-            logger.notice('Output file : '+opath)  
+            logger.notice('Fit output file : '+fpath)  
+            logger.notice('Result output file : '+rpath)
+
     if ( Plot != 'None' ):
         furyfitPlotSeq(fitWS, Plot)
     EndTime('FuryFit')
