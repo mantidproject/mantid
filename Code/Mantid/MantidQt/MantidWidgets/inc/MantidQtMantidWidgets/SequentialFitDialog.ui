@@ -122,6 +122,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="ckbPassWS">
+       <property name="text">
+        <string>Pass workspace index to function</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

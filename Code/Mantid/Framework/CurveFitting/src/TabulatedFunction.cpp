@@ -26,7 +26,7 @@ const int TabulatedFunction::defaultIndexValue = 0;
 
 /// Constructor
 TabulatedFunction::TabulatedFunction():
-    m_indexSet(false), m_setupFinished(false)
+    m_setupFinished(false)
 {
   declareParameter("Scaling",1.0,"A scaling factor");
   declareAttribute("FileName", Attribute("", true));
@@ -124,7 +124,6 @@ void TabulatedFunction::clear() const
 {
   m_xData.clear();
   m_yData.clear();
-  m_indexSet = false;
   m_setupFinished = false;
 }
 
@@ -161,10 +160,6 @@ void TabulatedFunction::setAttribute(const std::string& attName,const IFunction:
   {
     IFunction::setAttribute(attName,value);
     m_setupFinished = false;
-    if (attName == "WorkspaceIndex")
-    {
-        m_indexSet = true;
-    }
   }
 }
 
@@ -213,11 +208,6 @@ void TabulatedFunction::loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws
 {
   m_workspace = ws;
   m_setupFinished = false;
-  if ( m_indexSet )
-  {
-      setupData();
-  }
-
 }
 
 /**
@@ -225,7 +215,11 @@ void TabulatedFunction::loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws
   */
 void TabulatedFunction::setupData() const
 {
-    if ( m_setupFinished ) return;
+    if ( m_setupFinished )
+    {
+        g_log.debug() << "Re-setting isn't required.";
+        return;
+    }
 
     if ( !m_workspace )
     {
@@ -236,6 +230,8 @@ void TabulatedFunction::setupData() const
     }
 
     size_t index = static_cast<size_t>(getAttribute("WorkspaceIndex").asInt());
+
+    g_log.debug() << "Setting up " << m_workspace->name() << " index " << index << std::endl;
 
     const bool hist = m_workspace->isHistogramData();
     const size_t nbins = m_workspace->blocksize();

@@ -48,7 +48,6 @@ DECLARE_FUNCTION(Convolution)
 
 /// Constructor
 Convolution::Convolution()
-:m_resolution(NULL),m_resolutionSize(0)
 {
   declareAttribute("FixResolution", Attribute(true));
   setAttributeValue("NumDeriv", true );
@@ -57,7 +56,6 @@ Convolution::Convolution()
 /// Destructor
 Convolution::~Convolution()
 {
-  if (m_resolution) delete[] m_resolution;
 }
 
 void Convolution::init()
@@ -121,10 +119,9 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
 
   int n2 = static_cast<int>(nData) / 2;
   bool odd = n2*2 != static_cast<int>(nData);
-  if (m_resolution == 0)
+  if (m_resolution.empty())
   {
-    m_resolutionSize = nData;
-    m_resolution = new double[nData];
+    m_resolution.resize(nData);
     // the resolution must be defined on interval -L < xr < L, L == (xValues[nData-1] - xValues[0]) / 2 
     double* xr = new double[nData];
     double dx = (xValues[nData-1] - xValues[0]) / static_cast<double>((nData - 1));
@@ -146,7 +143,7 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
       delete [] xr;
       throw std::runtime_error("Convolution can work only with IFunction1D");
     }
-    fun->function1D(m_resolution,xr,nData);
+    fun->function1D(m_resolution.data(),xr,nData);
 
     // rotate the data to produce the right transform
     if (odd)
@@ -168,8 +165,8 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
         m_resolution[n2+i] = tmp;
       }
     }
-    gsl_fft_real_transform (m_resolution, 1, nData, wavetable, workspace);
-    std::transform(m_resolution,m_resolution+nData,m_resolution,std::bind2nd(std::multiplies<double>(),dx));
+    gsl_fft_real_transform (m_resolution.data(), 1, nData, wavetable, workspace);
+    std::transform(m_resolution.begin(),m_resolution.end(),m_resolution.begin(),std::bind2nd(std::multiplies<double>(),dx));
     delete[] xr;
   }
 
@@ -177,7 +174,7 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
   if (nFunctions() == 1)
   {
     double dx = 1.;//nData > 1? xValues[1] - xValues[0]: 1.;
-    std::transform(m_resolution,m_resolution+nData,out,std::bind2nd(std::multiplies<double>(),dx));
+    std::transform(m_resolution.begin(),m_resolution.end(),out,std::bind2nd(std::multiplies<double>(),dx));
     gsl_fft_real_wavetable_free (wavetable);
     gsl_fft_real_workspace_free (workspace);
     return;
@@ -227,7 +224,7 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
   double dx = nData > 1? xValues[1] - xValues[0]: 1.;
   std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dx));
 
-  HalfComplex res(m_resolution,nData);
+  HalfComplex res(m_resolution.data(),nData);
   HalfComplex fun(out,nData);
 
   for(size_t i = 0; i <= res.size(); i++)
@@ -304,11 +301,19 @@ size_t Convolution::addFunction(IFunction_sptr f)
   return iFun;
 }
 
+/**
+  * Make sure that the resolution is updated if this function is reused in several Fits.
+  */
+void Convolution::setUpForFit()
+{
+    m_resolution.clear();
+}
+
 /// Deletes and zeroes pointer m_resolution forsing function(...) to recalculate the resolution function
 void Convolution::refreshResolution()const
 {
   // refresh when calculation for the first time
-  bool needRefreshing = m_resolutionSize == 0;
+  bool needRefreshing = m_resolution.empty();
   if ( !needRefreshing )
   {
       // if resolution has active parameters always refresh
@@ -324,9 +329,7 @@ void Convolution::refreshResolution()const
   }
   if ( !needRefreshing ) return;
   // delete fourier transform of the resolution to force its recalculation
-  if (m_resolution) delete[] m_resolution;
-  m_resolution = NULL;
-  m_resolutionSize = 0;
+  m_resolution.clear();
 }
 
 

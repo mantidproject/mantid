@@ -152,6 +152,18 @@ namespace Mantid
       {
         throw std::invalid_argument("Fitting function failed to initialize");
       }
+
+      // for inidividual fittings store the initial parameters
+      std::vector<double> initialParams(ifun->nParams());
+      if ( !sequential )
+      {
+          for(size_t i = 0; i < initialParams.size(); ++i)
+          {
+              initialParams[i] = ifun->getParameter(i);
+          }
+      }
+
+
       for(size_t iPar=0;iPar<ifun->nParams();++iPar)
       {
         result->addColumn("double",ifun->parameterName(iPar));
@@ -223,6 +235,9 @@ namespace Mantid
                 setWorkspaceIndexAttribute( ifun, j );
             }
 
+            g_log.debug() << "Fitting " << data.ws->name() << " index " << j << " with " << std::endl;
+            g_log.debug() << ifun->asString() << std::endl;
+
             // Fit the function
             API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
             fit->initialize();
@@ -235,18 +250,22 @@ namespace Mantid
             fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
             fit->setProperty("CalcErrors",true);
             fit->execute();
+
+            if (!fit->isExecuted())
+            {
+                throw std::runtime_error("Fit child algorithm failed: "+data.ws->name());
+            }
+
             ifun = fit->getProperty("Function");
             chi2 = fit->getProperty("OutputChi2overDoF");
+
+            g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus") << ' ' << chi2 << std::endl;
+
           }
           catch(...)
           {
             g_log.error("Error in Fit ChildAlgorithm");
             throw;
-          }
-
-          if (!sequential)
-          {
-            ifun = FunctionFactory::Instance().createInitialized(fun);
           }
 
           // Extract the fitted parameters and put them into the result table
@@ -269,6 +288,16 @@ namespace Mantid
           Prog += dProg;
           progress(Prog);
           interruption_point();
+
+          if (!sequential)
+          {
+            //ifun = FunctionFactory::Instance().createInitialized(fun);
+            for(size_t i = 0; i < initialParams.size(); ++i)
+            {
+                ifun->setParameter(i,initialParams[i]);
+            }
+          }
+
         } // for(;j < jend;++j)
       }
     }

@@ -113,9 +113,6 @@ private:
   /// Stores y-values
   mutable std::vector<double> m_yData;
 
-  /// Flag of setting workspace index explicitly
-  mutable bool m_indexSet;
-
   /// Flag of completing data setup
   mutable bool m_setupFinished;
 
