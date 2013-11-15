@@ -19,12 +19,12 @@ from IndirectCommon import *
 import sys, platform, math, os.path, numpy as np
 mp = import_mantidplot()
 
-def CalcErange(inWS,ns,erange,nbin):
+def CalcErange(inWS,ns,erange,binWidth):
 	# length of array in Fortran
 	array_len = 4096
 	
-	nbin = int(nbin)
-	bnorm = 1.0/nbin
+	binWidth = int(binWidth)
+	bnorm = 1.0/binWidth
 
 	# get data from input workspace
 	N,X,Y,E = GetXYE(inWS,ns,array_len)
@@ -39,11 +39,11 @@ def CalcErange(inWS,ns,erange,nbin):
 	xInMax = Xin[-1]
 
 	#get indicies either side of energy range
-	minIndex = np.where(Xdata==xInMin)[0]+1
-	maxIndex = np.where(Xdata==xInMax)[0]+1
+	minIndex = np.where(Xdata==xInMin)[0][0]+1
+	maxIndex = np.where(Xdata==xInMax)[0][0]
 
 	#check we're using a valid range
-	if nbin == 0:
+	if binWidth == 0:
 		error = 'Erange - calculated points is Zero'
 		sys.exit(error)
 
@@ -56,15 +56,18 @@ def CalcErange(inWS,ns,erange,nbin):
 		sys.exit(error)
 
 	#reshape array into sublists of bins
-	Xin = Xin.reshape(len(Xin)/nbin, nbin)
+	Xin = Xin.reshape(len(Xin)/binWidth, binWidth)
 
 	#sum and normalise values in bins
 	Xout = [sum(bin)*bnorm for bin in Xin]
 
-	#pad array for use in Fortran code
-	Xout = PadArray(Xout,array_len)
+	#count number of bins
+	nbins = len(Xout)-1
+	
+	nout = [nbins, minIndex, maxIndex]
 
- 	nout = [nbin, minIndex, maxIndex]
+ 	#pad array for use in Fortran code
+	Xout = PadArray(Xout,array_len)
 
 	return nout,bnorm,Xout,X,Y,E
 
