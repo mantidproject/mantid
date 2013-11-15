@@ -65,6 +65,11 @@ namespace MantidQt
       m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
       m_icatUiForm.dataFileLoadBtn->setEnabled(false);
 
+      // We create the calendar here to allow only one instance of it to occur.
+      m_calendar = new QCalendarWidget(qobject_cast<QWidget*>(this->parent()));
+
+      // When the user has selected a date from the calendar we want to set the related date input field.
+      connect(m_calendar,SIGNAL(clicked(QDate)),this,SLOT(dateSelected(QDate)));
       // Show related help page when a user clicks on the "Help" button.
       connect(m_icatUiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
       // Show "Search" frame when user clicks "Catalog search" check box.
@@ -369,26 +374,7 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Updates text field depending on button picker selected.
-     * @param buttonName :: The name of the text field is derived from the buttonName.
-     */
     void CatalogSearch::dateSelected(const std::string &buttonName)
-    {
-      if (buttonName.compare("startDatePicker") == 0)
-      {
-        // Since the user wants to select a startDate we disable the endDate button to prevent any issues.
-        m_icatUiForm.endDatePicker->setEnabled(false);
-        // Update the text field and re-enable the button.
-        connect(m_calendar, SIGNAL(selectionChanged()),this, SLOT(updateStartDate()));
-      }
-      else
-      {
-        m_icatUiForm.startDatePicker->setEnabled(false);
-        connect(m_calendar, SIGNAL(selectionChanged()),this, SLOT(updateEndDate()));
-      }
-    }
-
-    /**
      * Populates the "Instrument" list-box
      */
     void CatalogSearch::populateInstrumentBox()
@@ -483,10 +469,6 @@ namespace MantidQt
      */
     void CatalogSearch::openCalendar()
     {
-      // Pop the m_calendar out into it's own window.
-      QWidget* parent = qobject_cast<QWidget*>(this->parent());
-      m_calendar = new QCalendarWidget(parent);
-
       // Set min/max dates to prevent user selecting unusual dates.
       m_calendar->setMinimumDate(QDate(1950, 1, 1));
       m_calendar->setMaximumDate(QDate(2050, 1, 1));
@@ -499,31 +481,53 @@ namespace MantidQt
       m_calendar->setWindowTitle("Calendar picker");
       m_calendar->show();
 
-      // Uses the previously clicked button (startDatePicker or endDatePicker) to determine which
-      // text field that the opened m_calendar is coordinating with (e.g. the one we want to write date to).
-      dateSelected(sender()->name());
+      // Set the name of the date button the user pressed to open the calendar with.
+      m_dateButtonName = sender()->name();
     }
 
     /**
-     * Update startDate text field when startDatePicker is used and date is selected.
+     * Update text field when date is selected.
+     * @param date :: The date the user has selected.
      */
-    void CatalogSearch::updateStartDate()
+    void CatalogSearch::dateSelected(QDate date)
     {
-      // Update the text field with the user selected date then close the m_calendar.
-      m_icatUiForm.StartDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
+      // As openCalendar slot is used for both start and end date we need to perform a check
+      // to see which button was pressed, and then updated the related input field.
+      if (m_dateButtonName.compare("startDatePicker") == 0)
+      {
+        m_icatUiForm.StartDate->setText(date.toString("dd/MM/yyyy"));
+      }
+      else
+      {
+        m_icatUiForm.EndDate->setText(date.toString("dd/MM/yyyy"));
+      }
       m_calendar->close();
-      // Re-enable the button to allow the user to select an endDate if they wish.
-      m_icatUiForm.endDatePicker->setEnabled(true);
     }
 
     /**
-     * Update endDate text field when endDatePicker is used and date is selected.
+     * Checks if start date is greater than end date.
+     * @returns true if start date is greater than end date.
      */
-    void CatalogSearch::updateEndDate()
+    bool CatalogSearch::validateDates()
     {
-      m_icatUiForm.EndDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
-      m_calendar->close();
-      m_icatUiForm.startDatePicker->setEnabled(true);
+      std::string startDateInput = m_icatUiForm.StartDate->text().toStdString();
+      std::string endDateInput   = m_icatUiForm.EndDate->text().toStdString();
+
+      // Return false if the user has not input any dates. This prevents any null errors occurring.
+      if (startDateInput.size() <= 2 || endDateInput.size() <= 2) return false;
+
+      // If startDate > endDate we want to throw an error and inform the user (red star(*)).
+      if (m_icatHelper->getTimevalue(startDateInput) > m_icatHelper->getTimevalue(endDateInput))
+      {
+        m_icatUiForm.StartDate_err->setToolTip(QString::fromStdString("<span style=\"color: white;\">Start date cannot be greater than end date.</span>"));
+        m_icatUiForm.StartDate_err->show();
+        return true;
+      }
+      else
+      {
+        m_icatUiForm.StartDate_err->hide();
+        return false;
+      }
     }
 
     /**
@@ -569,8 +573,10 @@ namespace MantidQt
         std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
 
         // Has any errors occurred?
-        if (!errors.empty())
+        if (!errors.empty() || validateDates())
         {
+          // Clear form to prevent previous search results showing if an error occurs.
+          clearSearchResultFrame();
           showErrorLabels(errors);
           m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
           // Stop here to prevent the search being carried out below.
