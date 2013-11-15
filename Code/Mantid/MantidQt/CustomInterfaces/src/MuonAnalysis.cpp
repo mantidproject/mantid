@@ -2038,7 +2038,7 @@ QStringList MuonAnalysis::getPeriodLabels() const
  * @param wsName workspace name
  * @param wsIndex workspace index
  */
-void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale)
+void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const QMap<QString, QString>& params)
 {
     QString pyS;
 
@@ -2047,65 +2047,38 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
 
     // If doesn't exist - plot it
     pyS += "if w == None:\n"
-           "  w = plotSpectrum('%1', %2, True)\n"
-           "  w.setObjectName('%1')\n"
-           "  l = w.activeLayer()\n"
-           "  l.setCurveTitle(0, '%1')\n"
-           "  l.setTitle('%3')\n";
-
-    // Set logarithmic scale if required
-    if ( ylogscale )
-      pyS += "l.logYlinX()\n";
+           "  w = plotSpectrum('%1', %2, %3, %4)\n"
+           "  w.setObjectName('%1')\n";
 
     // If plot does exist already, it should've just been updated automatically, so we just
     // need to make sure it is visible
     pyS += "else:\n"
+          "  plotSpectrum('%1', %2, %3, %4, window = w, clearWindow = True)\n"
           "  w.show()\n"
           "  w.setFocus()\n";
 
-    runPythonCode( pyS.arg(wsName).arg(wsIndex).arg(m_title.c_str()) );
-}
+    pyS = pyS.arg(wsName).arg(wsIndex).arg(params["ShowErrors"]).arg(params["ConnectType"]);
+  
+    // Update titles
+    pyS += "l = w.activeLayer()\n"
+           "l.setCurveTitle(0, '%1')\n"
+           "l.setTitle('%2')\n";
 
-/**
- * Set various style parameters for the plot of the given ws
- * @param wsName Workspace which plot to style
- * @param params Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
-                 of possible keys
- */
-void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QString>& params)
-{
+    pyS = pyS.arg(wsName).arg(m_title.c_str());
 
-  QString code;
+    // Set logarithmic scale if required
+    if ( params["LogScale"] == "True" )
+      pyS += "l.logYlinX()\n";
 
-  // Get the active layer of the graph
-  code += "l = graph('"+ wsName + "-1').activeLayer()\n";
+    // Set scaling
+    if( params["YAxisAuto"] == "True" )
+      pyS += "l.setAutoScale()\n";
+    else
+      pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
 
-  // Set whether to show symbols
-  QString symbolStyle = (params["ConnectType"] == "0") ? QString("PlotSymbol.NoSymbol") : QString("PlotSymbol.Ellipse");
-  code += "l.setCurveSymbol(0, PlotSymbol(" + symbolStyle +", QBrush(), QPen(), QSize(5,5)))\n";
+    pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
 
-  // Set whether to show line
-  QString penStyle = (params["ConnectType"] == "1") ? QString("Qt.NoPen") : QString("Qt.SolidLine");
-  code += "pen = QPen(Qt.black)\n"
-          "pen.setStyle(" + penStyle +")\n"
-          "l.setCurvePen(0, pen)\n";
-
-  // Set error settings
-  QString showErrors = (params["ShowErrors"] == "True") ? QString("True") : QString("False");
-  code += "errorSettings = l.errorBarSettings(0, 0)\n"
-          "errorSettings.drawMinusSide(" + showErrors + ")\n"
-          "errorSettings.drawPlusSide(" + showErrors + ")\n";
-
-  // If autoscaling disabled - set manual Y axis values
-  if(params["YAxisAuto"] == "False")
-    code += "l.setAxisScale(Layer.Left," + params["YAxisMin"] + "," + params["YAxisMax"] + ")\n";
-  else
-    code += "l.setAutoScale()\n";
-
-  // Replot
-  code += "l.replot()\n";
-
-  runPythonCode(code);
+    runPythonCode( pyS );
 }
 
 /**
@@ -2268,11 +2241,7 @@ void MuonAnalysis::showPlot(const QString& wsName)
   {
     setCurrentDataName(wsName);
 
-    if(!plotExists(wsName))
-    {
-      plotSpectrum(m_currentDataName, 0, false);
-      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
-    }
+    plotSpectrum(m_currentDataName, 0, getPlotStyleParams(m_currentDataName, 0));
 
     selectMultiPeak(m_currentDataName);
   }
@@ -2393,12 +2362,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     matrix_workspace->setYUnitLabel(plotType);
 
-    // plot the spectrum
-    plotSpectrum(cropWS, groupNum, plotOnLogScale);
-
-    // Change the plot style of the graph so that it matches what is selected on
-    // the plot options tab.
-    setPlotStyle(titleLabel, getPlotStyleParams(titleLabel, groupNum));
+    QMap<QString, QString> params = getPlotStyleParams(titleLabel, groupNum);
+    params["LogScale"] = plotOnLogScale ? "True" : "False";
+    plotSpectrum(titleLabel, groupNum, params);
 
     setCurrentDataName(titleLabel);
   }
@@ -2518,12 +2484,8 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     matrix_workspace->setYUnitLabel(plotType);
     
-    // plot the spectrum
-    plotSpectrum(cropWS, 0);
-
-    // Change the plot style of the graph so that it matches what is selected on
-    // the plot options tab
-    setPlotStyle(titleLabel, getPlotStyleParams(titleLabel, 0));
+    QMap<QString, QString> params = getPlotStyleParams(titleLabel, 0);
+    plotSpectrum(titleLabel, 0, params);
     
     setCurrentDataName(titleLabel);
   }
@@ -3878,8 +3840,6 @@ void MuonAnalysis::updateCurrentPlotStyle()
   {
     if(plotExists(m_currentDataName))
     {
-      // TODO: This index magic wouldn't be needed if we'd store only a single group in a workspace.
-
       // Get selected group index
       int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
@@ -3887,7 +3847,7 @@ void MuonAnalysis::updateCurrentPlotStyle()
       if(index >= numGroups())
         index = 0;
 
-      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, index));
+      plotSpectrum(m_currentDataName, index, getPlotStyleParams(m_currentDataName, index));
     }
     else
       runFrontPlotButton();
