@@ -11,6 +11,8 @@ if( WIN32 )
   # Bundled for dev build
   #####################################################################
 
+  ## Python package directories ##
+  set ( PY_DIST_DIRS "${CMAKE_LIBRARY_PATH}/Python27/DLLs" "${CMAKE_LIBRARY_PATH}/Python27/Lib" )
   # Use xcopy to as it has the ability to copy directories but only those files that
   # have been updated. It requires native paths though.
   file(TO_NATIVE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} BIN_CFG_NATIVE)
@@ -31,9 +33,25 @@ if( WIN32 )
   set ( BIN_CFG_NATIVE )
   set ( PYDIR_NATIVE )
   
-  # Now the binary files
-  # The mingw libs are required by the compiled fortran files to import correctly
-  file ( GLOB MINGW_DLLS "${CMAKE_LIBRARY_PATH}/mingw/*.dll" )
+  ## Binary files ##
+  set ( PY_DLL_PREFIX  "${CMAKE_LIBRARY_PATH}/Python27/Python27" )
+  set ( PY_DLL_SUFFIX_RELEASE ".dll" )
+  set ( PY_DLL_SUFFIX_RELWITHDEBINFO ${PY_DLL_SUFFIX_RELEASE} )
+  set ( PY_DLL_SUFFIX_MINSIZEREL ${PY_DLL_SUFFIX_RELEASE}  )
+  set ( PY_DLL_SUFFIX_DEBUG "_d.dll" )
+
+  set ( PY_EXE_PREFIX  "${CMAKE_LIBRARY_PATH}/Python27/python" )
+  set ( PY_EXE_SUFFIX_RELEASE ".exe" )
+  set ( PY_EXE_SUFFIX_RELWITHDEBINFO ${PY_EXE_SUFFIX_RELEASE} )
+  set ( PY_EXE_SUFFIX_MINSIZEREL ${PY_EXE_SUFFIX_RELEASE}  )
+  set ( PY_EXE_SUFFIX_DEBUG "_d.exe" )
+  # No terminal version
+  set ( PY_EXEW_PREFIX  "${CMAKE_LIBRARY_PATH}/Python27/pythonw" )
+  set ( PY_EXEW_SUFFIX_RELEASE ".exe" )
+  set ( PY_EXEW_SUFFIX_RELWITHDEBINFO ${PY_EXE_SUFFIX_RELEASE} )
+  set ( PY_EXEW_SUFFIX_MINSIZEREL ${PY_EXE_SUFFIX_RELEASE}  )
+  set ( PY_EXEW_SUFFIX_DEBUG "_d.exe" )
+
   if ( MSVC_IDE )
     foreach ( TYPE DLL EXE EXEW )
       add_custom_command( TARGET ${PYBUNDLE_POST_TARGET} POST_BUILD 
@@ -45,11 +63,6 @@ if( WIN32 )
                           ${PY_${TYPE}_PREFIX}%PY_${TYPE}_SUFFIX_${CMAKE_CFG_INTDIR}% ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
                         )
     endforeach ( TYPE )
-    foreach ( DLL_FILE ${MINGW_DLLS} )
-      add_custom_command( TARGET ${PYBUNDLE_POST_TARGET} POST_BUILD
-                          COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                          ${DLL_FILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
-    endforeach( DLL_FILE )
   else () # Need to do things slightly differently for nmake
     foreach ( TYPE DLL EXE EXEW )
       add_custom_command( TARGET ${PYBUNDLE_POST_TARGET} POST_BUILD 
@@ -61,11 +74,6 @@ if( WIN32 )
                           ${PY_${TYPE}_PREFIX}%PY_${TYPE}_SUFFIX_${CMAKE_BUILD_TYPE}% ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
                         )
     endforeach ( TYPE )
-    foreach ( DLL_FILE MINGW_DLLS )
-      add_custom_command( TARGET ${PYBUNDLE_POST_TARGET} POST_BUILD
-                          COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                          ${DLL_FILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
-    endforeach( DLL_FILE )
   endif ()
   
   #####################################################################
