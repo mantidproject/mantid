@@ -294,7 +294,7 @@ private:
   void plotPair(const std::string& plotType);
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
-  void plotSpectrum(const QString& wsName, const int wsIndex, const QMap<QString, QString>& params);
+  void plotSpectrum(const QString& wsName, const int wsIndex, bool logScale = false);
 
   /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
   /// something is not specified

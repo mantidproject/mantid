@@ -2035,11 +2035,15 @@ QStringList MuonAnalysis::getPeriodLabels() const
 
 /**
  * plots specific WS spectrum (used by plotPair and plotGroup)
- * @param wsName workspace name
- * @param wsIndex workspace index
+ * @param wsName   :: Workspace name
+ * @param wsIndex  :: Workspace index
+ * @param logScale :: Whether to plot using logarithmic scale
  */
-void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const QMap<QString, QString>& params)
+void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, bool logScale)
 {
+    // Get plotting params
+    const QMap<QString, QString>& params = getPlotStyleParams(wsName, wsIndex);
+
     QString pyS;
 
     // Try to find existing graph window
@@ -2067,7 +2071,7 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
     pyS = pyS.arg(wsName).arg(m_title.c_str());
 
     // Set logarithmic scale if required
-    if ( params["LogScale"] == "True" )
+    if ( logScale )
       pyS += "l.logYlinX()\n";
 
     // Set scaling
@@ -2170,7 +2174,7 @@ void MuonAnalysis::selectMultiPeak(const QString& wsName)
   disableAllTools();
 
   if( ! plotExists(wsName) )
-    plotSpectrum(wsName, 0, getPlotStyleParams(wsName, 0));
+    plotSpectrum(wsName, 0);
 
   QString code;
 
@@ -2335,9 +2339,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     matrix_workspace->setYUnitLabel(plotType);
 
-    QMap<QString, QString> params = getPlotStyleParams(titleLabel, groupNum);
-    params["LogScale"] = plotOnLogScale ? "True" : "False";
-    plotSpectrum(titleLabel, groupNum, params);
+    plotSpectrum(titleLabel, groupNum, plotOnLogScale);
 
     setCurrentDataName(titleLabel);
   }
@@ -2457,8 +2459,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     matrix_workspace->setYUnitLabel(plotType);
     
-    QMap<QString, QString> params = getPlotStyleParams(titleLabel, 0);
-    plotSpectrum(titleLabel, 0, params);
+    plotSpectrum(titleLabel, 0);
     
     setCurrentDataName(titleLabel);
   }
@@ -3818,7 +3819,8 @@ void MuonAnalysis::updateCurrentPlotStyle()
     if(index >= numGroups())
       index = 0;
 
-    plotSpectrum(m_currentDataName, index, getPlotStyleParams(m_currentDataName, index));
+    // Replot using new style params
+    plotSpectrum(m_currentDataName, index);
   }
 }
 
