@@ -4,6 +4,11 @@ Filters out logs that do not sit between StartTime and EndTime. The algorithm al
 A workspace must be provided containing logs. The log name provided must refer to a FloatTimeSeries log.
 
 Unless specified, StartTime is taken to be run_start. StartTime and EndTime filtering is inclusive of the limits provided.
+
+The Method allows you to create quick statistics on the filtered array returned in the FilteredResult output argument. Therefore the return value from Method=mean is equivalent to running numpy.mean 
+on the output from the FilteredResult property. All the Method options map directly to python numpy functions with the same name. These are documented 
+[http://docs.scipy.org/doc/numpy/reference/routines.statistics.html here] 
+
 *WIKI*
 '''
 
@@ -28,7 +33,7 @@ class FilterLogByTime(PythonAlgorithm):
         self.declareProperty(name="StartTime", defaultValue=-sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="Start time for filtering. Seconds after run start")
         self.declareProperty(name="EndTime", defaultValue=sys.float_info.max, validator=FloatBoundedValidator(), direction=Direction.Input, doc="End time for filtering. Seconds after run start")
         self.declareProperty(name="Method",defaultValue="mean", validator=StringListValidator(["mean","min", "max", "median", "mode"]), doc="Statistical method to use to generate ResultStatistic output")
-        self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output), doc="Output stitched workspace")
+        self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output), doc="Filtered values between specified times.")
         self.declareProperty(name="ResultStatistic", defaultValue=0.0, direction=Direction.Output, doc="Requested statistic")
         self.setWikiSummary("Filters a log between time intervals and applies a user defined operation to the result.")
     
