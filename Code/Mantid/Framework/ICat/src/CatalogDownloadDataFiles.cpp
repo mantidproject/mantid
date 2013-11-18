@@ -5,20 +5,17 @@ if the data archive is not accessible, it downloads the files from the data serv
 
 *WIKI*/
 
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
+#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/CatalogFactory.h"
-#include "MantidAPI/ICatalog.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/FileDescriptor.h"
 
-#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/SSLException.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/StreamCopier.h>
@@ -26,15 +23,6 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include <Poco/URI.h>
 #include <fstream>
 #include <iomanip>
-
-using Poco::Net::HTTPClientSession;
-using Poco::Net::HTTPRequest;
-using Poco::Net::HTTPResponse;
-using Poco::Net::HTTPMessage;
-using Poco::StreamCopier;
-using Poco::Path;
-using Poco::URI;
-using Poco::Exception;
 
 namespace Mantid
 {
@@ -65,36 +53,11 @@ namespace Mantid
                       "A list of file locations to the catalog datafiles.");
     }
 
-    /// Raise an error concerning catalog searching
-    void CatalogDownloadDataFiles::throwCatalogError() const
-    {
-      const std::string facilityName = ConfigService::Instance().getFacility().name();
-      std::stringstream ss;
-      ss << "Your current Facility, " << facilityName << ", does not have ICAT catalog information. "
-          << std::endl;
-      ss << "The facilities.xml file may need updating. Contact the Mantid Team for help." << std::endl;
-      throw std::runtime_error(ss.str());
-    }
-
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
-      ICatalog_sptr catalog;
-
-      try
-      {
-        catalog = CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
-
-      }
-      catch(Kernel::Exception::NotFoundError&)
-      {
-        throwCatalogError();
-      }
-
-      if(!catalog)
-      {
-        throwCatalogError();
-      }
+      // Create and use the catalog the user has specified in Facilities.xml
+      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
 
       // Used in order to transform the archive path to the user's operating system.
       CatalogInfo catalogInfo = ConfigService::Instance().getFacility().catalogInfo();
@@ -123,8 +86,10 @@ namespace Mantid
         std::string fileLocation;
         catalog->getFileLocation(*fileID,fileLocation);
 
+        g_log.debug() << "CatalogDownloadDataFiles -> File location before transform is: " << fileLocation << std::endl;
         // Transform the archive path to the path of the user's operating system.
         fileLocation = catalogInfo.transformArchivePath(fileLocation);
+        g_log.debug() << "CatalogDownloadDataFiles -> File location after transform is:  " << fileLocation << std::endl;
 
         // Can we open the file (Hence, have access to the archives?)
         std::ifstream hasAccessToArchives(fileLocation.c_str());
@@ -157,13 +122,23 @@ namespace Mantid
     }
 
     /**
-     * Checks to see if the file to be downloaded is a datafile.
-     * @param stream ::  input stream
-     * @returns True if the stream is not considered ASCII (e.g. binary), false otherwise
-     */
-    bool CatalogDownloadDataFiles::isBinary(std::istream& stream)
+    * Checks to see if the file to be downloaded is a datafile.
+    * @param fileName :: Name of data file to download.
+    * @returns True if the file is a data file.
+    */
+    bool CatalogDownloadDataFiles::isDataFile(const std::string & fileName)
     {
-      return !FileDescriptor::isAscii(stream);
+      std::string extension = Poco::Path(fileName).getExtension();
+      std::transform(extension.begin(),extension.end(),extension.begin(),tolower);
+
+      if (extension.compare("raw") == 0 || extension.compare("nxs") == 0)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
     }
 
     /**
@@ -180,11 +155,7 @@ namespace Mantid
       //use HTTP  Get method to download the data file from the server to local disk
       try
       {
-        // Temporary fix (can be removed when ICAT3 disabled) as URL returned is HTTPS, which will cause the
-        // HTTPResponse below to fail the download. We can replace HTTPS with HTTP and download as expected.
-        std::string newURL = URL; // Need to convert to none const to perform replacement.
-        boost::replace_first(newURL, "https", "http");
-        URI uri(newURL);
+        Poco::URI uri(URL);
 
         std::string path(uri.getPathAndQuery());
         if (path.empty())
@@ -193,12 +164,16 @@ namespace Mantid
         }
         start=clock();
 
-        HTTPClientSession session(uri.getHost(), uri.getPort());
-        HTTPRequest req(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
-        session.sendRequest(req);
+        // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
+        const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
+        Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
 
-        HTTPResponse res;
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
+        session.sendRequest(request);
+
+        Poco::Net::HTTPResponse res;
         std::istream& rs = session.receiveResponse(res);
+
         //save file to local disk
         retVal_FullPath = saveFiletoDisk(rs,fileName);
 
@@ -207,14 +182,15 @@ namespace Mantid
         g_log.information()<<"Time taken to download file "<< fileName<<" is "<<std::fixed << std::setprecision(2) << diff <<" seconds" << std::endl;
 
       }
-      catch(Poco::SyntaxException&)
+      catch(Poco::Net::SSLException& error)
       {
-        throw std::runtime_error("Error when downloading the data file"+ fileName);
+        throw std::runtime_error(error.displayText());
       }
-      catch(Poco::Exception&)
-      {
-        throw std::runtime_error("Can not download the file "+fileName +". Path is invalid for the file.");
-      }
+      // A strange error occurs (what returns: {I/O error}, while message returns: { 9: The BIO reported an error }.
+      // This bug has been fixed in POCO 1.4 and is noted - http://sourceforge.net/p/poco/bugs/403/
+      // I have opted to catch the exception and do nothing as this allows the load/download functionality to work.
+      // However, the port the user used to download the file will be left open.
+      catch(Poco::Exception&) {}
 
       return retVal_FullPath;
     }
@@ -232,15 +208,16 @@ namespace Mantid
       Poco::Path path(downloadPath, fileName);
       std::string filepath = path.toString();
 
-      std::ios_base::openmode mode = isBinary(rs) ? std::ios_base::binary : std::ios_base::out;
+      std::ios_base::openmode mode = isDataFile(fileName) ? std::ios_base::binary : std::ios_base::out;
 
       std::ofstream ofs(filepath.c_str(), mode);
       if ( ofs.rdstate() & std::ios::failbit )
       {
         throw Mantid::Kernel::Exception::FileError("Error on creating File",fileName);
       }
+
       //copy the input stream to a file.
-      StreamCopier::copyStream(rs, ofs);
+      Poco::StreamCopier::copyStream(rs, ofs);
 
       return filepath;
     }

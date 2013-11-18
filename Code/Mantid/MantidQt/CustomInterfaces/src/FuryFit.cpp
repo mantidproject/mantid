@@ -363,17 +363,37 @@ namespace IDA
     {
     case 0:
       m_ffTree->addProperty(m_ffProp["Exponential1"]);
+
+      //remove option to plot beta
+      uiForm().furyfit_cbPlotOutput->removeItem(3);
       break;
     case 1:
       m_ffTree->addProperty(m_ffProp["Exponential1"]);
       m_ffTree->addProperty(m_ffProp["Exponential2"]);
+
+      //remove option to plot beta
+      uiForm().furyfit_cbPlotOutput->removeItem(3);
       break;
     case 2:
       m_ffTree->addProperty(m_ffProp["StretchedExp"]);
+
+      //add option to plot beta
+      if(uiForm().furyfit_cbPlotOutput->count() == 3)
+      {
+        uiForm().furyfit_cbPlotOutput->addItem("Beta");
+      }
+      
       break;
     case 3:
       m_ffTree->addProperty(m_ffProp["Exponential1"]);
       m_ffTree->addProperty(m_ffProp["StretchedExp"]);
+
+      //add option to plot beta
+      if(uiForm().furyfit_cbPlotOutput->count() == 3)
+      {
+        uiForm().furyfit_cbPlotOutput->addItem("Beta");
+      }
+
       break;
     }
   }

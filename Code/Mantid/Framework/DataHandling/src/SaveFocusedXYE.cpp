@@ -51,10 +51,7 @@ void SaveFocusedXYE::init()
       "The name of the workspace containing the data you wish to save");
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
       "The filename to use when saving data");
-  std::vector<std::string> Split(2);
-  Split[0] = "True";
-  Split[1] = "False";
-  declareProperty("SplitFiles", "True", boost::make_shared<Kernel::StringListValidator>(Split),
+  declareProperty("SplitFiles", true,
       "Save each spectrum in a different file (default true)");
   declareProperty("StartAtBankNumber", 0, "Start bank (spectrum) numbers at this number in the file.  "
     "The bank number in the file will be the workspace index + StartAtBankNumber.");
@@ -95,8 +92,7 @@ void SaveFocusedXYE::exec()
     g_log.error() << "Starting bank number cannot be less than 0. " << std::endl;
     throw std::invalid_argument("Incorrect starting bank number");
   }
-
-  std::string split = getProperty("SplitFiles");
+  bool split = getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
   using std::ios_base;
@@ -137,7 +133,7 @@ void SaveFocusedXYE::exec()
         }
     }
 
-    if (split == "False" && out) // Assign only one file
+    if ((!split) && out) // Assign only one file
     {
       const std::string file(filename + '.' + ext);
       Poco::File fileObj(file);
@@ -146,7 +142,7 @@ void SaveFocusedXYE::exec()
       if (headers && (!exists || !append))
         writeHeaders(out, inputWS);
     }
-    else if (split == "True")//Several files will be created with names: filename-i.ext
+    else if (split)//Several files will be created with names: filename-i.ext
     {
       number << "-" << i + startingbank;
       const std::string file(filename + number.str() + "." + ext);
@@ -193,14 +189,14 @@ void SaveFocusedXYE::exec()
             << std::setw(18) << E[j] << "\n";
     }
     //Close at each iteration
-    if (split == "True")
+    if (split)
     {
       out.close();
     }
     progress.report();
   }
   // Close if single file
-  if (split == "False")
+  if (!split)
   {
     out.close();
   }

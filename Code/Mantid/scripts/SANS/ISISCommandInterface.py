@@ -100,6 +100,21 @@ def LOQ():
     except:
         return False
     return True
+
+def LARMOR():
+    """
+    Initialises the instrument settings for LARMOR
+    @return True on success
+    """
+    _printMessage('LARMOR()')
+    try:
+        instrument = isis_instrument.LARMOR()
+        
+        ReductionSingleton().set_instrument(instrument)
+        config['default.instrument']='LARMOR'
+    except:
+        return False
+    return True
     
 def Detector(det_name):
     """

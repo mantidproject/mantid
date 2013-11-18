@@ -3,8 +3,10 @@
 #include "MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h"
 #include "MantidICat/ICat4/ICat4Catalog.h"
 #include "MantidICat/Session.h"
-#include "MantidKernel/Strings.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid
 {
@@ -27,7 +29,7 @@ namespace Mantid
     void ICat4Catalog::login(const std::string& username, const std::string& password, const std::string& url)
     {
       UNUSED_ARG(url)
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
 
       // Define ssl authentication scheme
       setSSLContext(icat);
@@ -84,7 +86,7 @@ namespace Mantid
      */
     void ICat4Catalog::logout()
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
       setSSLContext(icat);
 
       ns1__logout request;
@@ -113,144 +115,123 @@ namespace Mantid
      */
     std::string ICat4Catalog::getSearchQuery(const CatalogSearchParam& inputs)
     {
-      // This will hold strings for each table of the query. Each segment will be joined together (<->).
-      std::vector<std::string> querySegments;
-
-      // The investigation segment will be stored here as it makes up for several inputs.
-      // It will be converted to a string, joined and then added to the querySegments.
-      std::vector<std::string> investigationWhere;
-
-      // In ICat4.2 `Dataset` and `Sample` cannot be in the same query (due to restriction with join).
-      // As such, we will query for sample only when dataset inputs are not used.
-      bool queryDataset = false;
+      // Contain the related where and join clauses for the search query based on user-input.
+      std::vector<std::string> whereClause, joinClause;
 
       // Format the timestamps in order to compare them.
-      std::string startDate = formatDateTime(inputs.getStartDate(), "%F %T");
-      std::string endDate   = formatDateTime(inputs.getEndDate(), "%F %T");
+      std::string startDate = formatDateTime(inputs.getStartDate(), "%Y-%m-%d %H:%M:%S");
+      std::string endDate   = formatDateTime(inputs.getEndDate() + ((23*60*60) + (59*60) + 59), "%Y-%m-%d %H:%M:%S");
 
       // Investigation startDate if endDate is not selected
       if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0)
       {
-        investigationWhere.push_back("startDate >= '" + startDate + "'");
+        whereClause.push_back("inves.startDate >= '" + startDate + "'");
       }
 
       // Investigation endDate if startdate is not selected
       if (inputs.getEndDate() != 0 && inputs.getStartDate() == 0)
       {
-        investigationWhere.push_back("endDate <= '" + endDate + "'");
+        whereClause.push_back("inves.endDate <= '" + endDate + "'");
       }
 
       // Investigation Start and end date if both selected
       if(inputs.getStartDate() != 0 && inputs.getEndDate() != 0)
       {
-        investigationWhere.push_back("startDate BETWEEN '" + startDate + "' AND '" + endDate + "'");
+        whereClause.push_back("inves.startDate BETWEEN '" + startDate + "' AND '" + endDate + "'");
       }
 
       // Investigation name (title)
       if(!inputs.getInvestigationName().empty())
       {
-        investigationWhere.push_back("title LIKE '%" + inputs.getInvestigationName() + "%' ");
-      }
-
-      // Investigation abstract
-      if(!inputs.getInvestigationAbstract().empty())
-      {
-        investigationWhere.push_back("summary = '" + inputs.getInvestigationAbstract() + "' ");
-      }
-
-      // Iterate over query vector and append AND between inputs.
-      std::string investigationResult = Strings::join(investigationWhere.begin(), investigationWhere.end(), " AND ");
-
-      // Add the investigation result to the query if it exists.
-      if (!investigationResult.empty())
-      {
-        querySegments.push_back("Investigation[" + investigationResult + "]");
+        whereClause.push_back("inves.title LIKE '%" + inputs.getInvestigationName() + "%'");
       }
 
       // Investigation type
       if(!inputs.getInvestigationType().empty())
       {
-        querySegments.push_back("InvestigationType[name IN ('" + inputs.getInvestigationType() + "')]");
-      }
-
-      // Investigator's surname
-      if(!inputs.getInvestigatorSurName().empty())
-      {
-        querySegments.push_back("InvestigationUser <-> User[name LIKE '%" + inputs.getInvestigatorSurName() + "%']");
-      }
-
-      // Datafile name
-      if(!inputs.getDatafileName().empty())
-      {
-        querySegments.push_back("Dataset <-> Datafile[name = '" + inputs.getDatafileName() + "']");
-        queryDataset = true;
-      }
-
-      // Run start and end
-      if(inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)
-      {
-        // Convert the start and end runs to string.
-        std::string runStart = Strings::toString(inputs.getRunStart());
-        std::string runEnd   = Strings::toString(inputs.getRunEnd());
-
-        // To be able to use DatafileParameter we need to have access to Dataset and Datafile.
-        // If queryDataset is true, then we can rest assured that the relevant access is possible.
-        if (queryDataset)
-        {
-          querySegments.push_back("DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
-        }
-        else
-        {
-          // Otherwise we directly include them ourselves.
-          querySegments.push_back("Dataset <-> Datafile <-> DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
-          // We then set queryDataset to true since Sample can not be included if a dataset is.
-          queryDataset = true;
-        }
+        joinClause.push_back("JOIN inves.type itype");
+        whereClause.push_back("itype.name = '" + inputs.getInvestigationType() + "'");
       }
 
       // Instrument name
       if(!inputs.getInstrument().empty())
       {
-        querySegments.push_back("Instrument[name = '" + inputs.getInstrument() + "']");
+        joinClause.push_back("JOIN inves.investigationInstruments invInst");
+        joinClause.push_back("JOIN invInst.instrument inst");
+        whereClause.push_back("inst.name = '" + inputs.getInstrument() + "'");
       }
 
       // Keywords
       if(!inputs.getKeywords().empty())
       {
-        querySegments.push_back("Keyword[name IN ('" + inputs.getKeywords() + "')]");
+        joinClause.push_back("JOIN inves.keywords keywords");
+        whereClause.push_back("keywords.name IN ('" + inputs.getKeywords() + "')");
       }
 
       // Sample name
-      if(!inputs.getSampleName().empty() && !queryDataset)
+      if(!inputs.getSampleName().empty())
       {
-        querySegments.push_back("Sample[name = '" + inputs.getSampleName() + "']");
+        joinClause.push_back("JOIN inves.samples sample");
+        whereClause.push_back("sample.name LIKE '%" + inputs.getSampleName() + "%'");
       }
 
-      // Now we build the query from the segments. For each segment, we append a join ("<->").
-      std::string query = Strings::join(querySegments.begin(), querySegments.end(), " <-> ");
-
-      // We then append the required includes to output related data, such as instrument name and run parameters.
-      if (!query.empty())
+      // If the user has selected the "My data only" button.
+      // (E.g. they want to display or search through all the data they have access to.
+      if (inputs.getMyData())
       {
-        // If the user wants to search through their data in their archive.
-        if (inputs.getMyData())
+        joinClause.push_back("JOIN inves.investigationUsers users");
+        joinClause.push_back("JOIN users.user user");
+        whereClause.push_back("user.name = :user");
+      }
+
+      // Investigators complete name.
+      if (!inputs.getInvestigatorSurName().empty())
+      {
+        // We join another investigationUsers & user tables as we need two aliases.
+        joinClause.push_back("JOIN inves.investigationUsers usrs");
+        joinClause.push_back("JOIN usrs.user usr");
+        whereClause.push_back("usr.fullName LIKE '%" + inputs.getInvestigatorSurName() + "%'");
+      }
+
+      // Similar to above. We check if either has been input,
+      // join the related table and add the specific WHERE clause.
+      if(!inputs.getDatafileName().empty() || (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0))
+      {
+        joinClause.push_back("JOIN inves.datasets dataset");
+        joinClause.push_back("JOIN dataset.datafiles datafile");
+
+        if (!inputs.getDatafileName().empty())
         {
-          query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user] <-> ");
+          whereClause.push_back("datafile.name LIKE '%" + inputs.getDatafileName() + "%'");
         }
-        // Otherwise, we search the entire archive.
-        else
+
+        if (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)
         {
-          query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> ");
+          joinClause.push_back("JOIN datafile.parameters datafileparameters");
+          joinClause.push_back("JOIN datafileparameters.type dtype");
+          whereClause.push_back("dtype.name='run_number' AND datafileparameters.numericValue BETWEEN "
+              + Strings::toString(inputs.getRunStart()) + " AND " + Strings::toString(inputs.getRunEnd()) + "");
         }
       }
 
-      // If the user has only selected the "My data only" button (E.g. they want to display all their "My data").
-      if (query.empty() && inputs.getMyData())
+      std::string query;
+
+      // This prevents the user searching the entire archive (E.g. there is no "default" query).
+      if (!whereClause.empty() || !joinClause.empty())
       {
-        query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]");
+        std::string select, from, join, where, orderBy, includes;
+
+        select   = "SELECT DISTINCT inves";
+        from     = " FROM Investigation inves ";
+        join     = Strings::join(joinClause.begin(), joinClause.end(), " ");
+        where    = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
+        where.insert(0, " WHERE ");
+        orderBy  = " ORDER BY inves.id ASC";
+        includes = " INCLUDE inves.investigationInstruments.instrument, inves.parameters";
+        query    = select + from + join + where + orderBy + includes;
       }
 
-      g_log.debug() << "Query: { " << query << " }" << std::endl;
+      g_log.debug() << "ICat4Catalog::getSearchQuery: { " << query << " }" << std::endl;
 
       return (query);
     }
@@ -270,7 +251,8 @@ namespace Mantid
         throw std::runtime_error("You have not input any terms to search for.");
       }
 
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -297,7 +279,8 @@ namespace Mantid
      */
     void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -305,7 +288,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
+      std::string query = "Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
       request.query     = &query;
 
       int result = icat.search(&request, &response);
@@ -328,7 +311,7 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
-      outputws->addColumn("str","Investigation id");
+      outputws->addColumn("long64","Investigation id");
       outputws->addColumn("str","Title");
       outputws->addColumn("str","Instrument");
       outputws->addColumn("str","Run range");
@@ -347,32 +330,46 @@ namespace Mantid
           try
           {
             API::TableRow table = outputws->appendRow();
-            // Now add the relevant investigation data to the table.
-            savetoTableWorkspace(investigation->name, table);
+            // Used to insert an empty string into the cell if value does not exist.
+            std::string emptyCell("");
+
+            // Now add the relevant investigation data to the table (They always exist).
+            savetoTableWorkspace(investigation->id, table);
             savetoTableWorkspace(investigation->title, table);
-            savetoTableWorkspace(investigation->instrument->name, table);
+            savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
+
             // Verify that the run parameters vector exist prior to doing anything.
             // Since some investigations may not have run parameters.
             if (!investigation->parameters.empty())
             {
               savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
             }
+            else
+            {
+              savetoTableWorkspace(&emptyCell, table);
+            }
+
             // Again, we need to check first if start and end date exist prior to insertion.
             if (investigation->startDate)
             {
-              std::string startDate = formatDateTime(*investigation->startDate, "%d-%m-%y");
+              std::string startDate = formatDateTime(*investigation->startDate, "%Y-%m-%d");
               savetoTableWorkspace(&startDate, table);
             }
+            else
+            {
+              savetoTableWorkspace(&emptyCell, table);
+            }
+
             if (investigation->endDate)
             {
-              std::string endDate = formatDateTime(*investigation->endDate, "%d-%m-%y");
+              std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
               savetoTableWorkspace(&endDate, table);
             }
           }
-          catch(std::runtime_error& exception)
+          catch(std::runtime_error&)
           {
             g_log.information("An error occurred when saving the ICat search results data to Workspace");
-            throw exception;
+            throw;
           }
         }
         else
@@ -389,7 +386,8 @@ namespace Mantid
      */
     void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -397,8 +395,10 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + boost::lexical_cast<std::string>(investigationId) + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + boost::lexical_cast<std::string>(investigationId) + "']";
       request.query     = &query;
+
+      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -441,10 +441,10 @@ namespace Mantid
           savetoTableWorkspace(&temp, table);
           savetoTableWorkspace(&temp, table);
         }
-        catch(std::runtime_error& exception)
+        catch(std::runtime_error&)
         {
           g_log.information("An error occurred when saving file data to workspace.");
-          throw exception;
+          throw;
         }
       }
     }
@@ -456,7 +456,8 @@ namespace Mantid
      */
     void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -464,18 +465,10 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::ostringstream temp;
-      temp << investigationId;
-      std::string name = temp.str();
-
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + name + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + boost::lexical_cast<std::string>(investigationId) + "']";
       request.query     = &query;
 
-      // If the investigation name is not valid.
-      if(name == "0" || name.empty())
-      {
-        throw std::runtime_error("Invalid investigation ID supplied.");
-      }
+      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -491,8 +484,8 @@ namespace Mantid
 
     /**
      * Saves result from "getDataFiles" to workspace.
-     * @param investigationId :: unique identifier of the investigation
-     * @param outputws        :: shared pointer to datasets
+     * @param response :: result response from the catalog.
+     * @param outputws :: shared pointer to datasets
      */
     void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
@@ -516,17 +509,17 @@ namespace Mantid
             savetoTableWorkspace(datafile->name, table);
             savetoTableWorkspace(datafile->location, table);
 
-            std::string createDate = formatDateTime(*datafile->createTime, "%F %T");
+            std::string createDate = formatDateTime(*datafile->createTime, "%Y-%m-%d %H:%M:%S");
             savetoTableWorkspace(&createDate, table);
 
             savetoTableWorkspace(datafile->id, table);
             std::string fileSize = bytesToString(*datafile->fileSize);
             savetoTableWorkspace(&fileSize, table);
           }
-          catch(std::runtime_error& exception)
+          catch(std::runtime_error&)
           {
             g_log.information("An error occurred when saving file data to workspace.");
-            throw exception;
+            throw;
           }
         }
         else
@@ -542,7 +535,8 @@ namespace Mantid
      */
     void ICat4Catalog::listInstruments(std::vector<std::string>& instruments)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -582,7 +576,8 @@ namespace Mantid
      */
     void ICat4Catalog::listInvestigationTypes(std::vector<std::string>& invstTypes)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -623,7 +618,8 @@ namespace Mantid
      */
     void ICat4Catalog::getFileLocation(const long long & fileID, std::string & fileLocation)
     {
-      ICATPortBindingProxy icat;
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
 
       ns1__get request;
       ns1__getResponse response;
@@ -666,8 +662,20 @@ namespace Mantid
      */
     void ICat4Catalog::getDownloadURL(const long long & fileID, std::string& url)
     {
-      UNUSED_ARG(fileID);
-      UNUSED_ARG(url);
+      // Obtain the URL from the Facilities.xml file.
+      std::string urlToBuild = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
+
+      // Set the REST features of the URL.
+      std::string session  = "sessionId="    + Session::Instance().getSessionId();
+      std::string datafile = "&datafileIds=" + boost::lexical_cast<std::string>(fileID);
+      std::string outname  = "&outname="     + boost::lexical_cast<std::string>(fileID);
+
+      // Add all the REST pieces to the URL.
+      urlToBuild += ("getData?" + session + datafile + outname + "&zip=false");
+
+      g_log.debug() << "ICat4Catalog::getDownloadURL -> { " << urlToBuild << " }" << std::endl;
+
+      url = urlToBuild;
     }
 
     /**
@@ -690,10 +698,10 @@ namespace Mantid
      * Defines the SSL authentication scheme.
      * @param icat :: ICATPortBindingProxy object.
      */
-    void ICat4Catalog::setSSLContext(ICATPortBindingProxy& icat)
+    void ICat4Catalog::setSSLContext(ICat4::ICATPortBindingProxy& icat)
     {
       if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
+          SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
           NULL,       /* keyfile: required only when client must authenticate to
               server (see SSL docs on how to obtain this file) */
           NULL,       /* password to read the keyfile */
@@ -710,7 +718,7 @@ namespace Mantid
      * Throws an error message (returned by gsoap) to Mantid upper layer.
      * @param icat :: ICATPortBindingProxy object.
      */
-    void ICat4Catalog::throwErrorMessage(ICATPortBindingProxy& icat)
+    void ICat4Catalog::throwErrorMessage(ICat4::ICATPortBindingProxy& icat)
     {
       char buf[600];
       const int len = 600;
@@ -733,8 +741,7 @@ namespace Mantid
 
     /**
      * Convert a file size to human readable file format.
-     * @param size    :: The size in bytes of the file.
-     * @return string :: A human readable file format (e.g. 5MB).
+     * @param fileSize :: The size in bytes of the file.
      */
     std::string ICat4Catalog::bytesToString(int64_t &fileSize)
     {

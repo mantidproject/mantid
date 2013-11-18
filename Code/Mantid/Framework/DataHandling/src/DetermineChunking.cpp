@@ -275,7 +275,12 @@ namespace DataHandling
     	throw(std::invalid_argument("unsupported file type"));
     }
 
-    int numChunks = static_cast<int>(filesize/maxChunk);
+    int numChunks = 0;
+    if (maxChunk) //protect from divide by zero
+    {
+       numChunks = static_cast<int>(filesize/maxChunk);
+    }
+
     numChunks ++; //So maxChunkSize is not exceeded 
     if (numChunks <= 1 || isEmpty(maxChunk))
     {

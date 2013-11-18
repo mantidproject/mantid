@@ -110,7 +110,7 @@ public:
      | 0 2 0 1 0
      ------------>X
    */
-  MatrixWorkspace_sptr create_2d_workspace(){
+  static MatrixWorkspace_sptr create_2d_workspace(){
     MatrixWorkspace_sptr goodWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(5,5,-0.3,0.12);
     NumericAxis * yAxis = new NumericAxis(5);
     
@@ -180,7 +180,7 @@ public:
 
   } 
                               
-  MatrixWorkspace_sptr basic_checkup_on_output_workspace(RingProfile & alg, int num_bins){
+ static MatrixWorkspace_sptr basic_checkup_on_output_workspace( Algorithm & alg, int num_bins){
     MatrixWorkspace_sptr outws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(alg.getPropertyValue("OutputWorkspace"));
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1); 
     TS_ASSERT_EQUALS(outws->readY(0).size(), num_bins); 
@@ -335,7 +335,7 @@ public:
      | 0 2 0 3 0
      ------------>X
    */
-  MatrixWorkspace_sptr create_rectangular_instrument_workspace(){
+static  MatrixWorkspace_sptr create_rectangular_instrument_workspace(){
     MatrixWorkspace_sptr goodWS = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument (1, 5,1);
 
     // 0 values

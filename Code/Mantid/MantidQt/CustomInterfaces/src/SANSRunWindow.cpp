@@ -233,9 +233,6 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.q_rebin->setToolTip("Any string allowed by the Rebin algorithm may be used");
   
  
-  //Listen for Workspace delete signals
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
-
   makeValidator(m_uiForm.wavRanVal_lb, m_uiForm.wavRanges, m_uiForm.tab_2,
              "A comma separated list of numbers is required here");
 
@@ -728,9 +725,8 @@ bool SANSRunWindow::loadUserFile()
       "print i.ReductionSingleton().DQXY"), m_uiForm.qy_dqy,
       m_uiForm.qy_dqy_opt);
 
-  // The tramission line of the Limits section (read settings for sample and can)
-    transSelectorChanged(1); transSelectorChanged(0);
-
+  // The tramission line of the Limits section (read settings for sample and can) 
+  loadTransmissionSettings(); 
 
   // The front rescale/shift section
   m_uiForm.frontDetRescale->setText(runReduceScriptFunction(
@@ -1429,9 +1425,7 @@ void SANSRunWindow::applyMask(const QString& wsName,bool time_pixel)
 void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QString & can_logs)
 {
   resetGeometryDetailsBox();
-
-  double unit_conv(1000.);
-  
+    
   QString workspace_name = m_experWksp;
   if( workspace_name.isEmpty() ) return;
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
@@ -1466,6 +1460,8 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   try
   {
     Mantid::Geometry::IDetector_const_sptr detector = instr->getDetector(*dets.begin());
+    
+    double unit_conv(1000.);
     dist_mm = detector->getDistance(*source) * unit_conv;
   }
   catch(std::runtime_error&)
@@ -2605,6 +2601,8 @@ void SANSRunWindow::handleDefSaveClick()
           saveCommand += "'front-detector, rear-detector'";
         if ( matrix_workspace->getInstrument()->getName() == "LOQ" )
           saveCommand += "'HAB, main-detector-bank'";
+        if ( matrix_workspace->getInstrument()->getName() == "LARMOR")
+          saveCommand += "'" + m_uiForm.detbank_sel->currentText()+"'";
 
       /* From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
          reduced data. The name of workspaces of the Transmission are available at the 
@@ -3500,6 +3498,10 @@ void SANSRunWindow::transSelectorChanged(int currindex){
                       m_uiForm.trans_max_can, m_uiForm.trans_opt_can};
   for (size_t i = 0; i< 6; i++) wid[i]->setVisible(visible);
 
+}
+
+void SANSRunWindow::loadTransmissionSettings(){
+
   QString transMin = runReduceScriptFunction(
                   "print i.ReductionSingleton().transmission_calculator.lambdaMin('SAMPLE')").trimmed();
   if (transMin == "None")
@@ -3513,6 +3515,7 @@ void SANSRunWindow::transSelectorChanged(int currindex){
     m_uiForm.trans_max->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.lambdaMax('SAMPLE')").trimmed());
   }
+
   QString text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fitMethod('SAMPLE')").trimmed();
   int index = m_uiForm.trans_opt->findText(text, Qt::MatchFixedString);
@@ -3520,13 +3523,12 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   {
     m_uiForm.trans_opt->setCurrentIndex(index);
   }
-  if ( text == "Off" || text == "None" )
+  if ( text == "OFF" || text == "None" )
     m_uiForm.transFitOnOff->setChecked(false);
   else 
     m_uiForm.transFitOnOff->setChecked(true);
 
-  if (visible){
-    transMin = runReduceScriptFunction(
+  transMin = runReduceScriptFunction(
                   "print i.ReductionSingleton().transmission_calculator.lambdaMin('CAN')").trimmed();
   if (transMin == "None")
   {
@@ -3541,16 +3543,19 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   }
   text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fitMethod('CAN')").trimmed();
-  index = m_uiForm.trans_opt_can->findText(text, Qt::MatchCaseSensitive);
+  index = m_uiForm.trans_opt_can->findText(text, Qt::MatchFixedString);
   if( index >= 0 )
   {
     m_uiForm.trans_opt_can->setCurrentIndex(index);
   }
-  if ( text == "Off" || text == "None" )
+  if ( text == "OFF" || text == "None" )
     m_uiForm.transFitOnOff_can->setChecked(false);
   else 
     m_uiForm.transFitOnOff_can->setChecked(true);
-  }
+
+  bool separated = runReduceScriptFunction("print i.ReductionSingleton().transmission_calculator.isSeparate()").trimmed()=="True";
+  
+   m_uiForm.trans_selector_opt->setCurrentIndex(separated?1:0);
 
 
 }

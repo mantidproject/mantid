@@ -65,17 +65,17 @@ config_file_name = sys.argv[1]
 
 params_dictionary = ReduceDictionary.LoadDictionary( config_file_name )
 
-exp_name              = params_dictionary[ "exp_name" ]
-output_directory      = params_dictionary[ "output_directory" ]
-reduce_one_run_script = params_dictionary[ "reduce_one_run_script" ]
-slurm_queue_name      = params_dictionary[ "slurm_queue_name" ] 
-max_processes         = int(params_dictionary[ "max_processes" ])
-min_d                 = params_dictionary[ "min_d" ]
-max_d                 = params_dictionary[ "max_d" ]
-tolerance             = params_dictionary[ "tolerance" ]
-cell_type             = params_dictionary[ "cell_type" ] 
-centering             = params_dictionary[ "centering" ]
-run_nums              = params_dictionary[ "run_nums" ]
+exp_name              = params_dictionary.get('exp_name', "SAPPHIRE_JUNE_SPHERE")
+output_directory      = params_dictionary.get('output_directory', "/SNS/users/eu7/SCRIPT_TEST")
+reduce_one_run_script = params_dictionary.get('reduce_one_run_script', "ReduceOneSCD_Run.py")
+slurm_queue_name      = params_dictionary.get('slurm_queue_name', None) 
+max_processes         = int(params_dictionary.get('max_processes', "8"))
+min_d                 = params_dictionary.get('min_d', "4")
+max_d                 = params_dictionary.get('max_d', "8")
+tolerance             = params_dictionary.get('tolerance', "0.12")
+cell_type             = params_dictionary.get('cell_type', "Rhombohedral") 
+centering             = params_dictionary.get('centering', "R")
+run_nums              = params_dictionary.get('run_nums', "5637:5644")
 
 # determine what python executable to launch new jobs with
 python = sys.executable

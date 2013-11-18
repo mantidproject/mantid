@@ -102,7 +102,7 @@ namespace Mantid
     void MedianAndBelowThresholdRange::setWorkspace(Mantid::API::Workspace_sptr workspace)
     {
       m_isCalculated = false;
-      m_workspace = boost::shared_dynamic_cast<Mantid::API::IMDWorkspace>(workspace);
+      m_workspace = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(workspace);
       if(!workspace)
       {
         throw std::logic_error("MedianAndBelowThresholdRange only works for IMDWorkspaces");

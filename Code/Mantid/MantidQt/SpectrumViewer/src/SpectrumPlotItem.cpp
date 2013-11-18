@@ -134,7 +134,7 @@ void SpectrumPlotItem::draw(QPainter    * painter,
   size_t n_rows = data_array->GetNRows();
   size_t n_cols = data_array->GetNCols();
 
-  if ( n_rows <= 0 || n_cols <= 0 )
+  if ( n_rows == 0 || n_cols == 0 )
   {
     return;                                 // can't draw degenerate image
   }
@@ -167,15 +167,14 @@ void SpectrumPlotItem::draw(QPainter    * painter,
   }
 
   double scale = ((double)positive_color_table->size()-1)/zc_max;
-  size_t lut_size = 0;
   double ct_scale = ((double)positive_color_table->size()-1);
   if ( intensity_table != 0 )
   {
-    lut_size = intensity_table->size();
+    size_t lut_size = intensity_table->size();
     scale    = ((double)lut_size-1.0) / zc_max;
     ct_scale = ((double)positive_color_table->size()-1);
   }
-  size_t data_index;
+
   size_t color_index;
   size_t lut_index;
   size_t image_index = 0;
@@ -184,7 +183,7 @@ void SpectrumPlotItem::draw(QPainter    * painter,
   double val = 0;
   for ( int row = (int)n_rows-1; row >= 0; row-- )
   {
-    data_index = row * n_cols;
+    size_t data_index = row * n_cols;
     if (intensity_table == 0 )              // use color tables directly
     {
       for ( int col = 0; col < (int)n_cols; col++ )

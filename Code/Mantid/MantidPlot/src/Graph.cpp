@@ -379,7 +379,7 @@ bool Graph::isColorBarEnabled(int axis) const
 *  @param axis the aixs to check e.g. yright ...
 *  @return true if there is a log scale on that axis
 */
-bool Graph::isLog(const QwtPlot::Axis axis) const
+bool Graph::isLog(const QwtPlot::Axis& axis) const
 {
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
   return ( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 );

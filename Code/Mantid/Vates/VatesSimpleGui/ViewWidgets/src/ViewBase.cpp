@@ -314,7 +314,8 @@ void ViewBase::checkView()
  */
 void ViewBase::checkViewOnSwitch()
 {
-  if (this->isMDHistoWorkspace(this->origSrc))
+  if (this->hasWorkspaceType("MDHistoWorkspace") ||
+      this->hasFilter("MantidRebinning"))
   {
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
@@ -324,16 +325,13 @@ void ViewBase::checkViewOnSwitch()
  * This function is responsible for checking if a pipeline source has time
  * step information. If not, it will disable the animation controls. If the
  * pipeline source has time step information, the animation controls will be
- * enabled and the start, stop and number of time steps updated for the
- * animation scene. If the withUpdate flag is used (default off), then the
- * original pipeline source is updated with the number of "time" steps.
- * @param withUpdate update the original source with "time" step info
+ * enabled.
  */
-void ViewBase::setTimeSteps(bool withUpdate)
+void ViewBase::updateAnimationControls()
 {
   pqPipelineSource *src = this->getPvActiveSrc();
   unsigned int numSrcs = this->getNumSources();
-  if (!withUpdate && this->isPeaksWorkspace(src))
+  if (this->isPeaksWorkspace(src))
   {
     if (1 == numSrcs)
     {
@@ -350,7 +348,7 @@ void ViewBase::setTimeSteps(bool withUpdate)
   srcProxy1->UpdatePipelineInformation();
   vtkSMDoubleVectorProperty *tsv = vtkSMDoubleVectorProperty::SafeDownCast(\
                                      srcProxy1->GetProperty("TimestepValues"));
-  this->handleTimeInfo(tsv, withUpdate);
+  this->handleTimeInfo(tsv);
 }
 
 /**
@@ -379,13 +377,12 @@ unsigned int ViewBase::getNumSources()
 }
 
 /**
- * This function takes the incoming property and determines the start "time",
- * end "time" and the number of "time" steps. It also enables/disables the
- * animation controls widget based on the number of "time" steps.
+ * This function takes the incoming property and determines the number of
+ * "time" steps. It enables/disables the animation controls widget based on
+ * the number of "time" steps.
  * @param dvp the vector property containing the "time" information
- * @param doUpdate flag to update original source with "time" step info
  */
-void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
+void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp)
 {
   if (NULL == dvp)
   {
@@ -397,26 +394,9 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
   const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
   //qDebug() << "# timesteps: " << numTimesteps;
 
-  if (0 < numTimesteps)
+  if (1 < numTimesteps)
   {
-    // Integrated "time" axis has 1 bin
-    bool isIntegrated = !(1 < numTimesteps);
-    if (doUpdate)
-    {
-      vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(\
-                                     this->origSrc->getProxy());
-      vtkSMPropertyHelper(srcProxy, "TimestepValues").Set(dvp->GetElements(),
-                                                          numTimesteps);
-    }
-    int endIndex = 0;
-    if (!isIntegrated)
-    {
-      endIndex = dvp->GetNumberOfElements() - 1;
-    }
-    double tStart = dvp->GetElement(0);
-    double tEnd = dvp->GetElement(endIndex);
-    emit this->setAnimationControlState(!isIntegrated);
-    emit this->setAnimationControlInfo(tStart, tEnd, numTimesteps);
+    emit this->setAnimationControlState(true);
   }
   else
   {
@@ -446,14 +426,6 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z)
   center[2] = z;
   renderView->setCenterOfRotation(center);
   renderView->render();
-}
-
-/**
- * This function will handle axis scale updates. Most views will not do this,
- * so the default is to do nothing.
- */
-void ViewBase::setAxisScales()
-{
 }
 
 /**
@@ -671,6 +643,38 @@ pqPipelineSource *ViewBase::hasWorkspace(const QString &name)
     }
   }
   return NULL;
+}
+
+/**
+ * This function looks through all pipeline sources for one containing the given
+ * workspace typename.
+ * @param wsTypeName : The workspace typename (Id) to look for.
+ * @return : True if a source is found with the workspace type.
+ */
+bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
+{
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  QList<pqPipelineSource *>::Iterator source;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+  bool hasWsType = false;
+  for (source = sources.begin(); source != sources.end(); ++source)
+  {
+    QString wsType(vtkSMPropertyHelper((*source)->getProxy(),
+                                       "WorkspaceTypeName", true).GetAsString());
+    // This must be a Mantid rebinner filter if the property is empty.
+    if (wsType.isEmpty())
+    {
+      wsType = (*source)->getSMName();
+    }
+    hasWsType = wsType.contains(wsTypeName);
+    if (hasWsType)
+    {
+      break;
+    }
+  }
+  return hasWsType;
 }
 
 } // namespace SimpleGui

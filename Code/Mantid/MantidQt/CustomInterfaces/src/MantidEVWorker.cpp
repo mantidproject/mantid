@@ -10,6 +10,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/EmptyValues.h"
 #include <exception>
 
 namespace MantidQt
@@ -155,36 +156,45 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
 bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
                                          const std::string & md_ws_name,
-                                               double        maxQ,
-                                               bool          do_lorentz_corr,
-                                               bool          load_det_cal,
+                                         const double        minQ,
+                                         const double        maxQ,
+                                         const bool          do_lorentz_corr,
+                                         const bool          load_data,
+                                         const bool          load_det_cal,
                                          const std::string & det_cal_file,
-                                         const std::string & det_cal_file2  )
+                                         const std::string & det_cal_file2 )
 {
   try
   {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
-    alg->setProperty("Filename",file_name);
-    alg->setProperty("OutputWorkspace",ev_ws_name);
-    alg->setProperty("Precount",true);
-    alg->setProperty("LoadMonitors",true);
-
-    if ( !alg->execute() )
-      return false;
-
-    if ( load_det_cal )
+    IAlgorithm_sptr alg;
+    if (load_data)
     {
-      alg = AlgorithmManager::Instance().create("LoadIsawDetCal");
-      alg->setProperty( "InputWorkspace", ev_ws_name );
-      alg->setProperty( "Filename", det_cal_file );
-      alg->setProperty( "Filename2", det_cal_file2 );
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
+      alg->setProperty("Filename",file_name);
+      alg->setProperty("OutputWorkspace",ev_ws_name);
+      alg->setProperty("Precount",true);
+      alg->setProperty("LoadMonitors",true);
 
       if ( !alg->execute() )
         return false;
+
+      if ( load_det_cal )
+      {
+        alg = AlgorithmManager::Instance().create("LoadIsawDetCal");
+        alg->setProperty( "InputWorkspace", ev_ws_name );
+        alg->setProperty( "Filename", det_cal_file );
+        alg->setProperty( "Filename2", det_cal_file2 );
+
+        if ( !alg->execute() )
+          return false;
+      }
     }
 
     std::ostringstream min_str;
-    min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
+    if (minQ != Mantid::EMPTY_DBL())
+      min_str << minQ << "," << minQ << "," << minQ;
+    else
+      min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
 
     std::ostringstream max_str;
     max_str << maxQ << "," << maxQ << "," << maxQ;
@@ -196,6 +206,7 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
     alg->setProperty("QDimensions","Q3D");
     alg->setProperty("dEAnalysisMode","Elastic");
     alg->setProperty("QConversionScales","Q in A^-1");
+    alg->setProperty("Q3DFrames","Q_sample");
     alg->setProperty("LorentzCorrection",do_lorentz_corr);
     alg->setProperty("MinValues",min_str.str());
     alg->setProperty("MaxValues",max_str.str());
@@ -659,7 +670,11 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
                                              double        peak_radius,
                                              double        inner_radius,
                                              double        outer_radius,
-                                             bool          integrate_edge )
+                                             bool          integrate_edge,
+                                             bool          use_cylinder_integration,
+                                             double        cylinder_length,
+                                             double        cylinder_percent_bkg,
+                                       const std::string & cylinder_profile_fit)
 {
   try
   {
@@ -678,13 +693,14 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
     alg->setProperty("QDimensions","Q3D");
     alg->setProperty("dEAnalysisMode","Elastic");
     alg->setProperty("QConversionScales","Q in A^-1");
+    alg->setProperty("Q3DFrames","Q_sample");
     alg->setProperty("UpdateMasks",false);
     alg->setProperty("LorentzCorrection",false);
     alg->setProperty("MinValues","-30,-30,-30");
     alg->setProperty("MaxValues","30,30,30");
     alg->setProperty("SplitInto","2,2,2");
     alg->setProperty("SplitThreshold",200);
-    alg->setProperty("MaxRecursionDepth",12);
+    alg->setProperty("MaxRecursionDepth",10);
     alg->setProperty("MinRecursionDepth",7);
     std::cout << "Making temporary MD workspace" << std::endl; 
     if ( !alg->execute() )
@@ -701,6 +717,10 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
     alg->setProperty("OutputWorkspace",peaks_ws_name);
     alg->setProperty("ReplaceIntensity",true);
     alg->setProperty("IntegrateIfOnEdge",integrate_edge); 
+    alg->setProperty("Cylinder",use_cylinder_integration);
+    alg->setProperty("CylinderLength",cylinder_length);
+    alg->setProperty("PercentBackground",cylinder_percent_bkg);
+    alg->setProperty("ProfileFunction",cylinder_profile_fit);
 
     std::cout << "Integrating temporary MD workspace" << std::endl; 
 

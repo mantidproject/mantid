@@ -595,7 +595,7 @@ namespace LiveData
       if (m_status != NoRun)
       {
         // Previous status should have been NoRun.  Spit out a warning if it's not.
-        g_log.warning() << "Unexpected start of run.  Run status should have been "
+        g_log.debug() << "Unexpected start of run.  Run status should have been "
                         << NoRun << " (NoRun), but was " << m_status << std::endl;
       }
 
@@ -604,9 +604,8 @@ namespace LiveData
       // Add the run_number property
       if ( haveRunNumber )
       {
-        // Same problem as the run_start property above:  run_number should not exist
-        // at this point, and if it does, we can't do much about it.
-        g_log.error() << "run_number property already exists.  Current value will be ignored."  << std::endl
+        // run_number should not exist at this point, and if it does, we can't do much about it.
+        g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
                       << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
       }
       else
@@ -625,7 +624,7 @@ namespace LiveData
         // Previous status should have been Running or BeginRun.  Spit out a
         // warning if it's not.  (If it's BeginRun, that's fine.  Itjust means
         // that the run ended before extractData() was called.)
-        g_log.warning() << "Unexpected end of run.  Run status should have been "
+        g_log.debug() << "Unexpected end of run.  Run status should have been "
                         << Running << " (Running), but was " << m_status << std::endl;
       }
       m_status = EndRun;

@@ -107,6 +107,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_rebinMode(false), 
       m_rebinLocked(true), 
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
+      m_proxyPeaksPresenter(boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
       m_peaksSliderWidget(NULL)
 {
 	ui.setupUi(this);
@@ -2208,7 +2209,7 @@ void SliceViewer::clearPeaksWorkspaces()
    * Show a collection of peaks workspaces as overplots
    * @param list : List of peak workspace names to show.
    */
-  void SliceViewer::setPeaksWorkspaces(const QStringList& list)
+  ProxyCompositePeaksPresenter* SliceViewer::setPeaksWorkspaces(const QStringList& list)
   {
 
     if (m_ws->getNumDims() < 2)
@@ -2260,6 +2261,7 @@ void SliceViewer::clearPeaksWorkspaces()
     updatePeakOverlaySliderWidget();
     emit showPeaksViewer(true);
     m_menuPeaks->setEnabled(true);
+    return m_proxyPeaksPresenter.get();
   }
 
 /**
@@ -2372,7 +2374,7 @@ Get the peaks proxy presenter.
 */
 boost::shared_ptr<ProxyCompositePeaksPresenter> SliceViewer::getPeaksPresenter() const
 {
-  return boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter);
+  return m_proxyPeaksPresenter;
 }
 
 /**

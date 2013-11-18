@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
@@ -71,7 +72,7 @@ private:
   boost::shared_ptr<ChopperConfiguration> setupNOMConstants(int intfrequency);
 
   /// Parse profile table workspace to a map
-  void parseProfileTableWorkspace(DataObjects::TableWorkspace_sptr ws,
+  void parseProfileTableWorkspace(API::ITableWorkspace_sptr ws,
                                   std::map<unsigned int, std::map<std::string, double> >& profilemap);
 
   /// Convert to GSAS instrument file
@@ -114,7 +115,8 @@ private:
   double erfc(double xx);
 
   /// Input workspace
-  DataObjects::TableWorkspace_sptr m_inpWS;
+  API::ITableWorkspace_sptr m_inpWS;
+  // DataObjects::TableWorkspace_sptr m_inpWS;
 
   /// Instrument
   std::string m_instrument;

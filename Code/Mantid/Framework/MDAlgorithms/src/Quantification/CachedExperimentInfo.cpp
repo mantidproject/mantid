@@ -205,7 +205,7 @@ namespace Mantid
       m_gonimeter->makeUniversalGoniometer();
       m_gonimeter->setRotationAngle("phi", thetaInDegs);
       m_gonimeter->setRotationAngle("chi", phiInDegs);
-      m_sampleToDetMatrix = m_gonimeter->getR()*m_exptInfo.sample().getOrientedLattice().getU();
+      m_sampleToDetMatrix = m_exptInfo.sample().getOrientedLattice().getU()*m_gonimeter->getR();
 
       // EFixed
       m_efixed = m_exptInfo.getEFixed(det);

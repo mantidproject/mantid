@@ -357,6 +357,7 @@ public:
     //Now the string
     TS_ASSERT_EQUALS( utc_time.toSimpleString(), "2008-Feb-29 12:00:00");
 
+    delete timeinfo;
   }
 
 

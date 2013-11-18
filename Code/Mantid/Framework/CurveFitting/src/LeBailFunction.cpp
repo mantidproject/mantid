@@ -33,6 +33,10 @@ namespace CurveFitting
   {
     const int PEAKRADIUS = 8;
     const double PEAKRANGECONSTANT = 5.0;
+
+    const string CHEBYSHEV_BACKGROUND("Chebyshev");
+    const string POLYNOMIAL_BACKGROUND("Polynomial");
+    const string FULLPROF_POLYNOMIAL_BACKGROUND("FullprofPolynomial");
   }
 
   // Get a reference to the logger
@@ -902,52 +906,51 @@ namespace CurveFitting
     * @param startx :: background's StartX.  Used by Chebyshev
     * @param endx :: background's EndX.  Used by Chebyshev
     */
-  void LeBailFunction::addBackgroundFunction(string backgroundtype, const std::vector<double>& vecparvalues,
-                                             double startx, double endx)
+  void LeBailFunction::addBackgroundFunction(string backgroundtype, const unsigned int& order, const std::vector<std::string>& vecparnames,
+                                             const std::vector<double>& vecparvalues, double startx, double endx)
   {
     // Check
-    if (backgroundtype.compare("Polynomial") && backgroundtype.compare("Chebyshev"))
+    if (backgroundtype != POLYNOMIAL_BACKGROUND && backgroundtype != CHEBYSHEV_BACKGROUND
+        && backgroundtype != FULLPROF_POLYNOMIAL_BACKGROUND)
     {
       stringstream warnss;
       warnss << "Cliet specified background type " << backgroundtype << " may not be supported properly.";
       g_log.warning(warnss.str());
     }
+    if (vecparnames.size() != vecparvalues.size())
+      throw runtime_error("Input parameter names and parameter values are not matched. ");
 
-    // Determine order from number of input parameters
-    size_t numbkgdvec = vecparvalues.size();
+    g_log.information() << "Add background: type = " << backgroundtype << ", order = " << order
+                        << ", number of parameters/attributes = " << vecparnames.size() << "\n";
 
     // Create background function from factory
     auto background = FunctionFactory::Instance().createFunction(backgroundtype);
     m_background = boost::dynamic_pointer_cast<BackgroundFunction>(background);
 
-    // Set order and init: remember that for background function polynomial and chebyshev,
-    // n is always equal to number of order parameter plus 1.
-    int order = static_cast<int>(numbkgdvec)-1;
-    if (order < 0)
-      order = 0;
-    m_background->setAttributeValue("n", order);
+    // Set order and initialize
+    m_background->setAttributeValue("n",  static_cast<int>(order));
     m_background->initialize();
 
-    // Set parameters
-    if (numbkgdvec > 0)
+    // Set parameters & attribute
+    size_t numpars = vecparnames.size();
+    for (size_t i = 0; i < numpars; ++i)
     {
-      for (size_t i = 0; i < numbkgdvec; ++i)
-      {
-        m_background->setParameter(i, vecparvalues[i]);
-        g_log.debug() << "Background function: set " << m_background->parameterName(i)
-                      << " = " << vecparvalues[i] << ".\n";
-      }
-    }
-    else
-    {
-      // Set a flat zero background as default
-      m_background->setParameter(0, 0.);
+      const string& parname = vecparnames[i];
+      if (parname != "Bkpos")
+        m_background->setParameter(parname, vecparvalues[i]);
+      else if (backgroundtype == FULLPROF_POLYNOMIAL_BACKGROUND)
+        m_background->setAttributeValue("Bkpos", vecparvalues[i]);
+      else
+        throw runtime_error("Bkpos should not be in the parameter list. ");
     }
 
-    if (startx > 0.)
-      m_background->setAttributeValue("StartX", startx);
-    if (endx > 0.)
-      m_background->setAttributeValue("EndX", endx);
+    if (backgroundtype == CHEBYSHEV_BACKGROUND)
+    {
+      if (startx > 0.)
+        m_background->setAttributeValue("StartX", startx);
+      if (endx > 0.)
+        m_background->setAttributeValue("EndX", endx);
+    }
 
     return;
   }

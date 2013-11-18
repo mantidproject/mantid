@@ -197,5 +197,20 @@ namespace MantidQt
       return m_physicalPeaks[0]->getEffectiveRadius();
     }
 
+    bool PeakOverlayMultiCross::isBackgroundShown() const
+    {
+      return false; // The background is not displayed for this view type.
+    }
+
+    QColor PeakOverlayMultiCross::getBackgroundColour() const
+    {
+      return m_peakColour; // Doesn't really do anything since there is no background for a cross marker.
+    }
+
+    QColor PeakOverlayMultiCross::getForegroundColour() const
+    {
+      return m_peakColour;
+    }
+
   } // namespace Mantid
 } // namespace SliceViewer

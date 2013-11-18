@@ -195,7 +195,7 @@ QwtText ScaleDraw::label(double value) const
 			QwtValueList ticks = scDiv.ticks (QwtScaleDiv::MajorTick);
 
 			double break_offset = 0;
-			ScaleEngine *se = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+			ScaleEngine *se = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
 			/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
 			ScaleEngine *se =dynamic_cast<ScaleEngine*>(qwtsc_engine);
 			if(se!=NULL)
@@ -259,7 +259,7 @@ void ScaleDraw::drawLabel(QPainter *painter, double value) const
 {
     if (!d_plot)
         return;
-    ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+    ScaleEngine *sc_engine = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
 	/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
     ScaleEngine *sc_engine =dynamic_cast< ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
@@ -383,7 +383,7 @@ int ScaleDraw::axis() const
 
 void ScaleDraw::drawTick(QPainter *p, double value, int len) const
 {
-	ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+	ScaleEngine *sc_engine = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
 	/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
     ScaleEngine *sc_engine =dynamic_cast< ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
@@ -428,7 +428,7 @@ void ScaleDraw::draw(QPainter *painter, const QPalette& palette) const
 
 void ScaleDraw::drawBreak(QPainter *painter) const
 {
-	ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+	ScaleEngine *sc_engine = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
 	/*const QwtScaleEngine * qwtsc_engine=d_plot->axisScaleEngine(axis());
 	const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
@@ -490,7 +490,7 @@ void ScaleDraw::drawBreak(QPainter *painter) const
 
 void ScaleDraw::drawBackbone(QPainter *painter) const
 {
-    ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+    ScaleEngine *sc_engine = static_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis()));
 	/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
 	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)

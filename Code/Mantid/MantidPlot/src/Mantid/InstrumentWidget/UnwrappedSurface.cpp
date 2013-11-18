@@ -50,7 +50,7 @@ UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector & other)
 }
 
 /** Assignment operator */
-const UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector & other)
+UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector & other)
 {
   u = other.u;
   v = other.v;

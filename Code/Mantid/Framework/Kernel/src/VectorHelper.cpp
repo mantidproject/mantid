@@ -114,14 +114,14 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
   }
 
   size_t iold = 0, inew = 0;
-  double xo_low, xo_high, xn_low, xn_high, delta(0.0), width;
+  double  width;
 
   while ((inew < size_ynew) && (iold < size_yold))
   {
-    xo_low = xold[iold];
-    xo_high = xold[iold + 1];
-    xn_low = xnew[inew];
-    xn_high = xnew[inew + 1];
+    double xo_low = xold[iold];
+    double xo_high = xold[iold + 1];
+    double xn_low = xnew[inew];
+    double xn_high = xnew[inew + 1];
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
     else if (xo_high <= xn_low)
@@ -130,7 +130,7 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
     {
       //        delta is the overlap of the bins on the x axis
       //delta = std::min(xo_high, xn_high) - std::max(xo_low, xn_low);
-      delta = xo_high < xn_high ? xo_high : xn_high;
+      double delta = xo_high < xn_high ? xo_high : xn_high;
       delta -= xo_low > xn_low ? xo_low : xn_low;
       width = xo_high - xo_low;
       if ((delta <= 0.0) || (width <= 0.0))
@@ -440,28 +440,28 @@ std::vector<NumT> splitStringIntoVector(std::string listString)
 
 //-------------------------------------------------------------------------------------------------
 /** Return the index into a vector of bin boundaries for a particular X value.
- * The index returned is the one left edge of the bin.
- * If beyond the range of the vector, it will return either 0 or bins.size()-2.
- * @param bins :: A reference to the set of bin boundaries to search. It is assumed that they are
- * monotonically increasing values and this is NOT checked
- * @param value :: The value whose boundaries should be found
+ *  The index returned is the one for the left edge of the bin.
+ *  If beyond the range of the vector, it will return either 0 or bins.size()-2.
+ *  @param bins  A reference to the set of bin boundaries to search. It is assumed that they are
+ *               monotonically increasing values and this is NOT checked
+ *  @param value The value whose boundaries should be found
  */
 int getBinIndex(const std::vector<double>& bins, const double value )
 {
   assert(bins.size() >= 2);
-  //If X is below the min value
-  if(value < bins.front()) return 0;
+  // Since we cast to an int below:
+  assert(bins.size() < static_cast<size_t>(std::numeric_limits<int>::max()));
+  // If X is below the min value
+  if (value < bins.front()) return 0;
 
-  int index(0);
-  int nEdges = static_cast<int>(bins.size());
-  for (index = 0; index < nEdges-1; index++)
-  {
-    if ((value >= bins[index]) && (value < bins[index+1]))
-      return index;
-  }
-  assert(index > 0);
-  //If X is beyond the max value (take off one as the loop would have incremented it past bins.size()-2 to test it)
-  return index - 1;
+  // upper_bound will find the right-hand bin boundary (even if the value is equal to
+  // the left-hand one) - hence we subtract 1 from the found point.
+  // Since we want to return the LH boundary of the last bin if the value is outside
+  // the upper range, we leave the last value out (i.e. bins.end()-1)
+  auto it = std::upper_bound(bins.begin(),bins.end()-1,value) - 1;
+  assert(it >= bins.begin());
+  // Convert an iterator to an index for the return value
+  return static_cast<int>(it-bins.begin());
 }
 
 //-------------------------------------------------------------------------------------------------

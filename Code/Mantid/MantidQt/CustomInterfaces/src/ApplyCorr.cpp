@@ -19,6 +19,7 @@ namespace IDA
   {
     connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_dsContainer, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), uiForm().abscor_ckScaleMultiplier, SLOT(setEnabled(bool)));
+    connect(uiForm().abscor_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
     connect(uiForm().abscor_ckUseCorrections, SIGNAL(toggled(bool)), uiForm().abscor_dsCorrections, SLOT(setEnabled(bool)));
     connect(uiForm().abscor_ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
     connect(uiForm().abscor_cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
@@ -39,7 +40,17 @@ namespace IDA
   */
   void ApplyCorr::scaleMultiplierCheck(bool state)
   {
-    uiForm().abscor_leScaleMultiplier->setEnabled(state);
+    //scale input should be disabled if we're not using a can
+    if(!uiForm().abscor_ckUseCan->isChecked())
+    {
+      uiForm().abscor_leScaleMultiplier->setEnabled(false);
+    }
+    else
+    {
+      //else it should be whatever the scale checkbox is
+      state = uiForm().abscor_ckScaleMultiplier->isChecked();
+      uiForm().abscor_leScaleMultiplier->setEnabled(state);
+    }
   }
 
 

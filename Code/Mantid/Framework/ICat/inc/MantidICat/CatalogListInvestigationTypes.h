@@ -4,17 +4,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-
-
-
 namespace Mantid
 {
   namespace ICat
   {
 
-    /** CatalogListInvestigationTypes class is responsible for loading  investigation types from ICat server .
-     This class written as a Mantid algorithm. This algorithm is used to populate the 
-	   ICat Search Interface investigation types box  
+    /**
+     CatalogListInvestigationTypes class is responsible for loading investigation types from the catalog.
 
      @author Sofia Antony, STFC Rutherford Appleton Laboratory
      @date 12/08/2010

@@ -230,7 +230,6 @@ void ISISLiveEventDataListener::run()
         if (m_isConnected == false) // sanity check
         {
           throw std::runtime_error( std::string("No connection to the DAE."));
-          return;  // should never be called, but here just in case exceptions are disabled
         }
 
         TCPStreamEventDataNeutron events;

@@ -17,7 +17,7 @@ namespace MantidQt
     /** Constructor
      */
     PeakOverlayMultiSphere::PeakOverlayMultiSphere(QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks , const QColor& peakColour, const QColor& backColour) :
-        QWidget(parent), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_peakColour(peakColour), m_backColour(backColour)
+        QWidget(parent), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false)
     {
       setAttribute(Qt::WA_NoMousePropagation, false);
       this->setVisible(true);
@@ -155,6 +155,7 @@ namespace MantidQt
       { 
         m_physicalPeaks[i]->showBackgroundRadius(show);
       }
+      m_showBackground = show;
     }
 
     /**
@@ -194,6 +195,21 @@ namespace MantidQt
     double PeakOverlayMultiSphere::getRadius() const
     {
       return m_physicalPeaks[0]->getRadius();
+    }
+
+    bool PeakOverlayMultiSphere::isBackgroundShown() const
+    {
+      return m_showBackground;
+    }
+
+    QColor PeakOverlayMultiSphere::getBackgroundColour() const
+    {
+      return m_backColour;
+    }
+
+    QColor PeakOverlayMultiSphere::getForegroundColour() const
+    {
+      return m_peakColour;
     }
 
   } // namespace Mantid

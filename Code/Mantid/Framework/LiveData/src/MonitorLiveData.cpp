@@ -129,6 +129,8 @@ namespace LiveData
     DateAndTime lastTime = DateAndTime::getCurrentTime();
 
     m_chunkNumber = 0;
+    int runNumber = 0;
+
     std::string AccumulationWorkspace = this->getPropertyValue("AccumulationWorkspace");
     std::string OutputWorkspace = this->getPropertyValue("OutputWorkspace");
 
@@ -144,8 +146,7 @@ namespace LiveData
       Poco::Thread::sleep(50);
 
       DateAndTime now = DateAndTime::getCurrentTime();
-      double seconds;
-      seconds = DateAndTime::secondsFromDuration( now - lastTime );
+      double seconds = DateAndTime::secondsFromDuration( now - lastTime );
       if (seconds > UpdateEvery)
       {
         lastTime = now;
@@ -175,30 +176,33 @@ namespace LiveData
 
         NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
 
+        if ( runNumber == 0 )
+        {
+          runNumber = loadAlg->runNumber();
+          g_log.debug() << "Run number set to " << runNumber << std::endl;
+        }
+
         // Did we just hit the end of a run?
         if (listener->runStatus() == ILiveListener::EndRun)
         {
-          // Find the run number, if that is possible.
-          int runNumber = 0;
-          MatrixWorkspace_sptr OutputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OutputWorkspace);
-          if (OutputWS)
-            runNumber = OutputWS->getRunNumber();
-
-          g_log.notice();
+          std::stringstream message;
+          message << "Run";
+          if ( runNumber != 0 ) message << " #" << runNumber;
+          message << " ended. ";
           std::string EndRunBehavior = this->getPropertyValue("EndRunBehavior");
           if (EndRunBehavior == "Stop")
           {
-            g_log.notice() << "Run #" << runNumber << " ended. Stopping live data monitoring." << std::endl;
+            g_log.notice() << message.str() << "Stopping live data monitoring.\n";
             break;
           }
           else if (EndRunBehavior == "Restart")
           {
-            g_log.notice() << "Run #" << runNumber << " ended. Clearing existing workspace." << std::endl;
+            g_log.notice() << message.str() << "Clearing existing workspace.\n";
             NextAccumulationMethod = "Replace";
           }
           else if (EndRunBehavior == "Rename")
           {
-            g_log.notice() << "Run #" << runNumber << " ended. Renaming existing workspace." << std::endl;
+            g_log.notice() << message.str() << "Renaming existing workspace.\n";
             NextAccumulationMethod = "Replace";
 
             // Now we clone the existing workspaces
@@ -207,6 +211,8 @@ namespace LiveData
             if (!AccumulationWorkspace.empty())
               doClone(AccumulationWorkspace, AccumulationWorkspace + postFix);
           }
+
+          runNumber = 0;
         }
 
         m_chunkNumber++;

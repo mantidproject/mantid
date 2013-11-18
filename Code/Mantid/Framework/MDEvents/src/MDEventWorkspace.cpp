@@ -424,21 +424,17 @@ namespace MDEvents
     CPUTimer tim;
     UNUSED_ARG(start);
     UNUSED_ARG(num);
+
     // Boxes to show
     std::vector<API::IMDNode *> boxes;
     std::vector<MDBoxBase<MDE,nd>* > boxes_filtered;
     this->getBox()->getBoxes(boxes, 1000, false);
-
-    bool withPointsOnly = true;
     boxes_filtered.reserve(boxes.size());
 
     for (size_t i=0; i<boxes.size(); i++)
     {
         MDBoxBase<MDE,nd>* box = dynamic_cast<MDBoxBase<MDE,nd>* >(boxes[i]);
-        if (box->getNPoints() > 0 && withPointsOnly)
-          boxes_filtered.push_back(box);
-        else
-          boxes_filtered.push_back(box);
+        boxes_filtered.push_back(box);
     }
       
 

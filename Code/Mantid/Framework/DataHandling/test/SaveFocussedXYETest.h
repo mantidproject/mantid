@@ -48,7 +48,7 @@ public:
     std::string filename("focussed.test");
     saveXYE.setPropertyValue("Filename", filename);
     filename = saveXYE.getPropertyValue("Filename"); //absolute path
-    saveXYE.setPropertyValue("SplitFiles", "False");
+    saveXYE.setProperty("SplitFiles", false);
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
 
@@ -130,7 +130,7 @@ public:
     std::string filename("focussed.txt");
     saveXYE.setPropertyValue("Filename", filename);
     filename = saveXYE.getPropertyValue("Filename"); //get the absolute path
-    saveXYE.setPropertyValue("SplitFiles", "False");
+    saveXYE.setProperty("SplitFiles", false);
     saveXYE.setPropertyValue("Append", "0");
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
@@ -219,7 +219,7 @@ public:
     std::string filename("SaveGSS.txt");
     saveGSS.setPropertyValue("Filename", filename);
     filename = saveGSS.getPropertyValue("Filename"); //absolute path
-    saveGSS.setPropertyValue("SplitFiles", "False");
+    saveGSS.setProperty("SplitFiles", false);
     saveGSS.setPropertyValue("Append", "0");
     saveGSS.setPropertyValue("MultiplyByBinWidth", "1");
 
@@ -299,7 +299,7 @@ public:
     std::string filename("SaveGSS.txt");
     saveGSS.setPropertyValue("Filename", filename);
     filename = saveGSS.getPropertyValue("Filename"); //absolute path
-    saveGSS.setPropertyValue("SplitFiles", "False");
+    saveGSS.setProperty("SplitFiles", false);
     saveGSS.setPropertyValue("Append", "0");
     saveGSS.setPropertyValue("MultiplyByBinWidth", "0");
 
@@ -369,7 +369,7 @@ public:
     std::string filename("focussed.test");
     saveXYE.setPropertyValue("Filename", filename);
     filename = saveXYE.getPropertyValue("Filename"); //absolute path
-    saveXYE.setPropertyValue("SplitFiles", "False");
+    saveXYE.setProperty("SplitFiles", false);
 
     TS_ASSERT_THROWS_NOTHING(saveXYE.execute());
 
@@ -417,7 +417,7 @@ public:
     saveXYE.setPropertyValue("InputWorkspace","ws");
     saveXYE.setPropertyValue("Filename",filename);
     filename = saveXYE.getPropertyValue("Filename"); //absolute path
-    saveXYE.setPropertyValue("SplitFiles", "False");
+    saveXYE.setProperty("SplitFiles", false);
     saveXYE.execute();
     TS_ASSERT( saveXYE.isExecuted() );
     Poco::File focusfile(filename);

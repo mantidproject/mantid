@@ -111,12 +111,16 @@ public:
     filter.setProperty("InputWorkspace", "Test02");
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
+    filter.setProperty("GenerateTOFCorrection", false);
 
     // 3. Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
     TS_ASSERT(filter.isExecuted());
 
     // 4. Get output
+    int numsplittedws = filter.getProperty("NumberOutputWS");
+    TS_ASSERT_EQUALS(numsplittedws, 4);
+
     // 4.1 Workspace group 0
     DataObjects::EventWorkspace_sptr filteredws0 = boost::dynamic_pointer_cast
         <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
@@ -150,9 +154,94 @@ public:
     // 5. Clean up
     AnalysisDataService::Instance().remove("Test02");
     AnalysisDataService::Instance().remove("Splitter02");
+    AnalysisDataService::Instance().remove("FilteredWS01_unfiltered");
     AnalysisDataService::Instance().remove("FilteredWS01_0");
     AnalysisDataService::Instance().remove("FilteredWS01_1");
     AnalysisDataService::Instance().remove("FilteredWS01_2");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**  Filter events without any correction and test for user-specified workspace starting value
+    *  Event workspace:
+    * (1) 10 detectors
+    * (2) Run starts @ 20000000000 seconds
+    * (3) Pulse length = 100*1000*1000 seconds
+    * (4) Within one pulse, two consecutive events/neutrons is apart for 10*1000*1000 seconds
+    * (5) "Experiment": 5 pulse times.  10 events in each pulse
+    *
+    * In this test
+   *  (1) Leave correction table workspace empty
+   *  (2) Count events in each output including "-1", the excluded/unselected events
+   */
+  void test_FilterWOCorrection2()
+  {
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100*1000*1000;
+    int64_t tofdt = 10*1000*1000;
+    size_t numpulses = 5;
+
+    DataObjects::EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
+
+    DataObjects::SplittersWorkspace_sptr splws = createSplitter(runstart_i64, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test02");
+    filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
+    filter.setProperty("SplitterWorkspace", "Splitter02");
+    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Get output
+    int numsplittedws = filter.getProperty("NumberOutputWS");
+    TS_ASSERT_EQUALS(numsplittedws, 3);
+
+    // 4.1 Workspace group 0
+    DataObjects::EventWorkspace_sptr filteredws0 = boost::dynamic_pointer_cast
+        <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
+    TS_ASSERT(filteredws0);
+    TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
+    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 4);
+
+    // 4.2 Workspace group 1
+    DataObjects::EventWorkspace_sptr filteredws1 = boost::dynamic_pointer_cast
+        <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
+    TS_ASSERT(filteredws1);
+    TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
+
+    // 4.3 Workspace group 2
+    DataObjects::EventWorkspace_sptr filteredws2 = boost::dynamic_pointer_cast
+        <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_3"));
+    TS_ASSERT(filteredws2);
+    TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 21);
+
+    DataObjects::EventList elist3 = filteredws2->getEventList(3);
+    elist3.sortPulseTimeTOF();
+
+    DataObjects::TofEvent eventmin = elist3.getEvent(0);
+    TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64+pulsedt*2);
+    TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
+
+    DataObjects::TofEvent eventmax = elist3.getEvent(20);
+    TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64+pulsedt*4);
+    TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt*6/1000), 1.0E-4);
+
+    // 5. Clean up
+    AnalysisDataService::Instance().remove("Test02");
+    AnalysisDataService::Instance().remove("Splitter02");
+    AnalysisDataService::Instance().remove("FilteredWS01_1");
+    AnalysisDataService::Instance().remove("FilteredWS01_2");
+    AnalysisDataService::Instance().remove("FilteredWS01_3");
 
     return;
   }

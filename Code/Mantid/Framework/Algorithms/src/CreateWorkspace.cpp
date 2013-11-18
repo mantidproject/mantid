@@ -105,7 +105,6 @@ void CreateWorkspace::exec()
   const std::string xUnit = getProperty("UnitX");
   const std::string vUnit = getProperty("VerticalAxisUnit");
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
-  std::string parentWorkspace = getPropertyValue("ParentWorkspace");
 
   if ( ( vUnit != "SpectraNumber" ) && ( static_cast<int>(vAxis.size()) != nSpec ) )
   {
