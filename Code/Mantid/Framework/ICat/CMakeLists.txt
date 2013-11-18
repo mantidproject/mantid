@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/CatalogAlgorithmHelper.cpp
 	src/CatalogDownloadDataFiles.cpp
 	src/CatalogGetDataFiles.cpp
 	src/CatalogGetDataSets.cpp
@@ -9,16 +10,19 @@ set ( SRC_FILES
 	src/CatalogMyDataSearch.cpp
 	src/CatalogSearch.cpp
 	src/CatalogSearchParam.cpp
-	src/ErrorHandling.cpp
 	src/GSoap.cpp
-	src/GSoapGenerated.cpp
-	src/ICat3Catalog.cpp
-	src/ICatHelper.cpp
+	src/ICat3/ICat3GSoapGenerated.cpp
+	src/ICat3/ICat3ErrorHandling.cpp
+	src/ICat3/ICat3Catalog.cpp
+	src/ICat3/ICat3Helper.cpp
+	src/ICat4/ICat4GSoapGenerated.cpp
+	src/ICat4/ICat4Catalog.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( INC_FILES
+	inc/MantidICat/CatalogAlgorithmHelper.h
 	inc/MantidICat/CatalogDownloadDataFiles.h
 	inc/MantidICat/CatalogGetDataFiles.h
 	inc/MantidICat/CatalogGetDataSets.h
@@ -29,15 +33,21 @@ set ( INC_FILES
 	inc/MantidICat/CatalogMyDataSearch.h
 	inc/MantidICat/CatalogSearch.h
 	inc/MantidICat/CatalogSearchParam.h
-	inc/MantidICat/ErrorHandling.h
-	inc/MantidICat/GSoap/stdsoap2.h
-	inc/MantidICat/GSoapGenerated/soapH.h
-	inc/MantidICat/GSoapGenerated/soapICATPortBindingProxy.h
-	inc/MantidICat/GSoapGenerated/soapStub.h
-	inc/MantidICat/ICat3Catalog.h
 	inc/MantidICat/ICatExport.h
-	inc/MantidICat/ICatHelper.h
 	inc/MantidICat/Session.h
+	inc/MantidICat/GSoap/soapserializersH.h
+	inc/MantidICat/GSoap/soapserializersStub.h
+	inc/MantidICat/GSoap/stdsoap2.h
+	inc/MantidICat/ICat3/GSoapGenerated/ICat3H.h
+	inc/MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h
+	inc/MantidICat/ICat3/GSoapGenerated/ICat3Stub.h
+	inc/MantidICat/ICat3/ICat3ErrorHandling.h
+	inc/MantidICat/ICat3/ICat3Catalog.h
+	inc/MantidICat/ICat3/ICat3Helper.h
+	inc/MantidICat/ICat4/GSoapGenerated/ICat4H.h
+	inc/MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h
+	inc/MantidICat/ICat4/GSoapGenerated/ICat4Stub.h
+	inc/MantidICat/ICat4/ICat4Catalog.h
 )
 
 set ( TEST_FILES

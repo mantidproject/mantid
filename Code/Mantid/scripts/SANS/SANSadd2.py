@@ -6,7 +6,7 @@ from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'), lowMem=False, binning='Monitors'):
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors'):
   #check if there is at least one file in the list
   if len(runs) < 1 : return
 
@@ -86,7 +86,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     if isFirstDataSetEvent:
         wsInMonitor = mtd['AddFilesSumTempory_monitors']
         if binning == 'Monitors':
-            monX = wsInMonitor.dataX(i)
+            monX = wsInMonitor.dataX(0)
             binning = str(monX[0])
             binGap = monX[1] - monX[0]
             binning = binning + "," + str(binGap)
@@ -100,8 +100,10 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         logger.notice(binning)        
         Rebin(InputWorkspace='AddFilesSumTempory',OutputWorkspace='AddFilesSumTempory_Rebin',Params= binning, PreserveEvents=False)
         
+        # loading the nexus file using LoadNexus is necessary because it has some metadata
+        # that is not in LoadEventNexus. This must be fixed.
         filename, ext = _makeFilename(runs[0], defType, inst)
-        LoadNexus(Filename=filename, OutputWorkspace='AddFilesSumTempory')
+        LoadNexus(Filename=filename, OutputWorkspace='AddFilesSumTempory', SpectrumMax=wsInMonitor.getNumberHistograms())
         # User may have selected a binning which is different from the default
         Rebin(InputWorkspace='AddFilesSumTempory',OutputWorkspace='AddFilesSumTempory',Params= binning)
         # For now the monitor binning must be the same as the detector binning
@@ -116,10 +118,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         for i in range(mon_n):
             wsOut.setY(i,wsInMonitor.dataY(i))
             wsOut.setE(i,wsInMonitor.dataE(i))               
-                
-        for i in range(wsOut.getNumberHistograms()):
-            wsOut.setY(i+mon_n, wsInDetector.dataY(i))
-            wsOut.setE(i+mon_n, wsInDetector.dataE(i))
+        ConjoinWorkspaces(wsOut, wsInDetector, CheckOverlapping=True)
                        
         if 'AddFilesSumTempory_Rebin' in mtd : DeleteWorkspace('AddFilesSumTempory_Rebin')
 
@@ -194,15 +193,9 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
 
   if period != _NO_INDIVIDUAL_PERIODS:
       #load just a single period
-      if ext == ".nxs" or ext == ".NXS":
-        outWs = LoadNexus( Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
-      else:   
-        outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)     
+      outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
   else:
-      if ext == ".nxs" or ext == ".NXS":
-        outWs = LoadNexus(Filename=filename,OutputWorkspace=wsName)
-      else:
-        outWs = Load(Filename=filename,OutputWorkspace=wsName)
+      outWs = Load(Filename=filename,OutputWorkspace=wsName)
 
   props = outWs.getHistory().lastAlgorithm()
 

@@ -53,10 +53,32 @@ namespace API
    */
   bool IMDEventWorkspace::threadSafe() const
   {
-    return !this->isFileBacked();
+      return !this->isFileBacked();
   }
 
+  //-----------------------------------------------------------------------------------------------
 
+  /**
+   */
+  const std::string IMDEventWorkspace::toString() const
+  {
+    std::ostringstream os;
+    os << IMDWorkspace::toString();
+
+    // Now box controller details
+    std::vector<std::string> stats = getBoxControllerStats();
+    for (size_t i=0; i < stats.size(); i++)
+    {
+      os << stats[i] << "\n";
+    }
+
+    os << MultipleExperimentInfos::toString() << "\n";
+
+    os << "Events: " << getNPoints() << "\n";
+    return os.str();
+  }
+
+  //-----------------------------------------------------------------------------------------------
 
 }//namespace MDEvents
 

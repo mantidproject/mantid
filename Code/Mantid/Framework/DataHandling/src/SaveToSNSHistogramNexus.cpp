@@ -331,7 +331,7 @@ namespace DataHandling
         size_t wi = 0;
         try
         {
-          wi = (*map)[ det->getAtXY(x,y)->getID() ];
+          wi = map.find( det->getAtXY(x,y)->getID() )->second;
         }
         catch (...)
         {
@@ -694,7 +694,7 @@ namespace DataHandling
     inputWorkspace = getProperty("InputWorkspace");
 
     // We'll need to get workspace indices
-    map = inputWorkspace->getDetectorIDToWorkspaceIndexMap( false );
+    map = inputWorkspace->getDetectorIDToWorkspaceIndexMap();
 
     // Start the progress bar. 3 reports per histogram.
     prog = new Progress(this, 0, 1.0, inputWorkspace->getNumberHistograms()*3);
@@ -710,9 +710,6 @@ namespace DataHandling
 
     if (ret == NX_ERROR)
       throw std::runtime_error("Nexus error while copying the file.");
-
-    // Free map memory
-    delete map;
 
     return;
   }

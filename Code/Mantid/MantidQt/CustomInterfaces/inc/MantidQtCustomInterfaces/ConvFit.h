@@ -28,6 +28,7 @@ namespace IDA
     virtual QString helpURL() {return "ConvFit";}
 
   private slots:
+    void resType(const QString& type);
     void typeSelection(int index);
     void bgTypeSelection(int index);
     void plotInput();
@@ -43,9 +44,10 @@ namespace IDA
     void fitContextMenu(const QPoint &);
     void fixItem();
     void unFixItem();
+    void showTieCheckbox(QString);
 
   private:
-    boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tie=false);
+    boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tieCentres=false);
     QtProperty* createLorentzian(const QString &);
     void populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie);
     QString fitTypeString() const;
@@ -66,7 +68,8 @@ namespace IDA
     QwtPlotCurve* m_cfDataCurve;
     QwtPlotCurve* m_cfCalcCurve;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
-    std::string m_cfInputWSName;
+    QString m_cfInputWSName;
+    bool m_confitResFileType;
   };
 } // namespace IDA
 } // namespace CustomInterfaces

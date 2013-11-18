@@ -8,9 +8,9 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
+#include "MantidAPI/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/EmptyValues.h"
 #include <exception>
 
 namespace MantidQt
@@ -156,36 +156,45 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
 bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
                                          const std::string & md_ws_name,
-                                               double        maxQ,
-                                               bool          do_lorentz_corr,
-                                               bool          load_det_cal,
+                                         const double        minQ,
+                                         const double        maxQ,
+                                         const bool          do_lorentz_corr,
+                                         const bool          load_data,
+                                         const bool          load_det_cal,
                                          const std::string & det_cal_file,
-                                         const std::string & det_cal_file2  )
+                                         const std::string & det_cal_file2 )
 {
   try
   {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
-    alg->setProperty("Filename",file_name);
-    alg->setProperty("OutputWorkspace",ev_ws_name);
-    alg->setProperty("Precount",true);
-    alg->setProperty("LoadMonitors",true);
-
-    if ( !alg->execute() )
-      return false;
-
-    if ( load_det_cal )
+    IAlgorithm_sptr alg;
+    if (load_data)
     {
-      alg = AlgorithmManager::Instance().create("LoadIsawDetCal");
-      alg->setProperty( "InputWorkspace", ev_ws_name );
-      alg->setProperty( "Filename", det_cal_file );
-      alg->setProperty( "Filename2", det_cal_file2 );
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
+      alg->setProperty("Filename",file_name);
+      alg->setProperty("OutputWorkspace",ev_ws_name);
+      alg->setProperty("Precount",true);
+      alg->setProperty("LoadMonitors",true);
 
       if ( !alg->execute() )
         return false;
+
+      if ( load_det_cal )
+      {
+        alg = AlgorithmManager::Instance().create("LoadIsawDetCal");
+        alg->setProperty( "InputWorkspace", ev_ws_name );
+        alg->setProperty( "Filename", det_cal_file );
+        alg->setProperty( "Filename2", det_cal_file2 );
+
+        if ( !alg->execute() )
+          return false;
+      }
     }
 
     std::ostringstream min_str;
-    min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
+    if (minQ != Mantid::EMPTY_DBL())
+      min_str << minQ << "," << minQ << "," << minQ;
+    else
+      min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
 
     std::ostringstream max_str;
     max_str << maxQ << "," << maxQ << "," << maxQ;
@@ -197,6 +206,7 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
     alg->setProperty("QDimensions","Q3D");
     alg->setProperty("dEAnalysisMode","Elastic");
     alg->setProperty("QConversionScales","Q in A^-1");
+    alg->setProperty("Q3DFrames","Q_sample");
     alg->setProperty("LorentzCorrection",do_lorentz_corr);
     alg->setProperty("MinValues",min_str.str());
     alg->setProperty("MaxValues",max_str.str());
@@ -370,13 +380,14 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
  *
  *  @return true if FindUBusingIndexedPeaks completed successfully.
  */
-bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name)
+bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name, double tolerance )
 {
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FindUBUsingIndexedPeaks");
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
+  alg->setProperty("Tolerance",tolerance);
 
   if ( alg->execute() )
     return true;
@@ -624,7 +635,7 @@ bool MantidEVWorker::changeHKL(  const std::string & peaks_ws_name,
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("TransformHKL");
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
-  alg->setProperty("HKL_Transform",transf_string);
+  alg->setProperty("HKLTransform",transf_string);
 
   if ( alg->execute() )
     return true;
@@ -659,7 +670,11 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
                                              double        peak_radius,
                                              double        inner_radius,
                                              double        outer_radius,
-                                             bool          integrate_edge )
+                                             bool          integrate_edge,
+                                             bool          use_cylinder_integration,
+                                             double        cylinder_length,
+                                             double        cylinder_percent_bkg,
+                                       const std::string & cylinder_profile_fit)
 {
   try
   {
@@ -678,13 +693,14 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
     alg->setProperty("QDimensions","Q3D");
     alg->setProperty("dEAnalysisMode","Elastic");
     alg->setProperty("QConversionScales","Q in A^-1");
+    alg->setProperty("Q3DFrames","Q_sample");
     alg->setProperty("UpdateMasks",false);
     alg->setProperty("LorentzCorrection",false);
     alg->setProperty("MinValues","-30,-30,-30");
     alg->setProperty("MaxValues","30,30,30");
     alg->setProperty("SplitInto","2,2,2");
     alg->setProperty("SplitThreshold",200);
-    alg->setProperty("MaxRecursionDepth",12);
+    alg->setProperty("MaxRecursionDepth",10);
     alg->setProperty("MinRecursionDepth",7);
     std::cout << "Making temporary MD workspace" << std::endl; 
     if ( !alg->execute() )
@@ -701,6 +717,10 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
     alg->setProperty("OutputWorkspace",peaks_ws_name);
     alg->setProperty("ReplaceIntensity",true);
     alg->setProperty("IntegrateIfOnEdge",integrate_edge); 
+    alg->setProperty("Cylinder",use_cylinder_integration);
+    alg->setProperty("CylinderLength",cylinder_length);
+    alg->setProperty("PercentBackground",cylinder_percent_bkg);
+    alg->setProperty("ProfileFunction",cylinder_profile_fit);
 
     std::cout << "Integrating temporary MD workspace" << std::endl; 
 
@@ -990,9 +1010,8 @@ bool MantidEVWorker::getUB( const std::string & peaks_ws_name,
 
     if ( lab_coords )    // Try to get goniometer matrix from first peak 
     {                    // and adjust UB for goniometer rotation
-      Mantid::DataObjects::Peak peak = Mantid::DataObjects::Peak(peaks_ws->getPeak(0));
-      Mantid::Kernel::Matrix<double> goniometer_matrix(3, 3, true);
-      goniometer_matrix = peak.getGoniometerMatrix();
+      const IPeak & peak = peaks_ws->getPeak(0);
+      auto goniometer_matrix = peak.getGoniometerMatrix();
       UB = goniometer_matrix * UB;
     }
   }
@@ -1013,41 +1032,83 @@ bool MantidEVWorker::getUB( const std::string & peaks_ws_name,
  *                        lattice from.
  *  @param md_ws_name     The name of the md workspace to copy the
  *                        lattice to.
+ *  @param event_ws_name  The name of the event workspace to copy the
+ *                        lattice to.
  *  @return true if the copy was done, false if something went wrong.
  */
 bool MantidEVWorker::copyLattice( const std::string & peaks_ws_name,
-                                  const std::string & md_ws_name )
+                                  const std::string & md_ws_name,
+                                  const std::string & event_ws_name)
                            
 {
-  if ( !isPeaksWorkspace( peaks_ws_name ) )
+  // fail if peaks workspace is not there
+  if ( !isPeaksWorkspace(peaks_ws_name) )
   {
     return false;
   }
 
-  if ( !isMDWorkspace( md_ws_name ) )
+  // must have either md or event workspace
+  if ((md_ws_name.empty()) && (event_ws_name.empty()))
   {
-    return false;
+      return false;
   }
 
-  try
+  // copy onto md workspace
+  if (!md_ws_name.empty())
   {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CopySample");
-    alg->setProperty("InputWorkspace",peaks_ws_name);
-    alg->setProperty("OutputWorkspace",md_ws_name);
-    alg->setProperty("CopyName",       false);
-    alg->setProperty("CopyMaterial",   false);
-    alg->setProperty("CopyEnvironment",false);
-    alg->setProperty("CopyShape",      false);
-    alg->setProperty("CopyLattice",    true);
-    alg->execute();
+    if (!isMDWorkspace(md_ws_name))
+    {
+      return false;
+    }
+
+    try
+    {
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CopySample");
+      alg->setProperty("InputWorkspace",peaks_ws_name);
+      alg->setProperty("OutputWorkspace",md_ws_name);
+      alg->setProperty("CopyName",       false);
+      alg->setProperty("CopyMaterial",   false);
+      alg->setProperty("CopyEnvironment",false);
+      alg->setProperty("CopyShape",      false);
+      alg->setProperty("CopyLattice",    true);
+      alg->execute();
+    }
+    catch(...)
+    {
+      g_log.notice() << "\n";
+      g_log.notice() << "CopySample from " << peaks_ws_name <<
+                        " to " << md_ws_name << " FAILED\n\n";
+      return false;
+    }
   }
-  catch(...)
+
+  // copy onto
+  if (!event_ws_name.empty())
   {
-    g_log.notice() << std::endl;
-    g_log.notice() << "CopySample from " << peaks_ws_name <<
-                                 " to " << md_ws_name << " FAILED" << std::endl;
-    g_log.notice() << std::endl;
-    return false;
+    if (!isEventWorkspace(event_ws_name))
+    {
+      return false;
+    }
+
+    try
+    {
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CopySample");
+      alg->setProperty("InputWorkspace",peaks_ws_name);
+      alg->setProperty("OutputWorkspace",event_ws_name);
+      alg->setProperty("CopyName",       false);
+      alg->setProperty("CopyMaterial",   false);
+      alg->setProperty("CopyEnvironment",false);
+      alg->setProperty("CopyShape",      false);
+      alg->setProperty("CopyLattice",    true);
+      alg->execute();
+    }
+    catch(...)
+    {
+      g_log.notice() << "\n";
+      g_log.notice() << "CopySample from " << peaks_ws_name <<
+                        " to " << event_ws_name << " FAILED\n\n";
+      return false;
+    }
   }
 
   return true;
@@ -1065,14 +1126,12 @@ bool MantidEVWorker::copyLattice( const std::string & peaks_ws_name,
  *                         it is in sample coordinates.
  * @param  Q               The Q-vector.
  */
-std::vector< std::pair<std::string,std::string> >MantidEVWorker::PointInfo( const std::string & peaks_ws_name,
-                                                                                  bool          lab_coords,
-                                                                            Mantid::Kernel::V3D Q)
+std::vector< std::pair<std::string,std::string> > MantidEVWorker::PointInfo( const std::string & peaks_ws_name,
+                                                                             bool lab_coords,
+                                                                             Mantid::Kernel::V3D Q)
 {
-  const auto& ADS = AnalysisDataService::Instance();
-  Mantid::DataObjects::PeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<Mantid::DataObjects::PeaksWorkspace>(peaks_ws_name);
-
-  return peaks_ws->PeakInfo( Q , lab_coords); 
+  IPeaksWorkspace_sptr peaks_ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+  return peaks_ws->peakInfo( Q , lab_coords);
 }
 
 } // namespace CustomInterfaces

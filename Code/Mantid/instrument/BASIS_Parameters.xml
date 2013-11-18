@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "BASIS" date = "2011-07-19T00:00:00">
+<parameter-file instrument = "BASIS" valid-from = "2011-07-19T00:00:00">
 
 <component-link name = "BASIS">
 
@@ -19,10 +19,14 @@
 <!-- These properties are necessary for use in the Indirect CTE interface. -->
 
 <parameter name="analysers" type="string">
-    <value val="silicon" />
+    <value val="silicon,diffraction" />
 </parameter>
 <parameter name="refl-silicon" type="string">
     <value val="111" />
+</parameter>
+
+<parameter name="refl-diffraction" type="string">
+  <value val="diffonly,diffspec" />
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->

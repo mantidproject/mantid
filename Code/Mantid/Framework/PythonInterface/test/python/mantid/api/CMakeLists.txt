@@ -5,6 +5,7 @@ set ( TEST_PY_FILES
   AlgorithmTest.py
   AlgorithmFactoryTest.py
   AlgorithmManagerTest.py
+  AlgorithmPropertyTest.py
   AnalysisDataServiceTest.py
   AxisTest.py
   DeprecatedAlgorithmCheckerTest.py
@@ -21,6 +22,7 @@ set ( TEST_PY_FILES
   ITableWorkspaceTest.py
   JacobianTest.py
   MatrixWorkspaceTest.py
+  MDGeometryTest.py
   MDHistoWorkspaceTest.py
   MultipleExperimentInfos.py
   MultipleFilePropertyTest.py
@@ -29,6 +31,7 @@ set ( TEST_PY_FILES
   PythonAlgorithmChildAlgCallTest.py
   PythonAlgorithmTraitsTest.py
   PythonAlgorithmWorkspacePropertyTest.py
+  RunPythonScriptTest.py
   RunTest.py
   WorkspaceFactoryTest.py
   WorkspaceTest.py

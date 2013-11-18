@@ -49,6 +49,36 @@ namespace Mantid
       }
     }
 
+    /// @returns A human-readable string of the current state
+    const std::string MatrixWorkspace::toString() const
+    {
+      std::ostringstream os;
+      os << id() << "\n"
+         << "Title: " << getTitle() << "\n"
+         << "Histograms: " << getNumberHistograms() << "\n"
+         << "Bins: " << blocksize() << "\n";
+
+      if ( isHistogramData() ) os << "Histogram\n";
+      else os << "Data points\n";
+
+      os << "X axis: ";
+      if (axes() > 0 )
+      {
+        Axis *ax = getAxis(0);
+        if ( ax && ax->unit() ) os << ax->unit()->caption() << " / " << ax->unit()->label();
+        else os << "Not set";
+      }
+      else
+      {
+        os << "N/A";
+      }
+      os << "\n"
+         << "Y axis: " << YUnitLabel() << "\n";
+
+      os << ExperimentInfo::toString();
+      return os.str();
+    }
+
     /** Initialize the workspace. Calls the protected init() method, which is implemented in each type of
     *  workspace. Returns immediately if the workspace is already initialized.
     *  @param NVectors :: The number of spectra in the workspace (only relevant for a 2D workspace
@@ -95,7 +125,8 @@ namespace Mantid
       
       // A MatrixWorkspace contains uniquely one Run object, hence for this workspace
       // keep the Run object run_title property the same as the workspace title
-      m_run.access().addProperty("run_title",t, true);        
+      Run& run = mutableRun();
+      run.addProperty("run_title",t, true);        
     }
 
 
@@ -106,9 +137,9 @@ namespace Mantid
      */
     const std::string MatrixWorkspace::getTitle() const
     {
-      if ( m_run->hasProperty("run_title") )
+      if ( run().hasProperty("run_title") )
       {
-        std::string title = m_run->getProperty("run_title")->value();
+        std::string title = run().getProperty("run_title")->value();
         return title;
       }
       else      
@@ -284,19 +315,18 @@ namespace Mantid
     *    KEY is the Spectrum #
     *    VALUE is the Workspace Index
     */
-    spec2index_map * MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const
+    spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const
     {
       SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
       if (!ax)
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
-      spec2index_map * map = new spec2index_map();
+      spec2index_map map;
       try
       {
-        ax->getSpectraIndexMap(*map);
+        ax->getSpectraIndexMap(map);
       }
       catch (std::runtime_error &)
       {
-        delete map;
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: no elements!");
       }
       return map;
@@ -342,6 +372,30 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------
+    /** Does the workspace has any grouped detectors?
+    *  @return true if the workspace has any grouped detectors, otherwise false
+    */
+    bool MatrixWorkspace::hasGroupedDetectors() const
+    {
+      bool retVal = false;
+
+      //Loop through the workspace index
+      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
+      {
+        auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
+        if (detList.size() > 1)
+        {
+          retVal=true;
+          break;
+        }
+      }
+      return retVal;
+    }
+
+
+
+
+    //---------------------------------------------------------------------------------------
     /** Return a map where:
     *    KEY is the DetectorID (pixel ID)
     *    VALUE is the Workspace Index
@@ -350,12 +404,12 @@ namespace Mantid
     *  @throw runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
     *  @return Index to Index Map object. THE CALLER TAKES OWNERSHIP OF THE MAP AND IS RESPONSIBLE FOR ITS DELETION.
     */
-    detid2index_map * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
+    detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
     {
-      detid2index_map * map = new detid2index_map();
+      detid2index_map map;
 
       //Loop through the workspace index
-      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
+      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); ++workspaceIndex)
       {
         auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
 
@@ -363,23 +417,23 @@ namespace Mantid
         {
           if (detList.size() > 1)
           {
-            delete map;
             throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): more than 1 detector for one histogram! I cannot generate a map of detector ID to workspace index.");
           }
 
           //Set the KEY to the detector ID and the VALUE to the workspace index.
           if (detList.size() == 1)
-            (*map)[ *detList.begin() ] = workspaceIndex;
+            map[ *detList.begin() ] = workspaceIndex;
         }
         else
         {
           //Allow multiple detectors per workspace index
           for (auto it = detList.begin(); it != detList.end(); ++it)
-            (*map)[ *it ] = workspaceIndex;
+            map[ *it ] = workspaceIndex;
         }
 
         //Ignore if the detector list is empty.
       }
+
       return map;
     }
 
@@ -403,18 +457,12 @@ namespace Mantid
       detid_t maxId = 0;
       this->getInstrument()->getMinMaxDetectorIDs(minId, maxId);
       offset = -minId;
+      const int outSize = maxId - minId + 1;
       // Allocate at once
-      out.resize(maxId - minId + 1, 0);
-      int outSize = int(out.size());
+      out.resize(outSize, std::numeric_limits<size_t>::max());
 
-      // Run in parallel if thread-safe.
-      // We should expect that there is only one workspace index per detector ID.
-      int numHistos = int(this->getNumberHistograms());
-
-      for (int i=0; i < numHistos; i++)
+      for (size_t workspaceIndex=0; workspaceIndex < getNumberHistograms(); ++workspaceIndex)
       {
-        size_t workspaceIndex = size_t(i);
-
         //Get the list of detectors from the WS index
         const std::set<detid_t> & detList = this->getSpectrum(workspaceIndex)->getDetectorIDs();
 
@@ -428,7 +476,6 @@ namespace Mantid
           int index = *it + offset;
           if (index < 0 || index >= outSize)
           {
-            //throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" + Mantid::Kernel::Strings::toString(*it) + ") is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.");
             g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" << *it << " at workspace index " << workspaceIndex << ") is invalid." << std::endl;
           }
           else
@@ -1018,7 +1065,7 @@ namespace Mantid
     size_t MatrixWorkspace::getMemorySize() const
     {
       //3 doubles per histogram bin.
-      return 3*size()*sizeof(double) + m_run->getMemorySize();
+      return 3*size()*sizeof(double) + run().getMemorySize();
     }
 
     /** Returns the memory used (in bytes) by the X axes, handling ragged bins.
@@ -1176,10 +1223,10 @@ namespace Mantid
       virtual bool getIsIntegrated() const {return m_axis.length() == 1;}
 
       /// @return the minimum extent of this dimension
-      virtual coord_t getMinimum() const {return coord_t(m_axis(0));}
+      virtual coord_t getMinimum() const {return coord_t(m_axis.getMin());}
 
       /// @return the maximum extent of this dimension
-      virtual coord_t getMaximum() const {return coord_t(m_axis(m_axis.length()-1));}
+      virtual coord_t getMaximum() const {return coord_t(m_axis.getMax());}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual size_t getNBins() const {return m_axis.length();}
@@ -1577,7 +1624,6 @@ namespace Mantid
     {
       return Mantid::API::None;
     }
-
 
   } // namespace API
 } // Namespace Mantid

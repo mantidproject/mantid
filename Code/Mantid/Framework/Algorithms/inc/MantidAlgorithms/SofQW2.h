@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAlgorithms/SofQCommon.h"
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/IDetector.h"
@@ -74,8 +75,6 @@ namespace Mantid
 //      /// Rebin the inputQ
 //      void rebinToOutput(const Geometry::Quadrilateral & inputQ, API::MatrixWorkspace_const_sptr inputWS,
 //                         const size_t i, const size_t j, API::MatrixWorkspace_sptr outputWS);
-      /// Get the efixed value for the given detector
-      double getEFixed(Geometry::IDetector_const_sptr det) const;
       /// Calculate the Q value for a direct instrument
       double calculateDirectQ(const double efixed, const double deltaE, const double twoTheta, const double psi) const;
       /// Calculate the Q value for an indirect instrument
@@ -88,13 +87,8 @@ namespace Mantid
       /// Init the theta index
       void initThetaCache(API::MatrixWorkspace_const_sptr workspace);
 
-      /// E Mode
-      int m_emode;
-      /// EFixed has been provided
-      bool m_efixedGiven;
-      /// EFixed
-      double m_efixed;
 
+      SofQCommon  m_EmodeProperties;
       //---------------------------------------------------------------------------------
       /// Output Q axis
       std::vector<double> m_Qout;

@@ -97,7 +97,6 @@ namespace Algorithms
   {
     bool firstloop = true;
     API::MatrixWorkspace_sptr outputws;
-    string outputwsname = this->getPropertyValue("OutputWorkspace");
 
     size_t numcalls = m_xminVec.size();
 
@@ -120,10 +119,10 @@ namespace Algorithms
       else
       {
         if (!outputws)
-          throw runtime_error("Programming lotic error.");
-        maskbins->setPropertyValue("InputWorkspace", outputwsname);
+          throw runtime_error("Programming logic error.");
+        maskbins->setProperty("InputWorkspace", outputws);
       }
-      maskbins->setPropertyValue("OutputWorkspace", outputwsname);
+      maskbins->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       maskbins->setPropertyValue("SpectraList", m_spectraVec[ib]);
       maskbins->setProperty("XMin", m_xminVec[ib]);
       maskbins->setProperty("XMax", m_xmaxVec[ib]);
@@ -267,12 +266,12 @@ namespace Algorithms
     // Get workspace index from
     vector<size_t> wsindexvec;
 
-    detid2index_map* refermap = dataws->getDetectorIDToWorkspaceIndexMap(false);
+    detid2index_map refermap = dataws->getDetectorIDToWorkspaceIndexMap(false);
     for (size_t i = 0; i < numitems; ++i)
     {
       detid_t detid = detidvec[i];
-      detid2index_map::iterator fiter = refermap->find(detid);
-      if (fiter != refermap->end())
+      detid2index_map::const_iterator fiter = refermap.find(detid);
+      if (fiter != refermap.end())
       {
         size_t wsindex = fiter->second;
         wsindexvec.push_back(wsindex);
@@ -282,8 +281,6 @@ namespace Algorithms
         g_log.warning() << "Detector ID " << detid << " cannot be mapped to any workspace index/spectrum." << ".\n";
       }
     }
-
-    delete refermap;
 
     // Sort the vector
     if (wsindexvec.size() == 0)

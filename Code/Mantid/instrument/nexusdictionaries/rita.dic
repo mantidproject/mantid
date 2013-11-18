@@ -1,0 +1,9 @@
+data=/entry1/data/counts
+title=/entry1/title
+sample=/entry1/sample/name
+monitor1=/entry1/control/data
+ei=/entry1/data/energy
+energy_transfer=/entry1/data/energy_transfer
+qh=/entry1/data/Qh
+qk=/entry1/data/Qk
+ql=/entry1/data/Ql

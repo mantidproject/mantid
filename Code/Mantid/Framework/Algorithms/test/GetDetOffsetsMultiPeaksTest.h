@@ -18,6 +18,10 @@ using Mantid::DataObjects::OffsetsWorkspace_sptr;
 class GetDetOffsetsMultiPeaksTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GetDetOffsetsMultiPeaksTest *createSuite() { return new GetDetOffsetsMultiPeaksTest(); }
+  static void destroySuite( GetDetOffsetsMultiPeaksTest *suite ) { delete suite; }
 
   GetDetOffsetsMultiPeaksTest()
   {
@@ -61,7 +65,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpetraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
 
@@ -103,7 +107,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
-    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpetraFitInfoTableWorkspace", "FitInfoTable"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpectraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
 
@@ -131,9 +135,17 @@ private:
 
 class GetDetOffsetsMultiPeaksTestPerformance : public CxxTest::TestSuite
 {
-public:
   MatrixWorkspace_sptr WS;
   int numpixels;
+
+public:
+  static GetDetOffsetsMultiPeaksTestPerformance *createSuite() { return new GetDetOffsetsMultiPeaksTestPerformance(); }
+  static void destroySuite( GetDetOffsetsMultiPeaksTestPerformance *suite ) { delete suite; }
+
+  GetDetOffsetsMultiPeaksTestPerformance()
+  {
+    FrameworkManager::Instance();
+  }
 
   void setUp()
   {

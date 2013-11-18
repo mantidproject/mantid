@@ -8,13 +8,12 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::NexusTestHelper;
 
 // Helper class
 namespace
@@ -61,9 +60,6 @@ namespace
 class LogManagerTest : public CxxTest::TestSuite
 {
 public:
-  LogManagerTest()
-  {}
-
   void testAddGetData()
   {
     LogManager runInfo;
@@ -263,7 +259,37 @@ public:
     TS_ASSERT_EQUALS( runInfo.getPropertyValueAsType<int>(intProp), 99 );
   }
 
+  void clearOutdatedTimeSeriesLogValues()
+  {
+    // Set up a Run object with 3 properties in it (1 time series, 2 single value)
+    LogManager runInfo;
+    const std::string stringProp("aStringProp");
+    const std::string stringVal("testing");
+    runInfo.addProperty(stringProp,stringVal);
+    const std::string intProp("anIntProp");
+    runInfo.addProperty(intProp,99);
+    const std::string tspProp("tsp");
+    addTestTimeSeries(runInfo,"tsp");
 
+    // Check it's set up right
+    TS_ASSERT_EQUALS( runInfo.getProperties().size(), 3 );
+    auto tsp = runInfo.getTimeSeriesProperty<double>(tspProp);
+    TS_ASSERT_EQUALS( tsp->realSize(), 10 );
+
+    auto lastTime = tsp->lastTime();
+    auto lastValue = tsp->lastValue();
+
+    // Do the clearing work
+    TS_ASSERT_THROWS_NOTHING( runInfo.clearOutdatedTimeSeriesLogValues() );
+
+    // Check the time-series property has 1 entry, & the others are unchanged
+    TS_ASSERT_EQUALS( runInfo.getProperties().size(), 3 );
+    TS_ASSERT_EQUALS( tsp->realSize(), 1 );
+    TS_ASSERT_EQUALS( tsp->firstTime(), lastTime );
+    TS_ASSERT_EQUALS( tsp->firstValue(), lastValue );
+    TS_ASSERT_EQUALS( runInfo.getPropertyValueAsType<std::string>(stringProp), stringVal );
+    TS_ASSERT_EQUALS( runInfo.getPropertyValueAsType<int>(intProp), 99 );
+  }
 
   /** Save and load to NXS file */
   void test_nexus()
@@ -324,8 +350,6 @@ public:
  
   }
 
-private:
-  
 };
 
 //---------------------------------------------------------------------------------------

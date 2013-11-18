@@ -5,7 +5,6 @@ set ( SRC_FILES
 	#end TMP
 	src/AndMD.cpp
 	src/BinMD.cpp
-	src/BinToMDHistoWorkspace.cpp
 	src/BinaryOperationMD.cpp
 	src/BooleanBinaryOperationMD.cpp
 	src/CentroidPeaksMD.cpp
@@ -15,6 +14,7 @@ set ( SRC_FILES
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace2.cpp
 	src/ConvertToMD.cpp
+	src/ConvertToMDHelper.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
@@ -75,7 +75,6 @@ set ( INC_FILES
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
 	inc/MantidMDAlgorithms/AndMD.h
 	inc/MantidMDAlgorithms/BinMD.h
-	inc/MantidMDAlgorithms/BinToMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
@@ -85,6 +84,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
+	inc/MantidMDAlgorithms/ConvertToMDHelper.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/DivideMD.h
@@ -94,6 +94,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/FakeMDEventData.h
 	inc/MantidMDAlgorithms/FindPeaksMD.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
+    inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
@@ -146,7 +147,6 @@ set ( TEST_FILES
 	# these tests are as they test verify different parts of the CPR algorithms
 	#CreateMDFitWorkspaceTest.h
 	AndMDTest.h
-	BinToMDHistoWorkspaceTest.h
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
 	CentroidPeaksMDTest.h
@@ -157,6 +157,7 @@ set ( TEST_FILES
 	ConvertToDiffractionMDWorkspace2Test.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDComponentsTest.h
+	ConvertToMDHelperTest.h
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h

@@ -1,7 +1,8 @@
 <?xml version='1.0' encoding='ASCII'?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="CNCS" valid-from   ="1900-01-31 23:59:59"
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="CNCS" valid-from   ="1900-01-31 23:59:59"
                         valid-to     ="2011-08-17 17:17:00"
 		        last-modified="2010-10-12 08:54:11">
   <!--Created by Michael Reuter-->
@@ -11,7 +12,7 @@
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
-      <handedness axis="right"/>
+      <handedness val="right"/>
     </reference-frame>
   </defaults>
   <!--SOURCE AND SAMPLE POSITION-->
@@ -703,8 +704,8 @@
     <cylinder id="cyl-approx">
       <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>
-      <radius radius="0.01"/>
-      <height height="0.03"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
     </cylinder>
     <algebra val="cyl-approx"/>
   </type>

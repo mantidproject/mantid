@@ -8,6 +8,7 @@ For fast fequency sample logs, the time-of-flight of each neutron is recorded at
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceValidators.h"
 
 #include <fstream>
 #include <iomanip>
@@ -59,10 +60,10 @@ namespace Algorithms
     */
   void CreateLogTimeCorrection::init()
   {
-    auto inpwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input);
+    auto inpwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, boost::make_shared<InstrumentValidator>());
     declareProperty(inpwsprop, "Name of the input workspace to generate log correct from.");
 
-    auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "AnonymousOut", Direction::Output);
+    auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output);
     declareProperty(outwsprop, "Name of the output workspace containing the corrections.");
 
     auto fileprop = new FileProperty("OutputFilename", "", FileProperty::OptionalSave);
@@ -80,13 +81,6 @@ namespace Algorithms
     // 1. Process input
     m_dataWS = getProperty("InputWorkspace");
     m_instrument = m_dataWS->getInstrument();
-    if (!m_instrument)
-    {
-      stringstream errss;
-      errss << "Input matrix workspace " << m_dataWS->name() << " does not have instrument. ";
-      g_log.error(errss.str());
-      throw runtime_error(errss.str());
-    }
 
     //   Check whether the output workspace name is same as input
     string outwsname = getPropertyValue("OutputWorkspace");

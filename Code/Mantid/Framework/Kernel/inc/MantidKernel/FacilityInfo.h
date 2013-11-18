@@ -5,8 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/RemoteJobManager.h"
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -22,8 +24,6 @@ namespace Poco
     class Element;
   }
 }
-
-class RemoteJobManager;
 
 namespace Mantid
 {
@@ -70,16 +70,10 @@ public:
   /// Returns the preferred file extension
   const std::string & preferredExtension()const { return m_extensions.front(); }
 
-  /// Return the soap endpoint name
-  const std::string & getSoapEndPoint() const { return m_soapEndPoint; }
-  /// Returns the catalog name
-  const std::string & catalogName()const {return m_catalogName;}
   /// Return the archive search interface names
   const std::vector<std::string> & archiveSearch() const { return m_archiveSearch; }
-
   /// Returns the name of the default live listener
   const std::string & liveListener() const { return m_liveListener; }
-
   /// Returns a list of instruments of this facility
   const std::vector<InstrumentInfo> & instruments() const { return m_instruments; }
   /// Returns a list of instruments of given technique
@@ -90,14 +84,14 @@ public:
   std::vector<std::string> computeResources() const;
   /// Returns the RemoteJobManager for the named compute resource
   boost::shared_ptr<RemoteJobManager> getRemoteJobManager( const std::string &name) const;
+  /// Returns the catalogInfo class.
+  const CatalogInfo& catalogInfo() const { return m_catalogs; }
 
 private:
   void fillZeroPadding(const Poco::XML::Element* elem);
   void fillDelimiter(const Poco::XML::Element* elem);
   void fillExtensions(const Poco::XML::Element* elem);
-  void fillSoapEndPoint(const Poco::XML::Element* elem);
   void fillArchiveNames(const Poco::XML::Element* elem);
-  void fillCatalogName(const Poco::XML::Element* elem);
   void fillInstruments(const Poco::XML::Element* elem);
   void fillLiveListener(const Poco::XML::Element* elem);
   void fillHTTPProxy(const Poco::XML::Element* elem);
@@ -106,19 +100,17 @@ private:
   /// Add new extension
   void addExtension(const std::string& ext);
 
+  CatalogInfo m_catalogs;                      ///< Gain access to the catalogInfo class.
   const std::string m_name;                    ///< facility name
   int m_zeroPadding;                           ///< default zero padding for this facility
   std::string m_delimiter;                     ///< default delimiter between instrument name and run number
   std::vector<std::string> m_extensions;       ///< file extensions in order of preference
-  std::string m_soapEndPoint;                  ///< names of the soap end point
   std::vector<std::string> m_archiveSearch;    ///< names of the archive search interface
   std::vector<InstrumentInfo> m_instruments;   ///< list of instruments of this facility
-  std::string m_catalogName;                   ///< name of the catalog system of this facility
   std::string m_liveListener;                  ///< name of the default live listener
-  std::map< std::string, boost::shared_ptr<RemoteJobManager> > m_computeResources;
-    ///< list of compute resources (clusters, etc...) available at this facility
-    ///< sorted by their names
-    // Note that this is a map of pointers!  RemoteJobManager is an abstract base class.
+  typedef std::map< std::string, boost::shared_ptr<RemoteJobManager>  > ComputeResourcesMap;
+  ComputeResourcesMap m_computeResources;      ///< list of compute resources (clusters, etc...) available at this facility
+                                               // (Sorted by their names)
   static Logger& g_log;                        ///< logger
 };
 

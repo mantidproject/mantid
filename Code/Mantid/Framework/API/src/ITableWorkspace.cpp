@@ -11,6 +11,17 @@ namespace API
 // Get a reference to the logger
 Kernel::Logger& ITableWorkspace::g_log = Kernel::Logger::get("ITableWorkspace");
 
+/**
+ */
+const std::string ITableWorkspace::toString() const
+{
+  std::ostringstream os;
+  os << id() << "\n";
+  os << "Columns: " << boost::lexical_cast<std::string>(columnCount()) << "\n";
+  os << "Rows: " << boost::lexical_cast<std::string>(rowCount()) << "\n";
+  os << getMemorySizeAsStr();
+  return os.str();
+}
 
 /** Creates n new columns of the same type
  * @param type :: The datatype of the column
@@ -68,9 +79,8 @@ void ITableWorkspace::modified()
   ITableWorkspace_sptr tws = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
   if (!tws) return;
   AnalysisDataService::Instance().notificationCenter.postNotification(
-    new Kernel::DataService<API::Workspace>::AfterReplaceNotification(this->getName(),tws));
+              new Kernel::DataService<API::Workspace>::AfterReplaceNotification(this->getName(),tws));
 }
-
 
 
 /** Overridable method to custom-sort the workspace
@@ -106,7 +116,23 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type (ITableWorkspace)";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected ITableWorkspace";
+        throw std::runtime_error(message);
+      }
+    }
+
+    template<> MANTID_API_DLL
+    API::ITableWorkspace_const_sptr IPropertyManager::getValue<API::ITableWorkspace_const_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<API::ITableWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return prop->operator()();
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const ITableWorkspace";
         throw std::runtime_error(message);
       }
     }

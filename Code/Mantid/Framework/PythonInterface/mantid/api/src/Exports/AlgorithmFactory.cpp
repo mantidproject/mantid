@@ -1,5 +1,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
 
@@ -62,6 +64,7 @@ namespace
   // Python algorithm registration mutex in anonymous namespace (aka static)
   Poco::Mutex PYALG_REGISTER_MUTEX;
 
+GCC_DIAG_OFF(cast-qual)
   /**
    * A free function to subscribe a Python algorithm into the factory
    * @param obj :: A Python object that should either be a class type derived from PythonAlgorithm
@@ -88,11 +91,15 @@ namespace
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
     // Takes ownership of instantiator and replaces any existing algorithm
-    self.subscribe(new PythonObjectInstantiator<Algorithm>(classType), AlgorithmFactoryImpl::OverwriteCurrent);
+    auto descr = self.subscribe(new PythonObjectInstantiator<Algorithm>(classType), AlgorithmFactoryImpl::OverwriteCurrent);
+
+    // Python algorithms cannot yet act as loaders so remove any registered ones from the FileLoaderRegistry
+    FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
   }
 
   ///@endcond
 }
+GCC_DIAG_ON(cast-qual)
 
 void export_AlgorithmFactory()
 {
@@ -105,25 +112,4 @@ void export_AlgorithmFactory()
       .staticmethod("Instance")
     ;
 
-}
-
-namespace
-{
-  // ------ Deprecated ------------
-  /**
-   * A free function to register an algorithm from Python
-   * @param obj :: A Python object that should either be a class type derived from PythonAlgorithm
-   *              or an instance of a class type derived from PythonAlgorithm
-   */
-  void registerAlgorithm(const boost::python::object & obj)
-  {
-    PyErr_WarnEx(PyExc_DeprecationWarning, "registerAlgorithm is deprecated. Replace with AlgorithmFactory.subscribe", 1);
-    subscribe(AlgorithmFactory::Instance(), obj);
-  }
-}
-
-void export_RegisterAlgorithm()
-{
-  // The registration function
-  def("registerAlgorithm", &registerAlgorithm, "Register an algorithm with Mantid. The class must derive from mantid.api.PythonAlgorithm.");
 }

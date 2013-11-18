@@ -4,6 +4,7 @@ import math
 import os
 import time
 import sys
+from numpy import NAN
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 #from launch_peak_back_selection_1d import DesignerMainWindow
@@ -11,9 +12,11 @@ from reduction_gui.widgets.base_widget import BaseWidget
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
+    import mantid
+    #from MantidFramework import *
+    #mtd.initialise(False)
+    #from mantidsimple import *
+    from mantid.simpleapi import *
     from reduction.instruments.reflectometer import data_manipulation
 
     IS_IN_MANTIDPLOT = True
@@ -58,6 +61,8 @@ class BaseRefWidget(BaseWidget):
         self._summary.data_to_tof.setValidator(QtGui.QIntValidator(self._summary.data_to_tof))
         self._summary.dq0.setValidator(QtGui.QDoubleValidator(self._summary.dq0))
         self._summary.dq_over_q.setValidator(QtGui.QDoubleValidator(self._summary.dq_over_q))
+#        self._summary.overlapValueMeanRadioButton(QtGui.setChecked(False)
+#        self._summary.overlapValueLowestErrorRadioButton.setChecked(True)
 
         self._summary.x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_min_edit))
         self._summary.x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_max_edit))
@@ -152,6 +157,9 @@ class BaseRefWidget(BaseWidget):
         call_back = partial(self._edit_event, ctrl=self._summary.slits_width_flag)
         self.connect(self._summary.slits_width_flag, QtCore.SIGNAL("clicked()"), call_back)
  
+        call_back = partial(self._edit_event, ctrl=self._summary.geometry_correction_switch)
+        self.connect(self._summary.geometry_correction_switch, QtCore.SIGNAL("clicked()"), call_back)
+ 
         call_back = partial(self._edit_event, ctrl=self._summary.q_min_edit)
         self.connect(self._summary.q_min_edit, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.q_step_edit)
@@ -170,8 +178,14 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.dq_over_q, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.fourth_column_switch)
         self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked()"), call_back)
+        
+        #overlap values
+        call_back = partial(self._edit_event, ctrl=self._summary.overlapValueMeanRadioButton)
+        self.connect(self._summary.overlapValueMeanRadioButton, QtCore.SIGNAL("clicked()"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.overlapValueLowestErrorRadioButton)
+        self.connect(self._summary.overlapValueLowestErrorRadioButton, QtCore.SIGNAL("clicked()"), call_back)
  
-         #name of output file changed
+        #name of output file changed
         call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
         self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
 
@@ -197,12 +211,13 @@ class BaseRefWidget(BaseWidget):
         This retrieve the metadata from the data event NeXus file
         """
         _full_file_name = file
-        LoadEventNexus(Filename=_full_file_name,
-                       OutputWorkspace='tmpWks',
+        tmpWks = LoadEventNexus(Filename=_full_file_name,
+#                       OutputWorkspace='tmpWks',
                        MetaDataOnly='1')
         
-        mt1 = mtd['tmpWks']
-        mt_run = mt1.getRun()
+        #mt1 = mtd['tmpWks']
+        #mt_run = mt1.getRun()
+        mt_run = tmpWks.getRun()
         
         #tthd
         tthd = mt_run.getProperty('tthd').value[0]
@@ -298,9 +313,9 @@ class BaseRefWidget(BaseWidget):
         new_y_axis = []
         new_e_axis = []
         
-        if self.bDEBUG:
-            print 'x_axis before _smooth_x_axis:'
-            print x_axis
+#        if self.bDEBUG:
+#            print 'x_axis before _smooth_x_axis:'
+#            print x_axis
         
         sz = len(x_axis)        
         i=0
@@ -354,19 +369,196 @@ class BaseRefWidget(BaseWidget):
     
             i+=1
     
-        if self.bDEBUG:
-            print
-            print 'x-axis after _smooth_x_axis:'
-            print new_x_axis
+#        if self.bDEBUG:
+#            print
+#            print 'x-axis after _smooth_x_axis:'
+#            print new_x_axis
     
         self.x_axis = new_x_axis
         self.y_axis = new_y_axis
         self.e_axis = new_e_axis
+        
+    def weightedMean(self, data_array, error_array):
     
+        sz = len(data_array)
+    
+        # calculate the numerator of mean
+        dataNum = 0;
+        for i in range(sz):
+            if not (data_array[i] == 0):
+                tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
+                dataNum += tmpFactor
+    
+        # calculate denominator
+        dataDen = 0;
+        for i in range(sz):
+            if not (error_array[i] == 0):
+                tmpFactor = 1./float((pow(error_array[i],2)))
+                dataDen += tmpFactor
+
+        if dataDen == 0:
+            mean = 0
+            mean_error = 0
+        else:            
+            mean = float(dataNum) / float(dataDen)
+            mean_error = math.sqrt(1/dataDen)     
+
+        return [mean, mean_error]
+
+    def _average_y_of_same_x_(self):
+        """
+        2 y values sharing the same x-axis will be average using
+        the weighted mean
+        """
+        
+        ws_list = AnalysisDataService.getObjectNames()
+        scaled_ws_list = []
+
+        # Get the list of scaled histos
+        for ws in ws_list:
+            if ws.endswith("_scaled"):
+                scaled_ws_list.append(ws)
+        
+        
+        # get binning parameters
+        _from_q = str(self._summary.q_min_edit.text())
+        _bin_size = str(self._summary.q_step_edit.text())
+        _bin_max = str(2)
+        binning_parameters = _from_q + ',-' + _bin_size + ',' + _bin_max
+        
+        # Convert each histo to histograms and rebin to final binning
+        for ws in scaled_ws_list:
+            new_name = "%s_histo" % ws
+            ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
+            Rebin(InputWorkspace=new_name, Params=binning_parameters,
+                  OutputWorkspace=new_name)
+
+        # Take the first rebinned histo as our output
+        data_y = mtd[scaled_ws_list[0]+'_histo'].dataY(0)
+        data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
+
+        # Add in the other histos, averaging the overlaps
+        for i in range(1, len(scaled_ws_list)):
+            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)            
+            data_e_i = mt[scaled_ws_list[i]+'_histo'].dataE(0)
+            for j in range(len(data_y_i)):
+                
+                if data_y[j]>0 and data_y_i[j]>0:
+                    [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]]);
+                elif (data_y[j] == 0) and (data_y_i[j]>0):
+                    data_y[j] = data_y_i[j]
+                    data_e[j] = data_e_i[j]
+
+        return scaled_ws_list[0]+'_histo'
+        
+    def _produce_y_of_same_x_(self, isUsingLessErrorValue):
+        """
+        2 y values sharing the same x-axis will be average using
+        the weighted mean
+        """
+        
+        ws_list = AnalysisDataService.getObjectNames()
+        scaled_ws_list = []
+
+        # Get the list of scaled histos
+        for ws in ws_list:
+            if ws.endswith("_scaled"):
+                scaled_ws_list.append(ws)
+        
+        # get binning parameters
+        _from_q = str(self._summary.q_min_edit.text())
+        _bin_size = str(self._summary.q_step_edit.text())
+        _bin_max = str(2)
+        binning_parameters = _from_q + ',-' + _bin_size + ',' + _bin_max
+        
+        ## DEBUGGING ONLY
+        file_number = 0
+#        print '=========== BEFORE REBINING =========='
+        for ws in scaled_ws_list:
+#            print 'file_number: ' , file_number
+            data_y = mtd[ws].dataY(0)
+            data_e = mtd[ws].dataE(0)
+            
+            # cleanup data 0-> NAN
+            for j in range(len(data_y)):
+#                print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
+                if data_y[j] < 1e-12:
+                    data_y[j] = NAN
+                    data_e[j] = NAN
+            
+            file_number = file_number + 1
+        
+        ## END OF DEBUGGING ONLY
+        
+        # Convert each histo to histograms and rebin to final binning
+        for ws in scaled_ws_list:
+            new_name = "%s_histo" % ws
+            ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
+#            mtd[new_name].setDistribution(True)
+            Rebin(InputWorkspace=new_name, Params=binning_parameters,
+                  OutputWorkspace=new_name)
+
+        # Take the first rebinned histo as our output
+        data_y = mtd[scaled_ws_list[0]+'_histo'].dataY(0)
+        data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
+
+        # skip first 3 points and last one
+        skip_index = 0
+        point_to_skip = 3
+
+#        print '============ AFTER REBINING ================' #DEBUGGING ONLY
+
+        # Add in the other histos, averaging the overlaps
+        for i in range(1, len(scaled_ws_list)):
+            
+#            print 'i: ' , i
+            
+            skip_point = True
+            can_skip_last_point = False
+            
+            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)
+            data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
+            for j in range(len(data_y_i)-1):
+                
+#                print '-> j: ' , j
+                
+                if data_y_i[j] > 0:
+                    
+#                    print '   data_y_i[j]: ', data_y_i[j], ' data_e_i[j]: ' , data_e_i[j]
+                    
+                    can_skip_last_point = True
+                    if skip_point:
+                        skip_index = skip_index + 1
+                        if skip_index == point_to_skip:
+                            skip_point = False
+                            skip_index = 0
+                        else:
+                            continue
+                
+                if can_skip_last_point and (data_y_i[j+1]==0):
+                    break
+                
+                if data_y[j]>0 and data_y_i[j]>0:
+                    
+                    if isUsingLessErrorValue:
+                        if (data_e[j] > data_e_i[j]):
+                            data_y[j] = data_y_i[j]
+                            data_e[j] = data_e_i[j]
+                    else:
+                        [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]])
+                    
+                elif (data_y[j] == 0) and (data_y_i[j]>0):
+                    data_y[j] = data_y_i[j]
+                    data_e[j] = data_e_i[j]
+
+            
+        return scaled_ws_list[0]+'_histo'
+        
     def _create_ascii_clicked(self):
         """
-        Reached by the "Create ASCII" button
+        Reached by the 'Create ASCII' button
         """
+        
         #make sure there is the right output workspace called '
 #        if not mtd.workspaceExists('ref_combined'):
 #            print 'Workspace "ref_combined" does not exist !'
@@ -407,26 +599,33 @@ class BaseRefWidget(BaseWidget):
 #              OutputWorkspace='ref_combined',
 #              Params=q_binning)
             
-        mt = mtd['ref_combined']
-        x_axis = mt.readX(0)[:]
-        y_axis = mt.readY(0)[:]
-        e_axis = mt.readE(0)[:]
+        #using mean or value with less error
+        _overlap_less_error_flag = self._summary.overlapValueLowestErrorRadioButton.isChecked()
+        wks_file_name = self._produce_y_of_same_x_(_overlap_less_error_flag)
+#        print 'wks_file_name: ' , wks_file_name
+
+#        mt = mtd['ref_combined']
+#        x_axis = mt.readX(0)[:]
+#        y_axis = mt.readY(0)[:]
+#        e_axis = mt.readE(0)[:]
+#        
+#        self._smooth_x_axis(x_axis, y_axis, e_axis)
         
-        self._smooth_x_axis(x_axis, y_axis, e_axis)
-        x_axis = self.x_axis
-        y_axis = self.y_axis
-        e_axis = self.e_axis
+        x_axis = mtd[wks_file_name].readX(0)[:]
+        y_axis = mtd[wks_file_name].readY(0)[:]
+        e_axis = mtd[wks_file_name].readE(0)[:]
         
-        sz = len(x_axis)
+        sz = len(x_axis)-1
         for i in range(sz):
-            _line = str(x_axis[i])
-            _line += ' ' + str(y_axis[i])
-            _line += ' ' + str(e_axis[i])
-            if _with_4th_flag:
-                _precision = str(dq0 + dq_over_q * x_axis[i])
-                _line += ' ' + _precision
-            
-            text.append(_line)
+            # do not display data where R=0
+            if (y_axis[i] > 1e-15):
+                _line = str(x_axis[i])
+                _line += ' ' + str(y_axis[i])
+                _line += ' ' + str(e_axis[i])
+                if _with_4th_flag:
+                    _precision = str(dq0 + dq_over_q * x_axis[i])
+                    _line += ' ' + _precision
+                text.append(_line)
     
         f=open(file_name,'w')
         for _line in text:
@@ -519,10 +718,13 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.q_step_edit, False)
         util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
         util.set_edited(self._summary.incident_medium_combobox, False)
+        util.set_edited(self._summary.overlapValueLowestErrorRadioButton, False)
+        util.set_edited(self._summary.overlapValueMeanRadioButton, False)
         util.set_edited(self._summary.dq0, False)
         util.set_edited(self._summary.dq_over_q, False)
         util.set_edited(self._summary.fourth_column_switch, False)
         util.set_edited(self._summary.slits_width_flag, False)
+        util.set_edited(self._summary.geometry_correction_switch, False)
         util.set_edited(self._summary.angle_offset_edit, False)
         util.set_edited(self._summary.angle_offset_error_edit, False)
          
@@ -537,9 +739,9 @@ class BaseRefWidget(BaseWidget):
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
         content += "    del os.environ[\"MANTIDPATH\"]\n"
         content += "sys.path.insert(0,'/opt/mantidnightly/bin')\n"
-        content += "from MantidFramework import mtd\n"
-        content += "mtd.initialize()\n"
-        content += "from mantidsimple import *\n\n"
+        script += "import mantid\n"
+        script += "from mantid.simpleapi import *\n"
+        script += "from mantid.kernel import ConfigService\n"
         
         content += "eventFileAbs=sys.argv[1]\n"
         content += "outputDir=sys.argv[2]\n\n"
@@ -547,10 +749,7 @@ class BaseRefWidget(BaseWidget):
         content += "eventFile = os.path.split(eventFileAbs)[-1]\n"
         content += "nexusDir = eventFileAbs.replace(eventFile, '')\n"
         content += "runNumber = eventFile.split('_')[2]\n"
-        content += "configService = mtd.getSettings()\n"
-        content += "dataSearchPath = configService.getDataSearchDirs()\n"
-        content += "dataSearchPath.append(nexusDir)\n"
-        content += "configService.setDataSearchDirs(dataSearchPath)\n\n"
+        content += "ConfigService.Instance().appendDataSearchDir(nexusDir)\n\n"
         
         # Place holder for reduction script
         content += "\n"
@@ -887,14 +1086,23 @@ class BaseRefWidget(BaseWidget):
         range_max = int(self._summary.data_to_tof.text())
 
         ws_output_base = "Peak - " + basename + " - Y pixel _2D"
-        if mtd.workspaceExists(ws_output_base):
-            mtd.deleteWorkspace(ws_output_base)
+#        if mtd.workspaceExists(ws_output_base):
+#            mtd.deleteWorkspace(ws_output_base)
+#            ws_output_base_1 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs"
+#            mtd.deleteWorkspace(ws_output_base_1)
+#            ws_output_base_2 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs_all"
+#            mtd.deleteWorkspace(ws_output_base_2)
+#            ws_output_base_3 = "Peak - " + self.instrument_name + "_" + str(run_number) + "_event.nxs - Y pixel "
+#            mtd.deleteWorkspace(ws_output_base_3)
+
+        if mtd.doesExist(ws_output_base):
+            DeleteWorkspace(ws_output_base)
             ws_output_base_1 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs"
-            mtd.deleteWorkspace(ws_output_base_1)
+            DeleteWorkspace(ws_output_base_1)
             ws_output_base_2 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs_all"
-            mtd.deleteWorkspace(ws_output_base_2)
+            DeleteWorkspace(ws_output_base_2)
             ws_output_base_3 = "Peak - " + self.instrument_name + "_" + str(run_number) + "_event.nxs - Y pixel "
-            mtd.deleteWorkspace(ws_output_base_3)
+            DeleteWorkspace(ws_output_base_3)
 
         data_manipulation.counts_vs_pixel_distribution(file_path, 
                                                        is_pixel_y=True, 
@@ -1001,7 +1209,7 @@ class BaseRefWidget(BaseWidget):
         """
             Will launch the 2d plot for the norm of counts vs TOF
         """
-        print 'inside plot_norm_count_vs_tof_2d'
+        return
 
     
     
@@ -1023,7 +1231,7 @@ class BaseRefWidget(BaseWidget):
             @param max_ctrl: control widget containing the range maximum
             @param isPeak: are we working with peak or with background
         """
-        
+
         if not IS_IN_MANTIDPLOT:
             return
         
@@ -1061,7 +1269,6 @@ class BaseRefWidget(BaseWidget):
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))[0]
 #            print FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
-            
             range_min = int(self._summary.data_from_tof.text())
             range_max = int(self._summary.data_to_tof.text())
         
@@ -1092,7 +1299,7 @@ class BaseRefWidget(BaseWidget):
             while i < self._summary.angle_list.count():
                 
                 current_item = self._summary.angle_list.item(i)
-                state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+                state = current_item.data(QtCore.Qt.UserRole)
                 
                 _q_min = self._summary.q_min_edit.text()
                 state.q_min = float(_q_min)
@@ -1109,6 +1316,8 @@ class BaseRefWidget(BaseWidget):
                 
                 state.slits_width_flag = self._summary.slits_width_flag.isChecked()
                 
+                state.geometry_correction_switch = self._summary.geometry_correction_switch.isChecked()
+                
                 #incident medium
                 _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
                                           for j in range(self._summary.incident_medium_combobox.count())]
@@ -1118,7 +1327,11 @@ class BaseRefWidget(BaseWidget):
                 state.incident_medium_list = [_incident_medium_string]
                 
                 state.incident_medium_index_selected = _incident_medium_index_selected
-                
+
+                # how to treat overlap values
+                state.overlap_lowest_error = self._summary.overlapValueLowestErrorRadioButton.isChecked()               
+                state.overlap_mean_value = self._summary.overlapValueMeanRadioButton.isChecked()
+
                 #4th column (precision)
                 state.fourth_column_dq0 = self._summary.dq0.text()
                 state.fourth_column_dq_over_q = self._summary.dq_over_q.text()
@@ -1135,6 +1348,8 @@ class BaseRefWidget(BaseWidget):
             else:
                 state.scaling_factor_file_flag = False
 
+                state.geometry_correction_switch = self._summary.geometry_correction_switch.isChecked()
+
              #incident medium
             _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j)) 
                                      for j in range(self._summary.incident_medium_combobox.count())]
@@ -1142,7 +1357,11 @@ class BaseRefWidget(BaseWidget):
                 
             _incident_medium_string = (',').join(_incident_medium_list)
             state.incident_medium_list = [_incident_medium_string]
-                
+            
+            # how to treat overlap values
+            state.overlap_lowest_error = self._summary.overlapValueLowestErrorRadioButton.isChecked()               
+            state.overlap_mean_value = self._summary.overlapValueMeanRadioButton.isChecked()
+    
             state.incident_medium_index_selected = _incident_medium_index_selected
                 
             item_widget.setData(QtCore.Qt.UserRole, state)
@@ -1160,7 +1379,7 @@ class BaseRefWidget(BaseWidget):
         self._summary.remove_btn.setEnabled(False)  
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
-            state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+            state = current_item.data(QtCore.Qt.UserRole)
             self.set_editing_state(state)
             self._reset_warnings()
         self._summary.angle_list.setEnabled(True)
@@ -1258,6 +1477,10 @@ class BaseRefWidget(BaseWidget):
         self._summary.log_scale_chk.setChecked(state.q_step<0)
         self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
 
+        # overlap ascii values
+        self._summary.overlapValueLowestErrorRadioButton.setChecked(state.overlap_lowest_error)
+        self._summary.overlapValueMeanRadioButton.setChecked(state.overlap_mean_value)
+
         # Output directory
         if hasattr(state, "output_dir"):
             if len(str(state.output_dir).strip())>0:
@@ -1268,6 +1491,9 @@ class BaseRefWidget(BaseWidget):
         self._summary.cfg_scaling_factor_file_name.setText(str(state.scaling_factor_file))
         self._summary.slits_width_flag.setChecked(state.slits_width_flag)
         self._use_sf_config_clicked(state.scaling_factor_file_flag)
+            
+        # geomery correction
+        self._summary.geometry_correction_switch.setChecked(state.geometry_correction_switch)
             
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))

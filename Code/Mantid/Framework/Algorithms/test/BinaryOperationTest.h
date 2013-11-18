@@ -34,7 +34,7 @@ public:
   /// function to return a category of the algorithm. A default implementation is provided
   virtual const std::string category() const {return "Helper";}
 
-  bool checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
+  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
   {
     m_lhs = ws1;
     m_rhs = ws2;
@@ -68,11 +68,11 @@ public:
     Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     BinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6).empty());
   }
 
   void testcheckSizeCompatibility2D1D()
@@ -88,13 +88,13 @@ public:
     //will not pass x array does not match
     MatrixWorkspace_sptr work_inEvent2 = WorkspaceCreationHelper::CreateEventWorkspace(1,10);
     BinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent1));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent2));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent1).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent2).empty());
   }
 
   void testcheckSizeCompatibility2D2D()
@@ -110,18 +110,18 @@ public:
     MatrixWorkspace_sptr work_inEvent1 = WorkspaceCreationHelper::CreateEventWorkspace(5,5);
     MatrixWorkspace_sptr work_inEvent2 = WorkspaceCreationHelper::CreateEventWorkspace(10,10);
     BinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent1));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent2));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent1).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent2).empty());
   }
 
   void testMaskedSpectraPropagation()
   {
-    const int nHist = 10,nBins=20;
+    const int nHist = 5,nBins=10;
     std::set<int64_t> masking;
     masking.insert(0);
     masking.insert(2);
@@ -173,12 +173,12 @@ public:
   }
 
 
-  BinaryOperation::BinaryOperationTable * do_test_buildBinaryOperationTable(std::vector< std::vector<int> > lhs, std::vector< std::vector<int> > rhs,
+  BinaryOperation::BinaryOperationTable_sptr do_test_buildBinaryOperationTable(std::vector< std::vector<int> > lhs, std::vector< std::vector<int> > rhs,
       bool expect_throw = false)
   {
-    EventWorkspace_sptr lhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 100, 1.0);
-    EventWorkspace_sptr rhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 100, 1.0);
-    BinaryOperation::BinaryOperationTable * table = 0;
+    EventWorkspace_sptr lhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 50, 1.0);
+    EventWorkspace_sptr rhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 50, 1.0);
+    BinaryOperation::BinaryOperationTable_sptr table;
     Mantid::Kernel::Timer timer1;
     if (expect_throw)
     {
@@ -206,7 +206,7 @@ public:
       // 3 detectors in each on the rhs
       rhs[i/3].push_back(i);
     }
-    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs);
     for (int i=0; i<6; i++)
     {
       TS_ASSERT_EQUALS( (*table)[i], i/3);
@@ -223,7 +223,7 @@ public:
       // 3 detectors in each on the rhs
       rhs[i/3].push_back(i);
     }
-    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs, false);
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs, false);
     TS_ASSERT_EQUALS( (*table)[0], 1);
     TS_ASSERT_EQUALS( (*table)[1], 1);
     TS_ASSERT_EQUALS( (*table)[2], 1);
@@ -243,7 +243,7 @@ public:
       // 4 detectors in each on the rhs
       rhs[i/4].push_back(i);
     }
-    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs);
     for (int i=0; i<8; i++)
     {
       TS_ASSERT_EQUALS( (*table)[i], i/2);
@@ -260,27 +260,27 @@ public:
       // 6 detectors in each on the rhs
       rhs[i/6].push_back(i);
     }
-    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs, false);
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs, false);
     TS_ASSERT_EQUALS( (*table)[0], 0); //0-3 go into 0-5
     TS_ASSERT_EQUALS( (*table)[1], -1); //4-7 fails to go anywhere
     TS_ASSERT_EQUALS( (*table)[2], 1); //8-11 goes into 6-11
   }
 
 
-  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_veryLarge()
+  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_large()
   {
-    std::vector< std::vector<int> > lhs(16000), rhs(16);
-    for (int i=0; i<16000; i++)
+    std::vector< std::vector<int> > lhs(2000, std::vector<int>(1)), rhs(20, std::vector<int>(100));
+    for (int i=0; i<2000; i++)
     {
       // 1 detector per pixel in lhs
-      lhs[i].push_back(i);
-      // 10000 detectors in each on the rhs
-      rhs[i/1000].push_back(i);
+      lhs[i][0] = i;
+      // 1000 detectors in each on the rhs
+      rhs[i/100][i%100] = i;
     }
-    BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
-    for (int i=0; i<16000; i++)
+    auto table = do_test_buildBinaryOperationTable(lhs, rhs);
+    for (int i=0; i<2000; i++)
     {
-      TS_ASSERT_EQUALS( (*table)[i], i/1000);
+      TS_ASSERT_EQUALS( (*table)[i], i/100);
     }
   }
 

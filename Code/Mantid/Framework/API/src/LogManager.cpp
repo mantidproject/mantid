@@ -378,7 +378,22 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
     }
   }
 
- 
+  /** Clears out all but the last entry of all logs of type TimeSeriesProperty
+   *  Check the documentation/definition of TimeSeriesProperty::clearOutdated for
+   *  the definition of 'last entry'.
+   */
+  void LogManager::clearOutdatedTimeSeriesLogValues()
+  {
+    auto & props = getProperties();
+    for ( auto it = props.begin(); it != props.end(); ++it)
+    {
+      if ( auto tsp = dynamic_cast<ITimeSeriesProperty*>(*it) )
+      {
+        tsp->clearOutdated();
+      }
+    }
+  }
+
   //--------------------------------------------------------------------------------------------
   /** Save the object to an open NeXus file.
    * @param file :: open NeXus file
@@ -455,7 +470,9 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
 
   INSTANTIATE(double);
   INSTANTIATE(int);
+  INSTANTIATE(long);
   INSTANTIATE(uint32_t);
+  INSTANTIATE(uint64_t);
   INSTANTIATE(std::string);
   INSTANTIATE(bool);
 

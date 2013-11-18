@@ -4,12 +4,10 @@ import os
 import unittest
 import time
 from PyQt4 import QtCore, QtGui
-#from PyQt4.QtTest import QTest
+
         
 # Import the Mantid framework
-import MantidFramework
-from MantidFramework import mtd
-from mantidsimple import *
+from mantid.simpleapi import *
 import mantidqtpython
 
 from mantidqtpython import StdRuntimeError, StdInvalidArgument
@@ -446,7 +444,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv.refreshRebin()
         sv.setRebinMode(True, True)
         time.sleep(1)
-        self.assertTrue(mtd.workspaceExists('uniform_rebinned'), 'Dynamically rebinned workspace was created.')
+        self.assertTrue(mtd.doesExist('uniform_rebinned'), 'Dynamically rebinned workspace was created.')
         ws = mtd['uniform_rebinned']
         self.assertEqual(ws.getNumDims(), 3)
         self.assertEqual(ws.getNPoints(), 50*200*1)

@@ -3,90 +3,127 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/UnGroupWorkspace.h"
-#include "MantidDataHandling/LoadRaw3.h"
-
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace Mantid::DataHandling;
-using namespace Mantid::Algorithms;
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class UnGroupWorkspaceTest : public CxxTest::TestSuite
 {
 public:
-	void testName()
-	{
-		UnGroupWorkspace ungrpwsalg;
-		TS_ASSERT_EQUALS( ungrpwsalg.name(), "UnGroupWorkspace" );
-	}
+  void testName()
+  {
+    Mantid::Algorithms::UnGroupWorkspace alg;
+    TS_ASSERT_EQUALS( alg.name(), "UnGroupWorkspace" );
+  }
 
-	void testVersion()
-	{
-		UnGroupWorkspace ungrpwsalg;
-		TS_ASSERT_EQUALS( ungrpwsalg.version(), 1 );
-	}
+  void testVersion()
+  {
+    Mantid::Algorithms::UnGroupWorkspace alg;
+    TS_ASSERT_EQUALS( alg.version(), 1 );
+  }
 
-	void testInit()
-	{
-	    UnGroupWorkspace alg2;
-		TS_ASSERT_THROWS_NOTHING( alg2.initialize() );
-		TS_ASSERT( alg2.isInitialized() );
+  void testInit()
+  {
+    Mantid::Algorithms::UnGroupWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
 
-		const std::vector<Property*> props = alg2.getProperties();
-		TS_ASSERT_EQUALS( props.size(), 1 );
+    const auto props = alg.getProperties();
+    TS_ASSERT_EQUALS( props.size(), 1 );
 
-		TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" );
-		TS_ASSERT( props[0]->isDefault() );
-		
-	}
+    TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" );
+    TS_ASSERT( props[0]->isDefault() );
+  }
 
-	void testExecUnGroupSingleGroupWorkspace()
-	{
-		LoadRaw3 alg;
-		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","CSP79590.raw"));
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","CSP79590"));
-		TS_ASSERT_THROWS_NOTHING( alg.execute());
-		TS_ASSERT( alg.isExecuted() );
-		
-		UnGroupWorkspace ungrpwsalg;
-		ungrpwsalg.initialize();
-		//std::vector<std::string >input;
-		//input.push_back("CSP79590");
-		std::string input="CSP79590";
-		TS_ASSERT_THROWS_NOTHING( ungrpwsalg.setProperty("InputWorkspace",input));
-		TS_ASSERT_THROWS_NOTHING( ungrpwsalg.execute());
-		TS_ASSERT( ungrpwsalg.isExecuted() );
-		//EVS13895 gets deleted,so test it
-		WorkspaceGroup_sptr result;
-		TS_ASSERT_THROWS( result = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("CSP79590"),std::runtime_error );
+  void test_Exec_UnGroup_With_GroupWorkspace_With_Multiple_Members_Removes_Group_Leaving_Members()
+  {
+    std::vector<std::string> members(2, "test_Exec_UnGroup_With_GroupWorkspace_With_Multiple_Members_Removes_Group_Leaving_Members_1");
+    members[1] = "test_Exec_UnGroup_With_GroupWorkspace_With_Multiple_Members_Removes_Group_Leaving_Members_2";
+    const std::string groupName = "test_Exec_UnGroup_With_GroupWorkspace_With_Multiple_Members_Removes_Group_Leaving_Members_Group";
+    addTestGroupToADS(groupName,members);
 
-		Workspace_sptr result1;
-		TS_ASSERT_THROWS_NOTHING( result1 = AnalysisDataService::Instance().retrieveWS<Workspace>("CSP79590_1") );
-		TS_ASSERT_THROWS_NOTHING( result1 = AnalysisDataService::Instance().retrieveWS<Workspace>("CSP79590_2") );
-		
-	}
+    Mantid::Algorithms::UnGroupWorkspace alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace",groupName));
+    TS_ASSERT_THROWS_NOTHING( alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    auto & ads = Mantid::API::AnalysisDataService::Instance();
+    //Group no longer exists
+    TS_ASSERT_EQUALS(false, ads.doesExist(groupName));
+    // but members do
+    TS_ASSERT_EQUALS(true, ads.doesExist(members[0]));
+    TS_ASSERT_EQUALS(true, ads.doesExist(members[1]));
+
+    removeFromADS(members);
+  }
+
+  void test_Exec_UnGroup_With_GroupWorkspace_With_Single_Member_Removes_Group_Leaving_Members()
+  {
+    std::vector<std::string> members(1, "test_Exec_UnGroup_With_GroupWorkspace_With_Single_Member_Removes_Group_Leaving_Members_1");
+    const std::string groupName = "test_Exec_UnGroup_With_GroupWorkspace_With_Single_Member_Removes_Group_Leaving_Members_Group";
+    addTestGroupToADS(groupName,members);
+
+    Mantid::Algorithms::UnGroupWorkspace alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace",groupName));
+    TS_ASSERT_THROWS_NOTHING( alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    auto & ads = Mantid::API::AnalysisDataService::Instance();
+    //Group no longer exists
+    TS_ASSERT_EQUALS(false, ads.doesExist(groupName));
+    // but member does
+    TS_ASSERT_EQUALS(true, ads.doesExist(members[0]));
+
+    removeFromADS(members);
+  }
+
 	
-	void testExecUnGroupOneNormalWorkspace()
-	{
-  	LoadRaw3 alg;
-		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48098.raw"));
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48098"));
-		TS_ASSERT_THROWS_NOTHING( alg.execute());
-		TS_ASSERT( alg.isExecuted() );
+  void test_Exec_With_NonGroupWorkspace_Throws_Error_On_Setting_Property()
+  {
+    const std::string wsName("test_Exec_With_NonGroupWorkspace_Throws_Error");
+    addTestMatrixWorkspaceToADS(wsName);
 		
-		
-		UnGroupWorkspace ungrpwsalg;
-		ungrpwsalg.initialize();
-		/*std::vector<std::string >input;
-		input.push_back("LOQ48098");*/
-		std::string input="LOQ48098";
-		TS_ASSERT_THROWS( ungrpwsalg.setProperty("InputWorkspace",input), std::invalid_argument );
-		//this throws exception as selcted workspace is not a group ws
-		TS_ASSERT_THROWS( ungrpwsalg.execute(), std::runtime_error );
-		TS_ASSERT(! ungrpwsalg.isExecuted() );
-							
-	}
+    Mantid::Algorithms::UnGroupWorkspace alg;
+    alg.initialize();
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", wsName), std::invalid_argument);
+			
+    removeFromADS(std::vector<std::string>(1, wsName));
+  }
+
+private:
+
+  void addTestGroupToADS(const std::string & name, const std::vector<std::string> & inputs)
+  {
+    auto newGroup = boost::make_shared<Mantid::API::WorkspaceGroup>();
+
+    auto & ads = Mantid::API::AnalysisDataService::Instance();
+    for(auto it = inputs.begin(); it != inputs.end(); ++it)
+    {
+      auto ws = addTestMatrixWorkspaceToADS(*it);
+      newGroup->addWorkspace(ws);
+    }
+    ads.add(name, newGroup);
+  }
+
+  Mantid::API::MatrixWorkspace_sptr addTestMatrixWorkspaceToADS(const std::string & name)
+  {
+    auto & ads = Mantid::API::AnalysisDataService::Instance();
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
+    ads.add(name, ws);
+    return ws;
+  }
+
+
+  void removeFromADS(const std::vector<std::string>& members)
+  {
+    auto & ads = Mantid::API::AnalysisDataService::Instance();
+
+    for(auto it = members.begin(); it != members.end(); ++it)
+    {
+      if(ads.doesExist(*it)) ads.remove(*it);
+    }
+  }
 	
 };
 #endif

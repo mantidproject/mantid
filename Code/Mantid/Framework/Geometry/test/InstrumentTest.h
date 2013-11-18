@@ -5,6 +5,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
 
@@ -44,7 +45,7 @@ public:
     instrument.markAsMonitor(det3);
 
     //instrument.setDefaultViewAxis("X-");
-    instrument.getLogfileCache().insert(std::make_pair("apple",boost::shared_ptr<XMLlogfile>()));
+    instrument.getLogfileCache().insert(std::make_pair(std::make_pair("apple",det3),boost::shared_ptr<XMLlogfile>()));
     instrument.getLogfileUnit()["banana"] = "yellow";
   }
 
@@ -248,6 +249,12 @@ public:
     TS_ASSERT_EQUALS(instrument.getDetectorIDs(false).size(), ndets);
     TS_ASSERT_EQUALS(instrument.getNumberDetectors(false), ndets);
     TS_ASSERT_EQUALS(instrument.getNumberDetectors(true), ndets-1); // skipMonitors
+  }
+
+  void testNumMonitors()
+  {
+    TS_ASSERT_EQUALS( instrument.numMonitors(), 1 );
+    TS_ASSERT_EQUALS( Instrument().numMonitors(), 0 );
   }
 
   void testDetector()
@@ -473,6 +480,58 @@ public:
     TS_ASSERT_EQUALS( i.getDefaultView(), "SPHERICAL_Y" );
     i.setDefaultView( "inside-out" );
     TS_ASSERT_EQUALS( i.getDefaultView(), "3D" );
+  }
+
+  void testContainsRectDetectors()
+  {
+    Instrument_sptr instrFull 
+      = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+
+    TS_ASSERT_EQUALS(instrFull->containsRectDetectors(), 
+                     Instrument::ContainsState::Full);
+
+    Instrument_sptr instrPartial
+      = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+
+    // Add some non-rectangular component
+    instrPartial->add(new Component("Component"));
+
+    TS_ASSERT_EQUALS(instrPartial->containsRectDetectors(), 
+                     Instrument::ContainsState::Partial);
+
+
+    Instrument_sptr instrNone 
+      = ComponentCreationHelper::createTestInstrumentCylindrical(5, false);
+
+    TS_ASSERT_EQUALS(instrNone->containsRectDetectors(),
+                     Instrument::ContainsState::None);
+  }
+
+  void testContainsRectDetectorsRecursive()
+  {
+    Instrument_sptr instrRect
+      = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+
+    CompAssembly* newAssembly1 = new CompAssembly("Assembly 1");
+    CompAssembly* newAssembly2 = new CompAssembly("Assembly 2");
+
+    RectangularDetector* rectDet1 = new RectangularDetector("Rect Detector 1");
+    RectangularDetector* rectDet2 = new RectangularDetector("Rect Detector 2");
+
+    newAssembly2->add(rectDet2);
+
+    newAssembly1->add(rectDet1);
+    newAssembly1->add(newAssembly2);
+
+    instrRect->add(newAssembly1);
+
+    TS_ASSERT_EQUALS(instrRect->containsRectDetectors(),
+                     Instrument::ContainsState::Full);
+
+    instrRect->add(new Component("Component"));
+
+    TS_ASSERT_EQUALS(instrRect->containsRectDetectors(),
+                     Instrument::ContainsState::Partial);
   }
 
 private:

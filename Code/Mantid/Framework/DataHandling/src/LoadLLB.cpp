@@ -5,8 +5,8 @@
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <limits>
@@ -22,17 +22,15 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadLLB)
-//register the algorithm into loadalgorithm factory
-DECLARE_LOADALGORITHM(LoadLLB)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB);
+
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 LoadLLB::LoadLLB() {
 	m_instrumentName = "";
-	supportedInstruments.push_back("MIBEMOL");
+	m_supportedInstruments.push_back("MIBEMOL");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -59,52 +57,27 @@ const std::string LoadLLB::category() const {
 	return "DataHandling";
 }
 
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadLLB::confidence(Kernel::NexusDescriptor & descriptor) const {
+	// fields existent only at the LLB
+	if (descriptor.pathExists("/nxentry/program_name")
+			&& descriptor.pathExists("/nxentry/subrun_number")
+			&& descriptor.pathExists("/nxentry/total_subruns")) {
+		return 80;
+	} else {
+		return 0;
+	}
+}
+
 //----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm
 void LoadLLB::initDocs() {
 	this->setWikiSummary("Loads LLB nexus file.");
 	this->setOptionalMessage("Loads LLB nexus file.");
-}
-
-
-bool LoadLLB::quickFileCheck(const std::string& filePath, size_t nread,
-		const file_header& header) {
-	std::string extn = extension(filePath);
-	bool bnexs(false);
-	(!extn.compare("nxs") || !extn.compare("nx5")) ? bnexs = true : bnexs =
-																false;
-	/*
-	 * HDF files have magic cookie in the first 4 bytes
-	 */
-	if (((nread >= sizeof(unsigned))
-			&& (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs) {
-		//hdf
-		return true;
-	} else if ((nread >= sizeof(g_hdf5_signature))
-			&& (!memcmp(header.full_hdr, g_hdf5_signature,
-					sizeof(g_hdf5_signature)))) {
-		//hdf5
-		return true;
-	}
-	return false;
-}
-
-/**
- * Checks the file by opening it and reading few lines
- * @param filePath :: name of the file inluding its path
- * @return an integer value how much this algorithm can load the file
- */
-int LoadLLB::fileCheck(const std::string& filePath) {
-	// Create the root Nexus class
-	NXRoot root(filePath);
-	NXEntry entry = root.openFirstEntry();
-	std::string instrumentName = getInstrumentName(entry);
-	if (std::find(supportedInstruments.begin(), supportedInstruments.end(),
-			instrumentName) != supportedInstruments.end()) {
-		// FOUND
-		return 80;
-	}
-	return 0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -146,40 +119,14 @@ void LoadLLB::exec() {
 
 void LoadLLB::setInstrumentName(NeXus::NXEntry& entry) {
 
-	m_instrumentName = getInstrumentName(entry);
+	m_instrumentPath = "nxinstrument";
+	m_instrumentName = m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
+
 	if (m_instrumentName == "") {
-		std::string message(
-				"Cannot read the instrument name from the Nexus file!");
-		g_log.error(message);
-		throw std::runtime_error(message);
+		throw std::runtime_error("Cannot read the instrument name from the Nexus file!");
 	}
-
-}
-
-std::string LoadLLB::getInstrumentName(NeXus::NXEntry& entry) {
-
-	// format: /entry0/?????/name
-
-	std::string instrumentName = "";
-
-	std::vector<NXClassInfo> v = entry.groups();
-	for (auto it = v.begin(); it < v.end(); it++) {
-		if (it->nxclass == "NXinstrument" || it->nxname == "nxinstrument") {
-			m_nexusInstrumentEntryName = it->nxname;
-			std::string insNamePath = m_nexusInstrumentEntryName + "/name";
-			if ( !entry.isValid(insNamePath) )
-				throw std::runtime_error("Error reading the instrument name: " + insNamePath + " is not a valid path!");
-			instrumentName = entry.getString(insNamePath);
-			g_log.debug() << "Instrument Name: " << instrumentName
-					<< " in NxPath: " << insNamePath << std::endl;
-			break;
-		}
-	}
-	//std::replace( instrumentName.begin(), instrumentName.end(), ' ', '_'); // replace all ' ' to '_'
-	long unsigned int pos = instrumentName.find(" ");
-	instrumentName = instrumentName.substr (0,pos);
-	return instrumentName;
-
+	g_log.debug() << "Instrument Name: " << m_instrumentName
+						<< " in NxPath: " << m_instrumentPath << std::endl;
 }
 
 void LoadLLB::initWorkSpace(NeXus::NXEntry& entry) {
@@ -223,14 +170,13 @@ void LoadLLB::loadTimeDetails(NeXus::NXEntry& entry) {
 	m_wavelength = entry.getFloat("nxbeam/incident_wavelength");
 	// Apparently this is in the wrong units
 	// http://iramis.cea.fr/Phocea/file.php?class=page&reload=1227895533&file=21/How_to_install_and_use_the_Fitmib_suite_v28112008.pdf
-	m_channelWidth = entry.getInt("nxmonitor/channel_width") * 0.1 ;
+	m_channelWidth = entry.getInt("nxmonitor/channel_width") * 0.1;
 
 	g_log.debug("Nexus Data:");
 	g_log.debug() << " ChannelWidth: " << m_channelWidth << std::endl;
 	g_log.debug() << " Wavelength: " << m_wavelength << std::endl;
 
 }
-
 
 void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 
@@ -240,12 +186,14 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	data.load();
 
 	// EPP
-	int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(data);
+	int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
+			data);
 
-	std::vector<double> timeBinning = getTimeBinning(calculatedDetectorElasticPeakPosition, m_channelWidth);
+	std::vector<double> timeBinning = getTimeBinning(
+			calculatedDetectorElasticPeakPosition, m_channelWidth);
 
 	// Assign time bin to first X entry
-	m_localWorkspace->dataX(0).assign(timeBinning.begin(),timeBinning.end());
+	m_localWorkspace->dataX(0).assign(timeBinning.begin(), timeBinning.end());
 
 	Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 	size_t spec = 0;
@@ -277,27 +225,40 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
 
 	std::vector<int> listOfFoundEPP;
 
-
+	
 	std::vector<int> cumulatedSumOfSpectras(m_numberOfChannels, 0);
-	for (size_t i = 0; i < m_numberOfTubes; i++) {
+	for (size_t i = 0; i < m_numberOfTubes; i++) 
+	{
 		float* data_p = &data(static_cast<int>(i), 0);
-		std::vector<int> thisSpectrum(data_p, data_p + m_numberOfChannels);
-		// sum spectras
-		std::transform(thisSpectrum.begin(), thisSpectrum.end(),
-				cumulatedSumOfSpectras.begin(), cumulatedSumOfSpectras.begin(),
-				std::plus<int>());
+		float currentSpec = 0;
+
+		for (size_t j = 0; j  < m_numberOfChannels; ++j)
+			currentSpec += data_p[j];
+
+		if(i > 0)
+		{
+			cumulatedSumOfSpectras[i] = cumulatedSumOfSpectras[i-1] + static_cast<int>(currentSpec);
+		}
+		else
+		{
+			cumulatedSumOfSpectras[i] = static_cast<int>(currentSpec);
+		}
 	}
-	auto it = std::max_element(cumulatedSumOfSpectras.begin(),cumulatedSumOfSpectras.end());
+	auto it = std::max_element(cumulatedSumOfSpectras.begin(),
+			cumulatedSumOfSpectras.end());
 
 	int calculatedDetectorElasticPeakPosition;
 	if (it == cumulatedSumOfSpectras.end()) {
-		throw std::runtime_error("No Elastic peak position found while analyzing the data!");
+		throw std::runtime_error(
+				"No Elastic peak position found while analyzing the data!");
 	} else {
 		//calculatedDetectorElasticPeakPosition = *it;
-		calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(cumulatedSumOfSpectras.begin(), it));
+		calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(
+				cumulatedSumOfSpectras.begin(), it));
 
 		if (calculatedDetectorElasticPeakPosition == 0) {
-			throw std::runtime_error("No Elastic peak position found while analyzing the data. Elastic peak position is ZERO!");
+			throw std::runtime_error(
+					"No Elastic peak position found while analyzing the data. Elastic peak position is ZERO!");
 		} else {
 			g_log.debug() << "Calculated Detector EPP: "
 					<< calculatedDetectorElasticPeakPosition << std::endl;
@@ -306,65 +267,33 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
 	return calculatedDetectorElasticPeakPosition;
 }
 
-std::vector<double> LoadLLB::getTimeBinning(int elasticPeakPosition, double channelWidth) {
+std::vector<double> LoadLLB::getTimeBinning(int elasticPeakPosition,
+		double channelWidth) {
 
-  double l1 = getL1();
-  double l2 = getL2();
+	double l1 = m_loader.getL1(m_localWorkspace);
+	double l2 = m_loader.getL2(m_localWorkspace);
 
-  double theoreticalElasticTOF = (calculateTOF(l1) + calculateTOF(l2)) * 1e6; //microsecs
+	double theoreticalElasticTOF = (m_loader.calculateTOF(l1,m_wavelength) + m_loader.calculateTOF(l2,m_wavelength)) * 1e6; //microsecs
 
-  g_log.debug() << "elasticPeakPosition : "
-	<< static_cast<float>(elasticPeakPosition) << std::endl;
-    g_log.debug() << "l1 : " << l1 << std::endl;
-    g_log.debug() << "l2 : " << l2 << std::endl;
-    g_log.debug() << "theoreticalElasticTOF : " << theoreticalElasticTOF << std::endl;
+	g_log.debug() << "elasticPeakPosition : "
+			<< static_cast<float>(elasticPeakPosition) << std::endl;
+	g_log.debug() << "l1 : " << l1 << std::endl;
+	g_log.debug() << "l2 : " << l2 << std::endl;
+	g_log.debug() << "theoreticalElasticTOF : " << theoreticalElasticTOF
+			<< std::endl;
 
-  std::vector<double> detectorTofBins(m_numberOfChannels + 1);
+	std::vector<double> detectorTofBins(m_numberOfChannels + 1);
 
-  for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    detectorTofBins[i] = theoreticalElasticTOF
-	+ channelWidth
-	    * static_cast<double>(static_cast<int>(i)
-		- elasticPeakPosition)
-	- channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
+	for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+		detectorTofBins[i] = theoreticalElasticTOF
+				+ channelWidth
+						* static_cast<double>(static_cast<int>(i)
+								- elasticPeakPosition) - channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
 
-  }
-  return detectorTofBins;
+	}
+	return detectorTofBins;
 }
 
-double LoadLLB::getL1() {
-
-  Geometry::Instrument_const_sptr instrument =
-      m_localWorkspace->getInstrument();
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-  double l1 = instrument->getSource()->getDistance(*sample);
-  return l1;
-}
-
-double LoadLLB::getL2(int detId) {
-  // Get a pointer to the instrument contained in the workspace
-  Geometry::Instrument_const_sptr instrument =
-      m_localWorkspace->getInstrument();
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-  // Get the sample-detector distance for this detector (in metres)
-  double l2 = m_localWorkspace->getDetector(detId)->getPos().distance(
-      sample->getPos());
-  return l2;
-}
-
-/**
- * Calculate TOF from distance
- *  @param distance :: distance in meters
- *  @return tof in seconds
- */
-double LoadLLB::calculateTOF(double distance) {
-
-  double velocity = PhysicalConstants::h
-      / (PhysicalConstants::NeutronMass * m_wavelength * 1e-10); //m/s
-
-  return distance / velocity;
-}
 
 void LoadLLB::loadRunDetails(NXEntry & entry) {
 
@@ -385,25 +314,13 @@ void LoadLLB::loadRunDetails(NXEntry & entry) {
 	double wavelength = entry.getFloat("nxbeam/incident_wavelength");
 	runDetails.addProperty<double>("wavelength", wavelength);
 
-	double energy = calculateEnergy(wavelength);
-	runDetails.addProperty<double>("Ei", energy,true); //overwrite
+	double energy = m_loader.calculateEnergy(wavelength);
+	runDetails.addProperty<double>("Ei", energy, true); //overwrite
 
 	std::string title = entry.getString("title");
 	runDetails.addProperty("title", title);
 	m_localWorkspace->setTitle(title);
 
-}
-
-/**
- * Calculate Neutron Energy from wavelength: \f$ E = h^2 / 2m\lambda ^2 \f$
- *  @param wavelength :: wavelength in \f$ \AA \f$
- *  @return tof in seconds
- */
-double LoadLLB::calculateEnergy(double wavelength) {
-	double e = (PhysicalConstants::h * PhysicalConstants::h) /
-			(2 * PhysicalConstants::NeutronMass * wavelength*wavelength * 1e-20)/
-			PhysicalConstants::meV;
-	return e;
 }
 
 /*
@@ -418,7 +335,7 @@ void LoadLLB::loadExperimentDetails(NXEntry & entry) {
 	// TODO: Do the rest
 	// Pick out the geometry information
 
-	(void)entry;
+	(void) entry;
 
 //	std::string description = boost::lexical_cast<std::string>(
 //			entry.getFloat("sample/description"));
@@ -430,7 +347,6 @@ void LoadLLB::loadExperimentDetails(NXEntry & entry) {
 //	m_localWorkspace->mutableSample().setWidth(static_cast<double> (isis_raw->spb.e_width));
 
 }
-
 
 /**
  * Run the Child Algorithm LoadInstrument.

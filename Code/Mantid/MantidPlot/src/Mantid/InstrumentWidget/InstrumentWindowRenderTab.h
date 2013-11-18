@@ -61,7 +61,7 @@ private slots:
   /// Called before the display setting menu opens. Filters out menu options.
   void displaySettingsAboutToshow();
   /// Change the type of the surfac
-  void surfaceTypeChanged(int);
+  void surfaceTypeChanged(int index);
   void colorMapChanged();
   void scaleTypeChanged(int);
   void glOptionChanged(bool);
@@ -72,8 +72,9 @@ private:
   QMenu* createPeaksMenu();
   QFrame * setupAxisFrame();
   void setPrecisionMenuItemChecked(int n);
+  void enable3DSurface( bool on );
 
-  QComboBox* m_renderMode;
+  QPushButton *m_surfaceTypeButton;
   QPushButton *mSaveImage;
   ColorMapWidget* m_colorMapWidget;
   QFrame* m_resetViewFrame;
@@ -81,6 +82,16 @@ private:
   QCheckBox *m_flipCheckBox;
   QPushButton *m_peakOverlaysButton;
   QCheckBox *m_autoscaling;
+
+  QActionGroup *m_surfaceTypeActionGroup;
+  QAction *m_full3D;
+  QAction *m_cylindricalX;
+  QAction *m_cylindricalY;
+  QAction *m_cylindricalZ;
+  QAction *m_sphericalX;
+  QAction *m_sphericalY;
+  QAction *m_sphericalZ;
+  QAction *m_sideBySide;
 
   QAction *m_colorMap;
   QAction *m_backgroundColor;

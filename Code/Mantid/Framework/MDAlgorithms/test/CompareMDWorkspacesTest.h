@@ -3,7 +3,11 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDNode.h"
 #include "MantidMDAlgorithms/CompareMDWorkspaces.h"
+#include "MantidMDAlgorithms/CloneMDWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
@@ -28,7 +32,7 @@ public:
   }
   
   void doTest(std::string ws1, std::string ws2, std::string resultExpected="Success!",
-      bool CheckEvents = true)
+      bool CheckEvents = true,bool IgnoreDifferentID=false)
   {
 
     CompareMDWorkspaces alg;
@@ -38,6 +42,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace2", ws2) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("CheckEvents", CheckEvents) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Tolerance", 1e-5) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("IgnoreBoxID", IgnoreDifferentID) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -80,6 +85,28 @@ public:
     makeAnyMDEW<MDEvent<3>, 3>(3, 0., 10., 1, "C");
     doTest("A", "C", "Workspaces do not have the same number of boxes");
 
+    CloneMDWorkspace cloner ;
+    cloner.initialize();
+    cloner.setPropertyValue("InputWorkspace","A");
+    cloner.setPropertyValue("OutputWorkspace","A1");
+    TS_ASSERT_THROWS_NOTHING(cloner.execute());
+    if( !cloner.isExecuted())
+      return;
+
+    doTest("A","A1");
+
+    auto mdWorkspace = dynamic_cast<IMDEventWorkspace *>(FrameworkManager::Instance().getWorkspace("A1"));
+    TSM_ASSERT("Can not retrieve MD workspace A1 from analysis data service",mdWorkspace );
+
+    std::vector<IMDNode *> boxes;   
+    mdWorkspace->getBoxes(boxes, 1000, false);
+
+    boxes[0]->setID(10000);
+
+    doTest("A","A1","Boxes have different ID (0 vs 10000)");
+
+    // with ignore box ID the comparison is true
+    doTest("A","A1","Success!",true,true);
 
   }
 

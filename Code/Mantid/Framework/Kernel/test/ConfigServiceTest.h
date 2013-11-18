@@ -100,6 +100,25 @@ public:
     
   }
 
+  void testLogLevelOffset()
+  {
+    //attempt some logging
+    Logger& log1 = Logger::get("logTestOffset");
+    log1.setLevelOffset(0);
+    TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with offset 0"));
+    log1.setLevelOffset(-1);
+    TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with offset -1 should still be fatal"));
+    TS_ASSERT_THROWS_NOTHING(log1.information("a information string with offset -1 should be notice"));
+    log1.setLevelOffset(1);
+    TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with offset 1 should be critical"));
+    TS_ASSERT_THROWS_NOTHING(log1.notice("a notice string with offset 1 should be information"));
+    TS_ASSERT_THROWS_NOTHING(log1.debug("a debug string with offset 1 should be debug"));    
+    log1.setLevelOffset(999);
+    TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with offset 999 should  be trace"));
+    TS_ASSERT_THROWS_NOTHING(log1.notice("a notice string with offset 999 should be trace"));
+    TS_ASSERT_THROWS_NOTHING(log1.debug("a debug string with offset 999 should be trace"));
+  }
+
   void testDefaultFacility()
   {
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().getFacility() );
@@ -114,6 +133,23 @@ public:
 
 //    // Non existent facility
 //    TS_ASSERT_THROWS(ConfigService::Instance().setFacility(""), Mantid::Kernel::Exception::NotFoundError);
+
+  }
+
+  void testFacilityList()
+  {
+    std::vector<FacilityInfo*> facilities = ConfigService::Instance().getFacilities();
+    std::vector<std::string> names = ConfigService::Instance().getFacilityNames();
+
+    TS_ASSERT_LESS_THAN(0,names.size());
+    TS_ASSERT_EQUALS(facilities.size(),names.size());
+    auto itFacilities = facilities.begin();
+    auto itNames = names.begin();
+    for (; itFacilities != facilities.end(); ++itFacilities,++itNames)
+    {
+      TS_ASSERT_EQUALS(*itNames, (**itFacilities).name());
+    }
+
 
   }
 

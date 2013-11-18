@@ -101,6 +101,10 @@ public:
   void setVisible(bool on){m_visible = on;}
   /// Is shape visible?
   bool isVisible() const {return m_visible;}
+  /// Select/deselect the shape
+  void setSelected(bool on){m_selected = on;}
+  /// Is shape selected?
+  bool isSelected() const {return m_selected;}
 
   // --- Properties. for gui interaction --- //
 
@@ -138,7 +142,8 @@ protected:
   QColor m_color;
   QColor m_fill_color;
   bool m_scalable; ///< shape can be scaled when zoomed
-  bool m_editing;
+  bool m_editing;  ///< shape is being edited
+  bool m_selected; ///< shape is selected
   bool m_visible;  ///< flag to show or hide the shape
 };
 

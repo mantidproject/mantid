@@ -173,12 +173,12 @@ namespace Geometry
     else if (pDoc != NULL)
     {
       std::string lastModified = pRootElem->getAttribute("last-modified");
-      if (lastModified.length() == 0)
+      if (lastModified.empty())
       {
         g_log.warning() << "The IDF that you are using doesn't contain a 'last-modified' field. ";
         g_log.warning() << "You may not get the correct definition file loaded." << std::endl ;
       }
-      return m_xmlFile->getFileNameOnly() + lastModified;
+      return m_instName + lastModified;
     }
     else
     {
@@ -1638,7 +1638,7 @@ namespace Geometry
   *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
   */
   void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent* comp, const Poco::XML::Element* pElem,
-    std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache)
+    InstrumentParameterCache& logfileCache)
   {
     const std::string filename = m_xmlFile->getFileFullPathStr();
     // check first if pElem contains any <parameter> child elements, however not if this method is called through
@@ -1906,10 +1906,16 @@ namespace Geometry
         }
         pNLFormula->release();
 
-
-        boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit,
-          paramName, type, tie, constraint, penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp, m_angleConvertConst));
-        logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
+        
+        auto cacheKey = std::make_pair(paramName, comp);
+        auto cacheValue = boost::shared_ptr<XMLlogfile>(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit,
+                                                                       paramName, type, tie, constraint, penaltyFactor, fittingFunction, 
+                                                                       extractSingleValueAs, eq, comp, m_angleConvertConst));
+        auto inserted = logfileCache.insert(std::make_pair(cacheKey,cacheValue));
+        if(!inserted.second)
+        {
+          logfileCache[cacheKey] = cacheValue;
+        }
       } // end of if statement
     }
     pNL_comp->release();

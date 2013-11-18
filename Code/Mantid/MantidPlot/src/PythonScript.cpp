@@ -94,6 +94,27 @@ PythonScript::~PythonScript()
 }
 
 /**
+ * Set the name of the script. If empty, set a default so that the code object behaves correctly
+ * w.r.t inspect.stack(). If no name is set inspect.stack throws a RangeError.
+ * @param name An identifier for this object. Used in stack traces when reporting errors
+ */
+void PythonScript::setIdentifier(const QString & name)
+{
+  QString identifier = name;
+  if(identifier.isEmpty()) identifier = "New script";
+  Script::setIdentifier(identifier);
+
+  // Update or set the __file__ attribute
+  if( QFileInfo(identifier).exists() )
+  {
+    QString scriptPath = QFileInfo(identifier).absoluteFilePath();
+    // Make sure the __file__ variable is set
+    PyDict_SetItem(localDict,PyString_FromString("__file__"), PyString_FromString(scriptPath.toAscii().data()));
+  }
+}
+
+
+/**
  * Creates a PyObject that wraps the calling C++ instance.
  * Ownership is transferred to the caller, i.e. the caller
  * is responsible for calling Py_DECREF
@@ -288,7 +309,7 @@ QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError)
     msg = msg.arg(lineno);
     msg = msg.arg(exceptionAsStr);
   }
-  if(filename == name().c_str())
+  if(filename == identifier().c_str())
   {
     sendLineChangeSignal(lineno, true);
   }
@@ -312,7 +333,7 @@ void PythonScript::tracebackToMsg(QTextStream &msgStream,
   
   int lineno = traceback->tb_lineno;
   QString filename = QString::fromAscii(PyString_AsString(traceback->tb_frame->f_code->co_filename));
-  if(filename == name().c_str())
+  if(filename == identifier().c_str())
   {
     lineno = getRealLineNo(lineno);
     sendLineChangeSignal(lineno, true);
@@ -360,12 +381,7 @@ void PythonScript::initialize(const QString & name, QObject *context)
   GlobalInterpreterLock pythonlock;
   PyObject *pymodule = PyImport_AddModule("__main__");
   localDict = PyDict_Copy(PyModule_GetDict(pymodule));
-  if( QFileInfo(name).exists() )
-  {
-    QString scriptPath = QFileInfo(name).absoluteFilePath();
-    // Make sure the __file__ variable is set
-    PyDict_SetItem(localDict,PyString_FromString("__file__"), PyString_FromString(scriptPath.toAscii().data()));
-  }
+  PythonScript::setIdentifier(name);
   setContext(context);
 }
 
@@ -687,7 +703,7 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
   }
   bool success(false);
   // Simplest case: Code is a single expression
-  PyObject *compiledCode = Py_CompileString(codeString().c_str(), name().c_str(), Py_file_input);
+  PyObject *compiledCode = Py_CompileString(codeString().c_str(), identifier().c_str(), Py_file_input);
 
   if( compiledCode )
   {
@@ -712,7 +728,7 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
     signature.truncate(signature.length()-1);
     std::string fdef = "def __doit__("+signature.toStdString()+"):\n";
     fdef += codeString();
-    compiledCode = Py_CompileString(fdef.c_str(), name().c_str(), Py_file_input);
+    compiledCode = Py_CompileString(fdef.c_str(), identifier().c_str(), Py_file_input);
     if( compiledCode )
     {
       PyObject *tmp = PyDict_New();

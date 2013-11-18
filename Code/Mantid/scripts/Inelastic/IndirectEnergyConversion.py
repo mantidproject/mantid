@@ -36,7 +36,7 @@ def createMappingFile(groupFile, ngroup, nspec, first):
     if ( ngroup == 1 ): return 'All'
     if ( nspec == 1 ): return 'Individual'
     filename = config['defaultsave.directory']
-    filename += groupFile
+    filename = os.path.join(filename, groupFile)
     handle = open(filename, 'w')
     handle.write(str(ngroup) +  "\n" )
     for n in range(0, ngroup):
@@ -52,7 +52,7 @@ def createMappingFile(groupFile, ngroup, nspec, first):
 
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
-        plotOpt=False, Res=True):
+        plotOpt=False, Res=True, factor=None):
     reducer = inelastic_indirect_reducer.IndirectReducer()
     reducer.set_instrument_name(instrument)
     reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
@@ -65,13 +65,18 @@ def resolution(files, iconOpt, rebinParam, bground,
     reducer.set_sum_files(True)
     reducer.reduce()
     iconWS = reducer.get_result_workspaces()[0]
+    
+    if factor != None:
+        Scale(InputWorkspace=iconWS, OutputWorkspace=iconWS, Factor = factor)
+            
     if Res:
         name = getWSprefix(iconWS) + 'res'
-        FlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
+        CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
-        DeleteWorkspace(iconWS)
+            
         SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
+            
         if plotOpt:
             graph = mp.plotSpectrum(name, 0)
         return name
@@ -111,7 +116,7 @@ def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=True,
             Integration(InputWorkspace=root, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
                 StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
         else:
-            FlatBackground(InputWorkspace=root, OutputWorkspace=sfile, StartX=xrange[2], EndX=xrange[3], 
+            CalculateFlatBackground(InputWorkspace=root, OutputWorkspace=sfile, StartX=xrange[2], EndX=xrange[3], 
                     Mode='Mean')
             Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
                 StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
@@ -173,7 +178,7 @@ def getInstrumentDetails(instrument):
 def getReflectionDetails(inst, analyser, refl):
     idf_dir = config['instrumentDefinition.directory']
     ws = '__empty_' + inst
-    if (mtd[ws] == None):
+    if not mtd.doesExist(ws):
         idf_file = inst + '_Definition.xml'
         idf = os.path.join(idf_dir, idf_file)
         LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)
@@ -208,11 +213,11 @@ def UnwrapMon(inWS):
 #Fill bad (dip) in spectrum
     RemoveBins(InputWorkspace=outWS, OutputWorkspace=outWS, Xmin=join-0.001, Xmax=join+0.001,
         Interpolation="Linear")
-    FFTSmooth(InputWorkspace=outWS, OutputWorkspace=outWS, WorkspaceIndex=0)									# Smooth - FFT
-    DeleteWorkspace(inWS)								# delete monWS
+    FFTSmooth(InputWorkspace=outWS, OutputWorkspace=outWS, WorkspaceIndex=0, IgnoreXBins=True) # Smooth - FFT
+    DeleteWorkspace(inWS)	# delete monWS
     return outWS
 
-def TransMon(type,file,verbose):
+def TransMon(inst, type,file,verbose):
     if verbose:
         logger.notice('Raw file : '+file)
     LoadRaw(Filename=file,OutputWorkspace='__m1',SpectrumMin=1,SpectrumMax=1)
@@ -240,7 +245,7 @@ def TransMon(type,file,verbose):
     wmax = min(xmax1,xmax2)
     CropWorkspace(InputWorkspace='__Mon1', OutputWorkspace='__Mon1', XMin=wmin, XMax=wmax)
     RebinToWorkspace(WorkspaceToRebin='__Mon2', WorkspaceToMatch='__Mon1', OutputWorkspace='__Mon2')
-    monWS = file[0:8] +'_'+ type
+    monWS = inst +'_'+ type
     Divide(LHSWorkspace='__Mon2', RHSWorkspace='__Mon1', OutputWorkspace=monWS)
     DeleteWorkspace('__Mon1')								# delete monWS
     DeleteWorkspace('__Mon2')								# delete monWS
@@ -248,28 +253,30 @@ def TransMon(type,file,verbose):
 def TransPlot(inputWS):
     tr_plot=mp.plotSpectrum(inputWS,0)
 
-def IndirectTrans(sfile,cfile,Verbose=False,Plot=True,Save=False):
+def IndirectTrans(inst, sfile,cfile,Verbose=False,Plot=False,Save=False):
     StartTime('Transmission')
-    TransMon('Sam',sfile,Verbose)
-    TransMon('Can',cfile,Verbose)
-    samWS = sfile[0:8] + '_Sam'
-    canWS =cfile[0:8] + '_Can'
-    trWS = sfile[0:8] + '_Trans'
+    TransMon(inst,'Sam',sfile,Verbose)
+    TransMon(inst,'Can',cfile,Verbose)
+    samWS = inst + '_Sam'
+    canWS = inst + '_Can'
+    trWS = inst + '_Trans'
     Divide(LHSWorkspace=samWS, RHSWorkspace=canWS, OutputWorkspace=trWS)
     trans = np.average(mtd[trWS].readY(0))
-    transWS = sfile[0:8] + '_Transmission'
+    transWS = inst + '_Transmission'
     workdir = config['defaultsave.directory']
     group = samWS +','+ canWS +','+ trWS
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=transWS)
     if Verbose:
         logger.notice('Transmission : '+str(trans))
     path = os.path.join(workdir,transWS+'.nxs')
+    
     if Save:
         SaveNexusProcessed(InputWorkspace=transWS, Filename=path)
         if Verbose:
             logger.notice('Output file created : '+path)
-	if Plot:
-		TransPlot(transWS)
+            
+    if Plot:
+        TransPlot(transWS)
     EndTime('Transmission')
 
 ##############################################################################

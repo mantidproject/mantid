@@ -2,12 +2,14 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECT_H_
 
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/C2ETab.h"
 #include "ui_ConvertToEnergy.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 //----------------------------------------------------
 // Forward declarations
@@ -92,11 +94,11 @@ namespace MantidQt
       void setupSlice(); ///< setup the slice miniplot section
 
     private slots:
+      void validateSofQ(int);
       void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
       void pbRunFinding();  //< Called when the FileFinder starts finding the files.
       void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
 
-      void refreshWSlist();
       void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
       void reflectionSelected(int index); ///< set up parameter file values based on reflection
       void mappingOptionSelected(const QString& groupType); ///< change ui to display appropriate options
@@ -113,16 +115,18 @@ namespace MantidQt
       void useCalib(bool state); ///< whether to use calib file
       void calibCreate(); ///< create calibration file
       void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
+      void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
+      void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
 
       void calPlotRaw();
       void calPlotEnergy();
       void calMinChanged(double);
       void calMaxChanged(double);
       void calUpdateRS(QtProperty*, double);
+      void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
 
       void sOfQwClicked(); ///< S(Q,w) tab run button clicked
       void sOfQwRebinE(bool state);
-      void sOfQwInputType(const QString& input);
       void sOfQwPlotInput();
 
       void sliceRun();
@@ -176,6 +180,8 @@ namespace MantidQt
       QtDoublePropertyManager* m_sltDblMng;
       QtBoolPropertyManager* m_sltBlnMng;
       QtGroupPropertyManager* m_sltGrpMng;
+
+      C2ETab* m_tab_trans;
     };
   }
 }

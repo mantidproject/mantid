@@ -6,6 +6,7 @@
 //----------------------
 #include "ui_StepScan.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 
@@ -21,6 +22,8 @@ class StepScan : public API::UserSubWindow
 public:
   /// The name of the interface as registered into the factory
   static std::string name() { return "Step Scan Analysis"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "General"; }
 
   StepScan(QWidget *parent = 0);
   ~StepScan();
@@ -32,13 +35,15 @@ signals:
 
 private slots:
   void triggerLiveListener(bool checked);
-  void loadFile();
+  void startLiveListenerComplete(bool error);
+  void loadFile(bool async = true);
+  void loadFileComplete(bool error);
   void launchInstrumentWindow();
   void fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr& ws);
   void expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr& ws);
   void fillNormalizationCombobox();
   void runStepScanAlg();
-  void runStepScanAlgLive(std::string stepScanProperties);
+  bool runStepScanAlgLive(std::string stepScanProperties);
 
   void updateForNormalizationChange();
   void generateCurve(const QString& var);
@@ -48,7 +53,6 @@ private slots:
 private:
   void initLayout();
   void startLiveListener();
-  Mantid::API::IAlgorithm_sptr stopLiveListener();
   void setupOptionControls();
   void clearNormalizationCombobox();
   Mantid::API::IAlgorithm_sptr setupStepScanAlg();
@@ -57,6 +61,7 @@ private:
 
   void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
   void handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+  void addReplaceObserverOnce();
   void checkForMaskWorkspace(const std::string& wsName);
   void checkForResultTableUpdate(const std::string& wsName);
   void checkForVaryingLogs(const std::string& wsName);
@@ -66,10 +71,11 @@ private:
   QString m_inputFilename;
   bool m_dataReloadNeeded;
   const std::string m_instrument; ///< The default instrument (for live data)
-  Mantid::API::IAlgorithm_sptr m_monitorLiveData; ///< A handle to the running MonitorLiveData (null if none running)
 
+  API::AlgorithmRunner * m_algRunner; ///< Object for running algorithms asynchronously
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;
+  bool m_replaceObserverAdded;
 };
 
 } // namespace CustomInterfaces

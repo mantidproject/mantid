@@ -1,7 +1,7 @@
 """
     Inelastic specific implementation of the Reducer.
 """
-
+import mantid
 from reduction import Reducer
 # Validate_step is a decorator that allows both Python algorithms and 
 # ReductionStep objects to be passed to the Reducer.
@@ -9,8 +9,6 @@ from reduction import Reducer
 
 from reduction import validate_step
 from reduction import validate_loader
-mtd.initialise()
-from mantidsimple import *
 
 ## Version number
 __version__ = '0.01'

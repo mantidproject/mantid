@@ -26,7 +26,7 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 #include <Poco/Path.h>
 #include <boost/timer.hpp>
 #include "MantidAPI/FileFinder.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -56,9 +56,7 @@ namespace Mantid
 {
 namespace DataHandling
 {
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadEventPreNexus2)
-DECLARE_LOADALGORITHM(LoadEventPreNexus2)
+DECLARE_FILELOADER_ALGORITHM(LoadEventPreNexus2);
 
 using namespace Kernel;
 using namespace API;
@@ -96,6 +94,19 @@ static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
+static const string  EVENT_EXTS[] = {"_neutron_event.dat",
+                                     "_neutron0_event.dat",
+                                     "_neutron1_event.dat",
+                                     "_neutron2_event.dat",
+                                     "_neutron3_event.dat",
+                                     "_live_neutron_event.dat"};
+static const string  PULSE_EXTS[] = {"_pulseid.dat",
+                                     "_pulseid0.dat",
+                                     "_pulseid1.dat",
+                                     "_pulseid2.dat",
+                                     "_pulseid3.dat",
+                                     "_live_pulseid.dat"};
+static const int NUM_EXT = 6;
 
 //-----------------------------------------------------------------------------
 //Statistic Functions
@@ -115,26 +126,21 @@ static string getRunnumber(const string &filename) {
 
 static string generatePulseidName(string eventfile)
 {
-  size_t start;
-  string ending;
+  // initialize vector of endings and put live at the beginning
+  vector<string> eventExts(EVENT_EXTS, EVENT_EXTS+NUM_EXT);
+  std::reverse(eventExts.begin(), eventExts.end());
+  vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS+NUM_EXT);
+  std::reverse(pulseExts.begin(), pulseExts.end());
 
-  // normal ending
-  ending = "neutron_event.dat";
-  start = eventfile.find(ending);
-  if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid.dat");
+  // look for the correct ending
+  for (std::size_t i = 0; i < eventExts.size(); ++i)
+  {
+    size_t start = eventfile.find(eventExts[i]);
+    if (start != string::npos)
+      return eventfile.replace(start, eventExts[i].size(), pulseExts[i]);
+  }
 
-  // split up event files - yes this is copy and pasted code
-  ending = "neutron0_event.dat";
-  start = eventfile.find(ending);
-  if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid0.dat");
-
-  ending = "neutron1_event.dat";
-  start = eventfile.find(ending);
-  if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid1.dat");
-
+  // give up and return nothing
   return "";
 }
 
@@ -190,10 +196,34 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
 }
 //-----------------------------------------------------------------------------
 
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadEventPreNexus2::confidence(Kernel::FileDescriptor & descriptor) const
+{
+  if(descriptor.extension().rfind("dat") == std::string::npos) return 0;
+
+  // If this looks like a binary file where the exact file length is a multiple
+  // of the DasEvent struct then we're probably okay.
+  if(descriptor.isAscii()) return 0;
+
+  const size_t objSize = sizeof(DasEvent);
+  auto &handle = descriptor.data();
+  // get the size of the file in bytes and reset the handle back to the beginning
+  handle.seekg(0, std::ios::end);
+  const size_t filesize = static_cast<size_t>(handle.tellg());
+  handle.seekg(0, std::ios::beg);
+
+  if (filesize % objSize == 0) return 80;
+  else return 0;
+}
+
 /*
  * Constructor
  */
-LoadEventPreNexus2::LoadEventPreNexus2() : Mantid::API::IDataFileChecker(), eventfile(NULL), max_events(0)
+LoadEventPreNexus2::LoadEventPreNexus2() : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), eventfile(NULL), max_events(0)
 {
 }
 
@@ -221,20 +251,10 @@ void LoadEventPreNexus2::initDocs()
 void LoadEventPreNexus2::init()
 {
   // which files to use
-  vector<string> eventExts;
-  eventExts.push_back("_neutron_event.dat");
-  eventExts.push_back("_neutron0_event.dat");
-  eventExts.push_back("_neutron1_event.dat");
-  eventExts.push_back("_neutron2_event.dat");
-  eventExts.push_back("_neutron3_event.dat");
+  vector<string> eventExts(EVENT_EXTS, EVENT_EXTS+NUM_EXT);
   declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, eventExts),
       "The name of the neutron event file to read, including its full or relative path. In most cases, the file typically ends in neutron_event.dat (N.B. case sensitive if running on Linux).");
-  vector<string> pulseExts;
-  pulseExts.push_back("_pulseid.dat");
-  pulseExts.push_back("_pulseid0.dat");
-  pulseExts.push_back("_pulseid1.dat");
-  pulseExts.push_back("_pulseid2.dat");
-  pulseExts.push_back("_pulseid3.dat");
+  vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS+NUM_EXT);
   declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
       "File containing the accelerator pulse information; the filename will be found automatically if not specified.");
   declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
@@ -457,57 +477,6 @@ void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle, size_t mindex){
   return;
 }
 
-/**
- * Returns the name of the property to be considered as the Filename for Load
- * @returns A character string containing the file property's name
- */
-const char * LoadEventPreNexus2::filePropertyName() const
-{
-  return EVENT_PARAM.c_str();
-}
-
-/**
- * Do a quick file type check by looking at the first 100 bytes of the file
- *  @param filePath :: path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
- */
-bool LoadEventPreNexus2::quickFileCheck(const std::string& filePath,size_t,const file_header&)
-{
-  std::string ext = extension(filePath);
-  return (ext.rfind("dat") != std::string::npos);
-}
-
-/**
- * Checks the file by opening it and reading few lines
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file
- */
-int LoadEventPreNexus2::fileCheck(const std::string& filePath)
-{
-  int confidence(0);
-  try
-  {
-    // If this looks like a binary file where the exact file length is a multiple
-    // of the DasEvent struct then we're probably okay.
-    // NOTE: Putting this on the stack gives a segfault on Windows when for some reason
-    // the BinaryFile destructor is called twice! I'm sure there is something I don't understand there
-    // but heap allocation seems to work so go for that.
-    BinaryFile<DasEvent> *event_file = new BinaryFile<DasEvent>(filePath);
-    confidence = 80;
-    delete event_file;
-  }
-  catch(std::runtime_error &)
-  {
-    // This BinaryFile constructor throws if the file does not contain an
-    // exact multiple of the sizeof(DasEvent) objects.
-  }
-  return confidence;
-}
-
-
-
 //-----------------------------------------------------------------------------
 /** Load the instrument geometry File
  *  @param eventfilename :: Used to pick the instrument.
@@ -515,11 +484,25 @@ int LoadEventPreNexus2::fileCheck(const std::string& filePath)
  */
 void LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace)
 {
-  // determine the instrument parameter file
+  // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
-  size_t pos = instrument.rfind("_"); // get rid of 'event.dat'
-  pos = instrument.rfind("_", pos-1); // get rid of 'neutron'
-  pos = instrument.rfind("_", pos-1); // get rid of the run number
+
+  // initialize vector of endings and put live at the beginning
+  vector<string> eventExts(EVENT_EXTS, EVENT_EXTS+NUM_EXT);
+  std::reverse(eventExts.begin(), eventExts.end());
+
+  for (size_t i = 0; i < eventExts.size(); ++i)
+  {
+    size_t pos = instrument.find(eventExts[i]);
+    if (pos != string::npos)
+    {
+      instrument = instrument.substr(0, pos);
+      break;
+    }
+  }
+
+  // determine the instrument parameter file
+  size_t pos = instrument.rfind("_"); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
   // do the actual work

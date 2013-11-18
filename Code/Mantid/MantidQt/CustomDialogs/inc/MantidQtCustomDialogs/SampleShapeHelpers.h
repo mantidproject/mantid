@@ -48,7 +48,7 @@ private slots:
   void changeToCartesian();
   // Switch to spherical coordinates
   void changeToSpherical();
-  
+
 private:
   //Labels for fields
   QLabel *m_xlabel, *m_ylabel, *m_zlabel;
@@ -71,10 +71,10 @@ struct Operation
 {
   /// Default constructor
   Operation(int op = 0) : binaryop(op) {}
-  
+
   /// Return the string that represnts the result of this operation
   QString toString(QString left, QString right) const;
-  
+
   /// The stored operation
   int binaryop;
 };
@@ -89,7 +89,7 @@ struct BaseInstantiator
   /// Virtual destructor
   virtual ~BaseInstantiator() {}
   ///Create an instance
-  virtual ShapeDetails* createInstance() const = 0;
+virtual ShapeDetails* createInstance() const = 0;
 private:
   /// Private copy constructor
   BaseInstantiator(const BaseInstantiator&);
@@ -136,7 +136,7 @@ public:
 
   /// Get the id string
   QString getShapeID() const
-  { 
+  {
     return m_idvalue;
   }
 
@@ -151,7 +151,7 @@ public:
   void setComplementFlag(bool flag);
   /// Get complement flag
   bool getComplementFlag() const;
-  
+
 protected:
   /// ID string of this object
   QString m_idvalue;
@@ -163,7 +163,7 @@ private:
 };
 
 /**
- * A widget to define a sphere 
+ * A widget to define a sphere
  */
 class SphereDetails : public ShapeDetails
 {
@@ -177,7 +177,7 @@ public:
   ///Default constructor
   SphereDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~SphereDetails() { --g_nspheres; }
 
   //Write the XML definition of a sphere
@@ -193,7 +193,7 @@ private:
 };
 
 /**
- * A widget to define a cylinder 
+ * A widget to define a cylinder
  */
 class CylinderDetails : public ShapeDetails
 {
@@ -207,7 +207,7 @@ public:
   ///Default constructor
   CylinderDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~CylinderDetails() { --g_ncylinders; }
 
   //Write the XML definition of a sphere
@@ -223,7 +223,7 @@ private:
 };
 
 /**
- * A widget to define an infinite cylinder 
+ * A widget to define an infinite cylinder
  */
 class InfiniteCylinderDetails : public ShapeDetails
 {
@@ -237,7 +237,7 @@ public:
   ///Default constructor
   InfiniteCylinderDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~InfiniteCylinderDetails() { --g_ninfcyls; }
 
   //Write the XML definition of a sphere
@@ -253,7 +253,7 @@ private:
 };
 
 /**
- * A widget to define an infinite cylinder 
+ * A widget to define an infinite cylinder
  */
 class SliceOfCylinderRingDetails : public ShapeDetails
 {
@@ -267,7 +267,7 @@ public:
   ///Default constructor
   SliceOfCylinderRingDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~SliceOfCylinderRingDetails() { --g_ncylrings; }
 
   /// Write the XML definition of a sphere
@@ -295,7 +295,7 @@ public:
   ///Default constructor
   ConeDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~ConeDetails() { --g_ncones; }
 
   /// Write the XML definition of a sphere
@@ -325,7 +325,7 @@ public:
   ///Default constructor
   InfiniteConeDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~InfiniteConeDetails() { --g_ninfcones; }
 
   /// Write the XML definition of a sphere
@@ -353,7 +353,7 @@ public:
   ///Default constructor
   InfinitePlaneDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~InfinitePlaneDetails() { --g_ninfplanes; }
 
   /// Write the XML definition of a sphere
@@ -379,7 +379,7 @@ public:
   ///Default constructor
   CuboidDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~CuboidDetails() { --g_ncuboids; }
 
   /// Write the XML definition of a sphere
@@ -405,7 +405,7 @@ public:
   ///Default constructor
   HexahedronDetails(QWidget *parent = 0);
 
-  ///Default destructor 
+  ///Default destructor
   ~HexahedronDetails() { --g_nhexahedrons; }
 
   /// Write the XML definition of a sphere
@@ -432,7 +432,7 @@ private:
 //   ///Default constructor
 //   TorusDetails(QWidget *parent = 0);
 
-//   ///Default destructor 
+//   ///Default destructor
 //   ~TorusDetails() { --g_ntori; }
 
 //   /// Write the XML definition of a sphere

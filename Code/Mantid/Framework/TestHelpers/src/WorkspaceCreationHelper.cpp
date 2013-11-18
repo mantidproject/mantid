@@ -1,3 +1,11 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This collection of functions MAY NOT be used in any test from a package below
+ *  DataObjects (e.g. Kernel, Geometry, API).
+ *  Conversely, this file MAY NOT be modified to use anything from a package higher
+ *  than DataObjects (e.g. any algorithm), even if going via the factory.
+ *********************************************************************************/
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -214,6 +222,7 @@ namespace WorkspaceCreationHelper
   WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins, const std::string & stem)
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup);
+    AnalysisDataService::Instance().add(stem, group);
     for(int i = 0; i < nEntries; ++i)
     {
       Workspace2D_sptr ws = Create2DWorkspace(nHist,nBins);
@@ -222,7 +231,6 @@ namespace WorkspaceCreationHelper
       AnalysisDataService::Instance().add(os.str(), ws);
       group->add(os.str());
     }
-    AnalysisDataService::Instance().add(stem, group);
     return group;
   }
 
@@ -304,7 +312,7 @@ namespace WorkspaceCreationHelper
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors)
+  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors, bool startYNegative)
   {
     if( includeMonitors && nhist < 2 )
     {
@@ -332,7 +340,9 @@ namespace WorkspaceCreationHelper
       std::ostringstream lexer;
       lexer << "pixel-" << i << ")";
       Detector * physicalPixel = new Detector(lexer.str(), space->getAxis(1)->spectraNo(i), pixelShape, testInst.get());
-      const double ypos = i*2.0*pixelRadius;
+      int ycount(i);
+      if(startYNegative) ycount -= 1;
+      const double ypos = ycount*2.0*pixelRadius;
       physicalPixel->setPos(detXPos, ypos,0.0);
       testInst->add(physicalPixel);
       testInst->markAsDetector(physicalPixel);
@@ -435,6 +445,31 @@ namespace WorkspaceCreationHelper
     return ws;
   }
 
+  Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents)
+  {
+    // Number of detectors in a bank as created by createTestInstrumentCylindrical
+    const int DETECTORS_PER_BANK(9);
+
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(numBanks, false, 0.0025, 0.005);
+    EventWorkspace_sptr ws = CreateEventWorkspace2(numBanks * DETECTORS_PER_BANK, 100);
+    ws->setInstrument(inst);
+
+    std::vector<detid_t> detectorIds = inst->getDetectorIDs();
+
+    // Should be equal if DETECTORS_PER_BANK is correct
+    assert(detectorIds.size() == ws->getNumberHistograms());
+
+    // Re-assign detector IDs
+    for(size_t wi = 0; wi < ws->getNumberHistograms(); wi++)
+    {
+      ws->getEventList(wi).clearDetectorIDs();
+      if(clearEvents)
+        ws->getEventList(wi).clear(true);
+      ws->getEventList(wi).setDetectorID(detectorIds[wi]);
+    }
+
+    return ws;
+  }
 
   //================================================================================================================
   WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
@@ -467,8 +502,8 @@ namespace WorkspaceCreationHelper
   }
 
   /** Create event workspace with:
-   * 50 pixels
-   * 100 histogrammed bins from 0.0 in steps of 1.0
+   * numPixels pixels
+   * numBins histogrammed bins from 0.0 in steps of 1.0
    * 200 events; two in each bin, at time 0.5, 1.5, etc.
    * PulseTime = 0 second x2, 1 second x2, 2 seconds x2, etc. after 2010-01-01
    */
@@ -877,9 +912,10 @@ namespace WorkspaceCreationHelper
     */
    Mantid::DataObjects::EventWorkspace_sptr createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS, std::string wsname, API::Algorithm* alg)
    {
+       UNUSED_ARG(wsname);
      // 1. Initialize:use dummy numbers for arguments, for event workspace it doesn't matter
       Mantid::DataObjects::EventWorkspace_sptr outputWS = Mantid::DataObjects::EventWorkspace_sptr(new DataObjects::EventWorkspace());
-      outputWS->setName(wsname);
+      //outputWS->setName(wsname);
       outputWS->initialize(1,1,1);
 
       // 2. Set the units
@@ -943,7 +979,8 @@ namespace WorkspaceCreationHelper
    RebinnedOutput_sptr CreateRebinnedOutputWorkspace()
    {
      RebinnedOutput_sptr outputWS = Mantid::DataObjects::RebinnedOutput_sptr(new RebinnedOutput());
-     outputWS->setName("rebinTest");
+     //outputWS->setName("rebinTest");
+     Mantid::API::AnalysisDataService::Instance().add("rebinTest",outputWS);
 
      // Set Q ('y') axis binning
      MantidVec qbins;

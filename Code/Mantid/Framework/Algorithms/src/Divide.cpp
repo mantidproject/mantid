@@ -7,7 +7,7 @@
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Divide("w1","w2","output")
+ output = Divide("w1","w2")
  w3 = w1 / w2
  w1 /= w2  # Perform "in-place"
  # Using a scalar
@@ -54,6 +54,7 @@ namespace Mantid
       (void) lhsX; //Avoid compiler warning
 
       const int bins = static_cast<int>(lhsE.size());
+
       for (int j=0; j<bins; ++j)
       {
         // Get references to the input Y's
@@ -65,7 +66,7 @@ namespace Mantid
         // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
         // = (Sa 1/b)2 + (Sb (a/b2))2
         // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
-        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY*rhsE[j]/rightY, 2) )/rightY;
+        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY*rhsE[j]/rightY, 2) )/fabs(rightY);
 
         // Copy the result last in case one of the input workspaces is also any output
         YOut[j] = leftY/rightY;;
@@ -76,7 +77,10 @@ namespace Mantid
                                         const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
     {
       (void) lhsX; //Avoid compiler warning
-      if (rhsY == 0) g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero." << std::endl;
+
+      if (rhsY == 0)
+        g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero."
+                        << "\n";
 
       // Do the right-hand part of the error calculation just once
       const double rhsFactor = pow(rhsE/rhsY,2);
@@ -87,7 +91,7 @@ namespace Mantid
         const double leftY = lhsY[j];
 
         // see comment in the function above for the error formula
-        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY, 2)*rhsFactor )/rhsY;
+        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY, 2)*rhsFactor )/fabs(rhsY);
         // Copy the result last in case one of the input workspaces is also any output
         YOut[j] = leftY/rhsY;
       }
@@ -201,44 +205,55 @@ namespace Mantid
      *
      *  @param lhs :: the first workspace to compare
      *  @param rhs :: the second workspace to compare
-     *  @retval true The two workspaces are size compatible
-     *  @retval false The two workspaces are NOT size compatible
+     *  @retval "" The two workspaces are size compatible
+     *  @retval "<reason why not compatible>" The two workspaces are NOT size compatible
      */
-    bool Divide::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    std::string Divide::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       // --- Check for event workspaces - different than workspaces 2D! ---
 
       // A SingleValueWorkspace on the right matches anything
-      if (rhs->size()==1) return true;
+      if (rhs->size()==1) return "";
 
       // A SingleValueWorkspace on the left only matches if rhs was single value too. Why are you using mantid to do simple math?!?
-      if (lhs->size()==1) return false;
+      if (lhs->size()==1) return "The left side cannot contain a single value if the right side isn't also a single value.";
 
       // If RHS only has one value (1D vertical), the number of histograms needs to match.
       // Each lhs spectrum will be divided by that scalar
       //std::cout << "rhs->blocksize() " << rhs->blocksize() << std::endl;
-      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
+      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return "";
 
       if (m_matchXSize)
       {
         // Past this point, for a 2D WS operation, we require the X arrays to match. Note this only checks the first spectrum
-        if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) ) return false;
+        if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) )
+        {
+            return "X arrays must match when dividing 2D workspaces.";
+        }
       }
 
       // We don't need to check for matching bins for events. Yay events!
       const size_t rhsSpec = rhs->getNumberHistograms();
 
       // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
-      if (rhsSpec == 1) return true;
+      if (rhsSpec == 1) return "";
 
       // Are we allowing the division by different # of spectra, using detector IDs to match up?
       if (m_AllowDifferentNumberSpectra)
       {
-        return true;
+        return "";
       }
 
       // Otherwise, the number of histograms needs to match, but the block size of each does NOT need to match.
-      return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
+      
+      if ( lhs->getNumberHistograms() == rhs->getNumberHistograms() )
+      {
+        return "";
+      }
+      else
+      {
+        return "Number of histograms not identical.";
+      }
 
     }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="HRPD" date="blah...">
+<parameter-file instrument="HRPD" valid-from="blah...">
 
 <component-link name="bank_bsk" >
   <parameter name="BackToBackExponential:S" type="fitting">

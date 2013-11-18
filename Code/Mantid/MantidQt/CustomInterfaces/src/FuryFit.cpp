@@ -4,6 +4,7 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -86,10 +87,16 @@ namespace IDA
     // Signal/slot ui connections
     connect(uiForm().furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
-    connect(uiForm().furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(sequential()));
+
+    //plot input connections
+    connect(uiForm().furyfit_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_wsIqt, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+
     // apply validators - furyfit
     uiForm().furyfit_leSpecNo->setValidator(m_intVal);
 
@@ -132,7 +139,7 @@ namespace IDA
     }
 
     QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
-    pyInput = pyInput.arg(QString::fromStdString(m_ffInputWSName));
+    pyInput = pyInput.arg(m_ffInputWSName);
     QString outputNm = runPythonCode(pyInput).trimmed();
     outputNm += QString("fury_") + ftype + uiForm().furyfit_leSpecNo->text();
     std::string output = outputNm.toStdString();
@@ -141,7 +148,7 @@ namespace IDA
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
-    alg->setPropertyValue("InputWorkspace", m_ffInputWSName);
+    alg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
     alg->setProperty("WorkspaceIndex", uiForm().furyfit_leSpecNo->text().toInt());
     alg->setProperty("StartX", m_ffRangeManager->value(m_ffProp["StartX"]));
     alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
@@ -158,7 +165,7 @@ namespace IDA
     }
 
     // Now show the fitted curve of the mini plot
-    m_ffFitCurve = plotMiniplot(m_ffPlot, m_ffFitCurve, output+"_Workspace", 1);
+    m_ffFitCurve = plotMiniplot(m_ffPlot, m_ffFitCurve, outputNm+"_Workspace", 1);
     QPen fitPen(Qt::red, Qt::SolidLine);
     m_ffFitCurve->setPen(fitPen);
     m_ffPlot->replot();
@@ -242,7 +249,7 @@ namespace IDA
     const int fitType = uiForm().furyfit_cbFitType->currentIndex();
 
     Mantid::API::IFunction_sptr func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
-    func->setParameter("A0", m_ffDblMng->value(m_ffProp["BackgroundA0"]));
+    func->setParameter("A0", m_ffRangeManager->value(m_ffProp["BackgroundA0"]));
     result->addFunction(func);
     result->tie("f0.A1", "0");
     if ( tie ) { result->tie("f0.A0", m_ffProp["BackgroundA0"]->valueText().toStdString()); }
@@ -316,6 +323,7 @@ namespace IDA
     m_ffProp[name+".Intensity"] = m_ffDblMng->addProperty("Intensity");
     m_ffProp[name+".Tau"] = m_ffDblMng->addProperty("Tau");
     m_ffProp[name+".Beta"] = m_ffDblMng->addProperty("Beta");
+    m_ffDblMng->setRange(m_ffProp[name+".Beta"], 0, 1);
     m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], NUM_DECIMALS);
     m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], NUM_DECIMALS);
     m_ffDblMng->setDecimals(m_ffProp[name+".Beta"], NUM_DECIMALS);
@@ -372,8 +380,7 @@ namespace IDA
 
   void FuryFit::plotInput()
   {
-    std::string wsname;
-
+    using namespace Mantid::API;
     switch ( uiForm().furyfit_cbInputType->currentIndex() )
     {
     case 0: // "File"
@@ -384,33 +391,36 @@ namespace IDA
         }
         else
         {
-        QFileInfo fi(uiForm().furyfit_inputFile->getFirstFilename());
-        wsname = fi.baseName().toStdString();
-        if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
-        {
-          std::string filename = uiForm().furyfit_inputFile->getFirstFilename().toStdString();
-          // LoadNexus
-          Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
-          alg->initialize();
-          alg->setPropertyValue("Filename", filename);
-          alg->setPropertyValue("OutputWorkspace",wsname);
-          alg->execute();
-          // get the output workspace
-          m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
-        }
+          QFileInfo fi(uiForm().furyfit_inputFile->getFirstFilename());
+          QString wsname = fi.baseName();
+          if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
+          {
+            m_ffInputWSName = wsname;
+            QString filename = uiForm().furyfit_inputFile->getFirstFilename();
+            // get the output workspace
+            m_ffInputWS = runLoadNexus(filename, m_ffInputWSName);
+            if(!m_ffInputWS)
+            {
+              return;
+            }
+          }
         }
       }
       break;
     case 1: // Workspace
       {
-        wsname = uiForm().furyfit_wsIqt->currentText().toStdString();
+        m_ffInputWSName = uiForm().furyfit_wsIqt->currentText();
+        if(m_ffInputWSName.isEmpty())
+        {
+          return;
+        }
         try
         {
-          m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+          m_ffInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_ffInputWSName.toStdString());
         }
         catch ( Mantid::Kernel::Exception::NotFoundError & )
         {
-          QString msg = "Workspace: '" + QString::fromStdString(wsname) + "' could not be "
+          QString msg = "Workspace: '" + m_ffInputWSName + "' could not be "
             "found in the Analysis Data Service.";
           showInformationBox(msg);
           return;
@@ -418,11 +428,10 @@ namespace IDA
       }
       break;
     }
-    m_ffInputWSName = wsname;
 
     int specNo = uiForm().furyfit_leSpecNo->text().toInt();
 
-    m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWSName, specNo);
+    m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWS, specNo);
     try
     {
       const std::pair<double, double> range = getCurveRange(m_ffDataCurve);
@@ -501,7 +510,7 @@ namespace IDA
     std::string function = std::string(func->asString());
   
     QString pyInput = "from IndirectDataAnalysis import furyfitSeq\n"
-      "input = '" + QString::fromStdString(m_ffInputWSName) + "'\n"
+      "input = '" + m_ffInputWSName + "'\n"
       "func = r'" + QString::fromStdString(function) + "'\n"
       "ftype = '" + fitTypeString() + "'\n"
       "startx = " + m_ffProp["StartX"]->valueText() + "\n"

@@ -2,7 +2,7 @@
 
 Algorithm to load an NXSPE file into a workspace2D. It will create a new instrument, that can be overwritten later by the LoadInstrument algorithm.
 
-'''NOTE:''' In the current implementation, the rendering of the NXSPE instrument is VERY memry intensive.
+'''NOTE:''' In the current implementation, the rendering of the NXSPE instrument is VERY memory intensive.
 
 
 *WIKI*/
@@ -11,7 +11,7 @@ Algorithm to load an NXSPE file into a workspace2D. It will create a new instrum
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -29,10 +29,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadNXSPE)
-  //register the algorithm into loadalgorithm factory
-  DECLARE_LOADALGORITHM(LoadNXSPE)
+  DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE);
 
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -62,38 +59,18 @@ namespace DataHandling
     this->setWikiDescription("Algorithm to load an NXSPE file into a workspace2D. It will create a new instrument, that can be overwritten later by the LoadInstrument algorithm.");
   }
 
-  //----------------------------------------------------------------------------------------------
   /**
-   * Do a quick file type check by looking at the first 100 bytes of the file
-   *  @param filePath :: path of the file including name.
-   *  @param nread :: no.of bytes read
-   *  @param header :: The first 100 bytes of the file as a union
-   *  @return true if the given file is of type which can be loaded by this algorithm
+   * Return the confidence with with this algorithm can load the file
+   * @param descriptor A descriptor for the file
+   * @returns An integer specifying the confidence level. 0 indicates it will not be used
    */
-  bool LoadNXSPE::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
-  {
-    std::string ext = this->extension(filePath);
-    // If the extension is nxspe then give it a go
-    if( ext.compare("nxspe") == 0 ) return true;
-
-    // If not then let's see if it is a HDF file by checking for the magic cookie
-    if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
-    return false;
-  }
-
-
-  /**
-   * Checks the file by opening it and reading few lines
-   *  @param filePath :: name of the file inluding its path
-   *  @return an integer value how much this algorithm can load the file
-   */
-  int LoadNXSPE::fileCheck(const std::string& filePath)
+  int LoadNXSPE::confidence(Kernel::NexusDescriptor & descriptor) const
   {
     int confidence(0);
     typedef std::map<std::string,std::string> string_map_t;
     try
     {
-      ::NeXus::File file = ::NeXus::File(filePath);
+      ::NeXus::File file = ::NeXus::File(descriptor.filename());
       string_map_t entries = file.getEntries();
       for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
       {
@@ -325,9 +302,7 @@ namespace DataHandling
     Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
-
-    Geometry::Detector *det;
-
+    
     Geometry::Object_const_sptr cuboid(createCuboid(0.1,0.1,0.1));//FIXME: memory hog on rendering. Also, make each detector separate size
     for (std::size_t i=0;i<numSpectra;++i)
     {
@@ -340,14 +315,12 @@ namespace DataHandling
       Kernel::V3D pos;
       pos.spherical(r,polar.at(i),azimuthal.at(i));
 
-      det = new Geometry::Detector("pixel",static_cast<int>(i+1),sample);
+      Geometry::Detector *det = new Geometry::Detector("pixel",static_cast<int>(i+1),sample);
       det->setPos(pos);
       det->setShape(cuboid);
       instrument->add(det);
       instrument->markAsDetector(det);
     }
-
-
 
     setProperty("OutputWorkspace", outputWS);
   }

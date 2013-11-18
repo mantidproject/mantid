@@ -25,9 +25,9 @@ namespace MantidQt
     const QString QPeaksTableModel::FINAL_ENERGY("E_f");
     const QString QPeaksTableModel::TOF("TOF");
     const QString QPeaksTableModel::DSPACING = "DSpacing";
-    const QString QPeaksTableModel::INT = "Intens";
+    const QString QPeaksTableModel::INT = "Int";
     const QString QPeaksTableModel::SIGMINT = "SigInt";
-    const QString QPeaksTableModel::INT_SIGINT("I/sigmaI");
+    const QString QPeaksTableModel::INT_SIGINT("Int/SigInt");
     const QString QPeaksTableModel::BINCOUNT("BinCount");
     const QString QPeaksTableModel::BANKNAME("BankName");
     const QString QPeaksTableModel::ROW("Row");
@@ -81,8 +81,8 @@ namespace MantidQt
       double sigma = peak.getSigmaIntensity();
       m_dataCache.push_back(QString::number(intensity, 'f', 1));
       m_dataCache.push_back(QString::number(sigma, 'f', 1));
-      m_dataCache.push_back(QString::number(intensity/sigma, 'f', 1));
-      m_dataCache.push_back(QString::number(peak.getBinCount()));
+      m_dataCache.push_back(QString::number(intensity/sigma, 'f', 2));
+      m_dataCache.push_back(QString::number(peak.getBinCount(), 'g', 2));
       m_dataCache.push_back(QString(peak.getBankName().c_str()));
       m_dataCache.push_back(QString::number(peak.getRow()));
       m_dataCache.push_back(QString::number(peak.getCol()));
@@ -134,7 +134,7 @@ namespace MantidQt
       else if (column == COL_INT_SIGINT)
         return 5;
       else if (column == COL_BINCOUNT)
-        return 5;
+        return 6;
       else if (column == COL_BANKNAME)
         return 6;
       else if (column == COL_ROW)
@@ -307,14 +307,12 @@ namespace MantidQt
         size_t numToCheck(ids.size());
         if (numToCheck > 20) // arbitrary cutoff
           numToCheck = 20;
-        bool hasRectDet(false);
         const std::string RECT_DET("RectangularDetector");
         for (size_t i = 0; i < numToCheck; ++i)
         {
           boost::shared_ptr<const Mantid::Geometry::IComponent> component = instr->getDetector(ids[i]);
           if (component->type().compare(RECT_DET) == 0)
           {
-            hasRectDet = true;
             break;
           }
           else
@@ -322,7 +320,6 @@ namespace MantidQt
             component = component->getParent();
             if (component->type().compare(RECT_DET) == 0)
             {
-              hasRectDet = true;
               break;
             }
           }
@@ -339,8 +336,6 @@ namespace MantidQt
       // hide some columns based on the techniques
       { // shrink variable scope
         std::set<std::string> techniques = instrInfo.techniques();
-        // required for ???
-        const std::string SCD("Single Crystal Diffraction");
         // required for showing final and delta energy
         const std::string IGS("TOF Indirect Geometry Spectroscopy");
         // required for showing initial and delta energy
@@ -378,10 +373,15 @@ namespace MantidQt
       const bool isSortable = m_sortableColumns[columnName];
       if(isSortable)
       {
-       // TODO raise event and propagate through to Proper presenter.
-       peaksSorted(columnName.toStdString(), order== Qt::AscendingOrder);
+        std::string rationalName(columnName.toStdString());
+        if (columnName == QPeaksTableModel::INT)
+          rationalName = "Intens";
+        else if (columnName == QPeaksTableModel::RUNNUMBER)
+          rationalName = "RunNumber";
+        // TODO raise event and propagate through to Proper presenter.
+        peaksSorted(rationalName, order== Qt::AscendingOrder);
 
-       emit layoutChanged(); //This should tell the view that the data has changed.
+        emit layoutChanged(); //This should tell the view that the data has changed.
       }
     }
   }

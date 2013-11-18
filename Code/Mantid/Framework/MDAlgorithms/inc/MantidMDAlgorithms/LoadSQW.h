@@ -1,7 +1,8 @@
 #ifndef MANTID_MDEVENTS_LOAD_SQW_H_
 #define MANTID_MDEVENTS_LOAD_SQW_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidAPI/Progress.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
@@ -64,7 +65,7 @@ namespace MDAlgorithms
     };
   }
   
-  class DLLExport LoadSQW  : public API::Algorithm
+  class DLLExport LoadSQW  : public API::IFileLoader<Kernel::FileDescriptor>
   {
   public:
     LoadSQW();
@@ -76,6 +77,9 @@ namespace MDAlgorithms
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling;MDAlgorithms";}
+
+     /// Returns a confidence value that this algorithm can load a file
+    virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
   private:
     /// Sets documentation strings for this algorithm

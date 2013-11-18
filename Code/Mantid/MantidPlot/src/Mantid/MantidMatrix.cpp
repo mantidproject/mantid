@@ -44,51 +44,50 @@
 #include <limits>
 
 #include <boost/math/special_functions/fpclassify.hpp>
-
-using namespace Mantid;
+//using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
+using namespace Mantid::Geometry;
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
   : MdiSubWindow(parent, label, name, 0),
-    WorkspaceObserver(),
-    m_appWindow(parent),
-    m_workspace(ws),
-    y_start(0.0),y_end(0.0),
-    m_histogram(false),
-    m_min(0),m_max(0),
-    m_are_min_max_set(false),
-    m_boundingRect(),
-    m_strName(name.toStdString()),
-    m_selectedRows(),
-    m_selectedCols()
+  WorkspaceObserver(),
+  m_appWindow(parent),
+  m_workspace(ws),
+  y_start(0.0),y_end(0.0),
+  m_histogram(false),
+  m_min(0),m_max(0),
+  m_are_min_max_set(false),
+  m_boundingRect(),
+  m_strName(name.toStdString()),
+  m_selectedRows(),
+  m_selectedCols()
 {
   setup(ws,start,end);
   setWindowTitle(name);
   setName(name);
-  setIcon( matrixIcon() );
 
   m_modelY = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
   m_table_viewY = new QTableView();
   connectTableView(m_table_viewY,m_modelY);
   setColumnsWidth(0,MantidPreferences::MantidMatrixColumnWidthY());
   setNumberFormat(0,MantidPreferences::MantidMatrixNumberFormatY(),
-                  MantidPreferences::MantidMatrixNumberPrecisionY());
+    MantidPreferences::MantidMatrixNumberPrecisionY());
 
   m_modelX = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::X);
   m_table_viewX = new QTableView();
   connectTableView(m_table_viewX,m_modelX);
   setColumnsWidth(1,MantidPreferences::MantidMatrixColumnWidthX());
   setNumberFormat(1,MantidPreferences::MantidMatrixNumberFormatX(),
-                  MantidPreferences::MantidMatrixNumberPrecisionX());
+    MantidPreferences::MantidMatrixNumberPrecisionX());
 
   m_modelE = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::E);
   m_table_viewE = new QTableView();
   connectTableView(m_table_viewE,m_modelE);
   setColumnsWidth(2,MantidPreferences::MantidMatrixColumnWidthE());
   setNumberFormat(2,MantidPreferences::MantidMatrixNumberFormatE(),
-                  MantidPreferences::MantidMatrixNumberPrecisionE());
+    MantidPreferences::MantidMatrixNumberPrecisionE());
 
   m_YTabLabel = QString("Y values");
   m_XTabLabel = QString("X values");
@@ -111,7 +110,7 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, Applicati
   connect(m_tabs,SIGNAL(currentChanged(int)),this,SLOT(viewChanged(int)));
 
   setGeometry(50, 50, QMIN(5, numCols())*m_table_viewY->horizontalHeader()->sectionSize(0) + 55,
-              (QMIN(10,numRows())+1)*m_table_viewY->verticalHeader()->sectionSize(0)+100);
+    (QMIN(10,numRows())+1)*m_table_viewY->verticalHeader()->sectionSize(0)+100);
 
   observeAfterReplace();
   observePreDelete();
@@ -137,8 +136,8 @@ bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
 }
 
 /** Called when switching between tabs
- *  @param index :: The index of the new active tab
- */
+*  @param index :: The index of the new active tab
+*/
 void MantidMatrix::viewChanged(int index)
 {
   // get the previous view and selection model
@@ -236,8 +235,8 @@ QString MantidMatrix::text(int row, int col)
 }
 
 /** Sets new column width in a table view(s).
-    @param width :: New column width in pixels. All columns have the same width.
-    @param all :: If true the change will be applied to all three table views.
+@param width :: New column width in pixels. All columns have the same width.
+@param all :: If true the change will be applied to all three table views.
 */
 void MantidMatrix::setColumnsWidth(int width, bool all)
 {
@@ -275,8 +274,8 @@ void MantidMatrix::setColumnsWidth(int width, bool all)
 }
 
 /**  Sets column width to one table view.
-     @param i :: ordinal number of the view. 0 - Y, 1 - X, 2 - Error
-     @param width :: New column width in pixels. All columns have the same width.
+@param i :: ordinal number of the view. 0 - Y, 1 - X, 2 - Error
+@param width :: New column width in pixels. All columns have the same width.
 */
 void MantidMatrix::setColumnsWidth(int i,int width)
 {
@@ -299,8 +298,8 @@ void MantidMatrix::setColumnsWidth(int i,int width)
 }
 
 /**  Returns the width of a column.
-     @param i :: ordinal number of the view. 0 - Y, 1 - X, 2 - Error
-     @return The column width in pixels. All columns have the same width.
+@param i :: ordinal number of the view. 0 - Y, 1 - X, 2 - Error
+@return The column width in pixels. All columns have the same width.
 */
 int MantidMatrix::columnsWidth(int i)
 {
@@ -371,11 +370,11 @@ void MantidMatrix::copySelection()
 }
 
 /**  Returns minimum and maximum values in the matrix.
-     If setRange(...) has not been called it returns the true smalles ang largest Y-values in the matrix,
-     otherwise the values set with setRange(...) are returned. These are needed in plotGraph2D to set
-     the range of the third, colour axis.
-     @param[out] min is set to the minumium value
-     @param[out] max is set to the maximum value
+If setRange(...) has not been called it returns the true smalles ang largest Y-values in the matrix,
+otherwise the values set with setRange(...) are returned. These are needed in plotGraph2D to set
+the range of the third, colour axis.
+@param[out] min is set to the minumium value
+@param[out] max is set to the maximum value
 */
 void MantidMatrix::range(double *min, double *max)
 {
@@ -404,7 +403,7 @@ double** MantidMatrix::allocateMatrixData(int rows, int columns)
   double** data = (double **)malloc(rows * sizeof (double*));
   if(!data){
     QMessageBox::critical(0, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-                          tr("Not enough memory, operation aborted!"));
+      tr("Not enough memory, operation aborted!"));
     return NULL;
   }
 
@@ -416,7 +415,7 @@ double** MantidMatrix::allocateMatrixData(int rows, int columns)
       free(data);
 
       QMessageBox::critical(0, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
-                            tr("Not enough memory, operation aborted!"));
+        tr("Not enough memory, operation aborted!"));
       return NULL;
     }
   }
@@ -617,44 +616,44 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
   for(int i=0;i<numRows();i++)
     for(int j=0;j<numCols();j++)
     {
-    if (cell(i,j) < zMin) zMin = cell(i,j);
-    if (cell(i,j) > zMax) zMax = cell(i,j);
-  }
-
-  // Calculate xStart(), xEnd(), yStart(), yEnd()
-  boundingRect();
-  
-  MantidMatrixFunction *fun = new MantidMatrixFunction(*this);
-  plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
-
-  const Mantid::API::Axis* ax = m_workspace->getAxis(0);
-  std::string s;
-  if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-  else
-    s = "X Axis";
-  plot->setXAxisLabel(tr(s.c_str()));
-
-  if ( m_workspace->axes() > 1 )
-  {
-    ax = m_workspace->getAxis(1);
-    if (ax->isNumeric())
-    {
-      if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-      else
-        s = "Y Axis";
-      plot->setYAxisLabel(tr(s.c_str()));
+      if (cell(i,j) < zMin) zMin = cell(i,j);
+      if (cell(i,j) > zMax) zMax = cell(i,j);
     }
+
+    // Calculate xStart(), xEnd(), yStart(), yEnd()
+    boundingRect();
+
+    MantidMatrixFunction *fun = new MantidMatrixFunction(*this);
+    plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
+
+    const Mantid::API::Axis* ax = m_workspace->getAxis(0);
+    std::string s;
+    if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
     else
-      plot->setYAxisLabel(tr("Spectrum"));
-  }
+      s = "X Axis";
+    plot->setXAxisLabel(tr(s.c_str()));
 
-  plot->setZAxisLabel(tr(m_workspace->YUnitLabel().c_str()));
+    if ( m_workspace->axes() > 1 )
+    {
+      ax = m_workspace->getAxis(1);
+      if (ax->isNumeric())
+      {
+        if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
+        else
+          s = "Y Axis";
+        plot->setYAxisLabel(tr(s.c_str()));
+      }
+      else
+        plot->setYAxisLabel(tr("Spectrum"));
+    }
 
-  a->initPlot3D(plot);
-  //plot->confirmClose(false);
-  QApplication::restoreOverrideCursor();
+    plot->setZAxisLabel(tr(m_workspace->YUnitLabel().c_str()));
 
-  return plot;
+    a->initPlot3D(plot);
+    //plot->confirmClose(false);
+    QApplication::restoreOverrideCursor();
+
+    return plot;
 }
 
 void MantidMatrix::attachMultilayer(MultiLayer* ml)
@@ -666,8 +665,8 @@ void MantidMatrix::attachMultilayer(MultiLayer* ml)
 
 /** Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram.
 
-    @param type :: The "curve" type.
-    @return Pointer to the created graph.
+@param type :: The "curve" type.
+@return Pointer to the created graph.
 */
 MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 {
@@ -685,14 +684,13 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
   //#799 fix for  multiple dialog creation on double clicking/ on right click menu scale on  2d plot
   //   a->connectMultilayerPlot(g);
   Graph* plot = g->activeGraph();
-  ProjectData *prjData=0;
-  plotSpectrogram(plot,a,type,false,prjData);
- // g->confirmClose(false);
+  plotSpectrogram(plot,a,type,false,NULL);
+  // g->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return g;
 }
 
-Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData *prjData)
+Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, Graph::CurveType type,bool project,const ProjectData* const prjData)
 {
   app->setPreferences(plot);
   plot->setTitle(tr("Workspace ") + name());
@@ -783,9 +781,9 @@ const QList<int>& MantidMatrix::getSelectedRows() const
 }
 
 /**
- * Sets the internal cache of selected rows.
- * @return True if rows are selected, false otherwise
- */
+* Sets the internal cache of selected rows.
+* @return True if rows are selected, false otherwise
+*/
 bool MantidMatrix::setSelectedRows()
 {
   QTableView *tv = activeView();
@@ -810,15 +808,15 @@ const QList<int>& MantidMatrix::getSelectedColumns() const
 }
 
 /**
- * Sets the internal cache of selected columns.
- * @return True if columns are selected, false otherwise
- */
+* Sets the internal cache of selected columns.
+* @return True if columns are selected, false otherwise
+*/
 bool MantidMatrix::setSelectedColumns()
 {
   QTableView *tv = activeView();
   QItemSelectionModel *selModel = tv->selectionModel();
   if( !selModel ||  !selModel->hasSelection()) return false;
-  
+
   m_selectedCols.clear();
   const QModelIndexList cols = selModel->selectedColumns();
   QModelIndexList::const_iterator it;
@@ -850,21 +848,21 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
     if (i >= 0)m_plots2D.remove(i);
     else
     {QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find(dynamic_cast<MultiLayer*>(w));
-      if (i != m_plots1D.end())
+    if (i != m_plots1D.end())
+    {
+      if (i.value() != 0)
       {
-        if (i.value() != 0)
-        {
-          i.value()->confirmClose(false);
-          i.value()->close();
-        }
-        m_plots1D.erase(i);
+        i.value()->confirmClose(false);
+        i.value()->close();
       }
+      m_plots1D.erase(i);
+    }
     }
   }
 }
 
 /**
-     Repaints all 1D and 2D plots attached to this MantidMatrix
+Repaints all 1D and 2D plots attached to this MantidMatrix
 */
 void MantidMatrix::repaintAll()
 {
@@ -923,7 +921,19 @@ void MantidMatrix::repaintAll()
 
 void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  if( wsName != m_strName || !ws ) return;
+  if ( !ws ) return;
+  if( wsName != m_strName )
+  {
+    if ( ws == m_workspace ) // i.e. this is a rename
+    {
+      m_strName = wsName;
+      QString qwsName = QString::fromStdString(wsName);
+      setWindowTitle(qwsName);
+      setName(qwsName);
+      setObjectName(qwsName);
+    }
+    return;
+  }
 
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
   emit needWorkspaceChange( new_workspace ); 
@@ -934,7 +944,7 @@ void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::sha
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
 {
   if (m_cols != static_cast<int>(ws->blocksize()) ||
-      m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms()))
+    m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms()))
   {
     closeDependants();
   }
@@ -1116,7 +1126,7 @@ QString MantidMatrix::saveToString(const QString &geometry, bool saveAsTemplate)
 }
 
 /**  returns the workspace name
-  */
+*/
 const std::string & MantidMatrix::getWorkspaceName()
 {return m_strName;
 }
@@ -1124,13 +1134,13 @@ const std::string & MantidMatrix::getWorkspaceName()
 // ----------   MantidMatrixModel   ------------------ //
 
 /**   MantidMatrixModel constructor.
-      @param parent :: Pointer to the parent MantidMatrix
-      @param ws :: Underlying workspace
-      @param rows :: Number of rows in the workspace to be visible via MantidMatrixModel
-      @param cols :: Number of columns (time bins)
-      @param start :: Starting index
-      @param type :: Type of the data to display: Y, X, or E
-  */
+@param parent :: Pointer to the parent MantidMatrix
+@param ws :: Underlying workspace
+@param rows :: Number of rows in the workspace to be visible via MantidMatrixModel
+@param cols :: Number of columns (time bins)
+@param start :: Starting index
+@param type :: Type of the data to display: Y, X, or E
+*/
 MantidMatrixModel::MantidMatrixModel(QObject *parent,
                                      const Mantid::API::MatrixWorkspace* ws,
                                      int rows,
@@ -1138,7 +1148,7 @@ MantidMatrixModel::MantidMatrixModel(QObject *parent,
                                      int start,
                                      Type type):
 QAbstractTableModel(parent),m_type(type),
-m_format('e'),m_prec(6)
+  m_format('e'),m_prec(6)
 {
   setup(ws,rows,cols,start);
 }
@@ -1153,6 +1163,7 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace* ws,
   m_rows = rows;
   m_cols = cols;
   m_startRow = start >= 0? start : 0;
+  m_mon_color = QColor(255,255,204);
   if (ws->blocksize() != 0)
     m_colNumCorr = ws->isHistogramData() ? 1 : 0;
   else
@@ -1204,10 +1215,10 @@ Qt::ItemFlags MantidMatrixModel::flags(const QModelIndex & index ) const
 }
 
 /**
-      @param f :: Number format:  'f' - fixed, 'e' - scientific.
-      @param prec :: New precision (number of digits after the decimal point) with which the data will
-                   be shown in MantidMatrix.
-  */
+@param f :: Number format:  'f' - fixed, 'e' - scientific.
+@param prec :: New precision (number of digits after the decimal point) with which the data will
+be shown in MantidMatrix.
+*/
 void MantidMatrixModel::setFormat(const QChar& f,int prec)
 {
   QString formats = " ef";
@@ -1219,27 +1230,91 @@ void MantidMatrixModel::setFormat(const QChar& f,int prec)
 }
 
 QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
+{  
+  switch (role)
+  {
+  case Qt::DisplayRole:
+    {
+      double val = data(index.row(),index.column());
+      return QVariant(m_locale.toString(val,m_format,m_prec));
+    }
+  case Qt::BackgroundRole:
+    {
+      if (checkMontorCache(index.row()))
+      {
+        return m_mon_color;
+      }
+      else
+      {
+        return QVariant();
+      }
+    }
+  default:
+    {
+      return QVariant();
+    }
+    return QVariant();
+  }
+}
+
+/**   Checks the row cache to see if the detector flag is stored, then returns it, otherwise it looks it up and adds it to the cache for quick lookup
+@param row :: current row in the table that maps to a detector.
+@return bool :: the value of if the detector is a monitor or not.
+*/
+bool MantidMatrixModel::checkMontorCache(int row) const
 {
-  if (role != Qt::DisplayRole) return QVariant();
-  double val = data(index.row(),index.column());
-  return QVariant(m_locale.toString(val,m_format,m_prec));
+  if (m_workspace->getAxis(1)->isSpectra())
+  {
+    bool isMon = false;
+    if (m_monCache.contains(row))
+    {
+      isMon = m_monCache.value(row);
+    }
+    else
+    {
+      try
+      {
+        size_t wsIndex = static_cast<size_t>(row);
+        IDetector_const_sptr det = m_workspace->getDetector(wsIndex);
+        if (det->isMonitor())
+        {
+          isMon = true;
+        }
+        else
+        {
+          isMon = false;
+        }
+        m_monCache.insert(row, isMon);
+      }
+      catch (std::exception e)
+      {
+        m_monCache.insert(row,false);
+        isMon = false;
+      }
+    }
+    return isMon;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 
 void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
 {
-    //this is here to fill m_min and m_max with numbers that aren't nan
-    miny = std::numeric_limits<double>::max();
-    maxy = -std::numeric_limits<double>::max();
+  //this is here to fill m_min and m_max with numbers that aren't nan
+  miny = std::numeric_limits<double>::max();
+  maxy = -std::numeric_limits<double>::max();
 
-    if ( ws )
-    {
+  if ( ws )
+  {
 
-      PARALLEL_FOR1( ws )
+    PARALLEL_FOR1( ws )
       for (int wi=0; wi < static_cast<int>(ws->getNumberHistograms()); wi++)
       {
         double local_min, local_max;
-        const MantidVec & Y = ws->readY(wi);
+        const Mantid::MantidVec & Y = ws->readY(wi);
 
         local_min = std::numeric_limits<double>::max();
         local_max = -std::numeric_limits<double>::max();
@@ -1267,11 +1342,11 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
             miny = local_min;
         }
       }
-    }
+  }
 
-    // Make up some reasonable values if nothing was found
-    if (miny == std::numeric_limits<double>::max())
-      miny = 0;
-    if (maxy == -std::numeric_limits<double>::max())
-      maxy = miny + 1e6;
+  // Make up some reasonable values if nothing was found
+  if (miny == std::numeric_limits<double>::max())
+    miny = 0;
+  if (maxy == -std::numeric_limits<double>::max())
+    maxy = miny + 1e6;
 }

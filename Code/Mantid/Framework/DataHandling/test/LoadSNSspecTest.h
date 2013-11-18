@@ -9,6 +9,18 @@ using namespace Mantid::API;
 class LoadSNSspecTest : public CxxTest::TestSuite
 {
 public:
+
+  void testConfidence()
+  {
+    Mantid::DataHandling::LoadSNSspec loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "LoadSNSspec.txt");
+
+    Mantid::Kernel::FileDescriptor descriptor(loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(80, loader.confidence(descriptor));
+
+  }
+
   void testName()
   {
     TS_ASSERT_EQUALS( loader.name(), "LoadSNSspec" );

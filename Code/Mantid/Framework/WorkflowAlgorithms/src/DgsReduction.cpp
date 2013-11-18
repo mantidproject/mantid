@@ -91,6 +91,8 @@ namespace Mantid
           "Move detectors to position specified in cal file.");
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
+      auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
+      mustBePosInt->setLower(0);
       this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(), mustBePositive,
           "Set the value of the incident energy guess in meV.");
       this->declareProperty("UseIncidentEnergyGuess", false,
@@ -111,8 +113,10 @@ namespace Mantid
           "Negative width value indicates logarithmic binning.");
       this->declareProperty("SofPhiEIsDistribution", true,
           "The final S(Phi, E) data is made to be a distribution.");
-      this->declareProperty("HardMaskFile", "", "A file or workspace containing a hard mask.");
-      this->declareProperty("GroupingFile", "", "A file containing grouping (mapping) information.");
+      this->declareProperty(new FileProperty("HardMaskFile","",
+           FileProperty::OptionalLoad, ".xml"), "A file or workspace containing a hard mask.");
+      this->declareProperty(new FileProperty("GroupingFile", "",FileProperty::OptionalLoad, ".xml"),
+           "A file containing grouping (mapping) information.");
       this->declareProperty("ShowIntermediateWorkspaces", false,
           "Flag to show the intermediate workspaces (diagnostic mask, integrated detector vanadium, "
           "integrated absolute units) from the reduction.");
@@ -174,7 +178,7 @@ namespace Mantid
       this->declareProperty("SaveProcessedDetVan", false,
           "Save the processed detector vanadium workspace");
       this->setPropertySettings("SaveProcessedDetVan",
-          new VisibleWhenProperty("SaveProcessedDetVan", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty(new FileProperty("SaveProcDetVanFilename", "",
           FileProperty::OptionalSave, ".nxs"),
           "Provide a filename for saving the processed detector vanadium.");
@@ -245,10 +249,18 @@ namespace Mantid
           "Mask detectors below this threshold.");
       this->setPropertySettings("MedianTestLow",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
+      this->declareProperty("MedianTestLevelsUp", 0., mustBePositive,
+          "Mask detectors below this threshold.");
+      this->setPropertySettings("MedianTestLevelsUp",
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
+      this->declareProperty("MedianTestCorrectForSolidAngle", false,
+          "Flag to correct for solid angle efficiency.");
+      this->setPropertySettings("MedianTestCorrectForSolidAngle",
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("ErrorBarCriterion", EMPTY_DBL(), mustBePositive,
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("ErrorBarCriterion",
-          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));      
       this->declareProperty(new FileProperty("DetectorVanadium2InputFile", "",
           FileProperty::OptionalLoad, "_event.nxs"),
           "File containing detector vanadium data to compare against");
@@ -303,6 +315,8 @@ namespace Mantid
       this->setPropertyGroup("HighOutlier", findBadDets);
       this->setPropertyGroup("MedianTestHigh", findBadDets);
       this->setPropertyGroup("MedianTestLow", findBadDets);
+      this->setPropertyGroup("MedianTestLevelsUp", findBadDets);
+      this->setPropertyGroup("MedianTestCorrectForSolidAngle", findBadDets);
       this->setPropertyGroup("ErrorBarCriterion", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputFile", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputWorkspace", findBadDets);
@@ -762,7 +776,6 @@ namespace Mantid
         etConv->setProperty("GroupingWorkspace", groupingWS);
       }
       etConv->setProperty("ReductionProperties", reductionManagerName);
-      etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
       etConv->setProperty("OutputTibWorkspace", tibWsName);
       etConv->executeAsChildAlg();

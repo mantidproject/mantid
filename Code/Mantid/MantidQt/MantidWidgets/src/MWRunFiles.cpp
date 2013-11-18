@@ -1,11 +1,12 @@
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/LiveListenerFactory.h"
 
 #include <QStringList>
 #include <QFileDialog>
@@ -72,6 +73,8 @@ void FindFilesThread::run()
   // Reset result member vars.
   m_error.clear();
   m_filenames.clear();
+  m_valueForProperty.clear();
+
   if( m_text.empty() )
   {
     if( m_isOptional )
@@ -86,7 +89,6 @@ void FindFilesThread::run()
 
   try
   {
-    m_valueForProperty = "";
     // Use the property of the algorithm to find files, if one has been specified.
     if( m_algorithm.length() != 0 && m_property.length() != 0 )
     {
@@ -188,7 +190,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(false), 
     m_isOptional(false), m_multiEntry(false), m_buttonOpt(Text), m_fileProblem(""),
     m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
-    m_foundFiles(), m_lastDir(), m_fileFilter()
+    m_liveButtonState(Hide), m_foundFiles(), m_lastDir(), m_fileFilter()
 {
   m_thread = new FindFilesThread(this);
   
@@ -220,6 +222,9 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   }
 
   doButtonOpt(m_buttonOpt);
+
+  liveButtonState(m_liveButtonState);
+  connect(m_uiForm.liveButton, SIGNAL(toggled(bool)), this, SIGNAL(liveButtonPressed(bool)));
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);
@@ -271,6 +276,14 @@ QString MWRunFiles::getLabelText() const
 void MWRunFiles::setLabelText(const QString & text) 
 { 
   m_uiForm.textLabel->setText(text);
+}
+
+/** Set the minimum width on the label widget
+ *  @param width The new minimum width of the widget
+ */
+void MWRunFiles::setLabelMinWidth(const int width)
+{
+  m_uiForm.textLabel->setMinimumWidth(width);
 }
 
 /**
@@ -419,11 +432,51 @@ bool MWRunFiles::extsAsSingleOption() const
 
 /**
  * Sets whether the file dialog should display the exts as a single list or as multiple items
- * @@param value :: If true the file dialog wil contain a single entry will all filters
+ * @param value :: If true the file dialog wil contain a single entry will all filters
  */
 void MWRunFiles::extsAsSingleOption(const bool value)
 {
   m_extsAsSingleOption = value;
+}
+
+/// Returns whether the live button is being shown;
+MWRunFiles::LiveButtonOpts MWRunFiles::liveButtonState() const
+{
+  return m_liveButtonState;
+}
+
+void MWRunFiles::liveButtonState(const LiveButtonOpts option)
+{
+  m_liveButtonState = option;
+  if ( m_liveButtonState == Hide )
+  {
+    m_uiForm.liveButton->hide();
+  }
+  else
+  {
+    // Checks whether it's possible to connect to the user's default instrument
+    const bool canConnect = LiveListenerFactory::Instance().checkConnection(ConfigService::Instance().getInstrument().name());
+    if ( m_liveButtonState == AlwaysShow || canConnect )
+    {
+      m_uiForm.liveButton->setEnabled(canConnect);
+      m_uiForm.liveButton->show();
+    }
+  }
+}
+
+void MWRunFiles::liveButtonSetEnabled(const bool enabled)
+{
+  m_uiForm.liveButton->setEnabled(enabled);
+}
+
+void MWRunFiles::liveButtonSetChecked(const bool checked)
+{
+  m_uiForm.liveButton->setChecked(checked);
+}
+
+bool MWRunFiles::liveButtonIsChecked() const
+{
+  return m_uiForm.liveButton->isChecked();
 }
 
 /**
@@ -441,6 +494,16 @@ bool MWRunFiles::isValid() const
     return false;
   }
 }
+
+/**
+ * Is the widget currently searching
+ * @return True if a search is inprogress
+ */
+bool MWRunFiles::isSearching() const
+{
+  return (m_thread ? m_thread->isRunning() : false);
+}
+
 
 /** 
 * Returns the names of the files found
@@ -598,6 +661,16 @@ void MWRunFiles::setNumberOfEntries(const int number)
   }
 }
 
+/** Inform the widget of a running instance of MonitorLiveData to be used in stopLiveListener().
+ *  Note that the type passed in is IAlgorithm and that no check is made that it actually refers
+ *  to an instance of MonitorLiveData.
+ *  @param monitorLiveData The running algorithm
+ */
+void MWRunFiles::setLiveAlgorithm(const IAlgorithm_sptr& monitorLiveData)
+{
+  m_monitorLiveData = monitorLiveData;
+}
+
 /** 
 * Set the file text.  This is different to setText in that it emits findFiles, as well
 * changing the state of the text box widget to "modified = true" which is a prerequisite
@@ -647,6 +720,21 @@ void MWRunFiles::findFiles()
     // Make sure errors are correctly set if we didn't run
     inspectThreadResult();
   }
+}
+
+/** Calls cancel on a running instance of MonitorLiveData.
+ *  Requires that a handle to the MonitorLiveData instance has been set via setLiveListener()
+ *  @return A handle to the cancelled algorithm (usable if the method is called directly)
+ */
+IAlgorithm_const_sptr MWRunFiles::stopLiveAlgorithm()
+{
+  IAlgorithm_const_sptr theAlgorithmBeingCancelled = m_monitorLiveData;
+  if ( m_monitorLiveData && m_monitorLiveData->isRunning() )
+  {
+    m_monitorLiveData->cancel();
+    m_monitorLiveData.reset();
+  }
+  return theAlgorithmBeingCancelled;
 }
 
 /**

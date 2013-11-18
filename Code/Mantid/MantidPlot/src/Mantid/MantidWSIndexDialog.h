@@ -184,11 +184,28 @@ private:
   /// The IntervalList against which to validate.
   IntervalList m_intervalList;
 };
-
+ 
 class MantidWSIndexDialog : public QDialog
 {
   Q_OBJECT
-  
+/** Auxiliar class to wrap the QLine allowing to have a warn to the user for
+ *  invalid inputs. 
+*/
+class QLineEditWithErrorMark : public QWidget{
+public:
+  /// constructor that will join togheter the QLineEdit and an 'invisible' * label.
+  QLineEditWithErrorMark(QWidget * parent = 0); 
+  /// virtual destructor to allow Qt to deallocate all objects
+  virtual ~QLineEditWithErrorMark(){};
+  /// provide acess to the QLineEdit
+  QLineEdit * lineEdit(){return _lineEdit;}; 
+  /// if Error is not empty, it will make the * label visible and set the tooltip as the error.
+  void setError(QString error); 
+private: 
+  QLineEdit * _lineEdit; 
+  QLabel * m_validLbl;
+};
+
 public:
   /// Constructor - same parameters as one of the parent constructors, along with a 
   /// list of the names of workspaces to be plotted.
@@ -227,6 +244,9 @@ private:
   /// Generates an IntervalList which defines which spectra IDs the user can ask to plot.
   void generateSpectraIdIntervals();
 
+  /// Whether or not there are any common spectra IDs between workspaces.
+  bool usingSpectraIDs() const;
+
   /// A pointer to the parent MantidUI object
   MantidUI* m_mantidUI;
 
@@ -235,7 +255,7 @@ private:
 
   /// Pointers to the obligatory Qt objects:
   QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage;
-  QLineEdit *m_wsField, *m_spectraField;
+  QLineEditWithErrorMark *m_wsField, *m_spectraField;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox; 
   QHBoxLayout *m_buttonBox;
   QPushButton *m_okButton, *m_cancelButton, *m_plotAllButton;

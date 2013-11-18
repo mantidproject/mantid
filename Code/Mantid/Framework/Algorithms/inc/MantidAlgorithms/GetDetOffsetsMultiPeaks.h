@@ -55,7 +55,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  void fitSpectra(const int64_t s, API::MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions, const std::vector<double> &fitWindows, size_t &nparams,
+  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions, const std::vector<double> &fitWindows, size_t &nparams,
                   double &minD, double &maxD,
                   std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq);
 
@@ -68,9 +68,7 @@ private:
   std::string m_backType;
   std::string m_peakType;
   double m_maxChiSq;
-
-  DataObjects::TableWorkspace_sptr m_infoTableWS;
-  DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;
+  double m_minPeakHeight;
 };
 
 } // namespace Algorithm

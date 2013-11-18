@@ -246,10 +246,10 @@ namespace DataHandling
 
     size_t numErrors = 0;
 
-    detid2index_map * detID_to_wi = NULL;
+    detid2index_map detID_to_wi;
     if (doMask)
     {
-      detID_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap( false );
+      detID_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap();
     }
 
     // not all of these should be doubles, but to make reading work read as double then recast to int
@@ -305,8 +305,8 @@ namespace DataHandling
 
       if (doMask)
       {
-        detid2index_map::const_iterator it = detID_to_wi->find(udet);
-        if (it != detID_to_wi->end())
+        detid2index_map::const_iterator it = detID_to_wi.find(udet);
+        if (it != detID_to_wi.end())
         {
           size_t wi = it->second;
 
@@ -340,10 +340,6 @@ namespace DataHandling
       g_log.warning() << "'" << calFileName << "' has no spectra grouped\n";
     if (doMask && (!hasUnmasked))
       g_log.warning() << "'" << calFileName << "' masks all spectra\n";
-
-    if (doMask)
-      delete detID_to_wi;
-
   }
 
 

@@ -60,6 +60,12 @@ namespace DataHandling
   {
     return "SetSampleMaterial";
   }
+
+  int SetSampleMaterial::version() const
+  {
+    return (1);
+  }
+
   const std::string SetSampleMaterial::category() const
   {
     return "Sample;DataHandling";
@@ -229,10 +235,10 @@ namespace DataHandling
 
     // determine the sample number density
     double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+    double zParameter = getProperty("ZParameter"); // number of atoms
     if (isEmpty(rho))
     {
       double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
-      double zParameter = getProperty("ZParameter"); // number of atoms
 
       // get the unit cell volume from the workspace if it isn't set
       if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice())
@@ -257,30 +263,40 @@ namespace DataHandling
     const int z_number = getProperty("AtomicNumber");
     const int a_number = getProperty("MassNumber");
 
-    Material *mat = NULL;
+    boost::scoped_ptr<Material> mat;
     if (!chemicalSymbol.empty())
     {
       // Use chemical formula if given by user
       Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbol);
-      g_log.notice() << "Found " << CF.atoms.size() << " atoms in \"" << chemicalSymbol << "\"\n";
+      g_log.notice() << "Found " << CF.atoms.size() << " types of atoms in \""
+                     << chemicalSymbol << "\"\n";
 
       double numAtoms = 0.; // number of atoms in formula
       NeutronAtom neutron(0, 0., 0., 0., 0., 0., 0.); // starting thing for neutronic information
-      for (size_t i=0; i<CF.atoms.size(); i++)
+      if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho))
       {
-        Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
-        neutron = neutron + CF.numberAtoms[i] * myAtom.neutron;
 
-        g_log.information() << myAtom << ": " << myAtom.neutron << "\n";
-        numAtoms += static_cast<double>(CF.numberAtoms[i]);
+			Atom myAtom = getAtom(chemicalSymbol, CF.aNumbers[0]);
+			mat.reset(new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density));
       }
-      // normalize the accumulated number by the number of atoms
-      neutron = (1. / numAtoms) * neutron; // funny syntax b/c of operators in neutron atom
+      else
+      {
+			for (size_t i=0; i<CF.atoms.size(); i++)
+			{
+				Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
+				neutron = neutron + CF.numberAtoms[i] * myAtom.neutron;
 
-      fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
+				g_log.information() << myAtom << ": " << myAtom.neutron << "\n";
+				numAtoms += static_cast<double>(CF.numberAtoms[i]);
+			}
+			// normalize the accumulated number by the number of atoms
+			neutron = (1. / numAtoms) * neutron; // funny syntax b/c of operators in neutron atom
 
-      // create the material
-      mat = new Material(chemicalSymbol, neutron, rho);
+			fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
+
+			// create the material
+			mat.reset(new Material(chemicalSymbol, neutron, rho));
+      }
     }
     else
     {
@@ -290,38 +306,31 @@ namespace DataHandling
       fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
 
       // create the material
-      mat = new Material(chemicalSymbol, neutron, rho);
+      mat.reset(new Material(chemicalSymbol, neutron, rho));
     }
 
     // set the material on workspace
-    if (mat != NULL)
+    expInfo->mutableSample().setMaterial(*mat);
+    g_log.notice() << "Sample number density ";
+    if (isEmpty(mat->numberDensity()))
     {
-      expInfo->mutableSample().setMaterial(*mat);
-      g_log.notice() << "Sample number density ";
-      if (isEmpty(mat->numberDensity()))
-      {
-        g_log.notice() << "was not specified\n";
-      }
-      else
-      {
-        g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
-        setProperty("SampleNumberDensityResult", mat->numberDensity()); // in atoms/Angstrom^3
-      }
-      g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
-                     << "    Coherent "   << mat->cohScatterXSection() << " barns\n"
-                     << "    Incoherent " << mat->incohScatterXSection() << " barns\n"
-                     << "    Total "      << mat->totalScatterXSection() << " barns\n"
-                     << "    Absorption " << mat->absorbXSection() << " barns\n";
-      setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns
-      setProperty("IncoherentXSectionResult", mat->incohScatterXSection()); // in barns
-      setProperty("TotalXSectionResult",mat->totalScatterXSection()); // in barns
-      setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
-      setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
+      g_log.notice() << "was not specified\n";
     }
     else
     {
-      throw std::runtime_error("Failed to create a material");
+      g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
+      setProperty("SampleNumberDensityResult", mat->numberDensity()); // in atoms/Angstrom^3
     }
+    g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
+                   << "    Coherent "   << mat->cohScatterXSection() << " barns\n"
+                   << "    Incoherent " << mat->incohScatterXSection() << " barns\n"
+                   << "    Total "      << mat->totalScatterXSection() << " barns\n"
+                   << "    Absorption " << mat->absorbXSection() << " barns\n";
+    setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns
+    setProperty("IncoherentXSectionResult", mat->incohScatterXSection()); // in barns
+    setProperty("TotalXSectionResult",mat->totalScatterXSection()); // in barns
+    setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
+    setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
 
     // Done!
     progress(1);

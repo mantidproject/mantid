@@ -23,6 +23,7 @@ two pixels at the same vertical position in adjacent tubes.
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/Vertex2D.h"
@@ -41,6 +42,7 @@ namespace Algorithms
   DECLARE_ALGORITHM(SofQW3)
 
   using namespace Mantid::Kernel;
+  using namespace Mantid::Geometry;
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
   using Geometry::IDetector_const_sptr;
@@ -52,7 +54,7 @@ namespace Algorithms
 
   /// Default constructor
   SofQW3::SofQW3()
-    : Rebin2D(), m_emode(0), m_efixedGiven(false), m_efixed(0.0),
+    : Rebin2D(),
       m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1)
   {
   }
@@ -124,23 +126,24 @@ namespace Algorithms
                                                                     nreports));
 
     // Compute input caches
-    this->initCachedValues(inputWS);
+    m_EmodeProperties.initCachedValues(inputWS,this);
 
     std::vector<double> par = inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
     if (par.empty())
     {
       // Index theta cache
-      this->initThetaCache(inputWS);
+      this->initAngularCachesNonPSD(inputWS);
     }
     else
     {
       g_log.debug() << "Offset: " << par[0] << std::endl;
       this->m_detNeighbourOffset = static_cast<int>(par[0]);
-      this->getValuesAndWidths(inputWS);
+      this->initAngularCachesPSD(inputWS);
     }
 
     const MantidVec & X = inputWS->readX(0);
 
+    int emode = m_EmodeProperties.m_emode;
     PARALLEL_FOR2(inputWS, outputWS)
     for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) // signed for openmp
     {
@@ -153,22 +156,11 @@ namespace Algorithms
       }
 
       double theta = this->m_theta[i];
-      double phi = 0.0;
-      double thetaWidth = 0.0;
-      double phiWidth = 0.0;
-      // Non-PSD mode
-      if (par.empty())
-      {
-        thetaWidth = this->m_thetaWidth;
-      }
-      // PSD mode
-      else
-      {
-        phi = this->m_phi[i];
-        thetaWidth = this->m_thetaWidths[i];
-        phiWidth = this->m_phiWidths[i];
-      }
+      double phi = this->m_phi[i];
+      double thetaWidth = this->m_thetaWidths[i];
+      double phiWidth = this->m_phiWidths[i];
 
+      // Compute polygon points
       double thetaHalfWidth = 0.5 * thetaWidth;
       double phiHalfWidth = 0.5 * phiWidth;
 
@@ -178,8 +170,8 @@ namespace Algorithms
       const double phiLower = phi - phiHalfWidth;
       const double phiUpper = phi + phiHalfWidth;
 
-      const double efixed = this->getEFixed(detector);
-
+      const double efixed = m_EmodeProperties.getEFixed(detector);
+      const specid_t specNo = inputWS->getSpectrum(i)->getSpectrumNo();
       for(size_t j = 0; j < nEnergyBins; ++j)
       {
         m_progress->report("Computing polygon intersections");
@@ -188,10 +180,17 @@ namespace Algorithms
         const double dE_j = X[j];
         const double dE_jp1 = X[j+1];
 
-        const V2D ll(dE_j, this->calculateQ(efixed, dE_j, thetaLower, phiLower));
-        const V2D lr(dE_jp1, this->calculateQ(efixed, dE_jp1, thetaLower, phiLower));
-        const V2D ur(dE_jp1, this->calculateQ(efixed, dE_jp1, thetaUpper, phiUpper));
-        const V2D ul(dE_j, this->calculateQ(efixed, dE_j, thetaUpper, phiUpper));
+        const V2D ll(dE_j, this->calculateQ(efixed, emode,dE_j, thetaLower, phiLower));
+        const V2D lr(dE_jp1, this->calculateQ(efixed,emode, dE_jp1, thetaLower, phiLower));
+        const V2D ur(dE_jp1, this->calculateQ(efixed,emode, dE_jp1, thetaUpper, phiUpper));
+        const V2D ul(dE_j, this->calculateQ(efixed,emode, dE_j, thetaUpper, phiUpper));
+        if(g_log.is(Logger::Priority::PRIO_DEBUG))
+        {
+          g_log.debug() << "Spectrum=" << specNo << ", theta=" << theta << ",thetaWidth=" << thetaWidth
+                              << ", phi=" << phi << ", phiWidth=" << phiWidth
+                              << ". QE polygon: ll=" << ll << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
+        }
+
         Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
         this->rebinToFractionalOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
@@ -205,52 +204,28 @@ namespace Algorithms
     this->normaliseOutput(outputWS, inputWS);
   }
 
-  /**
-   * Return the efixed for this detector
-   * @param det :: A pointer to a detector object
-   * @return The value of efixed
-   */
-  double SofQW3::getEFixed(Geometry::IDetector_const_sptr det) const
-  {
-    double efixed(0.0);
-    if( m_emode == 1 ) //Direct
-    {
-      efixed = m_efixed;
-    }
-    else // Indirect
-    {
-      if( m_efixedGiven ) efixed = m_efixed; // user provided a value
-      else
-      {
-        std::vector<double> param = det->getNumberParameter("EFixed");
-        if( param.empty() ) throw std::runtime_error("Cannot find EFixed parameter for component \"" + det->getName()
-                                                     + "\". This is required in indirect mode. Please check the IDF contains these values.");
-        efixed = param[0];
-      }
-    }
-    return efixed;
-  }
 
   /**
    * Calculate the Q value for a given set of energy transfer, scattering
    * and azimuthal angle.
    * @param efixed :: An fixed energy value
+   * @param emode  :: the energy evaluation mode
    * @param deltaE :: The energy change
    * @param twoTheta :: The value of the scattering angle
    * @param azimuthal :: The value of the azimuthual angle
    * @return The value of Q
    */
-  double SofQW3::calculateQ(const double efixed, const double deltaE,
+  double SofQW3::calculateQ(const double efixed,int emode, const double deltaE,
                             const double twoTheta, const double azimuthal) const
   {
     double ki = 0.0;
     double kf = 0.0;
-    if (m_emode == 1)
+    if (emode == 1)
       {
         ki = std::sqrt(efixed * SofQW::energyToK());
         kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
       }
-    else if(m_emode == 2)
+    else if(emode == 2)
       {
         ki = std::sqrt((deltaE + efixed) * SofQW::energyToK());
         kf = std::sqrt(efixed * SofQW::energyToK());
@@ -260,62 +235,6 @@ namespace Algorithms
     const double Qz = -kf * std::sin(twoTheta) * std::sin(azimuthal);
     return std::sqrt(Qx * Qx + Qy * Qy + Qz * Qz);
   }
-
-  /**
-   * Init variables caches
-   * @param workspace :: Workspace pointer
-   */
-  void SofQW3::initCachedValues(API::MatrixWorkspace_const_sptr workspace)
-  {
-    // Retrieve the emode & efixed properties
-    const std::string emode = getProperty("EMode");
-    // Convert back to an integer representation
-    m_emode = 0;
-    if (emode == "Direct")
-    {
-      m_emode = 1;
-    }
-    else if (emode == "Indirect")
-    {
-      m_emode = 2;
-    }
-    m_efixed = getProperty("EFixed");
-
-    // Check whether they should have supplied an EFixed value
-    if( m_emode == 1 ) // Direct
-    {
-      // If GetEi was run then it will have been stored in the workspace, if not the user will need to enter one
-      if( m_efixed == 0.0 )
-      {
-        if ( workspace->run().hasProperty("Ei") )
-        {
-          Kernel::Property *p = workspace->run().getProperty("Ei");
-          Kernel::PropertyWithValue<double> *eiProp = dynamic_cast<Kernel::PropertyWithValue<double>*>(p);
-          if( !eiProp )
-          {
-            throw std::runtime_error("Input workspace contains Ei but its property type is not a double.");
-          }
-          m_efixed = (*eiProp)();
-        }
-        else
-        {
-          throw std::invalid_argument("Input workspace does not contain an EFixed value. Please provide one or run GetEi.");
-        }
-      }
-      else
-      {
-        m_efixedGiven = true;
-      }
-    }
-    else
-    {
-      if( m_efixed != 0.0 )
-      {
-        m_efixedGiven = true;
-      }
-    }
-  }
-
   /**
    * A map detector ID and Q ranges
    * This method looks unnecessary as it could be calculated on the fly but
@@ -324,16 +243,21 @@ namespace Algorithms
    * values are required very frequently so the total time is more than
    * offset by this precaching step
    */
-  void SofQW3::initThetaCache(API::MatrixWorkspace_const_sptr workspace)
+  void SofQW3::initAngularCachesNonPSD(const API::MatrixWorkspace_const_sptr & workspace)
   {
     const size_t nhist = workspace->getNumberHistograms();
     this->m_theta = std::vector<double>(nhist);
-    size_t ndets(0);
-    double minTheta(DBL_MAX), maxTheta(-DBL_MAX);
+    this->m_thetaWidths = std::vector<double>(nhist);
+    // Force phi widths to zero
+    this->m_phi = std::vector<double>(nhist, 0.0);
+    this->m_phiWidths = std::vector<double>(nhist, 0.0);
 
-    for(int64_t i = 0 ; i < (int64_t)nhist; ++i) //signed for OpenMP
+    auto inst = workspace->getInstrument();
+    const auto samplePos = inst->getSample()->getPos();
+    const PointingAlong upDir = inst->getReferenceFrame()->pointingUp();
+
+    for(size_t i = 0 ; i < nhist; ++i) //signed for OpenMP
     {
-
       m_progress->report("Calculating detector angles");
       IDetector_const_sptr det;
       try
@@ -342,7 +266,7 @@ namespace Algorithms
         // Check to see if there is an EFixed, if not skip it
         try
         {
-          getEFixed(det);
+            m_EmodeProperties.getEFixed(det);
         }
         catch(std::runtime_error&)
         {
@@ -359,25 +283,42 @@ namespace Algorithms
       if( !det || det->isMonitor() )
       {
         this->m_theta[i] = -1.0; // Indicates a detector to skip
+        this->m_thetaWidths[i] = -1.0;
+        continue;
       }
-      else
+      const double theta = workspace->detectorTwoTheta(det);
+      this->m_theta[i] = theta;
+
+      /**
+       * Determine width from shape geometry. A group is assumed to contain
+       * detectors with the same shape & r, theta value, i.e. a ring mapped-group
+       * The shape is retrieved and rotated to match the rotation of the detector.
+       * The angular width is computed using the l2 distance from the sample
+       */
+      if(auto group = boost::dynamic_pointer_cast<const DetectorGroup>(det))
       {
-        ++ndets;
-        const double theta = workspace->detectorTwoTheta(det);
-        this->m_theta[i] = theta;
-        if( theta < minTheta )
-        {
-          minTheta = theta;
-        }
-        else if( theta > maxTheta )
-        {
-          maxTheta = theta;
-        }
+        // assume they all have same shape and same r,theta
+        auto dets = group->getDetectors();
+        det = dets[0];
+      }
+      const auto pos = det->getPos();
+      double l2(0.0),t(0.0),p(0.0);
+      pos.getSpherical(l2,t,p);
+      // Get the shape
+      auto shape = det->shape(); // Defined in its own reference frame with centre at 0,0,0
+      auto rot = det->getRotation();
+      BoundingBox bbox = shape->getBoundingBox();
+      auto maxPoint(bbox.maxPoint());
+      rot.rotate(maxPoint);
+      double boxWidth = maxPoint[upDir];
+
+      m_thetaWidths[i] = std::fabs(2.0*std::atan(boxWidth/l2));
+      if(g_log.is(Logger::Priority::PRIO_DEBUG))
+      {
+        g_log.debug() << "Detector at spectrum =" << workspace->getSpectrum(i)->getSpectrumNo() << ", width=" << m_thetaWidths[i]*180.0/M_PI << " degrees\n";
       }
     }
 
-    this->m_thetaWidth = (maxTheta - minTheta)/static_cast<double>(ndets);
-    g_log.information() << "Calculated detector width in theta=" << (m_thetaWidth*180.0/M_PI) << " degrees.\n";
   }
 
   /**
@@ -386,7 +327,7 @@ namespace Algorithms
    * it calculates the two-theta and azimuthal angle widths.
    * @param workspace : the workspace containing the needed detector information
    */
-  void SofQW3::getValuesAndWidths(API::MatrixWorkspace_const_sptr workspace)
+  void SofQW3::initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace)
   {
     // Trigger a build of the nearst neighbors outside the OpenMP loop
     const int numNeighbours = 4;
@@ -431,7 +372,7 @@ namespace Algorithms
             spec == deltaPlusT || spec == deltaMinusT)
         {
           DetConstPtr detector_n = workspace->getDetector(spec - 1);
-          double theta_n = workspace->detectorTwoTheta(detector_n);
+          double theta_n = workspace->detectorTwoTheta(detector_n)/2.0;
           double phi_n = detector_n->getPhi();
 
           double dTheta = std::fabs(theta - theta_n);
@@ -439,12 +380,12 @@ namespace Algorithms
           if (dTheta > thetaWidth)
           {
             thetaWidth = dTheta;
-            //g_log.debug() << "Current ThetaWidth: " << thetaWidth << std::endl;
+            g_log.information() << "Current ThetaWidth: " << thetaWidth*180/M_PI << std::endl;
           }
           if (dPhi > phiWidth)
           {
             phiWidth = dPhi;
-            //g_log.debug() << "Current PhiWidth: " << phiWidth << std::endl;
+            g_log.information() << "Current PhiWidth: " << phiWidth*180/M_PI << std::endl;
           }
         }
       }

@@ -19,7 +19,9 @@ namespace Mantid
 namespace MDEvents
 {
 
+#ifndef __INTEL_COMPILER // As of July 13, the packing has no effect for the Intel compiler and produces a warning
 #pragma pack(push, 4) //Ensure the structure is no larger than it needs to
+#endif
    
   //===============================================================================================
   /** Templated class for a multi-dimensional event "box".
@@ -140,6 +142,7 @@ namespace MDEvents
     void calculateDimensionStats(MDDimensionStats * stats) const;
     void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
     void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;
+    void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const;
  
   //------------------------------------------------------------------------------------------------------------------------------------
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
@@ -182,7 +185,9 @@ namespace MDEvents
 
   };
 
+#ifndef __INTEL_COMPILER
 #pragma pack(pop) //Return to default packing size
+#endif
 
   //------------------------------------------------------------------------------------------------------------------------------------------------------------
   /* Internal TMP class to simplify adding events to the box for events and lean events using single interface*/

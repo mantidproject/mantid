@@ -55,6 +55,9 @@ public:
   /// Destructor
   ~PythonScript();
 
+  /// Set the identifier of the script. If empty, set a default so that the code object behaves correctly
+  void setIdentifier(const QString & name);
+
   /// Create a PyObject that wraps this C++ instance
   PyObject * createSipInstanceFromMe();
 

@@ -181,30 +181,31 @@ public:
   // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
   MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true, bool distr = false);
 
-  /// This method executes loadraw algorithm from  ICatInterface
-  void loadrawfromICatInterface(const QString& fileName,const QString& wsName);
-  
-  /// This method executes loadnexus algorithm from ICatInterface
-  void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
-
-  /// This method executes load algorithm from ICatInterface
-  void loadfromICatInterface(const QString& fileName,const QString& wsName);
-  
-  /// This method is to execute download data files algorithm from ICat
-  void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds);
-
   AlgorithmMonitor* getAlgMonitor(){return m_algMonitor;}
   /// updates the algorithms tree
   void updateAlgorithms();
   /// Show the algorithm dock widget
   void showAlgWidget(bool on = true);
 
+  /// Plot a 1D graph for an integrated mdworkspace
+  MultiLayer*  plotMDList(const QStringList& wsNames, const int plotAxis, 
+    const Mantid::API::MDNormalization normalization, const bool showError, MultiLayer* plotWindow = NULL,
+    bool clearWindow = false);
+
 public slots:
   // Create a 1d graph form specified spectra in a MatrixWorkspace
-  MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, bool distr=false);
-  MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs=false, bool distr=false);
+  MultiLayer* plotSpectraList(const QStringList& wsnames, const QList<int>& spec_list, bool errs=true,
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, 
+    bool distr=false, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false, 
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
+  MultiLayer* plotSpectraList(const QMultiMap<QString,std::set<int> >& toPlot, bool errs=false, bool distr=false,
+    MultiLayer* plotWindow = NULL, bool clearWindow = false);
+
   /// Draw a color fill plot for each of the listed workspaces
   void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
   /// Draw a color fill plot for the named workspace
@@ -232,9 +233,6 @@ public slots:
   // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
   Table* createTableDetectors(MantidMatrix *m);
 
-  //
-  bool executeICatLogout(int version);
-
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
   /// Create the instrument detector table from a MatrixWorkspace
@@ -244,8 +242,19 @@ public slots:
   Table* createDetectorTable(const QString & wsName, const Mantid::API::IPeaksWorkspace_sptr & ws);
 
 
+  // Determine whether the workspace has a UB matrix
+  bool hasUB(const QString& wsName);
+  // Clear the UB via the ClearUB algorithm
+  void clearUB(const QStringList& workspaces);
   //  *****                            *****  //
-  void renameWorkspace(QStringList);
+  void renameWorkspace(QStringList = QStringList());
+
+  /**
+   * Set the currently used fit property browser. Is needed because e.g. Muon Analysis is using its 
+   * own fit browser.
+   * @param newBrowser The browser to be used. If is null, is set to default one.
+   */
+  void setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser);
 
 public:
 
@@ -256,7 +265,8 @@ public:
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
 
-  MultiLayer* plotBin(const QString& wsName, const QList<int> & bins, bool errors = false, Graph::CurveType style = Graph::Line);
+  MultiLayer* plotBin(const QString& wsName, const QList<int> & bins, bool errors = false, 
+    Graph::CurveType style = Graph::Line, MultiLayer* plotWindow = NULL, bool clearWindow = false);
   void setIsRunning(bool running);
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
 				 const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled);
@@ -280,16 +290,11 @@ public:
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
 
-  //This is anoverloaded method toexecute load raw/nexus and  called from Icat interface
-  void executeloadAlgorithm(const QString&, const QString&, const QString&);
-
 signals:
   //A signal to indicate that we want a script to produce a dialog
   void showPropertyInputDialog(const QString & algName);
   // Broadcast that an algorithm is about to be created
   void algorithmAboutToBeCreated();
-  // a signal for getting the file locations from ICat downloaddatafiles algorithm
-  void fileLocations(const std::vector<std::string>&);
 
 public:
 
@@ -298,15 +303,9 @@ signals:
   // These signals are to be fired from methods run in threads other than the main one
   // (e.g. handlers of algorithm notifications)
 
-  // Signals that the UI needs to be updated.
-  void workspace_added(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_removed(const QString &);
   void workspaces_cleared();
-  void workspace_renamed(const QString &, const QString &);
-  void workspaces_grouped(const QStringList&);
-  void workspace_ungrouped(const QString&, Mantid::API::Workspace_sptr);
-  void workspace_group_updated(const QString&);
+  void ADS_updated();
+  void workspace_renamed(QString,QString);
 
   void needToCreateLoadDAEMantidMatrix(const QString&);
 
@@ -338,8 +337,8 @@ public slots:
   // Invoke a grid showing a table of MD summary list data.
   void showListData();
 
-  // ImageViewer
-  void showImageViewer();
+  // SpectrumViewer
+  void showSpectrumViewer();
 
   // SliceViewer
   void showSliceViewer();
@@ -503,7 +502,10 @@ private:
   MantidDockWidget *m_exploreMantid;          // Dock window for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms;   // Dock window for using algorithms
   RemoteClusterDockWidget *m_exploreRemoteTasks;   // Dock window for using remote tasks
-  MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;        // Dock window to set fit function properties
+  /// Current fit property browser being used
+  MantidQt::MantidWidgets::FitPropertyBrowser* m_fitFunction; 
+  /// Default fit property browser (the one docked on the left)
+  MantidQt::MantidWidgets::FitPropertyBrowser* m_defaultFitFunction;
 
   QAction *actionCopyRowToTable;
   QAction *actionCopyRowToGraph;

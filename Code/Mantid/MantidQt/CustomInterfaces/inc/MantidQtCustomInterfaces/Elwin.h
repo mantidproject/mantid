@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/IDATab.h"
 
 namespace MantidQt
@@ -22,6 +23,8 @@ namespace IDA
     virtual QString validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "Elwin";}
+    void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
+    void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
 
   private slots:
     void plotInput();

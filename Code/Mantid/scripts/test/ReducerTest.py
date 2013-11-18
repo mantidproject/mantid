@@ -1,11 +1,16 @@
 import unittest
-from MantidFramework import mtd
-mtd.initialise()
-from mantidsimple import LoadAscii, ConvertToHistogram
+import mantid
+from mantid.simpleapi import LoadAscii, ConvertToHistogram, DeleteWorkspace, mtd
 from reduction import Reducer, ReductionStep, validate_step
 
-# Make sure we can import the UI
-from reduction_application import ReductionGUI
+# ReductionGUI relies on sqlite3, which in Windows Debug mode we cannot easily
+# support.  Here we test if we can import it, and if not then we will skip the
+# "test_imports" test later.
+try:
+    import sqlite3
+    skip_import_test = False
+except ImportError:
+    skip_import_test = True
 
 class TestReductionStep(ReductionStep):
     def __init__(self):
@@ -28,8 +33,8 @@ class ReducerTest(unittest.TestCase):
             result = item.execute(r, "test2")
             
         # Check that the workspace was created
-        self.assertNotEqual(mtd["test2"], None)
-        mtd.deleteWorkspace("test2")
+        self.assertTrue("test2" in mtd)
+        DeleteWorkspace("test2")
 
     def test_pars_variation(self):
         """
@@ -44,8 +49,8 @@ class ReducerTest(unittest.TestCase):
             result = item.execute(r, "test2")
             
         # Check that the workspace was created
-        self.assertNotEqual(mtd["test2"], None)
-        mtd.deleteWorkspace("test2")
+        self.assertTrue("test2" in mtd)
+        DeleteWorkspace("test2")
                 
     def test_output_wksp(self):
         """
@@ -62,10 +67,10 @@ class ReducerTest(unittest.TestCase):
         r._reduction_steps[1].execute(r, "test2", "test3")
             
         # Check that the workspace was created
-        self.assertNotEqual(mtd["test2"], None)
-        self.assertNotEqual(mtd["test3"], None)
-        mtd.deleteWorkspace("test2")
-        mtd.deleteWorkspace("test3")
+        self.assertTrue("test2" in mtd)
+        self.assertTrue("test3" in mtd)
+        DeleteWorkspace("test2")
+        DeleteWorkspace("test3")
         
     def test_parameter_variation(self):
         """
@@ -77,8 +82,8 @@ class ReducerTest(unittest.TestCase):
             result = item.execute(r, "test2")
             
         # Check that the workspace was created
-        self.assertNotEqual(mtd["test2"], None)
-        mtd.deleteWorkspace("test2")
+        self.assertTrue("test2" in mtd)
+        DeleteWorkspace("test2")
             
     def test_reduction_step(self):
         """
@@ -116,8 +121,9 @@ class ReducerTest(unittest.TestCase):
         self.assertEqual(len(r._data_files), 0)
 
     def test_imports(self):
-        import reduction_gui
-        import reduction_application
+        if not skip_import_test:
+            import reduction_gui
+            import reduction_application
         
 
 if __name__ == '__main__':

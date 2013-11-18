@@ -109,5 +109,31 @@ void TextAxis::setLabel(const std::size_t& index, const std::string& lbl)
   m_values[index] = lbl;
 }
 
+ /// returns min value defined on axis
+ double TextAxis::getMin() const
+ {
+   try
+   {
+     return boost::lexical_cast<double>(m_values.front()) ;
+   }
+   catch(boost::bad_lexical_cast&)
+   {
+     return 0; // Default min
+   }
+ }
+
+ /// returns max value defined on axis
+ double TextAxis::getMax() const
+ {
+   try
+   {
+     return boost::lexical_cast<double>(m_values.back());
+   }
+   catch(boost::bad_lexical_cast&)
+   {
+     return getMin() + 1; // Default max
+   }
+ }
+
 } // namespace API
 } // namespace Mantid

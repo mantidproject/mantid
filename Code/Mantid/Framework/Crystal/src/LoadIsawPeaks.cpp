@@ -9,6 +9,7 @@ NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:'
 
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -29,7 +30,7 @@ NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:'
 #include <stdlib.h>
 #include <string>
 #include "MantidKernel/Unit.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
@@ -40,9 +41,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadIsawPeaks)
-  DECLARE_LOADALGORITHM(LoadIsawPeaks)
+  DECLARE_FILELOADER_ALGORITHM(LoadIsawPeaks);
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -64,6 +63,65 @@ namespace Crystal
   }
   
 
+  /**
+   * Return the confidence with with this algorithm can load the file
+   * @param descriptor A descriptor for the file
+   * @returns An integer specifying the confidence level. 0 indicates it will not be used
+   */
+  int LoadIsawPeaks::confidence(Kernel::FileDescriptor & descriptor) const
+  {
+    const std::string & extn = descriptor.extension();
+    // If the extension is peaks or integrate then give it a go
+    if(extn.compare(".peaks") != 0 && extn.compare(".integrate") != 0 ) return 0;
+
+    int confidence(0);
+    try
+    {
+      auto &in = descriptor.data();
+      // Read the header, load the instrument
+      std::string tag;
+      std::string r = getWord(in, false);
+
+      if(r.length() < 1)
+        throw std::logic_error( std::string( "No first line of Peaks file" ) );
+
+      if(r.compare("Version:") != 0)
+        throw std::logic_error(
+            std::string( "No Version: on first line of Peaks file" ) );
+
+      std::string C_version = getWord( in ,  false );
+      if( C_version.length() < 1 )
+        throw  std::logic_error( std::string( "No Version for Peaks file" ) );
+
+      getWord(in , false); //tag
+      // cppcheck-suppress unreadVariable
+      std::string C_Facility = getWord(in, false );
+
+      getWord(in , false ); //tag
+      std::string C_Instrument = getWord(in , false);
+
+      if( C_Instrument.length() < 1 )
+        throw std::logic_error(
+            std::string( "No Instrument for Peaks file" ) );
+
+      // Date: use the current date/time if not found
+      Kernel::DateAndTime C_experimentDate;
+      std::string date;
+      tag = getWord(in, false );
+      if(tag.empty())
+        date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+      else if(tag == "Date:")
+        date = getWord(in, false );
+      readToEndOfLine( in, true );
+      confidence = 95;
+    }
+    catch (std::exception & )
+    {
+    }
+    return confidence;
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void LoadIsawPeaks::initDocs()
@@ -73,69 +131,6 @@ namespace Crystal
    }
   //----------------------------------------------------------------------------------------------
 
- /// @copydoc Mantid::API::IDataFileChecker::quickFileCheck
-  bool LoadIsawPeaks::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-  {
-    UNUSED_ARG(nread);
-    UNUSED_ARG(header);
-
-    std::string ext = this->extension(filePath);
-    // If the extension is peaks or integrate then give it a go
-    if( ext.compare("peaks") == 0 ) return true;
-    else if( ext.compare("integrate") == 0 ) return true;
-    else return false;
-  }
-
-  /// @copydoc Mantid::API::IDataFileChecker::fileCheck
-  int LoadIsawPeaks::fileCheck(const std::string& filePath)
-  {
-      int confidence(0);
-      try
-      {
-	    // Open the file
-	    std::ifstream in( filePath.c_str() );
-	    // Read the header, load the instrument
-	    std::string tag;
-	    std::string r = getWord( in ,  false );
-
-	    if( r.length() < 1 )
-	      throw std::logic_error( std::string( "No first line of Peaks file" ) );
-
-	    if( r.compare( std::string( "Version:" ) ) != 0 )
-	      throw std::logic_error(
-	          std::string( "No Version: on first line of Peaks file" ) );
-
-	    std::string C_version = getWord( in ,  false );
-	    if( C_version.length() < 1 )
-	      throw  std::logic_error( std::string( "No Version for Peaks file" ) );
-
-	    getWord( in ,  false ); //tag
-	    // cppcheck-suppress unreadVariable
-	    std::string C_Facility = getWord( in ,  false );
-
-	    getWord( in ,  false ); //tag
-	    std::string C_Instrument = getWord( in ,  false );
-
-	    if( C_Instrument.length() < 1 )
-	      throw std::logic_error(
-	          std::string( "No Instrument for Peaks file" ) );
-
-	    // Date: use the current date/time if not found
-	    Kernel::DateAndTime C_experimentDate;
-	    std::string date;
-	    tag = getWord( in ,  false );
-	    if(tag.empty())
-	      date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
-	    else if(tag == "Date:")
-	      date = getWord( in ,  false );
-	    readToEndOfLine( in ,  true );
-	    confidence = 95;
-      }
-      catch (std::exception & )
-      {
-      }
-      return confidence;
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -177,10 +172,11 @@ namespace Crystal
        g_log.error()<<"Missing L1 or Time offset"<<std::endl;
        throw std::invalid_argument("Missing L1 or Time offset");
      }
-     double L1;
+
      try
      {
        std::istringstream iss( L1s+" "+T0s, std::istringstream::in);
+       double L1;
        iss>>L1;
        iss>>T0;
        V3D sampPos=instr->getSample()->getPos();
@@ -227,11 +223,13 @@ namespace Crystal
       startChar = getWord( in, false);// blank lines ?? and # lines ignore
 
       std::istringstream iss( line, std::istringstream::in);
-      int  bankNum,nrows,ncols;
-      double width,height,depth,detD,Centx,Centy,Centz,Basex,Basey,Basez,
+      int  bankNum;
+      double width,height,Centx,Centy,Centz,Basex,Basey,Basez,
              Upx,Upy,Upz;
       try
       {
+         int  nrows,ncols;
+         double depth,detD;
          iss>>bankNum>>nrows>>ncols>>width>>height>>depth>>detD
             >>Centx>>Centy>>Centz>>Basex>>Basey>>Basez
             >>Upx>>Upy>>Upz;
@@ -599,7 +597,6 @@ namespace Crystal
   {
     // Create the workspace
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
-    ws->setName(getPropertyValue("OutputWorkspace"));
 
     // This loads (appends) the peaks
     this->appendFile( ws, getPropertyValue("Filename") );

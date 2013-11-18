@@ -72,8 +72,6 @@ namespace Mantid
       std::string testDownload(const std::string& URL,const std::string& fileName);
 
     private:
-      /// Throw a catalog error.
-      void throwCatalogError() const;
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// Overwrites Algorithm method.
@@ -82,27 +80,17 @@ namespace Mantid
       void exec();
       /// get location of data file  or download method
       int doDownload( ICATPortBindingProxy & icat);
-
-      /// If the extn of the file .raw it returns true
+      /// True if the extension of the file is a datafile.
       bool isDataFile(const std::string& fileName);
-
-      /// This method saves the downloaded file to disc
+      /// Saves the downloaded file to disc
       std::string saveFiletoDisk(std::istream& rs,const std::string &fileName);
-
-      /// This method saves downloaded file to local disk
+      /// Saves downloaded file to local disk
       std::string doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
-
-      /// This method replaces backwardslash with forward slashes - for linux
-      void replaceBackwardSlash(std::string& inputString);
 
     private:
       /// progress indicator
       double m_prog;
-
-
-
     };
-
   }
 }
 #endif

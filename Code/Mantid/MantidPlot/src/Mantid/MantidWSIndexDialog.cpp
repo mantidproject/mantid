@@ -11,6 +11,7 @@
 #include <QtAlgorithms> 
 #include <boost/lexical_cast.hpp>
 #include <exception>
+#include <QPalette>
 
 //----------------------------------
 // MantidWSIndexDialog public methods
@@ -67,7 +68,7 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
       Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_wsNames[i].toStdString()));
       if ( NULL == ws ) continue;
 
-      Mantid::spec2index_map *spec2index = ws->getSpectrumToWorkspaceIndexMap();
+      const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
 
       std::set<int> origSet = m_spectraIdChoice.getIntSet();
       std::set<int>::iterator it = origSet.begin();
@@ -76,7 +77,7 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
       for( ; it != origSet.end(); ++it)
       {
         int origInt = (*it);
-        int convertedInt = static_cast<int>(spec2index->find(origInt)->second);
+        int convertedInt = static_cast<int>(spec2index.find(origInt)->second);
         convertedSet.insert(convertedInt);
       }
 
@@ -91,38 +92,31 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
 // MantidWSIndexDialog private slots
 //----------------------------------
 void MantidWSIndexDialog::plot()
-{
-  try
+{    
+  int npos = 0;
+  QString wsText = m_wsField->lineEdit()->text();
+  QString spectraTest = m_spectraField->lineEdit()->text();
+  QValidator::State wsState = m_wsField->lineEdit()->validator()->validate(wsText, npos);
+  QValidator::State spectraState = m_spectraField->lineEdit()->validator()->validate(spectraTest, npos);
+  
+  // If the user typed in the wsField ...
+  if(wsState == QValidator::Acceptable)
   {
-    int npos = 0;
-    QString wsText = m_wsField->text();
-    QString spectraTest = m_spectraField->text();
-    QValidator::State wsState = m_wsField->validator()->validate(wsText, npos);
-    QValidator::State spectraState = m_spectraField->validator()->validate(spectraTest, npos);
-
-    // If the user typed in the wsField ...
-    if(wsState == QValidator::Acceptable)
-    {
-      m_wsIndexChoice.addIntervals(m_wsField->text());
-      accept();
-    }
-    // Else if the user typed in the spectraField ...
-    else if(spectraState == QValidator::Acceptable)
-    {
-      m_spectraIdChoice.addIntervals(m_spectraField->text());
-      accept();
-    }
+    m_wsIndexChoice.addIntervals(m_wsField->lineEdit()->text());
+    accept();
   }
-  catch (std::exception &)
+  // Else if the user typed in the spectraField ...
+  else if(spectraState == QValidator::Acceptable)
   {
-    // Text could not be parsed.  Probably dont need this as we only
-    // parse "QValidator::Acceptable" fields anyway ...
+    m_spectraIdChoice.addIntervals(m_spectraField->lineEdit()->text());
+    accept();
+  }else{
+    QString error_message("Invalid input. It is not in the range available"); 
+    if (!wsText.isEmpty())
+      m_wsField->setError(error_message); 
+    if (!spectraTest.isEmpty())
+      m_spectraField->setError(error_message); 
   }
-
-  // We reach here if the user has typed nothing, or alternatively
-  // has failed to type in anything we can parse.
-
-  // TODO - Add functionality to warn the user?
 }
 
 void MantidWSIndexDialog::plotAll()
@@ -133,12 +127,16 @@ void MantidWSIndexDialog::plotAll()
 
 void MantidWSIndexDialog::editedWsField()
 {
-  if(m_spectra) m_spectraField->clear();
+  if(usingSpectraIDs()) {
+    m_spectraField->lineEdit()->clear();
+    m_spectraField->setError(""); 
+  }
 }
 
 void MantidWSIndexDialog::editedSpectraField()
 {
-  m_wsField->clear();
+  m_wsField->lineEdit()->clear();
+  m_wsField->setError(""); 
 }
 
 //----------------------------------
@@ -159,37 +157,39 @@ void MantidWSIndexDialog::initWorkspaceBox()
 {
   m_wsBox = new QVBoxLayout;
   m_wsMessage = new QLabel(tr("Enter Workspace Indices: " + m_wsIndexIntervals.toQString()));
-  m_wsField = new QLineEdit();
+  m_wsField = new QLineEditWithErrorMark();
 
-  m_wsField->setValidator(new IntervalListValidator(this, m_wsIndexIntervals));
+  m_wsField->lineEdit()->setValidator(new IntervalListValidator(this, m_wsIndexIntervals));
   m_wsBox->add(m_wsMessage);
   m_wsBox->add(m_wsField);
   m_outer->addItem(m_wsBox);
 
-  connect(m_wsField, SIGNAL(textEdited(const QString &)), this, SLOT(editedWsField()));
+  connect(m_wsField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedWsField()));
 }
 
 void MantidWSIndexDialog::initSpectraBox()
 {
   m_spectraBox = new QVBoxLayout;
   m_spectraMessage = new QLabel(tr("Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
-  m_spectraField = new QLineEdit();
+  m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
-  m_spectraField->setValidator(new IntervalListValidator(this, m_spectraIdIntervals));
+  m_spectraField->lineEdit()->setValidator(new IntervalListValidator(this, m_spectraIdIntervals));
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
   m_spectraBox->add(m_orMessage);
-  if(m_spectra) m_outer->addItem(m_spectraBox);
+  
+  if( usingSpectraIDs() )
+    m_outer->addItem(m_spectraBox);
 
-  connect(m_spectraField, SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
+  connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
 }
 
 void MantidWSIndexDialog::initButtons()
 {
   m_buttonBox = new QHBoxLayout;
   
-  m_okButton = new QPushButton("Ok");
+  m_okButton = new QPushButton("OK");
   m_cancelButton = new QPushButton("Cancel");
   m_plotAllButton = new QPushButton("Plot All");
 
@@ -258,53 +258,35 @@ void MantidWSIndexDialog::generateWsIndexIntervals()
 
 void MantidWSIndexDialog::generateSpectraIdIntervals()
 {
-  // Get the list of available intervals for each of the workspaces, and then
-  // present the user with intervals which are the INTERSECTION of each of
-  // those lists of intervals.
-  QList<QString>::const_iterator it = m_wsNames.constBegin();
-  
-  // Cycle through the workspaces ...
-  for ( ; it != m_wsNames.constEnd(); ++it )
+  bool firstWs = true;
+  foreach( const QString wsName, m_wsNames )
   {
-    Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve((*it).toStdString()));
-    if ( NULL == ws ) continue;
-    Mantid::spec2index_map * spec2index = ws->getSpectrumToWorkspaceIndexMap();
-    
-    Mantid::spec2index_map::const_iterator last = spec2index->end();
-    --last;
-    Mantid::spec2index_map::const_iterator first = spec2index->begin();
-    
-    const int startSpectrum = static_cast<int> (first->first);
-    const int endSpectrum = static_cast<int> (last->first);
-    const int size = static_cast<int> (spec2index->size());
-    if(size == (1 + endSpectrum - startSpectrum))
+    Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    if( !ws ) continue; // Belt and braces.
+
+    const Mantid::spec2index_map spec2index = ws->getSpectrumToWorkspaceIndexMap();
+
+    IntervalList spectraIntervalList;
+    for( auto pair = spec2index.begin(); pair != spec2index.end(); ++pair )
     {
-      // Here we make the assumption (?) that the spectra IDs are sorted, and so
-      // are a list of ints from startSpectrum to endSpectrum without any gaps.
-      Interval interval(startSpectrum, endSpectrum);
-      if(it == m_wsNames.constBegin())
-        m_spectraIdIntervals.addInterval(interval);
-      else
-        m_spectraIdIntervals.setIntervalList(IntervalList::intersect(m_spectraIdIntervals,interval));
+      spectraIntervalList.addInterval(static_cast<int>(pair->first));
+    }
+
+    if( firstWs )
+    {
+      m_spectraIdIntervals = spectraIntervalList;
+      firstWs = false;
     }
     else
     {
-      // The spectra IDs do not appear to be an uninterrupted list of numbers,
-      // and so we must go through each one and construct the intervals that way.
-      // TODO - is this at all feasible for large workspaces, and/or many workspaces?
-      ++last;
-      for ( ; first != last; ++first) 
-      {
-        const int spectraId = static_cast<int> (first->first);
-        
-        Interval interval(spectraId);
-        if(it == m_wsNames.constBegin())
-          m_spectraIdIntervals.addInterval(interval);
-        else
-          m_spectraIdIntervals.setIntervalList(IntervalList::intersect(m_spectraIdIntervals,interval));
-      }
+      m_spectraIdIntervals.setIntervalList(IntervalList::intersect(m_spectraIdIntervals, spectraIntervalList));
     }
   }
+}
+
+bool MantidWSIndexDialog::usingSpectraIDs() const
+{
+  return m_spectra && m_spectraIdIntervals.getList().size() > 0;
 }
 
 //----------------------------------
@@ -473,7 +455,7 @@ void Interval::init(int start, int end)
 //----------------------------------
 IntervalList::IntervalList(void)
 {
-  
+
 }
 
 IntervalList::IntervalList(QString intervals)
@@ -714,7 +696,7 @@ bool IntervalList::isParsable(const QString &input)
 {
   try
   {
-    new IntervalList(input);
+    IntervalList interval(input);
     return true;
   } 
   catch (std::exception&)
@@ -734,122 +716,14 @@ IntervalList IntervalList::intersect(const IntervalList& a, const IntervalList& 
 {
   IntervalList output;
 
-  const QList<Interval> aList = a.getList();
-  const QList<Interval> bList = b.getList();
+  const std::set<int> aInts = a.getIntSet();
+  const std::set<int> bInts = b.getIntSet();
 
-  QList<Interval>::const_iterator aIt = aList.constBegin();
-  QList<Interval>::const_iterator bIt = bList.constBegin();
-
-  QList<Interval>::const_iterator aItEnd = aList.constEnd();
-  QList<Interval>::const_iterator bItEnd = bList.constEnd();
-
-  bool a_open = false;
-  bool b_open = false;
-
-  int start = 0;
-  int end = 0;
-
-  // This looks atrocious, but is probably one of the quickest available methods
-  // to find the intersections of two lists of Intervals.  An easier (but much 
-  // less effecient way) would be to define Interval::intersect(Interval a, Interval b)
-  // for the Interval class, and then use that method to intersect two lists.  
-
-  // Plus, this is probably overkill anyway: who is going to spend time typing 
-  // in an interval list big enough to slow a computer down?
-  while(aIt != aItEnd && bIt != bItEnd)
+  for( auto aInt = aInts.begin(); aInt != aInts.end(); ++aInt )
   {
-    if(!a_open && !b_open)
-    {
-      if((*aIt).start() < (*bIt).start())
-      {
-        a_open = true;
-      } 
-      else if((*aIt).start() > (*bIt).start())
-      {
-        b_open = true;
-      }
-      else
-      {
-        a_open = true;
-        b_open = true;
-        start = (*aIt).start();
-      }
-    }
-    else if(a_open && !b_open)
-    {
-      if((*aIt).end() < (*bIt).start())
-      {
-        a_open = false;
-        ++aIt;
-      } 
-      else if((*aIt).end() > (*bIt).start())
-      {
-        b_open = true;
-        start = (*bIt).start();
-      }
-      else
-      {
-        a_open = false;
-        b_open = true;
-        start = (*aIt).end();
-        end = (*bIt).start();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++aIt;
-      }
-    }
-    else if(!a_open && b_open)
-    {
-      if((*bIt).end() < (*aIt).start())
-      {
-        b_open = false;
-        ++bIt;
-      } 
-      else if((*aIt).end() > (*bIt).start())
-      {
-        a_open = true;
-        start = (*aIt).start();
-      }
-      else
-      {
-        b_open = false;
-        a_open = true;
-        start = (*bIt).end();
-        end = (*aIt).start();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++bIt;
-      }
-    }
-    else
-    {
-      if((*aIt).end() < (*bIt).end())
-      {
-        a_open = false;
-        end = (*aIt).end();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++aIt;
-      } 
-      else if((*aIt).end() > (*bIt).end())
-      {
-        b_open = false;
-        end = (*bIt).end();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++bIt;
-      }
-      else
-      {
-        a_open = false;
-        b_open = false;
-        end = (*aIt).end();
-        Interval interval(start, end);
-        output.addInterval(interval);
-        ++aIt;
-        ++bIt;
-      }
-    }
+    const bool inIntervalListB = bInts.find(*aInt) != bInts.end();
+    if( inIntervalListB )
+      output.addInterval(*aInt);
   }
 
   return output;
@@ -875,4 +749,31 @@ QValidator::State IntervalListValidator::validate(QString &input, int &pos) cons
     return QValidator::Intermediate;
   
   return QValidator::Invalid;
+}
+
+
+
+//////////////////////////////////////
+// QLineEditWithErrorMark
+//////////////////////////////////////
+MantidWSIndexDialog::QLineEditWithErrorMark::QLineEditWithErrorMark(QWidget * parent): QWidget(parent){
+  QGridLayout * layout = new QGridLayout(); 
+  _lineEdit = new QLineEdit(); 
+  m_validLbl = new QLabel("*"); // make it red
+  QPalette pal = m_validLbl->palette(); 
+  pal.setColor(QPalette::WindowText, Qt::darkRed); 
+  m_validLbl->setPalette(pal); 
+  layout->addWidget(_lineEdit,0,0); 
+  layout->addWidget(m_validLbl,0,1);
+  m_validLbl->setVisible(false);
+  setLayout(layout);
+}
+
+void MantidWSIndexDialog::QLineEditWithErrorMark::setError(QString error){
+  if(error.isEmpty()){
+    m_validLbl->setVisible(false); 
+  }else{
+    m_validLbl->setVisible(true); 
+    m_validLbl->setToolTip(error.trimmed()); 
+  }
 }

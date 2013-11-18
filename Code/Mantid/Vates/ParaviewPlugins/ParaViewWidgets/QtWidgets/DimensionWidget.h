@@ -37,6 +37,7 @@ Displays dimension information as commanded by a DimensionPresenter.
 - Has public methods to allow the DimensionPresenter to command changes
 
 */
+// cppcheck-suppress class_X_Y
 class EXPORT_OPT_MANTIDPARVIEW DimensionWidget: public QWidget, public Mantid::VATES::DimensionView
 {
 Q_OBJECT

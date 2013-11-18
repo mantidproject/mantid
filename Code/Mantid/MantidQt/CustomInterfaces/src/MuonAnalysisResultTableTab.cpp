@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/TableRow.h"
 
 #include "MantidQtAPI/UserSubWindow.h"
 
@@ -30,11 +31,13 @@ namespace Muon
   using namespace Mantid::Kernel;
   using namespace MantidQt::MantidWidgets;
 
+  const std::string MuonAnalysisResultTableTab::RUN_NO_LOG = "run_number";
+  const std::string MuonAnalysisResultTableTab::RUN_NO_TITLE = "Run Number";
 /**
 * Constructor
 */
 MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
-  : m_uiForm(uiForm), m_numLogsdisplayed(0), m_selectedLogs(), m_unselectedFittings()
+  : m_uiForm(uiForm), m_numLogsdisplayed(0), m_savedLogsState(), m_unselectedFittings()
 {  
   // Connect the help button to the wiki page.
   connect(m_uiForm.muonAnalysisHelpResults, SIGNAL(clicked()), this, SLOT(helpResultsClicked()));
@@ -124,17 +127,19 @@ void MuonAnalysisResultTableTab::selectAllFittings(bool state)
  */
 void MuonAnalysisResultTableTab::storeUserSettings()
 {
+  m_savedLogsState.clear();
+
   // Find which logs have been selected by the user.
   for (int row = 0; row < m_uiForm.valueTable->rowCount(); ++row)
   {
-    QTableWidgetItem * temp = m_uiForm.valueTable->item(row,0);
-    if( temp )
+    if(QTableWidgetItem* log = m_uiForm.valueTable->item(row,0))
     {
-      QCheckBox* logChoice = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
-      if( logChoice->isChecked() )
-        m_selectedLogs += temp->text();
+      QCheckBox* logCheckBox = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
+      m_savedLogsState[log->text()] = logCheckBox->checkState();
     }
   }
+
+  m_unselectedFittings.clear();
 
   // Find which fittings have been deselected by the user.
   for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); ++row)
@@ -156,19 +161,18 @@ void MuonAnalysisResultTableTab::applyUserSettings()
 {
   // If we're just starting the tab for the first time (and there are no user choices),
   // then don't bother.
-  if( m_selectedLogs.isEmpty() && m_unselectedFittings.isEmpty() )
+  if( m_savedLogsState.isEmpty() && m_unselectedFittings.isEmpty() )
     return;
   
   // If any of the logs have previously been selected by the user, select them again.
   for (int row = 0; row < m_uiForm.valueTable->rowCount(); ++row)
   {
-    QTableWidgetItem * temp = m_uiForm.valueTable->item(row,0);
-    if( temp )
+    if(QTableWidgetItem * log = m_uiForm.valueTable->item(row,0))
     {
-      if( m_selectedLogs.contains(temp->text()) )
+      if( m_savedLogsState.contains(log->text()) )
       {
-        QCheckBox* logChoice = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
-        logChoice->setChecked(true);
+        QCheckBox* logCheckBox = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
+        logCheckBox->setCheckState(m_savedLogsState[log->text()]);
       }
     }
   }
@@ -201,7 +205,7 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
   storeUserSettings();
   
   // Clear the previous table values
-  m_tableValues.clear();
+  m_logValues.clear();
   QVector<QString> fittedWsList;
   // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
   for (int i(0); i<wsList.size(); ++i)
@@ -261,6 +265,16 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
       selectAllFittings(true);
     }
 
+    // If we have Run Number log value, we want to select it by default.
+    auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
+    if(!found.empty())
+    {
+      int r = found[0]->row();
+
+      if(QCheckBox* cb = dynamic_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(r, 1)))
+        cb->setCheckState(Qt::Checked); 
+    }
+
     applyUserSettings();
   }
   else
@@ -281,9 +295,12 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
   // Clear the logs if not empty and then repopulate.
   QVector<QString> logsToDisplay;
   
+  // Add run number explicitly as it is the only non-timeseries log value we are using 
+  logsToDisplay.push_back(RUN_NO_TITLE.c_str());
+
   for (int i=0; i<fittedWsList.size(); i++)
   { 
-    QMap<QString, double> allLogs;
+    QMap<QString, QVariant> allLogs;
 
     // Get log information
     Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString()));
@@ -294,7 +311,14 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 
     const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
     std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
-    
+
+    // Try to get a run number for the workspace
+    if (ws->run().hasProperty(RUN_NO_LOG))
+    {
+      // Set run number as a string, as we don't want it to be formatted like double.
+      allLogs[RUN_NO_TITLE.c_str()] = QString(ws->run().getLogData(RUN_NO_LOG)->value().c_str());
+    }
+
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
 
@@ -356,7 +380,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
     }
 
     // Add all data collected from one workspace to another map. Will be used when creating table.
-    m_tableValues[fittedWsList[i]] = allLogs;
+    m_logValues[fittedWsList[i]] = allLogs;
 
   } // End loop over all workspace's log information and param information
 
@@ -364,12 +388,10 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
   QVector<int> toRemove;
   for(int i=0; i<logsToDisplay.size(); ++i)
   {
-    QMap<QString,QMap<QString, double> >::Iterator itr; 
-    for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+    for (auto itr = m_logValues.begin(); itr != m_logValues.end(); itr++)
     { 
-      QMap<QString, double> logsAndValues = itr.value();
-
-      if (!(logsAndValues.contains(logsToDisplay[i])))
+      auto wsLogValues = itr.value();
+      if (!wsLogValues.contains(logsToDisplay[i]))
       {      
         toRemove.push_back(i);
         break;
@@ -528,7 +550,7 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QVector<QStr
 */
 void MuonAnalysisResultTableTab::createTable()
 {  
-  if (m_tableValues.size() == 0)
+  if (m_logValues.size() == 0)
   {
     QMessageBox::information(this, "Mantid - Muon Analysis", "No workspace found with suitable fitting.");
     return;
@@ -549,12 +571,31 @@ void MuonAnalysisResultTableTab::createTable()
   {
     // Create the results table
     Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    table->addColumn("str","Run Number");
-    table->getColumn(table->columnCount()-1)->setPlotType(6);
-    for(int i=0; i<logsSelected.size(); ++i)
+
+    // Add columns for log values 
+    foreach(QString log, logsSelected)
     {
-      table->addColumn("double", logsSelected[i].toStdString());
-      table->getColumn(table->columnCount()-1)->setPlotType(1);
+      std::string columnTypeName;
+      int columnPlotType;
+
+      // We use values of the first workspace to determine the type of the column to add. It seems reasonable to assume
+      // that log values with the same name will have same types.
+      QString typeName = m_logValues[wsSelected[0]][log].typeName();
+      if (typeName == "double")
+      {
+        columnTypeName = "double";
+        columnPlotType = 1;
+      }
+      else if(typeName == "QString")
+      {
+        columnTypeName = "str";
+        columnPlotType = 6;
+      }
+      else
+        throw std::runtime_error("Couldn't find appropriate column type for value with type " + typeName.toStdString());
+        
+      Mantid::API::Column_sptr newColumn = table->addColumn(columnTypeName, log.toStdString());
+      newColumn->setPlotType(columnPlotType);
     }
 
     // Get param information
@@ -592,32 +633,30 @@ void MuonAnalysisResultTableTab::createTable()
     }
 
     // Add data to table
-    QMap<QString,QMap<QString, double> >::Iterator itr; 
-    for (itr = m_tableValues.begin(); itr != m_tableValues.end(); itr++)
+    for (auto itr = m_logValues.begin(); itr != m_logValues.end(); itr++)
     { 
       for(int i=0; i<wsSelected.size(); ++i)
       {
         if (wsSelected[i] == itr.key())
         {
-          //Add new row and add run number
+          // Add new row
           Mantid::API::TableRow row = table->appendRow();
-          QString run(itr.key().left(itr.key().find(';')));
-        
-          for (int j=0; j<run.size(); ++j)
-          {
-            if(run[j].isNumber())
-            {
-              run = run.right(run.size() - j);
-              break;
-            }
-          }
-          row << run.toStdString();
 
-          // Add log values
-          QMap<QString, double> logsAndValues = itr.value();
-          for(int j=0; j<logsSelected.size(); ++j)
+          // Add log values to the row
+          QMap<QString, QVariant>& logValues = itr.value();
+
+          for(int j = 0; j < logsSelected.size(); j++)
           {
-            row << logsAndValues.find(logsSelected[j]).value();
+            Mantid::API::Column_sptr c = table->getColumn(j);
+            QVariant& v = logValues[logsSelected[j]];
+            
+            if(c->isType<double>())
+              row << v.toDouble();
+            else if(c->isType<std::string>())
+              row << v.toString().toStdString();
+            else
+              throw std::runtime_error("Log value with name '" + logsSelected[j].toStdString() + "' in '" 
+                + wsSelected[i].toStdString() + "' has unexpected type.");
           }
 
           // Add param values (presume params the same for all workspaces)
@@ -629,8 +668,22 @@ void MuonAnalysisResultTableTab::createTable()
         }
       }
     }  
+
+    std::string tableName = getFileName();
+
     // Save the table to the ADS
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(tableName,table);
+
+    // Python code to show a table on the screen
+    std::stringstream code;
+    code << "found = False" << std::endl
+         << "for w in windows():" << std::endl
+         << "  if w.windowLabel() == '" << tableName << "':" << std::endl
+         << "    found = True; w.show(); w.setFocus()" << std::endl
+         << "if not found:" << std::endl
+         << "  importTableWorkspace('" << tableName << "', True)" << std::endl;
+
+    emit runPythonCode(QString::fromStdString(code.str()), false);
   }
   else
   {
@@ -691,7 +744,7 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsLi
 QVector<QString> MuonAnalysisResultTableTab::getSelectedWs()
 {
   QVector<QString> wsSelected;
-  for (int i = 0; i < m_tableValues.size(); i++)
+  for (int i = 0; i < m_logValues.size(); i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(i,1));
     if (includeCell->isChecked())

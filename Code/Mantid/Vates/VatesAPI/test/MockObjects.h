@@ -102,13 +102,6 @@ public:
     return 0;
   }
 
-  //constructor allows a workspace name to be provide.
-  MockIMDWorkspace(std::string name)
-  : IMDWorkspace()
-  {
-    setName(name);
-  }
-
   MockIMDWorkspace()
   : IMDWorkspace()
   {

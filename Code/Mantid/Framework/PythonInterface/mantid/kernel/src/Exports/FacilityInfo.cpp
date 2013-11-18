@@ -1,6 +1,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::FacilityInfo;
 using Mantid::Kernel::InstrumentInfo;
@@ -8,6 +9,8 @@ using namespace boost::python;
 
 void export_FacilityInfo()
 {
+
+  register_ptr_to_python<FacilityInfo*>();
 
   class_<FacilityInfo>("FacilityInfo", no_init)
 
@@ -29,9 +32,6 @@ void export_FacilityInfo()
     .def("preferredExtension",&FacilityInfo::preferredExtension, return_value_policy<copy_const_reference>(),
          "Returns the extension that is preferred for this facility")
 
-    .def("getSoapEndPoint", &FacilityInfo::getSoapEndPoint, return_value_policy<copy_const_reference>(),
-         "Returns the name of the SOAP end point")
-
     .def("archiveSearch", &FacilityInfo::archiveSearch, return_value_policy<copy_const_reference>(),
          "Return the archive search interface names")
 
@@ -44,9 +44,6 @@ void export_FacilityInfo()
 
     .def("instrument", &FacilityInfo::instrument, return_value_policy<copy_const_reference>(),
          "Returns the instrument with the given name")
-
-    .def("catalogName", &FacilityInfo::catalogName, return_value_policy<copy_const_reference>(),
-         "Returns the catalog name used at this facility")
 
     .def("liveListener", &FacilityInfo::liveListener, return_value_policy<copy_const_reference>(),
          "Returns the name of the default live listener")

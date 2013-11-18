@@ -51,7 +51,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("L2","3.45") );
     TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Polar","90.09") );
     TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Azimuthal","1.84") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setProperty("NewInstrument", false) );
 
     // 4. Run
     TS_ASSERT_THROWS_NOTHING( editdetector.execute() );
@@ -81,9 +80,86 @@ public:
 
   }
 
+  /** Unit test to edit instrument parameters of all spectrums (>1)
+    */
+  void test_MultipleWholeSpectrumEdit()
+  {
+    // 1. Init
+    EditInstrumentGeometry editdetector;
+    editdetector.initialize();
+
+    // 2. Load Data
+    DataObjects::Workspace2D_sptr workspace2d = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100, false);
+    API::AnalysisDataService::Instance().add("inputWS2", workspace2d);
+
+
+    // 3. Set Property
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Workspace", "inputWS2") );
+    // TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("SpectrumIDs","3072,19456,40960,55296,74752,93184") );
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("L2","1.1,2.2,3.3,4.4,5.5,6.6") );
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Polar","90.1,90.2,90.3,90.4,90.5,90.6") );
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Azimuthal","1,2,3,4,5,6") );
+
+    // 4. Run
+    TS_ASSERT_THROWS_NOTHING( editdetector.execute() );
+    TS_ASSERT( editdetector.isExecuted() );
+
+    // 5. Check result
+    Mantid::API::MatrixWorkspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING( workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+      (Mantid::API::AnalysisDataService::Instance().retrieve("inputWS2")) );
+
+    checkDetectorParameters(workspace, 0, 1.1, 90.1, 1.0);
+    checkDetectorParameters(workspace, 1, 2.2, 90.2, 2.0);
+    checkDetectorParameters(workspace, 3, 4.4, 90.4, 4.0);
+    checkDetectorParameters(workspace, 5, 6.6, 90.6, 6.0);
+
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Unit test to edit instrument parameters of all spectrums (>1) and using new detector IDs
+    */
+  void test_MultiplePartialSpectrumEdit()
+  {
+    // Init
+    EditInstrumentGeometry editdetector;
+    editdetector.initialize();
+
+    // Load Data
+    DataObjects::Workspace2D_sptr workspace2d =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100, false);
+    API::AnalysisDataService::Instance().addOrReplace("inputWS3", workspace2d);
+
+    // Set Property
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Workspace", "inputWS3") );
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("SpectrumIDs","1,2,3,4,5,6") );
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("L2","1.1,2.2,3.3, 4.4, 5.5, 6.6") );
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Polar","90.1,90.2,90.3, 90.4, 90.5, 90.6") );
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Azimuthal","1,2,3,4,5,6") );
+    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("DetectorIDs", "200, 201, 300, 301, 400, 401") );
+
+    // Run
+    editdetector.execute();
+    TS_ASSERT( editdetector.isExecuted() );
+
+    // Check
+    checkDetectorID(workspace2d, 0, 200);
+    checkDetectorID(workspace2d, 1, 201);
+    checkDetectorID(workspace2d, 2, 300);
+    checkDetectorID(workspace2d, 3, 301);
+    checkDetectorID(workspace2d, 4, 400);
+    checkDetectorID(workspace2d, 5, 401);
+
+    // Clean
+    AnalysisDataService::Instance().remove("inputWS3");
+
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Check detector parameter
     */
-  void checkDetectorParameters(API::MatrixWorkspace_sptr workspace, size_t wsindex, double realr, double realtth, double realphi)
+  void checkDetectorParameters(API::MatrixWorkspace_sptr workspace, size_t wsindex, double realr,
+                               double realtth, double realphi)
   {
     API::ISpectrum* spectrum1 = workspace->getSpectrum(wsindex);
     Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
@@ -104,70 +180,26 @@ public:
 
   }
 
-  /** Unit test to edit instrument parameters of all spectrums (>1)
+  //----------------------------------------------------------------------------------------------
+  /** Check detector parameter
     */
-  void test_MultipleWholeSpectrumEdit()
+  void checkDetectorID(API::MatrixWorkspace_sptr workspace, size_t wsindex, detid_t detid)
   {
-    // 1. Init
-    EditInstrumentGeometry editdetector;
-    editdetector.initialize();
+    API::ISpectrum* spectrum1 = workspace->getSpectrum(wsindex);
+    Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
 
-    // 2. Load Data
-    DataObjects::Workspace2D_sptr workspace2d = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100, false);
-    API::AnalysisDataService::Instance().add("inputWS2", workspace2d);
+    std::set<detid_t> detids = spectrum1->getDetectorIDs();
+    TS_ASSERT_EQUALS(detids.size(), 1);
+    detid_t thisdetid = 0;
+    std::set<detid_t>::iterator it;
+    for (it = detids.begin(); it != detids.end(); ++it)
+    {
+      thisdetid = *it;
+    }
 
+    TS_ASSERT_EQUALS(detid, thisdetid);
 
-    // 3. Set Property
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Workspace", "inputWS2") );
-    // TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("SpectrumIDs","3072,19456,40960,55296,74752,93184") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("SpectrumIDs","1,2,3,4,5,6") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("L2","1.1,2.2,3.3,4.4,5.5,6.6") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Polar","90.1,90.2,90.3,90.4,90.5,90.6") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Azimuthal","1,2,3,4,5,6") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setProperty("NewInstrument", false) );
-
-    // 4. Run
-    TS_ASSERT_THROWS_NOTHING( editdetector.execute() );
-    TS_ASSERT( editdetector.isExecuted() );
-
-    // 5. Check result
-    Mantid::API::MatrixWorkspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING( workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-      (Mantid::API::AnalysisDataService::Instance().retrieve("inputWS2")) );
-
-    checkDetectorParameters(workspace, 0, 1.1, 90.1, 1.0);
-    checkDetectorParameters(workspace, 1, 2.2, 90.2, 2.0);
-    checkDetectorParameters(workspace, 3, 4.4, 90.4, 4.0);
-    checkDetectorParameters(workspace, 5, 6.6, 90.6, 6.0);
-
-  }
-
-
-  /** Unit test to edit instrument parameters of all spectrums (>1)
-    */
-  void test_MultiplePartialSpectrumEdit()
-  {
-    // 1. Init
-    EditInstrumentGeometry editdetector;
-    editdetector.initialize();
-
-    // 2. Load Data
-    DataObjects::Workspace2D_sptr workspace2d =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(6, 100, false);
-    API::AnalysisDataService::Instance().add("inputWS3", workspace2d);
-
-    // 3.1 Set Property
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Workspace", "inputWS3") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("SpectrumIDs","1,2,3") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("L2","1.1,2.2,3.3") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Polar","90.1,90.2,90.3") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setPropertyValue("Azimuthal","1,2,3") );
-    TS_ASSERT_THROWS_NOTHING( editdetector.setProperty("NewInstrument", false) );
-
-    // 3.2 Run
-    editdetector.execute();
-    TS_ASSERT(!editdetector.isExecuted() );
-
+    return;
   }
 
 };

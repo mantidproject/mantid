@@ -62,16 +62,11 @@ class MuonAnalysis : public MantidQt::API::UserSubWindow
 public:
   /// Name of the interface
   static std::string name() { return "Muon Analysis"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "Muon"; }
 
-
-public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
-
-  void initLocalPython()
-  {
-    runPythonCode("from mantid.simpleapi import *");
-  }
 
 private slots:
   /// Guess Alpha clicked
@@ -125,11 +120,14 @@ private slots:
   /// User select instrument
   void userSelectInstrument(const QString& prefix);
 
-  /// User clicks hide toolbars checkbox
-  void showHideToolbars(bool state);
+  /// Hide/show MantidPlot toolbars
+  void setToolbarsHidden(bool hidden);
 
   /// Run the plot button on the home tab.
   void runFrontPlotButton();
+
+  /// Creates a plot of selected group/pair.
+  void plotSelectedItem();
 
   /// 
   void runFrontGroupGroupPairComboBox(int index);
@@ -139,9 +137,6 @@ private slots:
 
   /// Link to the wiki for the grouping tab.
   void muonAnalysisHelpGroupingClicked();
-  
-  ///
-  void runFirstGoodBinFront();
 
   /// Check to see if the user want to append the previous run and set accordingly
   void checkAppendingPreviousRun();
@@ -164,8 +159,32 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
-  /// Assigns a peak picker tool to the workspace.
-  void assignPeakPickerTool(const QString &);
+  /// Updates the style of the current plot according to actual parameters on settings tab.
+  void updateCurrentPlotStyle();
+
+  /// Checks whether plots should be auto-updated when some settings change.
+  bool isAutoUpdateEnabled();
+
+  /// Show a plot for a given workspace. Closes previous plot if exists.
+  void showPlot(const QString& wsName);
+
+  /// Closes the window with the plot of the given ws
+  void closePlotWindow(const QString& wsName);
+
+  /// Checks if the plot for the workspace does exist.
+  bool plotExists(const QString& wsName);
+
+  /// Enable PP tool for the plot of the given WS
+  void selectMultiPeak(const QString& wsName);
+
+  /// Disable tools for all the graphs within MantidPlot
+  void disableAllTools();
+
+  /// Hides all the plot windows (MultiLayer ones)
+  void hideAllPlotWindows();
+
+  /// Shows all the plot windows (MultiLayer ones)
+  void showAllPlotWindows();
 
   /// Called when the plot function has been changed on the home page.
   void changeHomeFunction();
@@ -176,21 +195,33 @@ private slots:
   /// Change to the dead time file, make sure graph is updated next time it is plotted.
   void deadTimeFileSelected();
 
+  /// Updates the enabled-state and value of Time Zero using "auto" check-box state
+  void setTimeZeroState(int checkBoxState = -1);
+
+  /// Updates the enabled-state and value of First Good Data using "auto" check-box state
+  void setFirstGoodDataState(int checkBoxState = -1);
+
+  /// Saves the value of the widget which called the slot
+  void saveWidgetValue();
+
 
 private:
+  /// Initialize local Python environment
+  void initLocalPython();
+
   /// Initialize the layout
-  virtual void initLayout();
+  void initLayout();
 
   /// Set start up interface look
   void startUpLook();
 
-  /// Change the connected data text.
-  void setConnectedDataText();
+  /// Change the connected data name
+  void setCurrentDataName(const QString& name);
 
-  /// Catch when the interface is closed and do something before.
-  void closeEvent(QCloseEvent *e);
+  /// Executed when interface gets hidden or closed
+  void hideEvent(QHideEvent *e);
   
-  /// Catch when the interface is shown and do something before.
+  /// Executed when interface gets shown
   void showEvent(QShowEvent *e);
 
   /// Input file changed - update GUI accordingly
@@ -205,10 +236,6 @@ private:
   /// is grouping set
   bool isGroupingSet();
 
-  /// Apply grouping specified in xml file to workspace
-  bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS, 
-    const std::string& filename);
-
   /// create WS contained the data for a plot
   void createPlotWS(const std::string& groupName, 
                     const std::string& inputWS, const std::string& outWS);
@@ -221,6 +248,9 @@ private:
 
   /// Update front anc pair combo box
   void updateFrontAndCombo();
+
+  /// Updates widgets related to period algebra
+  void updatePeriodWidgets(int numPeriods);
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
@@ -266,8 +296,18 @@ private:
   /// Plot pair
   void plotPair(const std::string& plotType);
 
-  /// plots specific WS spectrum (used by plotPair and plotGroup)
+  // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
+  //       (as we are doing with pairs)
+
+  /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
+
+  /// Set various style parameters for the plot of the given ws
+  void setPlotStyle(const QString& wsName, const QMap<QString, QString>& params);
+
+  /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
+  /// something is not specified
+  QMap<QString, QString> getPlotStyleParams(const QString& wsName, const int wsIndex);
 
   /// get period labels
   QStringList getPeriodLabels() const;
@@ -293,26 +333,20 @@ private:
   /// name of the loaded data
   QString m_currentDataName;
 
-  /// boolean to tell whether the fit property browser has been assigned
-  bool m_assigned;
-
   /// which group table row has the user last clicked on
   int m_groupTableRowInFocus;
 
   /// which pair table row has the user last clicked on
   int m_pairTableRowInFocus;
 
-  /// Index of the current tab.
-  int m_tabNumber;
+  /// Widget of the current tab
+  QWidget* m_currentTab;
 
   /// used to test that a new filename has been entered 
   QStringList m_previousFilenames;
 
   /// List of current group names 
   std::vector<std::string> m_groupNames;
-
-  /// name for file to temperary store grouping
-  std::string m_groupingTempFilename;
 
   /// Deal with input file changes.
   void handleInputFileChanges();
@@ -379,6 +413,9 @@ private:
   /// Boolean to show whether the gui is being updated
   bool m_updating;
 
+  /// Flag to indicate that grouping table is being updated
+  bool m_updatingGrouping;
+
   /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
   bool m_loaded;
 
@@ -409,6 +446,12 @@ private:
   /// Setup the signals for updating
   void connectAutoUpdate();
 
+  /// Setup connects for saving values using QSettings
+  void connectAutoSave();
+
+  /// Saves the value of the widget which called the slot
+  void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -416,13 +459,19 @@ private:
   /// handles result table tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab* m_resultTableTab;
 
-  /// Time zero as stored in Nexus file. Need this because when loading Muon data
-  /// the x-axis has already been adjusted to that nexus time zero so if user select
-  /// a different time zero need to adjust the relative offset to this value
-  double m_nexusTimeZero;
+  /// Time Zero as loaded from Data file
+  double m_dataTimeZero;
+
+  /// First Good Data time as loaded from Data file
+  double m_dataFirstGoodData;
+
+  static const QString NOT_AVAILABLE;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
+
+  /// Creates new double validator which accepts numbers in standard notation only.
+  static QDoubleValidator* createDoubleValidator(QObject* parent);
 };
 
 }

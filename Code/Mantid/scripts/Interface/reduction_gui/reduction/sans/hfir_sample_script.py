@@ -206,7 +206,7 @@ class SampleData(BaseScriptElement):
                 for f in data_file_list:
                     script += "AppendDataFile([\"%s\"])\n" % f
         else:
-            parts = os.path.split(str(self.data_files[str(data_file)]).strip())
+            parts = os.path.split(str(data_file).strip())
             if len(parts[0])>0:
                 script += "DataPath(\"%s\")\n" % parts[0]
             else:
@@ -220,23 +220,14 @@ class SampleData(BaseScriptElement):
             Update transmission from reduction output
         """
         if IS_IN_MANTIDPLOT:
-            # Allow the use of the old reducer code, which 
-            # uses the Python API v1
-            if self.PYTHON_API==1:
-                from reduction.command_interface import ReductionSingleton
-                if ReductionSingleton()._transmission_calculator is not None:
-                    trans = ReductionSingleton()._transmission_calculator.get_transmission()
-                    self.transmission = trans[0]
-                    self.transmission_spread = trans[1]
-            else:
-                from mantid.api import PropertyManagerDataService
-                from reduction_workflow.command_interface import ReductionSingleton
-                property_manager_name = ReductionSingleton().get_reduction_table_name()
-                property_manager = PropertyManagerDataService.retrieve(property_manager_name)
-                if property_manager.existsProperty("MeasuredTransmissionValue"):
-                    self.transmission = property_manager.getProperty("MeasuredTransmissionValue").value
-                if property_manager.existsProperty("MeasuredTransmissionError"):
-                    self.transmission_spread = property_manager.getProperty("MeasuredTransmissionError").value
+            from mantid.api import PropertyManagerDataService
+            from reduction_workflow.command_interface import ReductionSingleton
+            property_manager_name = ReductionSingleton().get_reduction_table_name()
+            property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+            if property_manager.existsProperty("MeasuredTransmissionValue"):
+                self.transmission = property_manager.getProperty("MeasuredTransmissionValue").value
+            if property_manager.existsProperty("MeasuredTransmissionError"):
+                self.transmission_spread = property_manager.getProperty("MeasuredTransmissionError").value
 
     def to_xml(self):
         """
@@ -251,6 +242,7 @@ class SampleData(BaseScriptElement):
         xml += self.calculation_method.to_xml()
         xml += "</Transmission>\n"
         xml += "<SampleData>\n"
+        xml += "  <separate_jobs>%s</separate_jobs>\n" % str(self.separate_jobs)
         xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         for item in self.data_files:
             xml += "  <data_file>%s</data_file>\n" % item.strip()        
@@ -296,6 +288,9 @@ class SampleData(BaseScriptElement):
             self.data_files = BaseScriptElement.getStringList(sample_data_dom, "data_file")
             self.sample_thickness = BaseScriptElement.getFloatElement(sample_data_dom, "sample_thickness",
                                                                       default=SampleData.sample_thickness)      
+            self.separate_jobs = BaseScriptElement.getBoolElement(sample_data_dom, "separate_jobs",
+                                                                  default = SampleData.separate_jobs) 
+
     
     def reset(self):
         """

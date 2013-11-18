@@ -38,13 +38,13 @@ public:
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
-    ws->setName("TOPAZ_peaks");
+    //ws->setName("TOPAZ_peaks");
     double smu = 0.357;
     double amu = 0.011;
-	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
+    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
   			0.0, 0.0, smu, 0.0, smu, amu);
-    Material *mat = new Material("SetInSaveHKLTest", *neutron, 1.0);
-    ws->mutableSample().setMaterial(*mat);
+    Material mat("SetInSaveHKLTest", neutron, 1.0);
+    ws->mutableSample().setMaterial(mat);
     API::Run & mrun = ws->mutableRun();
     mrun.addProperty<double>("Radius", 0.1, true);
 

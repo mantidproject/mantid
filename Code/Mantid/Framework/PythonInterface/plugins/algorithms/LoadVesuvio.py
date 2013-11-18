@@ -9,7 +9,7 @@ from mantid.api import *
 from mantid.simpleapi import (CropWorkspace, LoadEmptyInstrument, LoadRaw, Plus, 
                               DeleteWorkspace)
 
-
+import copy
 import numpy as np
 import os
 
@@ -87,7 +87,6 @@ class LoadVesuvio(PythonAlgorithm):
 
                 self._integrate_periods()
                 self._sum_foil_periods()
-                self._apply_dead_time_correction()
                 self._normalise_by_monitor()
                 self._normalise_to_foil_out()
                 self._calculate_diffs()
@@ -188,7 +187,6 @@ class LoadVesuvio(PythonAlgorithm):
 
         self._backward_spectra_list = to_int_list(self.backward_scatter_spectra)
         self._forward_spectra_list = to_int_list(self.forward_scatter_spectra)
-        self._tau = self.dead_time_fraction
         self._mon_scale = self.monitor_scale
         self._beta =  self.double_diff_mixing
         self._tof_max = self.tof_max
@@ -225,20 +223,21 @@ class LoadVesuvio(PythonAlgorithm):
         self._raw_grp, self._raw_monitors = self._load_and_sum_runs(spectra)
         nperiods = self._raw_grp.size()
 
+        first_ws = self._raw_grp[0]
         self._nperiods = nperiods
-        self._goodframes = self._raw_grp[0].getRun().getLogData("goodfrm").value
+        self._goodframes = first_ws.getRun().getLogData("goodfrm").value
         
-        # X arrays won't change so store a copy of them
-        raw_t = self._raw_grp[0].readX(0)
-        self.raw_x = raw_t # For the final workspace
-        
-        # Convert the times to microseconds
-        self.pt_times = 0.5*(raw_t[1:] + raw_t[:-1])
-        self.delta_t = (raw_t[1:] - raw_t[:-1]) # Numpy does difference between successive elements
+        # Cache delta_t values
+        raw_t = first_ws.readX(0)
+        delay = raw_t[2] - raw_t[1]
+        raw_t = raw_t - delay # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
+        self.pt_times = raw_t[1:]
+        self.delta_t = (raw_t[1:] - raw_t[:-1])
 
         mon_raw_t = self._raw_monitors[0].readX(0)
-        # Convert the times to 
-        self.mon_pt_times = 0.5*(mon_raw_t[1:] + mon_raw_t[:-1])
+        delay = mon_raw_t[2] - mon_raw_t[1]
+        mon_raw_t = mon_raw_t - delay # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
+        self.mon_pt_times = mon_raw_t[1:]
         self.delta_tmon = (mon_raw_t[1:] - mon_raw_t[:-1])
 
 #----------------------------------------------------------------------------------------
@@ -273,10 +272,10 @@ class LoadVesuvio(PythonAlgorithm):
                 DeleteWorkspace(out_name,EnableLogging=_LOGGING_)
                 DeleteWorkspace(out_mon,EnableLogging=_LOGGING_)
 
-        CropWorkspace(Inputworkspace= SUMMED_WS, OutputWorkspace= SUMMED_WS, 
+        CropWorkspace(Inputworkspace= SUMMED_WS, OutputWorkspace= SUMMED_WS,
                       XMax=self._tof_max,EnableLogging=_LOGGING_)
         CropWorkspace(Inputworkspace= SUMMED_MON, OutputWorkspace= SUMMED_MON,
-                      XMax=self._mon_tof_max,EnableLogging=_LOGGING_)
+                      XMax=self._mon_tof_max, EnableLogging=_LOGGING_)
         return mtd[SUMMED_WS], mtd[SUMMED_MON]
 
 #----------------------------------------------------------------------------------------
@@ -338,11 +337,14 @@ class LoadVesuvio(PythonAlgorithm):
         sum1_start,sum1_end = self._period_sum1_start, self._period_sum1_end
         sum2_start,sum2_end = self._period_sum2_start,self._period_sum2_end
         xvalues = self.pt_times
+        sum1_indices = np.where((xvalues > sum1_start) & (xvalues < sum1_end))
+        sum2_indices = np.where((xvalues > sum2_start) & (xvalues < sum2_end))
+        
         wsindex = self._ws_index
         for i in range(self._nperiods):
             yvalues = self._raw_grp[i].readY(wsindex)
-            self.sum1[i] = np.sum(yvalues[(xvalues > sum1_start) & (xvalues < sum1_end)])
-            self.sum2[i] = np.sum(yvalues[(xvalues > sum2_start) & (xvalues < sum2_end)])
+            self.sum1[i] = np.sum(yvalues[sum1_indices])
+            self.sum2[i] = np.sum(yvalues[sum2_indices])
             if self.sum2[i] != 0.0:
                 self.sum1[i] /= self.sum2[i]
 
@@ -354,21 +356,33 @@ class LoadVesuvio(PythonAlgorithm):
     def _create_foil_workspaces(self):
         """
             Create the workspaces that will hold the foil out, thin & thick results
+            The output will be a point workspace
         """
         first_ws = self._raw_grp[0]
-        self.foil_out = WorkspaceFactory.create(first_ws) # This will be used as the result workspace
+        ndata_bins = first_ws.blocksize()
+        nhists = first_ws.getNumberHistograms()
+        data_kwargs = {'NVectors':nhists,'XLength':ndata_bins,'YLength':ndata_bins}
+        
+        self.foil_out = WorkspaceFactory.create(first_ws, **data_kwargs) # This will be used as the result workspace
         self.foil_out.setDistribution(True)
-        self.foil_thin = WorkspaceFactory.create(first_ws)
+        self.foil_thin = WorkspaceFactory.create(first_ws, **data_kwargs)
+
+        # Monitors will be a different size
         first_monws = self._raw_monitors[0]
-        self.mon_out = WorkspaceFactory.create(first_monws, NVectors=first_ws.getNumberHistograms())
-        self.mon_thin = WorkspaceFactory.create(first_monws,NVectors=first_ws.getNumberHistograms())
+        nmonitor_bins = first_monws.blocksize()
+        monitor_kwargs = copy.deepcopy(data_kwargs)
+        monitor_kwargs['XLength'] = nmonitor_bins
+        monitor_kwargs['YLength'] = nmonitor_bins
+
+        self.mon_out = WorkspaceFactory.create(first_monws, **monitor_kwargs)
+        self.mon_thin = WorkspaceFactory.create(first_monws, **monitor_kwargs)
 
         if self._nperiods == 2:
             self.foil_thick = None
             self.mon_thick = None
         else:
-            self.foil_thick = WorkspaceFactory.create(first_ws)
-            self.mon_thick = WorkspaceFactory.create(first_monws,NVectors=first_ws.getNumberHistograms())
+            self.foil_thick = WorkspaceFactory.create(first_ws, **data_kwargs)
+            self.mon_thick = WorkspaceFactory.create(first_monws, **monitor_kwargs)
 
 #----------------------------------------------------------------------------------------
     
@@ -442,17 +456,16 @@ class LoadVesuvio(PythonAlgorithm):
         raw_grp_indices = self.foil_map.get_indices(self._spectrum_no, foil_periods)
         wsindex = self._ws_index
         outY = foil_ws.dataY(wsindex)
-        outE = foil_ws.dataE(wsindex)
         delta_t = self.delta_t
         for grp_index in raw_grp_indices:
             raw_ws = self._raw_grp[grp_index]
             outY += raw_ws.readY(wsindex)
-            outE += raw_ws.readE(wsindex)
             self.sum3[sum_index] += self.sum2[grp_index]
-        
+
+        # Errors are calculated from counts
+        eout = np.sqrt(outY)/delta_t
+        foil_ws.setE(wsindex,eout)
         outY /= delta_t
-        outE = np.sqrt(outE, outE)
-        outE /= delta_t
 
         # monitors
         if mon_periods is None:
@@ -466,50 +479,21 @@ class LoadVesuvio(PythonAlgorithm):
         outY /= self.delta_tmon
 
 #----------------------------------------------------------------------------------------
-    def _apply_dead_time_correction(self):
-        """
-            Corrects the count arrays for each foil state for dead time in the detectors
-            for the current spectrum
-        """
-        # Calculate number of frames
-        sum3_total = self.sum3[0] + self.sum3[1] + self.sum3[2]
-        nframes = np.ones(3)
-        if sum3_total != 0.0:
-            for i in range(3):
-                nframes[i] = self._goodframes*self.sum3[i]/sum3_total
-                if nframes[i] == 0.0:
-                    self.getLogger().warning("nframes=0 for period %d in spectrum %d. Using nframes=1" % (i, self._spectrum_no))
-        else:
-            self.getLogger().warning("Sum of counts across all foil periods = 0 for spectrum %d. "
-                                     "Using nframes=1 for all periods in this spectrum" % self._spectrum_no)
-        
-        wsindex = self._ws_index
-        def dead_time_correct(foil_ws, period):
-            """Correct for dead time"""
-            for arr_func in (foil_ws.dataY, foil_ws.dataE):
-                values = arr_func(wsindex)
-                values /= nframes[period]
-                values /= (1.0 - self._tau*values)
-                values *= nframes[period]
-
-        dead_time_correct(self.foil_out, IOUT)
-        dead_time_correct(self.foil_thin, ITHIN)
-        if self._nperiods != 2:
-            dead_time_correct(self.foil_thick, ITHICK)
-
-#----------------------------------------------------------------------------------------
     def _normalise_by_monitor(self):
         """
             Normalises by the monitor counts between mon_norm_start & mon_norm_end
             instrument parameters for the current workspace index
         """
-        mon_range_indices = ((self.mon_pt_times >= self._mon_norm_start) & (self.mon_pt_times < self._mon_norm_end))
+        indices_in_range = np.where((self.mon_pt_times >= self._mon_norm_start) & (self.mon_pt_times < self._mon_norm_end))
+        
         wsindex = self._ws_index
+        # inner function to apply normalization
         def monitor_normalization(foil_ws, mon_ws):
             """Applies monitor normalization to the given foil spectrum from the given monitor spectrum
             """
             mon_values = mon_ws.readY(wsindex)
-            mon_values_sum = np.sum(mon_values[mon_range_indices])
+            mon_values_sum = np.sum(mon_values[indices_in_range])
+
             foil_state = foil_ws.dataY(wsindex)
             foil_state *= (self._mon_scale/mon_values_sum)
             err = foil_ws.dataE(wsindex)
@@ -527,7 +511,7 @@ class LoadVesuvio(PythonAlgorithm):
             for the current workspace index
         """
         # Indices where the given condition is true
-        range_indices = ((self.pt_times >= self._foil_out_norm_start) & (self.pt_times < self._foil_out_norm_end))
+        range_indices = np.where((self.pt_times >= self._foil_out_norm_start) & (self.pt_times < self._foil_out_norm_end))
         wsindex = self._ws_index
         cout = self.foil_out.readY(wsindex)
         sum_out = np.sum(cout[range_indices])
@@ -538,7 +522,10 @@ class LoadVesuvio(PythonAlgorithm):
             if sum_values == 0.0:
                 self.getLogger().warning("No counts in %s foil spectrum %d." % (foil_type,self._spectrum_no))
                 sum_values = 1.0
-            values *= (sum_out/sum_values)
+            norm_factor = (sum_out/sum_values)
+            values *= norm_factor
+            errors = foil_ws.dataE(wsindex)
+            errors *= norm_factor
         
         normalise_to_out(self.foil_thin, "thin")
         if self._nperiods != 2:
@@ -560,7 +547,7 @@ class LoadVesuvio(PythonAlgorithm):
         else:
             raise RuntimeError("Unknown difference type requested: %d" % self._diff_opt)
 
-        self.foil_out.setX(wsindex, self.raw_x)
+        self.foil_out.setX(wsindex, self.pt_times)
 #----------------------------------------------------------------------------------------
 
     def _calculate_thin_difference(self, ws_index):

@@ -179,6 +179,8 @@ namespace Mantid
             MantidVec::iterator iter;
             for (iter = outputWs->dataX(0).begin(); iter != outputWs->dataX(0).end(); ++iter)
             {
+              // cppcheck cannot see that this is used by reference by muparser
+              // cppcheck-suppress unreadVariable
               axisValue = *iter;
               double result = p.Eval();
               *iter = result;
@@ -202,6 +204,8 @@ namespace Mantid
             size_t axisLength = axisPtr->length();
             for (size_t i=0;i<axisLength;++i)
             {
+              // cppcheck cannot see that this is used by reference by muparser
+              // cppcheck-suppress unreadVariable
               axisValue = axisPtr->getValue(i);
               double result = p.Eval();
               axisPtr->setValue(i,result);
@@ -222,6 +226,13 @@ namespace Mantid
         throw std::invalid_argument(ss.str());
       }
 
+      IncreasingAxisValidator incAxis;
+      std::string incAxisResult = incAxis.isValid(outputWs);
+
+      if(incAxisResult != "")
+        g_log.warning(incAxisResult + ".\n"
+                      "Some of the Mantid algorithms might not use the workspace correctly.");
+
       if ((axisUnits!="") || (axisTitle!=""))
       {
         if (axisTitle=="")
@@ -232,7 +243,7 @@ namespace Mantid
         {
           axisUnits = axisPtr->unit()->label();
         }
-        axisPtr->unit() = boost::shared_ptr<Unit>(new Units::CustomUnit(axisTitle,axisUnits));
+        axisPtr->unit() = boost::shared_ptr<Unit>(new Units::Label(axisTitle,axisUnits));
       }
 
     }

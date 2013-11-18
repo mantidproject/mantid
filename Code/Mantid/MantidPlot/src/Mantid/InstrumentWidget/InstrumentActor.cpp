@@ -2,6 +2,9 @@
 #include "CompAssemblyActor.h"
 #include "ObjComponentActor.h"
 #include "SampleActor.h"
+#include "ComponentActor.h"
+#include "ObjCompAssemblyActor.h"
+#include "RectangularDetectorActor.h"
 #include "GLActorVisitor.h"
 
 #include "MantidKernel/Exception.h"
@@ -30,6 +33,15 @@ using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid;
+
+/// to be used in std::transform
+struct Sqrt
+{
+  double operator()(double x)
+  {
+    return sqrt(x);
+  }
+};
 
 double InstrumentActor::m_tolerance = 0.00001;
 
@@ -102,7 +114,7 @@ m_sampleActor(NULL)
   blockSignals(false);
 
   /// Keep the pointer to the detid2index map
-  m_detid2index_map = shared_workspace->getDetectorIDToWorkspaceIndexMap(false);
+  m_detid2index_map = shared_workspace->getDetectorIDToWorkspaceIndexMap();
 
   Instrument_const_sptr instrument = getInstrument();
 
@@ -120,7 +132,7 @@ m_sampleActor(NULL)
   m_scene.addActor(new CompAssemblyActor(*this,instrument->getComponentID()));
 
   FindComponentVisitor findVisitor(instrument->getSample()->getComponentID());
-  accept(findVisitor);
+  accept(findVisitor,GLActor::Finish);
   const ObjComponentActor* samplePosActor = dynamic_cast<const ObjComponentActor*>(findVisitor.getActor());
 
   m_sampleActor = new SampleActor(*this,shared_workspace->sample(),samplePosActor);
@@ -138,7 +150,6 @@ m_sampleActor(NULL)
 InstrumentActor::~InstrumentActor()
 {
   saveSettings();
-  delete m_detid2index_map;
 }
 
 /** Used to set visibility of an actor corresponding to a particular component
@@ -147,9 +158,10 @@ InstrumentActor::~InstrumentActor()
  * @param visitor
  * @return
  */
-bool InstrumentActor::accept(GLActorVisitor& visitor)
+bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
 {
-  bool ok = m_scene.accept(visitor);
+  bool ok = m_scene.accept(visitor, rule);
+  visitor.visit(this);
   SetVisibilityVisitor* vv = dynamic_cast<SetVisibilityVisitor*>(&visitor);
   if (vv && m_sampleActor)
   {
@@ -157,6 +169,25 @@ bool InstrumentActor::accept(GLActorVisitor& visitor)
   }
   invalidateDisplayLists();
   return ok;
+}
+
+bool InstrumentActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule rule) const
+{
+    bool ok = m_scene.accept(visitor, rule);
+    visitor.visit(this);
+    return ok;
+}
+
+void InstrumentActor::setChildVisibility(bool on)
+{
+    m_scene.setChildVisibility(on);
+    auto guidesVisitor = SetVisibleNonDetectorVisitor(m_showGuides);
+    m_scene.accept( guidesVisitor );
+}
+
+bool InstrumentActor::hasChildVisible() const
+{
+    return m_scene.hasChildVisible();
 }
 
 /** Returns the workspace relating to this instrument view.
@@ -305,7 +336,13 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
  */
 size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
 {
-    return (*m_detid2index_map)[id];
+  auto mapEntry = m_detid2index_map.find(id);
+  if ( mapEntry == m_detid2index_map.end() )
+  {
+    throw Kernel::Exception::NotFoundError("Detector ID not in workspace",id);
+  }
+
+  return mapEntry->second;
 }
 
 /**
@@ -380,7 +417,87 @@ double InstrumentActor::getIntegratedCounts(Mantid::detid_t id)const
   } catch (NotFoundError &) {
     // If the detector is not represented in the workspace
     return -1.0;
-  }
+    }
+}
+
+/**
+ * Sum counts in detectors for purposes of rough plotting against time of flight.
+ * Silently assumes that all spectra share the x vector.
+ *
+ * @param dets :: A list of detector IDs to sum.
+ * @param x :: (output) Time of flight values (or whatever values the x axis has) to plot against.
+ * @param y :: (output) The sums of the counts for each bin.
+ * @param err :: (optional output) Pointer to a buffer to receive the errors of the summed spectra.
+ *               If NULL the errors are not returned.
+ */
+void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x, std::vector<double> &y, std::vector<double> *err) const
+{
+
+    size_t wi;
+    bool isDataEmpty = dets.isEmpty();
+
+    if ( !isDataEmpty )
+    {
+        try {
+            wi = getWorkspaceIndex( dets[0] );
+        } catch (Mantid::Kernel::Exception::NotFoundError &) {
+          isDataEmpty = true; // Detector doesn't have a workspace index relating to it
+        }
+    }
+
+    if ( isDataEmpty )
+    {
+        x.clear();
+        y.clear();
+        if ( err )
+        {
+            err->clear();
+        }
+        return;
+    }
+
+    // find the bins inside the integration range
+    size_t imin,imax;
+    getBinMinMaxIndex(wi,imin,imax);
+
+    Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
+    const Mantid::MantidVec& X = ws->readX(wi);
+    x.assign(X.begin() + imin, X.begin() + imax);
+    if ( ws->isHistogramData() )
+    {
+      // calculate the bin centres
+      std::transform(x.begin(),x.end(),X.begin() + imin + 1,x.begin(),std::plus<double>());
+      std::transform(x.begin(),x.end(),x.begin(),std::bind2nd(std::divides<double>(),2.0));
+    }
+    y.resize(x.size(),0);
+    if (err)
+    {
+      err->resize(x.size(),0);
+    }
+
+    foreach(int id, dets)
+    {
+        try {
+          size_t index = getWorkspaceIndex( id );
+          const Mantid::MantidVec& Y = ws->readY(index);
+          std::transform(y.begin(),y.end(),Y.begin() + imin,y.begin(),std::plus<double>());
+          if (err)
+          {
+            const Mantid::MantidVec& E = ws->readE(index);
+            std::vector<double> tmp;
+            tmp.assign(E.begin() + imin,E.begin() + imax);
+            std::transform(tmp.begin(),tmp.end(),tmp.begin(),tmp.begin(),std::multiplies<double>());
+            std::transform(err->begin(),err->end(),tmp.begin(),err->begin(),std::plus<double>());
+          }
+        } catch (Mantid::Kernel::Exception::NotFoundError &) {
+          continue; // Detector doesn't have a workspace index relating to it
+        }
+    }
+
+    if (err)
+    {
+      std::transform(err->begin(),err->end(),err->begin(),Sqrt());
+    }
 }
 
 /**
@@ -782,18 +899,169 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D& Xfrom,
   }
 }
 
-bool SetVisibleComponentVisitor::visit(GLActor* actor)
+/**
+ * Calculate a rotation to look in a particular direction.
+ *
+ * @param eye :: A direction to look in
+ * @param up :: A vector showing the 'up' direction after the rotation. It doesn't have to be normal to eye
+ *   just non-collinear. If up is collinear to eye the actual 'up' direction is undefined.
+ * @param R :: The result rotation.
+ */
+void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye, const Mantid::Kernel::V3D &up, Mantid::Kernel::Quat &R)
 {
-  ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);
-  if (comp)
-  {
-    bool on = comp->getComponent()->getComponentID() == m_id;
-    actor->setVisibility(on);
-    return on;
-  }
-  return false;
+    if ( eye.nullVector() )
+    {
+        throw std::runtime_error("The eye vector is null in InstrumentActor::rotateToLookAt.");
+    }
+
+    // Basis vectors of the OpenGL reference frame. Z points into the screen, Y points up.
+    const Mantid::Kernel::V3D X(1,0,0);
+    const Mantid::Kernel::V3D Y(0,1,0);
+    const Mantid::Kernel::V3D Z(0,0,1);
+
+    Mantid::Kernel::V3D x,y,z;
+    z = eye;
+    z.normalize();
+    y = up;
+    x = y.cross_prod(z);
+    if (x.nullVector())
+    {
+        // up || eye
+        if ( z.X() != 0.0 )
+        {
+            x.setY(1.0);
+        }
+        else if ( z.Y() != 0.0 )
+        {
+            x.setZ(1.0);
+        }
+        else
+        {
+            x.setX(1.0);
+        }
+    }
+    x.normalize();
+    y = z.cross_prod(x);
+
+    BasisRotation(x,y,z,X,Y,Z,R);
 }
 
+/**
+ * Find the offsets in the spectrum's x vector of the bounds of integration.
+ * @param wi :: The works[ace index of the spectrum.
+ * @param imin :: Index of the lower bound: x_min == readX(wi)[imin]
+ * @param imax :: Index of the upper bound: x_max == readX(wi)[imax]
+ */
+void InstrumentActor::getBinMinMaxIndex( size_t wi, size_t& imin, size_t& imax ) const
+{
+  Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
+  const Mantid::MantidVec& x = ws->readX(wi);
+  Mantid::MantidVec::const_iterator x_begin = x.begin();
+  Mantid::MantidVec::const_iterator x_end = x.end();
+  if (x_begin == x_end)
+  {
+    throw std::runtime_error("No bins found to plot");
+  }
+  if (ws->isHistogramData())
+  {
+    --x_end;
+  }
+  if ( wholeRange() )
+  {
+    imin = 0;
+    imax = static_cast<size_t>(x_end - x_begin);
+  }
+  else
+  {
+    Mantid::MantidVec::const_iterator x_from = std::lower_bound( x_begin, x_end, minBinValue() );
+    Mantid::MantidVec::const_iterator x_to = std::upper_bound( x_begin, x_end, maxBinValue() );
+    imin = static_cast<size_t>(x_from - x_begin);
+    imax = static_cast<size_t>(x_to - x_begin);
+    if (imax <= imin)
+    {
+      if (x_from == x_end)
+      {
+        --x_from;
+        x_to = x_end;
+      }
+      else
+      {
+        x_to = x_from + 1;
+      }
+      imin = static_cast<size_t>(x_from - x_begin);
+      imax = static_cast<size_t>(x_to - x_begin);
+    }
+  }
+}
+
+//-------------------------------------------------------------------------//
+bool SetVisibleComponentVisitor::visit(GLActor* actor)
+{
+    actor->setVisibility(false);
+    return false;
+}
+
+bool SetVisibleComponentVisitor::visit(GLActorCollection *actor)
+{
+    bool visible = actor->hasChildVisible();
+    actor->setVisibility(visible);
+    return visible;
+}
+
+bool SetVisibleComponentVisitor::visit(ComponentActor *actor)
+{
+    bool on = actor->getComponent()->getComponentID() == m_id;
+    actor->setVisibility(on);
+    return on;
+}
+
+bool SetVisibleComponentVisitor::visit(CompAssemblyActor *actor)
+{
+    bool visible = false;
+    if ( actor->getComponent()->getComponentID() == m_id )
+    {
+        visible = true;
+        actor->setChildVisibility(true);
+    }
+    else
+    {
+        visible = actor->hasChildVisible();
+        actor->setVisibility(visible);
+    }
+    return visible;
+}
+
+bool SetVisibleComponentVisitor::visit(ObjCompAssemblyActor *actor)
+{
+    bool on = actor->getComponent()->getComponentID() == m_id;
+    actor->setVisibility(on);
+    return on;
+}
+
+bool SetVisibleComponentVisitor::visit(InstrumentActor *actor)
+{
+    bool visible = false;
+    if ( actor->getInstrument()->getComponentID() == m_id )
+    {
+        visible = true;
+        actor->setChildVisibility(true);
+    }
+    else
+    {
+        visible = actor->hasChildVisible();
+        actor->setVisibility(visible);
+    }
+    return visible;
+}
+
+bool SetVisibleComponentVisitor::visit(RectangularDetectorActor *actor)
+{
+    bool on = actor->getComponent()->getComponentID() == m_id || actor->isChildDetector(m_id);
+    actor->setVisibility(on);
+    return on;
+}
+
+//-------------------------------------------------------------------------//
 /**
  * Visits an actor and if it is a "non-detector" sets its visibility.
  *
@@ -810,6 +1078,7 @@ bool SetVisibleNonDetectorVisitor::visit(GLActor* actor)
   return false;
 }
 
+//-------------------------------------------------------------------------//
 bool FindComponentVisitor::visit(GLActor* actor)
 {
   ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);

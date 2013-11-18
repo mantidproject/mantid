@@ -1,8 +1,71 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "POLREF" date = "2012-01-31T00:00:00">
+<parameter-file instrument = "POLREF" valid-from = "2012-01-31T00:00:00">
 <component-link name = "POLREF">
   <parameter name="show-signed-theta" type="string">
     <value val="Always" />
   </parameter>
+    <parameter name="MonitorBackgroundMin">
+    <value val="14.0"/> 
+  </parameter>
+  
+  <parameter name="MonitorBackgroundMax">
+    <value val="15.0"/> 
+  </parameter>
+   
+<!-- here we need to add the other monitors -->
+  <parameter name="MonitorsToCorrect">
+    <value val="1"/>
+  </parameter>
+
+  <parameter name="PointDetectorStart">
+    <value val="3"/>
+  </parameter>
+
+  <parameter name="PointDetectorStop">
+    <value val="4"/>
+  </parameter>
+  
+  <parameter name="MultiDetectorStart">
+    <value val="6"/>
+  </parameter>
+  
+  <parameter name="I0MonitorIndex">
+    <value val="2"/>
+  </parameter>
+  
+  <parameter name="LambdaMin">
+    <value val="1.0"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="15.0"/>
+  </parameter>
+
+   <!-- parameters for efficiency correction -->
+   <parameter name="correction" type="string">
+    <value val="polynomial"/>
+   </parameter>
+   <parameter name="polystring" type="string">
+    <value val="35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-6"/>
+    <!--<value val="28.0051,-19.396,7.5629,-1.624,0.1986,-0.013783,0.00050478,-7.56647e-6"/>-->
+   </parameter>
+   
+<!-- POLARISATION CORRECTIONS-->
+   <parameter name="crho" type="string">
+    <value val="1.006831,-0.011467,0.002244,-0.000095"/>
+   </parameter>
+
+   <parameter name="calpha" type="string">
+    <value val="1.017526,-0.017183,0.003136,-0.000140"/>
+   </parameter>
+
+   <parameter name="cAp" type="string">
+    <value val="0.917940,0.038265,-0.006645,0.000282"/>
+   </parameter>
+
+   <parameter name="cPp" type="string">
+    <value val="0.972762,0.001828,-0.000261,0.0"/>
+   </parameter>
+
 </component-link>
 </parameter-file>

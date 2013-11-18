@@ -26,7 +26,8 @@ using Mantid::API::AnalysisDataService;
 
 /// Constructor
 vtkPeaksSource::vtkPeaksSource() :  m_wsName(""), 
-  m_wsTypeName(""), m_dimToShow(vtkPeakMarkerFactory::Peak_in_Q_lab)
+  m_wsTypeName(""), m_uintPeakMarkerSize(0.3),
+  m_dimToShow(vtkPeakMarkerFactory::Peak_in_Q_lab)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -161,4 +162,9 @@ Getter for the workspace type name.
 char* vtkPeaksSource::GetWorkspaceTypeName()
 {
   return const_cast<char*>(m_wsTypeName.c_str());
+}
+
+const char* vtkPeaksSource::GetWorkspaceName()
+{
+  return m_wsName.c_str();
 }

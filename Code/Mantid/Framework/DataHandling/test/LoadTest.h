@@ -370,6 +370,7 @@ public:
 
   void testList()
   {
+    AnalysisDataService::Instance().clear();
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "MUSR15189,15190,15191.nxs");
@@ -390,6 +391,12 @@ public:
     TS_ASSERT(ws5);
     MatrixWorkspace_sptr ws6 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_2");
     TS_ASSERT(ws6);
+
+    // Check that originally loaded groups are not left in the ADS
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015189"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015190"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015191"));
+
     removeGroupFromADS(output);
   }
 
@@ -485,13 +492,13 @@ public:
     TS_ASSERT_EQUALS(output->getNumberOfEntries(),2);
     MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_MUSR00015191_MUSR00015192_1");
     TS_ASSERT(ws1);
-    TS_ASSERT_DELTA(ws1->readY(0)[0], 28.0, 1e-12);
-    TS_ASSERT_DELTA(ws1->readY(6)[4], 2.0, 1e-12);
+    TS_ASSERT_DELTA(ws1->readY(0)[0], 16.0, 1e-12);
+    TS_ASSERT_DELTA(ws1->readY(6)[4], 1.0, 1e-12);
 
     MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_MUSR00015191_MUSR00015192_2");
     TS_ASSERT(ws2);
-    TS_ASSERT_DELTA(ws2->readY(0)[5], 1.0, 1e-12);
-    TS_ASSERT_DELTA(ws2->readY(8)[0], 3.0, 1e-12);
+    TS_ASSERT_DELTA(ws2->readY(0)[5], 2.0, 1e-12);
+    TS_ASSERT_DELTA(ws2->readY(8)[0], 6.0, 1e-12);
 
     removeGroupFromADS(output);
   }

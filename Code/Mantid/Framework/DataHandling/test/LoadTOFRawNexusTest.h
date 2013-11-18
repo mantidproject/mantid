@@ -31,14 +31,22 @@ public:
   {
     LoadTOFRawNexus alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+
     alg.setPropertyValue("Filename", "REF_L_32035.nxs");
-    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 80 );
+    Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS( alg.confidence(descr), 80 );
+
     alg.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 20 );
+    Mantid::Kernel::NexusDescriptor descr2(alg.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS( alg.confidence(descr2), 20 );
+
     alg.setPropertyValue("Filename", "argus0026577.nxs");
-    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 0 );
+    Mantid::Kernel::NexusDescriptor descr3(alg.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS( alg.confidence(descr3), 0 );
+
     alg.setPropertyValue("Filename", "PG3_733.nxs");
-    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 0 );
+    Mantid::Kernel::NexusDescriptor descr4(alg.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS( alg.confidence(descr4), 0 );
 
   }
 

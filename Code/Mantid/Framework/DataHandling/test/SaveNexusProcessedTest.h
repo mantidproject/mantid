@@ -13,7 +13,6 @@
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
-#include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -340,38 +339,54 @@ public:
     do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles, true /* DONT preserve events */, true /* Compress */);
   }
 
-  void xtestExec_LoadedEventWorkspace()  /** Disabled because it takes >3 seconds */
+  void testExecSaveLabel()
   {
-
-    //----- Now we re-load with precounting and compare memory use ----
-    Mantid::DataHandling::LoadSNSEventNexus ld2;
-    std::string outws_name = "SaveNexusProcessed_Loaded";
-    ld2.initialize();
-    ld2.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld2.setPropertyValue("OutputWorkspace",outws_name);
-    ld2.setPropertyValue("Precount", "1");
-    ld2.execute();
-    TS_ASSERT( ld2.isExecuted() );
-
     SaveNexusProcessed alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspace", outws_name);
-    outputFile = "SaveNexusProcessed_Loaded.nxs";
+    if ( !alg.isInitialized() ) alg.initialize();
+
+    // create dummy 2D-workspace
+    Workspace2D_sptr localWorkspace2D = boost::dynamic_pointer_cast<Workspace2D>
+      (WorkspaceFactory::Instance().create("Workspace2D",1,10,10));
+
+    //set units to be a label
+    localWorkspace2D->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(localWorkspace2D->getAxis(0)->unit());
+    label->setLabel("Temperature","K");
+
+    double d = 0.0;
+    for(int i = 0; i<10; ++i,d+=0.1)
+    {
+      localWorkspace2D->dataX(0)[i] = d;
+      localWorkspace2D->dataY(0)[i] = d;
+      localWorkspace2D->dataE(0)[i] = d;
+    }
+
+    AnalysisDataService::Instance().addOrReplace("testSpace", localWorkspace2D);
+
+    // Now set it...
+    // specify name of file to save workspace to
+    alg.setPropertyValue("InputWorkspace", "testSpace");
+    outputFile = "SaveNexusProcessedTest_testExec.nxs";
+    //entryName = "test";
     dataName = "spectra";
     title = "A simple workspace saved in Processed Nexus format";
-    alg.setPropertyValue("Filename", outputFile);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile));
     outputFile = alg.getPropertyValue("Filename");
+    //alg.setPropertyValue("EntryName", entryName);
     alg.setPropertyValue("Title", title);
-
-    // Clear the existing file, if any
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
-    alg.execute();
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Filename") );
+    TS_ASSERT( ! result.compare(outputFile));
+
+    // changed so that 1D workspaces are no longer written.
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
-    TS_ASSERT( Poco::File(outputFile).exists() );
+    if(clearfiles) Poco::File(outputFile).remove();
 
-    if (clearfiles)
-      if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
+    AnalysisDataService::Instance().remove("testSpace");
   }
 
 

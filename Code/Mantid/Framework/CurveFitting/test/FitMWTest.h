@@ -9,6 +9,8 @@
 #include "MantidCurveFitting/UserFunction.h"
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidCurveFitting/SeqDomain.h"
+#include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/Gaussian.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -18,6 +20,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidKernel/PropertyManager.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <sstream>
 
@@ -361,21 +364,14 @@ public:
 
   }
 
-#ifdef _WIN32
-#pragma warning( push )
-// Disable division by 0 warning
-#pragma warning( disable: 4723 )
-#endif
-
   void test_ignore_invalid_data()
   {
       auto ws = createTestWorkspace(false);
-      const double zero = 0.0;
       const double one = 1.0;
-      ws->dataY(0)[3] = 1.0 / zero;
+      ws->dataY(0)[3] = std::numeric_limits<double>::infinity();
       ws->dataY(0)[5] = log(-one);
       ws->dataE(0)[7] = 0;
-      ws->dataE(0)[9] = 1.0 / zero;
+      ws->dataE(0)[9] = std::numeric_limits<double>::infinity();
       ws->dataE(0)[11] = log(-one);
 
       FunctionDomain_sptr domain;
@@ -445,9 +441,178 @@ public:
 
   }
 
-#ifdef _WIN32
-#pragma warning ( pop ) // Re-enable the warning
-#endif
+  void test_setting_instrument_fitting_parameters()
+  {
+      boost::shared_ptr<Mantid::Geometry::Instrument> instrument;
+      instrument.reset(new Mantid::Geometry::Instrument);
+      Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent("source");
+      source->setPos(0.0,0.0,-10.0);
+      instrument->markAsSource(source);
+      Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent("sample");
+      instrument->markAsSamplePos(sample);
+      boost::shared_ptr<Mantid::Geometry::Detector> det = boost::shared_ptr<Mantid::Geometry::Detector>(new Mantid::Geometry::Detector("det",1,0));
+      instrument->markAsDetector(det.get());
+
+      API::MatrixWorkspace_sptr ws = createTestWorkspace(false);
+      ws->setInstrument( instrument );
+      ws->getSpectrum(0)->setDetectorID(det->getID());
+
+      auto &pmap = ws->instrumentParameters();
+
+      std::string value = "20.0 , ExpDecay , Lifetime , , , , , , , TOF ,";
+      pmap.add("fitting",det.get(), "Lifetime", value);
+      boost::shared_ptr<const Mantid::Geometry::IDetector> pdet = instrument->getDetector(det->getID());
+      TS_ASSERT( pdet );
+
+      Geometry::Parameter_sptr param = pmap.getRecursive(pdet.get(), "Lifetime", "fitting");
+      TS_ASSERT( param );
+
+      API::IFunction_sptr expDecay(new ExpDecay);
+      FunctionDomain_sptr domain;
+      IFunctionValues_sptr values;
+
+      // Requires a property manager to make a workspce
+      auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+      const std::string wsPropName = "TestWorkspaceInput";
+      propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+      propManager->setProperty<Workspace_sptr>(wsPropName, ws);
+
+      FitMW fitmw( propManager.get(), wsPropName);
+      fitmw.declareDatasetProperties("", true);
+      fitmw.createDomain(domain, values);
+      fitmw.initFunction(expDecay);
+
+      // test that the Lifetime parameter value was picked up from the instrument parameter map
+      TS_ASSERT_EQUALS( expDecay->getParameter("Lifetime"), 20.0 );
+  }
+
+  void do_test_convolve_members_option(bool withBackground)
+  {
+      auto conv = boost::shared_ptr<Convolution>(new Convolution);
+      auto resolution = IFunction_sptr(new Gaussian);
+      resolution->initialize();
+      resolution->setParameter("Height", 1.0);
+      resolution->setParameter("PeakCentre", 0.0);
+      resolution->setParameter("Sigma", 1.0);
+      auto gaussian1 = IFunction_sptr(new Gaussian);
+      gaussian1->initialize();
+      gaussian1->setParameter("Height", 1.0);
+      gaussian1->setParameter("PeakCentre", 0.0);
+      gaussian1->setParameter("Sigma", 1.0);
+      auto gaussian2 = IFunction_sptr(new Gaussian);
+      gaussian2->initialize();
+      gaussian2->setParameter("Height", 1.0);
+      gaussian2->setParameter("PeakCentre", 1.0);
+      gaussian2->setParameter("Sigma", 1.0);
+
+      conv->addFunction( resolution );
+      conv->addFunction( gaussian1 );
+      conv->addFunction( gaussian2 );
+
+      // workspace with 100 points on interval -10 <= x <= 10
+      boost::shared_ptr<WorkspaceTester> data(new WorkspaceTester());
+      data->init(1,100,100);
+      for(size_t i = 0; i < data->blocksize(); i++)
+      {
+          data->dataX(0)[i] = -10.0 + 0.2 * double( i );
+      }
+
+      FunctionDomain_sptr domain;
+      IFunctionValues_sptr values;
+
+      // Requires a property manager to make a workspce
+      auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+      const std::string wsPropName = "TestWorkspaceInput";
+      propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+      propManager->setProperty<Workspace_sptr>(wsPropName, data);
+
+      IFunction_sptr fitfun;
+      if ( withBackground )
+      {
+          API::IFunction_sptr bckgd(new ExpDecay);
+          bckgd->setParameter("Height",1.);
+          bckgd->setParameter("Lifetime",1.);
+          auto composite = boost::shared_ptr<API::CompositeFunction>(new API::CompositeFunction);
+          composite->addFunction(bckgd);
+          composite->addFunction(conv);
+          fitfun = composite;
+      }
+      else
+      {
+          fitfun = conv;
+      }
+
+      FitMW fitmw(propManager.get(), wsPropName);
+      fitmw.declareDatasetProperties("", true);
+      fitmw.initFunction(fitfun);
+      fitmw.separateCompositeMembersInOutput(true,true);
+      fitmw.createDomain(domain, values);
+
+      // Create Output
+      const std::string baseName("TestOutput_");
+      fitmw.createOutputWorkspace(baseName, conv, domain, values);
+
+
+      MatrixWorkspace_sptr outputWS;
+      // A new property should have appeared
+      TS_ASSERT_THROWS_NOTHING(outputWS = propManager->getProperty("OutputWorkspace"));
+      if(!outputWS)
+      {
+        TS_FAIL("No output workspace was found in the property manager");
+        return;
+      }
+
+      static const size_t nExpectedHist(5);
+      TS_ASSERT_EQUALS(nExpectedHist, outputWS->getNumberHistograms());
+      // Check axis has expected labels
+      API::Axis* axis = outputWS->getAxis(1);
+      TS_ASSERT(axis);
+      TS_ASSERT(axis->isText());
+      TS_ASSERT_EQUALS(axis->length(), nExpectedHist);
+      TS_ASSERT_EQUALS(axis->label(0), "Data");
+      TS_ASSERT_EQUALS(axis->label(1), "Calc");
+      TS_ASSERT_EQUALS(axis->label(2), "Diff");
+      TS_ASSERT_EQUALS(axis->label(3), "Convolution");
+      TS_ASSERT_EQUALS(axis->label(4), "Convolution");
+
+
+      FunctionDomain1DView x(data->dataX(0).data(),data->dataX(0).size());
+      FunctionValues gaus1Values(x);
+      FunctionValues gaus2Values(x);
+
+      Convolution conv1;
+      conv1.addFunction( resolution );
+      conv1.addFunction( gaussian1 );
+      conv1.function(x,gaus1Values);
+
+      for(size_t i = 0; i < data->blocksize(); i++)
+      {
+          TS_ASSERT_EQUALS( outputWS->dataY(3)[i], gaus1Values[i] );
+          TS_ASSERT_DIFFERS( outputWS->dataY(3)[i], 0.0 );
+      }
+
+      Convolution conv2;
+      conv2.addFunction( resolution );
+      conv2.addFunction( gaussian2 );
+      conv2.function(x,gaus2Values);
+
+      for(size_t i = 0; i < data->blocksize(); i++)
+      {
+          TS_ASSERT_EQUALS( outputWS->dataY(4)[i], gaus2Values[i] );
+          TS_ASSERT_DIFFERS( outputWS->dataY(4)[i], 0.0 );
+          TS_ASSERT_DIFFERS( outputWS->dataY(4)[i], outputWS->dataY(3)[i] );
+      }
+  }
+
+  void test_convolve_members_option_without_background()
+  {
+      do_test_convolve_members_option(false);
+  }
+
+  void test_convolve_members_option_with_background()
+  {
+      do_test_convolve_members_option(true);
+  }
 
 private:
 

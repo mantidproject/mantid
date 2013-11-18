@@ -83,7 +83,6 @@
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
-#include "CommandLineInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "TableStatistics.h"
 #include "Fit.h"
@@ -130,6 +129,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cassert>
 
 #include <qwt_scale_engine.h>
 #include <QFileDialog>
@@ -167,11 +167,14 @@
 #include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
+#include <QPair>
+#include <QtAlgorithms>
 #include <zlib.h>
 
 #include <gsl/gsl_sort.h>
 
 #include <boost/regex.hpp>
+#include <boost/scoped_ptr.hpp>
 
 //Mantid
 #include "ScriptingWindow.h"
@@ -180,6 +183,7 @@
 #include "Mantid/MantidAbout.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
+#include "Mantid/ManageInterfaceCategories.h"
 #include "Mantid/FirstTimeSetup.h"
 #include "Mantid/SetUpParaview.h"
 
@@ -190,9 +194,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
-#include "MantidQtMantidWidgets/ICatSearch.h"
-#include "MantidQtMantidWidgets/ICatMyDataSearch.h"
-#include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
+#include "MantidQtMantidWidgets/CatalogSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
@@ -411,16 +413,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
 
-  // Interpreter
-  m_interpreterDock = new QDockWidget(this);
-  m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
-  m_interpreterDock->setWindowTitle("Script Interpreter");
-  addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
-  // This is a temporary widget so that when the settings are read the dock's visible state is correct.
-  // It gets replaced with the script widget after the scripting language has been read and set
-  m_interpreterDock->setWidget(new QTextEdit);
-  m_interpreterDock->hide();
-
   undoStackWindow = new QDockWidget(this);
   undoStackWindow->setObjectName("undoStackWindow"); // this is needed for QMainWindow::restoreState()
   undoStackWindow->setWindowTitle(tr("Undo Stack"));
@@ -450,9 +442,66 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   scriptingWindow = NULL;
   d_text_editor = NULL;
 
-  // List of registered PyQt interfaces
-  QString pyqt_interfaces_as_str = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces"));
-  pyqt_interfaces = QStringList::split(" ", pyqt_interfaces_as_str);
+  const QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
+
+  // Parse the list of registered PyQt interfaces and their respective categories.
+  QString pyQtInterfacesProperty = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces"));
+  foreach(const QString pyQtInterfaceInfo, QStringList::split(" ", pyQtInterfacesProperty))
+  {
+    QString pyQtInterfaceFile;
+    QSet<QString> pyQtInterfaceCategories;
+    const QStringList tokens = QStringList::split("/", pyQtInterfaceInfo);
+
+    if( tokens.size() == 0 ) // Empty token - ignore.
+    {
+      continue;
+    }
+    else if( tokens.size() == 1 ) // Assume missing category.
+    {
+      pyQtInterfaceCategories += "Uncatagorised";
+      pyQtInterfaceFile = tokens[0];
+    }
+    else if( tokens.size() == 2 ) // Assume correct interface name and categories.
+    {
+      pyQtInterfaceCategories += QStringList::split(";", tokens[0]).toSet();
+      pyQtInterfaceFile = tokens[1];
+    }
+    else // Too many forward slashes, or no space between two interfaces.  Warn user and move on.
+    {
+      g_log.warning() << "The mantidqt.python_interfaces property contains an unparsable value: "
+                      << pyQtInterfaceInfo.toStdString();
+      continue;
+    }
+
+    const QString scriptPath = scriptsDir + '/' + pyQtInterfaceFile;
+
+    if( QFileInfo(scriptPath).exists() )
+    {
+      const QString pyQtInterfaceName = QFileInfo(scriptPath).baseName().replace("_", " ");
+      m_interfaceNameDataPairs.append(qMakePair(pyQtInterfaceName, scriptPath));
+
+      // Keep track of the interface's categories as we go.
+      m_interfaceCategories[pyQtInterfaceName] = pyQtInterfaceCategories;
+      m_allCategories += pyQtInterfaceCategories;
+    }
+    else
+    {
+      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
+      g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
+    }
+  }
+  
+  MantidQt::API::InterfaceManager interfaceManager;
+  // Add all interfaces inherited from UserSubWindow.
+  foreach(const QString userSubWindowName, interfaceManager.getUserSubWindowKeys())
+  {
+    m_interfaceNameDataPairs.append(qMakePair(userSubWindowName, userSubWindowName));
+
+    const QSet<QString> categories = UserSubWindowFactory::Instance().getInterfaceCategories(userSubWindowName);
+
+    m_interfaceCategories[userSubWindowName] = categories;
+    m_allCategories += categories;
+  }
 
   renamedTables = QStringList();
   if (!factorySettings)
@@ -500,11 +549,22 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  m_scriptInterpreter = new CommandLineInterpreter(*scriptingEnv(), m_interpreterDock);
-  delete m_interpreterDock->widget();
-  m_interpreterDock->setWidget(m_scriptInterpreter);
   m_iface_script = NULL;
+
+  m_interpreterDock = new QDockWidget(this);
+  m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
+  m_interpreterDock->setWindowTitle("Script Interpreter");
+  runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
+  if ( ! restoreDockWidget(m_interpreterDock))
+  {
+    // Restoring the widget fails if the settings aren't found or read. Therefore, add it manually.
+    addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
+  }
+
   loadCustomActions();
+
+  // Nullify catalogSearch
+  catalogSearch = NULL;
 
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser")
@@ -512,8 +572,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     logWindow->show();
     g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
-
-  actionIPythonConsole->setVisible(testForIPython());
 
   // Need to show first time setup dialog?
   using Mantid::Kernel::ConfigServiceImpl;
@@ -648,7 +706,7 @@ void ApplicationWindow::initGlobalConstants()
   appStyle = qApp->style()->objectName();
   d_app_rect = QRect();
   projectname = "untitled";
-  lastCopiedLayer = 0;
+  lastCopiedLayer = NULL;
   d_text_copy = NULL;
   d_arrow_copy = NULL;
   d_image_copy = NULL;
@@ -932,14 +990,6 @@ void ApplicationWindow::initToolBars()
   btnCursor->setCheckable( true );
   btnCursor->setIcon(QIcon(getQPixmap("select_xpm")) );
   //plotTools->addAction(btnCursor); disabled until fixed (#2783)
-
-  btnSelect = new QAction(tr("&Select Data Range"), this);
-  btnSelect->setShortcut( tr("ALT+S") );
-  btnSelect->setActionGroup(dataTools);
-  btnSelect->setCheckable( true );
-  btnSelect->setIcon(QIcon(getQPixmap("cursors_xpm")) );
-  //plotTools->addAction(btnSelect); disabled until fixed (#2783)
-
   btnPicker = new QAction(tr("S&creen Reader"), this);
   btnPicker->setActionGroup(dataTools);
   btnPicker->setCheckable( true );
@@ -1116,7 +1166,6 @@ void ApplicationWindow::initMainMenu()
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
   view->addAction(actionShowScriptInterpreter);
-  view->addAction(actionIPythonConsole);
   view->insertSeparator();
 
   mantidUI->addMenuItems(view);
@@ -1211,6 +1260,10 @@ void ApplicationWindow::initMainMenu()
   windowsMenu->setCheckable(true);
   connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(windowsMenuAboutToShow()));
 
+  interfaceMenu = new QMenu(this);
+  interfaceMenu->setObjectName("interfaceMenu");
+  connect(interfaceMenu, SIGNAL(aboutToShow()), this, SLOT(interfaceMenuAboutToShow()));
+
   foldersMenu = new QMenu(this);
   foldersMenu->setCheckable(true);
 
@@ -1223,6 +1276,7 @@ void ApplicationWindow::initMainMenu()
   help->addAction(actionmantidplotHelp);
   help->insertSeparator();
   help->addAction(actionHelpBugReports);
+  help->addAction(actionAskHelp);
   help->insertSeparator();
   help->addAction(actionFirstTimeSetup);
   help->insertSeparator();
@@ -1237,11 +1291,9 @@ void ApplicationWindow::initMainMenu()
 
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
-  icat->addAction(actionICatLogin);//Login menu item
-  icat->addAction(actionMydataSearch);// my data search menu item
-  icat->addAction(actionICatSearch);//search menu item
-  icat->addAction(actionAdvancedSearch); //advanced search menu item
-  icat->addAction(actionICatLogout);//logout menu item
+  icat->addAction(actionCatalogLogin);//Login menu item
+  icat->addAction(actionCatalogSearch); // ICAT GUI menu item
+  icat->addAction(actionCatalogLogout);//logout menu item
   disableActions();
 }
 
@@ -1319,7 +1371,6 @@ void ApplicationWindow::plotDataMenuAboutToShow()
   plotDataMenu->addAction(actionUnzoom);
   plotDataMenu->insertSeparator();
   plotDataMenu->addAction(btnCursor);
-  plotDataMenu->addAction(btnSelect);
   plotDataMenu->addAction(btnPicker);
   plotDataMenu->insertSeparator();
   plotDataMenu->addAction(actionDrawPoints);
@@ -1521,44 +1572,10 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   }
 
   myMenuBar()->insertItem(tr("&Catalog"),icat);
-
-  // Interface menu. Build the interface from the user sub windows list.
-  // Modifications will be done through the ManageCustomMenus dialog and
-  // remembered through QSettings.
-  MantidQt::API::InterfaceManager interfaceManager;
-  QStringList user_windows = interfaceManager.getUserSubWindowKeys();
-  QStringListIterator itr(user_windows);
-  QString menuName = "&Interfaces";
-  addUserMenu(menuName);
-  while( itr.hasNext() )
-  {
-      QString itemName = itr.next();
-      // Check whether the menu item was flagged in the QSettings.
-      if (getMenuSettingsFlag(itemName))
-          addUserMenuAction( menuName, itemName, itemName);
-  }
-
-  // Go through PyQt interfaces
-  QString scriptsDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("mantidqt.python_interfaces_directory"));
-  QStringListIterator pyqt_itr(pyqt_interfaces);
-  while( pyqt_itr.hasNext() )
-  {
-    QString itemName = pyqt_itr.next();
-    QString scriptPath = scriptsDir + '/' + itemName;
-
-    if( QFileInfo(scriptPath).exists() ) {
-      QString baseName = QFileInfo(scriptPath).baseName();
-      // Need to use "nice" name to check if scripts has been removed by user.
-      QString niceName = baseName.replace("_", " ");
-      if (getMenuSettingsFlag(niceName))
-        addUserMenuAction(menuName, baseName, scriptPath);
-    }
-    else
-    {
-      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
-      g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
-    }
-  }
+  
+  // -- INTERFACE MENU --
+  myMenuBar()->insertItem(tr("&Interfaces"), interfaceMenu);
+  interfaceMenuAboutToShow();
 
   myMenuBar()->insertItem(tr("&Help"), help );
 
@@ -1694,20 +1711,16 @@ void ApplicationWindow::disableToolbars()
   plotTools->setEnabled(false);
 }
 
-void ApplicationWindow::hideToolbars()
+/**
+ * Show/hide MantidPlot toolbars.
+ * @param visible If true, make toolbar visible, if false - hidden
+ */
+void ApplicationWindow::setToolbarsVisible(bool visible)
 {
-  standardTools->setVisible(false);
-  displayBar->setVisible(false);
-  plotTools->setVisible(false);
-  formatToolBar->setVisible(false);
-}
-
-void ApplicationWindow::showToolbars()
-{
-  standardTools->setVisible(true);
-  displayBar->setVisible(true);
-  plotTools->setVisible(true);
-  formatToolBar->setVisible(true);
+  standardTools->setVisible(visible);
+  displayBar->setVisible(visible);
+  plotTools->setVisible(visible);
+  formatToolBar->setVisible(visible);
 }
 
 void ApplicationWindow::plot3DRibbon()
@@ -2718,6 +2731,51 @@ MultiLayer* ApplicationWindow::newGraph(const QString& caption)
   return ml;
 }
 
+/**
+ * Prepares MultiLayer window for plotting - creates it if necessary, clears it, applies initial
+ * settings etc.
+ * @param isNew         :: Whether the Graph used for plotting was created, or the old one was used
+ * @param window        :: Existing MultiLayer window. If NULL - a new one will be created
+ * @param newWindowName :: Name of the new window if one is created
+ * @param clearWindow   :: Whether to clear existing window before plotting. Ignored if window is NULL
+ * @return Pointer to created window if window == NULL, otherwise - window.
+ */
+MultiLayer* ApplicationWindow::prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName, bool clearWindow) 
+{
+  isNew = false;
+
+  if(window == NULL)
+  { // If plot window is not specified, create a new one
+    window = multilayerPlot(generateUniqueName( newWindowName + "-"));
+    window->setCloseOnEmpty(true);
+    isNew = true;
+  } 
+  else if(clearWindow)
+  { 
+    window->setLayersNumber(0); // Clear by removing all the layers
+  }
+
+  if (window->isEmpty())
+  { // This will add a new layer in two situations: when we've cleared the window manually,
+    // or when the window specified didn't actually have any layers
+    window->addLayer();
+    isNew = true;
+  }
+
+  if(isNew)
+  { // If new graph was created, need to set some initial stuff
+
+    Graph *g = window->activeGraph(); // We use active graph only. No support for proper _multi_ layers yet.
+
+    connect(g,SIGNAL(curveRemoved()),window,SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+    setPreferences(g);
+    g->newLegend();
+    g->setTitle( newWindowName );
+  }
+
+  return window; 
+}
+
 MultiLayer* ApplicationWindow::multilayerPlot(Table* w, const QStringList& colList, int style, int startRow, int endRow)
 {//used when plotting selected columns
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -2844,7 +2902,6 @@ void ApplicationWindow::initMultilayerPlot(MultiLayer* g, const QString& name)
 
   g->setWindowTitle(label);
   g->setName(label);
-  g->setIcon(getQPixmap("graph_xpm"));
   g->setScaleLayersOnPrint(d_scale_plots_on_print);
   g->printCropmarks(d_print_cropmarks);
 
@@ -3065,8 +3122,11 @@ void ApplicationWindow::initTable(Table* w, const QString& caption)
   customTable(w);
 
   w->setName(name);
-  w->setIcon( getQPixmap("worksheet_xpm") );
   w->setSpecifications(w->saveToString(windowGeometryInfo(w)));
+  if ( !w->isA("MantidTable"))
+  {
+    w->setIcon( getQPixmap("worksheet_xpm") );
+  }
 
   addMdiSubWindow(w);
 }
@@ -3097,7 +3157,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
     name = generateUniqueName(tr("Notes"));
 
   m->setName(name);
-  m->setIcon(getQPixmap("note_xpm"));
   m->confirmClose(confirmCloseNotes);
 
   addMdiSubWindow(m);
@@ -3368,7 +3427,6 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
 
   m->setWindowTitle(name);
   m->setName(name);
-  m->setIcon( m->matrixIcon() );//Mantid
   m->confirmClose(confirmCloseMatrix);
   m->setNumericPrecision(d_decimal_digits);
 
@@ -3399,29 +3457,23 @@ void ApplicationWindow::convertTableToWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
-  {
-    mt = convertTableToTableWorkspace(t);
-  }
+  convertTableToTableWorkspace(t);
 }
 
 /**
- * Convert Table in the active window to a TableWorkspace
+ * Convert Table in the active window to a MatrixWorkspace
  */
 void ApplicationWindow::convertTableToMatrixWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
+  if(auto *mt = dynamic_cast<MantidTable*>(t))
   {
     mt = convertTableToTableWorkspace(t);
+    QMap<QString,QString> params;
+    params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+    mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
   }
-  if ( !mt ) return;
-  QMap<QString,QString> params;
-  params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-  mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
 }
 
 /**
@@ -3498,8 +3550,7 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
   {
     Mantid::API::AnalysisDataService::Instance().add(wsName,tws);
   }
-  MantidTable* mt = new MantidTable(scriptingEnv(), tws, t->objectName(), this);
-  return mt;
+  return new MantidTable(scriptingEnv(), tws, t->objectName(), this);
 }
 
 Matrix* ApplicationWindow::tableToMatrix(Table* t)
@@ -4758,11 +4809,6 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
     newEnv = ScriptingLangManager::newEnv(lang, this);
     connect(newEnv, SIGNAL(print(const QString&)), resultsLog, SLOT(appendNotice(const QString&)));
 
-    // The following is already part of executeScript
-    // This call could be uncommented if mantidsimple is folded into Mantid such that the
-    // algorithm call signature could also be updated.
-    //connect(mantidUI, SIGNAL(algorithmAboutToBeCreated()), newEnv, SLOT(refreshAlgorithms()));
-
     if( newEnv->initialize() )
     {   
       m_script_envs.insert(lang, newEnv);
@@ -5061,13 +5107,28 @@ void ApplicationWindow::readSettings()
   settings.endGroup(); // UserFunctions
 
   settings.beginGroup("/Confirmations");
-  confirmCloseFolder = settings.value("/Folder", true).toBool();
-  confirmCloseTable = settings.value("/Table", true).toBool();
-  confirmCloseMatrix = settings.value("/Matrix", true).toBool();
-  confirmClosePlot2D = settings.value("/Plot2D", true).toBool();
-  confirmClosePlot3D = settings.value("/Plot3D", true).toBool();
-  confirmCloseNotes = settings.value("/Note", true).toBool();
-  d_inform_rename_table = settings.value("/RenameTable", true).toBool();
+  //Once only for each Qsettings instance set all of the confirmations to false - they are annoying
+  //however if people consciously turn them back on then leave them alone.
+  //leaving renameTable out of this as it is bit different
+  bool setConfirmationDefaultsToFalseOnce= settings.value("/DefaultsSetToFalseOnce", false).toBool();
+  if (!setConfirmationDefaultsToFalseOnce)
+  {
+    settings.setValue("/Folder", false);
+    settings.setValue("/Table", false);
+    settings.setValue("/Matrix", false);
+    settings.setValue("/Plot2D", false);
+    settings.setValue("/Plot3D", false);
+    settings.setValue("/Note", false);
+    settings.setValue("/InstrumentWindow", false);
+    settings.setValue("/DefaultsSetToFalseOnce", true);
+  }
+  confirmCloseFolder = settings.value("/Folder", false).toBool();
+  confirmCloseTable = settings.value("/Table", false).toBool();
+  confirmCloseMatrix = settings.value("/Matrix", false).toBool();
+  confirmClosePlot2D = settings.value("/Plot2D", false).toBool();
+  confirmClosePlot3D = settings.value("/Plot3D", false).toBool();
+  confirmCloseNotes = settings.value("/Note", false).toBool();
+  d_inform_rename_table = settings.value("/RenameTable", false).toBool();
   confirmCloseInstrWindow=settings.value("/InstrumentWindow", false).toBool();
   settings.endGroup(); // Confirmations
 
@@ -5278,7 +5339,7 @@ void ApplicationWindow::readSettings()
   // Mantid
 
   bool warning_shown = settings.value("/DuplicationDialogShown", false).toBool();
-
+  
   //Check for user defined scripts in settings and create menus for them
   //Top level scripts group
   settings.beginGroup("CustomScripts");
@@ -5292,17 +5353,24 @@ void ApplicationWindow::readSettings()
 
   foreach(QString menu, settings.childGroups())
   {
+    // Specifically disallow the use of the Interfaces menu to users looking to
+    // customise their own menus, since it is managed separately.  Also, there
+    // may well be some left-over QSettings values from previous installations
+    // that we do not want used.
+    if( menu == "Interfaces" || menu == "&Interfaces" )
+      continue;
+  
     addUserMenu(menu);
     settings.beginGroup(menu);
     foreach(QString keyName, settings.childKeys())
     {
       QFileInfo fi(settings.value(keyName).toString());
       QString baseName = fi.fileName();
-      if (pyqt_interfaces.contains(baseName))
+      const QStringList pyQtInterfaces = m_interfaceCategories.keys();
+      if (pyQtInterfaces.contains(baseName))
         continue;
 
-      if ( menu.contains("Interfaces")==0 &&
-          (user_windows.grep(keyName).size() > 0 || pyqt_interfaces.grep(keyName).size() > 0) )
+      if ( user_windows.grep(keyName).size() > 0 || pyQtInterfaces.grep(keyName).size() > 0 )
       {
         duplicated_custom_menu.append(menu+"/"+keyName);
       }
@@ -5633,8 +5701,6 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/KeepAspect", d_keep_plot_aspect);
   settings.endGroup(); // ExportImage
 
-
-  if(m_scriptInterpreter ) m_scriptInterpreter->saveSettings();
   settings.beginGroup("/ScriptWindow");
   // Geometry is applied by the app window
   settings.setValue("/size", d_script_win_size);
@@ -6262,7 +6328,7 @@ bool ApplicationWindow::setWindowName(MdiSubWindow *w, const QString &text)
 
   newName.replace("_", "-");
 
-  // cppcheck-suppress unintvar
+  // cppcheck-suppress uninitvar
   while(alreadyUsedName(newName)){
     QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Name <b>%1</b> already exists!").arg(newName)+//Mantid
         "<p>"+tr("Please choose another name!")+
@@ -8168,7 +8234,6 @@ void ApplicationWindow::showImageDialog()
     id->setAttribute(Qt::WA_DeleteOnClose);
     connect (id, SIGNAL(setGeometry(int, int, int, int)),
         g, SLOT(updateImageMarker(int, int, int, int)));
-    //		id->setIcon(getQPixmap("logo_xpm"));
     id->setOrigin(im->origin());
     id->setSize(im->size());
     id->exec();
@@ -8281,11 +8346,6 @@ void ApplicationWindow::copySelection()
     info->copy();
     return;
   }
-  else if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->copy();
-    return;
-  }
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -8385,12 +8445,6 @@ void ApplicationWindow::copyMarker()
 
 void ApplicationWindow::pasteSelection()
 {  
-  if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->paste();
-    return;
-  }
-
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -9292,6 +9346,62 @@ void ApplicationWindow::windowsMenuAboutToShow()
   reloadCustomActions();
 }
 
+void ApplicationWindow::interfaceMenuAboutToShow()
+{
+  interfaceMenu->clear();
+  m_interfaceActions.clear();
+
+  // Create a submenu for each category.  Make sure submenus are in alphabetical order,
+  // and ignore any hidden categories.
+  const QString hiddenProp = QString::fromStdString(
+    Mantid::Kernel::ConfigService::Instance().getString("interfaces.categories.hidden")
+  );
+  auto hiddenCategories = hiddenProp.split(";", QString::SkipEmptyParts).toSet();
+  QMap<QString, QMenu *> categoryMenus;
+  auto sortedCategories = m_allCategories.toList();
+  qSort(sortedCategories);
+  foreach(const QString category, sortedCategories)
+  {
+    if( hiddenCategories.contains(category) )
+      continue;
+    QMenu * categoryMenu = new QMenu(interfaceMenu);
+    categoryMenu->setObjectName(category + "Menu");
+    interfaceMenu->insertItem(tr(category), categoryMenu);
+    categoryMenus[category] = categoryMenu;
+  }
+
+  // Turn the name/data pairs into QActions with which we populate the menus.
+  foreach(const auto interfaceNameDataPair, m_interfaceNameDataPairs)
+  {
+    const QString name = interfaceNameDataPair.first;
+    const QString data = interfaceNameDataPair.second;
+
+    foreach(const QString category, m_interfaceCategories[name])
+    {
+      if(!categoryMenus.contains(category))
+        continue;
+      QAction * openInterface = new QAction(tr(name), interfaceMenu);
+      openInterface->setData(data);
+      categoryMenus[category]->addAction(openInterface);
+
+      // Update separate list containing all interface actions.
+      m_interfaceActions.append(openInterface);
+    }
+  }
+
+  foreach( auto categoryMenu, categoryMenus.values() )
+  {
+    connect(categoryMenu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
+  }
+
+  interfaceMenu->insertSeparator();
+
+  // Allow user to customise categories.
+  QAction * customiseCategoriesAction = new QAction(tr("Add/Remove Categories"), this);
+  connect(customiseCategoriesAction, SIGNAL(activated()), this, SLOT(showInterfaceCategoriesDialog()));
+  interfaceMenu->addAction(customiseCategoriesAction);
+}
+
 void ApplicationWindow::showMarkerPopupMenu()
 {
   MultiLayer *plot = dynamic_cast<MultiLayer*>(activeWindow(MultiLayerWindow));
@@ -9460,13 +9570,6 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-  // don't ask the closing sub-windows: the answer will be ignored
-  MDIWindowList windows = getAllWindows();
-  foreach(MdiSubWindow* w,windows)
-  {
-    w->confirmClose(false);
-  }
-
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
     if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
@@ -9490,7 +9593,22 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     }
   }
 
+  // Close all the MDI windows
+  MDIWindowList windows = getAllWindows();
+  foreach(MdiSubWindow* w,windows)
+  {
+    w->confirmClose(false);
+    w->close();
+  }
+
   mantidUI->shutdown();
+
+  if (catalogSearch)
+  {
+    catalogSearch->disconnect();
+    delete catalogSearch;
+    catalogSearch = NULL;
+  }
 
   if( scriptingWindow )
   {
@@ -9513,7 +9631,6 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   //Save the settings and exit
   saveSettings();
-  m_scriptInterpreter->shutdown();
   scriptingEnv()->finalize();
 
   // Help window
@@ -12086,8 +12203,7 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
 }
 Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsName,const QStringList &lst)
 {
-  ProjectData *prjData=new ProjectData;
-  if(!prjData)return 0;
+  ProjectData prjData;
 
   foreach (QString str, lst) {
     if(str.contains("<ColorMap>"))
@@ -12096,7 +12212,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     QString colormapLine=lst[index+1];
     QStringList list=colormapLine.split("\t");
     QString colormapFile=list[2];
-    prjData->setColormapFile(colormapFile);
+    prjData.setColormapFile(colormapFile);
     }
     if(str.contains("<ColorPolicy>"))
     { 	//read the colormap policy to set gray scale
@@ -12105,7 +12221,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=colormapPolicy.indexOf(">");
       int index2=colormapPolicy.lastIndexOf("<");
       bool gray=colormapPolicy.mid(index1+1,index2-index1-1).toInt();
-      prjData->setGrayScale(gray);
+      prjData.setGrayScale(gray);
 
     }
     if (str.contains("\t<ContourLines>"))
@@ -12115,14 +12231,14 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=contourlines.indexOf(">");
       int index2=contourlines.lastIndexOf("<");
       int bcontour=contourlines.mid(index1+1,index2-index1-1).toInt();
-      if(bcontour)prjData->setContourMode(true);
+      if(bcontour)prjData.setContourMode(true);
 
       //setting contour levels
       QString contourlevels=lst[index+1];
       index1=contourlevels.indexOf(">");
       index2=contourlevels.lastIndexOf("<");
       int levels=contourlevels.mid(index1+1,index2-index1-1).toInt();
-      prjData->setContourLevels(levels);
+      prjData.setContourLevels(levels);
 
       //setting contour default pen
       QString pen=lst[index+2];
@@ -12144,15 +12260,15 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
         QString penstyle=stylestring.mid(index1+1,index2-index1-1);
         QColor qcolor(pencolor);
         QPen pen = QPen(qcolor, penwidth.toDouble(),Graph::getPenStyle(penstyle.toInt()));
-        prjData->setDefaultContourPen(pen);
-        prjData->setColorMapPen(false);
+        prjData.setDefaultContourPen(pen);
+        prjData.setColorMapPen(false);
       }
       else if (pen.contains("<CustomPen>"))
       {	ContourLinesEditor* contourLinesEditor = new ContourLinesEditor(this->locale());
-      prjData->setCotntourLinesEditor(contourLinesEditor);
-      prjData->setCustomPen(true);
+      prjData.setCotntourLinesEditor(contourLinesEditor);
+      prjData.setCustomPen(true);
       }
-      else prjData->setColorMapPen(true);
+      else prjData.setColorMapPen(true);
     }
     if(str.contains("<IntensityChanged>"))
     {	 //read the intensity changed line from file and setting the spectrogram flag for intenisity
@@ -12162,7 +12278,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=intensity.indexOf(">");
       int index2=intensity.lastIndexOf("<");
       bool bIntensity=intensity.mid(index1+1,index2-index1-1).toInt();
-      prjData->setIntensity(bIntensity);
+      prjData.setIntensity(bIntensity);
     }
 
   }
@@ -12174,8 +12290,13 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     if( *matrixItr && specgramwsName==(*matrixItr)->getWorkspaceName() )
       m = *matrixItr;
   }
-  if(!m) return 0 ;
-  Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);
+
+  if ( !m )
+  {
+    return NULL;
+  }
+
+  Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,&prjData);
   if ( ag->multiLayer() != NULL )
   {
     m->attachMultilayer( ag->multiLayer() );
@@ -12379,8 +12500,6 @@ void ApplicationWindow::pickDataTool( QAction* action )
 
   if (action == btnCursor)
     showCursor();
-  else if (action == btnSelect)
-    showRangeSelectors();
   else if (action == btnPicker)
     showScreenReader();
   else if (action == btnMovePoints)
@@ -13189,6 +13308,9 @@ void ApplicationWindow::createActions()
   actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
   connect(actionHelpBugReports, SIGNAL(triggered()), this, SLOT(showBugTracker()));
 
+  actionAskHelp = new QAction(tr("Ask for Help"), this);
+  connect(actionAskHelp, SIGNAL(triggered()), this, SLOT(showBugTracker()));
+
   //actionDownloadManual = new QAction(tr("Download &Manual"), this); // Mantid change
   //connect(actionDownloadManual, SIGNAL(activated()), this, SLOT(downloadManual())); // Mantid change
 
@@ -13219,14 +13341,6 @@ void ApplicationWindow::createActions()
 #endif
   actionShowScriptInterpreter->setToggleAction(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
-
-  actionIPythonConsole = new QAction(getQPixmap("python_xpm"), tr("Launch IPython Console"), this);
-#ifdef __APPLE__
-  actionIPythonConsole->setShortcut(tr("Ctrl+5")); // F4 is used by the window manager on Mac
-#else
-  actionIPythonConsole->setShortcut(tr("F5"));
-#endif
-  connect(actionIPythonConsole, SIGNAL(activated()), this, SLOT(launchIPythonConsole()));
 #endif
 
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
@@ -13317,25 +13431,17 @@ void ApplicationWindow::createActions()
   actionPanPlot = new QAction(QIcon(":/panning.png"), tr("Panning tool"), this);
   connect(actionPanPlot, SIGNAL(activated()), this, SLOT(panOnPlot()));
 
-  actionICatLogin  = new QAction("Login",this);
-  actionICatLogin->setToolTip(tr("Catalog Login"));
-  connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
+  actionCatalogLogin  = new QAction("Login",this);
+  actionCatalogLogin->setToolTip(tr("Catalog Login"));
+  connect(actionCatalogLogin, SIGNAL(activated()), this, SLOT(CatalogLogin()));
 
-  actionICatSearch=new QAction("Basic Search",this);
-  actionICatSearch->setToolTip(tr("Catalog Basic Search"));
-  connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
+  actionCatalogSearch = new QAction("Search",this);
+  actionCatalogSearch->setToolTip(tr("Search data in archives."));
+  connect(actionCatalogSearch, SIGNAL(activated()), this, SLOT(CatalogSearch()));
 
-  actionMydataSearch=new QAction("My Data Search",this);
-  actionMydataSearch->setToolTip(tr("Catalog MyData Search"));
-  connect(actionMydataSearch, SIGNAL(activated()), this, SLOT(ICatMyDataSearch()));
-
-  actionICatLogout=new QAction("Logout",this);
-  actionICatLogout->setToolTip(tr("Catalog Logout"));
-  connect(actionICatLogout, SIGNAL(activated()), this, SLOT(ICatLogout()));
-
-  actionAdvancedSearch = new QAction("Advanced Search",this);
-  actionAdvancedSearch->setToolTip(tr("Catalog Advanced Search"));
-  connect(actionAdvancedSearch, SIGNAL(activated()), this, SLOT(ICatAdvancedSearch()));
+  actionCatalogLogout = new QAction("Logout",this);
+  actionCatalogLogout->setToolTip(tr("Catalog Logout"));
+  connect(actionCatalogLogout, SIGNAL(activated()), this, SLOT(CatalogLogout()));
 
   actionWaterfallPlot = new QAction(QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
   connect(actionWaterfallPlot, SIGNAL(activated()), this, SLOT(waterfallPlot()));
@@ -13794,6 +13900,7 @@ void ApplicationWindow::translateActionsStrings()
   //actionCheckUpdates->setMenuText(tr("Search for &Updates")); //Mantid change - commented out
   //actionHelpForums->setText(tr("Visit QtiPlot &Forums"));
   actionHelpBugReports->setText(tr("Report a &Bug"));
+  actionAskHelp->setText(tr("Ask for Help"));
   //actionDownloadManual->setMenuText(tr("Download &Manual"));//Mantid change - commented out
   //actionTranslations->setMenuText(tr("&Translations"));//Mantid change - commented out
   //actionDonate->setMenuText(tr("Make a &Donation"));
@@ -13816,10 +13923,6 @@ void ApplicationWindow::translateActionsStrings()
   btnCursor->setMenuText(tr("&Data Reader"));
   btnCursor->setShortcut(tr("CTRL+D"));
   btnCursor->setToolTip(tr("Data Reader"));
-
-  btnSelect->setMenuText(tr("&Select Data Range"));
-  btnSelect->setShortcut(tr("ALT+S"));
-  btnSelect->setToolTip(tr("Select data range"));
 
   btnPicker->setMenuText(tr("S&creen Reader"));
   btnPicker->setToolTip(tr("Screen reader"));
@@ -14511,7 +14614,7 @@ void ApplicationWindow::showMantidConcepts()
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
-  std::string url("qthelp://org.mantidproject/doc/html/algorithms_index.html");
+  //std::string url("qthelp://org.mantidproject/doc/html/algorithms_index.html");
   HelpWindow::Instance().showAlgorithm();
 }
 
@@ -16144,31 +16247,11 @@ void ApplicationWindow::showScriptInterpreter()
   { 
     m_interpreterDock->show();
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
-    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
-    m_scriptInterpreter->setFocus();
+    m_interpreterDock->setFocusProxy(m_interpreterDock->widget());
+    m_interpreterDock->setFocus();
     m_interpreterDock->activateWindow();
-     
   }
 
-}
-
-bool ApplicationWindow::testForIPython()
-{
-#ifdef _WIN32
-  // We have an issue with clashing MSVCR90 libraries on 32-bit windows. When this method
-  // is run at startup it raises a dialog box warning about an invalid load of the C runtime library.
-  // It seems to have picked up MSCRV90 from the CMake bin directory. Clicking OK allows
-  // Mantid to load and then running IPython seesm fine, also without CMake in the PATH it is okay.
-  // We will have to assume that this is always here on Windows.
-  return true;
-#else
-  return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
-#endif
-}
-
-void ApplicationWindow::launchIPythonConsole()
-{
-  runPythonScript("from ipython_plugin import MantidPlot_IPython\nMantidPlot_IPython().launch_console()",false, true,false);
 }
 
 /**
@@ -16209,25 +16292,22 @@ void ApplicationWindow::fitFrameToLayer()
 
 ApplicationWindow::~ApplicationWindow()
 {
-  if (lastCopiedLayer)
-    delete lastCopiedLayer;
-
+  delete lastCopiedLayer;
   delete hiddenWindows;
-
-  if (scriptingWindow)
+  delete scriptingWindow;
+  delete d_text_editor;
+  delete catalogSearch;
+  while(!d_user_menus.isEmpty())
   {
-    delete scriptingWindow;
+    QMenu *menu = d_user_menus.takeLast();
+    delete menu;
   }
-
-  if (d_text_editor)
-    delete d_text_editor;
+  delete current_folder;
 
   QApplication::clipboard()->clear(QClipboard::Clipboard);
 
   btnPointer->setChecked(true);
-
-  //Mantid
-  if (mantidUI) delete mantidUI;
+  delete mantidUI;
 }
 
 QString ApplicationWindow::versionString()
@@ -16452,6 +16532,9 @@ bool ApplicationWindow::validFor2DPlot(Table *table)
   if (!table->selectedYColumns().count()){
     QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Please select a Y column to plot!"));//Mantid
     return false;
+  } else if (table->selectedXColumns().count() > 1){
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Can't plot using multiple X columns!"));//Mantid
+    return false;
   } else if (table->numCols()<2) {
     QMessageBox::critical(this, tr("MantidPlot - Error"),tr("You need at least two columns for this operation!"));//Mantid
     return false;
@@ -16474,7 +16557,7 @@ MultiLayer* ApplicationWindow::generate2DGraph(Graph::CurveType type)
       return 0;
 
     Q3TableSelection sel = table->getSelection();
-    return multilayerPlot(table, table->drawableColumnSelection(), type, sel.topRow(), sel.bottomRow());
+    return multilayerPlot(table, table->selectedColumns(), type, sel.topRow(), sel.bottomRow());
   } else if (w->isA("Matrix")){
     Matrix *m = static_cast<Matrix *>(w);
     return plotHistogram(m);
@@ -16890,6 +16973,20 @@ void ApplicationWindow::showCustomActionDialog()
   ad->setFocus();
 }
 
+void ApplicationWindow::showInterfaceCategoriesDialog()
+{
+  auto existingWindow = this->findChild<ManageInterfaceCategories *>();
+  if( !existingWindow )
+  {
+    auto * diag = new ManageInterfaceCategories(this);
+    diag->setAttribute(Qt::WA_DeleteOnClose);
+    diag->show();
+    diag->setFocus();
+  }
+  else
+    existingWindow->activateWindow();
+}
+
 void ApplicationWindow::showUserDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
@@ -16955,7 +17052,7 @@ void ApplicationWindow::removeCustomAction(QAction *action)
 
 void ApplicationWindow::performCustomAction(QAction *action)
 {
-  if (!action || !d_user_actions.contains(action))
+  if (!action || !(d_user_actions.contains(action) || m_interfaceActions.contains(action)))
     return;
 #ifdef SCRIPTING_PYTHON
 QString action_data = action->data().toString();
@@ -16984,12 +17081,12 @@ if( QFileInfo(action_data).exists() )
 }
 else
 {
-  //First search for an existing window
-  foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
+  // Check to see if the window is already open.  If so, just show it to the user.
+  foreach( auto userSubWindow, this->findChildren<UserSubWindow *>() )
   {
-    if( sub_win->widget()->objectName() == action_data )
+    if( userSubWindow->objectName() == action_data )
     {
-      sub_win->widget()->show();
+      userSubWindow->activateWindow();
       return;
     }
   }
@@ -17001,25 +17098,12 @@ else
   MantidQt::API::UserSubWindow *user_interface = interfaceManager.createSubWindow(action_data, usr_win);
   if(user_interface)
   {
-    connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
-    connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
     setGeometry(usr_win,user_interface);
-    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
-        SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
-    if(user_interface->objectName() == "Muon Analysis")
-    {
-      // Re-emits the signal caught from the muon analysis
-      connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
-      // Closes the active graph
-      connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
-      // Hides the graph
-      connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
-      // Shows the graph
-      connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
-      //If the fitting is requested then run the peak picker tool in runConnectFitting
-      connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
-          SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
-    }
+    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), 
+                      this, SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
+    // Update the used fit property browser
+    connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
+                  mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
     user_interface->initializeLocalPython();
   }
   else
@@ -17032,201 +17116,6 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
-/**This searches for the graph with a selected name and then attaches the fitFunctionBrowser to it
-*  This also disables the fitFunctionBrowser from all the other graphs.
-* 
-* @param fpb The fit property browser from the custom interface
-* @param nameOfPlot A string variable containing the name of the graph we want to fit.
-*
-*/
-void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot)
-{
-  // Loop through all multilayer (i.e. plots) windows displayed in Mantidplot 
-  // and apply pickpickertool to relevant plot
-  // Search and delete any current peak picker tools first
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-      {
-        // Check to see if graph is the new one by comparing the names
-        if (w->objectName() != nameOfPlot)
-        {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Delete the PeakPickerTool
-            g->disableTools();
-          }
-        }
-      }
-    }
-  }
-  // now check for graphs to add the peak picker tool to.
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-      {
-        if (w->objectName() == nameOfPlot)
-        {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true, true);
-            g->setActiveTool(ppicker);
-          }
-        }     
-      }
-    }
-  } 
-}
-
-
-/**
-* Close a given graph
-*
-* @params wsName :: The name of the graph to delete.
-*/
-void ApplicationWindow::closeGraph(const QString & wsName)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() == wsName)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->close();
-        break;
-      }
-    }
-  }
-}
-
-
-/**
-* Hide all the graphs apart from the exception. Default not to have exception.
-*
-* @params exception :: The workspace not to be hidden. Default is no exception ("").
-*/
-void ApplicationWindow::hideGraphs(const QString & exception)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() != exception)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->setHidden();
-      }
-    }
-  }
-}
-
-
-/**
-* Show all the graphs that are hidden
-*/
-void ApplicationWindow::showGraphs()
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-      activateWindow(w);
-  }
-}
-
-
-/**
-* Makes sure that it is dealing with a graph and then tells the plotDialog class 
-* to change the plot style
-*
-* @params plotDetails :: This includes all details of the plot [wsName, connectType, plotType, Errors, Color]
-*/
-void ApplicationWindow::setPlotType(const QStringList & plotDetails)
-{
-  if (plotDetails.size() == 0)
-  {
-    QMessageBox::information(this, "Mantid - Error", "Plot type or workspace name is missing. Please contact a Mantid team member.");
-  }
-  else
-  {
-    if (plotDetails.size() > 3)
-    {
-      int connectType = plotDetails[1].toInt();
-      QList<MdiSubWindow *> windows = windowsList();
-      foreach (MdiSubWindow *w, windows) 
-      {
-        if (w->isA("MultiLayer"))
-        {
-          MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-          {
-            // Check to see if graph is the new one by comparing the names
-            if (w->objectName() == plotDetails[0] + "-1")
-            {
-              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this, plot);
-              //pd->setMultiLayer(plot);
-              Graph *g = plot->activeGraph();
-              if (g)
-              {
-                int curveNum(-1);
-
-                if (plotDetails[2] == "Data")
-                {
-                  curveNum = g->curveIndex(plotDetails[0]); //workspaceName
-                  if (plotDetails[3] == "AllErrors") // if all errors, display all errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(true, true);
-                  }
-                  else // don't show errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(false, false);
-                  }
-                }
-                if (curveNum > -1) // If one of the curves has been changed 
-                {
-                  // line(0) scatter(1) line+symbol(2)
-                  if (connectType >= 0 && connectType <= 2)
-                  {
-                    if (plotDetails.size() > 4)
-                      pd->setPlotType(connectType, curveNum, plotDetails[4]);
-                    else
-                      pd->setPlotType(connectType, curveNum);            
-                  }
-                  g->replot();
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 
 void ApplicationWindow::loadCustomActions()
 {
@@ -17476,10 +17365,7 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
     if (g->zoomOn())
       btnZoomIn->setOn(true);
 
-    else if (g->areRangeSelectorsOn())
-      btnSelect->setOn(true);
-    //else if (dynamic_cast<PeakPickerTool1D*>(tool))
-    //  btnPeakPick->setOn(true);
+    else if (g->areRangeSelectorsOn()){}
     else if (dynamic_cast<PeakPickerTool*>(tool))
       btnMultiPeakPick->setOn(true);
     else if (dynamic_cast<DataPickerTool*>(tool))
@@ -17554,53 +17440,26 @@ void ApplicationWindow::panOnPlot()
   g->enablePanningMagnifier();
 }
 /// Handler for ICat Login Menu
-void ApplicationWindow::ICatLogin()
+void ApplicationWindow::CatalogLogin()
 {
   mantidUI->executeAlgorithm("CatalogLogin",1);
 }
 
-void ApplicationWindow::ICatIsisSearch()
-{	
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearch(usr_win);
-  if(icatsearch_interface)
-  {
-    setGeometry(usr_win,icatsearch_interface);
-  }
-  else
-  {
-    delete usr_win;
-  }
-}
-void ApplicationWindow::ICatMyDataSearch()
-{	
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* mydatsearch = new MantidQt::MantidWidgets::ICatMyDataSearch(usr_win);
-  if(mydatsearch)
-  {
-    setGeometry(usr_win,mydatsearch);
-  }
-  else
-  {
-    delete usr_win;
-  }
-}
-void ApplicationWindow ::ICatAdvancedSearch()
+void ApplicationWindow::CatalogSearch()
 {
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* advanced_search = new MantidQt::MantidWidgets::ICatAdvancedSearch(usr_win);
-  if(advanced_search)
+  if (catalogSearch == NULL || catalogSearch)
   {
-    setGeometry(usr_win,advanced_search);
-  }
-  else
-  {
-    delete usr_win;
+    // Only one ICAT GUI will appear, and that the previous one will be overridden.
+    // E.g. if a user opens the ICAT GUI without being logged into ICAT they will need to
+    // login in and then click "Search" again.
+    delete catalogSearch;
+    catalogSearch = new MantidQt::MantidWidgets::CatalogSearch();
+
+    catalogSearch->show();
+    catalogSearch->raise();
   }
 }
+
 void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interface)
 {   
   QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(),
@@ -17612,9 +17471,11 @@ void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interfac
   usr_win->setName(user_interface->windowTitle());
   addMdiSubWindow(usr_win);
 }
-void ApplicationWindow::ICatLogout()
+
+void ApplicationWindow::CatalogLogout()
 {
-  mantidUI->executeICatLogout(-1);
+  auto logout = mantidUI->createAlgorithm("CatalogLogout");
+  mantidUI->executeAlgorithmAsync(logout);
 }
 
 /**
@@ -17628,53 +17489,6 @@ void ApplicationWindow::writeToLogWindow(const MantidQt::API::Message & msg)
   resultsLog->append(msg);
 }
 
-/* This method executes loadraw asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadRawAsynch(const QString& fileName,const QString& wsName )
-{
-  mantidUI->loadrawfromICatInterface(fileName,wsName);
-}
-
-/* This method executes loadnexus asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadNexusAsynch(const QString& fileName,const QString& wsName)
-{
-  mantidUI->loadnexusfromICatInterface(fileName,wsName);
-}
-
-/* This method executes loadnexus asynchrnously
- * @param  fileName - name of the file to load
- * @param wsName :: -name of the workspace to store data
- */
-void ApplicationWindow::executeLoadAsynch(const QString& fileName,const QString& wsName)
-{
-  mantidUI->loadfromICatInterface(fileName,wsName);
-}
-
-/* This method executes Download data files algorithm
- * @param  filenames - list of the file names to download
- */
-void ApplicationWindow::executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<int64_t>& fileIds)
-{
-  //getting the sender of the signal(it's ICatInvestigation object)
-  QObject* qsender= sender();
-  if(!qsender) return;
-
-  // connecting  filelocations signal to ICatInvestigation slot setfileLocations
-  // This is to send the filelocations vector  after  algorithm execution to ICatInvestigation object(which is MnatidQt) for further processing
-  connect(mantidUI,SIGNAL(fileLocations(const std::vector<std::string>&)),qsender,SLOT(setfileLocations(const std::vector<std::string>&)));
-  /// execute the algorithm
-  mantidUI->executeDownloadDataFiles(filenNames,fileIds);
-}
-
-void  ApplicationWindow::executeloadAlgorithm(const QString& algName,const QString& fileName, const QString& wsName)
-{
-  mantidUI->executeloadAlgorithm(algName,fileName,wsName);
-}
 
 MultiLayer* ApplicationWindow::waterfallPlot()
 {
@@ -17840,6 +17654,7 @@ QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoin
 {
   QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
   sw->resize(w->size());
+  sw->setWindowIcon(w->windowIcon());
   if ( pos != QPoint(-1,-1) )
   {
     sw->move(pos);
@@ -18119,6 +17934,7 @@ void ApplicationWindow::about2Start(){
     // there is no reason to trigger UpdataScriptRepository if it has never been installed
     Mantid::API::IAlgorithm_sptr update_script_repo = mantidUI->createAlgorithm("UpdateScriptRepository");
     update_script_repo->initialize(); 
+    update_script_repo->setLoggingOffset(1);
     mantidUI->executeAlgorithmAsync(update_script_repo);
   }
 }

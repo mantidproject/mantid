@@ -5,9 +5,14 @@ GLActor::~GLActor()
 {
 }
 
-bool GLActor::accept(GLActorVisitor& visitor)
+bool GLActor::accept(GLActorVisitor& visitor, VisitorAcceptRule)
 {
-  return visitor.visit(this);
+    return visitor.visit(this);
+}
+
+bool GLActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule) const
+{
+    return visitor.visit(this);
 }
 
 GLColor GLActor::makePickColor(size_t pickID)

@@ -490,6 +490,34 @@ They will work as was expected for folders @ref folders-sec.
                 const std::string & author, 
                 const std::string & email)  = 0;
 
+    /**
+       Delete the file from the remote repository (it does not touch the local copy). 
+       After this, the file will not be available for anyone among the users. As so,
+       it is required a justification of why to remove (the comment), and the current
+       rule accept that only the owner of the file (which is considered the last one 
+       to use the file) is allowed to remove it. 
+
+       The file will be removed from the central repository (git)
+
+       @note This operation requires internet connection.
+
+       @param file_path for the file to be deleted. It will not accept deleting folders for
+              security reason. 
+       
+       @param comment The reson of why deleting this entry. 
+       
+       @param author An string that may identify who is requesting to delete the file.
+              It accept only the last author to remove it.
+
+       @param email An string that identifies the email of the author. 
+     
+      @exception ScriptRepoException may be triggered for an attempt to delete folders, 
+                 or a non existent file, or not allowed operation, or any network erros.   
+     */
+    virtual void remove(const std::string & file_path, const std::string & comment,
+                const std::string & author, 
+                const std::string & email)  = 0;
+
     /** Define the file patterns that will not be listed in listFiles. 
         This is important to force the ScriptRepository to not list hidden files, 
         automatic generated files and so on. This helps to present to the user a
@@ -522,10 +550,12 @@ They will work as was expected for folders @ref folders-sec.
         
         @param option: flag to set for auto-update, or not. If true, new versions of the path will replace the local file as soon as they are available at the central repository.
         
+        @return int: number of files changed (because of the cascading of folders)
+
         @exception ScriptRepoException : Invalid entry.
                 
     */
-    virtual void setAutoUpdate(const std::string & path, bool option = true) = 0;
+    virtual int setAutoUpdate(const std::string & path, bool option = true) = 0;
 
 
   };

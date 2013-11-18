@@ -13,6 +13,9 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
+
+  using namespace Mantid::API;
+
   /**
    * Constructor.
    *
@@ -102,17 +105,60 @@ namespace IDA
   }
 
   /**
+   * Run load nexus and return the workspace
+   * @param filename A full path to the filename
+   * @param wsname The workspace name in the ADS
+   * @return A pointer to the workspace or a null pointer if the load failed
+   */
+  MatrixWorkspace_const_sptr IDATab::runLoadNexus(const QString & filename, const QString & wsname)
+  {
+    using Mantid::Kernel::Exception::NotFoundError;
+
+    QString pyInput = "LoadNexus(Filename=r'" + filename + "', OutputWorkspace='" + wsname + "')";
+    runPythonCode(pyInput);
+
+    MatrixWorkspace_const_sptr ws;
+    try
+    {
+      ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+    }
+    catch(NotFoundError&)
+    {
+      showInformationBox("Failed to load "+filename+".\n Check the log for more details.");
+    }
+    return ws;
+  }
+
+  /**
    * Creates and returns a "mini plot", from the given QwtPlot and QwtPlotCurve objects, as well as the given workspace
    * and workspace index.
    *
    * @param plot      :: the QwtPlot object
    * @param curve     :: the QwtPlotCurve object
-   * @param workspace :: the workspace to use
+   * @param workspace :: A pointer to the workspace to use
    * @param wsIndex   :: the workspace index
    *
    * @returns the resulting QwtPlotCurve object
    */
-  QwtPlotCurve* IDATab::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const std::string & workspace, size_t wsIndex)
+  QwtPlotCurve* IDATab::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const QString & workspace, size_t index)
+  {
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
+    return plotMiniplot(plot, curve, ws, index);
+  }
+
+
+  /**
+   * Creates and returns a "mini plot", from the given QwtPlot and QwtPlotCurve objects, as well as the given workspace
+   * and workspace index.
+   *
+   * @param plot      :: the QwtPlot object
+   * @param curve     :: the QwtPlotCurve object
+   * @param workspace :: A pointer to the workspace to use
+   * @param wsIndex   :: the workspace index
+   *
+   * @returns the resulting QwtPlotCurve object
+   */
+  QwtPlotCurve* IDATab::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex)
   {
     if ( curve != NULL )
     {
@@ -121,9 +167,7 @@ namespace IDA
       curve = 0;
     }
 
-    Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(workspace));
-
-    size_t nhist = ws->getNumberHistograms();
+    size_t nhist = workspace->getNumberHistograms();
     if ( wsIndex >= nhist )
     {
       showInformationBox("Error: Workspace index out of range.");
@@ -131,11 +175,11 @@ namespace IDA
     }
 
     using Mantid::MantidVec;
-    const MantidVec & dataX = ws->readX(wsIndex);
-    const MantidVec & dataY = ws->readY(wsIndex);
+    const MantidVec & dataX = workspace->readX(wsIndex);
+    const MantidVec & dataY = workspace->readY(wsIndex);
 
     curve = new QwtPlotCurve();
-    curve->setData(&dataX[0], &dataY[0], static_cast<int>(ws->blocksize()));
+    curve->setData(&dataX[0], &dataY[0], static_cast<int>(workspace->blocksize()));
     curve->attach(plot);
 
     plot->replot();

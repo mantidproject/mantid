@@ -19,6 +19,7 @@
 //----------------------------------
 #include "DllOption.h"
 #include "InterfaceFactory.h"
+#include "PythonRunner.h"
 
 #include <QWidget>
 #include <QStringList>
@@ -106,18 +107,8 @@ signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString& code, bool);
 
-  /// Change the plot style/color
-  void setAsPlotType(const QStringList & plotDetails);
-
-  ///Connects MantidPlot up with the muon analysis custom interface and in turn the fitPropertyBrowser. (Emitted when a new graph is created).
-  void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
-
-  void closeGraph(const QString & wsName);
-  void hideGraphs(const QString & exception = ""); // wsName
-  void showGraphs();
-
-  void hideToolbars();
-  void showToolbars();
+  /// Thrown when used fit property browser should be changed to given one
+  void setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* browser);
   
 protected:
   /**@name Virtual Functions */
@@ -136,9 +127,6 @@ protected:
   QString openFileDialog(const bool save, const QStringList &exts);
   QLabel* newValidator(QWidget *parent);
 
-  /// Change the plot style/color
-  void changePlotType(const QStringList & plotDetails);
-
 private:
   // This is so that it can set the name
   // I can't pass anything as an argument to the constructor as I am using
@@ -153,6 +141,9 @@ private:
   bool m_isPyInitialized;
   /// Store the name of the interface
   QString m_ifacename;
+
+  /// Python executor
+  PythonRunner m_pythonRunner;
 };
 
 }

@@ -53,6 +53,9 @@ namespace API
                                    bool skipError = false) const = 0;
 
     virtual void clearMRU() const = 0;
+
+  protected:
+      virtual const std::string toString() const;
   };
 
   ///shared pointer to the matrix workspace base class

@@ -32,7 +32,7 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  CentroidPeaks::CentroidPeaks() : wi_to_detid_map(NULL)
+  CentroidPeaks::CentroidPeaks()
   {
   }
 
@@ -41,7 +41,6 @@ namespace Crystal
    */
   CentroidPeaks::~CentroidPeaks()
   {
-    delete wi_to_detid_map;
   }
 
 
@@ -101,9 +100,9 @@ namespace Crystal
       int pixelID = peak.getDetectorID();
 
       // Find the workspace index for this detector ID
-      if (wi_to_detid_map->find(pixelID) != wi_to_detid_map->end())
+      if (wi_to_detid_map.find(pixelID) != wi_to_detid_map.end())
       {
-         size_t wi = (*wi_to_detid_map)[pixelID];
+         size_t wi = wi_to_detid_map[pixelID];
          if(MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MinPeaks = i;
          if(peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MaxPeaks = i;
       }
@@ -120,8 +119,8 @@ namespace Crystal
       int col = peak.getCol();
       int row = peak.getRow();
       int pixelID = peak.getDetectorID();
-      detid2index_map::const_iterator it = wi_to_detid_map->find(pixelID);
-      if ( it == wi_to_detid_map->end() )
+      detid2index_map::const_iterator it = wi_to_detid_map.find(pixelID);
+      if ( it == wi_to_detid_map.end() )
       {
         continue;
       }
@@ -131,8 +130,8 @@ namespace Crystal
       int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
       std::string bankName = peak.getBankName();
 
-	  double intensity = 0.0;
-	  double chancentroid = 0.0;
+      double intensity = 0.0;
+      double chancentroid = 0.0;
 
       int chanstart = std::max(0,chan-PeakRadius);
       int chanend = std::min(static_cast<int>(X.size()),chan+PeakRadius);
@@ -149,8 +148,8 @@ namespace Crystal
           for (int icol=colstart; icol<=colend; ++icol)
           {
             if (edgePixel(bankName, icol, irow, Edge))continue;
-            detid2index_map::const_iterator it = wi_to_detid_map->find(findPixelID(bankName, icol, irow));
-            if ( it == wi_to_detid_map->end() ) continue;
+            detid2index_map::const_iterator it = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
+            if ( it == wi_to_detid_map.end() ) continue;
             size_t workspaceIndex = (it->second);
     
             const MantidVec & histogram = inWS->readY(workspaceIndex);
@@ -175,7 +174,7 @@ namespace Crystal
     // Set wavelength to change tof for peak object
       if (!edgePixel(bankName, col, row, Edge))
       {
-          it = wi_to_detid_map->find(findPixelID(bankName, col, row));
+          it = wi_to_detid_map.find(findPixelID(bankName, col, row));
           workspaceIndex = (it->second);
           Mantid::Kernel::Units::Wavelength wl;
           std::vector<double> timeflight;
@@ -240,9 +239,9 @@ namespace Crystal
       int pixelID = peak.getDetectorID();
 
       // Find the workspace index for this detector ID
-      if (wi_to_detid_map->find(pixelID) != wi_to_detid_map->end())
+      if (wi_to_detid_map.find(pixelID) != wi_to_detid_map.end())
       {
-         size_t wi = (*wi_to_detid_map)[pixelID];
+         size_t wi = wi_to_detid_map[pixelID];
          if(MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MinPeaks = i;
          if(peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MaxPeaks = i;
       }
@@ -265,7 +264,7 @@ namespace Crystal
       double tofcentroid = 0.0;
       if (edgePixel(bankName, col, row, Edge))continue;
       Mantid::detid2index_map::iterator it;
-      it = (*wi_to_detid_map).find(findPixelID(bankName, col, row));
+      it = wi_to_detid_map.find(findPixelID(bankName, col, row));
 
       double tofstart = TOFPeakd*std::pow(1.004,-PeakRadius);
       double tofend = TOFPeakd*std::pow(1.004,PeakRadius);
@@ -281,7 +280,7 @@ namespace Crystal
         {
           Mantid::detid2index_map::iterator it;
           if (edgePixel(bankName, icol, irow, Edge))continue;
-          it = wi_to_detid_map->find(findPixelID(bankName, icol, irow));
+          it = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
           size_t workspaceIndex = (it->second);
           EventList el = eventW->getEventList(workspaceIndex);
           el.switchTo(WEIGHTED_NOTIME);
@@ -359,7 +358,7 @@ namespace Crystal
     inWS = getProperty("InputWorkspace");
     
     // For quickly looking up workspace index from det id
-    wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap(false);
+    wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap();
 
     eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inWS );
     if(eventW)

@@ -50,20 +50,43 @@ namespace DataHandling
     virtual void initDocs();
     /// Initialisation code
     void init();
-    ///Execution code
+    /// Execution code
     void exec();
+
     ///Write the header information
 
-    std::string toProf10IrfString(int bankid);
+    /// Process properties
+    void processProperties();
+
+    /// Write out string for profile 10 .irf file
+    std::string toProf10IrfString();
+
+    /// Write out string for profile 9 .irf file
+    std::string toProf9IrfString();
 
     /// Parse input workspace to map of parameters
     void parseTableWorkspace();
 
+    /// Check wether a profile parameter map has the parameter
+    bool has_key(std::map<std::string, double> profmap, std::string key);
+
     /// Map containing the name of value of each parameter required by .irf file
-    std::map<std::string, double> mParameters;
+    std::map<std::string, double> m_profileParamMap;
 
     /// Input table workspace
-    DataObjects::TableWorkspace_sptr inpWS;
+    DataObjects::TableWorkspace_sptr m_profileTableWS;
+
+    /// Output Irf file name
+    std::string m_outIrfFilename;
+
+    /// Bank to write
+    int m_bankID;
+
+    /// Profile number
+    int m_fpProfileNumber;
+
+    /// Append to existing file
+    bool m_append;
     
   };
 

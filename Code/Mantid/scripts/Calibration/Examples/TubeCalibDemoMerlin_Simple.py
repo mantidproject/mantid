@@ -10,82 +10,77 @@
 # which takes a string consisting of the run number of a calibration run number as argument.
 # The workspace with calibrated instrument is saved to a Nexus file
 #
-from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
-from mantid.kernel import config  # To set default instrument to MERLIN
-from tube_calib_fit_params import * # To handle fit parameters
-from ideal_tube import * # For ideal tube
-from tube_calib import *  # For tube calibration functions
-from tube_spec import * # For tube specification class
 
-def CalibrateMerlin( RunNumber ):
-   '''
-   RunNumber is the run number of the calibration.
-   '''
+import tube
+from tube_calib_fit_params import TubeCalibFitParams 
 
-   # == Set parameters for calibration ==
-   previousDefaultInstrument = config['default.instrument']
-   config['default.instrument']="MERLIN"
-   filename = str(RunNumber) # Name of calibration run. 
-   rangeLower = 3000 # Integrate counts in each spectra from rangeLower to rangeUpper 
-   rangeUpper = 20000 #
+RunNumber = 12024
+def CalibrateMerlin(RunNumber):
+    # == Set parameters for calibration ==
+    previousDefaultInstrument = config['default.instrument']
+    config['default.instrument']="MERLIN"
+    filename = str(RunNumber) # Name of calibration run. 
+    rangeLower = 3000 # Integrate counts in each spectra from rangeLower to rangeUpper 
+    rangeUpper = 20000 #
 
-   # Set parameters for ideal tube. 
-   Left = 2.0 # Where the left end of tube should be in pixels (target for AP)
-   Centre = 512.5 # Where the centre of the tube should be in pixels (target for CP)
-   Right = 1023.0 # Where the right of the tube should be in pixels (target for BP)
-   ActiveLength = 2.9 # Active length of tube in Metres
+    # Set parameters for ideal tube. 
+    Left = 2.0 # Where the left end of tube should be in pixels (target for AP)
+    Centre = 512.5 # Where the centre of the tube should be in pixels (target for CP)
+    Right = 1023.0 # Where the right of the tube should be in pixels (target for BP)
+    ActiveLength = 2.9 # Active length of tube in Metres
 
-   # Set initial parameters for peak finding
-   ExpectedHeight = 1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
-   ExpectedWidth = 32.0 # Expected width of centre peak in Pixels (initial value of fit parameter)
-   ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak in pixels (initial values of fit parameters)
+    # Set initial parameters for peak finding
+    ExpectedHeight = 1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
+    ExpectedWidth = 32.0 # Expected width of centre peak in Pixels (initial value of fit parameter)
+    ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak in pixels (initial values of fit parameters)
 
-   # Set what we want to calibrate (e.g whole intrument or one door )
-   CalibratedComponent = 'MERLIN'  # Calibrate whole instrument 
+    # Set what we want to calibrate (e.g whole intrument or one door )
+    CalibratedComponent = 'MERLIN'  # Calibrate door 2
+
+    # Get calibration raw file and integrate it    
+    print filename
+    rawCalibInstWS = LoadRaw(filename)  
+    # 'raw' in 'rawCalibInstWS' means unintegrated.
+    print "Integrating Workspace"
+    CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
+    DeleteWorkspace(rawCalibInstWS)
+    print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
+
+    # == Create Objects needed for calibration ==
+
+    ## In the merlin case, the positions are usually given in pixels, instead of being given in 
+    ## meters, to convert to meter and put the origin in the center, we have to apply the following
+    ## transformation: 
+    ## 
+    ## pos = pixel * length/npixels - length/2 = length (pixel/npixels - 1/2)
+    ## 
+    ## for merlin: npixels = 1024
     
-   # Get calibration raw file and integrate it    
-   rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
-   print "Integrating Workspace"
-   CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
-   DeleteWorkspace(rawCalibInstWS)
-   print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
+    knownPos = ActiveLength * (numpy.array([Left, Centre, Right])/1024.0 - 0.5)
+    funcForm = 3*[1]
 
-   # == Create Objects needed for calibration ==
+    # Get fitting parameters
+    fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth, margin=40)
 
-   #Create Calibration Table
-   calibrationTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
-   calibrationTable.addColumn(type="int",name="Detector ID")  # "Detector ID" column required by ApplyCalbration
-   calibrationTable.addColumn(type="V3D",name="Detector Position")  # "Detector Position" column required by ApplyCalbration
+    print "Created objects needed for calibration."
 
-   # Specify component to calibrate
-   thisTubeSet = TubeSpec(CalibInstWS)
-   thisTubeSet.setTubeSpecByString(CalibratedComponent)
+    # == Get the calibration and put results into calibration table ==
+    # also put peaks into PeakFile
+    calibrationTable,peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
+                                      outputPeak=True, fitPar=fitPar, plotTube=range(0,280,20))
+    print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"    
 
-   # Get ideal tube
-   iTube = IdealTube()
-   iTube.constructTubeFor3PointsMethod ( Left, Right, Centre, ActiveLength )
+    # == Apply the Calibation ==
+    ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
+    print "Applied calibration"
 
-   # Get fitting parameters
-   fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
+    # == Save workspace ==
+    #SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Simple.py")
+    #print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
 
-   print "Created objects needed for calibration."
+    # == Reset dafault instrument ==
+    config['default.instrument'] = previousDefaultInstrument
 
-   # == Get the calibration and put results into calibration table ==
-   # also put peaks into PeakFile
-   getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength )
-   print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
+    # ==== End of CalibrateMerlin() ====
 
-   # == Apply the Calibation ==
-   ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
-   print "Applied calibration"
-
-   # == Save workspace ==
-   SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Simple.py")
-   print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
-   
-   # == Reset dafault instrument ==
-   config['default.instrument'] = previousDefaultInstrument
-   
-   # ==== End of CalibrateMerlin() ====
-
-CalibrateMerlin( 12024 )
+CalibrateMerlin( RunNumber )

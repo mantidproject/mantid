@@ -58,6 +58,10 @@ class HFIRSANSReduction(PythonAlgorithm):
             for i in range(len(data_file)):
                 if i==0:
                     output_str += _load_data(data_file[i], workspace)
+                    # Use the first file location as the default output directory
+                    head, tail = os.path.split(data_file[0])
+                    if os.path.isdir(head):
+                        self.default_output_dir = head
                 else:
                     output_str += _load_data(data_file[i], '__tmp_wksp')
                     api.Plus(LHSWorkspace=workspace,
@@ -83,6 +87,9 @@ class HFIRSANSReduction(PythonAlgorithm):
         else:
             output_str += "Loaded %s\n" % data_file
             output_str += _load_data(data_file, workspace)
+            head, tail = os.path.split(data_file)
+            if os.path.isdir(head):
+                self.default_output_dir = head
         return output_str
         
     def PyExec(self):
@@ -93,6 +100,9 @@ class HFIRSANSReduction(PythonAlgorithm):
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
         
         property_list = [p.name for p in property_manager.getProperties()]
+        
+        # Keep track of best output directory guess in case it wasn't supplied
+        self.default_output_dir = os.path.expanduser('~')
         
         output_msg = ""
         # Find the beam center
@@ -269,20 +279,22 @@ class HFIRSANSReduction(PythonAlgorithm):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'            
        
         # Verify output directory and save data
+        output_dir = ''
         if "OutputDirectory" in property_list:
             output_dir = property_manager.getProperty("OutputDirectory").value
-            #if len(output_dir)==0:
-            #    output_dir = os.path.dirname(filename)
-            if os.path.isdir(output_dir):
-                output_msg += self._save_output(iq_output, iqxy_output, 
-                                                output_dir, property_manager)
-                Logger.get("HFIRSANSReduction").notice("Output saved in %s" % output_dir)
-            elif len(output_dir)>0:
-                msg = "Output directory doesn't exist: %s\n" % output_dir
-                Logger.get("HFIRSANSReduction").error(msg)
+        if len(output_dir)==0:
+            output_dir = self.default_output_dir
+            
+        if os.path.isdir(output_dir):
+            output_msg += self._save_output(iq_output, iqxy_output, 
+                                            output_dir, property_manager)
+            Logger.get("HFIRSANSReduction").notice("Output saved in %s" % output_dir)
+        elif len(output_dir)>0:
+            msg = "Output directory doesn't exist: %s\n" % output_dir
+            Logger.get("HFIRSANSReduction").error(msg)
     
         self.setProperty("OutputMessage", output_msg)
-        
+
     def process_data_file(self, workspace):
         output_msg = ""
         property_manager_name = self.getProperty("ReductionProperties").value

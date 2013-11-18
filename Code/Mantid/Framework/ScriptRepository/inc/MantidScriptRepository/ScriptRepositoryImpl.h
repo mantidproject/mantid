@@ -100,6 +100,10 @@ namespace API{
     void upload(const std::string & file_path, const std::string & comment,
                 const std::string & author, 
                 const std::string & email);
+    // remove file from the central repository and from local folder
+    void remove(const std::string & file_path, const std::string & comment,
+                const std::string & author, 
+                const std::string & email);
 
     /* Return true if there is a local repository installed*/
     bool isValid(void);
@@ -110,15 +114,19 @@ namespace API{
     
     std::string ignorePatterns(void); 
 
-    void setAutoUpdate(const std::string & path, bool option = true);
+    int setAutoUpdate(const std::string & path, bool option = true);
 
     /// @deprecated Should avoid this, it is not in the design file.
     std::string localRepository() const {return local_repository;  }
 
 
  
- 
+
     virtual void doDownloadFile(const std::string & url_file, const std::string & local_file_path = "");
+    // convenient method to allow to perform the unit tests on remove files.
+    virtual std::string doDeleteRemoteFile(const std::string & url, const std::string & file_path, 
+                              const std::string & author, const std::string & email, 
+                              const std::string & comment);
  protected:
     void parseCentralRepository(Repository & repo);
 
@@ -127,7 +135,6 @@ namespace API{
     void parseDownloadedEntries(Repository & repo); 
 
     void ensureValidRepository();
-
 
     bool isEntryValid(const std::string & path);
 
@@ -171,6 +178,10 @@ namespace API{
     bool valid;
 
     std::string ignoreregex;    
+
+    bool getProxyConfig(std::string&, unsigned short&); 
+
+    std::string getParentFolder(const std::string & entry );
 
   };
   

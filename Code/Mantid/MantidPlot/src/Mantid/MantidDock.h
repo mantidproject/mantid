@@ -8,17 +8,22 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+
+#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+
+#include <QActionGroup>
+#include <QAtomicInt>
 #include <QComboBox>
 #include <QDockWidget>
+#include <QList>
 #include <QPoint>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QList>
-#include <QActionGroup>
 #include <QSortFilterProxyModel>
 #include <QStringList>
+#include <QMap>
+
 #include <set>
-#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 
 class MantidUI;
 class ApplicationWindow;
@@ -45,11 +50,9 @@ class MantidDockWidget: public QDockWidget
   Q_OBJECT
 public:
   MantidDockWidget(MantidUI *mui, ApplicationWindow *parent);
+  ~MantidDockWidget();
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
-
-signals:
-  void rerunFindAbandonedWorkspaces();
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
@@ -66,13 +69,6 @@ protected slots:
   void workspaceSelected();
 
 private slots:
-  void addWorkspace(const QString &, Mantid::API::Workspace_sptr);
-  void addTreeEntry(const QString &, Mantid::API::Workspace_sptr);
-  void replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr);
-  void unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr);
-  void removeWorkspaceEntry(const QString &);
-  void renameWorkspaceEntry(const QString &, const QString&);
-  void updateWorkspaceGroup(const QString &);
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();
@@ -83,30 +79,30 @@ private slots:
   void showDetectorTable();
   void convertToMatrixWorkspace();
   void convertMDHistoToMatrixWorkspace();
-  void findAbandonedWorkspaces();
+  void updateTree();
+  void incrementUpdateCount();
+  void recordWorkspaceRename(QString,QString);
+  void clearUB();
 
 private:
+  void setTreeUpdating(const bool state);
+  inline bool isTreeUpdating() const { return m_treeUpdating; }
+  void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems, const QStringList & expanded);
+  MantidTreeWidgetItem * addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent = NULL);
+  bool shouldBeSelected(QString name) const;
   void createWorkspaceMenuActions();
-  QString findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
-  void setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace_sptr workspace);
-  MantidTreeWidgetItem *createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
-  void updateWorkspaceEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
-  void updateWorkspaceGroupEntry(const QString & ws_name, Mantid::API::WorkspaceGroup_sptr workspace);
-  void populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
-  void populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
-  void populateExperimentInfoData(Mantid::API::ExperimentInfo_sptr workspace, QTreeWidgetItem* ws_item);
-  void populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
-  void populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sptr workspace, QTreeWidgetItem* ws_item);
-  void populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
-  void addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const;
-  void addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr mdeventWS) const;
-  void addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDWorkspace_const_sptr WS) const;
-  void addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const;
+  void createSortMenuActions();
+  void setItemIcon(QTreeWidgetItem *item,  const std::string & wsID);
+
+  void addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::API::MatrixWorkspace_const_sptr & matrixWS) const;
+  void addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr & mdeventWS) const;
+  void addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr & WS) const;
+  void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr & WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
+  void addClearMenuItems(QMenu* menu, const QString& wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
-  void scheduleFindAbandonedWorkspaces();
   
 protected:
   MantidTreeWidget * m_tree;
@@ -116,10 +112,9 @@ private:
   QString selectedWsName;
   
   MantidUI * const m_mantidUI;
-  QSet<QString> m_known_groups;
 
   QPushButton *m_loadButton;
-  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu, *m_choiceMenu;
+  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
@@ -129,16 +124,24 @@ private:
   //Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecDistr,
   *m_showDetectors, *m_showBoxData, *m_showVatesGui,
-  *m_showImageViewer,
+  *m_showSpectrumViewer,
   *m_showSliceViewer,
   *m_colorFill, *m_showLogs, *m_showHist, *m_showMDPlot, *m_showListData,
   *m_saveNexus, *m_rename, *m_delete,
   *m_program, * m_ascendingSortAction,
   *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
   *m_convertToMatrixWorkspace,
-  *m_convertMDHistoToMatrixWorkspace;
+  *m_convertMDHistoToMatrixWorkspace,
+  *m_clearUB;
 
-  size_t m_rerunStackSize;
+  QAtomicInt m_updateCount;
+  bool m_treeUpdating;
+  Mantid::API::AnalysisDataServiceImpl & m_ads;
+  /// Temporarily keeps names of selected workspaces during tree update
+  /// in order to restore selection after update
+  QStringList m_selectedNames;
+  /// Keep a map of renamed workspaces between updates
+  QMap<QString,QString> m_renameMap;
 
   static Mantid::Kernel::Logger& logObject;
 };
@@ -148,7 +151,7 @@ class MantidTreeWidget:public QTreeWidget
   Q_OBJECT
 
 public:
-  MantidTreeWidget(QWidget *w, MantidUI *mui);
+  MantidTreeWidget(MantidDockWidget *w, MantidUI *mui);
   void mousePressEvent (QMouseEvent *e);
   void mouseMoveEvent(QMouseEvent *e);
   void mouseDoubleClickEvent(QMouseEvent *e);
@@ -161,10 +164,13 @@ public:
   Qt::SortOrder getSortOrder() const;
   void logWarningMessage(const std::string&);
   void disableNodes(bool);
+  void sort();
 
 private:
   QPoint m_dragStartPosition;
+  MantidDockWidget *m_dockWidget;
   MantidUI *m_mantidUI;
+  Mantid::API::AnalysisDataServiceImpl & m_ads;
   static Mantid::Kernel::Logger& logObject;
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;
@@ -179,11 +185,14 @@ public:
   MantidTreeWidgetItem(MantidTreeWidget*);
   MantidTreeWidgetItem(QStringList, MantidTreeWidget*);
   void disableIfNode(bool);
+  void setSortPos(int o) {m_sortPos = o;}
+  int getSortPos() const {return m_sortPos;}
 
 private:
   bool operator<(const QTreeWidgetItem &other) const;
   MantidTreeWidget* m_parent;
   static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem*);
+  int m_sortPos;
 };
 
 

@@ -54,8 +54,8 @@ using std::size_t;
 DECLARE_FUNCTION(CompositeFunction)
 
 /// Default constructor
-CompositeFunction::CompositeFunction(): 
-m_nParams(0)
+CompositeFunction::CompositeFunction()
+  : IFunction(), m_nParams(0)
 {
   declareAttribute("NumDeriv", Attribute(false));
 }
@@ -160,6 +160,20 @@ void CompositeFunction::setWorkspace(boost::shared_ptr<const Workspace> ws)
   {
     (*it)->setWorkspace(ws);
   }
+}
+
+/**
+ * @param workspace :: A workspace to fit to.
+ * @param wi :: An index of a spectrum to fit to.
+ * @param startX :: A start of the fitting region.
+ * @param endX :: An end of the fitting region.
+ */
+void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX, double endX)
+{
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+        m_functions[ iFun ]->setMatrixWorkspace( workspace, wi, startX, endX );
+    }
 }
 
 /** Function you want to fit to. 

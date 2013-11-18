@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument name="BioSANS" valid-from   ="2012-02-01 00:00:00"
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="BioSANS" valid-from   ="2012-02-01 00:00:00"
                            valid-to     ="2100-01-31 23:59:59"
 		          last-modified="2012-03-23 15:02:05">
   <!---->
@@ -9,7 +10,7 @@
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
-      <handedness axis="right"/>
+      <handedness val="right"/>
     </reference-frame>
   </defaults>
   <!--SOURCE AND SAMPLE POSITION-->

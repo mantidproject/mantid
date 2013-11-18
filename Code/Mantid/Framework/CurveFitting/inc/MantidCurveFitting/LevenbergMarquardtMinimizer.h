@@ -44,7 +44,7 @@ class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer();
-  LevenbergMarquardtMinimizer():m_data(NULL),m_gslSolver(NULL){}
+  LevenbergMarquardtMinimizer();
 
   /// Overloading base class methods
   /// Name of the minimizer.
@@ -74,8 +74,14 @@ private:
   /// Stored to access IFunction interface in iterate()
   API::IFunction_sptr m_function;
 
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
+  /// Absolute error required for parameters
+  double m_absError;
+
+  /// Relative error required for parameters
+  double m_relError;
+
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
 };
 
 

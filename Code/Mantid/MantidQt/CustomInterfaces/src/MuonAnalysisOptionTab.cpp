@@ -74,24 +74,25 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.binBoundaries, SIGNAL(lostFocus()), this, 
            SLOT(runBinBoundaries()));
 
+  ////////////// Auto-update plot style //////////////
+  connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMin()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMax()));
+  
   ////////////// Auto Update  /////////////////
-  connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(editingFinished()), this, SLOT(storeCustomTimeValue()));
-  // Validate
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMinimumInput()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMaximumInput()));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   
   // Save settings
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMin()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMax()));
-  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(editingFinished()), this, SLOT(storeCustomTimeValue()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMinimumInput()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMaximumInput()));
 
   // Manage User Directories
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
@@ -216,6 +217,20 @@ void MuonAnalysisOptionTab::runTimeComboBox(int index)
       m_uiForm.timeAxisStartAtInput->setText("0.0");
     else
       m_uiForm.timeAxisStartAtInput->setText(m_customTimeValue);
+  }
+
+  if(index == 0)
+  {
+    // Synchronize First Good Data box on Home tab with the one on this tab, if Start at First Good
+    // Data is enabled.
+    connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
+      m_uiForm.timeAxisStartAtInput, SLOT(setText(const QString&)));
+  }
+  else
+  {
+    // Disable synchronization otherwise
+    disconnect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
+      m_uiForm.timeAxisStartAtInput, SLOT(setText(const QString&)));
   }
 
   // save this new choice
@@ -396,7 +411,7 @@ void MuonAnalysisOptionTab::validateYMin()
   runyAxisMinimumInput();
   if(tempValue == m_uiForm.yAxisMinimumInput->text())
   {
-    emit settingsTabUpdatePlot();
+    emit plotStyleChanged();
   }
 }
 
@@ -410,7 +425,7 @@ void MuonAnalysisOptionTab::validateYMax()
   runyAxisMaximumInput();
   if(tempValue == m_uiForm.yAxisMaximumInput->text())
   {
-    emit settingsTabUpdatePlot();
+    emit plotStyleChanged();
   }
 }
 
@@ -474,6 +489,30 @@ void MuonAnalysisOptionTab::storeCustomTimeValue()
     group.beginGroup(m_settingsGroup + "plotStyleOptions");
     group.setValue("customTimeValue", m_customTimeValue);
   }
+}
+
+/**
+ * Get plot style parameters from widgets. Parameters are as follows:
+ *   - ConnectType: 0 for Line, 1 for Scatter, 3 for Line + Symbol
+ *   - ShowErrors: True of False
+ *   - YAxisAuto: True or False
+ *   - YAxisMin/YAxisMax: Double values
+ *
+ * @param workspace :: The workspace name of the plot to be created.
+ */
+QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
+{
+  QMap<QString, QString> params;
+
+  params["ConnectType"] = QString::number(m_uiForm.connectPlotType->currentIndex());
+
+  params["ShowErrors"] = m_uiForm.showErrorBars->isChecked() ? "True" : "False";
+
+  params["YAxisAuto"] = m_uiForm.yAxisAutoscale->isChecked() ? "True" : "False";
+  params["YAxisMin"] = m_uiForm.yAxisMinimumInput->text();
+  params["YAxisMax"] = m_uiForm.yAxisMaximumInput->text();
+
+  return(params);
 }
 
 }

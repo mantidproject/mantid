@@ -49,7 +49,7 @@ SendToProgramDialog::SendToProgramDialog(QWidget* parent, Qt::WFlags fl)
 /**
 * Constructor when editing a program settings
 */
-SendToProgramDialog::SendToProgramDialog(QWidget* parent, QString& programName, std::map<std::string, std::string> programKeysAndDetails, Qt::WFlags fl)
+SendToProgramDialog::SendToProgramDialog(QWidget* parent, QString programName, std::map<std::string, std::string> programKeysAndDetails, Qt::WFlags fl)
     : QDialog(parent, fl), validName(true), validTarget(true), validSaveUsing(true)
 {
   m_uiform.setupUi(this);
@@ -70,14 +70,6 @@ SendToProgramDialog::SendToProgramDialog(QWidget* parent, QString& programName, 
   if (programKeysAndDetails.count("saveusing") != 0)
 
     m_uiform.saveUsingText->setText(QString::fromStdString(programKeysAndDetails.find("saveusing")->second));
-
-  if (programKeysAndDetails.count("visible") != 0)
-  {
-    if (programKeysAndDetails.find("visible")->second == "Yes")
-      m_uiform.visibleCheck->setCheckState(Qt::Checked);
-    else
-      m_uiform.visibleCheck->setCheckState(Qt::Unchecked);
-  }
 
   //Validation correct on startup
   validateName();
@@ -222,10 +214,8 @@ void SendToProgramDialog::save()
   if(m_uiform.saveParametersText->text() != "")
     programKeysAndDetails["saveparameters"] = m_uiform.saveParametersText->text().toStdString();
 
-  if( m_uiform.visibleCheck->checkState() == 0)
-    programKeysAndDetails["visible"] = "No";
-  else
-    programKeysAndDetails["visible"] = "Yes";
+  //when a program is saved be it an edit or a new program, visible defaults to "Yes"
+  programKeysAndDetails["visible"] = "Yes";
 
   m_settings.first = name; 
   m_settings.second = programKeysAndDetails;

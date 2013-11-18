@@ -198,7 +198,7 @@ void SaveCanSAS1D2::createSASRootElement(std::string& rootElem)
 }
 
 /** This method creates an XML element named "SAStransmission_spectrum"
- *  @param sasData :: string for sasdata element in the xml
+ *  @param sasTrans :: string for sasdata element in the xml
  * @param name :: name of the type of spectrum. Two values are acceptable: sample, can
  */
 void SaveCanSAS1D2::createSASTransElement(std::string& sasTrans, const std::string & name)

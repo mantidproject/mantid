@@ -1,11 +1,12 @@
-<instrument name="REF_L" valid-from="2011-12-08 11:36:21.935542" valid-to="2100-01-31 23:59:59">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="REF_L" valid-from="2011-12-08 11:36:21.935542" valid-to="2100-01-31 23:59:59">
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
-      <handedness axis="right"/>
+      <handedness val="right"/>
     </reference-frame>
   </defaults>
   <!--SOURCE AND SAMPLE POSITION-->
@@ -4563,8 +4564,8 @@
     <cylinder id="cyl-approx">
       <centre-of-bottom-base x="0.0" y="0.0" z="0.0"/>
       <axis x="0.0" y="0.0" z="1.0"/>
-      <radius radius="0.01"/>
-      <height height="0.03"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
     </cylinder>
     <algebra val="cyl-approx"/>
   </type>

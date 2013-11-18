@@ -361,6 +361,9 @@ namespace MDAlgorithms
 
     prog = new Progress(this, 0.30, 0.95, MaxPeaks);
 
+    // used for selecting method for calculating BinCount
+    bool isMDEvent(ws->id().find("MDEventWorkspace") != std::string::npos);
+
     int64_t numBoxesFound = 0;
     // Now we go (backwards) through the map
     // e.g. from highest density down to lowest density.
@@ -441,8 +444,10 @@ namespace MDAlgorithms
       // Q of the centroid of the box
       V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
-      // The "bin count" used will be the box density.
+      // The "bin count" used will be the box density or the number of events in the box
       double binCount = box->getSignalNormalized() * m_densityScaleFactor;
+      if (isMDEvent)
+        binCount = static_cast<double>(box->getNPoints());
 
       try
       {

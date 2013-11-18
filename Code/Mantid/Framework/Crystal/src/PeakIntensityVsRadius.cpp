@@ -118,8 +118,7 @@ namespace Crystal
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
     declareProperty("CoordinatesToUse", "Q (lab frame)", boost::make_shared<StringListValidator>(propOptions),
-      "Which coordinates of the peak center do you wish to use to integrate the peak? This should match the InputWorkspace's dimensions."
-       );
+    		"Deprecated:  algorithm uses the InputWorkspace's coordinates.");
 
     declareProperty("RadiusStart", 0.0, "Radius at which to start integrating." );
     declareProperty("RadiusEnd", 1.0, "Radius at which to stop integrating." );
@@ -153,6 +152,8 @@ namespace Crystal
 
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
         "An output workspace2D containing intensity vs radius.");
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","NumberPeaksIntegrated",Direction::Output),
+        "An output workspace2D containing number of peaks at levels of I/sigI vs radius.");
   }
 
   /** Check for reasonable values */
@@ -204,6 +205,15 @@ namespace Crystal
     }
     outWS->replaceAxis(1, ax);
 
+    MatrixWorkspace_sptr outWS2 = WorkspaceFactory::Instance().create("Workspace2D", 4, NumSteps, NumSteps);
+    // Create a text axis for axis(1), with H K L of each peak
+    TextAxis * ax2 = new TextAxis(outWS2->getNumberHistograms());
+    ax2->setLabel(0, "I/SigI=2");
+    ax2->setLabel(1, "I/SigI=3");
+    ax2->setLabel(2, "I/SigI=5");
+    ax2->setLabel(3, "I/SigI=10");
+    outWS2->replaceAxis(1, ax2);
+
     Progress prog(this, 0.0, 1.0, NumSteps);
     double progStep = 1.0 / double(NumSteps);
     for (int step = 0; step < NumSteps; step++)
@@ -233,6 +243,14 @@ namespace Crystal
       alg->execute();
       if (alg->isExecuted())
       {
+    	size_t ISigI2 = 0;
+    	size_t ISigI3 = 0;
+    	size_t ISigI5 = 0;
+    	size_t ISigI10 = 0;
+        for (int i=0; i<4; i++)
+        {
+        	outWS2->dataX(i)[step] = radius;
+        }
         // Retrieve the integrated workspace
         PeaksWorkspace_sptr outPeaks = alg->getProperty("OutputWorkspace");
         for (int i=0; i<outPeaks->getNumberPeaks(); i++)
@@ -242,7 +260,34 @@ namespace Crystal
           outWS->dataX(wi)[step] = radius;
           outWS->dataY(wi)[step] = p.getIntensity();
           outWS->dataE(wi)[step] = p.getSigmaIntensity();
+          double ISigI = p.getIntensity()/p.getSigmaIntensity();
+          if (ISigI > 10.0)
+          {
+        	  ISigI2++;
+        	  ISigI3++;
+        	  ISigI5++;
+        	  ISigI10++;
+          }
+          else if (ISigI > 5.0)
+          {
+        	  ISigI2++;
+        	  ISigI3++;
+        	  ISigI5++;
+          }
+          else if (ISigI > 3.0)
+          {
+        	  ISigI2++;
+        	  ISigI3++;
+          }
+          else if (ISigI > 2.0)
+          {
+        	  ISigI2++;
+          }
         }
+        outWS2->dataY(0)[step] = static_cast<double>(ISigI2);
+        outWS2->dataY(1)[step] = static_cast<double>(ISigI3);
+        outWS2->dataY(2)[step] = static_cast<double>(ISigI5);
+        outWS2->dataY(3)[step] = static_cast<double>(ISigI10);
       }
       else
       {
@@ -253,8 +298,11 @@ namespace Crystal
     // Fix units and labels
     outWS->setYUnit("Integrated Intensity");
     outWS->getAxis(0)->title() = "Radius";
+    outWS2->setYUnit("Number Peaks");
+    outWS2->getAxis(0)->title() = "Radius";
 
     setProperty("OutputWorkspace", outWS);
+    setProperty("OutputWorkspace2", outWS2);
   }
 
 

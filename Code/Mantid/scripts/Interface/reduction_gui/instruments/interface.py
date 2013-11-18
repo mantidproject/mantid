@@ -13,7 +13,7 @@ class InstrumentInterface(object):
         Defines the instrument-specific widgets
     """
     ## List of widgets with associated observers
-    widgets = []  
+    widgets = []
     ERROR_REPORT_NAME = "sans_error_report.xml"    
     LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"    
     ERROR_REPORT_DIR = ""
@@ -25,7 +25,10 @@ class InstrumentInterface(object):
             @param settings: 
         """
         ## List of widgets with associated observers
-        self.widgets = []      
+        self.widgets = []
+        
+        # A handle to the live data button widget (usually an instance of MWRunFiles)
+        self._livebuttonwidget = None
 
         # Scripter object to interface with Mantid 
         self.scripter = BaseReductionScripter(name=name)
@@ -38,13 +41,15 @@ class InstrumentInterface(object):
         self.ERROR_REPORT_NAME = InstrumentInterface.ERROR_REPORT_DIR
         self.LAST_REDUCTION_NAME = InstrumentInterface.LAST_REDUCTION_NAME
 
-        
     def attach(self, widget):
         """
             Attach a widget to the interface and hook it up to its observer/scripter.
             @param widget: QWidget object
         """
         self.widgets.append(widget)
+        if widget.live_button_widget() is not None:
+            self._livebuttonwidget = widget.live_button_widget()
+            self._livebuttonwidget.liveButtonPressed.connect(self.live_button_toggled)
         self.scripter.attach(widget)
 
     def destroy(self):
@@ -151,20 +156,23 @@ class InstrumentInterface(object):
             Pass the interface data to the scripter for parallel reduction
         """
         self.scripter.update()
-        try:
-            # Determine where the write the script
-            job_data_dir = self._settings.data_output_dir
-            if job_data_dir is None:
-                job_data_dir = os.path.expanduser('~')
+        if not self.live_button_is_checked():
+            try:
+                # Determine where the write the script
+                job_data_dir = self._settings.data_output_dir
+                if job_data_dir is None:
+                    job_data_dir = os.path.expanduser('~')
                 
-            self.scripter.cluster_submit(job_data_dir, user, pwd, resource, nodes, cores_per_node, job_name)
-        except:
-            msg = "The following error was encountered:\n\n%s" % sys.exc_value
-            msg += "\n\nPlease check your reduction parameters\n"
-            log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
-            msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
-            self._warning("Reduction Parameters Incomplete", msg)
-            self._error_report(traceback.format_exc())
+                self.scripter.cluster_submit(job_data_dir, user, pwd, resource, nodes, cores_per_node, job_name)
+            except:
+                msg = "The following error was encountered:\n\n%s" % sys.exc_value
+                msg += "\n\nPlease check your reduction parameters\n"
+                log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
+                msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
+                self._warning("Reduction Parameters Incomplete", msg)
+                self._error_report(traceback.format_exc())
+        else:
+            self._warning("Runtime error","You cannot send live data to cluster")
 
     def reduce(self):
         """
@@ -181,7 +189,12 @@ class InstrumentInterface(object):
         
         try:
             self.set_running(True)
-            self.scripter.apply()
+            if self.live_button_is_checked():
+                # Intercept and redirect if live data requested
+                self.scripter.apply_live()
+            else:
+                # Otherwise take the 'normal' path
+                self.scripter.apply()
             self.set_running(False)
         except RuntimeError, e:
             if self._settings.debug:
@@ -248,6 +261,27 @@ class InstrumentInterface(object):
             Returns true if the instrument is compatible with remote submission
         """
         return False
+    
+    def is_live_enabled(self):
+        """
+            Returns true if the instrument interface includes a live data button
+        """
+        return self._livebuttonwidget is not None
+    
+    def live_button_is_checked(self):
+        """
+            Returns true if there is a live button and it is selected
+        """
+        return self.is_live_enabled() and self._livebuttonwidget.liveButtonIsChecked()
+    
+    def live_button_toggled(self,checked):
+        """
+            Called as a slot when the live button is pressed to make any necessary settings
+            to other widgets.
+            @param checked: True if the button has been checked, false if unchecked
+        """
+        for item in self.widgets:
+            item.live_button_toggled_actions(checked)
     
     def reset(self):
         """

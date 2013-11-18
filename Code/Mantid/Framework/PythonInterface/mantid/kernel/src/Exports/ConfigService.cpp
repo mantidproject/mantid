@@ -1,6 +1,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -37,6 +38,10 @@ namespace
 
 void export_ConfigService()
 {
+  using Mantid::PythonInterface::std_vector_exporter;
+
+  std_vector_exporter<FacilityInfo*>::wrap("std_vector_facilityinfo");
+  
   class_<ConfigServiceImpl, boost::noncopyable>("ConfigServiceImpl", no_init)
     .def("reset", &ConfigServiceImpl::reset,
          "Clears all user settings and removes the user properties file")
@@ -48,6 +53,10 @@ void export_ConfigService()
     .def("getInstrumentDirectory", &ConfigServiceImpl::getInstrumentDirectory,
          "Returns the directory used for the instrument definitions")
 
+    .def("getFacilityNames", &ConfigServiceImpl::getFacilityNames, "Returns the default facility")
+
+    .def("getFacilities", &ConfigServiceImpl::getFacilities, "Returns the default facility")
+
     .def("getFacility", (const FacilityInfo&(ConfigServiceImpl::*)() const)&ConfigServiceImpl::getFacility,
         return_value_policy<reference_existing_object>(), "Returns the default facility")
 
@@ -55,7 +64,9 @@ void export_ConfigService()
          (arg("facilityName")), return_value_policy<reference_existing_object>(),
          "Returns the named facility. Raises an RuntimeError if it does not exist")
 
-    .def("setFacility", &ConfigServiceImpl::setString, (arg("facilityName")), "Sets the current facility to the given name")
+    .def("setFacility", &ConfigServiceImpl::setFacility, "Sets the current facility to the given name")
+
+    .def("updateFacilities", &ConfigServiceImpl::updateFacilities, "Loads facility information from a provided file")
 
     .def("getInstrument", &ConfigServiceImpl::getInstrument,
           getInstrument_Overload("Returns the named instrument. If name = \"\" then the default.instrument is returned",

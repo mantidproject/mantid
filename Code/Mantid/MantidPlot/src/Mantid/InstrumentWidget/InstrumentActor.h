@@ -10,7 +10,6 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include <boost/weak_ptr.hpp>
-#include <QObject>
 #include <vector>
 #include <map>
 
@@ -43,7 +42,7 @@ namespace Mantid
    operation for selective rendering of the instrument
 
 */
-class InstrumentActor: public QObject, public GLActor
+class InstrumentActor: public GLActor
 {
   Q_OBJECT
 public:
@@ -58,7 +57,13 @@ public:
   /// Return the bounding box in 3D
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
   /// Run visitors callback on each component
-  bool accept(GLActorVisitor& visitor);
+  bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  /// Run visitors callback on each component (const version)
+  bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll) const;
+  /// Toggle the visibility of the child actors (if exist).
+  virtual void setChildVisibility(bool);
+  /// Check if any child is visible
+  virtual bool hasChildVisible() const;
   /// Get the underlying instrument
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
@@ -71,6 +76,7 @@ public:
   void applyMaskWorkspace();
   /// Remove the attached mask workspace without applying the mask.
   void clearMaskWorkspace();
+
   /// Get the color map.
   const MantidColorMap & getColorMap() const;
   /// Load a new color map from a file
@@ -83,6 +89,7 @@ public:
   void setAutoscaling(bool);
   /// Get colormap scale autoscaling status.
   bool autoscaling()const{return m_autoscaling;}
+
   /// Set the integration range.
   void setIntegrationRange(const double& xmin,const double& xmax);
   /// Get the minimum data value on the color map scale.
@@ -103,6 +110,7 @@ public:
   double maxBinValue()const{return m_BinMaxValue;}
   /// Return true if the integration range covers the whole of the x-axis in the data workspace.
   bool wholeRange()const;
+
   /// Get the number of detectors in the instrument.
   size_t ndetectors()const{return m_detIDs.size();}
   /// Get shared pointer to a detector by a pick ID converted form a color in the pick image.
@@ -121,6 +129,11 @@ public:
   size_t getWorkspaceIndex(Mantid::detid_t id) const;
   /// Get the integrated counts of a detector by its detector ID.
   double getIntegratedCounts(Mantid::detid_t id)const;
+  /// Sum the counts in detectors
+  void sumDetectors(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, std::vector<double>* err = NULL) const;
+  /// Calc indexes for min and max bin values
+  void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax) const;
+
   /// Update the detector colors to match the integrated counts within the current integration range.
   void update();
   /// Invalidate the OpenGL display lists to force full re-drawing of the instrument and creation of new lists.
@@ -139,6 +152,8 @@ public:
                   Mantid::Kernel::Quat& R,
                   bool out = false
                   );
+
+  static void rotateToLookAt(const Mantid::Kernel::V3D& eye, const Mantid::Kernel::V3D& up, Mantid::Kernel::Quat &R);
 
   /* Masking */
 
@@ -175,8 +190,8 @@ protected:
   /// Flag to show the guide and other components. Loaded and saved in settings.
   bool m_showGuides;
 
-  /// Pointer to the workspace's detector ID to workspace index map
-  Mantid::detid2index_map *m_detid2index_map;
+  /// The workspace's detector ID to workspace index map
+  Mantid::detid2index_map m_detid2index_map;
 
   /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<Mantid::detid_t> m_detIDs;
@@ -212,6 +227,12 @@ class SetVisibleComponentVisitor: public SetVisibilityVisitor
 public:
   SetVisibleComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id){}
   bool visit(GLActor*);
+  bool visit(GLActorCollection*);
+  bool visit(ComponentActor* actor);
+  bool visit(CompAssemblyActor* actor);
+  bool visit(ObjCompAssemblyActor* actor);
+  bool visit(InstrumentActor* actor);
+  bool visit(RectangularDetectorActor* actor);
   Mantid::Geometry::ComponentID getID()const{return m_id;}
 private:
   Mantid::Geometry::ComponentID m_id;
@@ -228,6 +249,7 @@ public:
   /// @param on :: If true then all non-detectors will be made visible or invisible if false.
   SetVisibleNonDetectorVisitor(bool on):m_on(on){}
   bool visit(GLActor*);
+  SAME_VISITS
 private:
   bool m_on;
 };
@@ -240,6 +262,7 @@ class FindComponentVisitor: public GLActorVisitor
 public:
   FindComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id),m_actor(NULL){}
   bool visit(GLActor*);
+  SAME_VISITS
   ComponentActor* getActor()const{return m_actor;}
 private:
   Mantid::Geometry::ComponentID m_id;

@@ -388,6 +388,30 @@ void testAdd()
     TS_ASSERT_EQUALS(height,0.6);
   }
 
+  void test_fail_CreateOutline_for_wrong_component_type()
+  {
+    std::stringstream obj_str;
+    obj_str << "<segmented-cylinder id=\"stick\">";
+    obj_str << "<centre-of-bottom-base ";
+    obj_str << "x=\"0\" y=\"0\" z=\"0\" />";
+    obj_str << "<axis x=\"0\" y=\"1\" z=\"0\" /> ";
+    obj_str << "<radius val=\"0.1\" />";
+    obj_str << "<height val=\"0.2\" />";
+    obj_str << "</segmented-cylinder>";
+    boost::shared_ptr<Object> s = Mantid::Geometry::ShapeFactory().createShape(obj_str.str());
+
+    ObjCompAssembly bank("BankName");
+    Component* det1 = new ObjComponent("Det1Name",s); det1->setPos(V3D(0,-0.1,0));
+    Component* det2 = new ObjComponent("Det2Name",s); det2->setPos(V3D(0, 0.1,0));
+    Component* det3 = new ObjComponent("Det3Name",s); det3->setPos(V3D(0, 0.3,0));
+
+    bank.add(det1);
+    bank.add(det2);
+    bank.add(det3);
+
+    TS_ASSERT_THROWS( boost::shared_ptr<Object> shape = bank.createOutline(), std::runtime_error );
+  }
+
 };
 
 #endif

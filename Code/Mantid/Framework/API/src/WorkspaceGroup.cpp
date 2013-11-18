@@ -15,20 +15,39 @@ namespace API
 {
 
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
+size_t WorkspaceGroup::g_maximum_depth = 100;
 
-WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
+WorkspaceGroup::WorkspaceGroup() :
   Workspace(), 
   m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
   m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
   m_workspaces(), m_observingADS(false)
 {
-  observeADSNotifications(observeADS);
 }
 
 WorkspaceGroup::~WorkspaceGroup()
 {
   observeADSNotifications(false);
 }
+
+/**
+ * The format is:
+ *   ID
+ *   -- Name1
+ *   -- Name2
+ * @returns A formatted human-readable string specifying the contents of the group
+ */
+const std::string WorkspaceGroup::toString() const
+{
+  std::string descr = this->id() + "\n";
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+  {
+    descr += " -- " + (*it)->name() + "\n";
+  }
+  return descr;
+}
+
 
 /**
  * Turn on/off observing delete and rename notifications to update the group accordingly
@@ -57,14 +76,23 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
   }
 }
 
-/** Add the named workspace to the group. The workspace must exist in the ADS
- *  @param name :: The name of the workspace (in the AnalysisDataService) to add
+/**
+ * @param workspace :: A workspace to check.
+ * @return :: True if the workspace is found.
  */
-void WorkspaceGroup::add(const std::string& name)
+bool WorkspaceGroup::isInChildGroup(const Workspace &workspace) const
 {
-  Workspace_sptr ws = AnalysisDataService::Instance().retrieve( name );
-  addWorkspace( ws );
-  g_log.debug() << "workspacename added to group vector =  " << name <<std::endl;
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    for(auto ws = m_workspaces.begin(); ws != m_workspaces.end(); ++ws)
+    {
+        // check child groups only
+        WorkspaceGroup *group = dynamic_cast<WorkspaceGroup*>( ws->get() );
+        if ( group )
+        {
+            if ( group->isInGroup( workspace ) ) return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -79,7 +107,6 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
   if ( it == m_workspaces.end() )
   {
     m_workspaces.push_back( workspace );
-    updated();
   }
   else
   {
@@ -100,6 +127,28 @@ bool WorkspaceGroup::contains(const std::string & wsName) const
     if ( (**it).name() == wsName ) return true;
   }
   return false;
+}
+
+/**
+ * @param workspace A pointer to a workspace
+ * @returns True if the workspace exists in the group, false otherwise
+ */
+bool WorkspaceGroup::contains(const Workspace_sptr & workspace) const
+{
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  auto iend = m_workspaces.end();
+  auto it = std::find(m_workspaces.begin(),iend, workspace);
+  return (it != iend);
+}
+
+/**
+ * Adds the current workspace members to the given list
+ * @param memberList
+ */
+void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> & memberList) const
+{
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  memberList.insert(m_workspaces.begin(), m_workspaces.end());
 }
 
 /**
@@ -158,7 +207,7 @@ void WorkspaceGroup::removeAll()
 /** Remove the named workspace from the group. Does not delete the workspace from the AnalysisDataService.
  *  @param wsName :: The name of the workspace to be removed from the group.
  */
-void WorkspaceGroup::remove(const std::string& wsName)
+void WorkspaceGroup::removeByADS(const std::string& wsName)
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
   auto it = m_workspaces.begin();
@@ -170,20 +219,6 @@ void WorkspaceGroup::remove(const std::string& wsName)
       break;
     }
   }
-  updated();
-}
-
-/// Removes all members of the group from the group AND from the AnalysisDataService
-void WorkspaceGroup::deepRemoveAll()
-{
-  Poco::Mutex::ScopedLock _lock(m_mutex);
-  if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-  while (!m_workspaces.empty())
-  {
-    AnalysisDataService::Instance().remove(m_workspaces.back()->name());
-	  m_workspaces.pop_back();
-  }
-  if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
 }
 
 /// Print the names of all the workspaces in this group to the logger (at debug level)
@@ -194,6 +229,29 @@ void WorkspaceGroup::print() const
   {
     g_log.debug() << "Workspace name in group vector =  " << (**itr).name() << std::endl;
   }
+}
+
+/**
+ * Remove a workspace pointed to by an index. The workspace remains in the ADS if it was there
+ *
+ * @param index :: Index of a workspace to delete.
+ */
+void WorkspaceGroup::removeItem(const size_t index)
+{
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    // do not allow this way of removing for groups in the ADS
+    if ( ! name().empty() )
+    {
+        throw std::runtime_error("AnalysisDataService must be used to remove a workspace from group.");
+    }
+    if( index >= this->size() )
+    {
+      std::ostringstream os;
+      os << "WorkspaceGroup - index out of range. Requested=" << index << ", current size=" << this->size();
+      throw std::out_of_range(os.str());
+    }
+    auto it = m_workspaces.begin() + index;
+    m_workspaces.erase( it );
 }
 
 /** Callback for a workspace delete notification
@@ -211,7 +269,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
 
   if( deletedName != this->getName() )
   {
-    this->remove(deletedName);
+    this->removeByADS(deletedName);
     if(isEmpty())
     {
       //We are about to get deleted so we don't want to recieve any notifications
@@ -229,9 +287,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
 void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice)
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  bool isObserving = m_observingADS;
-  if ( isObserving )
-    observeADSNotifications( false );
+
   const std::string replacedName = notice->object_name();
   for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
   {
@@ -241,8 +297,6 @@ void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceN
       break;
     }
   }
-  if ( isObserving )
-    observeADSNotifications( true );
 }
 
 /**
@@ -283,27 +337,6 @@ bool WorkspaceGroup::areNamesSimilar() const
       return false;
   }
   return true;
-}
-
-//------------------------------------------------------------------------------
-/**
- * If the group observes the ADS it will send the GroupUpdatedNotification.
- */
-void WorkspaceGroup::updated() const
-{
-  Poco::Mutex::ScopedLock _lock(m_mutex);
-  if ( m_observingADS )
-  {
-    try
-    {
-      AnalysisDataService::Instance().notificationCenter.postNotification(
-        new GroupUpdatedNotification( name() ));
-    }
-    catch( ... )
-    {
-      // if this workspace is not in the ADS do nothing
-    }
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -350,6 +383,31 @@ bool WorkspaceGroup::isMultiperiod() const
     ++iterator;
   }
   return true;
+}
+
+/**
+ * @param workspace :: A workspace to check.
+ * @param level :: The current nesting level. Intended for internal use only by WorkspaceGroup.
+ * @return :: True if the worspace is found in any of the nested groups in this group.
+ */
+bool WorkspaceGroup::isInGroup(const Workspace &workspace, size_t level) const
+{
+    // Check for a cycle.
+    if ( level > g_maximum_depth )
+    {
+        throw std::runtime_error("WorkspaceGroup nesting level is too deep.");
+    }
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    for(auto ws = m_workspaces.begin(); ws != m_workspaces.end(); ++ws)
+    {
+        if ( ws->get() == &workspace ) return true;
+        WorkspaceGroup *group = dynamic_cast<WorkspaceGroup*>( ws->get() );
+        if ( group )
+        {
+            if ( group->isInGroup( workspace, level + 1 ) ) return true;
+        }
+    }
+    return false;
 }
 
 } // namespace API

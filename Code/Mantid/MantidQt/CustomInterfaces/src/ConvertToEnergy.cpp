@@ -4,7 +4,6 @@
 #include "MantidQtCustomInterfaces/ConvertToEnergy.h"
 #include "MantidQtCustomInterfaces/Homer.h" // user interface for Direct instruments
 #include "MantidQtCustomInterfaces/Indirect.h" // user interface for Indirect instruments
-
 #include "MantidQtAPI/ManageUserDirectories.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -27,7 +26,6 @@ namespace MantidQt
 }
 
 using namespace MantidQt::CustomInterfaces;
-
 //----------------------
 // Public member functions
 //----------------------
@@ -245,11 +243,10 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 ConvertToEnergy::DeltaEMode ConvertToEnergy::instrumentDeltaEMode(const QString& defFile)
 {
   QString pyInput =
-    "from mantidsimple import *\n"
-    "import sys\n"
+    "from mantid.simpleapi import LoadEmptyInstrument,mtd\n"
     "ws_name = '__empty_%2'\n"
-    "if not mtd.workspaceExists(ws_name):\n"
-    "  LoadEmptyInstrument(r'%1', ws_name)\n"
+    "if not mtd.doesExist(ws_name):\n"
+    "  LoadEmptyInstrument(Filename=r'%1', OutputWorkspace=ws_name)\n"
     "instrument = mtd[ws_name].getInstrument()\n"
     "try:\n"
     "    print instrument.getStringParameter('deltaE-mode')[0]\n"
@@ -287,6 +284,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabCalibration));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabSofQW));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabTimeSlice));
+    m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabTransmission));
     m_uiForm.tabWidget->addTab(m_uiForm.tabDiagnoseDetectors, "Diagnose Detectors");
     m_uiForm.tabWidget->addTab(m_uiForm.tabAbsoluteUnits, "Absolute Units");
     if ( m_directInstruments == NULL )
@@ -304,6 +302,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabAbsoluteUnits));
     m_uiForm.tabWidget->addTab(m_uiForm.tabCalibration, "Calibration");
     m_uiForm.tabWidget->addTab(m_uiForm.tabTimeSlice, "Diagnostics");
+    m_uiForm.tabWidget->addTab(m_uiForm.tabTransmission, "Transmission");
     m_uiForm.tabWidget->addTab(m_uiForm.tabSofQW, "S(Q, w)");
     if ( m_indirectInstruments == NULL )
     {

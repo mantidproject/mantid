@@ -8,6 +8,7 @@
 class DimensionWidgetFactory
 concrete DimensionViewFactory. Creational type, fabricating dimension widgets on request.
 */
+// cppcheck-suppress class_X_Y
 class EXPORT_OPT_MANTIDPARVIEW DimensionWidgetFactory  : public Mantid::VATES::DimensionViewFactory
 {
 public:

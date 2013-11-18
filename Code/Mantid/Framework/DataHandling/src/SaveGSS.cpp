@@ -59,12 +59,9 @@ namespace Mantid
           "The input workspace, which must be in time-of-flight");
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save),
           "The filename to use for the saved data");
-      std::vector<std::string> Split(2);
-      Split[0] = "True";
-      Split[1] = "False";
-      declareProperty("SplitFiles", "True", boost::make_shared<Kernel::StringListValidator>(Split),
+      declareProperty("SplitFiles", true,
           "Whether to save each spectrum into a separate file ('true') or not ('false'). Note that this is a string, not a boolean property.");
-      declareProperty("Append", true, "If true and Filename already exists, append, else overwrite");
+      declareProperty("Append", true, "If true and Filename already exists, append, else overwrite ");
       declareProperty(
           "Bank",
           1,
@@ -76,6 +73,9 @@ namespace Mantid
       declareProperty("MultiplyByBinWidth", true,
           "Multiply the intensity (Y) by the bin width; default TRUE.");
       declareProperty("ExtendedHeader", false, "Add information to the header about iparm file and normalization");
+
+      declareProperty("UseSpectrumNumberAsBankID", false, "If true, then each bank's bank ID is equal to the spectrum number; "
+                      "otherwise, the continous bank IDs are applied. ");
     }
 
     /**
@@ -121,17 +121,18 @@ namespace Mantid
       // Check the number of histogram/spectra < 99
       if (nHist > 99)
       {
-        g_log.error() << "Spectra number cannot be larger than 99 for GSAS file" << std::endl;
-        throw new std::invalid_argument("Workspace has more than 99 spectra, and not allowed by GSAS");
+        g_log.error() << "Number of Spectra ("<< nHist<<") cannot be larger than 99 for GSAS file" << std::endl;
+        throw new std::invalid_argument("Workspace has more than the 99 spectra, allowed by GSAS");
       }
 
       std::string filename = getProperty("Filename");
 
       const int bank = getProperty("Bank");
       const bool MultiplyByBinWidth = getProperty("MultiplyByBinWidth");
-      std::string split_string = getProperty("SplitFiles");
-      bool split = (split_string == "True");
+      const bool split = getProperty("SplitFiles");
       std::string outputFormat = getProperty("Format");
+
+      m_useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
 
       std::ostringstream number;
       std::ofstream out;
@@ -210,19 +211,30 @@ namespace Mantid
                 / (PhysicalConstants::h * 1e4)) << "\n";
           }
           out << "# Data for spectrum :" << i << std::endl;
+
+          int bankid;
+          if (m_useSpecAsBank)
+          {
+            bankid = static_cast<int>(inputWS->getSpectrum(i)->getSpectrumNo());
+          }
+          else
+          {
+            bankid = bank + i;
+          }
+
           if (RALF.compare(outputFormat) == 0)
           {
-            this->writeRALFdata(bank + i, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
+            this->writeRALFdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
                 inputWS->readE(i));
           }
           else if (SLOG.compare(outputFormat) == 0)
           {
-            this->writeSLOGdata(bank + i, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
+            this->writeSLOGdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
                 inputWS->readE(i));
           }
           else
           {
-            throw std::runtime_error("Do not know how to write output format " + outputFormat);
+            throw std::runtime_error("Cannot write to the unknown " +  outputFormat + "output format"); 
           }
 
         } // End separate scope

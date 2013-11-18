@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
 #include "MantidQtCustomInterfaces/IndirectDataAnalysis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -64,9 +65,14 @@ namespace IDA
     void showInformationBox(const QString & message);
     /// Run a piece of python code and return any output that was written to stdout
     QString runPythonCode(const QString & code, bool no_output = false);
+    /// Run load nexus and return the workspace.
+    Mantid::API::MatrixWorkspace_const_sptr runLoadNexus(const QString & filename, const QString & wsname);
 
+    /// Creates and returns a "mini plot" looking up the workspace from the ADS
+    QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const QString & workspace, size_t index);
     /// Creates and returns a "mini plot".
-    QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const std::string & workspace, size_t index);
+    QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const  Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t index);
+
     /// Returns the range of the given curve data.
     std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
 

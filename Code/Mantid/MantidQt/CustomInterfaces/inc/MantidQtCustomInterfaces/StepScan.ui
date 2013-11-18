@@ -17,28 +17,9 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QToolButton" name="liveButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Enabled if a connection can be made to your default instrument</string>
-       </property>
-       <property name="text">
-        <string>Use live stream</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextOnly</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mWRunFiles">
        <property name="label" stdset="0">
-        <string>Data file</string>
+        <string>Data source</string>
        </property>
        <property name="optional" stdset="0">
         <bool>true</bool>
@@ -50,6 +31,9 @@
         <stringlist>
          <string>nxs.h5</string>
         </stringlist>
+       </property>
+       <property name="liveButton" stdset="0">
+        <enum>MantidQt::MantidWidgets::MWRunFiles::AlwaysShow</enum>
        </property>
       </widget>
      </item>
@@ -264,7 +248,9 @@
            <enum>QComboBox::AdjustToContents</enum>
           </property>
           <property name="WorkspaceTypes">
-           <stringlist/>
+           <stringlist>
+            <string>MaskWorkspace</string>
+           </stringlist>
           </property>
           <property name="ShowHidden" stdset="0">
            <bool>false</bool>
@@ -339,6 +325,11 @@ p, li { white-space: pre-wrap; }
             <string>microseconds</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Å (d-spacing) </string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -361,22 +352,5 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>liveButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mWRunFiles</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>71</x>
-     <y>41</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>281</x>
-     <y>41</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

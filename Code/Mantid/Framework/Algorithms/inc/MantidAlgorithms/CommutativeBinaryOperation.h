@@ -49,7 +49,7 @@ namespace Mantid
     protected:
       // Overridden BinaryOperation method
       /// Checks the overall size compatability of two workspaces
-      virtual bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+      virtual std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
     };
 
   } // namespace Algorithm

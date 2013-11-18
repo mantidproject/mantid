@@ -10,6 +10,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
+#include <vector>
+#include <algorithm>
 
 using namespace Mantid::Kernel;
 using Mantid::API::IWorkspaceProperty;
@@ -182,7 +184,9 @@ namespace API
     // Delete all widgets in the layout
     QLayoutItem *child;
     while ((child = m_inputGrid->takeAt(0)) != 0) {
-      delete child->widget();
+      if(child->widget())
+        child->widget()->deleteLater();
+
       delete child;
     }
 
@@ -226,7 +230,7 @@ namespace API
           else
           {
             // Make a groupbox with a border and a light background
-            QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
+            QGroupBox* grpBox = new QGroupBox(QString::fromStdString(group) );
             grpBox->setAutoFillBackground(true);
             grpBox->setStyleSheet(
                 "QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }"
@@ -238,9 +242,12 @@ namespace API
             // Put the frame in the main grid
             m_inputGrid->addWidget(grpBox, row, 0, 1, 4);
 
+            m_groupWidgets[QString::fromStdString(group)] = grpBox;
+
             // Make a layout in the grp box
             m_currentGrid = new QGridLayout;
             grpBox->setLayout(m_currentGrid);
+
             row++;
           }
         }
@@ -297,6 +304,12 @@ namespace API
     this->hideOrDisableProperties();
   }
 
+  bool isCalledInputWorkspace(PropertyWidget * const candidate)
+  {
+    Mantid::Kernel::Property const * const  property  = candidate->getProperty();
+    const std::string& propertyName = property->name();
+    return propertyName == "InputWorkspace";
+  }
 
   //-------------------------------------------------------------------------------------------------
   /** A slot to handle the replace workspace button click
@@ -307,6 +320,8 @@ namespace API
   {
     if (m_propWidgets.contains(propName))
     {
+      typedef std::vector<PropertyWidget*> CollectionOfPropertyWidget;
+      CollectionOfPropertyWidget candidateReplacementSources;
       PropertyWidget * propWidget = m_propWidgets[propName];
       if (propWidget)
       {
@@ -324,13 +339,30 @@ namespace API
             {
               // Input workspace property. Get the text typed in.
               wsName = otherWidget->getValue();
-              break;
+              if (!wsName.isEmpty())
+              {
+                // Add the candidate to the list of candidates.
+                candidateReplacementSources.push_back(otherWidget);
+              }
             }
           }
         }
 
-        if (!wsName.isEmpty())
-          propWidget->setValue(wsName);
+        // Choose from candidates, only do this if there are candidates to select from.
+        if(candidateReplacementSources.size() > 0)
+        {
+          CollectionOfPropertyWidget::iterator selectedIt = std::find_if(candidateReplacementSources.begin(), candidateReplacementSources.end(), isCalledInputWorkspace);
+          if(selectedIt != candidateReplacementSources.end())
+          {
+            // Use the InputWorkspace property called "InputWorkspace" as the source for the OutputWorkspace.
+            propWidget->setValue((*selectedIt)->getValue());
+          }
+          else
+          {
+            // Take the first candidate if there are none called "InputWorkspace" as the source for the OutputWorkspace.
+            propWidget->setValue(candidateReplacementSources.front()->getValue());
+          }
+        }
       }
     }
 

@@ -24,13 +24,6 @@ namespace Mantid
       eNumber = 2
     };
 
-//    struct OpRequirements
-//    {
-//      bool matchXSize;
-//      bool keepEventWorkspace;
-//    };
-
-
     /** 
     BinaryOperation supports the implementation of a binary operation on two input workspaces.
     It inherits from the Algorithm class, and overrides the init() & exec() methods.
@@ -80,12 +73,13 @@ namespace Mantid
        * Index into vector: workspace index in the lhs;
        * Value at that index: workspace index of the rhs to apply to the WI in the lhs. -1 if not found.
        */
-      typedef std::vector< int64_t >  BinaryOperationTable;
+      typedef std::vector< int64_t>  BinaryOperationTable;
+      typedef boost::shared_ptr<BinaryOperationTable>  BinaryOperationTable_sptr;
 
-      static BinaryOperationTable * buildBinaryOperationTable(API::MatrixWorkspace_const_sptr lhs, API::MatrixWorkspace_const_sptr rhs);
+      static BinaryOperationTable_sptr
+        buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr & lhs, const API::MatrixWorkspace_const_sptr & rhs);
 
 
-    //protected:
     private:
       // Overridden Algorithm methods
       void init();
@@ -111,7 +105,7 @@ namespace Mantid
       virtual bool checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs);
 
       /// Checks the overall size compatibility of two workspaces
-      virtual bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+      virtual std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       
       /// Checks if the spectra at the given index of either input workspace is masked. If so then the output spectra has zeroed data
       /// and is also masked. The function returns true if further processing is not required on the spectra.

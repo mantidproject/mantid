@@ -47,7 +47,7 @@ def clear_loaded_data():
     global _last_mono_file, _loaded_data
     _last_mono_file = None
     for data_ws in _loaded_data:
-        mtd.deleteWorkspace(data_ws)
+        DeleteWorkspace(data_ws)
     _loaded_data = []
    
 def is_loaded(filename):

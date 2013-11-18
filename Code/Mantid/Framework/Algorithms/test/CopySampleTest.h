@@ -68,8 +68,8 @@ public:
     sample.setEnvironment(kit);
     OrientedLattice *latt = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
     sample.setOrientedLattice(latt);
-    Material *vanBlock = new Material("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
-    sample.setMaterial(*vanBlock);
+    Material vanBlock("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);
+    sample.setMaterial(vanBlock);
     Object_sptr shape_sptr =
       createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     sample.setShape(*shape_sptr);
@@ -170,6 +170,69 @@ public:
     AnalysisDataService::Instance().remove(inWSName);
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+
+  void test_orientation()
+  {
+    WorkspaceSingleValue_sptr ws1(new WorkspaceSingleValue(1,1));
+    WorkspaceSingleValue_sptr ws2(new WorkspaceSingleValue(4,2));
+    Sample s=createsample();
+    ws1->mutableSample()=s;
+
+    // Name of the output workspace.
+    std::string inWSName("CopySampleTest_InputWS");
+    std::string outWSName("CopySampleTest_OutputWS");
+    AnalysisDataService::Instance().add(inWSName, ws1);
+    AnalysisDataService::Instance().add(outWSName, ws2);
+
+    CopySample alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyName", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyMaterial", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyEnvironment", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyShape", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyLattice", "1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyOrientationOnly", "1") );
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service.
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+
+    // Check the results
+    Sample copy=ws->mutableSample();
+    TS_ASSERT(copy.hasOrientedLattice());
+    TS_ASSERT_EQUALS(copy.getOrientedLattice().getUB(), s.getOrientedLattice().getUB());
+
+    //modify the first unit cell, both U and B
+    s.getOrientedLattice().setUFromVectors(V3D(1,1,0),V3D(1,-1,0));
+    s.getOrientedLattice().seta(1.1);
+    ws1->mutableSample()=s;
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+    // Retrieve the workspace from data service.
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+
+    // Check the results
+    copy=ws->mutableSample();
+    TS_ASSERT(copy.hasOrientedLattice());
+    TS_ASSERT_DIFFERS(copy.getOrientedLattice().a(), s.getOrientedLattice().a()); //different B matrix
+    TS_ASSERT_EQUALS(copy.getOrientedLattice().getU(), s.getOrientedLattice().getU());//same U
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(inWSName);
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+
   void test_MDcopy()
   {
     IMDEventWorkspace_sptr ew(new MDEventWorkspace<MDEvent<3>, 3>());

@@ -66,6 +66,8 @@ public:
   std::string asString()const;
   /// Sets the workspace for each member function
   void setWorkspace(boost::shared_ptr<const Workspace> ws);
+  /// Set matrix workspace
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
 
   /// Function you want to fit to. 
   virtual void function(const FunctionDomain& domain, FunctionValues& values)const;

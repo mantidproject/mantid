@@ -12,6 +12,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
+#include <boost/make_shared.hpp>
+
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -329,16 +331,10 @@ namespace Mantid
       }
 
       // Check the size compatibility
-      if (!checkSizeCompatibility(lhs,rhs))
+      std::string checkSizeCompatibilityResult = checkSizeCompatibility(lhs,rhs); 
+      if (!checkSizeCompatibilityResult.empty())
       {
-        std::ostringstream ostr;
-        ostr<<"The sizes of the two workspaces " <<
-            "(" << lhs->getName() << ": " << lhs->getNumberHistograms() << " spectra, blocksize " << lhs->blocksize() << ")"
-            << " and " <<
-            "(" << rhs->getName() << ": " << rhs->getNumberHistograms() << " spectra, blocksize " << rhs->blocksize() << ")"
-            << " are not compatible for algorithm "<<this->name();
-        g_log.error() << ostr.str() << std::endl;
-        throw std::invalid_argument( ostr.str() );
+        throw std::invalid_argument(checkSizeCompatibilityResult);
       }
 
       return true;
@@ -366,31 +362,67 @@ namespace Mantid
      *  must divide be the size of the smaller workspace leaving no remainder
      *  @param lhs :: the first workspace to compare
      *  @param rhs :: the second workspace to compare
-     *  @retval true The two workspaces are size compatible
-     *  @retval false The two workspaces are NOT size compatible
+     *  @retval "" The two workspaces are size compatible
+     *  @retval "<reason why not compatible>" The two workspaces are NOT size compatible
      */
-    bool BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    std::string BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       const size_t lhsSize = lhs->size();
       const size_t rhsSize = rhs->size();
       // A SingleValueWorkspace on the right matches anything
-      if ( rhsSize == 1 ) return true;
-      // The rhs must not be smaller than the lhs
-      if ( lhsSize < rhsSize ) return false;
+      if ( rhsSize == 1 ) return "";
+      // The lhs must not be smaller than the rhs
+      if ( lhsSize < rhsSize ) return "Left hand side smaller than right hand side.";
 
       //Did checkRequirements() tell us that the X histogram size did not matter?
       if (!m_matchXSize)
+      {
         //If so, only the vertical # needs to match
-        return (lhs->getNumberHistograms() == rhs->getNumberHistograms());
-
+        
+        if ( lhs->getNumberHistograms() == rhs->getNumberHistograms() )
+        {
+          return "";
+        }
+        else
+        {
+          return "Number of histograms not identical.";
+        }
+      }
       // Otherwise they must match both ways, or horizontally or vertically with the other rhs dimension=1
-      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
+      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return "";
       // Past this point, we require the X arrays to match. Note this only checks the first spectrum
-      if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) ) return false;
+      if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) )
+        {
+            return "X arrays must match when performing this operation on a 2D workspaces.";
+        }
       
       const size_t rhsSpec = rhs->getNumberHistograms();
 
-      return ( lhs->blocksize() == rhs->blocksize() && ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec ) );
+      if ( lhs->blocksize() == rhs->blocksize())
+      {
+        if ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec )
+        {
+          return "";
+        }
+        else
+        {
+          //can't be more specific as if this is reached both failed and only one or both are needed
+          return "Left and right sides should contain the same amount of spectra or the right side should contian only one spectra.";
+        }
+      }
+      else
+      {
+        //blocksize check failed, but still check the number of spectra to see if that was wrong too
+        if ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec )
+        {
+          return "Number of y values not equal on left and right sides.";
+        }
+        else
+        {
+          //can't be more specific as if this is reached both failed and only one or both are needed
+          return "Number of y values not equal on left and right sides and the right side contained neither only one spectra or the same amount of spectra as the left.";
+        }
+      }
     }
 
 
@@ -645,10 +677,11 @@ namespace Mantid
      */
     void BinaryOperation::do2D( bool mismatchedSpectra)
     {
-      BinaryOperationTable * table = NULL;
+      BinaryOperationTable_sptr table;
       if (mismatchedSpectra)
+      {
         table = BinaryOperation::buildBinaryOperationTable(m_lhs, m_rhs);
-
+      }
 
       // Propagate any masking first or it could mess up the numbers
       //TODO: Check if this works for event workspaces...
@@ -969,12 +1002,13 @@ namespace Mantid
      * @return map from detector ID to workspace index for the RHS workspace.
      *        NULL if there is not a 1:1 mapping from detector ID to workspace index (e.g more than one detector per pixel).
      */
-    BinaryOperation::BinaryOperationTable * BinaryOperation::buildBinaryOperationTable(MatrixWorkspace_const_sptr lhs, MatrixWorkspace_const_sptr rhs)
+    BinaryOperation::BinaryOperationTable_sptr
+      BinaryOperation::buildBinaryOperationTable(const MatrixWorkspace_const_sptr &lhs, const MatrixWorkspace_const_sptr & rhs)
     {
       //An addition table is a list of pairs:
       //  First int = workspace index in the EW being added
       //  Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
-      BinaryOperationTable * table = new BinaryOperationTable();
+      auto table = boost::make_shared<BinaryOperationTable>();
 
       int rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
       int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
@@ -982,8 +1016,7 @@ namespace Mantid
       // Initialize the table; filled with -1 meaning no match
       table->resize(lhs_nhist, -1);
 
-      detid2index_map * rhs_det_to_wi;
-      rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap(false);
+      const detid2index_map rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap();
 
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
@@ -1012,7 +1045,7 @@ namespace Mantid
 
 
         // ----------------- Scrambled Detector IDs with one Detector per Spectrum --------------------------------------
-        if (!done && rhs_det_to_wi && (lhsDets.size() == 1))
+        if (!done && (lhsDets.size() == 1))
         {
           //Didn't find it. Try to use the RHS map.
 
@@ -1021,8 +1054,8 @@ namespace Mantid
           detid_t lhs_detector_ID = *lhsDets_it;
 
           //Now we use the RHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
-          detid2index_map::iterator map_it = rhs_det_to_wi->find(lhs_detector_ID);
-          if (map_it != rhs_det_to_wi->end())
+          detid2index_map::const_iterator map_it = rhs_det_to_wi.find(lhs_detector_ID);
+          if (map_it != rhs_det_to_wi.end())
           {
             rhsWI = map_it->second; //This is the workspace index in the RHS that matched lhs_detector_ID
           }

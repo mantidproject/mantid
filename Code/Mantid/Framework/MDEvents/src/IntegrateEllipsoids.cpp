@@ -280,6 +280,9 @@ namespace MDEvents
     double peak_radius       = getProperty( "PeakSize" );
     double back_inner_radius = getProperty( "BackgroundInnerSize" );
     double back_outer_radius = getProperty( "BackgroundOuterSize" );
+    std::vector<double> PeakRadiusVector(n_peaks,peak_radius);
+    std::vector<double> BackgroundInnerRadiusVector(n_peaks,back_inner_radius);
+    std::vector<double> BackgroundOuterRadiusVector(n_peaks,back_outer_radius);
     if ( specify_size )
     {
       if ( back_outer_radius > radius )
@@ -380,10 +383,9 @@ namespace MDEvents
     // This flag is used by the PeaksWorkspace to evaluate whether it has been integrated.
     peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
     // These flags are specific to the algorithm.
-    peak_ws->mutableRun().addProperty("PeakRadius", peak_radius, true);
-    peak_ws->mutableRun().addProperty("BackgroundInnerRadius", back_inner_radius, true);
-    peak_ws->mutableRun().addProperty("BackgroundOuterRadius", back_outer_radius, true);
-
+    peak_ws->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
+    peak_ws->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
+    peak_ws->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
 
     setProperty("OutputWorkspace", peak_ws);
   }

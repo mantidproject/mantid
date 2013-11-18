@@ -64,6 +64,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	CompressedWorkspace2DTest.h
 	EventListTest.h
+	EventsTest.h
 	EventWorkspaceMRUTest.h
 	EventWorkspaceTest.h
 	GroupingWorkspaceTest.h
@@ -93,7 +94,6 @@ set ( TEST_FILES
 	WorkspaceValidatorsTest.h
 )
 
-
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(DataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -105,7 +105,8 @@ enable_precompiled_headers( inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES 
 add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects 
-                                               COMPILE_DEFINITIONS IN_MANTID_DATA_OBJECTS )
+                                               COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS )
+                                               
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )
 

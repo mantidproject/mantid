@@ -90,6 +90,21 @@ class BaseWidget(QtGui.QWidget):
         """
         return NotImplemented 
     
+    def live_button_widget(self):
+        """
+            Returns a reference to a widget that is or contains a live data button
+        """
+        return None
+    
+    def live_button_toggled_actions(self,checked):
+        """
+            Actions to take on the widget (e.g. setting or disabling certain items) if the
+            live button has been turned on or off.
+            Default is to do nothing - override this method if you need something to happen.
+            @param checked: True if the button has been checked, false if unchecked
+        """
+        pass
+    
     def dir_browse_dialog(self):
         """
             Pop up a directory dialog box.
@@ -116,9 +131,9 @@ class BaseWidget(QtGui.QWidget):
             qflist = QtGui.QFileDialog.getOpenFileNames(self, title,
                                                               self._settings.data_path, 
                                                               data_type)
-            if qflist.count()>0:
+            if len(qflist)>0:
                 flist = []
-                for i in range(qflist.count()):
+                for i in range(len(qflist)):
                     flist.append(str(QtCore.QFileInfo(qflist[i]).filePath()))
                 # Store the location of the loaded file
                 self._settings.data_path = str(QtCore.QFileInfo(qflist[i]).path())

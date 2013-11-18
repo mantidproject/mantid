@@ -31,9 +31,10 @@ The Child Algorithms used by LoadMuonNexus are:
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
@@ -48,6 +49,8 @@ The Child Algorithms used by LoadMuonNexus are:
 #include "MantidNexus/NexusFileIO.h"
 #include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
@@ -60,8 +63,7 @@ namespace DataHandling
 {
 
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(LoadNexusProcessed)
-DECLARE_LOADALGORITHM(LoadNexusProcessed)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed);
 
 /// Sets documentation strings for this algorithm
 void LoadNexusProcessed::initDocs()
@@ -87,6 +89,17 @@ LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
 LoadNexusProcessed::~LoadNexusProcessed()
 {
   delete m_cppFile;
+}
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadNexusProcessed::confidence(Kernel::NexusDescriptor & descriptor) const
+{
+  if(descriptor.pathExists("/mantid_workspace_1")) return 80;
+  else return 0;
 }
 
 /** Initialisation method.
@@ -119,6 +132,7 @@ void LoadNexusProcessed::init()
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
                   "The particular entry number to read. Default load all workspaces and creates a workspacegroup (default: read all entries)." );
+  declareProperty("LoadHistory", true, "If true, the workspace history will be loaded");
 }
 
 
@@ -166,6 +180,22 @@ void LoadNexusProcessed::exec()
     //This forms the name of the group
     std::string base_name = getPropertyValue("OutputWorkspace");
     // First member of group should be the group itself, for some reason!
+
+    //load names of each of the workspaces and check for a common stem
+    std::vector<std::string> names(nperiods+1);
+    bool commonStem = checkForCommonNameStem(root, names);
+
+    //remove existing workspace and replace with the one being loaded
+    bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
+    if(wsExists)
+    {
+      Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
+      alg->initialize();
+      alg->setChild(true);
+      alg->setProperty("Workspace", base_name);
+      alg->execute();
+    }
+
     base_name += "_";
     const std::string prop_name = "OutputWorkspace_";
     double nperiods_d = static_cast<double>(nperiods);
@@ -173,8 +203,12 @@ void LoadNexusProcessed::exec()
     {
       std::ostringstream os;
       os << p;
+
+      //decide what the workspace should be called
+      std::string wsName = buildWorkspaceName(names[p], base_name, p, commonStem);
+
       Workspace_sptr local_workspace = loadEntry(root, basename + os.str(), static_cast<double>(p-1)/nperiods_d, 1./nperiods_d);
-      declareProperty(new WorkspaceProperty<API::Workspace>(prop_name + os.str(), base_name + os.str(),
+      declareProperty(new WorkspaceProperty<API::Workspace>(prop_name + os.str(), wsName,
           Direction::Output));
       //wksp_group->add(base_name + os.str());
       wksp_group->addWorkspace(local_workspace);
@@ -189,6 +223,139 @@ void LoadNexusProcessed::exec()
   m_axis1vals.clear();
 }
 
+
+/**
+ * Decides what to call a child of a group workspace.
+ *
+ * This function uses information about if the child workspace has a common stem
+ * and checks if the file contained a workspace name to decide what it should be called
+ *
+ * @param name :: The name loaded from the file (possibly the empty string if none was loaded)
+ * @param baseName :: The name group workspace
+ * @param wsIndex :: The current index of this workspace
+ * @param commonStem :: Whether the workspaces share a common name stem
+ *
+ * @return The name of the workspace
+ */
+std::string LoadNexusProcessed::buildWorkspaceName(const std::string& name, const std::string& baseName, int64_t wsIndex, bool commonStem)
+{
+  std::string wsName;
+  std::string index = boost::lexical_cast<std::string>(wsIndex);
+
+  //if we don't have a common stem then use name tag
+  if(!commonStem)
+  {
+    if(!name.empty())
+    {
+      //use name loaded from file there's no common stem
+      wsName = name;
+    }
+    else
+    {
+      //if the name property wasn't defined just use <OutputWorkspaceName>_n
+      wsName = baseName + index;
+    }
+  }
+  else
+  {
+    //we have a common stem so rename accordingly
+    boost::smatch results;
+    const boost::regex exp(".*_(\\d+$)");
+    //if we have a common name stem then name is <OutputWorkspaceName>_n
+    if(boost::regex_search(name, results, exp))
+    {
+      wsName = baseName + std::string(results[1].first, results[1].second);
+    }
+    else
+    {
+      //use default name if we couldn't match for some reason
+      wsName = baseName + index;
+    }
+  }
+
+  correctForWorkspaceNameClash(wsName);
+
+  return wsName;
+}
+
+/**
+ * Append an index to the name if it already exists in the AnalysisDataService
+ *
+ * @param wsName :: Name to call the workspace
+ */
+void LoadNexusProcessed::correctForWorkspaceNameClash(std::string& wsName)
+{
+  bool noClash(false);
+
+  for (int i =0; !noClash; ++i )
+  {
+    std::string wsIndex = ""; //dont use an index if there is no other workspace
+    if(i > 0)
+    {
+      wsIndex = "_" + boost::lexical_cast<std::string>(i);
+    }
+
+    bool wsExists = AnalysisDataService::Instance().doesExist(wsName+wsIndex);
+    if(!wsExists)
+    {
+      wsName += wsIndex;
+      noClash = true;
+    }
+  }
+}
+
+/**
+ * Check if the workspace name contains a common stem and load the workspace names
+ *
+ * @param root :: the root for the NeXus document
+ * @param names :: vector to store the names to be loaded.
+ * @return Whether there was a common stem.
+ */
+bool LoadNexusProcessed::checkForCommonNameStem(NXRoot & root, std::vector<std::string>& names)
+{
+  bool success(true);
+  int64_t nperiods = static_cast<int64_t>(root.groups().size());
+  for( int64_t p = 1; p <= nperiods; ++p )
+  {
+    std::ostringstream os;
+    os << p;
+
+    names[p] = loadWorkspaceName(root, "mantid_workspace_" + os.str());
+
+    boost::smatch results;
+    const boost::regex exp(".*_\\d+$");
+
+    //check if the workspace name has an index on the end
+    if (!boost::regex_match(names[p], results, exp))
+    {
+      success = false;
+    }
+  }
+
+  return success;
+}
+
+/**
+ * Load the workspace name, if the attribute exists
+ *
+ * @param root :: Root of NeXus file
+ * @param entr_name :: Entry in NeXus file to look at
+ * @return The workspace name. If none found an empty string is returned.
+ */
+std::string LoadNexusProcessed::loadWorkspaceName(NXRoot & root, const std::string& entry_name)
+{
+  NXEntry mtd_entry = root.openEntry(entry_name);
+  try
+  {
+    return mtd_entry.getString("workspace_name");
+  }
+  catch (std::runtime_error&)
+  {
+    return std::string("");
+  }
+
+  return std::string("");
+}
 
 
 //-------------------------------------------------------------------------------------------------
@@ -598,6 +765,23 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
       }
     }
 
+    if ( !str.compare("column_15") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+      Kernel::Matrix<double> gm(3, 3, false);
+      int k = 0;
+      for (int r = 0; r < numberPeaks; r++) {
+    	for (int j = 0; j < 9; j++)
+		{
+    		double val = nxDouble[k];
+    		k++;
+    		gm[j%3][j/3] = val;
+		}
+        peakWS->getPeak(r).setGoniometerMatrix( gm );
+      }
+    }
+
   }
 
   return boost::static_pointer_cast<API::Workspace>(peakWS);
@@ -864,6 +1048,13 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   try
   {
     local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create(unit1);
+    if(unit1 == "Label")
+    {
+      auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(local_workspace->getAxis(0)->unit());
+      auto ax = wksp_cls.openNXDouble("axis1");
+      label->setLabel(ax.attributes("caption"), ax.attributes("label"));
+    }
+
     //If this doesn't throw then it is a numeric access so grab the data so we can set it later
     axis2.load();
     m_axis1vals = MantidVec(axis2(), axis2() + axis2.dim0());
@@ -886,6 +1077,12 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
       Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(nspectra);
       local_workspace->replaceAxis(1, newAxis);
       newAxis->unit() = UnitFactory::Instance().create(unit2);
+      if(unit2 == "Label")
+      {
+        auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(newAxis->unit());
+        auto ax = wksp_cls.openNXDouble("axis2");
+        label->setLabel(ax.attributes("caption"), ax.attributes("label"));
+      }
     }
     catch( std::runtime_error & )
     {
@@ -940,7 +1137,8 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   m_cppFile->openPath(mtd_entry.path());
   try
   {
-    local_workspace->history().loadNexus(m_cppFile);
+    bool load_history = getProperty("LoadHistory");
+    if (load_history) local_workspace->history().loadNexus(m_cppFile);
   }
   catch (std::out_of_range&)
   {
@@ -976,14 +1174,12 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   //Read necessary arrays from the file
   // Detector list contains a list of all of the detector numbers. If it not present then we can't update the spectra
   // map
-  int ndets(-1);
-  boost::shared_array<int> det_list(new int);
+  boost::shared_array<int> det_list;
   try
   {
     NXInt detlist_group = detgroup.openNXInt("detector_list");
-    ndets = detlist_group.dim0();
     detlist_group.load();
-    det_list.swap(detlist_group.sharedBuffer());
+    det_list = detlist_group.sharedBuffer();
   }
   catch(std::runtime_error &)
   {
@@ -1003,12 +1199,12 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   //Spectra block - Contains spectrum numbers for each workspace index
   // This might not exist so wrap and check. If it doesn't exist create a default mapping
   bool have_spectra(true);
-  boost::shared_array<int> spectra(new int);
+  boost::shared_array<int> spectra;
   try
   {
     NXInt spectra_block = detgroup.openNXInt("spectra");
     spectra_block.load();
-    spectra.swap(spectra_block.sharedBuffer());
+    spectra = spectra_block.sharedBuffer();
   }
   catch(std::runtime_error &)
   {
@@ -1040,7 +1236,6 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 
         int start = det_index[i-1];
         int end = start + det_count[i-1];
-        assert( end <= ndets );
         spec->setDetectorIDs(std::set<detid_t>(det_list.get()+start,det_list.get()+end));
       }
   }
@@ -1591,58 +1786,6 @@ size_t LoadNexusProcessed::calculateWorkspacesize(const std::size_t numberofspec
   }
   return total_specs;
 }
-
-  /**This method does a quick file type check by looking at the first 100 bytes of the file 
-    *  @param filePath- path of the file including name.
-    *  @param nread :: no.of bytes read
-    *  @param header :: The first 100 bytes of the file as a union
-    *  @return true if the given file is of type which can be loaded by this algorithm
-    */
-    bool LoadNexusProcessed::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      std::string extn=extension(filePath);
-       bool bnexs(false);
-      (!extn.compare("nxs")||!extn.compare("nx5"))?bnexs=true:bnexs=false;
-      /*
-      * HDF files have magic cookie in the first 4 bytes
-      */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes)) == g_hdf_cookie)||bnexs )
-      {
-        //hdf
-        return true;
-      }
-      else if ( (nread >= sizeof(g_hdf5_signature)) && 
-                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
-      {    
-        //hdf5
-        return true;
-      }
-      return false;
-          
-    }
-   /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadNexusProcessed::fileCheck(const std::string& filePath)
-    {
-     std::vector<std::string> entryName,definition;
-      int count= getNexusEntryTypes(filePath,entryName,definition);
-      if(count<=-1)
-      {
-        throw Exception::FileError("Unable to read data in File:" , filePath);
-      }
-      else if(count==0)
-      {
-        throw Exception::FileError("Error no entries found in " , filePath);
-      }
-      int ret=0;
-      if( entryName[0]=="mantid_workspace_1" )
-      {
-        ret=80;
-      }
-      return ret;
-    }
 
 } // namespace DataHandling
 } // namespace Mantid

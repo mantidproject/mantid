@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<instrument name="SRF" valid-from   ="2010-01-10 23:59:59"
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="SRF" valid-from   ="2010-01-10 23:59:59"
                           valid-to     ="2100-01-30 23:59:59"          
               last-modified="2010-11-04 00:00:00">
   <defaults>
@@ -21,7 +22,14 @@
 	MultiDetectorStart=[1]
 	I0MonitorIndex=1
  -->
- 
+  <parameter name="MonitorIntegralMin">
+    <value val="4.0"/> 
+  </parameter>
+  
+  <parameter name="MonitorIntegralMax">
+    <value val="6.0"/> 
+  </parameter>
+  
   <parameter name="MonitorBackgroundMin">
 	<value val="7.6"/> 
   </parameter>
@@ -55,9 +63,22 @@
   </parameter>
   
   <parameter name="LambdaMax">
-    <value val="7.0"/>
+    <value val="9.0"/>
+  </parameter>
+
+  <!-- parameters for efficiency correction -->
+  <parameter name="correction" type="string">
+    <value val="exponential"/>
   </parameter>
   
+  <parameter name="C0">
+    <value val="36.5688"/>
+  </parameter>
+  
+  <parameter name="C1">
+    <value val="0.188676"/>
+  </parameter>
+
   
   <!-- BRIEF DESCRIPTION OF CRISP INSTRUMENT: 
   
@@ -83,7 +104,7 @@
   <!-- detector components (including monitors) -->
   
   <component type="monitor1" idlist="monitor1">
-    <location z="7.2055" />
+    <location z="7.2055"/>
   </component>
   
   <type name="monitor1" is="monitor">
@@ -219,45 +240,52 @@
   
   <!-- other components -->  
   
-  <component type="slit1">
+  <component type="slit" name="slit1">
     <location z="7.032"/>
      <!-- This log file stores the vertical opening of slit -->
-    <parameter name="opening height"> 
-      <logfile id="s1" extract-single-value-as="position 1" />
+    <parameter name="vertical gap"> 
+      <logfile id="S1" extract-single-value-as="last_value" />
     </parameter>
   </component>
   
-  <component type="slit2">  
+  <component type="slit" name="slit2">  
     <location z="8.532"/> 
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
-    <parameter name="opening height"> 
-      <logfile id="s2" extract-single-value-as="position 1" />
+    <parameter name="vertical gap"> 
+      <logfile id="S2" extract-single-value-as="last_value" />
     </parameter>
   </component>    
   
-  <component type="slit3">   
+  <component type="slit" name="slit3">   
     <location z="9.174"/>
     <!-- This log file stores the vertical opening of slit -->  
-    <parameter name="opening height">
-      <logfile id="s3" extract-single-value-as="position 1" />
+    <parameter name="vertical gap">
+      <logfile id="S3" extract-single-value-as="last_value" />
     </parameter>
   </component>    
   
-  <component type="slit4">    
-    <location z="11.300"/>     
+  <component type="slit" name="slit4">    
+    <location z="11.300"/> 
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
-    <parameter name="opening height"> 
-      <logfile id="s4" extract-single-value-as="position 1" />    
+    <parameter name="vertical gap"> 
+      <logfile id="S4" extract-single-value-as="last_value" />    
     </parameter>
   </component>
+
+  <type name="slit">
+    <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
   
-  <type name="slit1"></type>
-  <type name="slit2"></type>
-  <type name="slit3"></type>
-  <type name="slit4"></type>  
+
   
   
   

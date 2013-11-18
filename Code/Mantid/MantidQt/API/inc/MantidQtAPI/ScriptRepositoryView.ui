@@ -50,7 +50,7 @@
        </property>
       </widget>
      </item>
-    </layout>
+     </layout>
        </item>
        <item>
         <widget class="MantidQt::API::RepoTreeView" name="repo_treeView"/>

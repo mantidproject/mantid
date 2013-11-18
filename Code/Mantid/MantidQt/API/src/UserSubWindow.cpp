@@ -1,9 +1,9 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/UserSubWindow.h"
 
 #include <QIcon>
 #include <QMessageBox>
@@ -23,9 +23,14 @@ using namespace MantidQt::API;
  * Default Constructor
  */
 UserSubWindow::UserSubWindow(QWidget* parent) :  
-  QWidget(parent), m_bIsInitialized(false), m_isPyInitialized(false), m_ifacename("")
+  QWidget(parent), m_bIsInitialized(false), m_isPyInitialized(false), m_ifacename(""), m_pythonRunner()
 {
   setAttribute(Qt::WA_DeleteOnClose, false);
+
+  // re-emit the run Python code from m_pyRunner, to work this signal must reach the slot in QtiPlot
+  connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)),
+    this, SIGNAL(runAsPythonScript(const QString&, bool)));
+
 }
 
 /**
@@ -110,37 +115,7 @@ void UserSubWindow::showInformationBox(const QString & message) const
  */
 QString UserSubWindow::runPythonCode(const QString & code, bool no_output)
 {
-  if( no_output )
-  {
-    emit runAsPythonScript(code, true);
-    return QString();
-  }
-  
-  // Otherwise we need to gather the information from stdout. This is achieved by redirecting the stdout stream
-  // to a temporary file and then reading its contents
-  // A QTemporaryFile object is used since the file is automatically deleted when the object goes out of scope
-  QTemporaryFile tmp_file;
-  if( !tmp_file.open() )
-  {
-    showInformationBox("An error occurred opening a temporary file in " + QDir::tempPath());
-    return QString();
-  }
-  //The file name is only valid when the file is open
-   QString tmpstring = tmp_file.fileName();
-   tmp_file.close();
-   QString code_to_run = "import sys; sys.stdout = open('" + tmpstring + "', 'w')\n" + code;
-
-   emit runAsPythonScript(code_to_run, true);
-
-   //Now get the output
-   tmp_file.open();
-   QTextStream stream(&tmp_file);
-   tmpstring.clear();
-   while( !stream.atEnd() )
-   {
-     tmpstring.append(stream.readLine().trimmed() + "\n");
-   }
-   return tmpstring;
+  return m_pythonRunner.runPythonCode(code,no_output);
 }
 
 /**
@@ -190,18 +165,6 @@ QLabel* UserSubWindow::newValidator(QWidget *parent)
   validLbl->setPalette(pal);
   return validLbl;
 }
-
-/**
-* Re-emits the signal to change the plot style
-*
-* @param plotDetails :: This includes all details of the plot including type,
-* curve number, workspace and color
-*/
-void UserSubWindow::changePlotType(const QStringList& plotDetails)
-{
-  emit setAsPlotType(plotDetails);
-}
-
 
 //--------------------------------------
 // Private member functions

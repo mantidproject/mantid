@@ -39,23 +39,21 @@ namespace Algorithms
   public:
     EditInstrumentGeometry();
     ~EditInstrumentGeometry();
-    virtual const std::string name() const { return "EditInstrumentGeometry"; }
+    virtual const std::string name() const;
     /// Algorithm's category for identification overriding a virtual method
-    virtual const std::string category() const { return "Diffraction";}
+    virtual const std::string category() const;
     /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return 1; }
-    
+    virtual int version() const;
+    /// Validate the inputs that must be parallel
+    virtual std::map<std::string, std::string> validateInputs();
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
-    // virtual std::string name();
-    // virtual int version();
 
     /// Initialise the properties
     void init();
     /// Run the algorithm
     void exec();
-
   };
 
 

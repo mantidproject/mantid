@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "OSIRIS" date = "2010-05-05T00:00:00">
+<parameter-file instrument = "OSIRIS" valid-from = "2010-05-05T00:00:00">
 
 <component-link name = "OSIRIS">
 
@@ -16,17 +16,38 @@
 </parameter>
 
 <parameter name="refl-diffraction" type="string">
-  <value val="diffraction" />
+  <value val="diffonly,diffspec" />
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->
-<parameter name="Workflow.MonitorArea" >
+<parameter name="Workflow.Monitor1-ID" >
+  <value val="0" />
+</parameter>
+<parameter name="Workflow.Monitor1-Area" >
   <value val="1.276e-3" />
 </parameter>
-<parameter name="Workflow.MonitorThickness" >
+<parameter name="Workflow.Monitor1-Thickness" >
   <value val="0.025" />
 </parameter>
-<parameter name="Workflow.MonitorScalingFactor">
+<parameter name="Workflow.Monitor1-Attenuation" >
+  <value val="8.3" />
+</parameter>
+<parameter name="Workflow.Monitor1-ScalingFactor">
+  <value val="1e6" />
+</parameter>
+<parameter name="Workflow.Monitor2-ID" >
+  <value val="1" />
+</parameter>
+<parameter name="Workflow.Monitor2-Area" >
+  <value val="1.276e-3" />
+</parameter>
+<parameter name="Workflow.Monitor2-Thickness" >
+  <value val="0.025" />
+</parameter>
+<parameter name="Workflow.Monitor2-Attenuation" >
+  <value val="8.3" />
+</parameter>
+<parameter name="Workflow.Monitor2-ScalingFactor">
   <value val="1e6" />
 </parameter>
 <parameter name="Workflow.UnwrapMonitor" type="string">
@@ -34,6 +55,15 @@
 </parameter>
 <parameter name="Workflow.NamingConvention" type="string">
     <value val="AnalyserReflection" />
+</parameter>
+<parameter name="Workflow.SE-log" type="string">
+    <value val="sample" />
+</parameter>
+<parameter name="Workflow.beam-width" type="string">
+    <value val="2.2" />
+</parameter>
+<parameter name="Workflow.beam-height" type="string">
+    <value val="4.4" />
 </parameter>
 
 <parameter name="Workflow.Diffraction.Correction" type="string">

@@ -72,11 +72,20 @@ void EQSANSQ2D::exec()
 
   // Determine whether we need frame skipping or not by checking the chopper speed
   bool frame_skipping = false;
-  if (inputWS->run().hasProperty("is_frame_skipping"))
+  const auto & run = inputWS->run();
+  if (run.hasProperty("is_frame_skipping"))
   {
-    Mantid::Kernel::Property* prop = inputWS->run().getProperty("is_frame_skipping");
-    Mantid::Kernel::PropertyWithValue<int>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int>* >(prop);
-    frame_skipping = (*dp==1);
+    auto prop = run.getProperty("is_frame_skipping");
+    const auto & typeInfo = *(prop->type_info());
+    if(typeInfo == typeid(long))
+    {
+      frame_skipping = (run.getPropertyValueAsType<long>("is_frame_skipping") == 1);
+    }
+    else if(typeInfo == typeid(int))
+    {
+      frame_skipping = (run.getPropertyValueAsType<int>("is_frame_skipping") == 1);
+    }
+    else g_log.warning() << "Unknown property type for is_frame_skipping\n";
   }
 
   // Get run properties necessary to calculate the input parameters to Qxy

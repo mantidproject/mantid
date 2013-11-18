@@ -9,6 +9,7 @@ vanadium can be used in conjunction with the data reduction.
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
@@ -113,19 +114,14 @@ namespace Mantid
       MatrixWorkspace_sptr absGroupingWS = this->getProperty("GroupingWorkspace");
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
 
-      MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
-      std::string outputWsName = this->getPropertyValue("OutputWorkspace");
-
       // Process absolute units detector vanadium if necessary
       MatrixWorkspace_sptr absIdetVanWS;
       if (absDetVanWS)
       {
-        std::string idetVanName = outputWsName + "_absunits_idetvan";
         IAlgorithm_sptr detVan = this->createChildAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", absDetVanWS);
         detVan->setProperty("InputMonitorWorkspace", absDetVanMonWS);
         detVan->setProperty("ReductionProperties", reductionManagerName);
-        detVan->setProperty("OutputWorkspace", idetVanName);
         if (maskWS)
         {
           detVan->setProperty("MaskWorkspace", maskWS);
@@ -157,10 +153,8 @@ namespace Mantid
       }
       etConv->setProperty("AlternateGroupingTag", "AbsUnits");
       etConv->executeAsChildAlg();
-      outputWS = etConv->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr outputWS = etConv->getProperty("OutputWorkspace");
 
-      Property *prop = outputWS.get()->run().getProperty("Ei");
-      const double calculatedEi = boost::lexical_cast<double>(prop->value());
 
       const double vanadiumMass = getDblPropOrParam("VanadiumMass",
           reductionManager, "vanadium-mass", outputWS);
@@ -242,15 +236,9 @@ namespace Mantid
       // If the absolute units detector vanadium is used, do extra correction.
       if (absIdetVanWS)
       {
-        double xsection = 0.0;
-        if (200.0 <= calculatedEi)
-        {
-          xsection = 421.0;
-        }
-        else
-        {
-          xsection = 400.0 + (calculatedEi / 10.0);
-        }
+        NeutronAtom neutronVanadium=getNeutronAtom(vanadium.z_number);
+        double xsection = (neutronVanadium.inc_scatt_xs+neutronVanadium.coh_scatt_xs) * 1e3 / 4. / M_PI; //cross section per steradian in millibarns
+
         outputWS /= xsection;
         const double sampleMass = reductionManager->getProperty("SampleMass");
         const double sampleRmm = reductionManager->getProperty("SampleRmm");

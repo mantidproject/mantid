@@ -28,24 +28,14 @@ class LoggerTest : public CxxTest::TestSuite
   Logger & log;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoggerTest *createSuite() { return new LoggerTest(); }
+  static void destroySuite( LoggerTest *suite ) { delete suite; }
+  
   LoggerTest()
   : log(Logger::get("TestLogger"))
   {
-  }
-
-  //---------------------------------------------------------------------------
-  /** Set up a channel to a test log */
-  void setUp()
-  {
-//    AutoPtr<Poco::SimpleFileChannel> pChannel(new SimpleFileChannel);
-//    std::string dir = ConfigService::Instance().getTempDir();
-//    m_logFile = dir + "test.log";
-//    pChannel->setProperty("path", m_logFile);
-//    Poco::Logger::root().setChannel(pChannel);
-//    std::cout << "m_logFile is " << m_logFile << std::endl;
-//    // Erase the file if it exists
-//    if (Poco::File(m_logFile).exists())
-//      Poco::File(m_logFile).remove();
   }
 
   //---------------------------------------------------------------------------

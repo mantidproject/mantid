@@ -4,14 +4,18 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 class ModeratorTzeroLinearTest : public CxxTest::TestSuite
 {
@@ -35,67 +39,151 @@ public:
     TS_ASSERT( alg.isInitialized() );
   }
 
-  void testExec2D()
+  void testExecThrowsDeltaEmode()
   {
-    //load ASCII histogram file, data
-    const std::string inputWStr("inputWS");
-    Mantid::DataHandling::LoadAscii loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "BSS_11841_histo.dat");
-    loader.setPropertyValue("Unit", "TOF");
-    loader.setPropertyValue("OutputWorkspace", inputWStr);
-    loader.execute();
-    TS_ASSERT(loader.isExecuted() );
+    MatrixWorkspace_sptr testWS = CreateHistogramWorkspace();
+    AnalysisDataService::Instance().add("testWS", testWS);
+    ModeratorTzeroLinear alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",testWS);
+    alg.setProperty("OutputWorkspace","testWS");
+    alg.setRethrows(true); // necessary, otherwise the algorithm will catch all exceptions and not return them
+    TS_ASSERT_THROWS(alg.execute(), Exception::InstrumentDefinitionError);
+    AnalysisDataService::Instance().remove("testWS");
+  }
 
-    //load the instrument into the workspace
-    Mantid::DataHandling::LoadInstrument loaderX;
-    loaderX.initialize();
-    loaderX.setPropertyValue("InstrumentName", "BASIS");
-    loaderX.setPropertyValue("Workspace", inputWStr);
-    loaderX.execute();
-    TS_ASSERT(loader.isExecuted() );
+  void testExecThrowsNoFormula()
+  {
+    MatrixWorkspace_sptr testWS = CreateHistogramWorkspace();
+    AnalysisDataService::Instance().add("testWS", testWS);
+    const bool add_deltaE_mode=true;
+    AddToInstrument(testWS,add_deltaE_mode);
+    ModeratorTzeroLinear alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",testWS);
+    alg.setProperty("OutputWorkspace","testWS");
+    alg.setRethrows(true); // necessary, otherwise the algorithm will catch all exceptions and not return them
+    TS_ASSERT_THROWS(alg.execute(), Exception::InstrumentDefinitionError);
+    AnalysisDataService::Instance().remove("testWS");
+  }
 
-    if (!alg.isInitialized()) alg.initialize();
+  /*
+   * First spectrum is a detector. Remaining two spectra are monitors
+   */
+  void testExecHistogram()
+  {
+    MatrixWorkspace_sptr testWS = CreateHistogramWorkspace();
+    const bool add_deltaE_mode=true;
+    const bool add_t0_formula=true;
+    AddToInstrument(testWS, add_deltaE_mode, add_t0_formula);
+    ModeratorTzeroLinear alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",testWS);
+    alg.setProperty("OutputWorkspace","testWS");
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    //transform the time-of-flight values
-    alg.setPropertyValue("InputWorkspace", inputWStr);
-    const std::string outputWStr("outputWS");
-    alg.setPropertyValue("OutputWorkspace", outputWStr);
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
-  } //end of void testExec2D()
+    // Check a few values
+    for (size_t ihist=0; ihist<testWS->getNumberHistograms(); ++ihist)
+    {
+      const MantidVec& xarray=testWS->readX(ihist);
+      for(size_t ibin=0; ibin < xarray.size(); ibin+=400)
+        TS_ASSERT_DELTA(1600*ibin/400,xarray[ibin],0.1);
+    }
+    AnalysisDataService::Instance().remove("testWS");
+  }
 
   void testExecEvents()
   {
+    EventWorkspace_sptr testWS=CreateEventWorkspace();
+    const bool add_deltaE_mode=true;
+    const bool add_t0_formula=true;
+    AddToInstrument(testWS, add_deltaE_mode, add_t0_formula);
+    ModeratorTzeroLinear alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",testWS);
+    alg.setProperty("OutputWorkspace","testWS");
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    //load events file. Input and ouptut are set to be non-equal
-    Mantid::DataHandling::LoadEventNexus loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "BSS_11841_event.nxs");
-    const std::string inputWStr("inputWS");
-    loader.setPropertyValue("OutputWorkspace", inputWStr);
-    loader.execute();
-    TS_ASSERT(loader.isExecuted() );
-
-    if (!alg.isInitialized()) alg.initialize();
-
-    //transform the time-of-flight values
-    alg.setPropertyValue("InputWorkspace", inputWStr);
-    const std::string outputWStr("outputWS");
-    alg.setPropertyValue("OutputWorkspace", outputWStr);
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
-
-    //retrieve pointers to input and output workspaces
-    MatrixWorkspace_sptr inputWS, outputWS;
-    TS_ASSERT_THROWS_NOTHING(inputWS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWStr));
-    TS_ASSERT_THROWS_NOTHING(outputWS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWStr));
-
-    //Spectrum index 422 of BSS_11841_event.nxs containing three events
-    //std::size_t wkspIndex = 422;
+    // Check a few values
+    for (size_t ihist=0; ihist<testWS->getNumberHistograms(); ++ihist)
+    {
+      const EventList &evlist=testWS->getEventList(ihist);
+      const MantidVec& tofs_b=evlist.getTofs();
+      const MantidVec& xarray=evlist.readX();
+      for(size_t ibin=0; ibin < xarray.size(); ibin+=400)
+      {
+        TS_ASSERT_DELTA(1600*ibin/400,xarray[ibin],0.1);
+        TS_ASSERT_DELTA(1600*ibin/400,tofs_b[ibin],0.2);
+      }
+    }
+    AnalysisDataService::Instance().remove("testWS");
   }
 
 private:
+
+  MatrixWorkspace_sptr CreateHistogramWorkspace()
+  {
+    const int numHists(3);
+    const int numBins(4000);
+    MatrixWorkspace_sptr testWS=WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numHists, numBins, true);
+    testWS->getAxis(0)->unit()=Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    MantidVecPtr xdata;
+    xdata.access().resize(numBins+1);
+    const double peakHeight(1000), peakCentre(7000.), sigmaSq(1000*1000.);
+    for(int ibin=0; ibin<numBins; ++ibin)
+    {
+      const double xValue=4*ibin;
+      testWS->dataY(0)[ibin]=peakHeight*exp(-0.5*pow(xValue-peakCentre, 2.)/sigmaSq);
+      xdata.access()[ibin] = xValue;
+    }
+    xdata.access()[numBins] = 4*numBins;
+    for( int ihist=0; ihist<numHists; ihist++)
+      testWS->setX(ihist, xdata);
+    return testWS;
+  }
+
+  EventWorkspace_sptr CreateEventWorkspace()
+  {
+    const int numBanks(1), numPixels(1), numBins(4000);
+    const bool clearEvents(true);
+    EventWorkspace_sptr testWS=WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numBanks,numPixels,clearEvents);
+    testWS->getAxis(0)->unit()=Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    const size_t numHists=testWS->getNumberHistograms();
+    for (size_t ihist=0; ihist<numHists; ++ihist)
+    {
+      EventList &evlist=testWS->getEventList(ihist);
+      MantidVecPtr xdata;
+      xdata.access().resize(numBins+1);
+      for(int ibin=0; ibin<=numBins; ++ibin)
+      {
+        double tof=4*ibin;
+        TofEvent tofevent(tof);
+        xdata.access()[ibin]=tof;
+        evlist.addEventQuickly(tofevent); // insert event
+      }
+      evlist.setX(xdata); // set the bins for the associated histogram
+    }
+    return testWS;
+  }
+
+  void AddToInstrument(MatrixWorkspace_sptr testWS, const bool &add_deltaE_mode=false, const bool &add_t0_formula=false)
+  {
+    const double evalue(2.082); // energy corresponding to the first order Bragg peak in the analyzers
+    if(add_deltaE_mode)
+    {
+      testWS->instrumentParameters().addString(testWS->getInstrument()->getComponentID(),"deltaE-mode", "indirect");
+      for(size_t ihist=0; ihist<testWS->getNumberHistograms(); ++ihist)
+        testWS->instrumentParameters().addDouble(testWS->getDetector(ihist)->getComponentID(),"Efixed",evalue);
+    }
+    if(add_t0_formula)
+    {
+      testWS->instrumentParameters().addDouble(testWS->getInstrument()->getComponentID(),"Moderator.TimeZero.gradient",11.0);
+      testWS->instrumentParameters().addDouble(testWS->getInstrument()->getComponentID(),"Moderator.TimeZero.intercept",-5.0);
+    }
+  }
+
   ModeratorTzeroLinear alg;
 
 }; // end of class ModeratorTzeroLinearTest : public CxxTest::TestSuite

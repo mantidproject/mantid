@@ -4,12 +4,12 @@
 #
 
 LoadRawDialog(OutputWorkspace="GEM40979")
-alg = AlignDetectorsDialog("GEM40979","aligned")
-mtd.deleteWorkspace("GEM40979")
+alg= AlignDetectorsDialog("GEM40979",OutputWorkspace="aligned")
+DeleteWorkspace("GEM40979")
 calfile = alg.getPropertyValue("CalibrationFile")
-DiffractionFocussing("aligned","focussed",calfile)
-mtd.deleteWorkspace("aligned")
-StripPeaks("focussed","stripped")
+DiffractionFocussing("aligned",calfile,OutputWorkspace="focussed")
+DeleteWorkspace("aligned")
+StripPeaks("focussed",OutputWorkspace="stripped")
 
 # Plot a spectrum from each remaining workspace
 g1 = plotSpectrum(["focussed","stripped"],5)

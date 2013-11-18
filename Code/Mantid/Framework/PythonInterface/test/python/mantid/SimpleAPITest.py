@@ -1,5 +1,6 @@
 import unittest
-from mantid.api import (AlgorithmFactory, mtd, ITableWorkspace,MatrixWorkspace, WorkspaceGroup)
+from mantid.api import (AlgorithmFactory, mtd, IEventWorkspace, ITableWorkspace,
+                        MatrixWorkspace, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
 import numpy
 
@@ -121,9 +122,8 @@ PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorks
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
         ws1 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
         ws2 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
-        # GroupWorkspaces defines extra properties for each workspace added at runtime
-        wsgroup,ws1a,ws2a = simpleapi.GroupWorkspaces(InputWorkspaces="ws1,ws2")
-        self.assertTrue(isinstance(wsgroup, WorkspaceGroup))
+        # RenameWorkspaces defines extra properties for each workspace renamed at runtime
+        ws1a,ws2a = simpleapi.RenameWorkspaces(InputWorkspaces="ws1,ws2",WorkspaceNames="ws1a,ws2a")
         self.assertTrue(isinstance(ws1a, MatrixWorkspace))
         self.assertTrue(isinstance(ws2a, MatrixWorkspace))
         
@@ -159,8 +159,39 @@ PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorks
         
         self.assertTrue( isinstance(query[0], ITableWorkspace) )
         self.assertTrue( isinstance(query[1], ITableWorkspace) )
+
+    def test_function_attached_as_workpace_method_is_attached_to_correct_types(self):
+        self.assertTrue(hasattr(IEventWorkspace, "rebin"))
+        self.assertTrue(hasattr(MatrixWorkspace, "rebin"))
+        self.assertFalse(hasattr(ITableWorkspace, "rebin"))
+
+    def test_function_attached_as_workpace_method_has_same_metainformation_as_free_function(self):
+        self.assertEqual(MatrixWorkspace.rebin.__name__, simpleapi.Rebin.__name__)
+        self.assertEqual(MatrixWorkspace.rebin.__doc__, simpleapi.Rebin.__doc__)
         
-        
+        # Signature of method will have extra self argument
+        freefunction_sig = simpleapi.rebin.func_code.co_varnames
+        expected_method_sig = ['self']
+        expected_method_sig.extend(freefunction_sig)
+        self.assertEqual(MatrixWorkspace.rebin.func_code.co_varnames, tuple(expected_method_sig))
+
+    def test_function_attached_as_workpace_method_does_the_same_as_the_free_function(self):
+        # Use Rebin as a test
+        ws1 = simpleapi.CreateWorkspace(DataX=[1.5,2.0,2.5,3.0],DataY=[1,2,3],NSpec=1,UnitX='Wavelength')
+        self.assertTrue(hasattr(ws1, "rebin"))
+
+        ws2 = simpleapi.Rebin(ws1,Params=[1.5,1.5,3])
+        ws3 = ws1.rebin(Params=[1.5,1.5,3])
+        ws4 = ws1.rebin([1.5,1.5,3])
+        result = simpleapi.CheckWorkspacesMatch(ws2,ws3)
+        self.assertEquals("Success!",result)
+        result = simpleapi.CheckWorkspacesMatch(ws2,ws4)
+        self.assertEquals("Success!",result)
+
+        simpleapi.DeleteWorkspace(ws1)
+        simpleapi.DeleteWorkspace(ws2)
+        simpleapi.DeleteWorkspace(ws3)
+
     def test_that_dialog_call_raises_runtime_error(self):
         try:
             simpleapi.LoadEventNexusDialog()

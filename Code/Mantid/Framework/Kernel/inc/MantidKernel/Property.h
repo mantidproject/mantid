@@ -102,10 +102,9 @@ public:
   ///Overridden function that checks whether the property, if not overriden returns ""
   virtual std::string isValid() const;
 
-  /** Set the PropertySettings determining when this property is visible/enabled */
-  void setSettings(IPropertySettings * settings)
-  { m_settings = settings; }
-
+  /// Set the PropertySettings object
+  void setSettings(IPropertySettings * settings);
+ 
   /** @return the PropertySettings for this property */
   IPropertySettings * getSettings()
   { return m_settings; }

@@ -59,6 +59,7 @@ class WorkspaceGroup;
 class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
 {
  public:
+
   /** @name Extra notifications only applicable to the ADS */
   //@{
   /// GroupWorkspaces notification is send from GroupWorkspaces algorithm
@@ -112,6 +113,8 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    virtual void addOrReplace( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace);
    /// Overridden rename member to attach the new name to the workspace when a workspace object is renamed
    virtual void rename( const std::string& oldName, const std::string& newName);
+   /// Overridden remove member to delete its name held by the workspace itself
+   virtual void remove( const std::string& name);
 
    /** Retrieve a workspace and cast it to the given WSTYPE
     *
@@ -128,6 +131,15 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
      return boost::dynamic_pointer_cast<WSTYPE>(workspace);
    }
 
+   /** @name Methods to work with workspace groups */
+   //@{
+   void addToGroup(const std::string& groupName, const std::string& wsName);
+   void deepRemoveGroup(const std::string& name);
+   void removeFromGroup(const std::string& groupName, const std::string& wsName);
+   //@}
+
+   /// Return a lookup of the top level items
+   std::map<std::string,Workspace_sptr> topLevelItems() const;
 
 private:
    /// Checks the name is valid, throwing if not

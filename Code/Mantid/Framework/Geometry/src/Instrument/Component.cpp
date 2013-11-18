@@ -32,6 +32,7 @@ namespace Geometry
 
   }
 
+
   /** Empty constructor
    *  Create a component with null parent
    */

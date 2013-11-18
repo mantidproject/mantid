@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<parameter-file instrument = "EQ-SANS" date = "20th May 2010">
+<parameter-file instrument = "EQ-SANS" valid-from = "20th May 2010">
     
     <component-link name="EQ-SANS">
     

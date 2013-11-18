@@ -12,11 +12,14 @@ namespace Mantid
     {
 
       const Mantid::DataObjects::EventList & el = m_EventWS->getEventList(workspaceIndex);
+      size_t numEvents     = el.getNumberEvents();  
+      if (numEvents == 0) return 0;
+
 
       // create local unit conversion class
       UnitsConversionHelper localUnitConv(m_UnitConversion);
 
-      size_t numEvents     = el.getNumberEvents();      
+
       uint32_t detID       = m_detID[workspaceIndex];
       uint16_t runIndexLoc = m_RunIndex;
 
@@ -90,10 +93,11 @@ namespace Mantid
     /** method sets up all internal variables necessary to convert from Event Workspace to MDEvent workspace 
     @param WSD         -- the class describing the target MD workspace, sorurce Event workspace and the transformations, necessary to perform on these workspaces
     @param inWSWrapper -- the class wrapping the target MD workspace
+    @param ignoreZeros  -- if zero value signals should be rejected
     */
-    size_t  ConvToMDEventsWS::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+    size_t  ConvToMDEventsWS::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper,bool ignoreZeros)
     {
-      size_t numSpec=ConvToMDBase::initialize(WSD,inWSWrapper);
+      size_t numSpec=ConvToMDBase::initialize(WSD,inWSWrapper,ignoreZeros);
 
 
       m_EventWS  = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);

@@ -78,7 +78,8 @@ namespace CurveFitting
      double h0 = height();
      if ( h0 == 0.0 )
      {
-       h0 = 1e-6;
+       setParameter( 0, 1e-6 );
+       h0 = height();
      }
      double area = getParameter( 0 ); // == I
      area *= h / h0;
@@ -133,6 +134,8 @@ namespace CurveFitting
  
      double s2 = s*s;
      double normFactor = a * b / (a + b) / 2;
+     //Needed for IntegratePeaksMD for cylinder profile fitted with b=0
+     if (normFactor == 0.0) normFactor = 1.0;
      for (size_t i = 0; i < nData; i++) {
        double diff=xValues[i]-x0;
        if ( fabs(diff) < extent )
@@ -165,6 +168,8 @@ namespace CurveFitting
    {
      const double a = getParameter(1);
      const double b = getParameter(2);
+     //Needed for IntegratePeaksMD for cylinder profile fitted with b=0
+     if (a * b == 0.0) return M_LN2;
      return M_LN2 * (a + b) / (a * b);
    }
 

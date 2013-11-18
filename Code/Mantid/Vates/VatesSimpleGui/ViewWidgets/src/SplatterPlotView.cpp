@@ -1,6 +1,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidQtAPI/SelectionNotificationService.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
@@ -15,6 +17,7 @@
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
+#include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
 #include <vtkSMDoubleVectorProperty.h>
@@ -288,11 +291,20 @@ void SplatterPlotView::resetCamera()
 
 void SplatterPlotView::destroyPeakSources()
 {
+  pqServer *server = pqActiveObjects::instance().activeServer();
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  for( int i = 0; i < this->peaksSource.size(); ++i )
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  QList<pqPipelineSource *>::Iterator source;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+  for (source = sources.begin(); source != sources.end(); ++source)
   {
-    builder->destroy(this->peaksSource.at(i));
+    if (this->isPeaksWorkspace(*source))
+    {
+      builder->destroy(*source);
+    }
   }
+  this->peaksSource.clear();
 }
 
 /**

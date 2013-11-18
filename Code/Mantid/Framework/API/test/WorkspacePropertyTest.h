@@ -39,6 +39,7 @@ public:
 
   WorkspacePropertyTest()
   {
+    AnalysisDataService::Instance().clear();
     wsp1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input);
     wsp2 = new WorkspaceProperty<Workspace>("workspace2","",Direction::Output);
     wsp3 = new WorkspaceProperty<WorkspaceTester2>("workspace3","ws3",Direction::InOut);

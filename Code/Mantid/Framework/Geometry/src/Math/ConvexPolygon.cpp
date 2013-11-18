@@ -124,7 +124,7 @@ namespace Mantid
       do
       {
         PolygonEdge edge(v->point(), v->next()->point());
-        if( classify(point, edge) == Left ) return false;
+        if( classify(point, edge) == OnLeft ) return false;
         v = v->next();
       }
       while( v != m_head );

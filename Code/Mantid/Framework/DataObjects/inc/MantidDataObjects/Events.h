@@ -81,60 +81,20 @@ public:
   bool operator<(const TofEvent & rhs) const;
   bool operator<(const double rhs_tof) const;
   bool operator>(const TofEvent & rhs) const;
+  bool equals(const TofEvent & rhs, const double tolTof,
+              const int64_t tolPulse) const;
 
-  //------------------------------------------------------------------------
-  /** () operator: return the tof (X value) of the event.
-   * This is useful for std operations like comparisons
-   * and std::lower_bound
-   * @return :: double, the tof (X value) of the event.
-   */
-  double operator()() const
-  {
-    return this->m_tof;
-  }
-
-  //------------------------------------------------------------------------
-  /** Return the 'x value'. Despite the name, this can be in any unit in the UnitFactory.
-   *  If it is time-of-flight, it will be in microseconds.
-   */
-  double tof() const
-  {
-    return m_tof;
-  }
-
-  //------------------------------------------------------------------------
-  /// Return the pulse time
-  Mantid::Kernel::DateAndTime pulseTime() const
-  {
-    return m_pulsetime;
-  }
-
-  //------------------------------------------------------------------------
-  /// Return the weight of the event - exactly 1.0 always
-  double weight() const
-  {
-    return 1.0;
-  }
-
-  //------------------------------------------------------------------------
-  /// Return the error of the event - exactly 1.0 always
-  double error() const
-  {
-    return 1.0;
-  }
-
-  //------------------------------------------------------------------------
-  /// Return the errorSquared of the event - exactly 1.0 always
-  double errorSquared() const
-  {
-    return 1.0;
-  }
+  double operator()() const;
+  double tof() const;
+  Mantid::Kernel::DateAndTime pulseTime() const;
+  double weight() const;
+  double error() const;
+  double errorSquared() const;
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
 };
 #pragma pack(pop)
-
 
 
 //==========================================================================================
@@ -183,34 +143,12 @@ public:
   WeightedEvent& operator=(const WeightedEvent & rhs);
 
   bool operator==(const WeightedEvent & other) const;
+  bool equals(const WeightedEvent & rhs, const double tolTof,
+              const double tolWeight, const int64_t tolPulse) const;
 
-  //------------------------------------------------------------------------
-  /// Return the weight of the neutron, as a double (it is saved as a float).
-  double weight() const
-  {
-    return m_weight;
-  }
-
-  //------------------------------------------------------------------------
-  /** @return the error of the neutron, as a double (it is saved as a float).
-   * Note: this returns the actual error; the value is saved
-   * internally as the SQUARED error, so this function calculates sqrt().
-   * For more speed, use errorSquared().
-   *
-   */
-  double error() const
-  {
-    return std::sqrt( double(m_errorSquared) );
-  }
-
-  //------------------------------------------------------------------------
-  /** @return the square of the error for this event.
-   * This is how the error is saved internally, so this is faster than error()
-   */
-  double errorSquared() const
-  {
-    return m_errorSquared;
-  }
+  double weight() const;
+  double error() const;
+  double errorSquared() const;
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const WeightedEvent &event);
@@ -277,54 +215,15 @@ public:
   bool operator==(const WeightedEventNoTime & other) const;
   bool operator<(const WeightedEventNoTime & rhs) const;
   bool operator<(const double rhs) const;
+  bool equals(const WeightedEventNoTime & rhs, const double tolTof,
+              const double tolWeight) const;
 
-  //------------------------------------------------------------------------
-  /** () operator: return the tof (X value) of the event.
-   * This is useful for std operations like comparisons
-   * and std::lower_bound
-   * @return :: double, the tof (X value) of the event.
-   */
-  double operator()() const
-  {
-    return this->m_tof;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /// Return the time-of-flight of the neutron, as a double.
-  double tof() const
-  {
-    return m_tof;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Return the pulse time; this returns 0 since this
-   * type of Event has no time associated.
-   */
-  Mantid::Kernel::DateAndTime pulseTime() const
-  {
-    return 0;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /// Return the weight of the neutron, as a double (it is saved as a float).
-  double weight() const
-  {
-    return m_weight;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /// Return the error of the neutron, as a double (it is saved as a float).
-  double error() const
-  {
-    return std::sqrt( double(m_errorSquared) );
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /// Return the squared error of the neutron, as a double
-  double errorSquared() const
-  {
-    return m_errorSquared;
-  }
+  double operator()() const;
+  double tof() const;
+  Mantid::Kernel::DateAndTime pulseTime() const;
+  double weight() const;
+  double error() const;
+  double errorSquared() const;
 
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const WeightedEvent &event);
@@ -333,8 +232,119 @@ public:
 };
 #pragma pack(pop)
 
+//==========================================================================================
+// TofEvent inlined member function definitions
+//==========================================================================================
 
+/** () operator: return the tof (X value) of the event.
+ *  This is useful for std operations like comparisons and std::lower_bound
+ *  @return :: double, the tof (X value) of the event.
+ */
+inline double TofEvent::operator()() const
+{
+  return m_tof;
+}
 
+/** @return The 'x value'. Despite the name, this can be in any unit in the UnitFactory.
+ *  If it is time-of-flight, it will be in microseconds.
+ */
+inline double TofEvent::tof() const
+{
+  return m_tof;
+}
+
+/// Return the pulse time
+inline Mantid::Kernel::DateAndTime TofEvent::pulseTime() const
+{
+  return m_pulsetime;
+}
+
+/// Return the weight of the event - exactly 1.0 always
+inline double TofEvent::weight() const
+{
+  return 1.0;
+}
+
+/// Return the error of the event - exactly 1.0 always
+inline double TofEvent::error() const
+{
+  return 1.0;
+}
+
+/// Return the errorSquared of the event - exactly 1.0 always
+inline double TofEvent::errorSquared() const
+{
+  return 1.0;
+}
+
+//==========================================================================================
+// WeightedEvent inlined member function definitions
+//==========================================================================================
+
+/// Return the weight of the neutron, as a double (it is saved as a float).
+inline double WeightedEvent::weight() const
+{
+  return m_weight;
+}
+
+/** @return the error of the neutron, as a double (it is saved as a float).
+ *  Note: this returns the actual error; the value is saved
+ *  internally as the SQUARED error, so this function calculates sqrt().
+ *  For more speed, use errorSquared().
+ */
+inline double WeightedEvent::error() const
+{
+  return std::sqrt( double(m_errorSquared) );
+}
+
+/** @return the square of the error for this event.
+ *  This is how the error is saved internally, so this is faster than error()
+ */
+inline double WeightedEvent::errorSquared() const
+{
+  return m_errorSquared;
+}
+
+//==========================================================================================
+// WeightedEventNoTime inlined member function definitions
+//==========================================================================================
+
+inline double WeightedEventNoTime::operator()() const
+{
+  return m_tof;
+}
+
+/// Return the time-of-flight of the neutron, as a double.
+inline double WeightedEventNoTime::tof() const
+{
+  return m_tof;
+}
+
+/** Return the pulse time; this returns 0 since this
+ *  type of Event has no time associated.
+ */
+inline Kernel::DateAndTime WeightedEventNoTime::pulseTime() const
+{
+  return 0;
+}
+
+/// Return the weight of the neutron, as a double (it is saved as a float).
+inline double WeightedEventNoTime::weight() const
+{
+  return m_weight;
+}
+
+/// Return the error of the neutron, as a double (it is saved as a float).
+inline double WeightedEventNoTime::error() const
+{
+  return std::sqrt( double(m_errorSquared) );
+}
+
+/// Return the squared error of the neutron, as a double
+inline double WeightedEventNoTime::errorSquared() const
+{
+  return m_errorSquared;
+}
 
 } // DataObjects
 } // Mantid

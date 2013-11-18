@@ -3,7 +3,6 @@
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
 
 using Mantid::API::IPeaksWorkspace;
@@ -28,6 +27,7 @@ void export_IPeaksWorkspace()
     .def("hasIntegratedPeaks", &IPeaksWorkspace::hasIntegratedPeaks, "Determine if the peaks have been integrated")
     .def("getRun", &IPeaksWorkspace::mutableRun, return_internal_reference<>(),
              "Return the Run object for this workspace")
+    .def("peakInfoNumber", &IPeaksWorkspace::peakInfoNumber, "Peak info number at Q vector for this workspace")
       ;
 
   REGISTER_SINGLEVALUE_HANDLER(IPeaksWorkspace_sptr);

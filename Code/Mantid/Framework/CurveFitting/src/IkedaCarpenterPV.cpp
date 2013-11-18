@@ -254,9 +254,6 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
 
     const double k = 0.05;   
 
-    double u,v,s,r;
-    double yu, yv, ys, yr;
-
     // Not entirely sure what to do if sigmaSquared ever negative
     // for now just post a warning
     double someConst = std::numeric_limits<double>::max() / 100.0;
@@ -267,48 +264,42 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
       g_log.warning() << "sigmaSquared negative in functionLocal.\n";
     }
 
-    double R, Nu, Nv, Ns, Nr, N;
-
-    std::complex<double> zs, zu, zv, zr;
-
-    double alpha, a_minus, a_plus, x, y, z;
-
     // update wavelength vector
     calWavelengthAtEachDataPoint(xValues, nData);
 
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-X0;
 
-        R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
-        alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
+        double R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
+        double alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
 
-        a_minus = alpha*(1-k);
-        a_plus = alpha*(1+k);
-        x=a_minus-beta;
-        y=alpha-beta;
-        z=a_plus-beta; 
+        double a_minus = alpha*(1-k);
+        double a_plus = alpha*(1+k);
+        double x=a_minus-beta;
+        double y=alpha-beta;
+        double z=a_plus-beta; 
 
-        Nu=1-R*a_minus/x;
-        Nv=1-R*a_plus/z;
-        Ns=-2*(1-R*alpha/y);
-        Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
+        double Nu=1-R*a_minus/x;
+        double Nv=1-R*a_plus/z;
+        double Ns=-2*(1-R*alpha/y);
+        double Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
 
-        u=a_minus*(a_minus*sigmaSquared-2*diff)/2.0;
-        v=a_plus*(a_plus*sigmaSquared-2*diff)/2.0;
-        s=alpha*(alpha*sigmaSquared-2*diff)/2.0;
-        r=beta*(beta*sigmaSquared-2*diff)/2.0;
+        double u=a_minus*(a_minus*sigmaSquared-2*diff)/2.0;
+        double v=a_plus*(a_plus*sigmaSquared-2*diff)/2.0;
+        double s=alpha*(alpha*sigmaSquared-2*diff)/2.0;
+        double r=beta*(beta*sigmaSquared-2*diff)/2.0;
 
-        yu = (a_minus*sigmaSquared-diff)*someConst;
-        yv = (a_plus*sigmaSquared-diff)*someConst;
-        ys = (alpha*sigmaSquared-diff)*someConst;
-        yr = (beta*sigmaSquared-diff)*someConst;
+        double yu = (a_minus*sigmaSquared-diff)*someConst;
+        double yv = (a_plus*sigmaSquared-diff)*someConst;
+        double ys = (alpha*sigmaSquared-diff)*someConst;
+        double yr = (beta*sigmaSquared-diff)*someConst;
 
-        zs = std::complex<double>(-alpha*diff, 0.5*alpha*gamma);
-        zu = (1-k)*zs;
-        zv = (1-k)*zs;
-        zr = std::complex<double>(-beta*diff, 0.5*beta*gamma);
+        std::complex<double> zs = std::complex<double>(-alpha*diff, 0.5*alpha*gamma);
+        std::complex<double> zu = (1-k)*zs;
+        std::complex<double> zv = (1-k)*zs;
+        std::complex<double> zr = std::complex<double>(-beta*diff, 0.5*beta*gamma);
 
-        N = 0.25*alpha*(1-k*k)/(k*k);
+        double N = 0.25*alpha*(1-k*k)/(k*k);
 
         out[i] = I*N*( (1-eta)*(Nu*exp(u+gsl_sf_log_erfc(yu))+Nv*exp(v+gsl_sf_log_erfc(yv)) + 
                         Ns*exp(s+gsl_sf_log_erfc(ys))+Nr*exp(r+gsl_sf_log_erfc(yr))) -
@@ -340,10 +331,7 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const s
     // equations taken from Fullprof manual
 
     const double k = 0.05;   
-
-    double u,v,s,r;
-    double yu, yv, ys, yr;
-
+    
     // Not entirely sure what to do if sigmaSquared ever negative
     // for now just post a warning
     double someConst = std::numeric_limits<double>::max() / 100.0;
@@ -354,12 +342,7 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const s
       g_log.warning() << "sigmaSquared negative in functionLocal.\n";
     }
 
-    double R, Nu, Nv, Ns, Nr, N;
-
-    std::complex<double> zs, zu, zv, zr;
-
-    double alpha, a_minus, a_plus, x, y, z;
-
+    
     // update wavelength vector
     calWavelengthAtEachDataPoint(xValues, nData);
 
@@ -367,37 +350,37 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const s
         double diff=xValues[i]-X0;
 
 
-        R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
-        alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
+        double R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
+        double alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
 
 
-        a_minus = alpha*(1-k);
-        a_plus = alpha*(1+k);
-        x=a_minus-beta;
-        y=alpha-beta;
-        z=a_plus-beta; 
+        double a_minus = alpha*(1-k);
+        double a_plus = alpha*(1+k);
+        double x=a_minus-beta;
+        double y=alpha-beta;
+        double z=a_plus-beta; 
 
-        Nu=1-R*a_minus/x;
-        Nv=1-R*a_plus/z;
-        Ns=-2*(1-R*alpha/y);
-        Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
+        double Nu=1-R*a_minus/x;
+        double Nv=1-R*a_plus/z;
+        double Ns=-2*(1-R*alpha/y);
+        double Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
 
-        u=a_minus*(a_minus*sigmaSquared-2*diff)/2.0;
-        v=a_plus*(a_plus*sigmaSquared-2*diff)/2.0;
-        s=alpha*(alpha*sigmaSquared-2*diff)/2.0;
-        r=beta*(beta*sigmaSquared-2*diff)/2.0;
+        double u=a_minus*(a_minus*sigmaSquared-2*diff)/2.0;
+        double v=a_plus*(a_plus*sigmaSquared-2*diff)/2.0;
+        double s=alpha*(alpha*sigmaSquared-2*diff)/2.0;
+        double r=beta*(beta*sigmaSquared-2*diff)/2.0;
 
-        yu = (a_minus*sigmaSquared-diff)*someConst;
-        yv = (a_plus*sigmaSquared-diff)*someConst;
-        ys = (alpha*sigmaSquared-diff)*someConst;
-        yr = (beta*sigmaSquared-diff)*someConst;
+        double yu = (a_minus*sigmaSquared-diff)*someConst;
+        double yv = (a_plus*sigmaSquared-diff)*someConst;
+        double ys = (alpha*sigmaSquared-diff)*someConst;
+        double yr = (beta*sigmaSquared-diff)*someConst;
 
-        zs = std::complex<double>(-alpha*diff, 0.5*alpha*gamma);
-        zu = (1-k)*zs;
-        zv = (1-k)*zs;
-        zr = std::complex<double>(-beta*diff, 0.5*beta*gamma);
+        std::complex<double> zs = std::complex<double>(-alpha*diff, 0.5*alpha*gamma);
+        std::complex<double> zu = (1-k)*zs;
+        std::complex<double> zv = (1-k)*zs;
+        std::complex<double> zr = std::complex<double>(-beta*diff, 0.5*beta*gamma);
 
-        N = 0.25*alpha*(1-k*k)/(k*k);
+        double N = 0.25*alpha*(1-k*k)/(k*k);
 
         out[i] = I*N*( (1-eta)*(Nu*exp(u+gsl_sf_log_erfc(yu))+Nv*exp(v+gsl_sf_log_erfc(yv)) + 
                         Ns*exp(s+gsl_sf_log_erfc(ys))+Nr*exp(r+gsl_sf_log_erfc(yr))) -

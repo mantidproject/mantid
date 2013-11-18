@@ -58,6 +58,7 @@ namespace Mantid
     m_BoxChildren.assign(maxBoxes*2, 0);
 
     API::IMDNode *Box;
+    size_t ic(0);
     bool filePositionDefined(true);
     for(size_t i=0;i<maxBoxes;i++)
     {
@@ -76,20 +77,20 @@ namespace Mantid
         //    throw std::runtime_error("Non-sequential child ID encountered!");
         //  lastId = Box->getChild(i)->getId();
         //}
-
-        m_BoxType[id] = 2; 
-        m_BoxChildren[id*2] = int(Box->getChild(0)->getID());
-        m_BoxChildren[id*2+1] = int(Box->getChild(numChildren-1)->getID());
+        //TODO! id != ic
+        m_BoxType[ic] = 2; 
+        m_BoxChildren[ic*2] = int(Box->getChild(0)->getID());
+        m_BoxChildren[ic*2+1] = int(Box->getChild(numChildren-1)->getID());
 
         // no events but index defined -- TODO -- The proper file has to have consequent indexes for all boxes too. 
-        m_BoxEventIndex[id*2]   = 0;
-        m_BoxEventIndex[id*2+1] = 0;
+        m_BoxEventIndex[ic*2]   = 0;
+        m_BoxEventIndex[ic*2+1] = 0;
       }
       else
       {
-        m_BoxType[id] = 1;
-        m_BoxChildren[id*2]=0;
-        m_BoxChildren[id*2+1]=0;
+        m_BoxType[ic] = 1;
+        m_BoxChildren[ic*2]=0;
+        m_BoxChildren[ic*2+1]=0;
 
         //MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);
         //if(!mdBox) throw std::runtime_error("found unfamiliar type of box");
@@ -98,18 +99,18 @@ namespace Mantid
         uint64_t nPoints = Box->getNPoints();
         Kernel::ISaveable *pSaver = Box->getISaveable();
         if(pSaver)
-            m_BoxEventIndex[id*2]   = pSaver->getFilePosition();
+            m_BoxEventIndex[ic*2]   = pSaver->getFilePosition();
         else
             filePositionDefined = false;
 
-        m_BoxEventIndex[id*2+1] = nPoints;   
+        m_BoxEventIndex[ic*2+1] = nPoints;   
       }
 
       // Various bits of data about the box
-      m_Depth[id] = int(Box->getDepth());
-      m_BoxSignalErrorsquared[id*2] = double(Box->getSignal());
-      m_BoxSignalErrorsquared[id*2+1] = double(Box->getErrorSquared());
-      m_InverseVolume[id] = Box->getInverseVolume();
+      m_Depth[ic] = int(Box->getDepth());
+      m_BoxSignalErrorsquared[ic*2] = double(Box->getSignal());
+      m_BoxSignalErrorsquared[ic*2+1] = double(Box->getErrorSquared());
+      m_InverseVolume[ic] = Box->getInverseVolume();
       for (int d=0; d<m_nDim; d++)
       {
         size_t newIndex = id*size_t(m_nDim*2) + d*2;
@@ -117,6 +118,7 @@ namespace Mantid
         m_Extents[newIndex+1] = Box->getExtents(d).getMax();
 
       }
+      ic++;
     }
     // file postion have to be calculated afresh
     if(!filePositionDefined)
@@ -251,6 +253,12 @@ namespace Mantid
 
   }
 
+  /**load box structure from the file, defined by file name 
+   @param fileName       :: The name of the file with the box information
+   @param nDim           :: number of dimensions the boxes  have (as load usually occurs into existing MD workspace, this parameter 
+                            use to check the correspondence between workspace and the box structire in the file
+   @param EventType      :: "MDEvent" or "MDLeanEvent"  -- describe the type of events the workspace contans, similarly to nDim, used to check the data integrity
+   @param onlyEventInfo  :: load only box controller information and do not restore boxes thenleves and the events locations */
   void MDBoxFlatTree::loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType,bool onlyEventInfo)
   {
 
@@ -425,7 +433,15 @@ namespace Mantid
   }
 
 
+  /** Method recovers the interconnected box structure from the plain tree into box tree, recovering both boxes and their connectivity
+    * does the opposite to the initFlatStructure operation (the class contants remains unchanged)
+   @param  Boxes       :: the return vector of pointers to interconnected boxes. All previous pointers found in the vector will be overwritten (beware of memory loss)
+   @param  bc          :: shard pointer to the box controller, which each box uses
+   @param  FileBackEnd :: if one should make the data file backed, namely restore/calculate the data, nesessary to obtain events file positions
+   @parman BoxStructureOnly :: restore box tree only ignoring information about the box events
 
+   @returns   totalNumEvents :: total number of events the box structure should contain and allocated memory for.
+  */
   uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *>&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly)
   {
 
@@ -434,7 +450,8 @@ namespace Mantid
 
     uint64_t totalNumEvents(0);
     m_nDim = int(bc->getNDims());
-    if(m_nDim<=0||m_nDim>11 )throw std::runtime_error("Workspace dimesnions are not defined properly");
+    int maxNdim = int(MDEventFactory::getMaxNumDim());
+    if(m_nDim<=0||m_nDim>maxNdim)throw std::runtime_error("Workspace dimesnions are not defined properly in the box controller");
 
     int iEventType(0);
     if(m_eventType=="MDLeanEvent")
@@ -496,7 +513,9 @@ namespace Mantid
       ibox->setID(i);
       // calculate volume from extents;
       ibox->calcVolume();
-      if(std::fabs(ibox->getInverseVolume()-m_InverseVolume[i])>1.e-4)
+      double vol = m_InverseVolume[i];
+      if(vol<=FLT_EPSILON)vol=1;
+      if(std::fabs((ibox->getInverseVolume()-vol)/vol)>1.e-5)
       {
           g_log.debug()<<" Accuracy warning for box N "<<i<<" as stored inverse volume is : "<<m_InverseVolume[i]<<" and calculated from extents: "<<ibox->getInverseVolume()<<std::endl;
           ibox->setInverseVolume(coord_t(m_InverseVolume[i]));
@@ -523,7 +542,6 @@ namespace Mantid
     }
     bc->setMaxId(numBoxes);
     return totalNumEvents;
-      return 0;
   }
   /** The function to create a NeXus MD workspace group with specified events type and number of dimensions or opens the existing group, 
       which corresponds to the input parameters.

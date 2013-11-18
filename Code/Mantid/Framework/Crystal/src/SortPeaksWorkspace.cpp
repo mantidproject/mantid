@@ -142,10 +142,10 @@ namespace Mantid
         sortCriteria.push_back(std::pair<std::string, bool>(columnToSortBy, sortAscending));
         outputWS->sort(sortCriteria);
         setProperty("OutputWorkspace", outputWS);
-      } catch (std::invalid_argument& ex)
+      } catch (std::invalid_argument&)
       {
         this->g_log.error("Specified ColumnToSortBy does not exist");
-        throw ex;
+        throw;
       }
 
     }

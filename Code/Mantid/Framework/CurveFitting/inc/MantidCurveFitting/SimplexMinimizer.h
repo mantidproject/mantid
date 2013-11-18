@@ -41,8 +41,9 @@ namespace CurveFitting
 class DLLExport SimplexMinimizer : public API::IFuncMinimizer
 {
 public:
-  /// constructor and destructor
-  SimplexMinimizer();
+  /// Constructor setting a value for the relative error acceptance (default=0.01)
+  SimplexMinimizer(const double epsabs = 1e-2);
+  /// Destructor
   ~SimplexMinimizer();
 
   /// Overloading base class methods
@@ -66,6 +67,9 @@ private:
 
   /// Used by the GSL to evaluate the function
   static double fun(const gsl_vector * x, void *params);
+
+  /// Absolute value of the error that is considered a fit
+  double m_epsabs;
 
   /// Function to minimize.
   API::ICostFunction_sptr m_costFunction;

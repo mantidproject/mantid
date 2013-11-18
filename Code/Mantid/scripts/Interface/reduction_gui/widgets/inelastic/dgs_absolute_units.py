@@ -81,16 +81,16 @@ class AbsoluteUnitsWidget(BaseWidget):
         self._content.grouping_file_edit.setText(state.grouping_file)
         self._content.absunits_detvan_edit.setText(state.absunits_detector_vanadium)
         self._content.ei_edit.setText(state.incident_energy)
-        self._content.emin_edit.setText(QtCore.QString(str(state.emin)))
-        self._content.emax_edit.setText(QtCore.QString(str(state.emax)))
-        self._content.van_mass_edit.setText(QtCore.QString(str(state.vanadium_mass)))
-        self._content.sample_mass_edit.setText(QtCore.QString(str(state.sample_mass)))
-        self._content.sample_rmm_edit.setText(QtCore.QString(str(state.sample_rmm)))
-        self._content.median_test_high_edit.setText(QtCore.QString(str(state.absunits_median_test_high)))
-        self._content.median_test_low_edit.setText(QtCore.QString(str(state.absunits_median_test_low)))
-        self._content.median_test_out_high_edit.setText(QtCore.QString(str(state.absunits_median_test_out_high)))
-        self._content.median_test_out_low_edit.setText(QtCore.QString(str(state.absunits_median_test_out_low)))
-        self._content.errorbar_crit_edit.setText(QtCore.QString(str(state.absunits_errorbar_criterion)))
+        self._content.emin_edit.setText(str(state.emin))
+        self._content.emax_edit.setText(str(state.emax))
+        self._content.van_mass_edit.setText(str(state.vanadium_mass))
+        self._content.sample_mass_edit.setText(str(state.sample_mass))
+        self._content.sample_rmm_edit.setText(str(state.sample_rmm))
+        self._content.median_test_high_edit.setText(str(state.absunits_median_test_high))
+        self._content.median_test_low_edit.setText(str(state.absunits_median_test_low))
+        self._content.median_test_out_high_edit.setText(str(state.absunits_median_test_out_high))
+        self._content.median_test_out_low_edit.setText(str(state.absunits_median_test_out_low))
+        self._content.errorbar_crit_edit.setText(str(state.absunits_errorbar_criterion))
 
     def get_state(self):
         """
@@ -114,3 +114,13 @@ class AbsoluteUnitsWidget(BaseWidget):
         a.absunits_errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
         return a
         
+    def live_button_toggled_actions(self,checked):
+        if checked:
+            self._old_absunits = self._content.absunits_gb.isChecked()
+            self._content.absunits_gb.setChecked(False)
+        else:
+            try:
+                self._content.absunits_gb.setChecked(self._old_absunits)
+            except:  # This is for if the live button started out checked
+                pass
+        self._content.absunits_gb.setEnabled(not checked)

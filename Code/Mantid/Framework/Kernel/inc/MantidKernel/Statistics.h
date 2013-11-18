@@ -61,6 +61,9 @@ namespace Mantid
       double Rwp;
       /// Rp
       double Rp;
+      ///  Foos(int a, int b) : a(a), b(b) {}
+      Rfactor (double rwp, double rp) : Rwp(rwp), Rp(rp) {}
+      Rfactor () {Rwp = -1.0; Rp = -1.0;}
     };
   
     /// Return a statistics object for the given data set
@@ -74,7 +77,13 @@ namespace Mantid
     std::vector<double> getModifiedZscore(const std::vector<TYPE>& data, const bool sorted=false);
     /// Return the R-factors (Rwp) of a diffraction pattern data
     Rfactor MANTID_KERNEL_DLL getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE);
-  
+
+    /// Return the first n-moments of the supplied data.
+    template<typename TYPE>
+    std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE>& x, const std::vector<TYPE>& y, const int maxMoment=3);
+    /// Return the first n-moments of the supplied data.
+    template<typename TYPE>
+    std::vector<double> getMomentsAboutMean(const std::vector<TYPE>& x, const std::vector<TYPE>& y, const int maxMoment=3);
   } // namespace Kernel
 } // namespace Mantid
 #endif /* STATISTICS_H_ */

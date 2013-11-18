@@ -88,6 +88,8 @@ namespace Mantid
       virtual std::set<std::string> getParameterNames(bool recursive = true) const;
       /// Returns a boolean indicating whether the parameter exists or not
       bool hasParameter(const std::string & name, bool recursive = true) const;
+      // Hack used untill Geomertry can not exprot different types parematers properly
+      std::string getParameterType(const std::string & name, bool recursive = true) const;
       /**
        * Get a parameter defined as a double
        * @param pname :: The name of the parameter

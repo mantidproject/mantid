@@ -7,9 +7,10 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/LibraryManager.h"
-#include "MantidKernel/Glob.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -100,12 +101,13 @@ namespace Mantid
 
     /**
      * Return the full path to the file given its name
-     * @param fName :: A full file name (without path) including extension
+     * @param filename :: A file name (without path) including extension
      * @return The full path if the file exists and can be found in one of the search locations
      *  or an empty string otherwise.
      */
-    std::string FileFinderImpl::getFullPath(const std::string& fName) const
+    std::string FileFinderImpl::getFullPath(const std::string& filename) const
     {
+      std::string fName = Kernel::Strings::strip(filename);
       g_log.debug() << "getFullPath(" << fName << ")\n";
       // If this is already a full path, nothing to do
       if (Poco::Path(fName).isAbsolute())
@@ -352,20 +354,21 @@ namespace Mantid
     /**
      * Find the file given a hint. If the name contains a dot(.) then it is assumed that it is already a file stem
      * otherwise calls makeFileName internally.
-     * @param hint :: The name hint, format: [INSTR]1234[.ext]
+     * @param hintstr :: The name hint, format: [INSTR]1234[.ext]
      * @param exts :: Optional list of allowed extensions. Only those extensions found in both
      *  facilities extension list and exts will be used in the search. If an extension is given in hint
      *  this argument is ignored.
      * @return The full path to the file or empty string if not found
      */
-    std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std::string> *exts) const
+    std::string FileFinderImpl::findRun(const std::string& hintstr, const std::set<std::string> &exts) const
     {
-      g_log.debug() << "set findRun(\'" << hint << "\', exts[" << exts->size() << "])\n";
+      std::string hint = Kernel::Strings::strip(hintstr);
+      g_log.debug() << "set findRun(\'" << hintstr << "\', exts[" << exts.size() << "])\n";
       if (hint.empty())
         return "";
       std::vector<std::string> exts_v;
-      if (exts != NULL && exts->size() > 0)
-        exts_v.assign(exts->begin(), exts->end());
+      if (!exts.empty())
+        exts_v.assign(exts.begin(), exts.end());
 
       return this->findRun(hint, exts_v);
     }
@@ -412,8 +415,9 @@ namespace Mantid
       return "";
     }
 
-    std::string FileFinderImpl::findRun(const std::string& hint,const std::vector<std::string> &exts)const
+    std::string FileFinderImpl::findRun(const std::string& hintstr,const std::vector<std::string> &exts)const
     {
+      std::string hint = Kernel::Strings::strip(hintstr);
       g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
 
       //if partial filename or run number is not supplied, return here
@@ -570,15 +574,16 @@ namespace Mantid
 
     /**
      * Find a list of files file given a hint. Calls findRun internally.
-     * @param hint :: Comma separated list of hints to findRun method.
+     * @param hintstr :: Comma separated list of hints to findRun method.
      *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
      *  Only the beginning of a range can contain an instrument name.
      * @return A vector of full paths or empty vector
      * @throw std::invalid_argument if the argument is malformed
      * @throw Exception::NotFoundError if a file could not be found
      */
-    std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
+    std::vector<std::string> FileFinderImpl::findRuns(const std::string& hintstr) const
     {
+      std::string hint = Kernel::Strings::strip(hintstr);
       g_log.debug() << "findRuns hint = " << hint << "\n";
       std::vector < std::string > res;
       Poco::StringTokenizer hints(hint, ",",

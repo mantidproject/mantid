@@ -677,13 +677,15 @@ void ConfigDialog::initMantidPage()
 
   // Populate boxes
   Mantid::Kernel::ConfigServiceImpl & mantid_config = Mantid::Kernel::ConfigService::Instance();
-  QString property = QString::fromStdString(mantid_config.getString("supported.facilities"));
 
-  QStringList prop_list = property.split(";", QString::SkipEmptyParts);
-  facility->addItems(prop_list);
+  auto faclist = mantid_config.getFacilityNames();
+  for ( auto it = faclist.begin(); it != faclist.end(); ++it )
+  {
+    facility->addItem(QString::fromStdString(*it));
+  }
 
   // Set default property
-  property = QString::fromStdString(mantid_config.getFacility().name());
+  QString property = QString::fromStdString(mantid_config.getFacility().name());
   int index = facility->findText(property);
   if( index < 0 )
   {
@@ -736,15 +738,6 @@ void ConfigDialog::initMantidOptionsTab()
   grid->addWidget(treeCategories,1,0);
   refreshTreeCategories();
 
-  // Default Python API check box
-  m_defaultToNewPython = new QCheckBox("Use new-style Python by default (requires a restart of MantidPlot to take effect)");
-  QSettings settings;
-  int apiVersion = settings.value("Mantid/Python/APIVersion", 2).toInt();
-
-  if( apiVersion == 2 ) m_defaultToNewPython->setChecked(true);
-  else m_defaultToNewPython->setChecked(false);
-  grid->addWidget(m_defaultToNewPython, 2,0);
-
   // create a checkbox for the instrument view OpenGL option
   m_useOpenGL = new QCheckBox("Use OpenGL in Instrument View");
   m_useOpenGL->setChecked(true);
@@ -773,16 +766,6 @@ void ConfigDialog::initSendToProgramTab()
   widgetLayout ->addWidget(frame);
   QGridLayout *grid = new QGridLayout(frame);
 
-  //create tree diagram for all known programs that can be saved to
-  treePrograms = new QTreeWidget(frame);
-  treePrograms->setColumnCount(1);
-  treePrograms->setSortingEnabled(false);
-  treePrograms->setHeaderLabel(tr("List of Current Programs"));
-
-  grid->addWidget(treePrograms, 0,0);
-
-  connect(treePrograms,SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(treeClicked()));
-  populateProgramTree();
 
   //Add buttons to the bottom of the widget
   deleteButton = new QPushButton(tr("Delete"));
@@ -801,18 +784,32 @@ void ConfigDialog::initSendToProgramTab()
   buttons->addWidget(addButton);
 
   widgetLayout->addLayout(buttons);
+
+  //create tree diagram for all known programs that can be saved to
+  treePrograms = new QTreeWidget(frame);
+  treePrograms->setSelectionMode( QAbstractItemView::ExtendedSelection );
+  treePrograms->setColumnCount(1);
+  treePrograms->setSortingEnabled(false);
+  treePrograms->setHeaderLabel(tr("List of Current Programs"));
+
+  grid->addWidget(treePrograms, 0,0);
+
+  populateProgramTree();
+  connect(treePrograms,SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemCheckedChanged(QTreeWidgetItem*)));
+  connect(treePrograms,SIGNAL(itemSelectionChanged()), this, SLOT(enableButtons()));
+
 }
 
-void ConfigDialog::treeClicked()
+void ConfigDialog::enableButtons()
 {
-  QStringList checkedItems = treeChecking();
+  QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
   //Set the buttons on whether the conditions are met. Reducing the amount of user errors
-  if (checkedItems.size() == 0)
+  if (selectedItems.size() == 0)
   {  
     deleteButton->setEnabled(false);
     editButton->setEnabled(false);
   }
-  else if (checkedItems.size() == 1)
+  else if (selectedItems.size() == 1)
   {
     deleteButton->setEnabled(true);
     editButton->setEnabled(true);
@@ -821,6 +818,26 @@ void ConfigDialog::treeClicked()
   {
     deleteButton->setEnabled(true);
     editButton->setEnabled(false);
+  }
+}
+
+void ConfigDialog::itemCheckedChanged(QTreeWidgetItem* item)
+{
+  if (item->childCount() > 0)
+  {
+    treePrograms->setCurrentItem(item);
+  }
+  //enableButtons();
+  std::string visibility = "Yes";
+  if (item->checkState(0) != Qt::Checked)
+  {
+    visibility = "No";
+  }
+  auto it = m_sendToSettings.find(item->text(0).toStdString());
+  if (it != m_sendToSettings.end())
+  {
+    it->second["visible"] = visibility;
+    updateChildren(it->second, item);
   }
 }
 
@@ -840,17 +857,17 @@ void ConfigDialog::addDialog()
   //clear the tree and repopulate it without the programs that have just been deleted
   treePrograms->clear();
   updateProgramTree();
-  treeClicked();
+  enableButtons();
 }
 
 //Edit a program
 void ConfigDialog::editDialog()
 {
-  QStringList checkedItems = treeChecking();
+  QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
 
-  std::map<std::string,std::string> programKeysAndDetails = m_sendToSettings.find(checkedItems[0].toStdString())->second;
+  std::map<std::string,std::string> programKeysAndDetails = m_sendToSettings.find(selectedItems[0]->text(0).toStdString())->second;
 
-  SendToProgramDialog* editProgram = new SendToProgramDialog(this, checkedItems[0], programKeysAndDetails);
+  SendToProgramDialog* editProgram = new SendToProgramDialog(this, selectedItems[0]->text(0), programKeysAndDetails);
 
   editProgram->setWindowTitle(tr("Edit a Program"));
   editProgram->setModal(true);
@@ -864,18 +881,18 @@ void ConfigDialog::editDialog()
   //clear the tree and repopulate it without the programs that have just been deleted
   treePrograms->clear();
   updateProgramTree();
-  treeClicked();
+  enableButtons();
 }
 
 
 //Deleting send to options. Deletes them off the mantid.user.properties
 void ConfigDialog::deleteDialog()
 {
-  QStringList checkedItems = treeChecking();
-  if(checkedItems.size() > 0)
+  QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
+  if(selectedItems.size() > 0)
   {
     //Question box asking to continue to avoid accidental deletion of program options
-    int status = QMessageBox::question(this, tr("Delete save options?"), tr("Are you sure you want to delete \nthe (%1) selected save option(s)?").arg(checkedItems.size()),
+    int status = QMessageBox::question(this, tr("Delete save options?"), tr("Are you sure you want to delete \nthe (%1) selected save option(s)?").arg(selectedItems.size()),
       QMessageBox::Yes|QMessageBox::Default,
       QMessageBox::No|QMessageBox::Escape,
       QMessageBox::NoButton);
@@ -883,9 +900,9 @@ void ConfigDialog::deleteDialog()
     if(status == QMessageBox::Yes)
     {
       //For each program selected, remove all details from the user.properties file;
-      for (int i = 0; i<checkedItems.size(); ++i)
+      for (int i = 0; i<selectedItems.size(); ++i)
       {      
-        m_sendToSettings.erase(checkedItems[i].toStdString());
+        m_sendToSettings.erase(selectedItems[i]->text(0).toStdString());
       }
       //clear the tree and repopulate it without the programs that have just been deleted
       treePrograms->clear();
@@ -924,27 +941,26 @@ void ConfigDialog::updateProgramTree()
   std::map<std::string, std::map<std::string,std::string> >::const_iterator itr = m_sendToSettings.begin();
   for( ; itr != m_sendToSettings.end(); ++itr)
   {    
-    //Populate list
-    QTreeWidgetItem *program = createCheckedTreeItem(QString::fromStdString(itr->first), true);
-    treePrograms->addTopLevelItem(program);
-
-    //Check to see whether invisible. If so then change of colour is needed.
+    //creating the map of kvps needs to happen first as createing the item requires them. 
     std::map<std::string, std::string> programKeysAndDetails = itr->second;
-    bool invisible = (programKeysAndDetails.find("visible")->second == "No");
 
-    //get the current program's (itr) keys and values (pItr)
-    std::map<std::string,std::string>::const_iterator pItr = programKeysAndDetails.begin();
-    for( ; pItr != programKeysAndDetails.end(); ++pItr)
-    {
-      QTreeWidgetItem *item = new QTreeWidgetItem(program);
-      item->setText(0, tr("   " + QString::fromStdString(pItr->first) + " --- " + QString::fromStdString(pItr->second)));
-      if (invisible)
-      {
-        item->setTextColor(0,QColor(150,150,150));
-        program->setTextColor(0,QColor(150,150,150));
-      }
-      program->addChild(item);
-    }
+    //Populate list
+    QTreeWidgetItem *program = createCheckedTreeItem(QString::fromStdString(itr->first), (programKeysAndDetails.find("visible")->second == "Yes"));
+    treePrograms->addTopLevelItem(program);
+    updateChildren(programKeysAndDetails, program);
+  }
+}
+
+void ConfigDialog::updateChildren(std::map<std::string, std::string> &programKeysAndDetails, QTreeWidgetItem* program)
+{
+  program->takeChildren();
+  //get the current program's (itr) keys and values (pItr)
+  std::map<std::string,std::string>::const_iterator pItr = programKeysAndDetails.begin();
+  for( ; pItr != programKeysAndDetails.end(); ++pItr)
+  {
+    QTreeWidgetItem *item = new QTreeWidgetItem(program);
+    item->setText(0, tr("   " + QString::fromStdString(pItr->first) + " --- " + QString::fromStdString(pItr->second)));
+    program->addChild(item);
   }
 }
 
@@ -1011,7 +1027,7 @@ void ConfigDialog::refreshTreeCategories()
     QStringList subCats = catName.split('\\');
     if (subCats.size() == 1)
     {
-      QTreeWidgetItem *catItem = createCheckedTreeItem(catName,isHidden);
+      QTreeWidgetItem *catItem = createCheckedTreeItem(catName,!isHidden);
       categories.insert(catName,catItem);
       treeCategories->addTopLevelItem(catItem);
     }
@@ -1028,7 +1044,7 @@ void ConfigDialog::refreshTreeCategories()
         }
         else
         {
-          QTreeWidgetItem *newCatItem = createCheckedTreeItem(subCats[j],isHidden);
+          QTreeWidgetItem *newCatItem = createCheckedTreeItem(subCats[j],!isHidden);
           categories.insert(cn,newCatItem);
           if (!catItem)
           {
@@ -1052,11 +1068,11 @@ QTreeWidgetItem* ConfigDialog::createCheckedTreeItem(QString name,bool checkBoxS
   item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
   if (checkBoxState)
   {
-    item->setCheckState(0,Qt::Unchecked);
+    item->setCheckState(0,Qt::Checked);
   }
   else
   {
-    item->setCheckState(0,Qt::Checked);
+    item->setCheckState(0,Qt::Unchecked);
   }
   return item;
 }
@@ -2268,33 +2284,6 @@ void ConfigDialog::updateMantidOptionsTab()
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
     app->mantidUI->updateAlgorithms();
   }
-
-  // Default Python API
-  QSettings settings;
-  int apiVersion(1);
-  if( m_defaultToNewPython->isChecked() ) apiVersion = 2;
-  settings.setValue("Mantid/Python/APIVersion", apiVersion);
-}
-
-QStringList ConfigDialog::treeChecking(QTreeWidgetItem *parent)
-{
-  QStringList results;
-  //how many children at this level
-  int count = parent ? parent->childCount() : treePrograms->topLevelItemCount();
-
-  for (int i = 0; i<count; ++i)
-  {
-    //get the child
-    QTreeWidgetItem *item = parent ? parent->child(i) : treePrograms->topLevelItem(i);
-
-    if (item->checkState(0) == Qt::Checked)
-    {
-      results.append(item->text(0));
-    }
-  }
-
-  return results;
-
 }
 
 QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent)

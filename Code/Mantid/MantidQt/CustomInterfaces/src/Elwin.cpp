@@ -81,8 +81,8 @@ namespace IDA
     connect(m_elwBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
     twoRanges(0, false);
 
-    // m_uiForm element signals and slots
     connect(uiForm().elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
 
     // Set any default values
     m_elwDblMng->setValue(m_elwProp["R1S"], -0.02);
@@ -150,6 +150,42 @@ namespace IDA
     uiForm().elwin_inputFile->readSettings(settings.group());
   }
 
+  void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+  {
+    auto inst = ws->getInstrument();
+    auto analyser = inst->getStringParameter("analyser");
+
+    if(analyser.size() > 0)
+    {
+      auto comp = inst->getComponentByName(analyser[0]);
+      auto params = comp->getNumberParameter("resolution", true);
+
+      //set the default instrument resolution
+      if(params.size() > 0)
+      {
+        double res = params[0];
+        m_elwDblMng->setValue(m_elwProp["R1S"], -res);
+        m_elwDblMng->setValue(m_elwProp["R1E"], res);
+      }
+
+    }
+  }
+
+  void Elwin::setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws)
+  {
+    auto inst = ws->getInstrument();
+    auto log = inst->getStringParameter("Workflow.SE-log");
+    QString logName("sample");
+
+    if(log.size() > 0)
+    {
+      logName = QString::fromStdString(log[0]);
+    }
+    
+    uiForm().leLogName->setText(logName);
+  }
+
+
   void Elwin::plotInput()
   {
     if ( uiForm().elwin_inputFile->isValid() )
@@ -158,12 +194,17 @@ namespace IDA
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
 
-      QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')\n";
-      QString pyOutput = runPythonCode(pyInput);
+      auto ws = runLoadNexus(filename, wsname);
 
-      std::string workspace = wsname.toStdString();
+      if(!ws)
+      {
+        return;
+      }
 
-      m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, workspace, 0);
+      setDefaultResolution(ws);
+      setDefaultSampleLog(ws);
+
+      m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, ws, 0);
       try
       {
         const std::pair<double, double> range = getCurveRange(m_elwDataCurve);

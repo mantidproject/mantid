@@ -58,15 +58,15 @@ namespace Mantid
     {
     public:
       /// Empty Constructor
-      AlignAndFocusPowder() : API::Algorithm() {}
+      AlignAndFocusPowder();
       /// Destructor
-      virtual ~AlignAndFocusPowder() {}
+      virtual ~AlignAndFocusPowder();
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "AlignAndFocusPowder";}
+      virtual const std::string name() const;
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 1;}
+      virtual int version() const;
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Workflow\\Diffraction";}
+      virtual const std::string category() const;
     
     private:
       /// Sets documentation strings for this algorithm
@@ -75,7 +75,22 @@ namespace Mantid
       void init();
       void exec();
       void loadCalFile(const std::string &calFileName);
-      void rebin(API::MatrixWorkspace_sptr matrixws);
+      API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
+
+      API::MatrixWorkspace_sptr conjoinWorkspaces(API::MatrixWorkspace_sptr ws1, API::MatrixWorkspace_sptr ws2,
+                                                  size_t offset);
+
+      /// Call diffraction focus to a matrix workspace.
+      API::MatrixWorkspace_sptr diffractionFocus(API::MatrixWorkspace_sptr ws);
+
+      /// Convert units
+      API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws, std::string target);
+
+      /// Call edit instrument geometry
+      API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws, std::vector<double> polars,
+                                                                    std::vector<specid_t> specids, std::vector<double> l2s,
+                                                                    std::vector<double> phis);
+
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
       DataObjects::EventWorkspace_sptr m_inputEW;
@@ -83,7 +98,7 @@ namespace Mantid
       DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
       API::MatrixWorkspace_sptr m_maskWS;
       DataObjects::GroupingWorkspace_sptr m_groupWS;
-      double l1;
+      double m_l1;
       std::vector<int32_t> specids;
       std::vector<double> l2s;
       std::vector<double> tths;
@@ -108,9 +123,12 @@ namespace Mantid
       API::MatrixWorkspace_sptr m_lowResW;
       /// Low resolution TOF event workspace
       DataObjects::EventWorkspace_sptr m_lowResEW;
-      /// Process low resolution workspace
+      /// Flag to process low resolution workspace
       bool m_processLowResTOF;
+      /// Offset to low resolution TOF spectra
+      size_t m_lowResSpecOffset;
 
+      API::Progress* m_progress;   ///< Progress reporting
     };
 
   } // namespace WorkflowAlgorithm

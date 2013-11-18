@@ -10,10 +10,10 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ArrowMarker.cpp
                    src/AssociationsDialog.cpp
                    src/AxesDialog.cpp
+                   src/AxisDetails.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
-                   src/CommandLineInterpreter.cpp
                    src/ColorMapDialog.cpp
                    src/Cone3D.cpp
                    src/ConfigDialog.cpp
@@ -47,6 +47,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
+                   src/GridDetails.cpp
                    src/ImageDialog.cpp
                    src/ImageExportDialog.cpp
                    src/ImageMarker.cpp
@@ -97,6 +98,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/QwtPieCurve.cpp
                    src/RangeSelectorTool.cpp
                    src/RenameWindowDialog.cpp
+                   src/ScaleDetails.cpp
                    src/ScaleDraw.cpp
                    src/ScalePicker.cpp
                    src/ScreenPickerTool.cpp
@@ -166,6 +168,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InputHistory.cpp
                    src/Mantid/LoadDAEDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
+                   src/Mantid/ManageInterfaceCategories.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
                    src/Mantid/MantidCurve.cpp
@@ -185,6 +188,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/SetUpParaview.cpp				   
                    src/Mantid/UserFitFunctionDialog.cpp
+                   src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ComponentActor.cpp
@@ -214,6 +218,8 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
+                   src/Mantid/InstrumentWidget/RotationSurface.cpp
+                   src/Mantid/InstrumentWidget/PanelsSurface.cpp
                    src/Mantid/InstrumentWidget/ProjectionSurface.cpp
                    src/Mantid/InstrumentWidget/Projection3D.cpp
                    src/Mantid/InstrumentWidget/PeakMarker2D.cpp
@@ -237,10 +243,10 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ArrowMarker.h
                    src/AssociationsDialog.h
                    src/AxesDialog.h
+                   src/AxisDetails.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
-                   src/CommandLineInterpreter.h
                    src/ColorMapDialog.h
                    src/Cone3D.h
                    src/ConfigDialog.h
@@ -277,6 +283,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Graph3D.h
                    src/Graph.h
                    src/Grid.h
+                   src/GridDetails.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
                    src/ImageMarker.h
@@ -332,6 +339,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/RangeSelectorTool.h
                    src/RenameWindowDialog.h
                    src/resource.h
+                   src/ScaleDetails.h
                    src/ScaleDraw.h
                    src/ScalePicker.h
                    src/ScreenPickerTool.h
@@ -393,6 +401,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InputHistory.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
+                   src/Mantid/ManageInterfaceCategories.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
                    src/Mantid/MantidCurve.h
@@ -413,6 +422,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/SetUpParaview.h				   
                    src/Mantid/UserFitFunctionDialog.h
+                   src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ComponentActor.h
@@ -442,8 +452,10 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.h
                    src/Mantid/InstrumentWidget/UnwrappedSphere.h
                    src/Mantid/InstrumentWidget/UnwrappedSurface.h
+                   src/Mantid/InstrumentWidget/RotationSurface.h
                    src/Mantid/InstrumentWidget/PeakMarker2D.h
                    src/Mantid/InstrumentWidget/PeakOverlay.h
+                   src/Mantid/InstrumentWidget/PanelsSurface.h
                    src/Mantid/InstrumentWidget/ProjectionSurface.h
                    src/Mantid/InstrumentWidget/Projection3D.h
                    src/Mantid/InstrumentWidget/RectF.h
@@ -514,7 +526,7 @@ set( SRC_UNITY_IGNORE_FILES )
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}/../MantidQt/Python ${PYQT4_SIP_FLAGS}
-                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
+                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
                      DEPENDS src/qti.sip ${SIP_HDRS}
                      COMMENT "Generating python bindings using sip"
@@ -538,9 +550,9 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AssociationsDialog.h
                         src/AxesDialog.h
+                        src/AxisDetails.h
                         src/CanvasPicker.h
                         src/ColorMapDialog.h
-                        src/CommandLineInterpreter.h
                         src/ConfigDialog.h
                         src/ContourLinesEditor.h
                         src/Convolution.h
@@ -569,6 +581,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/Graph3D.h
                         src/Graph.h
                         src/Grid.h
+                        src/GridDetails.h
                         src/ImageDialog.h
                         src/ImageExportDialog.h
                         src/ImportASCIIDialog.h
@@ -609,6 +622,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/QwtPieCurve.h
                         src/RangeSelectorTool.h
                         src/RenameWindowDialog.h
+                   	src/ScaleDetails.h
                         src/ScalePicker.h
                         src/ScreenPickerTool.h
                         src/Script.h
@@ -657,6 +671,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
                        src/Mantid/ManageCustomMenus.h
+                       src/Mantid/ManageInterfaceCategories.h
                        src/Mantid/MantidAbout.h
                        src/Mantid/MantidApplication.h
                        src/Mantid/MantidCurve.h
@@ -705,6 +720,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/RemoveErrorsDialog.ui
                src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
+               src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
 )
 
@@ -727,38 +743,6 @@ qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-
-
-###########################################################################
-# Files specific to the remote job submission code
-###########################################################################
-if(MAKE_REMOTE_JOBS)
-# Add the algorithms for managing remote job submission
-  LIST(APPEND MANTID_SRCS
-	src/Mantid/Remote/JobStatusDialog.cpp
-	src/Mantid/Remote/MantidRemoteCluster.cpp
-	src/Mantid/Remote/NewClusterDialog.cpp
-  )
-
-  LIST(APPEND MANTID_HDRS
-	src/Mantid/Remote/JobStatusDialog.h
-	src/Mantid/Remote/MantidRemoteCluster.h
-	src/Mantid/Remote/NewClusterDialog.h
-  )
-
-  LIST(APPEND MANTID_MOC_FILES
-	src/Mantid/Remote/JobStatusDialog.h
-	src/Mantid/Remote/MantidRemoteCluster.h
-	src/Mantid/Remote/NewClusterDialog.h
-  )
-
-  LIST(APPEND UI_FILES
-	src/Mantid/Remote/JobStatusDialog.ui
-	src/Mantid/Remote/NewClusterDialog.ui
-  )
-
-endif(MAKE_REMOTE_JOBS)
-
 
 ###########################################################################
 # Internal icon links
@@ -808,7 +792,7 @@ include_directories ( ../QtPropertyBrowser/src )
 include_directories ( ../MantidQt/API/inc )
 include_directories ( ../MantidQt/MantidWidgets/inc )
 include_directories ( ../MantidQt/SliceViewer/inc )
-include_directories ( ../MantidQt/ImageViewer/inc )
+include_directories ( ../MantidQt/SpectrumViewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
 # ui_ files end up in these places
 include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
@@ -856,12 +840,11 @@ copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
 # IPython scripts
 set( IPY_FILES 
   __init__.py
-  internal_ipkernel.py
-  ipython_plugin.py
+  mantid_ipython_widget.py
 )
 copy_python_files_to_dir ( "${IPY_FILES}" 
-                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_plugin 
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_plugin 
+                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_widget
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget 
                             IPYTHON_INSTALL_FILES )
 
 ###########################################################################
@@ -871,14 +854,14 @@ copy_python_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp 
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} 
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
 )
 
 # Library dependencies
 target_link_libraries ( MantidPlot 
                         ${CORE_MANTIDLIBS}
                         MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
-                        MantidQtImageViewer 
+                        MantidQtSpectrumViewer 
                         QtPropertyBrowser ${QT_LIBRARIES} 
                         ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
                         ${QSCINTILLA_LIBRARIES}
@@ -1005,7 +988,7 @@ foreach(PY_FILE ${MTDPLOTPY_FILES} )
   install ( FILES mantidplotpy/${PY_FILE} DESTINATION ${BIN_DIR}/mantidplotpy )
 endforeach()
 foreach(PY_FILE ${IPY_FILES} )
-  install ( FILES ipython_plugin/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_plugin )
+  install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
 endforeach()
 
 if ( APPLE )

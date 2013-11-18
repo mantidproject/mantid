@@ -32,17 +32,11 @@ class EQSANSReductionScripter(BaseReductionScripter):
         script = "# EQSANS reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
-        if self._settings.api2:
-            script += "import mantid\n"
-            script += "from mantid.simpleapi import *\n"
-            script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
-            script += "config = ConfigService.Instance()\n"
-            script += "config['instrumentName']='EQSANS'\n"
-        else:
-            script += "from MantidFramework import *\n"
-            script += "mtd.initialise(False)\n"
-            script += "from reduction.instruments.sans.sns_command_interface import *\n"
-            script += "mtd.settings['default.instrument'] = 'EQSANS'\n"
+        script += "import mantid\n"
+        script += "from mantid.simpleapi import *\n"
+        script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
+        script += "config = ConfigService.Instance()\n"
+        script += "config['instrumentName']='EQSANS'\n"
         
         script += "\n"
         
@@ -56,10 +50,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
             xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
             
-        if self._settings.api2:
-            script += "SaveIq(process=%r)\n" % xml_process
-        else:
-            script += "SaveIqAscii(process=%r)\n" % xml_process
+        script += "SaveIq(process=%r)\n" % xml_process
 
         script += "Reduce()\n"
 
@@ -90,35 +81,31 @@ class EQSANSReductionScripter(BaseReductionScripter):
             script = "# EQSANS reduction script\n"
             script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
             
-            if self._settings.api2:
-                script += "import mantid\n"
-                script += "from mantid.simpleapi import *\n"
-                script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
-                script += "config = ConfigService.Instance()\n"
-                script += "config['instrumentName']='EQSANS'\n"
-            else:
-                script += "from MantidFramework import *\n"
-                script += "mtd.initialise(False)\n"
-                script += "from reduction.instruments.sans.sns_command_interface import *\n"
-                script += "mtd.settings['default.instrument'] = 'EQSANS'\n"
+            script += "import mantid\n"
+            script += "from mantid.simpleapi import *\n"
+            script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
+            script += "config = ConfigService.Instance()\n"
+            script += "config['instrumentName']='EQSANS'\n"
             
             script += "\n"
             
             for item in self._observers:
                 if item.state() is not None:
-                    if state.__class__.__name__=="SampleData":
+                    if item.state().__class__.__name__=="DataSets":
                         script += item.state().to_script(data_file=data_file)
                     else:
                         script += str(item.state())
             
-            xml_process = "None"
+            # Save the process description
+            base_name = os.path.basename(data_file)
+            name, ext = os.path.splitext(base_name)
+            xml_process = os.path.join(self._output_directory, "%s_process.xml" % name)
+            xml_process = os.path.normpath(xml_process)
+            self.to_xml(xml_process)
             
-            if self._settings.api2:
-                script += "SaveIq(process=%r)\n" % xml_process
-            else:
-                script += "SaveIqAscii(process=%r)\n" % xml_process
+            script += "SaveIq(process=%r)\n" % xml_process
     
-            script += "Reduce()\n"            
+            script += "Reduce()\n"         
             scripts.append(script)
             
         return scripts

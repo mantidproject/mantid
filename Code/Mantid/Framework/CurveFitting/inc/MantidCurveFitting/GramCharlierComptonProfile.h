@@ -54,12 +54,36 @@ namespace CurveFitting
     /// Declare the Gram-Charlier (Hermite) coefficients
     void declareGramCharlierParameters();
 
-    /// Compute the function
-    void massProfile(std::vector<double> & result,const double lorentzFWHM, const double resolutionFWHM) const;
+    /// Returns the indices of the intensity parameters
+    std::vector<size_t> intensityParameterIndices() const;
+    /// Fill in the columns of the matrix for this mass
+    size_t fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index,const std::vector<double>& errors) const;
+    /// Compute the sum for all Hermite polynomial coefficents
+    void massProfile(double * result, const size_t nData) const;
+    /// Compute the contribution to mass profile nth Hermite polynomial coefficient
+    void addMassProfile(double * result, const unsigned int npoly) const;
 
+    /// Add FSE term based on current parameter setting
+    void addFSETerm(std::vector<double> & lhs) const;
+    /// Convolute with resolution
+    void convoluteVoigt(double * result, const size_t nData, const std::vector<double> & profile) const;
+    /// Called by the framework when a workspace is set
+    void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
 
     /// The active hermite coefficents
     std::vector<short> m_hermite;
+    ///Y values over a finer range
+    std::vector<double> m_yfine;
+    /// Interpolated Q values over a finer Y range
+    std::vector<double> m_qfine;
+
+    /// Holds the value of the Voigt function for each coarse y-space point as this is an expensive calculation
+    std::vector<std::vector<double>> m_voigt;
+    /// Holds the result Voigt multiplied by the profile function for the extended Y space range
+    mutable std::vector<double> m_voigtProfile;
+
+    /// Flag to hold whether the FSE parameter is fixed by the user
+    bool m_userFixedFSE;
   };
 
 

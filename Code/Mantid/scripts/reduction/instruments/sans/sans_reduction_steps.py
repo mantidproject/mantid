@@ -11,34 +11,14 @@ from reduction import validate_step
 import warnings
 
 # Mantid imports
-from mantidsimple import *
+import mantid
+from mantid.simpleapi import *
 
 # Define a SANS specific logger 
 from mantid.kernel import Logger
+import mantid.simpleapi as api
+from mantid.api import AnalysisDataService
 sanslog = Logger.get("SANS")
-
-class HFIRSetup(ReductionStep):
-    def __init__(self):
-        super(HFIRSetup, self).__init__()
-    
-    def execute(self, reducer, workspace=None):
-        beam_ctr_x = None
-        beam_ctr_y = None
-        find_beam = "None"
-        
-        if reducer._beam_finder is not None and \
-            type(reducer._beam_finder)==BaseBeamFinder:
-            [beam_ctr_x, beam_ctr_y] = reducer._beam_finder.get_beam_center()
-            find_beam = "Value"
-
-        SetupHFIRReduction(SampleDetectorDistance=reducer._data_loader._sample_det_dist,
-                           SampleDetectorDistanceOffset=reducer._data_loader._sample_det_offset,
-                           Wavelength=reducer._data_loader._wavelength,
-                           WavelengthSpread=reducer._data_loader._wavelength_spread,
-                           BeamCenterMethod=find_beam,
-                           BeamCenterX=beam_ctr_x,
-                           BeamCenterY=beam_ctr_y,                           
-                           ReductionProperties=reducer.get_reduction_table_name())
         
 class BaseBeamFinder(ReductionStep):
     """
@@ -76,53 +56,16 @@ class BaseBeamFinder(ReductionStep):
         if self._beam_center_x is not None and self._beam_center_y is not None:
             return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
         
-        c=SANSBeamFinder(Filename=self._datafile,
-                         UseDirectBeamMethod=direct_beam,
-                         BeamRadius=self._beam_radius,
-                         PersistentCorrection=self._persistent,
-                         ReductionProperties=reducer.get_reduction_table_name())
+        beam_x,beam_y,msg = SANSBeamFinder(Filename=self._datafile,
+                                         UseDirectBeamMethod=direct_beam,
+                                         BeamRadius=self._beam_radius,
+                                         PersistentCorrection=self._persistent,
+                                         ReductionProperties=reducer.get_reduction_table_name())
         
-        self._beam_center_x = c.getProperty("FoundBeamCenterX").value
-        self._beam_center_y = c.getProperty("FoundBeamCenterY").value
-        return c.getPropertyValue("OutputMessage")
+        self._beam_center_x = beam_x
+        self._beam_center_y = beam_y
+        return msg
         
-class ScatteringBeamCenter(BaseBeamFinder):
-    """
-        Find the beam center using the scattering data
-    """  
-    def __init__(self, datafile, beam_radius=3):
-        """
-            @param datafile: beam center data file
-            @param beam_radius: beam radius in pixels
-        """
-        super(ScatteringBeamCenter, self).__init__()
-        ## Location of the data file used to find the beam center
-        self._datafile = datafile
-        ## Beam radius in pixels
-        self._beam_radius = beam_radius
-        
-    def execute(self, reducer, workspace=None):
-        """
-            Find the beam center.
-            @param reducer: Reducer object for which this step is executed
-        """
-        return super(ScatteringBeamCenter, self)._find_beam(False, reducer, workspace)
-
-class DirectBeamCenter(BaseBeamFinder):
-    """
-        Find the beam center using the direct beam
-    """  
-    def __init__(self, datafile):
-        super(DirectBeamCenter, self).__init__()
-        ## Location of the data file used to find the beam center
-        self._datafile = datafile
-        
-    def execute(self, reducer, workspace=None):
-        """
-            Find the beam center.
-            @param reducer: Reducer object for which this step is executed
-        """
-        return super(DirectBeamCenter, self)._find_beam(True, reducer, workspace)
 
 class BaseTransmission(ReductionStep):
     """
@@ -173,295 +116,12 @@ class BaseTransmission(ReductionStep):
                                         TransmissionError=self._error, 
                                         OutputWorkspace=workspace) 
         else:
-            CreateSingleValuedWorkspace("transmission", self._trans, self._error)
-            Divide(workspace, "transmission", workspace)
+            CreateSingleValuedWorkspace(OutputWorkspace="transmission", DataValue=self._trans, ErrorValue=self._error)
+            Divide(LHSWorkspace=workspace, RHSWorkspace="transmission", OutputWorkspace=workspace)
         
         return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
   
-class BeamSpreaderTransmission(BaseTransmission):
-    """
-        Calculate transmission using the beam-spreader method
-    """
-    def __init__(self, sample_spreader, direct_spreader,
-                       sample_scattering, direct_scattering,
-                       spreader_transmission=1.0, spreader_transmission_err=0.0,
-                       theta_dependent=True, dark_current=None): 
-        super(BeamSpreaderTransmission, self).__init__(theta_dependent=theta_dependent)
-        self._sample_spreader = sample_spreader
-        self._direct_spreader = direct_spreader
-        self._sample_scattering = sample_scattering
-        self._direct_scattering = direct_scattering
-        self._spreader_transmission = spreader_transmission
-        self._spreader_transmission_err = spreader_transmission_err
-        self._dark_current_data = dark_current
-        ## Transmission workspace (output of transmission calculation)
-        self._transmission_ws = None
-        
-    def execute(self, reducer, workspace=None):
-        """
-            Calculate transmission and apply correction
-            @param reducer: Reducer object for which this step is executed
-            @param workspace: workspace to apply correction to
-        """
-        if self._transmission_ws is None:
-            # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
-            self._transmission_ws = "transmission_fit_"+workspace
-            
-            sample_spreader_ws = "_trans_sample_spreader"
-            filepath = find_data(self._sample_spreader, instrument=reducer.instrument.name())
-            reducer._data_loader.clone(filepath).execute(reducer, sample_spreader_ws)
-            
-            direct_spreader_ws = "_trans_direct_spreader"
-            filepath = find_data(self._direct_spreader, instrument=reducer.instrument.name())
-            reducer._data_loader.clone(filepath).execute(reducer, direct_spreader_ws)
-            
-            sample_scatt_ws = "_trans_sample_scatt"
-            filepath = find_data(self._sample_scattering, instrument=reducer.instrument.name())
-            reducer._data_loader.clone(filepath).execute(reducer, sample_scatt_ws)
-            
-            direct_scatt_ws = "_trans_direct_scatt"
-            filepath = find_data(self._direct_scattering, instrument=reducer.instrument.name())
-            reducer._data_loader.clone(filepath).execute(reducer, direct_scatt_ws)
-            
-            # Subtract dark current
-            if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
-                dark_current = find_data(self._dark_current_data, instrument=reducer.instrument.name())
-                self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
-                                                  InputWorkspace=None, Filename=dark_current,
-                                                  OutputWorkspace=None,
-                                                  PersistentCorrection=False,
-                                                  ReductionProperties=reducer.get_reduction_table_name())
-                self._dark_current_subtracter.execute(reducer, sample_spreader_ws)
-                self._dark_current_subtracter.execute(reducer, direct_spreader_ws)
-                self._dark_current_subtracter.execute(reducer, sample_scatt_ws)
-                self._dark_current_subtracter.execute(reducer, direct_scatt_ws)
-                        
-            # Get normalization for transmission calculation
-            norm_detector = reducer.instrument.get_incident_mon(workspace, reducer.NORMALIZATION_TIME)
-            if reducer._normalizer is not None:
-                norm_option = -1
-                if hasattr(reducer._normalizer, "get_normalization_spectrum"):
-                    norm_option = reducer._normalizer.get_normalization_spectrum()
-                norm_detector = reducer.instrument.get_incident_mon(workspace, norm_option)
-            
-            # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
-            # as the monitor channel.
-            CalculateTransmissionBeamSpreader(SampleSpreaderRunWorkspace=sample_spreader_ws, 
-                                              DirectSpreaderRunWorkspace=direct_spreader_ws,
-                                              SampleScatterRunWorkspace=sample_scatt_ws, 
-                                              DirectScatterRunWorkspace=direct_scatt_ws, 
-                                              IncidentBeamMonitor=norm_detector,
-                                              OutputWorkspace=self._transmission_ws,
-                                              SpreaderTransmissionValue=str(self._spreader_transmission), 
-                                              SpreaderTransmissionError=str(self._spreader_transmission_err))
-
-        # 2- Apply correction (Note: Apply2DTransCorr)
-        #Apply angle-dependent transmission correction using the zero-angle transmission
-        if self._theta_dependent:
-            ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                        TransmissionWorkspace=self._transmission_ws, 
-                                        OutputWorkspace=workspace)          
-        else:
-            Divide(workspace, self._transmission_ws, workspace)  
-        
-        trans_ws = mtd[self._transmission_ws]
-        self._trans = trans_ws.dataY(0)[0]
-        self._error = trans_ws.dataE(0)[0]
-
-        return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
-          
-            
-class DirectBeamTransmission(BaseTransmission):
-    """
-        Calculate transmission using the direct beam method
-    """
-    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True, dark_current=None, use_sample_dc=False):
-        super(DirectBeamTransmission, self).__init__(theta_dependent=theta_dependent)
-        ## Location of the data files used to calculate transmission
-        self._sample_file = sample_file
-        self._empty_file = empty_file
-        ## Dark current data file
-        self._dark_current_data = dark_current
-        ## Radius of the beam
-        self._beam_radius = beam_radius
-        ## Transmission workspace (output of transmission calculation)
-        self._transmission_ws = None
-        ## Flag to tell us whether we should normalise to the monitor channel
-        self._monitor_det_ID = None
-        self._use_sample_dc = use_sample_dc        
-        
-    def _load_monitors(self, reducer, workspace):
-        """
-            Load files necessary to compute transmission.
-            Return their names.
-        """
-        output_str = ""
-        # If we need to get a special beam center position, do it now:
-        if self._beam_finder is not None:
-            output_str = "   %s\n" % self._beam_finder.execute(reducer)
-        
-        sample_ws = "__transmission_sample"
-        filepath = find_data(self._sample_file, instrument=reducer.instrument.name())
-        loader = reducer._data_loader.clone(data_file=filepath)
-        if self._beam_finder is not None:
-            loader.set_beam_center(self._beam_finder.get_beam_center())
-        l_text = loader.execute(reducer, sample_ws)
-        output_str += "   Sample: %s\n" % extract_workspace_name(self._sample_file)
-        output_str += "   %s\n" % l_text
-        
-        empty_ws = "__transmission_empty"
-        filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
-        loader = reducer._data_loader.clone(data_file=filepath)
-        if self._beam_finder is not None:
-            loader.set_beam_center(self._beam_finder.get_beam_center())
-        l_text = loader.execute(reducer, empty_ws)
-        output_str += "   Empty: %s\n" % extract_workspace_name(self._empty_file)
-        output_str += "   %s\n" % l_text
-        
-        # Subtract dark current
-        if self._use_sample_dc:
-            if reducer._dark_current_subtracter is not None:
-                partial_out = reducer._dark_current_subtracter.execute(reducer, sample_ws)
-                partial_out2 = reducer._dark_current_subtracter.execute(reducer, empty_ws)
-                partial_out = "\n   Sample: %s\n   Empty: %s" % (partial_out, partial_out2)
-                partial_out.replace('\n', '   \n')
-                output_str += partial_out
-        
-        elif self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
-            dark_current = find_data(self._dark_current_data, instrument=reducer.instrument.name())
-            self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
-                                              InputWorkspace=None, Filename=dark_current,
-                                              OutputWorkspace=None,
-                                              PersistentCorrection=False,
-                                              ReductionProperties=reducer.get_reduction_table_name())
-            partial_out = self._dark_current_subtracter.execute(reducer, sample_ws)
-            partial_out2 = self._dark_current_subtracter.execute(reducer, empty_ws)
-            partial_out = "\n%s\n%s" % (partial_out, partial_out2)
-            partial_out.replace('\n', '   \n')
-            output_str += partial_out
-            
-        # Find which pixels to sum up as our "monitor". At this point we have moved the detector
-        # so that the beam is at (0,0), so all we need is to sum the area around that point.
-        #TODO: in IGOR, the error-weighted average is computed instead of simply summing up the pixels
-        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
-        cylXML = '<infinite-cylinder id="transmission_monitor">' + \
-                   '<centre x="0.0" y="0.0" z="0.0" />' + \
-                   '<axis x="0.0" y="0.0" z="1.0" />' + \
-                   '<radius val="%12.10f" />' % (self._beam_radius*pixel_size_x/1000.0) + \
-                 '</infinite-cylinder>\n'
-                 
-        # Use the transmission workspaces to find the list of monitor pixels
-        # since the beam center may be at a different location
-        det_finder = FindDetectorsInShape(Workspace=sample_ws, ShapeXML=cylXML)
-        det_list = det_finder.getPropertyValue("DetectorList")
-        
-        first_det_str = det_list.split(',')[0]
-        if len(first_det_str.strip())==0:
-            raise RuntimeError, "Could not find detector pixels near the beam center: check that the beam center is placed at (0,0)."
-        first_det = int(first_det_str)
-        
-        #TODO: check that both workspaces have the same masked spectra
-        
-        # Get normalization for transmission calculation
-        self._monitor_det_ID = reducer.instrument.get_incident_mon(workspace, reducer.NORMALIZATION_TIME)
-        if reducer._normalizer is not None:
-            norm_option = -1
-            if hasattr(reducer._normalizer, "get_normalization_spectrum"):
-                norm_option = reducer._normalizer.get_normalization_spectrum()
-            self._monitor_det_ID = reducer.instrument.get_incident_mon(workspace, norm_option)
-            if self._monitor_det_ID<0:
-                norm_msg = reducer._normalizer.execute(reducer, empty_ws)
-                output_str += "   %s\n" % norm_msg.replace('\n', '   \n')
-                norm_msg = reducer._normalizer.execute(reducer, sample_ws)
-                output_str += "   %s\n" % norm_msg.replace('\n', '   \n')
-
-        empty_mon_ws = "__empty_mon"
-        sample_mon_ws = "__sample_mon"
-        GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace=empty_mon_ws,  DetectorList=det_list, KeepUngroupedSpectra="1")
-        GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace=sample_mon_ws, DetectorList=det_list, KeepUngroupedSpectra="1")
-        ConvertToMatrixWorkspace(InputWorkspace=empty_mon_ws, OutputWorkspace=empty_mon_ws)
-        ConvertToMatrixWorkspace(InputWorkspace=sample_mon_ws, OutputWorkspace=sample_mon_ws)
-        
-        # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
-        # as the monitor channel.
-        RebinToWorkspace(empty_mon_ws, sample_mon_ws, OutputWorkspace=empty_mon_ws)
-
-        # Clean up
-        for ws in [empty_ws, sample_ws]:
-            if mtd.workspaceExists(ws):
-                mtd.deleteWorkspace(ws)          
-            
-        return sample_mon_ws, empty_mon_ws, first_det, output_str
-        
-    def _calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, trans_output_workspace):
-        """
-            Compute zero-angle transmission
-        """
-        try:
-            if self._monitor_det_ID is not None and self._monitor_det_ID>=0:
-                CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
-                                      OutputWorkspace=trans_output_workspace,
-                                      IncidentBeamMonitor=str(self._monitor_det_ID), 
-                                      TransmissionMonitor=str(first_det),
-                                      OutputUnfittedData=True)
-            else:
-                CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
-                                      OutputWorkspace=trans_output_workspace,
-                                      TransmissionMonitor=str(first_det),
-                                      OutputUnfittedData=True)
-        except:
-            raise RuntimeError, "Couldn't compute transmission. Is the beam center in the right place?\n\n%s" % sys.exc_value
-        
-        for ws in [empty_mon_ws, sample_mon_ws]:
-            if mtd.workspaceExists(ws):
-                mtd.deleteWorkspace(ws)          
-                
-    def _apply_transmission(self, workspace):
-        """
-            Apply transmission correction
-            @param workspace: workspace to apply correction to
-        """
-        # Make sure the binning is compatible
-        RebinToWorkspace(self._transmission_ws, workspace, OutputWorkspace=self._transmission_ws+'_rebin')
-        #Apply angle-dependent transmission correction using the zero-angle transmission
-        if self._theta_dependent:
-            ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                        TransmissionWorkspace=self._transmission_ws+'_rebin', 
-                                        OutputWorkspace=workspace)          
-        else:
-            Divide(workspace, self._transmission_ws+'_rebin', workspace)  
-
-        if mtd.workspaceExists(self._transmission_ws+'_rebin'):
-            mtd.deleteWorkspace(self._transmission_ws+'_rebin')          
-       
-        
-    def execute(self,reducer, workspace=None):
-        """
-            Calculate transmission and apply correction
-            @param reducer: Reducer object for which this step is executed
-            @param workspace: workspace to apply correction to
-        """
-        output_str = ""
-        if self._transmission_ws is None:
-            # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
-            self._transmission_ws = "transmission_fit_"+workspace
-            # Load data files
-            sample_mon_ws, empty_mon_ws, first_det, output_str = self._load_monitors(reducer, workspace)
-            self._calculate_transmission(sample_mon_ws, empty_mon_ws, first_det, self._transmission_ws)
-            
-        # Add output workspace to the list of important output workspaces
-        #reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
-
-        # 2- Apply correction (Note: Apply2DTransCorr)
-        self._apply_transmission(workspace)
-
-        trans_ws = mtd[self._transmission_ws]
-        self._trans = trans_ws.dataY(0)[0]
-        self._error = trans_ws.dataE(0)[0]
-        if len(trans_ws.dataY(0))==1:
-            output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, self._trans, self._error)
-        return "Transmission correction applied [%s]\n%s\n" % (self._transmission_ws, output_str)
-                      
+  
 class Normalize(ReductionStep):
     """
         Normalize the data to timer or a spectrum, typically a monitor, 
@@ -492,206 +152,12 @@ class Normalize(ReductionStep):
                   Factor=1.0/norm_count, Operation='Multiply')
             return "Normalization by time: %6.2g sec" % norm_count
         else:
-            mantid.sendLogMessage("Normalization step did not get a valid normalization option: skipping")
+            logger.notice("Normalization step did not get a valid normalization option: skipping")
             return "Normalization step did not get a valid normalization option: skipping"
-                        
+
     def clean(self):
-        mtd.deleteWorkspace(norm_ws)
-            
-class WeightedAzimuthalAverage(ReductionStep):
-    """
-        ReductionStep class that performs azimuthal averaging
-        and transforms the 2D reduced data set into I(Q).
-    """
-    def __init__(self, binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1, log_binning=False):
-        super(WeightedAzimuthalAverage, self).__init__()
-        self._binning = binning
-        self._suffix = suffix
-        self._error_weighting = error_weighting
-        self._nbins = n_bins
-        self._nsubpix = n_subpix
-        self._log_binning = log_binning
-        
-    def _get_binning(self, reducer, workspace, wavelength_min, wavelength_max):
-        
-        sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
-        nx_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        ny_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
-        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
-
-        # Q min is one pixel from the center, unless we have the beam trap size
-        if mtd[workspace].getRun().hasProperty("beam-trap-diameter"):
-            mindist = mtd[workspace].getRun().getProperty("beam-trap-diameter").value/2.0
-        else:
-            mindist = min(pixel_size_x, pixel_size_y)
-        qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
-        
-        beam_ctr = reducer._beam_finder.get_beam_center()
-        dxmax = pixel_size_x*max(beam_ctr[0],nx_pixels-beam_ctr[0])
-        dymax = pixel_size_y*max(beam_ctr[1],ny_pixels-beam_ctr[1])
-        maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
-        qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
-        
-        if not self._log_binning:
-            qstep = (qmax-qmin)/self._nbins
-            f_step = (qmax-qmin)/qstep
-            n_step = math.floor(f_step)
-            if f_step-n_step>10e-10:
-                qmax = qmin+qstep*n_step
-            return qmin, qstep, qmax
-        else:
-            # Note: the log binning in Mantid is x_i+1 = x_i * ( 1 + dx )
-            qstep = (math.log10(qmax)-math.log10(qmin))/self._nbins
-            f_step = (math.log10(qmax)-math.log10(qmin))/qstep
-            n_step = math.floor(f_step)
-            if f_step-n_step>10e-10:
-                qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
-            return qmin, -(math.pow(10.0,qstep)-1.0), qmax
-        
-    def execute(self, reducer, workspace):
-        # Q range                        
-        beam_ctr = reducer._beam_finder.get_beam_center()
-        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
-        if beam_ctr[0] is None or beam_ctr[1] is None:
-            raise RuntimeError, "Azimuthal averaging could not proceed: beam center not set"
-        if self._binning is None:
-            # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
-            x = mtd[workspace].dataX(1)
-            x_length = len(x)
-            if x_length < 2:
-                raise RuntimeError, "Azimuthal averaging expects at least one wavelength bin"
-            wavelength_max = (x[x_length-2]+x[x_length-1])/2.0
-            wavelength_min = (x[0]+x[1])/2.0
-            if wavelength_min==0 or wavelength_max==0:
-                raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
-            qmin, qstep, qmax = self._get_binning(reducer, workspace, wavelength_min, wavelength_max)
-            self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
-        else:
-            toks = self._binning.split(',')
-            if len(toks)<3:
-                raise RuntimeError, "Invalid binning provided: %s" % str(self._binning)
-            qmin = float(toks[0])
-            qmax = float(toks[2])
-            
-        output_ws = workspace+str(self._suffix)
-
-        # If we kept the events this far, we need to convert the input workspace
-        # to a histogram here
-        input_workspace = workspace
-        if not isinstance(mtd[workspace]._getHeldObject(), MatrixWorkspace):
-            input_workspace = '__'+workspace
-            ConvertToMatrixWorkspace(workspace, input_workspace)
-            
-        Q1DWeighted(InputWorkspace=input_workspace, 
-                    OutputWorkspace=output_ws, 
-                    OutputBinning=self._binning,
-                    NPixelDivision=self._nsubpix,
-                    PixelSizeX=pixel_size_x,
-                    PixelSizeY=pixel_size_y, ErrorWeighting=self._error_weighting)  
-        
-        ReplaceSpecialValues(InputWorkspace=output_ws, 
-                             OutputWorkspace=output_ws, 
-                             NaNValue=0.0, NaNError=0.0, 
-                             InfinityValue=0.0, InfinityError=0.0)
-                
-        # Q resolution
-        if reducer._resolution_calculator is not None:
-            reducer._resolution_calculator(InputWorkspace=output_ws, 
-                                           OutputWorkspace=output_ws)
-            
-        # Add output workspace to the list of important output workspaces
-        reducer.output_workspaces.append(output_ws)
-        return "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
-        
-    def get_output_workspace(self, workspace):
-        return workspace+str(self._suffix)
-    
-    def get_data(self, workspace):
-        class DataSet(object):
-            x=[]
-            y=[]
-            dy=[]
-        
-        d = DataSet()
-        d.x = mtd[self.get_output_workspace(workspace)].dataX(0)[1:]
-        d.y = mtd[self.get_output_workspace(workspace)].dataY(0)
-        d.dx = mtd[self.get_output_workspace(workspace)].dataE(0)
-        return d
-            
-class SensitivityCorrection(ReductionStep):
-    """
-        Compute the sensitivity correction and apply it to the input workspace.
-        
-        The ReductionStep object stores the sensitivity, so that the object
-        be re-used on multiple data sets and the sensitivity will not be
-        recalculated.
-    """
-    def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, 
-                 beam_center=None, use_sample_dc=False):
-        super(SensitivityCorrection, self).__init__()
-        self._flood_data = flood_data
-        self._dark_current_data = dark_current
-        self._dark_current_subtracter = None
-        self._efficiency_ws = None
-        self._min_sensitivity = min_sensitivity
-        self._max_sensitivity = max_sensitivity
-        self._use_sample_dc = use_sample_dc
-        
-        # Beam center for flood data
-        self._beam_center = beam_center
-        
-    @validate_step
-    def set_beam_center(self, beam_center):
-        """
-             Set the reduction step that will find the beam center position
-             @param beam_center: ReductionStep object
-        """
-        self._beam_center = beam_center
-        
-    def get_beam_center(self):
-        """
-            Returns the beam center found by the beam center finder
-        """
-        if self._beam_center is not None:
-            return self._beam_center.get_beam_center()
-        else:
-            return None
-    
-    @validate_step
-    def set_dark_current_subtracter(self, subtracter):
-        warnings.warn("Call to deprecated method SensitivityCorrection.set_dark_current_subtracter", category=DeprecationWarning)        
-        self._dark_current_subtracter = subtracter
-        
-    def execute(self, reducer, workspace):
-        center_x = None
-        center_y = None
-        # Find the beam center if we need to
-        if self._beam_center is not None:
-            self._beam_center.execute(reducer)
-            [center_x, center_y] = self._beam_center.get_beam_center()
-        
-        # Load the flood data
-        filepath = find_data(self._flood_data, instrument=reducer.instrument.name())
-        dark_current=None
-        if self._dark_current_data is not None:
-            dark_current = find_data(self._dark_current_data, instrument=reducer.instrument.name())
-        
-        l=SANSSensitivityCorrection(InputWorkspace=workspace,
-                                  Filename=filepath,
-                                  UseSampleDC=self._use_sample_dc,
-                                  DarkCurrentFile=dark_current,
-                                  MinEfficiency=self._min_sensitivity,
-                                  MaxEfficiency=self._max_sensitivity,
-                                  BeamCenterX=center_x,
-                                  BeamCenterY=center_y,
-                                  OutputWorkspace=workspace,
-                                  ReductionProperties=reducer.get_reduction_table_name(),
-                                  OutputSensitivityWorkspace=self._efficiency_ws
-                                  )
-        return l.getPropertyValue("OutputMessage")
-        
+        DeleteWorkspace(Workspace=norm_ws)
+                    
 class Mask(ReductionStep):
     """
         Marks some spectra so that they are not included in the analysis
@@ -831,8 +297,9 @@ class Mask(ReductionStep):
     def execute(self, reducer, workspace):
         
         # Check whether the workspace has mask information
-        if not self._ignore_run_properties and mtd[workspace].getRun().hasProperty("rectangular_masks"):
-            mask_str = mtd[workspace].getRun().getProperty("rectangular_masks").value
+        run = mtd[workspace].run()
+        if not self._ignore_run_properties and run.hasProperty("rectangular_masks"):
+            mask_str = run.getProperty("rectangular_masks").value
             try:
                 rectangular_masks = pickle.loads(mask_str)
             except:
@@ -847,10 +314,10 @@ class Mask(ReductionStep):
                 try:
                     self.add_pixel_rectangle(rec[0], rec[1], rec[2], rec[3])
                 except:
-                    mantid.sendLogMessage("Badly defined mask from configuration file: %s" % str(rec))
+                    mantid.logger.notice("Badly defined mask from configuration file: %s" % str(rec))
         
         for shape in self._xml:
-            MaskDetectorsInShape(workspace, shape)
+            api.MaskDetectorsInShape(Workspace=workspace, ShapeXML=shape)
         
         instrument = reducer.instrument
         # Get a list of detector pixels to mask
@@ -862,19 +329,19 @@ class Mask(ReductionStep):
                                                                    workspace))
 
         if len(self.detect_list)>0:
-            MaskDetectors(workspace, DetectorList = self.detect_list)
+            MaskDetectors(Workspace=workspace, DetectorList = self.detect_list)
             
         # Mask out internal list of pixels
         if len(self.masked_pixels)>0:
             # Transform the list of pixels into a list of Mantid detector IDs
             masked_detectors = instrument.get_detector_from_pixel(self.masked_pixels, workspace)
             # Mask the pixels by passing the list of IDs
-            MaskDetectors(workspace, DetectorList = masked_detectors)
+            MaskDetectors(Workspace=workspace, DetectorList = masked_detectors)
             
-        masked_detectors = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
-        mantid.sendLogMessage("Mask check %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList"))))  
+        output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
+        mantid.logger.notice("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
         
-        return "Mask applied %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList")))
+        return "Mask applied %s: %g masked pixels" % (workspace, len(detector_list))
 
 class CorrectToFileStep(ReductionStep):
     """
@@ -904,8 +371,8 @@ class CorrectToFileStep(ReductionStep):
 
     def execute(self, reducer, workspace):
         if self._filename:
-            CorrectToFile(workspace, self._filename, workspace,
-                          self._corr_type, self._operation)
+            CorrectToFile(WorkspaceToCorrect=workspace, Filename=self._filename, OutputWorkspace=workspace,
+                          FirstColumnValue=self._corr_type, WorkspaceOperation=self._operation)
 
 class CalculateNorm(object):
     """
@@ -975,14 +442,14 @@ class CalculateNorm(object):
         wave_adj = None
         for wksp in wave_wksps:
             #before the workspaces can be combined they all need to match 
-            RebinToWorkspace(wksp, reducer.output_wksp, self.TMP_WORKSPACE_NAME)
+            api.RebinToWorkspace(WorkspaceToRebin=wksp, WorkspaceToMatch=reducer.output_wksp, OutputWorkspace=self.TMP_WORKSPACE_NAME)
 
             if not wave_adj:
                 #first time around this loop
                 wave_adj = self.WAVE_CORR_NAME
-                RenameWorkspace(self.TMP_WORKSPACE_NAME, wave_adj)
+                api.RenameWorkspace(InputWorkspace=self.TMP_WORKSPACE_NAME, OutputWorkspace=wave_adj)
             else:
-                Multiply(self.TMP_WORKSPACE_NAME, wave_adj, wave_adj)
+                api.Multiply(LHSWorkspace=self.TMP_WORKSPACE_NAME, RHSWorkspace=wave_adj, OutputWorkspace=wave_adj)
 
         # read pixel correction file
         # note the python code below is an attempt to emulate function overloading
@@ -991,14 +458,14 @@ class CalculateNorm(object):
         pixel_adj = ''
         if self._pixel_file:
             pixel_adj = self.PIXEL_CORR_NAME
-            load_com = self._load+'("'+self._pixel_file+'","'+pixel_adj+'"'
+            load_com = self._load+'(Filename="'+self._pixel_file+'",OutputWorkspace="'+pixel_adj+'"'
             if self._load_params:
                 load_com  += ','+self._load_params
             load_com += ')'
             eval(load_com)
         
-        if mtd.workspaceExists(self.TMP_WORKSPACE_NAME):
-            DeleteWorkspace(self.TMP_WORKSPACE_NAME)
+        if AnalysisDataService.doesExist(self.TMP_WORKSPACE_NAME):
+            AnalysisDataService.remove(self.TMP_WORKSPACE_NAME)
         
         return wave_adj, pixel_adj
 
@@ -1102,11 +569,11 @@ class ConvertToQ(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                Q1D(DetBankWorkspace=workspace, OutputWorkspace=workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
     
             elif self._Q_alg == 'Qxy':
-                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
-                ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
+                Qxy(InputWorkspace=workspace, OutputWorkspace=workspace, MaxQxy=reducer.QXY2, DeltaQ=reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
@@ -1123,139 +590,13 @@ class ConvertToQ(ReductionStep):
         """
         for wk in workspaces:
             try:
-                if wk and mantid.workspaceExists(wk):
-                    DeleteWorkspace(wk)
+                if AnalysisDataService.doesExist(wk):
+                    AnalysisDataService.remove(wk)
             except:
                 #if the workspace can't be deleted this function does nothing
                 pass
-            
-class SaveIqAscii(ReductionStep):
-    """
-        Save the reduced data to ASCII files
-    """
-    def __init__(self, process=None):
-        super(SaveIqAscii, self).__init__()
-        self._process = process
-        
-    def execute(self, reducer, workspace):
-        # Determine which directory to use
-        output_dir = reducer._data_path
-        if reducer._output_path is not None:
-            if os.path.isdir(reducer._output_path):
-                output_dir = reducer._output_path
-            else:
-                raise RuntimeError, "SaveIqAscii could not save in the following directory: %s" % reducer._output_path
-            
-        log_text = ""
-        if reducer._azimuthal_averager is not None:
-            output_list = reducer._azimuthal_averager.get_output_workspace(workspace)
-            if type(output_list) is not list:
-                output_list = [output_list]
-            for output_ws in output_list:
-                if mtd.workspaceExists(output_ws):
-                    proc_xml = ""
-                    if self._process is not None and os.path.isfile(self._process):
-                        proc = open(self._process, 'r')
-                        proc_xml = proc.read()
-                    elif self._process is not None:
-                        log_text += "Could not read %s\n" % self._process
-                        
-                    filename = os.path.join(output_dir, output_ws+'.txt')
-                    SaveAscii(Filename=filename, InputWorkspace=output_ws, Separator="Tab", CommentIndicator="# ", WriteXError=True)
-                    filename = os.path.join(output_dir, output_ws+'.xml')
-                    SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws, Process=proc_xml)
-                    
-                    log_text += "I(Q) saved in %s" % (filename)
-        
-        if reducer._two_dim_calculator is not None:
-            if hasattr(reducer._two_dim_calculator, "get_output_workspace"):
-                output_ws = reducer._two_dim_calculator.get_output_workspace(workspace)
-                if mtd.workspaceExists(output_ws):
-                    filename = os.path.join(output_dir, output_ws+'.dat')
-                    SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
-                    
-                    if len(log_text)>0:
-                        log_text += '\n'
-                    log_text += "I(Qx,Qy) saved in %s" % (filename)
-            
-        return log_text
-            
-class SubtractBackground(ReductionStep):
-    """
-        Subtracts background from a sample data workspace.
-        The processed background workspace is stored for later use.
-    """
-    def __init__(self, background_file, transmission=None):
-        """
-            @param background_file: file name of background data set
-            @param transmission: ReductionStep object to compute the background transmission
-        """
-        super(SubtractBackground, self).__init__()
-        self._background_file = background_file
-        self._background_ws = None
-        self._transmission = transmission
-    
-    def set_transmission(self, trans):
-        """
-             Set the reduction step that will apply the transmission correction
-             @param trans: ReductionStep object
-        """
-        if issubclass(trans.__class__, BaseTransmission) or trans is None:
-            self._transmission = trans
-        else:
-            raise RuntimeError, "SubtractBackground.set_transmission expects an object of class ReductionStep"
-        
-    def get_transmission_calculator(self):
-        return self._transmission
-    
-    def get_transmission(self):
-        if self._transmission is not None:
-            return self._transmission.get_transmission()
-        else:
-            return None
-        
-    def set_trans_theta_dependence(self, theta_dependence):
-        if self._transmission is not None:
-            self._transmission.set_theta_dependence(theta_dependence)
-        else:
-            raise RuntimeError, "A transmission algorithm must be selected before setting the theta-dependence of the correction."
-            
-    def set_trans_dark_current(self, dark_current):
-        if self._transmission is not None:
-            self._transmission.set_dark_current(dark_current)
-        else:
-            raise RuntimeError, "A transmission algorithm must be selected before setting its dark current correction."
-                    
-    def execute(self, reducer, workspace):
-        log_text = ''
-        if self._background_ws is None:
-            # Apply the reduction steps that we normally apply to the data
-            self._background_ws = "bck_"+extract_workspace_name(self._background_file)
-            reducer._extra_files[self._background_ws] = self._background_file
-            for item in reducer._2D_steps():
-                output = item.execute(reducer, self._background_ws)
-                if output is not None:
-                    output = output.replace('\n', '\n   |')
-                    log_text = "%s\n   %s" % (log_text, output)
-        
-            # The transmission correction is set separately
-            if self._transmission is not None:
-                output = self._transmission.execute(reducer, self._background_ws)
-                if output is not None:
-                    output = output.replace('\n', '\n   |')
-                    log_text = "%s\n   %s" % (log_text, output)
-        
-        # Make sure that we have the same binning
-        RebinToWorkspace(self._background_ws, workspace, OutputWorkspace="__tmp_bck")
-        Minus(LHSWorkspace=workspace, RHSWorkspace="__tmp_bck",
-              OutputWorkspace=workspace)
-        if mtd.workspaceExists("__tmp_bck"):
-            mtd.deleteWorkspace("__tmp_bck")        
-        
-        log_text = log_text.replace('\n','\n   |')
-        return "Background subtracted [%s]%s\n" % (self._background_ws, log_text)
-        
- 
+
+
 class GetSampleGeom(ReductionStep):
     """
         Loads, stores, retrieves, etc. data about the geometry of the sample
@@ -1381,9 +722,9 @@ class GetSampleGeom(ReductionStep):
             but doesn't replace values that have been previously set
         """
         wksp = mtd[workspace] 
-        if wksp.isGroup():
+        if isinstance(wksp, mantid.api.WorkspaceGroup):
             wksp = wksp[0]
-        sample_details = wksp.getSampleInfo()
+        sample_details = wksp.sample()
 
         if self._use_wksp_shape:
             self.shape = sample_details.getGeometryFlag()
@@ -1457,7 +798,7 @@ class StripEndZeros(ReductionStep):
         self._flag_value = flag_value
         
     def execute(self, reducer, workspace):
-        result_ws = mantid.getMatrixWorkspace(workspace)
+        result_ws = mtd[workspace]
         if result_ws.getNumberHistograms() != 1:
             #Strip zeros is only possible on 1D workspaces
             return
@@ -1482,7 +823,7 @@ class StripEndZeros(ReductionStep):
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop + 1]
-        CropWorkspace(workspace,workspace,startX,endX)
+        CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
 
 class StripEndNans(ReductionStep):
     # ISIS only
@@ -1505,7 +846,7 @@ class StripEndNans(ReductionStep):
             @param reducer: unused
             @param workspace: the workspace to convert
         """
-        result_ws = mantid.getMatrixWorkspace(workspace)
+        result_ws = mtd[workspace]
         if result_ws.getNumberHistograms() != 1:
             #Strip zeros is only possible on 1D workspaces
             return
@@ -1530,4 +871,4 @@ class StripEndNans(ReductionStep):
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop + 1]
-        CropWorkspace(workspace,workspace,startX,endX)
+        api.CropWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=startX, XMax=endX)

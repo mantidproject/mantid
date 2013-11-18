@@ -4,11 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/IDataFileChecker.h"
 #include <climits>
 
 //----------------------------------------------------------------------
@@ -54,7 +53,7 @@ namespace Mantid
 	File change history is stored at: <https://github.com/mantidproject/mantid>.
 	Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport LoadRawHelper: public API::IDataFileChecker 
+    class DLLExport LoadRawHelper: public API::IFileLoader<Kernel::FileDescriptor>
     {
     public:
       /// Default constructor
@@ -70,10 +69,8 @@ namespace Mantid
       /// Read in run parameters Public so that LoadRaw2 can use it
       void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const = NULL) const;
 
-      /// do a quick check that this file can be loaded 
-      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and if this file can be loaded return a value between 1 and 100
-      virtual int fileCheck(const std::string& filePath);
+      /// Returns a confidence value that this algorithm can load a file
+      virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     protected:
       /// Overwrites Algorithm method.
@@ -111,8 +108,7 @@ namespace Mantid
       API::WorkspaceGroup_sptr createGroupWorkspace();
 
       //Constructs the time channel (X) vector(s)     
-      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes,
-          const int64_t& lengthIn);
+      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes, const int64_t& lengthIn);
       /// loadinstrument Child Algorithm
       void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr, double, double );
       /// loadinstrumentfromraw algorithm
@@ -168,7 +164,6 @@ namespace Mantid
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
           DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
 
-
       /// Has the spectrum_list property been set?
       bool m_list;
       /// Have the spectrum_min/max properties been set?
@@ -186,8 +181,6 @@ namespace Mantid
 
       /// Overwrites Algorithm method
       void exec();
-      /// Check if the buffer looks like a RAW file header
-      bool isRawFileHeader(const int nread, const unsigned char* buffer) const;
       /// convert month label to int string
       std::string convertMonthLabelToIntStr(std::string month) const;
 
@@ -198,14 +191,11 @@ namespace Mantid
       /// The current value of the progress counter
       double m_prog;
 
-
       /// number of spectra
       specid_t m_numberOfSpectra;
 
       /// a vector holding the indexes of monitors
       std::vector<specid_t> m_monitordetectorList;
-
-
 
       /// boolean for list spectra options
       bool m_bmspeclist;
@@ -215,6 +205,17 @@ namespace Mantid
 
       /// A ptr to the log creator
       boost::scoped_ptr<ISISRunLogs> m_logCreator;
+
+      /// Search for the log files in the workspace, and output their names as a set.
+      std::list<std::string> searchForLogFiles(const std::string& fileName);
+      /// Extract the log name from the path to the specific log file.
+      std::string extractLogName(const std::string &path);
+      /// Checks if the file is an ASCII file
+      bool isAscii(const std::string& filenamePart);
+      /// if  alternate data stream named checksum exists for the raw file
+      bool adsExists(const std::string &pathToFile);
+      /// returns the list of log files from ADS checksum
+      std::set<std::string> getLogFilenamesfromADS(const std::string &pathToFile);
     };
 
   } // namespace DataHandling

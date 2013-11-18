@@ -1,15 +1,14 @@
 """
     Simple Reducer example
 """
-from MantidFramework import *
 from reduction import Reducer
 from reduction.instruments.example.ExampleRedStep import ExampleRedStep
 from reduction.instruments.example.ExampleRedStep import ExampleLoader
 # Validate_step is a decorator that allows both Python algorithms and ReductionStep objects to be passed to the Reducer.
 # It also does minimal type checking to ensure that the object that is passed is valid
 from reduction import validate_step, validate_loader
-from mantidsimple import *
-mtd.initialise()
+import mantid
+from mantid.simpleapi import *
 
 class ExampleReducer(Reducer):
     
@@ -39,13 +38,13 @@ class ExampleReducer(Reducer):
               where reduction_step is a ReductionStep object
               
             Method 2 (new): reducer.set_first_step(Algorithm, *args, **argv)
-              where Algorithm is an anlgorithm function from mantidsimple,
+              where Algorithm is an anlgorithm function from mantid.simpleapi,
               following by its arguments. 
               
               For example: 
                 reducer.set_first_step(Scale, InputWorkspace=None, OutputWorkspace=None, Factor='2.5')
               
-              The arguments follow the signature of the mantidsimple function.
+              The arguments follow the signature of the mantid.simpleapi function.
               
               See original ticket for more details:
                 http://trac.mantidproject.org/mantid/ticket/2129l
@@ -99,8 +98,8 @@ if __name__ == '__main__':
     #r._first_step.setProperty("Separator", "Tab")
     
     # Set up an algorithm to be used as part of a reduction step
-    alg = mtd._createAlgProxy("Scale")
-    alg.setPropertyValues(Factor="2.5")
+    alg = mantid.api.FrameworkManager.createAlgorithm("Scale")
+    alg.setProperty("Factor",2.5)
     r.set_normalizer(alg)
     
     # Set up the actual reduction step that will use the algorithm

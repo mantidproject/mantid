@@ -22,6 +22,11 @@ namespace Kernel
 
 namespace API
 {
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
+class AnalysisDataServiceImpl;
+
 /** Base Workspace Abstract Class.
 
     @author Laurent C Chapon, ISIS, RAL
@@ -50,6 +55,7 @@ namespace API
 class MANTID_API_DLL Workspace : public Kernel::DataItem
 {
 public:
+
     Workspace();
     Workspace(const Workspace & other);
     virtual ~Workspace();
@@ -62,28 +68,25 @@ public:
      * @return true if the workspace is suitable for multithreaded operations, otherwise false.
      */
     virtual bool threadSafe() const { return true; }
-    /** Returns the name of the workspace **/
-    virtual std::string toString() const { return name(); }
 
     void virtual setTitle(const std::string&);
     void setComment(const std::string&);
-    void setName(const std::string&);
-    //virtual const std::string& getTitle() const;
     virtual const std::string getTitle() const;
     const std::string& getComment() const;
     const std::string& getName() const;
     bool isDirty(const int n=1) const;
     /// Get the footprint in memory in bytes.
     virtual size_t getMemorySize() const = 0;
-
+    /// Returns the memory footprint in sensible units
+    std::string getMemorySizeAsStr() const;
 
     /// Returns a reference to the WorkspaceHistory
     WorkspaceHistory& history() { return m_history; }
     /// Returns a reference to the WorkspaceHistory const
     const WorkspaceHistory& getHistory() const { return m_history; }
 
-
 private:
+    void setName(const std::string&);
     /// The title of the workspace
     std::string m_title;
     /// A user-provided comment that is attached to the workspace
@@ -92,6 +95,8 @@ private:
     std::string m_name;
     /// The history of the workspace, algorithm and environment
     WorkspaceHistory m_history;
+
+    friend class AnalysisDataServiceImpl;
 
 };
 

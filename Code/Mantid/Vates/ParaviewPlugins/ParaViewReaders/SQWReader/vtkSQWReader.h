@@ -3,6 +3,7 @@
 
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "vtkStructuredGridAlgorithm.h"
+// cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkSQWReader : public vtkStructuredGridAlgorithm
 {
 public:

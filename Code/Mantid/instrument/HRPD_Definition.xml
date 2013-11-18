@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="HRPD" valid-from   ="1900-01-31 23:59:59"
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="HRPD" valid-from   ="1900-01-31 23:59:59"
                         valid-to     ="2100-01-31 23:59:59"
 		        last-modified="2010-05-04 00:00:00">
 
@@ -118,7 +119,7 @@
 <component type="module_la">
   <location  r="0" t="0" p="2.86241" name="mod0"/>
   <location  r="0" t="0" p="0" name="mod1"/>
-  <location  r="0" t="" p="-2.86241" name="mod2"/>
+  <location  r="0" t="0" p="-2.86241" name="mod2"/>
 </component>
 </type>
 <type name="module_bsk">

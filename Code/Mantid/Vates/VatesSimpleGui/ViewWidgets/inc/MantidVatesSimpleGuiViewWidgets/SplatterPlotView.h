@@ -87,6 +87,8 @@ public:
   void resetDisplay();
 
 signals:
+  /// Reset to the Standard View
+  void resetToStandardView();
   /// Change the state of the orthographic projection mode
   void toggleOrthographicProjection(bool state);
 
@@ -107,6 +109,8 @@ protected slots:
 private:
   Q_DISABLE_COPY(SplatterPlotView)
 
+  /// Check the source for the right dimensions
+  bool checkForBadDimensions(pqPipelineSource *src);
   /// Destroy all peak sources.
   void destroyPeakSources();
   /// Filter events for pick mode.

@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/CalculatePeaksHKL.cpp
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
+	src/ClearUB.cpp
 	src/CombinePeaksWorkspaces.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/FilterPeaks.cpp
@@ -13,6 +14,7 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/GoniometerAnglesFromPhiRotation.cpp
+	src/HasUB.cpp
 	src/IndexPeaks.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
@@ -27,6 +29,8 @@ set ( SRC_FILES
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PeaksInRegion.cpp
+	src/PeaksIntersection.cpp
+	src/PeaksOnSurface.cpp
 	src/PredictFractionalPeaks.cpp
 	src/PredictPeaks.cpp
 	src/SCDCalibratePanels.cpp
@@ -54,6 +58,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
+	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/FilterPeaks.h
@@ -64,6 +69,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/GoniometerAnglesFromPhiRotation.h
+	inc/MantidCrystal/HasUB.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
@@ -78,6 +84,8 @@ set ( INC_FILES
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PeaksInRegion.h
+	inc/MantidCrystal/PeaksIntersection.h
+	inc/MantidCrystal/PeaksOnSurface.h
 	inc/MantidCrystal/PredictFractionalPeaks.h
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SCDCalibratePanels.h
@@ -104,6 +112,7 @@ set ( TEST_FILES
 	CalculatePeaksHKLTest.h
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
+	ClearUBTest.h
 	CombinePeaksWorkspacesTest.h
 	DiffPeaksWorkspacesTest.h
 	FilterPeaksTest.h
@@ -113,6 +122,7 @@ set ( TEST_FILES
 	FindUBUsingLatticeParametersTest.h
 	FindUBUsingMinMaxDTest.h
 	GoniometerAnglesFromPhiRotationTest.h
+	HasUBTest.h
 	IndexPeaksTest.h
 	IndexSXPeaksTest.h
 	IntegratePeakTimeSlicesTest.h
@@ -126,6 +136,7 @@ set ( TEST_FILES
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
 	PeaksInRegionTest.h
+	PeaksOnSurfaceTest.h
 	PredictFractionalPeaksTest.h
 	PredictPeaksTest.h
 	SCDCalibratePanelsTest.h

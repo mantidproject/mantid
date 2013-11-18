@@ -59,6 +59,9 @@ namespace Mantid
       /// Destructor
       ~ForegroundModel();
 
+      /// Function category
+      virtual const std::string category() const { return "Quantification"; }
+
       /// Returns the type of model
       virtual ModelType modelType() const = 0;
       /// Calculates the intensity for the model for the current parameters, expt description & ND point

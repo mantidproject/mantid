@@ -5,7 +5,9 @@
 
 #include "MantidCurveFitting/ProcessBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/TableRow.h"
 
 #include <fstream>
 
@@ -13,6 +15,7 @@ using Mantid::CurveFitting::ProcessBackground;
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Kernel;
+using namespace Mantid::DataObjects;
 
 class ProcessBackgroundTest : public CxxTest::TestSuite
 {
@@ -119,7 +122,9 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Test automatic background selection
+    * Disabled because it requires a data file
    */
   void Passed_test_AutoBackgroundSelection()
   {
@@ -166,6 +171,7 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Test automatic background selection
    */
   void test_SimpleBackgroundGeneration()
@@ -204,6 +210,7 @@ public:
     alg.setProperty("Options", "SelectBackgroundPoints");
     alg.setProperty("BackgroundPointSelectMode", "Input Background Points Only");
 
+    alg.setProperty("SelectionMode", "FitGivenDataPoints");
     alg.setProperty("BackgroundType", "Polynomial");
     alg.setProperty("BackgroundPoints", bkgdpts);
 
@@ -229,7 +236,71 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test automatic background selection from a given data
+   */
+  void test_SelectBackgroundFromInputFunction()
+  {
+    // Create input data
+    DataObjects::Workspace2D_sptr dataws
+        = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1000, 1000));
+    for (size_t i = 0; i < 10; ++i)
+    {
+      dataws->dataX(0)[i] = double(i);
+      dataws->dataY(0)[i] = double(i)*double(i)+sin(double(i)/180.*3.14);
+    }
+    API::AnalysisDataService::Instance().addOrReplace("DiffractionData2", dataws);
 
+    // Create background function
+    TableWorkspace_sptr functablews = boost::make_shared<TableWorkspace>();
+    functablews->addColumn("str", "Name");
+    functablews->addColumn("double", "Value");
+    TableRow row0 = functablews->appendRow();
+    row0 << "A0" << 0.;
+    TableRow row1 = functablews->appendRow();
+    row1 << "A1" << 0.;
+    TableRow row2 = functablews->appendRow();
+    row2 << "A2" << 1.;
+    AnalysisDataService::Instance().addOrReplace("BackgroundParameters", functablews);
+
+    // Create and set up algorithm
+    ProcessBackground alg;
+    alg.initialize();
+
+    alg.setProperty("InputWorkspace", dataws);
+    alg.setProperty("WorkspaceIndex", 0);
+    alg.setProperty("OutputWorkspace", "SelectedBackgroundPoints2");
+    alg.setProperty("Options", "SelectBackgroundPoints");
+
+    alg.setProperty("BackgroundType", "Polynomial");
+    alg.setProperty("SelectionMode", "UserFunction");
+    alg.setProperty("BackgroundTableWorkspace", functablews);
+
+    alg.setProperty("NoiseTolerance", 0.25);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    TS_ASSERT(alg.isExecuted());
+
+    // 3. Check the result
+    DataObjects::Workspace2D_sptr bkgdws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (API::AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints2"));
+    TS_ASSERT(bkgdws);
+    if (bkgdws)
+    {
+      TS_ASSERT(bkgdws->readX(0).size() > 10);
+    }
+
+    AnalysisDataService::Instance().remove("DiffractionData2");
+    AnalysisDataService::Instance().remove("SelectedBackgroundPoints2");
+    AnalysisDataService::Instance().remove("BackgroundParameters");
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Read column file to create a workspace2D
    */
   DataObjects::Workspace2D_sptr createWorkspace2D(std::string filename)

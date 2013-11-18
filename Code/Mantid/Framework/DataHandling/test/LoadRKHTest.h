@@ -26,6 +26,16 @@ public:
     dataFile = "DIRECT.041";
   }
 
+  void testConfidence()
+  {
+    Mantid::DataHandling::LoadRKH loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", dataFile);
+
+    FileDescriptor descriptor(loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(20, loader.confidence(descriptor));
+  }
+
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( loadrkh.initialize());

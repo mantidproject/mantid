@@ -124,6 +124,56 @@ namespace Mantid
       return QUAT_PARAM_NAME;
     }
 
+    /**
+     * Compares the values in this object with that given for inequality
+     * The order of the values in the map is not important.
+     * @param rhs A reference to a ParameterMap object to compare it to
+     * @return true if the objects are considered not equal, false otherwise
+     */
+    bool ParameterMap::operator!=(const ParameterMap & rhs) const
+    { 
+      return !(this->operator==(rhs)); 
+    }
+    
+    /**
+     * Compares the values in this object with that given for equality
+     * The order of the values in the map is not important.
+     * @param rhs A reference to a ParameterMap object to compare it to
+     * @return true if the objects are considered equal, false otherwise
+     */
+    bool ParameterMap::operator==(const ParameterMap & rhs) const
+    {
+      if(this == &rhs) return true; // True for the same object
+      
+      // Quick size check
+      if(this->size() != rhs.size()) return false;
+      
+      // The map is unordered and the key is only valid at runtime. The
+      // asString method turns the ComponentIDs to full-qualified name identifiers
+      // so we will use the same approach to compare them
+
+      pmap_cit thisEnd = this->m_map.end();
+      pmap_cit rhsEnd = rhs.m_map.end();
+      for(pmap_cit thisIt = this->m_map.begin(); thisIt != thisEnd; ++thisIt)
+      {
+        const IComponent * comp = static_cast<IComponent*>(thisIt->first);
+        const std::string fullName = comp->getFullName();
+        const auto & param = thisIt->second;
+        bool match(false);
+        for(pmap_cit rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt)
+        {
+          const IComponent * rhsComp = static_cast<IComponent*>(rhsIt->first);
+          const std::string rhsFullName = rhsComp->getFullName();
+          if(fullName == rhsFullName && (*param) == (*rhsIt->second))
+          {
+            match = true;
+            break;
+          }
+        }
+        if(!match) return false;
+      }
+      return true;
+    }
 
     /**
      * Clear any parameters with the given name
@@ -456,6 +506,32 @@ namespace Mantid
       return false;
     }
 
+    /**
+     * @param comp A pointer to a component
+     * @param parameter A Parameter object
+     * @return true if the combination exists in the map, false otherwise
+     */
+    bool ParameterMap::contains(const IComponent* comp, const Parameter & parameter) const
+    {
+      if( m_map.empty() || !comp) return false;
+
+      const ComponentID id = comp->getComponentID();
+      pmap_cit it_found = m_map.find(id);
+      if(it_found != m_map.end())
+      {
+        pmap_cit itr = m_map.lower_bound(id);
+        pmap_cit itr_end = m_map.upper_bound(id);
+        for(; itr != itr_end; ++itr)
+        {
+          const Parameter_sptr & param = itr->second;
+          if(*param == parameter) return true;
+        }
+        return false;
+      }
+      else 
+        return false;
+    }
+
     /** FASTER LOOKUP in multithreaded loops. Return a named parameter
      * @param comp :: Component to which parameter is related
      * @param name :: Parameter name
@@ -540,22 +616,25 @@ namespace Mantid
         {
           const ComponentID id = comp->getComponentID();
           pmap_cit it_found = m_map.find(id);
-          if( it_found->first && it_found != m_map.end() )
+          if(it_found != m_map.end() )
           {
-            pmap_cit itr = m_map.lower_bound(id);
-            pmap_cit itr_end = m_map.upper_bound(id);
-            for( ; itr != itr_end; ++itr )
-            {
-              Parameter_sptr param = itr->second;
-              if( boost::iequals(param->type(), type) )
-              {
-                result = param;
-                break;
-              }
-            }
-          }
-        }
-      }
+             if (it_found->first)
+             {
+                pmap_cit itr = m_map.lower_bound(id);
+                pmap_cit itr_end = m_map.upper_bound(id);
+                for( ; itr != itr_end; ++itr )
+                {
+                    Parameter_sptr param = itr->second;
+                    if( boost::iequals(param->type(), type) )
+                    {
+                        result = param;
+                        break;
+                    }
+                }
+             } // found->firdst
+          } // it_found != m_map.end()
+        } //!m_map.empty()
+      } // PARALLEL_CRITICAL(ParameterMap_get)
       return result;
     }
 

@@ -8,11 +8,16 @@
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILL;
 
-class LoadILLTest: public CxxTest::TestSuite {
+class LoadILLTest: public CxxTest::TestSuite 
+{
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadILLTest *createSuite() { return new LoadILLTest(); }
+  static void destroySuite( LoadILLTest *suite ) { delete suite; }
 
 	LoadILLTest() :
-			m_testFile("ILLIN5_094460.nxs")
+			m_testFile("ILLIN5_104007.nxs")
 	{
 	}
 
@@ -72,7 +77,7 @@ public:
 	void testDefaultLoad() {
 		Mantid::DataHandling::LoadILL loader;
 		loader.initialize();
-		loader.setPropertyValue("Filename", "ILLIN5_094460.nxs");
+		loader.setPropertyValue("Filename", "ILLIN5_104007.nxs");
 		loader.setPropertyValue("OutputWorkspace", "ws");
 		TS_ASSERT( loader.execute());
 	}

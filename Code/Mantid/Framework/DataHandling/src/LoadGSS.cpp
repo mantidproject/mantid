@@ -13,20 +13,21 @@ Two types of GSAS files are supported
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadGSS.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidAPI/ISpectrum.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 
 using namespace Mantid::DataHandling;
@@ -37,12 +38,37 @@ namespace Mantid
 {
   namespace DataHandling
   {
+    DECLARE_FILELOADER_ALGORITHM(LoadGSS);
 
-    // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(LoadGSS)
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadGSS::confidence(Kernel::FileDescriptor & descriptor) const
+    {
+      if(!descriptor.isAscii()) return 0;
 
-    //register the algorithm into loadalgorithm factory
-    DECLARE_LOADALGORITHM(LoadGSS)
+      std::string str;
+      std::istream & file = descriptor.data();
+      std::getline(file, str);//workspace title first line
+      while (!file.eof())
+      {
+        std::getline(file, str);
+        // Skip over empty and comment lines, as well as those coming from files saved with the 'ExtendedHeader' option
+        if (str.empty() || str[0] == '#' || str.compare(0, 8, "Monitor:") == 0)
+        {
+          continue;
+        }
+        if(str.compare(0, 4,"BANK") == 0 &&
+           (str.find("RALF") != std::string::npos || str.find("SLOG") != std::string::npos) &&
+           (str.find("FXYE") != std::string::npos))
+        {
+          return 80;
+        }
+      }
+      return 0;
+    }
 
     /// Sets documentation strings for this algorithm
     void LoadGSS::initDocs()
@@ -65,6 +91,8 @@ namespace Mantid
           "The input filename of the stored data");
       declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
                       "Workspace name to load into.");
+
+      declareProperty("UseBankIDasSpectrumNumber", false, "If true, spectrum number corresponding to each bank is to be its bank ID. ");
     }
 
     /**
@@ -74,6 +102,8 @@ namespace Mantid
     {
       using namespace Mantid::API;
       std::string filename = getPropertyValue("Filename");
+
+      bool m_useBankAsSpectrum = getProperty("UseBankIDasSpectrumNumber");
 
       std::vector<MantidVec*> gsasDataX;
       std::vector<MantidVec*> gsasDataY;
@@ -95,17 +125,7 @@ namespace Mantid
       std::string wsTitle;
       std::string slogTitle;
       std::string instrumentname = "Generic";
-      bool slogtitleset = false;
       char filetype = 'x';
-
-      int nSpec = 0;
-      bool calslogx0 = true;
-      double bc4 = 0;
-      double bc3 = 0;
-
-      bool db1 = true;
-
-      bool multiplybybinwidth = false;
 
       std::ifstream input(filename.c_str(), std::ios_base::in);
 
@@ -123,6 +143,14 @@ namespace Mantid
 
         // 2. Loop all the lines
         bool isOutOfHead = false;
+        bool slogtitleset = false;
+        bool multiplybybinwidth = false;
+        bool db1 = true;      
+        int nSpec = 0;
+        bool calslogx0 = true;
+        double bc4 = 0;
+        double bc3 = 0;
+
         while (!input.eof() && input.getline(currentLine, 256))
         {
 
@@ -383,6 +411,12 @@ namespace Mantid
       }
 
       // 2.2 Put data from MatidVec's into outputWorkspace
+      if (detectorIDs.size() != static_cast<size_t>(nHist))
+      {
+        std::ostringstream mess("");
+        mess << "Number of spectra (" << detectorIDs.size() << ") is not equal to number of histograms (" << nHist << ").";
+        throw std::runtime_error(mess.str());
+      }
       for (int i = 0; i < nHist; ++i)
       {
         // Move data across
@@ -393,6 +427,13 @@ namespace Mantid
         delete gsasDataX[i];
         delete gsasDataY[i];
         delete gsasDataE[i];
+
+        // Reset spectrum number if
+        if (m_useBankAsSpectrum)
+        {
+          specid_t specno = static_cast<specid_t>(detectorIDs[i]);
+          outputWorkspace->getSpectrum(i)->setSpectrumNo(specno);
+        }
       }
 
       // 2.3 Build instrument geometry
@@ -430,67 +471,6 @@ namespace Mantid
       return rd;
     }
 
-    /**This method does a quick file type check by checking the first 100 bytes of the file
-     *  @param filePath- path of the file including name.
-     *  @param nread :: no.of bytes read
-     *  @param header :: The first 100 bytes of the file as a union
-     *  @return true if the given file is of type which can be loaded by this algorithm
-     */
-    bool LoadGSS::quickFileCheck(const std::string& filePath, size_t nread, const file_header& header)
-    {
-      // check the file extension
-      std::string extn = extension(filePath);
-      bool bascii;
-      if (extn.compare("gsa"))
-        bascii = true;
-      else if (extn.compare("txt"))
-        bascii = true;
-      else
-        bascii = false;
-
-      // check the bit of header
-      bool is_ascii(true);
-      for (size_t i = 0; i < nread; i++)
-      {
-        if (!isascii(header.full_hdr[i]))
-          is_ascii = false;
-      }
-      return (is_ascii || bascii);
-    }
-
-    /**checks the file by opening it and reading few lines
-     *  @param filePath :: name of the file including its path
-     *  @return an integer value how much this algorithm can load the file
-     */
-    int LoadGSS::fileCheck(const std::string& filePath)
-    {
-      std::ifstream file(filePath.c_str());
-      if (!file)
-      {
-        g_log.error("Unable to open file: " + filePath);
-        throw Exception::FileError("Unable to open file: ", filePath);
-      }
-      std::string str;
-      getline(file, str);//workspace title first line
-      while (!file.eof())
-      {
-        getline(file, str);
-        // Skip over empty and comment lines, as well as those coming from files saved with the 'ExtendedHeader' option
-        if (str.empty() || str[0] == '#' || !str.substr(0,8).compare("Monitor:") )
-        {
-          continue;
-        }
-        if (!str.substr(0, 4).compare("BANK") && (str.find("RALF") != std::string::npos || str.find(
-            "SLOG") != std::string::npos) && (str.find("FXYE") != std::string::npos))
-        {
-          return 80;
-        }
-        return 0;
-      }
-      return 0;
-
-    }
-
     /* Create the instrument geometry with Instrument
      *
      */
@@ -500,7 +480,7 @@ namespace Mantid
       // 0. Check Input
       g_log.information() << "L1 = " << primaryflightpath << std::endl;
       if (detectorids.size() != totalflightpaths.size() || totalflightpaths.size() != twothetas.size()){
-        g_log.warning() << "Cannot create geometry due to number of L2, Polar are not same." << std::endl;
+        g_log.warning() << "Cannot create geometry, because the numbers of L2 and Polar are not equal." << std::endl;
         return;
       }
       for (size_t i = 0; i < detectorids.size(); i ++){

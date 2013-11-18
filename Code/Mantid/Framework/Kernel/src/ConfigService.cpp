@@ -54,7 +54,8 @@ namespace Mantid
  */
 std::string welcomeMessage()
 {
-  return "Welcome to Mantid - Manipulation and Analysis Toolkit for Instrument Data";
+    return "Welcome to Mantid version " + std::string(Mantid::Kernel::MantidVersion::version()) + " - Manipulation and Analysis Toolkit for Instrument Data\n" +
+           "Please cite Mantid in your publications using: " + Mantid::Kernel::MantidVersion::doi();
 }
 
 namespace Kernel
@@ -223,7 +224,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_ConfigPaths.insert(std::make_pair("requiredpythonscript.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
-  m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories", true));
   m_ConfigPaths.insert(std::make_pair("python.plugins.directories", true));
   m_ConfigPaths.insert(std::make_pair("user.python.plugins.directories", true));
   m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
@@ -264,8 +264,8 @@ ConfigServiceImpl::ConfigServiceImpl() :
   g_log.debug() << "ConfigService created." << std::endl;
   g_log.debug() << "Configured Mantid.properties directory of application as " << getPropertiesDir()
       << std::endl;
-  g_log.information() << "This is Mantid Version "
-                      << MantidVersion::version() << "-" << MantidVersion::revision() << std::endl;
+  g_log.information() << "This is Mantid version "
+                      << MantidVersion::version() << " revision " << MantidVersion::revision() << std::endl;
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList << std::endl;
 #ifndef MPI_BUILD  // There is no logging to file by default in MPI build
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
@@ -436,9 +436,21 @@ void ConfigServiceImpl::configureLogging()
     if (m_logFilePath.empty())
     {
       m_logFilePath = getUserPropertiesDir() + "mantid.log";
-      logpath.assign(m_logFilePath);
-      logpath = logpath.absolute();
-      m_logFilePath = logpath.toString();
+      // Check whether the file can be written. The Poco::File::canWrite method does not work
+      // for files that don't exist, it throws an exception. It also can't be used to check for
+      // directory access as the Windows API doesn't return this information correctly for
+      // directories.
+      FILE *fp = fopen(m_logFilePath.c_str(), "a+");
+      if (!fp)
+      {
+          // if we cannot write to the default directory then set use the system temp
+          logpath = Poco::Path::temp() + "mantid.log";
+          m_logFilePath = logpath.toString();
+          std::cerr << "Error writing to log file path to default location: \"" << m_logFilePath
+                    << "\". Will use a system temp path instead: \"" << m_logFilePath << "\"" << std::endl;
+       }
+       else
+         fclose(fp);
     }
     // Set the line in the configuration properties.
     //  this'll be picked up by LoggingConfigurator (somehow)
@@ -454,10 +466,10 @@ void ConfigServiceImpl::configureLogging()
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
-  } catch (std::exception& e)
-  {
-    std::cerr << "Trouble configuring the logging framework " << e.what() << std::endl;
-  }
+    } catch (std::exception& e)
+    {
+        std::cerr << "Trouble configuring the logging framework " << e.what() << std::endl;
+    }
 
 }
 
@@ -1566,6 +1578,29 @@ const InstrumentInfo & ConfigServiceImpl::getInstrument(const std::string& instr
   throw Exception::NotFoundError("Instrument", instrumentName);
 }
 
+/** Gets a vector of the facility Information objects
+ * @return A vector of FacilityInfo objects
+ */
+const std::vector<FacilityInfo*> ConfigServiceImpl::getFacilities() const
+{
+  return m_facilities;
+}
+
+/** Gets a vector of the facility names
+ * @return A vector of the facility Names
+ */
+const std::vector<std::string> ConfigServiceImpl::getFacilityNames()const
+{
+  auto names = std::vector<std::string>(m_facilities.size());
+  auto itFacilities = m_facilities.begin();
+  auto itNames = names.begin();
+  for (; itFacilities != m_facilities.end(); ++itFacilities,++itNames)
+  {
+    *itNames = (**itFacilities).name();
+  }
+  return names;
+}
+
 /** Get the default facility
  * @return the facility information object
  */
@@ -1576,7 +1611,7 @@ const FacilityInfo& ConfigServiceImpl::getFacility() const
   {
     defFacility = "ISIS";
   }
-  return getFacility(defFacility);
+  return this->getFacility(defFacility);
 }
 
 /**
@@ -1745,7 +1780,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       if (givenVersionNumber == targetVersionNumber)
       {
         isAvailable = true;
-        this->g_log.notice("ParaView is available");
+        this->g_log.information("ParaView is available");
         // Now set the plugin path.
         this->setParaViewPluginPath();
       }
@@ -1754,7 +1789,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
         std::stringstream messageStream;
         messageStream << "The compatible version of ParaView is " << targetVersionNumber << " but the installed version is " << givenVersionNumber;
         this->g_log.debug(messageStream.str());
-        this->g_log.notice("ParaView is not available");
+        this->g_log.information("ParaView is not available");
       }
     }
     else
@@ -1762,13 +1797,13 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       std::stringstream messageStream;
       messageStream << "ParaView version query failed with code: " << rc;
       this->g_log.debug(messageStream.str());
-      this->g_log.notice("ParaView is not available");
+      this->g_log.information("ParaView is not available");
     }
   }
   catch(Poco::SystemException &e)
   {
     this->g_log.debug(e.what());
-    this->g_log.notice("ParaView is not available");
+    this->g_log.information("ParaView is not available");
   }
   return isAvailable; 
 }

@@ -1,12 +1,13 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument valid-to="2012-03-13 23:59:59" name="CNCS" valid-from="2012-02-15 10:45:00">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ valid-to="2012-03-13 23:59:59" name="CNCS" valid-from="2012-02-15 10:45:00">
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
-      <handedness axis="right"/>
+      <handedness val="right"/>
     </reference-frame>
   </defaults>
   <!--SOURCE AND SAMPLE POSITION-->
@@ -698,8 +699,8 @@
     <cylinder id="cyl-approx">
       <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>
-      <radius radius="0.01"/>
-      <height height="0.03"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
     </cylinder>
     <algebra val="cyl-approx"/>
   </type>

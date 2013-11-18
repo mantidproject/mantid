@@ -5,12 +5,6 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/TableRow.h"
-
 #include <QTableWidget>
 
 namespace Ui
@@ -60,6 +54,13 @@ public:
   MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm);
   void populateTables(const QStringList& wsList);
 
+  static const std::string RUN_NO_LOG; // Name of the run_number log
+  static const std::string RUN_NO_TITLE; // Table title for the run_number
+
+signals:
+  /// Emitted to run some (usually simple) Python code
+  void runPythonCode(const QString& code, bool async);
+
 private slots:
   void helpResultsClicked();
   void selectAllLogs(bool);
@@ -80,9 +81,14 @@ private:
   
   Ui::MuonAnalysis& m_uiForm;
   int m_numLogsdisplayed;
-  QMap<QString, QMap<QString, double> > m_tableValues;
+  
+  // Log values for all the fitted workspaces  
+  QMap<QString, QMap<QString, QVariant> > m_logValues;
+  
+  // Saved states of log value check-boxes. Used to remember what user has chosen when
+  // re-creating the table
+  QMap<QString, Qt::CheckState> m_savedLogsState;
 
-  QList<QString> m_selectedLogs;
   QList<QString> m_unselectedFittings;
 };
 

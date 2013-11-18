@@ -103,6 +103,26 @@ namespace DataObjects
     return (this->m_tof < rhs_tof);
   }
 
+  /**
+   * Compare two events within the specified tolerance
+   *
+   * @param rhs the other TofEvent to compare
+   * @param tolTof the tolerance of a difference in m_tof.
+   * @param tolPulse the tolerance of a difference in m_pulsetime
+   * in nanoseconds.
+   *
+   * @return True if the are the same within the specifed tolerances
+   */
+  bool TofEvent::equals(const TofEvent & rhs, const double tolTof,
+             const int64_t tolPulse) const
+  {
+    // compare m_tof
+    if (std::fabs(this->m_tof - rhs.m_tof) > tolTof)
+      return false;
+    // then it is just if the pulse-times are equal
+    return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
+  }
+
   /** Output a string representation of the event to a stream
    * @param os :: Stream
    * @param event :: TofEvent to output to the stream
@@ -112,10 +132,6 @@ namespace DataObjects
     os << event.m_tof << "," << event.m_pulsetime.toSimpleString();
     return os;
   }
-
-
-
-
 
   //==========================================================================
   /// --------------------- WeightedEvent stuff ------------------------------
@@ -221,7 +237,30 @@ namespace DataObjects
             (this->m_errorSquared == rhs.m_errorSquared);
   }
 
-
+  /**
+   * Compare two events within the specified tolerance
+   *
+   * @param rhs the other TofEvent to compare
+   * @param tolTof the tolerance of a difference in m_tof.
+   * @param tolWeight the tolerance of a difference in m_weight
+   * and m_errorSquared.
+   * @param tolPulse the tolerance of a difference in m_pulsetime
+   * in nanoseconds.
+   *
+   * @return True if the are the same within the specifed tolerances
+   */
+  bool WeightedEvent::equals(const WeightedEvent & rhs, const double tolTof,
+             const double tolWeight, const int64_t tolPulse) const
+  {
+    if (std::fabs(this->m_tof - rhs.m_tof) > tolTof)
+      return false;
+    if (std::fabs(this->m_weight - rhs.m_weight) > tolWeight)
+      return false;
+    if (std::fabs(this->m_errorSquared - rhs.m_errorSquared) > tolWeight)
+      return false;
+    // then it is just if the pulse-times are equal
+    return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
+  }
 
   /** Output a string representation of the event to a stream
    * @param os :: Stream
@@ -232,13 +271,6 @@ namespace DataObjects
     os << event.m_tof << "," << event.m_pulsetime.toSimpleString() << " (W" << event.m_weight << " +- " << event.error() << ")";
     return os;
   }
-
-
-
-
-
-
-
 
   //==========================================================================
   /// --------------------- WeightedEventNoTime stuff ------------------------
@@ -384,6 +416,29 @@ namespace DataObjects
   bool WeightedEventNoTime::operator<(const double rhs_tof) const
   {
     return (this->m_tof < rhs_tof);
+  }
+
+  /**
+   * Compare two events within the specified tolerance
+   *
+   * @param rhs the other TofEvent to compare
+   * @param tolTof the tolerance of a difference in m_tof.
+   * @param tolWeight the tolerance of a difference in m_weight
+   * and m_errorSquared.
+   *
+   * @return True if the are the same within the specifed tolerances
+   */
+  bool WeightedEventNoTime::equals(const WeightedEventNoTime & rhs, const double tolTof,
+             const double tolWeight) const
+  {
+    if (std::fabs(this->m_tof - rhs.m_tof) > tolTof)
+      return false;
+    if (std::fabs(this->m_weight - rhs.m_weight) > tolWeight)
+      return false;
+    if (std::fabs(this->m_errorSquared - rhs.m_errorSquared) > tolWeight)
+      return false;
+    // then it is just if the pulse-times are equal
+    return true;
   }
 
 } // DataObjects

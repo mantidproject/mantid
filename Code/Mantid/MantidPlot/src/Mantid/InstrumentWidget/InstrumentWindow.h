@@ -26,6 +26,7 @@ class InstrumentWindowTab;
 class XIntegrationControl;
 class SimpleWidget;
 class ProjectionSurface;
+class InstrumentWindowRenderTab;
 
 // Qt forward declarations
 class QPushButton;
@@ -61,7 +62,7 @@ class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObs
   Q_OBJECT
 
 public:
-  enum SurfaceType{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, RENDERMODE_SIZE };
+  enum SurfaceType{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, SIDE_BY_SIDE, RENDERMODE_SIZE };
   enum Tab{RENDER = 0, PICK, MASK, TREE};
 
   explicit InstrumentWindow(const QString& wsName, const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
@@ -127,9 +128,7 @@ protected:
 
 public slots:
   void tabChanged(int);
-  void multipleDetectorsSelected(QList<int>&);
   void componentSelected(Mantid::Geometry::ComponentID id);
-  void showPickOptions();
   void spectraInfoDialog();
   void plotSelectedSpectra();
   void showDetectorTable();
@@ -199,6 +198,7 @@ private:
   QTabWidget*  mControlsTab;
   /// Control tabs
   QList<InstrumentWindowTab *> m_tabs;
+  InstrumentWindowRenderTab *m_renderTab;
   XIntegrationControl * m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget* m_InstrumentDisplay;

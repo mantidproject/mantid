@@ -152,9 +152,9 @@ namespace Mantid
       float getVAXnum(const float A);
 
       /// Eat everything from the stream until the next EOL
-      MANTID_KERNEL_DLL void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL );
+      MANTID_KERNEL_DLL void readToEndOfLine( std::istream& in ,  bool ConsumeEOL );
       /// Returns the next word in the stream
-      MANTID_KERNEL_DLL std::string getWord( std::ifstream &in ,  bool consumeEOL );
+      MANTID_KERNEL_DLL std::string getWord( std::istream &in ,  bool consumeEOL );
       ///  function parses a path, found in input string "path" and returns vector of the folders contributed into the path */
       MANTID_KERNEL_DLL size_t split_path(const std::string &path, std::vector<std::string> &path_components);
 
@@ -163,6 +163,11 @@ namespace Mantid
 
       /// checks if the candidate is the member of the group
       MANTID_KERNEL_DLL int isMember(const std::vector<std::string> &group, const std::string &candidate);
+
+      /// Parses a number range, e.g. "1,4-9,54-111,3,10", to the vector containing all the elements 
+      /// within the range
+      MANTID_KERNEL_DLL std::vector<int> parseRange(const std::string& str, const std::string& elemSep = ",", 
+                                                    const std::string& rangeSep = "-");
 
     }   // NAMESPACE Strings
 

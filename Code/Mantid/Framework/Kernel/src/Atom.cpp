@@ -14,27 +14,14 @@ namespace PhysicalConstants
 
 using std::string;
 
-/// Get the corresponding neutronic atom
-const NeutronAtom getNeutronNoExceptions(const uint16_t z, const uint16_t a)
-{
-  try
-  {
-    return getNeutronAtom(z, a);
-  }
-  catch (std::runtime_error & )
-  {
-    return NeutronAtom(z, a,
-		       NAN, NAN, NAN, NAN,
-		       NAN, NAN, NAN, NAN); // set to junk value
-  }
-}
+
 
 Atom::Atom(const std::string& symbol, const uint16_t z, const uint16_t a,
            const double abundance, const double mass, const double density) :
            symbol(symbol), z_number(z), a_number(a), abundance(abundance),
            mass(mass), mass_density(density),
 	   number_density(density * N_A * 1.e-24/ mass),  // Convert from cm^-3 to Angstroms^-3
-	   neutron(getNeutronNoExceptions(z, a))
+	   neutron(getNeutronNoExceptions(z, a))   /// Get the corresponding neutronic atom
 {
 }
 

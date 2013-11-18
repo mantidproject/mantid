@@ -8,11 +8,11 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-  PeakTransformHKL::PeakTransformHKL() : PeakTransform("H", "K", regex("^H.*$"), regex("^K.*$"), regex("^L.*$") )
+  PeakTransformHKL::PeakTransformHKL() : PeakTransform("H", "K", regex("^(H.*)|(\\[H,0,0\\].*)$"), regex("^(K.*)|(\\[0,K,0\\].*)$"), regex("^(L.*)|(\\[0,0,L\\].*)$") )
   {
   }
 
-  PeakTransformHKL::PeakTransformHKL(const std::string& xPlotLabel, const std::string& yPlotLabel) : PeakTransform(xPlotLabel, yPlotLabel, regex("^H.*$"), regex("^K.*$"), regex("^L.*$") )
+  PeakTransformHKL::PeakTransformHKL(const std::string& xPlotLabel, const std::string& yPlotLabel) : PeakTransform(xPlotLabel, yPlotLabel, regex("^(H.*)|(\\[H,0,0\\].*)$"), regex("^(K.*)|(\\[0,K,0\\].*)$"), regex("^(L.*)|(\\[0,0,L\\].*)$") )
   {
   }
 

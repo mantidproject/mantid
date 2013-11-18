@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
+	src/CatalogInfo.cpp
 	src/CPUTimer.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
@@ -20,6 +21,7 @@ set ( SRC_FILES
 	src/EnvironmentHistory.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
+	src/FileDescriptor.cpp
 	src/FileValidator.cpp
 	src/FilterChannel.cpp
 	src/FilteredTimeSeriesProperty.cpp
@@ -40,10 +42,11 @@ set ( SRC_FILES
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
-	src/Material.cpp
 	src/MaskedProperty.cpp
+	src/Material.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
+	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
 	src/Memory.cpp
@@ -52,7 +55,7 @@ set ( SRC_FILES
 	src/MultiFileValidator.cpp
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
-	src/NexusTestHelper.cpp
+	src/NexusDescriptor.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
@@ -66,6 +69,7 @@ set ( SRC_FILES
 	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
+	src/RemoteJobManager.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
 	src/StartsWithValidator.cpp
@@ -114,6 +118,7 @@ set ( INC_FILES
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
 	inc/MantidKernel/BoundedValidator.h
+	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CompositeValidator.h
@@ -135,6 +140,7 @@ set ( INC_FILES
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
 	inc/MantidKernel/Fast_Exponential.h
+	inc/MantidKernel/FileDescriptor.h
 	inc/MantidKernel/FileValidator.h
 	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/FilteredTimeSeriesProperty.h
@@ -161,10 +167,11 @@ set ( INC_FILES
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
-	inc/MantidKernel/Material.h
 	inc/MantidKernel/MaskedProperty.h
+	inc/MantidKernel/Material.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
+	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
 	inc/MantidKernel/Memory.h
@@ -175,7 +182,7 @@ set ( INC_FILES
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
 	inc/MantidKernel/NeutronAtom.h
-	inc/MantidKernel/NexusTestHelper.h
+	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
@@ -193,6 +200,7 @@ set ( INC_FILES
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/RegistrationHelper.h
+	inc/MantidKernel/RemoteJobManager.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/StartsWithValidator.h
@@ -222,6 +230,7 @@ set ( INC_FILES
 	inc/MantidKernel/VMD.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
+	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
@@ -238,6 +247,7 @@ set ( TEST_FILES
 	BoundedValidatorTest.h
 	CPUTimerTest.h
 	CacheTest.h
+	CatalogInfoTest.h
 	CompositeValidatorTest.h
 	ConfigServiceTest.h
 	DataServiceTest.h
@@ -251,6 +261,7 @@ set ( TEST_FILES
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
 	FacilitiesTest.h
+	FileDescriptorTest.h
 	FileValidatorTest.h
 	FilterChannelTest.h
 	FilteredTimeSeriesPropertyTest.h
@@ -272,8 +283,8 @@ set ( TEST_FILES
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
 	MandatoryValidatorTest.h
-	MaterialTest.h
 	MaskedPropertyTest.h
+	MaterialTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h
@@ -284,6 +295,7 @@ set ( TEST_FILES
 	NDPseudoRandomNumberGeneratorTest.h
 	NDRandomNumberGeneratorTest.h
 	NeutronAtomTest.h
+	NexusDescriptorTest.h
 	NullValidatorTest.h
 	ProgressBaseTest.h
 	ProgressTextTest.h
@@ -296,6 +308,7 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
+	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
@@ -386,8 +399,7 @@ set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
-set ( PYTHONALG_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/PythonAlgorithms" ) # deprecated
-set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/plugins" )
+set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
 SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
@@ -461,8 +473,7 @@ else ()
 endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
-set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs ) # deprecated
-set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python;${PYTHONALG_DIRS}" )
+set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( DATADIRS "" )
 SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
 

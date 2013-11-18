@@ -126,7 +126,14 @@ public:
     TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(), 12345);
     // Bin count = density of the box / 1e6
     double BinCount = ws->getPeak(0).getBinCount();
-    TS_ASSERT_DELTA( BinCount, (histo ? 0.0102 : 0.213623), 0.001);
+    if (histo)
+    {
+      TS_ASSERT_DELTA( BinCount, 0.0102, 0.001);
+    }
+    else
+    {
+      TS_ASSERT_DELTA( BinCount, 7., 001000.);
+    }
 
     if (MaxPeaks > 1)
     {

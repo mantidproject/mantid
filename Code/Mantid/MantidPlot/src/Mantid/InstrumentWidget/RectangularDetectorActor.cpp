@@ -133,26 +133,20 @@ void RectangularDetectorActor::draw(bool picking)const
  * @param visitor :: A visitor.
  *
  */
-bool RectangularDetectorActor::accept(GLActorVisitor& visitor)
+bool RectangularDetectorActor::accept(GLActorVisitor& visitor, VisitorAcceptRule)
 {
-  if (visitor.visit(this)) return true;
+    return visitor.visit(this);
+}
 
-  // ID of the parent RectangularDetector
-  Mantid::Geometry::ComponentID thisID = this->m_id;
+bool RectangularDetectorActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule) const
+{
+    return visitor.visit(this);
+}
 
-  SetVisibleComponentVisitor* svv = dynamic_cast<SetVisibleComponentVisitor*>(&visitor);
-  if (svv)
-  {
-    Mantid::Geometry::ComponentID id = svv->getID();
-    // We are pointing to the whole RectangularDetector
-    if (id == thisID)
-    {
-      setVisibility(true);
-      return true;
-    }
-
-    // Is the ID passed the id of one of the pixels of this RectangularDetector?
-    // Find it and go UP the hierarchy to find out.
+bool RectangularDetectorActor::isChildDetector(const ComponentID &id) const
+{
+    // ID of the parent RectangularDetector
+    Mantid::Geometry::ComponentID thisID = this->m_id;
 
     // Get the component object
     IComponent_const_sptr comp = m_instrActor.getInstrument()->getComponentByID(id);
@@ -164,7 +158,6 @@ bool RectangularDetectorActor::accept(GLActorVisitor& visitor)
       {
         if (parent1->getComponentID() == thisID)
         {
-          setVisibility(true);
           return true;
         }
         // Go to grandparent
@@ -173,14 +166,12 @@ bool RectangularDetectorActor::accept(GLActorVisitor& visitor)
         {
           if (parent2->getComponentID() == thisID)
           {
-            setVisibility(true);
             return true;
           }
         } // valid grandparent
       } // valid parent
     } // valid component
-  }
-  return false;
+    return false;
 }
 
 //------------------------------------------------------------------------------------------------

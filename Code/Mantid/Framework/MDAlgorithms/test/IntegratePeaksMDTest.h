@@ -20,6 +20,7 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
 #include <iomanip>
 #include <iostream>
 
@@ -49,7 +50,7 @@ public:
   /** Run the IntegratePeaksMD with the given peak radius integration param */
   static void doRun(double PeakRadius, double BackgroundRadius,
       std::string OutputWorkspace = "IntegratePeaksMDTest_peaks",
-      double BackgroundStartRadius = 0.0, bool edge = true)
+      double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false, std::string fnct = "NoFit")
   {
     IntegratePeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -62,6 +63,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("IntegrateIfOnEdge", edge ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMDTest_peaks" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Cylinder", cyl ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("CylinderLength", 4.0 ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PercentBackground", 20.0 ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ProfileFunction", fnct ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("IntegrationOption", "Sum" ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
   }
@@ -106,6 +112,7 @@ public:
 
     MDEventWorkspace3Lean::sptr mdews =
         AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMDTest_MDEWS");
+    mdews->setCoordinateSystem(Mantid::API::HKL);
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
@@ -120,6 +127,36 @@ public:
     TS_ASSERT_EQUALS( peakWS0->getPeak(0).getIntensity(), 0.0);
     AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS0);
 
+    // ------------- Integrating with cylinder ------------------------
+    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true);
+
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    std::string fnct = "Gaussian";
+    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+    // More accurate integration changed values
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    Poco::File("IntegratePeaksMDTest_MDEWSGaussian.dat").remove();
+    fnct = "BackToBackExponential";
+    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 0.2);
+    Poco::File("IntegratePeaksMDTest_MDEWSBackToBackExponential.dat").remove();
+    /*fnct = "ConvolutionExpGaussian";
+    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);*/
     // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge false------------------------
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,false);
 
@@ -127,6 +164,7 @@ public:
 
     // Error is also calculated
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
 
     // --- Make a fake PeaksWorkspace ---
@@ -322,6 +360,10 @@ public:
     // Add a uniform, random background.
     FrameworkManager::Instance().exec("FakeMDEventData", 4,
         "InputWorkspace", "IntegratePeaksMDTest_MDEWS", "UniformParams", "100000");
+
+    MDEventWorkspace3Lean::sptr mdews =
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMDTest_MDEWS");
+    mdews->setCoordinateSystem(Mantid::API::HKL);
 
 
     // Make a fake instrument - doesn't matter, we won't use it really

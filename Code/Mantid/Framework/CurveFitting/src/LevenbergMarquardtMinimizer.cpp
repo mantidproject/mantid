@@ -24,6 +24,13 @@ DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer,Levenberg-Marquardt)
 // Get a reference to the logger
 Kernel::Logger& LevenbergMarquardtMinimizer::g_log = Kernel::Logger::get("LevenbergMarquardtMinimizer");
 
+LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer() 
+  : m_data(NULL), gslContainer(), m_gslSolver(NULL),m_function(), m_absError(1e-4), m_relError(1e-4)
+{
+  declareProperty("AbsError", m_absError, "Absolute error allowed for parameters - a stopping parameter in success.");
+  declareProperty("RelError", m_relError, "Relative error allowed for parameters - a stopping parameter in success.");
+}
+
 void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunction)
 {
   // set-up GSL container to be used with GSL simplex algorithm
@@ -77,6 +84,9 @@ LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer()
 
 bool LevenbergMarquardtMinimizer::iterate() 
 {
+  m_absError = getProperty("AbsError");
+  m_relError = getProperty("RelError");
+
   int retVal = gsl_multifit_fdfsolver_iterate(m_gslSolver);
 
   // From experience it is found that gsl_multifit_fdfsolver_iterate occasionally get
@@ -113,7 +123,7 @@ bool LevenbergMarquardtMinimizer::iterate()
 
 int LevenbergMarquardtMinimizer::hasConverged()
 {
-  return gsl_multifit_test_delta(m_gslSolver->dx, m_gslSolver->x, 1e-4, 1e-4);
+  return gsl_multifit_test_delta(m_gslSolver->dx, m_gslSolver->x, m_absError, m_relError);
 }
 
 double LevenbergMarquardtMinimizer::costFunctionVal()

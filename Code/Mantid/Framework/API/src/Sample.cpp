@@ -430,6 +430,16 @@ namespace Mantid
       return version;
     }
 
-
+    /**
+     * Delete the oriented lattice.
+     */
+    void Sample::clearOrientedLattice()
+    {
+      if(m_lattice)
+      {
+        delete m_lattice;
+        m_lattice = NULL;
+      }
+    }
   }
 }

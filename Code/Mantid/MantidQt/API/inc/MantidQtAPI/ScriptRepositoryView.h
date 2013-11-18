@@ -45,6 +45,7 @@ namespace API
   {
     Q_OBJECT
 
+      /// Delegate to show the icons Download and Upload
     class RepoDelegate : public QStyledItemDelegate
     {
     public:
@@ -59,11 +60,22 @@ namespace API
                        const QModelIndex &index);
       QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const ;
     };
-    
+    /// Delegate to show the checkbox for configuring the auto update
     class CheckBoxDelegate : public QStyledItemDelegate
     {
     public:
       CheckBoxDelegate(QObject * parent = 0); 
+      void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+      bool editorEvent(QEvent *event,
+                       QAbstractItemModel *model,
+                       const QStyleOptionViewItem &option,
+                       const QModelIndex &index);
+    };
+    /// Delegate to show the icon to remove the entry from the local and central repository
+    class RemoveEntryDelegate : public QStyledItemDelegate
+    {
+    public:
+      RemoveEntryDelegate(QObject * parent = 0); 
       void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
       bool editorEvent(QEvent *event,
                        QAbstractItemModel *model,
@@ -85,7 +97,7 @@ namespace API
     // allow to interact with the cells, in order to update the description of the files
     void cell_activated(const QModelIndex & ); 
     void updateModel();
-    void 	currentChanged ( const QModelIndex & current );
+    void currentChanged ( const QModelIndex & current );
     void helpClicked();
     void openFolderLink(QString);
 
