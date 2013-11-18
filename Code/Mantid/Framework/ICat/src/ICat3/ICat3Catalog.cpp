@@ -117,6 +117,13 @@ namespace Mantid
       helper.doAdvancedSearch(inputs,ws_sptr);
     }
 
+    /**
+     * Modifies the search query to obtain the number
+     * of investigations to be returned by the catalog.
+     * @return The number of investigations returned by the search performed.
+     */
+    long ICat3Catalog::getNumberOfSearchResults() {}
+
     /// keep alive
     void ICat3Catalog::keepAlive()
     {

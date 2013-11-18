@@ -274,6 +274,13 @@ namespace Mantid
     }
 
     /**
+     * Modifies the search query to obtain the number
+     * of investigations to be returned by the catalog.
+     * @return The number of investigations returned by the search performed.
+     */
+    long ICat4Catalog::getNumberOfSearchResults() {}
+
+    /**
      * Returns the logged in user's investigations data.
      * @param outputws :: Pointer to table workspace that stores the data.
      */

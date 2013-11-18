@@ -46,6 +46,8 @@ namespace Mantid
       virtual void logout();
       /// search isis data
       virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr);
+      /// Obtain the number of results returned by the search method.
+      virtual long getNumberOfSearchResults();
       /// logged in user's investigations search
       virtual void myData(Mantid::API::ITableWorkspace_sptr& mydataws_sptr);
       /// get datasets

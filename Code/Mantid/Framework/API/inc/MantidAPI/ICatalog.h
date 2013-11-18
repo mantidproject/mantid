@@ -51,6 +51,8 @@ public:
   virtual void logout()=0;
   ///Search investigations
   virtual void search(const ICat::CatalogSearchParam&,ITableWorkspace_sptr &)=0;
+  /// Obtain the number of results returned by the search method.
+  virtual long getNumberOfSearchResults()=0;
   /// search logged in users data
   virtual void myData(ITableWorkspace_sptr &)=0;
   /// get datasets.
