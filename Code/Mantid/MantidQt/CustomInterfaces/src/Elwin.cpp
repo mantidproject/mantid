@@ -88,8 +88,8 @@ namespace IDA
     m_elwDblMng->setValue(m_elwProp["R1S"], -0.02);
     m_elwDblMng->setValue(m_elwProp["R1E"], 0.02);
 
-    m_elwDblMng->setValue(m_elwProp["R2S"], -0.02);
-    m_elwDblMng->setValue(m_elwProp["R2E"], -0.17);
+    m_elwDblMng->setValue(m_elwProp["R2S"], -0.24);
+    m_elwDblMng->setValue(m_elwProp["R2E"], -0.22);
   }
 
   void Elwin::run()
