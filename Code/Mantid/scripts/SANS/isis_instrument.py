@@ -593,7 +593,7 @@ class ISISInstrument(instrument.Instrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:                
-            run_num = int(re.findall(r'\d+',run_string)[-1])
+            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
 
         if isSample:
             self.set_up_for_run(run_num)
