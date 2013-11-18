@@ -147,7 +147,10 @@ void initializeAttributeList(vector<string> &attrs)
 }
 
 SCDPanelErrors::SCDPanelErrors() :
-  API::ParamFunction(), IFunction1D()
+  API::ParamFunction(), IFunction1D(),
+  tolerance(.6),
+  m_startX(-1),
+  m_endX(-1)
 {
   initializeAttributeList(m_attrNames);
 
@@ -155,9 +158,6 @@ SCDPanelErrors::SCDPanelErrors() :
       = startX_set = NGroups_set  = false;
 
   // g_log.setLevel(7);
-
-  tolerance = .6;
-  startX = endX = -1;
 
   B0 = DblMatrix(3, 3);
 
@@ -226,9 +226,9 @@ IFunction::Attribute SCDPanelErrors::getAttribute(const std::string &attName) co
       return Attribute(0);
   }
   else if (attName == X_START)
-    return Attribute(startX);
+    return Attribute(static_cast<int>(m_startX));
   else if (attName == X_END)
-    return Attribute(endX);
+    return Attribute(static_cast<int>(m_endX));
 
 
   throw std::invalid_argument("Not a valid attribute name \"" + attName + "\"");
@@ -335,22 +335,17 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double
     throw std::invalid_argument("Not enough peaks to fit ");
   }
 
-  if ((startX >  (int)nData - 1) || (endX > (int) nData - 1))
+  if ((m_startX >  (int)nData - 1) || (m_endX > (int) nData - 1))
   {
     throw std::invalid_argument(X_START + " and " + X_END +" attributes are out of range");
   }
 
-  size_t StartX ;
-
-  if( startX < 0)
-    StartX = (size_t)0;
-  else
-    StartX= (size_t)startX;
-
-  size_t EndX = endX;
-
-  if (endX < 0)
-    EndX =  nData - 1;
+  size_t StartX = 0;
+  if (m_startX > 0)
+    StartX = static_cast<size_t>(m_startX);
+  size_t EndX = nData - 1;
+  if (m_endX > static_cast<int>(StartX))
+    EndX = static_cast<size_t>(m_endX);
 
   if (xValues[StartX] != floor(xValues[StartX]) )
   {
@@ -491,25 +486,18 @@ Peak SCDPanelErrors::createNewPeak(const API::IPeak & peak_old,
 void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t nData) const
 {
   g_log.debug()<<"Start function 1D\n";
-  size_t StartX;
-  size_t EndX;
+  if (nData == 0)
+    return;
+
+  size_t StartX = 0;
+  if (m_startX > 0)
+    StartX = static_cast<size_t>(m_startX);
+  size_t EndX = nData - 1;
+  if (m_endX > static_cast<int>(StartX))
+    EndX = static_cast<size_t>(m_endX);
+
   V3D panelCenter_old;
   V3D panelCenterNew;
-  if (startX < 0 || endX < 0)
-  {
-    StartX = 0;
-    EndX =  nData - 1;
-  }else
-  {
-    StartX = (size_t) startX;
-    EndX =(size_t) endX;
-    if( EndX >=nData  || EndX < StartX )
-      EndX = nData -1;
-  }
-
-
-  if (nData <= (size_t) 0)
-    return;
 
   double r = checkForNonsenseParameters();
 
@@ -780,13 +768,21 @@ void updateDerivResult(PeaksWorkspace_sptr peaks,
 
 void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
 {
+  if (nData <= 0)
+    return;
+
   size_t StartPos = 2;
 
   size_t L0param = parameterIndex("l0");
   size_t T0param = parameterIndex("t0");
 
-  size_t StartX;
-  size_t EndX;
+  size_t StartX = 0;
+  if (m_startX > 0)
+    StartX = static_cast<size_t>(m_startX);
+  size_t EndX = nData - 1;
+  if (m_endX > static_cast<int>(StartX))
+    EndX = static_cast<size_t>(m_endX);
+
   double rr;
   vector<int> row, col, peakIndx, NPanelrows, NPanelcols;
   vector<V3D> pos, xvec, yvec, hkl, qlab, qXtal;
@@ -804,27 +800,12 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   vector<string> Groups;
 
   CheckSizetMax(StartPos, L0param, T0param, "Start deriv");
-  if (nData <= 0)
-    return;
   // TODO error check
 //  if (NLatticeParametersSet < (int) nAttributes() - 2)
 //  {
 //    g_log.error("Not all lattice parameters have been set");
 //    throw std::invalid_argument("Not all lattice parameters have been set");
 //  }
-
-  if (startX < 0 || endX < 0 || endX < startX)
-  {
-    StartX = 0;
-    EndX = nData - 1;
-  }
-  else
-  {
-    StartX = (size_t) startX;
-    EndX = (size_t) endX;
-    if (EndX >= nData || EndX < StartX)
-      EndX = nData - 1;
-  }
 
   rr = checkForNonsenseParameters();
 
@@ -1569,12 +1550,12 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
   }
   else if (attName == X_START)
   {
-    startX =(size_t)value.asInt();
+    m_startX = value.asInt();
     startX_set = true;
   }
   else if (attName == "endX")
   {
-    endX = (size_t)value.asInt();
+    m_endX =  value.asInt();
     endX_set = true;
   }
   else

@@ -183,7 +183,8 @@ private:
   Kernel::DblMatrix B0;
   std::string BankNames;
 
-  int startX, endX; //start and end indicies in xValues array in functionMW. -1 use all.
+  int m_startX; ///<start index in xValues array in functionMW. -1 use all.
+  int m_endX;   ///<end index in xValues array in functionMW. -1 use all.
   static Kernel::Logger & g_log;
 
   std::vector<std::string> m_attrNames;
