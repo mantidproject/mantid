@@ -50,7 +50,8 @@ public:
   /// logout from catalog
   virtual void logout()=0;
   ///Search investigations
-  virtual void search(const ICat::CatalogSearchParam&,ITableWorkspace_sptr &)=0;
+  virtual void search(const ICat::CatalogSearchParam&,ITableWorkspace_sptr &,
+      const int &offset = -1,const int &limit = -1)=0;
   /// Obtain the number of results returned by the search method.
   virtual long getNumberOfSearchResults()=0;
   /// search logged in users data

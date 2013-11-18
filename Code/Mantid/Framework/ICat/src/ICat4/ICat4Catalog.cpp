@@ -240,8 +240,11 @@ namespace Mantid
      * Searches for the relevant data based on user input.
      * @param inputs   :: reference to a class contains search inputs
      * @param outputws :: shared pointer to search results workspace
+     * @param offset   :: skip this many rows and start returning rows from this point.
+     * @param limit    :: limit the number of rows returned by the query.
      */
-    void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws)
+    void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws,
+        const int &offset, const int &limit)
     {
       // Obtain the query from user input.
       std::string query = getSearchQuery(inputs);

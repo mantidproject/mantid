@@ -46,7 +46,8 @@ namespace Mantid
         /// Log the user out of the catalog system.
         virtual void logout();
         /// Search the catalog for data.
-        virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws);
+        virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws,
+            const int &offset, const int &limit);
         /// Obtain the number of results returned by the search method.
         virtual long getNumberOfSearchResults();
         /// Show the logged in user's investigations search results.

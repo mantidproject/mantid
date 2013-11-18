@@ -110,8 +110,11 @@ namespace Mantid
     /**This method method does the search for investigations
      *@param inputs :: reference to a class conatains search inputs
      *@param ws_sptr :: -shared pointer to search results workspace
+     *@param offset  :: skip this many rows and start returning rows from this point.
+     *@param limit   :: limit the number of rows returned by the query.
      */
-    void ICat3Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr)
+    void ICat3Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr,
+        const int &offset, const int &limit)
     {
       CICatHelper helper;
       helper.doAdvancedSearch(inputs,ws_sptr);
