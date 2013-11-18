@@ -38,7 +38,7 @@ TitlePicker::TitlePicker(QwtPlot *plot):
 	QObject(plot)
 {
     d_selected = false;
-	title = (QwtTextLabel *)plot->titleLabel();
+	title = plot->titleLabel();
 	title->setFocusPolicy(Qt::StrongFocus);
 	if (title)
 		title->installEventFilter(this);
@@ -94,5 +94,5 @@ void TitlePicker::setSelected(bool select)
     else
         text.setBackgroundPen(QPen(Qt::NoPen));
 
-    ((QwtPlot *)parent())->setTitle(text);
+    (static_cast<QwtPlot *>(parent()))->setTitle(text);
 }

@@ -1292,8 +1292,6 @@ void ApplicationWindow::initMainMenu()
   icat = new QMenu(this);
   icat->setObjectName("CatalogMenu");
   icat->addAction(actionCatalogLogin);//Login menu item
-  icat->addAction(actionCatalogSearch); // ICAT GUI menu item
-  icat->addAction(actionCatalogLogout);//logout menu item
   disableActions();
 }
 
@@ -2972,7 +2970,7 @@ void ApplicationWindow::setPreferences(Graph* g)
       g->enableAxis(i, show);
       if (show)
       {
-        ScaleDraw *sd = (ScaleDraw *)g->plotWidget()->axisScaleDraw (i);
+        ScaleDraw *sd = static_cast<ScaleDraw *>(g->plotWidget()->axisScaleDraw (i));
         sd->enableComponent(QwtAbstractScaleDraw::Labels, d_show_axes_labels[i]);
         sd->setSpacing(d_graph_tick_labels_dist);
         if (i == QwtPlot::yRight && !d_show_axes_labels[i])
@@ -11665,8 +11663,8 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
 
       int plotType = curve[3].toInt();
       Table *w = app->table(curve[2]);
-      PlotCurve *c = NULL;
       if (w){
+        PlotCurve *c = NULL;
         if(plotType == Graph::VectXYXY || plotType == Graph::VectXYAM){
           QStringList colsList;
           colsList<<curve[2]; colsList<<curve[20]; colsList<<curve[21];
@@ -17442,7 +17440,12 @@ void ApplicationWindow::panOnPlot()
 /// Handler for ICat Login Menu
 void ApplicationWindow::CatalogLogin()
 {
-  mantidUI->executeAlgorithm("CatalogLogin",1);
+  // Executes the catalog login algorithm, and returns true if user can login.
+  if (mantidUI->isValidCatalogLogin())
+  {
+    icat->addAction(actionCatalogSearch);
+    icat->addAction(actionCatalogLogout);
+  }
 }
 
 void ApplicationWindow::CatalogSearch()
@@ -17460,6 +17463,14 @@ void ApplicationWindow::CatalogSearch()
   }
 }
 
+void ApplicationWindow::CatalogLogout()
+{
+  auto logout = mantidUI->createAlgorithm("CatalogLogout");
+  mantidUI->executeAlgorithmAsync(logout);
+  icat->removeAction(actionCatalogSearch);
+  icat->removeAction(actionCatalogLogout);
+}
+
 void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interface)
 {   
   QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(),
@@ -17470,12 +17481,6 @@ void ApplicationWindow::setGeometry(MdiSubWindow* usr_win,QWidget* user_interfac
   usr_win->setGeometry(iface_geom);
   usr_win->setName(user_interface->windowTitle());
   addMdiSubWindow(usr_win);
-}
-
-void ApplicationWindow::CatalogLogout()
-{
-  auto logout = mantidUI->createAlgorithm("CatalogLogout");
-  mantidUI->executeAlgorithmAsync(logout);
 }
 
 /**

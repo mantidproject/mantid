@@ -139,7 +139,7 @@ def ReadWidthFile(readWidth,widthFile,numSampleGroups,Verbose):
 # QLines programs
 def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Save):
 	StartTime(program)
-
+	
 	#expand fit options
 	elastic, background, width, resnorm = Fit
 	
@@ -249,6 +249,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 		numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin]
 		rscl = 1.0
 		reals = [efix, theta[m], rscl, bnorm]
+
 		if prog == 'QLr':
 			nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
 												   Xdat,Xb,Yb,Wy,We,dtn,xsc,
@@ -361,6 +362,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 		if Verbose:
 			logger.notice('Output fit file created : ' + fit_path)
 			logger.notice('Output paramter file created : ' + out_path)
+
 	EndTime(program)
 
 
@@ -759,6 +761,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 		if Verbose:
 			logger.notice('Output file for Fit : ' + fpath)
 			logger.notice('Output file for Contours : ' + cpath)
+
 	if (Plot != 'None'):
 		QuestPlot(fname,Plot)
 	EndTime('Quest')
@@ -840,6 +843,7 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	group = fname + '_ResNorm_Intensity,'+ fname + '_ResNorm_Stretch'
 	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_ResNorm')
 	GroupWorkspaces(InputWorkspaces='Data,Fit',OutputWorkspace=fname+'_ResNorm_Fit')
+	
 	if Save:
 		par_path = os.path.join(workdir,fname+'_ResNorm.nxs')
 		SaveNexusProcessed(InputWorkspace=fname+'_ResNorm', Filename=par_path)
@@ -848,6 +852,7 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 		if Verbose:
 			logger.notice('Parameter file created : ' + par_path)
 			logger.notice('Fit file created : ' + fit_path)
+
 	if (Plot != 'None'):
 		ResNormPlot(fname,Plot)
 	EndTime('ResNorm')

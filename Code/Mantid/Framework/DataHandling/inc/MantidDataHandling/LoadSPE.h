@@ -66,7 +66,7 @@ private:
   // Execution code
   void exec();
 
-  void readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, int index);
+  void readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, size_t index);
   void reportFormatError(const std::string& what);
 
   std::string m_filename; ///< The file to load

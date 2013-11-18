@@ -70,6 +70,12 @@ namespace MantidQt
       virtual bool positionOnly() const = 0;
       /// Get radius or effective radius of view items.
       virtual double getRadius() const = 0;
+      /// Determine if the background is shown.
+      virtual bool isBackgroundShown() const = 0;
+      /// Get the current background colour
+      virtual QColor getBackgroundColour() const = 0;
+      /// Get the current foreground colour
+      virtual QColor getForegroundColour() const = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

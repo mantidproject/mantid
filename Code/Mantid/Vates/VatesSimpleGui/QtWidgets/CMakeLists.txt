@@ -3,31 +3,22 @@ project( MantidVatesSimpleGuiQtWidgets )
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiQtWidgets/AxisInformation.h
-  inc/MantidVatesSimpleGuiQtWidgets/AxisInteractor.h
   inc/MantidVatesSimpleGuiQtWidgets/GeometryParser.h
-  inc/MantidVatesSimpleGuiQtWidgets/Indicator.h
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
   inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h
-  inc/MantidVatesSimpleGuiQtWidgets/ScalePicker.h
   inc/MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h
 )
 
 set( SOURCE_FILES
   src/AxisInformation.cpp
-  src/AxisInteractor.cpp
   src/GeometryParser.cpp
-  src/Indicator.cpp
   src/ModeControlWidget.cpp
-  src/ScalePicker.cpp
   src/RotationPointDialog.cpp
 )
 
 # These are the headers to be preprocessed using Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SOURCES
-  inc/MantidVatesSimpleGuiQtWidgets/AxisInteractor.h
-  inc/MantidVatesSimpleGuiQtWidgets/Indicator.h
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
-  inc/MantidVatesSimpleGuiQtWidgets/ScalePicker.h
   inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h
 )
 

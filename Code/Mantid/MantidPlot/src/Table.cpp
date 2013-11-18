@@ -1039,13 +1039,12 @@ int Table::selectedColsNumber()
 
 QVarLengthArray<double> Table::col(int ycol)
 {
-  int i;
   int rows=d_table->numRows();
   int cols=d_table->numCols();
   QVarLengthArray<double> Y(rows);
   if (ycol<=cols)
   {
-    for (i=0;i<rows;i++)
+    for (int i=0;i<rows;i++)
       Y[i]=d_table->text(i,ycol).toDouble();
   }
   return Y;
@@ -1556,7 +1555,7 @@ void Table::normalizeCol(int col)
 
 void Table::sortColumnsDialog()
 {
-  SortDialog *sortd = new SortDialog((QWidget*)applicationWindow());
+  SortDialog *sortd = new SortDialog(applicationWindow());
   sortd->setAttribute(Qt::WA_DeleteOnClose);
   connect (sortd, SIGNAL(sort(int, int, const QString&)), this, SLOT(sortColumns(int, int, const QString&)));
   sortd->insertColumnsList(selectedColumns());
@@ -1565,7 +1564,7 @@ void Table::sortColumnsDialog()
 
 void Table::sortTableDialog()
 {
-  SortDialog *sortd = new SortDialog((QWidget*)applicationWindow());
+  SortDialog *sortd = new SortDialog(applicationWindow());
   sortd->setAttribute(Qt::WA_DeleteOnClose);
   connect (sortd, SIGNAL(sort(int, int, const QString&)), this, SLOT(sort(int, int, const QString&)));
   sortd->insertColumnsList(colNames());
@@ -2456,7 +2455,7 @@ void Table::importASCII(const QString &fname, const QString &sep, int ignoredLin
     setHeaderColType();
 
     int steps = rows/100 + 1;
-    QProgressDialog progress((QWidget *)applicationWindow());
+    QProgressDialog progress(applicationWindow());
     progress.setWindowTitle(tr("MantidPlot") + " - " + tr("Reading file..."));
     progress.setLabelText(fname);
     progress.setActiveWindow();
@@ -2712,7 +2711,7 @@ bool Table::eventFilter(QObject *object, QEvent *e)
 void Table::customEvent(QEvent *e)
 {
   if (e->type() == SCRIPTING_CHANGE_EVENT)
-    scriptingChangeEvent((ScriptingChangeEvent*)e);
+    scriptingChangeEvent(static_cast<ScriptingChangeEvent*>(e));
 }
 
 QString& Table::getSpecifications()

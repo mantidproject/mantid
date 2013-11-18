@@ -64,13 +64,12 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_simpleDisplay(NULL),
   m_workspaceName(wsName),
   m_instrumentActor(NULL),
+  m_surfaceType(FULL3D),
+  m_savedialog_dir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
   mViewChanged(false), 
   m_blocked(false),
   m_instrumentDisplayContextMenuOn(false)
 {
-  m_surfaceType = FULL3D;
-  m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-
   setFocusPolicy(Qt::StrongFocus);
   QVBoxLayout* mainLayout = new QVBoxLayout(this);
   QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);

@@ -62,13 +62,10 @@ namespace CurveFitting
     }
       
     // 2. Calculate
-    double lambda,theta0,dthet,dthetr,dt,bgd,scalefac,pthet;
-    double tl,tlc,con;
     std::vector<double> dn(m_nlayer+2);
     std::vector<double> rnbn(m_nlayer+2);
     std::vector<double> zbb(m_nlayer+2);
     int nit=21;
-    int i;
     std::vector<double> cy(nData);
 
     std::complex<double> c0(0.0, 0.0);
@@ -103,29 +100,21 @@ namespace CurveFitting
     std::complex<double> a321(0.0,0.0);
     std::complex<double> a322(0.0,0.0);
 
-    theta0=coeff[0]*PI/180.0;
-    scalefac=coeff[1];
+    double theta0=coeff[0]*PI/180.0;
+    double scalefac=coeff[1];
     rnbn[0]=coeff[2];
     rnbn[m_nlayer+1]=coeff[3];
     zbb[0]=coeff[4]*coeff[4];
     zbb[m_nlayer+1]=0.0;
-    bgd=coeff[5];
-    pthet=coeff[6];
+    double bgd=coeff[5];
+    double pthet=coeff[6];
 
-/*    g_log.information() << "Theta0="<< theta0 << "\n";
-    g_log.information() << "scalefac="<< scalefac << "\n";
-    g_log.information() << "rnbn[0]="<< rnbn[0] << "\n";
-    g_log.information() << "rnbn[m_nlayer+1]="<< rnbn[m_nlayer+1] << "\n";
-    g_log.information() << "zbb[0]="<< zbb[0] << "\n";
-    g_log.information() << "bgd="<< bgd << "\n";
-    g_log.information() << "pthet="<< pthet << "\n";
-*/
     dn[0]=0.0;
     dn[m_nlayer+1]=0.0;
 
     if(m_nlayer>0)
     {
-      for (i=0;i<m_nlayer;++i)
+      for (int i=0;i<m_nlayer;++i)
       {
          rnbn[i+1]=coeff[7+i*3];
          dn[i+1]=coeff[8+i*3];
@@ -138,13 +127,13 @@ namespace CurveFitting
     std::vector<double> xnit(nit1);
     int ii,k;
 
-    dthet=theta0*pthet/100.0;
+    double dthet=theta0*pthet/100.0;
     dthet=dthet/2.35;
-    dthetr=dthet*2.51;
+    double dthetr=dthet*2.51;
     tmax=theta0+dthet*3;
     tmin=theta0-dthet*3;
-    dt=(tmax-tmin)/nit;
-    for (i=0;i<nit1;i++)
+    double dt=(tmax-tmin)/nit;
+    for (int i=0;i<nit1;i++)
     {
        xnit[i]=tmin+dt*i;
     }
@@ -153,11 +142,11 @@ namespace CurveFitting
 
     for (size_t j = 0; j < nData; ++j)
     {
-      lambda=4*PI*sin(theta0)/xValues[j];
+      double lambda=4*PI*sin(theta0)/xValues[j];
       cy[j]=0.0;
-      tl=lambda*lambda;
-      tlc=8.0*PI*PI/tl;
-      con=tl/(2.0*PI);
+      double tl=lambda*lambda;
+      double tlc=8.0*PI*PI/tl;
+      double con=tl/(2.0*PI);
 
       for (k=0; k<m_nlayer+2; k++)
       {
@@ -171,7 +160,7 @@ namespace CurveFitting
          st0=sin(x);
          pfn[0]=rnfn[0]*st0;
 
-         for (i=1;i<m_nlayer+1;i++)
+         for (int i=1;i<m_nlayer+1;i++)
          {
             rnf=(rnfn[i]*rnfn[i])*cr;
             rnf1=(rnfn[0]*rnfn[0])*cr;
@@ -182,7 +171,7 @@ namespace CurveFitting
          rnf1=(rnfn[0]*rnfn[0])*cr;
          pfn[m_nlayer+1]=sqrt(rnf-(rnf1*ct0*ct0));
 
-         for (i=1;i<m_nlayer+1;i++)
+         for (int i=1;i<m_nlayer+1;i++)
          {
            betan[i]=2.0*PI*dn[i]*pfn[i]/lambda;
          }
@@ -199,7 +188,7 @@ namespace CurveFitting
          a121=a112;
          a122=cr;
          
-         for (i=1;i<m_nlayer+1;i++)
+         for (int i=1;i<m_nlayer+1;i++)
          {
            btm=betan[i]*ci;
            btm1=-1.0*betan[i]*ci;

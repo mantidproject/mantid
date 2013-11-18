@@ -163,7 +163,7 @@ namespace MantidQt
 				    }
 				  }
 				}
-				catch(std::runtime_error e)
+				catch(std::runtime_error& e)
 				{
 					emit showMessageBox(e.what());
 				}
@@ -188,7 +188,6 @@ namespace MantidQt
 			MatrixWorkspace_sptr idfWs;
 
     	// Find the file path of the insturment file
-			std::string inst = instrument.toStdString();
     	std::string idfPath = ExperimentInfo::getInstrumentFilename(instrument.toStdString());
     	if(idfPath.empty())
     	{
@@ -209,7 +208,7 @@ namespace MantidQt
 
 	      idfWs = loadEmptyInst->getProperty("OutputWorkspace");
     	}
-    	catch(std::runtime_error ex)
+    	catch(std::runtime_error& ex)
     	{
     		throw std::runtime_error("Could not load instrument file for instrument" + instrument.toStdString()
     					+ "\n " + ex.what());

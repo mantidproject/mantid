@@ -1286,7 +1286,7 @@ bool MantidMatrixModel::checkMontorCache(int row) const
         }
         m_monCache.insert(row, isMon);
       }
-      catch (std::exception e)
+      catch (std::exception&)
       {
         m_monCache.insert(row,false);
         isMon = false;

@@ -288,6 +288,7 @@ set ( TEST_FILES
 	LoadEventPreNexusTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSSTest.h
+	LoadIDFFromNexusTest.h
 	LoadILLSANSTest.h
 	LoadILLTest.h
 	LoadISISNexusTest.h

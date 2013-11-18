@@ -89,7 +89,7 @@ SelectionMoveResizer::~SelectionMoveResizer()
 
 void SelectionMoveResizer::add(LegendWidget *target)
 {
-	if ((QWidget*)target->parentWidget() != parent())
+	if (target->parentWidget() != parent())
 		return;
 	d_legend_markers << target;
 	target->installEventFilter(this);
@@ -105,7 +105,7 @@ void SelectionMoveResizer::add(LegendWidget *target)
 
 void SelectionMoveResizer::add(ArrowMarker *target)
 {
-	if ((QWidget*)target->plot()->canvas() != parent())
+	if (target->plot()->canvas() != parent())
 		return;
 	d_line_markers << target;
 
@@ -118,7 +118,7 @@ void SelectionMoveResizer::add(ArrowMarker *target)
 }
 void SelectionMoveResizer::add(ImageMarker *target)
 {
-	if ((QWidget*)target->plot()->canvas() != parent())
+	if (target->plot()->canvas() != parent())
 		return;
 	d_image_markers << target;
 
@@ -148,7 +148,7 @@ void SelectionMoveResizer::add(QWidget *target)
 
 QRect SelectionMoveResizer::boundingRectOf(QwtPlotMarker *target) const
 {
-	return ((PlotEnrichement *)target)->rect();
+	return (static_cast<PlotEnrichement *>(target))->rect();
 }
 
 int SelectionMoveResizer::removeAll(LegendWidget *target)
@@ -313,7 +313,7 @@ void SelectionMoveResizer::operateOnTargets()
             f.setPointSize(f.pointSize() * new_rect.width() * new_rect.height()/(i->rect().width() * i->rect().height()));
             i->setFont(f);
             i->repaint();
-            ((Graph *)i->parent()->parent())->notifyFontChange(f);
+            (static_cast<Graph *>(i->parent()->parent()))->notifyFontChange(f);
 		}
 	}
 
@@ -500,12 +500,12 @@ bool SelectionMoveResizer::eventFilter(QObject *o, QEvent *e)
 {
 	switch (e->type()) {
 		case QEvent::Resize:
-			if((QWidget*)o == parentWidget())
+			if(static_cast<QWidget*>(o) == parentWidget())
 				setGeometry(0, 0, parentWidget()->width(), parentWidget()->height());
 			recalcBoundingRect();
 			return false;
 		case QEvent::Move:
-			if((QWidget*)o != parentWidget())
+			if(static_cast<QWidget*>(o) != parentWidget())
 				recalcBoundingRect();
 			return false;
 		default:
@@ -515,10 +515,10 @@ bool SelectionMoveResizer::eventFilter(QObject *o, QEvent *e)
 
 void SelectionMoveResizer::removeWidget(QObject* w)
 {
-	removeAll((QWidget*) w);
+	removeAll(static_cast<QWidget*>(w));
 }
 
 void SelectionMoveResizer::removeLegend(QObject* w)
 {
-	removeAll((LegendWidget*) w);
+	removeAll(static_cast<LegendWidget*>(w));
 }

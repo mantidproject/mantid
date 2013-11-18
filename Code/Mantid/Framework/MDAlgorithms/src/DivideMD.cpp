@@ -119,9 +119,9 @@ namespace MDAlgorithms
     for (size_t i=0; i<boxes.size(); i++)
     {
       MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
-      size_t ic(0);
       if (box)
       {
+        size_t ic(0);
         typename std::vector<MDE> & events = box->getEvents();
         typename std::vector<MDE>::iterator it = events.begin();
         typename std::vector<MDE>::iterator it_end = events.end();

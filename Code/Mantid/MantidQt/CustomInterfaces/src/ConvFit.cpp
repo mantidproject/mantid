@@ -795,8 +795,10 @@ namespace IDA
 
     QString ftype = fitTypeString();
     QString bg = backgroundString();
+    bool useTies = uiForm().confit_ckTieCentres->isChecked();
+    QString ties = (useTies ? "True" : "False");
 
-    Mantid::API::CompositeFunction_sptr func = createFunction();
+    Mantid::API::CompositeFunction_sptr func = createFunction(useTies);
     std::string function = std::string(func->asString());
     QString stX = m_cfProp["StartX"]->valueText();
     QString enX = m_cfProp["EndX"]->valueText();
@@ -810,6 +812,7 @@ namespace IDA
       "specMin = " + uiForm().confit_leSpecNo->text() + "\n"
       "specMax = " + uiForm().confit_leSpecMax->text() + "\n"
       "plot = '" + uiForm().confit_cbPlotOutput->currentText() + "'\n"
+      "ties = " + ties + "\n"
       "save = ";
   
     pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
@@ -820,7 +823,7 @@ namespace IDA
     pyInput +=    
       "bg = '" + bg + "'\n"
       "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax, Verbose=verbose)\n";
+      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax, ties, Verbose=verbose)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }

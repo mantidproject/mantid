@@ -1156,12 +1156,11 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       if(calcQ)
       {
 
-        double efixed(0.0), usignTheta(0.0);
         try
         {
           // Get unsigned theta and efixed value
-          efixed = ws->getEFixed(det);
-          usignTheta = ws->detectorTwoTheta(det)/2.0;
+          double efixed = ws->getEFixed(det);
+          double usignTheta = ws->detectorTwoTheta(det)/2.0;
 
           double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
           colValues << QVariant(q);
@@ -1371,6 +1370,8 @@ void MantidUI::executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API:
   }
   else
   {
+    using Mantid::API::AlgorithmManager;
+    AlgorithmManager::Instance().removeById(alg->getAlgorithmID());
     delete dlg;
   }
 }
@@ -1493,16 +1494,15 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 bool MantidUI::hasUB(const QString& wsName)
 {
   const std::string algName("HasUB");
-  const int version = -1;
   Mantid::API::IAlgorithm_sptr alg;
   try
   {
+    
     alg = Mantid::API::AlgorithmManager::Instance().create(algName);
   } catch (...)
   {
     QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
-        "Cannot create algorithm " + QString::fromStdString(algName) + " version "
-            + QString::number(version));
+        "Cannot create algorithm " + QString::fromStdString(algName) );
     return false;
   }
   if (!alg)
@@ -1571,54 +1571,30 @@ void MantidUI::renameWorkspace(QStringList wsName)
     }
   }
 
-  //determine the algorithm
-  std::string algName("RenameWorkspace"); 
-  if(wsName.size() > 1)
-  {
-     algName = std::string("RenameWorkspaces");
-  }
+  //Determine the algorithm
+  QString algName("RenameWorkspace"); 
+  if(wsName.size() > 1) algName = "RenameWorkspaces";
   int version=-1;
+  auto alg = createAlgorithm(algName, version);
+  if(!alg) return;
 
-  // execute the algorithm
-  Mantid::API::IAlgorithm_sptr alg;
-  try
-  {
-    alg = Mantid::API::AlgorithmManager::Instance().create(algName,version);
-  }
-  catch(...)
-  {
-    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+QString::fromStdString(algName)+" version "+QString::number(version));
-    return;
-  }
-  if (!alg)
-  {
-    return;
-  }
-  MantidQt::API::InterfaceManager interfaceManager;
   QHash<QString,QString> presets;
-
-  if(wsName.size() == 1)
+  if(wsName.size() > 1 )
   {
-    presets["InputWorkspace"] = wsName[0];
+    presets["InputWorkspaces"] =  wsName.join(",");
   }
   else
   {
-    presets["InputWorkspaces"] = wsName.join(",");
+    presets["InputWorkspace"] =  wsName[0];
   }
 
-  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow,false,presets);
-  if( !dlg ) return;
-  
-  if ( dlg->exec() == QDialog::Accepted)
-  {
-    delete dlg;
-    alg->execute();
-  }
-  else
-  {
-    delete dlg;
-  }
+  using namespace MantidQt::API;
+  InterfaceManager interfaceManager;
+  AlgorithmDialog *dialog =
+      interfaceManager.createDialog(alg.get(), m_appWindow, false, presets,
+                                    QString(alg->getOptionalMessage().c_str()));
 
+  executeAlgorithm(dialog,alg);
 }
 
 void MantidUI::setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser)
@@ -2030,6 +2006,22 @@ void MantidUI::saveProject(bool saved)
 void MantidUI::enableSaveNexus(const QString& wsName)
 {
   appWindow()->enablesaveNexus(wsName);
+}
+
+/**
+ * Executes the catalog login algorithm.
+ * Returns true if login was a success.
+ */
+bool MantidUI::isValidCatalogLogin()
+{
+  auto catalogAlgorithm = this->createAlgorithm("CatalogLogin");
+  auto loginDialog      = this->createAlgorithmDialog(catalogAlgorithm);
+
+  if(loginDialog->exec() == QDialog::Accepted)
+  {
+    if (catalogAlgorithm->execute()) return true;
+  }
+  return false;
 }
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.

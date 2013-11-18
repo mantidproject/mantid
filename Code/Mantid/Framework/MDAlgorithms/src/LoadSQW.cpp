@@ -242,7 +242,7 @@ namespace Mantid
       declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
         "Load Metadata without events.");
       std::vector<std::string> fileExtensions2(1);
-      fileExtensions[0]=".nxs";
+      fileExtensions2[0]=".nxs";
       declareProperty(new API::FileProperty("OutputFilename","", API::FileProperty::OptionalSave, fileExtensions2),
           "If the input SQW file is too large to fit in memory, specify an output NXS file.\n"
           "The MDEventWorkspace will be create with this file as its back-end.");
@@ -257,6 +257,7 @@ namespace Mantid
       parseMetadata(m_fileName);
 
       // Create a new output workspace.
+      // cppcheck-suppress constStatement
       MDEventWorkspace<MDEvent<4>,4>* pWs = new MDEventWorkspace<MDEvent<4>,4>;
       Mantid::API::IMDEventWorkspace_sptr ws(pWs);
 
@@ -886,7 +887,7 @@ namespace LoadSQWHelper
    { // we do not need this header  at the moment -> just calculating its length; or may be we do soon?
       std::vector<char> data_buffer(8);
 
-    // cppcheck-suppress redundantAssignment
+      // cppcheck-suppress redundantAssignment
       std::streamoff end_location = start_location;
       std::streamoff shift = start_location-dataStream.tellg();
       // move to specified location, which should be usually 0;
@@ -945,7 +946,7 @@ namespace LoadSQWHelper
       std::vector<char> data_buffer(8);
 
       // cppcheck-suppress redundantAssignment
-    std::streamoff end_location = start_location;
+      std::streamoff end_location = start_location;
       std::streamoff shift = start_location-dataStream.tellg();
       // move to specified location, which should be usually 0;
       dataStream.seekg(shift,std::ios_base::cur);              
@@ -1036,11 +1037,10 @@ namespace LoadSQWHelper
         dataStream.seekg(npax*4,std::ios_base::cur);
 
         mdImageSize = 1;
-        unsigned int nAxisPoints;
         for(unsigned int i=0;i<npax;i++){
           dataStream.read(&data_buffer[0],4);
 
-          nAxisPoints = *((uint32_t*)(&data_buffer[0])); 
+          unsigned int  nAxisPoints = *((uint32_t*)(&data_buffer[0])); 
           nBins[i] = nAxisPoints-1;
           mdImageSize *= nBins[i] ;
           dataStream.seekg(nAxisPoints*4,std::ios_base::cur);

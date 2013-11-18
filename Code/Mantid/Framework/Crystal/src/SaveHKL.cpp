@@ -252,13 +252,13 @@ namespace Crystal
 			for (int wi=0; wi < 8; wi++)getline(infile,STRING); // Saves the line in STRING.
 			while(!infile.eof()) // To get you all the lines.
 			{
-				double time0, spectra0;
 				time.resize(a+1);
 				spectra.resize(a+1);
 				getline(infile,STRING); // Saves the line in STRING.
 				std::stringstream ss(STRING);
 				if(STRING.find("Bank") == std::string::npos)
-				{
+				{				
+          double time0, spectra0;
 					ss >> time0 >> spectra0;
 					time[a].push_back(time0);
 					spectra[a].push_back(spectra0);
