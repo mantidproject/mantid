@@ -112,6 +112,13 @@ const string LATTICE_C("c");
 const string LATTICE_ALPHA("alpha");
 const string LATTICE_BETA("beta");
 const string LATTICE_GAMMA("gamma");
+const string BANK_NAMES("BankNames");
+const string NUM_GROUPS("NGroups");
+const string X_START("startX");
+const string X_END("endX");
+const string PEAKS_WKSP("PeakWorkspaceName");
+const string ROTATE_CEN("RotateCenters");
+const string SAMPLE_OFF("SampleOffsets");
 }
 
 void CheckSizetMax( size_t v1, size_t v2, size_t v3,std::string ErrMess)
@@ -130,13 +137,13 @@ void initializeAttributeList(vector<string> &attrs)
   attrs.push_back(LATTICE_ALPHA);
   attrs.push_back(LATTICE_BETA);
   attrs.push_back(LATTICE_GAMMA);
-  attrs.push_back("PeakWorkspaceName");
-  attrs.push_back("BankNames");
-  attrs.push_back("startX");
-  attrs.push_back("endX");
-  attrs.push_back("NGroups");
-  attrs.push_back("RotateCenters");
-  attrs.push_back("SampleOffsets");
+  attrs.push_back(PEAKS_WKSP);
+  attrs.push_back(BANK_NAMES);
+  attrs.push_back(X_START);
+  attrs.push_back(X_END);
+  attrs.push_back(NUM_GROUPS);
+  attrs.push_back(ROTATE_CEN);
+  attrs.push_back(SAMPLE_OFF);
 }
 
 SCDPanelErrors::SCDPanelErrors() :
@@ -201,21 +208,20 @@ IFunction::Attribute SCDPanelErrors::getAttribute(const std::string &attName) co
     return Attribute(beta);
   if (attName == LATTICE_GAMMA)
     return Attribute(gamma);
-
-  if (attName == ("BankNames"))
+  if (attName == (BANK_NAMES))
     return Attribute(BankNames);
-  else if( attName == "PeakWorkspaceName")
+  else if( attName == PEAKS_WKSP)
     return Attribute( PeakName );
-  else if( attName =="NGroups")
+  else if( attName == NUM_GROUPS)
     return Attribute(NGroups);
-  else if( attName == "RotateCenters")
+  else if( attName == ROTATE_CEN)
   {
     if(RotateCenters)
       return Attribute(1);
     else
       return Attribute(0);
   }
-  else if( attName== "SampleOffsets")
+  else if( attName== SAMPLE_OFF)
   {
     if( SampleOffsets)
 
@@ -223,9 +229,9 @@ IFunction::Attribute SCDPanelErrors::getAttribute(const std::string &attName) co
     else
       return Attribute(0);
   }
-  else if (attName == "startX")
+  else if (attName == X_START)
     return Attribute(startX);
-  else if (attName == "endX")
+  else if (attName == X_END)
     return Attribute(endX);
 
 
@@ -258,14 +264,12 @@ SCDPanelErrors::SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::strin
   setAttribute(LATTICE_BETA, Attribute(betax));
   setAttribute(LATTICE_GAMMA, Attribute(gammax));
 
-  setAttribute("PeakWorkspaceName", Attribute("xxx"));
-
-  setAttribute("BankNames", Attribute(Component_name));
-
-  setAttribute("startX", Attribute(-1));
-  setAttribute("endX", Attribute(-1));
-  setAttribute("RotateCenters",Attribute(0));
-  setAttribute("SampleOffsets", Attribute(0));
+  setAttribute(PEAKS_WKSP, Attribute("xxx"));
+  setAttribute(BANK_NAMES, Attribute(Component_name));
+  setAttribute(X_START, Attribute(-1));
+  setAttribute(X_END, Attribute(-1));
+  setAttribute(ROTATE_CEN,Attribute(0));
+  setAttribute(SAMPLE_OFF, Attribute(0));
   init();
 
 }
@@ -338,8 +342,7 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double
 
   if ((startX >  (int)nData - 1) || (endX > (int) nData - 1))
   {
-    g_log.error("startX and endX attributes are out of range");
-    throw std::invalid_argument("startX and endX attributes are out of range");
+    throw std::invalid_argument(X_START + " and " + X_END +" attributes are out of range");
   }
 
   size_t StartX ;
@@ -1513,16 +1516,16 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
     gamma_set = true;
     recalcB = true;
   }
-  else if (attName == ("BankNames"))
+  else if (attName == (BANK_NAMES))
   {
     BankNames = value.asString();
     BankNames_set = true;
   }
-  else if( attName =="PeakWorkspaceName")
+  else if( attName ==PEAKS_WKSP)
   {
     PeakName= value.asString();
     PeakName_set = true;
-  }else if( attName == "NGroups")
+  }else if( attName == NUM_GROUPS)
   {
     if( NGroups_set )
     {
@@ -1546,7 +1549,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
     }
     NGroups_set = true;
   }
-  else if( attName == "RotateCenters")
+  else if( attName == ROTATE_CEN)
   {
     int v= value.asInt();
     if( v==0)
@@ -1555,7 +1558,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
       RotateCenters = true;
 
   }
-  else if( attName== "SampleOffsets")
+  else if( attName== SAMPLE_OFF)
   { int v= value.asInt();
     if( v==0)
       SampleOffsets= false;
@@ -1569,7 +1572,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
       SampOffsetDeclareStatus =2;
     }
   }
-  else if (attName == "startX")
+  else if (attName == X_START)
   {
     startX =(size_t)value.asInt();
     startX_set = true;
