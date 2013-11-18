@@ -688,6 +688,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   The sum of the squares of the residual errors is returned.  This method is
   used to optimize the UB matrix once an initial indexing has been found.
   
+  @param  lattice_parameters std::vector of doubles that contain the lattice parameters
   @param  UB           3x3 matrix that will be set to the UB matrix
   @param  hkl_vectors  std::vector of V3D objects that contains the 
                        list of hkl values
