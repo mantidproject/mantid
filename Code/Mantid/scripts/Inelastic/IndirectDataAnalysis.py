@@ -348,108 +348,146 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
             datTx = np.append(datTx,Txa)
             datTy = np.append(datTy,iqa)
             datTe = np.append(datTe,eqa)
-    DeleteWorkspace(tempWS)
+
     DeleteWorkspace('__eq1')
     DeleteWorkspace('__eq2')
+    DeleteWorkspace('__elf')
+
     if (nr == 1):
         ename = first[:-1]
     else:
         ename = first+'to_'+last
-    
-    elfWS = ename+'_elf'    # interchange Q & T
 
-    #check if temp was increasing of decreasing
+    #check if temp was increasing or decreasing
     if(datTx[0] > datTx[-1]):
         # if so reverse data to follow natural ordering
     	datTx = datTx[::-1]
         datTy = datTy[::-1]
         datTe = datTe[::-1]
-    
-    CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
-        Nspec=nQ, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=q1)
-    DeleteWorkspace('__elf')
-    label = unit[0]+' / '+unit[1]
-    AddSampleLog(Workspace=elfWS, LogName="Vaxis", LogType="String", LogText=label)
+
+    elfWS = ename+'_elf'
     e1WS = ename+'_eq1'
-    CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
-        Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
-    label = unit[0]+' / '+unit[1]
-    AddSampleLog(Workspace=e1WS, LogName="Vaxis", LogType="String", LogText=label)
     e2WS = ename+'_eq2'
-    CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
-        Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
-    AddSampleLog(Workspace=e2WS, LogName="Vaxis", LogType="String", LogText=label)
+    #elt only created if we normalise
+    eltWS = None
+
+    wsnames = [elfWS, e1WS, e2WS]
+    
+    #x,y,e data for the elf, e1 and e2 workspaces
+    data = [[datTx, datTy, datTe], 
+            [datX1, datY1, datE1], 
+            [datX2, datY2, datE2]]
+    
+    #x and vertical units for the elf, e1 and e2 workspaces
+    xunits = ['Energy', 'MomentumTransfer', 'QSquared']
+    vunits = ['MomentumTransfer', 'Energy', 'Energy']
+
+    #vertical axis values for the elf, e1 and e2 workspaces
+    vvalues = [q1, Taxis, Taxis]
+    
+    #number of spectra in each workspace
+    nspecs =  [nQ, nr, nr]
+
+    #x-axis units label
+    label = unit[0]+' / '+unit[1]
+
+    wsInfo = zip(wsnames,data, xunits, vunits, vvalues, nspecs)
+
+    #Create output workspaces and add sample logs
+    for wsname, wsdata, xunit, vunit, vvalue, nspec in wsInfo:
+        x, y, e = wsdata
+
+        CreateWorkspace(OutputWorkspace=wsname, DataX=x, DataY=y, DataE=e,
+            Nspec=nspec, UnitX=xunit, VerticalAxisUnit=vunit, VerticalAxisValues=vvalue)
+
+        #add sample logs to new workspace
+        CopyLogs(InputWorkspace=tempWS, OutputWorkspace=wsname)
+        addElwinLogs(wsname, label, eRange, Range2)
+
+    # remove the temp workspace now we've copied the logs
+    DeleteWorkspace(tempWS)
 
     if unit[0] == 'Temperature':
-        nT = len(Tvalue)
-        if Tvalue[0] < Tvalue[nT-1]:
-            lo = 0
-            hi = nT-1
-        else:
-            lo = nT-1
-            hi = 0
-        text = 'Temperature range : '+str(Tvalue[lo])+' to '+str(Tvalue[hi])
-        AddSampleLog(Workspace=e1WS, LogName="Temperature normalise", LogType="String", LogText=str(Normalise))
-        if Normalise:
-            yval = mtd[e1WS].readY(lo)
-            normFactor = 1.0/yval[0]
-            Scale(InputWorkspace=e1WS, OutputWorkspace=e1WS, Factor=normFactor, Operation='Multiply')
-            AddSampleLog(Workspace=e1WS, LogName="Temperature value", LogType="Number", LogText=str(Tvalue[0]))
-            if Verbose:
-                text = 'Temperature range : '+str(Tvalue[lo])+' to '+str(Tvalue[hi])
-                logger.notice(text)
-                logger.notice('Normalised eq1 by scale factor : '+str(normFactor))
 
+        AddSampleLog(Workspace=e1WS, LogName="temp_normalise", 
+            LogType="String", LogText=str(Normalise))
+
+        #create workspace normalized to the lowest temperature
+        if Normalise:
+            eltWS = ename+'_elt'
+            
+            #create elt workspace
+            mtd[elfWS].clone(OutputWorkspace=eltWS)
+            elwinNormalizeToLowestTemp(eltWS)
+
+            #set labels and meta data
+            unitx = mtd[eltWS].getAxis(0).setUnit("Label")
+            unitx.setLabel(unit[0], unit[1])
+            addElwinLogs(eltWS, label, eRange, Range2)
+
+            #append workspace name to output files list
+            wsnames.append(eltWS)
+
+    #set labels on workspace axes
     unity = mtd[e1WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
-    label = unit[0]+' / '+unit[1]
-    addElwinLogs(e1WS, label, eRange, Range2)
     
     unity = mtd[e2WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
-    addElwinLogs(e2WS, label, eRange, Range2)
     
     unitx = mtd[elfWS].getAxis(0).setUnit("Label")
     unitx.setLabel(unit[0], unit[1])
-    addElwinLogs(elfWS, label, eRange, Range2)
 
     if Save:
-        e1_path = os.path.join(workdir, e1WS+'.nxs')					# path name for nxs file
-        e2_path = os.path.join(workdir, e2WS+'.nxs')					# path name for nxs file
-        elf_path = os.path.join(workdir, elfWS+'.nxs')					# path name for nxs file
-
-        if Verbose:
-            logger.notice('Creating file : '+e1_path)
-            logger.notice('Creating file : '+e2_path)
-            logger.notice('Creating file : '+elf_path)
-
-        SaveNexusProcessed(InputWorkspace=e1WS, Filename=e1_path)
-        SaveNexusProcessed(InputWorkspace=e2WS, Filename=e2_path)
-        SaveNexusProcessed(InputWorkspace=elfWS, Filename=elf_path)
+        elwinSaveWorkspaces(wsnames, workdir, Verbose)
 
     if Plot:
-        elwinPlot(label,e1WS,e2WS,elfWS)
+        elwinPlot(label,e1WS,e2WS,elfWS,eltWS)
 
     EndTime('Elwin')
     return e1WS,e2WS
 
+#normalize workspace to the lowest temperature
+def elwinNormalizeToLowestTemp(eltWS):
+    nhist = mtd[eltWS].getNumberHistograms()
+    
+    #normalize each spectrum in the workspace
+    for n in range(0,nhist):
+        y = mtd[eltWS].readY(n)
+        scale = 1.0/y[0]
+        yscaled = scale * y
+        mtd[eltWS].setY(n, yscaled)
+
+# Write each of the created workspaces to file
+def elwinSaveWorkspaces(flist, dir, Verbose):
+    for fname in flist:
+        fpath = os.path.join(dir, fname+'.nxs')
+
+        if Verbose:
+            logger.notice('Creating file : '+ fpath)
+
+        SaveNexusProcessed(InputWorkspace=fname, Filename=fpath)
+
 # Add sample log to each of the workspaces created by Elwin
 def addElwinLogs(ws, label, eRange, Range2):
 
-    AddSampleLog(Workspace=ws, LogName="Vaxis", LogType="String", LogText=label)
-    AddSampleLog(Workspace=ws, LogName="Range1 start", LogType="Number", LogText=str(eRange[0]))
-    AddSampleLog(Workspace=ws, LogName="Range1 end", LogType="Number", LogText=str(eRange[1]))
-    AddSampleLog(Workspace=ws, LogName="Two ranges", LogType="String", LogText=str(Range2))
+    AddSampleLog(Workspace=ws, LogName="vert_axis", LogType="String", LogText=label)
+    AddSampleLog(Workspace=ws, LogName="range1_start", LogType="Number", LogText=str(eRange[0]))
+    AddSampleLog(Workspace=ws, LogName="range1_end", LogType="Number", LogText=str(eRange[1]))
+    AddSampleLog(Workspace=ws, LogName="two_ranges", LogType="String", LogText=str(Range2))
 
     if Range2:
-        AddSampleLog(Workspace=ws, LogName="Range2 start", LogType="Number", LogText=str(eRange[2]))
-        AddSampleLog(Workspace=ws, LogName="Range2 end", LogType="Number", LogText=str(eRange[3]))
+        AddSampleLog(Workspace=ws, LogName="range2_start", LogType="Number", LogText=str(eRange[2]))
+        AddSampleLog(Workspace=ws, LogName="range2_end", LogType="Number", LogText=str(eRange[3]))
 
 #Plot each of the workspace output by elwin
-def elwinPlot(label,eq1,eq2,elf):
+def elwinPlot(label,eq1,eq2,elf,elt):
     plotElwinWorkspace(eq1, yAxisTitle='Elastic Intensity', setScale=True)
     plotElwinWorkspace(eq2, yAxisTitle='log(Elastic Intensity)', setScale=True)
     plotElwinWorkspace(elf, xAxisTitle=label)
+
+    if elt is not None:
+        plotElwinWorkspace(elt, xAxisTitle=label)
 
 #Plot a workspace generated by Elwin
 def plotElwinWorkspace(ws, xAxisTitle=None, yAxisTitle=None, setScale=False):
@@ -891,6 +929,14 @@ def msdfitParsToWS(Table, xData):
     dataY1 = map(lambda x : -x, yA1) 
     eA1 = ws.column(4)
     wsname = Table
+
+    #check if temp was increasing or decreasing
+    if(dataX[0] > dataX[-1]):
+        # if so reverse data to follow natural ordering
+        dataX = dataX[::-1]
+        dataY1 = dataY1[::-1]
+        eA1 = eA1[::-1]
+
     CreateWorkspace(OutputWorkspace=wsname+'_a0', DataX=dataX, DataY=yA0, DataE=eA0,
         Nspec=1, UnitX='')
     CreateWorkspace(OutputWorkspace=wsname+'_a1', DataX=dataX, DataY=dataY1, DataE=eA1,
@@ -928,8 +974,8 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
     ws_run = ws.getRun()
     vertAxisValues = ws.getAxis(1).extractValues()
     x_list = vertAxisValues
-    if 'Vaxis' in ws_run:
-        xlabel = ws_run.getLogData('Vaxis').value
+    if 'vert_axis' in ws_run:
+        xlabel = ws_run.getLogData('vert_axis').value
     for nr in range(0, nHist):
         nsam,ntc = CheckHistZero(root)
         lnWS = '__lnI_'+str(nr)
@@ -984,6 +1030,12 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
         DeleteWorkspace(inWS)
         DeleteWorkspace('__data')
     GroupWorkspaces(InputWorkspaces=gro,OutputWorkspace=calcWS)
+
+    #add sample logs to output workspace
+    CopyLogs(InputWorkspace=root, OutputWorkspace=msdWS)
+    AddSampleLog(Workspace=msdWS, LogName="start_x", LogType="Number", LogText=str(startX))
+    AddSampleLog(Workspace=msdWS, LogName="end_x", LogType="Number", LogText=str(endX))
+    
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
         msdfitPlotFits(calcWS, 0)
