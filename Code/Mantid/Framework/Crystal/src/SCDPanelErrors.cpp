@@ -161,7 +161,7 @@ SCDPanelErrors::SCDPanelErrors() :
 
   boost::shared_ptr<PeaksWorkspace> pwks1(new PeaksWorkspace());
 
-  peaks = pwks1;
+  m_peaks = pwks1;
 
   B0 = DblMatrix(3, 3);
 
@@ -249,7 +249,7 @@ SCDPanelErrors::SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::strin
 {
   initializeAttributeList(m_attrNames);
 
-  peaks = pwk;
+  m_peaks = pwk;
   BankNames = Component_name;
 
   tolerance = tolerance1;
@@ -303,7 +303,7 @@ void SCDPanelErrors::init()
 boost::shared_ptr<DataObjects::PeaksWorkspace> SCDPanelErrors::getPeaks() const
 {
   boost::shared_ptr<DataObjects::PeaksWorkspace> pwks;
-  pwks = peaks;
+  pwks = m_peaks;
   if (pwks->rowCount() < 1)
   {
     pwks = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace> (PeakName);
@@ -316,7 +316,7 @@ boost::shared_ptr<DataObjects::PeaksWorkspace> SCDPanelErrors::getPeaks() const
     return pwks;
   }
   else
-    return peaks;
+    return m_peaks;
 }
 
 void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData) const
@@ -843,16 +843,16 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   }
 
   CheckSizetMax(StartX, EndX, EndX, "Deriv calc StartX,EndX");
-  peaks = getPeaks();
-  Check(peaks, xValues, nData);
+  m_peaks = getPeaks();
+  Check(m_peaks, xValues, nData);
 
-  Instrument_sptr instrNew = getNewInstrument(peaks->getPeak(0));
+  Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
 
   boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();
 
   V3D SamplePos = instrNew->getSample()->getPos();
   V3D SourcePos = instrNew->getSource()->getPos();
-  IPeak & ppeak = peaks->getPeak(0);
+  IPeak & ppeak = m_peaks->getPeak(0);
   L0 = ppeak.getL1();
 
   velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
@@ -866,7 +866,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     V3D HKL;
     string thisBankName;
     Quat Rot;
-    IPeak& peak_old = peaks->getPeak((int) x);
+    IPeak& peak_old = m_peaks->getPeak((int) x);
 
     peak = createNewPeak(peak_old, instrNew,getParameter("t0"),getParameter("l0"));
 
@@ -984,7 +984,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   V3D beamDir = instrNew->getBeamDirection();
   for (size_t peak = 0; peak < qlab.size(); ++peak)
   {
-    Peak Peak1(peaks->getPeak( peakIndx[peak]));
+    Peak Peak1(m_peaks->getPeak( peakIndx[peak]));
     Matrix<double>Gon = Peak1.getGoniometerMatrix();
     Gon.Invert();
 
@@ -1021,7 +1021,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       Matrix<double> Result(3, qlab.size());
       CheckSizetMax(gr, param, param, "xyzoffset1 Deriv");
       for (size_t peak = 0; peak < qlab.size(); ++peak)
-        if (bankName2Group[peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
+        if (bankName2Group[m_peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
         {
           Unrot_dQ[param - StartPos].push_back(V3D(0.0, 0.0, 0.0));//Save for later calculations
 
@@ -1043,7 +1043,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
           dV = dV - dV1;
           dQlab += dV * (-K);
 
-          Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+          Matrix<double> GonMatrix = m_peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
           V3D dQsamp = GonMatrix * dQlab;
 
@@ -1102,7 +1102,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       Rot2dRot *= M_PI / 180.;
 
       for (size_t peak = 0; peak < qlab.size(); ++peak)
-        if (bankName2Group[peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
+        if (bankName2Group[m_peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
         {
           Result[0][peak] = 0;
           Result[1][peak] = 0;
@@ -1140,7 +1140,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
 
           if (doMethod == 0)
           {
-            Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+            Matrix<double> GonMatrix = m_peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
             GonMatrix.Invert();
 
             V3D RotDeriv = GonMatrix * unRotDeriv;
@@ -1149,7 +1149,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
               Result[kk][peak] = RotDeriv[kk];
           }
           else
-            updateDerivResult(peaks, unRotDeriv, Result, peak, peakIndx);
+            updateDerivResult(m_peaks, unRotDeriv, Result, peak, peakIndx);
         }
 
       Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
@@ -1175,7 +1175,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     size_t param = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_detWidthScale");
 
     for (size_t peak = 0; peak < qlab.size(); ++peak)
-      if (bankName2Group[peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
+      if (bankName2Group[m_peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
       {
         Result[0][peak] = 0;
         Result[1][peak] = 0;
@@ -1199,7 +1199,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
         V3D unRotDeriv = Bas * Xvec;
         if (doMethod == 0)
         {
-          Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+          Matrix<double> GonMatrix = m_peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
 
           V3D RotDeriv = GonMatrix * unRotDeriv;
@@ -1208,7 +1208,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
             Result[kk][peak] = RotDeriv[kk];
         }
         else
-          updateDerivResult(peaks, unRotDeriv, Result, peak, peakIndx);
+          updateDerivResult(m_peaks, unRotDeriv, Result, peak, peakIndx);
       }
 
     Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
@@ -1226,7 +1226,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
 
     Result.zeroMatrix();
     for (size_t peak = 0; peak < qlab.size(); ++peak)
-      if (bankName2Group[peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
+      if (bankName2Group[m_peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
       {
         Result[0][peak] = 0;
         Result[1][peak] = 0;
@@ -1251,7 +1251,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
 
         if (doMethod == 0)
         {
-          Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+          Matrix<double> GonMatrix = m_peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
 
           V3D RotDeriv = GonMatrix * unRotDeriv;
@@ -1260,7 +1260,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
             Result[kk][peak] = RotDeriv[kk];
         }
         else
-          updateDerivResult(peaks, unRotDeriv, Result, peak, peakIndx);
+          updateDerivResult(m_peaks, unRotDeriv, Result, peak, peakIndx);
       }
 
     Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
@@ -1297,7 +1297,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
 
       V3D unRotDeriv = qlab[peak] * KK;
 
-      updateDerivResult(peaks, unRotDeriv, Result, peak, peakIndx);
+      updateDerivResult(m_peaks, unRotDeriv, Result, peak, peakIndx);
 
     }
 
@@ -1321,7 +1321,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       double KK = -1 / time[peak];
       V3D unRotDeriv = qlab[peak] * KK;
 
-      Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+      Matrix<double> GonMatrix = m_peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
       GonMatrix.Invert();
       V3D RotDeriv = GonMatrix * unRotDeriv;
 
@@ -1357,7 +1357,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       for( size_t peak=0; peak < qlab.size(); peak++)
       {
         V3D Ddsx,Ddsy,Ddsz;
-        Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+        Matrix<double> GonMatrix = m_peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
         GonMatrix.Invert();
         Matrix<double> Ssxsyszdsx1sy1sz1(GonMatrix.Transpose());//row 1 wrt sx,row2 wrt sy
         // std::cout<<"Dsxyz'/dsxy"<<Ssxsyszdsx1sy1sz1<<std::endl;
@@ -1397,7 +1397,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
           V3D dKV = dKV2-dKV1;
 
           V3D dQlab =(dKV);
-          Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
+          Matrix<double> GonMatrix = m_peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
           V3D dQsamp = GonMatrix * dQlab;
 

@@ -154,7 +154,7 @@ protected:
   double checkForNonsenseParameters() const;
 
 private:
-  boost::shared_ptr< DataObjects::PeaksWorkspace> peaks;
+  boost::shared_ptr< DataObjects::PeaksWorkspace> m_peaks;
 
   double a,b,c,alpha,beta,gamma;
   int NGroups;
