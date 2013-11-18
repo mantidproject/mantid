@@ -386,16 +386,12 @@ namespace Mantid
       //    And at the same time, iterate through the splitter
       Kernel::TimeSplitterType::iterator itspl = splitter.begin();
 
-      //Info of each splitter
-      DateAndTime start, stop;
-      int index;
-
       while (itspl != splitter.end())
       {
         //Get the splitting interval times and destination
-        start = itspl->start();
-        stop = itspl->stop();
-        index = itspl->index();
+        DateAndTime start = itspl->start();
+        DateAndTime stop = itspl->stop();
+        int index = itspl->index();
 
         // Skip the events before the start of the time
         // TODO  Algorithm here can be refactored for better performance

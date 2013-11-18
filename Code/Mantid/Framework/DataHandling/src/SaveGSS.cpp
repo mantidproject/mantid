@@ -488,16 +488,14 @@ namespace Mantid
           << std::setprecision(0) << std::setw(10) << bc2 << std::fixed << " " << std::setprecision(7)
           << std::setw(10) << bc3 << std::fixed << " 0 FXYE" << std::endl;
 
-      double delta, y, e;
-
       for (size_t i = 0; i < datasize; i++)
       {
-        y = Y[i];
-        e = E[i];
+        double y = Y[i];
+        double e = E[i];
         if (MultiplyByBinWidth)
         {
           // Multiple by bin width as
-          delta = X[i + 1] - X[i];
+          double delta = X[i + 1] - X[i];
           y *= delta;
           e *= delta;
         }

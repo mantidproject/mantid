@@ -318,11 +318,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     size_t numrows = peaktablews->rowCount();
     vec_peakcentre.resize(numrows, 0.);
     vec_peakfwhm.resize(numrows, 0.);
-    double centre, fwhm;
+
     for (size_t i = 0; i < numrows; ++i)
     {
-      centre = peaktablews->cell<double>(i, index_centre);
-      fwhm = peaktablews->cell<double>(i, index_fwhm);
+      double centre = peaktablews->cell<double>(i, index_centre);
+      double fwhm = peaktablews->cell<double>(i, index_fwhm);
       vec_peakcentre[i] = centre;
       vec_peakfwhm[i] = fwhm;
     }
@@ -973,11 +973,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     size_t numrows = peaktablews->rowCount();
     vec_peakcentre.resize(numrows, 0.);
     vec_peakfwhm.resize(numrows, 0.);
-    double centre, fwhm;
+
     for (size_t i = 0; i < numrows; ++i)
     {
-      centre = peaktablews->cell<double>(i, index_centre);
-      fwhm = peaktablews->cell<double>(i, index_fwhm);
+      double centre = peaktablews->cell<double>(i, index_centre);
+      double fwhm = peaktablews->cell<double>(i, index_fwhm);
       vec_peakcentre[i] = centre;
       vec_peakfwhm[i] = fwhm;
     }

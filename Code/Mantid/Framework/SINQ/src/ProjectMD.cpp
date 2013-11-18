@@ -172,8 +172,7 @@ void ProjectMD::putValue(IMDHistoWorkspace_sptr ws, int dim[], double value)
 void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr outWS,
 		  int *sourceDim, int *targetDim, int targetDimCount, int dimNo, int start, int end, int currentDim)
 {
-	  int i, length;
-	  double val, sumVal = 0;
+	  double sumVal = 0;
 	  boost::shared_ptr<const IMDDimension> dimi;
 
 	  /*
@@ -181,11 +180,11 @@ void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr outW
 	     we actually do the sums...
 	   */
 	  if (currentDim == static_cast<int>(inWS->getNumDims())) {
-	    length = end - start;
+	    int length = end - start;
 	    sumVal = getValue(outWS, targetDim);
-	    for (i = 0; i < length; i++) {
+	    for (int i = 0; i < length; i++) {
 	      sourceDim[dimNo] = start + i;
-	      val = getValue(inWS, sourceDim);
+	      double val = getValue(inWS, sourceDim);
 	      sumVal += val;
 	    }
 	    putValue(outWS, targetDim, sumVal);
@@ -203,8 +202,7 @@ void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr outW
 	         loop over all values of the non summed dimension
 	       */
 	      dimi = inWS->getDimension(currentDim);
-	      //std::cout << " dim " << currentDim << " val " <<  dimi->getNBins() << std::endl;
-	      for (i = 0; i < static_cast<int>(dimi->getNBins()); i++) {
+	      for (int i = 0; i < static_cast<int>(dimi->getNBins()); i++) {
 	        /*
 	           the problem here is that we have to jump over the summed
 	           dimension here. This why we have to maintain a separate

@@ -366,10 +366,10 @@ namespace Mantid
               savetoTableWorkspace(&endDate, table);
             }
           }
-          catch(std::runtime_error& exception)
+          catch(std::runtime_error&)
           {
             g_log.information("An error occurred when saving the ICat search results data to Workspace");
-            throw exception;
+            throw;
           }
         }
         else
@@ -441,10 +441,10 @@ namespace Mantid
           savetoTableWorkspace(&temp, table);
           savetoTableWorkspace(&temp, table);
         }
-        catch(std::runtime_error& exception)
+        catch(std::runtime_error&)
         {
           g_log.information("An error occurred when saving file data to workspace.");
-          throw exception;
+          throw;
         }
       }
     }
@@ -516,10 +516,10 @@ namespace Mantid
             std::string fileSize = bytesToString(*datafile->fileSize);
             savetoTableWorkspace(&fileSize, table);
           }
-          catch(std::runtime_error& exception)
+          catch(std::runtime_error&)
           {
             g_log.information("An error occurred when saving file data to workspace.");
-            throw exception;
+            throw;
           }
         }
         else

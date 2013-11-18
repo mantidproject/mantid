@@ -186,8 +186,8 @@ void Plot::printCanvas(QPainter *painter, const QRect&, const QRect &canvasRect,
 	// print texts
 	QObjectList lst = children();
 	foreach(QObject *o, lst){
-		if (o->inherits("LegendWidget") && !((QWidget *)o)->isHidden())
-        	((LegendWidget *)o)->print(painter, map);
+		if (o->inherits("LegendWidget") && !(static_cast<QWidget *>(o))->isHidden())
+        	(static_cast<LegendWidget *>(o))->print(painter, map);
 	}
 }
 
@@ -207,7 +207,7 @@ void Plot::drawItems (QPainter *painter, const QRect &rect,
 		if (!axisEnabled(i))
 			continue;
 
-		const ScaleEngine *sc_engine = (const ScaleEngine *)axisScaleEngine(i);
+		const ScaleEngine *sc_engine = static_cast<const ScaleEngine *>(axisScaleEngine(i));
 		/*const QwtScaleEngine *qwtsc_engine=axisScaleEngine(i);
 		const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
 		if(sc_engine!=NULL)

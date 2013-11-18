@@ -608,7 +608,6 @@ namespace Algorithms
     map<string, double> errormap;
     push(bkgdfunc, m_bkupBkgdFunc, errormap);
 
-    std::vector<double> vec_bkgd;
     vector<double> vec_xmin(2);
     vector<double> vec_xmax(2);
     vec_xmin[0] = m_minFitX;
@@ -761,6 +760,7 @@ namespace Algorithms
         push(m_bkgdFunc, m_bestBkgdFunc, m_fitErrorBkgdFunc);
       m_bestRwp = rwp;
     }
+    g_log.debug()<<"Failed due to: " << failreason <<std::endl;
 
     return;
   }
@@ -947,12 +947,10 @@ namespace Algorithms
     {
       // Fit for composite function renders a better result
       goodness_final = goodness;
-      errorreason = "";
     }
     else if (goodness_init <= goodness && goodness_init < DBL_MAX)
     {
       goodness_final = goodness_init;
-      errorreason = "";
       g_log.information("Fit peak/background composite function FAILS to render a better solution.");
       pop(bkuppeakmap, peakfunc);
       pop(bkupbkgdmap, bkgdfunc);
