@@ -35,18 +35,8 @@ namespace Mantid
     /// exec method
     void CatalogListInstruments::exec()
     {
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
-
       std::vector<std::string> intruments;
-      try
-      {
-        catalog->listInstruments(intruments);
-      }
-      catch(std::runtime_error&)
-      {
-        setProperty("IsValid",false);
-        throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
-      }
+      CatalogAlgorithmHelper().createCatalog()->listInstruments(intruments);
       setProperty("InstrumentList",intruments);
     }
 

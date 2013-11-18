@@ -146,41 +146,6 @@ namespace MantidQt
       return errors;
     }
 
-
-    /**
-     * Using the list instruments algorithm verify if the session is valid.
-     * @return True if session is valid, otherwise false.
-     */
-    bool CatalogHelper::validSession()
-    {
-      auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
-
-      executeAsynchronously(catalogAlgorithm);
-
-      if (catalogAlgorithm->getProperty("IsValid"))
-      {
-        return true;
-      }
-      return false;
-    }
-
-    /**
-     * Open the login dialog if user not logged in.
-     * @param window :: The window to open the dialog box in.
-     */
-    void CatalogHelper::openLoginDialog(QWidget* window)
-    {
-      auto catalogAlgorithm = createCatalogAlgorithm("CatalogLogin");
-
-      MantidQt::API::InterfaceManager interfaceManager;
-      auto *loginDialog = interfaceManager.createDialog(catalogAlgorithm.get(), window);
-
-      if(loginDialog->exec() == QDialog::Accepted)
-      {
-        executeAsynchronously(catalogAlgorithm);
-      }
-    }
-
     /**
     * Creates a time_t value from an input date ("23/06/2003") for comparison.
     * @param inputDate :: string containing the date.

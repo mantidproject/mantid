@@ -21,11 +21,6 @@ namespace MantidQt
      */
     CatalogSearch::CatalogSearch(QWidget* parent) : QWidget(parent)
     {
-      if (!m_icatHelper->validSession())
-      {
-        m_icatHelper->openLoginDialog(parent);
-      }
-
       initLayout();
       // Load saved settings from store.
       loadSettings();

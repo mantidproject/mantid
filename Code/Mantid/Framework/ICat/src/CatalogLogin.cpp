@@ -34,17 +34,12 @@ namespace Mantid
     /// execute the algorithm
     void CatalogLogin::exec()
     {
-      // Create and use the catalog the user has specified in Facilities.xml
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
-
       std::string username = getProperty("Username");
       std::string password = getProperty("Password");
-
       g_log.notice() << "Attempting to verify user credentials against " <<
           Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo().catalogName() << std::endl;
       progress(0.5, "Verifying user credentials...");
-
-      catalog->login(username,password,"");
+      CatalogAlgorithmHelper().createCatalog()->login(username, password, "");
     }
 
   }
