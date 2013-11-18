@@ -30,11 +30,10 @@ __version__ = '0.0'
 current_settings = None
 
 class Sample(object):
+    ISSAMPLE = True
     def __init__(self):
         #will contain a LoadSample() object that converts the run number into a file name and loads that file  
         self.loader = None
-        #the logs from the run file
-        self.log = None
         #geometry that comes from the run and can be overridden by user settings
         self.geometry = sans_reduction_steps.GetSampleGeom()
         #record options for the set_run
@@ -64,14 +63,21 @@ class Sample(object):
         self.period_option = period
 
         self.loader = isis_reduction_steps.LoadSample(run, reload, period)
-        self.log = self.loader.execute(reducer, None)
-        
-        self.geometry.execute(None, self.get_wksp_name())
+        self.loader.execute(reducer, self.ISSAMPLE)
+        if self.ISSAMPLE:
+            self.geometry.execute(None, self.get_wksp_name())
         
     def get_wksp_name(self):
         return self.loader.wksp_name
     
+    def get_periods_in_file(self):
+        return self.loader.periods_in_file
+
     wksp_name = property(get_wksp_name, None, None, None)
+    periods_in_file = property(get_periods_in_file, None, None, None)
+
+class Can(Sample):
+    ISSAMPLE = False
 
 class ISISReducer(SANSReducer):
     """
@@ -112,7 +118,7 @@ class ISISReducer(SANSReducer):
         proc_wav.append(self._corr_and_scale)
         proc_wav.append(self.geometry_correcter)
 
-        self._can = [self.background_subtracter]
+        self._can = [self._background_subtracter]
         
 #        self._tidy = [self._zero_error_flags]
         self._tidy = [self._rem_nans]
@@ -133,8 +139,6 @@ class ISISReducer(SANSReducer):
 
         #except self.prep_normalize all the steps below are used by the reducer
         self.crop_detector =   isis_reduction_steps.CropDetBank(crop_sample=True)
-        self.samp_trans_load = None
-        self.can_trans_load =  None
         self.mask =self._mask= isis_reduction_steps.Mask_ISIS()
         self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
         self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
@@ -151,18 +155,22 @@ class ISISReducer(SANSReducer):
 
         self.to_Q =            isis_reduction_steps.ConvertToQISIS(
                                                         self.prep_normalize)
-        self.background_subtracter = None
-        self.geometry_correcter =       sans_reduction_steps.SampleGeomCor(
-                                                self._sample_run.geometry)
+        self._background_subtracter = isis_reduction_steps.CanSubtraction()
+        self.geometry_correcter =       sans_reduction_steps.SampleGeomCor()
 #        self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
         self._rem_nans =      sans_reduction_steps.StripEndNans()
 
         self.set_Q_output_type(self.to_Q.output_type)
 	
+    def _clean_loaded_data(self):
+        self._sample_run = Sample()
+        self._can_run = Can()
+        self.samp_trans_load = None
+        self.can_trans_load = None
+
     def __init__(self):
         SANSReducer.__init__(self)
         self._dark_current_subtracter_class = None
-        self._sample_run = Sample()
         self.output_wksp = None
         self.full_trans_wav = False
         self._monitor_set = False
@@ -173,6 +181,7 @@ class ISISReducer(SANSReducer):
         #all workspaces created by this reducer
         self._workspace = [self._temporys, self._outputs] 
 
+        self._clean_loaded_data()
         self._init_steps()
         
         #process the background (can) run instead of the sample 
@@ -191,6 +200,7 @@ class ISISReducer(SANSReducer):
         # register the value of transmission can
         self.__transmission_can = ""
 
+
     def set_sample(self, run, reload, period):
         """
             Assigns and load the run that this reduction chain will analysis
@@ -198,7 +208,12 @@ class ISISReducer(SANSReducer):
             @param reload: if this sample should be reloaded before the first reduction  
             @param period: the period within the sample to be analysed
         """
+        # ensure that when you set sample, you start with no can, transmission previously used.
+        self._clean_loaded_data()
         self._sample_run.set_run(run, reload, period, self)
+        
+    def set_can(self, run, reload, period):
+        self._can_run.set_run(run, reload, period, self)
 
     def get_sample(self):
         """
@@ -208,7 +223,29 @@ class ISISReducer(SANSReducer):
         if not self._process_can:
             return self._sample_run
         else:
-            return self.background_subtracter
+            return self.get_can()
+
+    def get_transmissions(self):
+        """ Get the transmission and direct workspace if they were given
+        for the can and for the sample"""
+        if self._process_can:
+            loader = self.can_trans_load
+        else:
+            loader = self.samp_trans_load
+        if loader:
+            return loader.trans.wksp_name, loader.direct.wksp_name
+        else:
+            return "", ""
+
+    def get_can(self):
+        if self._can_run.loader and self._can_run.wksp_name:
+            return self._can_run
+        else:
+            return None
+
+    # for compatibility reason, previously, background_subtracter was used to
+    # query if the can was provided and for the can reduction.
+    background_subtracter = property(get_can, None, None, None)
         
     def get_out_ws_name(self, show_period=True):
         """
@@ -293,24 +330,27 @@ class ISISReducer(SANSReducer):
             @param new_wksp: the name of the workspace that will store the result
             @param run_Q: set to false to stop just before converting to Q, default is convert to Q
         """
-        # copy all the run settings from the sample, these settings can come from the user file, Python scripting or the GUI
-        new_reducer = self.deep_copy()
-
-        new_reducer._process_can = True
-        #set the workspace that we've been setting up as the one to be processed 
-        new_reducer.output_wksp = new_wksp
+        # copy settings
+        sample_wksp_name = self.output_wksp
+        sample_trans_name = self.transmission_calculator.output_wksp
+        # configure can
+        self._process_can = True
+        # set the workspace that we've been setting up as the one to be processed 
+        self.output_wksp = new_wksp
         
-        can_steps = new_reducer._conv_Q
+        can_steps = self._conv_Q
         if not run_Q:
             #the last step in the list must be ConvertToQ or this wont work
             can_steps = can_steps[0:len(can_steps)-1]
 
         #the reducer is completely setup, run it
-        new_reducer._reduce(init=False, post=False, steps=can_steps)
-        ## after the reduction of can, the new_reducer will be discarded
-        ## so, we will keep the information of the transmission and save it 
-        ## inside the __transmission_can attribute.
-        self.__transmission_can = new_reducer.transmission_calculator.output_wksp
+        self._reduce(init=False, post=False, steps=can_steps)
+
+        # restore settings
+        self._process_can = False
+        self.output_wksp = sample_wksp_name
+        self.__transmission_can = self.transmission_calculator.output_wksp
+        self.__transmission_sample = sample_trans_name
 
     def run_from_raw(self):
         """
@@ -338,8 +378,11 @@ class ISISReducer(SANSReducer):
         AddSampleLog(Workspace=self.output_wksp,LogName="UserFile", LogText=user_file)
 
         # get the value of __transmission_sample from the transmission_calculator if it has 
-        if self.transmission_calculator and self.transmission_calculator.output_wksp:
+        if (not self.get_can()) and self.transmission_calculator.output_wksp:
+            # it updates only if there was not can, because, when there is can, the __transmission_sample
+            # is already correct and transmission_calculator.output_wksp points to the can transmission
             self.__transmission_sample = self.transmission_calculator.output_wksp
+
         # The reducer itself sometimes will be reset, and the users of the singleton
         # not always will have access to its settings. So, we will add the transmission workspaces
         # to the SampleLog, to be connected to the workspace, and be available outside. These values
@@ -349,6 +392,10 @@ class ISISReducer(SANSReducer):
         if self.__transmission_can:
             AddSampleLog(Workspace=self.output_wksp,LogName= "TransmissionCan", LogText=self.__transmission_can + str('_unfitted'))
 	
+        # clean these values for subsequent executions
+        self.__transmission_sample = ""
+        self.__transmission_can = ""
+
         for role in self._temporys.keys():
             try:
                 DeleteWorkspace(Workspace=self._temporys[role])
@@ -375,18 +422,14 @@ class ISISReducer(SANSReducer):
         self.transmission_calculator.set_trans_fit(fit_method, lambda_min, lambda_max, override=True, selector=selector)
         
     def set_trans_sample(self, sample, direct, reload=True, period_t = -1, period_d = -1):
-        if not issubclass(self.samp_trans_load.__class__, sans_reduction_steps.BaseTransmission):
-            self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload=reload)
+        self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload=reload)
         self.samp_trans_load.set_trans(sample, period_t)
         self.samp_trans_load.set_direc(direct, period_d)
-        self.transmission_calculator.samp_loader = self.samp_trans_load
 
     def set_trans_can(self, can, direct, reload = True, period_t = -1, period_d = -1):
-        if not issubclass(self.can_trans_load.__class__, sans_reduction_steps.BaseTransmission):
-            self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True, reload=reload)
+        self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True, reload=reload)
         self.can_trans_load.set_trans(can, period_t)
         self.can_trans_load.set_direc(direct, period_d)
-        self.transmission_calculator.can_loader = self.can_trans_load
 
     def set_monitor_spectrum(self, specNum, interp=False, override=True):
         if override:
