@@ -80,6 +80,12 @@ namespace SliceViewer
     bool positionOnly() const;
     /// Get the effective radius.
     virtual double getRadius() const;
+    /// Is the background radius visible
+    virtual bool isBackgroundShown() const;
+    /// Get the foreground colour
+    virtual QColor getForegroundColour() const;
+    /// Get the background colour
+    virtual QColor getBackgroundColour() const;
 
   private:
 

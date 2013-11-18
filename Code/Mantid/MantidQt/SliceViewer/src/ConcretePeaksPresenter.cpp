@@ -1,4 +1,6 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
+#include "MantidQtSliceViewer/UpdateableOnDemand.h"
+#include "MantidQtSliceViewer/ZoomableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -100,7 +102,7 @@ namespace MantidQt
     ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
         boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) : m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
             transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
-            g_log(Mantid::Kernel::Logger::get("PeaksPresenter"))
+            g_log(Mantid::Kernel::Logger::get("PeaksPresenter")), m_owningPresenter(NULL), m_isHidden(false)
     {
       // Check that the workspaces appear to be compatible. Log if otherwise.
       checkWorkspaceCompatibilities(mdWS);
@@ -274,7 +276,17 @@ namespace MantidQt
       return workspaces;
     }
 
-    void ConcretePeaksPresenter::setForegroundColour(const QColor colour)
+    QColor ConcretePeaksPresenter::getBackgroundColor() const
+    {
+      return m_viewPeaks->getBackgroundColour();
+    }
+
+    QColor ConcretePeaksPresenter::getForegroundColor() const
+    {
+      return m_viewPeaks->getForegroundColour();
+    }
+
+    void ConcretePeaksPresenter::setForegroundColor(const QColor colour)
     {
       // Change foreground colours
       if(m_viewPeaks!=NULL)
@@ -282,9 +294,11 @@ namespace MantidQt
         m_viewPeaks->changeForegroundColour(colour);
         m_viewPeaks->updateView();
       }
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
-    void ConcretePeaksPresenter::setBackgroundColour(const QColor colour)
+    void ConcretePeaksPresenter::setBackgroundColor(const QColor colour)
     {
       // Change background colours
       if(m_viewPeaks!=NULL)
@@ -292,6 +306,8 @@ namespace MantidQt
         m_viewPeaks->changeBackgroundColour(colour);
         m_viewPeaks->updateView();
       }
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     std::string ConcretePeaksPresenter::getTransformName() const
@@ -307,10 +323,13 @@ namespace MantidQt
         m_viewPeaks->showBackgroundRadius(show);
         doFindPeaksInRegion();
       }
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     void ConcretePeaksPresenter::setShown(const bool shown)
     {
+      m_isHidden = !shown;
       if(m_viewPeaks!=NULL)
       {
        if (shown)
@@ -323,6 +342,17 @@ namespace MantidQt
           }
           m_viewPeaks->updateView();
       }
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
+    }
+
+    /**
+     * Determine whether the presenter is hidden or not.
+     * @return
+     */
+    bool ConcretePeaksPresenter::isHidden() const
+    {
+      return m_isHidden;
     }
 
     /**
@@ -368,13 +398,16 @@ namespace MantidQt
     {
       m_viewPeaks->changeOccupancyInView(fraction);
       m_viewPeaks->updateView();
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
     {
       m_viewPeaks->changeOccupancyIntoView(fraction);
       doFindPeaksInRegion();
-      //m_viewPeaks->updateView();
+      // For the case that this has been performed outside the GUI.
+      informOwnerUpdate();
     }
 
     double ConcretePeaksPresenter::getPeakSizeOnProjection() const
@@ -395,6 +428,32 @@ namespace MantidQt
         result = m_viewPeaks->getOccupancyIntoView();
       }
       return result;
+    }
+
+    void ConcretePeaksPresenter::registerOwningPresenter(UpdateableOnDemand* owner)
+    {
+      m_owningPresenter = owner;
+    }
+
+    void ConcretePeaksPresenter::informOwnerUpdate()
+    {
+      if(m_owningPresenter)
+      {
+        m_owningPresenter->performUpdate();
+      }
+    }
+
+    bool ConcretePeaksPresenter::getShowBackground() const
+    {
+      return m_viewPeaks->isBackgroundShown();
+    }
+
+    void ConcretePeaksPresenter::zoomToPeak(const int peakIndex)
+    {
+      if(auto zoomable = dynamic_cast<ZoomableOnDemand*>(m_owningPresenter))
+      {
+        zoomable->zoomToPeak(this, peakIndex);
+      }
     }
 
   }
