@@ -3153,7 +3153,6 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
     for (int i = 0; i < names.count(); i++)
     {
       int c = w->colIndex(names[i]);
-      std::cerr << " w->colIndex(names[i]) : " << c << std::endl;
       if (c < 0)
       {
         continue;

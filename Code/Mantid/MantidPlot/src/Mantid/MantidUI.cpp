@@ -2522,8 +2522,6 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, c
 */
 void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName, int filter)
 {
-  std::cerr << wsName.toStdString() << std::endl;
-  std::cerr << logName.toStdString() << std::endl;
   //if you need to add a final filter valure to the end of the filter to match the extent of the data, then set this to the index of the row to add the value
   int addFinalFilterValueIndex = 0;
   Mantid::Kernel::DateAndTime lastFilterTime;
