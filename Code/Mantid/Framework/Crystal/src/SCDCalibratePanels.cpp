@@ -1382,22 +1382,7 @@ namespace Mantid
       declareProperty("RotateCenters", false,"Rotate bank Centers with panel orientations");
       declareProperty("AllowSampleShift",false,"Allow and fit for a sample that is off center");
 
-
-      declareProperty("tolerance", .12, mustBePositive,
-                      "offset of hkl values from integer for GOOD Peaks");
-
-      vector< string > exts;
-      exts.push_back(".DetCal");
-      exts.push_back(".Det_Cal");
-      declareProperty(new FileProperty("DetCalFilename", "", FileProperty::OptionalSave, exts),
-        "Path to an ISAW-style .detcal file to save.");
-
-      vector< string > exts1;
-      exts1.push_back(".xml");
-      declareProperty(new FileProperty("XmlFilename", "", FileProperty::OptionalSave, exts1),
-        "Path to an Mantid .xml description(for LoadParameterFile) file to save.");
-
-
+      // ---------- preprocessing
       vector< string > preProcessOptions;
       preProcessOptions.push_back(string("A)No PreProcessing"));
       preProcessOptions.push_back("B)Apply a ISAW.DetCal File");
@@ -1416,23 +1401,50 @@ namespace Mantid
 
       declareProperty("InitialTimeOffset", 0.0, "Initial time offset when using xml files");
 
+      const string PREPROC("Preprocessing");
+      setPropertyGroup("PreProcessInstrument", PREPROC);
+      setPropertyGroup("PreProcFilename", PREPROC);
+      setPropertyGroup("InitialTimeOffset", PREPROC);
+
+      // ---------- outputs
+      vector< string > exts;
+      exts.push_back(".DetCal");
+      exts.push_back(".Det_Cal");
+      declareProperty(new FileProperty("DetCalFilename", "", FileProperty::OptionalSave, exts),
+        "Path to an ISAW-style .detcal file to save.");
+
+      vector< string > exts1;
+      exts1.push_back(".xml");
+      declareProperty(new FileProperty("XmlFilename", "", FileProperty::OptionalSave, exts1),
+        "Path to an Mantid .xml description(for LoadParameterFile) file to save.");
 
       declareProperty(new WorkspaceProperty<ITableWorkspace> ("ResultWorkspace", "ResultWorkspace",
         Kernel::Direction::Output), "Workspace of Results");
 
       declareProperty(new WorkspaceProperty<ITableWorkspace> ("QErrorWorkspace", "QErrorWorkspace",
         Kernel::Direction::Output), "Workspace of Errors in Q");
+
+      const string OUTPUTS("Outputs");
+      setPropertyGroup("DetCalFilename", OUTPUTS);
+      setPropertyGroup("XmlFilename", OUTPUTS);
+      setPropertyGroup("ResultWorkspace", OUTPUTS);
+      setPropertyGroup("QErrorWorkspace", OUTPUTS);
+
       //------------------------------------ Tolerance settings-------------------------
+      declareProperty("tolerance", .12, mustBePositive,
+                      "offset of hkl values from integer for GOOD Peaks");
 
       declareProperty( "NumIterations",60,"Number of iterations");
       declareProperty("MaxRotationChangeDegrees",5.0,"Maximum Change in Rotations about x,y,or z in degrees(def=5)");
       declareProperty("MaxPositionChange_meters",.010,"Maximum Change in Panel positions in meters(def=.01)");
       declareProperty("MaxSamplePositionChangeMeters",.005,"Maximum Change in Sample position in meters(def=.005)");
 
-      setPropertyGroup("NumIterations", "Tolerance settings");
-      setPropertyGroup("MaxRotationChangeDegrees", "Tolerance settings");
-      setPropertyGroup("MaxPositionChange_meters", "Tolerance settings");
-      setPropertyGroup("MaxSamplePositionChangeMeters", "Tolerance settings");
+      const string TOLERANCES("Tolerance settings");
+      setPropertyGroup("tolerance", TOLERANCES);
+      setPropertyGroup("NumIterations", TOLERANCES);
+      setPropertyGroup("MaxRotationChangeDegrees", TOLERANCES);
+      setPropertyGroup("MaxPositionChange_meters", TOLERANCES);
+      setPropertyGroup("MaxSamplePositionChangeMeters", TOLERANCES);
 
 
       declareProperty("ChiSqOverDOF",-1.0,"ChiSqOverDOF",Kernel::Direction::Output);
