@@ -128,7 +128,7 @@ namespace Mantid
       std::string fun = getPropertyValue("Function");
       //int wi = getProperty("WorkspaceIndex");
       std::string logName = getProperty("LogValue");
-      bool sequential = getPropertyValue("FitType") == "Sequential";
+      bool individual = getPropertyValue("FitType") == "Individual";
       bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
 
       bool isDataName = false; // if true first output column is of type string and is the data source name
@@ -155,7 +155,7 @@ namespace Mantid
 
       // for inidividual fittings store the initial parameters
       std::vector<double> initialParams(ifun->nParams());
-      if ( !sequential )
+      if ( individual )
       {
           for(size_t i = 0; i < initialParams.size(); ++i)
           {
@@ -289,9 +289,8 @@ namespace Mantid
           progress(Prog);
           interruption_point();
 
-          if (!sequential)
+          if (individual)
           {
-            //ifun = FunctionFactory::Instance().createInitialized(fun);
             for(size_t i = 0; i < initialParams.size(); ++i)
             {
                 ifun->setParameter(i,initialParams[i]);

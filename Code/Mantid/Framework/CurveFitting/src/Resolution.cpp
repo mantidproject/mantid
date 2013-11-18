@@ -14,9 +14,43 @@ using namespace API;
 
 DECLARE_FUNCTION(Resolution)
 
-Resolution::Resolution():TabulatedFunction()
+Resolution::Resolution():ParamFunction(),IFunction1D()
 {
-    tie("Scaling","1.0"); // fix the scaling parameter
+}
+
+void Resolution::function1D(double *out, const double *xValues, const size_t nData) const
+{
+    m_fun.function1D( out, xValues, nData );
+}
+
+void Resolution::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
+{
+    m_fun.functionDeriv1D( out, xValues, nData );
+}
+
+size_t Resolution::nAttributes() const
+{
+    return m_fun.nAttributes();
+}
+
+std::vector<std::string> Resolution::getAttributeNames() const
+{
+    return m_fun.getAttributeNames();
+}
+
+IFunction::Attribute Resolution::getAttribute(const std::string &attName) const
+{
+    return m_fun.getAttribute( attName );
+}
+
+void Resolution::setAttribute(const std::string &attName, const IFunction::Attribute &value)
+{
+    m_fun.setAttribute( attName, value );
+}
+
+bool Resolution::hasAttribute(const std::string &attName) const
+{
+    return m_fun.hasAttribute( attName );
 }
 
 
