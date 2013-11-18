@@ -212,7 +212,6 @@ namespace LiveData
     if (m_isConnected == false) // sanity check
     {
       throw std::runtime_error( std::string("SNSLiveEventDataListener::run(): No connection to SMS server."));
-      return;  // should never be called, but here just in case exceptions are disabled
     }
 
     // First thing to do is send a hello packet

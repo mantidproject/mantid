@@ -106,12 +106,9 @@ namespace Crystal
 
       // Date: use the current date/time if not found
       Kernel::DateAndTime C_experimentDate;
-      std::string date;
       tag = getWord(in, false );
-      if(tag.empty())
-        date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
-      else if(tag == "Date:")
-        date = getWord(in, false );
+      if(tag == "Date:")
+        getWord(in, false );
       readToEndOfLine( in, true );
       confidence = 95;
     }
