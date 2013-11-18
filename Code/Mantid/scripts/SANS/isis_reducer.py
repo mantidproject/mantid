@@ -333,7 +333,6 @@ class ISISReducer(SANSReducer):
         # copy settings
         sample_wksp_name = self.output_wksp
         sample_trans_name = self.transmission_calculator.output_wksp
-        
         # configure can
         self._process_can = True
         # set the workspace that we've been setting up as the one to be processed 
@@ -379,8 +378,11 @@ class ISISReducer(SANSReducer):
         AddSampleLog(Workspace=self.output_wksp,LogName="UserFile", LogText=user_file)
 
         # get the value of __transmission_sample from the transmission_calculator if it has 
-        if self.transmission_calculator and self.transmission_calculator.output_wksp:
+        if (not self.get_can()) and self.transmission_calculator.output_wksp:
+            # it updates only if there was not can, because, when there is can, the __transmission_sample
+            # is already correct and transmission_calculator.output_wksp points to the can transmission
             self.__transmission_sample = self.transmission_calculator.output_wksp
+
         # The reducer itself sometimes will be reset, and the users of the singleton
         # not always will have access to its settings. So, we will add the transmission workspaces
         # to the SampleLog, to be connected to the workspace, and be available outside. These values
@@ -390,6 +392,10 @@ class ISISReducer(SANSReducer):
         if self.__transmission_can:
             AddSampleLog(Workspace=self.output_wksp,LogName= "TransmissionCan", LogText=self.__transmission_can + str('_unfitted'))
 	
+        # clean these values for subsequent executions
+        self.__transmission_sample = ""
+        self.__transmission_can = ""
+
         for role in self._temporys.keys():
             try:
                 DeleteWorkspace(Workspace=self._temporys[role])
