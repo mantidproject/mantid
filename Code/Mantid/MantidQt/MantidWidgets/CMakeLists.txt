@@ -1,22 +1,23 @@
 set ( SRC_FILES
 	src/AlgorithmSelectorWidget.cpp
+	src/CatalogHelper.cpp
+	src/CatalogSearch.cpp
 	src/CheckboxHeader.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
-	src/FindReplaceDialog.cpp
 	src/FindDialog.cpp
+	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/FunctionBrowser.cpp
-	src/CatalogSearch.cpp
-	src/CatalogHelper.cpp
 	src/InstrumentSelector.cpp
-	src/MessageDisplay.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
+	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
 	src/MuonFitPropertyBrowser.cpp
+	src/MuonSequentialFitDialog.cpp
+	src/ProcessingAlgoWidget.cpp
 	src/PropertyHandler.cpp
-    src/ProcessingAlgoWidget.cpp
 	src/RangeSelector.cpp
 	src/RenameParDialog.cpp
 	src/SafeQwtPlot.cpp
@@ -46,6 +47,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
@@ -65,7 +67,7 @@ set ( MOC_FILES
 
 # Add the include files are NOT already in MOC_FILES
 set ( INC_FILES
-    ${MOC_FILES}
+	${MOC_FILES}
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
 
