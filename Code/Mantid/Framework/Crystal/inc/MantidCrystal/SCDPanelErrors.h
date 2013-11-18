@@ -131,7 +131,6 @@ protected:
 
   void init();
 
-  boost::shared_ptr<DataObjects::PeaksWorkspace> getPeaks()const;
 
   /**
      *  Checks for out of bounds values ,  peaksWorkspace status
@@ -147,14 +146,21 @@ protected:
   Geometry::Instrument_sptr getNewInstrument( const API::IPeak & peak)const;
 
 
-  /**
-     * Even though constrains are used. Often very illogical parameters have to be processed.
-     * This checks for these conditions.
-     */
-  double checkForNonsenseParameters() const;
+
 
 private:
-  boost::shared_ptr< DataObjects::PeaksWorkspace> m_peaks;
+  /**
+   * Even though constrains are used. Often very illogical parameters have to be processed.
+   * This checks for these conditions.
+   */
+  double checkForNonsenseParameters() const;
+
+  /**
+   * Get the peaks workspace that was specified.
+   */
+  void getPeaks() const;
+
+  mutable boost::shared_ptr< DataObjects::PeaksWorkspace> m_peaks;
 
   double a,b,c,alpha,beta,gamma;
   int NGroups;

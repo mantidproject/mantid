@@ -159,10 +159,6 @@ SCDPanelErrors::SCDPanelErrors() :
   tolerance = .6;
   startX = endX = -1;
 
-  boost::shared_ptr<PeaksWorkspace> pwks1(new PeaksWorkspace());
-
-  m_peaks = pwks1;
-
   B0 = DblMatrix(3, 3);
 
   BankNames = "";
@@ -300,23 +296,22 @@ void SCDPanelErrors::init()
   }
 }
 
-boost::shared_ptr<DataObjects::PeaksWorkspace> SCDPanelErrors::getPeaks() const
+void SCDPanelErrors::getPeaks() const
 {
-  boost::shared_ptr<DataObjects::PeaksWorkspace> pwks;
-  pwks = m_peaks;
-  if (pwks->rowCount() < 1)
-  {
-    pwks = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace> (PeakName);
+  // if the pointer is set just return
+  if (m_peaks && m_peaks->rowCount() > 0)
+    return;
 
-    if (!pwks || pwks->rowCount() < 1)
-    {
-      g_log.error("There are no peaks in the peaks workspace or no PeakWorkspace");
-      throw std::invalid_argument("There are no peaks in the peaks workspace or no PeakWorkspace");
-    }
-    return pwks;
-  }
-  else
-    return m_peaks;
+  if (PeakName.empty())
+    throw std::invalid_argument("Cannot retrieve peaks workspace from empty string");
+
+  // get the workspace from the framework
+  m_peaks = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace> (PeakName);
+
+  // error check it
+  if (!m_peaks || m_peaks->rowCount() < 1)
+    throw std::invalid_argument("There are no peaks in the peaks workspace or no PeakWorkspace named \""
+                                + PeakName + "\"");
 }
 
 void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData) const
@@ -532,14 +527,14 @@ void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t
     return;
   }
 
-  boost::shared_ptr<DataObjects::PeaksWorkspace> pwks = getPeaks();
+  this->getPeaks();
 
-  Check(pwks, xValues, nData);
+  Check(m_peaks, xValues, nData);
 
   g_log.debug() << "BankNames " << BankNames << "   Number of peaks" << (EndX - StartX + 1) / 3
                 << std::endl;
 
-  boost::shared_ptr<Geometry::Instrument> instChange = getNewInstrument(pwks->getPeak(0));
+  boost::shared_ptr<Geometry::Instrument> instChange = getNewInstrument(m_peaks->getPeak(0));
   V3D samplePosition = instChange->getSample()->getPos();
 
 
@@ -560,7 +555,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t
     }
 
     size_t pkIndex = (size_t) xIndx;
-    if ( pkIndex >=  pwks->rowCount()) // ||pkIndex < 0
+    if ( pkIndex >=  m_peaks->rowCount()) // ||pkIndex < 0
     {
 
       g_log.error()<<"Improper workspace set "<<pkIndex<<","<<xIndx<<std::endl;
@@ -568,7 +563,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t
             "Improper workspace. xVals correspond to an index in the PeaksWorkspace");
     }
 
-    IPeak & peak_old = pwks->getPeak((int) pkIndex);
+    IPeak & peak_old = m_peaks->getPeak((int) pkIndex);
     V3D detOld;
 
     Peak peak = createNewPeak(peak_old, instChange,getParameter("t0"),getParameter("l0"));
@@ -843,7 +838,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   }
 
   CheckSizetMax(StartX, EndX, EndX, "Deriv calc StartX,EndX");
-  m_peaks = getPeaks();
+  this->getPeaks();
   Check(m_peaks, xValues, nData);
 
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
