@@ -69,6 +69,7 @@ To do so select the workspace, which you have calibrated as the InputWorkspace a
 
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -617,6 +618,8 @@ namespace Mantid
       return true;
     }
 
+    namespace { // anonymous namespace
+
     /**
      * Adds a tie to the IFunction.
      * @param iFunc The function to add the tie to.
@@ -629,14 +632,25 @@ namespace Mantid
       if (!tie) return;
       std::ostringstream ss;
       ss << std::fixed << value;
-      std::cout << "Tying " << parName << " = " << value << std::endl; // REMOVE
       iFunc->tie(parName, ss.str());
     }
+
+    static inline void constrain(IFunction_sptr & iFunc, const string &parName,
+                                 const double min, const double max)
+    {
+      std::ostringstream ss;
+      ss << std::fixed << min
+         << "<" << parName << "<"
+         << std::fixed << max;
+      IConstraint * constraint = API::ConstraintFactory::Instance().createInitialized(iFunc.get(), ss.str());
+      iFunc->addConstraint(constraint);
+    }
+
+    } // end anonymous namespace
 
     void  SCDCalibratePanels::exec ()
     {
       PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
-
 
       double a = getProperty("a");
       double b = getProperty("b");
@@ -645,14 +659,13 @@ namespace Mantid
       double beta = getProperty("beta");
       double gamma = getProperty("gamma");
 
-
       double tolerance = getProperty("tolerance");
 
       if( !GoodStart( peaksWs, a,b,c,alpha,beta,gamma,tolerance))
-        {
-           g_log.warning()<<"**** Indexing is NOT compatible with given lattice parameters******"<<std::endl;
-           g_log.warning()<<"        Index with conventional orientation matrix???"<<std::endl;
-        }
+      {
+        g_log.warning()<<"**** Indexing is NOT compatible with given lattice parameters******"<<std::endl;
+        g_log.warning()<<"        Index with conventional orientation matrix???"<<std::endl;
+      }
 
       bool useL0 = getProperty("useL0");
       bool useTimeOffset = getProperty("useTimeOffset");
@@ -693,7 +706,6 @@ namespace Mantid
 
 
       //----------- Initialize peaksWorkspace, initial parameter values etc.---------
-
       boost::shared_ptr<const Instrument> instrument = peaksWs->getPeak(0).getInstrument();
       double T0 = 0;
       if((string) getProperty("PreProcessInstrument") == "C)Apply a LoadParameter.xml type file")
@@ -717,7 +729,6 @@ namespace Mantid
       }
 
       int nbanksSoFar = 0;
-      bool first = false;
       int NGroups = (int)Groups.size();
       double detWidthScale0,
         detHeightScale0,
@@ -773,7 +784,6 @@ namespace Mantid
       iFunc->setParameter("t0", T0);
 
       double maxXYOffset = getProperty("MaxPositionChange_meters");
-      string Constraints("");
       int i = -1;//position in ParamResults Array.
       for(auto group = Groups.begin(); group !=Groups.end(); ++group)
       {
@@ -820,13 +830,6 @@ namespace Mantid
         nbanksSoFar = nbanksSoFar + static_cast<int>(group->size());
 
         //---------- setup ties ----------------------------------
-
-
-        if( i == 0)
-        {
-          first = true;
-        }
-
         tie(iFunc, !use_PanelWidth, paramPrefix+"detWidthScale", detWidthScale0);
         tie(iFunc, !use_PanelHeight, paramPrefix+"detHeightScale", detHeightScale0);
         tie(iFunc, !use_PanelPosition, paramPrefix+"Xoffset", Xoffset0);
@@ -836,273 +839,255 @@ namespace Mantid
         tie(iFunc, !use_PanelOrientation, paramPrefix+"Yrot", Yrot0);
         tie(iFunc, !use_PanelOrientation, paramPrefix+"Zrot", Zrot0);
 
-        //--------------- set Constraints Property  -------------------------------
-        ostringstream oss2 ( ostringstream::out);
-
+        //--------------- setup constraints ------------------------------
         if( i == 0)
-          oss2 <<  (MIN_DET_HW_SCALE*L0) << "<" <<  "l0<"  <<  (MAX_DET_HW_SCALE*L0 ) << ",-5<" <<  "t0<5" ;
+        {
+          constrain(iFunc, "l0", (MIN_DET_HW_SCALE*L0), (MAX_DET_HW_SCALE*L0 ));
+          constrain(iFunc, "t0", -5., 5.);
+        }
+
+        constrain(iFunc, paramPrefix+"detWidthScale", MIN_DET_HW_SCALE*detWidthScale0, MAX_DET_HW_SCALE*detWidthScale0);
+        constrain(iFunc, paramPrefix+"detHeightScale", MIN_DET_HW_SCALE*detHeightScale0, MAX_DET_HW_SCALE*detHeightScale0);
+        constrain(iFunc, paramPrefix+"Xoffset", -1.*maxXYOffset+Xoffset0, maxXYOffset+Xoffset0);
+        constrain(iFunc, paramPrefix+"Yoffset", -1.*maxXYOffset+Yoffset0, maxXYOffset+Yoffset0);
+        constrain(iFunc, paramPrefix+"Zoffset", -1.*maxXYOffset+Zoffset0, maxXYOffset+Zoffset0);
 
         double MaxRotOffset = getProperty("MaxRotationChangeDegrees");
-        oss2 <<  "," << (MIN_DET_HW_SCALE)*detWidthScale0 << "<" << paramPrefix << "detWidthScale<" << (MAX_DET_HW_SCALE)*detWidthScale0
-          << "," << (MIN_DET_HW_SCALE)*detHeightScale0 << "<" << paramPrefix << "detHeightScale<" << (MAX_DET_HW_SCALE)*detHeightScale0
-          <<","<< -maxXYOffset+Xoffset0 << "<" << paramPrefix << "Xoffset<" << maxXYOffset+Xoffset0
-          << "," << -maxXYOffset+Yoffset0 << "<" << paramPrefix << "Yoffset<" << maxXYOffset+Yoffset0<<
-          "," << -maxXYOffset+Zoffset0 << "<" << paramPrefix << "Zoffset<" << maxXYOffset+Zoffset0<<","
-          << -MaxRotOffset<<"<" << paramPrefix << "Xrot<"<<MaxRotOffset<<",-"<<MaxRotOffset<<"<"
-          << paramPrefix << "Yrot<"<<MaxRotOffset<<",-"<<MaxRotOffset<< "<" << paramPrefix << "Zrot<"<<MaxRotOffset
-          ;
-
-
-        Constraints += oss2.str();
-
-
+        constrain(iFunc, paramPrefix+"Xrot", -1.*MaxRotOffset, MaxRotOffset);
+        constrain(iFunc, paramPrefix+"Yrot", -1.*MaxRotOffset, MaxRotOffset);
+        constrain(iFunc, paramPrefix+"Zrot", -1.*MaxRotOffset, MaxRotOffset);
       }//for vector< string > in Groups
 
+      // Constraints for sample offsets
+      if( getProperty("AllowSampleShift"))
+      {
+        // TODO the function should support setting the sample position even when it isn't be refined
+        iFunc->setAttributeValue("SampleX", samplePos.X());
+        iFunc->setAttributeValue("SampleY", samplePos.Y());
+        iFunc->setAttributeValue("SampleZ", samplePos.Z());
 
-      //Constraints for sample offsets
-     maxXYOffset = getProperty("MaxSamplePositionChangeMeters");
-
-     if( getProperty("AllowSampleShift"))
-     {
-       // TODO the function should support setting the sample position even when it isn't be refined
-       iFunc->setAttributeValue("SampleX", samplePos.X());
-       iFunc->setAttributeValue("SampleY", samplePos.Y());
-       iFunc->setAttributeValue("SampleZ", samplePos.Z());
-
-       ostringstream oss2(ostringstream::out);
-       if (!Constraints.empty())
-         oss2 << ",";
-
-       oss2 << samplePos.X()-maxXYOffset << "<SampleX<" <<samplePos.X()+ maxXYOffset << ","
-            << samplePos.Y()-maxXYOffset << "<SampleY<"
-            << samplePos.Y()+maxXYOffset << "," << samplePos.Z()-maxXYOffset << "<SampleZ<" << samplePos.Z()+maxXYOffset;
-
-       Constraints += oss2.str();
-     }
+        maxXYOffset = getProperty("MaxSamplePositionChangeMeters");
+        constrain(iFunc, "SampleX", samplePos.X()-maxXYOffset, samplePos.X()+ maxXYOffset);
+        constrain(iFunc, "SampleY", samplePos.Y()-maxXYOffset, samplePos.Y()+maxXYOffset);
+        constrain(iFunc, "SampleZ", samplePos.Z()-maxXYOffset, samplePos.Z()+maxXYOffset);
+      }
 
      tie(iFunc, !useL0, "l0", L0);
      tie(iFunc, !useTimeOffset, "t0", T0);
 
-      //--------------------- Set up Fit Algorithm and Execute-------------------
-      boost::shared_ptr< Algorithm > fit_alg = createChildAlgorithm( "Fit", .2, .9, true );
+     //--------------------- Set up Fit Algorithm and Execute-------------------
+     boost::shared_ptr< Algorithm > fit_alg = createChildAlgorithm( "Fit", .2, .9, true );
 
-      if( ! fit_alg)
-        throw invalid_argument( "Cannot find Fit algorithm" );
-      g_log.debug()<<"Constraints="<<Constraints<< "\n";
-      fit_alg->initialize();
+     if( ! fit_alg)
+       throw invalid_argument( "Cannot find Fit algorithm" );
+     fit_alg->initialize();
 
-      int Niterations =  getProperty( "NumIterations");
-      fit_alg->setProperty( "Function", iFunc);
-      fit_alg->setProperty( "MaxIterations", Niterations );
-      fit_alg->setProperty( "Constraints", Constraints);
-      fit_alg->setProperty( "InputWorkspace", ws);
-      fit_alg->setProperty( "CreateOutput",true);
-      fit_alg->setProperty( "Output","out");
-      fit_alg->executeAsChildAlg();
+     int Niterations =  getProperty( "NumIterations");
+     fit_alg->setProperty( "Function", iFunc);
+     fit_alg->setProperty( "MaxIterations", Niterations );
+     fit_alg->setProperty( "InputWorkspace", ws);
+     fit_alg->setProperty( "CreateOutput",true);
+     fit_alg->setProperty( "Output","out");
+     fit_alg->executeAsChildAlg();
 
-      g_log.debug()<<"Finished executing Fit algorithm\n";
+     g_log.debug()<<"Finished executing Fit algorithm\n";
 
-      string OutputStatus =fit_alg->getProperty("OutputStatus");
-      g_log.notice() <<"Output Status="<<OutputStatus<< "\n";
+     string OutputStatus =fit_alg->getProperty("OutputStatus");
+     g_log.notice() <<"Output Status="<<OutputStatus<< "\n";
 
-      declareProperty(
-        new API::WorkspaceProperty<API::ITableWorkspace>
-        ("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
-        "The name of the TableWorkspace in which to store the final covariance matrix" );
+     declareProperty(
+           new API::WorkspaceProperty<API::ITableWorkspace>
+           ("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
+           "The name of the TableWorkspace in which to store the final covariance matrix" );
 
 
-      ITableWorkspace_sptr NormCov= fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
-      // setProperty("OutputNormalisedCovarianceMatrix", NormCov);
-      AnalysisDataService::Instance().addOrReplace( string("CovarianceInfo"), NormCov);
-      setPropertyValue("OutputNormalisedCovarianceMatrix",   string("CovarianceInfo"));
+     ITableWorkspace_sptr NormCov= fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
+     // setProperty("OutputNormalisedCovarianceMatrix", NormCov);
+     AnalysisDataService::Instance().addOrReplace( string("CovarianceInfo"), NormCov);
+     setPropertyValue("OutputNormalisedCovarianceMatrix",   string("CovarianceInfo"));
 
-      //--------------------- Get and Process Results -----------------------
-      double chisq = fit_alg->getProperty( "OutputChi2overDoF");
-      setProperty("ChiSqOverDOF", chisq);
-      if( chisq >1)
-      {
-        g_log.warning()<<"************* This is a large chi squared value ************\n";
-        g_log.warning()<<"    the indexing may have been using an incorrect\n";
-        g_log.warning()<<"    orientation matrix, instrument geometry or goniometer info\n";
-      }
-      ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
-      vector< double >params;
-      vector< double >errs ;
-      vector< string >names;
-      double sigma= sqrt(chisq);
+     //--------------------- Get and Process Results -----------------------
+     double chisq = fit_alg->getProperty( "OutputChi2overDoF");
+     setProperty("ChiSqOverDOF", chisq);
+     if( chisq >1)
+     {
+       g_log.warning()<<"************* This is a large chi squared value ************\n";
+       g_log.warning()<<"    the indexing may have been using an incorrect\n";
+       g_log.warning()<<"    orientation matrix, instrument geometry or goniometer info\n";
+     }
+     ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
+     vector< double >params;
+     vector< double >errs ;
+     vector< string >names;
+     double sigma= sqrt(chisq);
 
-      if( chisq < 0 ||  chisq != chisq)
-        sigma = -1;
-      string fieldBaseNames = ";l0;t0;detWidthScale;detHeightScale;Xoffset;Yoffset;Zoffset;Xrot;Yrot;Zrot;";
-      if( getProperty("AllowSampleShift"))
-        fieldBaseNames +="SampleX;SampleY;SampleZ;";
-      for( size_t prm = 0; prm < RRes->rowCount(); ++prm )
-      {
-        string namee =RRes->getRef< string >( "Name", prm );
-        size_t dotPos = namee.find('_');
-        if (dotPos >= namee.size())
-          dotPos = 0;
-        else
-          dotPos++;
-        string Field = namee.substr(dotPos);
-        size_t FieldNum= fieldBaseNames.find(";"+Field+";");
-        if( FieldNum > fieldBaseNames.size())
-          continue;
-        if( dotPos !=0)
-        {
-          int col = atoi( namee.substr( 1,dotPos).c_str());
-          if( col < 0 || col >=NGroups)
-            continue;
-        }
-        names.push_back( namee );
-        params.push_back( RRes->getRef< double >( "Value", prm ));
-        double err =  RRes->getRef< double >( "Error", prm );
-        errs.push_back( sigma * err );
+     if( chisq < 0 ||  chisq != chisq)
+       sigma = -1;
+     string fieldBaseNames = ";l0;t0;detWidthScale;detHeightScale;Xoffset;Yoffset;Zoffset;Xrot;Yrot;Zrot;";
+     if( getProperty("AllowSampleShift"))
+       fieldBaseNames +="SampleX;SampleY;SampleZ;";
+     for( size_t prm = 0; prm < RRes->rowCount(); ++prm )
+     {
+       string namee =RRes->getRef< string >( "Name", prm );
+       size_t dotPos = namee.find('_');
+       if (dotPos >= namee.size())
+         dotPos = 0;
+       else
+         dotPos++;
+       string Field = namee.substr(dotPos);
+       size_t FieldNum= fieldBaseNames.find(";"+Field+";");
+       if( FieldNum > fieldBaseNames.size())
+         continue;
+       if( dotPos !=0)
+       {
+         int col = atoi( namee.substr( 1,dotPos).c_str());
+         if( col < 0 || col >=NGroups)
+           continue;
+       }
+       names.push_back( namee );
+       params.push_back( RRes->getRef< double >( "Value", prm ));
+       double err =  RRes->getRef< double >( "Error", prm );
+       errs.push_back( sigma * err );
+     }
 
-      }
+     //------------------- Report chi^2 value --------------------
+     int nVars =8;// NGroups;
 
-      //------------------- Report chi^2 value --------------------
-      int nVars =8;// NGroups;
+     if( !use_PanelWidth) nVars--;
+     if( !use_PanelHeight)nVars--;
+     if( !use_PanelPosition) nVars -=3;
+     if( !use_PanelOrientation) nVars -=3;
+     nVars *= NGroups ;
+     nVars += 2;
 
-      if( !use_PanelWidth) nVars--;
-      if( !use_PanelHeight)nVars--;
-      if( !use_PanelPosition) nVars -=3;
-      if( !use_PanelOrientation) nVars -=3;
-      nVars *= NGroups ;
-      nVars += 2;
+     if( !useL0)nVars--;
+     if( !useTimeOffset)nVars--;
 
-      if( !useL0)nVars--;
-      if( !useTimeOffset)nVars--;
+     // g_log.notice() << "      nVars=" <<nVars<< endl;
+     int NDof = ( (int)ws->dataX( 0).size()- nVars);
+     setProperty("DOF",NDof);
+     g_log.notice() << "ChiSqoverDoF =" << chisq << " NDof =" << NDof << "\n";
 
-      // g_log.notice() << "      nVars=" <<nVars<< endl;
-      int NDof = ( (int)ws->dataX( 0).size()- nVars);
-      setProperty("DOF",NDof);
-      g_log.notice() << "ChiSqoverDoF =" << chisq << " NDof =" << NDof << "\n";
+     map<string,double> result;
 
-      map<string,double> result;
+     for( size_t i = 0; i < min< size_t >( params.size(), names.size() ); ++i )
+     {
+       result[ names[ i ] ] = params[ i ];
+     }
 
-      for( size_t i = 0; i < min< size_t >( params.size(), names.size() ); ++i )
-      {
-        result[ names[ i ] ] = params[ i ];
+     //--------------------- Create Result Table Workspace-------------------
+     this->progress(.92, "Creating Results table");
+     createResultWorkspace(NGroups, names, params, errs);
 
-      }
+     //---------------- Create new instrument with ------------------------
+     //--------------new parameters to SAVE to files---------------------
 
-      //--------------------- Create Result Table Workspace-------------------
-      this->progress(.92, "Creating Results table");
-      createResultWorkspace(NGroups, names, params, errs);
+     boost::shared_ptr<ParameterMap> pmap( new ParameterMap());
+     boost::shared_ptr<const ParameterMap> pmapOld = instrument->getParameterMap();
+     boost::shared_ptr<const Instrument> NewInstrument( new Instrument( instrument->baseInstrument(), pmap));
 
-      //---------------- Create new instrument with ------------------------
-      //--------------new parameters to SAVE to files---------------------
+     i = -1;
 
-      boost::shared_ptr<ParameterMap> pmap( new ParameterMap());
-      boost::shared_ptr<const ParameterMap> pmapOld = instrument->getParameterMap();
-      boost::shared_ptr<const Instrument> NewInstrument( new Instrument( instrument->baseInstrument(), pmap));
+     for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
+     {
+       i++;
 
-      i = -1;
+       boost::shared_ptr<const RectangularDetector> bank_rect;
+       double rotx,roty,rotz;
 
-      for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
-      {
-        i++;
-
-        boost::shared_ptr<const RectangularDetector> bank_rect;
-        double rotx,roty,rotz;
-
-        string prefix = "f"+boost::lexical_cast<string>(i)+"_";
+       string prefix = "f"+boost::lexical_cast<string>(i)+"_";
 
 
-        rotx = result[ prefix + "Xrot" ];
+       rotx = result[ prefix + "Xrot" ];
+       roty = result[ prefix + "Yrot" ];
+       rotz = result[ prefix + "Zrot" ];
 
-        roty = result[ prefix + "Yrot" ];
+       Quat newRelRot = Quat( rotx,V3D( 1,0,0))*Quat( roty,V3D( 0,1,0))*Quat( rotz,V3D( 0,0,1));//*RelRot;
 
-        rotz = result[ prefix + "Zrot" ];
+       FixUpBankParameterMap( (*itv),
+                              NewInstrument,
+                              V3D(result[ prefix + "Xoffset" ], result[ prefix + "Yoffset" ],result[ prefix + "Zoffset" ]),
+           newRelRot,
+           result[ prefix+"detWidthScale" ],
+           result[ prefix+"detHeightScale" ],
+           pmapOld, getProperty("RotateCenters"));
 
-        Quat newRelRot = Quat( rotx,V3D( 1,0,0))*Quat( roty,V3D( 0,1,0))*Quat( rotz,V3D( 0,0,1));//*RelRot;
+     }//For @ group
 
-        FixUpBankParameterMap( (*itv),
-          NewInstrument,
-          V3D(result[ prefix + "Xoffset" ], result[ prefix + "Yoffset" ],result[ prefix + "Zoffset" ]),
-          newRelRot,
-          result[ prefix+"detWidthScale" ],
-          result[ prefix+"detHeightScale" ],
-          pmapOld, getProperty("RotateCenters"));
+     V3D sampPos(NewInstrument->getSample()->getPos());//should be (0,0,0)???
+     if( getProperty("AllowSampleShift"))
+       sampPos= V3D( result["SampleX"],result["SampleY"],result["SampleZ"]);
 
-      }//For @ group
+     FixUpSourceParameterMap( NewInstrument, result["l0"],sampPos, pmapOld);
 
-      V3D sampPos(NewInstrument->getSample()->getPos());//should be (0,0,0)???
-      if( getProperty("AllowSampleShift"))
-        sampPos= V3D( result["SampleX"],result["SampleY"],result["SampleZ"]);
+     //---------------------- Save new instrument to DetCal-------------
+     //-----------------------or xml(for LoadParameterFile) files-----------
+     this->progress(.94, "Saving detcal file");
+     string DetCalFileName = getProperty( "DetCalFilename");
+     saveIsawDetCal( NewInstrument,AllBankNames, result[ "t0" ], DetCalFileName);
 
-      FixUpSourceParameterMap( NewInstrument, result["l0"],sampPos, pmapOld);
+     this->progress(.96, "Saving xml param file");
+     string XmlFileName = getProperty( "XmlFilename");
+     saveXmlFile(  XmlFileName, Groups,NewInstrument);
 
-      //---------------------- Save new instrument to DetCal-------------
-      //-----------------------or xml(for LoadParameterFile) files-----------
-      this->progress(.94, "Saving detcal file");
-      string DetCalFileName = getProperty( "DetCalFilename");
-      saveIsawDetCal( NewInstrument,AllBankNames, result[ "t0" ], DetCalFileName);
+     //----------------- Calculate & Create Qerror table------------------
+     this->progress(.98, "Creating Qerror table");
+     ITableWorkspace_sptr QErrTable
+         = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+     QErrTable->addColumn("int","Bank Number");
+     QErrTable->addColumn("int","Peak Number");
+     QErrTable->addColumn("int","Peak Row");
+     QErrTable->addColumn("double","Error in Q");
+     QErrTable->addColumn("int","Peak Column");
+     QErrTable->addColumn("int","Run Number");
+     QErrTable->addColumn("double","wl");
+     QErrTable->addColumn("double","tof");
+     QErrTable->addColumn("double","d-spacing");
+     QErrTable->addColumn("double","L2");
+     QErrTable->addColumn("double","Scat");
+     QErrTable->addColumn("double","y");
 
-      this->progress(.96, "Saving xml param file");
-      string XmlFileName = getProperty( "XmlFilename");
-      saveXmlFile(  XmlFileName, Groups,NewInstrument);
-
-      //----------------- Calculate & Create Qerror table------------------
-      this->progress(.98, "Creating Qerror table");
-      ITableWorkspace_sptr QErrTable
-          = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      QErrTable->addColumn("int","Bank Number");
-      QErrTable->addColumn("int","Peak Number");
-      QErrTable->addColumn("int","Peak Row");
-      QErrTable->addColumn("double","Error in Q");
-      QErrTable->addColumn("int","Peak Column");
-      QErrTable->addColumn("int","Run Number");
-      QErrTable->addColumn("double","wl");
-      QErrTable->addColumn("double","tof");
-      QErrTable->addColumn("double","d-spacing");
-      QErrTable->addColumn("double","L2");
-      QErrTable->addColumn("double","Scat");
-      QErrTable->addColumn("double","y");
-
-      //--------------- Create Function argument for the FunctionHandler------------
+     //--------------- Create Function argument for the FunctionHandler------------
 
 
-      size_t nData = ws->dataX(0).size();
-      vector<double> out(nData);
-      vector<double> xVals = ws->dataX(0);
+     size_t nData = ws->dataX(0).size();
+     vector<double> out(nData);
+     vector<double> xVals = ws->dataX(0);
 
-      CreateFxnGetValues( ws,NGroups, names,params,BankNameString, out.data(),xVals.data(),nData);
+     CreateFxnGetValues( ws,NGroups, names,params,BankNameString, out.data(),xVals.data(),nData);
 
 
-      string prevBankName ="";
-      int BankNumDef = 200;
-      for (size_t q = 0; q < nData; q += 3)
-      {
-        int pk = (int) xVals[q];
-        const API::IPeak & peak = peaksWs->getPeak(pk);
+     string prevBankName ="";
+     int BankNumDef = 200;
+     for (size_t q = 0; q < nData; q += 3)
+     {
+       int pk = (int) xVals[q];
+       const API::IPeak & peak = peaksWs->getPeak(pk);
 
-        string bankName =peak.getBankName();
-        size_t pos = bankName.find_last_not_of("0123456789");
-        int bankNum;
-        if( pos < bankName.size())
-          bankNum = boost::lexical_cast<int>(bankName.substr(pos+1));
-        else if( bankName == prevBankName)
-          bankNum = BankNumDef;
-        else
-        {
-          prevBankName = bankName;
-          BankNumDef ++;
-          bankNum = BankNumDef;
-        }
+       string bankName =peak.getBankName();
+       size_t pos = bankName.find_last_not_of("0123456789");
+       int bankNum;
+       if( pos < bankName.size())
+         bankNum = boost::lexical_cast<int>(bankName.substr(pos+1));
+       else if( bankName == prevBankName)
+         bankNum = BankNumDef;
+       else
+       {
+         prevBankName = bankName;
+         BankNumDef ++;
+         bankNum = BankNumDef;
+       }
 
-        Mantid::API::TableRow row = QErrTable->appendRow();
-        row << bankNum << pk << peak.getRow()
-            << sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] + out[q + 2] * out[q + 2])
-            << peak.getCol() << peak.getRunNumber()
-            << peak.getWavelength() << peak.getTOF() << peak.getDSpacing()
-            << peak.getL2() << peak.getScattering() << peak.getDetPos().Y();
-      }
+       Mantid::API::TableRow row = QErrTable->appendRow();
+       row << bankNum << pk << peak.getRow()
+           << sqrt(out[q] * out[q] + out[q + 1] * out[q + 1] + out[q + 2] * out[q + 2])
+           << peak.getCol() << peak.getRunNumber()
+           << peak.getWavelength() << peak.getTOF() << peak.getDSpacing()
+           << peak.getL2() << peak.getScattering() << peak.getDetPos().Y();
+     }
 
-      QErrTable->setComment(string("Errors in Q for each Peak"));
-      setProperty("QErrorWorkspace", QErrTable);
-
+     QErrTable->setComment(string("Errors in Q for each Peak"));
+     setProperty("QErrorWorkspace", QErrTable);
     }
 
 
