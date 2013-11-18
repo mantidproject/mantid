@@ -8,7 +8,9 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QSettings>
+#include <QStyle>
 #include <QUrl>
+#include <QDesktopWidget>
 
 namespace MantidQt
 {
@@ -124,6 +126,8 @@ namespace MantidQt
 
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
+      // Centre the GUI on screen.
+      this->setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,this->window()->size(),QDesktopWidget().availableGeometry()));
     }
 
     /**
@@ -473,8 +477,8 @@ namespace MantidQt
       m_calendar->setMinimumDate(QDate(1950, 1, 1));
       m_calendar->setMaximumDate(QDate(2050, 1, 1));
 
-      // Make the m_calendar wide and tall enough to see all dates.
-      m_calendar->setGeometry(QRect(180, 0, 445, 210));
+      // Centre the calendar on screen.
+      m_calendar->setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,QSize(445,205),QDesktopWidget().availableGeometry()));
 
       // Improve UX, then display the m_calendar.
       m_calendar->setGridVisible(true);
