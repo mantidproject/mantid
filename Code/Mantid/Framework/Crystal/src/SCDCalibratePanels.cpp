@@ -228,13 +228,14 @@ namespace Mantid
               for (size_t i = 0; i < 3; ++i)
               {
                 xRef.push_back((double) j);
-                yvalB.push_back(0.0);
-                errB.push_back(1.0);
               }
             }
         }//for @ peak
         bounds.push_back(N);
       }//for @ bank name
+
+      yvalB.assign(xRef.size(), 0.0);
+      errB.assign(xRef.size(), 1.0);
 
       if( N < 4)//If not well indexed
         return boost::shared_ptr<DataObjects::Workspace2D>(new DataObjects::Workspace2D);
