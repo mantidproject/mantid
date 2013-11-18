@@ -1295,7 +1295,7 @@ namespace Mantid
       if (m_filter.size() == 0)
       {
         // I. No filter
-        if (n >= static_cast<int>(m_values.size()))
+        if (n >= static_cast<int>(m_values.size()) || (n == static_cast<int>(m_values.size())-1 && m_values.size() == 1))
         {
           // 1. Out of bound
           ;
@@ -1303,7 +1303,12 @@ namespace Mantid
         else if (n == static_cast<int>(m_values.size())-1)
         {
           // 2. Last one by making up an end time.
-          time_duration d = m_values.rbegin()->time() - (m_values.rbegin()+1)->time();
+          std::cerr << "size : " << m_values.size() << std::endl;
+          std::cerr << "n : " << n << std::endl;
+          std::cerr << "m_values.rbegin()->time() : " << m_values.rbegin()->time() << std::endl;
+          std::cerr << "(m_values.rbegin()+1)->time() : " << (m_values.rbegin() + 1)->time() << std::endl;
+
+          time_duration d = m_values.rbegin()->time() - (m_values.rbegin() + 1)->time();
           DateAndTime endTime = m_values.rbegin()->time() + d;
           Kernel::TimeInterval dt(m_values.rbegin()->time(), endTime);
           deltaT = dt;

@@ -3152,7 +3152,13 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
     // Select only those column names which we can draw and search for any X columns specified
     for (int i = 0; i < names.count(); i++)
     {
-      int d = w->colPlotDesignation(w->colIndex(names[i]));
+      int c = w->colIndex(names[i]);
+      std::cerr << " w->colIndex(names[i]) : " << c << std::endl;
+      if (c < 0)
+      {
+        continue;
+      }
+      int d = w->colPlotDesignation(c);
 
       if (d == Table::Y || d == Table::xErr || d == Table::yErr || d == Table::Label)
       {

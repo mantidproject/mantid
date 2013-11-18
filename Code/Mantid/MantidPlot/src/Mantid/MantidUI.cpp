@@ -2814,7 +2814,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   }
   g->setXAxisTitle(t->colLabel(0));
   g->setYAxisTitle(t->colLabel(1).section(".",0,0));
-  g->setTitle(label.section("-",0, 0));
+  g->setTitle(label);
   g->setAutoScale();
 
   ml->showNormal();
