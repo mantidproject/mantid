@@ -75,27 +75,6 @@ set ( PYTHON_EXECUTABLE_DEBUG "${CMAKE_LIBRARY_PATH}/Python27/python_d.exe" CACH
 ## The "pythonw" executable that avoids raising another terminal when it runs. Used for IPython
 set ( PYTHONW_EXECUTABLE "${CMAKE_LIBRARY_PATH}/Python27/pythonw.exe" CACHE FILEPATH "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE ) 
 
-# Finally create variables containing the required distribution files
-set ( PY_DIST_DIRS "${CMAKE_LIBRARY_PATH}/Python27/DLLs" "${CMAKE_LIBRARY_PATH}/Python27/Lib" )
-set ( PY_DLL_PREFIX  "${CMAKE_LIBRARY_PATH}/Python27/Python27" )
-set ( PY_DLL_SUFFIX_RELEASE ".dll" )
-set ( PY_DLL_SUFFIX_RELWITHDEBINFO ${PY_DLL_SUFFIX_RELEASE} )
-set ( PY_DLL_SUFFIX_MINSIZEREL ${PY_DLL_SUFFIX_RELEASE}  )
-set ( PY_DLL_SUFFIX_DEBUG "_d.dll" )
-
-set ( PY_EXE_PREFIX  "${CMAKE_LIBRARY_PATH}/Python27/python" )
-set ( PY_EXE_SUFFIX_RELEASE ".exe" )
-set ( PY_EXE_SUFFIX_RELWITHDEBINFO ${PY_EXE_SUFFIX_RELEASE} )
-set ( PY_EXE_SUFFIX_MINSIZEREL ${PY_EXE_SUFFIX_RELEASE}  )
-set ( PY_EXE_SUFFIX_DEBUG "_d.exe" )
-# No terminal version
-set ( PY_EXEW_PREFIX  "${CMAKE_LIBRARY_PATH}/Python27/pythonw" )
-set ( PY_EXEW_SUFFIX_RELEASE ".exe" )
-set ( PY_EXEW_SUFFIX_RELWITHDEBINFO ${PY_EXE_SUFFIX_RELEASE} )
-set ( PY_EXEW_SUFFIX_MINSIZEREL ${PY_EXE_SUFFIX_RELEASE}  )
-set ( PY_EXEW_SUFFIX_DEBUG "_d.exe" )
-
-
 ###########################################################################
 # Compiler options.
 ###########################################################################
