@@ -164,10 +164,10 @@ namespace DataHandling
     }
 
     // Generate output table workspace
-    API::ITableWorkspace_sptr outws = genTableWorkspace(bankparammap);
+    API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
 
     // 6. Output
-    setProperty("OutputTableWorkspace", outws);
+    setProperty("OutputTableWorkspace", outTabWs);
 
     return;
   }
