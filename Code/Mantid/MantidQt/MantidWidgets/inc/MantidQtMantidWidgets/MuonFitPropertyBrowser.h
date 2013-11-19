@@ -47,6 +47,8 @@ public:
 public slots:
   /// Perform the fit algorithm
   virtual void fit();
+  /// Open sequential fit dialog
+  virtual void sequentialFit();
 
 
 protected:
@@ -60,8 +62,6 @@ private slots:
 private:  
   /// Get the registered function names
   virtual void populateFunctionNames();
-  /// Enable/disable the Fit button;
-  virtual void setFitEnabled(bool yes);
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
 

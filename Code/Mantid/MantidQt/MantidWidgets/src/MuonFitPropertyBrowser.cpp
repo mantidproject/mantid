@@ -1,6 +1,6 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
-#include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidAPI/FunctionFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -35,13 +35,13 @@
 
 #include <QSettings>
 #include <QMessageBox>
+#include <QAction>
 
 
 namespace MantidQt
 {
 namespace MantidWidgets
 {
-
 
 /**
  * Constructor
@@ -311,6 +311,14 @@ void MuonFitPropertyBrowser::fit()
   }
 }
 
+/**
+ * Show sequential fit dialog.
+ */
+void MuonFitPropertyBrowser::sequentialFit()
+{
+  MuonSequentialFitDialog* dialog = new MuonSequentialFitDialog(this);
+  dialog->show();
+}
 
 /**
  * Connect to the AnalysisDataServis when shown
@@ -321,17 +329,6 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent* e)
   observePostDelete();
   populateWorkspaceNames();
 }
-
-
-/** 
-* Enable/disable the Fit button.
-*/
-void MuonFitPropertyBrowser::setFitEnabled(bool yes)
-{
-  m_fitActionFit->setEnabled(yes);
-  m_fitActionSeqFit->setEnabled(false);
-}
-
 
 /** Check if the workspace can be used in the fit. The accepted types are
   * MatrixWorkspaces same size and that it isn't the generated raw file.

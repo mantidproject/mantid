@@ -1,6 +1,6 @@
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 
-namespace Mantid
+namespace MantidQt
 {
 namespace MantidWidgets
 {

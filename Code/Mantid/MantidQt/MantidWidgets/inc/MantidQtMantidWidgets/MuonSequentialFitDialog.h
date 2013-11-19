@@ -5,7 +5,7 @@
 
 #include <QDialog>
 
-namespace Mantid
+namespace MantidQt
 {
 namespace MantidWidgets
 {

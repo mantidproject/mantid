@@ -211,7 +211,7 @@ public:
 
 public slots:
   virtual void fit(){ doFit(500); }
-  void sequentialFit();
+  virtual void sequentialFit();
   void undoFit();
   void clear();
   void clearBrowser();
