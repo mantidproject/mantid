@@ -12,6 +12,11 @@ namespace MantidQt
   {
 
     /**
+     * Constructor
+     */
+    CatalogHelper::CatalogHelper() : m_numberOfResults(0) {}
+
+    /**
      * Obtain the list of instruments from the ICAT Catalog algorithm.
      * @return A vector containing the list of all instruments available.
      */
@@ -38,10 +43,17 @@ namespace MantidQt
     /**
      * Search the archive with the user input terms provided and save them to a workspace ("searchResults").
      * @param userInputFields :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
+     * @param offset   :: skip this many rows and start returning rows from this point.
+     * @param limit    :: limit the number of rows returned by the query.
      */
-    void CatalogHelper::executeSearch(const std::map<std::string, std::string> &userInputFields)
+    void CatalogHelper::executeSearch(const std::map<std::string, std::string> &userInputFields,
+        const int &offset, const int &limit)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
+
+      // Set the properties to limit the number of results returned for paging purposes.
+      catalogAlgorithm->setProperty("Limit", offset);
+      catalogAlgorithm->setProperty("Offset", limit);
 
       // This will be the workspace where the content of the search result is output to.
       catalogAlgorithm->setProperty("OutputWorkspace", "__searchResults");
@@ -58,8 +70,23 @@ namespace MantidQt
           catalogAlgorithm->setProperty(it->first, value);
         }
       }
+
       // Allow asynchronous execution to update label while search is being carried out.
       executeAsynchronously(catalogAlgorithm);
+
+      // The number of results to be returned and used by the GUI.
+      m_numberOfResults = catalogAlgorithm->getProperty("NumberOfSearchResults");
+    }
+
+
+    /**
+     * The number of results returned by the search query
+     * (based on values of input fields in executeSearch() above).
+     * @return Number of results returned by the search query.
+     */
+    long CatalogHelper::getNumberOfSearchResults()
+    {
+      return m_numberOfResults;
     }
 
     /**
