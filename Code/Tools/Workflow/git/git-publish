@@ -65,8 +65,8 @@ main() {
     local_modifications
     if [ $? -eq 1 ]; then
         echo "Warning: You have local modifications."
-	echo "The current commits will be pushed to the remote if you wish to"
-	echo "publish the uncommitted changes then commit them and rerun this command."
+        echo "The current commits will be pushed to the remote if you wish to"
+        echo "publish the uncommitted changes then commit them and rerun this command."
     fi
 
     
