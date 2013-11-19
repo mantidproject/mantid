@@ -64,6 +64,11 @@ signals:
   /// Tell others we are hiding
   void hideMe();
 
+protected:
+  void dropEvent(QDropEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dragEnterEvent(QDragEnterEvent *de);
+
 private slots:
   /// Populate file menu
   void populateFileMenu();
@@ -115,6 +120,8 @@ private:
   /// Accept a custom defined event
   void customEvent(QEvent * event);
 
+  /// Extract py files from urllist
+  QStringList extractPyFiles(const QList<QUrl>& urlList) const;
 
 private:
   /// The script editors' manager

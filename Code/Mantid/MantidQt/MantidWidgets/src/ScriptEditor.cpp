@@ -23,6 +23,7 @@
 #include <QClipboard>
 #include <QShortcut>
 #include <QSettings>
+#include <QMimeData>
 
 // Qscintilla
 #include <Qsci/qscilexer.h> 
@@ -526,9 +527,15 @@ void ScriptEditor::dropEvent(QDropEvent *de)
     {
       int line, index;
       this->getCursorPosition(&line,&index);
+      QMimeData myMimeData;
       QString wsName = mimeData->text().mid(WORKSPACE_PREFIX.size());
       QString importStatement = wsName + " = mtd[\"" + wsName + "\"]";
-      this->insertAt(importStatement,line,index);
+      myMimeData.setText(importStatement);
+
+      QDropEvent myDropEvent(de->pos(),de->possibleActions(),&myMimeData, de->mouseButtons(),de->keyboardModifiers(),de->type());
+      QsciScintilla::dropEvent(&myDropEvent);
+      de->acceptProposedAction();
+      //this->insertAt(importStatement,line,index);
     } 
     else
     {
