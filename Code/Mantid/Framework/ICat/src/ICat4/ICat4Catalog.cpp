@@ -291,7 +291,36 @@ namespace Mantid
      * of investigations to be returned by the catalog.
      * @return The number of investigations returned by the search performed.
      */
-    long ICat4Catalog::getNumberOfSearchResults() {}
+    long ICat4Catalog::getNumberOfSearchResults()
+    {
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+      request.query         = &m_countQuery;
+
+      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Query is: { " << m_countQuery << " }" << std::endl;
+
+      int result = icat.search(&request, &response);
+
+      xsd__long * numOfResults;
+      if (result == 0)
+      {
+        numOfResults = dynamic_cast<xsd__long*>(response.return_.at(0));
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
+
+      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Number of results returned is: { " << numOfResults->__item << " }" << std::endl;
+
+      return numOfResults->__item;
+    }
 
     /**
      * Returns the logged in user's investigations data.
