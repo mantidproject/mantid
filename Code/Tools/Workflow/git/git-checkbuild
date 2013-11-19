@@ -70,10 +70,13 @@ start_on_feature() {
     # We're starting again so clear out previous saved setting
     remove_config_value ${MERGENAME_CFG_KEY}
 
-    # No need to be careful about the state of develop so kill the local branch and recreate it
+    # First publish the changes on the branch so that is is visible publicly
     mergebranch=$(current_branch)
-    echo "Starting from branch ${mergebranch}."
+    echo "Publishing branch '${mergebranch}'"
+    git_halt_on_error push origin ${mergebranch}
 
+    # Now do the merge. No need to be careful about the state of develop
+    # so kill the local branch and recreate it
     local_branch_exists ${BUILD_BRANCH}
     if [ $? -eq 1 ]; then
         echo "Deleting local copy of ${BUILD_BRANCH}"
@@ -97,7 +100,7 @@ start_on_feature() {
         remove_config_value ${MERGENAME_CFG_KEY}
     fi
     
-    # Publish
+    # Publish changes to develop
     git_ignore_errors push origin ${BUILD_BRANCH}
     if [ $? -gt 0 ]; then
         echo "Could not push to remote. The remote ${BUILD_BRANCH} was probably recreated. Rerun this command to recreate local ${BUILD_BRANCH}"
