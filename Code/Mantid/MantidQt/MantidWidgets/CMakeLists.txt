@@ -33,9 +33,9 @@ set ( SRC_FILES
 
 # Header files with Q_OBJECT that qmake will "moc"
 set ( MOC_FILES 
-	inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
-	inc/MantidQtMantidWidgets/CheckboxHeader.h
-	inc/MantidQtMantidWidgets/DataSelector.h
+	  inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
+	  inc/MantidQtMantidWidgets/CheckboxHeader.h
+	  inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
@@ -55,7 +55,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/pythonCalc.h
     inc/MantidQtMantidWidgets/RangeSelector.h
     inc/MantidQtMantidWidgets/RenameParDialog.h
-	inc/MantidQtMantidWidgets/SafeQwtPlot.h
+	  inc/MantidQtMantidWidgets/SafeQwtPlot.h
     inc/MantidQtMantidWidgets/SaveWorkspaces.h
     inc/MantidQtMantidWidgets/ScriptEditor.h
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
@@ -73,11 +73,12 @@ set ( INC_FILES
 
 # QtDesigner UI files to process
 set ( UI_FILES 
-	inc/MantidQtMantidWidgets/DataSelector.ui
+	  inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
-    inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
+    inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
+    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui

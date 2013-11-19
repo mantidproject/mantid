@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 
+#include "ui_MuonSequentialFitDialog.h"
+
 #include <QDialog>
 
 namespace MantidQt
@@ -40,6 +42,9 @@ namespace MantidWidgets
   public:
     MuonSequentialFitDialog(QWidget* parent);
     virtual ~MuonSequentialFitDialog();
+
+  private:
+    Ui::MuonSequentialFitDialog ui;
     
   };
 

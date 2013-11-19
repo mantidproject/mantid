@@ -10,7 +10,9 @@ namespace MantidWidgets
    */
   MuonSequentialFitDialog::MuonSequentialFitDialog(QWidget* parent) :
     QDialog(parent)
-  {}
+  {
+    ui.setupUi(this);
+  }
     
   /**
    * Destructor
