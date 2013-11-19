@@ -732,6 +732,11 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 
 		CreateWorkspace(OutputWorkspace=zpWS, DataX=dataXz, DataY=dataYz, DataE=dataEz,
 			Nspec=Nsig, UnitX='MomentumTransfer', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=dataXs)
+		
+		unitx = mtd[zpWS].getAxis(0).setUnit("Label")
+		unitx.setLabel('beta' , '')
+		unity = mtd[zpWS].getAxis(1).setUnit("Label")
+		unity.setLabel('sigma' , '')
 
 		if m == 0:
 			xSig = dataXs
