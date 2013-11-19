@@ -317,6 +317,7 @@ void MuonFitPropertyBrowser::fit()
 void MuonFitPropertyBrowser::sequentialFit()
 {
   MuonSequentialFitDialog* dialog = new MuonSequentialFitDialog(this);
+  dialog->setModal(true);
   dialog->show();
 }
 
