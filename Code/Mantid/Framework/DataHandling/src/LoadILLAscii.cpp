@@ -7,6 +7,8 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataHandling/LoadILLAsciiHelper.h"
 
+#include <algorithm>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -14,7 +16,7 @@ using namespace Kernel;
 using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadILLAscii)
+DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -27,6 +29,32 @@ LoadILLAscii::LoadILLAscii() {
 /** Destructor
  */
 LoadILLAscii::~LoadILLAscii() {
+}
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadILLAscii::confidence(Kernel::FileDescriptor & descriptor) const {
+	const std::string & filePath = descriptor.filename();
+	// Avoid some known file types that have different loaders
+	int confidence(0);
+
+	if (descriptor.isAscii()) {
+		confidence = 10; // Low so that others may try
+		ILLParser p(filePath);
+		std::string instrumentName = p.getInstrumentName();
+
+		g_log.information() << "Instrument name: " << instrumentName << "\n";
+
+		if (std::find(m_supportedInstruments.begin(),
+				m_supportedInstruments.end(), instrumentName)
+				!= m_supportedInstruments.end() )
+			confidence = 80;
+	}
+
+	return confidence;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -44,7 +72,7 @@ int LoadILLAscii::version() const {
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLAscii::category() const {
-	return "DataHandling";
+	return "DataHandling\\Text";
 }
 
 //----------------------------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <fstream>
-
+#include <stdexcept>
 #include <vector>
 #include <string>
 #include <map>
@@ -14,7 +14,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-
 
 namespace Mantid {
 namespace DataHandling {
@@ -60,18 +59,33 @@ void ILLParser::startParsing() {
 }
 
 /**
- *
+ * Reads the instrument name from the file
+ * This should be done before parsing the file!
  */
-std::string ILLParser::getInstrumentName(){
-	std::string instrumentKeyword("Inst"), instrumentName("");
-	if (header.size()  > 0 )  {
-		for (auto it = header.begin(); it != header.end(); ++it) {
-			if (boost::starts_with(it->first , instrumentKeyword)){
-				instrumentName = it->second.substr(0,instrumentKeyword.size());
-				boost::algorithm::erase_all(instrumentName, " ");
-			}
-		}
+std::string ILLParser::getInstrumentName() {
+
+	if (fin.tellg() != std::ios::beg) {
+		fin.seekg(0, std::ios::beg);
+		fin.clear();
+		//throw std::runtime_error("Must be called before reading the file!");
 	}
+
+	std::string line, instrumentKeyword("Inst"), instrumentName("");
+	int lineRead = 0, maxLineRead = 20; //never read more than
+
+	while (std::getline(fin, line) && lineRead < maxLineRead) {
+
+		if (boost::starts_with(line, instrumentKeyword)) {
+			std::getline(fin, line);
+			instrumentName = line.substr(0, instrumentKeyword.size());
+			boost::algorithm::erase_all(instrumentName, " ");
+		}
+		lineRead += 1;
+	}
+
+	// Point to the begining again!
+	fin.seekg(0, std::ios::beg);
+	fin.clear();
 	return instrumentName;
 }
 
