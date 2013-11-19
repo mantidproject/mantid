@@ -40,10 +40,9 @@ namespace Mantid
     /// Initialisation method.
     void CatalogSearch::init()
     {
-      auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
       auto isDate = boost::make_shared<DateValidator>();
-      mustBePositive->setLower(0.0);
 
+      // Properties related to the search fields the user will fill in to improve search.
       declareProperty("InvestigationName", "", "The name of the investigation to search.");
       declareProperty("Instrument","","The name of the instrument used for investigation search.");
       declareProperty("RunRange","","The range of runs to search for related investigations.");
@@ -58,6 +57,10 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
           "The name of the workspace that will be created to store the ICat investigations search result.");
 
+      // These are needed for paging on the interface, and to minimise the amount of results returned by the query.
+      declareProperty<int>("Limit", 0, "");
+      declareProperty<int>("Offset",0, "");
+      declareProperty<long>("NumberOfSearchResults", 0, "");
     }
 
     /// Execution method.
@@ -69,8 +72,12 @@ namespace Mantid
       getInputProperties(params);
       // Create output workspace.
       auto workspace = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      // Create a catalog since we use it twice on execution.
+      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
       // Search for investigations in the archives.
-      CatalogAlgorithmHelper().createCatalog()->search(params,workspace);
+      catalog->search(params,workspace,getProperty("Limit"),getProperty("Offset"));
+      // Set the related property needed for paging.
+      setProperty("NumberOfSearchResults", catalog->getNumberOfSearchResults());
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
     }
@@ -83,7 +90,7 @@ namespace Mantid
     {
       params.setInvestigationName(getPropertyValue("InvestigationName"));
       params.setInstrument(getPropertyValue("Instrument"));
-      std::string runRange = getProperty("runRange");
+      std::string runRange = getProperty("RunRange");
       setRunRanges(runRange,params);
       params.setStartDate(params.getTimevalue(getPropertyValue("StartDate")));
       params.setEndDate(params.getTimevalue(getPropertyValue("EndDate")));

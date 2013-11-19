@@ -116,6 +116,8 @@ namespace Mantid
     void ICat3Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr,
         const int &offset, const int &limit)
     {
+      UNUSED_ARG(offset);
+      UNUSED_ARG(limit);
       CICatHelper helper;
       helper.doAdvancedSearch(inputs,ws_sptr);
     }
@@ -125,7 +127,7 @@ namespace Mantid
      * of investigations to be returned by the catalog.
      * @return The number of investigations returned by the search performed.
      */
-    long ICat3Catalog::getNumberOfSearchResults() {}
+    long ICat3Catalog::getNumberOfSearchResults() { return -1; }
 
     /// keep alive
     void ICat3Catalog::keepAlive()
