@@ -289,7 +289,7 @@ void LinearFit::fit()
 
 	generateFitCurve();
 
-	ApplicationWindow *app = (ApplicationWindow *)parent();
+	ApplicationWindow *app = static_cast<ApplicationWindow *>(parent());
 	if (app->writeFitResultsToLog)
 		app->updateLog(logFitInfo(0, 0));
 }

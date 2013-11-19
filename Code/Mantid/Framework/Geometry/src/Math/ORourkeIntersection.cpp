@@ -51,7 +51,6 @@ namespace Mantid
       const size_t nverts_p(P.numVertices()), nverts_q(Q.numVertices());
       const V2D origin(0.0,0.0);
 
-      size_t pi(0), pim1(0), qi(0), qim1(0);
       size_t count_p(0), count_q(0); // Number of vertices visited
       unsigned int inflag(Unknown);
       bool firstPoint(true);
@@ -65,6 +64,8 @@ namespace Mantid
       Vertex2DList intersectList;
       do
       {
+        size_t pi(0), pim1(0), qi(0), qim1(0);
+      
         // Compute a vector between the previous point in the direction of the next
         pim1 = (pi + nverts_p - 1) % nverts_p;
         qim1 = (qi + nverts_q - 1) % nverts_q;
