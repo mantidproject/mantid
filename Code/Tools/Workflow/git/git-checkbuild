@@ -76,8 +76,8 @@ start_on_feature() {
 
     local_branch_exists ${BUILD_BRANCH}
     if [ $? -eq 1 ]; then
-	echo "Deleting local copy of ${BUILD_BRANCH}"
-	git_halt_on_error branch -D ${BUILD_BRANCH}
+        echo "Deleting local copy of ${BUILD_BRANCH}"
+        git_halt_on_error branch -D ${BUILD_BRANCH}
     fi
 
     echo "Creating local copy of ${BUILD_BRANCH}"
@@ -87,26 +87,26 @@ start_on_feature() {
     # Do merge
     git_ignore_errors merge --no-ff ${mergebranch}
     if [ $? -gt 0 ]; then
-	# Record what was attempted to be merged
-	git config ${MERGENAME_CFG_KEY} ${mergebranch}
-	echo
-	echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command from ${BUILD_BRANCH}."
-	exit 1
+        # Record what was attempted to be merged
+        git config ${MERGENAME_CFG_KEY} ${mergebranch}
+        echo
+        echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command from ${BUILD_BRANCH}."
+        exit 1
     else
-	# Remove any stored name if there was one
-	remove_config_value ${MERGENAME_CFG_KEY}
+        # Remove any stored name if there was one
+        remove_config_value ${MERGENAME_CFG_KEY}
     fi
     
     # Publish
     git_ignore_errors push origin ${BUILD_BRANCH}
     if [ $? -gt 0 ]; then
-	echo "Could not push to remote. The remote ${BUILD_BRANCH} was probably recreated. Rerun this command to recreate local ${BUILD_BRANCH}"
+        echo "Could not push to remote. The remote ${BUILD_BRANCH} was probably recreated. Rerun this command to recreate local ${BUILD_BRANCH}"
     fi
 
     # Put us back where we started
     git_ignore_errors checkout ${mergebranch}
     if [ $? -gt 0 ]; then
-	echo "Warning: An error occurred when switching back to ${mergebranch}. Still on ${BUILD_BRANCH}!"
+        echo "Warning: An error occurred when switching back to ${mergebranch}. Still on ${BUILD_BRANCH}!"
     fi
 }
 
@@ -114,16 +114,16 @@ start_on_feature() {
 start_on_develop() {
     mergebranch=$(git config ${MERGENAME_CFG_KEY})
     if [ -z "${mergebranch}" ]; then
-	echo "No failed merge detected. Please run this command from your feature branch."
-	exit 1
+        echo "No failed merge detected. Please run this command from your feature branch."
+        exit 1
     fi
     
     # Has previous merge been resolved
     git_dir="$(git rev-parse --show-toplevel)/.git"
     if [ -f ${git_dir}/MERGE_HEAD ]; then
-	echo "It looks like there is a merge in progress."
-	echo "Resolve any current conflicts with 'git add' & 'git commit' then rerun this command."
-	exit 1
+        echo "It looks like there is a merge in progress."
+        echo "Resolve any current conflicts with 'git add' & 'git commit' then rerun this command."
+        exit 1
     fi
 
     # Merge as it has already been done, just push. It is likely, given the time spread that origin/develop has been updated and it
@@ -136,23 +136,23 @@ start_on_develop() {
     # If this command produces output then an update has been forced and we need to start again
     unreachable_commits=$(git rev-list $prefetch_sha1 ^$postfetch_sha1)
     if [ ! -z "${unreachable_commits}" ]; then
-	echo "The remote ${BUILD_BRANCH} has been recreated, 'git checkbuild' needs to be started from scratch."
-	echo "On exit you will be back your branch. Please rerun the command."
-	git_ignore_errors checkout ${mergebranch}
-	exit 1
+        echo "The remote ${BUILD_BRANCH} has been recreated, 'git checkbuild' needs to be started from scratch."
+        echo "On exit you will be back your branch. Please rerun the command."
+        git_ignore_errors checkout ${mergebranch}
+        exit 1
     else
-	git_halt_on_error rebase --preserve-merges origin/${BUILD_BRANCH}
+        git_halt_on_error rebase --preserve-merges origin/${BUILD_BRANCH}
     fi
 
     git_ignore_errors push origin ${BUILD_BRANCH}
     if [ $? -gt 0 ]; then
-	echo "Warning: Could not push to remote."
+        echo "Warning: Could not push to remote."
     fi
 
     # Put us back where we started
     git_ignore_errors checkout ${mergebranch}
     if [ $? -gt 0 ]; then
-	echo "Warning: An error occurred when switching back to ${mergebranch}. Still on ${BUILD_BRANCH}!"
+        echo "Warning: An error occurred when switching back to ${mergebranch}. Still on ${BUILD_BRANCH}!"
     fi
 
     # Remove any stored name
@@ -162,7 +162,7 @@ start_on_develop() {
 main() {
     # Helper functions
     . "${CMDFILE_DIR}/gitworkflow-helpers"
-	
+        
     checkargs "$@"
 
     # Cannot be on master
@@ -184,9 +184,9 @@ main() {
 
     # Run
     if [ ${currentbranch} = "${BUILD_BRANCH}" ]; then
-	start_on_develop
+        start_on_develop
     else
-	start_on_feature
+        start_on_feature
     fi
    
 }
