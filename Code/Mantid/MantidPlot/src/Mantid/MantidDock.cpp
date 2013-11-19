@@ -102,6 +102,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),Qt::QueuedConnection);
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(populateChildData(QTreeWidgetItem*)));
+  m_tree->setDragEnabled(true);
 }
 
 MantidDockWidget::~MantidDockWidget()
@@ -1149,6 +1150,10 @@ MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
   setAcceptDrops(true);
 }
 
+/**
+ * Accept a drag move event and selects whether to accept the action
+ * @param de :: The drag move event
+ */
 void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de)
 {
     // The event needs to be accepted here
@@ -1156,6 +1161,10 @@ void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de)
       de->accept();
 }
  
+/**
+ * Accept a drag enter event and selects whether to accept the action
+ * @param de :: The drag enter event
+ */
 void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
 {
     // Set the drop action to be the proposed action.
@@ -1163,6 +1172,10 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
         de->acceptProposedAction();
 }
  
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
 void MantidTreeWidget::dropEvent(QDropEvent *de)
 {
     QStringList filenames;

@@ -169,7 +169,7 @@ public:
 protected:
   void dropEvent(QDropEvent *de);
   void dragMoveEvent(QDragMoveEvent *de);
-  void dragEnterEvent(QDragEnterEvent *event);
+  void dragEnterEvent(QDragEnterEvent *de);
 
 private:
   QPoint m_dragStartPosition;
