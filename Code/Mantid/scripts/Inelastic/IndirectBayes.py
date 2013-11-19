@@ -20,40 +20,23 @@ import sys, platform, math, os.path, numpy as np
 mp = import_mantidplot()
 
 def CalcErange(inWS,ns,erange,binWidth):
-	# length of array in Fortran
+	#length of array in Fortran
 	array_len = 4096
 	
 	binWidth = int(binWidth)
 	bnorm = 1.0/binWidth
 
-	# get data from input workspace
+	#get data from input workspace
 	N,X,Y,E = GetXYE(inWS,ns,array_len)
 	Xdata = mtd[inWS].readX(0)
 
 	#get all x values within the energy range
-	rangeMask = (Xdata > erange[0]) & (Xdata < erange[1])
+	rangeMask = (Xdata >= erange[0]) & (Xdata <= erange[1])
 	Xin = Xdata[rangeMask]
 
-	#get elements on the edge of our data range
-	xInMin = Xin[0]
-	xInMax = Xin[-1]
-
-	#get indicies either side of energy range
-	minIndex = np.where(Xdata==xInMin)[0][0]+1
-	maxIndex = np.where(Xdata==xInMax)[0][0]+1
-
-	#check we're using a valid range
-	if binWidth == 0:
-		error = 'Erange - calculated points is Zero'
-		sys.exit(error)
-
-	if minIndex <= 0:
-		error = 'Erange - calculated minIndex is Zero'
-		sys.exit(error)
-
-	if maxIndex <= 0:
-		error = 'Erange - calculated maxIndex is Zero'
-		sys.exit(error)
+	#get indicies of the bounds of our energy range
+	minIndex = np.where(Xdata==Xin[0])[0][0]+1
+	maxIndex = np.where(Xdata==Xin[-1])[0][0]
 
 	#reshape array into sublists of bins
 	Xin = Xin.reshape(len(Xin)/binWidth, binWidth)
@@ -281,6 +264,9 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 		numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin]
 		rscl = 1.0
 		reals = [efix, theta[m], rscl, bnorm]
+
+		print nout
+
 		if prog == 'QLr':
 			nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
 												   Xdat,Xb,Yb,Wy,We,dtn,xsc,
@@ -816,7 +802,9 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	theta,Q = GetThetaQ(vname)
 	efix = getEfixed(vname)
 	nres,ntr = CheckHistZero(rname)
+	print "begining erange calc"
 	nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
+	print "end of erange calc"
 	Ndat = nout[0]
 	Imin = nout[1]
 	Imax = nout[2]
