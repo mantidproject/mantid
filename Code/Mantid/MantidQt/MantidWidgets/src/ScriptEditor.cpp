@@ -529,7 +529,7 @@ void ScriptEditor::dropEvent(QDropEvent *de)
       this->getCursorPosition(&line,&index);
       QMimeData myMimeData;
       QString wsName = mimeData->text().mid(WORKSPACE_PREFIX.size());
-      QString importStatement = wsName + " = mtd[\"" + wsName + "\"]";
+      QString importStatement = wsName + " = mtd[\"" + wsName + "\"]\n";
       myMimeData.setText(importStatement);
 
       QDropEvent myDropEvent(de->pos(),de->possibleActions(),&myMimeData, de->mouseButtons(),de->keyboardModifiers(),de->type());
