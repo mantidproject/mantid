@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_gui.ui'
 #
-# Created: Tue Nov 19 14:30:54 2013
+# Created: Tue Nov 19 16:37:20 2013
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
