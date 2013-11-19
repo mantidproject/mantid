@@ -77,7 +77,7 @@ namespace Mantid
         // Saves "MyData" query result to output workspace.
         void saveInvestigations(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Creates a search query string based on inputs provided by the user.
-        std::string getSearchQuery(const CatalogSearchParam& inputs);
+        std::string getSearchQuery(const CatalogSearchParam& inputs, const int &offset, const int &limit);
         // Saves "DataFiles" result to output workspace.
         void saveDataFiles(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Saves "DataSets" information to the output workspace.
@@ -88,6 +88,8 @@ namespace Mantid
         std::string formatDateTime(const time_t &timestamp, const std::string &format);
         // Reference to the logger class.
         Kernel::Logger& g_log;
+        // Modifies the search query to insert a count.
+        std::string m_countQuery;
 
         /**
          * Template method to save data to table workspace

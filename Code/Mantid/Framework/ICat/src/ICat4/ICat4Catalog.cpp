@@ -111,9 +111,11 @@ namespace Mantid
     /**
      * Creates a search query string based on inputs provided by the user.
      * @param inputs :: reference to a class contains search inputs.
+     * @param offset :: skip this many rows and start returning rows from this point.
+     * @param limit  :: limit the number of rows returned by the query.
      * @return a query string constructed from user input.
      */
-    std::string ICat4Catalog::getSearchQuery(const CatalogSearchParam& inputs)
+    std::string ICat4Catalog::getSearchQuery(const CatalogSearchParam& inputs, const int &offset, const int &limit)
     {
       // Contain the related where and join clauses for the search query based on user-input.
       std::vector<std::string> whereClause, joinClause;
@@ -219,16 +221,23 @@ namespace Mantid
       // This prevents the user searching the entire archive (E.g. there is no "default" query).
       if (!whereClause.empty() || !joinClause.empty())
       {
-        std::string select, from, join, where, orderBy, includes;
+        std::string select, selectC, from, join, where, orderBy, includes, limits;
 
         select   = "SELECT DISTINCT inves";
+        selectC  = "SELECT COUNT(DISTINCT inves)";
         from     = " FROM Investigation inves ";
         join     = Strings::join(joinClause.begin(), joinClause.end(), " ");
         where    = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
-        where.insert(0, " WHERE ");
         orderBy  = " ORDER BY inves.id ASC";
         includes = " INCLUDE inves.investigationInstruments.instrument, inves.parameters";
-        query    = select + from + join + where + orderBy + includes;
+        limits   = " LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit);
+
+        // As we joined all WHERE claused with AND we need to include the WHERE at the start of the where segment.
+        where.insert(0, " WHERE ");
+        // This query is used to populate investigation table on GUI.
+        query    = select + from + join + where + orderBy + includes + limits;
+        // This query is used to count the number of investigations returned.
+        m_countQuery = selectC + from + join + where + orderBy + includes;
       }
 
       g_log.debug() << "ICat4Catalog::getSearchQuery: { " << query << " }" << std::endl;
@@ -247,12 +256,13 @@ namespace Mantid
         const int &offset, const int &limit)
     {
       // Obtain the query from user input.
-      std::string query = getSearchQuery(inputs);
+      std::string query = getSearchQuery(inputs,offset,limit);
 
-      if (query.empty())
-      {
-        throw std::runtime_error("You have not input any terms to search for.");
-      }
+      if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
+
+      // If offset or limit is default value then we want to return as
+      // we just wanted to perform the getSearchQuery to build our COUNT query.
+      if (offset == -1 || limit == -1) return;
 
       ICat4::ICATPortBindingProxy icat;
       setSSLContext(icat);
