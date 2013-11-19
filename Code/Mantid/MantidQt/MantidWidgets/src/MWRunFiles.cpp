@@ -276,6 +276,7 @@ QString MWRunFiles::getLabelText() const
 void MWRunFiles::setLabelText(const QString & text) 
 { 
   m_uiForm.textLabel->setText(text);
+  m_uiForm.textLabel->setVisible( ! text.isEmpty() );
 }
 
 /** Set the minimum width on the label widget
