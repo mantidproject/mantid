@@ -151,7 +151,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="controlsLayout">
+    <layout class="QHBoxLayout" name="controlLayout">
      <item>
       <widget class="QProgressBar" name="progress">
        <property name="enabled">
@@ -169,25 +169,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="stopButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Stop</string>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="startButton">
+      <widget class="QPushButton" name="controlButton">
        <property name="text">
         <string>Start</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
