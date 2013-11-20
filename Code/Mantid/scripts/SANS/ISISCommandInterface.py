@@ -330,30 +330,6 @@ def GetMismatchedDetList():
     """
     return ReductionSingleton().instrument.get_marked_dets()
 
-def _setUpPeriod(i):
-    # it first get the reference to the loaders, then it calls the AssignSample 
-    # (which get rid of the reducer objects (see clean_loaded_data())
-    # but because we still get the reference, we can use it to query the data file and method.
-    # ideally, we should not use this _setUpPeriod in the future.
-    
-    trans_samp = ReductionSingleton().samp_trans_load
-    can = ReductionSingleton().get_can()
-    trans_can = ReductionSingleton().can_trans_load
-    new_sample_workspaces = AssignSample(ReductionSingleton().get_sample().loader._data_file, period=i)[0]
-    if can:
-        #replace one thing that gets overwritten
-        AssignCan(can.loader._data_file, True, period=can.loader.getCorrospondingPeriod(i, ReductionSingleton()))
-    if trans_samp:
-        trans = trans_samp.trans
-        direct = trans_samp.direct
-        TransmissionSample(trans._data_file, direct._data_file, True, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
-    if trans_can:
-        trans = trans_can.trans
-        direct = trans_can.direct
-        TransmissionCan(trans._data_file, direct._data_file, True, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
-
-    return new_sample_workspaces
-
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, resetSetup=True, out_fit_settings = dict()):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics 
@@ -643,29 +619,34 @@ def _WavRangeReduction(name_suffix=None):
     """
         Run a reduction that has been set up, from loading the raw data to calculating Q
     """
+    def _setUpPeriod(period):
+        assert(ReductionSingleton().get_sample().loader.move2ws(period))
+        can = ReductionSingleton().get_can()
+        if can and can.loader.periods_in_file > 1:
+            can.loader.move2ws(period)
 
+        for trans in [ReductionSingleton().samp_trans_load, ReductionSingleton().can_trans_load]:
+            if trans and trans.direct.periods_in_file > 1 and trans.trans.periods_in_file > 1:
+                trans.direct.move2ws(period)
+                trans.trans.move2next(period)
+        return
+
+    result = ""
+    if ReductionSingleton().get_sample().loader.periods_in_file == 1:
+        result = ReductionSingleton()._reduce()
+        return result
+
+    calculated = []
     try:
-        # do a reduction
-        calculated = [ReductionSingleton()._reduce()]
-
-        periods = ReductionSingleton().get_sample().loader.entries    
-        if len(periods) > 1:
-            run_setup = ReductionSingleton().settings()
-            for i in periods[1:len(periods)]:
-                ReductionSingleton.replace(copy.deepcopy(run_setup))
-                temp_workspaces = _setUpPeriod(i)
-                # do a reduction for period i
-                calculated.append(ReductionSingleton()._reduce())
-                delete_workspaces(temp_workspaces)
-            result = ReductionSingleton().get_out_ws_name(show_period=False)
-            all_results = calculated[0]
-            for name in calculated[1:len(calculated)]:
-                all_results += ',' + name
-            GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=all_results)
-        else:
-            result = calculated[0]            
+        for period in ReductionSingleton().get_sample().loader.entries:
+            _setUpPeriod(period)
+            calculated.append(ReductionSingleton()._reduce())
+    
     finally:
-        f=1 #_refresh_singleton()
+        if len(calculated) > 0:
+            allnames = ','.join(calculated)
+            result = ReductionSingleton().get_out_ws_name(show_period=False)
+            GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=allnames)
 
     if name_suffix:
         old = result
