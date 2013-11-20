@@ -103,8 +103,7 @@ DECLARE_FUNCTION( SCDPanelErrors )
 Kernel::Logger& SCDPanelErrors::g_log = Kernel::Logger::get("SCDPanelErrors");
 
 namespace { // anonymous namespace
-static const double UBq2Q(2 * M_PI);
-static const double Q2UBq = 1 / UBq2Q;
+static const double ONE_OVER_TWO_PI = 1. / M_2_PI;
 static int doMethod = 1;
 const string LATTICE_A("a");
 const string LATTICE_B("b");
@@ -119,13 +118,6 @@ const string X_END("endX");
 const string PEAKS_WKSP("PeakWorkspaceName");
 const string ROTATE_CEN("RotateCenters");
 const string SAMPLE_OFF("SampleOffsets");
-}
-
-void CheckSizetMax( size_t v1, size_t v2, size_t v3,std::string ErrMess)
-{
-  // TODO this check stops "real" examples from working
-  if( v1 > 32000 ||v2 > 32000 ||v3 > 32000 )
-    throw std::invalid_argument("Size_t val very large "+ErrMess);
 }
 
 void initializeAttributeList(vector<string> &attrs)
@@ -158,8 +150,6 @@ SCDPanelErrors::SCDPanelErrors() :
       = startX_set = NGroups_set  = false;
 
   // g_log.setLevel(7);
-
-  B0 = DblMatrix(3, 3);
 
   BankNames = "";
 
@@ -314,7 +304,8 @@ void SCDPanelErrors::getPeaks() const
                                 + PeakName + "\"");
 }
 
-void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData) const
+void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues,
+                           const size_t nData, size_t &StartX, size_t &EndX) const
 {
   // TODO need to error check this
 //  if (NLatticeParametersSet < (int) nAttributes()-2)
@@ -325,13 +316,11 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double
 
   if (!pkwsp)
   {
-    g_log.error("Cannot find a PeaksWorkspace ");
     throw std::invalid_argument("Cannot find a PeaksWorkspace ");
   }
 
   if (pkwsp->getNumberPeaks() < 4)
   {
-    g_log.error("Not enough peaks to fit ");
     throw std::invalid_argument("Not enough peaks to fit ");
   }
 
@@ -340,29 +329,26 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double
     throw std::invalid_argument(X_START + " and " + X_END +" attributes are out of range");
   }
 
-  size_t StartX = 0;
+  StartX = 0;
   if (m_startX > 0)
     StartX = static_cast<size_t>(m_startX);
-  size_t EndX = nData - 1;
+  EndX = nData - 1;
   if (m_endX > static_cast<int>(StartX))
     EndX = static_cast<size_t>(m_endX);
 
   if (xValues[StartX] != floor(xValues[StartX]) )
   {
-    g_log.error("Improper workspace set xVals must be integer");
     throw std::invalid_argument("Improper workspace. xVals must be integer");
   }
 
   if (xValues[StartX] < 0 || xValues[StartX] >= pkwsp->rowCount())
   {
 
-    g_log.error("Improper workspace set");
     throw std::invalid_argument("Improper workspace. xVals correspond to an index in the PeaksWorkspace");
   }
 
   if( (EndX-StartX+1)/3 < 4)
   {
-    g_log.error("Not enough peaks to process banks "+ BankNames);
     throw std::invalid_argument("Not enough peaks to process banks "+ BankNames);
   }
 
@@ -391,9 +377,6 @@ Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak & peak) const
   }
   else //catch(...)
   {
-
-
-
     //TODO eliminate next 2 lines. not used
     boost::shared_ptr<const IComponent> inst3 = boost::dynamic_pointer_cast<const IComponent>(
           instSave);
@@ -486,21 +469,16 @@ Peak SCDPanelErrors::createNewPeak(const API::IPeak & peak_old,
 void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t nData) const
 {
   g_log.debug()<<"Start function 1D\n";
+
+  // return early if there is nothing to do
   if (nData == 0)
     return;
 
-  size_t StartX = 0;
-  if (m_startX > 0)
-    StartX = static_cast<size_t>(m_startX);
-  size_t EndX = nData - 1;
-  if (m_endX > static_cast<int>(StartX))
-    EndX = static_cast<size_t>(m_endX);
+  if (!m_unitCell)
+    throw runtime_error("Cannot evaluate function without setting the lattice constants");
 
-  V3D panelCenter_old;
-  V3D panelCenterNew;
-
+  // error check the parameters
   double r = checkForNonsenseParameters();
-
   if( r != 0 )
   {
     for( size_t i=0;i < nData; ++i )
@@ -509,145 +487,94 @@ void SCDPanelErrors::function1D(double *out, const double *xValues, const size_t
     g_log.debug() << "Parametersxx  for " << BankNames << ">=";
     for( size_t i=0; i < nParams(); ++i)
       g_log.debug() << getParameter(i) << ",";
-
     g_log.debug() << "\n";
 
     return;
   }
 
+  // determine the range of data to fit by index
+  size_t StartX;
+  size_t EndX;
   this->getPeaks();
-
-  Check(m_peaks, xValues, nData);
+  Check(m_peaks, xValues, nData, StartX, EndX);
 
   g_log.debug() << "BankNames " << BankNames << "   Number of peaks" << (EndX - StartX + 1) / 3
                 << std::endl;
 
+  // some pointers for the updated instrument
   boost::shared_ptr<Geometry::Instrument> instChange = getNewInstrument(m_peaks->getPeak(0));
   V3D samplePosition = instChange->getSample()->getPos();
 
 
   //---------------------------- Calculate q and hkl vectors-----------------
-  Kernel::Matrix<double> UB(3, 3, false);
 
   vector<Kernel::V3D> hkl_vectors;
   vector<Kernel::V3D> q_vectors;
-  CheckSizetMax(StartX,EndX,EndX,"f(x) main loop");
+  double t0 = getParameter("t0");
+  double l0 = getParameter("l0");
   for (size_t i = StartX; i <= EndX; i += 3)
   {
-    double xIndx = (xValues[i]);
-    if (xIndx != floor(xIndx) || xIndx < 0)
-    {
-      g_log.error()<<"Improper workspace set xVals must be positive integers "
-                  <<xIndx<<","<<floor(xIndx)<<std::endl;
+    // the x-values are the peak indices as triplets, convert them to size_t
+    if (xValues[i] < 0.)
       throw invalid_argument("Improper workspace. xVals must be positive integers");
-    }
-
-    size_t pkIndex = (size_t) xIndx;
-    if ( pkIndex >=  m_peaks->rowCount()) // ||pkIndex < 0
+    size_t pkIndex = static_cast<size_t>(xValues[i]+.5); // just round to nearest int
+    if ( pkIndex >=  m_peaks->rowCount())
     {
 
-      g_log.error()<<"Improper workspace set "<<pkIndex<<","<<xIndx<<std::endl;
+      g_log.error()<<"Improper workspace set " << pkIndex << "\n";
       throw invalid_argument(
             "Improper workspace. xVals correspond to an index in the PeaksWorkspace");
     }
 
     IPeak & peak_old = m_peaks->getPeak((int) pkIndex);
-    V3D detOld;
-
-    Peak peak = createNewPeak(peak_old, instChange,getParameter("t0"),getParameter("l0"));
-
-    if( xIndx==4 || xIndx==5)
-    {
-      Matrix<double>Gon(peak.getGoniometerMatrix());
-      Gon.Invert();
-      V3D labQ= peak.getQLabFrame();
-
-    }
     Kernel::V3D hkl = peak_old.getHKL();
-    double hkl1[3] =
-    { hkl.X(), hkl.Y(), hkl.Z() };
 
-    bool ok = true;
-    for (size_t k = 0; k < 3 && ok; ++k) //eliminate tolerance cause only those peaks that are
-      // OK should be here
+    //eliminate tolerance cause only those peaks that are OK should be here
+    if (IndexingUtils::ValidIndex(hkl, tolerance))
     {
-      double off = hkl1[k] - floor(hkl1[k]);
-
-      if (off < tolerance)
-
-        hkl1[k] = floor(hkl1[k]);
-
-      else if (1 - off < tolerance)
-
-        hkl1[k] = floor(hkl1[k]) + 1;
-
-      else
-
-        ok = false;
-    }
-    if (ok && (hkl.X() != 0 || hkl.Y() != 0 || hkl.Z() != 0))
-    {
-
-      hkl_vectors.push_back(Kernel::V3D(hkl1[0], hkl1[1], hkl1[2]));
+      hkl_vectors.push_back(hkl);
+      Peak peak = createNewPeak(peak_old, instChange, t0, l0);
       q_vectors.push_back(peak.getQSampleFrame());
-
     }
-
   }
 
   //----------------------------------Calculate out ----------------------------------
-  bool badParams=false;
-  Kernel::DblMatrix UB0;
 
+  // determine the OrientedLattice for converting to Q-sample
+  Geometry::OrientedLattice lattice(m_unitCell.get());
   try
   {
-
+    Kernel::Matrix<double> UB(3, 3, false);
     Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, q_vectors);
-
     Geometry::OrientedLattice lat;
-
     lat.setUB(UB);
-
-    const Kernel::DblMatrix U = lat.getU();
-
-    UB0 = U * B0;
-  } catch (std::exception & )
+    lattice.setU(lat.getU());
+  }  catch (...)
   {
-
-    badParams = true;
-  } catch (char * )
-  {
-
-    badParams = true;
-  } catch (...)
-  {
-    badParams = true;
-  }
-
-  if( badParams)
-  { CheckSizetMax(StartX,EndX,nData,"deriv xyz final");
     for(size_t i = StartX; i <= EndX; ++i)
       out[i]= 10000;
     g_log.debug()<<"Could Not find a UB matix"<<std::endl;
     return;
   }
 
+  // cumulative error
   double chiSq = 0;// for debug log message
 
+  for (size_t i = 0; i < StartX; ++i)
+    out[i] = 0.;
   for (size_t i = 0; i < q_vectors.size(); ++i)
   {
-    Kernel::V3D err = q_vectors[i] - UB0 * hkl_vectors[i] * UBq2Q;
+    Kernel::V3D err = q_vectors[i] - lattice.qFromHKL(hkl_vectors[i]);
 
-    out[3 * i+StartX] = err[0];
-    out[3 * i + 1+StartX] = err[1];
-    out[3 * i + 2+StartX] = err[2];
+    size_t outIndex = 3 * i + StartX;
+    out[outIndex + 0] = err[0];
+    out[outIndex + 1] = err[1];
+    out[outIndex + 2] = err[2];
     chiSq += err[0]*err[0] + err[1]*err[1] + err[2]*err[2] ;
-
-    CheckSizetMax(i,i,i,"f(x) loop 2");
   }
 
-  for (size_t i = 3 * q_vectors.size(); i < nData; ++i)
-    out[i] = 0;
+  for (size_t i = EndX; i < nData; ++i)
+    out[i] = 0.;
 
   g_log.debug() << "Parameters" << std::endl;
 
@@ -671,7 +598,7 @@ Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(Matrix<double> const& DerivQ,
 {
   try
   {
-    Matrix<double> dUB = DerivQ * Mhkl * InvhklThkl * Q2UBq;
+    Matrix<double> dUB = DerivQ * Mhkl * InvhklThkl * ONE_OVER_TWO_PI;
 
     Geometry::OrientedLattice lat;
     lat.setUB(Matrix<double> (UB) + dUB * .001);
@@ -684,10 +611,10 @@ Matrix<double> SCDPanelErrors::CalcDiffDerivFromdQ(Matrix<double> const& DerivQ,
     Kernel::DblMatrix dU = (U2A - U1) * (1 / .002);
     if( dU == Kernel::DblMatrix())
       std::cout<<"zero dU in CalcDiffDerivFromdQ"<<std::endl;
-    Kernel::DblMatrix dUB0 = dU * B0;
+    Kernel::DblMatrix dUB0 = dU * m_unitCell->getB();
 
     Kernel::DblMatrix dQtheor = dUB0 * MhklT;
-    Kernel::DblMatrix Deriv = Matrix<double> (DerivQ) - dQtheor * UBq2Q;
+    Kernel::DblMatrix Deriv = Matrix<double> (DerivQ) - dQtheor * M_2_PI;
 
     return Deriv;
 
@@ -717,7 +644,7 @@ double SCDPanelErrors::checkForNonsenseParameters()const
   double L0    = getParameter(8);
   double T0    = getParameter(9);
 
-  double r =0.;
+  double r = 0.;
   if( L0 <1. )
     r = 1.-L0;
 
@@ -771,17 +698,13 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   if (nData <= 0)
     return;
 
+  if (!m_unitCell)
+    throw runtime_error("Cannot evaluate function without setting the lattice constants");
+
   size_t StartPos = 2;
 
   size_t L0param = parameterIndex("l0");
   size_t T0param = parameterIndex("t0");
-
-  size_t StartX = 0;
-  if (m_startX > 0)
-    StartX = static_cast<size_t>(m_startX);
-  size_t EndX = nData - 1;
-  if (m_endX > static_cast<int>(StartX))
-    EndX = static_cast<size_t>(m_endX);
 
   double rr;
   vector<int> row, col, peakIndx, NPanelrows, NPanelcols;
@@ -799,14 +722,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   map<string, size_t> bankName2Group;
   vector<string> Groups;
 
-  CheckSizetMax(StartPos, L0param, T0param, "Start deriv");
-  // TODO error check
-//  if (NLatticeParametersSet < (int) nAttributes() - 2)
-//  {
-//    g_log.error("Not all lattice parameters have been set");
-//    throw std::invalid_argument("Not all lattice parameters have been set");
-//  }
-
   rr = checkForNonsenseParameters();
 
   if (rr > 0)
@@ -818,9 +733,10 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     return;
   }
 
-  CheckSizetMax(StartX, EndX, EndX, "Deriv calc StartX,EndX");
+  size_t StartX;
+  size_t EndX;
   this->getPeaks();
-  Check(m_peaks, xValues, nData);
+  Check(m_peaks, xValues, nData, StartX, EndX);
 
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
 
@@ -995,7 +911,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       parxyz[param - StartPos] = 1;
 
       Matrix<double> Result(3, qlab.size());
-      CheckSizetMax(gr, param, param, "xyzoffset1 Deriv");
       for (size_t peak = 0; peak < qlab.size(); ++peak)
         if (bankName2Group[m_peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
         {
@@ -1042,7 +957,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       for (size_t coll = 0; coll < Deriv.numCols(); ++coll)
         for (size_t roww = 0; roww < 3; ++roww)
         {
-          CheckSizetMax(coll, roww, x, "deriv xyz final");
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
@@ -1087,7 +1001,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
         }
         else
         {
-          CheckSizetMax(gr, param, param, "Deriv rot A");
           int Nwrt = 3;
           int NderOf = 3;
           Matrix<double> Bas(NderOf, Nwrt); //partial Qxyz wrt xyx
@@ -1134,7 +1047,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       for (size_t coll = 0; coll < Deriv.numCols(); ++coll)
         for (int roww = 0; roww < 3; ++roww)
         {
-          CheckSizetMax(coll, roww, x, "deriv rot final");
           out->set(x, param, Deriv[roww][coll]);
           x++;
         }
@@ -1160,7 +1072,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       }
       else
       {
-        CheckSizetMax(gr, peak, peak, "deriv detw A");
         int Nwrt = 3;
         int NderOf = 3;
         Matrix<double> Bas(NderOf, Nwrt);
@@ -1193,7 +1104,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     for (size_t coll = 0; coll < Deriv.numCols(); ++coll)
       for (int roww = 0; roww < 3; ++roww)
       {
-        CheckSizetMax(coll, roww, x, "deriv scalew final");
         out->set(x, param, Deriv[roww][coll]);
         x++;
       }
@@ -1211,7 +1121,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       }
       else
       {
-        CheckSizetMax(gr, peak, peak, "deriv detH A");
         int Nwrt = 3;
         int NderOf = 3;
         Matrix<double> Bas(NderOf, Nwrt);
@@ -1247,7 +1156,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     for (size_t coll = 0; coll < Deriv.numCols(); ++coll)
       for (int roww = 0; roww < 3; ++roww)
       {
-        CheckSizetMax(coll, roww, x, "deriv scaleH final");
         out->set(x, param, Deriv[roww][coll]);
         x++;
       }
@@ -1285,7 +1193,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     for (size_t coll = 0; coll < Deriv.numCols(); ++coll)
       for (int roww = 0; roww < 3; ++roww)
       {
-        CheckSizetMax(coll, roww, x, "deriv L0 final");
         out->set(x, param, Deriv[roww][coll]);
         x++;
       }
@@ -1313,7 +1220,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     for (size_t coll = 0; coll < Deriv.numCols(); ++coll)
       for (int roww = 0; roww < 3; ++roww)
       {
-        CheckSizetMax(coll, roww, x, "deriv t0 final");
         out->set(x, param, Deriv[roww][coll]);
         x++;
       }
@@ -1387,7 +1293,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
         for (size_t coll = 0; coll < Deriv.numCols(); ++coll)
           for (size_t roww = 0; roww < 3; ++roww)
           {
-            CheckSizetMax(coll, roww, x, "deriv xyz final");
             out->set(x, param, Deriv[roww][coll]);
             x++;
           }
@@ -1566,8 +1471,8 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
   {
     if (a_set && b_set && c_set && alpha_set && beta_set && gamma_set)
     {
-      Geometry::UnitCell lat(a, b, c, alpha, beta, gamma);
-      B0 = lat.getB();
+      m_unitCell
+          = boost::shared_ptr<Geometry::UnitCell>(new Geometry::UnitCell(a, b, c, alpha, beta, gamma));
     }
   }
 }

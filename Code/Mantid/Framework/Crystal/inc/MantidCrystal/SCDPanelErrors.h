@@ -135,7 +135,8 @@ protected:
   /**
      *  Checks for out of bounds values ,  peaksWorkspace status
      */
-  void Check( DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData)const;
+  void Check( DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData,
+              size_t &StartX, size_t &EndX)const;
 
   /**
      * Gets the new instrument by applying parameters values to the old instrument
@@ -180,7 +181,9 @@ private:
 
   double tolerance;
 
-  Kernel::DblMatrix B0;
+  /// The OrientedLattice created from the parameters
+  boost::shared_ptr<Geometry::UnitCell> m_unitCell;
+
   std::string BankNames;
 
   int m_startX; ///<start index in xValues array in functionMW. -1 use all.
