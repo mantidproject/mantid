@@ -190,6 +190,8 @@ namespace MantidQt
       CatalogHelper * m_icatHelper;
       /// The directory to save the downloaded dataFiles.
       QString m_downloadSaveDir;
+      /// The current page the user is on in the results window. Used for paging.
+      int m_currentPageNumber;
     };
   }
 }

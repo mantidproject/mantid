@@ -16,10 +16,12 @@ namespace MantidQt
 {
   namespace MantidWidgets
   {
+
     /**
      * Constructor
      */
-    CatalogSearch::CatalogSearch(QWidget* parent) : QWidget(parent)
+    CatalogSearch::CatalogSearch(QWidget* parent) : QWidget(parent),
+        m_icatHelper(new CatalogHelper()), m_currentPageNumber(1)
     {
       initLayout();
       // Load saved settings from store.
@@ -106,14 +108,6 @@ namespace MantidQt
       // these elements for testing purposes as multiple facilities or paging has not yet been implemented.
       // They will be implemented in separate tickets in the next release.
       m_icatUiForm.facilityLogin->hide();
-      m_icatUiForm.resDisplayingTxt->hide();
-      m_icatUiForm.resInstructions->hide();
-      m_icatUiForm.resPageEndNumTxt->hide();
-      m_icatUiForm.resPageNextTxt->hide();
-      m_icatUiForm.resPageOfTxt->hide();
-      m_icatUiForm.resPageStartNumTxt->hide();
-      m_icatUiForm.resPageTxt->hide();
-      m_icatUiForm.resPreviousTxt->hide();
 
       // Limit input to: A number, 1 hyphen or colon followed by another number. E.g. 444-444, -444, 444-
       QRegExp re("[0-9]*(-|:){1}[0-9]*");
@@ -565,6 +559,11 @@ namespace MantidQt
     {
       if (m_icatUiForm.searchBtn)
       {
+        std::string name = sender()->name();
+        // This allows us to perform paging on each search separately
+        // as we call this method in three separate SLOTS (two paging & search button).
+        if (name.compare("searchBtn") == 0) m_currentPageNumber = 1;
+
         clearDataFileFrame();
 
         std::map<std::string, std::string> inputFields = getSearchFields();
@@ -597,8 +596,26 @@ namespace MantidQt
         std::string searchResults = "searchResults";
         clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
 
-        // Perform the search using the values the user has input as they are valid.
+        // Perform a search without limit or offset to run COUNT query.
         m_icatHelper->executeSearch(inputFields);
+
+        // Obtain the number of results for paging.
+        int numrows = int(m_icatHelper->getNumberOfSearchResults());
+
+        // Setup values used for paging.
+        double limit      = 100; // Have to make a double for ceil to work correctly.
+        int totalNumPages = int(ceil(numrows / limit));
+        int offset        = (m_currentPageNumber - 1) * int(limit);
+
+        // Set paging labels.
+        m_icatUiForm.resPageStartNumTxt->setText(QString::number(m_currentPageNumber));
+        m_icatUiForm.resPageEndNumTxt->setText(QString::number(totalNumPages));
+
+        // Perform a search using paging (E.g. return only n from m).
+        m_icatHelper->executeSearch(inputFields,offset,int(limit));
+
+        // Update the label to inform the user of how many investigations have been returned from the search.
+        m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) + " investigations found.");
 
         // Populate the result table from the searchResult workspace.
         populateResultTable();
@@ -700,7 +717,6 @@ namespace MantidQt
       setupTable(resultsTable, workspace->rowCount(), workspace->columnCount());
 
       // Update the label to inform the user of how many investigations have been returned from the search.
-      m_icatUiForm.searchResultsLbl->setText(QString::number(workspace->rowCount()) + " investigations found.");
 
       // We want to show this now as we are certain that search results exist, and not display a blank frame (bad UX).
       m_icatUiForm.resFrame->show();

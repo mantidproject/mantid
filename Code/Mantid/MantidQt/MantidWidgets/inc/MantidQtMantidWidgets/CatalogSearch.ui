@@ -91,12 +91,15 @@
         <item>
          <layout class="QHBoxLayout" name="resFooter">
           <item>
-           <widget class="QLabel" name="resPreviousTxt">
+           <widget class="QPushButton" name="resPrevious">
             <property name="font">
              <font>
-              <weight>50</weight>
-              <bold>false</bold>
+              <weight>75</weight>
+              <bold>true</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Reset all fields&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>&lt; Prev |</string>
@@ -156,12 +159,15 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="resPageNextTxt">
+           <widget class="QPushButton" name="resNext">
             <property name="font">
              <font>
-              <weight>50</weight>
-              <bold>false</bold>
+              <weight>75</weight>
+              <bold>true</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Reset all fields&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>| Next &gt;</string>
