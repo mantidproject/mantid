@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/LoadILLAsciiHelper.h"
 #include "MantidAPI/IFileLoader.h"
 
 namespace Mantid {
@@ -52,10 +53,13 @@ private:
 	virtual void initDocs();
 	void init();
 	void exec();
-	LoadHelper m_loader;
+	void loadInstrumentName(ILLParser &);
+	void loadInstrumentDetails(ILLParser &p);
+	void loadIDF(API::MatrixWorkspace_sptr &workspace);
+	//LoadHelper m_loader;
 	std::string m_instrumentName; ///< Name of the instrument
+	double m_wavelength;
 	std::vector<std::string> m_supportedInstruments;
-	API::MatrixWorkspace_sptr m_localWorkspace;
 };
 
 } // namespace DataHandling

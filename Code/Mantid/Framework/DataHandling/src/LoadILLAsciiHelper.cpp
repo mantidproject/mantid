@@ -1,8 +1,138 @@
 /*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
+ ILL File parser.
+
+ The file format is the following:
+
+Keys, data and text and are written in 80 character fixed length strings (data following the V descriptor have
+variable length).
+A key field signifies a certain type of data field follows, with information on the size of the following field, and how
+much text (if any) is present describing the field of data.
+The text (if present) then follows (new feature).
+The next records then contain the data.
+There then follows another key record for the next data field.
+The next record contains information on the size of the following field, and how much text (if any) is present
+describing the field of data. etc.,
+Key fields
+These identifying fields consist of two 80 character strings with a fixed format. The first is completely filled with one of
+the five key letters (R, S, A, F,I,J or V), written with the Fortran format (80A1); the second contains up to 10 integers
+in Fortran format (10I8). The first record can always be read using the A1 format and checked before any attempt is
+made to read the following integers. These integers contain control information.
+The seven key types are described below:
+RRRRRRRRRR..			..RRR	(80A1)
+NRUN	NTEXT	NVERS				(10I8)
+
+NRUN	is the run number (numor ) for the data following
+NTEXT	is the number of lines of descriptive text which follow
+NVERS	is the version of the data (modified as data structure changes)
+
+SSSSSSSSSS..	...		..SSS	(80A1)
+ISPEC	NREST	NTOT	NRUN	NTEXT	NPARS	(10I8)
+
+ISPEC	is the following sub-spectrum number
+NREST	is the number of subspectra remaining after ISPEC
+NTOT	is the total number of subspectra in the run
+NRUN	is the current run number
+NTEXT	is the number of lines of descriptive text
+NPARS	is the number of parameter sections (F, I etc, preceding the
+        counts data), typically for step-scanning multi-detector
+        instruments where additional information is stored at each step
+
+AAAAAAAAAA..	...		..AAA	(80A1)
+NCHARS	NTEXT				(10I8)
+
+NCHARS 	is the number of characters to be read from the next data field
+	using the format (80A1)
+NTEXT	is the number of lines of descriptive text before this data
+
+FFFFFFFFFF..	...		..FFF	(80A1)
+NFLOAT	NTEXT				(10I8)
+
+NFLOAT 	is the number of floating point numbers to be read from the
+	next data field using format (5E16.8)
+NTEXT	is the number of lines of descriptive text before the data
+
+
+IIIIIIIIII..	...		..III	(80A1)
+NINTGR	NTEXT				(10I8)
+
+NINTGR 	is the number of integer numbers to be read from the next data
+	field using the format (10I8)
+NTEXT	is the number of line of descriptive text before the data
+
+JJJJJJJJJJ..	...		..JJJ	(80A1)
+NINTGR	NTEXT				(8I10)
+
+NINTGR 	is the number of integer numbers to be read from the next data
+	field using the format (8I10), for use where the data are
+        likely overwrite white space if written in I8 format.
+NTEXT	is the number of line of descriptive text before the data
+
+VVVVVVVVVV..	...		..VVV	(80A1)
+
+Text data following are in a variable length format, and no further
+standard fields are expected.
+Examples
+The sequence of key strings and data for typical instruments may be described in an abbreviated form where each
+capital letter, R,A,S,F,I,J,V denotes the initial key string, the small letter the length information, and t and d denote
+descriptive text and data strings respectively, all of fixed 80 characters total string length. The data strings v are of
+variable length (usually less than 256 characters, and most often less than 132 characters).
+One spectrum/run
+
+	RrtAatddFftttdddSsIittdddddddddddddddddddd
+
+The program /usr/ill/bin/anadat can be used to analyse a file,
+e.g. for D20 with one frame per run:
+
+% /usr/ill/bin/anadat 050750
+ anadat - version 3.1  June 2001  (R.E. Ghosh)
+
+
+ Scanning file :050750
+  Run  Format............ from  record      1
+ 50750 80A 480A  30F  25F  30F  15F  55F  20F +  1 x (  5F  1600J )
+ End of file after    310  records
+
+
+Several subspectra/run
+
+	RrtAatddFftttdddSsIitdddddddSsIitdddddSsIitddddd..
+
+A second example of D20 with 31 frames in a single file:
+% /usr/ill/bin/anadat 044450
+ anadat - version 3.1  June 2001  (R.E. Ghosh)
+
+
+ Scanning file :044450
+  Run  Format............ from  record      1
+ 44450 80A 480A  30F  25F  30F  15F  55F  20F + 31 x ( 30F  1600J )
+ End of file after   6692  records
+
+Variable format
+
+	RrtAatddVvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+Apart from the run number the data are identified by the name of the instrument, the date and time of the initial
+recording, and a short experiment name. This information appears as a text field immediately after the run number
+key.
+The text field thus follows an AAA key; at present (September 1994) the 80 characters are used as follows:
+INSTexpt.-nameDD-MMM-YY.hh:mm:ss---48 blank ---- (80 total) where:
+INST instrument (4 characters) expt.-name experiment name (10 characters) DD-MMM-YY date of recording
+(9 characters,one space) hh:mm:ss time of recording (8 characters) Example of a data file from D11 Small-angle
+scattering spectrometer
+In addition to the standard header containing the instrument name etc., the following 5 data fields are present:
+	156I, 512A, 128F, 256I, 4096I
+
+The formatted structure is:
+
+RrAadIitddddddddddddddddAatdddddddFfttttttttddddddddddddddddddddddddddIitdd etc.
+
+
+
  *WIKI*/
 
 #include "MantidDataHandling/LoadILLAsciiHelper.h"
+#include "MantidKernel/DllConfig.h"
 
 #include <iostream>
 #include <fstream>
@@ -31,7 +161,7 @@ ILLParser::~ILLParser() {
 /**
  * Main function
  */
-void ILLParser::startParsing() {
+void ILLParser::parse() {
 	std::string line;
 	while (std::getline(fin, line)) {
 		if (line.find(
@@ -282,5 +412,24 @@ T ILLParser::evaluate(std::string field) {
 	return value;
 }
 
+template<typename T> T ILLParser::getValueFromHeader(const std::string &field) {
+	T ret;
+	for (auto it = header.begin(); it != header.end(); ++it) {
+		//std::cout << it->first << "=>" << it->second << '\n';
+		std::size_t pos = it->first.find(field);
+		if (pos != std::string::npos) {
+			//std::cout << "Found field: " << field << "=>" << it->second << '\n';
+			ret = evaluate<T>(it->second);
+		}
+	}
+
+	return ret;
+}
+
+
 } // namespace DataHandling
-} // namespace Mantid
+}// namespace Mantid
+
+// Concrete template instantiation:The other libraries can't see the template definition so it needs to be instantiated in API
+template MANTID_KERNEL_DLL double Mantid::DataHandling::ILLParser::getValueFromHeader(const std::string &);
+

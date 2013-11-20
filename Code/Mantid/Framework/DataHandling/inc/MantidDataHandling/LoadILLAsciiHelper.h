@@ -42,9 +42,12 @@ class ILLParser {
 public:
 	ILLParser(const std::string &filename);
 	virtual ~ILLParser();
-	void startParsing();
+	void parse();
 	void showHeader();
 	std::string getInstrumentName();
+	std::vector< std::vector<int> > getSpectraList() const {return spectraList;}
+	std::vector<std::map<std::string, std::string> > getSpectraHeaderList() const {return spectraHeaders;}
+	template<typename T> T getValueFromHeader(const std::string &field);
 private:
 	void parseFieldR();
 	void parseFieldA();

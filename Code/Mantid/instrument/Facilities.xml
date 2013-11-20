@@ -459,6 +459,11 @@
   <instrument name="D33">
     <technique>SANS</technique> 
   </instrument>
+  
+  <instrument name="D2B">
+    <technique>Powder diffraction</technique> 
+  </instrument>
+  
 
 </facility>
 
