@@ -212,7 +212,8 @@ namespace Crystal
       Material mat("SetInAnvredCorrection", neutron, 1.0);
       ws->mutableSample().setMaterial(mat);
     }
-    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
+    if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
+      g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
                    << "LinearAbsorptionCoef = "   << amu << " 1/cm\n"
                    << "Radius = " << radius << " cm\n"
     			   << "Power Lorentz corrections = " << power_th << " \n";
@@ -295,7 +296,11 @@ namespace Crystal
       double scattering = p.getScattering();
       double lambda =  p.getWavelength();
       double dsp = p.getDSpacing();
-      double transmission = absor_sphere(scattering, lambda, tbar);
+      double transmission = 0;
+      if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
+      {
+        transmission = absor_sphere(scattering, lambda, tbar);
+      }
       if(dsp < dMin || lambda < wlMin || lambda > wlMax) continue;
 
       // Anvred write from Art Schultz/
