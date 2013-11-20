@@ -16,15 +16,48 @@
   <property name="windowTitle">
    <string>ISIS Reflectometry</string>
   </property>
-  <widget class="QWidget" name="mainRowLayout">
+  <widget class="QWidget" name="layoutMainRow">
    <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
-     <layout class="QHBoxLayout" name="topRowLayout">
+     <layout class="QHBoxLayout" name="layoutTopRow">
       <property name="spacing">
        <number>12</number>
       </property>
       <item>
-       <widget class="QComboBox" name="comboInstrument"/>
+       <widget class="QComboBox" name="comboInstrument">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <item>
+         <property name="text">
+          <string>Inter</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SURF</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>CRISP</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>PolRef</string>
+         </property>
+        </item>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="labelRB">
@@ -84,7 +117,34 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboPolarCorrect"/>
+       <widget class="QComboBox" name="comboPolarCorrect">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1-PNR</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2-PA</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3-Other</string>
+         </property>
+        </item>
+       </widget>
       </item>
       <item>
        <spacer name="spacer_2">
@@ -132,14 +192,20 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="bottomRowLayout">
+     <layout class="QHBoxLayout" name="layoutBottomRow">
       <item>
-       <widget class="QListWidget" name="mainList">
+       <widget class="QListWidget" name="listMain">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="selectionMode">
          <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -156,7 +222,7 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>20</width>
+          <width>25</width>
           <height>16777215</height>
          </size>
         </property>
@@ -166,12 +232,222 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="tableColumnLayout">
+       <layout class="QVBoxLayout" name="layoutTableColumn">
         <item>
-         <widget class="QTableView" name="mainTable"/>
+         <widget class="QTableWidget" name="tableMain">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="rowCount">
+           <number>100</number>
+          </property>
+          <property name="columnCount">
+           <number>17</number>
+          </property>
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>60</number>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>20</number>
+          </attribute>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <row/>
+          <column>
+           <property name="text">
+            <string>Run(s)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Angle 1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>trans 1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>qmin_1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>qmax_1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Run(s)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Angle 2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>trans 2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>qmin_2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>qmax_2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Run(s)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Angle 3</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>qmin_3</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>qmax_3</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>dq/q</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Scale</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Stitch?</string>
+           </property>
+          </column>
+         </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="tableButtonLayout">
+         <layout class="QHBoxLayout" name="layoutTableButton">
           <item>
            <widget class="QPushButton" name="buttonProcess">
             <property name="sizePolicy">
@@ -200,7 +476,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
+  <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
