@@ -307,19 +307,21 @@ namespace Mantid
 
       int result = icat.search(&request, &response);
 
-      xsd__long * numOfResults;
+      int64_t numOfResults = 0;
+
       if (result == 0)
       {
-        numOfResults = dynamic_cast<xsd__long*>(response.return_.at(0));
+        xsd__long * numRes = dynamic_cast<xsd__long*>(response.return_.at(0));
+        numOfResults = numRes->__item;
       }
       else
       {
         throwErrorMessage(icat);
       }
 
-      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Number of results returned is: { " << numOfResults->__item << " }" << std::endl;
+      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Number of results returned is: { " << numOfResults << " }" << std::endl;
 
-      return numOfResults->__item;
+      return numOfResults;
     }
 
     /**
