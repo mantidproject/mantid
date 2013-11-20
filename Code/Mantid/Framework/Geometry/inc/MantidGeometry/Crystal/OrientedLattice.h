@@ -50,6 +50,8 @@ namespace Geometry
                       const int angleunit=angDegrees);
       //UnitCell constructor
       OrientedLattice(const UnitCell & uc , const Kernel::DblMatrix & Umatrix = Kernel::DblMatrix(3,3,true));
+      //UnitCell constructor
+      OrientedLattice(const UnitCell * uc , const Kernel::DblMatrix & Umatrix = Kernel::DblMatrix(3,3,true));
       // Destructor
       virtual ~OrientedLattice();  
 
@@ -61,8 +63,10 @@ namespace Geometry
       //get u and v vectors for Horace/Mslice
       Kernel::V3D getuVector();
       Kernel::V3D getvVector();
-      /// Return q(hkl) from the lab coordinates
+      /// Return hkl from the Q-sample coordinates
       Kernel::V3D hklFromQ(const Kernel::V3D & Q) const;
+      /// Return Q-sample coordinates from hkl
+      Kernel::V3D qFromHKL(const Kernel::V3D & hkl) const;
       /// Create the U matrix from two vectors
       const Kernel::DblMatrix & setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
       /// Save the lattice to an open NeXus file

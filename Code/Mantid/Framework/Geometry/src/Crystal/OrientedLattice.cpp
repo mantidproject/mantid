@@ -82,6 +82,17 @@ namespace Geometry
     else throw std::invalid_argument("U is not a proper rotation");
   }
 
+  OrientedLattice::OrientedLattice(const UnitCell * uc , const DblMatrix & Umatrix)
+    : UnitCell(uc),U(Umatrix)
+  {
+    if (Umatrix.isRotation()==true)
+    {
+      U=Umatrix;
+      UB=U*getB();
+    }
+    else throw std::invalid_argument("U is not a proper rotation");
+  }
+
   /// Destructor
   OrientedLattice::~OrientedLattice()
   {
@@ -152,6 +163,14 @@ namespace Geometry
     return out;
   }
 
+  /** Calculate the hkl corresponding to a given Q-vector
+   * @return Q :: Q-vector in $AA^-1 in the sample frame
+   * @param a V3D with H,K,L
+   */
+  V3D OrientedLattice::qFromHKL(const V3D & hkl) const
+  {
+    return UB*hkl*M_2_PI;
+  }
 
   /** gets a vector along beam direction when goniometers are at 0. Note, this vector is not unique, but
     all vectors can be obtaineb by multiplying with a scalar
