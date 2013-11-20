@@ -89,7 +89,7 @@ namespace Mantid
       // qhkl = (1/2pi)(RB)^-1(qxyz)
       const Geometry::OrientedLattice & lattice = exptSetup.sample().getOrientedLattice();
       const Kernel::DblMatrix & gr = exptSetup.run().getGoniometerMatrix();
-      const Kernel::DblMatrix & bmat = lattice.getB();
+      const Kernel::DblMatrix & bmat = lattice.getUB();
 
       // Avoid doing inversion with Matrix class as it forces memory allocations
       // M^-1 = (1/|M|)*M^T
