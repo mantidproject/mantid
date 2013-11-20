@@ -118,6 +118,8 @@ namespace MantidQt
       // Limit input to: A number, 1 hyphen or colon followed by another number. E.g. 444-444, -444, 444-
       QRegExp re("[0-9]*(-|:){1}[0-9]*");
       m_icatUiForm.RunRange->setValidator(new QRegExpValidator(re, this));
+      // Limit the page number input field to only digits.
+      m_icatUiForm.pageStartNum->setValidator(new QIntValidator(0,999,this));
 
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
@@ -779,7 +781,15 @@ namespace MantidQt
      */
     void CatalogSearch::goToInputPage()
     {
-      m_currentPageNumber = m_icatUiForm.pageStartNum->text().toInt();
+      int pageNum = m_icatUiForm.pageStartNum->text().toInt();
+      // If the user inputs a page number larger than the total
+      // amount of page numbers we do not want to do anything.
+      if (pageNum > m_icatUiForm.resPageEndNumTxt->text().toInt())
+      {
+        m_icatUiForm.pageStartNum->setText(QString::number(m_currentPageNumber));
+        return;
+      }
+      m_currentPageNumber = pageNum;
       searchClicked();
     }
 

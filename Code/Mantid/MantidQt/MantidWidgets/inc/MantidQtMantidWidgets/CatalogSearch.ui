@@ -129,7 +129,7 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>40</width>
+              <width>35</width>
               <height>16777215</height>
              </size>
             </property>
@@ -140,7 +140,7 @@
              <set>Qt::ImhDigitsOnly</set>
             </property>
             <property name="maxLength">
-             <number>4</number>
+             <number>3</number>
             </property>
            </widget>
           </item>
