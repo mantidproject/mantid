@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/NormaliseVanadium.cpp
 	src/OptimizeCrystalPlacement.cpp
 	src/OptimizeExtinctionParameters.cpp
+	src/OptimizeLatticeParameters.cpp
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
@@ -80,6 +81,7 @@ set ( INC_FILES
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
+	inc/MantidCrystal/OptimizeLatticeParameters.h
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h

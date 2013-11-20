@@ -680,6 +680,110 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   return fit_error;
 }
 
+double IndexingUtils::Optimize_UB(      std::vector<double> & params,
+                                        std::string       & cell_type,
+                                        std::vector<double> & lattice_parameters,
+                                        DblMatrix         & UB,
+                                  const std::vector<V3D>  & hkl_vectors,
+                                  const std::vector<V3D>  & q_vectors )
+{
+  if (cell_type == "Cubic")
+  {
+    lattice_parameters[0] = params[0];       
+    lattice_parameters[1] = params[0];
+    lattice_parameters[2] = params[0];      
+
+    lattice_parameters[3] = 90;
+    lattice_parameters[4] = 90;
+    lattice_parameters[5] = 90;
+  }
+  else if (cell_type == "Tetragonal")
+  {
+    lattice_parameters[0] = params[0];    
+    lattice_parameters[1] = params[0];
+    lattice_parameters[2] = params[1];   
+
+    lattice_parameters[3] = 90;
+    lattice_parameters[4] = 90;
+    lattice_parameters[5] = 90;
+  }
+  else if (cell_type == "Orthorhombic")
+  {
+    lattice_parameters[0] = params[0];  
+    lattice_parameters[1] = params[1];
+    lattice_parameters[2] = params[2]; 
+
+    lattice_parameters[3] = 90;
+    lattice_parameters[4] = 90;
+    lattice_parameters[5] = 90;
+  }
+  else if (cell_type == "Rhombohedral")
+  {
+    lattice_parameters[0] = params[0];
+    lattice_parameters[1] = params[0];
+    lattice_parameters[2] = params[0];  
+
+    lattice_parameters[3] = params[1];
+    lattice_parameters[4] = params[1];
+    lattice_parameters[5] = params[1];
+  }
+  else if (cell_type == "Hexagonal")
+  {
+    lattice_parameters[0] = params[0]; 
+    lattice_parameters[1] = params[0];
+    lattice_parameters[2] = params[1];
+
+    lattice_parameters[3] = 90;
+    lattice_parameters[4] = 90;
+    lattice_parameters[5] = 120;
+  }
+  else if (cell_type == "Monoclinic ( a unique )")
+  {
+    lattice_parameters[0] = params[0];
+    lattice_parameters[1] = params[1];
+    lattice_parameters[2] = params[2];
+
+    lattice_parameters[3] = params[3];
+    lattice_parameters[4] = 90;
+    lattice_parameters[5] = 90;
+  }
+  else if (cell_type == "Monoclinic ( b unique )")
+  {
+    lattice_parameters[0] = params[0];
+    lattice_parameters[1] = params[1];
+    lattice_parameters[2] = params[2];
+
+    lattice_parameters[3] = 90;
+    lattice_parameters[4] = params[3];
+    lattice_parameters[5] = 90;
+  }
+  else if (cell_type == "Monoclinic ( c unique )")
+  {
+    lattice_parameters[0] = params[0];
+    lattice_parameters[1] = params[1];
+    lattice_parameters[2] = params[2];
+
+    lattice_parameters[3] = 90;
+    lattice_parameters[4] = 90;
+    lattice_parameters[5] = params[3];
+  }
+  else if (cell_type == "Triclinic")
+  {
+    lattice_parameters[0] = params[0];
+    lattice_parameters[1] = params[1];
+    lattice_parameters[2] = params[2]; 
+
+    lattice_parameters[3] = params[3];
+    lattice_parameters[4] = params[4];
+    lattice_parameters[5] = params[5];
+  }
+
+    for( int i=0;i<6;i++)std::cout << lattice_parameters[i]<<"  ";
+    std::cout << "\n";
+    double result = Optimize_UB( lattice_parameters, UB, hkl_vectors,q_vectors);
+    return result;
+}
+
 /** 
   STATIC method Optimize_UB: Calculates the matrix that most nearly maps
   the specified hkl_vectors to the specified q_vectors.  The calculated
@@ -721,17 +825,30 @@ double IndexingUtils::Optimize_UB(      std::vector<double> & lattice_parameters
                                   const std::vector<V3D>  & hkl_vectors,
                                   const std::vector<V3D>  & q_vectors )
 {
-  DblMatrix A(3,3);
-  for( int i=0;i<3;i++) A[0][i] = lattice_parameters[i];
-  for( int i=0;i<3;i++) A[1][i] = lattice_parameters[i+3];
-  for( int i=0;i<3;i++) A[2][i] = 0.0;
-  DblMatrix UBA = UB * A;
+  std::string message1 = " Lattice Parameters:" +
+                        IndexingUtils::GetLatticeParameterString( UB );
+
+  std::cout <<message1<<"\n";
+  Geometry::UnitCell lat(lattice_parameters[0], lattice_parameters[1], lattice_parameters[2], 
+       lattice_parameters[3], lattice_parameters[4], lattice_parameters[5]);
+  DblMatrix UBA = UB * lat.getB();
+  
   OrientedLattice u;
   u.setUB(UBA);
-  DblMatrix U1 = u.getU();
     
-  UB = U1 * A.Invert();
-  double result = Optimize_UB( UB, hkl_vectors,q_vectors);
+  //UB = u.getU() * lat.getBinv();
+  std::string message = " Lattice Parameters:" +
+                        IndexingUtils::GetLatticeParameterString( UB );
+
+  std::cout <<message;
+
+  double result = 0;
+  for ( size_t i = 0; i < hkl_vectors.size(); i++ ) 
+  {
+     V3D error = UB * hkl_vectors[i] - q_vectors[i];
+     result += error.norm();
+   }
+  std::cout <<result<< "\n";
   return result;
 }
 /** 

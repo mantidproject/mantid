@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -87,16 +88,25 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                double                     degrees_per_step );
 
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
+  static double Optimize_UB(               std::vector<double> & params,
+                                           std::string       & cell_type,
+                                           std::vector<double> & lattice_parameters,
+                                           Kernel::DblMatrix         & UB,
+                                    const std::vector<Kernel::V3D>  & hkl_vectors,
+                                    const std::vector<Kernel::V3D>  & q_vectors );
+
+  /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
+  static double Optimize_UB(               std::vector<double> & lattice_parameters,
+                                           Kernel::DblMatrix         & UB,
+                                    const std::vector<Kernel::V3D>  & hkl_vectors,
+                                    const std::vector<Kernel::V3D>  & q_vectors );
+
+  /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double Optimize_UB(      Kernel::DblMatrix         & UB,
                                     const std::vector<Kernel::V3D>  & hkl_vectors,
                                     const std::vector<Kernel::V3D>  & q_vectors ,
                                     std::vector<double> & sigabc);
 
-  /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
-  static double Optimize_UB(      std::vector<double> & lattice_parameters,
-                                  Kernel::DblMatrix         & UB,
-                            const std::vector<Kernel::V3D>  & hkl_vectors, 
-                            const std::vector<Kernel::V3D>  & q_vectors   );
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double Optimize_UB(      Kernel::DblMatrix         & UB,
                             const std::vector<Kernel::V3D>  & hkl_vectors, 
@@ -303,6 +313,10 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   /// Construct a newUB corresponding to a Niggli cell from the given UB
   static bool MakeNiggliUB( const Kernel::DblMatrix  & UB,
                                   Kernel::DblMatrix  & newUB );
+private:
+ 
+    /// Static reference to the logger class
+    static Mantid::Kernel::Logger& g_Log;
 };
 
 
