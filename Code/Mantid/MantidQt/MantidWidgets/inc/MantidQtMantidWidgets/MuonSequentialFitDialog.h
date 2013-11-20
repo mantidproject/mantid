@@ -45,10 +45,18 @@ namespace MantidWidgets
     virtual ~MuonSequentialFitDialog();
 
   private:
+    enum ControlButtonType {
+      Start,
+      Stop
+    };
+
     // -- FUNCTIONS -----------------------------------------------------------
 
     /// Check if all the input field are valid 
     bool isInputValid();
+
+    /// Set the type of the control button
+    void setControlButtonType(ControlButtonType type);
 
     // -- VARIABLES -----------------------------------------------------------
 
@@ -70,6 +78,11 @@ namespace MantidWidgets
     /// Enables/disables start button depending on wether we are allowed to start
     void updateControlButtonState();
 
+    /// Start fitting process
+    void startFit();
+
+    /// Stop fitting process
+    void stopFit();
   };
 
 

@@ -14,11 +14,12 @@ namespace MantidWidgets
    * Constructor
    */
   MuonSequentialFitDialog::MuonSequentialFitDialog(QWidget* parent) :
-    QDialog(parent) 
+    QDialog(parent)
   {
     m_ui.setupUi(this);
 
     // TODO: set initial values 
+    setControlButtonType(Start); 
 
     // After initial values are set, update depending elements accordingly. We don't rely on
     // slot/signal update, as element might be left with default values which means these will
@@ -82,6 +83,43 @@ namespace MantidWidgets
   void MuonSequentialFitDialog::updateControlButtonState()
   {
     m_ui.controlButton->setEnabled( isInputValid() );
+  }
+
+  /**
+   * Set the type of the control button. It is Start button when fitting has not been started,
+   * and Stop button when fitting is running.
+   * @param type :: New type of the button  
+   */
+  void MuonSequentialFitDialog::setControlButtonType(ControlButtonType type)
+  {
+    // Disconnect everything connected to pressed() signal of the button 
+    disconnect( m_ui.controlButton, SIGNAL( pressed() ), 0, 0);
+ 
+    // Connect to appropriate slot
+    auto buttonSlot = (type == Start) ? SLOT( startFit() ) : SLOT( stopFit() );
+    connect( m_ui.controlButton, SIGNAL( pressed() ), this, buttonSlot );
+
+    // Set appropriate text
+    QString buttonText = (type == Start) ? "Start" : "Stop";
+    m_ui.controlButton->setText(buttonText);
+  }
+
+  /**
+   * Start fitting process.
+   */
+  void MuonSequentialFitDialog::startFit()
+  {
+    g_log.notice("Seq. fitting started");
+    setControlButtonType(Stop);
+  }
+
+  /**
+   * Stop fitting process.
+   */
+  void MuonSequentialFitDialog::stopFit()
+  {
+    g_log.notice("Seq. fitting stopped");
+    setControlButtonType(Start);
   }
 
   /**
