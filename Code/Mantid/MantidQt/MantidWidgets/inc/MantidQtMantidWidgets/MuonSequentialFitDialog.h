@@ -6,6 +6,8 @@
 
 #include "ui_MuonSequentialFitDialog.h"
 
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+
 #include <QDialog>
 
 namespace MantidQt
@@ -41,7 +43,7 @@ namespace MantidWidgets
     Q_OBJECT
 
   public:
-    MuonSequentialFitDialog(QWidget* parent);
+    MuonSequentialFitDialog(MuonFitPropertyBrowser* parent);
     virtual ~MuonSequentialFitDialog();
 
   private:
@@ -61,10 +63,16 @@ namespace MantidWidgets
     /// Update enabled state off all the input widgets (except for control ones) 
     void setInputEnabled(bool enabled);
 
+    /// Initialize diagnosis table 
+    void initDiagnosisTable();
+
     // -- VARIABLES -----------------------------------------------------------
 
     /// UI form
     Ui::MuonSequentialFitDialog m_ui;
+
+    /// Fit properties browser used to start the dialog
+    MuonFitPropertyBrowser* m_fitPropBrowser;
 
     // -- STATIC MEMBERS ------------------------------------------------------
 

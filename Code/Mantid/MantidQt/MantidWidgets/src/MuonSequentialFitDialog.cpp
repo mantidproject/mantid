@@ -1,4 +1,6 @@
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+
 #include "MantidAPI/AnalysisDataService.h" 
 
 namespace MantidQt
@@ -13,13 +15,15 @@ namespace MantidWidgets
   /** 
    * Constructor
    */
-  MuonSequentialFitDialog::MuonSequentialFitDialog(QWidget* parent) :
-    QDialog(parent)
+  MuonSequentialFitDialog::MuonSequentialFitDialog(MuonFitPropertyBrowser* fitPropBrowser) :
+    QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser)
   {
     m_ui.setupUi(this);
 
     // TODO: set initial values 
     setControlButtonType(Start); 
+
+    initDiagnosisTable();
 
     // After initial values are set, update depending elements accordingly. We don't rely on
     // slot/signal update, as element might be left with default values which means these will
@@ -47,6 +51,30 @@ namespace MantidWidgets
       return "Can not be empty";
     else
       return AnalysisDataService::Instance().isValid(label);
+  }
+
+  /**
+   * Initialize diagnosis table.
+   */
+  void MuonSequentialFitDialog::initDiagnosisTable()
+  {
+    QStringList headerLabels;
+
+    // Add two static columns 
+    headerLabels << "Run" << "Fit quality";
+
+    // Add remaining columns - one for every fit function parameter
+    CompositeFunction_const_sptr fitFunc = m_fitPropBrowser->compositeFunction();
+
+    for(size_t i = 0; i < fitFunc->nParams(); i++)
+      headerLabels << QString::fromStdString( fitFunc->parameterName(i) );
+
+    m_ui.diagnosisTable->setColumnCount( headerLabels.size() );
+    m_ui.diagnosisTable->setHorizontalHeaderLabels(headerLabels);
+
+    // Make the table fill all the available space
+    QHeaderView* header = m_ui.diagnosisTable->horizontalHeader();
+    header->setResizeMode(QHeaderView::Stretch);
   }
 
   /**
