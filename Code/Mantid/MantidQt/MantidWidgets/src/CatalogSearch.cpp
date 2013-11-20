@@ -102,6 +102,8 @@ namespace MantidQt
       connect(m_icatUiForm.resPrevious,SIGNAL(clicked()),this,SLOT(prevPageClicked()));
       // When the user clicks "Next >" populate the results table with the next 100 results.
       connect(m_icatUiForm.resNext,SIGNAL(clicked()),this,SLOT(nextPageClicked()));
+      // When the user is done editing & presses enter we retrieve the results for that specific page in paging.
+      connect(m_icatUiForm.pageStartNum,SIGNAL(editingFinished()),SLOT(goToInputPage()));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -276,7 +278,6 @@ namespace MantidQt
 
       // In order to reset fields for the table
       setupTable(table, 0, 0);
-
     }
 
     /**
@@ -561,69 +562,66 @@ namespace MantidQt
      */
     void CatalogSearch::searchClicked()
     {
-      if (m_icatUiForm.searchBtn)
+      std::string name = sender()->name();
+      // This allows us to perform paging on each search separately
+      // as we call this method in three separate SLOTS (two paging & search button).
+      if (name.compare("searchBtn") == 0) m_currentPageNumber = 1;
+
+      clearDataFileFrame();
+
+      std::map<std::string, std::string> inputFields = getSearchFields();
+      // Contains the error label names, and the related error message.
+      std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
+
+      // Has any errors occurred?
+      if (!errors.empty() || validateDates())
       {
-        std::string name = sender()->name();
-        // This allows us to perform paging on each search separately
-        // as we call this method in three separate SLOTS (two paging & search button).
-        if (name.compare("searchBtn") == 0) m_currentPageNumber = 1;
-
-        clearDataFileFrame();
-
-        std::map<std::string, std::string> inputFields = getSearchFields();
-        // Contains the error label names, and the related error message.
-        std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
-
-        // Has any errors occurred?
-        if (!errors.empty() || validateDates())
-        {
-          // Clear form to prevent previous search results showing if an error occurs.
-          clearSearchResultFrame();
-          showErrorLabels(errors);
-          m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
-          // Stop here to prevent the search being carried out below.
-          return;
-        }
-
-        // Since there are no longer errors we hide the error labels.
-        hideErrorLabels();
-
-        // We want to disable/hide these as a search is in progress, but no results have been obtained.
-        m_icatUiForm.resFrame->hide();
-        m_icatUiForm.searchResultsCbox->setEnabled(false);
-        m_icatUiForm.searchResultsCbox->setChecked(false);
-
-        // Update the label to inform the user that searching is in progress.
-        m_icatUiForm.searchResultsLbl->setText("searching investigations...");
-
-        // Remove previous search results.
-        std::string searchResults = "searchResults";
-        clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
-
-        // Perform a search without limit or offset to run COUNT query.
-        m_icatHelper->executeSearch(inputFields);
-
-        // Obtain the number of results for paging.
-        int numrows = int(m_icatHelper->getNumberOfSearchResults());
-
-        // Setup values used for paging.
-        double limit      = 100; // Have to make a double for ceil to work correctly.
-        int totalNumPages = int(ceil(numrows / limit));
-        int offset        = (m_currentPageNumber - 1) * int(limit);
-
-        // Set paging labels.
-        m_icatUiForm.resPageStartNumTxt->setText(QString::number(m_currentPageNumber));
-        m_icatUiForm.resPageEndNumTxt->setText(QString::number(totalNumPages));
-
-        // Perform a search using paging (E.g. return only n from m).
-        m_icatHelper->executeSearch(inputFields,offset,int(limit));
-
-        // Update the label to inform the user of how many investigations have been returned from the search.
-        m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) + " investigations found.");
-
-        // Populate the result table from the searchResult workspace.
-        populateResultTable();
+        // Clear form to prevent previous search results showing if an error occurs.
+        clearSearchResultFrame();
+        showErrorLabels(errors);
+        m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
+        // Stop here to prevent the search being carried out below.
+        return;
       }
+
+      // Since there are no longer errors we hide the error labels.
+      hideErrorLabels();
+
+      // We want to disable/hide these as a search is in progress, but no results have been obtained.
+      m_icatUiForm.resFrame->hide();
+      m_icatUiForm.searchResultsCbox->setEnabled(false);
+      m_icatUiForm.searchResultsCbox->setChecked(false);
+
+      // Update the label to inform the user that searching is in progress.
+      m_icatUiForm.searchResultsLbl->setText("searching investigations...");
+
+      // Remove previous search results.
+      std::string searchResults = "searchResults";
+      clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
+
+      // Perform a search without limit or offset to run COUNT query.
+      m_icatHelper->executeSearch(inputFields);
+
+      // Obtain the number of results for paging.
+      int numrows = int(m_icatHelper->getNumberOfSearchResults());
+
+      // Setup values used for paging.
+      double limit      = 100; // Have to make a double for ceil to work correctly.
+      int totalNumPages = int(ceil(numrows / limit));
+      int offset        = (m_currentPageNumber - 1) * int(limit);
+
+      // Set paging labels.
+      m_icatUiForm.pageStartNum->setText(QString::number(m_currentPageNumber));
+      m_icatUiForm.resPageEndNumTxt->setText(QString::number(totalNumPages));
+
+      // Perform a search using paging (E.g. return only n from m).
+      m_icatHelper->executeSearch(inputFields,offset,int(limit));
+
+      // Update the label to inform the user of how many investigations have been returned from the search.
+      m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) + " investigations found.");
+
+      // Populate the result table from the searchResult workspace.
+      populateResultTable();
     }
 
     /**
@@ -662,8 +660,6 @@ namespace MantidQt
       m_icatUiForm.Keywords_err->setVisible(false);
       m_icatUiForm.SampleName_err->setVisible(false);
       m_icatUiForm.InvestigationType_err->setVisible(false);
-
-
     }
 
     /**
@@ -783,7 +779,8 @@ namespace MantidQt
      */
     void CatalogSearch::goToInputPage()
     {
-
+      m_currentPageNumber = m_icatUiForm.pageStartNum->text().toInt();
+      searchClicked();
     }
 
     /**

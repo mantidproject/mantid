@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>679</width>
-    <height>944</height>
+    <height>954</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -99,10 +99,10 @@
              </font>
             </property>
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Reset all fields&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to retrieve the &lt;span style=&quot; font-style:italic;&quot;&gt;previous&lt;/span&gt; 100 investigations for your search.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>&lt; Prev |</string>
+             <string>&lt; Prev</string>
             </property>
            </widget>
           </item>
@@ -120,15 +120,27 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="resPageStartNumTxt">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
+           <widget class="QLineEdit" name="pageStartNum">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="text">
-             <string/>
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Press &lt;span style=&quot; font-style:italic;&quot;&gt;enter&lt;/span&gt; to perform the search for that page number.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="inputMethodHints">
+             <set>Qt::ImhDigitsOnly</set>
+            </property>
+            <property name="maxLength">
+             <number>4</number>
             </property>
            </widget>
           </item>
@@ -160,17 +172,30 @@
           </item>
           <item>
            <widget class="QPushButton" name="resNext">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <weight>75</weight>
               <bold>true</bold>
+              <stylestrategy>PreferDefault</stylestrategy>
              </font>
             </property>
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Reset all fields&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to retrieve the &lt;span style=&quot; font-style:italic;&quot;&gt;next&lt;/span&gt; 100 investigations for your search.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>| Next &gt;</string>
+             <string>Next &gt;</string>
             </property>
            </widget>
           </item>
@@ -186,19 +211,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="resDisplayingTxt">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
           </item>
          </layout>
         </item>
@@ -253,16 +265,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2" alignment="Qt::AlignHCenter">
-           <widget class="QLabel" name="InvestigatorSurname_err">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
-            </property>
-            <property name="text">
-             <string>*</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="3">
            <spacer name="searchGridSpacer">
             <property name="orientation">
@@ -278,6 +280,16 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="3" column="2" alignment="Qt::AlignHCenter">
+           <widget class="QLabel" name="InvestigatorSurname_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
           </item>
           <item row="4" column="1" alignment="Qt::AlignVCenter">
            <widget class="QLineEdit" name="DataFileName"/>
@@ -593,9 +605,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="5" colspan="2">
-           <widget class="QLineEdit" name="SampleName"/>
-          </item>
           <item row="5" column="0">
            <widget class="QCheckBox" name="advSearchCbox">
             <property name="text">
@@ -671,6 +680,9 @@
              <string>*</string>
             </property>
            </widget>
+          </item>
+          <item row="3" column="5" colspan="2">
+           <widget class="QLineEdit" name="SampleName"/>
           </item>
          </layout>
         </item>
