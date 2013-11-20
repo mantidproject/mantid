@@ -2,6 +2,7 @@
 #define MANTID_MANTIDWIDGETS_MUONSEQUENTIALFITDIALOG_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 
 #include "ui_MuonSequentialFitDialog.h"
 
@@ -44,8 +45,19 @@ namespace MantidWidgets
     virtual ~MuonSequentialFitDialog();
 
   private:
+    /// UI form
     Ui::MuonSequentialFitDialog ui;
-    
+
+    /// Checks if specified name is valid as a name for label. 
+    static std::string isValidLabel(const std::string& label);
+
+    /// Instance used to print log messages
+    static Mantid::Kernel::Logger& g_log;
+
+  private slots:
+  
+    /// Updates visibility/tooltip of label error asterisk
+    void validateLabel(const QString& label);
   };
 
 
