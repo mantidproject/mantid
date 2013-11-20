@@ -925,9 +925,6 @@ class LoadSample(LoadRun):
         self.entries = []
     
     def execute(self, reducer, isSample):
-        if not reducer.user_settings.executed:
-            raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
-
         self._assignHelper(reducer)
 
         if self.wksp_name == '':
