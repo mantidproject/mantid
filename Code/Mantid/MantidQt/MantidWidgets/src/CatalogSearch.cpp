@@ -98,6 +98,10 @@ namespace MantidQt
       connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(itemClicked(QTableWidgetItem*)),this,SLOT(dataFileCheckboxSelected(QTableWidgetItem*)));
       // When several rows are selected we want to check the related checkboxes.
       connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(itemSelectionChanged()),this,SLOT(dataFileRowSelected()));
+      // When the user clicks "< Prev" populate the results table with the previous 100 results.
+      connect(m_icatUiForm.resPrevious,SIGNAL(clicked()),this,SLOT(prevPageClicked()));
+      // When the user clicks "Next >" populate the results table with the next 100 results.
+      connect(m_icatUiForm.resNext,SIGNAL(clicked()),this,SLOT(nextPageClicked()));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -762,7 +766,17 @@ namespace MantidQt
      */
     void CatalogSearch::nextPageClicked()
     {
-
+      int totalNumPages = m_icatUiForm.resPageEndNumTxt->text().toInt();
+      // Prevent user from pressing "next" when no more investigations exist.
+      if (m_currentPageNumber >= totalNumPages)
+      {
+        m_currentPageNumber = totalNumPages;
+        return;
+      }
+      // Increment here as we need to validate page number above.
+      m_currentPageNumber++;
+      // Perform the search, and update the table with the new results using the current page num.
+      searchClicked();
     }
 
     /**
@@ -770,7 +784,14 @@ namespace MantidQt
      */
     void CatalogSearch::prevPageClicked()
     {
-
+      m_currentPageNumber--;
+      // Prevent user from pressing "Previous" when no investigations exist.
+      if (m_currentPageNumber <= 0)
+      {
+        m_currentPageNumber = 1;
+        return;
+      }
+      searchClicked();
     }
 
     /**
