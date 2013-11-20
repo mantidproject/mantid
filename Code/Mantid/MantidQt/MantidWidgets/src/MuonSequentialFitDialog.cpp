@@ -18,8 +18,21 @@ namespace MantidWidgets
   {
     ui.setupUi(this);
 
+    // TODO: set initial values 
+
+    // After initial values are set, update depending elements accordingly. We don't rely on
+    // slot/signal update, as element might be left with default values which means these will
+    // never be called on initialication.
+    updateLabelError( ui.labelInput->text() );
+    updateStartButton();
+
     connect( ui.labelInput, SIGNAL( textChanged(const QString&) ), 
-      this, SLOT( validateLabel(const QString&) ) );
+      this, SLOT( updateLabelError(const QString&) ) );
+
+    connect( ui.labelInput, SIGNAL( textChanged(const QString&) ), 
+      this, SLOT( updateStartButton() ) );
+    connect( ui.runs, SIGNAL( fileFindingFinished() ), 
+      this, SLOT( updateStartButton() ) );
   }
 
   /**
@@ -39,12 +52,36 @@ namespace MantidWidgets
    * Updates visibility/tooltip of label error asterisk.
    * @param label :: New label as specified by user 
    */
-  void MuonSequentialFitDialog::validateLabel(const QString& label)
+  void MuonSequentialFitDialog::updateLabelError(const QString& label)
   {
     std::string error = isValidLabel( label.toStdString() );
 
     ui.labelError->setVisible( ! error.empty() ); 
     ui.labelError->setToolTip( QString::fromStdString(error) );
+  }
+
+  /**
+   * Check if all the input field are valid.
+   * @return True if everything valid, false otherwise
+   */
+  bool MuonSequentialFitDialog::isInputValid()
+  {
+    if ( ! ui.runs->isValid() )
+      return false;  
+
+    std::string label = ui.labelInput->text().toStdString();
+    if ( ! isValidLabel(label).empty() )
+      return false;
+
+    return true;
+  }
+
+  /**
+   * Enables/disables start button depending on wether we are allowed to start.
+   */
+  void MuonSequentialFitDialog::updateStartButton()
+  {
+    ui.controlButton->setEnabled( isInputValid() );
   }
 
   /**

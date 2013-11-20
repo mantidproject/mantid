@@ -48,6 +48,9 @@ namespace MantidWidgets
     /// UI form
     Ui::MuonSequentialFitDialog ui;
 
+    /// Check if all the input field are valid 
+    bool isInputValid();
+
     /// Checks if specified name is valid as a name for label. 
     static std::string isValidLabel(const std::string& label);
 
@@ -55,9 +58,11 @@ namespace MantidWidgets
     static Mantid::Kernel::Logger& g_log;
 
   private slots:
-  
     /// Updates visibility/tooltip of label error asterisk
-    void validateLabel(const QString& label);
+    void updateLabelError(const QString& label);
+
+    /// Enables/disables start button depending on wether we are allowed to start.
+    void updateStartButton();
   };
 
 
