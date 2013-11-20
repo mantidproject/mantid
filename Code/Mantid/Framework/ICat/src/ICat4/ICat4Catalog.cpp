@@ -228,7 +228,7 @@ namespace Mantid
         from     = " FROM Investigation inves ";
         join     = Strings::join(joinClause.begin(), joinClause.end(), " ");
         where    = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
-        orderBy  = " ORDER BY inves.id ASC";
+        orderBy  = " ORDER BY inves.id DESC";
         includes = " INCLUDE inves.investigationInstruments.instrument, inves.parameters";
         limits   = " LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit);
 
@@ -417,7 +417,6 @@ namespace Mantid
           }
           catch(std::runtime_error&)
           {
-            g_log.information("An error occurred when saving the ICat search results data to Workspace");
             throw;
           }
         }
@@ -492,7 +491,6 @@ namespace Mantid
         }
         catch(std::runtime_error&)
         {
-          g_log.information("An error occurred when saving file data to workspace.");
           throw;
         }
       }
@@ -567,7 +565,6 @@ namespace Mantid
           }
           catch(std::runtime_error&)
           {
-            g_log.information("An error occurred when saving file data to workspace.");
             throw;
           }
         }
