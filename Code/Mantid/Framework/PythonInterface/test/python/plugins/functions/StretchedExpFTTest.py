@@ -80,7 +80,7 @@ class StretchedExpFTTest(unittest.TestCase):
             self.fail('Could not create StretchedExpFT function: %s' % str(exc))
             
     def test_fit(self):
-        if self.skipTest() # python2.6 doesn't have skipping decorators :(
+        if self.skipTest(): # python2.6 doesn't have skipping decorators
             return
 
         from random import random
