@@ -61,17 +61,17 @@ class LoadRun(object):
         self.ext = ''
         self.shortrun_no = -1
         #the name of the loaded workspace in Mantid
-        self.__wksp_name = ''
+        self._wksp_name = ''
 
     def get_wksp_name(self):
-        ref_ws = mtd[str(self.__wksp_name)]
+        ref_ws = mtd[str(self._wksp_name)]
         if isinstance(ref_ws, WorkspaceGroup):
             if self._period >= 0:
                 return ref_ws[self._period].name()
             else:
                 return ref_ws[0].name()
         else:
-            return self.__wksp_name
+            return self._wksp_name
   
     wksp_name = property(get_wksp_name, None, None, None)
 
@@ -116,7 +116,7 @@ class LoadRun(object):
                 RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= period_definitely_inc)
                 workspace = period_definitely_inc 
         
-        self.__wksp_name = workspace 
+        self._wksp_name = workspace 
         self.periods_in_file = numPeriods
 
 
@@ -167,7 +167,7 @@ class LoadRun(object):
             LoadSampleDetailsFromRaw(ws_pointer, self._data_file)
 
         # so, it will try, not to reload the workspace.
-        self.__wksp_name = ws_pointer.name()
+        self._wksp_name = ws_pointer.name()
         self.periods_in_file = 1
         self.shortrun_no = ws_pointer.getRunNumber()
 
@@ -215,7 +215,7 @@ class LoadRun(object):
             self._load(reducer.instrument, extra_options=spectrum_limits)
         except RuntimeError, details:
             sanslog.warning(str(details))
-            self.__wksp_name = ''
+            self._wksp_name = ''
             return 
         
         return 
