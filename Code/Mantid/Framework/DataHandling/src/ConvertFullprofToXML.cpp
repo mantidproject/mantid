@@ -108,7 +108,7 @@ namespace DataHandling
     // This code will later go into a child algorithm to enable it to be used by other algorithms
 
     // Set up access to table workspace ParamTable
-    API::ITableWorkspace_sptr paramTable = loader->getProperty("OutputWorkspace");
+    API::ITableWorkspace_sptr paramTable = loader->getProperty("OutputTableWorkspace");
     // get the table workspace row numbers of the parameters and store them for later use
     getTableRowNumbers( paramTable, m_rowNumbers);
 
