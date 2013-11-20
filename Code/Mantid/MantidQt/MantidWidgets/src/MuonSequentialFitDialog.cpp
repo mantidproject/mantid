@@ -16,22 +16,22 @@ namespace MantidWidgets
   MuonSequentialFitDialog::MuonSequentialFitDialog(QWidget* parent) :
     QDialog(parent) 
   {
-    ui.setupUi(this);
+    m_ui.setupUi(this);
 
     // TODO: set initial values 
 
     // After initial values are set, update depending elements accordingly. We don't rely on
     // slot/signal update, as element might be left with default values which means these will
     // never be called on initialication.
-    updateLabelError( ui.labelInput->text() );
+    updateLabelError( m_ui.labelInput->text() );
     updateStartButton();
 
-    connect( ui.labelInput, SIGNAL( textChanged(const QString&) ), 
+    connect( m_ui.labelInput, SIGNAL( textChanged(const QString&) ), 
       this, SLOT( updateLabelError(const QString&) ) );
 
-    connect( ui.labelInput, SIGNAL( textChanged(const QString&) ), 
+    connect( m_ui.labelInput, SIGNAL( textChanged(const QString&) ), 
       this, SLOT( updateStartButton() ) );
-    connect( ui.runs, SIGNAL( fileFindingFinished() ), 
+    connect( m_ui.runs, SIGNAL( fileFindingFinished() ), 
       this, SLOT( updateStartButton() ) );
   }
 
@@ -56,8 +56,8 @@ namespace MantidWidgets
   {
     std::string error = isValidLabel( label.toStdString() );
 
-    ui.labelError->setVisible( ! error.empty() ); 
-    ui.labelError->setToolTip( QString::fromStdString(error) );
+    m_ui.labelError->setVisible( ! error.empty() ); 
+    m_ui.labelError->setToolTip( QString::fromStdString(error) );
   }
 
   /**
@@ -66,10 +66,10 @@ namespace MantidWidgets
    */
   bool MuonSequentialFitDialog::isInputValid()
   {
-    if ( ! ui.runs->isValid() )
+    if ( ! m_ui.runs->isValid() )
       return false;  
 
-    std::string label = ui.labelInput->text().toStdString();
+    std::string label = m_ui.labelInput->text().toStdString();
     if ( ! isValidLabel(label).empty() )
       return false;
 
@@ -81,7 +81,7 @@ namespace MantidWidgets
    */
   void MuonSequentialFitDialog::updateStartButton()
   {
-    ui.controlButton->setEnabled( isInputValid() );
+    m_ui.controlButton->setEnabled( isInputValid() );
   }
 
   /**

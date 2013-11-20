@@ -45,11 +45,17 @@ namespace MantidWidgets
     virtual ~MuonSequentialFitDialog();
 
   private:
-    /// UI form
-    Ui::MuonSequentialFitDialog ui;
+    // -- FUNCTIONS -----------------------------------------------------------
 
     /// Check if all the input field are valid 
     bool isInputValid();
+
+    // -- VARIABLES -----------------------------------------------------------
+
+    /// UI form
+    Ui::MuonSequentialFitDialog m_ui;
+
+    // -- STATIC MEMBERS ------------------------------------------------------
 
     /// Checks if specified name is valid as a name for label. 
     static std::string isValidLabel(const std::string& label);
