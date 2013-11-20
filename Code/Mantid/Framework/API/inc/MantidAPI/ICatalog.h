@@ -53,7 +53,7 @@ public:
   virtual void search(const ICat::CatalogSearchParam&,ITableWorkspace_sptr &,
       const int &offset = -1,const int &limit = -1)=0;
   /// Obtain the number of results returned by the search method.
-  virtual long getNumberOfSearchResults()=0;
+  virtual int64_t getNumberOfSearchResults()=0;
   /// search logged in users data
   virtual void myData(ITableWorkspace_sptr &)=0;
   /// get datasets.

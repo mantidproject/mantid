@@ -84,7 +84,7 @@ namespace MantidQt
      * (based on values of input fields in executeSearch() above).
      * @return Number of results returned by the search query.
      */
-    long CatalogHelper::getNumberOfSearchResults()
+    int64_t CatalogHelper::getNumberOfSearchResults()
     {
       return m_numberOfResults;
     }

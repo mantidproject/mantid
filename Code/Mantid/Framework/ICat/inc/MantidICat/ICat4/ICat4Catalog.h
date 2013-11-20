@@ -49,7 +49,7 @@ namespace Mantid
         virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws,
             const int &offset, const int &limit);
         /// Obtain the number of results returned by the search method.
-        virtual long getNumberOfSearchResults();
+        virtual int64_t getNumberOfSearchResults();
         /// Show the logged in user's investigations search results.
         virtual void myData(Mantid::API::ITableWorkspace_sptr& outputws);
         /// Get datasets.

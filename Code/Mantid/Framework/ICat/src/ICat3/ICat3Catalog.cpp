@@ -127,7 +127,7 @@ namespace Mantid
      * of investigations to be returned by the catalog.
      * @return The number of investigations returned by the search performed.
      */
-    long ICat3Catalog::getNumberOfSearchResults() { return -1; }
+    int64_t ICat3Catalog::getNumberOfSearchResults() { return -1; }
 
     /// keep alive
     void ICat3Catalog::keepAlive()

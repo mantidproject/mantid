@@ -60,7 +60,7 @@ namespace Mantid
       // These are needed for paging on the interface, and to minimise the amount of results returned by the query.
       declareProperty<int>("Limit", 0, "");
       declareProperty<int>("Offset",0, "");
-      declareProperty<long>("NumberOfSearchResults", 0, "");
+      declareProperty<int64_t>("NumberOfSearchResults", 0, "");
     }
 
     /// Execution method.
