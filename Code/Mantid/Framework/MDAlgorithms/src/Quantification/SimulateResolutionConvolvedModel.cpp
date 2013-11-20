@@ -165,6 +165,9 @@ namespace Mantid
       m_outputWS = boost::shared_ptr<QOmegaWorkspace>(new QOmegaWorkspace);
 
       // Bins extents and meta data
+      // Set sensible defaults for splitting behaviour
+      BoxController_sptr bc = m_outputWS->getBoxController();
+      bc->setSplitThreshold(3000);
       for(size_t i = 0;i < 4; ++i)
       {
         boost::shared_ptr<const Geometry::IMDDimension> inputDim = m_inputWS->getDimension(i);
@@ -173,61 +176,18 @@ namespace Mantid
         builder.setId(inputDim->getDimensionId());
         builder.setUnits(inputDim->getUnits());
         builder.setNumBins(inputDim->getNBins());
+        bc->setSplitInto(i, inputDim->getNBins());
         builder.setMin(inputDim->getMinimum());
         builder.setMax(inputDim->getMaximum());
 
         m_outputWS->addDimension(builder.create());
       }
-
       // Run information
       m_outputWS->copyExperimentInfos(*m_inputWS);
-      // Set sensible defaults for splitting behaviour
-      BoxController_sptr bc = m_outputWS->getBoxController();
-      bc->setSplitInto(3);
-      bc->setSplitThreshold(3000);
 
       m_outputWS->initialize();
       m_outputWS->splitBox(); // Make grid box
     }
-
-    /**
-     * Adds simulated events to the output workspace
-     */
-    void SimulateResolutionConvolvedModel::addSimulatedEvents()
-    {
-      auto inputIter = m_inputWS->createIterator();
-      size_t resultValueIndex(0);
-      const float errorSq = 0.0;
-      do
-      {
-        const size_t numEvents = inputIter->getNumEvents();
-        const float signal = static_cast<float>(m_calculatedValues->getCalculated(resultValueIndex));
-        for(size_t i = 0; i < numEvents; ++i)
-        {
-          coord_t centers[4] = { inputIter->getInnerPosition(i,0), inputIter->getInnerPosition(i,1),
-                                 inputIter->getInnerPosition(i,2), inputIter->getInnerPosition(i,3) };
-          m_outputWS->addEvent(MDEvent<4>(signal, errorSq,
-                                          inputIter->getInnerRunIndex(i),
-                                          inputIter->getInnerDetectorID(i),
-                                          centers));
-        }
-        ++resultValueIndex;
-      }
-      while(inputIter->next());
-      delete inputIter;
-
-      API::MemoryManager::Instance().releaseFreeMemory();
-      // This splits up all the boxes according to split thresholds and sizes.
-      auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
-      Kernel::ThreadPool threadPool(threadScheduler);
-      m_outputWS->splitAllIfNeeded(threadScheduler);
-      threadPool.joinAll();
-      m_outputWS->refreshCache();
-
-      // Flush memory
-      API::MemoryManager::Instance().releaseFreeMemory();
-    }
-
 
   } // namespace MDAlgorithms
 } // namespace Mantid

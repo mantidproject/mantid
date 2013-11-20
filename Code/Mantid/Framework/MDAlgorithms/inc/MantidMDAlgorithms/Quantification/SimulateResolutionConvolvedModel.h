@@ -56,8 +56,6 @@ namespace Mantid
       void createDomains();
       /// Generate the output MD workspace that is a result of the simulation
       void createOutputWorkspace();
-      /// Add the simulated events
-      void addSimulatedEvents();
 
       /// The input workspace
       API::IMDEventWorkspace_sptr m_inputWS;
