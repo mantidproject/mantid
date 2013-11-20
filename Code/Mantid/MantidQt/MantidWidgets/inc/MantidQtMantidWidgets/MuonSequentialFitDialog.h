@@ -58,6 +58,9 @@ namespace MantidWidgets
     /// Set the type of the control button
     void setControlButtonType(ControlButtonType type);
 
+    /// Update enabled state off all the input widgets (except for control ones) 
+    void setInputEnabled(bool enabled);
+
     // -- VARIABLES -----------------------------------------------------------
 
     /// UI form

@@ -104,6 +104,19 @@ namespace MantidWidgets
     m_ui.controlButton->setText(buttonText);
   }
 
+  /** * Update enabled state off all the input widgets (except for control ones).
+   * @param enabled :: True if widgets should be enabled, false otherwise
+   */
+  void MuonSequentialFitDialog::setInputEnabled(bool enabled)
+  {
+    m_ui.runs->setEnabled(enabled);
+    m_ui.labelInput->setEnabled(enabled);
+   
+    foreach(QAbstractButton* button, m_ui.paramTypeGroup->buttons())
+      button->setEnabled(enabled); 
+
+  }
+
   /**
    * Start fitting process.
    */
@@ -111,6 +124,7 @@ namespace MantidWidgets
   {
     g_log.notice("Seq. fitting started");
     setControlButtonType(Stop);
+    setInputEnabled(false);
   }
 
   /**
@@ -120,6 +134,7 @@ namespace MantidWidgets
   {
     g_log.notice("Seq. fitting stopped");
     setControlButtonType(Start);
+    setInputEnabled(true);
   }
 
   /**
