@@ -741,22 +741,6 @@ namespace MantidQt
       resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),Qt::DescendingOrder);
     }
 
-    /**
-     * Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
-     */
-    void CatalogSearch::resultInfoUpdate()
-    {
-
-    }
-
-    /**
-     * Updates the page numbers (e.g. m & n in: Page m of n )
-     */
-    void CatalogSearch::pageNumberUpdate()
-    {
-
-    }
-
     ///////////////////////////////////////////////////////////////////////////////
     // SLOTS for "Search results"
     ///////////////////////////////////////////////////////////////////////////////
@@ -845,7 +829,7 @@ namespace MantidQt
      */
     void CatalogSearch::populateDataFileTable()
     {
-      // Obtain a pointer to the "dataFileResults" workspace where the related datafiles for the user selected invesitgation exist.
+      // Obtain a pointer to the "dataFileResults" workspace where the related datafiles for the user selected investigation exist.
       Mantid::API::ITableWorkspace_sptr workspace;
 
       // Check to see if the workspace exists...
