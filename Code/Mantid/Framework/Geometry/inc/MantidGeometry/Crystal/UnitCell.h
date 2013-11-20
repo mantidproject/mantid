@@ -58,6 +58,8 @@ namespace Geometry
       UnitCell(); 
       //Copy constructor
       UnitCell(const UnitCell& other); 
+      //Copy constructor
+      UnitCell(const UnitCell* other);
       // a,b,c constructor
       UnitCell(const double _a,const double _b,const double _c); 
       //a,b,c,alpha,beta,gamma constructor

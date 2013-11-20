@@ -31,6 +31,20 @@ namespace Geometry
   {
   }
 
+  /** Copy constructor
+   *@param other :: The UnitCell from which to copy lattice parameters
+   */
+  UnitCell::UnitCell(const UnitCell* other) :
+    da(other->da),
+    ra(other->ra),
+    errorda(other->errorda),
+    G(other->G),
+    Gstar(other->Gstar),
+    B(other->B),
+    Binv(other->Binv)
+  {
+  }
+
   /** Constructor
   @param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
   with \f$\alpha = \beta = \gamma = 90^\circ \f$*/
