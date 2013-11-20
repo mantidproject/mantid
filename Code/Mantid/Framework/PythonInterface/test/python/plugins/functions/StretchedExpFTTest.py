@@ -66,6 +66,13 @@ class _InternalMakeSEFTData(PythonAlgorithm):
             
 class StretchedExpFTTest(unittest.TestCase):
 
+    def skipTest(self):
+        try:
+            import scipy.fftpack # Scipy not available in windows debug
+            return False
+        except ImportError:
+            return True
+
     def test_registered(self):
         try:
             FunctionFactory.createFunction('StretchedExpFT')
@@ -73,6 +80,9 @@ class StretchedExpFTTest(unittest.TestCase):
             self.fail('Could not create StretchedExpFT function: %s' % str(exc))
             
     def test_fit(self):
+        if self.skipTest() # python2.6 doesn't have skipping decorators :(
+            return
+
         from random import random
         variation = lambda x: x*( 1+(random()-0.5)/5. )  # range [x*0.9, x*1.1] should be bigger but not until parameter constraints have been exposed to python 
         #Generate a data workspace using random parameters around {'height':0.1,'tau':100,'beta':1}
