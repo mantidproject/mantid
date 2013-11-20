@@ -256,11 +256,8 @@ class ISISReducer(SANSReducer):
         """
         sample_obj = self.get_sample().loader
         name = str(sample_obj.shortrun_no)
-        if show_period and sample_obj.periods_in_file > 1:
-            if sample_obj._period == sample_obj.UNSET_PERIOD:
-                period = 1
-            else:
-                period = sample_obj._period
+        if show_period:
+            period = sample_obj.curr_period()
             name += 'p'+str(period)
         
         name += self.instrument.cur_detector().name('short')

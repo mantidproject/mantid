@@ -65,6 +65,10 @@ class LoadRun(object):
         #the name of the loaded workspace in Mantid
         self._wksp_name = ''
 
+    def curr_period(self):
+        if self._period != self.UNSET_PERIOD:
+            return self._period
+        return self._index_of_group + 1
             
     def move2ws(self, index):
         if self.periods_in_file > 1:
