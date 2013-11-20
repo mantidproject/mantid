@@ -67,8 +67,9 @@ namespace MantidWidgets
     /// Updates visibility/tooltip of label error asterisk
     void updateLabelError(const QString& label);
 
-    /// Enables/disables start button depending on wether we are allowed to start.
-    void updateStartButton();
+    /// Enables/disables start button depending on wether we are allowed to start
+    void updateControlButtonState();
+
   };
 
 

@@ -24,15 +24,15 @@ namespace MantidWidgets
     // slot/signal update, as element might be left with default values which means these will
     // never be called on initialication.
     updateLabelError( m_ui.labelInput->text() );
-    updateStartButton();
+    updateControlButtonState();
 
     connect( m_ui.labelInput, SIGNAL( textChanged(const QString&) ), 
       this, SLOT( updateLabelError(const QString&) ) );
 
     connect( m_ui.labelInput, SIGNAL( textChanged(const QString&) ), 
-      this, SLOT( updateStartButton() ) );
+      this, SLOT( updateControlButtonState() ) );
     connect( m_ui.runs, SIGNAL( fileFindingFinished() ), 
-      this, SLOT( updateStartButton() ) );
+      this, SLOT( updateControlButtonState() ) );
   }
 
   /**
@@ -79,7 +79,7 @@ namespace MantidWidgets
   /**
    * Enables/disables start button depending on wether we are allowed to start.
    */
-  void MuonSequentialFitDialog::updateStartButton()
+  void MuonSequentialFitDialog::updateControlButtonState()
   {
     m_ui.controlButton->setEnabled( isInputValid() );
   }
