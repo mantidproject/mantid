@@ -138,6 +138,7 @@ namespace MDAlgorithms
     // Save each NEW ExperimentInfo to a spot in the file
     MDBoxFlatTree::saveExperimentInfos(file.get(),ws);
 
+
     if(!update)
     {
       // Save the algorithm history under "process"
