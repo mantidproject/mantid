@@ -35,14 +35,6 @@ class ConvertToWavelengthTest(unittest.TestCase):
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
         
-    def test_get_monitors_mask(self):
-        ws = Load(Filename='INTER00013460')
-        masks = ConvertToWavelength.get_monitors_mask(ws)
-        self.assertTrue(isinstance(masks, list), "Should have returned a list of masks")
-        self.assertEqual(len(masks), ws.getNumberHistograms())
-        self.assertEqual(masks, [True, True, True, False, False], "Monitor masks did not match expected")
-        DeleteWorkspace(ws)
-        
     def test_sum_workspaces(self):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CloneWorkspace(ws1)
@@ -57,20 +49,20 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def test_conversion_throws_with_min_wavelength_greater_or_equal_to_max_wavelength(self):
         ws = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength(ws)
-        self.assertRaises(ValueError, converter.convert, 1, 0)
-        self.assertRaises(ValueError, converter.convert, 1, 1)
+        self.assertRaises(ValueError, converter.convert, 1, 0, (), 0)
+        self.assertRaises(ValueError, converter.convert, 1, 1, (), 0)
         DeleteWorkspace(ws)
     
     def test_conversion_throws_with_some_flat_background_params_but_not_all(self):
         ws = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength(ws)
-        self.assertRaises(ValueError, converter.convert, 0, 1, [])
+        self.assertRaises(ValueError, converter.convert, 0, 1, (), 0, [])
         DeleteWorkspace(ws)
         
     def test_conversion_throws_with_min_background_greater_than_or_equal_to_max_background(self):
         ws = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength(ws)
-        self.assertRaises(ValueError, converter.convert, 0, 1, [], 0, 1)
+        self.assertRaises(ValueError, converter.convert, 0, 1, (), 0, [], 0, 1)
         DeleteWorkspace(ws)
         
         
@@ -89,6 +81,14 @@ class ConvertToWavelengthTest(unittest.TestCase):
         temp_ws = ConvertToWavelength.crop_range(original_ws, ( ( (0, 1), (3, 4) ) ))
         self.assertEqual(2, temp_ws.getNumberHistograms())
         
+        # Crop out all but 1 spectra 
+        temp_ws = ConvertToWavelength.crop_range(original_ws, ( (1, 3) ) )
+        self.assertEqual(3, temp_ws.getNumberHistograms())
+        # First and last dectors are cropped off, so indexes go 2-4 rather than 1-5
+        self.assertEqual(2, temp_ws.getDetector(0).getID())
+        self.assertEqual(3, temp_ws.getDetector(1).getID())
+        self.assertEqual(4, temp_ws.getDetector(2).getID())
+        
         # Test resilience to junk
         self.assertRaises(ValueError, ConvertToWavelength.crop_range, original_ws, 'a')
         self.assertRaises(ValueError, ConvertToWavelength.crop_range, original_ws, (1,2,3))
@@ -104,12 +104,11 @@ class ConvertToWavelengthTest(unittest.TestCase):
         ws = Load(Filename='INTER00013460')
         converter = ConvertToWavelength(ws)
         
-        monitor_ws, detector_ws = converter.convert(wavelength_min=0, wavelength_max=10, monitors_to_correct=[0],bg_min=2, bg_max=8)
+        monitor_ws, detector_ws = converter.convert(wavelength_min=0, wavelength_max=10, detector_workspace_indexes = (2,4), monitor_workspace_index=0, monitors_to_correct=[0],bg_min=2, bg_max=8)
         
-        masks = ConvertToWavelength.get_monitors_mask(ws)
-        
-        self.assertEqual(masks.count(True), monitor_ws.getNumberHistograms(), "Wrong number of spectra in monitor workspace")
-        self.assertEqual(masks.count(False), detector_ws.getNumberHistograms(), "Wrong number of spectra in detector workspace")
+        print detector_ws.getNumberHistograms()
+        self.assertEqual(1, monitor_ws.getNumberHistograms(), "Wrong number of spectra in monitor workspace")
+        self.assertEqual(3, detector_ws.getNumberHistograms(), "Wrong number of spectra in detector workspace")
         self.assertEqual("Wavelength", detector_ws.getAxis(0).getUnit().unitID())
         self.assertEqual("Wavelength", monitor_ws.getAxis(0).getUnit().unitID())
         x_min, x_max = ConvertToWavelengthTest.cropped_x_range(detector_ws, 0)

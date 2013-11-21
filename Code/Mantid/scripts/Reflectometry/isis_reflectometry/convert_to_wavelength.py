@@ -7,25 +7,6 @@ class ConvertToWavelength(object):
     # List of workspaces to process.
     __ws_list = []
     
-    @classmethod 
-    def get_monitors_mask(cls, ws):  
-        """
-        Get the monitor indexes as a mask.
-        
-        Arguments:
-        ws -- Workspace to determine the monitor masks for.
-        """
-        monitor_masks = list()
-        for i in range(ws.getNumberHistograms()):
-            ismonitor = False
-            try:
-                det = ws.getDetector(i)
-                ismonitor = det.isMonitor()
-            except RuntimeError:
-                pass
-            monitor_masks.append(ismonitor)
-        return monitor_masks
-    
     @classmethod
     def sum_workspaces(cls, workspaces):
         """
@@ -65,6 +46,15 @@ class ConvertToWavelength(object):
             
     @classmethod
     def crop_range(cls, ws, rng):
+        """
+        Given a range of workspace indexes to keep (rng), Crop the workspace such that these are kept.
+        Arguments:
+        
+        ws : Workspace to crop spectrum from
+        rng : Tuple of range tuples. syntax may be (start, stop) or ((start0, stop0), (start1, stop1), ...)
+        
+        returns a new copy of the workspace with spectra cropped out.
+        """
         
         in_rng = msi.CloneWorkspace(ws)
         if not isinstance(rng, tuple):
@@ -73,7 +63,6 @@ class ConvertToWavelength(object):
         def is_actual_range(rng):
             return len(rng) == 2 and isinstance(rng[0], int) and isinstance(rng[1], int)
         
-        print "Running"
         if is_actual_range(rng):
             start, stop = rng[0], rng[1]
             in_rng = msi.CropWorkspace(InputWorkspace=in_rng, StartWorkspaceIndex=start,EndWorkspaceIndex=stop)
@@ -83,7 +72,7 @@ class ConvertToWavelength(object):
   
         return in_rng
         
-    def convert(self, wavelength_min, wavelength_max, monitors_to_correct=None, bg_min=None, bg_max=None):
+    def convert(self, wavelength_min, wavelength_max, detector_workspace_indexes, monitor_workspace_index, monitors_to_correct=None, bg_min=None, bg_max=None):
         """
         Run the conversion
         
@@ -92,6 +81,9 @@ class ConvertToWavelength(object):
         workspace_ids: Start and end ranges. Ids to be considered as workspaces. Nested list syntax supported
         wavelength_min: min wavelength in x for monitor workspace
         wavelength_max: max wavelength in x for detector workspace
+        detector_workspace_indexes: Tuple of workspace indexes (or tuple of tuple min, max ranges to keep)
+        monitor_workspace_index: The index of the monitor workspace
+        monitors_to_correct: Monitors indexes to have flat background calculated for.
         bg_min: x min background in wavelength
         bg_max: x max background in wavelength
         
@@ -110,16 +102,14 @@ class ConvertToWavelength(object):
         
         sum = ConvertToWavelength.sum_workspaces(self.__ws_list)
         sum_wavelength= msi.ConvertUnits(InputWorkspace=sum, Target="Wavelength")
-        monitor_masks = ConvertToWavelength.get_monitors_mask(sum)
-    
-        # Assuming that the monitors are in a block start-end.
-        first_detector_index = monitor_masks.index(False)
-        logger.debug("First detector index %s" % str(first_detector_index))
+       
+        logger.debug("Monitor detector index %s" % str(monitor_workspace_index))
             
         # Crop out the monitor workspace
-        monitor_ws = msi.CropWorkspace(InputWorkspace=sum_wavelength, StartWorkspaceIndex=0,EndWorkspaceIndex=first_detector_index-1)
-        # Crop out the detector workspace
-        detector_ws = msi.CropWorkspace(InputWorkspace=sum_wavelength, XMin=wavelength_min,XMax=wavelength_max,StartWorkspaceIndex=first_detector_index)
+        monitor_ws = msi.CropWorkspace(InputWorkspace=sum_wavelength, StartWorkspaceIndex=monitor_workspace_index,EndWorkspaceIndex=monitor_workspace_index)
+        # Crop out the detector workspace then chop out the x-ranges of interest.
+        detector_ws =  ConvertToWavelength.crop_range(sum_wavelength, detector_workspace_indexes)
+        detector_ws =  msi.CropWorkspace(InputWorkspace=detector_ws, XMin=wavelength_min, XMax=wavelength_max)
         # Apply a flat background
         if all((monitors_to_correct, bg_min, bg_max)):
             monitor_ws = msi.CalculateFlatBackground(InputWorkspace=monitor_ws,WorkspaceIndexList=monitors_to_correct,StartX=bg_min, EndX=bg_max)
