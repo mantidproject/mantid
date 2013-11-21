@@ -4,8 +4,8 @@ This algorithm loads a [[MDEventWorkspace]] that was previously
 saved using the [[SaveMD]] algorithm to a .nxs file format.
 
 If the workspace is too large to fit into memory,
-You can load the workspace as a [[MDWorkspace#File-Backed MDWorkspaces|file-backed MDWorkspace]]
-by checking the FileBackEnd option. This will load the box structure
+You can load the workspace as a [[MDWorkspace#m_file-Backed MDWorkspaces|file-backed MDWorkspace]]
+by checking the fileBackEnd option. This will load the box structure
 (allowing for some visualization with no speed penalty) but leave the
 events on disk until requested. Processing file-backed MDWorkspaces
 is significantly slower than in-memory workspaces due to frequency file access!
@@ -19,9 +19,9 @@ and used by other algorithms, they should not be needed in daily use.
 *WIKI*/
 
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/fileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/RegisterfileLoader.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -74,8 +74,8 @@ namespace Mantid
 
 
     /**
-     * Return the confidence with with this algorithm can load the file
-     * @param descriptor A descriptor for the file
+     * Return the confidence with with this algorithm can load the m_file
+     * @param descriptor A descriptor for the m_file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
     int LoadMD::confidence(Kernel::NexusDescriptor & descriptor) const
@@ -134,18 +134,26 @@ namespace Mantid
     */
     void LoadMD::exec()
     {
-      m_filename = getPropertyValue("Filename");
+      m_filename = getPropertyValue("filename");
 
       // Start loading
-      bool fileBacked = this->getProperty("FileBackEnd");
+      bool fileBacked = this->getProperty("fileBackEnd");
       if (fileBacked)
-        file = new ::NeXus::File(m_filename, NXACC_RDWR);
+      {
+        boost::scoped_ptr<::NeXus::File> tf(new ::NeXus::File(m_filename, NXACC_RDWR)); 
+        m_file.swap(tf);
+      }
       else
-        file = new ::NeXus::File(m_filename, NXACC_READ);
+      {
+        boost::scoped_ptr<::NeXus::File> tf(new ::NeXus::File(m_filename, NXACC_READ));
+        m_file.swap(tf);
+      }
+
+
 
       // The main entry
       std::map<std::string, std::string> entries;
-      file->getEntries(entries);
+      m_file->getEntries(entries);
 
       std::string entryName;
       if (entries.find("MDEventWorkspace") != entries.end())
@@ -156,11 +164,11 @@ namespace Mantid
         throw std::runtime_error("Unexpected NXentry name. Expected 'MDEventWorkspace' or 'MDHistoWorkspace'.");
 
       // Open the entry
-      file->openGroup(entryName, "NXentry");
+      m_file->openGroup(entryName, "NXentry");
 
       // How many dimensions?
       std::vector<int32_t> vecDims;
-      file->readData("dimensions", vecDims);
+      m_file->readData("dimensions", vecDims);
       if (vecDims.empty())
         throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
       m_numDims = vecDims[0];
@@ -174,13 +182,13 @@ namespace Mantid
       {
         //The type of event
         std::string eventType;
-        file->getAttr("event_type", eventType);
+        m_file->getAttr("event_type", eventType);
 
         // Use the factory to make the workspace of the right type
         IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
 
         // Now the ExperimentInfo
-        MDBoxFlatTree::loadExperimentInfos(file,ws);
+        MDBoxFlatTree::loadExperimentInfos(m_file.get(),ws);
 
         // Wrapper to cast to MDEventWorkspace then call the function
         CALL_MDEVENT_FUNCTION(this->doLoad, ws);
@@ -194,8 +202,6 @@ namespace Mantid
         this->loadHisto();
       }
 
-      delete file;
-
     }
 
     /**
@@ -208,15 +214,15 @@ namespace Mantid
      */
     void LoadMD::loadSlab(std::string name, void * data, MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType)
     {
-      file->openData(name);
-      if (file->getInfo().type != dataType)
+      m_file->openData(name);
+      if (m_file->getInfo().type != dataType)
         throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
-      if (file->getInfo().dims[0] != static_cast<int>(ws->getNPoints()))
+      if (m_file->getInfo().dims[0] != static_cast<int>(ws->getNPoints()))
         throw std::runtime_error("Inconsistency between the number of points in '" + name + "' and the number of bins defined by the dimensions.");
       std::vector<int> start(1,0);
       std::vector<int> size(1, static_cast<int>(ws->getNPoints()));
-      file->getSlab(data, start, size);
-      file->closeData();
+      m_file->getSlab(data, start, size);
+      m_file->closeData();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -229,10 +235,10 @@ namespace Mantid
       MDHistoWorkspace_sptr ws(new MDHistoWorkspace(m_dims));
 
       // Now the ExperimentInfo
-      MDBoxFlatTree::loadExperimentInfos(file,ws);
+      MDBoxFlatTree::loadExperimentInfos(m_file.get(),ws);
 
       // Load the WorkspaceHistory "process"
-      ws->history().loadNexus(file);
+      ws->history().loadNexus(m_file.get());
 
       this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
@@ -242,7 +248,7 @@ namespace Mantid
       this->loadSlab("num_events", ws->getNumEventsArray(), ws, ::NeXus::FLOAT64);
       this->loadSlab("mask", ws->getMaskArray(), ws, ::NeXus::INT8);
 
-      file->close();
+      m_file->close();
 
       // Save to output
       setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
@@ -261,7 +267,7 @@ namespace Mantid
         std::ostringstream mess;
         mess << "dimension" << d;
         std::string dimXML;
-        file->getAttr(mess.str(), dimXML);
+        m_file->getAttr(mess.str(), dimXML);
         // Use the dimension factory to read the XML
         IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimXML);
         IMDDimension_sptr dim(factory.create());
@@ -274,35 +280,35 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Do the loading.
     *
-    * The file should be open at the entry level at this point.
+    * The m_file should be open at the entry level at this point.
     *
     * @param ws :: MDEventWorkspace of the given type
     */
     template<typename MDE, size_t nd>
     void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
     {
-      // Are we using the file back end?
-      bool FileBackEnd = getProperty("FileBackEnd");
+      // Are we using the m_file back end?
+      bool fileBackEnd = getProperty("fileBackEnd");
       bool BoxStructureOnly = getProperty("BoxStructureOnly");
 
-      if (FileBackEnd && BoxStructureOnly)
-        throw std::invalid_argument("Both BoxStructureOnly and FileBackEnd were set to TRUE: this is not possible.");
+      if (fileBackEnd && BoxStructureOnly)
+        throw std::invalid_argument("Both BoxStructureOnly and fileBackEnd were set to TRUE: this is not possible.");
 
       CPUTimer tim;
       Progress * prog = new Progress(this, 0.0, 1.0, 100);
 
       prog->report("Opening file.");
       std::string title;
-      file->getAttr("title", title);
+      m_file->getAttr("title", title);
       ws->setTitle("title");
 
       // Load the WorkspaceHistory "process"
-      ws->history().loadNexus(file);
+      ws->history().loadNexus(m_file.get());
 
       this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
-      file->closeGroup();
-      file->close();
+      m_file->closeGroup();
+      m_file->close();
       // Add each of the dimension
       for (size_t d=0; d<nd; d++)
         ws->addDimension(m_dims[d]);
@@ -317,17 +323,17 @@ namespace Mantid
       bc->fromXMLString(FlatBoxTree.getBCXMLdescr());
 
       std::vector<API::IMDNode *> boxTree;
-   //   uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,FileBackEnd,bMetadataOnly);
-      FlatBoxTree.restoreBoxTree(boxTree,bc,FileBackEnd,bMetadataOnly);
+   //   uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,fileBackEnd,bMetadataOnly);
+      FlatBoxTree.restoreBoxTree(boxTree,bc,fileBackEnd,bMetadataOnly);
       size_t numBoxes = boxTree.size();
 
     // ---------------------------------------- DEAL WITH BOXES  ------------------------------------
-      if (FileBackEnd)
+      if (fileBackEnd)
       { // TODO:: call to the file format factory
           auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
           loader->setDataType(sizeof(coord_t),MDE::getTypeName());
           bc->setFileBacked(loader,m_filename);
-          // boxes have been already made file-backed when restoring the boxTree;
+          // boxes have been already made m_file-backed when restoring the boxTree;
       // How much memory for the cache?
         {
         // TODO: Clean up, only a write buffer now
@@ -380,7 +386,7 @@ namespace Mantid
 
       //end-of bMetaDataOnly
       // Refresh cache
-      //TODO:if(!FileBackEnd)ws->refreshCache();
+      //TODO:if(!fileBackEnd)ws->refreshCache();
       ws->refreshCache();
       g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
 
@@ -396,7 +402,7 @@ namespace Mantid
   void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws)
   {
     std::map<std::string, std::string> entries;
-    file->getEntries(entries);
+    m_file->getEntries(entries);
 
     if (entries.find("transform_to_orig") != entries.end())
     {
@@ -419,16 +425,16 @@ namespace Mantid
    */
   CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name)
   {
-    file->openData(entry_name);
+    m_file->openData(entry_name);
     std::vector<coord_t> vec;
-    file->getData<coord_t>(vec);
+    m_file->getData<coord_t>(vec);
     std::string type;
     int inD(0);
     int outD(0);
-    file->getAttr("type", type);
-    file->getAttr<int>("rows", outD);
-    file->getAttr<int>("columns", inD);
-    file->closeData();
+    m_file->getAttr("type", type);
+    m_file->getAttr<int>("rows", outD);
+    m_file->getAttr<int>("columns", inD);
+    m_file->closeData();
     // Adjust dimensions
     inD--;
     outD--;
