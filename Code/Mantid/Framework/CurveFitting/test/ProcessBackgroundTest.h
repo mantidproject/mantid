@@ -277,7 +277,7 @@ public:
     alg.setProperty("SelectionMode", "UserFunction");
     alg.setProperty("BackgroundTableWorkspace", functablews);
 
-    alg.setProperty("OutputBackgroundParameterTable", "OutBackgroundParameters");
+    alg.setProperty("OutputBackgroundParameterWorkspace", "OutBackgroundParameters");
     alg.setProperty("OutputBackgroundType", "Chebyshev");
     alg.setProperty("OutputBackgroundOrder", 6);
 

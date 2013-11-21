@@ -179,10 +179,10 @@ DECLARE_ALGORITHM(ProcessBackground)
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Optional output workspace
-    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputBackgroundParameterTable", "", Direction::Output,
+    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputBackgroundParameterWorkspace", "", Direction::Output,
                                                           PropertyMode::Optional),
                             "Output parameter table workspace containing the background fitting result. ");
-    setPropertySettings("OutputBackgroundParameterTable",
+    setPropertySettings("OutputBackgroundParameterWorkspace",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Output background type.
@@ -257,7 +257,7 @@ DECLARE_ALGORITHM(ProcessBackground)
     }
     else if (option.compare("SelectBackgroundPoints") == 0)
     {
-      string outbkgdparwsname = getPropertyValue("OutputBackgroundParameterTable");
+      string outbkgdparwsname = getPropertyValue("OutputBackgroundParameterWorkspace");
       if (outbkgdparwsname.size() > 0)
       {
         // Will fit the selected background
@@ -1177,7 +1177,7 @@ DECLARE_ALGORITHM(ProcessBackground)
 
     g_log.information() << "Set table workspace (#row = " << outbkgdparws->rowCount()
                         << ") to OutputBackgroundParameterTable. " << "\n";
-    setProperty("OutputBackgroundParameterTable", outbkgdparws);
+    setProperty("OutputBackgroundParameterWorkspace", outbkgdparws);
 
     // Set output workspace
     const MantidVec& vecX = m_outputWS->readX(0);
