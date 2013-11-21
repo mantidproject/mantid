@@ -46,10 +46,15 @@ public:
 
 
     MDBoxFlatTree BoxStoredTree;
+    int nDims = 3;
     TSM_ASSERT_THROWS("Should throw as the box data were written for lean event and now we try to retrieve full events",
-      BoxStoredTree.loadBoxStructure("someFile.nxs",3,"MDEvent"),std::runtime_error);
+      BoxStoredTree.loadBoxStructure("someFile.nxs",nDims,"MDEvent"),std::runtime_error);
 
-    TS_ASSERT_THROWS_NOTHING(BoxStoredTree.loadBoxStructure("someFile.nxs",3,"MDLeanEvent"));
+    nDims = 0;
+    TSM_ASSERT_THROWS_NOTHING("Should path now and return nDims",BoxStoredTree.loadBoxStructure("someFile.nxs",nDims,"MDEvent"));
+
+    TSM_ASSERT_EQUALS("Should be nDims = 3",3,nDims);
+    TS_ASSERT_THROWS_NOTHING(BoxStoredTree.loadBoxStructure("someFile.nxs",nDims,"MDLeanEvent"));
 
     size_t nDim = size_t(BoxStoredTree.getNDims());
     API::BoxController_sptr new_bc = boost::shared_ptr<API::BoxController>(new API::BoxController(nDim));    
