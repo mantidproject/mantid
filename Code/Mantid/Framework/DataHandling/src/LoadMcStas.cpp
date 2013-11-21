@@ -219,7 +219,6 @@ namespace DataHandling
 	{
 		std::string filename = getPropertyValue("Filename");
 		auto entries = nxFile.getEntries();
-		auto itend = entries.end();
 
 		// will assume that each top level entry contain one mcstas
 		// generated IDF and any event data entries within this top level
