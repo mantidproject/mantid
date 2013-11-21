@@ -55,7 +55,7 @@ namespace Mantid
      *  @param response :: const reference to response object
      *  @param outputws :: shared pointer to output workspace
      */
-    void  CICatHelper::saveSearchRessults(const ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws)
+    void  CICatHelper::saveSearchRessults(const ns1__searchByAdvancedPaginationResponse& response,API::ITableWorkspace_sptr& outputws)
     {
       //create table workspace
 
@@ -790,14 +790,15 @@ namespace Mantid
     /* This method does advanced search and returns investigation data
      * @param inputs :: reference to class containing search inputs
      * @param outputws :: shared pointer to output workspace
+     * @param offset   :: skip this many rows and start returning rows from this point.
+     * @param limit    :: limit the number of rows returned by the query.
      */
-    void CICatHelper::doAdvancedSearch(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws)
+    void CICatHelper::doAdvancedSearch(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws,
+        const int &offset, const int &limit)
     {
-
-      //ICAt proxy object
-      ICATPortBindingProxy icat;
-      // request object
-      boost::shared_ptr<ns1__searchByAdvanced> req_sptr(new ns1__searchByAdvanced );
+      // As this is a member variable we need to reset the search terms once
+      // a new search is performed.
+      m_advancedSearchDetails = new ICat3::ns1__advancedSearchDetails;
 
       if (inputs.getMyData())
       {
@@ -805,95 +806,120 @@ namespace Mantid
         return;
       }
 
-      //session id
-      boost::shared_ptr<std::string > sessionId_sptr(new std::string);
-      req_sptr->sessionId=sessionId_sptr.get();
-      //get the sessionid which is cached in session class during login
-      *req_sptr->sessionId=Session::Instance().getSessionId();
+      ns1__investigationInclude invesInclude = ns1__investigationInclude__INVESTIGATORS_USCOREAND_USCOREKEYWORDS;
+      m_advancedSearchDetails->investigationInclude = &invesInclude;
 
-      boost::shared_ptr<ns1__advancedSearchDetails>adv_sptr(new ns1__advancedSearchDetails);
-      req_sptr->advancedSearchDetails=adv_sptr.get();
+      double runStart, runEnd;
       //run start
-      boost::shared_ptr<double>runstart_sptr(new double);
-      if(inputs.getRunStart()>0)
+      if(inputs.getRunStart() > 0)
       {
-        req_sptr->advancedSearchDetails->runStart = runstart_sptr.get();
-        *req_sptr->advancedSearchDetails->runStart = inputs.getRunStart();
+        runStart = inputs.getRunStart();
+        m_advancedSearchDetails->runStart = &runStart;
       }
+
       //run end
-      boost::shared_ptr<double>runend_sptr(new double);
       if(inputs.getRunEnd()>0)
       {
-        req_sptr->advancedSearchDetails->runEnd = runend_sptr.get();
-        *req_sptr->advancedSearchDetails->runEnd = inputs.getRunEnd();
-      }
-      //start date
-      boost::shared_ptr<time_t> startdate_sptr(new time_t);
-      if(inputs.getStartDate()!=0)
-      {
-        req_sptr->advancedSearchDetails->dateRangeStart = startdate_sptr.get();
-        *req_sptr->advancedSearchDetails->dateRangeStart = inputs.getStartDate();
-      }
-      //end date
-      boost::shared_ptr<time_t> enddate_sptr(new time_t);
-      if(inputs.getEndDate()!=0)
-      {
-        req_sptr->advancedSearchDetails->dateRangeEnd =  enddate_sptr.get();
-        *req_sptr->advancedSearchDetails->dateRangeEnd = inputs.getEndDate();
+        runEnd = inputs.getRunEnd();
+        m_advancedSearchDetails->runEnd = &runEnd;
       }
 
-      // investigation include
-      boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
-      req_sptr->advancedSearchDetails->investigationInclude = invstInculde_sptr.get();
-      *req_sptr->advancedSearchDetails->investigationInclude = ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;
+      time_t startDate, endDate;
+      //start date
+      if(inputs.getStartDate()!=0)
+      {
+        startDate = inputs.getStartDate();
+        m_advancedSearchDetails->dateRangeStart = &startDate;
+      }
+
+      //end date
+      if(inputs.getEndDate()!=0)
+      {
+        endDate = inputs.getEndDate();
+        m_advancedSearchDetails->dateRangeEnd = &endDate;
+      }
 
       //instrument name
       if(!inputs.getInstrument().empty())
       {
-        req_sptr->advancedSearchDetails->instruments.push_back(inputs.getInstrument());
+        m_advancedSearchDetails->instruments.push_back(inputs.getInstrument());
       }
+
       // keywords
       if(!inputs.getKeywords().empty())
       {
-        req_sptr->advancedSearchDetails->keywords.push_back(inputs.getKeywords());
+        m_advancedSearchDetails->keywords.push_back(inputs.getKeywords());
       }
 
-      //invetigation name
-      boost::shared_ptr<std::string > investName_sptr(new std::string);
+      std::string investigationName, investigationType, datafileName, sampleName;
+
+      //Investigation name
       if(!inputs.getInvestigationName().empty())
       {
-        req_sptr->advancedSearchDetails->investigationName = investName_sptr.get();
-        *req_sptr->advancedSearchDetails->investigationName = inputs.getInvestigationName();
+        investigationName = inputs.getInvestigationName();
+        m_advancedSearchDetails->investigationName = &investigationName;
+      }
+
+      //Investigation type
+      if(!inputs.getInvestigationType().empty())
+      {
+        investigationType = inputs.getInvestigationType();
+        m_advancedSearchDetails->investigationType = &investigationType;
       }
 
       //datafile name
-      boost::shared_ptr<std::string > datafilename_sptr(new std::string);
       if(!inputs.getDatafileName().empty())
       {
-        req_sptr->advancedSearchDetails->datafileName = datafilename_sptr.get();
-        *req_sptr->advancedSearchDetails->datafileName = inputs.getDatafileName();
+        datafileName = inputs.getDatafileName();
+        m_advancedSearchDetails->datafileName = &datafileName;
       }
 
       //sample name
-      boost::shared_ptr<std::string > sample_sptr(new std::string);
       if(!inputs.getSampleName().empty())
       {
-        req_sptr->advancedSearchDetails->sampleName = sample_sptr.get();
-        *req_sptr->advancedSearchDetails->sampleName = inputs.getSampleName();
+        sampleName = inputs.getSampleName();
+        m_advancedSearchDetails->sampleName = &sampleName;
       }
 
       //investigator's surname
-      boost::shared_ptr<std::string > investigator_sptr(new std::string);
       if(!inputs.getInvestigatorSurName().empty())
       {
-        req_sptr->advancedSearchDetails->investigators.push_back(inputs.getInvestigatorSurName());
+        m_advancedSearchDetails->investigators.push_back(inputs.getInvestigatorSurName());
       }
 
-      //response object
-      ns1__searchByAdvancedResponse response;
-      // do  search
-      int ret_search=doSearch(icat,req_sptr,response);
-      if(ret_search!=0)
+      ns1__searchByAdvancedPagination request;
+      ns1__searchByAdvancedPaginationResponse response;
+
+      // If offset or limit is default value then we want to return as
+      // we just wanted to perform the getSearchQuery to build our COUNT query.
+      if (offset == -1 || limit == -1) return;
+
+      std::string ses = Session::Instance().getSessionId();
+      request.sessionId = &ses;
+      // Setup paging information to search with paging enabled.
+      request.numberOfResults = limit;
+      request.startIndex      = offset;
+      request.advancedSearchDetails = m_advancedSearchDetails;
+
+      //ICAt proxy object
+      ICATPortBindingProxy icat;
+
+      if (soap_ssl_client_context(&icat,
+          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
+          NULL,       /* keyfile: required only when client must authenticate to
+                         server (see SSL docs on how to obtain this file) */
+          NULL,       /* password to read the keyfile */
+          NULL,      /* optional cacert file to store trusted certificates */
+          NULL,      /* optional capath to directory with trusted certificates */
+          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
+      ))
+      {
+        CErrorHandling::throwErrorMessages(icat);
+      }
+
+      int result = icat.searchByAdvancedPagination(&request, &response);
+
+      if(result != 0)
       {
         //replace with mantid error routine
         CErrorHandling::throwErrorMessages(icat);
@@ -905,9 +931,53 @@ namespace Mantid
       }
       //save response to a table workspace
       saveSearchRessults(response,outputws);
-
     }
 
+    /**
+     * Uses user input fields to perform a search & obtain the COUNT of results for paging.
+     * @return The number of investigations returned by the search performed.
+     */
+    int64_t CICatHelper::getNumberOfSearchResults()
+    {
+      ICATPortBindingProxy icat;
+
+      if (soap_ssl_client_context(&icat,
+          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
+          NULL,       /* keyfile: required only when client must authenticate to
+                         server (see SSL docs on how to obtain this file) */
+          NULL,       /* password to read the keyfile */
+          NULL,      /* optional cacert file to store trusted certificates */
+          NULL,      /* optional capath to directory with trusted certificates */
+          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
+      ))
+      {
+        CErrorHandling::throwErrorMessages(icat);
+      }
+
+      ns1__searchByAdvanced request;
+      ns1__searchByAdvancedResponse response;
+
+      std::string session = Session::Instance().getSessionId();
+      request.sessionId = &session;
+      request.advancedSearchDetails = m_advancedSearchDetails;
+
+      int result = icat.searchByAdvanced(&request, &response);
+
+      int64_t numOfResults = 0;
+
+      if (result == 0)
+      {
+        numOfResults = response.return_.size();
+      }
+      else
+      {
+        CErrorHandling::throwErrorMessages(icat);
+      }
+
+      g_log.debug() << "CICatHelper::getNumberOfSearchResults -> Number of results returned is: { " << numOfResults << " }" << std::endl;
+
+      return numOfResults;
+    }
 
     /**This method checks the given session is valid
      *@return returns true if the session id is valid,otherwise false;

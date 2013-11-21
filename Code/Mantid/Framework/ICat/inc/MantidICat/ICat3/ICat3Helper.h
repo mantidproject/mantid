@@ -44,7 +44,7 @@ namespace Mantid
     public:
 
       /// constructor
-      CICatHelper():g_log(Kernel::Logger::get("CICatHelper"))
+      CICatHelper() : g_log(Kernel::Logger::get("CICatHelper")), m_advancedSearchDetails(NULL)
       {}
       /// destructor
       ~CICatHelper(){}
@@ -71,7 +71,11 @@ namespace Mantid
       void doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr);
 
       /// do advanced search 
-      void doAdvancedSearch(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws);
+      void doAdvancedSearch(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws,
+          const int &offset, const int &limit);
+
+      /// Obtain the number of results returned by the doAdvancedSearch method.
+      int64_t getNumberOfSearchResults();
 
       // do login
       void doLogin(const std::string& name,const std::string& password,const std::string& url);
@@ -96,7 +100,7 @@ namespace Mantid
       API::ITableWorkspace_sptr saveFileSearchResponse(const ICat3::ns1__searchByAdvancedResponse& response);
 
       /// This method saves the response data of search by run number to table workspace
-      void saveSearchRessults(const ICat3::ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws);
+      void saveSearchRessults(const ICat3::ns1__searchByAdvancedPaginationResponse& response,API::ITableWorkspace_sptr& outputws);
 
       /// this method saves investigation include response to a table workspace
       void  saveInvestigationIncludesResponse(
@@ -125,7 +129,6 @@ namespace Mantid
       ///saves
       void saveInvestigatorsNameandSample(ICat3::ns1__investigation* investigation,API::TableRow& t);
 
-
       /** This is a template method to save data to table workspace
        * @param input :: pointer to input value
        * @param t :: table row reference
@@ -145,6 +148,9 @@ namespace Mantid
       }
     private:
       Kernel::Logger& g_log;    ///< reference to the logger class
+      /// Holds the user search input for searching.
+      ICat3::ns1__advancedSearchDetails* m_advancedSearchDetails;
+
     };
 
 
