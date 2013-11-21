@@ -62,16 +62,38 @@ class ConvertToWavelength(object):
             self.__ws_list = source_list
         else:
             self.__ws_list = source
+            
+    @classmethod
+    def crop_range(cls, ws, rng):
+        
+        in_rng = msi.CloneWorkspace(ws)
+        if not isinstance(rng, tuple):
+            raise ValueError("Elements must be tuples.")
+        
+        def is_actual_range(rng):
+            return len(rng) == 2 and isinstance(rng[0], int) and isinstance(rng[1], int)
+        
+        print "Running"
+        if is_actual_range(rng):
+            start, stop = rng[0], rng[1]
+            in_rng = msi.CropWorkspace(InputWorkspace=in_rng, StartWorkspaceIndex=start,EndWorkspaceIndex=stop)
+        else:
+            for subrng in rng:
+                in_rng = ConvertToWavelength.crop_range(ws, subrng)
+  
+        return in_rng
         
     def convert(self, wavelength_min, wavelength_max, monitors_to_correct=None, bg_min=None, bg_max=None):
         """
         Run the conversion
         
         Arguments:
-        bg_min: x min background in wavelength
-        bg_max: x max background in wavelength
+        
+        workspace_ids: Start and end ranges. Ids to be considered as workspaces. Nested list syntax supported
         wavelength_min: min wavelength in x for monitor workspace
         wavelength_max: max wavelength in x for detector workspace
+        bg_min: x min background in wavelength
+        bg_max: x max background in wavelength
         
         Returns:
         monitor_ws: A workspace of monitors
