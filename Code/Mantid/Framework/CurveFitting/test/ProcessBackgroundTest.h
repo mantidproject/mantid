@@ -27,7 +27,7 @@ public:
 
   /** Test option delete region
    */
-  void test_DeleteRegion()
+  void Ptest_DeleteRegion()
   {
     // 1. Create Workspace2D
     DataObjects::Workspace2D_sptr inpws
@@ -70,7 +70,7 @@ public:
 
   /** Test option "Add Region"
    */
-  void test_AddRegion()
+  void Ptest_AddRegion()
   {
     // 1. Create Workspace2D
     DataObjects::Workspace2D_sptr inpws
@@ -174,7 +174,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test automatic background selection
    */
-  void test_SimpleBackgroundGeneration()
+  void Ptest_SimpleBackgroundGeneration()
   {
 
     // 1. Prepare for data
@@ -245,7 +245,7 @@ public:
     DataObjects::Workspace2D_sptr dataws
         = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1000, 1000));
-    for (size_t i = 0; i < 10; ++i)
+    for (size_t i = 0; i < 1000; ++i)
     {
       dataws->dataX(0)[i] = double(i);
       dataws->dataY(0)[i] = double(i)*double(i)+sin(double(i)/180.*3.14);
@@ -277,6 +277,10 @@ public:
     alg.setProperty("SelectionMode", "UserFunction");
     alg.setProperty("BackgroundTableWorkspace", functablews);
 
+    alg.setProperty("OutputBackgroundParameterTable", "OutBackgroundParameters");
+    alg.setProperty("OutputBackgroundType", "Chebyshev");
+    alg.setProperty("OutputBackgroundOrder", 6);
+
     alg.setProperty("NoiseTolerance", 0.25);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -290,7 +294,12 @@ public:
     if (bkgdws)
     {
       TS_ASSERT(bkgdws->readX(0).size() > 10);
+      TS_ASSERT_EQUALS(bkgdws->getNumberHistograms(), 3);
     }
+
+    TableWorkspace_sptr bkgdparws = boost::dynamic_pointer_cast<TableWorkspace>(
+          API::AnalysisDataService::Instance().retrieve("OutBackgroundParameters"));
+    TS_ASSERT(bkgdparws);
 
     AnalysisDataService::Instance().remove("DiffractionData2");
     AnalysisDataService::Instance().remove("SelectedBackgroundPoints2");
