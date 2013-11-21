@@ -24,8 +24,10 @@ using namespace Mantid::Geometry;
 
 namespace Mantid
 {
-  namespace Algorithms
+  namespace Crystal
   {
+    Kernel::Logger& OptimizeLatticeParameters::g_log =
+                        Kernel::Logger::get("OptimizeLatticeParameters");
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(OptimizeLatticeParameters)
@@ -58,7 +60,7 @@ namespace Mantid
       std::string cell_type = p[1];
       std::vector<double>Params;
       for ( size_t i = 0; i < v->size; i++ )Params.push_back(gsl_vector_get(v,i));
-      Mantid::Algorithms::OptimizeLatticeParameters u;
+      Mantid::Crystal::OptimizeLatticeParameters u;
       return u.optLattice(inname, cell_type, Params);
     }
   
@@ -151,7 +153,7 @@ namespace Mantid
     
       /* Initialize method and iterate */
       minex_func.n = nopt;
-      minex_func.f = &Mantid::Algorithms::gsl_costFunction;
+      minex_func.f = &Mantid::Crystal::gsl_costFunction;
       minex_func.params = &par;
     
       s = gsl_multimin_fminimizer_alloc (T, nopt);
@@ -168,23 +170,22 @@ namespace Mantid
         status = gsl_multimin_test_size (size, 1e-4);
     
       }
-      while (status == GSL_CONTINUE && iter < 500);
+      while (status == GSL_CONTINUE && iter < 5000);
     
       // Output summary to log file
-      std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
-      //g_log.debug() << 
-      std::cout <<
+      std::string report = gsl_strerror(status);
+      g_log.notice() <<
         " Method used = " << " Simplex" << 
         " Iteration = " << iter << 
-        " Status = " << reportOfDiffractionEventCalibrateDetectors << 
-        " Minimize Sum = " << s->fval << 
-        " Output  = ";
-      for ( size_t i = 1; i < nopt; i++ )std::cout << gsl_vector_get (s->x, i) ;
-      std::cout <<  "  \n";
+        " Status = " << report << 
+        " Chisq = " << s->fval ; 
       gsl_vector_free(x);
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
       setProperty("OutputChi2", s->fval);
+      // Show the modified lattice parameters
+      OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
+      g_log.notice() << o_lattice << "\n";
 
     }
 
@@ -206,21 +207,130 @@ namespace Mantid
            (AnalysisDataService::Instance().retrieve(inname));
       const std::vector<Peak> &peaks = ws->getPeaks();
       size_t n_peaks = ws->getNumberPeaks();
-      DblMatrix UB = ws->sample().getOrientedLattice().getUB();
-      std::vector<double>lat(6);
-      IndexingUtils::GetLatticeParameters( UB, lat);
       std::vector<V3D> q_vector;
       std::vector<V3D> hkl_vector;
 
+      for ( size_t i = 0; i < params.size(); i++ )params[i]=std::abs(params[i]);
       for ( size_t i = 0; i < n_peaks; i++ )
       {
         q_vector.push_back(peaks[i].getQSampleFrame());
         hkl_vector.push_back(peaks[i].getHKL());
       }
-      double Chisq = IndexingUtils::Optimize_UB( params, cell_type, lat, UB, hkl_vector, q_vector);
-      return Chisq;
-    }
-
-
+      std::vector<double> lattice_parameters;
+      lattice_parameters.assign (6,0);
+      if (cell_type == "Cubic")
+      {
+        lattice_parameters[0] = params[0];       
+        lattice_parameters[1] = params[0];
+        lattice_parameters[2] = params[0];      
+    
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Tetragonal")
+      {
+        lattice_parameters[0] = params[0];    
+        lattice_parameters[1] = params[0];
+        lattice_parameters[2] = params[1];   
+    
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Orthorhombic")
+      {
+        lattice_parameters[0] = params[0];  
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2]; 
+    
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Rhombohedral")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[0];
+        lattice_parameters[2] = params[0];  
+    
+        lattice_parameters[3] = params[1];
+        lattice_parameters[4] = params[1];
+        lattice_parameters[5] = params[1];
+      }
+      else if (cell_type == "Hexagonal")
+      {
+        lattice_parameters[0] = params[0]; 
+        lattice_parameters[1] = params[0];
+        lattice_parameters[2] = params[1];
+    
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 120;
+      }
+      else if (cell_type == "Monoclinic ( a unique )")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2];
+    
+        lattice_parameters[3] = params[3];
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Monoclinic ( b unique )")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2];
+    
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = params[3];
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Monoclinic ( c unique )")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2];
+    
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = params[3];
+      }
+      else if (cell_type == "Triclinic")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2]; 
+    
+        lattice_parameters[3] = params[3];
+        lattice_parameters[4] = params[4];
+        lattice_parameters[5] = params[5];
+      }
+    
+    
+      Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("CalculateUMatrix");
+      alg->setPropertyValue("PeaksWorkspace", inname);
+      alg->setProperty("a",lattice_parameters[0]);
+      alg->setProperty("b",lattice_parameters[1]);
+      alg->setProperty("c",lattice_parameters[2]);
+      alg->setProperty("alpha",lattice_parameters[3]);
+      alg->setProperty("beta",lattice_parameters[4]);
+      alg->setProperty("gamma",lattice_parameters[5]);
+      alg->executeAsChildAlg();
+    
+      ws = alg->getProperty("PeaksWorkspace");
+      OrientedLattice latt=ws->mutableSample().getOrientedLattice();
+      DblMatrix UB = latt.getUB();
+    
+      double result = 0;
+      for ( size_t i = 0; i < hkl_vector.size(); i++ ) 
+      {
+         V3D error = UB * hkl_vector[i] - q_vector[i];
+         result += error.norm();
+      }
+      return result;
+      }
   } // namespace Algorithm
 } // namespace Mantid

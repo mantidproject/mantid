@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -11,7 +12,7 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace Crystal
 {
 /**
  Find the offsets for each detector
@@ -61,6 +62,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
   
 };
 
