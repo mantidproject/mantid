@@ -631,10 +631,18 @@ def _WavRangeReduction(name_suffix=None):
                 trans.trans.move2next(period)
         return
 
+    def _applySuffix(result, name_suffix):
+        if name_suffix:
+            old = result
+            result += name_suffix
+            RenameWorkspace(InputWorkspace=old,OutputWorkspace= result)
+        return result
+
+
     result = ""
     if ReductionSingleton().get_sample().loader.periods_in_file == 1:
         result = ReductionSingleton()._reduce()
-        return result
+        return _applySuffix(result, name_suffix)
 
     calculated = []
     try:
@@ -648,12 +656,7 @@ def _WavRangeReduction(name_suffix=None):
             result = ReductionSingleton().get_out_ws_name(show_period=False)
             GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=allnames)
 
-    if name_suffix:
-        old = result
-        result += name_suffix
-        RenameWorkspace(InputWorkspace=old,OutputWorkspace= result)
-        
-    return result
+    return _applySuffix(result, name_suffix)
 
 def delete_workspaces(workspaces):
     """
