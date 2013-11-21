@@ -714,8 +714,14 @@ void InstrumentWindow::saveImage(QString filename)
     }
   }
   
-  if ( m_InstrumentDisplay )
+  if ( isGLEnabled() )
+  {
     m_InstrumentDisplay->saveToFile(filename);
+  }
+  else
+  {
+    m_simpleDisplay->saveToFile(filename);
+  }
 }
 
 /**
