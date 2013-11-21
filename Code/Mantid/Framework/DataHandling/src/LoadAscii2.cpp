@@ -251,7 +251,6 @@ namespace Mantid
     void LoadAscii2::setcolumns(std::ifstream & file, std::string & line, std::list<std::string> & columns)
     {
       size_t lineno = 0;
-      size_t lastSpecID = 0;
       std::vector<double> values;
       //first find the first data set and set that as the template for the number of data collumns we expect from this file
       while( getline(file,line) && m_baseCols == 0)
@@ -283,10 +282,6 @@ namespace Mantid
               }
               //a size of 1 is most likely a spectra ID so ignore it, a value of 2, 3 or 4 is a valid data set
               m_baseCols = cols;
-            }
-            else if (cols == 1)
-            {
-              lastSpecID = lineno;
             }
           }
         }
