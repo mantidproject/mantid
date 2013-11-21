@@ -1,5 +1,5 @@
-#ifndef MANTID_CRYSTAL_OptimizeLatticeParameters_H_
-#define MANTID_CRYSTAL_OptimizeLatticeParameters_H_
+#ifndef MANTID_CRYSTAL_OptimizeLatticeForCellType_H_
+#define MANTID_CRYSTAL_OptimizeLatticeForCellType_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -40,15 +40,15 @@ namespace Crystal
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport OptimizeLatticeParameters: public API::Algorithm
+class DLLExport OptimizeLatticeForCellType: public API::Algorithm
 {
 public:
   /// Default constructorMatrix
-  OptimizeLatticeParameters();
+  OptimizeLatticeForCellType();
   /// Destructor
-  virtual ~OptimizeLatticeParameters();
+  virtual ~OptimizeLatticeForCellType();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "OptimizeLatticeParameters"; }
+  virtual const std::string name() const { return "OptimizeLatticeForCellType"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -70,4 +70,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_CRYSTAL_OptimizeLatticeParameters_H_*/
+#endif /*MANTID_CRYSTAL_OptimizeLatticeForCellType_H_*/

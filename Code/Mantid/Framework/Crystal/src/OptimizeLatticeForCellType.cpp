@@ -2,7 +2,7 @@
 
 
 *WIKI*/
-#include "MantidCrystal/OptimizeLatticeParameters.h"
+#include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidCrystal/GSLFunctions.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -26,14 +26,14 @@ namespace Mantid
 {
   namespace Crystal
   {
-    Kernel::Logger& OptimizeLatticeParameters::g_log =
-                        Kernel::Logger::get("OptimizeLatticeParameters");
+    Kernel::Logger& OptimizeLatticeForCellType::g_log =
+                        Kernel::Logger::get("OptimizeLatticeForCellType");
 
     // Register the class into the algorithm factory
-    DECLARE_ALGORITHM(OptimizeLatticeParameters)
+    DECLARE_ALGORITHM(OptimizeLatticeForCellType)
     
     /// Sets documentation strings for this algorithm
-    void OptimizeLatticeParameters::initDocs()
+    void OptimizeLatticeForCellType::initDocs()
     {
       this->setWikiSummary("Optimize lattice parameters for cell type.");
       this->setOptionalMessage("Optimize lattice parameters for cell type.");
@@ -45,12 +45,12 @@ namespace Mantid
     using namespace DataObjects;
 
     /// Constructor
-    OptimizeLatticeParameters::OptimizeLatticeParameters()
+    OptimizeLatticeForCellType::OptimizeLatticeForCellType()
     {
     }
 
     /// Destructor
-    OptimizeLatticeParameters::~OptimizeLatticeParameters()
+    OptimizeLatticeForCellType::~OptimizeLatticeForCellType()
     {}
   
     static double gsl_costFunction(const gsl_vector *v, void *params)
@@ -60,17 +60,17 @@ namespace Mantid
       std::string cell_type = p[1];
       std::vector<double>Params;
       for ( size_t i = 0; i < v->size; i++ )Params.push_back(gsl_vector_get(v,i));
-      Mantid::Crystal::OptimizeLatticeParameters u;
+      Mantid::Crystal::OptimizeLatticeForCellType u;
       return u.optLattice(inname, cell_type, Params);
     }
   
     //-----------------------------------------------------------------------------------------
     /** Initialisation method. Declares properties to be used in algorithm.
      */
-    void OptimizeLatticeParameters::init()
+    void OptimizeLatticeForCellType::init()
     {
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace","",Direction::InOut),
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::InOut),
         "An input PeaksWorkspace with an instrument.");
     std::vector<std::string> cellTypes;
     cellTypes.push_back("Cubic" );
@@ -95,14 +95,14 @@ namespace Mantid
      *
      *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
      */
-    void OptimizeLatticeParameters::exec()
+    void OptimizeLatticeForCellType::exec()
     {
       std::string par[6];
-      std::string inname = getProperty("InputWorkspace");
+      std::string inname = getProperty("PeaksWorkspace");
       par[0] = inname;
       std::string type = getProperty("CellType");
       par[1] = type;
-      PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
+      PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
 
       const gsl_multimin_fminimizer_type *T =
       gsl_multimin_fminimizer_nmsimplex;
@@ -179,6 +179,9 @@ namespace Mantid
         " Iteration = " << iter << 
         " Status = " << report << 
         " Chisq = " << s->fval ; 
+      std::vector<double>Params;
+      for ( size_t i = 0; i < s->x->size; i++ )Params.push_back(gsl_vector_get(s->x,i));
+      optLattice(inname, type, Params);
       gsl_vector_free(x);
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
@@ -186,7 +189,10 @@ namespace Mantid
       // Show the modified lattice parameters
       OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
       g_log.notice() << o_lattice << "\n";
-
+      // Reindex peaks with new UB
+      Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
+      alg->setPropertyValue("PeaksWorkspace", inname);
+      alg->executeAsChildAlg();
     }
 
 
@@ -201,7 +207,7 @@ namespace Mantid
      * @param tofParams
      * @return
      */
-    double OptimizeLatticeParameters::optLattice(std::string inname, std::string cell_type, std::vector<double> & params)
+    double OptimizeLatticeForCellType::optLattice(std::string inname, std::string cell_type, std::vector<double> & params)
     {
       PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>
            (AnalysisDataService::Instance().retrieve(inname));

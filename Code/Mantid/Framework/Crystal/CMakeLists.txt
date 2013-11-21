@@ -134,6 +134,7 @@ set ( TEST_FILES
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
 	OptimizeCrystalPlacementTest.h
+	OptimizeLatticeForCellTypeTest.h
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
