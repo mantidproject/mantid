@@ -169,7 +169,7 @@ namespace Geometry
    */
   V3D OrientedLattice::qFromHKL(const V3D & hkl) const
   {
-    return UB*hkl*M_2_PI;
+    return UB*hkl*2.*M_PI;
   }
 
   /** gets a vector along beam direction when goniometers are at 0. Note, this vector is not unique, but
