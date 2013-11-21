@@ -4,6 +4,7 @@
 #include "MantidAPI/ICatalog.h"
 #include "MantidICat/CatalogSearchParam.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
+#include "MantidICat/ICat3/ICat3Helper.h"
 
 namespace Mantid
 {
@@ -67,6 +68,10 @@ namespace Mantid
       virtual void keepAlive();
       /// keep alive in minutes
       virtual int keepAliveinminutes();
+
+    private:
+      /// The helper class that accesses ICAT functionality.
+      CICatHelper* m_helper;
     };
 
   }
