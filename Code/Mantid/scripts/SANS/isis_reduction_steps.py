@@ -81,10 +81,7 @@ class LoadRun(object):
     def get_wksp_name(self):
         ref_ws = mtd[str(self._wksp_name)]
         if isinstance(ref_ws, WorkspaceGroup):
-            if self._period >= 0:
-                return ref_ws[self._period].name()
-            else:
-                return ref_ws[0].name()
+            return ref_ws[self._index_of_group].name()
         else:
             return self._wksp_name
   
@@ -169,7 +166,13 @@ class LoadRun(object):
             _file_path = getFilePathFromWorkspace(ws_pointer)
         except:
             raise RuntimeError("Failed to retrieve information to reload this workspace " + str(self._data_file))
-        self._data_file = self._extract_run_details(_file_path)
+        self._data_file = _file_path
+        self.ext = _file_path[-3:]
+        if isinstance(ws_pointer, WorkspaceGroup):
+            self.shortrun_no = ws_pointer[0].getRunNumber()
+        else:
+            self.shortrun_no = ws_pointer.getRunNumber()
+
         if self._reload:
             # give to _assignHelper the responsibility of loading this data.
             return False
