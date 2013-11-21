@@ -169,7 +169,7 @@ namespace Mantid
   {
     m_FileName = fileName;
 
-    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false));
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,m_nDim,m_Boxes[0]->getEventType(),false));
 
     //Save box structure;
     this->saveBoxStructure(hFile.get());
@@ -255,25 +255,37 @@ namespace Mantid
 
   /**load box structure from the file, defined by file name 
    @param fileName       :: The name of the file with the box information
-   @param nDim           :: number of dimensions the boxes  have (as load usually occurs into existing MD workspace, this parameter 
-                            use to check the correspondence between workspace and the box structire in the file
+   @param nDim           :: number of dimensions the boxes  have.
+                            If this number is <=0 on input, method loads existing number of box dimensions from the file, if it is a number, method verifies if 
+                            if the number of dimensions provided equal to this number in  the file. (leftower from the time when it was templated method) 
    @param EventType      :: "MDEvent" or "MDLeanEvent"  -- describe the type of events the workspace contans, similarly to nDim, used to check the data integrity
-   @param onlyEventInfo  :: load only box controller information and do not restore boxes thenleves and the events locations */
-  void MDBoxFlatTree::loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType,bool onlyEventInfo)
+   @param onlyEventInfo  :: load only box controller information and the events locations -- do not restore boxes themselves 
+   @param restoreExperimentinfo :: load also experiment information 
+   */
+  void MDBoxFlatTree::loadBoxStructure(const std::string &fileName,int &nDim,const std::string &EventType,bool onlyEventInfo,bool restoreExperimentInfo)
   {
 
     m_FileName = fileName;
-    m_nDim = static_cast<unsigned int>(nDim);
+    m_nDim = static_cast<int>(nDim);
     m_eventType = EventType;
  
     // open the file and the MD workspace group.
-    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_eventType,true));
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,m_nDim,m_eventType,true));
 
 
     this->loadBoxStructure(hFile.get(),onlyEventInfo);
 
+    if(restoreExperimentInfo)
+    {
+      if (!m_mEI)
+          m_mEI = boost::make_shared<Mantid::API::MultipleExperimentInfos>(Mantid::API::MultipleExperimentInfos());
+
+      loadExperimentInfos(hFile.get(), m_mEI);
+    }
+
     // close workspace group
     hFile->closeGroup();
+  
     // close the NeXus file
     hFile->close();
   }
@@ -373,7 +385,7 @@ namespace Mantid
   * @param file :: the pointer to the properly opened nexus data file where the experiment info groups can be found. 
   * @param ws :: MDEventWorkspace/MDHisto to load experiment infos to
   */
-  void MDBoxFlatTree::loadExperimentInfos(::NeXus::File * const file,boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
+  void MDBoxFlatTree::loadExperimentInfos(::NeXus::File * const file,boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei)
   {
       // First, find how many experimentX blocks there are
       std::map<std::string,std::string> entries;
@@ -419,8 +431,8 @@ namespace Mantid
               ei->loadExperimentInfoNexus(file, parameterStr);
               // Now do the parameter map
               ei->readParameterMap(parameterStr);
-              // And set it in the workspace.
-              ws->addExperimentInfo(ei);
+              // And add it to the mutliple experiment info.
+              mei->addExperimentInfo(ei);
           }
           catch (std::exception & e)
           {
@@ -431,25 +443,35 @@ namespace Mantid
       }
 
   }
+  /**Export existing experiment info defined in the box structure to target workspace (or other experiment info as workspace is an experiment info) */
+  void MDBoxFlatTree::exportExperiment(Mantid::API::IMDEventWorkspace_sptr &targetWS)
+  {
+    // copy experiment infos
+    targetWS->copyExperimentInfos (*m_mEI);
+    // free this Experiment info as it has been already exported
+    m_mEI.reset();
 
+  }
 
   /** Method recovers the interconnected box structure from the plain tree into box tree, recovering both boxes and their connectivity
     * does the opposite to the initFlatStructure operation (the class contants remains unchanged)
    @param  Boxes       :: the return vector of pointers to interconnected boxes. All previous pointers found in the vector will be overwritten (beware of memory loss)
    @param  bc          :: shard pointer to the box controller, which each box uses
    @param  FileBackEnd :: if one should make the data file backed, namely restore/calculate the data, nesessary to obtain events file positions
-   @parman BoxStructureOnly :: restore box tree only ignoring information about the box events
+   @param BoxStructureOnly :: restore box tree only ignoring information about the box events
+   @param restoreExperimentInfo :: restore experiment info saved into the file earlier
+
 
    @returns   totalNumEvents :: total number of events the box structure should contain and allocated memory for.
   */
-  uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *>&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly)
+  uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *>&Boxes,API::BoxController_sptr &bc, bool FileBackEnd,bool BoxStructureOnly)
   {
 
     size_t numBoxes = this->getNBoxes();
     Boxes.assign(numBoxes, NULL);
 
     uint64_t totalNumEvents(0);
-    m_nDim = int(bc->getNDims());
+    m_nDim = static_cast<int>(bc->getNDims());
     int maxNdim = int(MDEventFactory::getMaxNumDim());
     if(m_nDim<=0||m_nDim>maxNdim)throw std::runtime_error("Workspace dimesnions are not defined properly in the box controller");
 
@@ -555,7 +577,7 @@ namespace Mantid
    *@throws if group or its component do not exist and the file is opened read-only or if the existing file parameters are not equal to the 
               input parameters.
   */
-  ::NeXus::File * MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName,size_t nDims, const std::string &WSEventType, bool readOnly)
+  ::NeXus::File * MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName,int &nDims, const std::string &WSEventType, bool readOnly)
   {
         Poco::File oldFile(fileName);
         bool fileExists = oldFile.exists();
@@ -613,13 +635,21 @@ namespace Mantid
               {
                 int32_t nFileDims;
                 hFile->readData<int32_t>("dimensions",nFileDims);
-                if(nFileDims != static_cast<int32_t>(nDims))
-                        throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace initiated for different number of dimensions then requested ",
-                        fileName);
+                if (nDims != 0) // check against dimensions provided
+                {
+                  if(nFileDims != static_cast<int32_t>(nDims))
+                          throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace initiated for different number of dimensions then requested ",
+                                                              fileName);
+                }
+                else          // read what is already there
+                  nDims = static_cast<int>(nFileDims);
               }
               else
               {
                  auto nFileDim = static_cast<int32_t>(nDims);
+                 if (nFileDim <=0)
+                    throw std::invalid_argument("MDBoxFlatTree::createOrOpenMDWSgrou: Invalid number of workspace dimensions provided to save into file ");
+
               // Write out  # of dimensions
                  hFile->writeData("dimensions", nFileDim);
               }
@@ -647,6 +677,95 @@ namespace Mantid
         return hFile.release();
   }
 
+
+   /**Save workpace generig info like dimension structure, history, titile dimensions etc.*/
+   void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,API::IMDWorkspace_const_sptr ws)
+   {
+
+      // Save the algorithm history under "process"
+      ws->getHistory().saveNexus(file);
+
+      // Write out the affine matrices
+      saveAffineTransformMatricies(file,boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws));
+
+      // Save some info as attributes. (Note: need to use attributes, not data sets because those cannot be resized).
+      file->putAttr("definition",  ws->id());
+      file->putAttr("title",  ws->getTitle() );
+      // Save each dimension, as their XML representation
+      size_t nDim = ws->getNumDims();
+      for (size_t d=0; d<nDim; d++)
+      {
+        std::ostringstream mess;
+        mess << "dimension" << d;
+        file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
+      }
+
+   }
+
+  /**
+   * Save the affine matricies to both directional conversions to the
+   * data.
+   * @param file : pointer to the NeXus file
+   * @param ws : workspace to get matrix from
+   */
+  void MDBoxFlatTree::saveAffineTransformMatricies(::NeXus::File *const file,API::IMDWorkspace_const_sptr ws)
+  {
+    try {
+      saveAffineTransformMatrix(file,ws->getTransformToOriginal(),"transform_to_orig");
+    }
+    catch (std::runtime_error &)
+    {
+      // Do nothing
+    }
+    try {
+      saveAffineTransformMatrix(file,ws->getTransformFromOriginal(),"transform_from_orig");
+    }
+    catch (std::runtime_error &)
+    {
+      // Do nothing
+    }
+  }
+  /**
+   * Extract and save the requested affine matrix.
+   * @param file : pointer to the NeXus file
+   * @param transform : the object to extract the affine matrix from
+   * @param entry_name : the tag in the NeXus file to save under
+   */
+  void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file,API::CoordTransform *transform, std::string entry_name)
+  {
+    Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
+    g_log.debug() << "TRFM: " << matrix.str() << std::endl;
+    saveMatrix<coord_t>(file, entry_name, matrix,
+                              ::NeXus::FLOAT32, transform->id());
+  }
+
+
+  /**
+   * Save routine for a generic matrix
+   * @param file : pointer to the NeXus file
+   * @param name : the tag in the NeXus file to save under
+   * @param m : matrix to save
+   * @param type : NXnumtype for the matrix data
+   * @param tag : id for an affine matrix conversion
+   */
+  template<typename T>
+  void saveMatrix(::NeXus::File *const file, std::string name,Kernel::Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag)
+  {
+    std::vector<T> v = m.getVector();
+    // Number of data points
+    int nPoints = static_cast<int>(v.size());
+
+    file->makeData(name, type, nPoints, true);
+    // Need a pointer
+    file->putData(&v[0]);
+    if (!tag.empty())
+    {
+      file->putAttr("type", tag);
+      file->putAttr("rows", static_cast<int>(m.numRows()));
+      file->putAttr("columns", static_cast<int>(m.numCols()));
+    }
+    file->closeData();
+  }
 
   
   }

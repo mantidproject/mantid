@@ -4,8 +4,8 @@ This algorithm loads a [[MDEventWorkspace]] that was previously
 saved using the [[SaveMD]] algorithm to a .nxs file format.
 
 If the workspace is too large to fit into memory,
-You can load the workspace as a [[MDWorkspace#m_file-Backed MDWorkspaces|file-backed MDWorkspace]]
-by checking the fileBackEnd option. This will load the box structure
+You can load the workspace as a [[MDWorkspace#File-Backed MDWorkspaces|file-backed MDWorkspace]]
+by checking the FileBackEnd option. This will load the box structure
 (allowing for some visualization with no speed penalty) but leave the
 events on disk until requested. Processing file-backed MDWorkspaces
 is significantly slower than in-memory workspaces due to frequency file access!
@@ -19,9 +19,9 @@ and used by other algorithms, they should not be needed in daily use.
 *WIKI*/
 
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/fileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/RegisterfileLoader.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -74,8 +74,8 @@ namespace Mantid
 
 
     /**
-     * Return the confidence with with this algorithm can load the m_file
-     * @param descriptor A descriptor for the m_file
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
     int LoadMD::confidence(Kernel::NexusDescriptor & descriptor) const
@@ -134,21 +134,31 @@ namespace Mantid
     */
     void LoadMD::exec()
     {
-      m_filename = getPropertyValue("filename");
+      m_filename = getPropertyValue("Filename");
 
       // Start loading
-      bool fileBacked = this->getProperty("fileBackEnd");
+      bool fileBacked = this->getProperty("FileBackEnd");
+      //TODO: is not used?
+      bool bMetadataOnly = getProperty("MetadataOnly");
+
+      m_BoxStructureOnly = this->getProperty("BoxStructureOnly");
+     // Nexus constructor/desctructors throw, so can not be used with scoped pointers directrly 
+      //(do they lock file because of this and this code is useless?)  
+      std::string for_access;
       if (fileBacked)
       {
-        boost::scoped_ptr<::NeXus::File> tf(new ::NeXus::File(m_filename, NXACC_RDWR)); 
-        m_file.swap(tf);
+
+         for_access="for Read/Write access";
+         m_file.reset(new ::NeXus::File(m_filename, NXACC_RDWR));
       }
       else
       {
-        boost::scoped_ptr<::NeXus::File> tf(new ::NeXus::File(m_filename, NXACC_READ));
-        m_file.swap(tf);
+         for_access="for Read access";
+         m_file.reset(new ::NeXus::File(m_filename, NXACC_READ));
       }
 
+      if(!m_file)
+        throw Kernel::Exception::FileError("Can not open file "+for_access,m_filename);
 
 
       // The main entry
@@ -282,16 +292,16 @@ namespace Mantid
     *
     * The m_file should be open at the entry level at this point.
     *
-    * @param ws :: MDEventWorkspace of the given type
+    * @param             ws :: MDEventWorkspace of the given type
     */
     template<typename MDE, size_t nd>
     void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
     {
-      // Are we using the m_file back end?
-      bool fileBackEnd = getProperty("fileBackEnd");
-      bool BoxStructureOnly = getProperty("BoxStructureOnly");
+      // Are we using the file back end?
+      bool fileBackEnd = getProperty("FileBackEnd");
 
-      if (fileBackEnd && BoxStructureOnly)
+
+      if (fileBackEnd && m_BoxStructureOnly)
         throw std::invalid_argument("Both BoxStructureOnly and fileBackEnd were set to TRUE: this is not possible.");
 
       CPUTimer tim;
@@ -313,18 +323,18 @@ namespace Mantid
       for (size_t d=0; d<nd; d++)
         ws->addDimension(m_dims[d]);
 
-      bool bMetadataOnly = getProperty("MetadataOnly");
 
       // ----------------------------------------- Box Structure ------------------------------
       MDBoxFlatTree FlatBoxTree;
-      FlatBoxTree.loadBoxStructure(m_filename,nd,MDE::getTypeName());
+      int nDims = static_cast<int>(nd); // should be safe
+      FlatBoxTree.loadBoxStructure(m_filename,nDims,MDE::getTypeName());
 
       BoxController_sptr bc = ws->getBoxController();
       bc->fromXMLString(FlatBoxTree.getBCXMLdescr());
 
       std::vector<API::IMDNode *> boxTree;
    //   uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,fileBackEnd,bMetadataOnly);
-      FlatBoxTree.restoreBoxTree(boxTree,bc,fileBackEnd,bMetadataOnly);
+      FlatBoxTree.restoreBoxTree(boxTree,bc,fileBackEnd,m_BoxStructureOnly);
       size_t numBoxes = boxTree.size();
 
     // ---------------------------------------- DEAL WITH BOXES  ------------------------------------
@@ -333,7 +343,7 @@ namespace Mantid
           auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
           loader->setDataType(sizeof(coord_t),MDE::getTypeName());
           bc->setFileBacked(loader,m_filename);
-          // boxes have been already made m_file-backed when restoring the boxTree;
+          // boxes have been already made file-backed when restoring the boxTree;
       // How much memory for the cache?
         {
         // TODO: Clean up, only a write buffer now

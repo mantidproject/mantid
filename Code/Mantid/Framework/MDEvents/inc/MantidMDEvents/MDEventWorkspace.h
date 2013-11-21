@@ -96,6 +96,8 @@ namespace MDEvents
     virtual void refreshCache();
 
     std::string getEventTypeName() const;
+    /// return the size (in bytes) of an event, this workspace contains
+    size_t sizeofEvent()const{return sizeof(MDE);}
 
     virtual void setMinRecursionDepth(size_t minDepth);
 
