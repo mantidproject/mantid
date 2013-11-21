@@ -205,7 +205,7 @@ namespace Crystal
                      << "    Total = "      << sampleMaterial.totalScatterXSection() << " barns\n"
                      << "    Absorption = " << sampleMaterial.absorbXSection() << " barns\n";
     }
-    else  //Save input in Sample with wrong atomic number and name
+    else if (smu != EMPTY_DBL() && amu != EMPTY_DBL()) //Save input in Sample with wrong atomic number and name
     {
       NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
     			0.0, 0.0, smu, 0.0, smu, amu);
