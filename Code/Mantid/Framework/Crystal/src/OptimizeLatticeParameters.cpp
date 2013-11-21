@@ -327,7 +327,7 @@ namespace Mantid
       double result = 0;
       for ( size_t i = 0; i < hkl_vector.size(); i++ ) 
       {
-         V3D error = UB * hkl_vector[i] - q_vector[i];
+         V3D error = UB * hkl_vector[i] - q_vector[i] / (2.0 * M_PI);
          result += error.norm();
       }
       return result;
