@@ -203,10 +203,14 @@ namespace Mantid
       double tolerance, vector< int >&bounds)
     {
       int N=0;
-      if( tolerance < 0)
+      if( tolerance <= 0)
         tolerance = .5;
       tolerance = min< double >(.5, tolerance);
 
+      // For the fake data the values are
+      //   X = peak index (repeated 3 times
+      //   Y = 0. as the function evals to (Q-vec) - (UB * hkl * 2pi)
+      //   E = the weighting as used in the cost function
       Mantid::MantidVecPtr pX;
       Mantid::MantidVec& xRef = pX.access();
       Mantid::MantidVecPtr yvals;
@@ -220,14 +224,26 @@ namespace Mantid
       {
         for (int j = 0; j < pwks->getNumberPeaks(); ++j)
         {
-          API::IPeak& peak = pwks->getPeak((int) j);
+          const API::IPeak& peak = pwks->getPeak((int) j);
           if (std::find(bankNames.begin(), bankNames.end(), peak.getBankName()) != bankNames.end())
             if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance))
             {
               N += 3;
+
+              // 1/sigma is considered the weight for the fit
+              double weight = 1.;                // default is even weighting
+              if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
+                weight = 1./peak.getSigmaIntensity();
+              else if (peak.getIntensity() > 0.) // next favorite weight by I
+                weight = 1./peak.getIntensity();
+              else if (peak.getBinCount() > 0.)  // then by counts in peak centre
+                weight = 1./peak.getBinCount();
+
+              const double PEAK_INDEX = static_cast<double>(j);
               for (size_t i = 0; i < 3; ++i)
               {
-                xRef.push_back((double) j);
+                xRef.push_back(PEAK_INDEX);
+                errB.push_back(weight);
               }
             }
         }//for @ peak
@@ -235,21 +251,16 @@ namespace Mantid
       }//for @ bank name
 
       yvalB.assign(xRef.size(), 0.0);
-      errB.assign(xRef.size(), 1.0);
 
       if( N < 4)//If not well indexed
         return boost::shared_ptr<DataObjects::Workspace2D>(new DataObjects::Workspace2D);
 
       std::cout<<"Number indexed peaks used="<<(N/3)<<std::endl;
       MatrixWorkspace_sptr mwkspc
-          = API::WorkspaceFactory::Instance().create("Workspace2D",(size_t)3,3*N,3*N);
+          = API::WorkspaceFactory::Instance().create("Workspace2D",1,3*N,3*N);
 
       mwkspc->setX(0, pX);
-      mwkspc->setX(1, pX);
-      mwkspc->setX(2, pX);
-      mwkspc->setData(0, yvals,errs);
-      mwkspc->setData(1, pX);
-      mwkspc->setData(2, yvals);
+      mwkspc->setData(0, yvals, errs);
 
       return boost::dynamic_pointer_cast< DataObjects::Workspace2D >(mwkspc);
     }
@@ -699,12 +710,6 @@ namespace Mantid
       //------------------ Set Up Workspace for IFitFunction Fit---------------
       vector< int >bounds;
       Workspace2D_sptr   ws = calcWorkspace( peaksWs, banksVec,tolerance, bounds );
-      if( ws->getNumberHistograms() < 2)
-      {
-        g_log.error(" Not enough data to fit parameters ");
-        throw length_error( " Not enough data to fit parameters " );
-      }
-
 
       //----------- Initialize peaksWorkspace, initial parameter values etc.---------
       boost::shared_ptr<const Instrument> instrument = peaksWs->getPeak(0).getInstrument();
@@ -887,8 +892,8 @@ namespace Mantid
      fit_alg->setProperty( "Function", iFunc);
      fit_alg->setProperty( "MaxIterations", Niterations );
      fit_alg->setProperty( "InputWorkspace", ws);
-     fit_alg->setProperty( "CreateOutput",true);
      fit_alg->setProperty( "Output","out");
+     fit_alg->setProperty("CalcErrors", false);
      fit_alg->executeAsChildAlg();
 
      g_log.debug()<<"Finished executing Fit algorithm\n";
