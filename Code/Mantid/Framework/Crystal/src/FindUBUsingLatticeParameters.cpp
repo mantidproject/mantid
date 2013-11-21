@@ -166,7 +166,7 @@ namespace Crystal
         IndexingUtils::GetIndexedPeaks( UB, q_vectors, tolerance,
                                miller_ind, indexed_qs, fit_error );
 
-        //IndexingUtils::Optimize_UB(UB, miller_ind,indexed_qs,sigabc);
+        IndexingUtils::Optimize_UB(UB, miller_ind,indexed_qs,sigabc);
 
         char logInfo[200];
         int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
