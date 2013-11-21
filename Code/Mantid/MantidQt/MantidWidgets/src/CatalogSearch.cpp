@@ -784,7 +784,7 @@ namespace MantidQt
       int pageNum = m_icatUiForm.pageStartNum->text().toInt();
       // If the user inputs a page number larger than the total
       // amount of page numbers we do not want to do anything.
-      if (pageNum > m_icatUiForm.resPageEndNumTxt->text().toInt())
+      if (pageNum > m_icatUiForm.resPageEndNumTxt->text().toInt() || pageNum <= 0)
       {
         m_icatUiForm.pageStartNum->setText(QString::number(m_currentPageNumber));
         return;
