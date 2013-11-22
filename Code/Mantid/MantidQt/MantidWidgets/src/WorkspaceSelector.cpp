@@ -87,6 +87,11 @@ void WorkspaceSelector::showHiddenWorkspaces(bool show)
   }
 }
 
+bool WorkspaceSelector::isValid() const
+{
+  return (this->currentText() != "");
+}
+
 bool WorkspaceSelector::isOptional() const
 {
   return m_optional;
