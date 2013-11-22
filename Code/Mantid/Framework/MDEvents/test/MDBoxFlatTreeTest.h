@@ -51,7 +51,7 @@ public:
       BoxStoredTree.loadBoxStructure("someFile.nxs",nDims,"MDEvent"),std::runtime_error);
 
     nDims = 0;
-    TSM_ASSERT_THROWS_NOTHING("Should path now and return nDims",BoxStoredTree.loadBoxStructure("someFile.nxs",nDims,"MDEvent"));
+    TSM_ASSERT_THROWS_NOTHING("Should path now and return nDims",BoxStoredTree.loadBoxStructure("someFile.nxs",nDims,"MDLeanEvent"));
 
     TSM_ASSERT_EQUALS("Should be nDims = 3",3,nDims);
     TS_ASSERT_THROWS_NOTHING(BoxStoredTree.loadBoxStructure("someFile.nxs",nDims,"MDLeanEvent"));

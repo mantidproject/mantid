@@ -266,11 +266,12 @@ namespace Mantid
   {
 
     m_FileName = fileName;
-    m_nDim = static_cast<int>(nDim);
+    m_nDim = nDim;
     m_eventType = EventType;
  
     // open the file and the MD workspace group.
-    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,m_nDim,m_eventType,true));
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,nDim,m_eventType,true));
+    m_nDim = nDim;
 
 
     this->loadBoxStructure(hFile.get(),onlyEventInfo);
@@ -642,7 +643,9 @@ namespace Mantid
                                                               fileName);
                 }
                 else          // read what is already there
-                  nDims = static_cast<int>(nFileDims);
+                {
+                  nDims   = static_cast<int>(nFileDims);
+                }
               }
               else
               {
