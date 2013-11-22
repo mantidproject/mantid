@@ -30,14 +30,12 @@ public:
 	}
 
 	void test_exec() {
-		// Name of the output workspace.
-		std::string outWSName("LoadILLAsciiTest_OutputWS");
 
 		LoadILLAscii alg;
 		TS_ASSERT_THROWS_NOTHING(alg.initialize())
 		TS_ASSERT(alg.isInitialized())
 		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", m_testFile));
-		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspacePrefix", "value"));
+		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "outputWSName"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute(); );
 		TS_ASSERT(alg.isExecuted( ));
 

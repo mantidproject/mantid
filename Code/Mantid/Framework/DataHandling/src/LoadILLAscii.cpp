@@ -9,9 +9,11 @@
 
 #include "MantidDataHandling/LoadILLAscii.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataHandling/LoadILLAsciiHelper.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/System.h"
 
 #include <algorithm>
 
@@ -20,7 +22,6 @@ namespace DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace Mantid::Kernel;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
@@ -97,8 +98,9 @@ void LoadILLAscii::initDocs() {
 void LoadILLAscii::init() {
 	declareProperty(new FileProperty("Filename", "", FileProperty::Load, ""),
 			"Name of the data file to load.");
-	declareProperty("OutputWorkspacePrefix", "",
-			"Prefix for the workspaces created by the moving instrument.");
+	declareProperty(
+	        new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+	        "Name to use for the output workspace");
 
 }
 
@@ -108,76 +110,64 @@ void LoadILLAscii::init() {
 void LoadILLAscii::exec() {
 	// Init
 	std::string filename = getPropertyValue("Filename");
-	std::string prefix = getPropertyValue("OutputWorkspacePrefix");
-
 	ILLParser p(filename);
 	loadInstrumentName(p);
 	p.parse();
 	loadInstrumentDetails(p);
 
+	// get local references to the parsed file
 	const std::vector<std::vector<int> > &spectraList = p.getSpectraList();
 	const std::vector<std::map<std::string, std::string> > &spectraHeaderList =
 			p.getSpectraHeaderList();
 
+	std::vector<API::MatrixWorkspace_sptr> workspaceList;
+	workspaceList.reserve(spectraList.size());
+
+	// iterate parsed file
 	std::vector<std::vector<int> >::const_iterator iSpectra;
 	std::vector<std::map<std::string, std::string> >::const_iterator iSpectraHeader;
 
 	Progress progress(this, 0, 1, spectraList.size());
-	for (iSpectra = spectraList.begin(), iSpectraHeader =
-			spectraHeaderList.begin();
-			iSpectra < spectraList.end()
-					&& iSpectraHeader < spectraHeaderList.end();
+	for (iSpectra = spectraList.begin(), iSpectraHeader =spectraHeaderList.begin();
+			iSpectra < spectraList.end() && iSpectraHeader < spectraHeaderList.end();
 			++iSpectra, ++iSpectraHeader) {
 
-		g_log.debug() << "Reading sprectra: " << std::distance(spectraList.begin(),iSpectra) << std::endl;
+		g_log.debug() << "Reading Spectrum: " << std::distance(spectraList.begin(),iSpectra) << std::endl;
 
 		std::vector<int> thisSpectrum = *iSpectra;
 		API::MatrixWorkspace_sptr thisWorkspace = WorkspaceFactory::Instance().create("Workspace2D", thisSpectrum.size(),
 				2, 1);
-		g_log.debug() << "2" << std::endl;
+
 		thisWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(
 				"Wavelength");
-		g_log.debug() << "3" << std::endl;
-
 		thisWorkspace->setYUnitLabel("Counts");
 		loadIDF(thisWorkspace);
-		// todo : need to mobe instrument
+		// todo : need to move instrument
+
+		double currentPositionAngle = p.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
+		moveDetector(thisWorkspace, currentPositionAngle);
 
 
+		//
+		loadsDataIntoTheWS(thisWorkspace,thisSpectrum);
+		loadIDF(thisWorkspace); // assigns data to the instrument
 
-		thisWorkspace->dataX(0)[0] = m_wavelength - 0.001;
-		thisWorkspace->dataX(0)[1] = m_wavelength + 0.001;
+		workspaceList.push_back(thisWorkspace);
 
-
-
-
-		size_t spec = 0;
-		for (size_t i = 0; i < thisSpectrum.size(); ++i) {
-
-			if (spec > 0) {
-				// just copy the time binning axis to every spectra
-				thisWorkspace->dataX(spec) = thisWorkspace->readX(0);
-			}
-			// Assign Y
-			thisWorkspace->dataY(spec)[0] = thisSpectrum[i];
-			// Assign Error
-			thisWorkspace->dataE(spec)[0] = thisSpectrum[i] * thisSpectrum[i];
-
-			++spec;
-		}
-
-		loadIDF(thisWorkspace); // assins data to the instrument
-
-		// Set the output workspace property : concatenate prefix with spectrum number
+		// JUUST TO SEE the WS in mantiplot
 		std::stringstream outWorkspaceNameStream;
-		outWorkspaceNameStream << prefix << std::distance(spectraList.begin(),iSpectra);
-
+		outWorkspaceNameStream << "test" << std::distance(spectraList.begin(),iSpectra);
 		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(), thisWorkspace);
 
 		progress.report();
 	}
 
-	p.showHeader();
+	//p.showHeader();
+
+	// TODO: Merge workspaces
+
+	// TODO : Correct (this is like this to work!)
+	setProperty("OutputWorkspace", WorkspaceFactory::Instance().create("Workspace2D", 128,2, 1));
 
 }
 
@@ -219,5 +209,65 @@ void LoadILLAscii::loadIDF(API::MatrixWorkspace_sptr &workspace) {
 		g_log.information("Cannot load the instrument definition.");
 	}
 }
+
+/**
+ * Loads the scan into the workspace
+ */
+void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
+		const std::vector<int> &thisSpectrum) {
+
+	thisWorkspace->dataX(0)[0] = m_wavelength - 0.001;
+	thisWorkspace->dataX(0)[1] = m_wavelength + 0.001;
+
+	size_t spec = 0;
+	for (size_t i = 0; i < thisSpectrum.size(); ++i) {
+
+		if (spec > 0) {
+			// just copy the time binning axis to every spectra
+			thisWorkspace->dataX(spec) = thisWorkspace->readX(0);
+		}
+		// Assign Y
+		thisWorkspace->dataY(spec)[0] = thisSpectrum[i];
+		// Assign Error
+		thisWorkspace->dataE(spec)[0] = thisSpectrum[i] * thisSpectrum[i];
+
+		++spec;
+	}
+
+	loadIDF(thisWorkspace); // assigns data to the instrument
+
+}
+
+/**
+ * This is not working!!!
+ *
+ * Either I have to put a location in bank_uniq to move the whole detector
+ * or have to move every tube. To be done!
+ *
+ *
+ */
+void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle){
+
+	// todo: put this as a constant somewhere?
+	const std::string componentName("bank_uniq");
+
+	// current position
+	Geometry::Instrument_const_sptr instrument = ws->getInstrument();
+	Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
+
+	// position - set all detector distance to constant l2
+	double r, theta, phi;
+	V3D oldPos = component->getPos();
+	oldPos.getSpherical(r, theta, phi);
+
+	V3D newPos;
+	newPos.spherical(r, angle, phi);
+
+	g_log.debug() << "Theta before = " << theta << " ; after = " << angle << "\n";
+	Geometry::ParameterMap& pmap = ws->instrumentParameters();
+	Geometry::ComponentHelper::moveComponent(*component, pmap, newPos,Geometry::ComponentHelper::Absolute);
+
+}
+
 } // namespace DataHandling
 } // namespace Mantid

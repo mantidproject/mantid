@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
-<instrument name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-11-05 13:11:35">
+<instrument name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-11-22 09:57:44">
   <!-- Author: ricardo.leal@ill.fr -->
   <defaults>
     <length unit="meter" />
@@ -305,7 +305,7 @@
     <cylinder id="shape">
       <centre-of-bottom-base x="0.0" y="-0.006144" z="0.0" />
       <axis x="0.0" y="1.0" z="0.0" />
-      <radius val="0.0127" />
+      <radius val="0.00127" />
       <height val=".0114341328125" />
     </cylinder>
     <algebra val="shape" />

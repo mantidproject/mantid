@@ -148,8 +148,12 @@ RrAadIitddddddddddddddddAatdddddddFfttttttttddddddddddddddddddddddddddIitdd etc.
 namespace Mantid {
 namespace DataHandling {
 
-ILLParser::ILLParser(const std::string &filename) {
-	fin.open(filename);
+
+/*
+ * @param filepath for the raw file
+ */
+ILLParser::ILLParser(const std::string &filepath) {
+	fin.open(filepath);
 }
 
 ILLParser::~ILLParser() {
@@ -158,8 +162,9 @@ ILLParser::~ILLParser() {
 	}
 }
 
-/**
- * Main function
+/*
+ * Main function that parses the files a fills in the lists (see private
+ * attributes of this class)
  */
 void ILLParser::parse() {
 	std::string line;
@@ -190,11 +195,16 @@ void ILLParser::parse() {
 
 /**
  * Reads the instrument name from the file
- * This should be done before parsing the file!
+ * TODO:
+ * This must be done before parsing the file, otherwise doesn't work:
+ * fin.seekg(0, std::ios::beg) ; fin.clear();
+ * If the file was already parsed, those functions don't appear to put
+ * the get stream at the beginning. Needs to be fix.
  */
 std::string ILLParser::getInstrumentName() {
 
 	if (fin.tellg() != std::ios::beg) {
+		//TODO: this doesn't seem to work.
 		fin.seekg(0, std::ios::beg);
 		fin.clear();
 		//throw std::runtime_error("Must be called before reading the file!");
@@ -213,7 +223,7 @@ std::string ILLParser::getInstrumentName() {
 		lineRead += 1;
 	}
 
-	// Point to the begining again!
+	// Point to the beginning again!
 	fin.seekg(0, std::ios::beg);
 	fin.clear();
 	return instrumentName;
@@ -288,7 +298,7 @@ void ILLParser::parseFieldNumeric(std::map<std::string, std::string> &header,
 			index += 1;
 		}
 	}
-
+	// keep the pairs key=value in the header
 	std::vector<std::string>::const_iterator iKey;
 	std::vector<std::string>::const_iterator iValue;
 	for (iKey = keys.begin(), iValue = values.begin();
@@ -301,7 +311,7 @@ void ILLParser::parseFieldNumeric(std::map<std::string, std::string> &header,
 }
 
 /**
- * Parses the spectrum
+ * Parses the field I in the spectrum block
  */
 std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
 	std::string line;
@@ -317,6 +327,7 @@ std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
 				fieldWith);
 		nSpectraRead += static_cast<int>(s.size());
 		for (auto it = s.begin(); it != s.end(); ++it) {
+			// sscanf is much faster than lexical_cast / erase_spaces
 			sscanf(it->c_str(), "%d", &spectrumValues[index]);
 			index += 1;
 		}
@@ -325,7 +336,8 @@ std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
 }
 
 /**
- * Shows contents
+ * Shows contents of the headers
+ * Just for debug purposes.
  */
 void ILLParser::showHeader() {
 	std::cout << "* Global header" << '\n';
@@ -354,6 +366,9 @@ void ILLParser::showHeader() {
 
 }
 
+/**
+ * Parses the spectrum blocks. Called after the header has been parsed.
+ */
 void ILLParser::startParseSpectra() {
 	std::string line;
 	std::getline(fin, line);
@@ -399,6 +414,9 @@ std::vector<std::string> ILLParser::splitLineInFixedWithFields(
 	return outVec;
 }
 
+/**
+ * Evaluate the input string to a type <T>
+ */
 template<typename T>
 T ILLParser::evaluate(std::string field) {
 	boost::algorithm::erase_all(field, " ");
@@ -412,9 +430,21 @@ T ILLParser::evaluate(std::string field) {
 	return value;
 }
 
+/**
+ * Gets a value from the header.
+ */
 template<typename T> T ILLParser::getValueFromHeader(const std::string &field) {
+
+	return getValue<T>(field,header);
+}
+
+/*
+ * Get value type <T> from a map<strin,string>
+ */
+template<typename T> T ILLParser::getValue(const std::string &field,
+		const std::map<std::string, std::string> &thisHeader ) {
 	T ret;
-	for (auto it = header.begin(); it != header.end(); ++it) {
+	for (auto it = thisHeader.begin(); it != thisHeader.end(); ++it) {
 		//std::cout << it->first << "=>" << it->second << '\n';
 		std::size_t pos = it->first.find(field);
 		if (pos != std::string::npos) {
@@ -430,6 +460,8 @@ template<typename T> T ILLParser::getValueFromHeader(const std::string &field) {
 } // namespace DataHandling
 }// namespace Mantid
 
-// Concrete template instantiation:The other libraries can't see the template definition so it needs to be instantiated in API
+// Concrete template instantiation
+// The other libraries can't see the template definition so it needs to be instantiated in API
 template MANTID_KERNEL_DLL double Mantid::DataHandling::ILLParser::getValueFromHeader(const std::string &);
+template MANTID_KERNEL_DLL double Mantid::DataHandling::ILLParser::getValue(const std::string &,const std::map<std::string, std::string> &);
 
