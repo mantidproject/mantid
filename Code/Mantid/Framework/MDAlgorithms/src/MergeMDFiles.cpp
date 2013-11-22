@@ -399,6 +399,8 @@ namespace MDAlgorithms
     // do the job
     this->doExecByCloning(firstWS);
 
+    m_OutIWS->setFileNeedsUpdating(false);
+
     setProperty("OutputWorkspace", m_OutIWS);
   }
   /**Delete all event loaders */ 
