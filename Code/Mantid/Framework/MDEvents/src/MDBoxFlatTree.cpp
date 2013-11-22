@@ -460,7 +460,6 @@ namespace Mantid
    @param  bc          :: shard pointer to the box controller, which each box uses
    @param  FileBackEnd :: if one should make the data file backed, namely restore/calculate the data, nesessary to obtain events file positions
    @param BoxStructureOnly :: restore box tree only ignoring information about the box events
-   @param restoreExperimentInfo :: restore experiment info saved into the file earlier
 
 
    @returns   totalNumEvents :: total number of events the box structure should contain and allocated memory for.
@@ -507,8 +506,8 @@ namespace Mantid
       {
         // --- Make a MDBox -----
         if(BoxStructureOnly)
-        {
-            ibox  = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType),bc,extentsVector);
+        {  // create box with undefined numer of events -- differs from 0 number of events by not calling reserve(0) on underlying vectors.
+            ibox  = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType),bc,extentsVector,m_Depth[i]);
         }
         else // !BoxStructureOnly)
         {

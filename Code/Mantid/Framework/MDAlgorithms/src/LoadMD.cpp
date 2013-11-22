@@ -112,10 +112,10 @@ namespace Mantid
         "The name of the Nexus file to load, as a full or relative path");
 
       declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
-        "Load Metadata without events.");
+        "Load Box structure and other metadata without events. The loaded workspace will be empty and not file-backed.");
 
       declareProperty(new Kernel::PropertyWithValue<bool>("BoxStructureOnly", false),
-        "Load the structure of boxes but do not fill them with events. The loaded workspace will be empty and not file-backed.");
+        "Load partial information aboug the boxes and events. Redundant property currently equivalent to  MetadataOnly");
 
       declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
         "Set to true to load the data only on demand.");
@@ -138,10 +138,15 @@ namespace Mantid
 
       // Start loading
       bool fileBacked = this->getProperty("FileBackEnd");
-      //TODO: is not used?
-      bool bMetadataOnly = getProperty("MetadataOnly");
 
-      m_BoxStructureOnly = this->getProperty("BoxStructureOnly");
+      m_BoxStructureAndMethadata = getProperty("MetadataOnly");
+
+      bool BoxAndEventInfoOnly = this->getProperty("BoxStructureOnly");
+      if (m_BoxStructureAndMethadata || BoxAndEventInfoOnly)
+      {
+        m_BoxStructureAndMethadata  = true;
+      }
+
      // Nexus constructor/desctructors throw, so can not be used with scoped pointers directrly 
       //(do they lock file because of this and this code is useless?)  
       std::string for_access;
@@ -301,7 +306,7 @@ namespace Mantid
       bool fileBackEnd = getProperty("FileBackEnd");
 
 
-      if (fileBackEnd && m_BoxStructureOnly)
+      if (fileBackEnd && m_BoxStructureAndMethadata)
         throw std::invalid_argument("Both BoxStructureOnly and fileBackEnd were set to TRUE: this is not possible.");
 
       CPUTimer tim;
@@ -334,7 +339,7 @@ namespace Mantid
 
       std::vector<API::IMDNode *> boxTree;
    //   uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,fileBackEnd,bMetadataOnly);
-      FlatBoxTree.restoreBoxTree(boxTree,bc,fileBackEnd,m_BoxStructureOnly);
+      FlatBoxTree.restoreBoxTree(boxTree,bc,fileBackEnd,m_BoxStructureAndMethadata);
       size_t numBoxes = boxTree.size();
 
     // ---------------------------------------- DEAL WITH BOXES  ------------------------------------
@@ -361,7 +366,7 @@ namespace Mantid
           g_log.information() << "Setting a DiskBuffer cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
         }   
       } // Not file back end
-      else
+      else if (!m_BoxStructureAndMethadata)
       {
         // ---------------------------------------- READ IN THE BOXES ------------------------------------
        // TODO:: call to the file format factory
@@ -385,7 +390,9 @@ namespace Mantid
         }
         loader->closeFile();
       }
-
+      else // box structure and methadata only
+      {
+      }
       g_log.debug() << tim << " to create all the boxes and fill them with events." << std::endl;
 
 

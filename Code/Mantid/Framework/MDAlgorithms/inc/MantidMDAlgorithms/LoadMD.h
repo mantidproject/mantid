@@ -89,7 +89,7 @@ namespace MDAlgorithms
     /// Each dimension object loaded.
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
     ///load only the box structure with empty boxes but do not tload boxes events
-    bool m_BoxStructureOnly;
+    bool m_BoxStructureAndMethadata;
 
   };
 
