@@ -224,6 +224,17 @@ namespace DataHandling
     */
   int LoadFullprofResolution::getProfNumber( const vector<string>& lines)
   {
+    // Assume the NPROF number is on the second line
+    if (lines[1].find("NPROF") != string::npos)
+    {
+       // Split line to get the NPROF number
+      size_t nStart = lines[1].find("NPROF");
+      size_t nNumber = lines[1].find("=", nStart) + 1;
+      size_t nEnd = lines[1].find(" ",nStart); // Assume the NRPOF number is followed by space
+      if(nNumber == string::npos + 1 || nEnd == string::npos ) return (-1);
+      return( std::stoi(lines[1].substr(nNumber,nEnd-nNumber)) );
+    }
+
     return(0);
   }
 
