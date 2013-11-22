@@ -22,7 +22,7 @@ using namespace Mantid::DataObjects;
 
 //
 // Test checks if number  of workspace equals one
-// Test checks if number  getNumberHistograms = 327682x16384. (128x128= 16384 pixels in one detector)
+// Test checks if number getNumberHistograms = 2x4096. (64x64= 4096 pixels in one detector) 
 // 
 class LoadMcStasTest : public CxxTest::TestSuite
 {
