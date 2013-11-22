@@ -674,49 +674,79 @@ def furyfitParsToWS(Table, Data, option):
 def createFurySeqResFun(ties, par, option):
     npeak, type = getFuryFitOption(option)   
     fun = 'name=LinearBackground,A0='+str(par[0])+',A1=0,ties=(A1=0);'
-    if npeak == '1' and type == 'E':
+    
+    npeak = int(npeak)
+
+    if npeak >= 1 and type == 'E':
+        #one exponential
         fun += 'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),Intensity='+str(par[1])+',Tau='+str(par[2])
-    if npeak == '1' and type == 'S':
+
+    if npeak == 2 and type == 'E':
+        #two exponentials
+        fun += ';name=UserFunction,Formula=Intensity*exp(-(x/Tau)),Intensity='+str(par[3])+',Tau='+str(par[4])
+
+    if npeak == 1 and type == 'S':
+        #one stretched exponential
         fun += 'name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity='+str(par[1])+',Tau='+str(par[2])+',Beta='+str(par[3])
+
+    if npeak == 2 and type == 'SE':
+        #one exponential, one stretched exponential
+        fun += 'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),Intensity='+str(par[1])+',Tau='+str(par[2])
+        fun += ';name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity='+str(par[3])+',Tau='+str(par[4])+',Beta='+str(par[5])
+
     if ties:
         fun += ';ties=(f1.Intensity=1-f0.A0)'
+    
     return fun
 
 def getFurySeqResult(inputWS, outNm, option, Verbose):
     logger.notice('Option : ' +option)
-    npeak, type = getFuryFitOption(option)   
+    fitWS = outNm + '_Result_'
+    npeak, type = getFuryFitOption(option)
+
+    #table workspace containing parameters for fit 
     params = mtd[outNm+'_Parameters']
-    A0 = params.column(1)     #bgd value
-    I1 = params.column(5)      #intensity1 value
-    T1 = params.column(7)      #tau1 value
-    if npeak == '1' and type == 'S':
-        B1 = params.column(9)  #beta1 value
-    if npeak == '2':
-        I2 = params.column(9)  #intensity2 value
-        T2 = params.column(11)  #tau2 value
+    
+    #list of columns containing fit parameters
+    #start with the background value
+    paramColumnNames = ['f0.A0']
+
+    #add fit params from both peaks
+    for i in range(1,int(npeak)+1):
+        paramColumnNames += ['f'+str(i)+'.Intensity', 'f'+str(i)+'.Tau']
+
+    #add beta value if using a stretched exponetial
+    if type == 'SE' or type == 'S':
+        paramColumnNames.append('f'+npeak+'.Beta')
+
+    group = []
     nHist = mtd[inputWS].getNumberHistograms()
     for i in range(nHist):
-        paras = [A0[i], I1[i], T1[i]]
-        if npeak == '1' and type == 'S':
-            paras.append(B1[i])
-        if npeak == '2':
-            paras.append(I2[i])
-            paras.append(T2[i])
+        #get all the applicable parameters for this iteration
+        paramRow = params.row(i)
+        paras = [paramRow[key] for key in paramColumnNames]
+
+        #build function string with our parameters included
         func = createFurySeqResFun(True, paras, option)
+
         if Verbose:
-            logger.notice('Fit func : '+func)  	
-        fitWS = outNm + '_Result_'
+            logger.notice('Fit func : '+func)
+        
         fout = fitWS + str(i)
+        
+        #run fit function and collection generated workspace
         Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
-        unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
-        unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
-        DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
-        DeleteWorkspace(fitWS+str(i)+'_Parameters')
-        if i == 0:
-            group = fout
-        else:
-            group += ',' + fout
+        unitx = mtd[fout].getAxis(0).setUnit("Label")
+        unitx.setLabel('Time' , 'ns')
+        
+        #clean up fit output
+        DeleteWorkspace(fout+'_NormalisedCovarianceMatrix')
+        DeleteWorkspace(fout+'_Parameters')
+
+        #add generated workspace to group
+        group.append(fout)
+    
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
 
 def furyfitPlotSeq(inputWS, Plot):
@@ -739,31 +769,59 @@ def furyfitPlotSeq(inputWS, Plot):
 
 def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False): 
     StartTime('FuryFit')
+    
     workdir = config['defaultsave.directory']
-    input = inputWS+',i0'
     nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(1,nHist):
-        input += ';'+inputWS+',i'+str(i)
+   
+    #name stem for generated workspace
     outNm = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
-    option = ftype[:-2]
+    
+    fitType = ftype[:-2]
     if Verbose:
-        logger.notice('Option: '+option)  
-        logger.notice(func)  
+        logger.notice('Option: '+fitType)  
+        logger.notice(func)
+
+    #build input string for PlotPeakByLogValue
+    input = [inputWS +',i' + str(i) for i in range(0,nHist)]
+    input = ';'.join(input)
+    
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startx, EndX=endx, FitType='Sequential')
-    fitWS = furyfitParsToWS(outNm, inputWS, option)
+    
+    fitWS = furyfitParsToWS(outNm, inputWS, fitType)
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm+"_Parameters")
     CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
-    getFurySeqResult(inputWS, outNm, option, Verbose)
-    if Save:
-        opath = os.path.join(workdir, fitWS+'.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=fitWS, Filename=opath)
-        if Verbose:
-            logger.notice('Output file : '+opath)  
+
+    getFurySeqResult(inputWS, outNm, fitType, Verbose)
+    
+    #process generated workspaces
+    wsnames = [fitWS, outNm+'_Result']
+    params = [startx, endx, fitType]
+    for ws in wsnames:
+        furyAddSampleLogs(inputWS, ws, params)
+
+        if Save:
+            #save workspace to default directory
+            fpath = os.path.join(workdir, ws+'.nxs')
+            SaveNexusProcessed(InputWorkspace=ws, Filename=fpath)
+
+            if Verbose:
+                logger.notice(ws + ' output to file : '+fpath)
+
     if ( Plot != 'None' ):
         furyfitPlotSeq(fitWS, Plot)
+
     EndTime('FuryFit')
+
     return mtd[fitWS]
+
+#Copy logs from sample and add some addtional ones
+def furyAddSampleLogs(inputWs, ws, params):
+    startx, endx, fitType = params
+    CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
+    AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
+    AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
+    AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
 
 def furyfitMultParsToWS(Table, Data):
 #   Q = createQaxis(Data)
