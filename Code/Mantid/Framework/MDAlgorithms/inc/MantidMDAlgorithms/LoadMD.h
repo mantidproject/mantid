@@ -78,7 +78,7 @@ namespace MDAlgorithms
     API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
     /// Open file handle
-    boost::scoped_ptr<::NeXus::File> m_file;
+    boost::scoped_ptr< ::NeXus::File> m_file;
 
     /// Name of that file
     std::string m_filename;
