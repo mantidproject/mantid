@@ -109,7 +109,7 @@ DECLARE_ALGORITHM(ProcessBackground)
     std::vector<std::string> bkgdtype;
     bkgdtype.push_back("Polynomial");
     bkgdtype.push_back("Chebyshev");
-    bkgdtype.push_back("FullprofPolynomial");
+    // bkgdtype.push_back("FullprofPolynomial");
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
     declareProperty("BackgroundType", "Polynomial", bkgdvalidator,
                     "Type of the background. Options include Polynomial and Chebyshev.");
@@ -186,7 +186,11 @@ DECLARE_ALGORITHM(ProcessBackground)
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Output background type.
-    declareProperty("OutputBackgroundType", "Polynomial", bkgdvalidator,
+    std::vector<std::string> outbkgdtype;
+    outbkgdtype.push_back("Polynomial");
+    outbkgdtype.push_back("Chebyshev");
+    auto outbkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+    declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,
                     "Type of background to fit with selected background points.");
     setPropertySettings("OutputBackgroundType",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));

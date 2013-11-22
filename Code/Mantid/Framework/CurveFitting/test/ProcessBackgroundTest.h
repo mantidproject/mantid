@@ -27,7 +27,7 @@ public:
 
   /** Test option delete region
    */
-  void Ptest_DeleteRegion()
+  void test_DeleteRegion()
   {
     // 1. Create Workspace2D
     DataObjects::Workspace2D_sptr inpws
@@ -70,7 +70,7 @@ public:
 
   /** Test option "Add Region"
    */
-  void Ptest_AddRegion()
+  void test_AddRegion()
   {
     // 1. Create Workspace2D
     DataObjects::Workspace2D_sptr inpws
@@ -174,14 +174,8 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test automatic background selection
    */
-  void Ptest_SimpleBackgroundGeneration()
+  void test_SimpleBackgroundGeneration()
   {
-
-    // 1. Prepare for data
-    /*
-    std::string datafile("/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp");
-    DataObjects::Workspace2D_sptr dataws = createWorkspace2D(datafile);
-    */
     // 1. Create Workspace2D
     DataObjects::Workspace2D_sptr dataws
         = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
