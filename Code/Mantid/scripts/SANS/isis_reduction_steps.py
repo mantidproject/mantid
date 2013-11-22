@@ -393,8 +393,9 @@ class CanSubtraction(ReductionStep):
         #clean up the workspaces ready users to see them if required
         if reducer.to_Q.output_type == '1D':
             rem_nans = sans_reduction_steps.StripEndNans()
-            rem_nans.execute(reducer, tmp_smp)
-            rem_nans.execute(reducer, tmp_can)
+
+        DeleteWorkspace(tmp_smp)
+        DeleteWorkspace(tmp_can)
 
     def get_wksp_name(self):
         return self.workspace.wksp_name
