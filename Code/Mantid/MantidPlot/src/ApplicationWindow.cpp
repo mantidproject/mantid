@@ -3111,7 +3111,6 @@ Table* ApplicationWindow::newHiddenTable(const QString& name, const QString& lab
 void ApplicationWindow::initTable(Table* w, const QString& caption)
 {
   QString name = caption;
-  name = name.replace ("_","-");
 
   while(name.isEmpty() || alreadyUsedName(name))
     name = generateUniqueName(tr("Table"));
@@ -14742,7 +14741,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
         }
         catch(std::runtime_error& exc)
         {
-          std::cerr << "Error thrown while running scrip file asynchronously '" << exc.what() << "'\n";
+          std::cerr << "Error thrown while running script file asynchronously '" << exc.what() << "'\n";
           setExitCode(1);
         }
         saved = true;
