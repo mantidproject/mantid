@@ -744,11 +744,11 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
 
   V3D SamplePos = instrNew->getSample()->getPos();
   V3D SourcePos = instrNew->getSource()->getPos();
-  IPeak & ppeak = m_peaks->getPeak(0);
+  const IPeak & ppeak = m_peaks->getPeak(0);
   L0 = ppeak.getL1();
 
   velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
-  K = 2 * M_PI / ppeak.getWavelength() / velocity;//2pi/lambda = K*velocity
+  K = 2. * M_PI / ppeak.getWavelength() / velocity;//2pi/lambda = K*velocity
 
   for (size_t xval = StartX; xval <= EndX; xval += 3)
   {
@@ -787,8 +787,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     }
     else
     {
-      V3D x_vec(1, 0, 0);
-      V3D y_vec(0, 1, 0);
+      V3D x_vec(1., 0., 0.);
+      V3D y_vec(0., 1., 0.);
       boost::shared_ptr<const IComponent> panel = instrNew->getComponentByName(thisBankName);
       Rot = panel->getRotation();
       Rot.rotate(x_vec);
@@ -799,7 +799,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       x_vec *= rPanel->xstep();
       y_vec *= rPanel->ystep();
       int Nrows = rPanel->ypixels();
-
       int Ncols = rPanel->xpixels();
 
       NPanelrows.push_back(Nrows);
@@ -908,7 +907,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     {
 
       V3D parxyz(0, 0, 0);
-      parxyz[param - StartPos] = 1;
+      parxyz[param - StartPos] = 1.;
 
       Matrix<double> Result(3, qlab.size());
       for (size_t peak = 0; peak < qlab.size(); ++peak)
@@ -928,11 +927,11 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
           V3D dQlab = beamDir * (vMagdxyz[peak][xyz] * K);
           //V = D/t1 where D =pos-samplepos
           V3D D = pos[peak] - samplePos;
-          V3D dV = parxyz * (1 / t1[peak]);
+          V3D dV = parxyz * (1. / t1[peak]);
           double x = t1dxyz[peak][xyz] / t1[peak] / t1[peak];
           V3D dV1 = D * x;
           dV = dV - dV1;
-          dQlab += dV * (-K);
+          dQlab += dV * (-1.*K);
 
           Matrix<double> GonMatrix = m_peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();
@@ -978,6 +977,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
 
     size_t StartRot = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xrot");
 
+    const double DEG_TO_RAD = M_PI / 180.;
     for (size_t param = StartRot; param <= StartRot + 2; ++param)
     {
       Matrix<double> Result(3, qlab.size());
@@ -989,7 +989,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
       Rot2dRot[r][(r + 1) % 3] = -1;
       r = (r + 1) % 3;
       Rot2dRot[r][(r + 2) % 3] = +1;
-      Rot2dRot *= M_PI / 180.;
+      Rot2dRot *= DEG_TO_RAD;
 
       for (size_t peak = 0; peak < qlab.size(); ++peak)
         if (bankName2Group[m_peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
