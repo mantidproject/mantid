@@ -28,7 +28,7 @@ See also: [[MergeMD]], for merging any MDWorkspaces in system memory (faster, bu
 #include "MantidAPI/MemoryManager.h"
 
 #include <boost/scoped_ptr.hpp>
-#include <Poco/Path.h>
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -383,8 +383,7 @@ namespace MDAlgorithms
     if (!outputFile.empty())
     {
         m_fileBasedTargetWS = true;
-        std::string defautSavePath = Kernel::ConfigService::Instance().getString("defaultsave.directory");
-        if (Poco::Path(outputFile).isFile() || Poco::Path(defautSavePath,outputFile).isFile()) 
+        if (Poco::File(outputFile).exists()) 
           throw std::invalid_argument(" File "+outputFile+" already exists. Can not use existing file as the target to MergeMD files.\n"+
                                       " Use it as one of source files if you want to add MD data to it" );
     }
