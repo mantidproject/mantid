@@ -353,12 +353,18 @@ namespace MDAlgorithms
 
       file->closeGroup();
       file->close();
+     // -------------- Save Box Structure  -------------------------------------
+     // OK, we've filled these big arrays of data representing flat box structrre. Save them.
+      progress(0.91, "Writing Box Data");
+      prog->resetNumSteps(8, 0.92, 1.00);
 
-      this->prog->report();
+     //Save box structure;
+      m_BoxStruct.saveBoxStructure(outputFile);
+
     }
 
  
-    g_log.information() << overallTime << " to run SaveMD." << std::endl;
+    g_log.information() << overallTime << " to run SaveMD structure" << std::endl;
   }
 
 
