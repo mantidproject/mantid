@@ -204,6 +204,7 @@ namespace MDAlgorithms
    * as its structure is equivalent to the partial box structures. 
    *
    * @param ws :: first MDEventWorkspace in the list to merge to.
+   * @param outputFile :: the name of the output file where file-based workspace should be saved
    */
   void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,const std::string &outputFile)
   {

@@ -260,7 +260,7 @@ namespace Mantid
                             if the number of dimensions provided equal to this number in  the file. (leftower from the time when it was templated method) 
    @param EventType      :: "MDEvent" or "MDLeanEvent"  -- describe the type of events the workspace contans, similarly to nDim, used to check the data integrity
    @param onlyEventInfo  :: load only box controller information and the events locations -- do not restore boxes themselves 
-   @param restoreExperimentinfo :: load also experiment information 
+   @param restoreExperimentInfo :: load also experiment information 
    */
   void MDBoxFlatTree::loadBoxStructure(const std::string &fileName,int &nDim,const std::string &EventType,bool onlyEventInfo,bool restoreExperimentInfo)
   {
@@ -384,7 +384,7 @@ namespace Mantid
   /** Load the ExperimentInfo blocks, if any, in the NXS file
   *
   * @param file :: the pointer to the properly opened nexus data file where the experiment info groups can be found. 
-  * @param ws :: MDEventWorkspace/MDHisto to load experiment infos to
+  * @param mei :: MDEventWorkspace/MDHisto to load experiment infos to or rather pointer to the base class of this workspaces (which is an experimentInfo)
   */
   void MDBoxFlatTree::loadExperimentInfos(::NeXus::File * const file,boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei)
   {
