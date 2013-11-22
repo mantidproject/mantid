@@ -255,7 +255,6 @@ namespace Mantid
       if( N < 4)//If not well indexed
         return boost::shared_ptr<DataObjects::Workspace2D>(new DataObjects::Workspace2D);
 
-      std::cout<<"Number indexed peaks used="<<(N/3)<<std::endl;
       MatrixWorkspace_sptr mwkspc
           = API::WorkspaceFactory::Instance().create("Workspace2D",1,3*N,3*N);
 
