@@ -92,6 +92,9 @@ namespace DataHandling
     vector<string> lines;
     loadFile(datafile, lines);
 
+    // Get Prof number
+    int nProf = getProfNumber(lines);
+
     // Examine bank information
     vector<int> vec_bankinirf;
     map<int, int> bankstartindexmap, bankendindexmap;
@@ -159,7 +162,7 @@ namespace DataHandling
       int bankid = vec_bankids[i];
       g_log.debug() << "Parse bank " << bankid << " of total " << vec_bankids.size() << ".\n";
       map<string, double> parammap;
-      parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid]);
+      parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid], nProf);
       bankparammap.insert(make_pair(bankid, parammap));
     }
 
@@ -216,11 +219,20 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Get the NPROF number
+    * @param lines :: vector of string of all non-empty lines in input file;
+    */
+  int LoadFullprofResolution::getProfNumber( const vector<string>& lines)
+  {
+    return(0);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Scan lines for bank IDs
     * @param lines :: vector of string of all non-empty lines in input file;
     * @param banks :: [output] vector of integers for existing banks in .irf file;
     * @param bankstartindexmap :: [output] map to indicate the first line of each bank in vector lines.
-    * @param bankendindexmap :: [output] map to indicate the last lie of each bank in vector lines
+    * @param bankendindexmap :: [output] map to indicate the last line of each bank in vector lines
     */
   void LoadFullprofResolution::scanBanks(const vector<string>& lines, vector<int>& banks,
                                          map<int, int>& bankstartindexmap, map<int, int>& bankendindexmap)
@@ -283,7 +295,7 @@ namespace DataHandling
     * @param endlineindex :: [input] index of the last line of the bank in vector of lines
     */
   void LoadFullprofResolution::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines,
-                                                      int bankid, int startlineindex, int endlineindex)
+                                                      int bankid, int startlineindex, int endlineindex, int profNumber)
   {
     string bankline = lines[startlineindex];
     double cwl;
@@ -305,6 +317,7 @@ namespace DataHandling
         << ") found in the specified region from input. ";
       throw runtime_error(errss.str());
     }
+    parammap["NPROF"] = profNumber;
     parammap["CWL"] = cwl;
 
     double tempdb;
