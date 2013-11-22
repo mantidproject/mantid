@@ -7,7 +7,7 @@ from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
 from isis_reflectometry.combineMulti import *
-from latest_isis_runs import *
+from isis_reflgui.latest_isis_runs import *
 
 currentTable = ' '
 
@@ -70,18 +70,25 @@ class ReflGuiWindow(refl_gui.Ui_windowRefl_gui):
         else:
             self.comboInstrument.setCurrentIndex(0)
             config['default.instrument'] = 'INTER'
-        for row in range(self.tableMain.rowCount()):
-            check = QtGui.QCheckBox()
-            check.setCheckState(False)
-            item = QtGui.QWidget()
-            layout = QtGui.QHBoxLayout(item)
-            layout.addWidget(check)
-            layout.setAlignment(QtCore.Qt.AlignCenter)
-            layout.setSpacing(0)
-            layout.setContentsMargins(0, 0, 0, 0)
-            item.setLayout(layout)
-            item.setContentsMargins(0, 0, 0, 0)
-            self.tableMain.setCellWidget(row, 17, item)
+        for column in range(self.tableWidget.columnCount()):
+            for row in range(self.tableWidget.rowCount()):
+                if (column == 17):
+                    check = QtGui.QCheckBox()
+                    check.setCheckState(False)
+                    item = QtGui.QWidget()
+                    layout = QtGui.QHBoxLayout(item)
+                    layout.addWidget(check)
+                    layout.setAlignment(QtCore.Qt.AlignCenter)
+                    layout.setSpacing(0)
+                    layout.setContentsMargins(0, 0, 0, 0)
+                    item.setLayout(layout)
+                    item.setContentsMargins(0, 0, 0, 0)
+                    self.tableMain.setCellWidget(row, 17, item)
+                else:
+                    self.tableWidget.setRowHeight(row, 20)
+                    item = QtGui.QTableWidgetItem()
+                    item.setText('')
+                    self.tableWidget.setItem(row, column, item)
     def connectSlots(self):
         QtCore.QObject.connect(self.buttonAuto, QtCore.SIGNAL(_fromUtf8("clicked()")), self.on_buttonAuto_clicked)
         QtCore.QObject.connect(self.checkTickAll, QtCore.SIGNAL(_fromUtf8("stateChanged(int)")), self.on_checkTickAll_stateChanged)
