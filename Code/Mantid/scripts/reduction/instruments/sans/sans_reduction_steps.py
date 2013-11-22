@@ -750,23 +750,12 @@ class SampleGeomCor(ReductionStep):
         ORNL only divides by thickness, in the absolute scaling step
 
     """
-    def __init__(self, geometry):
-        """
-            Takes a reference to the sample geometry
-            @param geometry: A GetSampleGeom object to load the sample dimensions from
-            @raise TypeError: if an object of the wrong type is passed to it
-        """
-        super(SampleGeomCor, self).__init__()
-
-        if issubclass(geometry.__class__, GetSampleGeom):
-            self.geo = geometry
-        else:
-            raise TypeError, 'Sample geometry correction requires a GetSampleGeom object'
-
     def execute(self, reducer, workspace):
         """
             Divide the counts by the volume of the sample
         """
+        self.geo = reducer._sample_run.geometry
+        assert( issubclass(self.geo.__class__, GetSampleGeom))
 
         try:
             if self.geo.shape == 'cylinder-axis-up':

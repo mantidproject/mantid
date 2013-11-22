@@ -254,19 +254,10 @@ def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSE
         mes += ', ' + str(period)
     mes += ')'
     _printMessage(mes)
-
-    if (not can_run) or (isinstance(can_run,str) and can_run.startswith('.')):
-        ReductionSingleton().background_subtracter = None
-        return '', None
-
-    ReductionSingleton().background_subtracter = \
-        isis_reduction_steps.CanSubtraction(
-                                can_run, reload=reload, period=period)
-    #ideally this code should live in a separate load can object 
-    ReductionSingleton().background_subtracter.assign_can(
-        ReductionSingleton())
+    
+    ReductionSingleton().set_can(can_run, reload, period)
     return _return_old_compatibility_assign_methods(
-        ReductionSingleton().background_subtracter.workspace.wksp_name)
+        ReductionSingleton().get_can().wksp_name)
 
 def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
     """
@@ -340,13 +331,18 @@ def GetMismatchedDetList():
     return ReductionSingleton().instrument.get_marked_dets()
 
 def _setUpPeriod(i):
+    # it first get the reference to the loaders, then it calls the AssignSample 
+    # (which get rid of the reducer objects (see clean_loaded_data())
+    # but because we still get the reference, we can use it to query the data file and method.
+    # ideally, we should not use this _setUpPeriod in the future.
+    
     trans_samp = ReductionSingleton().samp_trans_load
-    can = ReductionSingleton().background_subtracter
+    can = ReductionSingleton().get_can()
     trans_can = ReductionSingleton().can_trans_load
     new_sample_workspaces = AssignSample(ReductionSingleton().get_sample().loader._data_file, period=i)[0]
     if can:
         #replace one thing that gets overwritten
-        AssignCan(can.workspace._data_file, True, period=can.workspace.getCorrospondingPeriod(i, ReductionSingleton()))
+        AssignCan(can.loader._data_file, True, period=can.loader.getCorrospondingPeriod(i, ReductionSingleton()))
     if trans_samp:
         trans = trans_samp.trans
         direct = trans_samp.direct
@@ -455,8 +451,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 ReductionSingleton().instrument.setDetector('front')
                 ReductionSingleton()._sample_run.reload(ReductionSingleton())
                 #reassign can
-                if ReductionSingleton().background_subtracter:
-                    ReductionSingleton().background_subtracter.assign_can(ReductionSingleton())
+                if ReductionSingleton().get_can():
+                    ReductionSingleton().get_can().reload(ReductionSingleton())
                 if ReductionSingleton().samp_trans_load:
                     #refresh Transmission
                     ReductionSingleton().samp_trans_load.execute(ReductionSingleton(), None)
