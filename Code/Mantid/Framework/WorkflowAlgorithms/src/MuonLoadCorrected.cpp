@@ -1,13 +1,18 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Load Muon data with Dead Time Correction applied. Part of the Muon workflow.
 *WIKI*/
 
 #include "MantidWorkflowAlgorithms/MuonLoadCorrected.h"
+
+#include "MantidAPI/FileProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
 namespace WorkflowAlgorithms
 {
+  using namespace Kernel;
+  using namespace API;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(MuonLoadCorrected)
@@ -50,6 +55,22 @@ namespace WorkflowAlgorithms
    */
   void MuonLoadCorrected::init()
   {
+    declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
+      "The name of the Nexus file to load" );      
+    
+    std::vector<std::string> dtcTypes;
+    dtcTypes.push_back("None");
+    dtcTypes.push_back("FromData");
+    dtcTypes.push_back("FromSpecifiedFile");
+
+    declareProperty("DtcType","None", boost::make_shared<StringListValidator>(dtcTypes),
+      "Type of dead time correction to apply");
+
+    declareProperty(new FileProperty("DtcFile", "", FileProperty::OptionalLoad, ".nxs"),
+      "File with dead time values. Used only when DtcType is FromSpecifiedFile.");      
+
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
+      "The name of the workspace to be created as the output of the algorithm.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -57,6 +78,15 @@ namespace WorkflowAlgorithms
    */
   void MuonLoadCorrected::exec()
   {
+    std::string filename = getPropertyValue("Filename"); 
+
+    IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadMuonNexus");
+    loadAlg->setPropertyValue("Filename", filename);
+    loadAlg->executeAsChildAlg();
+
+    Workspace_sptr outWS = loadAlg->getProperty("OutputWorkspace");
+
+    setProperty("OutputWorkspace", outWS);
   }
 
 } // namespace WorkflowAlgorithms
