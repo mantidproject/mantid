@@ -1,13 +1,17 @@
 #ifndef MANTID_WORKFLOWALGORITHMS_MUONLOADCORRECTED_H_
 #define MANTID_WORKFLOWALGORITHMS_MUONLOADCORRECTED_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
 namespace WorkflowAlgorithms
 {
+  using namespace Kernel;
+  using namespace API;
+  using namespace DataObjects;
 
   /** MuonLoadCorrected : loads Muon data with Dead Time Correction applied. 
     
@@ -45,6 +49,19 @@ namespace WorkflowAlgorithms
     virtual void initDocs();
     void init();
     void exec();
+
+    /// Attempts to load dead time table from given Muon Nexus file
+    Workspace_sptr loadDeadTimesFromNexus(const std::string& filename, int numPeriods = 1);
+
+    /// Applies dead time table to a workspace
+    Workspace_sptr applyDtc(Workspace_sptr ws, Workspace_sptr dt);
+    
+    /// Runs ApplyDeadTimeCorre algorithm
+    MatrixWorkspace_sptr runApplyDtc(MatrixWorkspace_sptr ws, TableWorkspace_sptr dtt);
+
+    /// Creates Dead Time Table from the given list of dead times.
+    TableWorkspace_sptr createDeadTimeTable( std::vector<double>::const_iterator begin, 
+      std::vector<double>::const_iterator end);
   };
 
 
