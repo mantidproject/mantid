@@ -1348,4 +1348,11 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
     miny = 0;
   if (maxy == -std::numeric_limits<double>::max())
     maxy = miny + 1e6;
+
+  if (maxy == miny)
+  {
+      if ( maxy == 0.0 ) maxy += 1.0;
+      else
+          maxy += fabs(miny);
+  }
 }
