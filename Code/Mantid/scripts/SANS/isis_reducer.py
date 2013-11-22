@@ -330,24 +330,27 @@ class ISISReducer(SANSReducer):
             @param new_wksp: the name of the workspace that will store the result
             @param run_Q: set to false to stop just before converting to Q, default is convert to Q
         """
-        # copy all the run settings from the sample, these settings can come from the user file, Python scripting or the GUI
-        new_reducer = self.deep_copy()
-
-        new_reducer._process_can = True
-        #set the workspace that we've been setting up as the one to be processed 
-        new_reducer.output_wksp = new_wksp
+        # copy settings
+        sample_wksp_name = self.output_wksp
+        sample_trans_name = self.transmission_calculator.output_wksp
+        # configure can
+        self._process_can = True
+        # set the workspace that we've been setting up as the one to be processed 
+        self.output_wksp = new_wksp
         
-        can_steps = new_reducer._conv_Q
+        can_steps = self._conv_Q
         if not run_Q:
             #the last step in the list must be ConvertToQ or this wont work
             can_steps = can_steps[0:len(can_steps)-1]
 
         #the reducer is completely setup, run it
-        new_reducer._reduce(init=False, post=False, steps=can_steps)
-        ## after the reduction of can, the new_reducer will be discarded
-        ## so, we will keep the information of the transmission and save it 
-        ## inside the __transmission_can attribute.
-        self.__transmission_can = new_reducer.transmission_calculator.output_wksp
+        self._reduce(init=False, post=False, steps=can_steps)
+
+        # restore settings
+        self._process_can = False
+        self.output_wksp = sample_wksp_name
+        self.__transmission_can = self.transmission_calculator.output_wksp
+        self.__transmission_sample = sample_trans_name
 
     def run_from_raw(self):
         """
@@ -375,8 +378,11 @@ class ISISReducer(SANSReducer):
         AddSampleLog(Workspace=self.output_wksp,LogName="UserFile", LogText=user_file)
 
         # get the value of __transmission_sample from the transmission_calculator if it has 
-        if self.transmission_calculator and self.transmission_calculator.output_wksp:
+        if (not self.get_can()) and self.transmission_calculator.output_wksp:
+            # it updates only if there was not can, because, when there is can, the __transmission_sample
+            # is already correct and transmission_calculator.output_wksp points to the can transmission
             self.__transmission_sample = self.transmission_calculator.output_wksp
+
         # The reducer itself sometimes will be reset, and the users of the singleton
         # not always will have access to its settings. So, we will add the transmission workspaces
         # to the SampleLog, to be connected to the workspace, and be available outside. These values
@@ -386,6 +392,10 @@ class ISISReducer(SANSReducer):
         if self.__transmission_can:
             AddSampleLog(Workspace=self.output_wksp,LogName= "TransmissionCan", LogText=self.__transmission_can + str('_unfitted'))
 	
+        # clean these values for subsequent executions
+        self.__transmission_sample = ""
+        self.__transmission_can = ""
+
         for role in self._temporys.keys():
             try:
                 DeleteWorkspace(Workspace=self._temporys[role])
