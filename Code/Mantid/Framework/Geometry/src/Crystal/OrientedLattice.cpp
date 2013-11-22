@@ -7,6 +7,10 @@ namespace Geometry
   using Mantid::Kernel::DblMatrix;
   using Mantid::Kernel::V3D;
 
+  namespace {
+  const double TWO_PI = 2.*M_PI;
+  }
+
   /** Default constructor
   @param Umatrix :: orientation matrix U. By default this will be identity matrix
   */
@@ -169,7 +173,7 @@ namespace Geometry
    */
   V3D OrientedLattice::qFromHKL(const V3D & hkl) const
   {
-    return UB*hkl*2.*M_PI;
+    return UB*hkl*TWO_PI;
   }
 
   /** gets a vector along beam direction when goniometers are at 0. Note, this vector is not unique, but
