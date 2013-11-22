@@ -70,8 +70,8 @@ class ReflGuiWindow(refl_gui.Ui_windowRefl_gui):
         else:
             self.comboInstrument.setCurrentIndex(0)
             config['default.instrument'] = 'INTER'
-        for column in range(self.tableWidget.columnCount()):
-            for row in range(self.tableWidget.rowCount()):
+        for column in range(self.tableMain.columnCount()):
+            for row in range(self.tableMain.rowCount()):
                 if (column == 17):
                     check = QtGui.QCheckBox()
                     check.setCheckState(False)
@@ -85,10 +85,9 @@ class ReflGuiWindow(refl_gui.Ui_windowRefl_gui):
                     item.setContentsMargins(0, 0, 0, 0)
                     self.tableMain.setCellWidget(row, 17, item)
                 else:
-                    self.tableWidget.setRowHeight(row, 20)
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
-                    self.tableWidget.setItem(row, column, item)
+                    self.tableMain.setItem(row, column, item)
     def connectSlots(self):
         QtCore.QObject.connect(self.buttonAuto, QtCore.SIGNAL(_fromUtf8("clicked()")), self.on_buttonAuto_clicked)
         QtCore.QObject.connect(self.checkTickAll, QtCore.SIGNAL(_fromUtf8("stateChanged(int)")), self.on_checkTickAll_stateChanged)
