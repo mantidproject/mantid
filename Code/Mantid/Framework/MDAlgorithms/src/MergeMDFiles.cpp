@@ -26,7 +26,9 @@ See also: [[MergeMD]], for merging any MDWorkspaces in system memory (faster, bu
 #include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidAPI/MemoryManager.h"
+
 #include <boost/scoped_ptr.hpp>
+#include <Poco/Path.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -203,17 +205,11 @@ namespace MDAlgorithms
    *
    * @param ws :: first MDEventWorkspace in the list to merge to.
    */
-  void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws)
+  void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,const std::string &outputFile)
   {
     m_OutIWS = ws;
     m_MDEventType = ws->getEventTypeName();
 
-    std::string outputFile = getProperty("OutputFilename");
-    m_fileBasedTargetWS = false;
-    if (!outputFile.empty())
-    {
-        m_fileBasedTargetWS = true;
-    }
 
    // Run the tasks in parallel? TODO: enable
     //bool Parallel = this->getProperty("Parallel");
@@ -322,18 +318,17 @@ namespace MDAlgorithms
     clearEventLoaders();
 
     // Finish things up
-    this->finalizeOutput();
+    this->finalizeOutput(outputFile);
   }
 
 
 
   //----------------------------------------------------------------------------------------------
   /** Now re-save the MDEventWorkspace to update the file back end */
-  void MergeMDFiles::finalizeOutput()
+  void MergeMDFiles::finalizeOutput(const std::string &outputFile)
   {
     CPUTimer overallTime;
 
-    std::string outputFile = getProperty("OutputFilename");
 
     this->progress(0.90, "Refreshing Cache");
     m_OutIWS->refreshCache();
@@ -361,10 +356,11 @@ namespace MDAlgorithms
      //Save box structure;
       m_BoxStruct.saveBoxStructure(outputFile);
 
+      g_log.information() << overallTime << " to run SaveMD structure" << std::endl;
     }
 
  
-    g_log.information() << overallTime << " to run SaveMD structure" << std::endl;
+
   }
 
 
@@ -382,6 +378,19 @@ namespace MDAlgorithms
       throw std::invalid_argument("Must specify at least one filename.");
     std::string firstFile = m_Filenames[0];
 
+    std::string outputFile = getProperty("OutputFilename");
+    m_fileBasedTargetWS = false;
+    if (!outputFile.empty())
+    {
+        m_fileBasedTargetWS = true;
+        std::string defautSavePath = Kernel::ConfigService::Instance().getString("defaultsave.directory");
+        if (Poco::Path(outputFile).isFile() || Poco::Path(defautSavePath,outputFile).isFile()) 
+          throw std::invalid_argument(" File "+outputFile+" already exists. Can not use existing file as the target to MergeMD files.\n"+
+                                      " Use it as one of source files if you want to add MD data to it" );
+    }
+
+
+
     // Start by loading the first file but just the box structure, no events, and not file-backed
     //m_BoxStruct.loadBoxStructure(firstFile,
     IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
@@ -397,7 +406,7 @@ namespace MDAlgorithms
       throw std::runtime_error("Can not load MDEventWorkspace from initial file "+firstFile);
 
     // do the job
-    this->doExecByCloning(firstWS);
+    this->doExecByCloning(firstWS,outputFile);
 
     m_OutIWS->setFileNeedsUpdating(false);
 

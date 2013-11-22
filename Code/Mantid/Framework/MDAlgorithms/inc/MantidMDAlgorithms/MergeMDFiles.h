@@ -62,9 +62,9 @@ namespace MDAlgorithms
 
     void loadBoxData();
 
-    void doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws);
+    void doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,const std::string &outputFile);
 
-    void finalizeOutput();
+    void finalizeOutput(const std::string &outputFile);
 
 
     uint64_t loadEventsFromSubBoxes(API::IMDNode *TargetBox);
