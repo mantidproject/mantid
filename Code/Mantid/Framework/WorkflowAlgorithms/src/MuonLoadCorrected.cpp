@@ -84,7 +84,7 @@ namespace WorkflowAlgorithms
    */
   void MuonLoadCorrected::exec()
   {
-    std::string filename = getPropertyValue("Filename"); 
+    const std::string filename = getPropertyValue("Filename"); 
 
     IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadMuonNexus");
     loadAlg->setPropertyValue("Filename", filename);
@@ -98,17 +98,25 @@ namespace WorkflowAlgorithms
     {
       setProperty("OutputWorkspace", loadedWS);
     }
-    else if ( dtcType == "FromData" )
+    else
     {
       int numPeriods = 1; // For now
 
-      Workspace_sptr deadTimes = loadDeadTimesFromNexus(filename, numPeriods);
+      Workspace_sptr deadTimes; 
+     
+      if ( dtcType == "FromData" )
+      {
+        deadTimes = loadDeadTimesFromData(filename, numPeriods);
+      }
+      else if ( dtcType == "FromSpecifiedFile" ) 
+      {
+        const std::string dtcFile = getPropertyValue("DtcFile"); 
+
+        deadTimes = loadDeadTimesFromFile(dtcFile, numPeriods);
+      }
+
       Workspace_sptr correctedWS = applyDtc(loadedWS, deadTimes);
       setProperty("OutputWorkspace", correctedWS);
-    }
-    else
-    {
-      // TODO
     }
   }
 
@@ -118,7 +126,7 @@ namespace WorkflowAlgorithms
    * @param numPeriods :: Number of data collection periods
    * @return TableWorkspace when one period, otherwise a group of TableWorkspace-s with dead times
    */
-  Workspace_sptr MuonLoadCorrected::loadDeadTimesFromNexus(const std::string& filename, int numPeriods)
+  Workspace_sptr MuonLoadCorrected::loadDeadTimesFromData(const std::string& filename, int numPeriods)
   {
     NeXus::NXRoot root(filename);
 
@@ -135,8 +143,22 @@ namespace WorkflowAlgorithms
   }
 
   /**
+   * Attempts to load dead time table from custom file.
+   * @param filename :: Path to the file. 
+   * @param numPeriods :: Number of data collection periods
+   * @return TableWorkspace when one period, otherwise a group of TableWorkspace-s with dead times
+   */
+  Workspace_sptr MuonLoadCorrected::loadDeadTimesFromFile(const std::string& filename, int numPeriods)
+  {
+    IAlgorithm_sptr loadNexusProc = createChildAlgorithm("LoadNexusProcessed");
+    loadNexusProc->setPropertyValue("Filename", filename);
+    loadNexusProc->execute();
+
+    return loadNexusProc->getProperty("OutputWorkspace");
+  }
+
+  /**
    * Creates Dead Time Table from the given list of dead times.
-   *
    * @param begin :: Iterator to the first element of the data to use
    * @param   end :: Iterator to the last element of the data to use
    * @return TableWorkspace created using the data

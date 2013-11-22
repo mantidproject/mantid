@@ -51,7 +51,10 @@ namespace WorkflowAlgorithms
     void exec();
 
     /// Attempts to load dead time table from given Muon Nexus file
-    Workspace_sptr loadDeadTimesFromNexus(const std::string& filename, int numPeriods = 1);
+    Workspace_sptr loadDeadTimesFromData(const std::string& filename, int numPeriods = 1);
+
+    /// Attempts to load dead time table from custom file
+    Workspace_sptr loadDeadTimesFromFile(const std::string& filename, int numPeriods = 1);
 
     /// Applies dead time table to a workspace
     Workspace_sptr applyDtc(Workspace_sptr ws, Workspace_sptr dt);
