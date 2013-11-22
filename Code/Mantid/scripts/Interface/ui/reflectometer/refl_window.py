@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 from isis_reflectometry.quick import *
 from isis_reflectometry.combineMulti import *
 from isis_reflgui.latest_isis_runs import *
+from mantid.api import Workspace, WorkspaceGroup
 
 currentTable = ' '
 
@@ -180,6 +181,9 @@ class ReflGuiWindow(refl_gui.Ui_windowRefl_gui):
             item.setText(self.textRuns.text())
             self.tableMain.setItem(row, col + 2, item)
             col = col + 5
+            if col >= 11:
+                col = 0
+                row = row + 1
     def unTickAll(self,state):
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, 17).children()[1].setCheckState(state)
@@ -401,40 +405,86 @@ def groupGet(wksp, whattoget, field=''):
     also if the workspace is a group (info from first group element)
     '''
     if (whattoget == 'inst'):
-        if isinstance(mtd[wksp], WorkspaceGroup):
-            return mtd[wksp + '_1'].getInstrument()
+        if isinstance(wksp, str):
+            if isinstance(mtd[wksp], WorkspaceGroup):
+                return mtd[wksp + '_1'].getInstrument()
+            else:
+                return mtd[wksp].getInstrument()
+        elif isinstance(wksp, Workspace):
+            if isinstance(wksp, WorkspaceGroup):
+                return mtd[wksp + '_1'].getInstrument()
+            else:
+                return wksp.getInstrument()
         else:
-            return mtd[wksp].getInstrument()
+            return 0
     elif (whattoget == 'samp' and field != ''):
-        if isinstance(mtd[wksp], WorkspaceGroup):
-            try:
-                log = mtd[wksp + '_1'].getRun().getLogData(field).value
-                if (type(log) is int or type(log) is str):
-                    res = log
-                else:
-                    res = log[len(log) - 1]
-            except RuntimeError:
-                res = 0
-                print "Block " + field + " not found."
+        if isinstance(wksp, str):
+            if isinstance(mtd[wksp], WorkspaceGroup):
+                try:
+                    log = mtd[wksp + '_1'].getRun().getLogData(field).value
+                    if (type(log) is int or type(log) is str):
+                        res = log
+                    else:
+                        res = log[len(log) - 1]
+                except RuntimeError:
+                    res = 0
+                    print "Block " + field + " not found."
+            else:
+                try:
+                    log = mtd[wksp].getRun().getLogData(field).value
+                    if (type(log) is int or type(log) is str):
+                        res = log
+                    else:
+                        res = log[len(log) - 1]
+                except RuntimeError:
+                    res = 0
+                    print "Block " + field + " not found."
+        elif isinstance(wksp, Workspace):
+            if isinstance(wksp, WorkspaceGroup):
+                try:
+                    log = mtd[wksp + '_1'].getRun().getLogData(field).value
+                    if (type(log) is int or type(log) is str):
+                        res = log
+                    else:
+                        res = log[len(log) - 1]
+                except RuntimeError:
+                    res = 0
+                    print "Block " + field + " not found."
+            else:
+                try:
+                    log = wksp.getRun().getLogData(field).value
+                    if (type(log) is int or type(log) is str):
+                        res = log
+                    else:
+                        res = log[len(log) - 1]
+                except RuntimeError:
+                    res = 0
+                    print "Block " + field + " not found."
         else:
-            try:
-                log = mtd[wksp].getRun().getLogData(field).value
-                if (type(log) is int or type(log) is str):
-                    res = log
-                else:
-                    res = log[len(log) - 1]
-            except RuntimeError:
-                res = 0
-                print "Block " + field + " not found."
+            res = 0
         return res
     elif (whattoget == 'wksp'):
-        if isinstance(mtd[wksp], WorkspaceGroup):
-            return mtd[wksp + '_1'].getNumberHistograms()
+        if isinstance(wksp, str):
+            if isinstance(mtd[wksp], WorkspaceGroup):
+                return mtd[wksp + '_1'].getNumberHistograms()
+            else:
+                return mtd[wksp].getNumberHistograms()
+        elif isinstance(wksp, Workspace):
+            if isinstance(wksp, WorkspaceGroup):
+                return mtd[wksp + '_1'].getNumberHistograms()
+            else:
+                return wksp.getNumberHistograms()
         else:
-            return mtd[wksp].getNumberHistograms()
+            return 0
 def getWorkspace(wksp):
-    if isinstance(mtd[wksp], WorkspaceGroup):
-        wout = mtd[wksp + '_1']
+    if isinstance(wksp, Workspace):
+        return wksp
+    elif isinstance(wksp, str):
+        if isinstance(mtd[wksp], WorkspaceGroup):
+            wout = mtd[wksp + '_1']
+        else:
+            wout = mtd[wksp]
+        return wout
     else:
-        wout = mtd[wksp]
-    return wout
+        print "Unable to get workspace: " + wksp
+        return 0
