@@ -413,16 +413,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
 
-  undoStackWindow = new QDockWidget(this);
-  undoStackWindow->setObjectName("undoStackWindow"); // this is needed for QMainWindow::restoreState()
-  undoStackWindow->setWindowTitle(tr("Undo Stack"));
-  addDockWidget(Qt::RightDockWidgetArea, undoStackWindow);
-
-  d_undo_view = new QUndoView(undoStackWindow);
-  d_undo_view->setCleanIcon(QIcon(getQPixmap("filesave_xpm")));
-  undoStackWindow->setWidget(d_undo_view);
-  undoStackWindow->hide();
-
   // Needs to be done after initialization of dock windows,
   // because we now use QDockWidget::toggleViewAction()
   createActions();
@@ -1120,7 +1110,6 @@ void ApplicationWindow::insertTranslatedStrings()
 
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   logWindow->setWindowTitle(tr("Results Log"));
-  undoStackWindow->setWindowTitle(tr("Undo Stack"));
   displayBar->setWindowTitle(tr("Data Display"));
   plotTools->setWindowTitle(tr("Plot"));
   standardTools->setWindowTitle(tr("Standard Tools"));
@@ -1436,11 +1425,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   // these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
   actionTableRecalculate->setEnabled(false);
 
-  // clear undo stack view (in case window is not a matrix)
-  d_undo_view->setStack(0);
-  actionUndo->setEnabled(false);
-  actionRedo->setEnabled(false);
-
   if(w){
     actionPrintAllPlots->setEnabled(projectHas2DPlots());
     actionPrint->setEnabled(true);
@@ -1545,9 +1529,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       matrixMenuAboutToShow();
       myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
       analysisMenuAboutToShow();
-      d_undo_view->setEmptyLabel(w->objectName() + ": " + tr("Empty Stack"));
-      QUndoStack *stack = dynamic_cast<Matrix *>(w)->undoStack();
-      d_undo_view->setStack(stack);
 
     } else if (w->isA("Note")) {
       actionSaveTemplate->setEnabled(false);
@@ -12726,8 +12707,6 @@ void ApplicationWindow::createActions()
   actionShowLog = logWindow->toggleViewAction();
   actionShowLog->setIcon(getQPixmap("log_xpm"));
 
-  actionShowUndoStack = undoStackWindow->toggleViewAction();
-
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("Alt+L") );
   connect(actionAddLayer, SIGNAL(activated()), this, SLOT(addLayer()));
@@ -13565,9 +13544,6 @@ void ApplicationWindow::translateActionsStrings()
 
   actionShowLog->setMenuText(tr("Results &Log"));
   actionShowLog->setToolTip(tr("Results Log"));
-
-  actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
-  actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
 
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow->setMenuText(tr("&Script Window"));

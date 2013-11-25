@@ -1375,7 +1375,7 @@ private:
   ScriptingWindow *scriptingWindow; //Mantid
   Script *m_iface_script;
   QTranslator *appTranslator, *qtTranslator;
-  QDockWidget *explorerWindow, *undoStackWindow;
+  QDockWidget *explorerWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QMdiArea *d_workspace;
 
@@ -1462,7 +1462,6 @@ private:
   QAction *Box, *Frame, *None;
   QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;
   QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
-  QAction *actionShowUndoStack;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
@@ -1472,7 +1471,6 @@ private:
   
   QList<QAction *> m_interfaceActions;
 
-  QUndoView *d_undo_view;
   /// list of mantidmatrix windows opened from project file.
   QList<MantidMatrix*> m_mantidmatrixWindows;
 
