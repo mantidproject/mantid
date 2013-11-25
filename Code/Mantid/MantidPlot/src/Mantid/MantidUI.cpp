@@ -1228,10 +1228,23 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
 bool MantidUI::drop(QDropEvent* e)
 {
-  if (e->source() == m_exploreMantid->m_tree)
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace")
   {
-    QString wsName = getSelectedWorkspaceName();
-    importWorkspace(wsName,false);
+    QString text = e->mimeData()->text();
+    int endIndex = 0;
+    QStringList wsNames;
+    while (text.indexOf("[\"",endIndex) > -1)
+    {
+      int startIndex = text.indexOf("[\"",endIndex) + 2;
+      endIndex = text.indexOf("\"]",startIndex);
+      wsNames.append(text.mid(startIndex,endIndex-startIndex));
+    }
+
+    for (const auto wsName: wsNames)
+    {
+      importWorkspace(wsName,false);
+    }
     return true;
   }
 

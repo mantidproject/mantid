@@ -1015,8 +1015,8 @@ void InstrumentWindow::setViewType(const QString& type)
 
 void InstrumentWindow::dragEnterEvent( QDragEnterEvent* e )
 {
-  QString text = e->mimeData()->text();
-  if (text.startsWith("Workspace::"))
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace")
   {
     e->accept();
   }
@@ -1028,11 +1028,23 @@ void InstrumentWindow::dragEnterEvent( QDragEnterEvent* e )
 
 void InstrumentWindow::dropEvent( QDropEvent* e )
 {
-  QString text = e->mimeData()->text();
-  if (text.startsWith("Workspace::"))
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace")
   {
-    QStringList wsName = text.split("::");
-    if(this->overlay(wsName[1])) e->accept();    
+    QString text = e->mimeData()->text();
+    int endIndex = 0;
+    QStringList wsNames;
+    while (text.indexOf("[\"",endIndex) > -1)
+    {
+      int startIndex = text.indexOf("[\"",endIndex) + 2;
+      endIndex = text.indexOf("\"]",startIndex);
+      wsNames.append(text.mid(startIndex,endIndex-startIndex));
+    }
+
+    for (const auto wsName: wsNames)
+    {
+      if(this->overlay(wsName)) e->accept();  
+    }   
   }
   e->ignore();
 }
