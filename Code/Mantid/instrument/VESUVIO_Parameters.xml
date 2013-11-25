@@ -124,6 +124,19 @@
   <value val="73"/>
 </parameter>
 
+<!-- Lorentzian HWHM of the foil energy (meV) -->
+<parameter name="hwhm_foil_lorentz">
+  <value val="144"/>
+</parameter>
+
+<!-- Gaussian standard deviation of the foil energy (meV) 
+     Note that this is not the HWHM but the standard deviation unlike the
+     Lorentzian parameter -->
+<parameter name="sigma_foil_gauss">
+  <value val="20"/>
+</parameter>
+
+
 <!-- ====================================================== -->
 
 </component-link>
