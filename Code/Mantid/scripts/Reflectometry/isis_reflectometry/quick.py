@@ -100,14 +100,19 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
     nHist = run_ws.getNumberHistograms()
     I0MonitorIndex = idf_defaults['I0MonitorIndex']
     MultiDetectorStart = idf_defaults['MultiDetectorStart']
-    monitor_ws, detector_ws = to_lam.convert(idf_defaults['LambdaMin'], idf_defaults['LambdaMax'], (idf_defaults['PointDetectorStart'], idf_defaults['PointDetectorStop']), idf_defaults['I0MonitorIndex'], [idf_defaults['MonitorsToCorrect']], idf_defaults['MonitorBackgroundMin'], idf_defaults['MonitorBackgroundMax'] )
+    lambda_min = idf_defaults['LambdaMin']
+    lambda_max = idf_defaults['LambdaMax']
+    detector_index_ranges = (idf_defaults['PointDetectorStart'], idf_defaults['PointDetectorStop'])
+    background_min = idf_defaults['MonitorBackgroundMin']
+    background_max = idf_defaults['MonitorBackgroundMax']
+    intmin = idf_defaults['MonitorIntegralMin']
+    intmax = idf_defaults['MonitorIntegralMax']
     
-    CloneWorkspace(run_ws, OutputWorkspace='_W')
+    monitor_ws, detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
 
     inst = run_ws.getInstrument()
     # Some beamline constants from IDF
-    intmin = idf_defaults['MonitorIntegralMin']
-    intmax = idf_defaults['MonitorIntegralMax']
+   
     print I0MonitorIndex
     print nHist
     if (nHist > 5 and not(pointdet)):

@@ -80,7 +80,7 @@ class ConvertToWavelength(object):
   
         return in_rng
         
-    def convert(self, wavelength_min, wavelength_max, detector_workspace_indexes, monitor_workspace_index, monitors_to_correct=None, bg_min=None, bg_max=None):
+    def convert(self, wavelength_min, wavelength_max, detector_workspace_indexes, monitor_workspace_index, correct_monitor=False, bg_min=None, bg_max=None):
         """
         Run the conversion
         
@@ -91,7 +91,7 @@ class ConvertToWavelength(object):
         wavelength_max: max wavelength in x for detector workspace
         detector_workspace_indexes: Tuple of workspace indexes (or tuple of tuple min, max ranges to keep)
         monitor_workspace_index: The index of the monitor workspace
-        monitors_to_correct: Monitors indexes to have flat background calculated for.
+        correct_monitor: Flag indicating that monitors should have a flat background correction applied
         bg_min: x min background in wavelength
         bg_max: x max background in wavelength
         
@@ -102,7 +102,7 @@ class ConvertToWavelength(object):
         if(wavelength_min >= wavelength_max):
             raise ValueError("Wavelength_min must be < wavelength_max min: %s, max: %s" % (wavelength_min, wavelength_max))
         
-        if any((monitors_to_correct, bg_min, bg_max)) and not all((monitors_to_correct, bg_min, bg_max)):
+        if correct_monitor and not all((bg_min, bg_max)):
             raise ValueError("Either provide ALL, monitors_to_correct, bg_min, bg_max or none of them")
         
         if all((bg_min, bg_max)) and bg_min >= bg_max:
@@ -119,10 +119,9 @@ class ConvertToWavelength(object):
         detector_ws =  ConvertToWavelength.crop_range(sum_wavelength, detector_workspace_indexes)
         
         detector_ws =  msi.CropWorkspace(InputWorkspace=detector_ws, XMin=wavelength_min, XMax=wavelength_max)
-        print "Detector block size", detector_ws.blocksize()
-        print "Monitor block size", monitor_ws.blocksize()
+
         # Apply a flat background
-        if all((monitors_to_correct, bg_min, bg_max)):
+        if correct_monitor and all((bg_min, bg_max)):
             monitor_ws = msi.CalculateFlatBackground(InputWorkspace=monitor_ws,WorkspaceIndexList=0,StartX=bg_min, EndX=bg_max)
         
         return (monitor_ws, detector_ws)
