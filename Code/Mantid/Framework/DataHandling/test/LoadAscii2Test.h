@@ -154,7 +154,7 @@ public:
   void test_fail_five_columns()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX, Z" << std::endl;
@@ -179,7 +179,7 @@ public:
   void test_fail_one_column()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X" << std::endl;
@@ -200,7 +200,7 @@ public:
   void test_fail_mismatching_bins()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
@@ -227,7 +227,7 @@ public:
   void test_fail_mismatching_columns()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
@@ -260,7 +260,7 @@ public:
   void test_fail_line_start_letter()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
@@ -295,7 +295,7 @@ public:
   void test_fail_line_start_noncomment_symbol()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
@@ -329,7 +329,7 @@ public:
   void test_fail_line_mixed_letter_number()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
@@ -364,7 +364,7 @@ public:
   void test_fail_line_mixed_symbol_number()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
@@ -398,7 +398,7 @@ public:
   void test_fail_spectra_ID_inclusion_inconisitant()
   {
     m_testno++;
-    std::ofstream file(getTestFileName());
+    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
 
     file << std::scientific;
@@ -448,7 +448,7 @@ private:
     if (cols < 3)
     {
       //saveascii2 doens't save 2 column files it has to be made manually
-      std::ofstream file(getTestFileName());
+      std::ofstream file(getTestFileName().c_str());
       if (scientific)
       {
         file << std::scientific;
