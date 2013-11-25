@@ -1241,7 +1241,7 @@ bool MantidUI::drop(QDropEvent* e)
       wsNames.append(text.mid(startIndex,endIndex-startIndex));
     }
 
-    for (const auto wsName: wsNames)
+    foreach (const auto& wsName, wsNames)
     {
       importWorkspace(wsName,false);
     }
