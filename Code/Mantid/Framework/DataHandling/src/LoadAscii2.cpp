@@ -250,104 +250,155 @@ namespace Mantid
     */
     void LoadAscii2::setcolumns(std::ifstream & file, std::string & line, std::list<std::string> & columns)
     {
-      size_t lineno = 0;
+      m_lineNo = 0;
       std::vector<double> values;
-      //first find the first data set and set that as the template for the number of data collumns we expect from this file
-      while( getline(file,line) && m_baseCols == 0)
+      //processheader will also look for a base number of columns, to save time here if possible
+      //but if the user specifies a number of lines to skip that check won't happen in processheader
+      processHeader(file);
+      if (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2)
       {
-        lineno++;
-        std::string templine = line;
-        boost::trim(templine);
-        if (!templine.empty())
+        //first find the first data set and set that as the template for the number of data collumns we expect from this file
+        while( getline(file,line) && (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2))
         {
-          if (std::isdigit(templine.at(0)))
+          //std::string line = line;
+          boost::trim(line);
+          if (!line.empty())
           {
-            const int cols = splitIntoColumns(columns, templine);
-            //we might have the first set of values but there can't be more than 3 commas if it is
-            //int values = std::count(line.begin(), line.end(), ',');
-            if (cols > 4 || cols < 1)
+            if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+')
             {
-              //there were more separators than there should have been, which isn't right, or something went rather wrong
-              throw std::runtime_error("Sets of values must have between 1 and 3 delimiters. Found " + boost::lexical_cast<std::string>(cols) + ".");
-            }
-            else if (cols != 1)
-            {
-              try
+              const int cols = splitIntoColumns(columns, line);
+              //we might have the first set of values but there can't be more than 3 commas if it is
+              //int values = std::count(line.begin(), line.end(), ',');
+              if (cols > 4 || cols < 1)
               {
-                fillInputValues(values, columns);
+                //there were more separators than there should have been, which isn't right, or something went rather wrong
+                throw std::runtime_error("Sets of values must have between 1 and 3 delimiters. Found " + boost::lexical_cast<std::string>(cols) + ".");
               }
-              catch(boost::bad_lexical_cast&)
+              else if (cols != 1)
               {
-                continue;
+                try
+                {
+                  fillInputValues(values, columns);
+                }
+                catch(boost::bad_lexical_cast&)
+                {
+                  continue;
+                }
+                //a size of 1 is most likely a spectra ID so ignore it, a value of 2, 3 or 4 is a valid data set
+                m_baseCols = cols;
               }
-              //a size of 1 is most likely a spectra ID so ignore it, a value of 2, 3 or 4 is a valid data set
-              m_baseCols = cols;
             }
           }
         }
-      }
-      //make sure some valid data has been found to set the amount of columns, and the file isn't at EOF
-      if (m_baseCols > 4 || m_baseCols < 2 || file.eof())
-      {
-        throw std::runtime_error("No valid data in file, check separator settings or number of collumns per bin.");
-      }
+        //make sure some valid data has been found to set the amount of columns, and the file isn't at EOF
+        if (m_baseCols > 4 || m_baseCols < 2 || file.eof())
+        {
+          throw std::runtime_error("No valid data in file, check separator settings or number of collumns per bin.");
+        }
 
-      //start from the top again, this time filling in the list
-      file.seekg(0,std::ios_base::beg);
-      
-      m_lineNo = processHeader(file);
+        //start from the top again, this time filling in the list
+        file.seekg(0,std::ios_base::beg);
+        for(int i = 0;i < m_lineNo;i++)
+        {
+          getline(file,line);
+        }
+      }
     }
 
     /**
     * Process the header information. This implementation just skips it entirely. 
     * @param file :: A reference to the file stream
     */
-    int LoadAscii2::processHeader(std::ifstream & file) const
+    void LoadAscii2::processHeader(std::ifstream & file)
     {
-
       // Most files will have some sort of header. If we've haven't been told how many lines to 
       // skip then try and guess 
       int numToSkip = getProperty("SkipNumLines");
+      size_t numCols = 0;
       if( numToSkip == EMPTY_INT() )
       {
         const int rowsToMatch(5);
         // Have a guess where the data starts. Basically say, when we have say "rowsToMatch" lines of pure numbers
         // in a row then the line that started block is the top of the data
-        int matchingRows = 0;
+        size_t matchingRows = 0;
+        size_t blankRows = 0;
         int row = 0;
-        size_t numCols = 0;
         std::string line;
         std::vector<double> values;
-        while( getline(file,line) )
+        while( getline(file,line) && matchingRows < rowsToMatch)
         {
           ++row;
           boost::trim(line);
-          if( skipLine(line,true) )
-          {
-            continue;
-          }
 
           std::list<std::string> columns;
-          size_t lineCols = this->splitIntoColumns(columns, line);
-          if (lineCols != 1)
+          size_t lineCols = 0;
+
+          if (!line.empty())
           {
-            try
+            if (badLine(line))
             {
-              fillInputValues(values, columns);
+              matchingRows = 0;
+              continue;
             }
-            catch(boost::bad_lexical_cast&)
+
+            //a skipped line is a valid non-data line this shouldn't be counted as a matching line
+            //but neither should it reset the matching counter
+            if (skipLine(line,true))
             {
               continue;
             }
+            if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+')
+            {
+              lineCols = this->splitIntoColumns(columns, line);
+              //we might have the first set of values but there can't be more than 3 delimiters if it is
+              if (lineCols > 4 || lineCols < 1)
+              {
+                //there were more separators than there should have been,
+                //which isn't right, or something went rather wrong
+                matchingRows = 0;
+                continue;
+              }
+              else if (lineCols != 1)
+              {
+                try
+                {
+                  fillInputValues(values, columns);
+                }
+                catch(boost::bad_lexical_cast&)
+                {
+                  matchingRows = 0;
+                  continue;
+                }
+                //a size of 1 is most likely a spectra ID so ignore it, a value of 2, 3 or 4 is a valid data set
+              }
+            }
+            else
+            {
+              //line wasn't valid
+              matchingRows = 0;
+              continue;
+            }
           }
-          if( numCols == 0 )
+          else
           {
-            numCols = lineCols;
-          }
-          if( lineCols == m_baseCols || (lineCols == 1))
-          {
+            //an empty line is legitimate but make sure there aren't too many in sucession as we need to see data
             ++matchingRows;
-            if( matchingRows == rowsToMatch ) break;
+            ++blankRows;
+            if (blankRows >= rowsToMatch)
+            {
+              matchingRows = 1;
+            }
+            continue;
+          }
+
+          //to reduce the chance of finding problems later,
+          //the concurrent data should also have the same nubmer of columns
+          //if the data has a different number of columns to the previous lines
+          //start the coutner again assuming those previous lines were header info
+          if ( lineCols == numCols || lineCols == 1)
+          {
+            //line is valid increment the counter
+            ++matchingRows;
           }
           else
           {
@@ -361,6 +412,13 @@ namespace Mantid
         if (file.eof()){
           file.clear(file.eofbit);
         }
+
+        //save some time in setcolumns as we've found the base columns
+        if (numCols > 4 || numCols < 2)
+        {
+          throw std::runtime_error("No valid data in file, check separator settings or number of collumns per bin.");
+        }
+        m_baseCols = numCols;
         // Seek the file pointer back to the start.
         // NOTE: Originally had this as finding the stream position of the data and then moving the file pointer
         // back to the start of the data. This worked when a file was read on the same platform it was written
@@ -370,13 +428,13 @@ namespace Mantid
         numToSkip = row - rowsToMatch;
       }
       int i(0);
+      m_lineNo = 0;
       std::string line;
-      while( i < numToSkip && getline(file, line) )
+      while( m_lineNo < numToSkip && getline(file, line) )
       {
-        ++i;
+        ++m_lineNo;
       }
       g_log.information() << "Skipped " << numToSkip << " line(s) of header information()\n";
-      return numToSkip;
     }
 
 
