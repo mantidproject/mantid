@@ -90,6 +90,9 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         self.declareProperty(FileProperty("InputProjectFilename","", FileAction.OptionalLoad, ['.nxs']),
                 "Name of sequential project file.")
 
+        # Project ID
+        self.declareProperty("ProjectID", "", "Project ID.")
+
 	return
 
 
@@ -100,7 +103,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	self._processInputProperties()
 
 	# Instantiaze sequential refinement 
-	seqrefine = SeqRefineProfile("IDx890", self.log())
+	seqrefine = SeqRefineProfile(self._projectID, self.log())
 
 	# Execute 
 	if self.functionoption == "Setup": 
@@ -147,8 +150,13 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 
 	self._lastStep = self.getProperty("FromStep").value
 
+        self._projectID = self.getProperty("ProjectID").value 
+        if len(self._projectID) == 0: 
+            raise NotImplementedError("User must specify project ID.")
+
 	self.functionoption = self.getProperty("FunctionOption").value
 	if self.functionoption == "Setup":
+            # Request on 'Setup'
             ptype = self.getProperty("ProfileType").value
             if ptype == "Neutron Back-to-back exponential convoluted with psuedo-voigt":
                 self.peaktype = "NeutronBk2BkExpConvPVoigt"
@@ -161,6 +169,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	    self.bkgdparws = self.getProperty("InputBackgroundParameterWorkspace").value
 	    self.profilews = self.getProperty("InputProfileWorkspace").value
 	    self.braggpeakws = self.getProperty("InputBraggPeaksWorkspace").value
+        
 
 	elif self.functionoption == "Refine":
 	    self.paramstofit = self.getProperty("Parameters2Refine").value
@@ -180,6 +189,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	    if self.wsindex < 0 or self.wsindex >= self.dataws.getNumberHistograms():
 	        raise NotImplementedError("Input workspace index %d is out of range (0, %d)." % 
                         (self.wsindex, self.dataws.getNumberHistograms()))
+
 	return
 
 
