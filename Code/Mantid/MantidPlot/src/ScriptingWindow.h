@@ -21,6 +21,13 @@ class QCloseEvent;
 class QShowEvent;
 class QHideEvent;
 
+namespace Mantid
+{
+  namespace Kernel
+  {
+    class Logger;
+  }
+}
 
 /** @class ScriptingWindow    
     This class displays a seperate window for editing and executing scripts
@@ -63,6 +70,11 @@ signals:
   void closeMe();
   /// Tell others we are hiding
   void hideMe();
+
+protected:
+  void dropEvent(QDropEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dragEnterEvent(QDragEnterEvent *de);
 
 private slots:
   /// Populate file menu
@@ -115,6 +127,8 @@ private:
   /// Accept a custom defined event
   void customEvent(QEvent * event);
 
+  /// Extract py files from urllist
+  QStringList extractPyFiles(const QList<QUrl>& urlList) const;
 
 private:
   /// The script editors' manager
@@ -150,6 +164,8 @@ private:
   /// Flag to define whether we should accept a close event
   bool m_acceptClose;
 
+  /// Log object
+  Mantid::Kernel::Logger & g_log;
 
 };
 

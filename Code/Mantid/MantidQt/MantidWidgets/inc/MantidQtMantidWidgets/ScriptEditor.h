@@ -191,6 +191,10 @@ signals:
 protected:
   /// Write to the given device
   virtual void writeToDevice(QIODevice & device) const;
+  
+  virtual void dropEvent(QDropEvent *de);
+  virtual void dragMoveEvent(QDragMoveEvent *de);
+  virtual void dragEnterEvent(QDragEnterEvent *de);
 
 private slots:
 
