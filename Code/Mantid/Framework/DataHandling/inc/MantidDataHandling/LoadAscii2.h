@@ -86,7 +86,7 @@ namespace Mantid
       //wirte the spectra to the workspace
       void writeToWorkspace(API::MatrixWorkspace_sptr & localWorkspace, const size_t & numSpectra) const;
       //Process the header information. This implementation just skips it entirely.
-      int processHeader(std::ifstream & file) const;
+      void processHeader(std::ifstream & file);
       /// The column separator
       std::string m_columnSep;
 

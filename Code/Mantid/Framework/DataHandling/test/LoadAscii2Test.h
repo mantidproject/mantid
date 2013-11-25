@@ -22,7 +22,9 @@ public:
 
   LoadAscii2Test()
   {
-    m_filename = "example.txt";
+    m_filename = "LoadAscii2Test";
+    m_ext = ".txt";
+    m_testno = 0;
   }
 
   ~LoadAscii2Test()
@@ -31,6 +33,7 @@ public:
 
   void testProperties()
   {
+    m_testno++;
     LoadAscii2 testLoad;
     TS_ASSERT_EQUALS("LoadAscii", testLoad.name());
     TS_ASSERT_EQUALS(2, testLoad.version());
@@ -39,6 +42,7 @@ public:
   //the Poco::File.remove() is always in a TS_ASERT as i need to make sure the loader has released the file.
   void testConfidence()
   {
+    m_testno++;
     LoadAscii2 testLoad;
     testLoad.initialize();
     m_abspath = writeTestFile(3);
@@ -51,6 +55,7 @@ public:
 
   void test_Three_Column_Example_With_No_Header()
   {
+    m_testno++;
     m_abspath = writeTestFile(3,false);
     runTest(3);
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -58,6 +63,7 @@ public:
 
   void test_Three_Column_With_Header_Info()
   {
+    m_testno++;
     m_abspath = writeTestFile(3);
     runTest(3);
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -65,6 +71,7 @@ public:
 
   void test_Two_Column_Example_With_No_Header()
   {
+    m_testno++;
     m_abspath = writeTestFile(2,false);
     runTest(2);
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -72,6 +79,7 @@ public:
 
   void test_Two_Column_With_Header_Info()
   {
+    m_testno++;
     m_abspath = writeTestFile(2);
     runTest(2);
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -79,6 +87,7 @@ public:
 
   void test_Four_Column_Example_With_No_Header()
   {
+    m_testno++;
     m_abspath = writeTestFile(4,false);
     runTest(4);
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -86,6 +95,7 @@ public:
 
   void test_Four_Column_Example_With_HeaderInfo()
   {
+    m_testno++;
     m_abspath = writeTestFile(4);
     runTest(4);
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -93,6 +103,7 @@ public:
 
   void test_Four_Column_With_HeaderInfo_CommentChange()
   {
+    m_testno++;
     m_abspath = writeTestFile(4,true,"~");
     runTest(4,false, "~");
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -100,6 +111,7 @@ public:
 
   void test_Four_Column_With_HeaderInfo_NonScientific()
   {
+    m_testno++;
     m_abspath = writeTestFile(4,true,"#", false, 7);
     runTest(4);
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -107,6 +119,7 @@ public:
 
   void test_Four_Column_With_Different_Separator()
   {
+    m_testno++;
     m_abspath = writeTestFile(4,true,"#", true, 6, "Space");
     runTest(4,true,"#","Space");
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -114,6 +127,7 @@ public:
 
   void test_Custom_Separators()
   {
+    m_testno++;
     m_abspath = writeTestFile(4,true,"#", true, 6, "UserDefined", "~");
     runTest(4,false,"#","UserDefined",false,"~");
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
@@ -121,6 +135,7 @@ public:
 
   void test_Spacing_Around_Separators()
   {
+    m_testno++;
     m_abspath = writeTestFile(4,true,"#", true, 6, "UserDefined", " , "); //space comma space
     //this should work as the load will look for commas and strip out excess spaces
     runTest(4);
@@ -129,6 +144,7 @@ public:
 
   void test_Double_Spacing_Separators()
   {
+    m_testno++;
     m_abspath = writeTestFile(4,true,"#", true, 6, "UserDefined", "  "); //double space
     //this should work as the load will strip out excess spaces
     runTest(4,true,"#","Space");
@@ -137,7 +153,9 @@ public:
 
   void test_fail_five_columns()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX, Z" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -160,7 +178,9 @@ public:
 
   void test_fail_one_column()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -179,7 +199,9 @@ public:
 
   void test_fail_mismatching_bins()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -204,7 +226,9 @@ public:
 
   void test_fail_mismatching_columns()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -235,7 +259,9 @@ public:
 
   void test_fail_line_start_letter()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -268,7 +294,9 @@ public:
 
   void test_fail_line_start_noncomment_symbol()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -300,7 +328,9 @@ public:
 
   void test_fail_line_mixed_letter_number()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -333,7 +363,9 @@ public:
 
   void test_fail_line_mixed_symbol_number()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -365,7 +397,10 @@ public:
 
   void test_fail_spectra_ID_inclusion_inconisitant()
   {
-    std::ofstream file(m_filename.c_str());
+    m_testno++;
+    std::ofstream file(getTestFileName().c_str());
+    m_abspath = getAbsPath();
+
     file << std::scientific;
     file << "# X , Y, E, DX" << std::endl;
     for (int i = 0; i < 5; i++)
@@ -393,17 +428,27 @@ public:
   }
 
 private:
-
+  const std::string getTestFileName() const
+  {
+    return m_filename + boost::lexical_cast<std::string>(m_testno) + m_ext;
+  }
+  std::string getAbsPath()
+  {
+    SaveAscii2 save;
+    save.initialize();
+    save.setPropertyValue("Filename", getTestFileName());
+    return save.getPropertyValue("Filename");
+  }
   // Write the test file
   std::string writeTestFile(const int cols, const bool header = true, const std::string & comment = "#", const bool scientific = true, const int precision = -1, const std::string & sep = "CSV", const std::string & custsep = "")
   {
     SaveAscii2 save;
     save.initialize();
-    save.setPropertyValue("Filename", m_filename);
+    save.setPropertyValue("Filename", getTestFileName() );
     if (cols < 3)
     {
       //saveascii2 doens't save 2 column files it has to be made manually
-      std::ofstream file(m_filename.c_str());
+      std::ofstream file(getTestFileName().c_str());
       if (scientific)
       {
         file << std::scientific;
@@ -476,7 +521,7 @@ private:
     LoadAscii2 loader;
     loader.initialize();
     loader.setRethrows(true);
-    const std::string outputName(m_filename);
+    const std::string outputName(getTestFileName());
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_abspath));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace",outputName));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Separator", sep));
@@ -579,6 +624,8 @@ private:
   }
   std::string m_filename;
   std::string m_abspath;
+  std::string m_ext;
+  size_t m_testno;
 };
 
 
