@@ -101,16 +101,9 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
     I0MonitorIndex = idf_defaults['I0MonitorIndex']
     MultiDetectorStart = idf_defaults['MultiDetectorStart']
     monitor_ws, detector_ws = to_lam.convert(idf_defaults['LambdaMin'], idf_defaults['LambdaMax'], (idf_defaults['PointDetectorStart'], idf_defaults['PointDetectorStop']), idf_defaults['I0MonitorIndex'], [idf_defaults['MonitorsToCorrect']], idf_defaults['MonitorBackgroundMin'], idf_defaults['MonitorBackgroundMax'] )
-    '''
-    CloneWorkspace(monitor_ws, OutputWorkspace='_M')
     
-    CloneWorkspace(detector_ws, OutputWorkspace='_D')
-    CloneWorkspace(detector_ws, OutputWorkspace='_DP')
-   '''
     CloneWorkspace(run_ws, OutputWorkspace='_W')
 
-    
-    #[I0MonitorIndex, MultiDetectorStart, nHist] = toLam(run,'',pointdet=1) #creates wTof = "_W" + name
     inst = run_ws.getInstrument()
     # Some beamline constants from IDF
     intmin = idf_defaults['MonitorIntegralMin']
@@ -181,7 +174,7 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
                 trans = RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch=IvsLam,OutputWorkspace=trans)
                 IvsLam = Divide(LHSWorkspace=IvsLam,RHSWorkspace=trans,OutputWorkspace="IvsLam")
             else:
-                transCorr(trans)
+                transCorr(trans, run_ws)
         
         # Convert to I vs Q
         # check if detector in direct beam
@@ -231,8 +224,8 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
 
 
 
-def transCorr(transrun):
-    inst = groupGet("_W",'inst')
+def transCorr(transrun, run_ws):
+    inst = run_ws.getInstrument()
     # Some beamline constants from IDF
     intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
     intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
@@ -356,7 +349,7 @@ def toLam(run, name, pointdet=1):
     # add multiple workspaces, if given
     coAdd(run,name)
 
-    inst = groupGet(wTof,'inst')
+    inst = groupGet(wTof, 'inst')
     # Some beamline constants from IDF
     
     bgmin = inst.getNumberParameter('MonitorBackgroundMin')[0]
