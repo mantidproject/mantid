@@ -49,6 +49,48 @@
       <right-front-bottom-point  x="0.01" y="0.01" z="0.0"  />
    </cuboid>
   </type>
+
+  <!-- FOILS  -->
+
+  <component type="foil">
+   <!-- position 0 -->
+   <location t="-42" r="0.225" p="45"/>
+   <location t="-64" r="0.225" p="45"/>
+   <location t="55" r="0.225" p="45"/>
+   <location t="35" r="0.225" p="45"/>
+   <!-- position 1 -->
+   <location t="-31" r="0.225" p="45"/>
+   <location t="-50" r="0.225" p="45"/>
+   <location t="46" r="0.225" p="45"/>
+   <location t="67" r="0.225" p="45"/>
+  </component>
+
+  <!-- The foil shape is not currently correct, but a cube just to
+      allow visualization -->
+  <type name="foil">
+    <cuboid id="foil-shape">
+      <left-front-bottom-point x="0.0125" y="-0.04" z="0.0"  />
+      <left-front-top-point  x="0.0125" y="-0.04" z="0.003"  />
+      <left-back-bottom-point  x="-0.0125" y="-0.04" z="0.0"  />
+      <right-front-bottom-point  x="0.0125" y="0.04" z="0.0"  />
+    </cuboid>
+  </type>
+  
+  <!-- FOIL CHANGER -->
+  <component type="foil-changer">
+  <location x="0" y ="0" z="0"/>
+  </component>
+  
+  <!-- The height is currently irrelevant, it is only the radius value
+       that is used by the background correction algorithm -->
+  <type name="foil-changer">
+    <cylinder id="foil-changer-shape">
+    <centre-of-bottom-base x="0.0" y="-0.025" z="0.0" />
+    <axis x="0.0" y="1" z="0" /> 
+    <radius val="0.20" />
+    <height val="0.05" />
+    </cylinder>
+  </type>
   
   
   <!-- DETECTORS -->
