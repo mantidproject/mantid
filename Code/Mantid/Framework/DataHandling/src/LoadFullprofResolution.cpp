@@ -340,6 +340,10 @@ namespace DataHandling
       if (line[0] == '!')
         continue;
 
+      // skip NPROF line, which is processed by getProfNumber
+      if ( line.find("NPROF") != string::npos )
+         continue;
+
       // Parse
       g_log.debug() << "Parse Line " << i << "\t\t" << line << "\n";
 
