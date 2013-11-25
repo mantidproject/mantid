@@ -9,6 +9,7 @@
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "ApplicationWindow.h"
 
 // MantidQt
@@ -40,7 +41,7 @@
  * @param flags :: Window flags passed to the base class
  */
 ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint, QWidget *parent, Qt::WindowFlags flags) :
-  QMainWindow(parent, flags), m_acceptClose(false)
+  QMainWindow(parent, flags), m_acceptClose(false),g_log(Mantid::Kernel::Logger::get("ScriptingWindow"))
 {
   Q_UNUSED(capturePrint);
   setObjectName("MantidScriptWindow");
@@ -644,15 +645,18 @@ QStringList ScriptingWindow::extractPyFiles(const QList<QUrl>& urlList) const
   for (int i = 0; i < urlList.size(); ++i) 
   {
     QString fName = urlList[i].toLocalFile();
+    g_log.debug() << "Filename from URL: " << fName.toStdString();
     if (fName.size()>0)
     {
       QFileInfo fi(fName);
       
+      g_log.debug() << " Ext: " << fi.suffix().toStdString();
       if (fi.suffix().upper()=="PY")
       {
         filenames.append(fName);
       }
     }
+    g_log.debug()<<std::endl;
   }
   return filenames;
 }
