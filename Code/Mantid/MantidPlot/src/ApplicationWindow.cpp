@@ -163,8 +163,6 @@
 #include <QSpinBox>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include <QUndoStack>
-#include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
 #include <QPair>
@@ -3409,10 +3407,6 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
   m->setNumericPrecision(d_decimal_digits);
 
   addMdiSubWindow(m);
-
-  QUndoStack *stack = m->undoStack();
-  connect(stack, SIGNAL(canUndoChanged(bool)), actionUndo, SLOT(setEnabled(bool)));
-  connect(stack, SIGNAL(canRedoChanged(bool)), actionRedo, SLOT(setEnabled(bool)));
 
   connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(updateMatrixPlots(MdiSubWindow *)));
 
@@ -9200,26 +9194,6 @@ void ApplicationWindow::fileMenuAboutToShow()
 
 void ApplicationWindow::editMenuAboutToShow()
 {
-  MdiSubWindow *w = activeWindow();
-  if (!w){
-    actionUndo->setEnabled(false);
-    actionRedo->setEnabled(false);
-    return;
-  }
-
-  if (qobject_cast<Note *>(w)){
-    QTextDocument* doc = dynamic_cast<Note*>(w)->editor()->document();
-    actionUndo->setEnabled(doc->isUndoAvailable());
-    actionRedo->setEnabled(doc->isRedoAvailable());
-  } else if (qobject_cast<Matrix *>(w)){
-    QUndoStack *stack = (dynamic_cast<Matrix*>(w))->undoStack();
-    actionUndo->setEnabled(stack->canUndo());
-    actionRedo->setEnabled(stack->canRedo());
-  } else {
-    actionUndo->setEnabled(false);
-    actionRedo->setEnabled(false);
-  }
-
   reloadCustomActions();
 }
 
@@ -12673,14 +12647,6 @@ void ApplicationWindow::createActions()
   actionLoad = new QAction(QIcon(getQPixmap("import_xpm")), tr("&Import ASCII..."), this);
   connect(actionLoad, SIGNAL(activated()), this, SLOT(importASCII()));
 
-  actionUndo = new QAction(QIcon(getQPixmap("undo_xpm")), tr("&Undo"), this);
-  actionUndo->setShortcut( tr("Ctrl+Z") );
-  connect(actionUndo, SIGNAL(activated()), this, SLOT(undo()));
-
-  actionRedo = new QAction(QIcon(getQPixmap("redo_xpm")), tr("&Redo"), this);
-  actionRedo->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_Z));
-  connect(actionRedo, SIGNAL(activated()), this, SLOT(redo()));
-
   actionCopyWindow = new QAction(QIcon(getQPixmap("duplicate_xpm")), tr("&Duplicate"), this);
   connect(actionCopyWindow, SIGNAL(activated()), this, SLOT(clone()));
 
@@ -13508,14 +13474,6 @@ void ApplicationWindow::translateActionsStrings()
   actionLoad->setMenuText(tr("&Import ASCII..."));
   actionLoad->setToolTip(tr("Import data file(s)"));
   actionLoad->setShortcut(tr("Ctrl+K"));
-
-  actionUndo->setMenuText(tr("&Undo"));
-  actionUndo->setToolTip(tr("Undo changes"));
-  actionUndo->setShortcut(tr("Ctrl+Z"));
-
-  actionRedo->setMenuText(tr("&Redo"));
-  actionRedo->setToolTip(tr("Redo changes"));
-  actionRedo->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_Z));
 
   actionCopyWindow->setMenuText(tr("&Duplicate"));
   actionCopyWindow->setToolTip(tr("Duplicate window"));
