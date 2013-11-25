@@ -190,12 +190,12 @@ namespace Mantid
       }
       else if (badLine(line))
       {
-        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(m_lineNo) + ": Unexpected character found at beginning of line. Lines must either be a single integer, a list of numeric values, blank, or a text line beginning with the specified comment indicator:" + m_comment +".");
+        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(m_lineNo) + ": Unexpected character found at beginning of line. Lines must either be a single integer, a list of numeric values, blank, or a text line beginning with the specified comment indicator: " + m_comment +".");
       }
       else
       {
         //strictly speaking this should never be hit, but just being sure
-        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(m_lineNo) + ": Unknown format at line. Lines must either be a single integer, a list of numeric values, blank, or a text line beginning with the specified comment indicator:" + m_comment +".");
+        throw std::runtime_error("Line " + boost::lexical_cast<std::string>(m_lineNo) + ": Unknown format at line. Lines must either be a single integer, a list of numeric values, blank, or a text line beginning with the specified comment indicator: " + m_comment +".");
       }
     }
 
@@ -257,7 +257,7 @@ namespace Mantid
       processHeader(file);
       if (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2)
       {
-        //first find the first data set and set that as the template for the number of data collumns we expect from this file
+        //first find the first data set and set that as the template for the number of data columns we expect from this file
         while( getline(file,line) && (m_baseCols == 0 || m_baseCols > 4 || m_baseCols < 2))
         {
           //std::string line = line;
@@ -293,7 +293,7 @@ namespace Mantid
         //make sure some valid data has been found to set the amount of columns, and the file isn't at EOF
         if (m_baseCols > 4 || m_baseCols < 2 || file.eof())
         {
-          throw std::runtime_error("No valid data in file, check separator settings or number of collumns per bin.");
+          throw std::runtime_error("No valid data in file, check separator settings or number of columns per bin.");
         }
 
         //start from the top again, this time filling in the list
@@ -321,6 +321,7 @@ namespace Mantid
         // Have a guess where the data starts. Basically say, when we have say "rowsToMatch" lines of pure numbers
         // in a row then the line that started block is the top of the data
         size_t matchingRows = 0;
+        int validRows = 0;
         size_t blankRows = 0;
         int row = 0;
         std::string line;
@@ -338,6 +339,7 @@ namespace Mantid
             if (badLine(line))
             {
               matchingRows = 0;
+              validRows = 0;
               continue;
             }
 
@@ -345,6 +347,7 @@ namespace Mantid
             //but neither should it reset the matching counter
             if (skipLine(line,true))
             {
+              ++validRows;
               continue;
             }
             if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+')
@@ -356,6 +359,7 @@ namespace Mantid
                 //there were more separators than there should have been,
                 //which isn't right, or something went rather wrong
                 matchingRows = 0;
+                validRows = 0;
                 continue;
               }
               else if (lineCols != 1)
@@ -367,6 +371,7 @@ namespace Mantid
                 catch(boost::bad_lexical_cast&)
                 {
                   matchingRows = 0;
+                  validRows = 0;
                   continue;
                 }
                 //a size of 1 is most likely a spectra ID so ignore it, a value of 2, 3 or 4 is a valid data set
@@ -376,6 +381,7 @@ namespace Mantid
             {
               //line wasn't valid
               matchingRows = 0;
+              validRows = 0;
               continue;
             }
           }
@@ -383,12 +389,19 @@ namespace Mantid
           {
             //an empty line is legitimate but make sure there aren't too many in sucession as we need to see data
             ++matchingRows;
+            ++validRows;
             ++blankRows;
             if (blankRows >= rowsToMatch)
             {
               matchingRows = 1;
+              validRows = 1;
             }
             continue;
+          }
+
+          if (numCols == 0 && lineCols != 1)
+          {
+            numCols = lineCols;
           }
 
           //to reduce the chance of finding problems later,
@@ -399,11 +412,13 @@ namespace Mantid
           {
             //line is valid increment the counter
             ++matchingRows;
+            ++validRows;
           }
           else
           {
             numCols = lineCols;
             matchingRows = 1;
+            validRows = 1;
           }
         }
         // if the file does not have more than rowsToMatch + skipped lines, it will stop 
@@ -416,7 +431,7 @@ namespace Mantid
         //save some time in setcolumns as we've found the base columns
         if (numCols > 4 || numCols < 2)
         {
-          throw std::runtime_error("No valid data in file, check separator settings or number of collumns per bin.");
+          throw std::runtime_error("No valid data in file, check separator settings or number of columns per bin.");
         }
         m_baseCols = numCols;
         // Seek the file pointer back to the start.
@@ -424,8 +439,8 @@ namespace Mantid
         // back to the start of the data. This worked when a file was read on the same platform it was written
         // but failed when read on a different one due to underlying differences in the stream translation.
         file.seekg(0,std::ios::beg);
-        // We've read the header plus the number of rowsToMatch
-        numToSkip = row - rowsToMatch;
+        // We've read the header plus a number of validRows
+        numToSkip = row - validRows;
       }
       int i(0);
       m_lineNo = 0;
@@ -453,7 +468,7 @@ namespace Mantid
       //check for E and DX
       switch (m_baseCols)
       {
-        // if only 2 collumns X and Y in file, E = 0 is implicit when constructing workspace, omit DX
+        // if only 2 columns X and Y in file, E = 0 is implicit when constructing workspace, omit DX
       case 3:
         {
           //E in file, include it, omit DX
@@ -552,12 +567,12 @@ namespace Mantid
     /**
     * Return true if the line doesn't start wiht a valid character.
     * @param[in] line :: The line to be checked
-    * @return :: True if the line doesn't start wiht a valid character.
+    * @return :: True if the line doesn't start with a valid character.
     */
     bool LoadAscii2::badLine(const std::string & line) const
     {
       // Empty or comment
-      return (!std::isdigit(line.at(0)) && line.at(0) != m_comment.at(0));
+      return (!(std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') && line.at(0) != m_comment.at(0));
     }
 
     /**
