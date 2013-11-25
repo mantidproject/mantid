@@ -233,9 +233,9 @@ def transCorr(transrun, run_ws):
         slam = transrun.split(',')[0]
         llam = transrun.split(',')[1]
         print "Transmission runs: ", transrun
-        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(slam,'_'+slam)
+        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(slam,'_'+slam, pointdet=1, run_ws=run_ws)
         CropWorkspace(InputWorkspace="_D_"+slam,OutputWorkspace="_D_"+slam,StartWorkspaceIndex=0,EndWorkspaceIndex=0)
-        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(llam,'_'+llam)
+        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(llam,'_'+llam, pointdet=1, run_ws=run_ws)
         CropWorkspace(InputWorkspace="_D_"+llam,OutputWorkspace="_D_"+llam,StartWorkspaceIndex=0,EndWorkspaceIndex=0)
         
         RebinToWorkspace(WorkspaceToRebin="_M_"+llam,WorkspaceToMatch="_DP_"+llam,OutputWorkspace="_M_P_"+llam)
@@ -270,7 +270,7 @@ def transCorr(transrun, run_ws):
         [transr, sf] = combine2("_D_"+slam,"_D_"+llam,"_DP_TRANS",10.0,12.0,1.5,17.0,0.02,scalehigh=1)
         #[wlam, wq, th] = quick(runno,angle,trans='_transcomb')
     else:
-        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(transrun,'_TRANS')
+        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(transrun,'_TRANS', pointdet=1, run_ws=run_ws)
         RebinToWorkspace(WorkspaceToRebin="_M_TRANS",WorkspaceToMatch="_DP_TRANS",OutputWorkspace="_M_P_TRANS")
         CropWorkspace(InputWorkspace="_M_P_TRANS",OutputWorkspace="_I0P_TRANS",StartWorkspaceIndex=I0MonitorIndex)
 
@@ -296,10 +296,12 @@ def cleanup():
         if re.search("^_", name):
             DeleteWorkspace(name)
         
-def coAdd(run,name):
+def coAddOld(run,name):
+    print "In COADD"
     names = mtd.getObjectNames()
     wTof = "_W" + name           # main workspace in time-of-flight    
     if run in names:
+        print "DO RENAME from: ", run, " to :", wTof
         RenameWorkspace(InputWorkspace=run,OutputWorkspace=wTof)
     else:
 
@@ -317,6 +319,7 @@ def coAdd(run,name):
             #LoadLiveData(currentInstrument,OutputWorkspace='_sum')
             #LoadDAE(DAEname='ndx'+mantid.settings['default.instrument'],OutputWorkspace='_sum')
         else:
+            print "LOADING 0 ...", runlist[0]
             Load(Filename=runlist[0],OutputWorkspace='_sum')#,LoadLogFiles="1")
             
         for i in range(len(runlist)-1):
@@ -325,6 +328,7 @@ def coAdd(run,name):
                 #LoadLiveData(currentInstrument,OutputWorkspace='_w2')
                 #LoadDAE(DAEname='ndx'+mantid.settings['default.instrument'],OutputWorkspace='_w2')
             else:
+                print "LOADING ...", runlist[i+1]
                 Load(Filename=runlist[i+1],OutputWorkspace='_w2')#,LoadLogFiles="1")
                 
             Plus(LHSWorkspace='_sum',RHSWorkspace='_w2',OutputWorkspace='_sum')
@@ -333,7 +337,7 @@ def coAdd(run,name):
 
     
 
-def toLam(run, name, pointdet=1):
+def toLam(run, name, pointdet, run_ws):
     '''
     toLam splits a given run into monitor and detector spectra and
     converts these to wavelength
@@ -345,11 +349,9 @@ def toLam(run, name, pointdet=1):
     pDet = "_DP" + name            # point-detector only vs. wavelength
     mDet = "_DM" + name            # multi-detector only vs. wavelength
     
+    RenameWorkspace(InputWorkspace=run,OutputWorkspace=wTof)
 
-    # add multiple workspaces, if given
-    coAdd(run,name)
-
-    inst = groupGet(wTof, 'inst')
+    inst = run_ws.getInstrument()
     # Some beamline constants from IDF
     
     bgmin = inst.getNumberParameter('MonitorBackgroundMin')[0]
