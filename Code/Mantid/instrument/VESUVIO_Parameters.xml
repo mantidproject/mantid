@@ -112,15 +112,15 @@
   <value val="4908"/>
 </parameter>
 
-<!-- Lorentzian HWHM of the foil analyser energy (efixed) (meV) -->
-<parameter name="hwhm_energy_lorentz">
+<!-- Lorentzian HWHM of the analyser energy (efixed) (meV) -->
+<parameter name="hwhm_analyser_lorentz">
   <value val="24"/>
 </parameter>
 
-<!-- Gaussian standard deviation of the foil analyser energy (efixed) (meV) 
+<!-- Gaussian standard deviation of the analyser energy (efixed) (meV) 
      Note that this is not the HWHM but the standard deviation unlike the
      Lorentzian parameter -->
-<parameter name="sigma_energy_gauss">
+<parameter name="sigma_analyser_gauss">
   <value val="73"/>
 </parameter>
 

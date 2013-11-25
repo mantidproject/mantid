@@ -52,8 +52,8 @@ namespace ComptonProfileTestHelpers
     pmap.addDouble(det0, "sigma_theta", 0.028);
     pmap.addDouble(det0, "efixed", 4908);
     pmap.addDouble(det0, "t0", -0.32);
-    pmap.addDouble(det0, "hwhm_energy_lorentz", 24);
-    pmap.addDouble(det0, "sigma_energy_gauss", 73);
+    pmap.addDouble(det0, "hwhm_analyser_lorentz", 24);
+    pmap.addDouble(det0, "sigma_analyser_gauss", 73);
 
     // Link workspace with detector
     auto *spec0 = ws2d->getSpectrum(0);

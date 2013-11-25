@@ -88,8 +88,8 @@ namespace CurveFitting
     m_sigmaTheta = getComponentParameter(*det, "sigma_theta");
     m_e1 = getComponentParameter(*det,"efixed");
     m_t0 = getComponentParameter(*det,"t0")*1e-6; // Convert to seconds
-    m_hwhmLorentzE = getComponentParameter(*det, "hwhm_energy_lorentz");
-    m_hwhmGaussE = STDDEV_TO_HWHM*getComponentParameter(*det, "sigma_energy_gauss");
+    m_hwhmLorentzE = getComponentParameter(*det, "hwhm_analyser_lorentz");
+    m_hwhmGaussE = STDDEV_TO_HWHM*getComponentParameter(*det, "sigma_analyser_gauss");
 
     // ------ Fixed coefficients related to resolution & Y-space transforms ------------------
     const double mn = PhysicalConstants::NeutronMassAMU;
