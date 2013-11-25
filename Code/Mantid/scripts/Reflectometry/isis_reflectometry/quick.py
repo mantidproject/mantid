@@ -98,6 +98,7 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
     idf_defaults = get_defaults(run_ws)
     to_lam = ConvertToWavelength(run_ws)
     nHist = run_ws.getNumberHistograms()
+    
     I0MonitorIndex = idf_defaults['I0MonitorIndex']
     MultiDetectorStart = idf_defaults['MultiDetectorStart']
     lambda_min = idf_defaults['LambdaMin']
@@ -230,50 +231,45 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
 
 
 def transCorr(transrun, run_ws):
+    
+    run_ws = ConvertToWavelength.to_workspace(run_ws)
+    idf_defaults = get_defaults(run_ws)
+
+    I0MonitorIndex = idf_defaults['I0MonitorIndex']
+    MultiDetectorStart = idf_defaults['MultiDetectorStart']
+    lambda_min = idf_defaults['LambdaMin']
+    lambda_max = idf_defaults['LambdaMax']
+    background_min = idf_defaults['MonitorBackgroundMin']
+    background_max = idf_defaults['MonitorBackgroundMax']
+    intmin = idf_defaults['MonitorIntegralMin']
+    intmax = idf_defaults['MonitorIntegralMax']
+    detector_index_ranges = (idf_defaults['PointDetectorStart'], idf_defaults['PointDetectorStop'])
+    
     inst = run_ws.getInstrument()
-    # Some beamline constants from IDF
-    intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
-    intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
+    
     if ',' in transrun:
         slam = transrun.split(',')[0]
         llam = transrun.split(',')[1]
         print "Transmission runs: ", transrun
-        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(slam,'_'+slam, pointdet=1, run_ws=run_ws)
-        CropWorkspace(InputWorkspace="_D_"+slam,OutputWorkspace="_D_"+slam,StartWorkspaceIndex=0,EndWorkspaceIndex=0)
-        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(llam,'_'+llam, pointdet=1, run_ws=run_ws)
-        CropWorkspace(InputWorkspace="_D_"+llam,OutputWorkspace="_D_"+llam,StartWorkspaceIndex=0,EndWorkspaceIndex=0)
         
-        RebinToWorkspace(WorkspaceToRebin="_M_"+llam,WorkspaceToMatch="_DP_"+llam,OutputWorkspace="_M_P_"+llam)
-        CropWorkspace(InputWorkspace="_M_P_"+llam,OutputWorkspace="_I0P_"+llam,StartWorkspaceIndex=I0MonitorIndex)
+        to_lam = ConvertToWavelength(slam)
+        monitor_ws_slam, detector_ws_slam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
         
-        #Normalise by monitor integral
-        inst = groupGet('_D_'+slam,'inst')
-        # Some beamline constants from IDF
-        intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
-        intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
-        Integration(InputWorkspace="_I0P_"+llam,OutputWorkspace="_monInt_TRANS",RangeLower=str(intmin),RangeUpper=str(intmax))
-        Divide(LHSWorkspace="_DP_"+llam,RHSWorkspace="_monInt_TRANS",OutputWorkspace="_D_"+llam)
-        #scaling=1/mantid.getMatrixWorkspace('_monInt_TRANS').dataY(0)[0]
-        #Scale(InputWorkspace="_DP_"+llam,OutputWorkspace="_D_"+llam,Factor=scaling,Operation="Multiply")
+        i0p_slam = RebinToWorkspace(WorkspaceToRebin=monitor_ws_slam, WorkspaceToMatch=detector_ws_slam)
+        mon_int_trans = Integration(InputWorkspace=i0p_slam, RangeLower=intmin, RangeUpper=intmax)
+        detector_ws_slam = Divide(LHSWorkspace=detector_ws_slam, RHSWorkspace=mon_int_trans)
         
-        # same for short wavelength run slam:
-        RebinToWorkspace(WorkspaceToRebin="_M_"+slam,WorkspaceToMatch="_DP_"+slam,OutputWorkspace="_M_P_"+slam)
-        CropWorkspace(InputWorkspace="_M_P_"+slam,OutputWorkspace="_I0P_"+slam,StartWorkspaceIndex=I0MonitorIndex)
-
-        #Normalise by monitor integral
-        inst = groupGet('_D_'+llam,'inst')
-        # Some beamline constants from IDF
-        intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
-        intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
-        Integration(InputWorkspace="_I0P_"+slam,OutputWorkspace="_monInt_TRANS",RangeLower=str(intmin),RangeUpper=str(intmax))
-        #scaling=1/mantid.getMatrixWorkspace('_monInt_TRANS').dataY(0)[0]
-        Divide(LHSWorkspace="_DP_"+slam,RHSWorkspace="_monInt_TRANS",OutputWorkspace="_D_"+slam)
-        #Scale(InputWorkspace="_DP_"+slam,OutputWorkspace="_D_"+slam,Factor=scaling,Operation="Multiply")
+        to_lam = ConvertToWavelength(llam)
+        monitor_ws_llam, detector_ws_llam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
         
-        #Divide(LHSWorkspace="_DP_"+slam,RHSWorkspace="_I0P_"+slam,OutputWorkspace="_D_"+slam)
-
-        [transr, sf] = combine2("_D_"+slam,"_D_"+llam,"_DP_TRANS",10.0,12.0,1.5,17.0,0.02,scalehigh=1)
-        #[wlam, wq, th] = quick(runno,angle,trans='_transcomb')
+        i0p_llam = RebinToWorkspace(WorkspaceToRebin=monitor_ws_llam, WorkspaceToMatch=detector_ws_llam)
+        mon_int_trans = Integration(InputWorkspace=i0p_llam, RangeLower=intmin,RangeUpper=intmax)
+        detector_ws_llam = Divide(LHSWorkspace=detector_ws_llam, RHSWorkspace=mon_int_trans)
+        
+        #[transr, sf] = combine2(detector_ws_slam.getName(), detector_ws_llam.getName(),"_DP_TRANS",10.0,12.0,1.5,17.0,0.02,scalehigh=1)
+        
+        outputs = Stitch1D(LHSWorkspace=detector_ws_slam, RHSWorkspace=detector_ws_llam, OutputWorkspace="_DP_TRANS", StartOverlap=10, EndOverlap=12,  Params="%f,%f,%f" % (1.5, 0.02, 17))
+        
     else:
         [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(transrun,'_TRANS', pointdet=1, run_ws=run_ws)
         RebinToWorkspace(WorkspaceToRebin="_M_TRANS",WorkspaceToMatch="_DP_TRANS",OutputWorkspace="_M_P_TRANS")
