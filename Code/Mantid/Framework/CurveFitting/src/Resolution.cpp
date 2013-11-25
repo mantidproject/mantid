@@ -23,9 +23,9 @@ void Resolution::function1D(double *out, const double *xValues, const size_t nDa
     m_fun.function1D( out, xValues, nData );
 }
 
-void Resolution::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
+void Resolution::functionDeriv1D(Jacobian *, const double *, const size_t)
 {
-    m_fun.functionDeriv1D( out, xValues, nData );
+    // do nothing: no fitting parameters
 }
 
 size_t Resolution::nAttributes() const
