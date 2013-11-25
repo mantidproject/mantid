@@ -51,7 +51,7 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 28);
+    TS_ASSERT_EQUALS(outws->rowCount(), getExpectedNumberOfRows() );
 
     // 3. Verify name and value
     map<string, double> parammap;
@@ -97,7 +97,7 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 28);
+    TS_ASSERT_EQUALS(outws->rowCount(), getExpectedNumberOfRows());
 
     // 3. Verify name and value
     map<string, double> parammap;
@@ -145,7 +145,7 @@ public:
 
     // Check table workspace size
     TS_ASSERT_EQUALS(outws->columnCount(), 3);
-    TS_ASSERT_EQUALS(outws->rowCount(), 28);
+    TS_ASSERT_EQUALS(outws->rowCount(), getExpectedNumberOfRows());
 
     // Verify value (including bank number)
     map<string, double> parammap1;
@@ -200,7 +200,7 @@ public:
 
     // Check table workspace size
     TS_ASSERT_EQUALS(outws->columnCount(), 4);
-    TS_ASSERT_EQUALS(outws->rowCount(), 28);
+    TS_ASSERT_EQUALS(outws->rowCount(), getExpectedNumberOfRows());
 
     // Verify value
     map<string, double> parammap1;
@@ -265,6 +265,49 @@ public:
     Poco::File("TestAGS.irf").remove();
 
     return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that the number from the NPROF is read correctly 
+  **  and has correct name in table.
+  */
+  void test_nprof()
+  {
+    // Generate file
+    string filename("TestNPROF.irf");
+    generate3BankIrfFile(filename);
+
+    // Init LoadFullprofResolution
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    // Set up
+    alg.setProperty("Filename", filename);
+    alg.setProperty("OutputTableWorkspace", "TestNPROFTable");
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve output
+    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    AnalysisDataService::Instance().retrieve("TestNPROFTable"));
+    TS_ASSERT(outws);
+
+    // Verify NPROF exists and has a value of 10 for first two banks
+    map<string, double> parammap1;
+    parseTableWorkspace(outws, parammap1);  // 1st bank
+    map<string, double> parammap2;
+    parseTableWorkspace2(outws, parammap2); // 2nd bank
+    TS_ASSERT_EQUALS(parammap1.count("NPROF"),1);
+    TS_ASSERT_DELTA(parammap1["NPROF"], 10.0, 0.0001);
+    TS_ASSERT_EQUALS(parammap2.count("NPROF"),1);
+    TS_ASSERT_DELTA(parammap2["NPROF"], 10.0, 0.0001);
+
+    // Clean
+    AnalysisDataService::Instance().remove("TestNPROFTable");
+    Poco::File("TestNPROF.irf").remove();
+    
   }
 
   //----------------------------------------------------------------------------------------------
@@ -521,6 +564,13 @@ public:
     }
 
     return;
+  }
+
+  /* Return the number of rows the table must have
+  */
+  int getExpectedNumberOfRows()
+  {
+    return 29;  // Change this value if you add or remove any rows from the OutputTableWorkspace
   }
 
 };
