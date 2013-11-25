@@ -101,16 +101,20 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
     I0MonitorIndex = idf_defaults['I0MonitorIndex']
     MultiDetectorStart = idf_defaults['MultiDetectorStart']
     monitor_ws, detector_ws = to_lam.convert(idf_defaults['LambdaMin'], idf_defaults['LambdaMax'], (idf_defaults['PointDetectorStart'], idf_defaults['PointDetectorStop']), idf_defaults['I0MonitorIndex'], [idf_defaults['MonitorsToCorrect']], idf_defaults['MonitorBackgroundMin'], idf_defaults['MonitorBackgroundMax'] )
+    '''
     CloneWorkspace(monitor_ws, OutputWorkspace='_M')
+    
     CloneWorkspace(detector_ws, OutputWorkspace='_D')
     CloneWorkspace(detector_ws, OutputWorkspace='_DP')
+   '''
     CloneWorkspace(run_ws, OutputWorkspace='_W')
+
     
     #[I0MonitorIndex, MultiDetectorStart, nHist] = toLam(run,'',pointdet=1) #creates wTof = "_W" + name
-    inst = groupGet("_W",'inst')
+    inst = run_ws.getInstrument()
     # Some beamline constants from IDF
-    intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
-    intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
+    intmin = idf_defaults['MonitorIntegralMin']
+    intmax = idf_defaults['MonitorIntegralMax']
     print I0MonitorIndex
     print nHist
     if (nHist > 5 and not(pointdet)):
@@ -142,33 +146,24 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
         print "This is a Point-Detector run."
         # handle transmission runs
         # process the point detector reflectivity  
-        RebinToWorkspace(WorkspaceToRebin="_M",WorkspaceToMatch="_DP",OutputWorkspace="_M_P")
-#        CropWorkspace(InputWorkspace="_M_P",OutputWorkspace="_I0P",StartWorkspaceIndex=I0MonitorIndex,EndWorkspaceIndex=I0MonitorIndex)
-        _I0P = mtd['_M_P'].clone()
-        Scale(InputWorkspace="_DP",OutputWorkspace="IvsLam",Factor=1)
-        #Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
+        _I0P = RebinToWorkspace(WorkspaceToRebin=monitor_ws,WorkspaceToMatch=detector_ws,OutputWorkspace="_M_P")
+        IvsLam = Scale(InputWorkspace=detector_ws,Factor=1)
         #  Normalise by good frames
-        GoodFrames = groupGet('IvsLam','samp','goodfrm')
+        GoodFrames = groupGet(IvsLam.getName(),'samp','goodfrm')
         print "run frames: ", GoodFrames
         if (run=='0'):
             RunNumber = '0'
         else:
-            RunNumber = groupGet('IvsLam','samp','run_number') 
-        #mantid['IvsLam'].getRun().getLogData("goodfrm").value
-        #Scale('IvsLam','IvsLam',GoodFrames**-1,'Multiply')
-        #IvsLam = mantid['IvsLam']*GoodFrames**-1
-        if (trans==''):
-            #monitor2Eff('M')  # This doesn't seem to work.
-            #heliumDetectorEff('DP')  # point detector  #Nor does this.
-            # Multidetector   (Flood)   TODO        
+            RunNumber = groupGet(IvsLam.getName(),'samp','run_number') 
+        if (trans==''):  
             print "No transmission file. Trying default exponential/polynomial correction..."
-            inst=groupGet('_DP','inst')
+            inst=groupGet(detector_ws.getName(),'inst')
             corrType=inst.getStringParameter('correction')[0]
             if (corrType=='polynomial'):
                 pString=inst.getStringParameter('polystring')
                 print pString
                 if len(pString):
-                    PolynomialCorrection(InputWorkspace='_DP',OutputWorkspace='IvsLam',Coefficients=pString[0],Operation='Divide')
+                    IvsLam = PolynomialCorrection(InputWorkspace=detector_ws,Coefficients=pString[0],Operation='Divide')
                 else:
                     print "No polynomial coefficients in IDF. Using monitor spectrum with no corrections."
             elif (corrType=='exponential'):
@@ -176,26 +171,17 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
                 c1=inst.getNumberParameter('C1')
                 print "Exponential parameters: ", c0[0], c1[0]
                 if len(c0):
-                    ExponentialCorrection(InputWorkspace='_DP',OutputWorkspace='IvsLam',C0=c0[0],C1=c1[0],Operation='Divide')
-                # normalise by monitor spectrum
-                # RebinToWorkspace(WorkspaceToRebin="_M",WorkspaceToMatch="_DP",OutputWorkspace="_M_M")
-                # CropWorkspace(InputWorkspace="M_M",OutputWorkspace="I0M",StartWorkspaceIndex=I0MonitorIndex)
-                # Divide(LHSWorkspace="DM",RHSWorkspace="I0M",OutputWorkspace="RM")
-            Divide(LHSWorkspace="IvsLam",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
+                    IvsLam = ExponentialCorrection(InputWorkspace=detector_ws,C0=c0[0],C1=c1[0],Operation='Divide')
+            IvsLam = Divide(LHSWorkspace=IvsLam, RHSWorkspace=_I0P)
         else: # we have a transmission run
-            Integration(InputWorkspace="_I0P",OutputWorkspace="_monInt",RangeLower=str(intmin),RangeUpper=str(intmax))
-            #scaling=1/mantid.getMatrixWorkspace('_monInt').dataY(0)[0]
-            Divide(LHSWorkspace="_DP",RHSWorkspace="_monInt",OutputWorkspace="IvsLam")
-            ##Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
+            _monInt = Integration(InputWorkspace=_I0P,RangeLower=intmin,RangeUpper=intmax)
+            IvsLam = Divide(LHSWorkspace=detector_ws,RHSWorkspace=_monInt)
             names = mtd.getObjectNames()
             if trans in names:
-                ##Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
-                RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch="IvsLam",OutputWorkspace=trans)
-                ##IvsLam = mantid['IvsLam']*GoodFrames**-1
-                Divide(LHSWorkspace="IvsLam",RHSWorkspace=trans,OutputWorkspace="IvsLam")
+                trans = RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch=IvsLam,OutputWorkspace=trans)
+                IvsLam = Divide(LHSWorkspace=IvsLam,RHSWorkspace=trans,OutputWorkspace="IvsLam")
             else:
                 transCorr(trans)
-        # Need to process the optional args to see what needs to be output and what division needs to be made
         
         # Convert to I vs Q
         # check if detector in direct beam
