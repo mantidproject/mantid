@@ -428,11 +428,11 @@ size_t FindDetectorsPar::loadParFile(const std::string &fileName){
         secondaryFlightpath.resize(m_nDetectors,std::numeric_limits<double>::quiet_NaN());
    
         for(size_t i=0;i<m_nDetectors;i++){
-           azimuthal[i]            =result[shift+2+i*Block_size];
-           polar[i]                =result[shift+1+i*Block_size];
-           azimuthalWidth[i]       =result[shift+3+i*Block_size];
-           polarWidth[i]           =result[shift+4+i*Block_size]; 
-           secondaryFlightpath[i] =result[shift+0+i*Block_size];
+           azimuthal[i]            = result[shift+2+i*Block_size];
+           polar[i]                = result[shift+1+i*Block_size];
+           azimuthalWidth[i]       =-result[shift+3+i*Block_size];
+           polarWidth[i]           = result[shift+4+i*Block_size]; 
+           secondaryFlightpath[i] = result[shift+0+i*Block_size];
            detID[i]               = i+1;
         }
 
