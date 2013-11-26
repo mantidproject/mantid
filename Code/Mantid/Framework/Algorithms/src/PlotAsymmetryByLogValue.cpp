@@ -256,7 +256,7 @@ namespace Mantid
           {
             if ( dtcType == "FromRunData" )
             {
-              Workspace_sptr runDataDTT = loadNexus->getProperty("DeadTimesTable");
+              Workspace_sptr runDataDTT = loadNexus->getProperty("DeadTimeTable");
               loadedWs = applyDeadTimeCorrection(runDataDTT, loadedWs);
             }
             else

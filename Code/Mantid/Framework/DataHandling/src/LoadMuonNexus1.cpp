@@ -462,7 +462,7 @@ namespace Mantid
     void LoadMuonNexus1::loadDeadTimes(NXRoot& root)
     {
       // If dead times workspace name is empty - caller doesn't need dead times 
-      if ( getPropertyValue("DeadTimesTable").empty() )
+      if ( getPropertyValue("DeadTimeTable").empty() )
         return;
 
       NXEntry detector = root.openEntry("run/instrument/detector");
@@ -491,7 +491,7 @@ namespace Mantid
           // Simpliest case - one dead time for one detector
 
           TableWorkspace_sptr table = createDeadTimeTable( deadTimes.begin(), deadTimes.end() );
-          setProperty("DeadTimesTable", table); 
+          setProperty("DeadTimeTable", table); 
         }
         else
         {
@@ -512,7 +512,7 @@ namespace Mantid
             tableGroup->addWorkspace(table);
           }
 
-          setProperty("DeadTimesTable", tableGroup); 
+          setProperty("DeadTimeTable", tableGroup); 
         }
       }
 

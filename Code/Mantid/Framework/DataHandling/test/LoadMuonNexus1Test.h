@@ -395,7 +395,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006473.nxs") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DeadTimesTable", deadTimesWSName) ); 
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DeadTimeTable", deadTimesWSName) ); 
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
@@ -438,7 +438,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "MUSR00015189.nxs") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DeadTimesTable", deadTimesWSName) ); 
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DeadTimeTable", deadTimesWSName) ); 
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );

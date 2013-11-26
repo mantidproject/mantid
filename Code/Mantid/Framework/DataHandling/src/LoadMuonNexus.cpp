@@ -89,7 +89,7 @@ namespace Mantid
       declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
       declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)", Direction::Output);
       
-      declareProperty(new WorkspaceProperty<Workspace>("DeadTimesTable", "", Direction::Output, PropertyMode::Optional), 
+      declareProperty(new WorkspaceProperty<Workspace>("DeadTimeTable", "", Direction::Output, PropertyMode::Optional), 
         "Table or a group of tables containing detector dead times");
     }
 
