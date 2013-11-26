@@ -3039,23 +3039,18 @@ bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWi
   assignCom.append(", r'"+direct.getFirstFilename()+"'");
 
   int period = trans.getEntryNum();
-  //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    trans.setEntryNum(period);
+    assignCom.append(", period_t="+QString::number(period));
   }
-  assignCom.append(", period_t="+QString::number(period));
 
   period = direct.getEntryNum();
   //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    direct.setEntryNum(period);
+    assignCom.append(", period_d="+QString::number(period)); 
   }
-  assignCom.append(", period_d="+QString::number(period)+")");
-  
+  assignCom.append(")");  
   //assign the workspace name to a Python variable and read back some details
   QString pythonC="t1, t2 = " + assignCom + ";print '"+PYTHON_SEP+"',t1,'"+PYTHON_SEP+"',t2";
   QString ws_names = runReduceScriptFunction(pythonC);
@@ -3092,13 +3087,13 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
   QString assignCom("i."+assignFn+"(r'" + runFile.getFirstFilename() + "'");
   assignCom.append(", reload = True");
   int period = runFile.getEntryNum();
-  //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    runFile.setEntryNum(period);
+    assignCom.append(", period = " + QString::number(period));
   }
-  assignCom.append(", period = " + QString::number(period)+")");
+  
+  assignCom.append(")");
 
   //assign the workspace name to a Python variable and read back some details
 
