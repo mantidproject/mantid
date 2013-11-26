@@ -6,7 +6,6 @@ set ( TEST_PY_FILES
       test/DgreduceTest.py
       test/DirectEnergyConversionTest.py
       test/ReflectometryQuickAuxiliaryTest.py 
-      test/ReflectometryQuickToLamTest.py
       test/ExtendedUnitCellTest.py
       test/SansIsisGuiSettings.py
       )
