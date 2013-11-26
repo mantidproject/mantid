@@ -223,7 +223,7 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
     
     if debug == 0:
         pass
-        #cleanup()
+        cleanup()
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
@@ -270,10 +270,10 @@ def transCorr(transrun, i_vs_lam):
         
         to_lam = ConvertToWavelength(transrun)
         monitor_ws_trans, detector_ws_trans = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
-        i0p_trans = RebinToWorkspace(WorkspaceToRebin=montitor_ws_trans, WorkspaceToMatch=detector_ws_trans)
+        i0p_trans = RebinToWorkspace(WorkspaceToRebin=monitor_ws_trans, WorkspaceToMatch=detector_ws_trans)
 
         mon_int_trans = Integration( InputWorkspace=i0p_trans, RangeLower=intmin, RangeUpper=intmax )
-        transWS = Divide( LHSWorkspace=detector_ws_trans, RHSWorkspace=monitor_ws_trans )
+        transWS = Divide( LHSWorkspace=detector_ws_trans, RHSWorkspace=mon_int_trans )
     
    
     #got sometimes very slight binning diferences, so do this again:
