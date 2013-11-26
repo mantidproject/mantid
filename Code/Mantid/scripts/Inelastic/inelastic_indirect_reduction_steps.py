@@ -521,7 +521,7 @@ class HandleMonitor(ReductionStep):
         unwrapped_ws, join = UnwrapMonitor(InputWorkspace=monitor, OutputWorkspace=monitor, LRef=l_ref)
         RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001, 
             Interpolation='Linear')
-        FFTSmooth(InputWorkspace=monitor,OutputWorkspace=monitor,WorkspaceIndex=0)
+        FFTSmooth(InputWorkspace=monitor,OutputWorkspace=monitor,WorkspaceIndex=0, IgnoreXBins=True)
 
     def _get_reference_length(self, ws, index):
         workspace = mtd[ws]
