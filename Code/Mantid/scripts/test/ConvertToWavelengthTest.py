@@ -9,21 +9,21 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def test_construction_from_single_ws(self):
         ws = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength(ws)
-        self.assertIsNotNone(converter, "Should have been able to make a valid converter from a single workspace")
+        self.assertTrue(converter != None, "Should have been able to make a valid converter from a single workspace")
         DeleteWorkspace(ws)
         
     def test_construction_from_single_ws_name(self):
         ws = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
 
         converter = ConvertToWavelength(ws.getName())
-        self.assertIsNotNone(converter, "Should have been able to make a valid converter from a single workspace name")
+        self.assertTrue(converter != None, "Should have been able to make a valid converter from a single workspace name")
         DeleteWorkspace(ws)
         
     def test_construction_from_many_workspaces(self):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength([ws1, ws2])
-        self.assertIsNotNone(converter, "Should have been able to make a valid converter from many workspace objects")
+        self.assertTrue(converter != None, "Should have been able to make a valid converter from many workspace objects")
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
         
@@ -31,7 +31,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         converter = ConvertToWavelength([ws1.getName(), ws2.getName()])
-        self.assertIsNotNone(converter, "Should have been able to make a valid converter from many workspace objects")
+        self.assertTrue(converter != None, "Should have been able to make a valid converter from many workspace objects")
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
         
