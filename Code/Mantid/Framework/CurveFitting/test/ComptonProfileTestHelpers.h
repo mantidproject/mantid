@@ -21,6 +21,7 @@ namespace ComptonProfileTestHelpers
     bool isHist(false);
 
     auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(ones(), nhist, x0,x1,dx,isHist);
+    ws2d->getAxis(0)->setUnit("TOF");
     // Requires an instrument.
     auto inst = boost::make_shared<Instrument>();
     ws2d->setInstrument(inst);
