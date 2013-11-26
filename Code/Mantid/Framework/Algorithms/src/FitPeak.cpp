@@ -178,6 +178,9 @@ namespace Algorithms
       Kernel::IValidator_sptr(new Kernel::StartsWithValidator(minimizerOptions)),
       "Minimizer to use for fitting. Minimizers available are \"Levenberg-Marquardt\", \"Simplex\","
                     "\"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate gradient (Polak-Ribiere imp.)\", \"BFGS\", and \"Levenberg-MarquardtMD\"");
+
+    declareProperty("CostFunctionValue", DBL_MAX, "Value of cost function of the fitted peak. ", Kernel::Direction::Output);
+
     return;
   }
 
@@ -231,7 +234,11 @@ namespace Algorithms
     vector<double> vec_bkgdparvalues = getProperty("BackgroundParameterValues");
     if (vec_bkgdparnames.size() != vec_bkgdparvalues.size() || vec_bkgdparnames.size() == 0)
     {
-      throw runtime_error("Input background properties' arrays are not correct!");
+      stringstream errss;
+      errss << "Input background properties' arrays are incorrect: # of parameter names = " << vec_bkgdparnames.size()
+            << ", # of parameter values = " << vec_bkgdparvalues.size() << "\n";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
     }
 
     // Set parameter values
@@ -595,6 +602,9 @@ namespace Algorithms
 
     setProperty("FittedBackgroundParameterValues", vec_fitbkgd);
 
+    // Output chi^2 or Rwp
+    setProperty("CostFunctionValue", m_finalGoodnessValue);
+
     return;
   }
 
@@ -608,6 +618,7 @@ namespace Algorithms
     map<string, double> errormap;
     push(bkgdfunc, m_bkupBkgdFunc, errormap);
 
+    std::vector<double> vec_bkgd;
     vector<double> vec_xmin(2);
     vector<double> vec_xmax(2);
     vec_xmin[0] = m_minFitX;
@@ -760,7 +771,6 @@ namespace Algorithms
         push(m_bkgdFunc, m_bestBkgdFunc, m_fitErrorBkgdFunc);
       m_bestRwp = rwp;
     }
-    g_log.debug()<<"Failed due to: " << failreason <<std::endl;
 
     return;
   }
@@ -947,10 +957,12 @@ namespace Algorithms
     {
       // Fit for composite function renders a better result
       goodness_final = goodness;
+      errorreason = "";
     }
     else if (goodness_init <= goodness && goodness_init < DBL_MAX)
     {
       goodness_final = goodness_init;
+      errorreason = "";
       g_log.information("Fit peak/background composite function FAILS to render a better solution.");
       pop(bkuppeakmap, peakfunc);
       pop(bkupbkgdmap, bkgdfunc);
