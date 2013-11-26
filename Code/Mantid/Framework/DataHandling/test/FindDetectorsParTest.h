@@ -98,7 +98,7 @@ public:
         pattern[0] = "2,3,4,";    // azimutal
         pattern[1] = "-3,-4,-5,"; //polar
         pattern[3] = "78.6901,71.5651,66.8014,"; // atan(5,6,7)/dist;    // pol_width
-        pattern[4] = "75.9638,68.1986,63.4349,"; // atan(4,5,6)/dist;    // az_width
+        pattern[4] = "-75.9638,-68.1986,-63.4349,"; // atan(4,5,6)/dist;    // az_width
         for(int i=0;i<5;i++){
             std::stringstream buf;
             for(int j=0;j<3;j++){
