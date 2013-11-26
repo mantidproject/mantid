@@ -131,6 +131,13 @@ namespace Algorithms
                                                       API::IBackgroundFunction_sptr bkgdfunc,
                                                       std::map<std::string, double> bkgderrormap);
 
+
+    /// Add function's parameter names after peak function name
+    std::vector<std::string> addFunctionParameterNames(std::vector<std::string> funcnames);
+
+    /// Parse peak type from full peak type/parameter names string
+    std::string parsePeakTypeFull(const std::string& fullstring, bool &defaultparorder);
+
     /// Input data workspace
     API::MatrixWorkspace_sptr m_dataWS;
     size_t m_wsIndex;
@@ -184,6 +191,9 @@ namespace Algorithms
 
     DataObjects::TableWorkspace_sptr m_peakParameterTableWS;
     DataObjects::TableWorkspace_sptr m_bkgdParameterTableWS;
+
+    /// Peak
+    std::vector<std::string> m_peakParameterNames;
 
     /// Minimizer
     std::string m_minimizer;
