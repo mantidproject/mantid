@@ -109,7 +109,7 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
     intmin = idf_defaults['MonitorIntegralMin']
     intmax = idf_defaults['MonitorIntegralMax']
     
-    monitor_ws, detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+    _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
 
     inst = run_ws.getInstrument()
     # Some beamline constants from IDF
@@ -121,12 +121,12 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
         # if roi or db are given in the function then sum over the apropriate channels
         print "This is a multidetector run."
         try:
-            _I0M = RebinToWorkspace(WorkspaceToRebin=monitor_ws,WorkspaceToMatch=detector_ws)
-            IvsLam = detector_ws / _IOM
+            _I0M = RebinToWorkspace(WorkspaceToRebin=_monitor_ws,WorkspaceToMatch=_detector_ws)
+            IvsLam = _detector_ws / _IOM
             if (roi != [0,0]) :
                 ReflectedBeam = SumSpectra(InputWorkspace=IvsLam, StartWorkspaceIndex=roi[0], EndWorkspaceIndex=roi[1])
             if (db != [0,0]) :
-                DirectBeam = SumSpectra(InputWorkspace=detector_ws, StartWorkspaceIndex=db[0], EndWorkspaceIndex=db[1])
+                DirectBeam = SumSpectra(InputWorkspace=_detector_ws, StartWorkspaceIndex=db[0], EndWorkspaceIndex=db[1])
         except SystemExit:
             print "Point-Detector only run."
         RunNumber = groupGet(IvsLam.getName(),'samp','run_number')
@@ -140,8 +140,8 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
         print "This is a Point-Detector run."
         # handle transmission runs
         # process the point detector reflectivity  
-        _I0P = RebinToWorkspace(WorkspaceToRebin=monitor_ws,WorkspaceToMatch=detector_ws)
-        IvsLam = Scale(InputWorkspace=detector_ws,Factor=1)
+        _I0P = RebinToWorkspace(WorkspaceToRebin=_monitor_ws,WorkspaceToMatch=_detector_ws)
+        IvsLam = Scale(InputWorkspace=_detector_ws,Factor=1)
         #  Normalise by good frames
         GoodFrames = groupGet(IvsLam.getName(),'samp','goodfrm')
         print "run frames: ", GoodFrames
@@ -151,13 +151,13 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
             RunNumber = groupGet(IvsLam.getName(),'samp','run_number') 
         if (trans==''):  
             print "No transmission file. Trying default exponential/polynomial correction..."
-            inst=groupGet(detector_ws.getName(),'inst')
+            inst=groupGet(_detector_ws.getName(),'inst')
             corrType=inst.getStringParameter('correction')[0]
             if (corrType=='polynomial'):
                 pString=inst.getStringParameter('polystring')
                 print pString
                 if len(pString):
-                    IvsLam = PolynomialCorrection(InputWorkspace=detector_ws,Coefficients=pString[0],Operation='Divide')
+                    IvsLam = PolynomialCorrection(InputWorkspace=_detector_ws,Coefficients=pString[0],Operation='Divide')
                 else:
                     print "No polynomial coefficients in IDF. Using monitor spectrum with no corrections."
             elif (corrType=='exponential'):
@@ -165,11 +165,11 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
                 c1=inst.getNumberParameter('C1')
                 print "Exponential parameters: ", c0[0], c1[0]
                 if len(c0):
-                    IvsLam = ExponentialCorrection(InputWorkspace=detector_ws,C0=c0[0],C1=c1[0],Operation='Divide')
+                    IvsLam = ExponentialCorrection(InputWorkspace=_detector_ws,C0=c0[0],C1=c1[0],Operation='Divide')
             IvsLam = Divide(LHSWorkspace=IvsLam, RHSWorkspace=_I0P)
         else: # we have a transmission run
             _monInt = Integration(InputWorkspace=_I0P,RangeLower=intmin,RangeUpper=intmax)
-            IvsLam = Divide(LHSWorkspace=detector_ws,RHSWorkspace=_monInt)
+            IvsLam = Divide(LHSWorkspace=_detector_ws,RHSWorkspace=_monInt)
             names = mtd.getObjectNames()
             if trans in names:
                 trans = RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch=IvsLam,OutputWorkspace=trans)
@@ -250,38 +250,38 @@ def transCorr(transrun, i_vs_lam):
         print "Transmission runs: ", transrun
         
         to_lam = ConvertToWavelength(slam)
-        monitor_ws_slam, detector_ws_slam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+        _monitor_ws_slam, _detector_ws_slam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
         
-        i0p_slam = RebinToWorkspace(WorkspaceToRebin=monitor_ws_slam, WorkspaceToMatch=detector_ws_slam)
-        mon_int_trans = Integration(InputWorkspace=i0p_slam, RangeLower=intmin, RangeUpper=intmax)
-        detector_ws_slam = Divide(LHSWorkspace=detector_ws_slam, RHSWorkspace=mon_int_trans)
+        _i0p_slam = RebinToWorkspace(WorkspaceToRebin=_monitor_ws_slam, WorkspaceToMatch=_detector_ws_slam)
+        _mon_int_trans = Integration(InputWorkspace=_i0p_slam, RangeLower=intmin, RangeUpper=intmax)
+        _detector_ws_slam = Divide(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_mon_int_trans)
         
         to_lam = ConvertToWavelength(llam)
-        monitor_ws_llam, detector_ws_llam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+        _monitor_ws_llam, _detector_ws_llam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
         
-        i0p_llam = RebinToWorkspace(WorkspaceToRebin=monitor_ws_llam, WorkspaceToMatch=detector_ws_llam)
-        mon_int_trans = Integration(InputWorkspace=i0p_llam, RangeLower=intmin,RangeUpper=intmax)
-        detector_ws_llam = Divide(LHSWorkspace=detector_ws_llam, RHSWorkspace=mon_int_trans)
+        _i0p_llam = RebinToWorkspace(WorkspaceToRebin=_monitor_ws_llam, WorkspaceToMatch=_detector_ws_llam)
+        _mon_int_trans = Integration(InputWorkspace=_i0p_llam, RangeLower=intmin,RangeUpper=intmax)
+        _detector_ws_llam = Divide(LHSWorkspace=_detector_ws_llam, RHSWorkspace=_mon_int_trans)
         
         # TODO: HARDCODED STITCHING VALUES!!!!!
-        transWS, outputScaling = Stitch1D(LHSWorkspace=detector_ws_slam, RHSWorkspace=detector_ws_llam, StartOverlap=10, EndOverlap=12,  Params="%f,%f,%f" % (1.5, 0.02, 17))
+        _transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=10, EndOverlap=12,  Params="%f,%f,%f" % (1.5, 0.02, 17))
 
     else:
         
         to_lam = ConvertToWavelength(transrun)
-        monitor_ws_trans, detector_ws_trans = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
-        i0p_trans = RebinToWorkspace(WorkspaceToRebin=monitor_ws_trans, WorkspaceToMatch=detector_ws_trans)
+        _monitor_ws_trans, _detector_ws_trans = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+        _i0p_trans = RebinToWorkspace(WorkspaceToRebin=_monitor_ws_trans, WorkspaceToMatch=_detector_ws_trans)
 
-        mon_int_trans = Integration( InputWorkspace=i0p_trans, RangeLower=intmin, RangeUpper=intmax )
-        transWS = Divide( LHSWorkspace=detector_ws_trans, RHSWorkspace=mon_int_trans )
+        _mon_int_trans = Integration( InputWorkspace=_i0p_trans, RangeLower=intmin, RangeUpper=intmax )
+        _transWS = Divide( LHSWorkspace=_detector_ws_trans, RHSWorkspace=_mon_int_trans )
     
    
     #got sometimes very slight binning diferences, so do this again:
-    i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=transWS, WorkspaceToMatch=i_vs_lam,OutputWorkspace=str(transrun)+'_IvsLam_TRANS')
+    _i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=_transWS, WorkspaceToMatch=i_vs_lam)
     # Normalise by transmission run.    
-    i_vs_lam_corrected = Divide(LHSWorkspace=i_vs_lam, RHSWorkspace=i_vs_lam_trans)
+    _i_vs_lam_corrected = i_vs_lam / _i_vs_lam_trans
     
-    return i_vs_lam_corrected
+    return _i_vs_lam_corrected
 
 
 def cleanup():

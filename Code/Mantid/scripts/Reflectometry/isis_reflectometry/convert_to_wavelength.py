@@ -124,6 +124,7 @@ class ConvertToWavelength(object):
         if correct_monitor and all((bg_min, bg_max)):
             monitor_ws = msi.CalculateFlatBackground(InputWorkspace=monitor_ws,WorkspaceIndexList=0,StartX=bg_min, EndX=bg_max)
         
+        msi.DeleteWorkspace(Workspace=sum_wavelength.getName())
         return (monitor_ws, detector_ws)
         
         
