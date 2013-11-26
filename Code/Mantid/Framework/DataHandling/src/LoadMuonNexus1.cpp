@@ -496,6 +496,23 @@ namespace Mantid
         else
         {
           // More complex case - different dead times for different periods
+
+          if( numDeadTimes != m_numberOfSpectra * m_numberOfPeriods )
+          {
+            throw Exception::FileError("Number of dead times doesn't cover every spectra in every period",
+              m_filename);
+          }
+
+          WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+
+          for(auto it = deadTimes.begin(); it != deadTimes.end(); it += m_numberOfSpectra)
+          {
+            TableWorkspace_sptr table = createDeadTimeTable(it, it + m_numberOfSpectra);
+
+            tableGroup->addWorkspace(table);
+          }
+
+          setProperty("DeadTimesTable", tableGroup); 
         }
       }
 
