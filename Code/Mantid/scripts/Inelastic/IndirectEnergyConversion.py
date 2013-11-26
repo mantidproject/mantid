@@ -213,6 +213,9 @@ def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=True, Plo
             sliceProcessCalib(rawFile, calibWsName, spec)
 
         sfile = sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, spec, suffix, Verbose)
+        Transpose(InputWorkspace=sfile, OutputWorkspace=sfile)
+        unit = mtd[sfile].getAxis(0).setUnit("Label")
+        unit.setLabel("Spectrum Number", "")
 
         outWSlist.append(sfile)
         DeleteWorkspace(rawFile)
