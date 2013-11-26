@@ -180,7 +180,10 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
                 trans = RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch=IvsLam,OutputWorkspace=trans)
                 IvsLam = Divide(LHSWorkspace=IvsLam,RHSWorkspace=trans,OutputWorkspace="IvsLam")
             else:
-                transCorr(trans, run_ws)
+                IvsLam = transCorr(trans, IvsLam)
+                print type(IvsLam)
+                RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam")
+                
         
         # Convert to I vs Q
         # check if detector in direct beam
@@ -230,9 +233,9 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
 
 
 
-def transCorr(transrun, run_ws):
+def transCorr(transrun, i_vs_lam):
     
-    run_ws = ConvertToWavelength.to_workspace(run_ws)
+    run_ws = ConvertToWavelength.to_workspace(i_vs_lam)
     idf_defaults = get_defaults(run_ws)
 
     I0MonitorIndex = idf_defaults['I0MonitorIndex']
@@ -247,6 +250,7 @@ def transCorr(transrun, run_ws):
     
     inst = run_ws.getInstrument()
     
+    transWS = None
     if ',' in transrun:
         slam = transrun.split(',')[0]
         llam = transrun.split(',')[1]
@@ -266,29 +270,25 @@ def transCorr(transrun, run_ws):
         mon_int_trans = Integration(InputWorkspace=i0p_llam, RangeLower=intmin,RangeUpper=intmax)
         detector_ws_llam = Divide(LHSWorkspace=detector_ws_llam, RHSWorkspace=mon_int_trans)
         
-        #[transr, sf] = combine2(detector_ws_slam.getName(), detector_ws_llam.getName(),"_DP_TRANS",10.0,12.0,1.5,17.0,0.02,scalehigh=1)
-        
-        outputs = Stitch1D(LHSWorkspace=detector_ws_slam, RHSWorkspace=detector_ws_llam, OutputWorkspace="_DP_TRANS", StartOverlap=10, EndOverlap=12,  Params="%f,%f,%f" % (1.5, 0.02, 17))
-        
-    else:
-        [I0MonitorIndex, MultiDetectorStart, nHist] = toLam(transrun,'_TRANS', pointdet=1, run_ws=run_ws)
-        RebinToWorkspace(WorkspaceToRebin="_M_TRANS",WorkspaceToMatch="_DP_TRANS",OutputWorkspace="_M_P_TRANS")
-        CropWorkspace(InputWorkspace="_M_P_TRANS",OutputWorkspace="_I0P_TRANS",StartWorkspaceIndex=I0MonitorIndex)
+        # TODO: HARDCODED STITCHING VALUES!!!!!
+        transWS, outputScaling = Stitch1D(LHSWorkspace=detector_ws_slam, RHSWorkspace=detector_ws_llam, StartOverlap=10, EndOverlap=12,  Params="%f,%f,%f" % (1.5, 0.02, 17))
 
-        #Normalise by monitor integral
-        Integration(InputWorkspace="_I0P_TRANS",OutputWorkspace="_monInt_TRANS",RangeLower=str(intmin),RangeUpper=str(intmax))
-        Divide(LHSWorkspace="_DP_TRANS",RHSWorkspace="_monInt_TRANS",OutputWorkspace="_DP_TRANS")
-        #scaling=1/mantid.getMatrixWorkspace('_monInt_TRANS').dataY(0)[0]
-        #print "SCALING:",scaling
-        #Scale(InputWorkspace="_I0P_TRANS",OutputWorkspace=str(transrun)+"_IvsLam_TRANS",Factor=scaling,Operation="Multiply")
-        #Scale(InputWorkspace="_DP_TRANS",OutputWorkspace="_DP_TRANS",Factor=scaling,Operation="Multiply")
-        
-    #got sometimes very slight binning diferences, so do this again:
-    RebinToWorkspace(WorkspaceToRebin='_DP_TRANS',WorkspaceToMatch="IvsLam",OutputWorkspace=str(transrun)+'_IvsLam_TRANS')
-    if isinstance(mtd["_DP_TRANS"], WorkspaceGroup):
-        Divide(LHSWorkspace="IvsLam",RHSWorkspace=str(transrun)+"_IvsLam_TRANS_1",OutputWorkspace="IvsLam")
     else:
-        Divide(LHSWorkspace="IvsLam",RHSWorkspace=str(transrun)+"_IvsLam_TRANS",OutputWorkspace="IvsLam")
+        
+        to_lam = ConvertToWavelength(transrun)
+        monitor_ws_trans, detector_ws_trans = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+        i0p_trans = RebinToWorkspace(WorkspaceToRebin=montitor_ws_trans, WorkspaceToMatch=detector_ws_trans)
+
+        mon_int_trans = Integration( InputWorkspace=i0p_trans, RangeLower=intmin, RangeUpper=intmax )
+        transWS = Divide( LHSWorkspace=detector_ws_trans, RHSWorkspace=monitor_ws_trans )
+    
+   
+    #got sometimes very slight binning diferences, so do this again:
+    i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=transWS, WorkspaceToMatch=i_vs_lam,OutputWorkspace=str(transrun)+'_IvsLam_TRANS')
+    # Normalise by transmission run.    
+    i_vs_lam_corrected = Divide(LHSWorkspace=i_vs_lam, RHSWorkspace=i_vs_lam_trans)
+    
+    return i_vs_lam_corrected
 
 
 def cleanup():
