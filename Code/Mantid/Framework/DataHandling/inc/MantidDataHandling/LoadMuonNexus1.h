@@ -98,7 +98,7 @@ namespace Mantid
       void loadRunDetails(Workspace2D_sptr localWorkspace);
 
       /// Loads dead time table for the detector
-      void loadDeadTimes(NeXus::NXRoot& root);
+      void loadDeadTimes(Mantid::NeXus::NXRoot& root);
 
       /// Creates Dead Time Table using all the data between begin and end
       TableWorkspace_sptr createDeadTimeTable(std::vector<double>::const_iterator begin, 
