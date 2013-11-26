@@ -57,15 +57,24 @@ namespace MantidQt
     }
 
     /**
-     * Get whether file or workspace input is currently being shown.
+     * Get if the file selector is currently being shown.
      *
-     * Returns 0 for file view and 1 for workspace view
-     *
-     * @return :: index of the visible view 
+     * @return :: true if it is visible, otherwise false 
      */
-    int DataSelector::getCurrentView() const
+    bool DataSelector::isFileSelectorVisible() const
     {
-      return m_uiForm.stackedDataSelect->currentIndex();
+      int index = m_uiForm.stackedDataSelect->currentIndex();
+      return ( index == 0 );
+    }
+
+    /**
+     * Get if the workspace selector is currently being shown.
+     *
+     * @return :: true if it is visible, otherwise false 
+     */
+    bool DataSelector::isWorkspaceSelectorVisible() const
+    {
+      return !isFileSelectorVisible();
     }
 
     /**
@@ -80,19 +89,36 @@ namespace MantidQt
     {
       bool isValid = false;
 
-      switch(getCurrentView())
+      if(isFileSelectorVisible())
       {
-        case 0:
-          // file view is visible
-          isValid = m_uiForm.rfFileInput->isValid();
-          break;
-        case 1:
-          // workspace view is visible
-          isValid = m_uiForm.wsWorkspaceInput->isValid();
-          break;
+        isValid = m_uiForm.rfFileInput->isValid();
+      }
+      else
+      {
+        isValid = m_uiForm.wsWorkspaceInput->isValid();
       }
 
       return isValid;
+    }
+
+    /**
+    * Return the error.
+    * @returns A string explaining the error.
+    */
+    QString DataSelector::getProblem() const
+    {
+      QString problem = "";
+
+      if(isFileSelectorVisible())
+      {
+        problem = m_uiForm.rfFileInput->getFileProblem();
+      }
+      else
+      {
+        problem = "A valid workspace has not been selected";
+      }
+
+      return problem;
     }
 
     /**

@@ -60,10 +60,14 @@ namespace MantidQt
       QString getFullFilePath();
       /// Get the currently available file or workspace name
       QString getCurrentDataName();
-      /// Get whether file or workspace input is currently being shown
-      int getCurrentView() const;
+      /// Get whether the file selector is currently being shown
+      bool isFileSelectorVisible() const;
+      /// Get whether the workspace selector is currently being shown
+      bool isWorkspaceSelectorVisible() const;
       /// Checks if widget is in a valid state
       bool isValid() const;
+      /// Get file problem, empty string means no error.
+      QString getProblem() const;
       /// Check if the widget is set to automatically attempt to load files
       bool willAutoLoad();
       /// Set the widget to automatically attempt to load files
