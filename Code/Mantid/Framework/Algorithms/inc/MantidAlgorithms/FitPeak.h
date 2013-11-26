@@ -136,7 +136,7 @@ namespace Algorithms
     std::vector<std::string> addFunctionParameterNames(std::vector<std::string> funcnames);
 
     /// Parse peak type from full peak type/parameter names string
-    std::string parsePeakTypeFull(const std::string& fullstring, bool &defaultparorder);
+    std::string parseFunctionTypeFull(const std::string& fullstring, bool &defaultparorder);
 
     /// Input data workspace
     API::MatrixWorkspace_sptr m_dataWS;
@@ -194,6 +194,8 @@ namespace Algorithms
 
     /// Peak
     std::vector<std::string> m_peakParameterNames;
+    /// Background
+    std::vector<std::string> m_bkgdParameterNames;
 
     /// Minimizer
     std::string m_minimizer;

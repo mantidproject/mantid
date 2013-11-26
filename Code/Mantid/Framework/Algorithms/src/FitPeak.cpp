@@ -123,8 +123,11 @@ namespace Algorithms
 
     vector<string> bkgdtypes;
     bkgdtypes.push_back("Flat");
+    bkgdtypes.push_back("Flat (A0)");
     bkgdtypes.push_back("Linear");
+    bkgdtypes.push_back("Linear (A0, A1)");
     bkgdtypes.push_back("Quadratic");
+    bkgdtypes.push_back("Quadratic (A0, A1, A2)");
     declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
                     "Type of Background.");
 
@@ -379,31 +382,47 @@ namespace Algorithms
     //=========================================================================
     // Generate background function
     //=========================================================================
-    string bkgdtype = getPropertyValue("BackgroundType");
+    // Get background type
+    string bkgdtyperaw = getPropertyValue("BackgroundType");
+    bool usedefaultbkgdparorder = false;
+    string bkgdtype = parseFunctionTypeFull(bkgdtyperaw, usedefaultbkgdparorder);
+
     // FIXME - Fix the inconsistency in nameing the background
     if (bkgdtype == "Flat" || bkgdtype == "Linear")
       bkgdtype += "Background";
 
+    // Generate background function
     m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
           FunctionFactory::Instance().createFunction(bkgdtype));
     g_log.debug() << "Created background function of type " << bkgdtype << "\n";
 
     // Set background function parameter values
-    vector<string> vec_bkgdparnames = getProperty("BackgroundParameterNames");
+    m_bkgdParameterNames = getProperty("BackgroundParameterNames");
+    if (usedefaultbkgdparorder && m_bkgdParameterNames.size() == 0)
+    {
+      m_bkgdParameterNames = m_bkgdFunc->getParameterNames();
+    }
+    else if (m_bkgdParameterNames.size() == 0)
+    {
+      throw runtime_error("In the non-default background parameter name mode, "
+                          "user must give out parameter names. ");
+    }
+
     vector<double> vec_bkgdparvalues = getProperty("BackgroundParameterValues");
-    if (vec_bkgdparnames.size() != vec_bkgdparvalues.size() || vec_bkgdparnames.size() == 0)
+    if (m_bkgdParameterNames.size() != vec_bkgdparvalues.size())
     {
       stringstream errss;
-      errss << "Input background properties' arrays are incorrect: # of parameter names = " << vec_bkgdparnames.size()
+      errss << "Input background properties' arrays are incorrect: # of parameter names = "
+            << m_bkgdParameterNames.size()
             << ", # of parameter values = " << vec_bkgdparvalues.size() << "\n";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
 
     // Set parameter values
-    for (size_t i = 0; i < vec_bkgdparnames.size(); ++i)
+    for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i)
     {
-      m_bkgdFunc->setParameter(vec_bkgdparnames[i], vec_bkgdparvalues[i]);
+      m_bkgdFunc->setParameter(m_bkgdParameterNames[i], vec_bkgdparvalues[i]);
     }
 
     //=========================================================================
@@ -411,7 +430,7 @@ namespace Algorithms
     //=========================================================================
     string peaktypeprev = getPropertyValue("PeakFunctionType");
     bool defaultparorder = true;
-    string peaktype = parsePeakTypeFull(peaktypeprev, defaultparorder);
+    string peaktype = parseFunctionTypeFull(peaktypeprev, defaultparorder);
     m_peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(
           FunctionFactory::Instance().createFunction(peaktype));
     g_log.debug() << "Create peak function of type " << peaktype << "\n";
@@ -454,7 +473,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Parse peak type from full peak type/parameter names string
     */
-  std::string FitPeak::parsePeakTypeFull(const std::string& fullstring, bool& defaultparorder)
+  std::string FitPeak::parseFunctionTypeFull(const std::string& fullstring, bool& defaultparorder)
   {
     string peaktype;
 
@@ -676,12 +695,10 @@ namespace Algorithms
     setProperty("FittedPeakParameterValues", vec_fitpeak);
 
     // Background
-    vector<string> vec_bkgdnames = getProperty("BackgroundParameterNames");
     vector<double> vec_fitbkgd;
-
-    for (size_t i = 0; i < vec_bkgdnames.size(); ++i)
+    for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i)
     {
-      double value = m_bkgdFunc->getParameter(vec_bkgdnames[i]);
+      double value = m_bkgdFunc->getParameter(m_bkgdParameterNames[i]);
       vec_fitbkgd.push_back(value);
     }
 

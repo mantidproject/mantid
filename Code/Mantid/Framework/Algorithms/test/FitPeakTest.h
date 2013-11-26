@@ -362,8 +362,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunctionType", "Gaussian (Height, PeakCentre, Sigma)"));
     // TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterNames", "Height, PeakCentre, Sigma"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterValues", "40.0, 2.0658, 0.001"));
-    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Linear"));
-    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterNames", "A0, A1"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Linear (A0, A1)"));
+    // TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterNames", "A0, A1"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterValues", "0.5, 0.0"));
     fitpeak.setPropertyValue("FitWindow", "2.051, 2.077");
     fitpeak.setPropertyValue("PeakRange", "2.055, 2.08");
