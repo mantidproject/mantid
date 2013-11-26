@@ -4,17 +4,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidKernel/System.h"
-#include <cmath>
+#include "MantidCurveFitting/TabulatedFunction.h"
 
 namespace Mantid
 {
 namespace CurveFitting
 {
 /**
-Resolution function
+Resolution function. It is implemented in terms of TabulatedFunction but doesn't inherit form it.
+It is done to make Resolution parameterless and at the same time use TabulatedFunction's attributes.
 
 @author Roman Tolchenov, Tessella plc
 @date 12/02/2010
@@ -43,63 +41,29 @@ class DLLExport Resolution : public API::ParamFunction, public API::IFunction1D
 {
 public:
   /// Constructor
-  Resolution():m_xStart(0),m_xEnd(0){}
-  /// Destructor
-  virtual ~Resolution() {};
+  Resolution();
 
   /// overwrite IFunction base class methods
   std::string name()const{return "Resolution";}
-  virtual const std::string category() const { return "General";}
+  /// Function values
   void function1D(double* out, const double* xValues, const size_t nData)const;
   ///  function derivatives
-  void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
-  {
-    (void) out; (void) xValues; (void) nData; //Avoid compiler warning
-  }
-
+  void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
   /// Returns the number of attributes associated with the function
-  size_t nAttributes()const{return 1;}
+  size_t nAttributes()const;
   /// Returns a list of attribute names
   std::vector<std::string> getAttributeNames()const;
   /// Return a value of attribute attName
-  IFunction::Attribute getAttribute(const std::string& attName)const
-  {
-    UNUSED_ARG(attName);
-    return IFunction::Attribute(m_fileName, true);
-  }
+  Attribute getAttribute(const std::string& attName)const;
   /// Set a value to attribute attName
-  void setAttribute(const std::string& attName,const IFunction::Attribute& value);
+  void setAttribute(const std::string& attName,const Attribute& );
   /// Check if attribute attName exists
-  bool hasAttribute(const std::string& attName)const{return attName == "FileName";}
+  bool hasAttribute(const std::string& attName)const;
 
 private:
 
-  /// Call the appropriate load function
-  void load(const std::string& fname);
-
-  /// Load the resolution from an ASCII file
-  void loadAscii(const std::string& fname);
-
-  /// Load the resolution from a NeXuS file
-  void loadNexus(const std::string& fname);
-
-  /// Size of the data
-  size_t size()const{return m_yData.size();}
-
-  /// The file name
-  std::string m_fileName;
-
-  /// Stores x-values
-  std::vector<double> m_xData;
-
-  /// Stores y-values
-  std::vector<double> m_yData;
-
-  /// The first x
-  double m_xStart;
-
-  /// The lasst x
-  double m_xEnd;
+  /// Function that does the actual job
+  TabulatedFunction m_fun;
 
 };
 
