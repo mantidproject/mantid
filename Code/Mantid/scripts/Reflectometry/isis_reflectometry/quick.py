@@ -121,31 +121,26 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
         # if roi or db are given in the function then sum over the apropriate channels
         print "This is a multidetector run."
         try:
-            CropWorkspace(InputWorkspace="_D",OutputWorkspace="_DM",StartWorkspaceIndex=MultiDetectorStart)
-            RebinToWorkspace(WorkspaceToRebin="_M",WorkspaceToMatch="_DM",OutputWorkspace="_M_M")
-            CropWorkspace(InputWorkspace="_M_M",OutputWorkspace="_I0M",StartWorkspaceIndex=I0MonitorIndex)
-            RebinToWorkspace(WorkspaceToRebin="_I0M",WorkspaceToMatch="_DM",OutputWorkspace="_I0M")
-            Divide(LHSWorkspace="_DM",RHSWorkspace="_I0M",OutputWorkspace="IvsLam")
+            _I0M = RebinToWorkspace(WorkspaceToRebin=monitor_ws,WorkspaceToMatch=detector_ws)
+            IvsLam = detector_ws / _IOM
             if (roi != [0,0]) :
-                SumSpectra(InputWorkspace="IvsLam",OutputWorkspace="DMR",StartWorkspaceIndex=roi[0], EndWorkspaceIndex=roi[1])
-                ReflectedBeam=mtd['DMR']
+                ReflectedBeam = SumSpectra(InputWorkspace=IvsLam, StartWorkspaceIndex=roi[0], EndWorkspaceIndex=roi[1])
             if (db != [0,0]) :
-                SumSpectra(InputWorkspace="_DM",OutputWorkspace="_DMD",StartWorkspaceIndex=db[0], EndWorkspaceIndex=db[1])
-                DirectBeam=mtd['_DMD']
+                DirectBeam = SumSpectra(InputWorkspace=detector_ws, StartWorkspaceIndex=db[0], EndWorkspaceIndex=db[1])
         except SystemExit:
             print "Point-Detector only run."
-        RunNumber = groupGet('IvsLam','samp','run_number')
+        RunNumber = groupGet(IvsLam.getName(),'samp','run_number')
         if (theta):
-            IvsQ = l2q(mtd['DMR'], 'linear-detector', theta)
+            IvsQ = l2q(ReflectedBeam, 'linear-detector', theta) # TODO: possible to get here and an invalid state if roi == [0,0] see above.
         else:
-            ConvertUnits(InputWorkspace='DMR',OutputWorkspace="IvsQ",Target="MomentumTransfer")
+            IvsQ = ConvertUnits(InputWorkspace=ReflectedBeam, Target="MomentumTransfer")
                 
     # Single Detector processing-------------------------------------------------------------
     else:
         print "This is a Point-Detector run."
         # handle transmission runs
         # process the point detector reflectivity  
-        _I0P = RebinToWorkspace(WorkspaceToRebin=monitor_ws,WorkspaceToMatch=detector_ws,OutputWorkspace="_M_P")
+        _I0P = RebinToWorkspace(WorkspaceToRebin=monitor_ws,WorkspaceToMatch=detector_ws)
         IvsLam = Scale(InputWorkspace=detector_ws,Factor=1)
         #  Normalise by good frames
         GoodFrames = groupGet(IvsLam.getName(),'samp','goodfrm')
@@ -178,11 +173,11 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
             names = mtd.getObjectNames()
             if trans in names:
                 trans = RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch=IvsLam,OutputWorkspace=trans)
-                IvsLam = Divide(LHSWorkspace=IvsLam,RHSWorkspace=trans,OutputWorkspace="IvsLam")
+                IvsLam = Divide(LHSWorkspace=IvsLam,RHSWorkspace=trans,OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
             else:
                 IvsLam = transCorr(trans, IvsLam)
                 print type(IvsLam)
-                RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam")
+                RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
                 
         
         # Convert to I vs Q
@@ -237,7 +232,6 @@ def transCorr(transrun, i_vs_lam):
     
     run_ws = ConvertToWavelength.to_workspace(i_vs_lam)
     idf_defaults = get_defaults(run_ws)
-
     I0MonitorIndex = idf_defaults['I0MonitorIndex']
     MultiDetectorStart = idf_defaults['MultiDetectorStart']
     lambda_min = idf_defaults['LambdaMin']
@@ -248,7 +242,6 @@ def transCorr(transrun, i_vs_lam):
     intmax = idf_defaults['MonitorIntegralMax']
     detector_index_ranges = (idf_defaults['PointDetectorStart'], idf_defaults['PointDetectorStop'])
     
-    inst = run_ws.getInstrument()
     
     transWS = None
     if ',' in transrun:
@@ -296,105 +289,11 @@ def cleanup():
     for name in names:
         if re.search("^_", name):
             DeleteWorkspace(name)
-        
-def coAddOld(run,name):
-    print "In COADD"
-    names = mtd.getObjectNames()
-    wTof = "_W" + name           # main workspace in time-of-flight    
-    if run in names:
-        print "DO RENAME from: ", run, " to :", wTof
-        RenameWorkspace(InputWorkspace=run,OutputWorkspace=wTof)
-    else:
-
-        currentInstrument=config['default.instrument']
-        runlist = []
-        l1 = run.split(',')
-        for subs in l1:
-            l2 = subs.split(':')
-            for l3 in l2:
-                runlist.append(l3)
-        print "Adding: ", runlist
-        currentInstrument=currentInstrument.upper()
-        if (runlist[0]=='0'): #DAE/current run
-            StartLiveData(Instrument=currentInstrument,UpdateEvery='0',Outputworkspace='_sum')
-            #LoadLiveData(currentInstrument,OutputWorkspace='_sum')
-            #LoadDAE(DAEname='ndx'+mantid.settings['default.instrument'],OutputWorkspace='_sum')
-        else:
-            print "LOADING 0 ...", runlist[0]
-            Load(Filename=runlist[0],OutputWorkspace='_sum')#,LoadLogFiles="1")
-            
-        for i in range(len(runlist)-1):
-            if (runlist[i+1]=='0'): #DAE/current run
-                StartLiveData(Instrument=currentInstrument,UpdateEvery='0',Outputworkspace='_w2')
-                #LoadLiveData(currentInstrument,OutputWorkspace='_w2')
-                #LoadDAE(DAEname='ndx'+mantid.settings['default.instrument'],OutputWorkspace='_w2')
-            else:
-                print "LOADING ...", runlist[i+1]
-                Load(Filename=runlist[i+1],OutputWorkspace='_w2')#,LoadLogFiles="1")
-                
-            Plus(LHSWorkspace='_sum',RHSWorkspace='_w2',OutputWorkspace='_sum')
-
-        RenameWorkspace(InputWorkspace='_sum',OutputWorkspace=wTof)
-
-    
-
-def toLam(run, name, pointdet, run_ws):
-    '''
-    toLam splits a given run into monitor and detector spectra and
-    converts these to wavelength
-    '''
-    # some naming for convenience
-    wTof = "_W" + name           # main workspace in time-of-flight
-    monInLam = "_M" + name        # monitor spectra vs. wavelength
-    detInLam = "_D" + name        # detector spectra vs. wavelength
-    pDet = "_DP" + name            # point-detector only vs. wavelength
-    mDet = "_DM" + name            # multi-detector only vs. wavelength
-    
-    RenameWorkspace(InputWorkspace=run,OutputWorkspace=wTof)
-
-    inst = run_ws.getInstrument()
-    # Some beamline constants from IDF
-    
-    bgmin = inst.getNumberParameter('MonitorBackgroundMin')[0]
-    bgmax = inst.getNumberParameter('MonitorBackgroundMax')[0]
-    MonitorBackground = [bgmin,bgmax]
-    intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
-    intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
-    MonitorsToCorrect = [int(inst.getNumberParameter('MonitorsToCorrect')[0])]
-    # Note: Since we are removing the monitors in the load raw command they are not counted here.
-    PointDetectorStart = int(inst.getNumberParameter('PointDetectorStart')[0])
-    PointDetectorStop = int(inst.getNumberParameter('PointDetectorStop')[0])
-    MultiDetectorStart = int(inst.getNumberParameter('MultiDetectorStart')[0])
-    I0MonitorIndex = int(inst.getNumberParameter('I0MonitorIndex')[0]) 
-    print "I0MONITOINDEX", inst.getNumberParameter('I0MonitorIndex')   
-    
-    # Get usable wavelength range
-    LambdaMin = float(inst.getNumberParameter('LambdaMin')[0])
-    LambdaMax = float(inst.getNumberParameter('LambdaMax')[0])
-            
-    # Convert spectra from TOF to wavelength
-    ConvertUnits(InputWorkspace=wTof,OutputWorkspace=wTof+"_lam",Target="Wavelength", AlignBins='1')
-    # Separate detector an monitor spectra manually
-    CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=monInLam,StartWorkspaceIndex='0',EndWorkspaceIndex=PointDetectorStart-1)
- 
-    CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=detInLam,XMin=LambdaMin,XMax=LambdaMax,StartWorkspaceIndex=PointDetectorStart)
-
-    # Subtract flat background from fit in range given from Instrument Def/Par File
-    CalculateFlatBackground(InputWorkspace=monInLam,OutputWorkspace=monInLam,WorkspaceIndexList=I0MonitorIndex,StartX=MonitorBackground[0],EndX=MonitorBackground[1])
-    
-    # Is it a multidetector run?
-    nHist = groupGet(wTof+"_lam",'wksp','')
-    if (nHist<6 or (nHist>5 and pointdet)):
-        CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=pDet,XMin=LambdaMin,XMax=LambdaMax,StartWorkspaceIndex=PointDetectorStart,EndWorkspaceIndex=PointDetectorStop)
-    else:
-        CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=mDet,XMin=LambdaMin,XMax=LambdaMax,StartWorkspaceIndex=MultiDetectorStart)
-
-    
-    
-    
-    return I0MonitorIndex, MultiDetectorStart, nHist
     
 def get_defaults(run_ws):
+    '''
+    Temporary helper  function. Aid refactoring by removing need to specifically ask things of parameter files.
+    '''
     defaults = dict()
     if isinstance(run_ws, WorkspaceGroup):
         instrument = run_ws[0].getInstrument()
