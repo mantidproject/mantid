@@ -64,17 +64,18 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	funcoptions = ["Setup", "Refine", "Save", "Load"]
 	self.declareProperty("FunctionOption", "Refine", StringListValidator(funcoptions), "Options of functionality")
 
-	refoptions = ["Levenberg-Marquardt", "Random Walk", "Single Peak Fit"]
+	#refoptions = ["Levenberg-Marquardt", "Random Walk", "Single Peak Fit"]
+	refoptions = ["Random Walk"]
 	self.declareProperty("RefinementOption", "Random Walk", StringListValidator(refoptions),
 	    "Options of algorithm to refine. ")
 
-	self.declareProperty(StringArrayProperty("Parameters2Refine", values=[], direction=Direction.Input),
+	self.declareProperty(StringArrayProperty("ParametersToRefine", values=[], direction=Direction.Input),
 	    "List of parameters to refine.")
 
 	self.declareProperty("NumRefineCycles", 1, "Number of refinement cycles.")
 
-        peaktypes = ["", "Neutron Back-to-back exponential convoluted with psuedo-voigt", 
-                "Thermal neutron Back-to-back exponential convoluted with psuedo-voigt"]
+        peaktypes = ["", "Neutron Back-to-back exponential convoluted with pseudo-voigt", 
+                "Thermal neutron Back-to-back exponential convoluted with pseudo-voigt"]
         self.declareProperty("ProfileType", "", StringListValidator(peaktypes), "Type of peak profile function.")
 
 	bkgdtypes = ["", "Polynomial", "Chebyshev", "FullprofPolynomial"]
@@ -158,9 +159,9 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 	if self.functionoption == "Setup":
             # Request on 'Setup'
             ptype = self.getProperty("ProfileType").value
-            if ptype == "Neutron Back-to-back exponential convoluted with psuedo-voigt":
+            if ptype == "Neutron Back-to-back exponential convoluted with pseudo-voigt":
                 self.peaktype = "NeutronBk2BkExpConvPVoigt"
-            elif ptype == "Thermal neutron Back-to-back exponential convoluted with psuedo-voigt":
+            elif ptype == "Thermal neutron Back-to-back exponential convoluted with pseudo-voigt":
                 self.peaktype = "ThermalNeutronBk2BkExpConvPVoigt"
             else:
                 raise NotImplementedError("Peak profile is not supported.")
@@ -172,7 +173,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         
 
 	elif self.functionoption == "Refine":
-	    self.paramstofit = self.getProperty("Parameters2Refine").value
+	    self.paramstofit = self.getProperty("ParametersToRefine").value
 	    self.numcycles = self.getProperty("NumRefineCycles").value
 
 	elif self.functionoption == "Save":
