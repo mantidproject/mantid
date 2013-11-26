@@ -8,15 +8,20 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
-#include "MantidNexus/NexusClasses.h"
 
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
+// Forward declaration (here, because is not in Mantid namespace)
 class MuonNexusReader;
 
 namespace Mantid
 {
+  //----------------------------------------------------------------------
+  // Forward declaration
+  //----------------------------------------------------------------------
+  namespace NeXus
+  {
+    class NXRoot;
+  }
+
   namespace DataHandling
   {
     using namespace DataObjects;
