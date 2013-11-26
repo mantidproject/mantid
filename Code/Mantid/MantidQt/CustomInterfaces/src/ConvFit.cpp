@@ -842,14 +842,13 @@ namespace IDA
   {
     const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
     // Always want FWHM to display as positive.
-    if ( val > peakCentre )
-    {
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], val*2.0-peakCentre);
-    }
-    else
-    {
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], peakCentre-val*2.0);
-    }
+    const double fwhm = std::fabs(val*2.0-peakCentre);
+    m_cfHwhmRange->blockSignals(true);
+    m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], fwhm);
+    // Synchronize min and max values
+    m_cfHwhmRange->setMinimum(peakCentre - val);
+    m_cfHwhmRange->setMaximum(peakCentre + val);
+    m_cfHwhmRange->blockSignals(false);
   }
 
   void ConvFit::backgLevel(double val)

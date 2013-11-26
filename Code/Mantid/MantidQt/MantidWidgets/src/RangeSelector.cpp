@@ -55,9 +55,6 @@ RangeSelector::RangeSelector(QwtPlot* plot, SelectType type,
     break;
   }
 
-  connect(this, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-  connect(this, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
-
   m_minChanging = false;
   m_maxChanging = false;
 
@@ -240,7 +237,7 @@ void RangeSelector::setRange(std::pair<double,double> range)
   this->setRange(range.first, range.second);
 }
 
-void RangeSelector::minChanged(double val)
+void RangeSelector::setMinLinePos(double val)
 {
   switch ( m_type )
   {
@@ -256,7 +253,7 @@ void RangeSelector::minChanged(double val)
   m_plot->replot();
 }
 
-void RangeSelector::maxChanged(double val)
+void RangeSelector::setMaxLinePos(double val)
 {
   switch ( m_type )
   {
@@ -336,6 +333,8 @@ void RangeSelector::setMaxMin(const double min, const double max)
   }
   m_min = min;
   m_max = max;
+  setMinLinePos(m_min);
+  setMaxLinePos(m_max);
   emit selectionChanged(m_min, m_max);
   emit minValueChanged(m_min);
   emit maxValueChanged(m_max);
@@ -349,6 +348,7 @@ void RangeSelector::setMin(double val)
   if ( val != m_min )
   {
     m_min = val;
+    setMinLinePos(m_min);
     emit minValueChanged(val);
     emit selectionChanged(val, m_max);
   }
@@ -362,6 +362,7 @@ void RangeSelector::setMax(double val)
   if ( val != m_max )
   {
     m_max = val;
+    setMaxLinePos(m_max);
     emit maxValueChanged(val);
     emit selectionChanged(m_min, val);
   }

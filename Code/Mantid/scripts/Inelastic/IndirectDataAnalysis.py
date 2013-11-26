@@ -64,10 +64,10 @@ def createConvFitFun(options, par, file, ties):
         ip = 2
     pk_1 = '(composite=Convolution;name=Resolution, FileName="'+file+'"'
     if  options[2] >= 1:
-        lor_fun = 'name=Lorentzian,Amplitude='+str(par[ip])+',PeakCentre='+str(par[ip+1])+',HWHM='+str(par[ip+2])
+        lor_fun = 'name=Lorentzian,Amplitude='+str(par[ip])+',PeakCentre='+str(par[ip+1])+',FWHM='+str(par[ip+2])
     if options[2] == 2:
         funcIndex = 1 if options[1] else 0
-        lor_2 = 'name=Lorentzian,Amplitude='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',HWHM='+str(par[ip+5])
+        lor_2 = 'name=Lorentzian,Amplitude='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',FWHM='+str(par[ip+5])
         lor_fun = lor_fun +';'+ lor_2 +';'
         if ties:
             lor_fun += 'ties=(f'+str(funcIndex)+'.PeakCentre=f'+str(funcIndex+1)+'.PeakCentre)'
@@ -148,7 +148,7 @@ def confitParsToWS(Table, Data, specMin=0, specMax=-1):
     for spec in range(0,nSpec):
         yCol = (spec*2)+1
         yAxis = cName[(spec*2)+1]
-        if re.search('HWHM$', yAxis) or re.search('Amplitude$', yAxis):
+        if re.search('FWHM$', yAxis) or re.search('Amplitude$', yAxis):
             xAxisVals += dataX
             if (len(names) > 0):
                 names += ","
@@ -177,8 +177,8 @@ def confitPlotSeq(inputWS, Plot):
     plotSpecs = []
     if ( Plot == 'Intensity' ):
         res = 'Amplitude$'
-    elif ( Plot == 'HWHM' ):
-        res = 'HWHM$'
+    elif ( Plot == 'FWHM' ):
+        res = 'FWHM$'
     for i in range(0,nhist):
         title = mtd[inputWS].getAxis(1).label(i)
         if re.search(res, title):
