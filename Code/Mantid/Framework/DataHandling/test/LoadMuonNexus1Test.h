@@ -407,6 +407,20 @@ public:
 
     TS_ASSERT( deadTimesTable );
 
+    if ( deadTimesTable )
+    {
+      TS_ASSERT_EQUALS( deadTimesTable->columnCount(), 2 );
+      TS_ASSERT_EQUALS( deadTimesTable->rowCount(), 32 );
+
+      TS_ASSERT_EQUALS( deadTimesTable->Int(0,0), 1 );
+      TS_ASSERT_EQUALS( deadTimesTable->Int(15,0), 16 );
+      TS_ASSERT_EQUALS( deadTimesTable->Int(31,0), 32 );
+
+      TS_ASSERT_DELTA( deadTimesTable->Double(0,1), 0.00172168, 0.00000001 );
+      TS_ASSERT_DELTA( deadTimesTable->Double(15,1),-0.00163397, 0.00000001 );
+      TS_ASSERT_DELTA( deadTimesTable->Double(31,1), -0.03767336, 0.00000001 );
+    }
+
     AnalysisDataService::Instance().remove(outWSName);
     AnalysisDataService::Instance().remove(deadTimesWSName);
   }

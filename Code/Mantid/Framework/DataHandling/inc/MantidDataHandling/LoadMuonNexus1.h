@@ -5,8 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
+#include "MantidNexus/NexusClasses.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -17,6 +19,8 @@ namespace Mantid
 {
   namespace DataHandling
   {
+    using namespace DataObjects;
+
     /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
     Loads an file in Nexus Muon format version 1 and stores it in a 2D workspace 
@@ -87,11 +91,18 @@ namespace Mantid
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       
-      void loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i,
-          MuonNexusReader& nxload, const int64_t lengthIn, DataObjects::Workspace2D_sptr localWorkspace);
-      void runLoadMappingTable(DataObjects::Workspace2D_sptr);
-      void runLoadLog(DataObjects::Workspace2D_sptr);
-      void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
+      void loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i, 
+        MuonNexusReader& nxload, const int64_t lengthIn, Workspace2D_sptr localWorkspace);
+      void runLoadMappingTable(Workspace2D_sptr);
+      void runLoadLog(Workspace2D_sptr);
+      void loadRunDetails(Workspace2D_sptr localWorkspace);
+
+      /// Loads dead time table for the detector
+      void loadDeadTimes(NeXus::NXRoot& root);
+
+      /// Creates Dead Time Table using all the data between begin and end
+      TableWorkspace_sptr createDeadTimeTable(std::vector<double>::const_iterator begin, 
+        std::vector<double>::const_iterator end);
     };
 
   } // namespace DataHandling

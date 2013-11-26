@@ -43,21 +43,23 @@ The ChildAlgorithms used by LoadMuonNexus are:
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+
 
 #include <Poco/Path.h>
 #include <limits>
@@ -129,22 +131,6 @@ namespace Mantid
       catch (...)
       {}
 
-      try
-      { 
-        std::vector<double>defaultDeadTimes;
-        NXFloat deadTimes = root.openNXFloat("run/instrument/detector/deadtimes");
-        deadTimes.load();
-
-        int length = deadTimes.dim0();
-        for (int i = 0; i < length; i++)
-        {
-          defaultDeadTimes.push_back(static_cast<double>(*(deadTimes() + i) ) );
-        }
-        setProperty("DeadTimes", defaultDeadTimes);
-      }
-      catch (...)
-      {}
-
       NXEntry nxRun = root.openEntry("run");
       std::string title;
       std::string notes;
@@ -183,6 +169,10 @@ namespace Mantid
         // Read the number of periods in this file
         m_numberOfPeriods = nxload.t_nper;
       }
+
+      // When we know number of periods and spectra - we can load dead times 
+      loadDeadTimes(root);
+
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
@@ -463,6 +453,81 @@ namespace Mantid
 
       // Clean up
       delete[] timeChannels;
+    }
+
+    /**
+     * Loads dead time table for the detector.
+     * @param root :: Root entry of the Nexus to read dead times from
+     */
+    void LoadMuonNexus1::loadDeadTimes(NXRoot& root)
+    {
+      // If dead times workspace name is empty - caller doesn't need dead times 
+      if ( getPropertyValue("DeadTimesTable").empty() )
+        return;
+
+      NXEntry detector = root.openEntry("run/instrument/detector");
+
+      NXInfo infoDeadTimes = detector.getDataSetInfo("deadtimes");
+      if (infoDeadTimes.stat != NX_ERROR)
+      {
+        NXFloat deadTimesData = detector.openNXFloat("deadtimes");
+        deadTimesData.load();
+
+        int numDeadTimes = deadTimesData.dim0();
+
+        std::vector<double> deadTimes;
+        deadTimes.reserve(numDeadTimes);
+
+        for (int i = 0; i < numDeadTimes; i++)
+          deadTimes.push_back(deadTimesData[i]);
+
+        if ( numDeadTimes < m_numberOfSpectra )
+        {
+          throw Exception::FileError("Number of dead times specified is less than number of spectra",
+            m_filename);
+        }
+        else if( numDeadTimes == m_numberOfSpectra )
+        {
+          // Simpliest case - one dead time for one detector
+
+          TableWorkspace_sptr table = createDeadTimeTable( deadTimes.begin(), deadTimes.end() );
+          setProperty("DeadTimesTable", table); 
+        }
+        else
+        {
+          // More complex case - different dead times for different periods
+        }
+      }
+
+      // It is expected that file might not contain any dead times, so not finding them is not an 
+      // error
+    }
+
+    /**
+     * Creates Dead Time Table using all the data between begin and end.
+     *
+     * @param begin :: Iterator to the first element of the data to use
+     * @param   end :: Iterator to the last element of the data to use
+     * @return Dead Time Table create using the data
+     */
+    TableWorkspace_sptr LoadMuonNexus1::createDeadTimeTable(
+      std::vector<double>::const_iterator begin, std::vector<double>::const_iterator end)
+    {
+      TableWorkspace_sptr deadTimeTable = boost::dynamic_pointer_cast<TableWorkspace>(
+        WorkspaceFactory::Instance().createTable("TableWorkspace") );
+
+      deadTimeTable->addColumn("int","spectrum");
+      deadTimeTable->addColumn("double","dead-time");
+
+      int s = 1; // Current spectrum
+
+      for(auto it = begin; it != end; it++)
+      {
+        TableRow row = deadTimeTable->appendRow();
+        row << s++ << *it;
+      }
+
+      return deadTimeTable;
     }
 
     /** Load in a single spectrum taken from a NeXus file
