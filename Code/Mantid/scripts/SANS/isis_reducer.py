@@ -208,6 +208,9 @@ class ISISReducer(SANSReducer):
             @param reload: if this sample should be reloaded before the first reduction  
             @param period: the period within the sample to be analysed
         """
+        if not self.user_settings.executed:
+            raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
+
         # ensure that when you set sample, you start with no can, transmission previously used.
         self._clean_loaded_data()
         self._sample_run.set_run(run, reload, period, self)
@@ -256,11 +259,8 @@ class ISISReducer(SANSReducer):
         """
         sample_obj = self.get_sample().loader
         name = str(sample_obj.shortrun_no)
-        if show_period and sample_obj.periods_in_file > 1:
-            if sample_obj._period == sample_obj.UNSET_PERIOD:
-                period = 1
-            else:
-                period = sample_obj._period
+        if show_period and (sample_obj.periods_in_file > 1 or sample_obj._period != -1):
+            period = sample_obj.curr_period()
             name += 'p'+str(period)
         
         name += self.instrument.cur_detector().name('short')
