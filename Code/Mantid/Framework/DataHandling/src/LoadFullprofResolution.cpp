@@ -76,6 +76,9 @@ namespace DataHandling
 
     // declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
 
+    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut, PropertyMode::Optional),
+        "Optional: A matrix workspace with the instrument to which we add the parameters from the Fullprof .irf file.");
+
     return;
   }
 
@@ -87,6 +90,7 @@ namespace DataHandling
     // Get input
     string datafile = getProperty("Filename");
     vector<int> outputbankids = getProperty("Banks");
+    MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
     // Import data
     vector<string> lines;
@@ -169,8 +173,13 @@ namespace DataHandling
     // Generate output table workspace
     API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
 
-    // 6. Output
+    // 6. Output table workspace
     setProperty("OutputTableWorkspace", outTabWs);
+
+    // 7. If workspace, put parameters there
+    if(workspace){
+      putParametersIntoWorkspace( outTabWs, workspace );
+    }
 
     return;
   }
@@ -731,6 +740,10 @@ namespace DataHandling
     } // END(i)
 
     return tablews;
+  }
+
+  void LoadFullprofResolution::putParametersIntoWorkspace( const API::ITableWorkspace_sptr tws, API::MatrixWorkspace_sptr ws)
+  {
   }
 
 } // namespace DataHandling
