@@ -226,7 +226,7 @@ namespace Algorithms
     */
   std::vector<std::string> FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames)
   {
-    vector<string> vec_funcparnames(funcnames.size());
+    vector<string> vec_funcparnames;
 
     for (size_t i = 0; i < funcnames.size(); ++i)
     {
@@ -454,8 +454,9 @@ namespace Algorithms
     if (m_peakParameterNames.size() != vec_peakparvalues.size())
     {
       stringstream errss;
-      errss << "Input peak parameters' names (" << m_peakParameterNames.size()
-            << ") and values (" << vec_peakparvalues.size() << ") have different numbers. ";
+      errss << "Input peak properties' arrays are incorrect: # of parameter names = "
+            << m_peakParameterNames.size()
+            << ", # of parameter values = " << vec_peakparvalues.size() << "\n";
       throw runtime_error(errss.str());
     }
 
