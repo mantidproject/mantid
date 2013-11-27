@@ -141,17 +141,102 @@ namespace WorkflowAlgorithms
    */
   Workspace_sptr MuonLoadCorrected::applyDtc(Workspace_sptr ws, Workspace_sptr dt)
   {
-    if ( auto wsMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(ws) )
+    using namespace boost; // We will use it a lot
+
+    if ( auto wsMatrix = dynamic_pointer_cast<MatrixWorkspace>(ws) )
     {
-      if ( auto dtTable = boost::dynamic_pointer_cast<TableWorkspace>(dt) )
+      if ( auto dtTable = dynamic_pointer_cast<TableWorkspace>(dt) )
       {
         return runApplyDtc(wsMatrix, dtTable); 
       }
-      else
+      else if ( auto dtGroup = dynamic_pointer_cast<WorkspaceGroup>(ws) )
+      {
         throw std::invalid_argument("Can't apply group of dead time tables to a single workspace");
+      }
+      else
+      {
+        throw std::invalid_argument("Incorrect DeadTimeTable type");
+      }
+    }
+    else if ( auto wsGroup = dynamic_pointer_cast<WorkspaceGroup>(ws) )
+    {
+      if ( auto dtTable = dynamic_pointer_cast<TableWorkspace>(dt) )
+      {
+        return applyDtcTableToGroup(wsGroup, dtTable);
+      }
+      else if ( auto dtGroup = dynamic_pointer_cast<WorkspaceGroup>(dt) )
+      {
+        return applyDtcGroupToGroup(wsGroup, dtGroup);
+      }
+      else
+      {
+        throw std::invalid_argument("Incorrect DeadTimeTable type");
+      }
+    }
+    else
+    {
+      throw std::invalid_argument("Unsupported workspace type");
+    }
+  }
+  
+  /**
+   * Applies dead time table to a group of workspaces.
+   * @param wsGroup :: Group to apply correction to
+   * @param dtTable :: Dead Time Table
+   * @return Group of corrected workspaces
+   */
+  WorkspaceGroup_sptr MuonLoadCorrected::applyDtcTableToGroup(WorkspaceGroup_sptr wsGroup,
+    TableWorkspace_sptr dtTable)
+  {
+    WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+
+    for(size_t i = 0; i < wsGroup->size(); i++)
+    {
+      auto wsMember = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+
+      if(!wsMember)
+        throw std::invalid_argument("Group contains unsupported type of workspace");
+
+      MatrixWorkspace_sptr outputWs = runApplyDtc(wsMember, dtTable);
+
+      outputGroup->addWorkspace(outputWs);
     }
 
-    return Workspace_sptr();
+    return outputGroup;
+  }
+
+  /**
+   * Applies group of dead time tables to a group of workspaces.
+   * @param wsGroup :: Group to apply correction to
+   * @param dtGroup :: Group of Dead Time Tables
+   * @return Group of corrected workspaces
+   */
+  WorkspaceGroup_sptr MuonLoadCorrected::applyDtcGroupToGroup(WorkspaceGroup_sptr wsGroup, 
+    WorkspaceGroup_sptr dtGroup)
+  {
+    if(dtGroup->size() != wsGroup->size())
+      throw std::invalid_argument("Dead Time Table group size is not equal to ws group size");
+
+    WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+
+    for(size_t i = 0; i < wsGroup->size(); i++)
+    {
+      auto wsMember = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+
+      if(!wsMember)
+        throw std::invalid_argument("Group contains unsupported type of workspace");
+
+      auto dtMember = boost::dynamic_pointer_cast<TableWorkspace>(dtGroup->getItem(i));
+
+      if(!dtMember)
+        throw std::invalid_argument("Dead Time Table group contains workspace which is not a table");
+
+      MatrixWorkspace_sptr outputWs = runApplyDtc(wsMember, dtMember);
+
+      outputGroup->addWorkspace(outputWs);
+    }
+
+    return outputGroup;
   }
 
 

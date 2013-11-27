@@ -55,6 +55,12 @@ namespace WorkflowAlgorithms
 
     /// Applies dead time table to a workspace
     Workspace_sptr applyDtc(Workspace_sptr ws, Workspace_sptr dt);
+
+    /// Applies dead time table to a group of workspaces
+    WorkspaceGroup_sptr applyDtcTableToGroup(WorkspaceGroup_sptr wsGroup, TableWorkspace_sptr dtTable);
+    
+    /// Applies a group of dead time tables to a group of workspaces
+    WorkspaceGroup_sptr applyDtcGroupToGroup(WorkspaceGroup_sptr wsGroup, WorkspaceGroup_sptr dtGroup);
     
     /// Runs ApplyDeadTimeCorre algorithm
     MatrixWorkspace_sptr runApplyDtc(MatrixWorkspace_sptr ws, TableWorkspace_sptr dtt);
