@@ -842,12 +842,10 @@ namespace IDA
   {
     const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
     // Always want FWHM to display as positive.
-    const double fwhm = std::fabs(val*2.0-peakCentre);
+    const double hwhm = std::fabs(val-peakCentre);
+    // Update the property
     m_cfHwhmRange->blockSignals(true);
-    m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], fwhm);
-    // Synchronize min and max values
-    m_cfHwhmRange->setMinimum(peakCentre - val);
-    m_cfHwhmRange->setMaximum(peakCentre + val);
+    m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], hwhm*2);
     m_cfHwhmRange->blockSignals(false);
   }
 
@@ -862,6 +860,10 @@ namespace IDA
     else if ( prop == m_cfProp["EndX"] ) { m_cfRangeS->setMaximum(val); }
     else if ( prop == m_cfProp["BGA0"] ) { m_cfBackgS->setMinimum(val); }
     else if ( prop == m_cfProp["Lorentzian 1.FWHM"] ) { hwhmUpdateRS(val); }
+    else if ( prop == m_cfProp["Lorentzian 1.PeakCentre"] )
+    {
+        hwhmUpdateRS(m_cfDblMng->value(m_cfProp["Lorentzian 1.FWHM"]));
+    }
   }
 
   void ConvFit::hwhmUpdateRS(double val)
