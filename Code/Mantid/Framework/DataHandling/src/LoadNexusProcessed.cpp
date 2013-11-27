@@ -559,16 +559,15 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
           workspace->setRowCount(nRows);
           hasNumberOfRowBeenSet = true;
         }
-        int maxStr = info.dims[1];
 
-        std::string fromCrap(maxStr,' ');
-
+        const int maxStr = info.dims[1];
         data.load();
-        for (int iR = 0; iR < nRows; iR++)
+        for (int iR = 0; iR < nRows; ++iR)
         {
-          for (int i = 0; i < maxStr; i++)
-            fromCrap[i] = *(data()+i+maxStr*iR);
-          workspace->cell<std::string>(iR,columnNumber-1) = fromCrap;
+          auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
+          auto startPoint = data() + maxStr*iR;
+          cellContents.assign(startPoint,startPoint+maxStr);
+          boost::trim_right(cellContents);
         }
       }
     } 
