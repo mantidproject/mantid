@@ -47,6 +47,7 @@ set ( SRC_FILES
 	src/Quantification/ForegroundModelFactory.cpp
 	src/Quantification/MDResolutionConvolution.cpp
 	src/Quantification/MDResolutionConvolutionFactory.cpp
+	src/Quantification/Models/QCoordinate.cpp
 	src/Quantification/Models/Strontium122.cpp
 	src/Quantification/Resolution/ModeratorChopperResolution.cpp
 	src/Quantification/Resolution/TobyFitBMatrix.cpp
@@ -119,6 +120,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/ForegroundModelFactory.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolution.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
+	inc/MantidMDAlgorithms/Quantification/Models/QCoordinate.h
 	inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
