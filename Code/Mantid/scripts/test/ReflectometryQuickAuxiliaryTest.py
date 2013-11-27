@@ -88,6 +88,45 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         # Test with group workspace as input
         self.assertEquals(errorCode, quick.groupGet(mtd[self.__wsName][0].name(), 'samp','MADE-UP-LOG-NAME'))
         
-
+    def test_exponential_correction_strategy(self):
+        test_ws =  CreateWorkspace(UnitX="TOF", DataX=[0,1,2,3], DataY=[1,1,1], NSpec=1)
+        
+        correction = quick.ExponentialCorrectionStrategy(1, 0) # Should have no effect.
+        self.assertTrue(isinstance(correction, quick.CorrectionStrategy), msg="Should be of type Correction")
+        
+        corrected = correction.apply(test_ws)
+        
+        self.assertTrue( all( test_ws.readY(0) == corrected.readY(0) ), msg="Input and outputs should be identical" )
+        
+        DeleteWorkspace(test_ws)
+        DeleteWorkspace(corrected)
+        
+    def test_polynomial_correction_strategy(self):
+        test_ws =  CreateWorkspace(UnitX="TOF", DataX=[0,1,2,3], DataY=[1,1,1], NSpec=1)
+        
+        correction = quick.PolynomialCorrectionStrategy("1, 0") # Should have no effect.
+        self.assertTrue(isinstance(correction, quick.CorrectionStrategy), msg="Should be of type Correction")
+        
+        corrected = correction.apply(test_ws)
+        
+        self.assertTrue( all( test_ws.readY(0) == corrected.readY(0) ), msg="Input and outputs should be identical" )
+        
+        DeleteWorkspace(test_ws)
+        DeleteWorkspace(corrected)
+        
+    def test_null_correction_strategy(self):
+        test_ws = CreateWorkspace(UnitX="TOF", DataX=[0,1,2,3], DataY=[1,1,1], NSpec=1)
+        
+        correction = quick.NullCorrectionStrategy() # Should have no effect.
+        self.assertTrue(isinstance(correction, quick.CorrectionStrategy), msg="Should be of type Correction")
+        
+        corrected = correction.apply(test_ws)
+        
+        self.assertTrue( all( test_ws.readY(0) == corrected.readY(0) ), msg="Input and outputs should be identical" )
+        
+        DeleteWorkspace(test_ws)
+        DeleteWorkspace(corrected)
+        
+        
 if __name__ == '__main__':
     unittest.main()
