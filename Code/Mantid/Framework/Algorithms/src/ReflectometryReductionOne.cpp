@@ -5,10 +5,13 @@ Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs 
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/make_shared.hpp>
+#include <vector>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+
 
 namespace Mantid
 {
@@ -60,6 +63,33 @@ namespace Algorithms
     inputValidator->add(boost::make_shared<WorkspaceUnitValidator>("TOF"));
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","", Direction::Input, inputValidator), "Run to reduce.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun","", Direction::Input, inputValidator->clone() ), "First transmission run, or the low wavelength transmision run if SecondTransmissionRun is also provided.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun","", Direction::Input, inputValidator->clone() ), "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
+    declareProperty(new PropertyWithValue<double>("Theta", -1, Direction::Input),  "Final theta value.");
+    declareProperty(new PropertyWithValue<bool>("PointDetectorAnalysis", true, Direction::Input ), "Set the Mode for the analysis");
+
+
+    std::vector<std::string> propOptions;
+    propOptions.push_back("PointDetectorAnalysis");
+    propOptions.push_back("MultiDetectorAnalysis");
+
+    declareProperty("AnalysisMode", "PointDetectorAnalysis", boost::make_shared<StringListValidator>(propOptions),
+          "The type of analysis to perform. Point detector or multi detector.");
+
+    // Declare property for region of interest (workspace index ranges min, max)
+    // Declare property for direct beam (workspace index ranges min, max)
+    // Declare property for workspace index ranges
+    // Declare property for lam min
+    // Declare property for lam max
+    // Declare property for integration min
+    // Declare property for integration max
+    // Declare property for workspace index I0
+    // Declare property for monitor integral min
+    // Declare property for monitor integral max
+    // Declare property for monitor background min
+    // Declare property for monitor background max.
+
+
 
     /*
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("LHSWorkspace","", Direction::Input), "An input workspace.");
