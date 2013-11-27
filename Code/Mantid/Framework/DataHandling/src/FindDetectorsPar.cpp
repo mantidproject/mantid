@@ -230,6 +230,28 @@ void FindDetectorsPar::setOutputTable()
 // Constant for converting Radians to Degrees
 const double rad2deg = 180.0 / M_PI;
 
+/** method calculates an angle closest to the initial one taken on a ring
+  * e.g. given inital angle 179 deg and another one -179 closest one to 179 is 181
+  @param baseAngle -- the angle to be close to
+  @param anAngle   -- the angle which ring image may be requested
+
+  @returns         -- the angle closest to the initial on a ring.
+*/
+double AvrgDetector::nearAngle(const double &baseAngle,const double &anAngle)
+{
+  double dist = baseAngle-anAngle;
+  if (dist>180.)
+  {
+    return (anAngle+360.);
+  }
+  else if(dist<-180.)
+  {
+    return (anAngle - 360.);
+  }
+  else
+    return anAngle;
+}
+
 /** method to cacluate the detectors parameters and add them to the detectors averages
 *@param spDet    -- shared pointer to the Mantid Detector
 *@param Observer -- sample position or the centre of the polar system of coordinates to calculate detector's parameters. 
@@ -240,12 +262,28 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const 
   Kernel::V3D detPos    =  spDet->getPos();
   Kernel::V3D toDet     = (detPos - Observer);
 
-  double dist2Det,Polar,Azimut;
+  double dist2Det,Polar,Azimut,ringPolar,ringAzim;
   // identify the detector' position in the beam coordinate system:
   toDet.getSpherical(dist2Det,Polar,Azimut);
-  m_FlightPathSum +=dist2Det;
-  m_PolarSum      +=Polar;
-  m_AzimutSum     +=Azimut;
+  if(m_nComponents <=1)
+  {
+    m_FlightPathSum =dist2Det;
+    m_PolarSum      =Polar;
+    m_AzimutSum     =Azimut;
+
+    m_AzimBase      = Polar;
+    m_PolarBase     = Azimut;
+    ringPolar       = Polar;
+    ringAzim        = Azimut;
+  }
+  else
+  {
+    ringPolar     = nearAngle(m_AzimBase,Polar) ;
+    ringAzim      = nearAngle(m_PolarBase,Azimut);
+    m_FlightPathSum +=dist2Det;
+    m_PolarSum      +=ringPolar;
+    m_AzimutSum     +=ringAzim;
+  }
 
 
    // centre of the azimuthal ring (the ring  detectors form around the beam)
@@ -284,10 +322,10 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const 
        double polarHalfSize  = rad2deg*atan2(0.5*(polarMax-polarMin), dist2Det);
        double azimHalfSize   = rad2deg*atan2(0.5*(azimMax-azimMin), dist2Det);
 
-       polarMin = Polar -polarHalfSize;
-       polarMax = Polar +polarHalfSize;
-       azimMin  = Azimut -azimHalfSize;
-       azimMax  = Azimut +azimHalfSize;
+       polarMin = ringPolar -polarHalfSize;
+       polarMax = ringPolar +polarHalfSize;
+       azimMin  = ringAzim -azimHalfSize;
+       azimMax  = ringAzim +azimHalfSize;
 
    }
    if (m_AzimMin>azimMin)m_AzimMin=azimMin;
