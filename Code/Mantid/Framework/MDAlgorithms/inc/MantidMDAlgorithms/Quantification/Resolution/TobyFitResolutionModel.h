@@ -53,7 +53,7 @@ namespace Mantid
         qz(qZ),
         deltaE(dE) {}
       ///
-      const double qx, qy, qz, deltaE;
+      double qx, qy, qz, deltaE;
     };
 
     /**
