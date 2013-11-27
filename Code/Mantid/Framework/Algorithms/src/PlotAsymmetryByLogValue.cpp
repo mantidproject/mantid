@@ -219,7 +219,7 @@ namespace Mantid
         fn << fnBase << fnn.str() << ext;
 
         // Load a muon nexus file with auto_group set to true
-        IAlgorithm_sptr loadAlg = createChildAlgorithm("MuonLoadCorrected");
+        IAlgorithm_sptr loadAlg = createChildAlgorithm("MuonApplyDTC");
         loadAlg->initialize();
         loadAlg->setPropertyValue("Filename", fn.str());
         loadAlg->setPropertyValue("DtcType", getPropertyValue("DeadTimeCorrType"));

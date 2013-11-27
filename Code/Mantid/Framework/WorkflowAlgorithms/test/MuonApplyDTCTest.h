@@ -7,29 +7,29 @@
 
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/SaveNexus.h"
-#include "MantidWorkflowAlgorithms/MuonLoadCorrected.h"
+#include "MantidWorkflowAlgorithms/MuonApplyDTC.h"
 
-using Mantid::WorkflowAlgorithms::MuonLoadCorrected;
+using Mantid::WorkflowAlgorithms::MuonApplyDTC;
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 
-class MuonLoadCorrectedTest : public CxxTest::TestSuite
+class MuonApplyDTCTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MuonLoadCorrectedTest *createSuite() { return new MuonLoadCorrectedTest(); }
-  static void destroySuite( MuonLoadCorrectedTest *suite ) { delete suite; }
+  static MuonApplyDTCTest *createSuite() { return new MuonApplyDTCTest(); }
+  static void destroySuite( MuonApplyDTCTest *suite ) { delete suite; }
 
   // Name of the output workspace.
   const std::string g_outWSName; 
 
-  MuonLoadCorrectedTest() : g_outWSName("MuonLoadCorrectedTest_OutputWS")
+  MuonApplyDTCTest() : g_outWSName("MuonApplyDTCTest_OutputWS")
   {}
 
-  ~MuonLoadCorrectedTest() 
+  ~MuonApplyDTCTest() 
   {
     AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
 
@@ -45,14 +45,14 @@ public:
 
   void test_init()
   {
-    MuonLoadCorrected alg;
+    MuonApplyDTC alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
 
   void test_properties()
   {
-    MuonLoadCorrected alg;
+    MuonApplyDTC alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT( alg.existsProperty("Filename") )
@@ -63,7 +63,7 @@ public:
   
   void test_singlePeriod_noCorrection()
   {
-    MuonLoadCorrected alg;
+    MuonApplyDTC alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
@@ -99,7 +99,7 @@ public:
 
   void test_singlePeriod_fromData()
   {
-    MuonLoadCorrected alg;
+    MuonApplyDTC alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
@@ -139,7 +139,7 @@ public:
 
     createDeadTimesTableFile(filename, 0.15);
 
-    MuonLoadCorrected alg;
+    MuonApplyDTC alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
@@ -178,7 +178,7 @@ public:
 
   void test_multiPeriod()
   {
-    MuonLoadCorrected alg;
+    MuonApplyDTC alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 

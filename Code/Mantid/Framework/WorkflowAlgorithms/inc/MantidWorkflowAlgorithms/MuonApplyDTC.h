@@ -1,5 +1,5 @@
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONLOADCORRECTED_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONLOADCORRECTED_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_MUONAPPLYDTC_H_
+#define MANTID_WORKFLOWALGORITHMS_MUONAPPLYDTC_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -13,7 +13,7 @@ namespace WorkflowAlgorithms
   using namespace API;
   using namespace DataObjects;
 
-  /** MuonLoadCorrected : loads Muon data with Dead Time Correction applied. 
+  /** MuonApplyDTC : Applies Dead Time Correction to Muon data.
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,11 +35,11 @@ namespace WorkflowAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport MuonLoadCorrected  : public API::Algorithm
+  class DLLExport MuonApplyDTC  : public API::Algorithm
   {
   public:
-    MuonLoadCorrected();
-    virtual ~MuonLoadCorrected();
+    MuonApplyDTC();
+    virtual ~MuonApplyDTC();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -70,4 +70,4 @@ namespace WorkflowAlgorithms
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_WORKFLOWALGORITHMS_MUONLOADCORRECTED_H_ */
+#endif  /* MANTID_WORKFLOWALGORITHMS_MUONAPPLYDTC_H_ */

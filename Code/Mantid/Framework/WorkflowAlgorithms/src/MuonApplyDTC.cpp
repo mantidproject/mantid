@@ -1,8 +1,8 @@
 /*WIKI*
-Load Muon data with Dead Time Correction applied. Part of the Muon workflow.
+Applies Dead Time Correction to Muon data. Part of the Muon workflow.
 *WIKI*/
 
-#include "MantidWorkflowAlgorithms/MuonLoadCorrected.h"
+#include "MantidWorkflowAlgorithms/MuonApplyDTC.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
@@ -19,50 +19,49 @@ namespace WorkflowAlgorithms
   using namespace DataObjects;
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(MuonLoadCorrected)
+  DECLARE_ALGORITHM(MuonApplyDTC)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MuonLoadCorrected::MuonLoadCorrected()
+  MuonApplyDTC::MuonApplyDTC()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  MuonLoadCorrected::~MuonLoadCorrected()
+  MuonApplyDTC::~MuonApplyDTC()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string MuonLoadCorrected::name() const { return "MuonLoadCorrected";};
+  const std::string MuonApplyDTC::name() const { return "MuonApplyDTC";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int MuonLoadCorrected::version() const { return 1;};
+  int MuonApplyDTC::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string MuonLoadCorrected::category() const { return "Workflow\\Muon";}
+  const std::string MuonApplyDTC::category() const { return "Workflow\\Muon";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void MuonLoadCorrected::initDocs()
+  void MuonApplyDTC::initDocs()
   {
-    this->setWikiSummary("Loads Muon data with Dead Time Correction applied.");
-    this->setOptionalMessage("Loads Muon data with Dead Time Correction applied.");
+    this->setWikiSummary("Applies Dead Time Correction to Muon data.");
+    this->setOptionalMessage("Applies Dead Time Correction to Muon data.");
   }
 
   //----------------------------------------------------------------------------------------------
   /** 
    * Initialize the algorithm's properties.
    */
-  void MuonLoadCorrected::init()
+  void MuonApplyDTC::init()
   {
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-      "The name of the Nexus file to load" );      
-    
+      "The name of the Nexus file to     
     std::vector<std::string> dtcTypes;
     dtcTypes.push_back("None");
     dtcTypes.push_back("FromRunData");
@@ -82,7 +81,7 @@ namespace WorkflowAlgorithms
   /** 
    * Execute the algorithm.
    */
-  void MuonLoadCorrected::exec()
+  void MuonApplyDTC::exec()
   {
     const std::string filename = getPropertyValue("Filename"); 
 
@@ -124,7 +123,7 @@ namespace WorkflowAlgorithms
    * @param numPeriods :: Number of data collection periods
    * @return TableWorkspace when one period, otherwise a group of TableWorkspace-s with dead times
    */
-  Workspace_sptr MuonLoadCorrected::loadDeadTimesFromNexus(const std::string& filename)
+  Workspace_sptr MuonApplyDTC::loadDeadTimesFromNexus(const std::string& filename)
   {
     IAlgorithm_sptr loadNexusProc = createChildAlgorithm("LoadNexusProcessed");
     loadNexusProc->setPropertyValue("Filename", filename);
@@ -139,7 +138,7 @@ namespace WorkflowAlgorithms
    * @param  dt :: Dead Times to use
    * @return Corrected workspace
    */
-  Workspace_sptr MuonLoadCorrected::applyDtc(Workspace_sptr ws, Workspace_sptr dt)
+  Workspace_sptr MuonApplyDTC::applyDtc(Workspace_sptr ws, Workspace_sptr dt)
   {
     using namespace boost; // We will use it a lot
 
@@ -185,7 +184,7 @@ namespace WorkflowAlgorithms
    * @param dtTable :: Dead Time Table
    * @return Group of corrected workspaces
    */
-  WorkspaceGroup_sptr MuonLoadCorrected::applyDtcTableToGroup(WorkspaceGroup_sptr wsGroup,
+  WorkspaceGroup_sptr MuonApplyDTC::applyDtcTableToGroup(WorkspaceGroup_sptr wsGroup,
     TableWorkspace_sptr dtTable)
   {
     WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
@@ -211,7 +210,7 @@ namespace WorkflowAlgorithms
    * @param dtGroup :: Group of Dead Time Tables
    * @return Group of corrected workspaces
    */
-  WorkspaceGroup_sptr MuonLoadCorrected::applyDtcGroupToGroup(WorkspaceGroup_sptr wsGroup, 
+  WorkspaceGroup_sptr MuonApplyDTC::applyDtcGroupToGroup(WorkspaceGroup_sptr wsGroup, 
     WorkspaceGroup_sptr dtGroup)
   {
     if(dtGroup->size() != wsGroup->size())
@@ -246,7 +245,7 @@ namespace WorkflowAlgorithms
    * @param  dt :: Dead Times to use
    * @return Corrected workspace 
    */
-  MatrixWorkspace_sptr MuonLoadCorrected::runApplyDtc(MatrixWorkspace_sptr ws, TableWorkspace_sptr dt)
+  MatrixWorkspace_sptr MuonApplyDTC::runApplyDtc(MatrixWorkspace_sptr ws, TableWorkspace_sptr dt)
   {
     IAlgorithm_sptr applyDtc = createChildAlgorithm("ApplyDeadTimeCorr");
 
