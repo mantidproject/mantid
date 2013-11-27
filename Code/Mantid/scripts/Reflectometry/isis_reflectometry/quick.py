@@ -17,112 +17,61 @@ from convert_to_wavelength import ConvertToWavelength
 import math
 import re
 
-
-def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', debug=0):
+def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', debug=False):
     '''
-    call signature(s)::
-
-    x=quick(RunNumber)
-    x=quick(RunNumber, roi=[0,0], db=[0,0], trans=0, outputType='pd')
-    x=quick(RunNumber,[1,10])
-    x=quick(RunNumber,[1,10],[20,40])
-    x=quick(RunNumber, trans=2568)
-    x=quick(RunNumber, trans='SomeSavedWorkspaceName')
-        
-    Reduces a ISIS  raw or nexus file created on one of the reflectometers applying 
-    only a minimum ammount of corrections. The data is left in terms of lambda.
-    
-    Required arguments
-    =========   =====================================================================
-    RunNumber    Either an ISIS run number when the paths are set up correctly or 
-            the full path and filename if an ISIS raw file.
-    =========   =====================================================================
-
-    Optional keyword arguments:    
-    =========   =====================================================================
-    Keyword         Description
-    =========   =====================================================================
-    roi        Region of interest marking the extent of the reflected beam. 
-            default [0,0]
-     db        Region of interest marking the extent of the direct beam. 
-            default [0,0]
-    trans        transmission run number or saved workspace. The default is 0 (No 
-            transmission run).  trans=-1 will supress the division of the 
-            detector by the monitor.
-    polcorr        polarisation correction, 0=no correction (unpolarised run)
-    usemon        monitor to be used for normalisation (-1 is default from IDF)
-    outputType    'pd' = point detector (Default), 'md'=  Multidetector   Will use
-            this to build the equivalent of gd in the old matlab code but 
-            keep all of the simple detector processing in one well organized
-            function.  This should not be used by the average user.
-    =========   =====================================================================
-
-    Outputs:
-    =========   =====================================================================
-    x        Either a single mantid workspace or worspace group or an array 
-            of them. 
-    =========   =====================================================================
-
-    Working examples:
-    >>> # reduce a data set with the default parameters 
-    >>> x=quick(/Users/trc/Dropbox/Work/PolrefTest/POLREF00003014.raw")
-
-    >>> # reduce a data set with a transmission run 
-    >>> t=quick(/Users/trc/Dropbox/Work/PolrefTest/POLREF00003010.raw")
-    >>> x=quick(/Users/trc/Dropbox/Work/PolrefTest/POLREF00003014.raw", trans=t)
-    
-    >>> # reduce a data set using the multidetector and output a single reflectivity 
-    >>> # where the reflected beam is between channel 121 and 130. 
-    >>> x=quick(/Users/trc/Dropbox/Work/PolrefTest/POLREF00003014.raw", [121,130])
-
-
-    Also see: pol
-
-    ToDo:
-        1) code for the transmisson DONE!
-        2) Similar to the genie on polref add extraction from the multidetector
-        3) need to make the variables stored in the frame work contain the run number. DONE!
-        
+    Original quick parameters fetched from IDF
     '''
-
-    ''' Notes for developers:
-
-        Naming conventions for workspaces which live in the mantid framework are as follows:
-
-            It's nearly random.  this needs to be fixed so that name clashes do not occur.  
-            May try adding a pair of underscores to the front of the name.
-
-    '''
-    
     run_ws = ConvertToWavelength.to_workspace(run)
     idf_defaults = get_defaults(run_ws)
+    
+    i0_monitor_index = idf_defaults['I0MonitorIndex']
+    multi_detector_start = idf_defaults['MultiDetectorStart']
+    lambda_min = idf_defaults['LambdaMin']
+    lambda_max = idf_defaults['LambdaMax']
+    point_detector_start = idf_defaults['PointDetectorStart']
+    point_detector_stop =  idf_defaults['PointDetectorStop']
+    multi_detector_start = idf_defaults['MultiDetectorStart']
+    background_min = idf_defaults['MonitorBackgroundMin']
+    background_max = idf_defaults['MonitorBackgroundMax']
+    int_min = idf_defaults['MonitorIntegralMin']
+    int_max = idf_defaults['MonitorIntegralMax']
+    
+    return quick_explicit(run=run, i0_monitor_index = i0_monitor_index, lambda_min = lambda_min, lambda_max = lambda_max, 
+                   point_detector_start = point_detector_start, point_detector_stop = point_detector_stop, 
+                   multi_detector_start = multi_detector_start, background_min = background_min, background_max = background_max, 
+                   int_min = int_min, int_max = int_max, theta = theta, pointdet = pointdet, roi = roi, db = db, trans = trans, debug = debug )
+    
+    
+def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_min, background_max, int_min, int_max,
+                   point_detector_start=0, point_detector_stop=0, multi_detector_start=0, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', debug=False):
+    '''
+    Version of quick where all parameters are explicitly provided.
+    '''
+
+    run_ws = ConvertToWavelength.to_workspace(run)
     to_lam = ConvertToWavelength(run_ws)
     nHist = run_ws.getNumberHistograms()
     
-    I0MonitorIndex = idf_defaults['I0MonitorIndex']
-    MultiDetectorStart = idf_defaults['MultiDetectorStart']
-    lambda_min = idf_defaults['LambdaMin']
-    lambda_max = idf_defaults['LambdaMax']
-    detector_index_ranges = (idf_defaults['PointDetectorStart'], idf_defaults['PointDetectorStop'])
-    background_min = idf_defaults['MonitorBackgroundMin']
-    background_max = idf_defaults['MonitorBackgroundMax']
-    intmin = idf_defaults['MonitorIntegralMin']
-    intmax = idf_defaults['MonitorIntegralMax']
+    if pointdet:
+        detector_index_ranges = (point_detector_start, point_detector_stop)
+    else:
+        detector_index_ranges = (multi_detector_start, nHist-1)
     
-    _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+    
+    _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
 
     inst = run_ws.getInstrument()
     # Some beamline constants from IDF
    
-    print I0MonitorIndex
+    print i0_monitor_index
     print nHist
-    if (nHist > 5 and not(pointdet)):
+    if not pointdet:
         # Proccess Multi-Detector; assume MD goes to the end:
         # if roi or db are given in the function then sum over the apropriate channels
         print "This is a multidetector run."
         try:
             _I0M = RebinToWorkspace(WorkspaceToRebin=_monitor_ws,WorkspaceToMatch=_detector_ws)
-            IvsLam = _detector_ws / _IOM
+            IvsLam = _detector_ws / _I0M
             if (roi != [0,0]) :
                 ReflectedBeam = SumSpectra(InputWorkspace=IvsLam, StartWorkspaceIndex=roi[0], EndWorkspaceIndex=roi[1])
             if (db != [0,0]) :
@@ -168,14 +117,15 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
                     IvsLam = ExponentialCorrection(InputWorkspace=_detector_ws,C0=c0[0],C1=c1[0],Operation='Divide')
             IvsLam = Divide(LHSWorkspace=IvsLam, RHSWorkspace=_I0P)
         else: # we have a transmission run
-            _monInt = Integration(InputWorkspace=_I0P,RangeLower=intmin,RangeUpper=intmax)
+            _monInt = Integration(InputWorkspace=_I0P,RangeLower=int_min,RangeUpper=int_max)
             IvsLam = Divide(LHSWorkspace=_detector_ws,RHSWorkspace=_monInt)
             names = mtd.getObjectNames()
             if trans in names:
                 trans = RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch=IvsLam,OutputWorkspace=trans)
                 IvsLam = Divide(LHSWorkspace=IvsLam,RHSWorkspace=trans,OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
             else:
-                IvsLam = transCorr(trans, IvsLam)
+                IvsLam = transCorr(trans, IvsLam, lambda_min, lambda_max, background_min, background_max, 
+                                   int_min, int_max, detector_index_ranges, i0_monitor_index)
                 print type(IvsLam)
                 RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
                 
@@ -228,20 +178,11 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
 
 
 
-def transCorr(transrun, i_vs_lam):
-    
-    run_ws = ConvertToWavelength.to_workspace(i_vs_lam)
-    idf_defaults = get_defaults(run_ws)
-    I0MonitorIndex = idf_defaults['I0MonitorIndex']
-    MultiDetectorStart = idf_defaults['MultiDetectorStart']
-    lambda_min = idf_defaults['LambdaMin']
-    lambda_max = idf_defaults['LambdaMax']
-    background_min = idf_defaults['MonitorBackgroundMin']
-    background_max = idf_defaults['MonitorBackgroundMax']
-    intmin = idf_defaults['MonitorIntegralMin']
-    intmax = idf_defaults['MonitorIntegralMax']
-    detector_index_ranges = (idf_defaults['PointDetectorStart'], idf_defaults['PointDetectorStop'])
-    
+def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index):
+    """
+    Perform transmission corrections on i_vs_lam.
+    return the corrected result.
+    """
     
     transWS = None
     if ',' in transrun:
@@ -250,17 +191,17 @@ def transCorr(transrun, i_vs_lam):
         print "Transmission runs: ", transrun
         
         to_lam = ConvertToWavelength(slam)
-        _monitor_ws_slam, _detector_ws_slam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+        _monitor_ws_slam, _detector_ws_slam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
         
         _i0p_slam = RebinToWorkspace(WorkspaceToRebin=_monitor_ws_slam, WorkspaceToMatch=_detector_ws_slam)
-        _mon_int_trans = Integration(InputWorkspace=_i0p_slam, RangeLower=intmin, RangeUpper=intmax)
+        _mon_int_trans = Integration(InputWorkspace=_i0p_slam, RangeLower=int_min, RangeUpper=int_max)
         _detector_ws_slam = Divide(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_mon_int_trans)
         
         to_lam = ConvertToWavelength(llam)
-        _monitor_ws_llam, _detector_ws_llam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+        _monitor_ws_llam, _detector_ws_llam = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
         
         _i0p_llam = RebinToWorkspace(WorkspaceToRebin=_monitor_ws_llam, WorkspaceToMatch=_detector_ws_llam)
-        _mon_int_trans = Integration(InputWorkspace=_i0p_llam, RangeLower=intmin,RangeUpper=intmax)
+        _mon_int_trans = Integration(InputWorkspace=_i0p_llam, RangeLower=int_min,RangeUpper=int_max)
         _detector_ws_llam = Divide(LHSWorkspace=_detector_ws_llam, RHSWorkspace=_mon_int_trans)
         
         # TODO: HARDCODED STITCHING VALUES!!!!!
@@ -269,10 +210,10 @@ def transCorr(transrun, i_vs_lam):
     else:
         
         to_lam = ConvertToWavelength(transrun)
-        _monitor_ws_trans, _detector_ws_trans = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=I0MonitorIndex, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+        _monitor_ws_trans, _detector_ws_trans = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
         _i0p_trans = RebinToWorkspace(WorkspaceToRebin=_monitor_ws_trans, WorkspaceToMatch=_detector_ws_trans)
 
-        _mon_int_trans = Integration( InputWorkspace=_i0p_trans, RangeLower=intmin, RangeUpper=intmax )
+        _mon_int_trans = Integration( InputWorkspace=_i0p_trans, RangeLower=int_min, RangeUpper=int_max )
         _transWS = Divide( LHSWorkspace=_detector_ws_trans, RHSWorkspace=_mon_int_trans )
     
    
@@ -292,7 +233,7 @@ def cleanup():
     
 def get_defaults(run_ws):
     '''
-    Temporary helper  function. Aid refactoring by removing need to specifically ask things of parameter files.
+    Fetch out instrument level defaults.
     '''
     defaults = dict()
     if isinstance(run_ws, WorkspaceGroup):
@@ -301,13 +242,13 @@ def get_defaults(run_ws):
         instrument = run_ws.getInstrument()    
     defaults['LambdaMin'] = float( instrument.getNumberParameter('LambdaMin')[0] )
     defaults['LambdaMax'] = float( instrument.getNumberParameter('LambdaMax')[0] )
-    defaults['MonitorBackgroundMin'] = float( instrument.getNumberParameter('MonitorBackgroundMin')[0] )
-    defaults['MonitorBackgroundMax'] = float( instrument.getNumberParameter('MonitorBackgroundMax')[0] ) 
-    defaults['MonitorIntegralMin'] = float( instrument.getNumberParameter('MonitorIntegralMin')[0] )
+    defaults['MonitorBackgroundMin'] =  float( instrument.getNumberParameter('MonitorBackgroundMin')[0] )
+    defaults['MonitorBackgroundMax'] =float( instrument.getNumberParameter('MonitorBackgroundMax')[0] ) 
+    defaults['MonitorIntegralMin'] =  float( instrument.getNumberParameter('MonitorIntegralMin')[0] )
     defaults['MonitorIntegralMax'] = float( instrument.getNumberParameter('MonitorIntegralMax')[0] )
     defaults['MonitorsToCorrect'] = int( instrument.getNumberParameter('MonitorsToCorrect')[0] )
-    defaults['PointDetectorStart'] = int( instrument.getNumberParameter('PointDetectorStart')[0] )
-    defaults['PointDetectorStop'] = int( instrument.getNumberParameter('PointDetectorStop')[0] )
+    defaults['PointDetectorStart'] =  int( instrument.getNumberParameter('PointDetectorStart')[0] )
+    defaults['PointDetectorStop'] =  int( instrument.getNumberParameter('PointDetectorStop')[0] )
     defaults['MultiDetectorStart'] = int( instrument.getNumberParameter('MultiDetectorStart')[0] )
     defaults['I0MonitorIndex'] = int( instrument.getNumberParameter('I0MonitorIndex')[0] ) 
     return defaults

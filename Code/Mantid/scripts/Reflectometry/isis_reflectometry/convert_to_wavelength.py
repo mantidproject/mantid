@@ -19,7 +19,7 @@ class ConvertToWavelength(object):
     @classmethod
     def to_workspace(cls, candidate):
         workspace = None
-        if isinstance(candidate, mantid.api.MatrixWorkspace):
+        if isinstance(candidate, mantid.api.Workspace):
             workspace = candidate
         elif isinstance(candidate, str):
             if  mantid.api.AnalysisDataService.doesExist(candidate):
