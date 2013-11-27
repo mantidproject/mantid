@@ -313,7 +313,7 @@ namespace Mantid
     {
       // Most files will have some sort of header. If we've haven't been told how many lines to 
       // skip then try and guess 
-      size_t numToSkip = getProperty("SkipNumLines");
+      int numToSkip = getProperty("SkipNumLines");
       if( numToSkip == EMPTY_INT() )
       {
         size_t numCols = 0;
@@ -444,7 +444,7 @@ namespace Mantid
       }
       m_lineNo = 0;
       std::string line;
-      while( m_lineNo < numToSkip && getline(file, line) )
+      while( m_lineNo < static_cast<size_t>(numToSkip) && getline(file, line) )
       {
         ++m_lineNo;
       }
