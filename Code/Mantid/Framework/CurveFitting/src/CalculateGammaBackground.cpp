@@ -26,7 +26,8 @@ namespace Mantid
     /// Default constructor
     CalculateGammaBackground::CalculateGammaBackground()
       : Algorithm(), m_inputWS(), m_npeaks(0), m_masses(), m_amplitudes(), m_widths(),
-        m_l1(0.0), m_foilRadius(0.0), m_foilBeamMin(0.0),m_foilBeamMax(0.0),
+        m_l1(0.0), m_foilRadius(0.0), m_foilBeamMin(0.0),m_foilBeamMax(0.0), m_foil0ThetaRange(),
+        m_foil1ThetaRange(),
         m_backgroundWS(), m_correctedWS()
     {
     }
@@ -137,16 +138,84 @@ namespace Mantid
         throw std::invalid_argument("Input workspace has no component named foil-changer. "
                                     "One is required to define integration area.");
       }
+
       // 'radius' of shape sets limits in beam direction
-      const auto boundBox = changer->shape()->getBoundingBox();
+      const auto & boundBox = changer->shape()->getBoundingBox();
       m_foilBeamMin = boundBox.minPoint()[beamAxis];
       m_foilBeamMax = boundBox.maxPoint()[beamAxis];
 
-      g_log.information() << "Instrument geometry:\n"
-                          << "  l1 = " << m_l1 << "m\n"
-                          << "  foil radius = " << m_foilRadius << "\n"
-                          << "  foil integration min = " << m_foilBeamMin << "\n"
-                          << "  foil integration max = " << m_foilBeamMax << "\n";
+      // foil geometry
+      // there should be the same number in each position
+      auto foils0 = inst->getAllComponentsWithName("foil-pos0");
+      auto foils1 = inst->getAllComponentsWithName("foil-pos1");
+      const size_t nfoils = foils0.size();
+      if(nfoils != foils1.size())
+      {
+        std::ostringstream os;
+        os << "Mismatch in number of foils between pos 0 & 1: pos0=" << nfoils << ", pos1=" << foils1.size();
+        throw std::runtime_error(os.str());
+      }
+      // It is assumed that the foils all lie on a circle of the same radius from the sample position
+      auto firstFoilPos = foils0[0]->getPos();
+      double dummy(0.0);
+      firstFoilPos.getSpherical(m_foilRadius,dummy,dummy);
+
+      // Cache min/max theta values
+      m_foil0ThetaRange.resize(nfoils);
+      m_foil1ThetaRange.resize(nfoils);
+      for(size_t i = 0; i < nfoils; ++i)
+      {
+        m_foil0ThetaRange[i] = calculateThetaRange(foils0[i], m_foilRadius,refFrame->pointingHorizontal());
+        m_foil1ThetaRange[i] = calculateThetaRange(foils1[i], m_foilRadius,refFrame->pointingHorizontal());
+      }
+
+      if(g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
+      {
+        std::ostringstream os;
+        os << "Instrument geometry:\n"
+           << "  l1 = " << m_l1 << "m\n"
+           << "  foil radius = " << m_foilRadius << "\n"
+           << "  foil integration min = " << m_foilBeamMin << "\n"
+           << "  foil integration max = " << m_foilBeamMax << "\n";
+        std::ostringstream secondos;
+        for(size_t i = 0; i < nfoils; ++i)
+        {
+          const auto & range0 = m_foil0ThetaRange[i];
+          os << "  foil position in position 0: theta_min=" << range0.first << ", theta_max=" << range0.second << "\n";
+          const auto & range1 = m_foil1ThetaRange[i];
+          secondos << "  foil position in position 1: theta_min=" << range1.first << ", theta_max=" << range1.second << "\n";
+        }
+        g_log.information() << os.str() << secondos.str();
+      }
+    }
+
+   /**
+     * @param foilComp A pointer to the foil component
+     * @param radius The radius that gives the distance to the centre of the bounding box
+     * @param horizDir An enumeration defining which direction is horizontal
+     * @return The min/max angle in theta(degrees) (horizontal direction if you assume mid-point theta = 0)
+     */
+    std::pair<double,double> CalculateGammaBackground::calculateThetaRange(const Geometry::IComponent_const_sptr & foilComp,
+                                                                           const double radius, const unsigned int horizDir) const
+    {
+      auto shapedObject = boost::dynamic_pointer_cast<const Geometry::IObjComponent>(foilComp);
+      if(!shapedObject)
+      {
+        throw std::invalid_argument("A foil has been defined without a shape. Please check instrument definition.");
+      }
+
+      // First get current theta position
+      auto pos = foilComp->getPos();
+      double theta(0.0), dummy(0.0);
+      pos.getSpherical(dummy, theta, dummy); // absolute angle values
+      if( pos[horizDir] < 0.0 ) theta *= -1.0; // negative quadrant for theta
+
+      // Compute dtheta from bounding box & radius
+      const auto & box = shapedObject->shape()->getBoundingBox();
+      //box has center at 0,0,0
+      double xmax = box.maxPoint()[0];
+      double dtheta = std::asin(xmax/radius)*180.0/M_PI;
+      return std::make_pair(theta-dtheta, theta+dtheta);
     }
 
     /**

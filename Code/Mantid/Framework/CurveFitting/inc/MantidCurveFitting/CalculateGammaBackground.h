@@ -49,6 +49,9 @@ namespace Mantid
       void retrieveInputs();
       /// Compute & store the parameters that are fixed during the correction
       void cacheInstrumentGeometry();
+      /// Compute the theta range for a given foil
+      std::pair<double,double> calculateThetaRange(const Geometry::IComponent_const_sptr & foilComp,
+                                                   const double radius, const unsigned int horizDir) const;
       /// Create the output workspaces
       void createOutputWorkspaces();
       /// Calculate & correct the given index of the input workspace
@@ -73,6 +76,10 @@ namespace Mantid
       double m_foilBeamMin;
       /// Minimum in beam dir to stop integration over foil volume
       double m_foilBeamMax;
+      /// Min/max theta values of foils in position 0
+      std::vector<std::pair<double,double>> m_foil0ThetaRange;
+      /// Min/max theta values of foils in position 1
+      std::vector<std::pair<double,double>> m_foil1ThetaRange;
 
       /// Stores the value of the calculated background
       API::MatrixWorkspace_sptr m_backgroundWS;

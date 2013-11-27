@@ -81,12 +81,18 @@ namespace ComptonProfileTestHelpers
     inst->add(changer);
 
     //add single foil in position 0
-    auto foilShape = ComponentCreationHelper::createCuboid(0.025,0.025,0.025);
+    auto foilShape = ComponentCreationHelper::createCuboid(0.02);
     auto *foilPos0 = new ObjComponent("foil-pos0",foilShape);
     V3D pos0;
     pos0.spherical(0.225,-42,45);
     foilPos0->setPos(pos0);
     inst->add(foilPos0);
+
+    auto *foilPos1 = new ObjComponent("foil-pos1",foilShape);
+    V3D pos1;
+    pos1.spherical(0.225,-31,45);
+    foilPos1->setPos(pos1);
+    inst->add(foilPos1);
 
     return inst;
   }
