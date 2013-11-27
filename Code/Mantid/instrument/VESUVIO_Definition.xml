@@ -52,12 +52,15 @@
 
   <!-- FOILS  -->
 
-  <component type="foil">
+  <component name="foil-pos0" type="foil">
    <!-- position 0 -->
    <location t="-42" r="0.225" p="45"/>
    <location t="-64" r="0.225" p="45"/>
    <location t="55" r="0.225" p="45"/>
    <location t="35" r="0.225" p="45"/>
+  </component>
+
+  <component name="foil-pos1" type="foil">
    <!-- position 1 -->
    <location t="-31" r="0.225" p="45"/>
    <location t="-50" r="0.225" p="45"/>
