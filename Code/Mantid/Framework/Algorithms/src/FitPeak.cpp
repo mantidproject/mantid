@@ -319,10 +319,8 @@ namespace Algorithms
     i_minPeakX = getVectorIndex(vecX, m_minPeakX);
     i_maxPeakX = getVectorIndex(vecX, m_maxPeakX);
 
-    //
     m_fitBkgdFirst = getProperty("FitBackgroundFirst");
 
-    //
     m_outputRawParams = getProperty("RawParams");
 
     // Trying FWHM in a certain range
@@ -594,13 +592,8 @@ namespace Algorithms
       processNStoreFitResult(rwp,false);
     }
 
-    // Make a combo fit
-
-    // Get best fitting peak function
+    // Get best fitting peak function and Make a combo fit
     pop(m_bestPeakFunc, m_peakFunc);
-
-    // Recover the original Y value from pure peak data range
-    // recoverOriginalData();
 
     m_finalGoodnessValue = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex,
                                                 m_minFitX, m_maxFitX);
@@ -865,7 +858,7 @@ namespace Algorithms
     } // RWP fine
     else
     {
-      // failreason = "(Single-step) Fit returns a DBL_MAX.";
+      failreason = "(Single-step) Fit returns a DBL_MAX.";
       fitsuccess = false;
     }
 
@@ -876,6 +869,10 @@ namespace Algorithms
       if (storebkgd)
         push(m_bkgdFunc, m_bestBkgdFunc, m_fitErrorBkgdFunc);
       m_bestRwp = rwp;
+    }
+    else if (!fitsuccess)
+    {
+      g_log.debug() << "Reason of fit's failure: " << failreason << "\n";
     }
 
     return;
@@ -1005,8 +1002,6 @@ namespace Algorithms
 
     // Get maximum peak value among
     const MantidVec& vecX = dataws->readX(wsindex);
-    // size_t ixmin = getVectorIndex(vecX, startx);
-    // size_t ixmax = getVectorIndex(vecX, endx);
 
     const MantidVec& vecY = dataws->readY(wsindex);
     double ymax = vecY[ixmin+1];
@@ -1129,24 +1124,7 @@ namespace Algorithms
     dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
     dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
 
-    // m_vecybkup.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
-    // m_vecebkup.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
-
     return purePeakWS;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Backup original data from i_minFitX to i_maxFitX
-    */
-  void FitPeak::recoverOriginalData()
-  {
-    MantidVec& dataY = m_dataWS->dataY(m_wsIndex);
-    MantidVec& dataE = m_dataWS->dataE(m_wsIndex);
-
-    copy(m_vecybkup.begin(), m_vecybkup.end(), dataY.begin() + i_minFitX);
-    copy(m_vecebkup.begin(), m_vecebkup.end(), dataE.begin() + i_minFitX);
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1172,9 +1150,7 @@ namespace Algorithms
     else
     {
       // Unfix all parameters
-      // FIXME - Remove this after 0-error is solved.
-      parnames = fitfunc->getParameterNames();
-      for (size_t i = 0; i < parnames.size(); ++i)
+      for (size_t i = 0; i < fitfunc->nParams(); ++i)
         fitfunc->unfix(i);
     }
 

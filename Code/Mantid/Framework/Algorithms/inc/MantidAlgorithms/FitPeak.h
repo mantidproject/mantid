@@ -113,9 +113,6 @@ namespace Algorithms
     /// Backup data
     API::MatrixWorkspace_sptr genPurePeakWS();
 
-    /// Backup original data from i_minFitX to i_maxFitX
-    void recoverOriginalData();
-
     /// Create functions
     void createFunctions();
 
