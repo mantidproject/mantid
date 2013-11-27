@@ -83,11 +83,11 @@ namespace Algorithms
                               double startx, double endx);
 
     /// Make a pure peak WS in the fit window region
-    void makePurePeakWS();
+    void makePurePeakWS(API::MatrixWorkspace_sptr purePeakWS);
 
     /// Estimate the peak height from a set of data containing pure peaks
     double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
-                              size_t wsindex, double startx, double endx);
+                              size_t wsindex, size_t ixmin, size_t ixmax);
 
     /// Fit a function.
     double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws,
@@ -111,7 +111,7 @@ namespace Algorithms
     void pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func);
 
     /// Backup data
-    void backupOriginalData();
+    API::MatrixWorkspace_sptr genPurePeakWS();
 
     /// Backup original data from i_minFitX to i_maxFitX
     void recoverOriginalData();

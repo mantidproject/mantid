@@ -553,14 +553,18 @@ namespace Algorithms
     // Fit background
     m_bkgdFunc = fitBackground(m_bkgdFunc);
 
+    // print background function and original input workspace
+
     // Backup original data due to pure peak data to be made
-    backupOriginalData();
+    MatrixWorkspace_sptr purePeakWS = genPurePeakWS();
 
     // Make pure peak
-    makePurePeakWS();
+    makePurePeakWS(purePeakWS);
+
+    // print this pure workspace out;
 
     // Estimate the peak height
-    double est_peakheight = estimatePeakHeight(m_peakFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
+    double est_peakheight = estimatePeakHeight(m_peakFunc, purePeakWS, 0, 0, purePeakWS->readX(0).size()-1);
     m_peakFunc->setHeight(est_peakheight);
 
     // Calculate guessed FWHM
@@ -584,7 +588,7 @@ namespace Algorithms
                     << vec_FWHM[i] << "\n";
 
       // Fit
-      double rwp = fitPeakFunction(m_peakFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
+      double rwp = fitPeakFunction(m_peakFunc, purePeakWS, 0, m_minFitX, m_maxFitX);
 
       // Store result
       processNStoreFitResult(rwp,false);
@@ -594,13 +598,14 @@ namespace Algorithms
 
     // Get best fitting peak function
     pop(m_bestPeakFunc, m_peakFunc);
-    g_log.information() << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString() << "\n";
 
     // Recover the original Y value from pure peak data range
-    recoverOriginalData();
+    // recoverOriginalData();
 
-    m_finalGoodnessValue = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
-    g_log.information() << "Final " << m_costFunction << " = " << m_finalGoodnessValue << "\n";
+    m_finalGoodnessValue = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex,
+                                                m_minFitX, m_maxFitX);
+    g_log.information() << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString()
+                        << "Final " << m_costFunction << " = " << m_finalGoodnessValue << "\n";
 
     return;
   }
@@ -716,11 +721,10 @@ namespace Algorithms
     */
   IBackgroundFunction_sptr FitPeak::fitBackground(IBackgroundFunction_sptr bkgdfunc)
   {
-    // backkup
+    // Backkup
     map<string, double> errormap;
     push(bkgdfunc, m_bkupBkgdFunc, errormap);
 
-    std::vector<double> vec_bkgd;
     vector<double> vec_xmin(2);
     vector<double> vec_xmax(2);
     vec_xmin[0] = m_minFitX;
@@ -741,21 +745,21 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Make a pure peak WS in the fit window region from m_background_function
     */
-  void FitPeak::makePurePeakWS()
+  void FitPeak::makePurePeakWS(MatrixWorkspace_sptr purePeakWS)
   {
     // Calculate background
-    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
-    FunctionDomain1DVector domain(vecX.begin()+i_minFitX, vecX.begin()+i_maxFitX);
+    const MantidVec& vecX = purePeakWS->readX(0);
+    FunctionDomain1DVector domain(vecX);
     FunctionValues bkgdvalues(domain);
     m_bkgdFunc->function(domain, bkgdvalues);
 
     // Calculate pure background and put weight on peak if using Rwp
-    MantidVec& vecY = m_dataWS->dataY(m_wsIndex);
-    MantidVec& vecE = m_dataWS->dataE(m_wsIndex);
-    for (size_t i = i_minFitX; i < i_maxFitX; ++i)
+    MantidVec& vecY = purePeakWS->dataY(0);
+    MantidVec& vecE = purePeakWS->dataE(0);
+    for (size_t i = 0; i < vecY.size(); ++i)
     {
       double y = vecY[i];
-      y -= bkgdvalues[i-i_minFitX];
+      y -= bkgdvalues[i];
       if (y < 0.)
         y = 0.;
       vecY[i] = y;
@@ -987,9 +991,9 @@ namespace Algorithms
   /** Estimate the peak height from a set of data containing pure peaks
     */
   double FitPeak::estimatePeakHeight(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_sptr dataws,
-                                     size_t wsindex, double startx, double endx)
+                                     size_t wsindex, size_t ixmin, size_t ixmax)
   {
-    // Get current peak height
+    // Get current peak height: from current peak centre (previously setup)
     double peakcentre = peakfunc->centre();
     vector<double> svvec(1, peakcentre);
     FunctionDomain1DVector svdomain(svvec);
@@ -1001,8 +1005,8 @@ namespace Algorithms
 
     // Get maximum peak value among
     const MantidVec& vecX = dataws->readX(wsindex);
-    size_t ixmin = getVectorIndex(vecX, startx);
-    size_t ixmax = getVectorIndex(vecX, endx);
+    // size_t ixmin = getVectorIndex(vecX, startx);
+    // size_t ixmax = getVectorIndex(vecX, endx);
 
     const MantidVec& vecY = dataws->readY(wsindex);
     double ymax = vecY[ixmin+1];
@@ -1016,8 +1020,8 @@ namespace Algorithms
         iymax = i;
       }
     }
-    g_log.debug() << "Estimate-Peak-Height: Maximum Y value between " << startx << " and "
-                  << endx << " is "
+    g_log.debug() << "Estimate-Peak-Height: Maximum Y value between " << vecX[ixmin] << " and "
+                  << vecX[ixmax] << " is "
                   << ymax << " at X = " << vecX[iymax] << ".\n";
 
     // Compute new peak
@@ -1106,17 +1110,29 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Backup original data from i_minFitX to i_maxFitX
+  /** Generate a new temporary workspace for removed background peak
     */
-  void FitPeak::backupOriginalData()
+  API::MatrixWorkspace_sptr FitPeak::genPurePeakWS()
   {
+    size_t size = i_maxFitX-i_minFitX+1;
+    MatrixWorkspace_sptr purePeakWS = WorkspaceFactory::Instance().create("Workspace2D",
+                                                                          1, size, size);
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
     const MantidVec& vecY = m_dataWS->readY(m_wsIndex);
     const MantidVec& vecE = m_dataWS->readE(m_wsIndex);
 
-    m_vecybkup.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
-    m_vecebkup.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
+    MantidVec& dataX = purePeakWS->dataX(0);
+    MantidVec& dataY = purePeakWS->dataY(0);
+    MantidVec& dataE = purePeakWS->dataE(0);
 
-    return;
+    dataX.assign(vecX.begin() + i_minFitX, vecX.begin() + i_maxFitX+1);
+    dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
+    dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
+
+    // m_vecybkup.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
+    // m_vecebkup.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
+
+    return purePeakWS;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1213,9 +1229,9 @@ namespace Algorithms
         fitfunc->unfix(i);
     }
 
-    g_log.information() << "FitSingleDomain Fitted-Function " << fitfunc->asString()
-                        << ": Fit-status = " << fitStatus
-                        << ", chi^2 = " << chi2 << ".\n";
+    g_log.debug() << "FitSingleDomain Fitted-Function " << fitfunc->asString()
+                  << ": Fit-status = " << fitStatus
+                  << ", chi^2 = " << chi2 << ".\n";
 
     return chi2;
   }
@@ -1271,7 +1287,7 @@ namespace Algorithms
     fit->setProperty("Minimizer", m_minimizer);
     fit->setProperty("CostFunction", "Least squares");
 
-    g_log.information() << "FitMultiDomain: Funcion " << funcmd->asString() << "\n";
+    g_log.debug() << "FitMultiDomain: Funcion " << funcmd->asString() << "\n";
 
     // Execute
     fit->execute();
@@ -1288,8 +1304,8 @@ namespace Algorithms
     if (fitStatus == "success")
     {
       chi2 = fit->getProperty("OutputChi2overDoF");
-      g_log.information() << "FitMultidomain: Successfully-Fitted Function " <<fitfunc->asString()
-                          << ", Chi^2 = "<< chi2 << "\n";
+      g_log.debug() << "FitMultidomain: Successfully-Fitted Function " <<fitfunc->asString()
+                    << ", Chi^2 = "<< chi2 << "\n";
     }
 
     return chi2;
