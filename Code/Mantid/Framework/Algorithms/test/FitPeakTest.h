@@ -342,6 +342,57 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test on fit a peak with 1 step
+    */
+  void test_FitPeakOneStepFullPeakName()
+  {
+    // Generate input workspace
+    MatrixWorkspace_sptr dataws = gen_PG3DiamondData();
+    AnalysisDataService::Instance().addOrReplace("PG3_Si_Peak", dataws);
+
+    // Initialize FitPeak
+    FitPeak fitpeak;
+    fitpeak.initialize();
+
+    // Set up properties
+    fitpeak.setPropertyValue("InputWorkspace", "PG3_Si_Peak");
+    fitpeak.setPropertyValue("OutputWorkspace", "FittedPeak2");
+    fitpeak.setPropertyValue("ParameterTableWorkspace", "Fitted_Si_Parameters");
+    fitpeak.setProperty("WorkspaceIndex", 0);
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunctionType", "Gaussian (Height, PeakCentre, Sigma)"));
+    // TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterNames", "Height, PeakCentre, Sigma"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakParameterValues", "40.0, 2.0658, 0.001"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundType", "Linear (A0, A1)"));
+    // TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterNames", "A0, A1"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundParameterValues", "0.5, 0.0"));
+    fitpeak.setPropertyValue("FitWindow", "2.051, 2.077");
+    fitpeak.setPropertyValue("PeakRange", "2.055, 2.08");
+    fitpeak.setProperty("FitBackgroundFirst", false);
+    fitpeak.setProperty("RawParams", true);
+
+    // Execute
+    fitpeak.execute();
+    TS_ASSERT(fitpeak.isExecuted());
+
+    // Check
+    vector<double> fittedpeakvalues = fitpeak.getProperty("FittedPeakParameterValues");
+    TS_ASSERT_EQUALS(fittedpeakvalues.size(), 3);
+
+    vector<double> fittedbkgdvalues = fitpeak.getProperty("FittedBackgroundParameterValues");
+    TS_ASSERT_EQUALS(fittedbkgdvalues.size(), 2);
+
+    double peakheight = fittedpeakvalues[0];
+    TS_ASSERT_DELTA(peakheight, 26., 1.);
+
+    // Clean
+    AnalysisDataService::Instance().remove("PG3_Si_Peak");
+    AnalysisDataService::Instance().remove("FittedPeak2");
+    AnalysisDataService::Instance().remove("Fitted_Si_Parameters");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
     */
   MatrixWorkspace_sptr gen_PG3DiamondData()
@@ -439,7 +490,6 @@ public:
 
     return;
   }
-
 
 };
 
