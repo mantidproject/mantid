@@ -47,18 +47,36 @@ namespace Mantid
 
       /// Check and store appropriate input data
       void retrieveInputs();
+      /// Compute & store the parameters that are fixed during the correction
+      void cacheInstrumentGeometry();
       /// Create the output workspaces
       void createOutputWorkspaces();
       /// Calculate & correct the given index of the input workspace
       void applyCorrection(const size_t index);
 
+      /// Input TOF data
       API::MatrixWorkspace_const_sptr m_inputWS;
+      /// The number of peaks in spectrum
       size_t m_npeaks;
+      /// Mass values for the m_npeaks
       std::vector<double> m_masses;
+      /// Amplitudes for the m_npeaks
       std::vector<double> m_amplitudes;
+      /// Widths for the m_npeaks
       std::vector<double> m_widths;
 
+      /// Source to sample distance
+      double m_l1;
+      /// Radius of (imaginary) circle that foils sit on
+      double m_foilRadius;
+      /// Minimum in beam dir to start integration over foil volume
+      double m_foilBeamMin;
+      /// Minimum in beam dir to stop integration over foil volume
+      double m_foilBeamMax;
+
+      /// Stores the value of the calculated background
       API::MatrixWorkspace_sptr m_backgroundWS;
+      /// Stores the corrected data
       API::MatrixWorkspace_sptr m_correctedWS;
 
     };

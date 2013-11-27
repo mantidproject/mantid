@@ -22,8 +22,7 @@ public:
     auto alg = createAlgorithm();
     alg->setRethrows(true);
 
-    double x0(165.0),x1(166.0),dx(0.5);
-    alg->setProperty("InputWorkspace",ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx));
+    alg->setProperty("InputWorkspace",createTestWorkspaceWithFoilChanger());
 
     alg->setPropertyValue("Masses", "1.0079");
     alg->setPropertyValue("PeakAmplitudes", "2.9e-2");
@@ -48,8 +47,7 @@ public:
     auto alg = createAlgorithm();
     alg->setRethrows(true);
 
-    double x0(165.0),x1(166.0),dx(0.5);
-    alg->setProperty("InputWorkspace",ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx));
+    alg->setProperty("InputWorkspace",createTestWorkspaceWithFoilChanger());
 
     // None set=all empty
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
@@ -68,13 +66,17 @@ public:
   {
     auto alg = createAlgorithm();
     alg->setRethrows(true);
-    double x0(165.0),x1(166.0),dx(0.5);
-    alg->setProperty("InputWorkspace",ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx));
+    alg->setProperty("InputWorkspace",createTestWorkspaceWithFoilChanger());
 
     alg->setProperty("Masses", "1,2,3");
     alg->setProperty("PeakAmplitudes", "1,2");
     alg->setProperty("PeakWidths", "1,2,3,4");
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
+  void test_InputWorkspace_Without_FoilChanger_Component_Throws_Error()
+  {
+
   }
 
 private:
@@ -88,6 +90,20 @@ private:
     alg->setPropertyValue("BackgroundWorkspace", "__UNUSED__");
     return alg;
   }
+
+  Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithFoilChanger()
+  {
+    double x0(165.0),x1(166.0),dx(0.5);
+    return ComptonProfileTestHelpers::createSingleSpectrumWorkspaceWithSingleMass(x0,x1,dx);
+  }
+
+  Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithNoFoilChanger()
+  {
+    double x0(165.0),x1(166.0),dx(0.5);
+    return ComptonProfileTestHelpers::createSingleSpectrumWorkspaceOfOnes(x0,x1,dx);
+
+  }
+
 
 };
 

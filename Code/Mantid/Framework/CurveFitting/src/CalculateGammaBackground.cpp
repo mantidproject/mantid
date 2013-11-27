@@ -4,15 +4,21 @@
 
  *WIKI*/
 #include "MantidCurveFitting/CalculateGammaBackground.h"
+
 #include "MantidAPI/WorkspaceValidators.h"
+
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 namespace Mantid
 {
   namespace CurveFitting
   {
+    // Subscription
+    DECLARE_ALGORITHM(CalculateGammaBackground);
+
     //--------------------------------------------------------------------------------------------------------
     // Public members
     //--------------------------------------------------------------------------------------------------------
@@ -20,6 +26,7 @@ namespace Mantid
     /// Default constructor
     CalculateGammaBackground::CalculateGammaBackground()
       : Algorithm(), m_inputWS(), m_npeaks(0), m_masses(), m_amplitudes(), m_widths(),
+        m_l1(0.0), m_foilRadius(0.0), m_foilBeamMin(0.0),m_foilBeamMax(0.0),
         m_backgroundWS(), m_correctedWS()
     {
     }
@@ -108,6 +115,38 @@ namespace Mantid
            << ", No. of amplitudes=" << m_amplitudes.size() << ", No. of peaks=" << m_widths.size();
         throw std::invalid_argument(os.str());
       }
+
+      cacheInstrumentGeometry();
+    }
+
+    /**
+     */
+    void CalculateGammaBackground::cacheInstrumentGeometry()
+    {
+      auto inst = m_inputWS->getInstrument();
+      auto refFrame = inst->getReferenceFrame();
+      auto beamAxis = refFrame->pointingAlongBeam();
+      auto source = inst->getSource();
+      auto sample = inst->getSample();
+      m_l1 = sample->getPos().distance(source->getPos());
+
+      // foils
+      auto changer = boost::dynamic_pointer_cast<const Geometry::IObjComponent>(inst->getComponentByName("foil-changer"));
+      if(!changer)
+      {
+        throw std::invalid_argument("Input workspace has no component named foil-changer. "
+                                    "One is required to define integration area.");
+      }
+      // 'radius' of shape sets limits in beam direction
+      const auto boundBox = changer->shape()->getBoundingBox();
+      m_foilBeamMin = boundBox.minPoint()[beamAxis];
+      m_foilBeamMax = boundBox.maxPoint()[beamAxis];
+
+      g_log.information() << "Instrument geometry:\n"
+                          << "  l1 = " << m_l1 << "m\n"
+                          << "  foil radius = " << m_foilRadius << "\n"
+                          << "  foil integration min = " << m_foilBeamMin << "\n"
+                          << "  foil integration max = " << m_foilBeamMax << "\n";
     }
 
     /**
@@ -125,7 +164,7 @@ namespace Mantid
      * input workspace
      * @param index A workspace index that defines the spectrum to correct
      */
-    void CalculateGammaBackground::applyCorrection(const size_t index)
+    void CalculateGammaBackground::applyCorrection(const size_t)
     {
 
     }
