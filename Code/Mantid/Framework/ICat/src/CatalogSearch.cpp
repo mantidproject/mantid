@@ -54,13 +54,15 @@ namespace Mantid
       declareProperty("DataFileName","", "The name of the data file to search.");
       declareProperty("InvestigationType", "", "The type  of the investigation to search.");
       declareProperty("MyData",false, "Boolean option to do my data only search.");
-      declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
-          "The name of the workspace that will be created to store the ICat investigations search result.");
 
       // These are needed for paging on the interface, and to minimise the amount of results returned by the query.
+      declareProperty("CountOnly",false,"Boolean option to perform COUNT search only.");
       declareProperty<int>("Limit", 0, "");
       declareProperty<int>("Offset",0, "");
-      declareProperty<int64_t>("NumberOfSearchResults", 0, "");
+
+      declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
+          "The name of the workspace that will be created to store the ICat investigations search result.");
+      declareProperty<int64_t>("NumberOfSearchResults", 0, "", Direction::Output);
     }
 
     /// Execution method.
@@ -74,12 +76,17 @@ namespace Mantid
       auto workspace = WorkspaceFactory::Instance().createTable("TableWorkspace");
       // Create a catalog since we use it twice on execution.
       API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
-      // Search for investigations in the archives.
-      catalog->search(params,workspace,getProperty("Limit"),getProperty("Offset"));
-      // Set the related property needed for paging.
-      setProperty("NumberOfSearchResults", catalog->getNumberOfSearchResults());
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
+      // Do not perform a full search if we only want a COUNT search.
+      if (getProperty("CountOnly"))
+      {
+        // Set the related property needed for paging.
+        setProperty("NumberOfSearchResults", catalog->getNumberOfSearchResults(params));
+        return;
+      }
+      // Search for investigations in the archives.
+      catalog->search(params,workspace,getProperty("Offset"),getProperty("Limit"));
     }
 
     /**
