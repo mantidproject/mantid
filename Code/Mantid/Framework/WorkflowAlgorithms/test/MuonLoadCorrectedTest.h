@@ -104,7 +104,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006473.nxs") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DTCType", "FromData") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DTCType", "FromRunData") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", g_outWSName) );
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
@@ -183,7 +183,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "MUSR00015189.nxs") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DTCType", "FromData") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DTCType", "FromRunData") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", g_outWSName) );
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );

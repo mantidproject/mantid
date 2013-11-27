@@ -65,7 +65,7 @@ namespace WorkflowAlgorithms
     
     std::vector<std::string> dtcTypes;
     dtcTypes.push_back("None");
-    dtcTypes.push_back("FromData");
+    dtcTypes.push_back("FromRunData");
     dtcTypes.push_back("FromSpecifiedFile");
 
     declareProperty("DtcType","None", boost::make_shared<StringListValidator>(dtcTypes),
@@ -102,7 +102,7 @@ namespace WorkflowAlgorithms
     {
       Workspace_sptr deadTimes; 
      
-      if ( dtcType == "FromData" )
+      if ( dtcType == "FromRunData" )
       {
         deadTimes = loadAlg->getProperty("DeadTimeTable");
       }
