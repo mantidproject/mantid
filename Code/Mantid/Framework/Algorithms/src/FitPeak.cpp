@@ -865,7 +865,7 @@ namespace Algorithms
     } // RWP fine
     else
     {
-      failreason = "(Single-step) Fit returns a DBL_MAX.";
+      // failreason = "(Single-step) Fit returns a DBL_MAX.";
       fitsuccess = false;
     }
 
@@ -1057,18 +1057,18 @@ namespace Algorithms
     double goodness = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
     string errorreason;
     goodness = checkFittedPeak(peakfunc, goodness, errorreason);
+    if (errorreason.size() > 0)
+      g_log.notice() << "Error reason: " << errorreason << "\n";
 
     double goodness_final = DBL_MAX;
     if (goodness < goodness_init)
     {
       // Fit for composite function renders a better result
       goodness_final = goodness;
-      errorreason = "";
     }
     else if (goodness_init <= goodness && goodness_init < DBL_MAX)
     {
       goodness_final = goodness_init;
-      errorreason = "";
       g_log.information("Fit peak/background composite function FAILS to render a better solution.");
       pop(bkuppeakmap, peakfunc);
       pop(bkupbkgdmap, bkgdfunc);
