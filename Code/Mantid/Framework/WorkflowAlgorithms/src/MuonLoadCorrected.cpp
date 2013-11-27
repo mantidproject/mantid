@@ -100,19 +100,17 @@ namespace WorkflowAlgorithms
     }
     else
     {
-      int numPeriods = 1; // For now
-
       Workspace_sptr deadTimes; 
      
       if ( dtcType == "FromData" )
       {
-        deadTimes = loadDeadTimesFromData(filename, numPeriods);
+        deadTimes = loadAlg->getProperty("DeadTimeTable");
       }
       else if ( dtcType == "FromSpecifiedFile" ) 
       {
         const std::string dtcFile = getPropertyValue("DtcFile"); 
 
-        deadTimes = loadDeadTimesFromFile(dtcFile, numPeriods);
+        deadTimes = loadDeadTimesFromNexus(dtcFile);
       }
 
       Workspace_sptr correctedWS = applyDtc(loadedWS, deadTimes);
@@ -121,66 +119,18 @@ namespace WorkflowAlgorithms
   }
 
   /**
-   * Attempts to load dead time table from given Muon Nexus file.
-   * @param filename :: Path of the Muon Nexus file to load dead times from
-   * @param numPeriods :: Number of data collection periods
-   * @return TableWorkspace when one period, otherwise a group of TableWorkspace-s with dead times
-   */
-  Workspace_sptr MuonLoadCorrected::loadDeadTimesFromData(const std::string& filename, int numPeriods)
-  {
-    NeXus::NXRoot root(filename);
-
-    NeXus::NXFloat deadTimes = root.openNXFloat("run/instrument/detector/deadtimes");
-    deadTimes.load();
-
-    std::vector<double> dtVector;
-    dtVector.reserve( deadTimes.size() );
-
-    for (int i = 0; i < deadTimes.size(); i++)
-      dtVector.push_back(deadTimes[i]);
-
-    return createDeadTimeTable( dtVector.begin(), dtVector.end() );
-  }
-
-  /**
    * Attempts to load dead time table from custom file.
    * @param filename :: Path to the file. 
    * @param numPeriods :: Number of data collection periods
    * @return TableWorkspace when one period, otherwise a group of TableWorkspace-s with dead times
    */
-  Workspace_sptr MuonLoadCorrected::loadDeadTimesFromFile(const std::string& filename, int numPeriods)
+  Workspace_sptr MuonLoadCorrected::loadDeadTimesFromNexus(const std::string& filename)
   {
     IAlgorithm_sptr loadNexusProc = createChildAlgorithm("LoadNexusProcessed");
     loadNexusProc->setPropertyValue("Filename", filename);
     loadNexusProc->execute();
 
     return loadNexusProc->getProperty("OutputWorkspace");
-  }
-
-  /**
-   * Creates Dead Time Table from the given list of dead times.
-   * @param begin :: Iterator to the first element of the data to use
-   * @param   end :: Iterator to the last element of the data to use
-   * @return TableWorkspace created using the data
-   */
-  TableWorkspace_sptr MuonLoadCorrected::createDeadTimeTable( std::vector<double>::const_iterator begin,
-    std::vector<double>::const_iterator end)
-  {
-    TableWorkspace_sptr deadTimeTable = boost::dynamic_pointer_cast<TableWorkspace>( 
-      WorkspaceFactory::Instance().createTable("TableWorkspace") );
-
-    deadTimeTable->addColumn("int","spectrum");
-    deadTimeTable->addColumn("double","dead-time");
-
-    int s = 1; // Current spectrum
-
-    for(auto it = begin; it != end; it++)
-    {
-      TableRow row = deadTimeTable->appendRow();
-      row << s++ << *it;
-    }
-
-    return deadTimeTable;
   }
 
   /**
