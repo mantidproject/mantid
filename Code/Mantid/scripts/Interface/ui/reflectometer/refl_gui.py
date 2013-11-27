@@ -10,8 +10,6 @@ from isis_reflectometry.combineMulti import *
 from isis_reflgui.latest_isis_runs import *
 from mantid.api import Workspace, WorkspaceGroup
 
-currentTable = None
-
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -63,6 +61,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.populateList()
         self.connectSlots()
     def initTable(self):
+        self.currentTable = None
         self.tableMain.resizeColumnsToContents()
         instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
         currentInstrument = config['default.instrument']
@@ -331,12 +330,12 @@ class ReflGui(refl_window.Ui_windowRefl):
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
         return th, qmin, qmax
     def saveTable(self):
-        #filename = QtGui.QFileDialog.getSaveFileName()
-        
         saveDialog = QtGui.QFileDialog(self.layoutMainRow.parent(), "Save Table")
-        saveDialog.setFileMode(QFileDialog.AnyFile)
-        saveDialog.setNameFilter("Table Files (*.tbl)")
-        if saveDialog.Exec():
+        saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
+        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        saveDialog.setDefaultSuffix("tbl")
+        saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
+        if saveDialog.exec_():
             filename = saveDialog.selectedFiles()[0]
             writer = csv.writer(open(filename, "wb"))
             for row in range(self.tableMain.rowCount()):
@@ -347,12 +346,11 @@ class ReflGui(refl_window.Ui_windowRefl):
                     writer.writerow(rowtext)
     def loadTable(self):
         loadDialog = QtGui.QFileDialog(self.layoutMainRow.parent(), "Open Table")
-        loadDialog.setFileMode(QFileDialog.ExistingFile)
-        loadDialog.setNameFilter("Table Files (*.tbl)")
-        if loadDialog.Exec():
-            #filename = QtGui.QFileDialog.getOpenFileName()
+        loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
+        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        if loadDialog.exec_():
             filename = loadDialog.selectedFiles()[0]
-            currentTable = filename
+            self.currentTable = filename
             reader = csv.reader(open(filename, "rb"))
             row = 0
             for line in reader:
@@ -363,7 +361,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                         self.tableMain.setItem(row, column, item)
                     row = row + 1
     def reloadTable(self):
-        filename = currentTable
+        filename = self.currentTable
         if filename:
             try:
                 reader = csv.reader(open(filename, "rb"))
@@ -384,7 +382,8 @@ class ReflGui(refl_window.Ui_windowRefl):
         #u = Ui_SaveWindow()
         #u.setupUi(Dialog)
         #Dialog.exec_()
-        print "Disabled until decision about old dialog has been reached"
+        #print "Disabled until decision about old dialog has been reached"
+        print "Disabled - Run desired save algorithm from main MantidPlot window instead"
     def showHelp(self):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
