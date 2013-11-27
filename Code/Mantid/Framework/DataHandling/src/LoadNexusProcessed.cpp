@@ -351,10 +351,8 @@ std::string LoadNexusProcessed::loadWorkspaceName(NXRoot & root, const std::stri
   }
   catch (std::runtime_error&)
   {
-    return std::string("");
+    return std::string();
   }
-
-  return std::string("");
 }
 
 
