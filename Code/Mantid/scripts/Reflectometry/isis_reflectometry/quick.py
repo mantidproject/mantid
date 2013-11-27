@@ -16,6 +16,31 @@ from mantid.api import WorkspaceGroup
 from convert_to_wavelength import ConvertToWavelength
 import math
 import re
+import abc
+
+class CorrectionStrategy(object):
+    __metaclass__ = abc.ABCMeta # Mark as an abstract class
+    
+    @abc.abstractmethod
+    def apply(self, to_correct):
+        pass
+    
+class ExponentialCorrectionStrategy(CorrectionStrategy):
+
+    def __init__(self, c0, c1):
+        self.__c0 = c0
+        self.__c1 = c1
+        
+    def apply(self, to_correct):
+        return ExponentialCorrection(InputWorkspace=to_correct,C0=self.__c0, C1= self.__c1, Operation='Divide')
+    
+class PolynomialCorrectionStrategy(CorrectionStrategy):
+    def __init__(self, poly_string):
+        self.__poly_string = poly_string
+    
+    def apply(self, to_correct):
+        return PolynomialCorrection(InputWorkspace=to_correct, Coefficients=self.__poly_string, Operation='Divide')
+        
 
 def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', debug=False):
     '''
@@ -251,6 +276,7 @@ def get_defaults(run_ws):
     defaults['PointDetectorStop'] =  int( instrument.getNumberParameter('PointDetectorStop')[0] )
     defaults['MultiDetectorStart'] = int( instrument.getNumberParameter('MultiDetectorStart')[0] )
     defaults['I0MonitorIndex'] = int( instrument.getNumberParameter('I0MonitorIndex')[0] ) 
+    
     return defaults
     
 def groupGet(wksp,whattoget,field=''):
