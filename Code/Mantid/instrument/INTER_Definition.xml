@@ -41,7 +41,7 @@
    
 <!-- here we need to add the other monitors -->
   <parameter name="MonitorsToCorrect">
-    <value val="1"/>
+    <value val="2"/>
   </parameter>
 
   <parameter name="PointDetectorStart">
