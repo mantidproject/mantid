@@ -88,8 +88,6 @@ namespace Mantid
         std::string formatDateTime(const time_t &timestamp, const std::string &format);
         // Reference to the logger class.
         Kernel::Logger& g_log;
-        // Modifies the search query to insert a count.
-        std::string m_countQuery;
 
         /**
          * Template method to save data to table workspace

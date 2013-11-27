@@ -219,26 +219,19 @@ namespace Mantid
       // This prevents the user searching the entire archive (E.g. there is no "default" query).
       if (!whereClause.empty() || !joinClause.empty())
       {
-        std::string select, selectC, from, join, where, orderBy, includes, limits;
+        std::string from, join, where, orderBy, includes;
 
-        select   = "SELECT DISTINCT inves";
-        selectC  = "SELECT COUNT(DISTINCT inves)";
         from     = " FROM Investigation inves ";
         join     = Strings::join(joinClause.begin(), joinClause.end(), " ");
         where    = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
         orderBy  = " ORDER BY inves.id DESC";
         includes = " INCLUDE inves.investigationInstruments.instrument, inves.parameters";
-        limits   = " LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit);
 
-        // As we joined all WHERE claused with AND we need to include the WHERE at the start of the where segment.
+        // As we joined all WHERE clause with AND we need to include the WHERE at the start of the where segment.
         where.insert(0, " WHERE ");
-        // This query is used to populate investigation table on GUI.
-        query    = select + from + join + where + orderBy + includes + limits;
-        // This query is used to count the number of investigations returned.
-        m_countQuery = selectC + from + join + where + orderBy + includes;
+        // Build the query from the result.
+        query = from + join + where + orderBy + includes;
       }
-
-      g_log.debug() << "ICat4Catalog::getSearchQuery: { " << query << " }" << std::endl;
 
       return (query);
     }
@@ -253,14 +246,16 @@ namespace Mantid
     void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws,
         const int &offset, const int &limit)
     {
-      // Obtain the query from user input.
-      std::string query = getSearchQuery(inputs,offset,limit);
+      std::string query = buildSearchQuery(inputs);
 
+      // Check if the query built was valid (e.g. if they user has input any search terms).
       if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
 
-      // If offset or limit is default value then we want to return as
-      // we just wanted to perform the getSearchQuery to build our COUNT query.
-      if (offset == -1 || limit == -1) return;
+      // Modify the query to include correct SELECT and LIMIT clauses.
+      query.insert(0, "SELECT DISTINCT inves");
+      query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit));
+
+      g_log.debug() << "ICat4Catalog::search -> Query is: { " << query << " }" << std::endl;
 
       ICat4::ICATPortBindingProxy icat;
       setSSLContext(icat);
@@ -298,9 +293,15 @@ namespace Mantid
 
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
-      request.query         = &m_countQuery;
 
-      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Query is: { " << m_countQuery << " }" << std::endl;
+      std::string query     = buildSearchQuery(inputs);
+
+      if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
+
+      query.insert(0, "SELECT COUNT(DISTINCT inves)");
+      request.query         = &query;
+
+      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Query is: { " << query << " }" << std::endl;
 
       int result = icat.search(&request, &response);
 
