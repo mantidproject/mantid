@@ -116,8 +116,7 @@ namespace Mantid
      */
     int64_t ICat3Catalog::getNumberOfSearchResults(const CatalogSearchParam& inputs)
     {
-      UNUSED_ARG(inputs);
-      return m_helper->getNumberOfSearchResults();
+      return m_helper->getNumberOfSearchResults(inputs);
     }
 
     /// keep alive

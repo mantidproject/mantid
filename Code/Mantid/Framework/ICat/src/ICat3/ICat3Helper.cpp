@@ -796,95 +796,11 @@ namespace Mantid
     void CICatHelper::doAdvancedSearch(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws,
         const int &offset, const int &limit)
     {
-      // As this is a member variable we need to reset the search terms once
-      // a new search is performed.
-      m_advancedSearchDetails = new ICat3::ns1__advancedSearchDetails;
-
+      // Show "my data" (without paging).
       if (inputs.getMyData())
       {
         doMyDataSearch(outputws);
         return;
-      }
-
-      ns1__investigationInclude invesInclude = ns1__investigationInclude__INVESTIGATORS_USCOREAND_USCOREKEYWORDS;
-      m_advancedSearchDetails->investigationInclude = &invesInclude;
-
-      double runStart, runEnd;
-      //run start
-      if(inputs.getRunStart() > 0)
-      {
-        runStart = inputs.getRunStart();
-        m_advancedSearchDetails->runStart = &runStart;
-      }
-
-      //run end
-      if(inputs.getRunEnd()>0)
-      {
-        runEnd = inputs.getRunEnd();
-        m_advancedSearchDetails->runEnd = &runEnd;
-      }
-
-      time_t startDate, endDate;
-      //start date
-      if(inputs.getStartDate()!=0)
-      {
-        startDate = inputs.getStartDate();
-        m_advancedSearchDetails->dateRangeStart = &startDate;
-      }
-
-      //end date
-      if(inputs.getEndDate()!=0)
-      {
-        endDate = inputs.getEndDate();
-        m_advancedSearchDetails->dateRangeEnd = &endDate;
-      }
-
-      //instrument name
-      if(!inputs.getInstrument().empty())
-      {
-        m_advancedSearchDetails->instruments.push_back(inputs.getInstrument());
-      }
-
-      // keywords
-      if(!inputs.getKeywords().empty())
-      {
-        m_advancedSearchDetails->keywords.push_back(inputs.getKeywords());
-      }
-
-      std::string investigationName, investigationType, datafileName, sampleName;
-
-      //Investigation name
-      if(!inputs.getInvestigationName().empty())
-      {
-        investigationName = inputs.getInvestigationName();
-        m_advancedSearchDetails->investigationName = &investigationName;
-      }
-
-      //Investigation type
-      if(!inputs.getInvestigationType().empty())
-      {
-        investigationType = inputs.getInvestigationType();
-        m_advancedSearchDetails->investigationType = &investigationType;
-      }
-
-      //datafile name
-      if(!inputs.getDatafileName().empty())
-      {
-        datafileName = inputs.getDatafileName();
-        m_advancedSearchDetails->datafileName = &datafileName;
-      }
-
-      //sample name
-      if(!inputs.getSampleName().empty())
-      {
-        sampleName = inputs.getSampleName();
-        m_advancedSearchDetails->sampleName = &sampleName;
-      }
-
-      //investigator's surname
-      if(!inputs.getInvestigatorSurName().empty())
-      {
-        m_advancedSearchDetails->investigators.push_back(inputs.getInvestigatorSurName());
       }
 
       ns1__searchByAdvancedPagination request;
@@ -899,7 +815,7 @@ namespace Mantid
       // Setup paging information to search with paging enabled.
       request.numberOfResults = limit;
       request.startIndex      = offset;
-      request.advancedSearchDetails = m_advancedSearchDetails;
+      request.advancedSearchDetails = buildSearchQuery(inputs);
 
       //ICAt proxy object
       ICATPortBindingProxy icat;
@@ -934,10 +850,105 @@ namespace Mantid
     }
 
     /**
+     * Creates a search query based on search inputs provided by the user.
+     * @param inputs :: Reference to a class containing search inputs.
+     * Return A populated searchDetails class used for performing a query against ICAT.
+     */
+    ICat3::ns1__advancedSearchDetails* CICatHelper::buildSearchQuery(const CatalogSearchParam& inputs)
+    {
+      // As this is a member variable we need to reset the search terms once
+      // a new search is performed.
+      ICat3::ns1__advancedSearchDetails* advancedSearchDetails = new ICat3::ns1__advancedSearchDetails;
+
+      ns1__investigationInclude invesInclude = ns1__investigationInclude__INVESTIGATORS_USCOREAND_USCOREKEYWORDS;
+      advancedSearchDetails->investigationInclude = &invesInclude;
+
+      double runStart, runEnd;
+      //run start
+      if(inputs.getRunStart() > 0)
+      {
+        runStart = inputs.getRunStart();
+        advancedSearchDetails->runStart = &runStart;
+      }
+
+      //run end
+      if(inputs.getRunEnd()>0)
+      {
+        runEnd = inputs.getRunEnd();
+        advancedSearchDetails->runEnd = &runEnd;
+      }
+
+      time_t startDate, endDate;
+      //start date
+      if(inputs.getStartDate()!=0)
+      {
+        startDate = inputs.getStartDate();
+        advancedSearchDetails->dateRangeStart = &startDate;
+      }
+
+      //end date
+      if(inputs.getEndDate()!=0)
+      {
+        endDate = inputs.getEndDate();
+        advancedSearchDetails->dateRangeEnd = &endDate;
+      }
+
+      //instrument name
+      if(!inputs.getInstrument().empty())
+      {
+        advancedSearchDetails->instruments.push_back(inputs.getInstrument());
+      }
+
+      // keywords
+      if(!inputs.getKeywords().empty())
+      {
+        advancedSearchDetails->keywords.push_back(inputs.getKeywords());
+      }
+
+      std::string investigationName, investigationType, datafileName, sampleName;
+
+      //Investigation name
+      if(!inputs.getInvestigationName().empty())
+      {
+        investigationName = inputs.getInvestigationName();
+        advancedSearchDetails->investigationName = &investigationName;
+      }
+
+      //Investigation type
+      if(!inputs.getInvestigationType().empty())
+      {
+        investigationType = inputs.getInvestigationType();
+        advancedSearchDetails->investigationType = &investigationType;
+      }
+
+      //datafile name
+      if(!inputs.getDatafileName().empty())
+      {
+        datafileName = inputs.getDatafileName();
+        advancedSearchDetails->datafileName = &datafileName;
+      }
+
+      //sample name
+      if(!inputs.getSampleName().empty())
+      {
+        sampleName = inputs.getSampleName();
+        advancedSearchDetails->sampleName = &sampleName;
+      }
+
+      //investigator's surname
+      if(!inputs.getInvestigatorSurName().empty())
+      {
+        advancedSearchDetails->investigators.push_back(inputs.getInvestigatorSurName());
+      }
+
+      return advancedSearchDetails;
+    }
+
+    /**
      * Uses user input fields to perform a search & obtain the COUNT of results for paging.
      * @return The number of investigations returned by the search performed.
      */
-    int64_t CICatHelper::getNumberOfSearchResults()
+    int64_t CICatHelper::getNumberOfSearchResults(const CatalogSearchParam& inputs)
     {
       ICATPortBindingProxy icat;
 
@@ -959,7 +970,7 @@ namespace Mantid
 
       std::string session = Session::Instance().getSessionId();
       request.sessionId = &session;
-      request.advancedSearchDetails = m_advancedSearchDetails;
+      request.advancedSearchDetails = buildSearchQuery(inputs);
 
       int result = icat.searchByAdvanced(&request, &response);
 

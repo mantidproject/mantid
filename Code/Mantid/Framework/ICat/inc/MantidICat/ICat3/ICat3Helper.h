@@ -44,7 +44,7 @@ namespace Mantid
     public:
 
       /// constructor
-      CICatHelper() : g_log(Kernel::Logger::get("CICatHelper")), m_advancedSearchDetails(NULL)
+      CICatHelper() : g_log(Kernel::Logger::get("CICatHelper"))
       {}
       /// destructor
       ~CICatHelper(){}
@@ -75,7 +75,7 @@ namespace Mantid
           const int &offset, const int &limit);
 
       /// Obtain the number of results returned by the doAdvancedSearch method.
-      int64_t getNumberOfSearchResults();
+      int64_t getNumberOfSearchResults(const CatalogSearchParam& inputs);
 
       // do login
       void doLogin(const std::string& name,const std::string& password,const std::string& url);
@@ -129,6 +129,9 @@ namespace Mantid
       ///saves
       void saveInvestigatorsNameandSample(ICat3::ns1__investigation* investigation,API::TableRow& t);
 
+      /// Builds search query based on user input and stores query in related ICAT class.
+      ICat3::ns1__advancedSearchDetails* buildSearchQuery(const CatalogSearchParam& inputs);
+
       /** This is a template method to save data to table workspace
        * @param input :: pointer to input value
        * @param t :: table row reference
@@ -148,8 +151,6 @@ namespace Mantid
       }
     private:
       Kernel::Logger& g_log;    ///< reference to the logger class
-      /// Holds the user search input for searching.
-      ICat3::ns1__advancedSearchDetails* m_advancedSearchDetails;
 
     };
 
