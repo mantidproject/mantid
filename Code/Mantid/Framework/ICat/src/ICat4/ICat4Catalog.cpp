@@ -111,11 +111,9 @@ namespace Mantid
     /**
      * Creates a search query string based on inputs provided by the user.
      * @param inputs :: reference to a class contains search inputs.
-     * @param offset :: skip this many rows and start returning rows from this point.
-     * @param limit  :: limit the number of rows returned by the query.
      * @return a query string constructed from user input.
      */
-    std::string ICat4Catalog::getSearchQuery(const CatalogSearchParam& inputs, const int &offset, const int &limit)
+    std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam& inputs)
     {
       // Contain the related where and join clauses for the search query based on user-input.
       std::vector<std::string> whereClause, joinClause;
@@ -287,11 +285,10 @@ namespace Mantid
     }
 
     /**
-     * Modifies the search query to obtain the number
-     * of investigations to be returned by the catalog.
+     * Obtain the number of investigations to be returned by the catalog.
      * @return The number of investigations returned by the search performed.
      */
-    int64_t ICat4Catalog::getNumberOfSearchResults()
+    int64_t ICat4Catalog::getNumberOfSearchResults(const CatalogSearchParam& inputs)
     {
       ICat4::ICATPortBindingProxy icat;
       setSSLContext(icat);

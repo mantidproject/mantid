@@ -114,8 +114,9 @@ namespace Mantid
      * of investigations to be returned by the catalog.
      * @return The number of investigations returned by the search performed.
      */
-    int64_t ICat3Catalog::getNumberOfSearchResults()
+    int64_t ICat3Catalog::getNumberOfSearchResults(const CatalogSearchParam& inputs)
     {
+      UNUSED_ARG(inputs);
       return m_helper->getNumberOfSearchResults();
     }
 
