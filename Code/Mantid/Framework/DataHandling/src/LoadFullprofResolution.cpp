@@ -1,6 +1,6 @@
 /*WIKI* 
 
-Load Fullprof resolution (.irf) file to TableWorkspace(s)
+Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instrument of a matrix workspace.
 
 *WIKI*/
 #include "MantidDataHandling/LoadFullprofResolution.h"
@@ -8,6 +8,9 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s)
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidAPI/InstrumentDataService.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
@@ -22,6 +25,11 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace std;
+
+using Geometry::Instrument;
+using Geometry::Instrument_sptr;
+using Geometry::Instrument_const_sptr;
+using Mantid::Geometry::InstrumentDefinitionParser;
 
 namespace Mantid
 {
@@ -742,8 +750,18 @@ namespace DataHandling
     return tablews;
   }
 
-  void LoadFullprofResolution::putParametersIntoWorkspace( const API::ITableWorkspace_sptr tws, API::MatrixWorkspace_sptr ws)
+  void LoadFullprofResolution::putParametersIntoWorkspace( const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws)
   {
+     Instrument_const_sptr instrument = ws->getInstrument();
+     //Instrument_const_sptr baseInstrument = ws->getInstrument()->baseInstrument();
+
+     //InstrumentDefinitionParser loadInstr;
+     //loadInstr.setComponentLinks(instrument, pRootElem);
+
+     auto & pmap = ws->instrumentParameters();
+
+     //pmap.addString(instrument->getComponentID(), blah);  // What do I do here?
+
   }
 
 } // namespace DataHandling

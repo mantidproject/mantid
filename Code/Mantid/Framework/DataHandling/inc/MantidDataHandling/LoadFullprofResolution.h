@@ -86,7 +86,7 @@ namespace DataHandling
     DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
 
     /// Put parameters into a metrix workspace
-    void putParametersIntoWorkspace( const API::ITableWorkspace_sptr tws, API::MatrixWorkspace_sptr ws);
+    void putParametersIntoWorkspace( const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws);
 
   };
 
