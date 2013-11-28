@@ -1,8 +1,9 @@
 #ifndef MANTID_API_SCOPEDWORKSPACE_H_
 #define MANTID_API_SCOPEDWORKSPACE_H_
 
-#include "MantidKernel/System.h"
+#include <string>
 
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -36,7 +37,22 @@ namespace API
   public:
     ScopedWorkspace();
     virtual ~ScopedWorkspace();
-    
+
+    /// Returns ADS name of the workspace
+    std::string name() const { return m_name; }
+
+  private:
+    /// ADS name of the workspace
+    std::string m_name;
+ 
+    /// Generates a tricky name which is unique within ADS 
+    static std::string generateUniqueName();
+
+    /// Generates a random alpha-numeric string
+    static std::string randomString(size_t len);
+  
+    /// Length of workspace names generated
+    static const size_t NAME_LENGTH;
   };
 
 

@@ -6,6 +6,8 @@
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 using namespace Mantid::API;
 
 class ScopedWorkspaceTest : public CxxTest::TestSuite
@@ -34,6 +36,16 @@ public:
     TS_ASSERT( ! test.name().empty() );
     // However, nothing should be added under that name yet
     TS_ASSERT( ! ads.doesExist( test.name() ) );
+  }
+
+  void test_name()
+  {
+    ScopedWorkspace test;
+
+    const std::string prefix("__ScopedWorkspace_");
+
+    TS_ASSERT( boost::starts_with(test.name(), prefix) );
+    TS_ASSERT_EQUALS( test.name().size(), prefix.size() + 16 );
   }
 
 private:
