@@ -42,6 +42,7 @@ namespace Algorithms
     virtual const std::string category() const;
 
   private:
+    bool isPropertyDefault(const std::string& propertyName) const;
     virtual void initDocs();
     void init();
     void exec();
