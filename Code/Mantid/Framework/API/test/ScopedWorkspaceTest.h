@@ -42,10 +42,18 @@ public:
   void test_emptyConstructor()
   {
     ScopedWorkspace test;
-    // Should have name created
+
     TS_ASSERT( ! test.name().empty() );
-    // However, nothing should be added under that name yet
     TS_ASSERT( ! m_ads.doesExist( test.name() ) );
+  }
+
+  void test_workspaceConstructor()
+  {
+    MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace);
+    ScopedWorkspace test(ws);
+
+    TS_ASSERT( ! test.name().empty() );
+    TS_ASSERT( m_ads.doesExist( test.name() ) );
   }
 
   void test_name()

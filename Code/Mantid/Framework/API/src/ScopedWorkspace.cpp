@@ -11,14 +11,19 @@ namespace API
 
   //----------------------------------------------------------------------------------------------
   /** 
-   * Constructor
+   * Empty constructor
    */
-  ScopedWorkspace::ScopedWorkspace()
-  {
-    // Randomize 
-    srand( static_cast<unsigned int>( time(0) ) );
+  ScopedWorkspace::ScopedWorkspace() :
+    m_name( generateUniqueName() )
+  {}
 
-    m_name = generateUniqueName();
+  /**
+   * Workspace constructor
+   */
+  ScopedWorkspace::ScopedWorkspace(Workspace_sptr ws) :
+    m_name( generateUniqueName() )
+  {
+    AnalysisDataService::Instance().add(m_name, ws); 
   }
     
   //----------------------------------------------------------------------------------------------
@@ -69,6 +74,9 @@ namespace API
   std::string ScopedWorkspace::randomString(size_t len)
   {
     static const std::string alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+    // Randomize
+    srand( static_cast<unsigned int>( time(0) ) );
 
     std::string result;
     result.reserve(len);

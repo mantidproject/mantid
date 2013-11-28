@@ -4,6 +4,7 @@
 #include <string>
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
@@ -35,7 +36,13 @@ namespace API
   class DLLExport ScopedWorkspace 
   {
   public:
+    /// Empty constructor
     ScopedWorkspace();
+
+    /// Workspace constructor
+    ScopedWorkspace(Workspace_sptr ws);
+
+    /// Destructor
     virtual ~ScopedWorkspace();
 
     /// Returns ADS name of the workspace
@@ -43,7 +50,7 @@ namespace API
 
   private:
     /// ADS name of the workspace
-    std::string m_name;
+    const std::string m_name;
  
     /// Generates a tricky name which is unique within ADS 
     static std::string generateUniqueName();
