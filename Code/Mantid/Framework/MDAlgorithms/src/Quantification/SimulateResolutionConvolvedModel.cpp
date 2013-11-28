@@ -43,6 +43,7 @@ namespace Mantid
       const char * RESOLUTION_NAME = "ResolutionFunction";
       const char * FOREGROUND_NAME = "ForegroundModel";
       const char * PARS_NAME = "Parameters";
+      const char * APPEND_NAME = "AppendToExisting";
     }
 
 
@@ -92,6 +93,10 @@ namespace Mantid
                       "The parameters/attributes for the function & model. See Fit documentation for format",
                       Direction::Input);
 
+      declareProperty(APPEND_NAME, false, 
+                      "If true then the simulated events will be added to an existing workspace. If the workspace does "
+                      "not exist then it is created", Direction::Input);
+
     }
 
     /**
@@ -113,13 +118,14 @@ namespace Mantid
 
       // If output workspace exists just add the events to that
       IMDEventWorkspace_sptr existingWS = getProperty(SIMULATED_NAME);
-      if(!existingWS)
+      bool append = getProperty(APPEND_NAME);
+      if(append && existingWS)
       {
-        createOutputWorkspace();
+        m_outputWS = boost::dynamic_pointer_cast<QOmegaWorkspace>(existingWS);
       }
       else
       {
-        m_outputWS = boost::dynamic_pointer_cast<QOmegaWorkspace>(existingWS);
+        createOutputWorkspace();
       }
       auto functionMD = boost::dynamic_pointer_cast<ResolutionConvolvedCrossSection>(resolution);
       functionMD->storeSimulatedEvents(m_outputWS);
