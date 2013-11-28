@@ -443,10 +443,11 @@ def fromEvent2Histogram(ws_event, ws_monitor = None):
     
     aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
     
-    monitor_ws_name = ws_monitor.name()
-    ConjoinWorkspaces(ws_monitor, aux_hist, CheckOverlapping=True)
+    name = '__monitor_tmp'
+    ws_monitor.clone(OutputWorkspace=name)
+    ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
     
-    ws_hist = RenameWorkspace(monitor_ws_name, OutputWorkspace=str(ws_event))
+    ws_hist = RenameWorkspace(name, OutputWorkspace=str(ws_event))
 
     return ws_hist
 		
