@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/Workspace.h"
 
@@ -10,7 +11,6 @@ namespace Mantid
 {
 namespace API
 {
-
   /** ScopedWorkspace : TODO: DESCRIPTION
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -48,7 +48,12 @@ namespace API
     /// Returns ADS name of the workspace
     std::string name() const { return m_name; }
 
+    /// Retrieve workspace from the ADS
+    Workspace_sptr retrieve() const;
+ 
   private:
+    DISABLE_COPY_AND_ASSIGN(ScopedWorkspace);
+
     /// ADS name of the workspace
     const std::string m_name;
  

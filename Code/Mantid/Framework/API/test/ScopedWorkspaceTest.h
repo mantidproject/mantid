@@ -66,6 +66,18 @@ public:
     TS_ASSERT_EQUALS( test.name().size(), prefix.size() + 16 );
   }
 
+  void test_retrieve()
+  {
+    ScopedWorkspace test;
+
+    TS_ASSERT( ! test.retrieve() );
+
+    MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace);
+    m_ads.add( test.name(), ws );
+
+    TS_ASSERT_EQUALS( ws, test.retrieve() );
+  }
+
   void test_removedWhenOutOfScope()
   {
     TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );

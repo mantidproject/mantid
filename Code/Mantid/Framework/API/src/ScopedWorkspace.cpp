@@ -48,6 +48,22 @@ namespace API
       }
     }
   }
+ 
+  /**
+   * Retrieve workspace from the ADS. Null pointer returned if nothing was added
+   * under the name.
+   */
+  Workspace_sptr ScopedWorkspace::retrieve() const
+  {
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
+    if ( ads.doesExist(m_name) )
+    {
+      return ads.retrieveWS<Workspace>(m_name);
+    }
+    
+    return Workspace_sptr();
+  }
 
   /**
    * Generates a tricky name which is unique within ADS.  
