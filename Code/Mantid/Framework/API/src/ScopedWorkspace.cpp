@@ -1,5 +1,6 @@
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace Mantid
 {
@@ -26,10 +27,20 @@ namespace API
    */
   ScopedWorkspace::~ScopedWorkspace()
   {
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
     // When destructed, remove workspace from the ADS if was added and still exists
-    if ( AnalysisDataService::Instance().doesExist(m_name) )
+    if ( ads.doesExist(m_name) )
     {
-      AnalysisDataService::Instance().remove(m_name);
+      if ( ads.retrieveWS<WorkspaceGroup>(m_name) )
+      {
+        // If is a group, need to remove all the members as well
+        ads.deepRemoveGroup(m_name);
+      }
+      else
+      {
+        ads.remove(m_name);
+      }
     }
   }
 

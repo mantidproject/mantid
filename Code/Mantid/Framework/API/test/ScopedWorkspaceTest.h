@@ -5,6 +5,7 @@
 
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -71,6 +72,29 @@ public:
     }
     
     // Should be removed when goes out of scope
+    TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
+  }
+
+  void test_workspaceGroups()
+  {
+    TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
+    
+    { // Simulated scope
+      MockWorkspace_sptr ws1 = MockWorkspace_sptr(new MockWorkspace);
+      MockWorkspace_sptr ws2 = MockWorkspace_sptr(new MockWorkspace);
+
+      WorkspaceGroup_sptr wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup);
+
+      wsGroup->addWorkspace(ws1);
+      wsGroup->addWorkspace(ws2);
+
+      ScopedWorkspace testGroup;
+      m_ads.add(testGroup.name(), wsGroup);
+
+      TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 3 );
+    }
+  
+    // Whole group should be removed
     TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
   }
 
