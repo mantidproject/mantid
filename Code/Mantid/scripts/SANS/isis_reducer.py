@@ -138,7 +138,7 @@ class ISISReducer(SANSReducer):
         self._out_name =       isis_reduction_steps.GetOutputName()
 
         #except self.prep_normalize all the steps below are used by the reducer
-        self.crop_detector =   isis_reduction_steps.CropDetBank(crop_sample=True)
+        self.crop_detector =   isis_reduction_steps.CropDetBank()
         self.mask =self._mask= isis_reduction_steps.Mask_ISIS()
         self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
         self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
@@ -311,6 +311,10 @@ class ISISReducer(SANSReducer):
 
         if not steps:
             steps = self._reduction_steps
+
+        # create the workspace that will be used throughout the reduction
+        CloneWorkspace(self.get_sample().wksp_name, OutputWorkspace=self.output_wksp)
+
         #the main part of the reduction is done here, go through and execute each step
         for item in steps:
             if item:

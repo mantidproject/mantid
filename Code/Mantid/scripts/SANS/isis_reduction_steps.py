@@ -954,19 +954,14 @@ class CropDetBank(ReductionStep):
         and crops the input workspace to just those spectra. Supports optionally
         generating the output workspace from a different (sample) workspace
     """ 
-    def __init__(self, crop_sample=False):
+    def __init__(self):
         """
             Sets up the object to either the output or sample workspace
-            @param crop_sample: if set to true the input workspace name is not the output but is taken from reducer.get_sample().wksp_name (default off) 
         """
         super(CropDetBank, self).__init__()
-        self._use_sample = crop_sample
 
     def execute(self, reducer, workspace):
-        if self._use_sample:
-            in_wksp = reducer.get_sample().wksp_name
-        else:
-            in_wksp = workspace
+        in_wksp = workspace
         
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
