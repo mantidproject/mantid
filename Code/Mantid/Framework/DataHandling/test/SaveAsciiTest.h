@@ -146,7 +146,6 @@ public:
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
-    int specID;
     std::string header1, header2, header3, header4, separator;
 
     // Test that the first few column headers, separator and first two bins are as expected
