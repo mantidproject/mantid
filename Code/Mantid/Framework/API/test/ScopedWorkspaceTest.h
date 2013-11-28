@@ -75,6 +75,29 @@ public:
     TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
   }
 
+  void test_removedWhenException()
+  {
+    TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
+    
+    try 
+    {
+      MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace); 
+  
+      ScopedWorkspace test;
+      m_ads.add(test.name(), ws);
+
+      TS_ASSERT( m_ads.doesExist( test.name() ) );
+
+      throw std::runtime_error("Exception");
+
+      TS_FAIL("Shouldn't get there");
+    }
+    catch(...)
+    {}
+
+    TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
+  }
+
   void test_workspaceGroups()
   {
     TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
