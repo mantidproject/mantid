@@ -98,24 +98,20 @@ class LoadRun(object):
         """
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
+            extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()
 
-        if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
-            outWs = LoadRaw(Filename=self._data_file, 
-                            OutputWorkspace=workspace,
-                            **extra_options)
-            if self._period != self.UNSET_PERIOD:
-                outWs = mtd[self._leaveSinglePeriod(str(outWs), self._period)]
-
-            # After loading raw, it is necessary to load Sample details
+        extra_options['OutputWorkspace'] = workspace
+        outWs = Load(self._data_file, **extra_options)
+        
+        loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
+        
+        if loader_name == 'LoadRaw':
             self._loadSampleDetails(workspace)
-        else:
-            if self._period != self.UNSET_PERIOD:
-                extra_options['EntryNumber']=self._period
-            outWs = LoadNexus(Filename=self._data_file, 
-                              OutputWorkspace=workspace,
-                              **extra_options)
+        
+        if self._period != self.UNSET_PERIOD and isinstance(outWs, WorkspaceGroup):
+            outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
 
         self.periods_in_file = self._find_workspace_num_periods(workspace)
         self._wksp_name = workspace
