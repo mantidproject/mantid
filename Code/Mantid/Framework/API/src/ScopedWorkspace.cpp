@@ -99,9 +99,6 @@ namespace API
   {
     static const std::string alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    // Randomize
-    srand( static_cast<unsigned int>( time(0) ) );
-
     std::string result;
     result.reserve(len);
 
