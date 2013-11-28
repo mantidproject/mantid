@@ -148,10 +148,10 @@ public:
         AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("DET_PAR2");
 
        TSM_ASSERT_DELTA("polar wrong ",      37.0451,  spResult->cell<double>(0,0),1.e-3);
-       TSM_ASSERT_DELTA("azimut wrong: some average angle -> 0 for many detectors", -114.5454, spResult->cell<double>(0,1),1.e-3);
+       TSM_ASSERT_DELTA("azimut wrong: some average angle -> around initial detector's angle for many detectors", -114.5454, spResult->cell<double>(0,1),1.e-3);
        TSM_ASSERT_DELTA("flight path wrong ",7.5248,  spResult->cell<double>(0,2),1.e-3);
        TSM_ASSERT_DELTA("polar width wrong ",20.0598,  spResult->cell<double>(0,3),1.e-3);
-       TSM_ASSERT_DELTA("azim width wrong ring of ~365deg",364.8752, spResult->cell<double>(0,4),1.e-3);
+       TSM_ASSERT_DELTA("azim width wrong ring of ~360deg",364.8752, spResult->cell<double>(0,4),1.e-3);
 
        AnalysisDataService::Instance().remove("DET_PAR2");
 
