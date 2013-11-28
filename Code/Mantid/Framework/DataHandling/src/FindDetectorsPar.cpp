@@ -646,6 +646,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName, std::ifstream &d
     int space_to_symbol_change=count_changes(&BUF[0],BUF.size());
     if(space_to_symbol_change>1){  // more then one group of symbols in the string, spe file
         int nData_records(0),nData_blocks(0);
+        // cppcheck-suppress invalidscanf
         int nDatas = sscanf(&BUF[0]," %d %d ",&nData_records,&nData_blocks);
         file_descriptor.nData_records = (size_t)nData_records;
         file_descriptor.nData_blocks  = (size_t)nData_blocks;
