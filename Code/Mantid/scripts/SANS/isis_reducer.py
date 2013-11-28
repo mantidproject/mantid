@@ -109,7 +109,8 @@ class ISISReducer(SANSReducer):
         """
             Defines the steps that are run and their order
         """
-        proc_TOF = [self.crop_detector]
+        proc_TOF = [self.event2hist]
+        proc_TOF.append(self.crop_detector)
         proc_TOF.append(self.mask)
         proc_TOF.append(self.to_wavelen)
 
@@ -167,6 +168,7 @@ class ISISReducer(SANSReducer):
         self._can_run = Can()
         self.samp_trans_load = None
         self.can_trans_load = None
+        self.event2hist = isis_reduction_steps.SliceEvent()
 
     def __init__(self):
         SANSReducer.__init__(self)
