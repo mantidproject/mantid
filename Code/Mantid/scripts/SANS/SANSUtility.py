@@ -407,7 +407,7 @@ def getBinsBoundariesFromWorkspace(ws_reference):
     return binning
 
 def loadMonitorsFromFile(fileName, monitor_ws_name='monitor_ws'):
-    monitor = LoadNexus(fileName, SpectrumMax=8, OutputWorkspace=monitor_ws_name)
+    monitor = LoadNexusMonitors(fileName, OutputWorkspace=monitor_ws_name)
     return monitor
 
 def getFilePathFromWorkspace(ws):
