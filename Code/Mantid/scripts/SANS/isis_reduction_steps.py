@@ -190,9 +190,6 @@ class LoadRun(object):
         if 'Algorithm: Move' in hist_str or 'Algorithm: Rotate' in hist_str:
             raise RuntimeError('Moving components needs to be made compatible with not reloading the sample')
         
-        if isEventWorkspace(ws_pointer):
-            ws_pointer = fromEvent2Histogram(ws_pointer)
-
         return True
         
 
