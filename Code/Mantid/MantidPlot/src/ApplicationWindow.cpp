@@ -163,8 +163,6 @@
 #include <QSpinBox>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include <QUndoStack>
-#include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
 #include <QPair>
@@ -412,16 +410,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   QList<int> splitterSizes;
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
-
-  undoStackWindow = new QDockWidget(this);
-  undoStackWindow->setObjectName("undoStackWindow"); // this is needed for QMainWindow::restoreState()
-  undoStackWindow->setWindowTitle(tr("Undo Stack"));
-  addDockWidget(Qt::RightDockWidgetArea, undoStackWindow);
-
-  d_undo_view = new QUndoView(undoStackWindow);
-  d_undo_view->setCleanIcon(QIcon(getQPixmap("filesave_xpm")));
-  undoStackWindow->setWidget(d_undo_view);
-  undoStackWindow->hide();
 
   // Needs to be done after initialization of dock windows,
   // because we now use QDockWidget::toggleViewAction()
@@ -1120,7 +1108,6 @@ void ApplicationWindow::insertTranslatedStrings()
 
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   logWindow->setWindowTitle(tr("Results Log"));
-  undoStackWindow->setWindowTitle(tr("Undo Stack"));
   displayBar->setWindowTitle(tr("Data Display"));
   plotTools->setWindowTitle(tr("Plot"));
   standardTools->setWindowTitle(tr("Standard Tools"));
@@ -1436,11 +1423,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   // these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
   actionTableRecalculate->setEnabled(false);
 
-  // clear undo stack view (in case window is not a matrix)
-  d_undo_view->setStack(0);
-  actionUndo->setEnabled(false);
-  actionRedo->setEnabled(false);
-
   if(w){
     actionPrintAllPlots->setEnabled(projectHas2DPlots());
     actionPrint->setEnabled(true);
@@ -1545,9 +1527,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       matrixMenuAboutToShow();
       myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
       analysisMenuAboutToShow();
-      d_undo_view->setEmptyLabel(w->objectName() + ": " + tr("Empty Stack"));
-      QUndoStack *stack = dynamic_cast<Matrix *>(w)->undoStack();
-      d_undo_view->setStack(stack);
 
     } else if (w->isA("Note")) {
       actionSaveTemplate->setEnabled(false);
@@ -3428,10 +3407,6 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
   m->setNumericPrecision(d_decimal_digits);
 
   addMdiSubWindow(m);
-
-  QUndoStack *stack = m->undoStack();
-  connect(stack, SIGNAL(canUndoChanged(bool)), actionUndo, SLOT(setEnabled(bool)));
-  connect(stack, SIGNAL(canRedoChanged(bool)), actionRedo, SLOT(setEnabled(bool)));
 
   connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(updateMatrixPlots(MdiSubWindow *)));
 
@@ -9219,26 +9194,6 @@ void ApplicationWindow::fileMenuAboutToShow()
 
 void ApplicationWindow::editMenuAboutToShow()
 {
-  MdiSubWindow *w = activeWindow();
-  if (!w){
-    actionUndo->setEnabled(false);
-    actionRedo->setEnabled(false);
-    return;
-  }
-
-  if (qobject_cast<Note *>(w)){
-    QTextDocument* doc = dynamic_cast<Note*>(w)->editor()->document();
-    actionUndo->setEnabled(doc->isUndoAvailable());
-    actionRedo->setEnabled(doc->isRedoAvailable());
-  } else if (qobject_cast<Matrix *>(w)){
-    QUndoStack *stack = (dynamic_cast<Matrix*>(w))->undoStack();
-    actionUndo->setEnabled(stack->canUndo());
-    actionRedo->setEnabled(stack->canRedo());
-  } else {
-    actionUndo->setEnabled(false);
-    actionRedo->setEnabled(false);
-  }
-
   reloadCustomActions();
 }
 
@@ -12692,14 +12647,6 @@ void ApplicationWindow::createActions()
   actionLoad = new QAction(QIcon(getQPixmap("import_xpm")), tr("&Import ASCII..."), this);
   connect(actionLoad, SIGNAL(activated()), this, SLOT(importASCII()));
 
-  actionUndo = new QAction(QIcon(getQPixmap("undo_xpm")), tr("&Undo"), this);
-  actionUndo->setShortcut( tr("Ctrl+Z") );
-  connect(actionUndo, SIGNAL(activated()), this, SLOT(undo()));
-
-  actionRedo = new QAction(QIcon(getQPixmap("redo_xpm")), tr("&Redo"), this);
-  actionRedo->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_Z));
-  connect(actionRedo, SIGNAL(activated()), this, SLOT(redo()));
-
   actionCopyWindow = new QAction(QIcon(getQPixmap("duplicate_xpm")), tr("&Duplicate"), this);
   connect(actionCopyWindow, SIGNAL(activated()), this, SLOT(clone()));
 
@@ -12725,8 +12672,6 @@ void ApplicationWindow::createActions()
 
   actionShowLog = logWindow->toggleViewAction();
   actionShowLog->setIcon(getQPixmap("log_xpm"));
-
-  actionShowUndoStack = undoStackWindow->toggleViewAction();
 
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("Alt+L") );
@@ -13530,14 +13475,6 @@ void ApplicationWindow::translateActionsStrings()
   actionLoad->setToolTip(tr("Import data file(s)"));
   actionLoad->setShortcut(tr("Ctrl+K"));
 
-  actionUndo->setMenuText(tr("&Undo"));
-  actionUndo->setToolTip(tr("Undo changes"));
-  actionUndo->setShortcut(tr("Ctrl+Z"));
-
-  actionRedo->setMenuText(tr("&Redo"));
-  actionRedo->setToolTip(tr("Redo changes"));
-  actionRedo->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_Z));
-
   actionCopyWindow->setMenuText(tr("&Duplicate"));
   actionCopyWindow->setToolTip(tr("Duplicate window"));
 
@@ -13565,9 +13502,6 @@ void ApplicationWindow::translateActionsStrings()
 
   actionShowLog->setMenuText(tr("Results &Log"));
   actionShowLog->setToolTip(tr("Results Log"));
-
-  actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
-  actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
 
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow->setMenuText(tr("&Script Window"));
