@@ -43,6 +43,7 @@ namespace Mantid
         else if(value == "K") m_coord = 4;
         else if(value == "L") m_coord = 5;
         else if(value == "En") m_coord = 6;
+        else if(value == "Unity") m_coord = 7;
         else
           throw std::invalid_argument("Unknown coordinate name passed to QCoordinate model");
       }
@@ -58,15 +59,20 @@ namespace Mantid
      */
     double QCoordinate::scatteringIntensity(const API::ExperimentInfo & exptSetup, const std::vector<double> & point) const
     {
-      const double qx(point[0]), qy(point[1]), qz(point[2]), eps(point[3]);
+      // unity
+      if(m_coord == 7) return 1.0;
+
+      // energy
+      const double eps(point[3]);
       if(m_coord == 6) return eps;
 
+      // crystal frame
+      const double qx(point[0]), qy(point[1]), qz(point[2]);
       if(m_coord == 0) return qx;
       else if(m_coord == 1) return qy;
       else if(m_coord == 2) return qz;
 
       // HKL coords
-
       // Transform the HKL only requires B matrix & goniometer (R) as ConvertToMD should have already
       // handled addition of U matrix
       // qhkl = (1/2pi)(RUB)^-1(qxyz)
