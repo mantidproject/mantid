@@ -12,7 +12,7 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 sanslog = sans_reduction_steps.sanslog
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace
+from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
                          getFilePathFromWorkspace, getWorkspaceReference)
@@ -1587,6 +1587,20 @@ class UnitsConvert(ReductionStep):
 
     def __str__(self):
         return '    Wavelength range: ' + self.get_rebin()
+
+class SliceEvent(ReductionStep):
+    
+    def __init__(self):
+        super(SliceEvent, self).__init__()
+
+    def execute(self, reducer, workspace):
+        ws_pointer = getWorkspaceReference(workspace)
+
+        # it applies only for event workspace
+        if not isinstance(ws_pointer, IEventWorkspace):
+            return
+
+        hist = fromEvent2Histogram(ws_pointer)
 
 class UserFile(ReductionStep):
     """
