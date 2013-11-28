@@ -438,6 +438,15 @@ def getMonitor4event(ws_event):
     return ws_monitor
 
 def fromEvent2Histogram(ws_event, ws_monitor = None):
+    """Transform an event mode workspace into a histogram workspace. 
+    It does conjoin the monitor and the workspace as it is expected from the current 
+    SANS data inside ISIS. 
+
+    Finally, it copies the parameter map from the workspace to the resulting histogram
+    in order to preserve the positions of the detectors components inside the workspace. 
+    
+    It will finally, replace the input workspace with the histogram equivalent workspace.
+    """
     if not ws_monitor:
         ws_monitor = getMonitor4event(ws_event)
     
@@ -445,7 +454,8 @@ def fromEvent2Histogram(ws_event, ws_monitor = None):
     
     name = '__monitor_tmp'
     ws_monitor.clone(OutputWorkspace=name)
-    ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
+    ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)    
+    CopyInstrumentParameters(ws_event, OutputWorkspace=name)
     
     ws_hist = RenameWorkspace(name, OutputWorkspace=str(ws_event))
 
