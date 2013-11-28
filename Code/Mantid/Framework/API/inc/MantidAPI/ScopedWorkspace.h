@@ -50,6 +50,9 @@ namespace API
 
     /// Retrieve workspace from the ADS
     Workspace_sptr retrieve() const;
+
+    /// Make ADS entry to point to the given workspace
+    void set(Workspace_sptr newWS);
  
   private:
     DISABLE_COPY_AND_ASSIGN(ScopedWorkspace);

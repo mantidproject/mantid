@@ -64,6 +64,14 @@ namespace API
     
     return Workspace_sptr();
   }
+ 
+  /**
+   * Make ADS entry to point to the given workspace.
+   */
+  void ScopedWorkspace::set(Workspace_sptr newWS)
+  {
+    AnalysisDataService::Instance().addOrReplace(m_name, newWS); 
+  }
 
   /**
    * Generates a tricky name which is unique within ADS.  

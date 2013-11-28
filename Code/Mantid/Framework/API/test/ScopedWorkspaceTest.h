@@ -66,14 +66,14 @@ public:
     TS_ASSERT_EQUALS( test.name().size(), prefix.size() + 16 );
   }
 
-  void test_retrieve()
+  void test_setAndRetrieve()
   {
     ScopedWorkspace test;
 
     TS_ASSERT( ! test.retrieve() );
 
     MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace);
-    m_ads.add( test.name(), ws );
+    test.set(ws);
 
     TS_ASSERT_EQUALS( ws, test.retrieve() );
   }
