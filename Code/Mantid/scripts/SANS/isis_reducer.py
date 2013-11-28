@@ -9,6 +9,7 @@ from reduction.instruments.sans.sans_reducer import SANSReducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 from mantid.simpleapi import *
+from mantid.api import IEventWorkspace
 import os
 import copy
 
@@ -229,6 +230,13 @@ class ISISReducer(SANSReducer):
             return self._sample_run
         else:
             return self.get_can()
+
+    def get_monitor(self, index):
+        _ws = mtd[self.get_sample().wksp_name]
+        if isinstance(_ws, IEventWorkspace):
+            _ws = mtd[self.event2hist.monitor]
+        __MonitorWs = ExtractSingleSpectrum(_ws, index)
+        return __MonitorWs
 
     def get_transmissions(self):
         """ Get the transmission and direct workspace if they were given

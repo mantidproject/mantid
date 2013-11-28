@@ -15,7 +15,8 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
-                         getFilePathFromWorkspace, getWorkspaceReference)
+                         getFilePathFromWorkspace, getWorkspaceReference,
+                         getMonitor4event)
 import isis_instrument
 import os
 import math
@@ -971,13 +972,12 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
     """
     NORMALISATION_SPEC_NUMBER = 1
     NORMALISATION_SPEC_INDEX = 0
-    def __init__(self, spectrum_number=None, raw_ws=None):
+    def __init__(self, spectrum_number=None):
         if not spectrum_number is None:
             index_num = spectrum_number
         else:
             index_num = None
         super(NormalizeToMonitor, self).__init__(index_num)
-        self._raw_ws = raw_ws
 
         #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
@@ -988,17 +988,13 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             #the -1 converts from spectrum number to spectrum index
             normalization_spectrum = reducer.instrument.get_incident_mon()
         
-        raw_ws = self._raw_ws
-        if raw_ws is None:
-            raw_ws = reducer.get_sample().wksp_name
-
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = 'Monitor'       
-        CropWorkspace(InputWorkspace=raw_ws,OutputWorkspace= self.output_wksp,
-                      StartWorkspaceIndex = normalization_spectrum-1, 
-                      EndWorkspaceIndex   = normalization_spectrum-1)
-    
+        self.output_wksp = 'Monitor'
+        mon = reducer.get_monitor(normalization_spectrum-1)
+        if str(mon) != self.output_wksp:
+            RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
+        
         if reducer.instrument.name() == 'LOQ':
             RemoveBins(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp,XMin= reducer.transmission_calculator.loq_removePromptPeakMin,XMax= 
                        reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
@@ -1589,6 +1585,7 @@ class SliceEvent(ReductionStep):
     
     def __init__(self):
         super(SliceEvent, self).__init__()
+        self.monitor = ""
 
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)
@@ -1596,8 +1593,9 @@ class SliceEvent(ReductionStep):
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
             return
-
-        hist = fromEvent2Histogram(ws_pointer)
+        self.monitor = getMonitor4event(ws_pointer)
+        hist = fromEvent2Histogram(ws_pointer, self.monitor)
+        self.monitor = str(self.monitor)
 
 class UserFile(ReductionStep):
     """
