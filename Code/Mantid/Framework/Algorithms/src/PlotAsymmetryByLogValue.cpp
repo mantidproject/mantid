@@ -40,17 +40,18 @@ There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlo
 #include <iomanip>
 #include <sstream>
 
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Progress.h"
+#include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/TextAxis.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -211,6 +212,20 @@ namespace Mantid
       }
       outWS->replaceAxis(1,tAxis);
 
+      const std::string dtcType = getPropertyValue("DeadTimeCorrType");
+
+      Workspace_sptr customDeadTimes;
+
+      if ( dtcType == "FromSpecifiedFile" )
+      {
+        IAlgorithm_sptr loadDeadTimes = createChildAlgorithm("LoadNexusProcessed");
+        loadDeadTimes->initialize();
+        loadDeadTimes->setPropertyValue( "Filename", getPropertyValue("DeadTimeCorrFile") );
+        loadDeadTimes->execute();
+
+        customDeadTimes = loadDeadTimes->getProperty("OutputWorkspace");
+      }
+
       Progress progress(this,0,1,ie-is+2);
       for(size_t i=is;i<=ie;i++)
       {
@@ -218,15 +233,40 @@ namespace Mantid
         fnn << std::setw(w) << std::setfill('0') << i ;
         fn << fnBase << fnn.str() << ext;
 
-        // Load a muon nexus file with auto_group set to true
-        IAlgorithm_sptr loadAlg = createChildAlgorithm("MuonApplyDTC");
-        loadAlg->initialize();
-        loadAlg->setPropertyValue("Filename", fn.str());
-        loadAlg->setPropertyValue("DtcType", getPropertyValue("DeadTimeCorrType"));
-        loadAlg->setPropertyValue("DtcFile", getPropertyValue("DeadTimeCorrFile"));
-        loadAlg->execute();
+        IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
+        load->initialize();
+        load->setPropertyValue("Filename", fn.str());
+        load->execute();
 
-        Workspace_sptr loadedWs = loadAlg->getProperty("OutputWorkspace");
+        Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
+
+        if ( dtcType != "None" )
+        {
+          IAlgorithm_sptr applyCorr = createChildAlgorithm("ApplyDeadTimeCorr", -1, -1, false);
+          applyCorr->initialize();
+
+          ScopedWorkspace ws(loadedWs);
+          applyCorr->setPropertyValue("InputWorkspace", ws.name());
+          applyCorr->setPropertyValue("OutputWorkspace", ws.name());
+
+          ScopedWorkspace deadTimes;
+
+          if ( dtcType == "FromSpecifiedFile" )
+          {
+            deadTimes.set(customDeadTimes);
+          }
+          else 
+          {
+            deadTimes.set( load->getProperty("DeadTimeTable") );
+          }
+
+          applyCorr->setPropertyValue( "DeadTimeTable", deadTimes.name() );
+          applyCorr->execute();
+ 
+          // Workspace should've been replaced in the ADS by ApplyDeadTimeCorr, so need to
+          // re-assign it
+          loadedWs = ws.retrieve();
+        }
 
         if(m_autogroup)
         {
@@ -263,6 +303,7 @@ namespace Mantid
         {
           DataObjects::Workspace2D_sptr ws_red;
           DataObjects::Workspace2D_sptr ws_green;
+          
 
           // Run through the periods of the loaded file and do calculations on the selected ones
           for(int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++)
@@ -291,6 +332,8 @@ namespace Mantid
             }
 
           }
+
+
           // red & green claculation
           if (green != EMPTY_INT())
           {
