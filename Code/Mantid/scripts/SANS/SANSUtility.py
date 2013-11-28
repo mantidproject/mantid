@@ -432,14 +432,16 @@ def getFilePathFromWorkspace(ws):
         raise RuntimeError("Can not find the file name for workspace " + str(ws))
     return file_path
 
+def getMonitor4event(ws_event):
+    file_path = getFilePathFromWorkspace(ws_event)
+    ws_monitor = loadMonitorsFromFile(file_path)
+    return ws_monitor
+
 def fromEvent2Histogram(ws_event, ws_monitor = None):
     if not ws_monitor:
-        file_path = getFilePathFromWorkspace(ws_event)
-        ws_monitor =  loadMonitorsFromFile(file_path)
+        ws_monitor = getMonitor4event(ws_event)
     
-    bins_option = getBinsBoundariesFromWorkspace(ws_monitor)
-    
-    aux_hist = Rebin(ws_event, bins_option, False)
+    aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
     
     monitor_ws_name = ws_monitor.name()
     ConjoinWorkspaces(ws_monitor, aux_hist, CheckOverlapping=True)
