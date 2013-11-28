@@ -10,6 +10,15 @@
 
 using namespace Mantid::API;
 
+/// MockWorkspace copied from AnalysisDataServiceTest so I have something to add to the ADS
+class MockWorkspace : public Workspace
+{
+  virtual const std::string id() const { return "MockWorkspace"; }
+  virtual const std::string toString() const { return ""; }
+  virtual size_t getMemorySize() const { return 1; }
+};
+typedef boost::shared_ptr<MockWorkspace> MockWorkspace_sptr;
+
 class ScopedWorkspaceTest : public CxxTest::TestSuite
 {
 public:
@@ -19,14 +28,14 @@ public:
   static void destroySuite( ScopedWorkspaceTest *suite ) { delete suite; }
 
   ScopedWorkspaceTest() :
-    ads( AnalysisDataService::Instance() )
+    m_ads( AnalysisDataService::Instance() )
   {
-    ads.clear();
+    m_ads.clear();
   }
 
   ~ScopedWorkspaceTest()
   {
-    ads.clear();
+    m_ads.clear();
   }
 
   void test_emptyConstructor()
@@ -35,7 +44,7 @@ public:
     // Should have name created
     TS_ASSERT( ! test.name().empty() );
     // However, nothing should be added under that name yet
-    TS_ASSERT( ! ads.doesExist( test.name() ) );
+    TS_ASSERT( ! m_ads.doesExist( test.name() ) );
   }
 
   void test_name()
@@ -48,8 +57,25 @@ public:
     TS_ASSERT_EQUALS( test.name().size(), prefix.size() + 16 );
   }
 
+  void test_removedWhenOutOfScope()
+  {
+    TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
+     
+    { // Simulated scope 
+      MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace); 
+  
+      ScopedWorkspace test;
+      m_ads.add(test.name(), ws);
+
+      TS_ASSERT( m_ads.doesExist( test.name() ) );
+    }
+    
+    // Should be removed when goes out of scope
+    TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
+  }
+
 private:
-  AnalysisDataServiceImpl& ads;
+  AnalysisDataServiceImpl& m_ads;
 };
 
 

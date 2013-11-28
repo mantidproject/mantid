@@ -26,6 +26,11 @@ namespace API
    */
   ScopedWorkspace::~ScopedWorkspace()
   {
+    // When destructed, remove workspace from the ADS if was added and still exists
+    if ( AnalysisDataService::Instance().doesExist(m_name) )
+    {
+      AnalysisDataService::Instance().remove(m_name);
+    }
   }
 
   /**
