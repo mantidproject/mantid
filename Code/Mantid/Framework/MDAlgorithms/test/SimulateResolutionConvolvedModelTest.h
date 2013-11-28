@@ -21,7 +21,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_EQUALS(alg.propertyCount(), 5);
+    TS_ASSERT_EQUALS(alg.propertyCount(), 6);
   }
 
 };
