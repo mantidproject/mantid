@@ -5,6 +5,8 @@
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace
 import math
+import re
+
 
 def GetInstrumentDetails(instrum):
     """
@@ -460,6 +462,108 @@ def fromEvent2Histogram(ws_event, ws_monitor = None):
     ws_hist = RenameWorkspace(name, OutputWorkspace=str(ws_event))
 
     return ws_hist
+
+
+def sliceParser(str_to_parser):
+    """
+    Create a list of boundaries from a string defing the slices. 
+    Valid syntax is:
+      * From 8 to 9 > '8-9' --> return [[8,9]]
+      * From 8 to 9 and from 10 to 12 > '8-9, 10-12' --> return [[8,9],[10,12]]
+      * From 5 to 10 in steps of 1 > '5:1:10' --> return [[5,6],[6,7],[7,8],[8,9],[9,10]]
+      * From 5 > '>5' --> return [[5,-1]]
+      * Till 5 > '<5' --> return [[-1,5]]
+      
+    Any combination of these syntax separated by comma is valid.
+    A special mark is used to signalize no limit: -1, 
+    As, so, for an empty string, it will return: [[-1, -1]].
+
+    It does not accept negative values.
+    
+    """
+    num_pat = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)' # float without sign
+    slice_pat = num_pat + r'-' + num_pat 
+    lowbound = '>'+num_pat
+    upbound = '<'+num_pat
+    sss_pat = num_pat+r':'+num_pat+r':'+num_pat
+    exception_pattern = 'Invalid input for Slicer: %s'
+    MARK = -1
+
+    def _check_match(inpstr, patternstr, qtde_nums):
+        match = re.match(patternstr, inpstr)
+        if match:
+            answer = match.groups()
+            if len(answer) != qtde_nums:
+                raise SyntaxError(exception_pattern %(inpstr))
+            return [float(answer[i]) for i in range(qtde_nums)]
+        else:
+            return False
+
+    def _parse_slice(inpstr):
+        return _check_match(inpstr, slice_pat, 2)
+
+    def _parse_lower(inpstr):
+        val = _check_match(inpstr, lowbound, 1)
+        if not val: return val
+        return [val[0], MARK]
+
+    def _parse_upper(inpstr):
+        val = _check_match(inpstr, upbound, 1)
+        if not val: return val
+        return [MARK, val[0]]
+        
+    def _parse_start_step_stop(inpstr):
+        val = _check_match(inpstr, sss_pat, 3)
+        if not val: return val
+        start = val[0]
+        step = val[1]
+        stop = val[2]
+        curr_value = start
+        
+        vallist = []
+        while True:
+            
+            next_value = curr_value + step 
+            
+            if next_value >= stop:
+                vallist.append([curr_value, stop])
+                return vallist
+            else:
+                vallist.append([curr_value, next_value])
+                
+            curr_value = next_value
+            
+            
+        
+    def _extract_simple_input(inpstr):
+        for fun in _parse_slice, _parse_lower, _parse_upper:
+            val = fun(inpstr)
+            if val:
+                return val
+            
+        return False
+
+    def _extract_composed_input(inpstr):
+        return _parse_start_step_stop(inpstr)
+
+    if not str_to_parser:
+        return [[MARK, MARK]]
+
+    parts = str_to_parser.split(',')
+    result = []
+    for inps in parts:
+        inps = inps.replace(' ','')
+        aux_res = _extract_simple_input(inps)
+        if aux_res:
+            result.append(aux_res)
+            continue
+        aux_res = _extract_composed_input(inps)
+        if aux_res:
+            result += aux_res
+            continue
+        raise SyntaxError('Invalid input '+ str_to_parser +'. Failed caused by this term:'+inps)
+
+    return result
 		
   
 if __name__ == '__main__':
