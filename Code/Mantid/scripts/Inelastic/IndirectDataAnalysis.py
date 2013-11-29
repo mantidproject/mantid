@@ -115,7 +115,8 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties
             logger.notice('Fit func : '+func)      
         fitWS = outNm + '_Result_'
         fout = fitWS + str(i)
-        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i+specMin,Output=fout,MaxIterations=0)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i+specMin,Output=fout,
+            CreateOutput=True, MaxIterations=0,OutputCompositeMembers=True, ConvolveMembers=True)
         unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
@@ -735,7 +736,8 @@ def getFurySeqResult(inputWS, outNm, option, Verbose):
         fout = fitWS + str(i)
         
         #run fit function and collection generated workspace
-        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,
+            CreateOutput=True, MaxIterations=0,OutputCompositeMembers=True, ConvolveMembers=True)
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
         unitx = mtd[fout].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
