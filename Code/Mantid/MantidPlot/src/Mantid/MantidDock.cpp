@@ -1141,6 +1141,15 @@ void MantidDockWidget::clearUB()
   m_mantidUI->clearUB(selctedWSNames);
 }
 
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void MantidDockWidget::dropEvent(QDropEvent *de)
+{
+  m_tree->dropEvent(de);
+}
+
 //------------ MantidTreeWidget -----------------------//
 
 MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
@@ -1172,6 +1181,8 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
     if (de->mimeData()->hasUrls())
         de->acceptProposedAction();
 }
+
+
  
 /**
  * Accept a drag drop event and process the data appropriately
@@ -1212,6 +1223,10 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
         logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }      
       catch (std::logic_error& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }
+      catch (std::exception& error)
       {
         logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }

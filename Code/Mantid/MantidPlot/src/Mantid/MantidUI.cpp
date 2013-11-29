@@ -1228,6 +1228,8 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
 bool MantidUI::drop(QDropEvent* e)
 {
+  
+
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace")
   {
@@ -1247,8 +1249,53 @@ bool MantidUI::drop(QDropEvent* e)
     }
     return true;
   }
+  else if (e->mimeData()->hasUrls())
+  {
+    QStringList pyFiles = extractPyFiles(e->mimeData()->urls());
+    if (pyFiles.size() > 0)
+    {
+      try
+      {
+        m_appWindow->openScriptWindow(pyFiles);
+      }
+      catch (std::runtime_error& error)
+      {
+        g_log.error()<<"Failed to Load the python files. The reason for failure is: "<< error.what()<<std::endl;
+      }      
+      catch (std::logic_error& error)
+      {
+        g_log.error()<<"Failed to Load the python files. The reason for failure is: "<< error.what()<<std::endl;
+      }
+    }
+    else
+    {
+      //pass to Loading of mantid workspaces
+      m_exploreMantid->dropEvent(e);
+    }
+    return true;
+  }
 
   return false;
+}
+
+///extracts the files from a mimedata object that have a .py extension
+QStringList MantidUI::extractPyFiles(const QList<QUrl>& urlList) const
+{
+  QStringList filenames;
+  for (int i = 0; i < urlList.size(); ++i) 
+  {
+    QString fName = urlList[i].toLocalFile();
+    if (fName.size()>0)
+    {
+      QFileInfo fi(fName);
+      
+      if (fi.suffix().upper()=="PY")
+      {
+        filenames.append(fName);
+      }
+    }
+  }
+  return filenames;
 }
 
 /**
