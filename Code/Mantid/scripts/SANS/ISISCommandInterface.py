@@ -900,6 +900,12 @@ def LimitsQXY(qmin, qmax, step, type):
 
     settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type, ReductionSingleton())
 
+def SetEventSlices(input_str):
+    """    
+    """
+    ReductionSingleton().setSlicesLimits(input_str)
+
+
 def PlotResult(workspace, canvas=None):
     """
         Draws a graph of the passed workspace. If the workspace is 2D (has many spectra
