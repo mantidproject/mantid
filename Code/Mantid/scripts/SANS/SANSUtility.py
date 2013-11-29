@@ -463,6 +463,53 @@ def fromEvent2Histogram(ws_event, ws_monitor = None):
 
     return ws_hist
 
+def getChargeAndTime(ws_event):
+    r = ws_event.getRun()
+    charges = r.getLogData('proton_charge')
+    total_charge = sum(charges.value)
+    time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
+    time_passed /= 1e6    
+    return total_charge, time_passed
+
+def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
+    def formatTime(time_val):
+        return "_T%.1f" % time_val
+    params = dict()
+    outname=str(ws_event)
+    if time_start:
+        outname +=formatTime(time_start)
+        params['StartTime'] = time_start
+    if time_stop:
+        outname += formatTime(time_stop)
+        params['StopTime'] = time_stop
+
+    params['OutputWorkspace'] = outname
+    sliced_ws = FilterByTime(ws_event, **params)
+    return sliced_ws
+
+def slice2histogram(ws_event, time_start, time_stop, monitor):
+    """Return the histogram of the sliced event and a tuple with the following:
+       - total time of the experiment
+       - total charge
+       - time of sliced data
+       - charge of sliced data
+    """
+    tot_c, tot_t = getChargeAndTime(ws_event)
+
+    if (time_start == -1) and (time_stop == -1):
+        hist = fromEvent2Histogram(ws_event, monitor)
+        return hist, (tot_t, tot_c, tot_t, tot_c)
+
+    sliced_ws = sliceByTimeWs(ws_event, time_start, time_stop)
+    sliced_ws = RenameWorkspace(sliced_ws, OutputWorkspace=ws_event.name())
+
+    part_c, part_t = getChargeAndTime(sliced_ws)
+    scaled_monitor = monitor * (part_c/tot_c)
+
+
+    hist = fromEvent2Histogram(sliced_ws, scaled_monitor)
+    return hist, (tot_t, tot_c, part_t, part_c)
+
 
 def sliceParser(str_to_parser):
     """
