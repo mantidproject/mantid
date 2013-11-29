@@ -37,7 +37,7 @@ void Lorentzian::init()
 {
   declareParameter("Amplitude", 1.0, "Maximum height of peak when x=x0");
   declareParameter("PeakCentre", 0.0, "Centre of peak");
-  declareParameter("HWHM", 0.0, "Half-width at half-maximum");
+  declareParameter("FWHM", 0.0, "Falf-width at half-maximum");
 }
 
 
@@ -45,7 +45,7 @@ void Lorentzian::functionLocal(double* out, const double* xValues, const size_t 
 {
     const double amplitude = getParameter("Amplitude");
     const double peakCentre = getParameter("PeakCentre");
-    const double halfGamma = 0.5*getParameter("HWHM");
+    const double halfGamma = 0.5*getParameter("FWHM");
 
     const double invPI = 1.0/M_PI;
     for (size_t i = 0; i < nData; i++)
@@ -59,7 +59,7 @@ void Lorentzian::functionDerivLocal(Jacobian* out, const double* xValues, const 
 {
     const double amplitude = getParameter("Amplitude");
     const double peakCentre = getParameter("PeakCentre");
-    const double gamma = getParameter("HWHM");
+    const double gamma = getParameter("FWHM");
     const double halfGamma = 0.5*gamma;
 
     const double invPI = 1.0/M_PI;
