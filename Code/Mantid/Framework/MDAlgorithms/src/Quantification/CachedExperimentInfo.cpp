@@ -189,13 +189,8 @@ namespace Mantid
       m_sampleWidths = shape.getBoundingBox().width();
 
       // Detector volume
-      const Geometry::Object_const_sptr detShape = instrument->getDetector(detID)->shape();
-      if(!detShape)
-      {
-        throw std::invalid_argument("CachedExperimentInfo::initCaches - Detector has no bounding box, cannot sample from it. ID:"
-                                    + boost::lexical_cast<std::string>(det->getID()));
-      }
-      m_detBox = detShape->getBoundingBox();
+      // Make sure it encompasses all possible detectors
+      det->getBoundingBox(m_detBox);
 
       const double rad2deg = 180./M_PI;
       const double thetaInDegs = twoTheta()*rad2deg;
