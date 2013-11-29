@@ -389,12 +389,6 @@ private:
   /// Get the new plot name
   QString getNewPlotName(const QString & cropWSfirstPart);
 
-  /// Get the dead times from the data and apply them.
-  void getDeadTimeFromData(const std::vector<double> & deadTimes);
-
-  /// Get the dead times from a user given file and apply them.
-  void getDeadTimeFromFile(const QString & fileName);
-
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 
 

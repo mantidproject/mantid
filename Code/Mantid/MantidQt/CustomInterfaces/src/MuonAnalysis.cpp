@@ -1,33 +1,33 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/MuonAnalysis.h"
-#include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
-#include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
-#include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
-#include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
-#include "MantidQtAPI/FileDialogHandler.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
+#include "MantidQtCustomInterfaces/MuonAnalysis.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -1047,7 +1047,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     std::string mainFieldDirection("");
     double timeZero(0.0);
     double firstGoodData(0.0);
-    std::vector<double> deadTimes;
+    ScopedWorkspace loadedDeadTimes;
 
     for (int i=0; i<files.size(); ++i)
     {
@@ -1086,6 +1086,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       // Setup Load Nexus Algorithm
       Mantid::API::IAlgorithm_sptr loadMuonAlg = Mantid::API::AlgorithmManager::Instance().create("LoadMuonNexus");
       loadMuonAlg->setPropertyValue("Filename", filename.toStdString() );
+      loadMuonAlg->setPropertyValue("DeadTimeTable", loadedDeadTimes.name());
+
       if (i > 0)
       {
         QString tempRangeNum;
@@ -1115,7 +1117,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         else
         {
           mainFieldDirection = loadMuonAlg->getPropertyValue("MainFieldDirection");
-          deadTimes = loadMuonAlg->getProperty("DeadTimes");
         }
       }
       else
@@ -1127,38 +1128,55 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     if (m_previousFilenames.size() > 1)
       plusRangeWorkspaces();
 
-    try // ... to apply dead time correction
+    if (m_uiForm.deadTimeType->currentIndex() != 0)
     {
-      // ARGUS does not support dead time corr.
-      if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS" && m_uiForm.deadTimeType->currentIndex() != 0)
-        throw std::runtime_error("Dead times are currently not implemented in ARGUS files.");
-
-      // Get dead times from data.
-      if (m_uiForm.deadTimeType->currentIndex() == 1)
+      try // ... to apply dead time correction
       {
-        getDeadTimeFromData(deadTimes);
+        // ARGUS does not support dead time corr.
+        if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS") 
+            throw std::runtime_error("Dead times are currently not implemented in ARGUS files.");
+
+        IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+
+        applyCorrAlg->setPropertyValue("InputWorkspace", m_workspace_name); 
+        applyCorrAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
+
+        ScopedWorkspace customDeadTimes;
+
+        if (m_uiForm.deadTimeType->currentIndex() == 1) // From Run Data
+        {
+          if( ! loadedDeadTimes )
+            throw std::runtime_error("Data file doesn't appear to contain dead time values");
+ 
+          applyCorrAlg->setPropertyValue("DeadTimeTable", loadedDeadTimes.name());
+        }
+        else if (m_uiForm.deadTimeType->currentIndex() == 2) // From Specified File
+        {
+          if(!m_uiForm.mwRunDeadTimeFile->isValid())
+            throw std::runtime_error("Specified Dead Time file is not valid.");
+
+          std::string deadTimeFile = m_uiForm.mwRunDeadTimeFile->getFirstFilename().toStdString();
+
+          IAlgorithm_sptr loadDeadTimes = AlgorithmManager::Instance().create("LoadNexusProcessed");
+          loadDeadTimes->setPropertyValue("Filename", deadTimeFile);
+          loadDeadTimes->setPropertyValue("OutputWorkspace", customDeadTimes.name());
+          loadDeadTimes->execute();
+
+          applyCorrAlg->setPropertyValue("DeadTimeTable", customDeadTimes.name());
+        }
+
+        applyCorrAlg->execute();
       }
-      // Get dead times from file.
-      else if (m_uiForm.deadTimeType->currentIndex() == 2)
+      catch(std::exception& e)
       {
-        if(!m_uiForm.mwRunDeadTimeFile->isValid())
-          throw std::runtime_error("Specified Dead Time file is not valid.");
+        QString errorMsg(e.what());
+        errorMsg += "\n\nNo Dead Time correction applied.\n\nReset to None.";
 
-        QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
+        // Set DTC type to None
+        m_uiForm.deadTimeType->setCurrentIndex(0);
 
-        getDeadTimeFromFile(deadTimeFile);
+        QMessageBox::warning(this, "Mantid - MuonAnalysis", errorMsg);
       }
-    }
-    // TODO: Shouldn't catch these exception. Done like this to minimize the impact of #8020.
-    catch(std::exception& e)
-    {
-      QString errorMsg(e.what());
-      errorMsg += "\n\nNo Dead Time correction applied.\n\nReset to None.";
-
-      // Set DTC type to None
-      m_uiForm.deadTimeType->setCurrentIndex(0);
-
-      QMessageBox::warning(this, "Mantid - MuonAnalysis", errorMsg);
     }
 
     // Make the options available
@@ -1395,184 +1413,6 @@ void MuonAnalysis::deleteRangedWorkspaces()
   }
 }
 
-
-/**
-* Create a table of dead times and apply them to the data.
-*
-* @param deadTimes :: a vector of all the dead times starting at spectrum 1.
-*/
-void MuonAnalysis::getDeadTimeFromData(const std::vector<double> & deadTimes)
-{
-  int numData(0); // Number of data sets under muon analysis.
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name) )
-  {
-    ++numData;
-    int loop(1);
-    while(loop == numData)
-    {
-      std::stringstream ss; //create a stringstream
-      ss << (numData + 1);
-      if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + '_' + ss.str() ) )
-      {
-        ++numData;
-      }
-      ++loop;
-    }
-  }
-
-  // Setup the dead time table.
-  for (int i=1; i<=numData; ++i)
-  {
-    std::string workspaceName("");
-    Mantid::API::ITableWorkspace_sptr deadTimeTable = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    deadTimeTable->addColumn("int","spectrum");
-    deadTimeTable->addColumn("double","dead-time");
-
-    Mantid::API::MatrixWorkspace_sptr muonData;
-
-    if (i==1 && 1==numData)
-    {
-      workspaceName = m_workspace_name;
-      muonData = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName) );
-    }
-    else
-    {
-      std::stringstream ss; //create a stringstream
-      ss << i;
-      workspaceName = m_workspace_name + '_' + ss.str();
-      muonData = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName) );
-    }
-
-    //check dead time size
-    if (deadTimes.size() >= (muonData->getNumberHistograms() + (i-1)*muonData->getNumberHistograms() ) )
-    {
-      for (size_t j=0; j<muonData->getNumberHistograms(); ++j)
-      {
-        Mantid::API::TableRow row = deadTimeTable->appendRow();
-        row << boost::lexical_cast<int>(j+1) << deadTimes[j+((i-1)*muonData->getNumberHistograms() ) ];
-      }
-    }
-
-    // Add to the ADS for use with algorithm. (Unique name chosen so not to cause conflict)
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("tempMuonDeadTime123qwe", deadTimeTable);
-
-    // Setup and run the ApplyDeadTimeCorr algorithm.
-    Mantid::API::IAlgorithm_sptr applyDeadTimeAlg = Mantid::API::AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
-    applyDeadTimeAlg->setPropertyValue("InputWorkspace", workspaceName );
-    applyDeadTimeAlg->setProperty("DeadTimeTable", deadTimeTable);
-    applyDeadTimeAlg->setPropertyValue("OutputWorkspace", workspaceName );
-    if (!applyDeadTimeAlg->execute())
-      throw std::runtime_error("Error in applying dead time.");
-    
-    // Make sure to remove the table from the ADS because it isn't used anymore.
-    Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-  }
-}
-
-
-/**
-* Load up a dead time table or a group of dead time tables and apply them to the workspace.
-*
-* @param fileName :: The file where the dead times are kept.
-*/
-void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
-{
-  Mantid::API::IAlgorithm_sptr loadDeadTimes = Mantid::API::AlgorithmManager::Instance().create("LoadNexusProcessed");
-  loadDeadTimes->setPropertyValue("Filename", fileName.toStdString() );
-  loadDeadTimes->setPropertyValue("OutputWorkspace", "tempMuonDeadTime123qwe");
-  if (loadDeadTimes->execute() )
-  {
-    Mantid::API::ITableWorkspace_sptr deadTimeTable = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("tempMuonDeadTime123qwe") );
-    if (deadTimeTable)
-    {
-      // Must be deadtime
-      Mantid::API::IAlgorithm_sptr applyDeadTimeAlg = Mantid::API::AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
-      applyDeadTimeAlg->setPropertyValue("InputWorkspace", m_workspace_name );
-      applyDeadTimeAlg->setProperty("DeadTimeTable", deadTimeTable);
-      applyDeadTimeAlg->setPropertyValue("OutputWorkspace", m_workspace_name );
-      if (!applyDeadTimeAlg->execute())
-        throw std::runtime_error("Error in applying dead time.");
-      Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-    }
-    else
-    {
-      // Check to see if it is a group of dead time tables
-      Mantid::API::WorkspaceGroup_sptr deadTimeTables = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(Mantid::API::AnalysisDataService::Instance().retrieve("tempMuonDeadTime123qwe") );
-      if (deadTimeTables)
-      {
-        std::vector<std::string> groupNames(deadTimeTables->getNames() );
-
-        size_t numData(0); // Number of data sets under muon analysis.
-        if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name) )
-        {
-          ++numData;
-          size_t loop(1);
-          while(loop == numData)
-          {
-            std::stringstream ss; //create a stringstream
-            ss << (numData + 1);
-            if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + '_' + ss.str() ) )
-            {
-              ++numData;
-            }
-            ++loop;
-          }
-        }
-
-        if (numData == groupNames.size() )
-        {
-          bool allTables(true);
-          for (size_t i=0; i<groupNames.size(); ++i)
-          {
-            deadTimeTable = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(groupNames[i] ) );
-            if (!deadTimeTable)
-              allTables = false;
-          }
-          if (allTables == true)
-          {
-            for (size_t i=0; i<groupNames.size(); ++i)
-            {
-              std::string workspaceName("");
-
-              Mantid::API::MatrixWorkspace_sptr muonData;
-
-              if (i==0 && 1==numData)
-              {
-                workspaceName = m_workspace_name;
-              }
-              else
-              {
-                std::stringstream ss; //create a stringstream
-                ss << (i+1);
-                workspaceName = m_workspace_name + '_' + ss.str();
-              }
-              deadTimeTable = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(groupNames[i] ) );
-              Mantid::API::IAlgorithm_sptr applyDeadTimeAlg = Mantid::API::AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
-              applyDeadTimeAlg->setPropertyValue("InputWorkspace", workspaceName );
-              applyDeadTimeAlg->setProperty("DeadTimeTable", deadTimeTable);
-              applyDeadTimeAlg->setPropertyValue("OutputWorkspace", workspaceName );
-              if (!applyDeadTimeAlg->execute())
-                throw std::runtime_error("Error in applying dead time.");
-            }
-          }
-        }
-      }
-      else
-      {
-        Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-        throw std::runtime_error("This kind of workspace is not compatible with applying dead times");
-      }
-      Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-    }
-  }
-  else
-  {
-    Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-    throw std::runtime_error("Failed to load dead times from the file " + fileName.toStdString());
-  }
-}
-
-
 /**
 * Get the group name for the workspace.
 *
@@ -1602,7 +1442,6 @@ QString MuonAnalysis::getGroupName()
   wsGroupName = wsGroupName.toUpper();
   return wsGroupName;
 }
-
 
 /**
 * Get ranged name.
