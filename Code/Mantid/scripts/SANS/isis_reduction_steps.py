@@ -12,10 +12,11 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 sanslog = sans_reduction_steps.sanslog
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace
+from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
-                         getFilePathFromWorkspace, getWorkspaceReference)
+                         getFilePathFromWorkspace, getWorkspaceReference,
+                         getMonitor4event)
 import isis_instrument
 import os
 import math
@@ -97,24 +98,20 @@ class LoadRun(object):
         """
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
+            extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()
 
-        if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
-            outWs = LoadRaw(Filename=self._data_file, 
-                            OutputWorkspace=workspace,
-                            **extra_options)
-            if self._period != self.UNSET_PERIOD:
-                outWs = mtd[self._leaveSinglePeriod(str(outWs), self._period)]
-
-            # After loading raw, it is necessary to load Sample details
+        extra_options['OutputWorkspace'] = workspace
+        outWs = Load(self._data_file, **extra_options)
+        
+        loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
+        
+        if loader_name == 'LoadRaw':
             self._loadSampleDetails(workspace)
-        else:
-            if self._period != self.UNSET_PERIOD:
-                extra_options['EntryNumber']=self._period
-            outWs = LoadNexus(Filename=self._data_file, 
-                              OutputWorkspace=workspace,
-                              **extra_options)
+        
+        if self._period != self.UNSET_PERIOD and isinstance(outWs, WorkspaceGroup):
+            outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
 
         self.periods_in_file = self._find_workspace_num_periods(workspace)
         self._wksp_name = workspace
@@ -190,9 +187,6 @@ class LoadRun(object):
         if 'Algorithm: Move' in hist_str or 'Algorithm: Rotate' in hist_str:
             raise RuntimeError('Moving components needs to be made compatible with not reloading the sample')
         
-        if isEventWorkspace(ws_pointer):
-            ws_pointer = fromEvent2Histogram(ws_pointer)
-
         return True
         
 
@@ -954,19 +948,14 @@ class CropDetBank(ReductionStep):
         and crops the input workspace to just those spectra. Supports optionally
         generating the output workspace from a different (sample) workspace
     """ 
-    def __init__(self, crop_sample=False):
+    def __init__(self):
         """
             Sets up the object to either the output or sample workspace
-            @param crop_sample: if set to true the input workspace name is not the output but is taken from reducer.get_sample().wksp_name (default off) 
         """
         super(CropDetBank, self).__init__()
-        self._use_sample = crop_sample
 
     def execute(self, reducer, workspace):
-        if self._use_sample:
-            in_wksp = reducer.get_sample().wksp_name
-        else:
-            in_wksp = workspace
+        in_wksp = workspace
         
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
@@ -979,13 +968,12 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
     """
     NORMALISATION_SPEC_NUMBER = 1
     NORMALISATION_SPEC_INDEX = 0
-    def __init__(self, spectrum_number=None, raw_ws=None):
+    def __init__(self, spectrum_number=None):
         if not spectrum_number is None:
             index_num = spectrum_number
         else:
             index_num = None
         super(NormalizeToMonitor, self).__init__(index_num)
-        self._raw_ws = raw_ws
 
         #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
@@ -996,17 +984,13 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             #the -1 converts from spectrum number to spectrum index
             normalization_spectrum = reducer.instrument.get_incident_mon()
         
-        raw_ws = self._raw_ws
-        if raw_ws is None:
-            raw_ws = reducer.get_sample().wksp_name
-
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = 'Monitor'       
-        CropWorkspace(InputWorkspace=raw_ws,OutputWorkspace= self.output_wksp,
-                      StartWorkspaceIndex = normalization_spectrum-1, 
-                      EndWorkspaceIndex   = normalization_spectrum-1)
-    
+        self.output_wksp = 'Monitor'
+        mon = reducer.get_monitor(normalization_spectrum-1)
+        if str(mon) != self.output_wksp:
+            RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
+        
         if reducer.instrument.name() == 'LOQ':
             RemoveBins(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp,XMin= reducer.transmission_calculator.loq_removePromptPeakMin,XMax= 
                        reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
@@ -1592,6 +1576,22 @@ class UnitsConvert(ReductionStep):
 
     def __str__(self):
         return '    Wavelength range: ' + self.get_rebin()
+
+class SliceEvent(ReductionStep):
+    
+    def __init__(self):
+        super(SliceEvent, self).__init__()
+        self.monitor = ""
+
+    def execute(self, reducer, workspace):
+        ws_pointer = getWorkspaceReference(workspace)
+
+        # it applies only for event workspace
+        if not isinstance(ws_pointer, IEventWorkspace):
+            return
+        self.monitor = getMonitor4event(ws_pointer)
+        hist = fromEvent2Histogram(ws_pointer, self.monitor)
+        self.monitor = str(self.monitor)
 
 class UserFile(ReductionStep):
     """

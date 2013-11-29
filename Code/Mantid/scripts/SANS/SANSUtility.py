@@ -407,7 +407,7 @@ def getBinsBoundariesFromWorkspace(ws_reference):
     return binning
 
 def loadMonitorsFromFile(fileName, monitor_ws_name='monitor_ws'):
-    monitor = LoadNexus(fileName, SpectrumMax=8, OutputWorkspace=monitor_ws_name)
+    monitor = LoadNexusMonitors(fileName, OutputWorkspace=monitor_ws_name)
     return monitor
 
 def getFilePathFromWorkspace(ws):
@@ -432,19 +432,32 @@ def getFilePathFromWorkspace(ws):
         raise RuntimeError("Can not find the file name for workspace " + str(ws))
     return file_path
 
+def getMonitor4event(ws_event):
+    file_path = getFilePathFromWorkspace(ws_event)
+    ws_monitor = loadMonitorsFromFile(file_path)
+    return ws_monitor
+
 def fromEvent2Histogram(ws_event, ws_monitor = None):
+    """Transform an event mode workspace into a histogram workspace. 
+    It does conjoin the monitor and the workspace as it is expected from the current 
+    SANS data inside ISIS. 
+
+    Finally, it copies the parameter map from the workspace to the resulting histogram
+    in order to preserve the positions of the detectors components inside the workspace. 
+    
+    It will finally, replace the input workspace with the histogram equivalent workspace.
+    """
     if not ws_monitor:
-        file_path = getFilePathFromWorkspace(ws_event)
-        ws_monitor =  loadMonitorsFromFile(file_path)
+        ws_monitor = getMonitor4event(ws_event)
     
-    bins_option = getBinsBoundariesFromWorkspace(ws_monitor)
+    aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
     
-    aux_hist = Rebin(ws_event, bins_option, False)
+    name = '__monitor_tmp'
+    ws_monitor.clone(OutputWorkspace=name)
+    ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)    
+    CopyInstrumentParameters(ws_event, OutputWorkspace=name)
     
-    monitor_ws_name = ws_monitor.name()
-    ConjoinWorkspaces(ws_monitor, aux_hist, CheckOverlapping=True)
-    
-    ws_hist = RenameWorkspace(monitor_ws_name, OutputWorkspace=str(ws_event))
+    ws_hist = RenameWorkspace(name, OutputWorkspace=str(ws_event))
 
     return ws_hist
 		

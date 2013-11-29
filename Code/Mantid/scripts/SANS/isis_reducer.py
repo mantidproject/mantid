@@ -9,6 +9,7 @@ from reduction.instruments.sans.sans_reducer import SANSReducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 from mantid.simpleapi import *
+from mantid.api import IEventWorkspace
 import os
 import copy
 
@@ -109,7 +110,8 @@ class ISISReducer(SANSReducer):
         """
             Defines the steps that are run and their order
         """
-        proc_TOF = [self.crop_detector]
+        proc_TOF = [self.event2hist]
+        proc_TOF.append(self.crop_detector)
         proc_TOF.append(self.mask)
         proc_TOF.append(self.to_wavelen)
 
@@ -138,7 +140,7 @@ class ISISReducer(SANSReducer):
         self._out_name =       isis_reduction_steps.GetOutputName()
 
         #except self.prep_normalize all the steps below are used by the reducer
-        self.crop_detector =   isis_reduction_steps.CropDetBank(crop_sample=True)
+        self.crop_detector =   isis_reduction_steps.CropDetBank()
         self.mask =self._mask= isis_reduction_steps.Mask_ISIS()
         self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
         self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
@@ -167,6 +169,7 @@ class ISISReducer(SANSReducer):
         self._can_run = Can()
         self.samp_trans_load = None
         self.can_trans_load = None
+        self.event2hist = isis_reduction_steps.SliceEvent()
 
     def __init__(self):
         SANSReducer.__init__(self)
@@ -227,6 +230,13 @@ class ISISReducer(SANSReducer):
             return self._sample_run
         else:
             return self.get_can()
+
+    def get_monitor(self, index):
+        _ws = mtd[self.get_sample().wksp_name]
+        if isinstance(_ws, IEventWorkspace):
+            _ws = mtd[self.event2hist.monitor]
+        __MonitorWs = ExtractSingleSpectrum(_ws, index)
+        return __MonitorWs
 
     def get_transmissions(self):
         """ Get the transmission and direct workspace if they were given
@@ -311,6 +321,10 @@ class ISISReducer(SANSReducer):
 
         if not steps:
             steps = self._reduction_steps
+
+        # create the workspace that will be used throughout the reduction
+        CloneWorkspace(self.get_sample().wksp_name, OutputWorkspace=self.output_wksp)
+
         #the main part of the reduction is done here, go through and execute each step
         for item in steps:
             if item:
