@@ -87,13 +87,13 @@ class IndirectTransmission(PythonAlgorithm):
 
 		# Convert all values to string
 		outputValues = map (str, outputValues)
-
+		
 		output = zip (outputNames, outputValues)
 
 		#build table of values
-		for name, value in output:
-			tableWs.addRow([name, value])
-			logger.notice(name + ": " + value)
+		for data in output:
+			tableWs.addRow(list(data))
+			logger.information(name + ": " + value)
 
 		#remove idf/ipf workspace
 		DeleteWorkspace(workspace)
