@@ -10,6 +10,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ArrowMarker.cpp
                    src/AssociationsDialog.cpp
                    src/AxesDialog.cpp
+                   src/AxisDetails.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
@@ -46,6 +47,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
+                   src/GridDetails.cpp
                    src/ImageDialog.cpp
                    src/ImageExportDialog.cpp
                    src/ImageMarker.cpp
@@ -83,7 +85,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Plot.cpp
                    src/PlotCurve.cpp
                    src/PlotDialog.cpp
-                   src/PlotEnrichement.cpp
                    src/PlotWizard.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
@@ -96,6 +97,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/QwtPieCurve.cpp
                    src/RangeSelectorTool.cpp
                    src/RenameWindowDialog.cpp
+                   src/ScaleDetails.cpp
                    src/ScaleDraw.cpp
                    src/ScalePicker.cpp
                    src/ScreenPickerTool.cpp
@@ -165,6 +167,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InputHistory.cpp
                    src/Mantid/LoadDAEDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
+                   src/Mantid/ManageInterfaceCategories.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
                    src/Mantid/MantidCurve.cpp
@@ -239,6 +242,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ArrowMarker.h
                    src/AssociationsDialog.h
                    src/AxesDialog.h
+                   src/AxisDetails.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
@@ -278,6 +282,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Graph3D.h
                    src/Graph.h
                    src/Grid.h
+                   src/GridDetails.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
                    src/ImageMarker.h
@@ -314,7 +319,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Plot3DDialog.h
                    src/PlotCurve.h
                    src/PlotDialog.h
-                   src/PlotEnrichement.h
                    src/Plot.h
                    src/PlotToolInterface.h
                    src/PlotWizard.h
@@ -333,6 +337,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/RangeSelectorTool.h
                    src/RenameWindowDialog.h
                    src/resource.h
+                   src/ScaleDetails.h
                    src/ScaleDraw.h
                    src/ScalePicker.h
                    src/ScreenPickerTool.h
@@ -394,6 +399,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InputHistory.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
+                   src/Mantid/ManageInterfaceCategories.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
                    src/Mantid/MantidCurve.h
@@ -518,7 +524,7 @@ set( SRC_UNITY_IGNORE_FILES )
 add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}/../MantidQt/Python ${PYQT4_SIP_FLAGS}
-                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
+                          -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
                      DEPENDS src/qti.sip ${SIP_HDRS}
                      COMMENT "Generating python bindings using sip"
@@ -542,6 +548,7 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AssociationsDialog.h
                         src/AxesDialog.h
+                        src/AxisDetails.h
                         src/CanvasPicker.h
                         src/ColorMapDialog.h
                         src/ConfigDialog.h
@@ -572,6 +579,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/Graph3D.h
                         src/Graph.h
                         src/Grid.h
+                        src/GridDetails.h
                         src/ImageDialog.h
                         src/ImageExportDialog.h
                         src/ImportASCIIDialog.h
@@ -612,6 +620,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/QwtPieCurve.h
                         src/RangeSelectorTool.h
                         src/RenameWindowDialog.h
+                   	src/ScaleDetails.h
                         src/ScalePicker.h
                         src/ScreenPickerTool.h
                         src/Script.h
@@ -660,6 +669,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
                        src/Mantid/ManageCustomMenus.h
+                       src/Mantid/ManageInterfaceCategories.h
                        src/Mantid/MantidAbout.h
                        src/Mantid/MantidApplication.h
                        src/Mantid/MantidCurve.h
@@ -708,6 +718,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/RemoveErrorsDialog.ui
                src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
+               src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
 )
 

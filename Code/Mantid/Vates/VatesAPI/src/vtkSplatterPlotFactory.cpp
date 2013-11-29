@@ -295,6 +295,8 @@ namespace VATES
     // Add points and scalars
     visualDataSet->SetPoints(points);
     visualDataSet->GetCellData()->SetScalars(signal);
+
+    delete [] ids;
   }
 
   /**
@@ -427,7 +429,7 @@ namespace VATES
 
   /**
    * Set the time value.
-   * @param double : the time
+   * @param time : the time
    */
   void vtkSplatterPlotFactory::setTime(double time)
   {

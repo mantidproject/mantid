@@ -98,8 +98,6 @@ public:
 
   EventList& operator+=(const EventList& more_events);
 
-  template<class T1, class T2>
-  static void minusHelper(std::vector<T1> & events, const std::vector<T2> & more_events);
   EventList& operator-=(const EventList& more_events);
 
   bool operator==(const EventList& rhs) const;
@@ -231,43 +229,25 @@ public:
 
   virtual size_t histogram_size() const;
 
-  template<class T>
-  static void compressEventsHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance);
-  template<class T>
-  void compressEventsParallelHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance);
   void compressEvents(double tolerance, EventList * destination, bool parallel = false);
   // get EventType declaration
-  template<class T>
-  static void histogramForWeightsHelper(const std::vector<T> & events, const MantidVec & X, MantidVec & Y, MantidVec & E);
   void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
   void generateHistogramPulseTime(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
 
-  template<class T>
-  static void integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange, double & sum, double & error);
   void integrate(const double minX, const double maxX, const bool entireRange, double & sum, double & error) const;
 
-  template<class T>
-  static double integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange);
   double integrate(const double minX, const double maxX, const bool entireRange) const;
 
-  template<class T>
-  void convertTofHelper(std::vector<T> & events, const double factor, const double offset);
   void convertTof(const double factor, const double offset=0.);
 
   void scaleTof(const double factor);
 
   void addTof(const double offset);
 
-  template<class T>
-  void addPulsetimeHelper(std::vector<T> & events, const double seconds);
   void addPulsetime(const double seconds);
 
-  template<class T>
-  static std::size_t maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax);
   void maskTof(const double tofMin, const double tofMax);
 
-  template<class T>
-  static void getTofsHelper(const std::vector<T> & events, std::vector<double> & tofs);
   void getTofs(std::vector<double>& tofs) const;
   double getTofMin() const;
   double getTofMax() const;
@@ -276,68 +256,40 @@ public:
 
   std::vector<double> getTofs() const;
 
-  template<class T>
-  static void getWeightsHelper(const std::vector<T> & events, std::vector<double> & weights);
   /// Return the list of event weight  values
   std::vector<double> getWeights() const;
   /// Return the list of event weight values
   void getWeights(std::vector<double>& weights) const;
   
-  template<class T>
-  static void getWeightErrorsHelper(const std::vector<T> & events, std::vector<double> & weightErrors);
   /// Return the list of event weight  error values
   std::vector<double> getWeightErrors() const;
   /// Return the list of event weight error values
   void getWeightErrors(std::vector<double>& weightErrors) const;
 
-  template<class T>
-  static void getPulseTimesHelper(const std::vector<T> & events, std::vector<Mantid::Kernel::DateAndTime> & times);
   std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const;
 
 
-  template<class T>
-  static void setTofsHelper(std::vector<T> & events, const std::vector<double> & tofs);
   void setTofs(const MantidVec& tofs);
 
   void reverse();
 
-  template<class T>
-  static void filterByPulseTimeHelper(std::vector<T> & events, Kernel::DateAndTime start, Kernel::DateAndTime stop, std::vector<T> & output);
   void filterByPulseTime(Kernel::DateAndTime start, Kernel::DateAndTime stop, EventList & output) const;
 
-  template< class T >
-  void filterInPlaceHelper(Kernel::TimeSplitterType & splitter, typename std::vector<T> & events);
   void filterInPlace(Kernel::TimeSplitterType & splitter);
 
-  template< class T >
-  void splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const;
   void splitByTime(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs) const;
 
-  template< class T >
-  void splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, typename std::vector<T> & events,
-      double tofcorrection) const;
-  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection) const;
+  void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection, bool docorrection) const;
 
-  template< class T>
-  static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
   void multiply(const double value, const double error = 0.0);
   EventList& operator*=(const double value);
 
-  template<class T>
-  static void multiplyHistogramHelper(std::vector<T> & events, const MantidVec & X, const MantidVec & Y, const MantidVec & E);
   void multiply(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
 
-  template<class T>
-  static void divideHistogramHelper(std::vector<T> & events, const MantidVec & X, const MantidVec & Y, const MantidVec & E);
   void divide(const double value, const double error=0.0);
   EventList& operator/=(const double value);
 
   void divide(const MantidVec & X, const MantidVec & Y, const MantidVec & E);
-
-  template<class T>
-  void convertUnitsViaTofHelper(typename std::vector<T> & events, Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit);
-  template<class T>
-  void convertUnitsQuicklyHelper(typename std::vector<T> & events, const double& factor, const double& power);
 
   void convertUnitsViaTof(Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit);
   void convertUnitsQuickly(const double& factor, const double& power);
@@ -385,6 +337,54 @@ private:
   void switchToWeightedEvents();
   void switchToWeightedEventsNoTime();
 
+  // helper functions are all internal to simplify the code
+  template<class T1, class T2>
+  static void minusHelper(std::vector<T1> & events, const std::vector<T2> & more_events);
+  template<class T>
+  static void compressEventsHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance);
+  template<class T>
+  void compressEventsParallelHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance);
+  template<class T>
+  static void histogramForWeightsHelper(const std::vector<T> & events, const MantidVec & X, MantidVec & Y, MantidVec & E);
+  template<class T>
+  static void integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange, double & sum, double & error);
+  template<class T>
+  static double integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange);
+  template<class T>
+  void convertTofHelper(std::vector<T> & events, const double factor, const double offset);
+  template<class T>
+  void addPulsetimeHelper(std::vector<T> & events, const double seconds);
+  template<class T>
+  static std::size_t maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax);
+  template<class T>
+  static void getTofsHelper(const std::vector<T> & events, std::vector<double> & tofs);
+  template<class T>
+  static void getWeightsHelper(const std::vector<T> & events, std::vector<double> & weights);
+  template<class T>
+  static void getWeightErrorsHelper(const std::vector<T> & events, std::vector<double> & weightErrors);
+  template<class T>
+  static void getPulseTimesHelper(const std::vector<T> & events, std::vector<Mantid::Kernel::DateAndTime> & times);
+  template<class T>
+  static void setTofsHelper(std::vector<T> & events, const std::vector<double> & tofs);
+  template<class T>
+  static void filterByPulseTimeHelper(std::vector<T> & events, Kernel::DateAndTime start, Kernel::DateAndTime stop, std::vector<T> & output);
+  template< class T >
+  void filterInPlaceHelper(Kernel::TimeSplitterType & splitter, typename std::vector<T> & events);
+  template< class T >
+  void splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const;
+  template< class T >
+  void splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, typename std::vector<T> & events,
+      double tofcorrection, bool docorrection) const;
+  template< class T>
+  static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
+  template<class T>
+  static void multiplyHistogramHelper(std::vector<T> & events, const MantidVec & X, const MantidVec & Y, const MantidVec & E);
+  template<class T>
+  static void divideHistogramHelper(std::vector<T> & events, const MantidVec & X, const MantidVec & Y, const MantidVec & E);
+  template<class T>
+  void convertUnitsViaTofHelper(typename std::vector<T> & events, Mantid::Kernel::Unit * fromUnit, Mantid::Kernel::Unit * toUnit);
+  template<class T>
+  void convertUnitsQuicklyHelper(typename std::vector<T> & events, const double& factor, const double& power);
 };
 
 // Methods overloaded to get event vectors.

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "LARMOR" valid-from = "2013-11-06T00:00:00">
+
+<component-link name = "LARMOR">
+
+<parameter name="low-angle-detector-name" type="string">
+  <value val="DetectorBench"/>
+</parameter>
+
+<parameter name="low-angle-detector-short-name" type="string">
+  <value val="rear"/>
+</parameter>
+
+<parameter name="default-incident-monitor-spectrum">
+  <value val="2"/>
+</parameter>
+
+<parameter name="default-transmission-monitor-spectrum">
+  <value val="3"/>
+</parameter>
+
+<parameter name="low-angle-detector-num-rows">
+  <value val="512"/>
+</parameter>
+
+<parameter name="low-angle-detector-num-columns">
+  <value val="80"/>
+</parameter>
+
+
+<parameter name="high-angle-detector-num-columns">
+  <value val="0"/>
+</parameter>
+
+<parameter name="high-angle-detector-num-rows">
+  <value val="0"/>
+</parameter>
+
+<parameter name="high-angle-detector-name" type="string">
+  <value val="front-detector"/>
+</parameter>
+
+<parameter name="high-angle-detector-short-name" type="string">
+  <value val="front"/>
+</parameter>
+
+
+<parameter name="centre-finder-step-size">
+<!-- this is the initial step for the beam centre finder in metres -->
+  <value val="0.005"/>
+</parameter>
+
+</component-link>
+
+</parameter-file>

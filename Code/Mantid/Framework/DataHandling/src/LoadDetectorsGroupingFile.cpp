@@ -787,8 +787,6 @@ namespace DataHandling
   {
     std::string line;
 
-    int currentGroupNo = 1;
-
     try
     {
       // We don't use the total number of groups report at the top of the file but we'll tell them 
@@ -802,6 +800,7 @@ namespace DataHandling
         throw std::invalid_argument("Expected a single int for the number of groups");
 
       // Parse groups
+      int currentGroupNo = 1;
       while(true)
       {
         // Read next line ("group spectrum no.") -> ignore the number itself

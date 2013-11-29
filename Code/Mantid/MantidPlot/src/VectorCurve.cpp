@@ -343,7 +343,7 @@ void VectorCurve::loadData()
 	int rows = abs(d_end_row - d_start_row) + 1;
     QVector<double> X(rows), Y(rows), X2(rows), Y2(rows);
     int size = 0;
-    QLocale locale = ((Plot *)plot())->locale();
+    QLocale locale = plot()->locale();
 	for (int i = d_start_row; i <= d_end_row; i++){
 		QString xval = d_table->text(i, xcol);
 		QString yval = d_table->text(i, ycol);

@@ -173,7 +173,11 @@ if ( ENABLE_CPACK )
     include ( CPackCommon )
     
     # Mac Packagemaker settings
-    set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
+    if (OSX_VERSION VERSION_LESS 10.8)
+      set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
+    else()
+      set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX10-8-README.rtf )
+    endif ()
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.rtf )
 
     IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
@@ -219,8 +223,8 @@ if ( ENABLE_CPACK )
         elseif( ${UNIX_CODENAME} STREQUAL "precise" )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time1.46.1,libboost-regex1.46.1,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9,libnexus0 (>= 4.3),python-nxs (>= 4.3),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),libqscintilla2-8,libqwt5-qt4,libqwtplot3d-qt4-0" )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),libmuparser0debian1,python-numpy,python-sip,python-qt4,libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}" )
-          # scipy, matploitlib & ipython
-          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},ipython-qtconsole,python-matplotlib,python-scipy" )
+          # scipy, matplotlib & ipython
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy" )
         else()
           message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
         endif()

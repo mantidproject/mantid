@@ -205,14 +205,15 @@ namespace Crystal
                      << "    Total = "      << sampleMaterial.totalScatterXSection() << " barns\n"
                      << "    Absorption = " << sampleMaterial.absorbXSection() << " barns\n";
     }
-    else  //Save input in Sample with wrong atomic number and name
+    else if (smu != EMPTY_DBL() && amu != EMPTY_DBL()) //Save input in Sample with wrong atomic number and name
     {
       NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
     			0.0, 0.0, smu, 0.0, smu, amu);
       Material mat("SetInAnvredCorrection", neutron, 1.0);
       ws->mutableSample().setMaterial(mat);
     }
-    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
+    if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
+      g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
                    << "LinearAbsorptionCoef = "   << amu << " 1/cm\n"
                    << "Radius = " << radius << " cm\n"
     			   << "Power Lorentz corrections = " << power_th << " \n";
@@ -252,13 +253,13 @@ namespace Crystal
 			for (int wi=0; wi < 8; wi++)getline(infile,STRING); // Saves the line in STRING.
 			while(!infile.eof()) // To get you all the lines.
 			{
-				double time0, spectra0;
 				time.resize(a+1);
 				spectra.resize(a+1);
 				getline(infile,STRING); // Saves the line in STRING.
 				std::stringstream ss(STRING);
 				if(STRING.find("Bank") == std::string::npos)
-				{
+				{				
+          double time0, spectra0;
 					ss >> time0 >> spectra0;
 					time[a].push_back(time0);
 					spectra[a].push_back(spectra0);
@@ -295,7 +296,11 @@ namespace Crystal
       double scattering = p.getScattering();
       double lambda =  p.getWavelength();
       double dsp = p.getDSpacing();
-      double transmission = absor_sphere(scattering, lambda, tbar);
+      double transmission = 0;
+      if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
+      {
+        transmission = absor_sphere(scattering, lambda, tbar);
+      }
       if(dsp < dMin || lambda < wlMin || lambda > wlMax) continue;
 
       // Anvred write from Art Schultz/

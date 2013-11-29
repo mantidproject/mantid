@@ -69,7 +69,7 @@ class LoadRun(object):
             @param inst: a reference to the current instrument
             @param iscan: set this to True for can runs
             @param extra_options: arguments to pass on to the Load Algorithm.
-            @return: log values, number of periods in the workspace
+            @return: number of periods in the workspace
         """
         if self._period > 1:
             workspace = self._get_workspace_name(self._period)
@@ -85,7 +85,6 @@ class LoadRun(object):
                             OutputWorkspace=workspace,
                             **extra_options)
 
-            self._data_file = getFilePathFromWorkspace(outWs)
             LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
 
             workspace = self._leaveSinglePeriod(workspace, period)
@@ -95,10 +94,7 @@ class LoadRun(object):
             outWs = LoadNexus(Filename=self._data_file, 
                               OutputWorkspace=workspace,
                               **extra_options)
-            self._data_file = getFilePathFromWorkspace(outWs)
 
-        SANS2D_log_file = mtd[workspace]
-       
         numPeriods  = self._find_workspace_num_periods(workspace)
         #deal with the difficult situation of not reporting the period of single period files
         if numPeriods > 1:
@@ -108,22 +104,9 @@ class LoadRun(object):
                 RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= period_definitely_inc)
                 workspace = period_definitely_inc 
         
-        log = self._extract_log_info(SANS2D_log_file, inst)
-        
         self.wksp_name = workspace 
-        return numPeriods, log        
+        self.periods_in_file = numPeriods
 
-    def _extract_log_info(self,wksp_pointer, inst):
-        log = None
-        if (not inst is None) and inst.name() == 'SANS2D':
-            #this instrument has logs to be loaded 
-            try:
-                log = inst.get_detector_log(wksp_pointer)
-            except:
-                #transmission workspaces, don't have logs 
-                if not self._is_trans:
-                    raise
-        return log
 
     def _get_workspace_name(self, entry_num=None):
         """
@@ -165,7 +148,7 @@ class LoadRun(object):
         self._data_file = _file_path
         if self._reload:
             # give to _assignHelper the responsibility of loading this data.
-            return False, None
+            return False
 
         #test if the sample details are already loaded:
         if not ws_pointer.sample().getGeometryFlag():
@@ -184,15 +167,15 @@ class LoadRun(object):
         if isEventWorkspace(ws_pointer):
             ws_pointer = fromEvent2Histogram(ws_pointer)
 
-        return True, self._extract_log_info(ws_pointer, reducer.instrument)
+        return True
         
 
     # Helper function
     def _assignHelper(self, reducer):
         if isinstance(self._data_file, Workspace):
-            loaded_flag, logs = self._loadFromWorkspace(reducer)
+            loaded_flag= self._loadFromWorkspace(reducer)
             if loaded_flag:
-                return logs
+                return
 
         if self._data_file == '' or self._data_file.startswith('.'):
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
@@ -217,13 +200,13 @@ class LoadRun(object):
 
         try:
             # the spectrum_limits is not the default only for transmission data
-            self.periods_in_file, logs = self._load(reducer.instrument, extra_options=spectrum_limits)
+            self._load(reducer.instrument, extra_options=spectrum_limits)
         except RuntimeError, details:
             sanslog.warning(str(details))
             self.wksp_name = ''
-            return '', -1
+            return 
         
-        return logs
+        return 
 
     def _leaveSinglePeriod(self, workspace, period):
         groupW = mtd[workspace]
@@ -256,12 +239,6 @@ class LoadRun(object):
         DeleteWorkspace(groupW.getName())
         return newName
     
-    def _clearPrevious(self, inWS, others = []):
-        if inWS != None:
-            if inWs in mtd and (not inWS in others):
-                DeleteWorkspace(inWs)
-                
-
     def _extract_run_details(self, run_string):
         """
             Takes a run number and file type and generates the filename, workspace name and log name
@@ -333,7 +310,7 @@ class LoadRun(object):
             raise RuntimeError('There is a mismatch in the number of periods (entries) in the file between the sample and another run')
 
 
-class LoadTransmissions(ReductionStep):
+class LoadTransmissions():
     """
         Loads the file used to apply the transmission correction to the
         sample or can 
@@ -347,7 +324,6 @@ class LoadTransmissions(ReductionStep):
             @param is_can: if this is to correct the can (default false i.e. it's for the sample)
             @param reload: setting this to false will mean the workspaces aren't reloaded if they already exist (default True i.e. reload)
         """
-        super(LoadTransmissions, self).__init__()
         self.trans = None
         self.direct = None
         self._reload = reload
@@ -382,14 +358,7 @@ class LoadTransmissions(ReductionStep):
                 raise RuntimeError('Transmission run set without direct run error')
  
         #transmission workspaces sometimes have monitor locations, depending on the instrument, load these locations
-        reducer.instrument.load_transmission_inst(self.trans.wksp_name)
-        reducer.instrument.load_transmission_inst(self.direct.wksp_name)
-        
-        if reducer.instrument.name() == 'SANS2D':        
-            beamcoords = reducer.get_beam_center()
-            reducer.instrument.move_components(self.trans.wksp_name, beamcoords[0], beamcoords[1]) 
-            if  self.trans.wksp_name != self.direct.wksp_name:
-              reducer.instrument.move_components(self.direct.wksp_name, beamcoords[0], beamcoords[1])                
+        reducer.instrument.load_transmission_inst(self.trans.wksp_name, self.direct.wksp_name, reducer.get_beam_center())
 
         return self.trans.wksp_name, self.direct.wksp_name
 
@@ -398,49 +367,17 @@ class CanSubtraction(ReductionStep):
         Apply the same corrections to the can that were applied to the sample and
         then subtracts this can from the sample.
     """
-    def __init__(self, can_run, reload = True, period = -1):
-        """
-            @param can_run: the run number followed by dot and the extension 
-            @param reload: if set to true (default) the workspace is replaced if it already exists
-            @param period: for multiple entry workspaces this is the period number
-        """
+    def __init__(self):
         super(CanSubtraction, self).__init__()
-        #contains the workspace with the background (can) data
-        self.workspace = LoadRun(can_run, reload=reload, entry=period)
-
-    def assign_can(self, reducer):
-        """
-            Loads the can workspace into Mantid and reads any log file
-            @param reducer: the reduction chain
-            @return: the logs object  
-        """
-        if not reducer.user_settings.executed:
-            raise RuntimeError('User settings must be loaded before the can can be loaded, run UserFile() first')
-    
-        logs = self.workspace._assignHelper(reducer)
-
-        if self.workspace.wksp_name == '':
-            sanslog.warning('Unable to load SANS can run, cannot continue.')
-            return '()'
-          
-        if logs:
-            reducer.instrument.check_can_logs(logs)
-        else:
-            logs = ""
-            if reducer.instrument.name() == 'SANS2D':
-                _issueWarning("Can logs could not be loaded, using sample values.")
-                return "()"    
-        
-        beamcoords = reducer.get_beam_center()
-        reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
-
-        return logs
 
     def execute(self, reducer, workspace):
         """
             Apply same corrections as for sample workspace then subtract from data
         """        
-        #remain the sample workspace, its name will be restored to the original once the subtraction has been done 
+        if reducer.get_can() is None:
+            return
+
+        #rename the sample workspace, its name will be restored to the original once the subtraction has been done 
         tmp_smp = workspace+"_sam_tmp"
         RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= tmp_smp)
 
@@ -974,14 +911,13 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             '    front time mask: ', str(self.time_mask_f)+'\n'
 
 
-class LoadSample(LoadRun, ReductionStep):
+class LoadSample(LoadRun):
     """
         Handles loading the sample run, this is the main experimental run with data
         about the sample of interest
     """
     def __init__(self, sample=None, reload=True, entry=-1):
         LoadRun.__init__(self, sample, reload=reload, entry=entry)
-        ReductionStep.__init__(self)
         self._scatter_sample = None
         self._SAMPLE_RUN = None
         
@@ -989,14 +925,11 @@ class LoadSample(LoadRun, ReductionStep):
         #is set to the entry (period) number in the sample to be run
         self.entries = []
     
-    def execute(self, reducer, workspace):
+    def execute(self, reducer, isSample):
         if not reducer.user_settings.executed:
             raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
 
-        # Code from AssignSample
-        self._clearPrevious(self._scatter_sample)
-        
-        logs = self._assignHelper(reducer)
+        self._assignHelper(reducer)
         if self._period != self.UNSET_PERIOD:
             self.entries  = [self._period]
         else:
@@ -1005,33 +938,7 @@ class LoadSample(LoadRun, ReductionStep):
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
-        p_run_ws = mtd[self.wksp_name]
-        
-        if isinstance(p_run_ws, WorkspaceGroup):
-            p_run_ws = p_run_ws[0]
-    
-        try:
-            run_num = p_run_ws.getRun().getLogData('run_number').value
-        except RuntimeError:
-            # if the run number is not stored in the workspace, try to take it from the filename
-            run_num = os.path.basename(self._data_file).split('.')[0].split('-')[0].split('0')[-1]
-            try:
-                dummy = int(run_num)
-            except ValueError:
-                logger.notice('Could not extract run number from file name ' + self._data_file)
-        
-        reducer.instrument.set_up_for_run(run_num)
-
-        if reducer.instrument.name() == 'SANS2D':
-            if logs == None:
-                DeleteWorkspace(self.wksp_name)
-                raise RuntimeError('Sample logs cannot be loaded, cannot continue')
-            reducer.instrument.apply_detector_logs(logs)           
-
-        beamcoords = reducer.get_beam_center()
-        reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
-
-        return logs
+        reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
     
     def get_group_name(self):
         return self._get_workspace_name(self._period)
@@ -1113,7 +1020,7 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             r_alg = 'Rebin'
         reducer.to_wavelen.execute(reducer, self.output_wksp, bin_alg=r_alg)
 
-class TransmissionCalc(sans_reduction_steps.BaseTransmission):
+class TransmissionCalc(ReductionStep):
     """
         Calculates the proportion of neutrons that are transmitted through the sample
         as a function of wavelength. The results are stored as a workspace
@@ -1146,10 +1053,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self.fit_settings = dict()
         for prop in self.fit_props:
             self.fit_settings['both::'+prop] = None
-        # An optional LoadTransmissions object that contains the names of the transmission and direct workspaces for the sample
-        self.samp_loader = None
-        # An optional LoadTransmissions objects for the can's transmission and direct workspaces
-        self.can_loader = None
         # this contains the spectrum number of the monitor that comes after the sample from which the transmission calculation is done 
         self._trans_spec = None
         # use InterpolatingRebin 
@@ -1164,19 +1067,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self.loq_removePromptPeakMax = 20500.0       
         
         
-    def _loader(self, reducer):
-        """
-            Returns the transmission loader objects for either the sample or the can depending
-            on the reduction object passed
-            @param reducer: the reduction chain of interest
-            @return: information on the transmission workspaces if these were loaded 
-        """ 
-        if reducer.is_can():
-            return self.can_loader
-        else:
-            return self.samp_loader
-
-
     def set_trans_fit(self, fit_method, min_=None, max_=None, override=True, selector='both'):
         """
             Set how the transmission fraction fit is calculated, the range of wavelengths
@@ -1231,7 +1121,18 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         # apply the propertis to self.fit_settings
         for prop in self.fit_props:
             self.fit_settings[select+prop] = sel_settings[prop]
+        
+        # When both is given, it is necessary to clean the specific settings for the individual selectors
+        if select == 'both::':            
+            for selector_ in ['sample::','can::']:
+                for prop_ in self.fit_props:
+                    prop_name = selector_+prop_
+                    if self.fit_settings.has_key(prop_name):
+                        del self.fit_settings[prop_name]
 
+    def isSeparate(self):
+        """ Returns true if the can or sample was given and false if just both was used"""
+        return self.fit_settings.has_key('sample::fit_method') or self.fit_settings.has_key('can::fit_method')
 
     def setup_wksp(self, inputWS, inst, wavbining, pre_monitor, post_monitor):
         """
@@ -1312,11 +1213,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             of the transmission
             @return: post_sample pre_sample workspace names
         """  
-        loader = self._loader(reducer)
-        if (not loader) or (not loader.trans.wksp_name):
-            return '', ''
-        else:
-            return loader.trans.wksp_name, loader.direct.wksp_name
+        return reducer.get_transmissions()
 
     def calculate(self, reducer):
         LAMBDAMIN = 'lambda_min'
@@ -1435,9 +1332,14 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def lambdaMax(self, selector):
         return self._get_fit_property(selector.lower(), 'lambda_max')
     def fitMethod(self, selector):
+        """It will return LINEAR, LOGARITHM, POLYNOMIALx for x in 2,3,4,5"""
         resp = self._get_fit_property(selector.lower(), 'fit_method')
         if 'POLYNOMIAL' == resp:
             resp += str(self._get_fit_property(selector.lower(), 'order'))
+        if resp  in ['LIN','STRAIGHT'] :
+            resp = 'LINEAR'
+        if resp in ['YLOG','LOG']:
+            resp = 'LOGARITHMIC'
         return resp
 
 class AbsoluteUnitsISIS(ReductionStep):
@@ -1855,7 +1757,7 @@ class UserFile(ReductionStep):
                 else:
                     raise 1
                 reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
-                                                              fit_method=fit_type, override=False, 
+                                                              fit_method=fit_type, override=True, 
                                                               selector=selector)
             except:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)

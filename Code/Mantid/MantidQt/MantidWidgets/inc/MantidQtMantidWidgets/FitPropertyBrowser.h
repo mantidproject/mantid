@@ -133,6 +133,8 @@ public:
   void setIgnoreInvalidData(bool on);
   /// Get the cost function
   std::string costFunction()const;
+  /// Get the "ConvolveMembers" option
+  bool convolveMembers()const;
 
   /// Get the start X
   double startX()const;
@@ -335,6 +337,8 @@ protected:
   void minimizerChanged();
   /// Do the fitting
   void doFit(int maxIterations);
+  /// Return the fitting function
+  Mantid::API::IFunction_sptr getFittingFunction() const;
 
   /// Property managers:
   QtGroupPropertyManager  *m_groupManager;
@@ -361,6 +365,7 @@ protected:
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_plotCompositeMembers;
+  QtProperty *m_convolveMembers;
   QtProperty *m_rawData;
   QtProperty *m_xColumn;
   QtProperty *m_yColumn;

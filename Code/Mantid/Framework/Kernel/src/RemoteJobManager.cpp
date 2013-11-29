@@ -10,6 +10,7 @@
 #include <Poco/Net/NameValueCollection.h>
 #include <Poco/URI.h>
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
@@ -36,7 +37,7 @@ RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
     throw std::runtime_error("Compute Resources must have a name attribute");
   }
 
-  Poco::XML::NodeList* nl = elem->getElementsByTagName("baseURL");
+  Poco::AutoPtr<Poco::XML::NodeList> nl = elem->getElementsByTagName("baseURL");
   if (nl->length() != 1)
   {
     g_log.error("HTTP Compute Resources must have exactly one baseURL tag");
@@ -136,7 +137,7 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
     postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
-    it++;
+    ++it;
   }
 
   // file data is treated the same as post data, except that we set the filename field
@@ -151,7 +152,7 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
     postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
-    it++;
+    ++it;
   }
 
   postBody << finalBoundaryLine;

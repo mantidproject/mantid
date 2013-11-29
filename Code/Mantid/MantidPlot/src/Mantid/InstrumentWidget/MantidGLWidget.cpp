@@ -58,7 +58,6 @@ void MantidGLWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface)
   m_surface = surface;
   connect(m_surface.get(),SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
   m_firstFrame = true;
-  initializeGL();
 }
 
 /**
@@ -76,7 +75,6 @@ void MantidGLWidget::initializeGL()
   // Clear the memory buffers
   QColor bgColor = currentBackgroundColor();
   glClearColor(GLclampf(bgColor.red()/255.0),GLclampf(bgColor.green()/255.0),GLclampf(bgColor.blue()/255.0),1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void MantidGLWidget::setRenderingOptions()
@@ -95,8 +93,6 @@ void MantidGLWidget::setRenderingOptions()
 
   //enablewriting into the depth buffer
   glDepthMask(GL_TRUE);
-
-  //setLightingModel(1);
 
   OpenGLError::check("setRenderingOptions");
 }
@@ -238,7 +234,6 @@ void MantidGLWidget::setBackgroundColor(QColor input)
 {
   makeCurrent();
   glClearColor(GLclampf(input.red()/255.0),GLclampf(input.green()/255.0),GLclampf(input.blue()/255.0),1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   OpenGLError::check("MantidGLWidget::setBackgroundColor");
   if (m_surface)
   {

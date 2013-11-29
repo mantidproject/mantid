@@ -41,6 +41,8 @@ public:
   double e(size_t i)const;
   double ex(size_t i)const;
   size_t esize()const;
+  double getYMin() const;
+  double getYMax() const;
 
   void setPreviewMode(bool preview);
   void setPlotAxisChoice(int choice);

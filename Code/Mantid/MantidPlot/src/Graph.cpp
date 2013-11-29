@@ -379,7 +379,7 @@ bool Graph::isColorBarEnabled(int axis) const
 *  @param axis the aixs to check e.g. yright ...
 *  @return true if there is a log scale on that axis
 */
-bool Graph::isLog(const QwtPlot::Axis axis) const
+bool Graph::isLog(const QwtPlot::Axis& axis) const
 {
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
   return ( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 );
@@ -3152,7 +3152,12 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
     // Select only those column names which we can draw and search for any X columns specified
     for (int i = 0; i < names.count(); i++)
     {
-      int d = w->colPlotDesignation(w->colIndex(names[i]));
+      int c = w->colIndex(names[i]);
+      if (c < 0)
+      {
+        continue;
+      }
+      int d = w->colPlotDesignation(c);
 
       if (d == Table::Y || d == Table::xErr || d == Table::yErr || d == Table::Label)
       {
@@ -5015,27 +5020,25 @@ void Graph::guessUniqueCurveLayout(int& colorIndex, int& symbolIndex)
     }
   }
 
-  for (int i=0; i<n_curves; i++){
+  for (int i=0; i<n_curves; ++i)
+  {
     const PlotCurve *c = dynamic_cast<PlotCurve *>(curve(i));
-    if (c){
-      int index = ColorBox::colorIndex(c->pen().color());
-      if (index > colorIndex)
-        colorIndex = index;
+    if (c)
+    {
+      colorIndex = std::max(ColorBox::colorIndex(c->pen().color()), colorIndex);
 
       QwtSymbol symb = c->symbol();
-      index = SymbolBox::symbolIndex(symb.style());
-      if (index > symbolIndex)
-        symbolIndex = index;
+      symbolIndex = std::max(SymbolBox::symbolIndex(symb.style()), symbolIndex);
     }
   }
   if (n_curves > 1)
-    colorIndex = (colorIndex+1)%16;
-  if (colorIndex == 15) //avoid white invisible curves
-    colorIndex = 0;
+    colorIndex = (colorIndex+1)%ColorBox::numPredefinedColors();
+  if (ColorBox::color(colorIndex) == Qt::white) //avoid white invisible curves
+    ++colorIndex;
 
   symbolIndex = (symbolIndex+1)%15;
-  if (!symbolIndex)
-    symbolIndex = 1;
+  if (symbolIndex == 0)
+    ++symbolIndex;
 }
 
 void Graph::addFitCurve(QwtPlotCurve *c)

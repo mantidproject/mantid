@@ -9,12 +9,17 @@
 
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/FileProperty.h>
+#include <MantidAPI/WorkspaceGroup.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidQtAPI/InterfaceManager.h>
 #include <MantidQtAPI/Message.h>
 
+#include <boost/assign/list_of.hpp>
+
 #include <Poco/Path.h>
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -97,6 +102,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),Qt::QueuedConnection);
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(populateChildData(QTreeWidgetItem*)));
+  m_tree->setDragEnabled(true);
 }
 
 MantidDockWidget::~MantidDockWidget()
@@ -1039,10 +1045,25 @@ void MantidDockWidget::plotSpectraDistributionErr()
 void MantidDockWidget::drawColorFillPlot()
 {
   // Get the selected workspaces
-  QStringList wsNames = m_tree->getSelectedWorkspaceNames();
+  const QStringList wsNames = m_tree->getSelectedWorkspaceNames();
   if( wsNames.empty() ) return;
-  m_mantidUI->drawColorFillPlots(wsNames);
 
+  // Extract child workspace names from any WorkspaceGroups selected.
+  QSet<QString> allWsNames;
+  foreach( const QString wsName, wsNames )
+  {
+    const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
+    if( wsGroup )
+    {
+      const auto children = wsGroup->getNames();
+      for( auto childWsName = children.begin(); childWsName != children.end(); ++childWsName )
+        allWsNames.insert(QString::fromStdString(*childWsName));
+    }
+    else
+      allWsNames.insert(wsName);
+  }
+
+  m_mantidUI->drawColorFillPlots(allWsNames.toList());
 }
 
 void MantidDockWidget::treeSelectionChanged()
@@ -1126,6 +1147,74 @@ MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
 {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
+  setAcceptDrops(true);
+}
+
+/**
+ * Accept a drag move event and selects whether to accept the action
+ * @param de :: The drag move event
+ */
+void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de)
+{
+    // The event needs to be accepted here
+    if (de->mimeData()->hasUrls())
+      de->accept();
+}
+ 
+/**
+ * Accept a drag enter event and selects whether to accept the action
+ * @param de :: The drag enter event
+ */
+void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
+{
+    // Set the drop action to be the proposed action.
+    if (de->mimeData()->hasUrls())
+        de->acceptProposedAction();
+}
+ 
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void MantidTreeWidget::dropEvent(QDropEvent *de)
+{
+    QStringList filenames;
+    const QMimeData *mimeData = de->mimeData();  
+    if (mimeData->hasUrls()) 
+    {
+      QList<QUrl> urlList = mimeData->urls();
+      for (int i = 0; i < urlList.size(); ++i) 
+      {
+            QString fName = urlList[i].toLocalFile();
+            if (fName.size()>0)
+            {
+              filenames.append(fName);
+            }
+      }
+    }
+    de->acceptProposedAction();
+
+    for (int i = 0; i < filenames.size(); ++i) 
+    {
+      try
+      {
+        QFileInfo fi(filenames[i]);
+        QString basename = fi.baseName();
+        IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("Load");
+        alg->initialize();
+        alg->setProperty("Filename",filenames[i].toStdString());
+        alg->setProperty("OutputWorkspace",basename.toStdString());
+        m_mantidUI->executeAlgorithmAsync(alg,true);
+      }
+      catch (std::runtime_error& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }      
+      catch (std::logic_error& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }
+    }
 }
 
 void MantidTreeWidget::mousePressEvent (QMouseEvent *e)
@@ -1183,93 +1272,101 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
   QTreeWidget::mouseDoubleClickEvent(e);
 }
 
-/** Returns a list of all selected workspaces
-*  (including members of groups if appropriate)
-*/
+/**
+ * Returns a list of all selected workspaces.  It does NOT
+ * extract child workspaces from groups - it only returns
+ * exactly what has been selected.
+ */
 QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 {
   QStringList names;
-  const QList<QTreeWidgetItem*> items = this->selectedItems();
-  QList<QTreeWidgetItem*>::const_iterator it;
-  // Need to look for workspace groups and add all children if found
-  for (it = items.constBegin(); it != items.constEnd(); ++it)
+  
+  foreach( const auto selectedItem, this->selectedItems() )
   {
-    /// This relies on the item descriptions being up-to-date
-    /// so ensure that they are or if something was
-    /// replaced then it might not be correct.
-    m_dockWidget->populateChildData(*it);
-
-    // Look for children (workspace groups)
-    QTreeWidgetItem *child = (*it)->child(0);
-    if ( child && child->text(0) == "WorkspaceGroup" )
-    {
-      // Have to populate the group's children if it hasn't been expanded
-      if (!(*it)->isExpanded()) m_dockWidget->populateChildData(*it);
-      const int count = (*it)->childCount();
-      for ( int i=1; i < count; ++i )
-      {
-        names.append((*it)->child(i)->text(0));
-      }
-    }
-    else
-    {
-      // Add entries that aren't groups
-      if (*it) names.append((*it)->text(0));
-    }
-  }//end of for loop for selected items
+    if( selectedItem )
+      names.append(selectedItem->text(0));
+  }
 
   return names;
 }
 
-/** Allows the user to select a spectrum from the selected workspaces.
-*  Automatically chooses spectrum 0 if all are single-spectrum workspaces.
-*  @return A map of workspace name - spectrum index pairs
-*/
+/**
+ * Allows users to choose spectra from the selected workspaces by presenting them
+ * with a dialog box.  Skips showing the dialog box and automatically chooses
+ * workspace index 0 for all selected workspaces if one or more of the them are
+ * single-spectrum workspaces.
+ *
+ * We also must filter the list of selected workspace names to account for any
+ * non-MatrixWorkspaces that may have been selected.  In particular WorkspaceGroups
+ * (the children of which are to be included if they are MatrixWorkspaces) and
+ * TableWorkspaces (which are implicitly excluded).  We only want workspaces we
+ * can actually plot!
+ *
+ * @return :: A map of workspace name to spectrum numbers to plot.
+ */
 QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
 {
-  // Get hold of the names of all the selected workspaces
-  QList<QString> allWsNames = this->getSelectedWorkspaceNames();
-  QList<QString> wsNames;
-
-  for (int i=0; i<allWsNames.size(); i++)
+  // Check for any selected WorkspaceGroup names and replace with the names of
+  // their children.
+  QSet<QString> selectedWsNames;
+  foreach( const QString wsName, this->getSelectedWorkspaceNames() )
   {
-    if (m_ads.retrieve(allWsNames[i].toStdString())->id() != "TableWorkspace")
-      wsNames.append(allWsNames[i]);
-  }
-
-  // cppcheck-suppress redundantAssignment
-  QList<QString>::const_iterator it = wsNames.constBegin();
-
-  // Check to see if all workspaces have a *single* histogram ...
-  QList<size_t> wsSizes;
-  it = wsNames.constBegin();
-  size_t maxHists = 0;
-  for ( ; it != wsNames.constEnd(); ++it )
-  {
-    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(m_ads.retrieve((*it).toStdString()));
-    if ( !ws ) continue;
-    const size_t currentHists = ws->getNumberHistograms();
-    wsSizes.append(currentHists);
-    if ( currentHists > maxHists ) maxHists = currentHists;
-  }
-
-  QMultiMap<QString,std::set<int> > toPlot;
-
-  // ... if so, no need to ask user which one to plot - just go!
-  if(maxHists == 1)
-  {
-    it = wsNames.constBegin();
-    for ( ; it != wsNames.constEnd(); ++it )
+    const auto groupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
+    if( groupWs )
     {
-      std::set<int> zero;
-      zero.insert(0);
-      toPlot.insert((*it),zero);
+      const auto childWsNames = groupWs->getNames();
+      for( auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName )
+      {
+        selectedWsNames.insert(QString::fromStdString(*childWsName));
+      }
     }
-
-    return toPlot;
+    else
+    {
+      selectedWsNames.insert(wsName);
+    }
   }
 
-  MantidWSIndexDialog *dio = new MantidWSIndexDialog(m_mantidUI, 0, wsNames);
+  // Get the names of, and pointers to, the MatrixWorkspaces only.
+  QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
+  QList<QString> selectedMatrixWsNameList;
+  foreach( const auto selectedWsName, selectedWsNames )
+  {
+    const auto matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(m_ads.retrieve(selectedWsName.toStdString()));
+    if( matrixWs )
+    {
+      selectedMatrixWsList.append(matrixWs);
+      selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
+    }
+  }
+
+  // Check to see if all workspaces have only a single spectrum ...
+  bool allSingleWorkspaces = true;
+  foreach( const auto selectedMatrixWs, selectedMatrixWsList )
+  {
+    if( selectedMatrixWs->getNumberHistograms() != 1 )
+    {
+      allSingleWorkspaces = false;
+      break;
+    }
+  }
+
+  // ... and if so, just return all workspace names mapped to workspace index 0;
+  if( allSingleWorkspaces )
+  {
+    const std::set<int> SINGLE_SPECTRUM = boost::assign::list_of<int>(0);
+    QMultiMap<QString,std::set<int>> spectrumToPlot;
+    foreach( const auto selectedMatrixWs, selectedMatrixWsList )
+    {
+      spectrumToPlot.insert(
+        QString::fromStdString(selectedMatrixWs->name()),
+        SINGLE_SPECTRUM
+      );
+    }
+    return spectrumToPlot;
+  }
+
+  // Else, one or more workspaces 
+  MantidWSIndexDialog *dio = new MantidWSIndexDialog(m_mantidUI, 0, selectedMatrixWsNameList);
   dio->exec();
   return dio->getPlots();
 }

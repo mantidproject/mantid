@@ -2,6 +2,7 @@
 #include "ProjectionSurface.h"
 
 #include <QApplication>
+#include <QPixmap>
 
 /// Constructor
 SimpleWidget::SimpleWidget(QWidget* parent):QWidget(parent)
@@ -43,6 +44,17 @@ void SimpleWidget::updateDetectors()
       m_surface->updateDetectors();
       update();
     }
+}
+
+/**
+  * Save widget content to a file.
+  * @param filename :: A file to save to.
+  */
+void SimpleWidget::saveToFile(const QString &filename)
+{
+    QPixmap image( size() );
+    render( &image );
+    image.save( filename );
 }
 
 void SimpleWidget::paintEvent(QPaintEvent*)

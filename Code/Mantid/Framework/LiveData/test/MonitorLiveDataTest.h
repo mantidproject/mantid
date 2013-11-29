@@ -205,8 +205,8 @@ public:
     // Cancel the algo before exiting test (avoids segfault)
     alg1->cancel();
 
-    // The first workspace got cloned to a new name
-    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_0");
+    // The first workspace got cloned to a new name (the suffix is set in the TestDataListener)
+    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_999");
     TS_ASSERT_EQUALS( ws1->getNumberEvents(), 4*200);
 
     // And this is the current run

@@ -7,6 +7,7 @@ reference to None, thus ensuring that further attempts at access do not cause a 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
 import __builtin__
+import mantid
 
 #-----------------------------------------------------------------------------
 #--------------------------- MultiThreaded Access ----------------------------
@@ -29,6 +30,7 @@ class CrossThreadCall(QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.moveToThread(QtGui.qApp.thread())
         self.__callable = callable
+        self.__call__.__func__.__doc__ = callable.__doc__
         
     def dispatch(self, *args, **kwargs):
         """Dispatches a call to callable with
@@ -162,6 +164,9 @@ class QtProxyObject(QtCore.QObject):
         """
         callable = getattr(self._getHeldObject(), attr)
         return CrossThreadCall(callable)
+
+    def __dir__(self):
+        return dir(self._getHeldObject())
 
     def __str__(self):
         """
@@ -710,16 +715,72 @@ class SliceViewerWindowProxy(QtProxyObject):
 
         # Return the proxy to the LineViewer widget        
         return liner
+
+#-----------------------------------------------------------------------------
+def getWorkspaceNames(source):
+    """Takes a "source", which could be a WorkspaceGroup, or a list
+    of workspaces, or a list of names, and converts
+    it to a list of workspace names.
+    
+    Args:
+        source :: input list or workspace group
         
+    Returns:
+        list of workspace names 
+    """
+    ws_names = []
+    if isinstance(source, list) or isinstance(source,tuple):
+        for w in source:
+            names = getWorkspaceNames(w)
+            ws_names += names
+    elif hasattr(source, 'getName'):
+        if hasattr(source, '_getHeldObject'):
+            wspace = source._getHeldObject()
+        else:
+            wspace = source
+        if wspace == None:
+            return []
+        if hasattr(wspace, 'getNames'):
+            grp_names = wspace.getNames()
+            for n in grp_names:
+                if n != wspace.getName():
+                    ws_names.append(n)
+        else:
+            ws_names.append(wspace.getName())
+    elif isinstance(source,str):
+        w = mantid.AnalysisDataService.Instance()[source]
+        if w != None:
+            names = getWorkspaceNames(w)
+            for n in names:
+                ws_names.append(n)
+    else:
+        raise TypeError('Incorrect type passed as workspace argument "' + str(source) + '"')
+    return ws_names
 
-
+#-----------------------------------------------------------------------------        
+class ProxyCompositePeaksPresenter(QtProxyObject):
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self,toproxy)
+        
+    def getPeaksPresenter(self, source):
+        to_present = None
+        if isinstance(source, str):
+            to_present = source
+        elif isinstance(source, mantid.api.Workspace):
+            to_present = source.getName()
+        else:
+            raise ValueError("getPeaksPresenter expects a Workspace name or a Workspace object.")
+        if not mantid.api.mtd.doesExist(to_present):
+                raise ValueError("%s does not exist in the workspace list" % to_present)
+        
+        return new_proxy(QtProxyObject, self._getHeldObject().getPeaksPresenter, to_present)
 
 #-----------------------------------------------------------------------------
 class SliceViewerProxy(QtProxyObject):
     """Proxy for a C++ SliceViewer widget.
     """
     # These are the exposed python method names
-    slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "getImage", "saveImage", "copyImageToClipboard", "setFastRender", "getFastRender", "toggleLineMode", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice", "setColorMapBackground", "setTransparentZeros", "setNormalization", "getNormalization", "setRebinThickness", "setRebinNumBins", "setRebinMode", "refreshRebin"]
+    slicer_methods = ["setWorkspace", "getWorkspaceName", "showControls", "openFromXML", "getImage", "saveImage", "copyImageToClipboard", "setFastRender", "getFastRender", "toggleLineMode", "setXYDim", "setXYDim", "getDimX", "getDimY", "setSlicePoint", "setSlicePoint", "getSlicePoint", "getSlicePoint", "setXYLimits", "getXLimits", "getYLimits", "zoomBy", "setXYCenter", "resetZoom", "loadColorMap", "setColorScale", "setColorScaleMin", "setColorScaleMax", "setColorScaleLog", "getColorScaleMin", "getColorScaleMax", "getColorScaleLog", "setColorScaleAutoFull", "setColorScaleAutoSlice", "setColorMapBackground", "setTransparentZeros", "setNormalization", "getNormalization", "setRebinThickness", "setRebinNumBins", "setRebinMode", "setPeaksWorkspaces", "refreshRebin"]
     
     def __init__(self, toproxy):
         QtProxyObject.__init__(self, toproxy)
@@ -727,6 +788,18 @@ class SliceViewerProxy(QtProxyObject):
     def __dir__(self):
         """Returns the list of attributes for this object.   """
         return self.slicer_methods()
+    
+    def setPeaksWorkspaces(self, source):
+        workspace_names = getWorkspaceNames(source)
+        if len(workspace_names) == 0:
+            raise ValueError("No workspace names given to setPeaksWorkspaces")
+        for name in workspace_names:
+            if not mantid.api.mtd.doesExist(name):
+                raise ValueError("%s does not exist in the workspace list" % name)
+        if not isinstance(mantid.api.mtd[name], mantid.api.IPeaksWorkspace):
+            raise ValueError("%s is not an IPeaksWorkspace" % name)
+
+        return new_proxy(ProxyCompositePeaksPresenter, self._getHeldObject().setPeaksWorkspaces, workspace_names)
     
 
 #-----------------------------------------------------------------------------
@@ -750,3 +823,5 @@ class FitBrowserProxy(QtProxyObject):
     """
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
+        
+        

@@ -166,6 +166,11 @@ public:
   void disableNodes(bool);
   void sort();
 
+protected:
+  void dropEvent(QDropEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dragEnterEvent(QDragEnterEvent *de);
+
 private:
   QPoint m_dragStartPosition;
   MantidDockWidget *m_dockWidget;
@@ -173,7 +178,7 @@ private:
   Mantid::API::AnalysisDataServiceImpl & m_ads;
   static Mantid::Kernel::Logger& logObject;
   MantidItemSortScheme m_sortScheme;
-  Qt::SortOrder m_sortOrder;
+  Qt::SortOrder m_sortOrder;  
 };
 
 /**A class derived from QTreeWidgetItem, to accomodate
@@ -187,6 +192,7 @@ public:
   void disableIfNode(bool);
   void setSortPos(int o) {m_sortPos = o;}
   int getSortPos() const {return m_sortPos;}
+
 
 private:
   bool operator<(const QTreeWidgetItem &other) const;

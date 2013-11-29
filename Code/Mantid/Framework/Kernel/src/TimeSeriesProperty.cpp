@@ -386,16 +386,12 @@ namespace Mantid
       //    And at the same time, iterate through the splitter
       Kernel::TimeSplitterType::iterator itspl = splitter.begin();
 
-      //Info of each splitter
-      DateAndTime start, stop;
-      int index;
-
       while (itspl != splitter.end())
       {
         //Get the splitting interval times and destination
-        start = itspl->start();
-        stop = itspl->stop();
-        index = itspl->index();
+        DateAndTime start = itspl->start();
+        DateAndTime stop = itspl->stop();
+        int index = itspl->index();
 
         // Skip the events before the start of the time
         // TODO  Algorithm here can be refactored for better performance
@@ -665,9 +661,19 @@ namespace Mantid
     template<typename TYPE>
     double TimeSeriesProperty<TYPE>::timeAverageValue() const
     {
-      TimeSplitterType filter;
-      filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
-      return this->averageValueInFilter(filter);
+      double retVal = 0.0;
+      try
+      {
+        TimeSplitterType filter;
+        filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
+        retVal = this->averageValueInFilter(filter);
+      }
+      catch (exception)
+      {
+        //just return nan
+         retVal = std::numeric_limits<double>::quiet_NaN();
+      }
+      return retVal;
     }
 
     /** Function specialization for TimeSeriesProperty<std::string>
@@ -727,6 +733,25 @@ namespace Mantid
         out.push_back(m_values[i].value());
 
       return out;
+    }
+
+    /**
+      * Return the time series as a C++ multimap<DateAndTime, TYPE>. All values.
+      * This method is used in parsing the ISIS ICPevent log file: different commands
+      * can be recorded against the same time stamp but all must be present.
+      */
+    template<typename TYPE>
+    std::multimap<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMultiMap() const
+    {
+        std::multimap<DateAndTime, TYPE> asMultiMap;
+
+        if (m_values.size() > 0)
+        {
+          for (size_t i = 0; i < m_values.size(); i ++)
+            asMultiMap.insert( std::make_pair(m_values[i].time(), m_values[i].value()) );
+        }
+
+        return asMultiMap;
     }
 
     /**
@@ -1285,7 +1310,7 @@ namespace Mantid
       if (m_filter.size() == 0)
       {
         // I. No filter
-        if (n >= static_cast<int>(m_values.size()))
+        if (n >= static_cast<int>(m_values.size()) || (n == static_cast<int>(m_values.size())-1 && m_values.size() == 1))
         {
           // 1. Out of bound
           ;
@@ -1293,7 +1318,7 @@ namespace Mantid
         else if (n == static_cast<int>(m_values.size())-1)
         {
           // 2. Last one by making up an end time.
-          time_duration d = m_values.rbegin()->time() - (m_values.rbegin()+1)->time();
+          time_duration d = m_values.rbegin()->time() - (m_values.rbegin() + 1)->time();
           DateAndTime endTime = m_values.rbegin()->time() + d;
           Kernel::TimeInterval dt(m_values.rbegin()->time(), endTime);
           deltaT = dt;

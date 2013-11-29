@@ -412,9 +412,23 @@ def loadMonitorsFromFile(fileName, monitor_ws_name='monitor_ws'):
 
 def getFilePathFromWorkspace(ws):
     ws_pointer = getWorkspaceReference(ws)
+    file_path = None
+
     try:
-        file_path = ws_pointer.getHistory().getAlgorithm(0).getPropertyValue('Filename')
+        for hist in ws_pointer.getHistory():
+            try:
+                if 'Load' in hist.name():
+                    file_path = hist.getPropertyValue('Filename')
+            except:
+                pass
     except:
+        try:
+            hist = ws_pointer.getHistory().lastAlgorithm()
+            file_path = hist.getPropertyValue('Filename')
+        except:
+            raise RuntimeError("Failed while looking for file in workspace: " + str(ws))
+
+    if not file_path:
         raise RuntimeError("Can not find the file name for workspace " + str(ws))
     return file_path
 

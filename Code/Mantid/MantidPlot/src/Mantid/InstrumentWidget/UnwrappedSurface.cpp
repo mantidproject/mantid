@@ -50,7 +50,7 @@ UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector & other)
 }
 
 /** Assignment operator */
-const UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector & other)
+UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector & other)
 {
   u = other.u;
   v = other.v;
@@ -567,6 +567,10 @@ void UnwrappedSurface::setFlippedView(bool on)
     {
         m_flippedView = on;
         m_viewRect.xFlip();
+        for(int i = 0;i < m_zoomStack.size(); ++i)
+        {
+            m_zoomStack[i].xFlip();
+        }
     }
 }
 

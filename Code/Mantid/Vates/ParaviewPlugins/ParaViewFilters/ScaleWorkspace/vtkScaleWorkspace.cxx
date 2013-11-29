@@ -13,7 +13,10 @@ vtkStandardNewMacro(vtkScaleWorkspace);
 
 using namespace Mantid::VATES;
 
-vtkScaleWorkspace::vtkScaleWorkspace()
+vtkScaleWorkspace::vtkScaleWorkspace() :
+  m_xScaling(1),
+  m_yScaling(1),
+  m_zScaling(1)
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);

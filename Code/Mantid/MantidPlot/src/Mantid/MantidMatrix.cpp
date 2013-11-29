@@ -483,7 +483,6 @@ double MantidMatrix::dataE(int row, int col) const
 {
   if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
   double res = m_workspace->readE(row + m_startRow)[col];
-  if (res == 0.) res = 1.;//  quick fix of the fitting problem
   return res;
 
 }
@@ -1263,34 +1262,41 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 */
 bool MantidMatrixModel::checkMontorCache(int row) const
 {
-  bool isMon = false;
-  if (m_monCache.contains(row))
+  if (m_workspace->getAxis(1)->isSpectra())
   {
-    isMon = m_monCache.value(row);
+    bool isMon = false;
+    if (m_monCache.contains(row))
+    {
+      isMon = m_monCache.value(row);
+    }
+    else
+    {
+      try
+      {
+        size_t wsIndex = static_cast<size_t>(row);
+        IDetector_const_sptr det = m_workspace->getDetector(wsIndex);
+        if (det->isMonitor())
+        {
+          isMon = true;
+        }
+        else
+        {
+          isMon = false;
+        }
+        m_monCache.insert(row, isMon);
+      }
+      catch (std::exception&)
+      {
+        m_monCache.insert(row,false);
+        isMon = false;
+      }
+    }
+    return isMon;
   }
   else
   {
-    try
-    {
-      size_t wsIndex = static_cast<size_t>(row);
-      IDetector_const_sptr det = m_workspace->getDetector(wsIndex);
-      if (det->isMonitor())
-      {
-        isMon = true;
-      }
-      else
-      {
-        isMon = false;
-      }
-      m_monCache.insert(row, isMon);
-    }
-    catch (std::exception e)
-    {
-      m_monCache.insert(row,false);
-      isMon = false;
-    }
+    return false;
   }
-  return isMon;
 }
 
 
@@ -1342,4 +1348,11 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
     miny = 0;
   if (maxy == -std::numeric_limits<double>::max())
     maxy = miny + 1e6;
+
+  if (maxy == miny)
+  {
+      if ( maxy == 0.0 ) maxy += 1.0;
+      else
+          maxy += fabs(miny);
+  }
 }

@@ -963,6 +963,7 @@ namespace API
     }
     else
     {
+      if ( !instrumentFilename.empty() ) instrumentFilename = ConfigService::Instance().getInstrumentDirectory() + "/" + instrumentFilename;
       g_log.debug() << "Using instrument IDF XML text contained in nexus file.\n";
     }
 

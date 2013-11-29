@@ -61,13 +61,12 @@ namespace Mantid
     {
       (void) noPts; //Avoid compiler warning
         glBegin(GL_TRIANGLES);
-        int index1, index2, index3;
         V3D normal;
         for (int i = 0; i < noFaces; i++)
         {
-          index1 = faces[i * 3] * 3;
-          index2 = faces[i * 3 + 1] * 3;
-          index3 = faces[i * 3 + 2] * 3;
+          int index1 = faces[i * 3] * 3;
+          int index2 = faces[i * 3 + 1] * 3;
+          int index3 = faces[i * 3 + 2] * 3;
           //Calculate normal and normalize
           V3D v1(points[index1], points[index1 + 1], points[index1 + 2]);
           V3D v2(points[index2], points[index2 + 1], points[index2 + 2]);

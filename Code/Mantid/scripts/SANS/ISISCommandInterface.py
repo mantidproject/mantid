@@ -100,6 +100,21 @@ def LOQ():
     except:
         return False
     return True
+
+def LARMOR():
+    """
+    Initialises the instrument settings for LARMOR
+    @return True on success
+    """
+    _printMessage('LARMOR()')
+    try:
+        instrument = isis_instrument.LARMOR()
+        
+        ReductionSingleton().set_instrument(instrument)
+        config['default.instrument']='LARMOR'
+    except:
+        return False
+    return True
     
 def Detector(det_name):
     """
@@ -208,6 +223,20 @@ def TransWorkspace(sample, can = None):
     ReductionSingleton().transmission_calculator.calculated_samp = sample 
     ReductionSingleton().transmission_calculator.calculated_can = can 
 
+def _return_old_compatibility_assign_methods(ws_name):
+    """For backward compatibility, AssignCan and AssignSample returns a tuple
+    with workspace name and the log entry if available.
+    
+    In the future, those methods should return just workspace name
+    """
+    logs = ""
+    if isinstance(ReductionSingleton().instrument, isis_instrument.SANS2D):
+        try:
+            logs = ReductionSingleton().instrument.get_detector_log(ws_name)
+        except:            
+            pass        
+    return ws_name, logs
+
 def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
     """
         The can is a scattering run under the same conditions as the experimental run but the
@@ -225,18 +254,10 @@ def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSE
         mes += ', ' + str(period)
     mes += ')'
     _printMessage(mes)
-
-    if (not can_run) or (isinstance(can_run,str) and can_run.startswith('.')):
-        ReductionSingleton().background_subtracter = None
-        return '', None
-
-    ReductionSingleton().background_subtracter = \
-        isis_reduction_steps.CanSubtraction(
-                                can_run, reload=reload, period=period)
-    #ideally this code should live in a separate load can object 
-    logs = ReductionSingleton().background_subtracter.assign_can(
-        ReductionSingleton())
-    return ReductionSingleton().background_subtracter.workspace.wksp_name, logs
+    
+    ReductionSingleton().set_can(can_run, reload, period)
+    return _return_old_compatibility_assign_methods(
+        ReductionSingleton().get_can().wksp_name)
 
 def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
     """
@@ -285,8 +306,7 @@ def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRu
     
     global LAST_SAMPLE
     LAST_SAMPLE = ReductionSingleton().get_sample().wksp_name
-    return ReductionSingleton().get_sample().wksp_name, \
-        ReductionSingleton().get_sample().log
+    return _return_old_compatibility_assign_methods(LAST_SAMPLE)
 
 def SetCentre(xcoord, ycoord, bank = 'rear'):
     """
@@ -311,13 +331,18 @@ def GetMismatchedDetList():
     return ReductionSingleton().instrument.get_marked_dets()
 
 def _setUpPeriod(i):
+    # it first get the reference to the loaders, then it calls the AssignSample 
+    # (which get rid of the reducer objects (see clean_loaded_data())
+    # but because we still get the reference, we can use it to query the data file and method.
+    # ideally, we should not use this _setUpPeriod in the future.
+    
     trans_samp = ReductionSingleton().samp_trans_load
-    can = ReductionSingleton().background_subtracter
+    can = ReductionSingleton().get_can()
     trans_can = ReductionSingleton().can_trans_load
     new_sample_workspaces = AssignSample(ReductionSingleton().get_sample().loader._data_file, period=i)[0]
     if can:
         #replace one thing that gets overwritten
-        AssignCan(can.workspace._data_file, True, period=can.workspace.getCorrospondingPeriod(i, ReductionSingleton()))
+        AssignCan(can.loader._data_file, True, period=can.loader.getCorrospondingPeriod(i, ReductionSingleton()))
     if trans_samp:
         trans = trans_samp.trans
         direct = trans_samp.direct
@@ -426,8 +451,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 ReductionSingleton().instrument.setDetector('front')
                 ReductionSingleton()._sample_run.reload(ReductionSingleton())
                 #reassign can
-                if ReductionSingleton().background_subtracter:
-                    ReductionSingleton().background_subtracter.assign_can(ReductionSingleton())
+                if ReductionSingleton().get_can():
+                    ReductionSingleton().get_can().reload(ReductionSingleton())
                 if ReductionSingleton().samp_trans_load:
                     #refresh Transmission
                     ReductionSingleton().samp_trans_load.execute(ReductionSingleton(), None)

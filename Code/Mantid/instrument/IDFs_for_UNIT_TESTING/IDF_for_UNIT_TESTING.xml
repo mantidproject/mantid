@@ -56,6 +56,10 @@
   <location x="0.0" y="0.0" z="100.0"> <facing val="none"/> </location>
 </component>
 
+<component type="tapered-guide-test" idlist="tapered-guide-test">
+  <location x="0.0" y="0.0" z="100.0"> <facing val="none"/> </location>
+</component>
+
 <component type="cuboid-rotating-test" idlist="cuboid-rotating-test">
   <location x="0.0" y="100.0" z="0.0"> </location>
   <location x="0.0" y="200.0" z="0.0">  <facing rot="45"/> </location> 
@@ -239,6 +243,17 @@
     <algebra val="some-shape" />  
   </type>    
   
+  <type name="tapered-guide-test" is="detector">
+    <tapered-guide id="some-shape">
+      <aperture-start height="2.0" width="2.0" />
+      <length val="2.0" />
+      <aperture-end height="4.0" width="4.0" />
+      <centre x="0.0" y="0.0" z="-1.0" />
+      <axis x="0.0" y="0.0" z="1" />
+    </tapered-guide>
+    <algebra val="some-shape" />
+  </type>
+  
   <type name="cuboid-rotating-test" is="detector">
     <cuboid id="approximate-shape">
       <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
@@ -340,6 +355,10 @@
   
   <idlist idname="hexahedron-test">
     <id val="8" />
+  </idlist> 
+  
+  <idlist idname="tapered-guide-test">
+    <id val="9" />
   </idlist> 
   
   <idlist idname="cuboid-rotating-test">

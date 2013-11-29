@@ -25,7 +25,7 @@ namespace Mantid
     PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
       m_name(alg->name()),m_category(alg->category()), m_categorySeparator(alg->categorySeparator()),
       m_alias(alg->alias()), m_version(alg->version()), m_alg(alg),
-      m_isExecuted(),m_isLoggingEnabled(true), m_rethrow(false),
+      m_isExecuted(),m_isLoggingEnabled(true), m_loggingOffset(0), m_rethrow(false),
       m_isChild(false)
     {
       if (!alg)
@@ -83,11 +83,10 @@ namespace Mantid
       }
       catch(...)
       {
-        m_alg.reset();
+        stopped();
         throw;
       }
       stopped();
-
       return m_isExecuted;
     }
 
@@ -117,7 +116,7 @@ namespace Mantid
       }
       catch(...)
       {
-        m_alg.reset(); // Release the concrete algorithm instance
+        stopped();
         throw;
       }
       stopped();
@@ -184,6 +183,33 @@ namespace Mantid
     }
 
     /**
+     * @return A string giving the method name that should be attached to a workspace
+     */
+    const std::string AlgorithmProxy::workspaceMethodName() const
+    {
+      if(m_alg) return m_alg->workspaceMethodName();
+      else return "";
+    }
+
+    /**
+     * @return A set of workspace class names that should have the workspaceMethodName attached
+     */
+    const std::vector<std::string> AlgorithmProxy::workspaceMethodOn() const
+    {
+      if(m_alg) return m_alg->workspaceMethodOn();
+      else return std::vector<std::string>();
+    }
+
+    /**
+     * @return The name of the property that the calling object will be passed to
+     */
+    const std::string AlgorithmProxy::workspaceMethodInputProperty() const
+    {
+      if(m_alg) return m_alg->workspaceMethodInputProperty();
+      else return "";
+    }
+
+    /**
     * Override setPropertyValue
     * @param name The name of the property
     * @param value The value of the property as a string
@@ -234,8 +260,24 @@ namespace Mantid
     */
     void AlgorithmProxy::stopped()
     {
+      if(!isChild()) dropWorkspaceReferences();
       m_isExecuted = m_alg->isExecuted();
       m_alg.reset();
+    }
+
+    /**
+     * Forces any workspace property to clear its internal workspace reference
+     */
+    void AlgorithmProxy::dropWorkspaceReferences()
+    {
+      const std::vector< Property*> &props = getProperties();
+      for (unsigned int i = 0; i < props.size(); ++i)
+      {
+        if(auto *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]))
+        {
+          wsProp->clear();
+        }
+      }
     }
 
     /**

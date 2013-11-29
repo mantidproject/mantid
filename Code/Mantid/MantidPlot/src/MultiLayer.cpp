@@ -1255,7 +1255,7 @@ void MultiLayer::setLayersNumber(int n)
 
 		// check whether the active Graph.has been deleted
 		if(graphsList.indexOf(active_graph) == -1)
-			active_graph=(Graph*) graphsList.last();
+			active_graph=static_cast<Graph*>( graphsList.last());
         for (int j=0;j<static_cast<int>(graphsList.count());j++){
             Graph *gr=static_cast<Graph *>(graphsList.at(j));
 			if (gr == active_graph){

@@ -57,6 +57,8 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp
         MantidPlot/src/nrutil.cpp
         MantidPlot/src/origin/OPJFile.cpp
+        MantidPlot/src/zlib123/minigzip.c
+        Framework/SINQ/src/PoldiPeakFit.cpp
       )
 
   # Header files to be ignored require different handling
@@ -114,7 +116,7 @@ if ( CPPCHECK_EXECUTABLE )
   # put the finishing bits on the final command call
   set (_cppcheck_xml_args)
   if (CPPCHECK_GENERATE_XML)
-    list( APPEND _cppcheck_xml_args --xml --xml-version=2 ${_cppcheck_source_dirs} 2> ${CMAKE_BINARY_DIR}/cppcheck.xml )
+    list( APPEND _cppcheck_xml_args  --xml --xml-version=2 ${_cppcheck_source_dirs} 2> ${CMAKE_BINARY_DIR}/cppcheck.xml )
   else (CPPCHECK_GENERATE_XML)
     list( APPEND _cppcheck_xml_args  ${_cppcheck_source_dirs} )
   endif (CPPCHECK_GENERATE_XML)

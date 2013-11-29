@@ -14,7 +14,7 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI>  OutputWorkspace - name of the OutputWorkspace which contains myinvestigations search
+    <LI>  OutputWorkspace - name of the OutputWorkspace which contains my investigations search
     <LI>  isValid         - Boolean option used to check the validity of login session
     </UL>
 
@@ -47,15 +47,14 @@ namespace Mantid
       ///constructor
       CatalogMyDataSearch():API::Algorithm(){}
       ///destructor
-      ~CatalogMyDataSearch()
-      {
-      }
+      ~CatalogMyDataSearch() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogMyDataSearch"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
+
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
@@ -63,9 +62,7 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm exec method
       void exec();
-
     };
-
   }
 }
 

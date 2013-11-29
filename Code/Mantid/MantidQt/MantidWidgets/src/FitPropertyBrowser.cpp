@@ -39,6 +39,7 @@
   #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 #include "qteditorfactory.h"
+#include "StringEditorFactory.h"
 #include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
 #if defined(__INTEL_COMPILER)
@@ -197,11 +198,11 @@ void FitPropertyBrowser::init()
 
   /* Create function group */
   QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
-  QtProperty* settingsGroup(NULL);
+
 
   connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
   /* Create input - output properties */  
-  settingsGroup = m_groupManager->addProperty("Settings");    
+  QtProperty* settingsGroup = m_groupManager->addProperty("Settings");
   m_startX = addDoubleProperty("StartX");
   m_endX = addDoubleProperty("EndX");
 
@@ -234,6 +235,11 @@ void FitPropertyBrowser::init()
                                            QVariant(false)).toBool();
   m_boolManager->setValue(m_plotCompositeMembers, plotCompositeItems);
 
+  m_convolveMembers = m_boolManager->addProperty("Convolve Composite Members");
+  bool convolveCompositeItems = settings.value(m_plotCompositeMembers->propertyName(),
+                                           QVariant(false)).toBool();
+  m_boolManager->setValue(m_convolveMembers, convolveCompositeItems);
+
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
   m_errColumn = m_columnManager->addProperty("ErrColumn");
@@ -250,14 +256,15 @@ void FitPropertyBrowser::init()
   settingsGroup->addSubProperty(m_costFunction);
   settingsGroup->addSubProperty(m_plotDiff);
   settingsGroup->addSubProperty(m_plotCompositeMembers);
-    
+  settingsGroup->addSubProperty(m_convolveMembers);
+
   /* Create editors and assign them to the managers */
   createEditors(w);
 
   updateDecimals();
   
   m_functionsGroup = m_browser->addProperty(functionsGroup);
-  m_settingsGroup = m_browser->addProperty(settingsGroup);  
+  m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   initLayout(w);
 
@@ -423,7 +430,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
-  QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
+  StringEditorFactory* stringEditFactory = new StringEditorFactory(w);
   StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(w);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(w);
 
@@ -432,7 +439,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_stringManager, stringEditFactory);
   m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
@@ -1130,6 +1137,14 @@ std::string FitPropertyBrowser::costFunction()const
   return m_costFunctions[i].toStdString();
 }
 
+/**
+  * Get the "ConvolveMembers" option
+  */
+bool FitPropertyBrowser::convolveMembers() const
+{
+    return m_boolManager->value(m_convolveMembers);
+}
+
 /// Get the registered function names
 void FitPropertyBrowser::populateFunctionNames()
 {
@@ -1511,15 +1526,7 @@ void FitPropertyBrowser::doFit(int maxIterations)
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    std::string funStr;
-    if (m_compositeFunction->nFunctions() > 1)
-    {
-      funStr = m_compositeFunction->asString();
-    }
-    else
-    {
-      funStr = (m_compositeFunction->getFunction(0))->asString();
-    }
+    std::string funStr = getFittingFunction()->asString();
 
     if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
     {
@@ -1537,8 +1544,7 @@ void FitPropertyBrowser::doFit(int maxIterations)
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function",funStr);
-    //alg->setPropertyValue("InputWorkspace",wsName);
-    alg->setProperty("InputWorkspace",getWorkspace());
+    alg->setPropertyValue("InputWorkspace",wsName);
     alg->setProperty("WorkspaceIndex",workspaceIndex());
     alg->setProperty("StartX",startX());
     alg->setProperty("EndX",endX());
@@ -1549,6 +1555,10 @@ void FitPropertyBrowser::doFit(int maxIterations)
     alg->setProperty( "MaxIterations", maxIterations );
     // Always output each composite function but not necessarily plot it
     alg->setProperty("OutputCompositeMembers", true);
+    if ( alg->existsProperty("ConvolveMembers") )
+    {
+        alg->setProperty("ConvolveMembers", convolveMembers());
+    }
     observeFinish(alg);
     alg->executeAsync();
 
@@ -1558,6 +1568,23 @@ void FitPropertyBrowser::doFit(int maxIterations)
     QString msg = "Fit algorithm failed.\n\n"+QString(e.what())+"\n";
     QMessageBox::critical(this,"Mantid - Error", msg);
   }
+}
+
+/**
+  * Return the function that will be passed to Fit.
+  */
+Mantid::API::IFunction_sptr FitPropertyBrowser::getFittingFunction() const
+{
+    Mantid::API::IFunction_sptr function;
+    if (m_compositeFunction->nFunctions() > 1)
+    {
+      function = m_compositeFunction;
+    }
+    else
+    {
+      function = m_compositeFunction->getFunction(0);
+    }
+    return function;
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)

@@ -27,6 +27,9 @@ See also: [[MergeMD]], for merging any MDWorkspaces in system memory (faster, bu
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidAPI/MemoryManager.h"
 
+#include <boost/scoped_ptr.hpp>
+#include <Poco/File.h>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
@@ -89,7 +92,6 @@ namespace MDAlgorithms
   /** Loads all of the box data required (no events) for later use.
   * Calculates total number events in each box
   * Also opens the files and leaves them open */
-  template<typename MDE, size_t nd>
   void MergeMDFiles::loadBoxData()
   {
       this->progress(0.05, "Loading File Info");
@@ -109,7 +111,10 @@ namespace MDAlgorithms
       {
           for (size_t i=0; i<m_Filenames.size(); i++)
           {
-              m_fileComponentsStructure[i].loadBoxStructure(m_Filenames[i],nd,MDE::getTypeName(),true);
+              // load box structure and the experimental info from each target workspace. 
+              m_fileComponentsStructure[i].loadBoxStructure(m_Filenames[i],m_nDims,m_MDEventType,true,true);
+              // export just loaded experiment info to the target workspace
+              m_fileComponentsStructure[i].exportExperiment(m_OutIWS);
 
               // Check for consistency
               if (i>0)
@@ -129,11 +134,11 @@ namespace MDAlgorithms
               }
 
               // Open the event data, track the total number of events
-              auto  bc = boost::shared_ptr<API::BoxController>(new API::BoxController(nd));
+              auto  bc = boost::shared_ptr<API::BoxController>(new API::BoxController(static_cast<size_t>(m_nDims)));
               bc->fromXMLString(m_fileComponentsStructure[i].getBCXMLdescr());
 
               m_EventLoader[i] = new BoxControllerNeXusIO(bc.get());
-              m_EventLoader[i]->setDataType(sizeof(coord_t),MDE::getTypeName());
+              m_EventLoader[i]->setDataType(sizeof(coord_t),m_MDEventType);
               m_EventLoader[i]->openFile(m_Filenames[i],"r");
 
           }
@@ -198,35 +203,37 @@ namespace MDAlgorithms
   /** Perform the merging, but clone the initial workspace and use the same splitting
    * as its structure is equivalent to the partial box structures. 
    *
-   * @param ws :: first MDEventWorkspace in the list to merge
+   * @param ws :: first MDEventWorkspace in the list to merge to.
+   * @param outputFile :: the name of the output file where file-based workspace should be saved
    */
-  template<typename MDE, size_t nd>
-  void MergeMDFiles::doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,const std::string &outputFile)
   {
-    std::string outputFile = getProperty("OutputFilename");
-    m_fileBasedTargetWS = false;
-    if (!outputFile.empty())
-    {
-        m_fileBasedTargetWS = true;
-    }
+    m_OutIWS = ws;
+    m_MDEventType = ws->getEventTypeName();
+
 
    // Run the tasks in parallel? TODO: enable
     //bool Parallel = this->getProperty("Parallel");
 
     // Fix the box controller settings in the output workspace so that it splits normally
     BoxController_sptr bc = ws->getBoxController();
+    // set up internal variables characterizing the workspace. 
+    m_nDims = static_cast<int>(bc->getNDims());
+
+
     // Fix the max depth to something bigger.
     bc->setMaxDepth(20);
     bc->setSplitThreshold(5000);
     auto saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
-    saver->setDataType(sizeof(coord_t),MDE::getTypeName());    
+    saver->setDataType(sizeof(coord_t),m_MDEventType);    
     if(m_fileBasedTargetWS)
     {
         bc->setFileBacked(saver,outputFile);
     // Complete the file-back-end creation.
         g_log.notice() << "Setting cache to 400 MB write." << std::endl;
-        bc->getFileIO()->setWriteBufferSize(400000000/sizeof(MDE));
+        bc->getFileIO()->setWriteBufferSize(400000000/m_OutIWS->sizeofEvent());
     }
+
  /*   else
     {
         saver->openFile(outputFile,"w");
@@ -234,8 +241,8 @@ namespace MDAlgorithms
     // Init box structure used for memory/file space calculations
     m_BoxStruct.initFlatStructure(ws,outputFile);
 
-    // First, load all the box data and calculate file positions of the target workspace
-    this->loadBoxData<MDE,nd>();
+    // First, load all the box data and experiment info and calculate file positions of the target workspace
+    this->loadBoxData();
 
 
 
@@ -252,6 +259,7 @@ namespace MDAlgorithms
 
     ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts);
+
     Kernel::DiskBuffer *DiskBuf(NULL);
     if(m_fileBasedTargetWS)
     {
@@ -260,14 +268,13 @@ namespace MDAlgorithms
 
     this->totalLoaded = 0;
     std::vector<API::IMDNode *> &boxes = m_BoxStruct.getBoxes();
-    //std::vector<uint64_t>      &targetEventIndexes= m_BoxStruct.getEventIndex();    
 
     for(size_t ib=0;ib<numBoxes;ib++)
     {
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[ib]);
-      if(!box)continue;
+      auto box = boxes[ib];
+      if(!box->isBox())continue;
       // load all contributed events into current box;
-      this->loadEventsFromSubBoxes(box);
+      this->loadEventsFromSubBoxes(boxes[ib]);
 
       if(DiskBuf)
       {
@@ -312,37 +319,49 @@ namespace MDAlgorithms
     clearEventLoaders();
 
     // Finish things up
-    this->finalizeOutput<MDE,nd>(ws);
+    this->finalizeOutput(outputFile);
   }
 
 
 
   //----------------------------------------------------------------------------------------------
   /** Now re-save the MDEventWorkspace to update the file back end */
-  template<typename MDE, size_t nd>
-  void MergeMDFiles::finalizeOutput(typename MDEventWorkspace<MDE, nd>::sptr outWS)
+  void MergeMDFiles::finalizeOutput(const std::string &outputFile)
   {
     CPUTimer overallTime;
 
 
-
     this->progress(0.90, "Refreshing Cache");
-    outWS->refreshCache();
-    m_OutIWS = outWS;
+    m_OutIWS->refreshCache();
+
     g_log.information() << overallTime << " to run refreshCache()." << std::endl;
 
-    std::string outputFile = getProperty("OutputFilename");
     if (!outputFile.empty())
     {
       g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
-      IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.9, 1.00);
-      saver->setProperty("InputWorkspace", m_OutIWS);
-      saver->setProperty("UpdateFileBackEnd", true);
-      saver->executeAsChildAlg();
+   // create or open WS group and put there additional information about WS and its dimesnions
+      boost::scoped_ptr< ::NeXus::File>  file(MDBoxFlatTree::createOrOpenMDWSgroup(outputFile,m_nDims,m_MDEventType,false));
+      this->progress(0.94, "Saving ws history and dimensions");    
+      MDBoxFlatTree::saveWSGenericInfo(file.get(),m_OutIWS);
+    // Save each ExperimentInfo to a spot in the file
+      this->progress(0.98, "Saving experiment infos");    
+      MDBoxFlatTree::saveExperimentInfos(file.get(),m_OutIWS);
+
+      file->closeGroup();
+      file->close();
+     // -------------- Save Box Structure  -------------------------------------
+     // OK, we've filled these big arrays of data representing flat box structrre. Save them.
+      progress(0.91, "Writing Box Data");
+      prog->resetNumSteps(8, 0.92, 1.00);
+
+     //Save box structure;
+      m_BoxStruct.saveBoxStructure(outputFile);
+
+      g_log.information() << overallTime << " to run SaveMD structure" << std::endl;
     }
 
  
-    g_log.information() << overallTime << " to run SaveMD." << std::endl;
+
   }
 
 
@@ -360,18 +379,36 @@ namespace MDAlgorithms
       throw std::invalid_argument("Must specify at least one filename.");
     std::string firstFile = m_Filenames[0];
 
+    std::string outputFile = getProperty("OutputFilename");
+    m_fileBasedTargetWS = false;
+    if (!outputFile.empty())
+    {
+        m_fileBasedTargetWS = true;
+        if (Poco::File(outputFile).exists()) 
+          throw std::invalid_argument(" File "+outputFile+" already exists. Can not use existing file as the target to MergeMD files.\n"+
+                                      " Use it as one of source files if you want to add MD data to it" );
+    }
+
+
+
     // Start by loading the first file but just the box structure, no events, and not file-backed
+    //m_BoxStruct.loadBoxStructure(firstFile,
     IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
     loader->setPropertyValue("Filename", firstFile);
     loader->setProperty("MetadataOnly", false);
     loader->setProperty("BoxStructureOnly", true);
     loader->setProperty("FileBackEnd", false);
     loader->executeAsChildAlg();
-    IMDWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
+    IMDWorkspace_sptr result= (loader->getProperty("OutputWorkspace"));
+    
+    auto firstWS = boost::dynamic_pointer_cast<API::IMDEventWorkspace>(result);
+    if(!firstWS)
+      throw std::runtime_error("Can not load MDEventWorkspace from initial file "+firstFile);
 
+    // do the job
+    this->doExecByCloning(firstWS,outputFile);
 
-    // Call the templated method
-    CALL_MDEVENT_FUNCTION( this->doExecByCloning, firstWS);
+    m_OutIWS->setFileNeedsUpdating(false);
 
     setProperty("OutputWorkspace", m_OutIWS);
   }

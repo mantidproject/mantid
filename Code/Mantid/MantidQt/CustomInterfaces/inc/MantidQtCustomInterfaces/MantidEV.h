@@ -35,13 +35,15 @@ class RunLoadAndConvertToMD : public QRunnable
   public:
 
   /// Constructor just saves the info needed by the run() method
-  RunLoadAndConvertToMD(       MantidEVWorker * worker, 
+  RunLoadAndConvertToMD(MantidEVWorker * worker,
                          const std::string    & file_name,
                          const std::string    & ev_ws_name,
                          const std::string    & md_ws_name,
-                               double           maxQ,
-                               bool             do_lorentz_corr,
-                               bool             load_det_cal,
+                         const double           minQ,
+                         const double           maxQ,
+                         const bool             do_lorentz_corr,
+                         const bool             load_data,
+                         const bool             load_det_cal,
                          const std::string    & det_cal_file,
                          const std::string    & det_cal_file2 );
 
@@ -53,8 +55,10 @@ class RunLoadAndConvertToMD : public QRunnable
     std::string      file_name;
     std::string      ev_ws_name;
     std::string      md_ws_name;
+    double           minQ;
     double           maxQ;
     bool             do_lorentz_corr;
+    bool             load_data;
     bool             load_det_cal;
     std::string      det_cal_file;
     std::string      det_cal_file2;
@@ -99,7 +103,11 @@ class RunSphereIntegrate : public QRunnable
                             double           peak_radius,
                             double           inner_radius,
                             double           outer_radius,
-                            bool             integrate_edge );
+                            bool             integrate_edge,
+                            bool             use_cylinder_integration,
+                            double           cylinder_length,
+                            double           cylinder_percent_bkg,
+                      const std::string &    cylinder_profile_fit);
 
   /// Calls worker->sphereIntegrate from a separate thread
   void run();
@@ -112,6 +120,10 @@ class RunSphereIntegrate : public QRunnable
     double           inner_radius; 
     double           outer_radius; 
     bool             integrate_edge; 
+    bool             use_cylinder_integration;
+    double           cylinder_length;
+    double           cylinder_percent_bkg;
+    std::string      cylinder_profile_fit;
 };
 
 
@@ -196,6 +208,8 @@ public:
 
   /// The name of the interface as registered into the factory
   static std::string name() { return "SCD Event Data Reduction"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "Diffraction"; }
 
 public slots:
   /// Slot for Q-Point selection notification

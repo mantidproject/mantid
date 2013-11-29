@@ -43,7 +43,7 @@ namespace Mantid
     const double SaveNXSPE::MASK_FLAG = std::numeric_limits<double>::quiet_NaN();
     const double SaveNXSPE::MASK_ERROR = 0.0;
     // works fine but there were cases that some compilers crush on this (VS2008 in mixed .net environment ?)
-    const std::string SaveNXSPE::NXSPE_VER = "1.1";
+    const std::string SaveNXSPE::NXSPE_VER = "1.2";
 
     SaveNXSPE::SaveNXSPE() :
       API::Algorithm()

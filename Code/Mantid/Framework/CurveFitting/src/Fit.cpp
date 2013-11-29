@@ -1,4 +1,37 @@
 /*WIKI* 
+
+=== Additional properties for a 1D function and a MatrixWorkspace ===
+If Function defines a one-dimensional function and InputWorkspace is a [[MatrixWorkspace]]
+the algorithm will have these additional properties:
+
+{| border="1" cellpadding="5" cellspacing="0"
+!Name
+!Direction
+!Type
+!Default
+!Description
+|-
+|WorkspaceIndex
+|Input
+|integer
+|0
+|The spectrum to fit, using the workspace numbering of the spectra
+|-
+|StartX
+|Input
+|double
+|Start of the spectrum
+|An X value in the first bin to be included in the fit
+|-
+|EndX
+|Input
+|double
+|End of the spectrum
+|An X value in the last bin to be included in the fit
+|}
+
+=== Overview ===
+
 This is a generic algorithm for fitting data in a Workspace with a function.
 The workspace must have the type supported by the algorithm. Currently supported
 types are: [[MatrixWorkspace]] for fitting with a [[IFunction1D]] and
@@ -188,36 +221,6 @@ This example repeats the previous one but with the Sigmas of the two Gaussians t
 
 [[Image:Gaussian2Fit_Ties.jpg]]
 
-=== Additional properties for a 1D function and a MatrixWorkspace ===
-If Function defines a one-dimensional function and InputWorkspace is a [[MatrixWorkspace]]
-the algorithm will have these additional properties:
-
-{| border="1" cellpadding="5" cellspacing="0"
-!Name
-!Direction
-!Type
-!Default
-!Description
-|-
-|WorkspaceIndex
-|Input
-|integer
-|0
-|The spectrum to fit, using the workspace numbering of the spectra 
-|-
-|StartX
-|Input
-|double
-|Start of the spectrum
-|An X value in the first bin to be included in the fit
-|-
-|EndX
-|Input
-|double
-|End of the spectrum
-|An X value in the last bin to be included in the fit
-|}
-
 *WIKI*/
 
 //----------------------------------------------------------------------
@@ -228,6 +231,7 @@ the algorithm will have these additional properties:
 #include "MantidCurveFitting/CostFuncFitting.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
+#include "MantidCurveFitting/Convolution.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
@@ -361,6 +365,7 @@ namespace CurveFitting
     {
       m_workspacePropertyNames.resize(1,"InputWorkspace");
     }
+
   }
 
   /**
@@ -554,6 +559,9 @@ namespace CurveFitting
       "(default is false)." );
     declareProperty("OutputCompositeMembers",false,
         "If true and CreateOutput is true then the value of each member of a Composite Function is also output.");
+    declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
+      "If true and OutputCompositeMembers is true members of any Convolution are output convolved\n"
+      "with corresponding resolution");
   }
 
   /** Executes the algorithm
@@ -790,7 +798,12 @@ namespace CurveFitting
       setProperty("OutputParameters",result);
 
       const bool unrollComposites = getProperty("OutputCompositeMembers");
-      m_domainCreator->separateCompositeMembersInOutput(unrollComposites);
+      bool convolveMembers = existsProperty("ConvolveMembers");
+      if ( convolveMembers )
+      {
+          convolveMembers = getProperty("ConvolveMembers");
+      }
+      m_domainCreator->separateCompositeMembersInOutput(unrollComposites,convolveMembers);
       m_domainCreator->createOutputWorkspace(baseName,m_function,domain,values);
 
     }

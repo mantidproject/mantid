@@ -30,16 +30,18 @@ When processed by this algorithm, 4th and 5th column are transformed into angula
 
 *WIKI*/
 #include "MantidDataHandling/FindDetectorsPar.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+
 #include <Poco/File.h>
 #include <limits>
 #include <iostream>
@@ -67,7 +69,7 @@ using namespace Kernel;
 using namespace API;
 // nothing here according to mantid
 FindDetectorsPar::FindDetectorsPar():
-return_linear_ranges(false)
+m_SizesAreLinear(false)
 {};
 FindDetectorsPar::~FindDetectorsPar(){};
 
@@ -98,8 +100,7 @@ void FindDetectorsPar::init()
 
 }
 
-void 
-FindDetectorsPar::exec()
+void FindDetectorsPar::exec()
 {
 
  // Get the input workspace
@@ -108,7 +109,7 @@ FindDetectorsPar::exec()
       throw(Kernel::Exception::NotFoundError("can not obtain InoputWorkspace for the algorithm to work",""));
   }
  // Number of spectra
-  const size_t nHist = inputWS->getNumberHistograms();
+  const int64_t nHist = (int64_t)inputWS->getNumberHistograms();
 
   // try to load par file if one is availible
   std::string fileName = this->getProperty("ParFile");
@@ -118,9 +119,9 @@ FindDetectorsPar::exec()
          throw(Kernel::Exception::FileError(" file not exist",fileName));
      }
      size_t nPars = loadParFile(fileName);
-     if(nPars == nHist){
+     if(nPars ==(size_t)nHist){
           this->populate_values_from_file(inputWS);
-          this->set_output_table();
+          this->setOutputTable();
           return;
      }else{
           g_log.warning()<<" number of parameters in the file: "<<fileName<<"  not equal to the number of histograms in the workspace"
@@ -129,65 +130,67 @@ FindDetectorsPar::exec()
      }
   
   }
-  return_linear_ranges = this->getProperty("ReturnLinearRanges");
+  m_SizesAreLinear = this->getProperty("ReturnLinearRanges");
   
    
-  // Get a pointer to the sample
-   Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
 
-
-  azimuthal.assign(nHist,std::numeric_limits<double>::quiet_NaN());
-  polar.assign(nHist,std::numeric_limits<double>::quiet_NaN());
-  azimuthal_width.assign(nHist,std::numeric_limits<double>::quiet_NaN());
-  polar_width.assign(nHist,std::numeric_limits<double>::quiet_NaN());
-  secondary_flightpath.assign(nHist,std::numeric_limits<double>::quiet_NaN());
-  det_ID.assign(nHist,std::numeric_limits<size_t>::quiet_NaN());
-  this->nDetectors = 0;
+  std::vector<DetParameters> Detectors(nHist);
+  DetParameters AverageDetector;
+  this->m_nDetectors = 0;
 
   Progress progress(this,0,1,100);
    const int progStep = (int)(ceil(double(nHist)/100.0));
 
-   // Loop over the spectra
-   size_t ic(0);
-   for (size_t i = 0; i < nHist; i++)
-   {
-     Geometry::IDetector_const_sptr spDet;
-     try{
-        spDet= inputWS->getDetector(i);
-     }catch(Kernel::Exception::NotFoundError &){
-        continue;
-     }
- 
-    // Check that we aren't writing a monitor...
-    if (spDet->isMonitor())continue;   
-     det_ID[ic] = spDet->getID();
 
-     Kernel::V3D groupCentre;  
-     Geometry::det_topology group_shape= spDet->getTopology(groupCentre);
-     if(group_shape == Geometry::cyl){  // we have a ring;
-            calc_cylDetPar(spDet,sample,groupCentre,azimuthal[ic], polar[ic], 
-                           azimuthal_width[ic], polar_width[ic],secondary_flightpath[ic]);
-     }else{  // we have a detector or a rectangular shape
-           calc_rectDetPar(inputWS,spDet,sample,groupCentre,azimuthal[ic],polar[ic],
-                           azimuthal_width[ic],polar_width[ic],secondary_flightpath[ic]);
+   // define the centre of coordinates:
+   Kernel::V3D Observer =inputWS->getInstrument()->getSample()->getPos();
+
+   // Loop over the spectra
+   PARALLEL_FOR_NO_WSP_CHECK()  
+   for (int64_t i = 0; i < nHist; i++)
+   {
+     PARALLEL_START_INTERUPT_REGION
+     Geometry::IDetector_const_sptr spDet;
+     try
+     {
+        spDet= inputWS->getDetector(i);
      }
-     ic++ ;
+     catch(Kernel::Exception::NotFoundError &)
+     {// Intel compilers on MAC hungs on continue here
+       // should be no problem with this if get detector implemented properly and workspace keeps ownership for the detector (I expet so)
+        spDet.reset();
+     }
+     // separate check as some compilers do not obey the standard evaluation order
+     if (!spDet)continue;   
+     // Check that we aren't writing a monitor...
+     if (spDet->isMonitor())continue;   
+
+
+    // valid detector has valid detID
+     Detectors[i].detID = spDet->getID();
+
+     // calculate all parameters for current composite detector
+     calcDetPar(spDet,Observer,Detectors[i]);
+ 
      // make regular progress reports and check for canceling the algorithm
+
      if ( i % progStep == 0 ){
             progress.report();
      }
+     PARALLEL_END_INTERUPT_REGION
 
    }
-   nDetectors = ic;
-   this->set_output_table();
+   PARALLEL_CHECK_INTERUPT_REGION
+
+   this->extractAndLinearize(Detectors);
+   // if necessary set up table workspace with detectors parameters. 
+   this->setOutputTable();
    
 
 }
-// Constant for converting Radians to Degrees
-const double rad2deg = 180.0 / M_PI;
-// functions defines the ouptput table with parameters 
-void 
-FindDetectorsPar::set_output_table()
+
+/// fills in the ouptput table workspace with calculated values 
+void FindDetectorsPar::setOutputTable()
 {
   std::string output = getProperty("OutputParTable");
   if(output.empty())return;
@@ -206,7 +209,7 @@ FindDetectorsPar::set_output_table()
      m_result->addColumn("double","twoTheta");
      m_result->addColumn("double","azimuthal");
      m_result->addColumn("double","secondary_flightpath");
-     if(return_linear_ranges){
+     if(m_SizesAreLinear){
         m_result->addColumn("double","det_width");
         m_result->addColumn("double","det_height");
      }else{
@@ -215,171 +218,245 @@ FindDetectorsPar::set_output_table()
      }
      m_result->addColumn("long64","detID");
  
-     for(size_t i=0;i<nDetectors;i++){
+     for(size_t i=0;i<m_nDetectors;i++){
          Mantid::API::TableRow row = m_result->appendRow();
-         row << polar[i] << azimuthal[i] << secondary_flightpath[i] << polar_width[i] << azimuthal_width[i] << (int64_t)det_ID[i];
+         row << polar[i] << azimuthal[i] << secondaryFlightpath[i] << polarWidth[i] << azimuthalWidth[i] <<int64_t(detID[i]);
      }
      setProperty("OutputParTableWS",m_result);
      API::AnalysisDataService::Instance().addOrReplace(output,m_result);
 
 }
 
-void 
-FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
-                                 const Kernel::V3D &GroupCenter,
-                                 double &azim, double &polar, double &azim_width, double &polar_width,double &dist)
+// Constant for converting Radians to Degrees
+const double rad2deg = 180.0 / M_PI;
+
+/** method to cacluate the detectors parameters and add them to the detectors averages
+*@param spDet    -- shared pointer to the Mantid Detector
+*@param Observer -- sample position or the centre of the polar system of coordinates to calculate detector's parameters. 
+*/
+void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &Observer)
 {
-        // polar values are constants for ring;
-        azim_width= 0;
-        azim      = 0;
+  m_nComponents++;
+  Kernel::V3D detPos    =  spDet->getPos();
+  Kernel::V3D toDet     = (detPos - Observer);
 
-        // accumulators;
-        double d1_min(FLT_MAX);
-        double d1_max(-FLT_MAX);
-        double d1_sum(0);
-        double dist_sum(0);
-       
+  double dist2Det,Polar,Azimut;
+  // identify the detector' position in the beam coordinate system:
+  toDet.getSpherical(dist2Det,Polar,Azimut);
+  m_FlightPathSum +=dist2Det;
+  m_PolarSum      +=Polar;
+  m_AzimutSum     +=Azimut;
 
-        std::vector<Kernel::V3D> coord(3);
 
-        // get vector leading from the sample to the ring centre 
-        Kernel::V3D Observer      = sample->getPos();
-        coord[1]  = (GroupCenter-Observer);
-        double d0 = coord[1].norm();
-        coord[1] /= d0;
-        // access contributed detectors;
-        Geometry::DetectorGroup_const_sptr pDetGroup = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(spDet);
-        if(!pDetGroup){
+   // centre of the azimuthal ring (the ring  detectors form around the beam)
+   Kernel::V3D ringCentre(0,0,toDet.Z());
+
+    // Get the bounding box
+   Geometry::BoundingBox bbox;
+   std::vector<Kernel::V3D> coord(3);
+
+   Kernel::V3D er(0,1,0),e_th,ez(0,0,1);  //ez along beamline, which is always oz; 
+   if(dist2Det)er  = toDet/dist2Det; // direction to the detector
+   Kernel::V3D e_tg = er.cross_prod(ez);  // tangential to the ring and anticloakwise;
+   e_tg.normalize();
+   // make orthogonal -- projections are calculated in this coordinate system
+   ez = e_tg.cross_prod(er);
+
+   coord[0]=er; // new X
+   coord[1]=ez; // new y
+   coord[2]=e_tg ; // new z
+   bbox.setBoxAlignment(ringCentre,coord);
+
+   spDet->getBoundingBox(bbox);
+
+   // linear extensions of the bounding box orientied tangentially to the equal scattering angle circle
+   double azimMin = bbox.zMin();
+   double azimMax = bbox.zMax();
+   double polarMin = bbox.yMin(); // bounding box has been rotated according to coord above, so z is along e_tg
+   double polarMax = bbox.yMax();
+
+
+   if (m_useSphericalSizes)
+   {
+      if (dist2Det==0) dist2Det = 1;
+  
+       // convert to angular units 
+       double polarHalfSize  = rad2deg*atan2(0.5*(polarMax-polarMin), dist2Det);
+       double azimHalfSize   = rad2deg*atan2(0.5*(azimMax-azimMin), dist2Det);
+
+       polarMin = Polar -polarHalfSize;
+       polarMax = Polar +polarHalfSize;
+       azimMin  = Azimut -azimHalfSize;
+       azimMax  = Azimut +azimHalfSize;
+
+   }
+   if (m_AzimMin>azimMin)m_AzimMin=azimMin;
+   if (m_AzimMax<azimMax)m_AzimMax=azimMax;
+
+   if (m_PolarMin>polarMin)m_PolarMin=polarMin;
+   if (m_PolarMax<polarMax)m_PolarMax=polarMax;
+
+}
+
+/** Method processes accumulated averages and return them in preexistent avrgDet class
+@returns avrgDet -- the detector with averaged parameters
+ */
+void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet)
+{
+
+  // return undefined detector parameters if no average detector is defined;
+  if(m_nComponents==0)return;
+
+  avrgDet.azimutAngle = m_AzimutSum/double(m_nComponents);
+  avrgDet.polarAngle  = m_PolarSum/double(m_nComponents);
+  avrgDet.secondaryFlightPath = m_FlightPathSum/double(m_nComponents);
+
+  avrgDet.azimWidth =(m_AzimMax-m_AzimMin);
+  avrgDet.polarWidth=(m_PolarMax-m_PolarMin);
+
+}
+/** Method calculates averaged polar coordinates of the detector's group   (which may consist of one detector)
+*@param spDet    -- shared pointer to the Mantid Detector
+*@param Observer -- sample position or the centre of the polar system of coordinates to calculate detector's parameters. 
+
+*@param Detector  -- return Detector class containing averaged polar coordinates of the detector or detector's group in 
+                     spherical coordinate system with centre at Observer
+*/
+void FindDetectorsPar::calcDetPar(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &Observer,
+                                   DetParameters  &Detector)
+{
+
+  // get number of basic detectors within the composit detector
+   size_t nDetectors = spDet->nDets();
+   // define summator
+   AvrgDetector detSum;
+   // do we want spherical or linear box sizes?
+   detSum.setUseSpherical(!m_SizesAreLinear);
+
+   if( nDetectors == 1)
+   {
+      detSum.addDetInfo(spDet,Observer);
+   }
+   else
+   {
+        // access contributing detectors;
+        Geometry::DetectorGroup_const_sptr spDetGroup = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(spDet);
+        if(!spDetGroup){
              g_log.error()<<"calc_cylDetPar: can not downcast IDetector_sptr to detector group for det->ID: "<<spDet->getID()<<std::endl;
              throw(std::bad_cast());
         }
-        std::vector<Geometry::IDetector_const_sptr> pDets = pDetGroup->getDetectors();
-        Geometry::BoundingBox bbox;
-
-        // loop through all detectors in the group 
-        for(size_t i=0;i<pDets.size();i++){
-            Kernel::V3D center= pDets[i]->getPos();
-            coord[0]  = center-GroupCenter;
-            double d1 = coord[0].norm();
-            coord[0] /= d1;
-            coord[2]  = coord[0].cross_prod(coord[1]);
-
-             // obtain the bounding box, aligned accordingly to the coordinates;
-            bbox.nullify();
-            bbox.setBoxAlignment(center,coord);
-            pDets[i]->getBoundingBox(bbox);
-
-            double d_min = d1+bbox.xMin();  if(d_min<d1_min)d1_min = d_min;
-            double d_max = d1+bbox.xMax();  if(d_max>d1_max)d1_max = d_max;
-            double d_azim = (bbox.zMax()-bbox.zMin())/d1;
-            azim_width+=d_azim;
-
-            d1_sum   +=d1;
-            dist_sum +=d1*d1+d0*d0;
+        auto detectors = spDetGroup->getDetectors();
+        auto it     = detectors.begin();
+        auto it_end = detectors.end();
+        for(;it!=it_end;it++)
+        {
+          detSum.addDetInfo(*it,Observer);
         }
-        double dNdet= double(pDets.size());
-        dist        = sqrt(dist_sum/dNdet);
-    if(return_linear_ranges){
-        polar_width  = d1_max-d1_min;          // the width of the detector's ring;
-        azim_width   = 2*M_PI*(d1_sum/dNdet);  // the length of the detector's ring
-    }else{
 
-        polar_width = (atan2(d1_max,d0)-atan2(d1_min,d0))*rad2deg;
-        polar       = atan2(d1_sum/dNdet,d0)*rad2deg;
-     
-        azim_width *= rad2deg;
-    }        
+   }
+   // calculate averages and return the detector parameters
+   detSum.returnAvrgDetPar(Detector);
+
 }
-
-void 
-FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS, 
-                                 const Geometry::IDetector_const_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
-                                 const Kernel::V3D &GroupCentre,
-                                 double &azim, double &polar, double &azim_width, double &polar_width,double &dist)
+/**Method to convert vector of Detector's classes into vectors of doubles with all correspondent information 
+   also drops non-existent detectors and monitors */ 
+void FindDetectorsPar::extractAndLinearize(const std::vector<DetParameters> &detPar)
 {
-    // Get Sample->Detector distance
-     dist     =  spDet->getDistance(*sample);
-     polar    =  inputWS->detectorTwoTheta(spDet)*rad2deg;
-     azim     =  spDet->getPhi()*rad2deg;    
-    // Now let's work out the detector widths on basis of bounding box tangential to the 2Theta=const ring;
-     Kernel::V3D beamDetVector(GroupCentre.X(),GroupCentre.Y(),0);  // group centre minus the projection of this centre to the beamline
-     beamDetVector.normalize();
-     std::vector<Kernel::V3D> coord(3);
-     coord[0]  = beamDetVector;
-     coord[1]  = Kernel::V3D(0,0,1); // along beamline, which is always oz; (can be amended)
-     coord[2]  = coord[0].cross_prod(coord[1]);  // tangential to the ring and anticloakwise;
-  
+  size_t nDetectors;
 
-    // Get the bounding box
-    Geometry::BoundingBox bbox;
-    bbox.setBoxAlignment(GroupCentre,coord);
+  // provisional number
+  nDetectors = detPar.size();
 
-    spDet->getBoundingBox(bbox);
-    double xsize = bbox.xMax() - bbox.xMin();
-    double ysize = bbox.zMax() - bbox.zMin(); // bounding box has been rotated according to coord above, so z is along coord[2]
+  this->azimuthal.resize(nDetectors);
+  this->polar.resize(nDetectors);
+  this->azimuthalWidth.resize(nDetectors);
+  this->polarWidth.resize(nDetectors);
+  this->secondaryFlightpath.resize(nDetectors);
+  this->detID.resize(nDetectors);
 
-    if(return_linear_ranges){
-        polar_width  = xsize;  // width
-        azim_width   = ysize;  // height
-    }else{
-        polar_width  = 2*rad2deg*atan2((xsize/2.0), dist);
-        azim_width   = 2*rad2deg*atan2((ysize/2.0), dist);
-    }
+  nDetectors = 0;
+  for(size_t i=0;i<detPar.size();i++)
+  {
+    if(detPar[i].detID<0)continue;
+
+    azimuthal[nDetectors]       = detPar[i].azimutAngle;
+    polar[nDetectors]           = detPar[i].polarAngle;
+    azimuthalWidth[nDetectors]  = detPar[i].azimWidth;
+    polarWidth[nDetectors]      = detPar[i].polarWidth;
+    secondaryFlightpath[nDetectors]=detPar[i].secondaryFlightPath;
+    detID[nDetectors]           = static_cast<size_t>(detPar[i].detID);
+    nDetectors++;
+  }
+  // store caluclated value
+  m_nDetectors = nDetectors;
+
+  // resize to actual detector's number
+  this->azimuthal.resize(nDetectors);
+  this->polar.resize(nDetectors);
+  this->azimuthalWidth.resize(nDetectors);
+  this->polarWidth.resize(nDetectors);
+  this->secondaryFlightpath.resize(nDetectors);
+  this->detID.resize(nDetectors);
+
 }
-
+   
 //
-size_t 
-FindDetectorsPar::loadParFile(const std::string &fileName){
+size_t FindDetectorsPar::loadParFile(const std::string &fileName){
     // load ASCII par or phx file
     std::ifstream dataStream;
     std::vector<double> result;
     this->current_ASCII_file = get_ASCII_header(fileName,dataStream);
     load_plain(dataStream,result,current_ASCII_file);
 
-    this->nDetectors = current_ASCII_file.nData_records;
+    m_nDetectors = current_ASCII_file.nData_records;
 
     dataStream.close();
     // transfer par data into internal algorithm parameters;
-    azimuthal.resize(nDetectors);
-    polar.resize(nDetectors);
-    det_ID.resize(nDetectors);
+    azimuthal.resize(m_nDetectors);
+    polar.resize(m_nDetectors);
+    detID.resize(m_nDetectors);
 
     int Block_size,shift;
     
-    if(current_ASCII_file.Type==PAR_type){
+    if(current_ASCII_file.Type==PAR_type)    
+    {
+        m_SizesAreLinear = true;
         Block_size  = 5; // this value coinside with the value defined in load_plain
         shift       = 0;
-        width.resize(nDetectors);
-        height.resize(nDetectors);
-        secondary_flightpath.resize(nDetectors,std::numeric_limits<double>::quiet_NaN());
+        azimuthalWidth.resize(m_nDetectors);
+        polarWidth.resize(m_nDetectors);
+        secondaryFlightpath.resize(m_nDetectors,std::numeric_limits<double>::quiet_NaN());
    
-        for(size_t i=0;i<nDetectors;i++){
+        for(size_t i=0;i<m_nDetectors;i++){
            azimuthal[i]            =result[shift+2+i*Block_size];
            polar[i]                =result[shift+1+i*Block_size];
-           width[i]                =result[shift+3+i*Block_size];
-           height[i]               =result[shift+4+i*Block_size]; 
-           secondary_flightpath[i] =result[shift+0+i*Block_size];
-           det_ID[i]               = i+1;
+           azimuthalWidth[i]       =result[shift+3+i*Block_size];
+           polarWidth[i]           =result[shift+4+i*Block_size]; 
+           secondaryFlightpath[i] =result[shift+0+i*Block_size];
+           detID[i]               = i+1;
         }
 
-    }else if(current_ASCII_file.Type==PHX_type){
+    }else if(current_ASCII_file.Type==PHX_type)
+    {
+         m_SizesAreLinear = false;
          Block_size = 6; // this value coinside with the value defined in load_plain
          shift      = 1;
-         azimuthal_width.resize(nDetectors);
-         polar_width.resize(nDetectors);
-         for(size_t i=0;i<nDetectors;i++){
+         azimuthalWidth.resize(m_nDetectors);
+         polarWidth.resize(m_nDetectors);
+         for(size_t i=0;i<m_nDetectors;i++)
+         {
              azimuthal[i]       =result[shift+2+i*Block_size];
              polar[i]           =result[shift+1+i*Block_size];
-             azimuthal_width[i] =result[shift+4+i*Block_size];
-             polar_width[i]     =result[shift+3+i*Block_size]; 
-             det_ID[i]               = i+1;
+             azimuthalWidth[i]  =result[shift+4+i*Block_size];
+             polarWidth[i]      =result[shift+3+i*Block_size]; 
+             detID[i]           =i+1;
          }
     }else{
         g_log.error()<<" unsupported type of ASCII parameter file: "<<fileName<<std::endl;
         throw(std::invalid_argument("unsupported ASCII file type"));
     }
 
-    return nDetectors;
+    return m_nDetectors;
 }
 // 
 void 
@@ -387,25 +464,20 @@ FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr & in
 {
     size_t nHist = inputWS->getNumberHistograms();
 
-    if(this->current_ASCII_file.Type == PAR_type){
+    if(this->current_ASCII_file.Type == PAR_type)
+    {
         // in this case data in azimuthal width and polar width are in fact real sizes in meters; have to transform it in into angular values
-        azimuthal_width.resize(nHist);
-        polar_width.resize(nHist);
         for (size_t i = 0; i < nHist; i++){
-            if((azimuthal[i]>-45&&azimuthal[i]<45)||(azimuthal[i]>135)||(azimuthal[i]<-135)){
-                azimuthal_width[i]=atan2(height[i],secondary_flightpath[i])*rad2deg;
-                polar_width[i]    =atan2(width[i],secondary_flightpath[i])*rad2deg;
-            }else{
-                azimuthal_width[i]=atan2(width[i],secondary_flightpath[i])*rad2deg;
-                polar_width[i]    =atan2(height[i],secondary_flightpath[i])*rad2deg;
-            }
+             azimuthalWidth[i]=atan2(azimuthalWidth[i],secondaryFlightpath[i])*rad2deg;
+             polarWidth[i]    =atan2(polarWidth[i],secondaryFlightpath[i])*rad2deg;
         }
-        height.resize(0);
-        width.resize(0);
-    }else{
+        m_SizesAreLinear = false;
+    }
+    else
+    {
 
        Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
-       secondary_flightpath.resize(nHist);
+       secondaryFlightpath.resize(nHist);
      // Loop over the spectra
      for (size_t i = 0; i < nHist; i++){
             Geometry::IDetector_const_sptr spDet;
@@ -417,7 +489,7 @@ FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr & in
         // Check that we aren't writing a monitor...
         if (spDet->isMonitor())continue;
         /// this is the only value, which is not defined in phx file, so we calculate it   
-           secondary_flightpath[i]     =  spDet->getDistance(*sample);
+           secondaryFlightpath[i]     =  spDet->getDistance(*sample);
      }
 
     }
@@ -536,7 +608,6 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName, std::ifstream &d
     int space_to_symbol_change=count_changes(&BUF[0],BUF.size());
     if(space_to_symbol_change>1){  // more then one group of symbols in the string, spe file
         int nData_records(0),nData_blocks(0);
-        // cppcheck-suppress invalidscanf
         int nDatas = sscanf(&BUF[0]," %d %d ",&nData_records,&nData_blocks);
         file_descriptor.nData_records = (size_t)nData_records;
         file_descriptor.nData_blocks  = (size_t)nData_blocks;

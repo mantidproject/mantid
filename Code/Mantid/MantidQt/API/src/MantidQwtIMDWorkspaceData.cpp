@@ -232,6 +232,44 @@ size_t MantidQwtIMDWorkspaceData::esize() const
   return m_E.size();
 }
 
+/**
+ * Depending upon whether the log options have been set.
+ * @return the lowest y value.
+ */
+double MantidQwtIMDWorkspaceData::getYMin() const
+{
+  auto it = std::min_element(m_Y.begin(), m_Y.end());
+  double temp = 0;
+  if(it != m_Y.end())
+  {
+    temp = *it;
+  }
+  if (m_logScale && temp <= 0.)
+  {
+    temp = m_minPositive;
+  }
+  return temp;
+}
+
+/**
+ * Depending upon whether the log options have been set.
+ * @return the highest y value.
+ */
+double MantidQwtIMDWorkspaceData::getYMax() const
+{
+  auto it = std::max_element(m_Y.begin(), m_Y.end());
+  double temp = 0;
+  if(it != m_Y.end())
+  {
+    temp = *it;
+  }
+  if (m_logScale && temp <= 0.)
+  {
+    temp = m_minPositive;
+  }
+  return temp;
+}
+
 void MantidQwtIMDWorkspaceData::setLogScale(bool on)
 {
   m_logScale = on;

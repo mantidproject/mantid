@@ -514,8 +514,6 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
 {
   QStringList propList;
   std::string sProperty;
-  bool bisDefault;
-  int nDirection=0;
   for ( std::vector<Mantid::Kernel::PropertyHistory>::const_iterator pIter = m_Histprop.begin();
 	pIter != m_Histprop.end(); ++pIter )
   {
@@ -524,11 +522,11 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
     sProperty=(*pIter).value();
     propList.append(sProperty.c_str());
 
-    bisDefault=(*pIter).isDefault();
+    bool bisDefault=(*pIter).isDefault();
     bisDefault? (sProperty="Yes"):(sProperty="No");
 
     propList.append(sProperty.c_str());
-    nDirection=(*pIter).direction();
+    int nDirection=(*pIter).direction();
     switch(nDirection)
     {
     case 0:{sProperty="Input";break;}

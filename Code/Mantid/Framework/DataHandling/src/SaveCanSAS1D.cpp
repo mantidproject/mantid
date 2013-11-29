@@ -255,23 +255,24 @@ bool SaveCanSAS1D::openForAppending(const std::string & filename)
  */
 void SaveCanSAS1D::findEndofLastEntry()
 {
-  static const int LAST_TAG_LEN = 11;
-  static const char LAST_TAG[LAST_TAG_LEN+1] = "</SASentry>";
-  // UNCERT should be less than the length of a SASentry
-  static const int UNCERT = 20;
   const int rootTagLen = static_cast<int>(std::string("</SASroot>").length());
 
   try
   {
+    static const int LAST_TAG_LEN = 11;
+
     //move to the place _near_ the end of the file where the data will be appended to
     m_outFile.seekg(-LAST_TAG_LEN-rootTagLen, std::ios::end);
     char test_tag[LAST_TAG_LEN+1];
     m_outFile.read(test_tag, LAST_TAG_LEN);
     //check we're in the correct place in the file
+    static const char LAST_TAG[LAST_TAG_LEN+1] = "</SASentry>";
     if ( std::string(test_tag,LAST_TAG_LEN)!=std::string(LAST_TAG,LAST_TAG_LEN) )
     {
       //we'll allow some extra charaters so there is some variablity in where the tag might be found
-      bool tagFound(false);
+      bool tagFound(false);  
+      // UNCERT should be less than the length of a SASentry
+      static const int UNCERT = 20;
       for ( int i = 1; i < UNCERT; ++i )
       {
         //together this seek and read move the file pointer back on byte at a time and read
