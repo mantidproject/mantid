@@ -171,6 +171,10 @@ class ISISReducer(SANSReducer):
         self.samp_trans_load = None
         self.can_trans_load = None
         self.event2hist = isis_reduction_steps.SliceEvent()
+        # keep information about event slicing
+        self._slices_def = []
+        self._slice_index = 0
+
 
     def __init__(self):
         SANSReducer.__init__(self)
@@ -203,9 +207,6 @@ class ISISReducer(SANSReducer):
         self.__transmission_sample = ""
         # register the value of transmission can
         self.__transmission_can = ""
-        # keep information about event slicing
-        self._slices_def = []
-        self._slice_index = 0
 
 
     def set_sample(self, run, reload, period):
@@ -282,6 +283,13 @@ class ISISReducer(SANSReducer):
         name += '_' + self.to_wavelen.get_range()
         if self.to_Q.get_output_type() == "1D":
           name += self.mask.get_phi_limits_tag()
+
+        if self.getNumSlices() > 0:
+            limits = self.getCurrSliceLimit()
+            if limits[0] != -1:
+                name += '_t%.2f'%limits[0]
+            if limits[1] != -1:
+                name += '_T%.2f'%limits[1]
 
         return name
 
