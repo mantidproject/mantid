@@ -1041,7 +1041,7 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
       wsNames.append(text.mid(startIndex,endIndex-startIndex));
     }
 
-    for (const auto wsName: wsNames)
+    foreach (const auto& wsName, wsNames)
     {
       if(this->overlay(wsName)) e->accept();  
     }   
