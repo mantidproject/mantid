@@ -204,11 +204,11 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showTransposed = new QAction(tr("Show Transposed"),this);
   connect(m_showTransposed,SIGNAL(triggered()),m_mantidUI,SLOT(importTransposed()));
 
-  m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkspace"),this);
   m_convertToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertToMatrixWorkspace()));
 
-  m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkspace"),this);
   m_convertMDHistoToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertMDHistoToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertMDHistoToMatrixWorkspace()));
 
