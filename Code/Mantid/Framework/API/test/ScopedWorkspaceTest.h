@@ -150,6 +150,17 @@ public:
     TS_ASSERT_THROWS( ScopedWorkspace test2(ws), std::invalid_argument );
   }
 
+  void test_boolConversion()
+  {
+    ScopedWorkspace test;
+
+    TS_ASSERT( ! test );
+
+    test.set(MockWorkspace_sptr(new MockWorkspace));
+
+    TS_ASSERT( test );
+  }
+
 private:
   AnalysisDataServiceImpl& m_ads;
 };

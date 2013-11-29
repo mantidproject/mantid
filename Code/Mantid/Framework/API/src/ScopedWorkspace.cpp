@@ -48,6 +48,20 @@ namespace API
       }
     }
   }
+
+  /**
+   * Operator for conversion to boolean. Returns true if workspace was created for the
+   * name and it is not null workspace.
+   */
+  ScopedWorkspace::operator bool() const
+  {
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
+    if ( ads.doesExist(m_name) )
+      return ads.retrieveWS<Workspace>(m_name);
+    else
+      return false;
+  }
  
   /**
    * Retrieve workspace from the ADS. Null pointer returned if nothing was added
