@@ -196,17 +196,9 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
             PI = 3.1415926535
             theta = inst.getComponentByName('point-detector').getTwoTheta(sampleLocation, beamPos)*180.0/PI/2.0
             print "Det location: ", detLocation, "Calculated theta = ",theta
-            if detLocation.getY() == 0:  # detector is not in correct place
-                print "det at 0"
-                # Load corresponding NeXuS file
-                runno = '_' + str(run)
-                #templist.append(runno)
-                if type(run)==type(int()):
-                    LoadNexus(Filename=run,OutputWorkspace=runno)
-                else:
-                    LoadNexus(Filename=run.replace("raw","nxs",1),OutputWorkspace=runno)
+            if detLocation.getY() == 0:  # detector is not in correct place   
                 # Get detector angle theta from NeXuS
-                theta = groupGet(runno,'samp','theta')
+                theta = groupGet(run_ws,'samp','theta')
                 print 'Nexus file theta =', theta
                 IvsQ = l2q(mtd['IvsLam'], 'point-detector', theta)
             else:
