@@ -1669,7 +1669,11 @@ void Indirect::calPlotEnergy()
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
   //something went wrong in the python
-  if(pyOutput == "None") return;
+  if(pyOutput == "None")
+  {
+    showInformationBox("Failed to plot energy. See log for details.");
+    return;
+  }
   
   Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(pyOutput.toStdString()));
 
