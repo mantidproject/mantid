@@ -10,6 +10,7 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace
+import SANSUtility as su
 import os
 import copy
 
@@ -202,6 +203,9 @@ class ISISReducer(SANSReducer):
         self.__transmission_sample = ""
         # register the value of transmission can
         self.__transmission_can = ""
+        # keep information about event slicing
+        self._slices_def = []
+        self._slice_index = 0
 
 
     def set_sample(self, run, reload, period):
@@ -535,6 +539,31 @@ class ISISReducer(SANSReducer):
                 return self._front_beam_finder.get_beam_center()
             else:
                 return self._beam_finder.get_beam_center()
+
+    def getCurrSliceLimit(self):
+        if not self._slices_def:
+            self._slices_def = su.sliceParser("")
+            assert(self._slice_index == 0)
+        return self._slices_def[self._slice_index]
+
+    def getNumSlices(self):
+        # slices are defined only for event workspaces
+        ws = mtd[self.get_sample().wksp_name]
+        if not isinstance(ws, IEventWorkspace):
+            return 0        
+        if not self._slices_def:
+            return 0
+        return len(self._slices_def)
+
+    def setSliceIndex(self, index):
+        if index < self.getNumSlices():
+            self._slice_index = index
+        else:
+            raise IndexError("Outside range")
+    
+    def setSlicesLimits(self, str_def):
+        self._slices_def = su.sliceParser(str_def)
+        self._slice_index = 0
     
 def deleteWorkspaces(workspaces):
     """
