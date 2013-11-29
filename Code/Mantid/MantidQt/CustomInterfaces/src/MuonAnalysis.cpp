@@ -1162,6 +1162,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
           loadDeadTimes->setPropertyValue("OutputWorkspace", customDeadTimes.name());
           loadDeadTimes->execute();
 
+          if ( ! customDeadTimes )
+            throw std::runtime_error("Unable to load dead times from the spefied file");
+
           applyCorrAlg->setPropertyValue("DeadTimeTable", customDeadTimes.name());
         }
 
