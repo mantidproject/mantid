@@ -73,7 +73,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
     def tearDown(self):
         DeleteWorkspace(self.__tof)
         DeleteWorkspace(self.__not_tof)
-    
+     
     def test_check_input_workpace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_InputWorkspace(self.__not_tof)
@@ -98,7 +98,6 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg = self.construct_standard_algorithm()
         alg.set_FirstTransmissionRun(self.__tof)
         alg.set_SecondTransmissionRun(self.__tof)
-        alg.execute()
         self.assertRaises(ValueError, alg.execute)
         
     def test_must_provide_wavelengths(self):
@@ -141,6 +140,23 @@ class ReflectometryReductionOneTest(unittest.TestCase):
     def test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max(self):
         alg = self.construct_standard_algorithm()
         alg.set_WorkspaceIndexList([1, 0]) # 1 > 0
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_define_region_of_interest(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_I0MonitorIndex(-1)
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_cannot_set_region_of_interest_without_multidetector_run(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_AnalysisMode("PointDetectorAnalysis")
+        alg.set_RegionOfInterest([1, 2])
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_cannot_set_direct_beam_region_of_interest_without_multidetector_run(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_AnalysisMode("PointDetectorAnalysis")
+        alg.set_RegionOfDirectBeam([1, 2])
         self.assertRaises(ValueError, alg.execute)
         
         

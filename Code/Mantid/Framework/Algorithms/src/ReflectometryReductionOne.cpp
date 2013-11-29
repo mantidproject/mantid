@@ -65,6 +65,8 @@ namespace Algorithms
     const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
     const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
     typedef boost::optional< MatrixWorkspace_sptr > OptionalMatrixWorkspace_sptr;
+    typedef boost::optional<std::vector<int> > OptionalWorkspaceIndexes;
+    typedef boost::optional<double> OptionalDouble;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -94,6 +96,8 @@ namespace Algorithms
     declareProperty("AnalysisMode", "PointDetectorAnalysis", boost::make_shared<StringListValidator>(propOptions),
           "The type of analysis to perform. Point detector or multi detector.");
 
+    declareProperty(new ArrayProperty<int>("RegionOfInterest"),"Indices of the spectra a pair (lower, upper) that mark the ranges that correspond to the region of interest (reflected beam) in multi-detector mode.");
+    declareProperty(new ArrayProperty<int>("RegionOfDirectBeam"),"Indices of the spectra a pair (lower, upper) that mark the ranges that correspond to the direct beam in multi-detector mode.");
 
     declareProperty(new PropertyWithValue<double>("WavelengthMin", Mantid::EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(), Direction::Input), "Wavelength minimum");
     declareProperty(new PropertyWithValue<double>("WavelengthMax", Mantid::EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(), Direction::Input), "Wavelength maximum");
@@ -168,9 +172,9 @@ namespace Algorithms
     }
 
     OptionalMatrixWorkspace_sptr secondTransmissionRun;
-    boost::optional<double> stitchingStartQ;
-    boost::optional<double> stitchingDeltaQ;
-    boost::optional<double> stitchingEndQ;
+    OptionalDouble stitchingStartQ;
+    OptionalDouble stitchingDeltaQ;
+    OptionalDouble stitchingEndQ;
 
     if ( !isPropertyDefault("SecondTransmissionRun") )
     {
@@ -193,7 +197,7 @@ namespace Algorithms
       }
     }
 
-    boost::optional<double> theta;
+    OptionalDouble theta;
     if ( !isPropertyDefault("Theta") )
     {
       double temp = this->getProperty("Theta");
@@ -201,7 +205,8 @@ namespace Algorithms
     }
 
     const std::string strAnalysisMode = getProperty("AnalysisMode");
-    const bool isPointDetector = (strAnalysisMode.compare(pointDetectorAnalysis) == 0);
+    const bool isPointDetector = (pointDetectorAnalysis.compare(strAnalysisMode) == 0);
+
     const double wavelengthMin = getProperty("WavelengthMin");
     const double wavelengthMax = getProperty("WavelengthMax");
     if (wavelengthMin > wavelengthMax)
@@ -238,6 +243,30 @@ namespace Algorithms
       if (indexList[i] > indexList[i+1])
         throw std::invalid_argument("WorkspaceIndexList pairs must be in min, max order");
     }
+
+    OptionalWorkspaceIndexes regionOfInterest;
+    if( !isPropertyDefault("RegionOfInterest") )
+    {
+      if( isPointDetector )
+      {
+        throw std::invalid_argument("Cannot have a region of interest property in point detector mode.");
+      }
+      std::vector<int> temp = getProperty("RegionOfInterest");
+      regionOfInterest = temp;
+    }
+
+    OptionalWorkspaceIndexes directBeam;
+    if( !isPropertyDefault("RegionOfDirectBeam") )
+    {
+      if( isPointDetector )
+      {
+        throw std::invalid_argument("Cannot have a direct beam property in point detector mode.");
+      }
+      std::vector<int> temp = getProperty("RegionOfDirectBeam");
+      directBeam = temp;
+    }
+
+
 
 
     auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
