@@ -141,6 +141,15 @@ public:
     TS_ASSERT_EQUALS( m_ads.getObjectNamesInclHidden().size(), 0 );
   }
 
+  void test_alreadyExistsInTheADS()
+  {
+    MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace);
+
+    ScopedWorkspace test(ws);
+
+    TS_ASSERT_THROWS( ScopedWorkspace test2(ws), std::invalid_argument );
+  }
+
 private:
   AnalysisDataServiceImpl& m_ads;
 };

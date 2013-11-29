@@ -23,7 +23,7 @@ namespace API
   ScopedWorkspace::ScopedWorkspace(Workspace_sptr ws) :
     m_name( generateUniqueName() )
   {
-    AnalysisDataService::Instance().add(m_name, ws); 
+    set(ws);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -70,7 +70,12 @@ namespace API
    */
   void ScopedWorkspace::set(Workspace_sptr newWS)
   {
-    AnalysisDataService::Instance().addOrReplace(m_name, newWS); 
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
+    if ( ! newWS->name().empty() && ads.doesExist( newWS->name() ) )
+      throw std::invalid_argument( "Workspace is already in the ADS under the name " + newWS->name() );
+
+    ads.add(m_name, newWS); 
   }
 
   /**
