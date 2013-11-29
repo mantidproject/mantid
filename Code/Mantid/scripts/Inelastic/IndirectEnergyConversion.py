@@ -232,7 +232,11 @@ def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=True, Plo
         DeleteWorkspace(Workspace=calibWsName)
 
     if Plot:
-        graph = mp.plotBin(outWSlist, 0)
+        try:
+            graph = mp.plotSpectrum(sfile, 0)
+        except RuntimeError, e:
+            #User clicked cancel on plot so don't do anything
+            pass
 
     EndTime('Slice')
     
