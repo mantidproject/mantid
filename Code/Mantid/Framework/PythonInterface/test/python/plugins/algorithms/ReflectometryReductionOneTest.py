@@ -57,6 +57,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_WavelengthMin(0.0)
         alg.set_WavelengthMax(1.0)
         alg.set_I0MonitorIndex(0)
+        alg.set_WorkspaceIndexList([0, 1])
         alg.set_MonitorBackgroundWavelengthMin(0.0)
         alg.set_MonitorBackgroundWavelengthMax(1.0)
         alg.set_MonitorIntegrationWavelengthMin(0.0)
@@ -88,11 +89,22 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_SecondTransmissionRun(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)
         
+    def test_proivde_second_transmission_run_without_first_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_SecondTransmissionRun(self.__tof)
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_provide_second_transmission_run_without_params_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_FirstTransmissionRun(self.__tof)
+        alg.set_SecondTransmissionRun(self.__tof)
+        alg.execute()
+        self.assertRaises(ValueError, alg.execute)
+        
     def test_must_provide_wavelengths(self):
         self.assertRaises(RuntimeError, ReflectometryReductionOne, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMin=1.0)
         self.assertRaises(RuntimeError, ReflectometryReductionOne, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMax=1.0)
-        #ReflectometryReductionOne( InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMin=0, WavelengthMax=1.0, I0MonitorIndex=0)
-    
+        
     def test_wavelength_min_greater_wavelength_max_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_WavelengthMin(1.0)
@@ -110,6 +122,27 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_MonitorIntegrationWavelengthMin(1.0)
         alg.set_MonitorIntegrationWavelengthMax(0.0)
         self.assertRaises(ValueError, alg.execute)
+        
+    def test_monitor_index_positive(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_I0MonitorIndex(-1)
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_workspace_index_list_throw_if_not_pairs(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_WorkspaceIndexList([0])
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_workspace_index_list_values_not_positive_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_WorkspaceIndexList([-1, 0]) # -1 is not acceptable.
+        self.assertRaises(ValueError, alg.execute)
+    
+    def test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_WorkspaceIndexList([1, 0]) # 1 > 0
+        self.assertRaises(ValueError, alg.execute)
+        
         
         
 if __name__ == '__main__':

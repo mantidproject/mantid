@@ -9,6 +9,8 @@ Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs 
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <vector>
@@ -78,6 +80,12 @@ namespace Algorithms
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun","", Direction::Input, PropertyMode::Optional, inputValidator->clone() ), "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
     declareProperty(new PropertyWithValue<double>("Theta", -1, Direction::Input),  "Final theta value.");
 
+    declareProperty(
+                new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
+                "A comma separated list of first bin boundary, width, last bin boundary. "
+                "These parameters are used for stitching together transmission runs. "
+                "Values are in q. This input is only needed if a SecondTransmission run is provided."
+                );
 
     std::vector<std::string> propOptions;
     propOptions.push_back( pointDetectorAnalysis );
@@ -140,6 +148,11 @@ namespace Algorithms
     return property->isDefault();
   }
 
+  bool checkNotPositive(const int value)
+  {
+    return value < 0;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -155,10 +168,29 @@ namespace Algorithms
     }
 
     OptionalMatrixWorkspace_sptr secondTransmissionRun;
+    boost::optional<double> stitchingStartQ;
+    boost::optional<double> stitchingDeltaQ;
+    boost::optional<double> stitchingEndQ;
+
     if ( !isPropertyDefault("SecondTransmissionRun") )
     {
+      if( isPropertyDefault("FirstTransmissionRun") )
+      {
+        throw std::invalid_argument("A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
+      }
       MatrixWorkspace_sptr temp = this->getProperty("SecondTransmissionRun");
       secondTransmissionRun = temp;
+      if (isPropertyDefault("Params"))
+      {
+        throw std::invalid_argument("If a SecondTransmissionRun has been given, then stitching Params are also required.");
+      }
+      else
+      {
+        std::vector<double> params = getProperty("Params");
+        stitchingStartQ = params[0];
+        stitchingDeltaQ = params[1];
+        stitchingEndQ = params[2];
+      }
     }
 
     boost::optional<double> theta;
@@ -189,6 +221,24 @@ namespace Algorithms
     {
       throw std::invalid_argument("Cannot have MonitorIntegrationWavelengthMin > MonitorIntegrationWavelengthMax");
     }
+
+    const std::vector<int> indexList = getProperty("WorkspaceIndexList");
+    if(indexList.size() % 2 != 0 || indexList.size() == 0)
+    {
+      throw std::invalid_argument("WorkspaceIndex list must be composed of pairs of min index, max index.");
+    }
+
+    if( std::find_if(indexList.begin(), indexList.end(), checkNotPositive) != indexList.end() )
+    {
+      throw std::invalid_argument("WorkspaceIndexList contains negative indexes");
+    }
+
+    for(size_t i = 0; (i+1) < indexList.size(); i+=2)
+    {
+      if (indexList[i] > indexList[i+1])
+        throw std::invalid_argument("WorkspaceIndexList pairs must be in min, max order");
+    }
+
 
     auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
     cloneAlg->initialize();
