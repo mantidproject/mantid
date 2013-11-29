@@ -8,6 +8,7 @@ Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs 
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <vector>
@@ -73,8 +74,8 @@ namespace Algorithms
     inputValidator->add(boost::make_shared<WorkspaceUnitValidator>("TOF"));
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","", Direction::Input, inputValidator), "Run to reduce.");
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun","", Direction::Input, inputValidator->clone() ), "First transmission run, or the low wavelength transmision run if SecondTransmissionRun is also provided.");
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun","", Direction::Input, inputValidator->clone() ), "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun","", Direction::Input, PropertyMode::Optional, inputValidator->clone() ), "First transmission run, or the low wavelength transmision run if SecondTransmissionRun is also provided.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun","", Direction::Input, PropertyMode::Optional, inputValidator->clone() ), "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
     declareProperty(new PropertyWithValue<double>("Theta", -1, Direction::Input),  "Final theta value.");
 
 
@@ -95,13 +96,17 @@ namespace Algorithms
     boundedIndex->setLower(0);
     mandatoryWorkspaceIndex->add(boundedIndex);
 
+    declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),"Indices of the spectra in pairs (lower, upper) that mark the ranges that correspond to detectors of interest.");
+
     declareProperty(new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT(), mandatoryWorkspaceIndex), "I0 monitor index");
 
-    declareProperty(new PropertyWithValue<double>("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(), Direction::Input), "Wavelength minimum for monitor background. Taken to be WavelengthMin if not provided.");
-    declareProperty(new PropertyWithValue<double>("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(), Direction::Input), "Wavelength maximum for monitor background. Taken to be WavelengthMax if not provided.");
+    declareProperty(new PropertyWithValue<double>("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(), Direction::Input), "Wavelength minimum for monitor background. Taken to be WavelengthMin if not provided.");
+    declareProperty(new PropertyWithValue<double>("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(), Direction::Input), "Wavelength maximum for monitor background. Taken to be WavelengthMax if not provided.");
 
-    declareProperty(new PropertyWithValue<double>("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(), Direction::Input), "Wavelength minimum for integration. Taken to be WavelengthMin if not provided.");
-    declareProperty(new PropertyWithValue<double>("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(), Direction::Input), "Wavelength maximum for integration. Taken to be WavelengthMax if not provided.");
+    declareProperty(new PropertyWithValue<double>("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(), Direction::Input), "Wavelength minimum for integration. Taken to be WavelengthMin if not provided.");
+    declareProperty(new PropertyWithValue<double>("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(), Direction::Input), "Wavelength maximum for integration. Taken to be WavelengthMax if not provided.");
+
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
 
     // Declare property for region of interest (workspace index ranges min, max)
     // Declare property for direct beam (workspace index ranges min, max)
@@ -140,6 +145,8 @@ namespace Algorithms
    */
   void ReflectometryReductionOne::exec()
   {
+    MatrixWorkspace_sptr runWS = getProperty("InputWorkspace");
+
     OptionalMatrixWorkspace_sptr firstTransmissionRun;
     if ( !isPropertyDefault("FirstTransmissionRun") )
     {
@@ -170,27 +177,27 @@ namespace Algorithms
       throw std::invalid_argument("Cannot have WavelengthMin > WavelengthMax");
     }
     const int i0MonitorIndex = getProperty("I0MonitorIndex");
-    double monitorBackgroundWavelengthMin = wavelengthMin;
-    double monitorBackgroundWavelengthMax = wavelengthMax;
-    double monitorIntegrationMin = wavelengthMin;
-    double monitorIntegrationMax = wavelengthMax;
-    if( !isPropertyDefault("MonitorBackgroundWavelengthMin") )
+    const double monitorBackgroundWavelengthMin = getProperty("MonitorBackgroundWavelengthMin");
+    const double monitorBackgroundWavelengthMax = getProperty("MonitorBackgroundWavelengthMax");
+    if (monitorBackgroundWavelengthMin > monitorBackgroundWavelengthMax)
     {
-      monitorBackgroundWavelengthMin = getProperty("MonitorBackgroundWavelengthMin");
+      throw std::invalid_argument("Cannot have MonitorBackgroundWavelengthMin > MonitorBackgroundWavelengthMax");
     }
-    if ( !isPropertyDefault("MonitorBackgroundWavelengthMax") )
+    const double monitorIntegrationMin = getProperty("MonitorIntegrationWavelengthMin");
+    const double monitorIntegrationMax = getProperty("MonitorIntegrationWavelengthMax");
+    if (monitorIntegrationMin > monitorIntegrationMax )
     {
-      monitorBackgroundWavelengthMax = getProperty("MonitorWavelengthMax");
-    }
-    if ( !isPropertyDefault("MonitorIntegrationWavelengthMin" ))
-    {
-      monitorIntegrationMin = getProperty("MonitorIntegrationWavelengthMin");
-    }
-    if ( !isPropertyDefault("MonitorIntegrationWavelengthMax"))
-    {
-      monitorIntegrationMax = getProperty("MonitorIntegrationWavelengthMax");
+      throw std::invalid_argument("Cannot have MonitorIntegrationWavelengthMin > MonitorIntegrationWavelengthMax");
     }
 
+    auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
+    cloneAlg->initialize();
+    cloneAlg->setProperty("InputWorkspace", runWS);
+    cloneAlg->setPropertyValue("OutputWorkspace", "OutWS");
+    cloneAlg->execute();
+    Workspace_sptr cloned = cloneAlg->getProperty("OutputWorkspace");
+
+    setProperty("OutputWorkspace", cloned );
     // Convert To Lambda.
 
 
