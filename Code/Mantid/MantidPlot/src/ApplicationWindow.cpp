@@ -11156,13 +11156,13 @@ void ApplicationWindow::openScriptWindow(const QStringList &list)
   scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->languageName() + " Window");
   QStringList scriptnames;
 
-  for (QString fileNameEntry : list)
+  foreach (QString fileNameEntry, list)
   {
     scriptnames.append(fileNameEntry.split("\t"));
   }
 
   bool newTab = false;
-  for (QString scriptname : scriptnames)
+  foreach (QString scriptname, scriptnames)
   {
     scriptingWindow->open(scriptname,newTab);
     newTab=false;
