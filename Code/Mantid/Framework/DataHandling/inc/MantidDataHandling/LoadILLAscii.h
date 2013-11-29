@@ -58,6 +58,7 @@ private:
 	void loadIDF(API::MatrixWorkspace_sptr &workspace);
 	void loadsDataIntoTheWS(API::MatrixWorkspace_sptr &, const std::vector<int> &);
 	void moveDetector(API::MatrixWorkspace_sptr &, double angle);
+	API::MatrixWorkspace_sptr mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> &);
 	//LoadHelper m_loader;
 	std::string m_instrumentName; ///< Name of the instrument
 	double m_wavelength;

@@ -16,6 +16,8 @@
 #include "MantidKernel/System.h"
 
 #include <algorithm>
+#include <boost/shared_ptr.hpp>
+#include <iterator>     // std::distance
 
 namespace Mantid {
 namespace DataHandling {
@@ -30,8 +32,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
 /** Constructor
  */
 LoadILLAscii::LoadILLAscii() :
-		m_instrumentName(""),
-		m_wavelength(0) {
+		m_instrumentName(""), m_wavelength(0) {
 	m_supportedInstruments.push_back("D2B");
 }
 
@@ -99,8 +100,8 @@ void LoadILLAscii::init() {
 	declareProperty(new FileProperty("Filename", "", FileProperty::Load, ""),
 			"Name of the data file to load.");
 	declareProperty(
-	        new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-	        "Name to use for the output workspace");
+			new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+			"Name to use for the output workspace");
 
 }
 
@@ -128,36 +129,41 @@ void LoadILLAscii::exec() {
 	std::vector<std::map<std::string, std::string> >::const_iterator iSpectraHeader;
 
 	Progress progress(this, 0, 1, spectraList.size());
-	for (iSpectra = spectraList.begin(), iSpectraHeader =spectraHeaderList.begin();
-			iSpectra < spectraList.end() && iSpectraHeader < spectraHeaderList.end();
+	for (iSpectra = spectraList.begin(), iSpectraHeader =
+			spectraHeaderList.begin();
+			iSpectra < spectraList.end()
+					&& iSpectraHeader < spectraHeaderList.end();
 			++iSpectra, ++iSpectraHeader) {
 
-		g_log.debug() << "Reading Spectrum: " << std::distance(spectraList.begin(),iSpectra) << std::endl;
+		g_log.debug() << "Reading Spectrum: "
+				<< std::distance(spectraList.begin(), iSpectra) << std::endl;
 
 		std::vector<int> thisSpectrum = *iSpectra;
-		API::MatrixWorkspace_sptr thisWorkspace = WorkspaceFactory::Instance().create("Workspace2D", thisSpectrum.size(),
-				2, 1);
+		API::MatrixWorkspace_sptr thisWorkspace =
+				WorkspaceFactory::Instance().create("Workspace2D",
+						thisSpectrum.size(), 2, 1);
 
 		thisWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(
 				"Wavelength");
 		thisWorkspace->setYUnitLabel("Counts");
 		loadIDF(thisWorkspace);
-		// todo : need to move instrument
 
-		double currentPositionAngle = p.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
+		double currentPositionAngle = p.getValue<double>("angles*1000",
+				*iSpectraHeader) / 1000;
 		moveDetector(thisWorkspace, currentPositionAngle);
 
-
 		//
-		loadsDataIntoTheWS(thisWorkspace,thisSpectrum);
+		loadsDataIntoTheWS(thisWorkspace, thisSpectrum);
 		loadIDF(thisWorkspace); // assigns data to the instrument
 
 		workspaceList.push_back(thisWorkspace);
 
 		// JUUST TO SEE the WS in mantiplot
 		std::stringstream outWorkspaceNameStream;
-		outWorkspaceNameStream << "test" << std::distance(spectraList.begin(),iSpectra);
-		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(), thisWorkspace);
+		outWorkspaceNameStream << "test"
+				<< std::distance(spectraList.begin(), iSpectra);
+		AnalysisDataService::Instance().addOrReplace(
+				outWorkspaceNameStream.str(), thisWorkspace);
 
 		progress.report();
 	}
@@ -165,9 +171,11 @@ void LoadILLAscii::exec() {
 	//p.showHeader();
 
 	// TODO: Merge workspaces
+	MatrixWorkspace_sptr outWorkspace = mergeWorkspaces(workspaceList);
 
 	// TODO : Correct (this is like this to work!)
-	setProperty("OutputWorkspace", WorkspaceFactory::Instance().create("Workspace2D", 128,2, 1));
+	setProperty("OutputWorkspace",outWorkspace);
+			//WorkspaceFactory::Instance().create("Workspace2D", 128, 2, 1));
 
 }
 
@@ -176,10 +184,9 @@ void LoadILLAscii::exec() {
  */
 void LoadILLAscii::loadInstrumentDetails(ILLParser &p) {
 
-	m_wavelength  = p.getValueFromHeader<double>("wavelength");
+	m_wavelength = p.getValueFromHeader<double>("wavelength");
 	g_log.debug() << "Wavelength: " << m_wavelength << std::endl;
 }
-
 
 void LoadILLAscii::loadInstrumentName(ILLParser &p) {
 
@@ -190,7 +197,7 @@ void LoadILLAscii::loadInstrumentName(ILLParser &p) {
 	}
 	g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
 
-	m_wavelength  = p.getValueFromHeader<double>("wavelength");
+	m_wavelength = p.getValueFromHeader<double>("wavelength");
 	g_log.debug() << "Wavelength: " << m_wavelength << std::endl;
 }
 
@@ -239,33 +246,131 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
 }
 
 /**
- * This is not working!!!
  *
- * Either I have to put a location in bank_uniq to move the whole detector
- * or have to move every tube. To be done!
- *
- *
+ * @param angle :: the theta angle read from the data file
  */
-void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle){
+void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle) {
 
 	// todo: put this as a constant somewhere?
 	const std::string componentName("bank_uniq");
 
-	// current position
-	Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-	Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
+	try {
+		// current position
+		Geometry::Instrument_const_sptr instrument = ws->getInstrument();
 
-	// position - set all detector distance to constant l2
-	double r, theta, phi;
-	V3D oldPos = component->getPos();
-	oldPos.getSpherical(r, theta, phi);
+		Geometry::IComponent_const_sptr component =
+				instrument->getComponentByName(componentName);
+		Geometry::ICompAssembly_const_sptr componentAssembly =
+				boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+						component);
 
-	V3D newPos;
-	newPos.spherical(r, angle, phi);
+		if (componentAssembly) {
+			// Get a vector of children (recursively)
+			std::vector<Geometry::IComponent_const_sptr> children;
+			componentAssembly->getChildren(children, false);
 
-	g_log.debug() << "Theta before = " << theta << " ; after = " << angle << "\n";
-	Geometry::ParameterMap& pmap = ws->instrumentParameters();
-	Geometry::ComponentHelper::moveComponent(*component, pmap, newPos,Geometry::ComponentHelper::Absolute);
+			for (unsigned int i = 0; i < children.size(); ++i) {
+				std::string tubeName = children.at(i)->getName();
+
+				Geometry::IComponent_const_sptr tube =
+						instrument->getComponentByName(tubeName);
+
+				// position - set all detector distance to constant l2
+				double r, theta, phi, refTheta, newTheta;
+				V3D oldPos = tube->getPos();
+				oldPos.getSpherical(r, theta, phi);
+
+				if (i == 0) {
+					// the theta for the first tube is the reference
+					refTheta = theta;
+				}
+
+				newTheta = theta - refTheta + angle;
+
+				V3D newPos;
+				newPos.spherical(r, newTheta, phi);
+
+				//g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " << newTheta << "\n";
+				Geometry::ParameterMap& pmap = ws->instrumentParameters();
+				Geometry::ComponentHelper::moveComponent(*tube, pmap, newPos,
+						Geometry::ComponentHelper::Absolute);
+
+			}
+		}
+	} catch (Mantid::Kernel::Exception::NotFoundError&) {
+		throw std::runtime_error(
+				"Error when trying to move the detector : NotFoundError");
+	} catch (std::runtime_error &) {
+		throw std::runtime_error(
+				"Error when trying to move the detector : runtime_error");
+	}
+
+}
+
+/**
+ * Merge all workspaces and create a virtual new instrument.
+ * @return new workspace with all data and the new virtual instrument
+ */
+MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
+		std::vector<API::MatrixWorkspace_sptr> &workspaceList) {
+
+
+
+	if (workspaceList.size() > 0) {
+
+
+
+		// 1st workspace will be the reference
+		API::MatrixWorkspace_sptr &refWorkspace = workspaceList[0];
+		size_t numberOfHistograms = refWorkspace->getNumberHistograms() * workspaceList.size();
+		size_t xWidth = refWorkspace->blocksize()+1;
+		size_t yWidth = refWorkspace->blocksize();
+		MatrixWorkspace_sptr outWorkspace = WorkspaceFactory::Instance().create(
+				"Workspace2D", numberOfHistograms, xWidth, yWidth);
+		outWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+		outWorkspace->setYUnitLabel("Counts");
+
+		// This is not corect : i copies also teh detectors!
+		// copy base instrument
+		outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument()); // if baseInstrument the ParameterMap is empty!
+
+		// let's modify the instrument!
+		Geometry::Instrument_const_sptr outInstrument = outWorkspace->getInstrument();
+
+		std::size_t numberOfDetectorsPerScan = outInstrument->getNumberDetectors(true);
+		g_log.debug() << "numberOfDetectorsPerScan: " << numberOfDetectorsPerScan << std::endl;
+
+
+
+
+
+		auto it = workspaceList.begin();
+		for (++it; it < workspaceList.end(); ++it) { // just the first
+			std::size_t pos = std::distance(workspaceList.begin(),it);
+			API::MatrixWorkspace_sptr thisWorkspace = *it;
+
+			g_log.debug() << "Merging the workspace: " << pos << std::endl;
+
+			// current position
+			Geometry::Instrument_const_sptr thisInstrument = thisWorkspace->getInstrument();
+			boost::shared_ptr<Geometry::ParameterMap> outParameterMap = thisInstrument->getParameterMap();
+
+			g_log.debug() << outParameterMap->asString() << std::endl;
+
+			//outInstrument->printTree(g_log.debug());
+
+			//g_log.debug() << "outParameterMap Map size: " << outParameterMap->size() << std::endl;
+
+
+			long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
+
+
+		}
+		return outWorkspace;
+	}
+	else{
+		throw std::runtime_error("Error: No workspaces were found to be merged!");
+	}
 
 }
 
