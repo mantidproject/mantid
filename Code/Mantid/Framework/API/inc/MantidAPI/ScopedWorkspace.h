@@ -11,7 +11,16 @@ namespace Mantid
 {
 namespace API
 {
-  /** ScopedWorkspace : TODO: DESCRIPTION
+  /** ScopedWorkspace : scoped workspace ADS entry.
+
+    This class is provided for situations when you need a workspace to be in the ADS to run an 
+    algorithm, but you don't really need to keep it there after the algorithm has finished. In
+    these circumstances you can create ScopedWorkspace, set it's name as a workspace property
+    for the algorithm and retrieve it when algorithm has finished. The workspace will be
+    removed from the ADS when the object goes out of scope, or exception is thrown.
+
+    Primarily, it was created to overcome some limitations of WorkspaceProperties, but it can be
+    useful in other places, e.g. tests.
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
