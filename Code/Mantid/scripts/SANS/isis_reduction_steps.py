@@ -12,10 +12,11 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 sanslog = sans_reduction_steps.sanslog
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace
+from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
-                         getFilePathFromWorkspace, getWorkspaceReference)
+                         getFilePathFromWorkspace, getWorkspaceReference,
+                         getMonitor4event)
 import isis_instrument
 import os
 import math
@@ -56,13 +57,37 @@ class LoadRun(object):
         self._reload = reload
         #entry number of the run inside the run file that will be analysed, as requested by the caller
         self._period = int(entry)
+        self._index_of_group = 0
+
         #set to the total number of periods in the file
         self.periods_in_file = None
         self.ext = ''
         self.shortrun_no = -1
         #the name of the loaded workspace in Mantid
-        self.wksp_name = ''
-        
+        self._wksp_name = ''
+
+    def curr_period(self):
+        if self._period != self.UNSET_PERIOD:
+            return self._period
+        return self._index_of_group + 1
+            
+    def move2ws(self, index):
+        if self.periods_in_file > 1:
+            if index < self.periods_in_file:
+                self._index_of_group = index
+                return True
+        else:
+            return False
+
+    def get_wksp_name(self):
+        ref_ws = mtd[str(self._wksp_name)]
+        if isinstance(ref_ws, WorkspaceGroup):
+            return ref_ws[self._index_of_group].name()
+        else:
+            return self._wksp_name
+  
+    wksp_name = property(get_wksp_name, None, None, None)
+
     def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
             Load a workspace and read the logs into the passed instrument reference
@@ -71,42 +96,25 @@ class LoadRun(object):
             @param extra_options: arguments to pass on to the Load Algorithm.
             @return: number of periods in the workspace
         """
-        if self._period > 1:
+        if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
+            extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()
 
-        period = self._period
-        if period == self.UNSET_PERIOD:
-            period = 1
-
-        if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
-            outWs = LoadRaw(Filename=self._data_file, 
-                            OutputWorkspace=workspace,
-                            **extra_options)
-
-            LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
-
-            workspace = self._leaveSinglePeriod(workspace, period)
-        else:
-            if period != 1:
-                extra_options['EntryNumber']=period
-            outWs = LoadNexus(Filename=self._data_file, 
-                              OutputWorkspace=workspace,
-                              **extra_options)
-
-        numPeriods  = self._find_workspace_num_periods(workspace)
-        #deal with the difficult situation of not reporting the period of single period files
-        if numPeriods > 1:
-            #get the workspace name, a period number of 1 is only included if the file has more than 1 period
-            period_definitely_inc = self._get_workspace_name(self._period)
-            if period_definitely_inc != workspace:
-                RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= period_definitely_inc)
-                workspace = period_definitely_inc 
+        extra_options['OutputWorkspace'] = workspace
+        outWs = Load(self._data_file, **extra_options)
         
-        self.wksp_name = workspace 
-        self.periods_in_file = numPeriods
+        loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
+        
+        if loader_name == 'LoadRaw':
+            self._loadSampleDetails(workspace)
+        
+        if self._period != self.UNSET_PERIOD and isinstance(outWs, WorkspaceGroup):
+            outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
 
+        self.periods_in_file = self._find_workspace_num_periods(workspace)
+        self._wksp_name = workspace
 
     def _get_workspace_name(self, entry_num=None):
         """
@@ -127,6 +135,16 @@ class LoadRun(object):
             return run + '_sans_' + self.ext.lower()
 
 
+    def _loadSampleDetails(self, ws_name):
+        ws_pointer = mtd[str(ws_name)]
+        if isinstance(ws_pointer, WorkspaceGroup):
+            workspaces = [ws for ws in ws_pointer]
+        else:
+            workspaces = [ws_pointer]
+        for ws in workspaces:
+            LoadSampleDetailsFromRaw(ws, self._data_file)
+        
+
     def _loadFromWorkspace(self, reducer):
         """ It substitute the work of _assignHelper for workspaces, or, at least, 
         prepare the internal attributes, to be processed by the _assignHelper. 
@@ -146,27 +164,29 @@ class LoadRun(object):
         except:
             raise RuntimeError("Failed to retrieve information to reload this workspace " + str(self._data_file))
         self._data_file = _file_path
+        self.ext = _file_path[-3:]
+        if isinstance(ws_pointer, WorkspaceGroup):
+            self.shortrun_no = ws_pointer[0].getRunNumber()
+        else:
+            self.shortrun_no = ws_pointer.getRunNumber()
+
         if self._reload:
             # give to _assignHelper the responsibility of loading this data.
             return False
 
-        #test if the sample details are already loaded:
-        if not ws_pointer.sample().getGeometryFlag():
-            LoadSampleDetailsFromRaw(ws_pointer, self._data_file)
+        #test if the sample details are already loaded, necessary only for raw files:
+        if '.nxs' not in self._data_file[-4:]:
+            self._loadSampleDetails(ws_pointer)
 
         # so, it will try, not to reload the workspace.
-        self.wksp_name = ws_pointer.name()
-        self.periods_in_file = 1
-        self.shortrun_no = ws_pointer.getRunNumber()
+        self._wksp_name = ws_pointer.name()
+        self.periods_in_file = self._find_workspace_num_periods(self._wksp_name)
 
         #check that the current workspace has never been moved
         hist_str = self._getHistory(ws_pointer)
         if 'Algorithm: Move' in hist_str or 'Algorithm: Rotate' in hist_str:
             raise RuntimeError('Moving components needs to be made compatible with not reloading the sample')
         
-        if isEventWorkspace(ws_pointer):
-            ws_pointer = fromEvent2Histogram(ws_pointer)
-
         return True
         
 
@@ -203,41 +223,29 @@ class LoadRun(object):
             self._load(reducer.instrument, extra_options=spectrum_limits)
         except RuntimeError, details:
             sanslog.warning(str(details))
-            self.wksp_name = ''
+            self._wksp_name = ''
             return 
         
         return 
 
     def _leaveSinglePeriod(self, workspace, period):
         groupW = mtd[workspace]
-        if isinstance(groupW, WorkspaceGroup):
-            num_periods = groupW.getNames()
-        else:
-            num_periods = 1
-
-        if period > num_periods or period < 1:
-            raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
-        
-        if num_periods == 1:
+        if not isinstance(groupW, WorkspaceGroup):
+            logger.warning("Invalid request for getting single period in a non group workspace")
             return workspace
-        #get the name of the individual workspace in the group
-        oldName = groupW.getName()+'_'+str(self._period)
-        #move this workspace out of the group (this doesn't delete it)
-        groupW.remove(oldName)
-    
-        discriptors = groupW.getName().split('_')       #information about the run (run number, if it's 1D or 2D, etc) is listed in the workspace name between '_'s
-        for i in range(0, len(discriptors) ):           #insert the period name after the run number
-            if i == 0 :                                 #the run number is the first part of the name
-                newName = discriptors[0]+'p'+str(self._period)#so add the period number here
-            else :
-                newName += '_'+discriptors[i]
-    
-        if oldName != newName:
-            RenameWorkspace(InputWorkspace=oldName,OutputWorkspace= newName)
-    
-        #remove the rest of the group
-        DeleteWorkspace(groupW.getName())
-        return newName
+        if len(groupW) < period:
+            raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
+        ws_name = groupW[period].name()
+        
+        # remove this workspace from the group
+        groupW.remove(ws_name)
+        # remove the entire group
+        DeleteWorkspace(groupW)
+        
+        new_name = self._get_workspace_name(period)
+        if new_name != ws_name:
+            RenameWorkspace(ws_name, OutputWorkspace=new_name)
+        return new_name
     
     def _extract_run_details(self, run_string):
         """
@@ -252,27 +260,15 @@ class LoadRun(object):
     
     def _find_workspace_num_periods(self, workspace): 
         """
-            Deal with selection and reporting of periods in multi-period files,
-            this is complicated because different file formats have different ways
-            of report numbers of periods
             @param workspace: the name of the workspace
         """
         numPeriods = -1
         pWorksp = mtd[workspace]
         if isinstance(pWorksp, WorkspaceGroup) :
             #get the number of periods in a group using the fact that each period has a different name
-            numPeriods = len(pWorksp.getNames())
+            numPeriods = len(pWorksp)
         else :
             numPeriods = 1
-
-        #the logs have the definitive information on the number of periods, if it is in the logs
-        try:
-            samp = pWorksp.getRun()
-            numPeriods = samp.getLogData('nperiods').value
-        except:
-            #it's OK for there not to be any logs
-            pass
-        
         return numPeriods
 
     def _getHistory(self, wk_name):
@@ -391,8 +387,9 @@ class CanSubtraction(ReductionStep):
         #clean up the workspaces ready users to see them if required
         if reducer.to_Q.output_type == '1D':
             rem_nans = sans_reduction_steps.StripEndNans()
-            rem_nans.execute(reducer, tmp_smp)
-            rem_nans.execute(reducer, tmp_can)
+
+        DeleteWorkspace(tmp_smp)
+        DeleteWorkspace(tmp_can)
 
     def get_wksp_name(self):
         return self.workspace.wksp_name
@@ -926,22 +923,24 @@ class LoadSample(LoadRun):
         self.entries = []
     
     def execute(self, reducer, isSample):
-        if not reducer.user_settings.executed:
-            raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
-
         self._assignHelper(reducer)
-        if self._period != self.UNSET_PERIOD:
-            self.entries  = [self._period]
-        else:
-            self.entries  = range(1, self.periods_in_file+1)
 
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
-        reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
+        if self.periods_in_file > 1:
+            self.entries = range(0, self.periods_in_file)
+
+        # applies on_load_sample for all the workspaces (single or groupworkspace)
+        num = 0
+        while True:
+            reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
+            num += 1
+            if num == self.periods_in_file:
+                break
+            self.move2ws(num)        
+        self.move2ws(0)
     
-    def get_group_name(self):
-        return self._get_workspace_name(self._period)
 
 class CropDetBank(ReductionStep):
     """
@@ -949,19 +948,14 @@ class CropDetBank(ReductionStep):
         and crops the input workspace to just those spectra. Supports optionally
         generating the output workspace from a different (sample) workspace
     """ 
-    def __init__(self, crop_sample=False):
+    def __init__(self):
         """
             Sets up the object to either the output or sample workspace
-            @param crop_sample: if set to true the input workspace name is not the output but is taken from reducer.get_sample().wksp_name (default off) 
         """
         super(CropDetBank, self).__init__()
-        self._use_sample = crop_sample
 
     def execute(self, reducer, workspace):
-        if self._use_sample:
-            in_wksp = reducer.get_sample().wksp_name
-        else:
-            in_wksp = workspace
+        in_wksp = workspace
         
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
@@ -974,13 +968,12 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
     """
     NORMALISATION_SPEC_NUMBER = 1
     NORMALISATION_SPEC_INDEX = 0
-    def __init__(self, spectrum_number=None, raw_ws=None):
+    def __init__(self, spectrum_number=None):
         if not spectrum_number is None:
             index_num = spectrum_number
         else:
             index_num = None
         super(NormalizeToMonitor, self).__init__(index_num)
-        self._raw_ws = raw_ws
 
         #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
@@ -991,17 +984,13 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             #the -1 converts from spectrum number to spectrum index
             normalization_spectrum = reducer.instrument.get_incident_mon()
         
-        raw_ws = self._raw_ws
-        if raw_ws is None:
-            raw_ws = reducer.get_sample().wksp_name
-
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = 'Monitor'       
-        CropWorkspace(InputWorkspace=raw_ws,OutputWorkspace= self.output_wksp,
-                      StartWorkspaceIndex = normalization_spectrum-1, 
-                      EndWorkspaceIndex   = normalization_spectrum-1)
-    
+        self.output_wksp = 'Monitor'
+        mon = reducer.get_monitor(normalization_spectrum-1)
+        if str(mon) != self.output_wksp:
+            RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
+        
         if reducer.instrument.name() == 'LOQ':
             RemoveBins(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp,XMin= reducer.transmission_calculator.loq_removePromptPeakMin,XMax= 
                        reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
@@ -1587,6 +1576,22 @@ class UnitsConvert(ReductionStep):
 
     def __str__(self):
         return '    Wavelength range: ' + self.get_rebin()
+
+class SliceEvent(ReductionStep):
+    
+    def __init__(self):
+        super(SliceEvent, self).__init__()
+        self.monitor = ""
+
+    def execute(self, reducer, workspace):
+        ws_pointer = getWorkspaceReference(workspace)
+
+        # it applies only for event workspace
+        if not isinstance(ws_pointer, IEventWorkspace):
+            return
+        self.monitor = getMonitor4event(ws_pointer)
+        hist = fromEvent2Histogram(ws_pointer, self.monitor)
+        self.monitor = str(self.monitor)
 
 class UserFile(ReductionStep):
     """
