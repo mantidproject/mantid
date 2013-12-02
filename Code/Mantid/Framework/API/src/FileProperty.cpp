@@ -42,7 +42,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
                                    /* Create either a FileValidator or a DirectoryValidator, depending on Action */
                                    (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
                                    boost::make_shared<DirectoryValidator>(action == FileProperty::Directory) :
-                                   boost::make_shared<FileValidator>(exts, (action == FileProperty::Load) )
+                                   boost::make_shared<FileValidator>(exts, (action == FileProperty::Load), (action == FileProperty::Save) )
                                    , direction),
     m_action(action),
     m_defaultExt(""),
@@ -69,7 +69,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
       /* Create either a FileValidator or a DirectoryValidator, depending on Action */
       (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
           boost::make_shared<DirectoryValidator>(action == FileProperty::Directory) :
-          boost::make_shared<FileValidator>(std::vector<std::string>(1,ext), (action == FileProperty::Load) )
+          boost::make_shared<FileValidator>(std::vector<std::string>(1,ext), (action == FileProperty::Load), (action == FileProperty::Save) )
       , direction),
     m_action(action),
     m_defaultExt(ext),
