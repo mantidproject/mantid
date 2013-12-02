@@ -142,7 +142,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_WorkspaceIndexList([1, 0]) # 1 > 0
         self.assertRaises(ValueError, alg.execute)
         
-    def test_define_region_of_interest(self):
+    def test_region_of_interest_throws_if_i0monitor_index_negative(self):
         alg = self.construct_standard_algorithm()
         alg.set_I0MonitorIndex(-1)
         self.assertRaises(ValueError, alg.execute)
@@ -153,12 +153,35 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_RegionOfInterest([1, 2])
         self.assertRaises(ValueError, alg.execute)
         
+    def test_region_of_interest_indexes_cannot_be_negative_or_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_RegionOfInterest([0, -1]);
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_region_of_integrest_indexes_must_be_provided_as_min_max_order_or_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_RegionOfInterest([1, 0]);
+        self.assertRaises(ValueError, alg.execute)
+        
     def test_cannot_set_direct_beam_region_of_interest_without_multidetector_run(self):
         alg = self.construct_standard_algorithm()
         alg.set_AnalysisMode("PointDetectorAnalysis")
         alg.set_RegionOfDirectBeam([1, 2])
         self.assertRaises(ValueError, alg.execute)
         
+    def test_region_of_direct_beam_indexes_cannot_be_negative_or_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_RegionOfDirectBeam([0, -1]);
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_region_of_direct_beam_indexes_must_be_provided_as_min_max_order_or_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_RegionOfDirectBeam([1, 0]);
+        self.assertRaises(ValueError, alg.execute)
         
         
 if __name__ == '__main__':

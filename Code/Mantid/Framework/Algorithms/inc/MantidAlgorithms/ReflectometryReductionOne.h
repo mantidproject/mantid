@@ -3,6 +3,10 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include <boost/optional.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <vector>
 
 namespace Mantid
 {
@@ -42,7 +46,16 @@ namespace Algorithms
     virtual const std::string category() const;
 
   private:
+    typedef boost::tuple<double, double> MinMax;
+    typedef boost::optional<double> OptionalDouble;
+    typedef boost::optional<Mantid::API::MatrixWorkspace_sptr> OptionalMatrixWorkspace_sptr;
+    typedef std::vector<int> WorkspaceIndexList;
+    typedef boost::optional< std::vector< int > > OptionalWorkspaceIndexes;
     bool isPropertyDefault(const std::string& propertyName) const;
+    WorkspaceIndexList getWorkspaceIndexList();
+    void fetchOptionalLowerUpperPropertyValue(const std::string& propertyName, bool isPointDetector, OptionalWorkspaceIndexes& optionalUpperLower);
+    MinMax getMinMax(const std::string& minProperty, const std::string& maxProperty);
+    void getTransmissionRunInfo(OptionalMatrixWorkspace_sptr firstTransmissionRun, OptionalMatrixWorkspace_sptr secondTransmissionRun, OptionalDouble& stitchingStartQ, OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ);
     virtual void initDocs();
     void init();
     void exec();
