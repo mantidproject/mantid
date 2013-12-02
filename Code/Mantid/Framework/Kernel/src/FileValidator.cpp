@@ -86,10 +86,19 @@ std::string FileValidator::checkValidity(const std::string &value) const
     }
   }
 
+  // create a variable for the absolute path to be used in error messages
+  std::string abspath(value);
+  if (!value.empty())
+  {
+    Poco::Path path(value);
+    if (path.isAbsolute())
+      abspath = path.toString();
+  }
+
   //If the file is required to exist check it is there
   if ( m_testExist && ( value.empty() || !Poco::File(value).exists() ) )
   {
-    return "File \"" + Poco::Path(value).getFileName() + "\" not found";
+    return "File \"" + abspath + "\" not found";
   }
 
   //If the file is required to be writable...
@@ -106,7 +115,7 @@ std::string FileValidator::checkValidity(const std::string &value) const
       try
       {
         if (!file.canWrite())
-          return "File \"" + Poco::Path(value).getFileName() + "\" cannot be written";
+          return "File \"" + abspath + "\" cannot be written";
       }
       catch (std::exception &e)
       {
@@ -121,7 +130,7 @@ std::string FileValidator::checkValidity(const std::string &value) const
       {
         FILE *fp = fopen(value.c_str(), "w+");
         if (!fp)
-          error = "File \"" + Poco::Path(value).getFileName() + "\" cannot be written";
+          error = "File \"" + abspath + "\" cannot be written";
         else // this only gets run if handle is non-null
         {
           fclose(fp);
