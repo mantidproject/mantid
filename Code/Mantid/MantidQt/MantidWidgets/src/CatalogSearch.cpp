@@ -861,6 +861,7 @@ namespace MantidQt
       // Hide these columns as they're not useful for the user, but are used by the algorithms.
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Id"), true);
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Location"), true);
+      dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "File size(bytes)"), true);
 
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
@@ -1161,12 +1162,11 @@ namespace MantidQt
      */
     void CatalogSearch::sortByFileSize(int column)
     {
-      int byteColumn  = headerIndexByName(m_icatUiForm.dataFileResultsTbl, "File size(bytes)");
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+      int byteColumn  = headerIndexByName(table, "File size(bytes)");
 
-      if (column == headerIndexByName(m_icatUiForm.dataFileResultsTbl, "File size"))
+      if (column == headerIndexByName(table, "File size"))
       {
-        QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
-
         // Convert cell value to int within the datamodel.
         // This allows us to sort by the specific column.
         for(int row = 0 ; row < table->rowCount(); row++)
