@@ -31,7 +31,7 @@ public:
   void test_groupCounts_singlePeriod()
   {
     // Name of the output workspace.
-    const std::string outWSName = outputWorkspaceName("GroupCounts");
+    const std::string outWSName = outputWorkspaceName("GroupCounts_SinglePeriod");
 
     MatrixWorkspace_sptr inWS = createWorkspace();
   
@@ -64,6 +64,96 @@ public:
       TS_ASSERT_DELTA( ws->readE(0)[0], 0.4, 0.01 );
       TS_ASSERT_DELTA( ws->readE(0)[1], 0.5, 0.01 );
       TS_ASSERT_DELTA( ws->readE(0)[2], 0.6, 0.01 );
+    }
+    
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_groupCounts_twoPeriods_plus()
+  {
+    // Name of the output workspace.
+    const std::string outWSName = outputWorkspaceName("GroupCounts_TwoPeriods_Plus");
+
+    MatrixWorkspace_sptr inWSFirst = createWorkspace();
+    MatrixWorkspace_sptr inWSSecond = createWorkspace();
+  
+    MuonCalculateAsymmetry alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FirstPeriodWorkspace", inWSFirst) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("SecondPeriodWorkspace", inWSSecond) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeriodOperation", "+") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputType", "GroupCounts") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupIndex", 1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+    
+    // Retrieve the workspace from data service.
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    TS_ASSERT(ws);
+
+    if (ws)
+    {
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 ); 
+      TS_ASSERT_EQUALS( ws->blocksize(), 3 );
+
+      TS_ASSERT_EQUALS( ws->readY(0)[0], 8 );
+      TS_ASSERT_EQUALS( ws->readY(0)[1], 10 );
+      TS_ASSERT_EQUALS( ws->readY(0)[2], 12 );
+
+      TS_ASSERT_EQUALS( ws->readX(0)[0], 1 );
+      TS_ASSERT_EQUALS( ws->readX(0)[1], 2 );
+      TS_ASSERT_EQUALS( ws->readX(0)[2], 3 );
+
+      TS_ASSERT_DELTA( ws->readE(0)[0], 0.566, 0.001 );
+      TS_ASSERT_DELTA( ws->readE(0)[1], 0.707, 0.001 );
+      TS_ASSERT_DELTA( ws->readE(0)[2], 0.849, 0.001 );
+    }
+    
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_groupCounts_twoPeriod_minus()
+  {
+    // Name of the output workspace.
+    const std::string outWSName = outputWorkspaceName("GroupCounts_TwoPeriods_Minus");
+
+    MatrixWorkspace_sptr inWSFirst = createWorkspace(3);
+    MatrixWorkspace_sptr inWSSecond = createWorkspace();
+  
+    MuonCalculateAsymmetry alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FirstPeriodWorkspace", inWSFirst) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("SecondPeriodWorkspace", inWSSecond) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeriodOperation", "-") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputType", "GroupCounts") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupIndex", 1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+    
+    // Retrieve the workspace from data service.
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    TS_ASSERT(ws);
+
+    if (ws)
+    {
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 ); 
+      TS_ASSERT_EQUALS( ws->blocksize(), 3 );
+
+      TS_ASSERT_EQUALS( ws->readY(0)[0], 3 );
+      TS_ASSERT_EQUALS( ws->readY(0)[1], 3 );
+      TS_ASSERT_EQUALS( ws->readY(0)[2], 3 );
+
+      TS_ASSERT_EQUALS( ws->readX(0)[0], 1 );
+      TS_ASSERT_EQUALS( ws->readX(0)[1], 2 );
+      TS_ASSERT_EQUALS( ws->readX(0)[2], 3 );
+
+      TS_ASSERT_DELTA( ws->readE(0)[0], 0.806, 0.001 );
+      TS_ASSERT_DELTA( ws->readE(0)[1], 0.943, 0.001 );
+      TS_ASSERT_DELTA( ws->readE(0)[2], 1.082, 0.001 );
     }
     
     // Remove workspace from the data service.

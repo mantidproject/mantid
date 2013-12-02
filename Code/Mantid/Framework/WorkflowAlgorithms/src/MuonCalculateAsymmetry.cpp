@@ -58,8 +58,8 @@ namespace WorkflowAlgorithms
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstPeriodWorkspace","",Direction::Input), 
       "First period data. If second period is not specified - the only one used.");
 
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondPeriodWorkspace","",Direction::Output,PropertyMode::Optional),
-      "Second period data. If not spefied - first period used only.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("SecondPeriodWorkspace","",Direction::Input, 
+      PropertyMode::Optional), "Second period data. If not spefied - first period used only.");
 
     std::vector<std::string> allowedOperations;
     allowedOperations.push_back("+");
@@ -97,14 +97,22 @@ namespace WorkflowAlgorithms
   void MuonCalculateAsymmetry::exec()
   {
     MatrixWorkspace_sptr firstPeriodWS = getProperty("FirstPeriodWorkspace");
+    MatrixWorkspace_sptr secondPeriodWS = getProperty("SecondPeriodWorkspace");
 
-    if ( getPropertyValue("SecondPeriodWorkspace").empty() )
+    MatrixWorkspace_sptr firstConverted = convertWorkspace( firstPeriodWS );
+
+    if ( secondPeriodWS )
+    {
+      // Two periods
+      MatrixWorkspace_sptr secondConverted = convertWorkspace( secondPeriodWS );
+
+      setProperty( "OutputWorkspace", mergePeriods(firstConverted, secondConverted) );
+    }
+    else
     {
       // Single period only
 
-      MatrixWorkspace_sptr convertedWS = convertWorkspace(firstPeriodWS);
-
-      setProperty("OutputWorkspace", convertedWS);
+      setProperty("OutputWorkspace", firstConverted);
     }
   }
 
@@ -132,6 +140,35 @@ namespace WorkflowAlgorithms
       
       return alg->getProperty("OutputWorkspace");
     }
+  }
+
+  /**
+   * TODO: comment
+   */
+  MatrixWorkspace_sptr MuonCalculateAsymmetry::mergePeriods(MatrixWorkspace_sptr ws1, MatrixWorkspace_sptr ws2)
+  {
+    std::string op = getProperty("PeriodOperation");
+
+    std::string algorithmName;
+
+    if ( op == "+" )
+    {
+      algorithmName = "Plus";
+    }
+    else if ( op == "-" )
+    {
+      algorithmName = "Minus";
+    }
+
+    IAlgorithm_sptr alg = createChildAlgorithm(algorithmName);
+    alg->initialize();
+    alg->setProperty("LHSWorkspace",ws1);
+    alg->setProperty("RHSWorkspace",ws2);
+    alg->execute();
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+
+    return outWS;
   }
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

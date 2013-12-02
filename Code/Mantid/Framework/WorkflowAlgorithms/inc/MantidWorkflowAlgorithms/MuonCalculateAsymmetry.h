@@ -50,7 +50,9 @@ namespace WorkflowAlgorithms
 
     /// TODO: comment
     MatrixWorkspace_sptr convertWorkspace(MatrixWorkspace_sptr ws);
-
+  
+    /// TODO: comment
+    MatrixWorkspace_sptr mergePeriods(MatrixWorkspace_sptr ws1, MatrixWorkspace_sptr ws2);
   };
 
 
