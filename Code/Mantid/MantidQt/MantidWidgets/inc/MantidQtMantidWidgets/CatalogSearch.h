@@ -176,6 +176,8 @@ namespace MantidQt
       void dataFileCheckboxSelected(QTableWidgetItem* item);
       /// Select/Deselect row & check-box when a row is selected.
       void dataFileRowSelected();
+      /// Sort table by file size when certain column is clicked (E.g. "File size" row).
+      void sortByFileSize(int column);
 
     private:
       /// The name of the date button the user pressed to open the calendar.
