@@ -8,6 +8,8 @@ namespace Mantid
 {
 namespace WorkflowAlgorithms
 {
+  using namespace Kernel;
+  using namespace API;
 
   /** MuonCalculateAsymmetry : TODO: DESCRIPTION
     
@@ -46,6 +48,8 @@ namespace WorkflowAlgorithms
     void init();
     void exec();
 
+    /// TODO: comment
+    MatrixWorkspace_sptr convertWorkspace(MatrixWorkspace_sptr ws);
 
   };
 
