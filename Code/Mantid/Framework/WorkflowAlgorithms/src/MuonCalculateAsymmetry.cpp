@@ -123,23 +123,38 @@ namespace WorkflowAlgorithms
   {
     const std::string type = getPropertyValue("OutputType");
 
-    if ( type == "GroupCounts" )
+    if ( type == "GroupCounts" || type == "GroupAsymmetry" )
     {
-      // The simpliest one - just copy the counts of some group
-
       int groupIndex = getProperty("GroupIndex");
 
       if ( groupIndex == EMPTY_INT() )
         throw std::runtime_error("GroupIndex is not specified");
 
+      // Yank out the counts of requested group
       IAlgorithm_sptr alg = createChildAlgorithm("ExtractSingleSpectrum");
       alg->initialize();
       alg->setProperty("InputWorkspace", ws);
       alg->setProperty("WorkspaceIndex", groupIndex);
       alg->execute();
-      
-      return alg->getProperty("OutputWorkspace");
+
+      MatrixWorkspace_sptr outWS =  alg->getProperty("OutputWorkspace");
+
+      if ( type == "GroupAsymmetry" )
+      {
+        // GroupAsymmetry - counts with ExpDecay removed and normalized
+
+        IAlgorithm_sptr alg = createChildAlgorithm("RemoveExpDecay");
+        alg->initialize();
+        alg->setProperty("InputWorkspace", outWS);
+        alg->execute();
+
+        outWS = alg->getProperty("OutputWorkspace");
+      }
+
+      return outWS;
     }
+
+    throw std::invalid_argument("Specified OutputType is not supported");
   }
 
   /**
