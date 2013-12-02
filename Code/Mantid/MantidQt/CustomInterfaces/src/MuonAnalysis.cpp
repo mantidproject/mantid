@@ -2532,14 +2532,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     // note after running this method you are just left with the processed cropWS (and curresponding _Raw)
     handlePeriodChoice(cropWS, periodLabel, wsGroupName);
 
-    // set the workspace Y Unit label
-    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
-    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-    matrix_workspace->setYUnitLabel(plotType);
-    ws_ptr = AnalysisDataService::Instance().retrieve((cropWS+"_Raw").toStdString());
-    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-    matrix_workspace->setYUnitLabel(plotType);
-    
     // plot the spectrum
     plotSpectrum(cropWS, 0);
 
