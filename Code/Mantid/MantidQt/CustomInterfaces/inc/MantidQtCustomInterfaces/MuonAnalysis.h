@@ -26,6 +26,8 @@ namespace Muon
   class MuonAnalysisResultTableTab;
 }
 
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 /** 
 This is the main class for the MuonAnalysis interface
@@ -165,6 +167,9 @@ private slots:
   /// Checks whether plots should be auto-updated when some settings change.
   bool isAutoUpdateEnabled();
 
+  /// Whether Overwrite option is enabled on the Settings tab.
+  bool isOverwriteEnabled();
+
   /// Show a plot for a given workspace. Closes previous plot if exists.
   void showPlot(const QString& wsName);
 
@@ -206,6 +211,16 @@ private slots:
 
 
 private:
+ 
+  // Types of entities we are dealing with
+  enum ItemType { Pair, Group };
+  
+  // Possible plot types users might request
+  enum PlotType { Asymmetry, Counts, Logorithm };
+
+  // Types of periods
+  enum PeriodType { First, Second };
+
   /// Initialize local Python environment
   void initLocalPython();
 
@@ -236,6 +251,22 @@ private:
   /// is grouping set
   bool isGroupingSet();
 
+  /// Crop/rebins/offsets the workspace according to interface settings. 
+  MatrixWorkspace_sptr prepareAnalysisWorkspace(MatrixWorkspace_sptr ws, bool isRaw);
+
+  /// Creates workspace for specified group/pair and plots it 
+  void plotItem(ItemType itemType, int tableRow, PlotType plotType);
+  
+  /// Creates workspace ready for analysis and plotting
+  MatrixWorkspace_sptr createAnalysisWorkspace(ItemType itemType, int tableRow, PlotType type,
+    bool isRaw = false);
+
+  /// Finds a name for new analysis workspace 
+  std::string getNewAnalysisWSName(const std::string& runLabel, ItemType itemType, int tableRow,
+    PlotType plotType);
+
+  /// Selects a workspace from the group according to what is selected on the interface for the period
+  MatrixWorkspace_sptr getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group);
   /// create WS contained the data for a plot
   void createPlotWS(const std::string& groupName, 
                     const std::string& inputWS, const std::string& outWS);
@@ -396,7 +427,7 @@ private:
   void setDummyGrouping(const int numDetectors);
 
   ///
-  void setGroupingFromIDF(const std::string& mainFieldDirection, Mantid::API::MatrixWorkspace_sptr matrix_workspace);
+  void setGroupingFromIDF(const std::string& mainFieldDirection, MatrixWorkspace_sptr matrix_workspace);
 
   /// title of run
   std::string m_title;

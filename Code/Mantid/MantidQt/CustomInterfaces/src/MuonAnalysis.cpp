@@ -318,6 +318,113 @@ void MuonAnalysis::plotSelectedItem()
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
   if (index < 0)
+/**
+ * Creates workspace for specified group/pair and plots it;
+ * @param itemType :: Whether it's a group or pair
+ * @param tableRow :: Row in the group/pair table which contains the item
+ * @param plotType :: What kind of plot we want to analyse
+ */ 
+void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
+{
+  m_updating = true;
+
+  AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
+  // Name of the group currently used to store plot workspaces. Depends on loaded data.
+  const std::string groupName = getGroupName().toStdString();
+
+  const std::string wsName = getNewAnalysisWSName(groupName, itemType, tableRow, plotType); 
+  const std::string wsRawName = wsName + "; Raw"; 
+
+  MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
+  MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
+
+  ads.addOrReplace(wsName, ws);
+  ads.addOrReplace(wsRawName, wsRaw);
+
+  if ( ! ads.retrieveWS<WorkspaceGroup>(groupName)->contains(wsName) )
+  {
+    ads.addToGroup(groupName, wsName);
+    ads.addToGroup(groupName, wsRawName);
+  }
+
+  QString wsNameQ = QString::fromStdString(wsName);
+
+  // Hide all the previous plot windows, if requested by user
+  if (m_uiForm.hideGraphs->isChecked())
+    hideAllPlotWindows();
+
+  // Plot the workspace
+  plotSpectrum( wsNameQ, 0, (plotType == Logorithm) );
+
+  // Change the plot style of the graph so that it matches what is selected on
+  // the plot options tab.
+  setPlotStyle( wsNameQ, getPlotStyleParams(wsNameQ, 0) );
+
+  setCurrentDataName( wsNameQ );
+
+  m_updating = false;
+}
+
+/**
+ * Finds a name for new analysis workspace.
+ * @param runLabel :: String describing the run we are working with
+ * @param itemType :: Whether it's a group or pair
+ * @param tableRow :: Row in the group/pair table which contains the item
+ * @param plotType :: What kind of plot we want to analyse
+ * @return New name
+ */ 
+std::string MuonAnalysis::getNewAnalysisWSName(const std::string& runLabel, ItemType itemType, int tableRow, 
+  PlotType plotType)
+{
+  std::string plotTypeName;
+
+  switch(plotType)
+  {
+    case Asymmetry:
+      plotTypeName = "Asym"; break;
+    case Counts:
+      plotTypeName = "Counts"; break;
+    case Logorithm:
+      plotTypeName = "Logs"; break;
+  }
+
+  std::string itemTypeName;
+  std::string itemName;
+
+  if ( itemType == Pair )
+  {
+    itemTypeName = "Pair";
+    itemName = m_uiForm.pairTable->item(tableRow,0)->text().toStdString();
+  }
+  else if ( itemType == Group )
+  {
+    itemTypeName = "Group";
+    itemName = m_uiForm.groupTable->item(tableRow,0)->text().toStdString();
+  }
+
+  const std::string firstPart = runLabel + "; " + itemTypeName + "; " + itemName + "; " + plotTypeName + "; #";
+
+  std::string newName;
+
+  if ( isOverwriteEnabled() )
+  {
+    // If ovewrite is enabled, can use the same name again and again 
+    newName = firstPart + "1";
+  }
+  else
+  { 
+    // If overwrite is disabled, need to find unique name for the new workspace
+    int plotNum(1);
+    do
+    {
+      newName = firstPart + boost::lexical_cast<std::string>(plotNum++);
+    }
+    while ( AnalysisDataService::Instance().doesExist(newName) );
+  }
+
+  return newName;
+}
   {
     index = 0;
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
@@ -337,6 +444,240 @@ void MuonAnalysis::plotSelectedItem()
   }
 }
 
+/**
+ * Creates workspace ready for analysis and plotting. 
+ * @param itemType :: Whether it's a group or pair
+ * @param tableRow :: Row in the group/pair table which contains the item
+ * @param plotType :: What kind of plot we want to analyse
+ * @param isRaw    :: Whether binning should be applied to the workspace
+ * @return Created workspace
+ */ 
+MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, int tableRow, PlotType plotType,
+  bool isRaw)
+{
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("MuonCalculateAsymmetry");
+
+  alg->initialize();
+
+  // TODO: should really be global
+  const std::string loadedWSName = m_workspace_name + "Grouped";
+
+  auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(loadedWSName);
+
+  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
+  {
+    // If is a group, will need to handle periods
+    
+    if ( MatrixWorkspace_sptr ws1 = getPeriodWorkspace(First, group) )
+    {
+      alg->setProperty( "FirstPeriodWorkspace", prepareAnalysisWorkspace(ws1, isRaw) );
+    }
+    else
+    {
+      // First period should be selected no matter what
+      throw std::runtime_error("First period should be specified");
+    }
+
+    if ( MatrixWorkspace_sptr ws2 = getPeriodWorkspace(Second, group) )
+    {
+      // If second period was selected, set it up together with selected period arithmetics
+
+      alg->setProperty("SecondPeriodWorkspace", prepareAnalysisWorkspace(ws2, isRaw) );
+ 
+      // Parse selected operation
+      const std::string op = m_uiForm.homePeriodBoxMath->currentText().toStdString();
+      alg->setProperty("PeriodOperation", op);
+    }
+  }
+  else if ( auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) )
+  {
+    alg->setProperty( "FirstPeriodWorkspace", prepareAnalysisWorkspace(ws, isRaw) );
+  }
+  else
+  {
+    throw std::runtime_error("Usupported workspace type");
+  }
+
+  if ( itemType == Group )
+  {
+    std::string outputType;
+
+    switch(plotType)
+    {
+      case Counts:
+      case Logorithm:
+        outputType = "GroupCounts"; break;
+      case Asymmetry:
+        outputType = "GroupAsymmetry"; break;
+      default:
+        throw std::invalid_argument("Unsupported plot type");
+    }
+
+    alg->setProperty("OutputType", outputType);
+
+    int groupNum = getGroupNumberFromRow(tableRow);
+    alg->setProperty("GroupIndex", groupNum);
+  }
+  else if ( itemType == Pair )
+  {
+    if ( plotType == Asymmetry )
+      alg->setProperty("OutputType", "PairAsymmetry");
+    else
+      throw std::invalid_argument("Pairs support asymmetry plot type only");
+
+    QTableWidget* t = m_uiForm.pairTable;
+
+    double alpha = t->item(m_pairTableRowInFocus,3)->text().toDouble();
+    int index1 = static_cast<QComboBox*>( t->cellWidget(tableRow,1) )->currentIndex();
+    int index2 = static_cast<QComboBox*>( t->cellWidget(tableRow,2) )->currentIndex();
+
+    alg->setProperty("PairFirstIndex", index1);
+    alg->setProperty("PairSecondIndex", index2);
+    alg->setProperty("Alpha", alpha);
+  }
+  else
+  {
+    throw std::invalid_argument("Unsupported item type");
+  }
+
+  // We don't want workspace in the ADS so far
+  alg->setChild(true);
+
+  // Name is not used, as is child algorithm, so just to make validator happy
+  alg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe");
+
+  alg->execute();
+
+  return alg->getProperty("OutputWorkspace");
+}
+
+/**
+ * Crop/rebins/offsets the workspace according to interface settings.  
+ * @param ws    :: Loaded data which to prepare
+ * @param isRaw :: If true, Rebin is not applied
+ * @return Prepared workspace
+ */ 
+MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr ws, bool isRaw)
+{
+  // Adjust for time zero if necessary
+  if ( m_dataTimeZero != timeZero())
+  {
+      double shift = m_dataTimeZero - timeZero();
+
+      Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("ChangeBinOffset");
+      alg->initialize();
+      alg->setChild(true);
+      alg->setProperty("InputWorkspace", ws);
+      alg->setProperty("Offset", shift);
+      alg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
+      alg->execute();    
+
+      ws = alg->getProperty("OutputWorkspace");
+  }
+
+  // Crop workspace
+  Mantid::API::IAlgorithm_sptr cropAlg = AlgorithmManager::Instance().createUnmanaged("CropWorkspace");
+  cropAlg->initialize();
+  cropAlg->setChild(true);
+  cropAlg->setProperty("InputWorkspace", ws);
+  cropAlg->setProperty("Xmin", plotFromTime());
+  if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
+    cropAlg->setProperty("Xmax", plotToTime());
+  cropAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
+  cropAlg->execute();
+
+  ws = cropAlg->getProperty("OutputWorkspace");
+
+  // Rebin data if option set in Plot Options and we don't want raw workspace
+  if ( !isRaw && m_uiForm.rebinComboBox->currentIndex() != 0)
+  {
+    std::string rebinParams;
+    double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
+
+    if(m_uiForm.rebinComboBox->currentIndex() == 1) // Fixed
+    {
+      double bunchedBinSize = binSize * m_uiForm.optionStepSizeText->text().toDouble();
+      rebinParams = boost::lexical_cast<std::string>(bunchedBinSize);
+    }
+    else // Variable
+    {
+      rebinParams = m_uiForm.binBoundaries->text().toStdString();
+    }
+
+    // Rebin data
+    IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().createUnmanaged("Rebin");
+    rebinAlg->initialize();
+    rebinAlg->setChild(true);
+    rebinAlg->setProperty("InputWorkspace", ws);
+    rebinAlg->setProperty("Params", rebinParams);
+    rebinAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
+    rebinAlg->execute();
+
+    ws = rebinAlg->getProperty("OutputWorkspace");
+
+    // TODO: The following should be moved to Rebin as additional option
+
+    // However muon group don't want last bin if shorter than previous bins
+    binSize = ws->dataX(0)[1] - ws->dataX(0)[0]; 
+    double firstX = ws->dataX(0)[0];
+    double lastX = ws->dataX(0)[ws->dataX(0).size()-1];
+    double numberOfFullBunchedBins =  std::floor((lastX - firstX) / binSize );
+
+    if ( numberOfFullBunchedBins )
+    {
+      lastX = firstX + numberOfFullBunchedBins * binSize;
+
+      IAlgorithm_sptr cropAlg = AlgorithmManager::Instance().createUnmanaged("CropWorkspace");
+      cropAlg->initialize();
+      cropAlg->setChild(true);
+      cropAlg->setProperty("InputWorkspace", ws);
+      cropAlg->setProperty("Xmax", lastX);
+      cropAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
+      cropAlg->execute();
+
+      ws = cropAlg->getProperty("OutputWorkspace");
+    }
+  }
+
+  return ws;
+}
+
+
+/**
+ * Selects a workspace from the group according to what is selected on the interface for the period.
+ * @param periodType :: Which period we want
+ * @param group      :: Workspace group as loaded from the data file
+ * @return Selected workspace
+ */ 
+MatrixWorkspace_sptr MuonAnalysis::getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group)
+{
+  QComboBox* periodSelector;
+ 
+  switch(periodType)
+  {
+    case First:
+      periodSelector = m_uiForm.homePeriodBox1; break;
+    case Second:
+      periodSelector = m_uiForm.homePeriodBox2; break;
+  }
+
+  const QString periodLabel = periodSelector->currentText();
+
+  if ( periodLabel != "None" )
+  {
+    int periodNumber = periodLabel.toInt();
+    size_t periodIndex = static_cast<size_t>(periodNumber - 1);
+
+    if ( periodNumber < 1 || periodIndex >= group->size() )
+      throw std::runtime_error("Loaded group doesn't seem to have period " + periodLabel.toStdString());
+
+    return boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(periodIndex) );
+  }
+  else
+  {
+    return MatrixWorkspace_sptr();
+  }
+}
 
 /**
 * If the instrument selection has changed (slot)
@@ -3732,6 +4073,16 @@ bool MuonAnalysis::isAutoUpdateEnabled()
 {
   int choice(m_uiForm.plotCreation->currentIndex());
   return (choice == 0 || choice == 1);
+}
+
+/**
+ * Whether Overwrite option is enabled on the Settings tab.
+ * @return True if enabled, false if not
+ */
+bool MuonAnalysis::isOverwriteEnabled()
+{
+  int choice(m_uiForm.plotCreation->currentIndex());
+  return (choice == 0 || choice == 2);
 }
 
 /**
