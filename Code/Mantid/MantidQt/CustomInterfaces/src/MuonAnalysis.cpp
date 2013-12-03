@@ -1726,6 +1726,20 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     static const QChar MU_SYM(956);
     m_uiForm.optionLabelBinWidth->setText(QString("Data collected with histogram bins of ") + QString::number(binWidth) + QString(" %1s").arg(MU_SYM));
 
+    m_uiForm.tabWidget->setTabEnabled(3, true);
+
+    m_updating = false;
+    m_deadTimesChanged = false;
+
+    m_loaded = true;
+
+    // Create a group for new data, if it doesn't exist
+    const std::string groupName = getGroupName().toStdString();
+    if ( ! AnalysisDataService::Instance().doesExist(groupName) )
+    {
+      AnalysisDataService::Instance().add( groupName, boost::make_shared<WorkspaceGroup>() );
+    }
+
     if(m_uiForm.frontPlotButton->isEnabled())
       plotSelectedItem();
   }
@@ -1736,10 +1750,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     QMessageBox::warning(this,"Mantid - MuonAnalysis", e.what());
   }
 
-  m_uiForm.tabWidget->setTabEnabled(3, true);
-  m_updating = false;
-
-  m_deadTimesChanged = false;
 }
 
 
@@ -1927,7 +1937,10 @@ void MuonAnalysis::updateFront()
   // get current index
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
+  m_uiForm.frontPlotFuncs->blockSignals(true);
   m_uiForm.frontPlotFuncs->clear();
+  m_uiForm.frontPlotFuncs->blockSignals(false);
+
   int numG = numGroups();
   if (numG)
   {
