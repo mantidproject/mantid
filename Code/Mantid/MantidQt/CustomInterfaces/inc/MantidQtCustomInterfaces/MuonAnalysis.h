@@ -270,9 +270,6 @@ private:
 
   /// Selects a workspace from the group according to what is selected on the interface for the period
   MatrixWorkspace_sptr getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group);
-  /// create WS contained the data for a plot
-  void createPlotWS(const std::string& groupName, 
-                    const std::string& inputWS, const std::string& outWS);
 
   /// Apply whatever grouping is specified in GUI tables to workspace
   bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
@@ -323,12 +320,6 @@ private:
 
   /// Return number of groups defined (not including pairs)
   int numGroups();
-
-  /// Plot group
-  void plotGroup(const std::string& plotType);
-
-  /// Plot pair
-  void plotPair(const std::string& plotType);
 
   // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
   //       (as we are doing with pairs)
