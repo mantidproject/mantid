@@ -80,6 +80,16 @@ class Sample(object):
 
 class Can(Sample):
     ISSAMPLE = False
+    def set_run(self, run, reload, period, reducer):
+        
+        super(Can, self).set_run(run, reload, period, reducer)
+
+        # currently, no slices will be applied to Can #8535
+        for period in reversed(range(self.loader.periods_in_file)):
+            self.loader.move2ws(period)
+            name = self.loader.wksp_name
+            if su.isEventWorkspace(name):
+                su.fromEvent2Histogram(mtd[name])
 
 class ISISReducer(SANSReducer):
     """
@@ -225,6 +235,7 @@ class ISISReducer(SANSReducer):
         
     def set_can(self, run, reload, period):
         self._can_run.set_run(run, reload, period, self)
+        
 
     def get_sample(self):
         """
