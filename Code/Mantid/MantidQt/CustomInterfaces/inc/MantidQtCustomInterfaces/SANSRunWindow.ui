@@ -239,14 +239,41 @@
           </widget>
          </item>
          <item>
+          <spacer name="horizontalSpacer_16">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>Slice Events:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="sliceEvent">
+           <property name="toolTip">
+            <string>Define the slices for the event. Valid inputs: min-max, start:step:stop, &gt;min, &lt;max. Combinations of those as well.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_4">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>231</width>
-             <height>32</height>
+             <width>0</width>
+             <height>0</height>
             </size>
            </property>
           </spacer>
