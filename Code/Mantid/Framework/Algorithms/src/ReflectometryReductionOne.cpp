@@ -268,8 +268,8 @@ namespace Mantid
      * @param stitchingEndQ
      */
     void ReflectometryReductionOne::getTransmissionRunInfo(
-        OptionalMatrixWorkspace_sptr firstTransmissionRun,
-        OptionalMatrixWorkspace_sptr secondTransmissionRun, OptionalDouble& stitchingStartQ,
+        OptionalMatrixWorkspace_sptr& firstTransmissionRun,
+        OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
         OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ)
     {
       if (!isPropertyDefault("FirstTransmissionRun"))
@@ -434,7 +434,64 @@ namespace Mantid
       // Monitor Workspace Processing
       MatrixWorkspace_sptr monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
 
+      // Rebin the Monitor Workspace to match the Detector Workspace.
+      auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
+      rebinToWorkspaceAlg->initialize();
+      rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", monitorWS);
+      rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
+      rebinToWorkspaceAlg->execute();
+      monitorWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+
       return DetectorMonitorWorkspacePair( detectorWS, monitorWS );
+    }
+
+    MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(MatrixWorkspace_sptr IvsLam,
+        const MinMax& wavelengthInterval,
+        const MinMax& wavelengthMonitorBackgroundInterval,
+        const MinMax& wavelengthMonitorIntegrationInterval,
+        const int& i0MonitorIndex,
+        OptionalMatrixWorkspace_sptr firstTransmissionRun,
+        OptionalMatrixWorkspace_sptr secondTransmissionRun,
+        const OptionalDouble& stitchingStartQ,
+        const OptionalDouble& stitchingDeltaQ,
+        const OptionalDouble& stitchingEndQ)
+    {
+      auto transRun1 = firstTransmissionRun.get();
+
+      const WorkspaceIndexList indexZero = boost::assign::list_of(0)(0).convert_to_container<std::vector<int> >();
+      auto trans1InLam = toLam(transRun1, indexZero, i0MonitorIndex, wavelengthInterval, wavelengthMonitorBackgroundInterval);
+      MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
+      MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
+
+      // Monitor integration ... can this happen inside the toLam routine?
+      auto integrationAlg = this->createChildAlgorithm("Integration");
+      integrationAlg->initialize();
+      integrationAlg->setProperty("InputWorkspace", trans1Monitor);
+      integrationAlg->setProperty("RangeLower", wavelengthMonitorIntegrationInterval.get<0>());
+      integrationAlg->setProperty("RangeUpper", wavelengthMonitorIntegrationInterval.get<1>());
+      integrationAlg->execute();
+      trans1Monitor = integrationAlg->getProperty("OutputWorkspace");
+
+      MatrixWorkspace_sptr normalizedTrans1 = trans1Detector / trans1Monitor;
+
+      if(secondTransmissionRun.is_initialized())
+      {
+        auto transRun2 = secondTransmissionRun.get();
+        return IvsLam; //hack
+      }
+      else
+      {
+
+        auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
+        rebinToWorkspaceAlg->initialize();
+        rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", IvsLam);
+        rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", normalizedTrans1);
+        rebinToWorkspaceAlg->execute();
+        normalizedTrans1 = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+
+        MatrixWorkspace_sptr normalizedIvsLam = IvsLam / normalizedTrans1;
+        return normalizedIvsLam;
+      }
     }
 
     //----------------------------------------------------------------------------------------------
@@ -477,8 +534,39 @@ namespace Mantid
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
       DetectorMonitorWorkspacePair inLam = toLam(runWS, indexList, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval);
+      auto detectorWS = inLam.get<0>();
+      auto monitorWS = inLam.get<1>();
 
-      setProperty("OutputWorkspace", inLam.get<0>());
+      if(isPointDetector)
+      {
+        if(firstTransmissionRun.is_initialized())
+        {
+          auto integrationAlg = this->createChildAlgorithm("Integration");
+          integrationAlg->initialize();
+          integrationAlg->setProperty("InputWorkspace", monitorWS);
+          integrationAlg->setProperty("RangeLower", monitorIntegrationWavelengthInterval.get<0>());
+          integrationAlg->setProperty("RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
+          integrationAlg->execute();
+          MatrixWorkspace_sptr integratedMonitor =  integrationAlg->getProperty("OutputWorkspace");
+
+          MatrixWorkspace_sptr IvsLam = detectorWS / monitorWS; // Normalize by the integrated monitor counts.
+
+          detectorWS = transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex, firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ);
+
+
+        }
+        else
+        {
+          throw std::runtime_error("Cannot yet handle no transmission runs.");
+        }
+      }
+      else
+      {
+        throw std::runtime_error("Multi-detector processing is not yet implemented.");
+      }
+
+
+      setProperty("OutputWorkspace", detectorWS);
 
     }
 

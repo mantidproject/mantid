@@ -189,10 +189,12 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         real_run = Load('INTER00013460.nxs')
         alg.set_InputWorkspace(real_run)
         alg.set_WorkspaceIndexList([3,4])
+        alg.set_FirstTransmissionRun(real_run) # Currently a requirement.
         out_ws = alg.execute()
         
         self.assertTrue(isinstance(out_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
         self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
+        
         self.assertEqual(2, out_ws.getNumberHistograms())
         DeleteWorkspace(real_run)
         
