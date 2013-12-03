@@ -58,16 +58,26 @@ namespace Algorithms
   private:
 
     bool isPropertyDefault(const std::string& propertyName) const;
+
     WorkspaceIndexList getWorkspaceIndexList();
+
     void fetchOptionalLowerUpperPropertyValue(const std::string& propertyName, bool isPointDetector, OptionalWorkspaceIndexes& optionalUpperLower);
+
     MinMax getMinMax(const std::string& minProperty, const std::string& maxProperty);
+
     void getTransmissionRunInfo(OptionalMatrixWorkspace_sptr firstTransmissionRun, OptionalMatrixWorkspace_sptr secondTransmissionRun, OptionalDouble& stitchingStartQ, OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ);
+
     virtual void initDocs();
+
     void init();
+
     void exec();
 
+    API::MatrixWorkspace_sptr toLamMonitor(const API::MatrixWorkspace_sptr& toConvert, const int monitorIndex, const MinMax& backgroundMinMax);
 
-  };
+    API::MatrixWorkspace_sptr toLamDetector(const WorkspaceIndexList& detectorIndexRange,
+          const API::MatrixWorkspace_sptr& toConvert, const MinMax& wavelengthMinMax);
+    };
 
 
 } // namespace Algorithms
