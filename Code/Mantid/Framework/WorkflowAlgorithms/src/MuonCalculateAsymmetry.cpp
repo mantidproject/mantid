@@ -153,6 +153,38 @@ namespace WorkflowAlgorithms
 
       return outWS;
     }
+    else if ( type == "PairAsymmetry" )
+    {
+      // PairAsymmetry - result of AsymmetryCalc algorithm
+
+      int pairFirstIndex = getProperty("PairFirstIndex");
+      int pairSecondIndex = getProperty("PairSecondIndex");
+
+      if ( pairFirstIndex == EMPTY_INT() || pairSecondIndex == EMPTY_INT() )
+        throw std::invalid_argument("Both pair indices should be specified");
+
+      double alpha = getProperty("Alpha");
+
+      // We get pair groups as their workspace indices, but AsymmetryCalc wants spectra numbers, 
+      // so need to convert
+      specid_t spectraNo1 = ws->getSpectrum(pairFirstIndex)->getSpectrumNo();
+      specid_t spectraNo2 = ws->getSpectrum(pairSecondIndex)->getSpectrumNo();
+
+      if ( spectraNo1 == -1 || spectraNo2 == -1 || spectraNo1 == spectraNo2 )
+        throw std::invalid_argument("Spectra numbers of the input workspace are not set properly");
+
+      IAlgorithm_sptr alg = createChildAlgorithm("AsymmetryCalc");
+      alg->setProperty("InputWorkspace", ws);
+      // As strings, cause otherwise would need to create arrays with single elements
+      alg->setPropertyValue("ForwardSpectra", boost::lexical_cast<std::string>(spectraNo1));
+      alg->setPropertyValue("BackwardSpectra", boost::lexical_cast<std::string>(spectraNo2));
+      alg->setProperty("Alpha", alpha);
+      alg->execute();
+
+      MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+
+      return outWS;
+    }
 
     throw std::invalid_argument("Specified OutputType is not supported");
   }
