@@ -503,10 +503,12 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionSave_Table"/>
-    <addaction name="actionLoad_Table"/>
-    <addaction name="actionRe_Load_Table"/>
+    <addaction name="actionOpen_Table"/>
+    <addaction name="actionReload_from_Disk"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSave_As"/>
     <addaction name="actionSave_Workspaces"/>
+    <addaction name="actionClose_Refl_Gui"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -517,25 +519,25 @@
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
   </widget>
-  <action name="actionSave_Table">
+  <action name="actionSave_As">
    <property name="text">
-    <string>Save Table</string>
+    <string>Save As...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+S</string>
+    <string>Ctrl+Alt+S</string>
    </property>
   </action>
-  <action name="actionLoad_Table">
+  <action name="actionOpen_Table">
    <property name="text">
-    <string>Load Table</string>
+    <string>Open Table...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="actionRe_Load_Table">
+  <action name="actionReload_from_Disk">
    <property name="text">
-    <string>Re-Load Table</string>
+    <string>Reload from Disk</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -555,6 +557,22 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionClose_Refl_Gui">
+   <property name="text">
+    <string>Close Refl Gui</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F4</string>
    </property>
   </action>
  </widget>
