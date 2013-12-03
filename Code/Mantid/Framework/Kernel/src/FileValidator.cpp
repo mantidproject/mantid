@@ -124,27 +124,35 @@ std::string FileValidator::checkValidity(const std::string &value) const
     }
     else // if the file doesn't exist try to temporarily create one
     {
-      std::string error; // error message
-
       try
       {
-        FILE *fp = fopen(value.c_str(), "w+");
-        if (!fp)
-          error = "File \"" + abspath + "\" cannot be written";
-        else // this only gets run if handle is non-null
+        Poco::Path direc(value);
+        if (direc.isAbsolute())
         {
-          fclose(fp);
-          if (file.exists())
-            file.remove(false); // non-recursively remove the temp file
+          // look for an existing parent
+          while (!Poco::File(direc).exists())
+          {
+            direc = direc.parent();
+          }
+
+          // see if the directory exists
+          Poco::File direcFile(direc);
+          if (direcFile.exists() && direcFile.isDirectory())
+          {
+            if (direcFile.canWrite())
+              return "";
+            else
+              return "Cannot write to directory \"" + direc.toString() + "\"";
+          }
         }
+
+        g_log.debug() << "Do not have enough information to validate \""
+                      << abspath << "\"\n";
       }
       catch (std::exception &e)
       {
         g_log.information() << "Encountered exception while checking for writable: " << e.what();
       }
-
-      if (!error.empty())
-        return error;
     }
   }
 
