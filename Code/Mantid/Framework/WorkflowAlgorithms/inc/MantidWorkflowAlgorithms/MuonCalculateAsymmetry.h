@@ -11,7 +11,7 @@ namespace WorkflowAlgorithms
   using namespace Kernel;
   using namespace API;
 
-  /** MuonCalculateAsymmetry : TODO: DESCRIPTION
+  /** MuonCalculateAsymmetry : converts loaded/prepared Muon data to a data suitable for analysis. 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -48,10 +48,10 @@ namespace WorkflowAlgorithms
     void init();
     void exec();
 
-    /// TODO: comment
+    /// Converts given workspace according to the OutputType
     MatrixWorkspace_sptr convertWorkspace(MatrixWorkspace_sptr ws);
   
-    /// TODO: comment
+    /// Merges two period workspaces according to PeriodOperation specified
     MatrixWorkspace_sptr mergePeriods(MatrixWorkspace_sptr ws1, MatrixWorkspace_sptr ws2);
   };
 

@@ -1,5 +1,12 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Converts loaded/prepared Muon data to a data suitable for analysis.
+
+Supports three modes:
+* PairAsymmetry - asymmetry is calculated for a given pair of groups, using the alpha value provided.
+* GroupAsymmetry - asymmetry between given group and Muon exponential decay is calculated.
+* GroupCount - '''no asymmetry is calculated''', pure counts of the specified group are used.
+
+For every mode, either one or two data acquisition period workspaces can be provided. PeriodOperation determines in which way period data will be merged at the end.
 *WIKI*/
 
 #include "MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h"
@@ -16,23 +23,23 @@ namespace WorkflowAlgorithms
   DECLARE_ALGORITHM(MuonCalculateAsymmetry)
   
   //----------------------------------------------------------------------------------------------
+
   /**
    * Constructor
    */
   MuonCalculateAsymmetry::MuonCalculateAsymmetry()
-  {
-  }
+  {}
     
   //----------------------------------------------------------------------------------------------
+
   /**
    * Destructor
    */
   MuonCalculateAsymmetry::~MuonCalculateAsymmetry()
-  {
-  }
-  
+  {}
 
   //----------------------------------------------------------------------------------------------
+
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string MuonCalculateAsymmetry::name() const { return "MuonCalculateAsymmetry";};
   
@@ -43,15 +50,18 @@ namespace WorkflowAlgorithms
   const std::string MuonCalculateAsymmetry::category() const { return "Workflow\\Muon"; }
 
   //----------------------------------------------------------------------------------------------
+
   /// Sets documentation strings for this algorithm
   void MuonCalculateAsymmetry::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiSummary("Converts loaded/prepared Muon data to a data suitable for analysis.");
+    this->setOptionalMessage("Converts loaded/prepared Muon data to a data suitable for analysis.");
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
+
+  /** 
+   * Initialize the algorithm's properties.
    */
   void MuonCalculateAsymmetry::init()
   {
@@ -91,6 +101,7 @@ namespace WorkflowAlgorithms
   }
 
   //----------------------------------------------------------------------------------------------
+
   /** 
    * Execute the algorithm.
    */
@@ -117,7 +128,9 @@ namespace WorkflowAlgorithms
   }
 
   /**
-   * TODO: comment
+   * Converts given workspace according to the OutputType.
+   * @param ws :: Workspace to convert
+   * @return Converted workspace
    */
   MatrixWorkspace_sptr MuonCalculateAsymmetry::convertWorkspace(MatrixWorkspace_sptr ws)
   {
@@ -190,7 +203,10 @@ namespace WorkflowAlgorithms
   }
 
   /**
-   * TODO: comment
+   * Merges two period workspaces according to PeriodOperation specified. 
+   * @param ws1 :: First period workspace
+   * @param ws2 :: Second period workspace
+   * @return Merged workspace
    */
   MatrixWorkspace_sptr MuonCalculateAsymmetry::mergePeriods(MatrixWorkspace_sptr ws1, MatrixWorkspace_sptr ws2)
   {
