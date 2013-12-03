@@ -314,10 +314,30 @@ void MuonAnalysis::runFrontPlotButton()
  */
 void MuonAnalysis::plotSelectedItem()
 {
-  // Get current index
+  ItemType itemType;
+  int tableRow; 
+
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
   if (index < 0)
+    throw std::runtime_error("Item not selected");
+
+  if (index >= numGroups())
+  {
+    itemType = Pair;
+    tableRow = m_pairToRow[index-numGroups()];
+  }
+  else
+  {
+    itemType = Group;
+    tableRow = m_groupToRow[index];
+  }
+
+  PlotType plotType = parsePlotType(m_uiForm.frontPlotFuncs);
+
+  plotItem(itemType, tableRow, plotType);  
+}
+
 /**
  * Creates workspace for specified group/pair and plots it;
  * @param itemType :: Whether it's a group or pair
@@ -425,22 +445,31 @@ std::string MuonAnalysis::getNewAnalysisWSName(const std::string& runLabel, Item
 
   return newName;
 }
+
+/**
+ * Returns PlotType as chosen using given selector.
+ * @param selector :: Widget to use for parsing
+ * @return PlotType as selected using the widget
+ */ 
+MuonAnalysis::PlotType MuonAnalysis::parsePlotType(QComboBox* selector)
+{
+  std::string plotTypeName = selector->currentText().toStdString();
+
+  if ( plotTypeName == "Asymmetry" )
   {
-    index = 0;
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
+    return Asymmetry;
   }
-  else if (index >= numGroups())
+  else if ( plotTypeName == "Counts" )
   {
-    // i.e. index points to a pair
-    m_pairTableRowInFocus = m_pairToRow[index-numGroups()];  // this can be improved
-    std::string str = m_uiForm.frontPlotFuncs->currentText().toStdString();
-    plotPair(str);
+    return Counts;
+  }
+  else if ( plotTypeName == "Logorithm" )
+  {
+    return Logorithm;
   }
   else
   {
-    m_groupTableRowInFocus = m_groupToRow[index];
-    std::string str = m_uiForm.frontPlotFuncs->currentText().toStdString();
-    plotGroup(str);
+    throw std::runtime_error("Unknown plot type name: " + plotTypeName);
   }
 }
 

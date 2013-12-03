@@ -261,6 +261,9 @@ private:
   MatrixWorkspace_sptr createAnalysisWorkspace(ItemType itemType, int tableRow, PlotType type,
     bool isRaw = false);
 
+  /// Returns PlotType as chosen using given selector 
+  PlotType parsePlotType(QComboBox* selector);
+
   /// Finds a name for new analysis workspace 
   std::string getNewAnalysisWSName(const std::string& runLabel, ItemType itemType, int tableRow,
     PlotType plotType);
