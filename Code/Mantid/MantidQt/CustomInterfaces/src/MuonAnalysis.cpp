@@ -2186,6 +2186,9 @@ QStringList MuonAnalysis::getPeriodLabels() const
  */
 void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale)
 {
+    // Close the previous plot window ( if exists )
+    closePlotWindow(wsName);
+
     // create first part of plotting Python string
     QString gNum = QString::number(wsIndex);
     QString pyS;
