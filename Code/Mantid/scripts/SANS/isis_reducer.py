@@ -174,6 +174,10 @@ class ISISReducer(SANSReducer):
         self._rem_nans =      sans_reduction_steps.StripEndNans()
 
         self.set_Q_output_type(self.to_Q.output_type)
+        # keep information about event slicing
+        self._slices_def = []
+        self._slice_index = 0
+
 	
     def _clean_loaded_data(self):
         self._sample_run = Sample()
@@ -181,9 +185,6 @@ class ISISReducer(SANSReducer):
         self.samp_trans_load = None
         self.can_trans_load = None
         self.event2hist = isis_reduction_steps.SliceEvent()
-        # keep information about event slicing
-        self._slices_def = []
-        self._slice_index = 0
 
 
     def __init__(self):

@@ -153,6 +153,10 @@ def MaskFile(file_name):
         @param file_name: the settings file
     """
     _printMessage('#Opening "'+file_name+'"')
+
+    # ensure that no slice string is kept from previous executions.
+    ReductionSingleton().setSlicesLimits("")
+
     ReductionSingleton().user_settings = isis_reduction_steps.UserFile(
         file_name)
     status = ReductionSingleton().user_settings.execute(
