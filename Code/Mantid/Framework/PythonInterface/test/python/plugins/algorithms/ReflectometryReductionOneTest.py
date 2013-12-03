@@ -188,7 +188,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg = self.construct_standard_algorithm()
         real_run = Load('INTER00013460.nxs')
         alg.set_InputWorkspace(real_run)
-        alg.set_WorkspaceIndexList([3,3,4,4])
+        alg.set_WorkspaceIndexList([3,4])
         out_ws = alg.execute()
         
         self.assertTrue(isinstance(out_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")

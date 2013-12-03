@@ -13,6 +13,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/make_shared.hpp>
+#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -315,10 +316,11 @@ namespace Mantid
     }
     */
 
-    MatrixWorkspace_sptr ReflectometryReductionOne::toLam(MatrixWorkspace_sptr toConvert,
+    ReflectometryReductionOne::DetectorMonitorWorkspacePair ReflectometryReductionOne::toLam(MatrixWorkspace_sptr toConvert,
         const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
         const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax)
     {
+      // Detector Workspace Processing
       MatrixWorkspace_sptr detectorWS;
       for (size_t i = 0; i < detectorIndexRange.size(); i += 2)
       {
@@ -361,7 +363,33 @@ namespace Mantid
       cropWorkspaceAlg->execute();
       detectorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
-      return detectorWS;
+      // Monitor Workspace Processing
+      convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+      convertUnitsAlg->initialize();
+      convertUnitsAlg->setProperty("InputWorkspace", toConvert);
+      convertUnitsAlg->setProperty("Target", "Wavelength");
+      convertUnitsAlg->setProperty("AlignBins", true);
+      convertUnitsAlg->execute();
+      MatrixWorkspace_sptr monitorWS = convertUnitsAlg->getProperty("OutputWorkspace");
+
+      cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
+      cropWorkspaceAlg->initialize();
+      cropWorkspaceAlg->setProperty("InputWorkspace", monitorWS);
+      cropWorkspaceAlg->setProperty("StartWorkspaceIndex", monitorIndex);
+      cropWorkspaceAlg->setProperty("EndWorkspaceIndex", monitorIndex);
+      cropWorkspaceAlg->execute();
+      monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
+
+      auto correctMonitorsAlg = this->createChildAlgorithm("CalculateFlatBackground");
+      correctMonitorsAlg->initialize();
+      correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
+      correctMonitorsAlg->setProperty("WorkspaceIndexList", boost::assign::list_of(0).convert_to_container<std::vector< int> >());
+      correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
+      correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
+      correctMonitorsAlg->execute();
+      monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
+
+      return DetectorMonitorWorkspacePair( detectorWS, monitorWS );
     }
 
     //----------------------------------------------------------------------------------------------

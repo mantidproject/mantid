@@ -45,6 +45,7 @@ namespace Algorithms
     typedef boost::optional<Mantid::API::MatrixWorkspace_sptr> OptionalMatrixWorkspace_sptr;
     typedef std::vector<int> WorkspaceIndexList;
     typedef boost::optional< std::vector< int > > OptionalWorkspaceIndexes;
+    typedef boost::tuple<Mantid::API::MatrixWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr> DetectorMonitorWorkspacePair;
 
     ReflectometryReductionOne();
     virtual ~ReflectometryReductionOne();
@@ -52,7 +53,7 @@ namespace Algorithms
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
-    Mantid::API::MatrixWorkspace_sptr toLam(Mantid::API::MatrixWorkspace_sptr toConvert, const WorkspaceIndexList& detectorIndexRange, const int monitorIndex, const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax);
+    DetectorMonitorWorkspacePair toLam(Mantid::API::MatrixWorkspace_sptr toConvert, const WorkspaceIndexList& detectorIndexRange, const int monitorIndex, const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax);
 
   private:
 
