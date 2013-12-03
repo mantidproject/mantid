@@ -857,7 +857,12 @@ void MuonAnalysis::runGroupTablePlotButton()
     inputFileChanged(m_previousFilenames);
     return;
   }
-  plotGroup(m_uiForm.groupTablePlotChoice->currentText().toStdString());
+
+  if ( getGroupNumberFromRow(m_groupTableRowInFocus) != -1 )
+  {
+    PlotType plotType = parsePlotType(m_uiForm.groupTablePlotChoice);
+    plotItem(Group, m_groupTableRowInFocus, plotType);
+  }
 }
 
 /**
@@ -1037,23 +1042,16 @@ void MuonAnalysis::runPairTablePlotButton()
     return;
   }
 
-  m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.pairTablePlotChoice->currentIndex());
-  // if something sensible in row then update front
-  int currentSelection(m_uiForm.pairTable->currentRow());
-  if (currentSelection >= 0)
+  if ( getPairNumberFromRow(m_pairTableRowInFocus) != -1 )
   {
-    int index (numGroups() + currentSelection);
-    if (m_uiForm.frontGroupGroupPairComboBox->count() >= index)
-    {
-      m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
-      plotPair(m_uiForm.pairTablePlotChoice->currentText().toStdString());
-    }
+    // Sync with selectors on the front
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(numGroups() + m_pairTableRowInFocus);
+    m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.pairTablePlotChoice->currentIndex());
+
+    PlotType plotType = parsePlotType(m_uiForm.pairTablePlotChoice);
+    plotItem(Pair, m_pairTableRowInFocus, plotType);
   }
-  else
-  {
-    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(numGroups()); //if two groups then index 2 will be pair group
-    plotPair(m_uiForm.pairTablePlotChoice->currentText().toStdString());
-  }
+
 }
 
 /**
