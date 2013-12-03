@@ -606,6 +606,7 @@ set ( TEST_FILES
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
+	ReflectometryReductionOneTest.h
 	RegroupTest.h
 	RemoveBinsTest.h
 	RemoveExpDecayTest.h

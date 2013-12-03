@@ -38,19 +38,24 @@ namespace Algorithms
   class DLLExport ReflectometryReductionOne  : public API::DataProcessorAlgorithm
   {
   public:
+
+    // Class typedefs
+    typedef boost::tuple<double, double> MinMax;
+    typedef boost::optional<double> OptionalDouble;
+    typedef boost::optional<Mantid::API::MatrixWorkspace_sptr> OptionalMatrixWorkspace_sptr;
+    typedef std::vector<int> WorkspaceIndexList;
+    typedef boost::optional< std::vector< int > > OptionalWorkspaceIndexes;
+
     ReflectometryReductionOne();
     virtual ~ReflectometryReductionOne();
     
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    Mantid::API::MatrixWorkspace_sptr toLam(Mantid::API::MatrixWorkspace_sptr toConvert, const WorkspaceIndexList& detectorIndexRange, const int monitorIndex, const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax);
 
   private:
-    typedef boost::tuple<double, double> MinMax;
-    typedef boost::optional<double> OptionalDouble;
-    typedef boost::optional<Mantid::API::MatrixWorkspace_sptr> OptionalMatrixWorkspace_sptr;
-    typedef std::vector<int> WorkspaceIndexList;
-    typedef boost::optional< std::vector< int > > OptionalWorkspaceIndexes;
+
     bool isPropertyDefault(const std::string& propertyName) const;
     WorkspaceIndexList getWorkspaceIndexList();
     void fetchOptionalLowerUpperPropertyValue(const std::string& propertyName, bool isPointDetector, OptionalWorkspaceIndexes& optionalUpperLower);

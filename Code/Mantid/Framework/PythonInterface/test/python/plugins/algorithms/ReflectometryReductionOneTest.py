@@ -1,5 +1,6 @@
 import unittest
 from mantid.simpleapi import *
+import mantid.api
 
 import inspect
 import re
@@ -53,7 +54,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
     
     def construct_standard_algorithm(self):
         alg = make_decorator(ReflectometryReductionOne)
-        alg.set_InputWorkspace(self.__tof.getName())
+        alg.set_InputWorkspace(self.__tof)
         alg.set_WavelengthMin(0.0)
         alg.set_WavelengthMax(1.0)
         alg.set_I0MonitorIndex(0)
@@ -65,15 +66,15 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         return alg
     
     def setUp(self):
-        tof = CreateWorkspace(UnitX="TOF", DataX=[0,0,0], DataY=[0,0,0], NSpec=1)
-        not_tof =  CreateWorkspace(UnitX="1/q", DataX=[0,0,0], DataY=[0,0,0], NSpec=1)
+        tof = CreateWorkspace(UnitX="TOF", DataX=[0,0,0,0], DataY=[0,0,0], NSpec=1)
+        not_tof =  CreateWorkspace(UnitX="1/q", DataX=[0,0,0,0], DataY=[0,0,0], NSpec=1)
         self.__tof = tof
         self.__not_tof = not_tof
         
     def tearDown(self):
         DeleteWorkspace(self.__tof)
         DeleteWorkspace(self.__not_tof)
-     
+    
     def test_check_input_workpace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_InputWorkspace(self.__not_tof)
@@ -182,6 +183,18 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_AnalysisMode("MultiDetectorAnalysis")
         alg.set_RegionOfDirectBeam([1, 0]);
         self.assertRaises(ValueError, alg.execute)
+        
+    def test_output_in_lam(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('INTER00013460.nxs')
+        alg.set_InputWorkspace(real_run)
+        alg.set_WorkspaceIndexList([3,3,4,4])
+        out_ws = alg.execute()
+        
+        self.assertTrue(isinstance(out_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
+        self.assertEqual(2, out_ws.getNumberHistograms())
+        DeleteWorkspace(real_run)
         
         
 if __name__ == '__main__':

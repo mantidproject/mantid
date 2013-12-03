@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -300,6 +301,68 @@ namespace Mantid
       }
     }
 
+    /*
+    WorkspaceIndexList getSpectrumIds(const WorkspaceIndexList& workspaceIds)
+    {
+      // Get spectrum ID.
+            WorkspaceIndexList detectorSpectrumIdRange;
+            for(size_t i = 0; i < detectorIndexRange.size(); ++i)
+            {
+              auto spectrum = inLam->getSpectrum(detectorIndexRange[i]);
+              specid_t specId = spectrum->getSpectrumNo();
+              detectorSpectrumIdRange.push_back(specId);
+            }
+    }
+    */
+
+    MatrixWorkspace_sptr ReflectometryReductionOne::toLam(MatrixWorkspace_sptr toConvert,
+        const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
+        const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax)
+    {
+      MatrixWorkspace_sptr detectorWS;
+      for (size_t i = 0; i < detectorIndexRange.size(); i += 2)
+      {
+        auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
+        cropWorkspaceAlg->initialize();
+        cropWorkspaceAlg->setProperty("InputWorkspace", toConvert);
+        cropWorkspaceAlg->setProperty("StartWorkspaceIndex", detectorIndexRange[i]);
+        cropWorkspaceAlg->setProperty("EndWorkspaceIndex", detectorIndexRange[i + 1]);
+
+        cropWorkspaceAlg->execute();
+        MatrixWorkspace_sptr subRange = cropWorkspaceAlg->getProperty("OutputWorkspace");
+        if (i == 0)
+        {
+          detectorWS = subRange;
+        }
+        else
+        {
+          auto conjoinWorkspaceAlg = this->createChildAlgorithm("ConjoinWorkspaces");
+          conjoinWorkspaceAlg->initialize();
+          conjoinWorkspaceAlg->setProperty("InputWorkspace1", detectorWS);
+          conjoinWorkspaceAlg->setProperty("InputWorkspace2", subRange);
+          conjoinWorkspaceAlg->execute();
+          detectorWS = conjoinWorkspaceAlg->getProperty("InputWorkspace1");
+        }
+      }
+
+      auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+      convertUnitsAlg->initialize();
+      convertUnitsAlg->setProperty("InputWorkspace", detectorWS);
+      convertUnitsAlg->setProperty("Target", "Wavelength");
+      convertUnitsAlg->setProperty("AlignBins", true);
+      convertUnitsAlg->execute();
+      detectorWS = convertUnitsAlg->getProperty("OutputWorkspace");
+
+      auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
+      cropWorkspaceAlg->initialize();
+      cropWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
+      cropWorkspaceAlg->setProperty("XMin", wavelengthMinMax.get<0>());
+      cropWorkspaceAlg->setProperty("XMax", wavelengthMinMax.get<1>());
+      cropWorkspaceAlg->execute();
+      detectorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
+
+      return detectorWS;
+    }
 
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
@@ -338,15 +401,11 @@ namespace Mantid
       OptionalWorkspaceIndexes directBeam;
       fetchOptionalLowerUpperPropertyValue("RegionOfDirectBeam", isPointDetector, directBeam);
 
-      auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
-      cloneAlg->initialize();
-      cloneAlg->setProperty("InputWorkspace", runWS);
-      cloneAlg->setPropertyValue("OutputWorkspace", "OutWS");
-      cloneAlg->execute();
-      Workspace_sptr cloned = cloneAlg->getProperty("OutputWorkspace");
+      const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
-      setProperty("OutputWorkspace", cloned);
-      // Convert To Lambda.
+      auto outWS = toLam(runWS, indexList, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval);
+
+      setProperty("OutputWorkspace", outWS);
 
     }
 
