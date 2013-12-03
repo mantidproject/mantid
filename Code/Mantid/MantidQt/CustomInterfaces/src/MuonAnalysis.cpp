@@ -2099,63 +2099,6 @@ void MuonAnalysis::clearTablesAndCombo()
   }
 }
 
-
-
-/**
- * Used by plotGroup and plotPair. 
- */
-void MuonAnalysis::handlePeriodChoice(const QString wsName, const QStringList& periodLabel, const QString& /*groupName*/)
-{
-  if ( periodLabel.size() == 2 )
-  {
-    if ( m_uiForm.homePeriodBoxMath->currentText()=="+" )
-    {
-      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Plus");
-      alg->setPropertyValue("LHSWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString());
-      alg->setPropertyValue("RHSWorkspace", wsName.toStdString() + periodLabel.at(1).toStdString());
-      alg->setPropertyValue("OutputWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString());
-      alg->execute();
-
-      alg = Mantid::API::AlgorithmManager::Instance().create("Plus");
-      alg->setPropertyValue("LHSWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString() + "_Raw");
-      alg->setPropertyValue("RHSWorkspace", wsName.toStdString() + periodLabel.at(1).toStdString() + "_Raw");
-      alg->setPropertyValue("OutputWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString() + "_Raw");
-      alg->execute();
-    }
-    else
-    {
-      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Minus");
-      alg->setPropertyValue("LHSWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString());
-      alg->setPropertyValue("RHSWorkspace", wsName.toStdString() + periodLabel.at(1).toStdString());
-      alg->setPropertyValue("OutputWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString());
-      alg->execute();
-
-      alg = Mantid::API::AlgorithmManager::Instance().create("Minus");
-      alg->setPropertyValue("LHSWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString() + "_Raw");
-      alg->setPropertyValue("RHSWorkspace", wsName.toStdString() + periodLabel.at(1).toStdString() + "_Raw");
-      alg->setPropertyValue("OutputWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString() + "_Raw");
-      alg->execute();
-    }
-
-    Mantid::API::AnalysisDataService::Instance().remove((wsName + periodLabel.at(1)).toStdString() );
-    Mantid::API::AnalysisDataService::Instance().remove((wsName + periodLabel.at(1) + "_Raw").toStdString() ); 
-
-    Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)).toStdString(), wsName.toStdString());
-    Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)+"_Raw").toStdString(), (wsName+"_Raw").toStdString()); 
-  }
-  else
-  {
-    if ( periodLabel.at(0) != "" )
-    {
-      Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)).toStdString(), wsName.toStdString());
-      Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)+"_Raw").toStdString(), (wsName+"_Raw").toStdString());      
-    }
-  }
-}
-
-
-
-
 /**
  * Get period labels for the periods selected in the GUI
  * @return Return empty string if no periods (well just one period). If more 
@@ -2418,33 +2361,6 @@ void MuonAnalysis::showPlot(const QString& wsName)
 
     selectMultiPeak(m_currentDataName);
   }
-}
-
-QString MuonAnalysis::getNewPlotName(const QString & cropWSfirstPart)
-{
-  // check if this workspace already exist to avoid replotting an existing workspace
-  QString cropWS("");
-  int plotNum = 1;
-  while (1==1)
-  {
-    cropWS = cropWSfirstPart + "; #" + boost::lexical_cast<std::string>(plotNum).c_str();
-    if ( AnalysisDataService::Instance().doesExist(cropWS.toStdString()) ) 
-    {
-      if((m_uiForm.plotCreation->currentIndex() == 0) || (m_uiForm.plotCreation->currentIndex() == 2) )
-      {
-        closePlotWindow(cropWS);
-        AnalysisDataService::Instance().remove(cropWS.toStdString());
-        break;
-      }
-      else
-        plotNum++;
-    }
-    else
-    {
-      break;
-    }
-  }
-  return cropWS;
 }
 
 /**
