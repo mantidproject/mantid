@@ -11,7 +11,6 @@
 
 #include <numeric> // std::accumulate
 
-using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
