@@ -38,7 +38,7 @@ private:
   QString createSliceEventCode(const QString & name_ws, const QString & start, const QString & stop); 
   ChargeAndTime runSliceEvent(const QString & code2run); 
   void checkPythonOutput(const QString & result); 
-
+  ChargeAndTime values2ChargeAndTime(const QString & input);
   void raiseWarning(QString title, QString message); 
 
  protected: 

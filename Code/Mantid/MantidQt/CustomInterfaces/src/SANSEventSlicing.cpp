@@ -97,15 +97,22 @@ SANSEventSlicing::ChargeAndTime SANSEventSlicing::getFullChargeAndTime(const QSt
 
   checkPythonOutput(result); 
 
-  QStringList values = result.split(" ");
+  return values2ChargeAndTime(result);
+}
+
+SANSEventSlicing::ChargeAndTime SANSEventSlicing::values2ChargeAndTime(const QString & input)
+{
+  QStringList values = input.split(" ");
   ChargeAndTime inf; 
   if (values.size() < 2)
-    throw std::runtime_error(QString("Unexpected result: %1").arg(result).toStdString());
+    throw std::runtime_error(QString("Unexpected result: %1").arg(input).toStdString());
 
   inf.charge = values[0]; 
   inf.time = values[1];
   return inf; 
+  
 }
+
 
 void SANSEventSlicing::checkPythonOutput(const QString & result)
 {
@@ -138,7 +145,7 @@ QString SANSEventSlicing::createSliceEventCode(const QString & name_ws,
          << "  hist, times = su.slice2histogram(ws" 
          << ", " << start << ", " << stop
          << ", mon)\n"
-         << "  print times[0], times[1], times[2], times[3]\n"
+         << "  print '%.2f, %.2f' %(times[3], times[2])\n"
          << "except:\n"
          << "  print 'EXCEPTION:',sys.exc_info()[2]";
 
@@ -151,14 +158,8 @@ SANSEventSlicing::ChargeAndTime SANSEventSlicing::runSliceEvent(const QString & 
   QString result = runPythonCode(code).simplified(); 
   
   checkPythonOutput(result); 
-  
-  QStringList values = result.split(' '); 
-  if (values.size() < 4)
-    throw std::runtime_error(QString("Unexpected result: %1").arg(result).toStdString());
-  ChargeAndTime sliced; 
-  sliced.charge = values[3]; 
-  sliced.time = values[1]; 
-  return sliced; 
+
+  return values2ChargeAndTime(result);
 }
 
 void SANSEventSlicing::raiseWarning(QString title, QString message){
