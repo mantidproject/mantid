@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
 	src/DerivMinimizer.cpp
+	src/DiffRotDiscreteCircle.cpp
 	src/DiffSphere.cpp
 	src/ElasticDiffSphere.cpp
 	src/EndErfc.cpp
@@ -119,6 +120,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DerivMinimizer.h
 	inc/MantidCurveFitting/DiffSphere.h
+	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/ElasticDiffSphere.h
 	inc/MantidCurveFitting/EmptyValues.h
@@ -213,6 +215,7 @@ set ( TEST_FILES
 	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
+	DiffRotDiscreteCircleTest.h
 	EndErfcTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
