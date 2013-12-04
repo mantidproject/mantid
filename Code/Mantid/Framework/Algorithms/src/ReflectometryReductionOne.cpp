@@ -104,6 +104,11 @@ namespace Mantid
               "These parameters are used for stitching together transmission runs. "
               "Values are in q. This input is only needed if a SecondTransmission run is provided.");
 
+      declareProperty(new PropertyWithValue<double>("StartOverlapQ", Mantid::EMPTY_DBL(), Direction::Input), "Start Q for stitching transmission runs together");
+      declareProperty(new PropertyWithValue<double>("EndOverlapQ", Mantid::EMPTY_DBL(), Direction::Input), "End Q for stitching transmission runs together");
+
+
+
       std::vector<std::string> propOptions;
       propOptions.push_back(pointDetectorAnalysis);
       propOptions.push_back(multiDetectorAnalysis);
@@ -162,12 +167,23 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
     }
 
+    /**
+     * Determine if the property value is the same as the default value.
+     * This can be used to determine if the property has not been set.
+     * @param propertyName : Name of property to query
+     * @return: True only if the property has it's default value.
+     */
     bool ReflectometryReductionOne::isPropertyDefault(const std::string& propertyName) const
     {
       Property* property = this->getProperty(propertyName);
       return property->isDefault();
     }
 
+    /**
+     *  Helper method used with the stl to determine whether values are negative
+     * @param value : Value to check
+     * @return : True if negative.
+     */
     bool checkNotPositive(const int value)
     {
       return value < 0;
@@ -270,43 +286,72 @@ namespace Mantid
     void ReflectometryReductionOne::getTransmissionRunInfo(
         OptionalMatrixWorkspace_sptr& firstTransmissionRun,
         OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
-        OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ)
+        OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
+        OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ)
     {
       if (!isPropertyDefault("FirstTransmissionRun"))
       {
         MatrixWorkspace_sptr temp = this->getProperty("FirstTransmissionRun");
         /*
-        if(temp->getNumberHistograms() > 1)
-        {
-          throw std::invalid_argument("Error with FirstTransmissionRun. Only one histogram is permitted for a transmission run.");
-        }
-        */
+         if(temp->getNumberHistograms() > 1)
+         {
+         throw std::invalid_argument("Error with FirstTransmissionRun. Only one histogram is permitted for a transmission run.");
+         }
+         */
         firstTransmissionRun = temp;
       }
 
       if (!isPropertyDefault("SecondTransmissionRun"))
       {
+        // Verify that all the required inputs for the second transmission run are now given.
         if (isPropertyDefault("FirstTransmissionRun"))
         {
           throw std::invalid_argument(
               "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
         }
-        MatrixWorkspace_sptr temp = this->getProperty("SecondTransmissionRun");
-        secondTransmissionRun = temp;
         if (isPropertyDefault("Params"))
         {
           throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then stitching Params are also required.");
+              "If a SecondTransmissionRun has been given, then stitching Params for the transmission runs are also required.");
         }
-        else
+        if (isPropertyDefault("StartOverlapQ"))
+        {
+          throw std::invalid_argument(
+              "If a SecondTransmissionRun has been given, then a stitching StartOverlapQ for the transmission runs is also required.");
+        }
+        if (isPropertyDefault("EndOverlapQ"))
+        {
+          throw std::invalid_argument(
+              "If a SecondTransmissionRun has been given, then a stitching EndOverlapQ for the transmission runs is also required.");
+        }
+        const double startOverlapQ = this->getProperty("StartOverlapQ");
+        const double endOverlapQ = this->getProperty("EndOverlapQ");
+        if( startOverlapQ >= endOverlapQ)
+        {
+          throw std::invalid_argument("EndOverlapQ must be > StartOverlapQ");
+        }
+
+        // Set the values.
+        {
+          MatrixWorkspace_sptr temp = this->getProperty("SecondTransmissionRun");
+          secondTransmissionRun = temp;
+        }
         {
           std::vector<double> params = getProperty("Params");
           stitchingStartQ = params[0];
           stitchingDeltaQ = params[1];
           stitchingEndQ = params[2];
         }
+        {
+          double temp = this->getProperty("StartOverlapQ");
+          stitchingStartOverlapQ = temp;
+          temp = this->getProperty("EndOverlapQ");
+          stitchingEndOverlapQ = temp;
+        }
       }
+
     }
+
 
     /**
      * Convert the TOF workspace into a monitor workspace. Crops to the monitorIndex and applying flat background correction as part of the process.
@@ -460,7 +505,11 @@ namespace Mantid
         OptionalMatrixWorkspace_sptr secondTransmissionRun,
         const OptionalDouble& stitchingStartQ,
         const OptionalDouble& stitchingDeltaQ,
-        const OptionalDouble& stitchingEndQ)
+        const OptionalDouble& stitchingEndQ,
+        const OptionalDouble& stitchingStartOverlapQ,
+        const OptionalDouble& stitchingEndOverlapQ
+
+    )
     {
       auto transRun1 = firstTransmissionRun.get();
 
@@ -508,8 +557,8 @@ namespace Mantid
         AnalysisDataService::Instance().addOrReplace("normalizedTrans2", normalizedTrans2);
         stitch1DAlg->setProperty("LHSWorkspace", denominator);
         stitch1DAlg->setProperty("RHSWorkspace", normalizedTrans2);
-        stitch1DAlg->setProperty("StartOverlap", 10.0); // TODO HARDCODED!!!!!!!!!!!!!
-        stitch1DAlg->setProperty("EndOverlap", 12.0); // TODO HARDCODED!!!!!!!!!!!!!
+        stitch1DAlg->setProperty("StartOverlap", stitchingStartOverlapQ.get() );
+        stitch1DAlg->setProperty("EndOverlap", stitchingEndOverlapQ.get() );
         const std::vector<double> params = boost::assign::list_of(stitchingStartQ.get())(stitchingDeltaQ.get())(stitchingEndQ.get()).convert_to_container<std::vector< double > >();
         stitch1DAlg->setProperty("Params", params);
         stitch1DAlg->execute();
@@ -546,8 +595,10 @@ namespace Mantid
       OptionalDouble stitchingStartQ;
       OptionalDouble stitchingDeltaQ;
       OptionalDouble stitchingEndQ;
+      OptionalDouble stitchingStartOverlapQ;
+      OptionalDouble stitchingEndOverlapQ;
 
-      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ);
+      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
 
       OptionalDouble theta;
       if (!isPropertyDefault("Theta"))
@@ -591,7 +642,8 @@ namespace Mantid
 
           MatrixWorkspace_sptr IvsLam = detectorWS / monitorWS; // Normalize by the integrated monitor counts.
 
-          detectorWS = transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex, firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ);
+          detectorWS = transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
+              i0MonitorIndex, firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
 
 
         }

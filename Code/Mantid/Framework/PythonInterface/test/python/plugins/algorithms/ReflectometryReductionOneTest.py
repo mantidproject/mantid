@@ -110,6 +110,31 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_SecondTransmissionRun(self.__tof)
         self.assertRaises(ValueError, alg.execute)
         
+    def test_provide_second_transmission_run_without_start_overlap_q_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_FirstTransmissionRun(self.__tof)
+        alg.set_SecondTransmissionRun(self.__tof)
+        alg.set_Params([0, 0.1, 1])
+        alg.set_EndOverlapQ( 0.4 )
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_provide_end_transmission_run_without_end_overlap_q_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_FirstTransmissionRun(self.__tof)
+        alg.set_SecondTransmissionRun(self.__tof)
+        alg.set_Params([0, 0.1, 1])
+        alg.set_StartOverlapQ( 0.4 )
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_end_overlap_q_must_be_greater_than_start_overlap_q_or_throw(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_FirstTransmissionRun(self.__tof)
+        alg.set_SecondTransmissionRun(self.__tof)
+        alg.set_Params([0, 0.1, 1])
+        alg.set_StartOverlapQ( 0.6 )
+        alg.set_EndOverlapQ( 0.4 )
+        self.assertRaises(ValueError, alg.execute)
+        
     def test_must_provide_wavelengths(self):
         self.assertRaises(RuntimeError, ReflectometryReductionOne, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMin=1.0)
         self.assertRaises(RuntimeError, ReflectometryReductionOne, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMax=1.0)
@@ -217,7 +242,10 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_WorkspaceIndexList([3,4])
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_SecondTransmissionRun(trans_run2)
-        alg.set_Params("1.5, 0.02, 17")
+        alg.set_Params([1.5, 0.02, 17])
+        alg.set_StartOverlapQ( 10.0 )
+        alg.set_EndOverlapQ( 12.0 )
+        
         out_ws = alg.execute()
         
         self.assertTrue(isinstance(out_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
