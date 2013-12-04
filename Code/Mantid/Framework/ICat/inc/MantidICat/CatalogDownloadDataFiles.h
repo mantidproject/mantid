@@ -6,11 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
-class ICATPortBindingProxy;
-
 namespace Mantid
 {
   namespace ICat
@@ -78,8 +73,6 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
-      /// get location of data file  or download method
-      int doDownload( ICATPortBindingProxy & icat);
       /// True if the extension of the file is a datafile.
       bool isDataFile(const std::string& fileName);
       /// Saves the downloaded file to disc
