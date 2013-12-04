@@ -435,6 +435,8 @@ def getFilePathFromWorkspace(ws):
     return file_path
 
 def getMonitor4event(ws_event):
+    if not isEventWorkspace(ws_event):
+        raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
     file_path = getFilePathFromWorkspace(ws_event)
     ws_monitor = loadMonitorsFromFile(file_path)
     return ws_monitor
@@ -494,6 +496,9 @@ def slice2histogram(ws_event, time_start, time_stop, monitor):
        - time of sliced data
        - charge of sliced data
     """
+    if not isEventWorkspace(ws_event):
+        raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
+
     tot_c, tot_t = getChargeAndTime(ws_event)
 
     if (time_start == -1) and (time_stop == -1):
