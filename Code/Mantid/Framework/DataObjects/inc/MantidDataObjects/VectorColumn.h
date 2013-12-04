@@ -35,18 +35,18 @@ namespace DataObjects
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+   
+  template <class Type>
   class DLLExport VectorColumn : public Column
   {
   public:
     VectorColumn() 
     {
-      // TODO: implement
+      m_type = typeName();
     }
 
     virtual ~VectorColumn()
-    {
-      // TODO: implement
-    }
+    {}
     
     /// Number of individual elements in the column
     virtual size_t size() const
@@ -57,13 +57,13 @@ namespace DataObjects
     /// Returns typeid for the data in the column
     virtual const std::type_info& get_type_info() const
     {
-      return typeid(int); // TODO: for now
+      return typeid( std::vector<Type> );
     }
 
     /// Returns typeid for the pointer type to the data element in the column
     virtual const std::type_info& get_pointer_type_info() const
     {
-      return typeid(int); // TODO: for now
+      return typeid( std::vector<Type>* );
     }
 
     /// Print specified item to the stream
@@ -87,13 +87,13 @@ namespace DataObjects
     /// Overall memory size taken by the column
     virtual long int sizeOfData() const
     {
-      return 0; // TODO: for now
+      // TODO: implement
     }
 
     /// Create another copy of the column 
     virtual VectorColumn* clone() const
     {
-      return NULL; // TODO: for now
+      // TODO: implement
     }
 
     /// Cast to double
@@ -129,22 +129,28 @@ namespace DataObjects
     /// Pointer to a data element
     virtual void* void_pointer(size_t index)
     {
-      return NULL;
+      // TODO: implement
     }
 
     /// Pointer to a data element
     virtual const void* void_pointer(size_t index) const
     {
-      return NULL;
+      // TODO: implement
     }
 
   private:
     /// All the vectors stored
-    std::vector< std::vector<int> > m_data;
+    std::vector< std::vector<Type> > m_data;
+
+    /// Returns the name of the column with the given type. Is specialized using DECLARE_VECTORCOLUMN
+    std::string typeName();
   };
 
 
 } // namespace DataObjects
 } // namespace Mantid
+
+#define DECLARE_VECTORCOLUMN(Type,TypeName) \
+  template<> std::string VectorColumn<Type>::typeName() { return #TypeName; };
 
 #endif  /* MANTID_DATAOBJECTS_VECTORCOLUMN_H_ */

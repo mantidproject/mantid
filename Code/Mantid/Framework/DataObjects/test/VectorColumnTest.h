@@ -15,10 +15,10 @@ public:
   static VectorColumnTest *createSuite() { return new VectorColumnTest(); }
   static void destroySuite( VectorColumnTest *suite ) { delete suite; }
 
-
-  void test_Something()
+  void test_construction()
   {
-    TSM_ASSERT( "You forgot to write a test!", 0);
+    VectorColumn<int> col;
+    TS_ASSERT_EQUALS( col.type(), "vector_int"); 
   }
 
 
