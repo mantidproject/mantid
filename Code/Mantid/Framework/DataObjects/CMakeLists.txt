@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/SplittersWorkspace.cpp
 	src/TableColumn.cpp
 	src/TableWorkspace.cpp
+	src/VectorColumn.cpp
 	src/Workspace2D.cpp
 	src/WorkspaceSingleValue.cpp
 )
@@ -57,6 +58,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/SplittersWorkspace.h
 	inc/MantidDataObjects/TableColumn.h
 	inc/MantidDataObjects/TableWorkspace.h
+	inc/MantidDataObjects/VectorColumn.h
 	inc/MantidDataObjects/Workspace2D.h
 	inc/MantidDataObjects/WorkspaceSingleValue.h
 )
@@ -64,9 +66,9 @@ set ( INC_FILES
 set ( TEST_FILES
 	CompressedWorkspace2DTest.h
 	EventListTest.h
-	EventsTest.h
 	EventWorkspaceMRUTest.h
 	EventWorkspaceTest.h
+	EventsTest.h
 	GroupingWorkspaceTest.h
 	Histogram1DTest.h
 	LibraryManagerTest.h
@@ -86,6 +88,7 @@ set ( TEST_FILES
 	TableWorkspacePropertyTest.h
 	TableWorkspaceTest.h
 	TofEventTest.h
+	VectorColumnTest.h
 	WeightedEventNoTimeTest.h
 	WeightedEventTest.h
 	Workspace2DTest.h
