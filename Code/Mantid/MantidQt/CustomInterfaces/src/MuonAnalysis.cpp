@@ -699,6 +699,8 @@ MatrixWorkspace_sptr MuonAnalysis::getPeriodWorkspace(PeriodType periodType, Wor
       periodSelector = m_uiForm.homePeriodBox1; break;
     case Second:
       periodSelector = m_uiForm.homePeriodBox2; break;
+    default:
+      throw std::invalid_argument("Unsupported period type");
   }
 
   const QString periodLabel = periodSelector->currentText();
