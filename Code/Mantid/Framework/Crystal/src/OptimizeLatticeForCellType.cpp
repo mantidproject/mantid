@@ -83,7 +83,8 @@ namespace Mantid
     cellTypes.push_back("Triclinic");
     declareProperty("CellType", cellTypes[0],boost::make_shared<StringListValidator>(cellTypes),
       "Select the cell type.");
-
+    declareProperty( "Apply", false, "Re-index the peaks");
+    declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
     declareProperty("OutputChi2", 0.0,Direction::Output);
 
       //Disable default gsl error handler (which is to call abort!)
@@ -97,6 +98,8 @@ namespace Mantid
      */
     void OptimizeLatticeForCellType::exec()
     {
+      bool   apply          = this->getProperty("Apply");
+      double tolerance      = this->getProperty("Tolerance");
       std::string par[6];
       std::string inname = getProperty("PeaksWorkspace");
       par[0] = inname;
@@ -189,10 +192,14 @@ namespace Mantid
       // Show the modified lattice parameters
       OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
       g_log.notice() << o_lattice << "\n";
-      // Reindex peaks with new UB
-      Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
-      alg->setPropertyValue("PeaksWorkspace", inname);
-      alg->executeAsChildAlg();
+      if ( apply )
+      {
+		  // Reindex peaks with new UB
+		  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
+		  alg->setPropertyValue("PeaksWorkspace", inname);
+		  alg->setProperty("Tolerance", tolerance);
+		  alg->executeAsChildAlg();
+      }
     }
 
 
