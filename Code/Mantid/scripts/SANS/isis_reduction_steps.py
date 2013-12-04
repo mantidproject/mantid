@@ -16,7 +16,7 @@ from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
                          getFilePathFromWorkspace, getWorkspaceReference,
-                         getMonitor4event)
+                         getMonitor4event, slice2histogram)
 import isis_instrument
 import os
 import math
@@ -1611,9 +1611,15 @@ class SliceEvent(ReductionStep):
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
             return
-        self.monitor = getMonitor4event(ws_pointer)
-        hist = fromEvent2Histogram(ws_pointer, self.monitor)
-        self.monitor = str(self.monitor)
+        start, stop = reducer.getCurrSliceLimit()
+        
+        _monitor = getMonitor4event(ws_pointer)
+
+        hist, others = slice2histogram(ws_pointer, start, stop, _monitor)
+        
+        # get the monitors scaled for the sliced event
+        self.monitor = '_scaled_monitor'
+        CropWorkspace(hist, EndWorkspaceIndex=_monitor.getNumberHistograms()-1, OutputWorkspace=self.monitor)
 
 class UserFile(ReductionStep):
     """
