@@ -106,7 +106,7 @@ namespace Mantid
       API::MatrixWorkspace_sptr transmissonCorrection(API::MatrixWorkspace_sptr IvsLam,
           const MinMax& wavelengthInterval, const MinMax& wavelengthMonitorBackgroundInterval,
           const MinMax& wavelengthMonitorIntegrationInterval, const int& i0MonitorIndex,
-          OptionalMatrixWorkspace_sptr firstTransmissionRun,
+          API::MatrixWorkspace_sptr firstTransmissionRun,
           OptionalMatrixWorkspace_sptr secondTransmissionRun, const OptionalDouble& stitchingStartQ,
           const OptionalDouble& stitchingDeltaQ, const OptionalDouble& stitchingEndQ,
           const OptionalDouble& stitchingStartOverlapQ, const OptionalDouble& stitchingEndOverlapQ);

@@ -95,8 +95,6 @@ namespace Mantid
           new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input,
               PropertyMode::Optional, inputValidator->clone()),
           "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
-      declareProperty(new PropertyWithValue<double>("Theta", -1, Direction::Input),
-          "Final theta value.");
 
       declareProperty(
           new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
@@ -105,9 +103,15 @@ namespace Mantid
               "Values are in q. This input is only needed if a SecondTransmission run is provided.");
 
       declareProperty(new PropertyWithValue<double>("StartOverlapQ", Mantid::EMPTY_DBL(), Direction::Input), "Start Q for stitching transmission runs together");
-      declareProperty(new PropertyWithValue<double>("EndOverlapQ", Mantid::EMPTY_DBL(), Direction::Input), "End Q for stitching transmission runs together");
+      declareProperty(
+          new PropertyWithValue<double>("EndOverlapQ", Mantid::EMPTY_DBL(), Direction::Input),
+          "End Q for stitching transmission runs together");
 
-
+      setPropertyGroup("FirstTransmissionRun", "Transmission");
+      setPropertyGroup("SecondTransmissionRun", "Transmission");
+      setPropertyGroup("Params", "Transmission");
+      setPropertyGroup("StartOverlapQ", "Transmission");
+      setPropertyGroup("EndOverlapQ", "Transmission");
 
       std::vector<std::string> propOptions;
       propOptions.push_back(pointDetectorAnalysis);
@@ -165,6 +169,10 @@ namespace Mantid
           "Wavelength maximum for integration. Taken to be WavelengthMax if not provided.");
 
       declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+
+      declareProperty(new PropertyWithValue<double>("Theta", -1, Direction::Input),
+                "Final theta value.");
+
     }
 
     /**
@@ -460,22 +468,17 @@ namespace Mantid
       cropWorkspaceAlg->setProperty("XMax", wavelengthMinMax.get<1>());
       cropWorkspaceAlg->execute();
       detectorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
+
+      auto rebinWorkspaceAlg = this->createChildAlgorithm("Rebin");
+      rebinWorkspaceAlg->initialize();
+      std::vector<double> params = boost::assign::list_of(0.05); // HARDCODED!!!!!
+      rebinWorkspaceAlg->setProperty("Params", params);
+      rebinWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
+      rebinWorkspaceAlg->execute();
+      detectorWS = rebinWorkspaceAlg->getProperty("OutputWorkspace");
+
       return detectorWS;
     }
-
-    /*
-    WorkspaceIndexList getSpectrumIds(const WorkspaceIndexList& workspaceIds)
-    {
-      // Get spectrum ID.
-            WorkspaceIndexList detectorSpectrumIdRange;
-            for(size_t i = 0; i < detectorIndexRange.size(); ++i)
-            {
-              auto spectrum = inLam->getSpectrum(detectorIndexRange[i]);
-              specid_t specId = spectrum->getSpectrumNo();
-              detectorSpectrumIdRange.push_back(specId);
-            }
-    }
-    */
 
     /**
      * Convert From a TOF workspace into a detector and monitor workspace both in Lambda.
@@ -507,25 +510,61 @@ namespace Mantid
       return DetectorMonitorWorkspacePair( detectorWS, monitorWS );
     }
 
+    /**
+     * Helper non-member function for translating all the workspace indexes in an origin workspace into workspace indexes
+     * of a host end-point workspace. This is done using spectrum numbers as the intermediate.
+     *
+     * This function will throw a runtime error if the specId are not found to exist on the host end-point workspace.
+     *
+     * @param originWS : Origin workspace, which provides the original workspaceindex to spectrum id mapping.
+     * @param hostWS : Workspace onto which the resulting workspace indexes will be hosted
+     * @return Remapped wokspace indexes applicable for the host workspace.
+     */
+    ReflectometryReductionOne::WorkspaceIndexList createWorkspaceIndexListFromDetectorWorkspace(MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS)
+    {
+      auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
+      ReflectometryReductionOne::WorkspaceIndexList transmissionDetectorIndexList;
+      for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it)
+      {
+        specid_t specId = (*it).first;
+        transmissionDetectorIndexList.push_back(hostWS->getIndexFromSpectrumNumber(specId)); // Could be slow to do it like this.
+      }
+      return transmissionDetectorIndexList;
+    }
+
+    /**
+     * Perform Transmission Corrections.
+     * @param IvsLam : Run workspace which is to be normalized by the results of the transmission corrections.
+     * @param wavelengthInterval : Wavelength interval for the run workspace.
+     * @param wavelengthMonitorBackgroundInterval : Wavelength interval for the monitor background
+     * @param wavelengthMonitorIntegrationInterval : Wavelength interval for the monitor integration
+     * @param i0MonitorIndex : Monitor index for the I0 monitor
+     * @param firstTransmissionRun : The first transmission run
+     * @param secondTransmissionRun : The second transmission run (optional)
+     * @param stitchingStartQ : Stitching start Q (optional but dependent on secondTransmissionRun)
+     * @param stitchingDeltaQ : Stitching delta Q (optional but dependent on secondTransmissionRun)
+     * @param stitchingEndQ : Stitching end Q (optional but dependent on secondTransmissionRun)
+     * @param stitchingStartOverlapQ : Stitching start Q overlap (optional but dependent on secondTransmissionRun)
+     * @param stitchingEndOverlapQ : Stitching end Q overlap (optional but dependent on secondTransmissionRun)
+     * @return Normalized run workspace by the transmission workspace, which have themselves been converted to Lam, normalized by monitors and possibly stitched together.
+     */
     MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(MatrixWorkspace_sptr IvsLam,
         const MinMax& wavelengthInterval,
         const MinMax& wavelengthMonitorBackgroundInterval,
         const MinMax& wavelengthMonitorIntegrationInterval,
         const int& i0MonitorIndex,
-        OptionalMatrixWorkspace_sptr firstTransmissionRun,
+        MatrixWorkspace_sptr firstTransmissionRun,
         OptionalMatrixWorkspace_sptr secondTransmissionRun,
         const OptionalDouble& stitchingStartQ,
         const OptionalDouble& stitchingDeltaQ,
         const OptionalDouble& stitchingEndQ,
         const OptionalDouble& stitchingStartOverlapQ,
         const OptionalDouble& stitchingEndOverlapQ
-
     )
     {
-      auto transRun1 = firstTransmissionRun.get();
-
-      const WorkspaceIndexList indexZero = boost::assign::list_of(0)(0).convert_to_container<std::vector<int> >();
-      auto trans1InLam = toLam(transRun1, indexZero, 0, wavelengthInterval, wavelengthMonitorBackgroundInterval); //TODO: Check index selection assumptions here!
+      g_log.debug("Extracting first transmission run workspace indexes from spectra");
+      const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam, firstTransmissionRun);
+      auto trans1InLam = toLam(firstTransmissionRun, detectorIndexes, i0MonitorIndex, wavelengthInterval, wavelengthMonitorBackgroundInterval); //TODO: Check index selection assumptions here!
       MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
       MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
 
@@ -543,10 +582,10 @@ namespace Mantid
       if (secondTransmissionRun.is_initialized())
       {
         auto transRun2 = secondTransmissionRun.get();
-
-        const WorkspaceIndexList indexZero = boost::assign::list_of(0)(0).convert_to_container<std::vector<int> >();
-        auto trans2InLam = toLam(transRun2, indexZero, 0, wavelengthInterval,
-            wavelengthMonitorBackgroundInterval); //TODO: Check index selection assumptions here!
+        g_log.debug("Extracting second transmission run workspace indexes from spectra");
+        const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam, transRun2);
+        auto trans2InLam = toLam(transRun2, detectorIndexes, i0MonitorIndex, wavelengthInterval,
+            wavelengthMonitorBackgroundInterval);
         MatrixWorkspace_sptr trans2Detector = trans2InLam.get<0>();
         MatrixWorkspace_sptr trans2Monitor = trans2InLam.get<1>();
 
@@ -576,10 +615,6 @@ namespace Mantid
         denominator = stitch1DAlg->getProperty("OutputWorkspace");
         AnalysisDataService::Instance().remove("denominator");
         AnalysisDataService::Instance().remove("normalizedTrans2");
-
-        /*
-         * _transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=10, EndOverlap=12,  Params="%f,%f,%f" % (1.5, 0.02, 17))
-         */
       }
 
         auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
@@ -651,11 +686,11 @@ namespace Mantid
           integrationAlg->execute();
           MatrixWorkspace_sptr integratedMonitor =  integrationAlg->getProperty("OutputWorkspace");
 
-          MatrixWorkspace_sptr IvsLam = detectorWS / monitorWS; // Normalize by the integrated monitor counts.
+          MatrixWorkspace_sptr IvsLam = detectorWS / integratedMonitor; // Normalize by the integrated monitor counts.
 
           // Perform transmission correction.
           detectorWS = transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
-              i0MonitorIndex, firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
+              i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
         }
         else
         {

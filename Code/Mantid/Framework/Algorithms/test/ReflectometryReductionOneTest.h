@@ -28,7 +28,7 @@ public:
     std::vector<int> detectorIndexRange;
     size_t workspaceIndexToKeep1 = 3;
     size_t workspaceIndexToKeep2 = 4;
-    size_t monitorIndex = 0;
+    size_t monitorIndex = 2;
 
     specid_t specId1 = toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
     specid_t specId2 = toConvert->getSpectrum(workspaceIndexToKeep2)->getSpectrumNo();
@@ -41,7 +41,7 @@ public:
     detectorIndexRange.push_back(workspaceIndexToKeep2);
     detectorIndexRange.push_back(workspaceIndexToKeep2);
     // Define a wavelength range for the detector workspace
-    const double wavelengthMin = 10;
+    const double wavelengthMin = 1.0;
     const double wavelengthMax = 15;
     const double backgroundWavelengthMin = 17;
     const double backgroundWavelengthMax = 20;
