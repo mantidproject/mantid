@@ -543,6 +543,11 @@
     <technique>Muon spectroscopy</technique>
   </instrument>
 
+  <instrument name="GPS">
+    <zeropadding size="3"/>
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+  
 </facility>
 
 <!--  Reactor Orphee (France) -->

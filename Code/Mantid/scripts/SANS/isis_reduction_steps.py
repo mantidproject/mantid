@@ -88,6 +88,25 @@ class LoadRun(object):
   
     wksp_name = property(get_wksp_name, None, None, None)
 
+    def _load_transmission(self, inst=None, is_can=False, extra_options=dict()):
+        if '.raw' in self._data_file or '.RAW' in self._data_file:
+            self._load(inst, is_can, extra_options)
+            return
+      
+        workspace = self._get_workspace_name()
+
+        # For sans, in transmission, we care only about the monitors. Hence,
+        # by trying to load only the monitors we speed up the reduction process. 
+        # besides, we avoid loading events which is uselles for transmission. 
+        # it may fail, if the input file was not a nexus file, in this case, 
+        # it pass the job to the default _load method.
+        try:
+            outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
+            self.periods_in_file = 1
+            self._wksp_name = workspace
+        except:
+            self._load(inst, is_can, extra_options)
+
     def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
             Load a workspace and read the logs into the passed instrument reference
@@ -219,8 +238,11 @@ class LoadRun(object):
                 spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
 
         try:
-            # the spectrum_limits is not the default only for transmission data
-            self._load(reducer.instrument, extra_options=spectrum_limits)
+            if self._is_trans:
+                self._load_transmission(reducer.instrument, extra_options=spectrum_limits)
+            else:
+                # the spectrum_limits is not the default only for transmission data
+                self._load(reducer.instrument, extra_options=spectrum_limits)
         except RuntimeError, details:
             sanslog.warning(str(details))
             self._wksp_name = ''
