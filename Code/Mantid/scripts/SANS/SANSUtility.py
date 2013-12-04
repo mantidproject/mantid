@@ -493,12 +493,21 @@ def slice2histogram(ws_event, time_start, time_stop, monitor):
        - total charge
        - time of sliced data
        - charge of sliced data
+       @param ws_event pointer to the event workspace
+       @param time_start: the minimum value to filter. Pass -1 to get the minimum available
+       @param time_stop: the maximum value to filter. Pass -1 to get the maximum available
+       @param monitor: pointer to the monitor workspace
     """
     tot_c, tot_t = getChargeAndTime(ws_event)
 
     if (time_start == -1) and (time_stop == -1):
         hist = fromEvent2Histogram(ws_event, monitor)
         return hist, (tot_t, tot_c, tot_t, tot_c)
+    
+    if time_start == -1: 
+        time_start = 0.0
+    if time_stop == -1:
+        time_stop = tot_t+0.001
 
     sliced_ws = sliceByTimeWs(ws_event, time_start, time_stop)
     sliced_ws = RenameWorkspace(sliced_ws, OutputWorkspace=ws_event.name())
