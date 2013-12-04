@@ -13,6 +13,7 @@
 
 import tube
 from tube_calib_fit_params import TubeCalibFitParams 
+import numpy
 
 RunNumber = 12024
 def CalibrateMerlin(RunNumber):
