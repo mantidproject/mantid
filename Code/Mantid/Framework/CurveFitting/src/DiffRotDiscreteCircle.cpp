@@ -129,7 +129,6 @@ void InelasticDiffRotDiscreteCircle::function1D( double *out, const double* xVal
   const int N = getAttribute( "N" ).asInt();
 
 
-  //double sph[ N ];
   double* sph = new double[ N ];
   for ( int k = 1;  k < N;  k++ )
   {
@@ -137,7 +136,6 @@ void InelasticDiffRotDiscreteCircle::function1D( double *out, const double* xVal
 	sph[ k ] = sin( x ) / x; // spherical Besell function of order zero 'j0' is sin(x)/x
   }
 
-  //double ratel[ N ];
   double* ratel = new double[ N ];
   for ( int l = 1;  l < ( N - 1 );  l++)
   {
