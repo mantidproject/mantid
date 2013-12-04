@@ -55,10 +55,6 @@ If the energy units are <math>\mu</math>eV, then <math>\tau</math> is expressed 
 #include <cmath>
 #include "MantidAPI/ParameterTie.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 namespace Mantid
 {
 namespace CurveFitting
@@ -91,8 +87,8 @@ double ElasticDiffRotDiscreteCircle::HeightPrefactor() const{
   double aN = 0;
   for ( int k = 1;  k < N;  k++ )
   {
-	double x = 2 * Q * R * sin( M_PI * k / N );
-	aN += sin( x ) / x;  // spherical Besell function of order zero j0==sin(x)/x
+    double x = 2 * Q * R * sin( M_PI * k / N );
+    aN += sin( x ) / x;  // spherical Besell function of order zero j0==sin(x)/x
   }
   aN += 1; // limit for j0 when k==N, or x==0
   return aN / N;
@@ -129,42 +125,39 @@ void InelasticDiffRotDiscreteCircle::function1D( double *out, const double* xVal
   const int N = getAttribute( "N" ).asInt();
 
 
-  double* sph = new double[ N ];
+  std::vector<double> sph( N );
   for ( int k = 1;  k < N;  k++ )
   {
-	double x = 2 * Q * R * sin( M_PI * k / N );
-	sph[ k ] = sin( x ) / x; // spherical Besell function of order zero 'j0' is sin(x)/x
+    double x = 2 * Q * R * sin( M_PI * k / N );
+    sph[ k ] = sin( x ) / x; // spherical Besell function of order zero 'j0' is sin(x)/x
   }
 
-  double* ratel = new double[ N ];
+  std::vector<double> ratel( N );
   for ( int l = 1;  l < ( N - 1 );  l++)
   {
-	ratel[ l ] = rate * 4 * pow( sin( M_PI * l / N ), 2 ); // notice that 0 < l/N < 1
+    ratel[ l ] = rate * 4 * pow( sin( M_PI * l / N ), 2 ); // notice that 0 < l/N < 1
   }
 
   for ( size_t i = 0;  i < nData;  i++ )
   {
-	double w = xValues[ i ];
-	double S = 0.0;
-	for ( int l = 1;  l < ( N - 1 ); l++ )
-	{
-	  double lorentzian = ratel[ l ] / ( ratel[ l ] * ratel[ l ] + w * w );
-	  double al = 0.0;
-	  for ( int k = 1;  k < N;  k++ )
-	  {
-		double y = 2 * M_PI * l * k / N;
-		al += cos( y ) * sph[ k ];
-	  }
-	  al += 1; // limit for j0 when k==N, or x==0
-	  al /= N;
-	  S += al * lorentzian;
-	}
-	out[ i ] = I * S / M_PI;
+    double w = xValues[ i ];
+    double S = 0.0;
+    for ( int l = 1;  l < ( N - 1 ); l++ )
+    {
+      double lorentzian = ratel[ l ] / ( ratel[ l ] * ratel[ l ] + w * w );
+      double al = 0.0;
+      for ( int k = 1;  k < N;  k++ )
+      {
+        double y = 2 * M_PI * l * k / N;
+        al += cos( y ) * sph[ k ];
+      }
+      al += 1; // limit for j0 when k==N, or x==0
+      al /= N;
+      S += al * lorentzian;
+    }
+    out[ i ] = I * S / M_PI;
   }
 
-  // some cleaning
-  delete [] ratel;
-  delete [] sph;
 }
 
 /* Propagate the attribute to its member functions.
