@@ -353,15 +353,19 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
   // Name of the group currently used to store plot workspaces. Depends on loaded data.
   const std::string groupName = getGroupName().toStdString();
 
-  const std::string wsName = getNewAnalysisWSName(groupName, itemType, tableRow, plotType); 
-  const std::string wsRawName = wsName + "; Raw"; 
-
+  // Create workspace and a raw (unbinned) version of it
   MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
   MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
+  // Find names for new workspaces
+  const std::string wsName = getNewAnalysisWSName(groupName, itemType, tableRow, plotType); 
+  const std::string wsRawName = wsName + "; Raw"; 
+
+  // Make sure they end up in the ADS
   ads.addOrReplace(wsName, ws);
   ads.addOrReplace(wsRawName, wsRaw);
 
+  // Make sure they are in the right group
   if ( ! ads.retrieveWS<WorkspaceGroup>(groupName)->contains(wsName) )
   {
     ads.addToGroup(groupName, wsName);
