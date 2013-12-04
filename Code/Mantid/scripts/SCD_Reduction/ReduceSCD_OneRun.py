@@ -245,11 +245,31 @@ if use_sphere_integration:
                     SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
   peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
-                  CoordinatesToUse="Q (sample frame)",
 	          BackgroundOuterRadius=bkg_outer_radius, 
                   BackgroundInnerRadius=bkg_inner_radius,
 	          PeaksWorkspace=peaks_ws, 
                   IntegrateIfOnEdge=integrate_if_edge_peak )
+elif use_cylinder_integration:
+#
+# Integrate found or predicted peaks in Q space using spheres, and save 
+# integrated intensities, with Niggli indexing.  First get an un-weighted 
+# workspace to do raw integration (we don't need high resolution or 
+# LorentzCorrection to do the raw sphere integration )
+#
+  MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
+                    dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
+                    LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
+                    SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
+
+  peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
+	              BackgroundOuterRadius=bkg_outer_radius, 
+                  BackgroundInnerRadius=bkg_inner_radius,
+	              PeaksWorkspace=peaks_ws, 
+                  IntegrateIfOnEdge=integrate_if_edge_peak, 
+                  Cylinder=use_cylinder_integration,CylinderLength=cylinder_length,
+                  PercentBackground=cylinder_percent_bkg,
+                  IntegrationOption=cylinder_int_option,
+                  ProfileFunction=cylinder_profile_fit)
 
 elif use_fit_peaks_integration:
   event_ws = Rebin( InputWorkspace=event_ws,

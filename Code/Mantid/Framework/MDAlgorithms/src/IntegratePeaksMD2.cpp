@@ -70,7 +70,7 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDAlgorithms/IntegratePeaksMD.h"
+#include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -95,7 +95,7 @@ namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(IntegratePeaksMD)
+  DECLARE_ALGORITHM(IntegratePeaksMD2)
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -107,21 +107,21 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  IntegratePeaksMD::IntegratePeaksMD()
+  IntegratePeaksMD2::IntegratePeaksMD2()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  IntegratePeaksMD::~IntegratePeaksMD()
+  IntegratePeaksMD2::~IntegratePeaksMD2()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void IntegratePeaksMD::initDocs()
+  void IntegratePeaksMD2::initDocs()
   {
     this->setWikiSummary("Integrate single-crystal peaks in reciprocal space, for [[MDEventWorkspace]]s.");
     this->setOptionalMessage("Integrate single-crystal peaks in reciprocal space, for MDEventWorkspaces.");
@@ -130,7 +130,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void IntegratePeaksMD::init()
+  void IntegratePeaksMD2::init()
   {
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
 
@@ -138,8 +138,6 @@ namespace MDAlgorithms
     propOptions.push_back("Q (lab frame)");
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
-    declareProperty("CoordinatesToUse", "Q (lab frame)",boost::make_shared<StringListValidator>(propOptions),
-       "Ignored:  algorithm uses the InputWorkspace's coordinates.");
 
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
         "Fixed radius around each peak position in which to integrate (in the same units as the workspace).");
@@ -199,7 +197,7 @@ namespace MDAlgorithms
    * @param ws ::  MDEventWorkspace to integrate
    */
   template<typename MDE, size_t nd>
-  void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     if (nd != 3)
       throw std::invalid_argument("For now, we expect the input MDEventWorkspace to have 3 dimensions only.");
@@ -212,16 +210,7 @@ namespace MDAlgorithms
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
 
-    /// Value of the CoordinatesToUse property.
-    std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
     int CoordinatesToUse =  ws->getSpecialCoordinateSystem();
-    g_log.warning() << " Warning"<< CoordinatesToUse<<std::endl;
-    if (CoordinatesToUse == 1 && CoordinatesToUseStr != "Q (lab frame)")
-      g_log.warning() << "Warning: used Q (lab frame) coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
-    else if (CoordinatesToUse == 2 && CoordinatesToUseStr != "Q (sample frame)")
-      g_log.warning() << "Warning: used Q (sample frame) coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
-    else if (CoordinatesToUse == 3 && CoordinatesToUseStr != "HKL")
-      g_log.warning() << "Warning: used HKL coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
 
     /// Radius to use around peaks
     double PeakRadius = getProperty("PeakRadius");
@@ -586,7 +575,7 @@ namespace MDAlgorithms
 					double error;
 
 					gsl_function F;
-					F.function = &Mantid::MDAlgorithms::f_eval;
+					F.function = &Mantid::MDAlgorithms::f_eval2;
 					F.params = &fun;
 
 					gsl_integration_qags (&F, x[0], x[numSteps-1], 0, 1e-7, 1000,
@@ -652,7 +641,7 @@ namespace MDAlgorithms
    * @param QLabFrame. The Peak center.
    * @param r: Peak radius.
    */
-  bool IntegratePeaksMD::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
+  bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
   {
     bool in = true;
     const int nAngles = 8;
@@ -691,14 +680,14 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void IntegratePeaksMD::exec()
+  void IntegratePeaksMD2::exec()
   {
     inWS = getProperty("InputWorkspace");
 
     CALL_MDEVENT_FUNCTION(this->integrate, inWS);
   }
 
-  double f_eval (double x, void * params)
+  double f_eval2 (double x, void * params)
   {
 	boost::shared_ptr<const API::CompositeFunction> fun = *(boost::shared_ptr<const API::CompositeFunction> *) params;
 	FunctionDomain1DVector domain(x);

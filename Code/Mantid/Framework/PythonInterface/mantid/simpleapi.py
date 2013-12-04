@@ -34,6 +34,8 @@ from api._aliases import *
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
 __SPECIALIZED_FUNCTIONS__ = ["Load", "Fit"]
+# List of specialized algorithms
+__MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD","IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
 __LOGGING_KEYWORD__ = "EnableLogging"
 
@@ -547,6 +549,10 @@ def _create_algorithm(algorithm, version, _algm_object):
         algm = _framework.createAlgorithm(algorithm, _version)
         _set_logging_option(algm, kwargs)
 
+        # Temporary removal of unneeded parameter from user's python scripts
+        if "CoordinatesToUse" in kwargs and algorithm in __MDCOORD_FUNCTIONS__:
+            del kwargs["CoordinatesToUse"]
+ 
         try:
             frame = kwargs["__LHS_FRAME_OBJECT__"]
             del kwargs["__LHS_FRAME_OBJECT__"]
