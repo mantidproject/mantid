@@ -1,20 +1,48 @@
 /*WIKI*
-This fitting function models the dynamics structure factor of a particle undergoing
-discrete jumps on N-sites evenly distributed in a circle. The particle can only
-jump to neighboring sites. This is the most common type of discrete rotational diffusion
-in a circle.
+== Summary ==
+
+This fitting function models the dynamics structure factor of a particle undergoing discrete jumps on N-sites
+evenly distributed in a circle. The particle can only jump to neighboring sites.
+This is the most common type of discrete rotational diffusion in a circle.
 
 The fitting parameters are the inverse of the transition rate, <math>\tau</math>
 and the circle radius <math>r</math>
 
-<math> S(Q,E) = A_0(Q,r) \delta (\omega) + \frac{1}{\pi} \sum_{l=1}^{N-1} A_l (Q,r) \frac{\tau_l}{1+(\omega \tau_l)^2} </math}
+<math> S(Q,E) = A_0(Q,r) \delta (\omega) + \frac{1}{\pi} \sum_{l=1}^{N-1} A_l (Q,r) \frac{\tau_l}{1+(\omega \tau_l)^2} </math>
 
-<math> A_l(Q,r) = \frac{1}{N} \sum_{k=1}^{N} j_0( 2 Q r sin(\frac{{\pi k}{N}) ) cos(\frac{2\pi lk}{N}) </math>
+<math> A_l(Q,r) = \frac{1}{N} \sum_{k=1}^{N} j_0( 2 Q r sin(\frac{\pi k}{N}) ) cos(\frac{2\pi lk}{N}) </math>
 
 <math> \tau_l^{-1} = 4 \tau^{-1} sin^2(\frac{\pi l}{N}) </math>
 
-If the energy units of energy are micro-eV, then tau is expressed in nano-seconds. If E-units are mili-eV then
-tau is expressed in pico-seconds.
+If the energy units are <math>\mu</math>eV, then <math>\tau</math> is expressed in nano-seconds. If E-units are meV then
+<math>\tau</math> is expressed in pico-seconds.
+
+== Properties ==
+
+{| border="1" cellpadding="5" cellspacing="0"
+!Order
+!Name
+!Default
+!Description
+|-
+|1
+|Intensity
+|0.1
+|Intensity of the peak
+|-
+|2
+|Radius
+|1.0
+|Circle radius
+|-
+|3
+|Decay
+|100.0
+|inverse of the transition rate (ps if energy in meV; ns if energy in <math>\mu</math>eV)
+|}
+
+
+[[Category:Fit_functions]]
 *WIKI*/
 
 //----------------------------------------------------------------------
