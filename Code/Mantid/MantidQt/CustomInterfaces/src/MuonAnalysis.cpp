@@ -350,42 +350,49 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
   AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
 
-  // Name of the group currently used to store plot workspaces. Depends on loaded data.
-  const std::string groupName = getGroupName().toStdString();
-
-  // Create workspace and a raw (unbinned) version of it
-  MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
-  MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
-
-  // Find names for new workspaces
-  const std::string wsName = getNewAnalysisWSName(groupName, itemType, tableRow, plotType); 
-  const std::string wsRawName = wsName + "; Raw"; 
-
-  // Make sure they end up in the ADS
-  ads.addOrReplace(wsName, ws);
-  ads.addOrReplace(wsRawName, wsRaw);
-
-  // Make sure they are in the right group
-  if ( ! ads.retrieveWS<WorkspaceGroup>(groupName)->contains(wsName) )
+  try 
   {
-    ads.addToGroup(groupName, wsName);
-    ads.addToGroup(groupName, wsRawName);
+    // Name of the group currently used to store plot workspaces. Depends on loaded data.
+    const std::string groupName = getGroupName().toStdString();
+
+    // Create workspace and a raw (unbinned) version of it
+    MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
+    MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
+
+    // Find names for new workspaces
+    const std::string wsName = getNewAnalysisWSName(groupName, itemType, tableRow, plotType); 
+    const std::string wsRawName = wsName + "; Raw"; 
+
+    // Make sure they end up in the ADS
+    ads.addOrReplace(wsName, ws);
+    ads.addOrReplace(wsRawName, wsRaw);
+
+    // Make sure they are in the right group
+    if ( ! ads.retrieveWS<WorkspaceGroup>(groupName)->contains(wsName) )
+    {
+      ads.addToGroup(groupName, wsName);
+      ads.addToGroup(groupName, wsRawName);
+    }
+
+    QString wsNameQ = QString::fromStdString(wsName);
+
+    // Hide all the previous plot windows, if requested by user
+    if (m_uiForm.hideGraphs->isChecked())
+      hideAllPlotWindows();
+
+    // Plot the workspace
+    plotSpectrum( wsNameQ, 0, (plotType == Logorithm) );
+
+    // Change the plot style of the graph so that it matches what is selected on
+    // the plot options tab.
+    setPlotStyle( wsNameQ, getPlotStyleParams(wsNameQ, 0) );
+
+    setCurrentDataName( wsNameQ );
   }
-
-  QString wsNameQ = QString::fromStdString(wsName);
-
-  // Hide all the previous plot windows, if requested by user
-  if (m_uiForm.hideGraphs->isChecked())
-    hideAllPlotWindows();
-
-  // Plot the workspace
-  plotSpectrum( wsNameQ, 0, (plotType == Logorithm) );
-
-  // Change the plot style of the graph so that it matches what is selected on
-  // the plot options tab.
-  setPlotStyle( wsNameQ, getPlotStyleParams(wsNameQ, 0) );
-
-  setCurrentDataName( wsNameQ );
+  catch(std::exception& e)
+  { 
+    QMessageBox::critical( this, "MuonAnalysis - Error", "Unable to plot the item. Check log for details." ); 
+  }
 
   m_updating = false;
 }
