@@ -27,17 +27,17 @@ If the energy units are <math>\mu</math>eV, then <math>\tau</math> is expressed 
 |-
 |1
 |Intensity
-|0.1
-|Intensity of the peak
+|1.0
+|Intensity of the peak [arbitrary units]
 |-
 |2
 |Radius
 |1.0
-|Circle radius
+|Circle radius [Angstroms]
 |-
 |3
 |Decay
-|100.0
+|1.0
 |inverse of the transition rate (ps if energy in meV; ns if energy in <math>\mu</math>eV)
 |}
 
@@ -70,7 +70,7 @@ DECLARE_FUNCTION(DiffRotDiscreteCircle);
 
 ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle(){
   //declareParameter("Height", 1.0); //parameter "Height" already declared in constructor of base class DeltaFunction
-  declareParameter( "Radius", 1.0, "Circle radius" );
+  declareParameter( "Radius", 1.0, "Circle radius [Angstroms] " );
 
   // Ensure positive values for Height and Radius
   BoundaryConstraint* HeightConstraint = new BoundaryConstraint( this, "Height", std::numeric_limits<double>::epsilon(), true );
@@ -100,9 +100,9 @@ double ElasticDiffRotDiscreteCircle::HeightPrefactor() const{
 
 InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle() : m_t2e(4.136)
 {
-  declareParameter( "Intensity",1.0, "scaling factor" );
-  declareParameter( "Radius", 1.0, "Circle radius" );
-  declareParameter( "Decay", 1.0, "Inverse of transition rate, in nanoseconds or picoseconds" );
+  declareParameter( "Intensity",1.0, "scaling factor [arbitrary units]" );
+  declareParameter( "Radius", 1.0, "Circle radius [Angstroms]" );
+  declareParameter( "Decay", 1.0, "Inverse of transition rate, in nanoseconds if energy in micro-ev, or picoseconds if energy in mili-eV" );
 
   declareAttribute( "Q", API::IFunction::Attribute( 0.5 ) );
   declareAttribute( "N", API::IFunction::Attribute( 3 ) );
