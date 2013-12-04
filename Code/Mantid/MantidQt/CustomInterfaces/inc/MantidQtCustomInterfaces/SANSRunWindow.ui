@@ -254,7 +254,7 @@
          <item>
           <widget class="QPushButton" name="slicePb">
            <property name="text">
-            <string>Slice Events:</string>
+            <string>Time slicing:</string>
            </property>
           </widget>
          </item>
