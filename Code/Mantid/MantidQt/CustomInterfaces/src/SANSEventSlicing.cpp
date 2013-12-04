@@ -91,7 +91,7 @@ SANSEventSlicing::ChargeAndTime SANSEventSlicing::getFullChargeAndTime(const QSt
          << "  charge, t_passed = su.getChargeAndTime(ws)\n"
          << "  print '%.2f, %.2f' %(charge, t_passed)\n"
          << "except :\n"
-         << "  print 'EXCEPTION:',sys.exc_info()[2]\n";
+         << "  print 'EXCEPTION:',sys.exc_info()[1]\n";
 
   QString result = runPythonCode(code).simplified(); 
 
@@ -116,9 +116,11 @@ SANSEventSlicing::ChargeAndTime SANSEventSlicing::values2ChargeAndTime(const QSt
 
 void SANSEventSlicing::checkPythonOutput(const QString & result)
 {
-  if (result.contains("EXCEPTION"))
+  const QString MARK("EXCEPTION:");
+  if (result.contains(MARK))
   {
-    throw std::runtime_error(result.toStdString()); 
+    
+    throw std::runtime_error(QString(result).replace(MARK, "").toStdString()); 
   }
 }
 
@@ -147,7 +149,7 @@ QString SANSEventSlicing::createSliceEventCode(const QString & name_ws,
          << ", mon)\n"
          << "  print '%.2f, %.2f' %(times[3], times[2])\n"
          << "except:\n"
-         << "  print 'EXCEPTION:',sys.exc_info()[2]";
+         << "  print 'EXCEPTION:',sys.exc_info()[1]";
 
   return code; 
 
