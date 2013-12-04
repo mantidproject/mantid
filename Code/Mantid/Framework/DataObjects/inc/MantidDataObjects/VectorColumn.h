@@ -73,7 +73,21 @@ namespace DataObjects
     /// Print specified item to the stream
     virtual void print(size_t index, std::ostream& s) const
     {
-      // TODO: implement
+      const std::vector<Type>& values = m_data.at(index);
+
+      auto it = values.begin();
+
+      if ( it != values.end() )
+      {
+        s << *it;  
+        ++it;
+      }
+
+      for ( ; it != values.end(); ++it )
+      {
+        s << ',';
+        s << *it;
+      }
     }
 
     /// Set item from a string value

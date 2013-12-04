@@ -64,6 +64,33 @@ public:
     TS_ASSERT_THROWS( col.read(4,"1,2,a,3"), std::invalid_argument);
   }
 
+  void test_print()
+  {
+    VectorColumnTestHelper<int> col;
+
+    col.resize(3);
+   
+    // Simple case
+    std::vector<int> v1;
+    v1.push_back(11); v1.push_back(22); v1.push_back(33); v1.push_back(44); v1.push_back(55);
+    col.cell< std::vector<int> >(0) = v1;
+    std::ostringstream s1;
+    TS_ASSERT_THROWS_NOTHING( col.print(0, s1) );
+    TS_ASSERT_EQUALS( s1.str(), "11,22,33,44,55" );
+
+    // Single element
+    std::vector<int> v2;
+    v2.push_back(9876);
+    col.cell< std::vector<int> >(1) = v2;
+    std::ostringstream s2;
+    TS_ASSERT_THROWS_NOTHING( col.print(1, s2) );
+    TS_ASSERT_EQUALS( s2.str(), "9876" );
+
+    // Unset element
+    std::ostringstream s3;
+    TS_ASSERT_THROWS_NOTHING( col.print(2, s3) );
+    TS_ASSERT( s3.str().empty() );
+  }
 };
 
 
