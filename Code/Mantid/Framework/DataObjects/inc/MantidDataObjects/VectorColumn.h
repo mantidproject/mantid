@@ -4,6 +4,10 @@
 #include "MantidAPI/Column.h"
 #include "MantidKernel/System.h"
 
+#include <boost/algorithm/string/join.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 namespace Mantid
 {
@@ -75,7 +79,28 @@ namespace DataObjects
     /// Set item from a string value
     virtual void read(size_t index, const std::string & text)
     {
-      // TODO: implement
+      std::vector<Type> newValues;
+      
+      boost::char_separator<char> delim(",");
+      boost::tokenizer< boost::char_separator<char> > elements(text, delim);
+
+      for ( auto it = elements.begin(); it != elements.end(); it++ )
+      {
+        std::string element(*it);
+
+        boost::trim(element);
+
+        try 
+        {
+          newValues.push_back( boost::lexical_cast<Type>(element) );
+        }
+        catch(boost::bad_lexical_cast&)
+        {
+          throw std::invalid_argument("Unable to convert one of the elements: " + element);
+        }
+      }
+
+      m_data.at(index) = newValues;
     }
 
     /// Specialized type check
@@ -112,7 +137,7 @@ namespace DataObjects
     /// Sets the new column size.
     virtual void resize(size_t count)
     {
-      // TODO: implement
+      m_data.resize(count);
     }
 
     /// Inserts an item.
@@ -129,13 +154,13 @@ namespace DataObjects
     /// Pointer to a data element
     virtual void* void_pointer(size_t index)
     {
-      // TODO: implement
+      return &m_data.at(index);
     }
 
     /// Pointer to a data element
     virtual const void* void_pointer(size_t index) const
     {
-      // TODO: implement
+      return &m_data.at(index);
     }
 
   private:
