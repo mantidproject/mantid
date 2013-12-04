@@ -11,6 +11,7 @@ class ConfirmQMainWindow(QtGui.QMainWindow):
         self.modFlag = False
         self.gui = ui
     def closeEvent(self, event):
+        self.gui.buttonProcess.setFocus()
         if self.modFlag:
             event.ignore()
             msgBox = QtGui.QMessageBox()

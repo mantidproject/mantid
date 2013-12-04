@@ -25,6 +25,10 @@ except ImportError:
 class ReflGui(refl_window.Ui_windowRefl):
     __instrumentRuns = None
 
+    def __del__(self):
+        if self.windowRefl.modFlag:
+            self.save(true)
+
     def on_buttonAuto_clicked(self):
         self.autoFill()
     def on_comboCycle_activated(self, cycle):
@@ -57,14 +61,19 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.showHelp()
     def on_actionMantid_Help_triggered(self):
         self.showHelp()
+    def on_tableMain_modified(self):
+        if not self.loading:
+            self.windowRefl.modFlag = True
 
     #Further UI setup
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
+        self.loading = False
         self.initTable()
         self.populateList()
-        self.connectSlots(windowRefl)
-        windowRefl.modFlag = True
+        self.windowRefl = windowRefl
+        self.connectSlots()
+        #self.windowRefl.modFlag = True
     def initTable(self):
         self.currentTable = None
         self.tableMain.resizeColumnsToContents()
@@ -93,7 +102,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
-    def connectSlots(self, windowRefl):
+    def connectSlots(self):
         self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboCycle.activated.connect(self.on_comboCycle_activated)
@@ -107,9 +116,9 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionSave.triggered.connect(self.on_actionSave_triggered)
         self.actionSave_As.triggered.connect(self.on_actionSave_As_triggered)
         self.actionSave_Workspaces.triggered.connect(self.on_actionSave_Workspaces_triggered)
-        self.actionClose_Refl_Gui.triggered.connect(windowRefl.close)
+        self.actionClose_Refl_Gui.triggered.connect(self.windowRefl.close)
         self.actionMantid_Help.triggered.connect(self.on_actionMantid_Help_triggered)
-        #windowRefl.saveSignal.connect(self.saving)
+        self.tableMain.cellChanged.connect(self.on_tableMain_modified)
     def populateList(self, selected_cycle=None):
         # Clear existing
         self.listMain.clear()
@@ -348,8 +357,10 @@ class ReflGui(refl_window.Ui_windowRefl):
                     writer.writerow(rowtext)
             self.currentTable = filename
             print "Saved file to " + filename
+            self.windowRefl.modFlag = False
         except:
             return False
+        self.windowRefl.modFlag = False
         return True
     def save(self, failsave = False):
         filename = ''
@@ -400,22 +411,29 @@ class ReflGui(refl_window.Ui_windowRefl):
             filename = saveDialog.selectedFiles()[0]
             self.saveTable(filename)
     def loadTable(self):
+        self.loading = True
         loadDialog = QtGui.QFileDialog(self.layoutMainRow.parent(), "Open Table")
         loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
         loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
         if loadDialog.exec_():
-            filename = loadDialog.selectedFiles()[0]
-            self.currentTable = filename
-            reader = csv.reader(open(filename, "rb"))
-            row = 0
-            for line in reader:
-                if (row < 100):
-                    for column in range(self.tableMain.columnCount() - 1):
-                        item = QtGui.QTableWidgetItem()
-                        item.setText(line[column])
-                        self.tableMain.setItem(row, column, item)
-                    row = row + 1
+            try:
+                filename = loadDialog.selectedFiles()[0]
+                self.currentTable = filename
+                reader = csv.reader(open(filename, "rb"))
+                row = 0
+                for line in reader:
+                    if (row < 100):
+                        for column in range(self.tableMain.columnCount() - 1):
+                            item = QtGui.QTableWidgetItem()
+                            item.setText(line[column])
+                            self.tableMain.setItem(row, column, item)
+                        row = row + 1
+            except:
+                print 'Could not load file: ' + filename + '. File not found or unable to read from file.'
+        self.loading = False
+        self.windowRefl.modFlag = False
     def reloadTable(self):
+        self.loading = True
         filename = self.currentTable
         if filename:
             try:
@@ -432,6 +450,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                 print 'Could not load file: ' + filename + '. File not found or unable to read from file.'
         else:
             print 'No file in table to reload.'
+        self.loading = False
+        self.windowRefl.modFlag = False
     def saveWorkspaces(self):
         #Dialog = QtGui.QDialog()
         #u = Ui_SaveWindow()
