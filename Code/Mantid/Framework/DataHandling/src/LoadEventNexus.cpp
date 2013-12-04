@@ -653,6 +653,13 @@ public:
         if (temp < m_min_id) m_min_id = temp;
         if (temp > m_max_id) m_max_id = temp;
       }
+
+      if ( m_min_id > static_cast<uint32_t>(alg->eventid_max) )
+      {
+        // All the detector IDs in the bank are higher than the highest 'known' (from the IDF)
+        // ID. Setting this will abort the loading of the bank.
+        m_loadError = true;
+      }
     }
   }
 
