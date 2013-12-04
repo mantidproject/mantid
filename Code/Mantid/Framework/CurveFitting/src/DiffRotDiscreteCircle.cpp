@@ -48,6 +48,7 @@ If the energy units are <math>\mu</math>eV, then <math>\tau</math> is expressed 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <limits>
 #include "MantidCurveFitting/DiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidAPI/FunctionFactory.h"
