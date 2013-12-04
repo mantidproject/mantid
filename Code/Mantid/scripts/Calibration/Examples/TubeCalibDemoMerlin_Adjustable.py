@@ -14,6 +14,7 @@
 import tube
 from tube_calib_fit_params import * # To handle fit parameters
 import os
+import numpy
 
 def CalibrateMerlin( RunNumber, UsePeakFile=False ):
 # Run number must include any leading zeros that appear in the file name of the run.
