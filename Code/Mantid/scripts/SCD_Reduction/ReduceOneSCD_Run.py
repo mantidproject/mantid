@@ -59,8 +59,8 @@ run              = sys.argv[2]
 params_dictionary = ReduceDictionary.LoadDictionary( config_file_name )
 
 instrument_name           = params_dictionary[ "instrument_name" ]
-calibration_file_1        = params_dictionary[ "calibration_file_1" ]
-calibration_file_2        = params_dictionary[ "calibration_file_2" ]
+calibration_file_1        = params_dictionary.get('calibration_file_1', None)
+calibration_file_2        = params_dictionary.get('calibration_file_2', None)
 data_directory            = params_dictionary[ "data_directory" ]
 output_directory          = params_dictionary[ "output_directory" ]
 min_tof                   = params_dictionary[ "min_tof" ] 
@@ -73,6 +73,7 @@ centering                 = params_dictionary[ "centering" ]
 num_peaks_to_find         = params_dictionary[ "num_peaks_to_find" ]
 min_d                     = params_dictionary[ "min_d" ]
 max_d                     = params_dictionary[ "max_d" ]
+max_Q                     = params_dictionary.get('max_Q', "50")
 tolerance                 = params_dictionary[ "tolerance" ]
 integrate_predicted_peaks = params_dictionary[ "integrate_predicted_peaks" ]
 min_pred_wl               = params_dictionary[ "min_pred_wl" ]
@@ -80,10 +81,10 @@ max_pred_wl               = params_dictionary[ "max_pred_wl" ]
 min_pred_dspacing         = params_dictionary[ "min_pred_dspacing" ]
 max_pred_dspacing         = params_dictionary[ "max_pred_dspacing" ]
 
-use_sphere_integration    = params_dictionary[ "use_sphere_integration" ]
-use_ellipse_integration   = params_dictionary[ "use_ellipse_integration" ]
-use_fit_peaks_integration = params_dictionary[ "use_fit_peaks_integration" ]
-use_cylindrical_integration = params_dictionary[ "use_cylindrical_integration" ]
+use_sphere_integration    = params_dictionary.get('use_sphere_integration', True)
+use_cylinder_integration    = params_dictionary.get('use_cylinder_integration', False)
+use_ellipse_integration   = params_dictionary.get('use_ellipse_integration', False)
+use_fit_peaks_integration = params_dictionary.get('use_fit_peaks_integration', False)
 
 peak_radius               = params_dictionary[ "peak_radius" ]
 bkg_inner_radius          = params_dictionary[ "bkg_inner_radius" ]
@@ -156,12 +157,14 @@ integrated_monitor_ws = Integration( InputWorkspace=monitor_ws,
 monitor_count = integrated_monitor_ws.dataY(0)[0]
 print "\n", run, " has calculated monitor count", monitor_count, "\n"
 
+minVals= "-"+max_Q +",-"+max_Q +",-"+max_Q
+maxVals = max_Q +","+max_Q +","+ max_Q
 #
 # Make MD workspace using Lorentz correction, to find peaks 
 #
 MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                     dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
-   	            LorentzCorrection='1', MinValues="-50,-50,-50", MaxValues="50,50,50",
+                    LorentzCorrection='1', MinValues=minVals, MaxValues=maxVals,
                     SplitInto='2', SplitThreshold='50',MaxRecursionDepth='11' )
 #
 # Find the requested number of peaks.  Once the peaks are found, we no longer
@@ -221,7 +224,7 @@ if use_sphere_integration:
 #
   MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                     dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
-                    LorentzCorrection='0', MinValues="-50,-50,-50", MaxValues="50,50,50",
+                    LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
                     SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
   peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
@@ -251,7 +254,7 @@ elif use_cylindrical_integration:
   profiles_filename = output_directory + "/" + instrument_name + '_' + run + '.profiles'
   MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                     dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
-                    LorentzCorrection='0', MinValues="-50,-50,-50", MaxValues="50,50,50",
+                    LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
                     SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
   peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=cylinder_radius,

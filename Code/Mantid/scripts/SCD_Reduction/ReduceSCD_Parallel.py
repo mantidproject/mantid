@@ -92,6 +92,11 @@ instrument_name       = params_dictionary[ "instrument_name" ]
 read_UB               = params_dictionary[ "read_UB" ]
 UB_filename           = params_dictionary[ "UB_filename" ]
 
+# determine what python executable to launch new jobs with
+python = sys.executable
+if python is None: # not all platforms define this variable
+   python = 'python'
+
 #
 # Make the list of separate process commands.  If a slurm queue name
 # was specified, run the processes using slurm, otherwise just use
@@ -101,7 +106,7 @@ list=[]
 index = 0
 for r_num in run_nums:
   list.append( ProcessThread() )
-  cmd = 'python ' + reduce_one_run_script + ' ' + config_file_name + ' ' + str(r_num)
+  cmd = '%s %s %s %s' % (python, reduce_one_run_script, config_file_name, str(r_num))
   if slurm_queue_name is not None:
     console_file = output_directory + "/" + str(r_num) + "_output.txt"
     cmd =  'srun -p ' + slurm_queue_name + \
