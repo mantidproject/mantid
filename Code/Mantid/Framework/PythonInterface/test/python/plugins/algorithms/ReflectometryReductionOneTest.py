@@ -84,7 +84,16 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg = self.construct_standard_algorithm()
         alg.set_FirstTransmissionRun(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)
-    
+        
+    ''' TODO: Need to check that the following rule is valid. If not, which spectra do we use?
+    def test_first_transmission_workspace_not_single_spectra_throws(self):
+        alg = self.construct_standard_algorithm()
+        two_spectra = CreateWorkspace(UnitX="TOF", DataX=[0,0,0,0], DataY=[0,0], NSpec=2)
+        alg.set_FirstTransmissionRun(two_spectra)
+        self.assertRaises(ValueError, alg.execute)
+        DeleteWorkspace(two_spectra)
+    '''
+        
     def test_check_second_transmission_workspace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_SecondTransmissionRun(self.__not_tof)
@@ -184,12 +193,12 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_RegionOfDirectBeam([1, 0]);
         self.assertRaises(ValueError, alg.execute)
         
-    def test_output_in_lam(self):
+    def test_point_detector_run_with_single_transmission_workspace(self):
         alg = self.construct_standard_algorithm()
         real_run = Load('INTER00013460.nxs')
         alg.set_InputWorkspace(real_run)
         alg.set_WorkspaceIndexList([3,4])
-        alg.set_FirstTransmissionRun(real_run) # Currently a requirement.
+        alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
         out_ws = alg.execute()
         
         self.assertTrue(isinstance(out_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
@@ -197,6 +206,27 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         
         self.assertEqual(2, out_ws.getNumberHistograms())
         DeleteWorkspace(real_run)
+        
+    def test_point_detector_run_with_two_transmission_workspaces(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('INTER00013460.nxs')
+        trans_run1 = Load('INTER00013463.nxs')
+        trans_run2 = Load('INTER00013464.nxs')
+        
+        alg.set_InputWorkspace(real_run)
+        alg.set_WorkspaceIndexList([3,4])
+        alg.set_FirstTransmissionRun(trans_run1) 
+        alg.set_SecondTransmissionRun(trans_run2)
+        alg.set_Params("1.5, 0.02, 17")
+        out_ws = alg.execute()
+        
+        self.assertTrue(isinstance(out_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
+        
+        self.assertEqual(2, out_ws.getNumberHistograms())
+        DeleteWorkspace(real_run)
+        DeleteWorkspace(trans_run1)
+        DeleteWorkspace(trans_run2)
         
         
 if __name__ == '__main__':

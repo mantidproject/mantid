@@ -275,6 +275,12 @@ namespace Mantid
       if (!isPropertyDefault("FirstTransmissionRun"))
       {
         MatrixWorkspace_sptr temp = this->getProperty("FirstTransmissionRun");
+        /*
+        if(temp->getNumberHistograms() > 1)
+        {
+          throw std::invalid_argument("Error with FirstTransmissionRun. Only one histogram is permitted for a transmission run.");
+        }
+        */
         firstTransmissionRun = temp;
       }
 
@@ -459,7 +465,7 @@ namespace Mantid
       auto transRun1 = firstTransmissionRun.get();
 
       const WorkspaceIndexList indexZero = boost::assign::list_of(0)(0).convert_to_container<std::vector<int> >();
-      auto trans1InLam = toLam(transRun1, indexZero, i0MonitorIndex, wavelengthInterval, wavelengthMonitorBackgroundInterval);
+      auto trans1InLam = toLam(transRun1, indexZero, 0, wavelengthInterval, wavelengthMonitorBackgroundInterval); //TODO: Check index selection assumptions here!
       MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
       MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
 
@@ -472,26 +478,60 @@ namespace Mantid
       integrationAlg->execute();
       trans1Monitor = integrationAlg->getProperty("OutputWorkspace");
 
-      MatrixWorkspace_sptr normalizedTrans1 = trans1Detector / trans1Monitor;
+      MatrixWorkspace_sptr denominator = trans1Detector / trans1Monitor;
 
-      if(secondTransmissionRun.is_initialized())
+      if (secondTransmissionRun.is_initialized())
       {
         auto transRun2 = secondTransmissionRun.get();
-        return IvsLam; //hack
+
+        const WorkspaceIndexList indexZero = boost::assign::list_of(0)(0).convert_to_container<std::vector<int> >();
+        auto trans2InLam = toLam(transRun2, indexZero, 0, wavelengthInterval,
+            wavelengthMonitorBackgroundInterval); //TODO: Check index selection assumptions here!
+        MatrixWorkspace_sptr trans2Detector = trans2InLam.get<0>();
+        MatrixWorkspace_sptr trans2Monitor = trans2InLam.get<1>();
+
+        // Monitor integration ... can this happen inside the toLam routine?
+        auto integrationAlg = this->createChildAlgorithm("Integration");
+        integrationAlg->initialize();
+        integrationAlg->setProperty("InputWorkspace", trans2Monitor);
+        integrationAlg->setProperty("RangeLower", wavelengthMonitorIntegrationInterval.get<0>());
+        integrationAlg->setProperty("RangeUpper", wavelengthMonitorIntegrationInterval.get<1>());
+        integrationAlg->execute();
+        trans2Monitor = integrationAlg->getProperty("OutputWorkspace");
+
+        MatrixWorkspace_sptr normalizedTrans2 = trans2Detector / trans2Monitor;
+
+        // Stitch the results.
+        auto stitch1DAlg = this->createChildAlgorithm("Stitch1D");
+        stitch1DAlg->initialize();
+        AnalysisDataService::Instance().addOrReplace("denominator", denominator);
+        AnalysisDataService::Instance().addOrReplace("normalizedTrans2", normalizedTrans2);
+        stitch1DAlg->setProperty("LHSWorkspace", denominator);
+        stitch1DAlg->setProperty("RHSWorkspace", normalizedTrans2);
+        stitch1DAlg->setProperty("StartOverlap", 10.0); // TODO HARDCODED!!!!!!!!!!!!!
+        stitch1DAlg->setProperty("EndOverlap", 12.0); // TODO HARDCODED!!!!!!!!!!!!!
+        const std::vector<double> params = boost::assign::list_of(stitchingStartQ.get())(stitchingDeltaQ.get())(stitchingEndQ.get()).convert_to_container<std::vector< double > >();
+        stitch1DAlg->setProperty("Params", params);
+        stitch1DAlg->execute();
+        denominator = stitch1DAlg->getProperty("OutputWorkspace");
+        AnalysisDataService::Instance().remove("denominator");
+        AnalysisDataService::Instance().remove("normalizedTrans2");
+
+        /*
+         * _transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=10, EndOverlap=12,  Params="%f,%f,%f" % (1.5, 0.02, 17))
+         */
       }
-      else
-      {
 
         auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
         rebinToWorkspaceAlg->initialize();
         rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", IvsLam);
-        rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", normalizedTrans1);
+        rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", denominator);
         rebinToWorkspaceAlg->execute();
-        normalizedTrans1 = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+        denominator = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
 
-        MatrixWorkspace_sptr normalizedIvsLam = IvsLam / normalizedTrans1;
+        MatrixWorkspace_sptr normalizedIvsLam = IvsLam / denominator;
         return normalizedIvsLam;
-      }
+
     }
 
     //----------------------------------------------------------------------------------------------
