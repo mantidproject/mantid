@@ -51,7 +51,7 @@ public:
   virtual ~ElasticDiffRotDiscreteCircle() {};
 
   /// overwrite IFunction base class methods
-  virtual std::string name()const{return "ElasticDiffRotDiscreteCircle";}
+  virtual std::string name()const{ return "ElasticDiffRotDiscreteCircle"; }
 
   /// A rescaling of the peak intensity
   double HeightPrefactor() const;
@@ -72,11 +72,11 @@ public:
   /// Destructor
   virtual ~InelasticDiffRotDiscreteCircle() {}
 
-  virtual std::string name() const {return "InelasticDiffRotDiscreteCircle";}
+  virtual std::string name() const { return "InelasticDiffRotDiscreteCircle"; }
 
 protected:
 
-  virtual void function1D(double * out, const double* xValues, const size_t nData) const;
+  virtual void function1D( double * out, const double* xValues, const size_t nData ) const;
 
 private:
 
@@ -109,10 +109,10 @@ public:
   virtual void trickleDownAttribute( const std::string &name );
 
   /// Override parent definition
-  virtual void declareAttribute( const std::string & name, const API::IFunction::Attribute & defaultValue);
+  virtual void declareAttribute( const std::string & name, const API::IFunction::Attribute & defaultValue );
 
   /// Override parent definition
-  virtual void setAttribute( const std::string & attName, const Attribute & att);
+  virtual void setAttribute( const std::string & attName, const Attribute & att );
 
 private:
 
