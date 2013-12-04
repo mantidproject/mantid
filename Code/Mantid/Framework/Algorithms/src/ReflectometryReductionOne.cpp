@@ -193,7 +193,7 @@ namespace Mantid
      * Get the workspace index list
      * @return Workspace index list.
      */
-    ReflectometryReductionOne::WorkspaceIndexList ReflectometryReductionOne::getWorkspaceIndexList()
+    ReflectometryReductionOne::WorkspaceIndexList ReflectometryReductionOne::getWorkspaceIndexList() const
     {
       WorkspaceIndexList indexList = getProperty("WorkspaceIndexList");
       if (indexList.size() % 2 != 0 || indexList.size() == 0)
@@ -223,7 +223,7 @@ namespace Mantid
      * @param optionalUpperLower : Object to set min and max on.
      */
     void ReflectometryReductionOne::fetchOptionalLowerUpperPropertyValue(const std::string& propertyName,
-        bool isPointDetector, OptionalWorkspaceIndexes& optionalUpperLower)
+        bool isPointDetector, OptionalWorkspaceIndexes& optionalUpperLower) const
     {
       if (!isPropertyDefault(propertyName))
       {
@@ -260,7 +260,7 @@ namespace Mantid
      * @return A tuple consisting of min, max
      */
     ReflectometryReductionOne::MinMax ReflectometryReductionOne::getMinMax(
-        const std::string& minProperty, const std::string& maxProperty)
+        const std::string& minProperty, const std::string& maxProperty) const
     {
       const double min = getProperty(minProperty);
       const double max = getProperty(maxProperty);
@@ -269,6 +269,42 @@ namespace Mantid
         throw std::invalid_argument("Cannot have any WavelengthMin > WavelengthMax");
       }
       return MinMax(min, max);
+    }
+
+    /**
+     * Validate the transmission workspace inputs when a second transmission run is provided.
+     * Throws if any of the property values do not make sense.
+     */
+    void ReflectometryReductionOne::validateTransmissionInputs() const
+    {
+      // Verify that all the required inputs for the second transmission run are now given.
+      if (isPropertyDefault("FirstTransmissionRun"))
+      {
+        throw std::invalid_argument(
+            "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
+      }
+      if (isPropertyDefault("Params"))
+      {
+        throw std::invalid_argument(
+            "If a SecondTransmissionRun has been given, then stitching Params for the transmission runs are also required.");
+      }
+      if (isPropertyDefault("StartOverlapQ"))
+      {
+        throw std::invalid_argument(
+            "If a SecondTransmissionRun has been given, then a stitching StartOverlapQ for the transmission runs is also required.");
+      }
+      if (isPropertyDefault("EndOverlapQ"))
+      {
+        throw std::invalid_argument(
+            "If a SecondTransmissionRun has been given, then a stitching EndOverlapQ for the transmission runs is also required.");
+      }
+      const double startOverlapQ = this->getProperty("StartOverlapQ");
+      const double endOverlapQ = this->getProperty("EndOverlapQ");
+      if (startOverlapQ >= endOverlapQ)
+      {
+        throw std::invalid_argument("EndOverlapQ must be > StartOverlapQ");
+      }
+
     }
 
     /**
@@ -287,7 +323,7 @@ namespace Mantid
         OptionalMatrixWorkspace_sptr& firstTransmissionRun,
         OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
         OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
-        OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ)
+        OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ) const
     {
       if (!isPropertyDefault("FirstTransmissionRun"))
       {
@@ -303,33 +339,8 @@ namespace Mantid
 
       if (!isPropertyDefault("SecondTransmissionRun"))
       {
-        // Verify that all the required inputs for the second transmission run are now given.
-        if (isPropertyDefault("FirstTransmissionRun"))
-        {
-          throw std::invalid_argument(
-              "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
-        }
-        if (isPropertyDefault("Params"))
-        {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then stitching Params for the transmission runs are also required.");
-        }
-        if (isPropertyDefault("StartOverlapQ"))
-        {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then a stitching StartOverlapQ for the transmission runs is also required.");
-        }
-        if (isPropertyDefault("EndOverlapQ"))
-        {
-          throw std::invalid_argument(
-              "If a SecondTransmissionRun has been given, then a stitching EndOverlapQ for the transmission runs is also required.");
-        }
-        const double startOverlapQ = this->getProperty("StartOverlapQ");
-        const double endOverlapQ = this->getProperty("EndOverlapQ");
-        if( startOverlapQ >= endOverlapQ)
-        {
-          throw std::invalid_argument("EndOverlapQ must be > StartOverlapQ");
-        }
+        // Check that the property values provided make sense together.
+        validateTransmissionInputs();
 
         // Set the values.
         {
@@ -642,10 +653,9 @@ namespace Mantid
 
           MatrixWorkspace_sptr IvsLam = detectorWS / monitorWS; // Normalize by the integrated monitor counts.
 
+          // Perform transmission correction.
           detectorWS = transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
               i0MonitorIndex, firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
-
-
         }
         else
         {

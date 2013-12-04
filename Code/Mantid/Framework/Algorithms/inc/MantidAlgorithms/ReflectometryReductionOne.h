@@ -13,7 +13,7 @@ namespace Mantid
   namespace Algorithms
   {
 
-    /** ReflectometryReductionOne : TODO: DESCRIPTION
+    /** ReflectometryReductionOne : Reflectometry reduction of a single input TOF workspace to an IvsQ workspace.
 
      Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -47,45 +47,62 @@ namespace Mantid
       typedef boost::optional<std::vector<int> > OptionalWorkspaceIndexes;
       typedef boost::tuple<Mantid::API::MatrixWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr> DetectorMonitorWorkspacePair;
 
+      /// Constructor
       ReflectometryReductionOne();
+      /// Destructor
       virtual ~ReflectometryReductionOne();
 
       virtual const std::string name() const;
       virtual int version() const;
       virtual const std::string category() const;
 
+      /// Convert the input workspace to wavelength, splitting according to the properties provided.
       DetectorMonitorWorkspacePair toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
           const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
           const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax);
 
     private:
 
-      bool isPropertyDefault(const std::string& propertyName) const;
-
-      WorkspaceIndexList getWorkspaceIndexList();
-
-      void fetchOptionalLowerUpperPropertyValue(const std::string& propertyName, bool isPointDetector,
-          OptionalWorkspaceIndexes& optionalUpperLower);
-
-      MinMax getMinMax(const std::string& minProperty, const std::string& maxProperty);
-
-      void getTransmissionRunInfo(OptionalMatrixWorkspace_sptr& firstTransmissionRun,
-          OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
-          OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
-          OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ);
-
+      /** Overridden Algorithm methods **/
       virtual void initDocs();
 
       void init();
 
       void exec();
 
+      /** Auxillary getters and validators **/
+      bool isPropertyDefault(const std::string& propertyName) const;
+
+      /// Get a workspace index list.
+      WorkspaceIndexList getWorkspaceIndexList() const;
+
+      /// Get min max indexes.
+      void fetchOptionalLowerUpperPropertyValue(const std::string& propertyName, bool isPointDetector,
+          OptionalWorkspaceIndexes& optionalUpperLower) const;
+
+      /// Get the min/max property values
+      MinMax getMinMax(const std::string& minProperty, const std::string& maxProperty) const;
+
+      /// Get the transmission correction properties
+      void getTransmissionRunInfo(OptionalMatrixWorkspace_sptr& firstTransmissionRun,
+          OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
+          OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
+          OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ) const;
+
+      /// Validate the transmission correction property inputs
+      void validateTransmissionInputs() const;
+
+      /** Algorithm running methods **/
+
+      /// Convert the monitor parts of the input workspace to wavelength
       API::MatrixWorkspace_sptr toLamMonitor(const API::MatrixWorkspace_sptr& toConvert,
           const int monitorIndex, const MinMax& backgroundMinMax);
 
+      /// Convert the detector spectrum of the input workspace to wavelength
       API::MatrixWorkspace_sptr toLamDetector(const WorkspaceIndexList& detectorIndexRange,
           const API::MatrixWorkspace_sptr& toConvert, const MinMax& wavelengthMinMax);
 
+      /// Perform a transmission correction on the input IvsLam workspace
       API::MatrixWorkspace_sptr transmissonCorrection(API::MatrixWorkspace_sptr IvsLam,
           const MinMax& wavelengthInterval, const MinMax& wavelengthMonitorBackgroundInterval,
           const MinMax& wavelengthMonitorIntegrationInterval, const int& i0MonitorIndex,
