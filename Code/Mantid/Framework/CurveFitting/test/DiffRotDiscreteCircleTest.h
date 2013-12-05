@@ -106,7 +106,7 @@ public:
 
     // check Chi-square is small
     const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( chi_squared, 0.01, 0.01 );
+    TS_ASSERT_LESS_THAN( chi_squared, 0.001 );
     //std::cout << "\nchi_squared = " << chi_squared << "\n"; // only for debugging purposes
 
     // check the parameters of the resolution did not change
@@ -164,18 +164,18 @@ public:
     //auto temp_workspace = generateWorkspaceFromFitAlgorithm( fitalg );           // for debugging purposes only
     //saveWorkspace( temp_workspace, "/tmp/junk_from_fit_algorithm.nxs" );         // for debugging purposes only
 
-    // check Chi-square is small
-    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( chi_squared, 1e-09, 1e-09 );
-    //std::cout << "\nchi_squared = " << chi_squared << "\n"; // only for debugging purposes
-
-    // check the parameters of the InelasticDiffRotDiscreteCircle
+    // check the parameters of the InelasticDiffRotDiscreteCircle did not change
     Mantid::API::IFunction_sptr  fitalg_structure_factor = fitalg.getProperty( "Function" );
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Intensity" ), I, I * 0.01 ); // allow for a small percent variation
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Radius" ), R, R * 0.01 );      // allow for a small percent variation
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Decay" ), tao, tao * 0.01 );       // allow for a small percent variation
     //std::cout << "\nGOAL: Intensity = 2.9,  Radius = 2.3,  Decay = 0.468\n"; // only for debugging purposes
     //std::cout << "OPTIMIZED: Intensity = " << fitalg_structure_factor->getParameter("Intensity") << "  Radius = " << fitalg_structure_factor->getParameter("Radius") << "  Decay = " << fitalg_structure_factor->getParameter("Decay") << "\n"; // only for debugging purposes
+
+    // check Chi-square is small
+    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN( chi_squared, 1e-12 );
+    //std::cout << "\nchi_squared = " << chi_squared << "\n"; // only for debugging purposes
 
   }
 
@@ -267,7 +267,7 @@ public:
 
     // check Chi-square is small
     const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( chi_squared, 0.01, 0.01 );
+    TS_ASSERT_LESS_THAN( chi_squared, 0.001 );
     //std::cout << "\nchi_squared = " << chi_squared << "\n"; // only for debugging purposes
 
     // check the parameters of the resolution did not change
