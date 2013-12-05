@@ -92,6 +92,7 @@ namespace MantidWidgets
     void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
     void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
     void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
+    void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
     bool checkEligibility(const QString & name, Mantid::API::Workspace_sptr object) const;
     bool hasValidSuffix(const QString& name) const;
@@ -102,6 +103,7 @@ namespace MantidWidgets
     Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
     Poco::NObserver<WorkspaceSelector, Mantid::API::ClearADSNotification> m_clearObserver;
     Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
+    Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
 
     bool m_init;
