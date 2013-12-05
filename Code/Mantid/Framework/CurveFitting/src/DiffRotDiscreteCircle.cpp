@@ -133,7 +133,7 @@ void InelasticDiffRotDiscreteCircle::function1D( double *out, const double* xVal
   }
 
   std::vector<double> ratel( N );
-  for ( int l = 1;  l < ( N - 1 );  l++)
+  for ( int l = 1;  l < N;  l++) // l goes up to N-1
   {
     ratel[ l ] = rate * 4 * pow( sin( M_PI * l / N ), 2 ); // notice that 0 < l/N < 1
   }
@@ -142,11 +142,11 @@ void InelasticDiffRotDiscreteCircle::function1D( double *out, const double* xVal
   {
     double w = xValues[ i ];
     double S = 0.0;
-    for ( int l = 1;  l < ( N - 1 ); l++ )
+    for ( int l = 1;  l < N; l++ ) // l goes up to N-1
     {
       double lorentzian = ratel[ l ] / ( ratel[ l ] * ratel[ l ] + w * w );
       double al = 0.0;
-      for ( int k = 1;  k < N;  k++ )
+      for ( int k = 1;  k < N;  k++ ) // case k==N after the loop
       {
         double y = 2 * M_PI * l * k / N;
         al += cos( y ) * sph[ k ];
