@@ -2,6 +2,7 @@ import unittest
 from testhelpers import run_algorithm
 from mantid.kernel import std_vector_str
 from mantid.api import WorkspaceFactory
+import numpy
 
 class ITableWorkspaceTest(unittest.TestCase):
   
@@ -108,6 +109,18 @@ class ITableWorkspaceTest(unittest.TestCase):
         
         self.assertTrue(table.cell(0, 0))
         self.assertFalse(table.cell(1, 0))
+
+    def test_set_and_extract_vector_columns(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type='vector_int', name='values')
+
+        # Settings from general Python list
+        table.addRow([ [1,2,3,4,5] ])
+        # Setting from numpy array
+        table.addRow([ numpy.array([6,7,8,9,10]) ])
+
+        self.assertTrue( numpy.array_equal( table.cell(0,0), numpy.array([1,2,3,4,5]) ) )
+        self.assertTrue( numpy.array_equal( table.cell(1,0), numpy.array([6,7,8,9,10]) ) )
         
 if __name__ == '__main__':
     unittest.main()
