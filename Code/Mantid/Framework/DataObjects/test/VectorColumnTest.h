@@ -91,6 +91,19 @@ public:
     TS_ASSERT_THROWS_NOTHING( col.print(2, s3) );
     TS_ASSERT( s3.str().empty() );
   }
+
+  void test_sizeOfData()
+  {
+    VectorColumnTestHelper<int> col;
+
+    col.resize(3);
+
+    col.read(0, "1,2,3");
+    col.read(1, "3,4,5");
+    col.read(2, "7,8,9,10");
+
+    TS_ASSERT_EQUALS( col.sizeOfData(), 10 * sizeof(int) );
+  }
 };
 
 

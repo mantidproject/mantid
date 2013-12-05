@@ -123,10 +123,17 @@ namespace DataObjects
       return false;
     }
 
-    /// Overall memory size taken by the column
+    /// Overall memory size taken by the column (bytes)
     virtual long int sizeOfData() const
     {
-      // TODO: implement
+      long int size(0);
+
+      for ( auto elemIt = m_data.begin(); elemIt != m_data.end(); ++elemIt )
+        size += elemIt->size() * sizeof(Type);
+      {
+      }
+
+      return size;
     }
 
     /// Create another copy of the column 
