@@ -108,6 +108,14 @@ namespace Mantid
       /// Creates Dead Time Table using all the data between begin and end
       TableWorkspace_sptr createDeadTimeTable(std::vector<double>::const_iterator begin, 
         std::vector<double>::const_iterator end);
+
+      /// Loads detector grouping information 
+      void loadDetectorGrouping(Mantid::NeXus::NXRoot& root);
+
+      /// Creates Detector Grouping Table using all the data from the range
+      TableWorkspace_sptr createDetectorGroupingTable(std::vector<int>::const_iterator begin,
+        std::vector<int>::const_iterator end);
+
     };
 
   } // namespace DataHandling

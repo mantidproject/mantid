@@ -170,8 +170,11 @@ namespace Mantid
         m_numberOfPeriods = nxload.t_nper;
       }
 
-      // When we know number of periods and spectra - we can load dead times 
+      // Try to load dead time info
       loadDeadTimes(root);
+
+      // Try to load detector grouping info
+      loadDetectorGrouping(root);
 
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
@@ -521,6 +524,64 @@ namespace Mantid
     }
 
     /**
+     * Loads detector grouping.
+     * @param root :: Root entry of the Nexus file to read from 
+     */
+    void LoadMuonNexus1::loadDetectorGrouping(NXRoot& root)
+    {
+      if ( getPropertyValue("DetectorGroupingTable").empty() )
+        return;
+
+      NXEntry dataEntry = root.openEntry("run/histogram_data_1");
+
+      NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
+      if ( infoGrouping.stat != NX_ERROR )
+      {
+        NXInt groupingData = dataEntry.openNXInt("grouping");
+        groupingData.load();
+
+        int numGroupingEntries = groupingData.dim0();
+
+        std::vector<int> grouping;
+        grouping.reserve(numGroupingEntries);
+
+        for ( int i = 0; i < numGroupingEntries; i++ )
+          grouping.push_back(groupingData[i]);
+
+        if ( numGroupingEntries < m_numberOfSpectra )
+        {
+          throw Exception::FileError("Number of grouping entries is less than number of spectra",
+            m_filename);
+        }
+        else if ( numGroupingEntries == m_numberOfSpectra)
+        {
+          // Simpliest case - one grouping entry per spectra
+          TableWorkspace_sptr table = createDetectorGroupingTable( grouping.begin(), grouping.end() );
+          setProperty("DetectorGroupingTable", table);
+        }
+        else
+        {
+          // More complex case - grouping information for every period
+          
+          if ( numGroupingEntries != m_numberOfSpectra * m_numberOfPeriods )
+          {
+            throw Exception::FileError("Number of grouping entries doesn't cover every spectra in every period",
+              m_filename);
+          }
+
+          WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+
+          for ( auto it = grouping.begin(); it != grouping.end(); it += m_numberOfSpectra )
+          {
+            tableGroup->addWorkspace( createDetectorGroupingTable(it, it + m_numberOfSpectra) );
+          }
+
+          setProperty("DetectorGroupingTable", tableGroup);
+        }
+      }
+    }
+
+    /**
      * Creates Dead Time Table using all the data between begin and end.
      *
      * @param begin :: Iterator to the first element of the data to use
@@ -545,6 +606,39 @@ namespace Mantid
       }
 
       return deadTimeTable;
+    }
+
+    /**
+     * Creates Detector Grouping Table using all the data between begin and end.
+     *
+     * @param begin :: Iterator to the first element of the data to use
+     * @param   end :: Iterator to the last element of the data to use
+     * @return Detector Grouping Table create using the data
+     */
+    TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
+        std::vector<int>::const_iterator begin, std::vector<int>::const_iterator end)
+    {
+      auto detectorGroupingTable = boost::dynamic_pointer_cast<TableWorkspace>(
+        WorkspaceFactory::Instance().createTable("TableWorkspace") );
+
+      detectorGroupingTable->addColumn("str", "ItemType");
+      detectorGroupingTable->addColumn("str", "ItemName");
+      detectorGroupingTable->addColumn("vector_int", "Elements");
+
+      std::map<int, std::vector<int>> grouping;
+
+      for ( auto it = begin; it != end; ++it )
+      {
+        grouping[*it].push_back( static_cast<int>( std::distance(begin,it) ) );
+      }
+
+      for ( auto it = grouping.begin(); it != grouping.end(); ++it )
+      {
+        TableRow newRow = detectorGroupingTable->appendRow();
+         newRow << "Group" << boost::lexical_cast<std::string>(it->first) << it->second;
+      }
+
+      return detectorGroupingTable;
     }
 
     /** Load in a single spectrum taken from a NeXus file

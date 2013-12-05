@@ -492,7 +492,145 @@ public:
     AnalysisDataService::Instance().deepRemoveGroup(outWSName);
     AnalysisDataService::Instance().deepRemoveGroup(deadTimesWSName);
   }
+
+  void test_loadingDetectorGrouping_singlePeriod()
+  {
+    const std::string outWSName = "LoadMuonNexus1Test_OutputWS";
+    const std::string detectorGroupingWSName = "LoadMuonNexus1Test_DetectorGrouping";
+
+    LoadMuonNexus1 alg;
+
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006473.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DetectorGroupingTable", detectorGroupingWSName) ); 
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    TableWorkspace_sptr detectorGrouping;
+    
+    TS_ASSERT_THROWS_NOTHING( detectorGrouping = 
+        AnalysisDataService::Instance().retrieveWS<TableWorkspace>( detectorGroupingWSName ) );
+
+    TS_ASSERT( detectorGrouping );
+
+    if ( detectorGrouping )
+    {
+      TS_ASSERT_EQUALS( detectorGrouping->columnCount(), 3 );
+      TS_ASSERT_EQUALS( detectorGrouping->rowCount(), 2 );
+
+      TS_ASSERT_EQUALS( detectorGrouping->getColumn(0)->type(), "str" );
+      TS_ASSERT_EQUALS( detectorGrouping->getColumn(1)->type(), "str" );
+      TS_ASSERT_EQUALS( detectorGrouping->getColumn(2)->type(), "vector_int" );
+
+      TS_ASSERT_EQUALS( detectorGrouping->getColumn(0)->name(), "ItemType" );
+      TS_ASSERT_EQUALS( detectorGrouping->getColumn(1)->name(), "ItemName" );
+      TS_ASSERT_EQUALS( detectorGrouping->getColumn(2)->name(), "Elements" );
+
+      TS_ASSERT_EQUALS( detectorGrouping->cell<std::string>(0,0), "Group" );
+      TS_ASSERT_EQUALS( detectorGrouping->cell<std::string>(1,0), "Group" );
+
+      TS_ASSERT_EQUALS( detectorGrouping->cell<std::string>(0,1), "1" );
+      TS_ASSERT_EQUALS( detectorGrouping->cell<std::string>(1,1), "2" );
+
+      std::vector<int> e1, e2;
+      TS_ASSERT_THROWS_NOTHING( e1 = detectorGrouping->cell< std::vector<int> >(0,2) );
+      TS_ASSERT_THROWS_NOTHING( e2 = detectorGrouping->cell< std::vector<int> >(1,2) );
+
+      TS_ASSERT_EQUALS( e1.size(), 16);
+      TS_ASSERT_EQUALS( e2.size(), 16);
+
+      TS_ASSERT_EQUALS( e1[0], 0 );
+      TS_ASSERT_EQUALS( e1[15], 15);
+
+      TS_ASSERT_EQUALS( e2[0], 16 );
+      TS_ASSERT_EQUALS( e2[15], 31 );
+    }
+
+    AnalysisDataService::Instance().remove(outWSName);
+    AnalysisDataService::Instance().remove(detectorGroupingWSName);
+  }
   
+  void test_loadingDetectorGrouping_multiPeriod()
+  {
+    const std::string outWSName = "LoadMuonNexus1Test_OutputWS";
+    const std::string detectorGroupingWSName = "LoadMuonNexus1Test_DetectorGrouping";
+
+    LoadMuonNexus1 alg;
+
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "MUSR00015189.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DetectorGroupingTable", detectorGroupingWSName) ); 
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    WorkspaceGroup_sptr detectorGrouping;
+    
+    TS_ASSERT_THROWS_NOTHING( detectorGrouping = 
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>( detectorGroupingWSName ) );
+
+    TS_ASSERT( detectorGrouping );
+
+    if ( detectorGrouping )
+    {
+      TS_ASSERT_EQUALS( detectorGrouping->size(), 2 );
+
+      TableWorkspace_sptr table1 = boost::dynamic_pointer_cast<TableWorkspace>( detectorGrouping->getItem(0) );
+      TS_ASSERT( table1 );
+
+      if ( table1 )
+      {
+        TS_ASSERT_EQUALS( table1->columnCount(), 3 );
+        TS_ASSERT_EQUALS( table1->rowCount(), 2 );
+
+        std::vector<int> e1, e2;
+        TS_ASSERT_THROWS_NOTHING( e1 = table1->cell< std::vector<int> >(0,2) );
+        TS_ASSERT_THROWS_NOTHING( e2 = table1->cell< std::vector<int> >(1,2) );
+
+        TS_ASSERT_EQUALS( e1.size(), 32);
+        TS_ASSERT_EQUALS( e2.size(), 32);
+
+        TS_ASSERT_EQUALS( e1[0], 32 );
+        TS_ASSERT_EQUALS( e1[31], 63 );
+
+        TS_ASSERT_EQUALS( e2[0], 0 );
+        TS_ASSERT_EQUALS( e2[31], 31 );
+      }
+
+      TableWorkspace_sptr table2 = boost::dynamic_pointer_cast<TableWorkspace>( detectorGrouping->getItem(1) );
+      TS_ASSERT( table2 );
+
+      if ( table2 )
+      {
+        TS_ASSERT_EQUALS( table2->columnCount(), 3 );
+        TS_ASSERT_EQUALS( table2->rowCount(), 2 );
+
+        std::vector<int> e1, e2;
+        TS_ASSERT_THROWS_NOTHING( e1 = table2->cell< std::vector<int> >(0,2) );
+        TS_ASSERT_THROWS_NOTHING( e2 = table2->cell< std::vector<int> >(1,2) );
+
+        TS_ASSERT_EQUALS( e1.size(), 32);
+        TS_ASSERT_EQUALS( e2.size(), 32);
+
+        TS_ASSERT_EQUALS( e1[0], 32 );
+        TS_ASSERT_EQUALS( e1[31], 63 );
+
+        TS_ASSERT_EQUALS( e2[0], 0 );
+        TS_ASSERT_EQUALS( e2[31], 31);
+
+      }
+    }
+
+    AnalysisDataService::Instance().deepRemoveGroup(outWSName);
+    AnalysisDataService::Instance().deepRemoveGroup(detectorGroupingWSName);
+  }
 private:
   LoadMuonNexus1 nxLoad,nxload2,nxload3;
   std::string outputSpace;
