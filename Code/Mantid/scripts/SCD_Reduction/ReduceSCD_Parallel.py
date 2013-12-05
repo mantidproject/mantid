@@ -26,6 +26,13 @@
 # runs and to index the combined file (Code from Xiapoing).
 #
 
+#
+# _v2: December 3rd 2013. Mads Joergensen
+# Adds the posibility to optimize the loaded UB for each run for a better peak prediction
+# It is also possible to find the common UB by using lattice parameters of the first
+# run or the loaded matirix instead of the default FFT method
+#
+
 import os
 import sys
 import threading
@@ -91,6 +98,8 @@ instrument_name       = params_dictionary[ "instrument_name" ]
 
 read_UB               = params_dictionary[ "read_UB" ]
 UB_filename           = params_dictionary[ "UB_filename" ]
+UseFirstLattice       = params_dictionary[ "UseFirstLattice" ]
+num_peaks_to_find     = params_dictionary[ "num_peaks_to_find" ]
 
 # determine what python executable to launch new jobs with
 python = sys.executable
@@ -151,7 +160,17 @@ if not use_cylindrical_integration:
     one_run_file = output_directory + '/' + str(r_num) + '_Niggli.integrate'
     peaks_ws = LoadIsawPeaks( Filename=one_run_file )
     if first_time:
+      if UseFirstLattice:
+	# Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
+        FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
+        uc_a = peaks_ws.sample().getOrientedLattice().a()
+        uc_b = peaks_ws.sample().getOrientedLattice().b()
+        uc_c = peaks_ws.sample().getOrientedLattice().c()
+        uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
+        uc_beta = peaks_ws.sample().getOrientedLattice().beta()
+        uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
       SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
+
       first_time = False
     else:
       SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=True, Filename=niggli_integrate_file )
@@ -168,7 +187,19 @@ if not use_cylindrical_integration:
 #Index peaks using UB from UB of initial orientation run/or combined runs from first iteration of crystal orientation refinement
   if read_UB:
     LoadIsawUB(InputWorkspace=peaks_ws, Filename=UB_filename)
+    if UseFirstLattice:
+      # Find UB using lattice parameters from the specified file
+      uc_a = peaks_ws.sample().getOrientedLattice().a()
+      uc_b = peaks_ws.sample().getOrientedLattice().b()
+      uc_c = peaks_ws.sample().getOrientedLattice().c()
+      uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
+      uc_beta = peaks_ws.sample().getOrientedLattice().beta()
+      uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
+      FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
   #OptimizeCrystalPlacement(PeaksWorkspace=peaks_ws,ModifiedPeaksWorkspace=peaks_ws,FitInfoTable='CrystalPlacement_info',MaxIndexingError=tolerance)
+  elif UseFirstLattice and not read_UB:
+    # Find UB using lattice parameters using the FFT results from first run if no UB file is specified
+    FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
   else:
     FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
 

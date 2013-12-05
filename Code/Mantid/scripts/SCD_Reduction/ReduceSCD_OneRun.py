@@ -25,6 +25,12 @@
 # runs and to index the combined file (Code from Xiapoing).
 #
 
+#
+# _v2: December 3rd 2013. Mads Joergensen
+# Adds the posibility to optimize the loaded UB for each run for a better peak prediction
+# It is also possible to find the common UB by using lattice parameters of the first
+# run or the loaded matirix instead of the default FFT method
+#
 
 import os
 import sys
@@ -82,9 +88,9 @@ min_pred_dspacing         = params_dictionary[ "min_pred_dspacing" ]
 max_pred_dspacing         = params_dictionary[ "max_pred_dspacing" ]
 
 use_sphere_integration    = params_dictionary.get('use_sphere_integration', True)
-use_cylinder_integration    = params_dictionary.get('use_cylinder_integration', False)
 use_ellipse_integration   = params_dictionary.get('use_ellipse_integration', False)
 use_fit_peaks_integration = params_dictionary.get('use_fit_peaks_integration', False)
+use_cylinder_integration    = params_dictionary.get('use_cylinder_integration', False)
 
 peak_radius               = params_dictionary[ "peak_radius" ]
 bkg_inner_radius          = params_dictionary[ "bkg_inner_radius" ]
@@ -106,6 +112,8 @@ cylinder_length           = params_dictionary[ "cylinder_length" ]
 
 read_UB                   = params_dictionary[ "read_UB" ]
 UB_filename               = params_dictionary[ "UB_filename" ]
+optimize_UB               = params_dictionary[ "optimize_UB" ]
+
 
 #
 # Get the fully qualified input run file name, either from a specified data 
@@ -164,7 +172,7 @@ maxVals = max_Q +","+max_Q +","+ max_Q
 #
 MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                     dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
-                    LorentzCorrection='1', MinValues=minVals, MaxValues=maxVals,
+   	            LorentzCorrection='1', MinValues=minVals, MaxValues=maxVals,
                     SplitInto='2', SplitThreshold='50',MaxRecursionDepth='11' )
 #
 # Find the requested number of peaks.  Once the peaks are found, we no longer
@@ -179,6 +187,15 @@ AnalysisDataService.remove( MDEW.getName() )
 if read_UB:
   # Read orientation matrix from file
   LoadIsawUB(InputWorkspace=peaks_ws, Filename=UB_filename)
+  if optimize_UB:
+    # Optimize the specifiec UB for better peak prediction
+    uc_a = peaks_ws.sample().getOrientedLattice().a()
+    uc_b = peaks_ws.sample().getOrientedLattice().b()
+    uc_c = peaks_ws.sample().getOrientedLattice().c()
+    uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
+    uc_beta = peaks_ws.sample().getOrientedLattice().beta()
+    uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
+    FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
 else:
   # Find a Niggli UB matrix that indexes the peaks in this run
   FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
