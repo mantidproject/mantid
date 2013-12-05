@@ -74,17 +74,17 @@ namespace DataHandling
     */
   void SaveFullprofResolution::init()
   {
-    this->declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "Anonymous", Direction::Input),
-                          "Input TableWorkspace containing the parameters for .irf file.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "", Direction::Input),
+                    "Input TableWorkspace containing the parameters for .irf file.");
 
     std::vector<std::string> exts;
     exts.push_back(".irf");
-    this->declareProperty(new API::FileProperty("OutputFilename", "fp.irf", API::FileProperty::Save, exts),
+    declareProperty(new API::FileProperty("OutputFilename", "", API::FileProperty::Save, exts),
                           "Name of the output .irf file.");
 
     boost::shared_ptr<BoundedValidator<int> > bankboundval = boost::make_shared<BoundedValidator<int> >();
     bankboundval->setLower(0);
-    this->declareProperty("Bank", EMPTY_INT(), "Bank number of the parameters belonged to. ");
+    declareProperty("Bank", EMPTY_INT(), "Bank number of the parameters belonged to. ");
 
     vector<string> supportedfunctions;
     supportedfunctions.push_back("Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
@@ -130,10 +130,12 @@ namespace DataHandling
     if (m_append)
     {
       ofile.open(m_outIrfFilename.c_str(), std::ofstream::out | std::ofstream::app);
+      g_log.information() << "Opened output file " << m_outIrfFilename << " in append mode. " << "\n";
     }
     else
     {
       ofile.open(m_outIrfFilename.c_str(), std::ofstream::out | std::ofstream::trunc);
+      g_log.information() << "Opened output file " << m_outIrfFilename << " in new/overwrite mode. " << "\n";
     }
     ofile << filestr;
     ofile.close();
@@ -151,6 +153,8 @@ namespace DataHandling
 
     // Output file and operation
     m_outIrfFilename = getPropertyValue("OutputFilename");
+    if (m_outIrfFilename.size() == 0)
+      throw runtime_error("Input file name invalid. ");
     m_append = getProperty("Append");
     if (m_append)
     {

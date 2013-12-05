@@ -2087,6 +2087,10 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
 
   //mask strings that the user has entered manually on to the GUI
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
+
+  // add slicing definition
+  exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
+
   return exec_reduce;
 }
 ///Reads the sample geometry, these settings will override what is stored in the run file

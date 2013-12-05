@@ -75,7 +75,7 @@
        <string>Run Numbers</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_28">
-       <item row="0" column="0" colspan="5">
+       <item row="0" column="0" colspan="2">
         <layout class="QGridLayout" name="gridLayout_46">
          <item row="0" column="0">
           <widget class="QLabel" name="label_11">
@@ -227,52 +227,83 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QCheckBox" name="allowPeriods_ck">
-         <property name="toolTip">
-          <string>Show the multi-period entry boxes</string>
-         </property>
-         <property name="text">
-          <string>Multi-period</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_16">
+         <item>
+          <widget class="QCheckBox" name="allowPeriods_ck">
+           <property name="toolTip">
+            <string>Show the multi-period entry boxes</string>
+           </property>
+           <property name="text">
+            <string>Multi-period</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_16">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>Slice Events:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="sliceEvent">
+           <property name="toolTip">
+            <string>Define the slices for the event. Valid inputs: min-max, start:step:stop, &gt;min, &lt;max. Combinations of those as well.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_34">
+           <property name="text">
+            <string>Instrument:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt">
+           <property name="techniques" stdset="0">
+            <stringlist>
+             <string>Small Angle Scattering</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="1" column="2">
-        <spacer name="horizontalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>231</width>
-           <height>32</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLabel" name="label_34">
-         <property name="text">
-          <string>Instrument:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt">
-         <property name="techniques">
-          <stringlist>
-           <string>Small Angle Scattering</string>
-          </stringlist>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="5">
+       <item row="2" column="0" colspan="2">
         <widget class="Line" name="line_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="5">
+       <item row="3" column="0" colspan="2">
         <widget class="QStackedWidget" name="mode_stack">
          <property name="lineWidth">
           <number>0</number>
@@ -601,7 +632,7 @@
          </widget>
         </widget>
        </item>
-       <item row="4" column="0" colspan="5">
+       <item row="4" column="0" colspan="2">
         <layout class="QGridLayout" name="gridLayout_44">
          <item row="0" column="0">
           <widget class="QGroupBox" name="groupBox_4">

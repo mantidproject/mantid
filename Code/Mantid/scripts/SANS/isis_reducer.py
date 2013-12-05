@@ -9,6 +9,8 @@ from reduction.instruments.sans.sans_reducer import SANSReducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 from mantid.simpleapi import *
+from mantid.api import IEventWorkspace
+import SANSUtility as su
 import os
 import copy
 
@@ -78,6 +80,16 @@ class Sample(object):
 
 class Can(Sample):
     ISSAMPLE = False
+    def set_run(self, run, reload, period, reducer):
+        
+        super(Can, self).set_run(run, reload, period, reducer)
+
+        # currently, no slices will be applied to Can #8535
+        for period in reversed(range(self.loader.periods_in_file)):
+            self.loader.move2ws(period)
+            name = self.loader.wksp_name
+            if su.isEventWorkspace(name):
+                su.fromEvent2Histogram(mtd[name])
 
 class ISISReducer(SANSReducer):
     """
@@ -109,7 +121,8 @@ class ISISReducer(SANSReducer):
         """
             Defines the steps that are run and their order
         """
-        proc_TOF = [self.crop_detector]
+        proc_TOF = [self.event2hist]
+        proc_TOF.append(self.crop_detector)
         proc_TOF.append(self.mask)
         proc_TOF.append(self.to_wavelen)
 
@@ -138,7 +151,7 @@ class ISISReducer(SANSReducer):
         self._out_name =       isis_reduction_steps.GetOutputName()
 
         #except self.prep_normalize all the steps below are used by the reducer
-        self.crop_detector =   isis_reduction_steps.CropDetBank(crop_sample=True)
+        self.crop_detector =   isis_reduction_steps.CropDetBank()
         self.mask =self._mask= isis_reduction_steps.Mask_ISIS()
         self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
         self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
@@ -161,12 +174,18 @@ class ISISReducer(SANSReducer):
         self._rem_nans =      sans_reduction_steps.StripEndNans()
 
         self.set_Q_output_type(self.to_Q.output_type)
+        # keep information about event slicing
+        self._slices_def = []
+        self._slice_index = 0
+
 	
     def _clean_loaded_data(self):
         self._sample_run = Sample()
         self._can_run = Can()
         self.samp_trans_load = None
         self.can_trans_load = None
+        self.event2hist = isis_reduction_steps.SliceEvent()
+
 
     def __init__(self):
         SANSReducer.__init__(self)
@@ -217,6 +236,7 @@ class ISISReducer(SANSReducer):
         
     def set_can(self, run, reload, period):
         self._can_run.set_run(run, reload, period, self)
+        
 
     def get_sample(self):
         """
@@ -227,6 +247,13 @@ class ISISReducer(SANSReducer):
             return self._sample_run
         else:
             return self.get_can()
+
+    def get_monitor(self, index):
+        _ws = mtd[self.get_sample().wksp_name]
+        if isinstance(_ws, IEventWorkspace):
+            _ws = mtd[self.event2hist.monitor]
+        __MonitorWs = ExtractSingleSpectrum(_ws, index)
+        return __MonitorWs
 
     def get_transmissions(self):
         """ Get the transmission and direct workspace if they were given
@@ -268,6 +295,13 @@ class ISISReducer(SANSReducer):
         name += '_' + self.to_wavelen.get_range()
         if self.to_Q.get_output_type() == "1D":
           name += self.mask.get_phi_limits_tag()
+
+        if self.getNumSlices() > 0:
+            limits = self.getCurrSliceLimit()
+            if limits[0] != -1:
+                name += '_t%.2f'%limits[0]
+            if limits[1] != -1:
+                name += '_T%.2f'%limits[1]
 
         return name
 
@@ -311,6 +345,10 @@ class ISISReducer(SANSReducer):
 
         if not steps:
             steps = self._reduction_steps
+
+        # create the workspace that will be used throughout the reduction
+        CloneWorkspace(self.get_sample().wksp_name, OutputWorkspace=self.output_wksp)
+
         #the main part of the reduction is done here, go through and execute each step
         for item in steps:
             if item:
@@ -521,6 +559,31 @@ class ISISReducer(SANSReducer):
                 return self._front_beam_finder.get_beam_center()
             else:
                 return self._beam_finder.get_beam_center()
+
+    def getCurrSliceLimit(self):
+        if not self._slices_def:
+            self._slices_def = su.sliceParser("")
+            assert(self._slice_index == 0)
+        return self._slices_def[self._slice_index]
+
+    def getNumSlices(self):
+        # slices are defined only for event workspaces
+        ws = mtd[self.get_sample().wksp_name]
+        if not isinstance(ws, IEventWorkspace):
+            return 0        
+        if not self._slices_def:
+            return 0
+        return len(self._slices_def)
+
+    def setSliceIndex(self, index):
+        if index < self.getNumSlices():
+            self._slice_index = index
+        else:
+            raise IndexError("Outside range")
+    
+    def setSlicesLimits(self, str_def):
+        self._slices_def = su.sliceParser(str_def)
+        self._slice_index = 0
     
 def deleteWorkspaces(workspaces):
     """
