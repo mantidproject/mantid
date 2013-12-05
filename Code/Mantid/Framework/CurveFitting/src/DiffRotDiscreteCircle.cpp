@@ -8,14 +8,25 @@ This is the most common type of discrete rotational diffusion in a circle.
 The fitting parameters are the inverse of the transition rate, <math>\tau</math>
 and the circle radius <math>r</math>
 
-<math> S(Q,E) = A_0(Q,r) \delta (\omega) + \frac{1}{\pi} \sum_{l=1}^{N-1} A_l (Q,r) \frac{\tau_l}{1+(\omega \tau_l)^2} </math>
+<center><math> S(Q,E) = A_0(Q,r) \delta (\omega) + \frac{1}{\pi} \sum_{l=1}^{N-1} A_l (Q,r) \frac{\tau_l}{1+(\omega \tau_l)^2} </math></center>
 
-<math> A_l(Q,r) = \frac{1}{N} \sum_{k=1}^{N} j_0( 2 Q r sin(\frac{\pi k}{N}) ) cos(\frac{2\pi lk}{N}) </math>
+<center><math> A_l(Q,r) = \frac{1}{N} \sum_{k=1}^{N} j_0( 2 Q r sin(\frac{\pi k}{N}) ) cos(\frac{2\pi lk}{N}) </math></center>
 
-<math> \tau_l^{-1} = 4 \tau^{-1} sin^2(\frac{\pi l}{N}) </math>
+<center><math> \tau_l^{-1} = 4 \tau^{-1} sin^2(\frac{\pi l}{N}) </math></center>
 
-If the energy units are <math>\mu</math>eV, then <math>\tau</math> is expressed in nano-seconds. If E-units are meV then
-<math>\tau</math> is expressed in pico-seconds.
+If the unit of <math>\omega</math> is energy, and the energy unit is <math>\mu</math>eV, then <math>\tau</math> is expressed in nano-seconds. If E-unit is meV then <math>\tau</math> is expressed in pico-seconds. The conversion equation used between the jump transition rate <math>k</math>, expressed in energy units, and <math>\tau</math> is: <math>k\cdot \tau=4.136\, meV\cdot ps=4.136\, \mu eV\cdot ns</math>
+
+== Example: Methyl Rotations ==
+Methyl Rotations can be modelled setting N=3. In this case, the inelastic part reduces to a single Lorentzian:
+
+<center><math> S(Q,E) = A_0(Q,r) \delta (\omega) + \frac{2}{\pi} A_1 (Q,r) \frac{3 \tau}{9+(\omega \tau)^2} </math></center>
+
+If, alternatively, one models these dynamics using the [[Lorentzian]] function provided in Mantid:
+
+<center><math> S(Q,E) = A \delta (\omega) + \frac{B}{\pi} \left( \frac{\frac{\Gamma}{2}}{(\frac{\Gamma}{2})^2 + \omega^2}\right) </math></center>
+Then the following equalities hold:
+<center><math>B = 2\,A_1</math></center>
+<center><math>\Gamma = 6\cdot 4.126/\tau</math></center>
 
 == Properties ==
 
@@ -43,6 +54,7 @@ If the energy units are <math>\mu</math>eV, then <math>\tau</math> is expressed 
 
 
 [[Category:Fit_functions]]
+
 *WIKI*/
 
 //----------------------------------------------------------------------
