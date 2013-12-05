@@ -90,7 +90,7 @@ max_pred_dspacing         = params_dictionary[ "max_pred_dspacing" ]
 use_sphere_integration    = params_dictionary.get('use_sphere_integration', True)
 use_ellipse_integration   = params_dictionary.get('use_ellipse_integration', False)
 use_fit_peaks_integration = params_dictionary.get('use_fit_peaks_integration', False)
-use_cylinder_integration    = params_dictionary.get('use_cylinder_integration', False)
+use_cylinder_integration  = params_dictionary.get('use_cylinder_integration', False)
 
 peak_radius               = params_dictionary[ "peak_radius" ]
 bkg_inner_radius          = params_dictionary[ "bkg_inner_radius" ]
@@ -267,7 +267,7 @@ elif use_ellipse_integration:
                                  BackgroundOuterSize = bkg_outer_radius,
                                  BackgroundInnerSize = bkg_inner_radius )
 
-elif use_cylindrical_integration:
+elif use_cylinder_integration:
   profiles_filename = output_directory + "/" + instrument_name + '_' + run + '.profiles'
   MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                     dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
@@ -293,7 +293,7 @@ SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
                Filename=run_niggli_integrate_file )
 
 # Print warning if user is trying to integrate using the cylindrical method and transorm the cell
-if use_cylindrical_integration: 
+if use_cylinder_integration:
   if (not cell_type is None) or (not centering is None):
     print "WARNING: Cylindrical profiles are NOT transformed!!!"
 #
