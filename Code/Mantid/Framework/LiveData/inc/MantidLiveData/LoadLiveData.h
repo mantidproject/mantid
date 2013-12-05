@@ -62,6 +62,7 @@ namespace LiveData
     void addChunk(Mantid::API::Workspace_sptr chunkWS);
     void addMatrixWSChunk(const std::string &algoName, API::Workspace_sptr accumWS, API::Workspace_sptr chunkWS);
     void appendChunk(Mantid::API::Workspace_sptr chunkWS);
+    API::Workspace_sptr appendMatrixWSChunk(API::Workspace_sptr accumWS, Mantid::API::Workspace_sptr chunkWS);
 
     void doSortEvents(Mantid::API::Workspace_sptr ws);
 
