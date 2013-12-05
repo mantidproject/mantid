@@ -563,33 +563,37 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)          
         else:
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift")   
     elif rAnds.fitShift==False:
-        if rAnds.qRangeUserSelected:        
+        if rAnds.qRangeUserSelected:
+            function_input = 'name=TabulatedFunction, Workspace="'+str(frontData)+'"' +";name=FlatBackground"
+            ties = 'f1.A0='+str(rAnds.shift*rAnds.scale)
+            logger.warning('function input ' + str(function_input))
+
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)               
         else:           
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift")   
     else:
         if rAnds.qRangeUserSelected:          
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground",
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
-            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground",Output="__fitRescaleAndShift")
                         
     param = mtd['__fitRescaleAndShift_Parameters']
