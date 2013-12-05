@@ -28,18 +28,19 @@ class LatestISISRuns(object):
             print "DataMountPoint is missing from the config.xml file."
             raise
         
-        self.__cycleMap = self.makeMappings(firstonly = True)
+        self.__cycleMap = self.makeList()
+        print self.__cycleMap
         
-    def __make_map_entry(self, map, element, base_path, instr_path):
+    def __list(self, list, element, base_path, instr_path):
         journal_file = element.attrib.get('name')
         journal_path = os.path.join(base_path, journal_file)
         cycle_id = self.__findCycleId(journal_path)
         cycle = 'cycle_'+ cycle_id
         cycle_dir_path = os.path.join(instr_path, 'data', cycle)
-        map[cycle] = journal_path, cycle_dir_path
+        list = journal_path, cycle_dir_path
         self.__most_recent_cycle = cycle
         
-    def makeMappings(self, firstonly = False):
+    def makeMappings(self):
         instr_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument')
         self.__checkPath(instr_path)
             
@@ -48,15 +49,11 @@ class LatestISISRuns(object):
         
         path = os.path.join(base_path, 'journal_main.xml') 
         tree = xml.parse(path)
-        map = dict()
+        list = []
 
         dom = tree.getroot()
-        if firstonly:
-            self.__make_map_entry(map, dom[-1], base_path, instr_path)
-        else:
-            for elem in dom:
-                self.__make_map_entry(map, elem, base_path, instr_path)
-        return map
+        self.__list(list, dom[-1], base_path, instr_path)
+        return list
     
     def getLatestCycle(self):
         return self.__most_recent_cycle
@@ -77,8 +74,12 @@ class LatestISISRuns(object):
     def __findCycleId(self, path):
         tree = xml.parse(path)    
         root = tree.getroot()
+        print root.tag
         for  run in root:
+            print run.tag
             for elem in run:
+                print elem.tag
+                print elem.tag.split('}')
                 if elem.tag.split('}')[-1] == 'isis_cycle':
                     return  elem.text
                     
