@@ -146,9 +146,9 @@ public:
     if ( !finder.isInitialized() ) finder.initialize();
 
     if (!m_dataWS)
-      throw std::runtime_error("Unable to get inpout matrix workspace. ");
+      throw std::runtime_error("Unable to get input matrix workspace. ");
     finder.setPropertyValue("InputWorkspace","FindPeaksTest_peaksWS");
-    finder.setPropertyValue("WorkspaceIndex","4");
+    finder.setPropertyValue("PeakPositions", "0.8089, 0.9571, 1.0701,1.2356,1.5133,2.1401");
     finder.setPropertyValue("PeaksList","FindPeaksTest_foundpeaks");
 
     finder.execute();
