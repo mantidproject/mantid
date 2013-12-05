@@ -90,6 +90,26 @@ public:
     AnalysisDataService::Instance().remove(toConvert->getName());
   }
 
+  void testIvsQ()
+  {
+    auto loadAlg = AlgorithmManager::Instance().create("Load");
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", "INTER13460_IvsLam.nxs");
+    loadAlg->setPropertyValue("OutputWorkspace", "demo");
+    loadAlg->execute();
+
+    MatrixWorkspace_sptr toConvert = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("demo");
+
+    ReflectometryReductionOne alg;
+
+    MatrixWorkspace_const_sptr inQ = alg.toIvsQ(toConvert, true /*correct position*/,
+        true /*is point detector*/, 0.7);
+
+    TS_ASSERT_EQUALS("MomentumTransfer", inQ->getAxis(0)->unit()->unitID());
+
+    AnalysisDataService::Instance().remove(toConvert->getName());
+  }
+
 };
 
 #endif /* REFLECTOMETRYREDUCTIONONETEST_H_ */

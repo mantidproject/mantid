@@ -669,21 +669,21 @@ namespace Mantid
 
       const double thetaInRad = thetaInDeg * ( M_PI / 180.0 );
 
-      const double accrossOffset = 0;
+      double  acrossOffset = 0;
 
-      const double beamOffset = detectorPosition.scalar_prod( referenceFrame->vecPointingAlongBeam() );
+      double beamOffset = detectorPosition.scalar_prod( referenceFrame->vecPointingAlongBeam() );
 
-      const double upOffset = sampleToDetectorAlongBeam * std::sin( 2.0 * thetaInRad );
+      double upOffset = sampleToDetectorAlongBeam * std::sin( 2.0 * thetaInRad );
 
       auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
       moveComponentAlg->initialize();
-      moveComponentAlg->setProperty("InputWorkspace", toCorrect);
+      moveComponentAlg->setProperty("Workspace", toCorrect);
       moveComponentAlg->setProperty("ComponentName", componentToCorrect);
       moveComponentAlg->setProperty("RelativePosition", false);
       // Movements
-      //moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(), beamOffset);
-      //moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
-      //moveComponentAlg->setProperty(referenceFrame->pointingUp(), upOffset);
+      moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(), beamOffset);
+      moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
+      moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(), upOffset);
       // Execute the movement.
       moveComponentAlg->execute();
 
@@ -700,7 +700,10 @@ namespace Mantid
      */
     Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition, const bool isPointDetector, const double& thetaInDeg)
     {
-      if( bCorrectPosition )
+
+      // TODO. Warn if the detector is not in the right place. The previous quick algorithm handled this by doing a detector.getPos().getY() != 0 check. But the problem is that this means we need to hard-code for detector names!!!
+
+      if( bCorrectPosition ) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
       {
         correctPosition(toConvert, isPointDetector, thetaInDeg);
       }
@@ -777,6 +780,13 @@ namespace Mantid
           // Perform transmission correction.
           detectorWS = transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
               i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
+
+          // Now, if a theta value has been provided we just run the toLam
+
+          // If no theta value has been provided, we attempt to calculate it given the detector position and sample poition, and then just run run the convert units portion (no point in doing position corrections)
+
+          // ... and that's it for the point detector processing! just return the value in wavelength.
+
         }
         else
         {
