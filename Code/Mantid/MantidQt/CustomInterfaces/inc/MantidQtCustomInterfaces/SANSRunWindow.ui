@@ -252,9 +252,9 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLabel" name="label_15">
+          <widget class="QPushButton" name="slicePb">
            <property name="text">
-            <string>Slice Events:</string>
+            <string>Time slicing:</string>
            </property>
           </widget>
          </item>

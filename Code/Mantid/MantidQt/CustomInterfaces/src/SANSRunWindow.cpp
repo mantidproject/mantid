@@ -38,6 +38,8 @@
 #include <boost/lexical_cast.hpp>
 #include "MantidGeometry/IDetector.h"
 
+#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
+
 using Mantid::detid_t;
 
 //Add this class to the list of specialised dialogs in this namespace
@@ -72,7 +74,8 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
-  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
+  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""),
+  slicingWindow(NULL)
 {
   ConfigService::Instance().addObserver(m_newInDir);
 }
@@ -202,6 +205,7 @@ void SANSRunWindow::initLayout()
   connect(m_uiForm.detbank_sel, SIGNAL(currentIndexChanged(int)), this, SLOT(phiMaskingChanged(int))); 
   connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
+  connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
 
   readSettings();
 }
@@ -3534,6 +3538,20 @@ void SANSRunWindow::loadTransmissionSettings(){
    m_uiForm.trans_selector_opt->setCurrentIndex(separated?1:0);
 
 
+}
+
+void SANSRunWindow::handleSlicePushButton(){
+  if (!slicingWindow){
+    slicingWindow = new SANSEventSlicing(this);
+    connect(slicingWindow, SIGNAL(runAsPythonScript(const QString&, bool)),
+            this, SIGNAL(runAsPythonScript(const QString&, bool)));
+    //    slicingWindow->setParent(this);
+    slicingWindow->initializeLayout();
+    slicingWindow->initializeLocalPython();
+  }
+
+  slicingWindow->show(); 
+  slicingWindow->raise();
 }
 
 } //namespace CustomInterfaces
