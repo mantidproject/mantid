@@ -1,6 +1,7 @@
 #ifndef DIFFROTDISCRETECIRCLETEST_H_
 #define DIFFROTDISCRETECIRCLETEST_H_
 
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -92,7 +93,7 @@ public:
     fitalg.setProperty( "Function", funtion_string );
 
     // create the data workspace by evaluating the fit function in the Fit algorithm
-    auto data_workspace = generateWorkspace( fitalg );
+    auto data_workspace = generateWorkspaceFromFitAlgorithm( fitalg );
     //saveWorkspace( data_workspace, "/tmp/junk.nxs" ); // for debugging purposes only
 
     //override the function with new parameters, then do the Fit
@@ -126,6 +127,57 @@ public:
     //std::cout << "OPTIMIZED: Intensity = " << fitalg_structure_factor->getParameter("Intensity") << "  Radius = " << fitalg_structure_factor->getParameter("Radius") << "  Decay = " << fitalg_structure_factor->getParameter("Decay") << "\n"; // only for debugging purposes
 
   } // testDiffRotDiscreteCircleElastic
+
+  /* Check the particular case for N = 3
+   * In this case, the inelastic part should reduce to a single Lorentzian in 'w':
+   *   ( 2 / pi ) * A1( Q ) * ( 3 * tao / ( 9 + ( w * tao )**2 ) )
+   *   A1( Q ) = ( 1 / 3 ) * ( 1 - j0( Q * R * sqrt( 3 ) ) )
+   *   j0( x ) = sin( x ) / x
+   */
+  void testDiffRotDiscreteCircleInelasticN3()
+  {
+    const double I = 2.9;
+    const double R = 2.3;
+    const double tao = 0.468;
+    const double Q = 0.9;
+
+    // generate data workspace with the single lorentzian function
+    auto data_workspace = generateN3Workspace( I, R, tao, Q );
+    //saveWorkspace( data_workspace, "/tmp/junk_single_lorentzian.nxs" ); // for debugging purposes only
+
+    // initialize the fitting function string
+    // Parameter units are assumed in micro-eV, Angstroms, Angstroms**(-1), and nano-seconds. Intensities have arbitrary units
+    std::string funtion_string = "name=InelasticDiffRotDiscreteCircle,N=3,Q=0.9,Intensity=2.9,Radius=2.3,Decay=0.468";
+
+    // Do a fit with no iterations
+    Mantid::CurveFitting::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING( fitalg.initialize() );
+    TS_ASSERT( fitalg.isInitialized() );
+    fitalg.setProperty( "Function", funtion_string );
+    fitalg.setProperty( "MaxIterations", 0 ); // no iterations
+    fitalg.setProperty( "InputWorkspace", data_workspace );
+    fitalg.setPropertyValue( "WorkspaceIndex", "0" );
+    TS_ASSERT_THROWS_NOTHING( TS_ASSERT( fitalg.execute() ) );
+    TS_ASSERT( fitalg.isExecuted() );
+
+    // create temporary workspace to check Y-values produced by the Fit algorithm  // for debugging purposes only
+    //auto temp_workspace = generateWorkspaceFromFitAlgorithm( fitalg );           // for debugging purposes only
+    //saveWorkspace( temp_workspace, "/tmp/junk_from_fit_algorithm.nxs" );         // for debugging purposes only
+
+    // check Chi-square is small
+    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA( chi_squared, 1e-09, 1e-09 );
+    //std::cout << "\nchi_squared = " << chi_squared << "\n"; // only for debugging purposes
+
+    // check the parameters of the InelasticDiffRotDiscreteCircle
+    Mantid::API::IFunction_sptr  fitalg_structure_factor = fitalg.getProperty( "Function" );
+    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Intensity" ), I, I * 0.01 ); // allow for a small percent variation
+    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Radius" ), R, R * 0.01 );      // allow for a small percent variation
+    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Decay" ), tao, tao * 0.01 );       // allow for a small percent variation
+    //std::cout << "\nGOAL: Intensity = 2.9,  Radius = 2.3,  Decay = 0.468\n"; // only for debugging purposes
+    //std::cout << "OPTIMIZED: Intensity = " << fitalg_structure_factor->getParameter("Intensity") << "  Radius = " << fitalg_structure_factor->getParameter("Radius") << "  Decay = " << fitalg_structure_factor->getParameter("Decay") << "\n"; // only for debugging purposes
+
+  }
 
 
   /// check ties between elastic and inelastic parts
@@ -202,7 +254,7 @@ public:
     fitalg.setProperty( "Function", funtion_string );
 
     // create the data workspace by evaluating the fit function in the Fit algorithm
-    auto data_workspace = generateWorkspace( fitalg );
+    auto data_workspace = generateWorkspaceFromFitAlgorithm( fitalg );
     //saveWorkspace( data_workspace, "/tmp/junk.nxs" ); // for debugging purposes only
 
     //override the function with new parameters, then do the Fit
@@ -278,6 +330,45 @@ private:
 
   }
 
+
+  /* Create a workspace with the following single lorentzian in 'w'
+   *   ( 2 / pi ) * A1( Q ) * ( 3 * tao / ( 9 + ( w * tao )**2 ) )
+   *   A1( Q ) = ( 1 / 3 ) * ( 1 - j0( Q * R * sqrt( 3 ) ) )
+   *   j0( x ) = sin( x ) / x
+   */
+  Mantid::DataObjects::Workspace2D_sptr generateN3Workspace( const double & I, const double & R, const double & tao, const double & Q )
+  {
+    const double rate = 4.136 / tao; // conversion from picosec to mili-eV, or from nanosec to micro-eV
+
+    // calculate prefix A1. Better be verbose for clarity
+    const double x = Q * R * sqrt( 3.0 );
+    const double j0 = sin( x ) / x;
+    const double A1 = ( 1.0 / 3.0 ) * ( 1.0 - j0 );
+
+    // initialize some frequency values centered around zero. Will work as dataX
+    const size_t M = 1001;
+    double dataX[ M ];
+    const double dw = 0.4; // typical bin width for BASIS@ORNL beamline, in micro-seconds
+    for( size_t i = 0;  i < M;  i++ ) dataX[i] = (static_cast<double>(i) - M/2 ) * dw;
+
+    // create the workspace
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M );
+    double fractional_error = 0.01; // error taken as a percent of the signal
+    for( size_t i = 0;  i < M;  i++ )
+    {
+      double bin_boundary = dataX[ i ] - dw / 2.0; // bin boundaries are shifted by half the bind width
+      double y = I * ( 2.0 / M_PI ) * A1 * ( 3.0 * rate / ( 9.0 * rate * rate + dataX[ i ] * dataX[ i ]) ); // verbose for clarity
+      ws -> dataX( 0 )[ i ] = bin_boundary ;
+      ws -> dataY( 0 )[ i ] = y;
+      ws -> dataE( 0 )[ i ] = fractional_error * y; // assume the error is a small percent of the actual value
+    }
+    ws -> dataX( 0 )[ M ] = dataX[ M - 1 ] + dw/2; // recall number of bin boundaries is 1 + #bins
+
+   // return now the workspace
+   return ws;
+  }
+
+
   /// save a worskapece to a nexus file
   void saveWorkspace( Mantid::DataObjects::Workspace2D_sptr &ws, const std::string &filename )
   {
@@ -289,8 +380,9 @@ private:
     save->execute();
   }
 
+
   // create a data workspace using a Fit algorithm
-  Mantid::DataObjects::Workspace2D_sptr generateWorkspace( Mantid::CurveFitting::Fit & fitalg )
+  Mantid::DataObjects::Workspace2D_sptr generateWorkspaceFromFitAlgorithm( Mantid::CurveFitting::Fit & fitalg )
   {
     // initialize some frequency values centered around zero. Will work as dataX
     const size_t M = 1001;
