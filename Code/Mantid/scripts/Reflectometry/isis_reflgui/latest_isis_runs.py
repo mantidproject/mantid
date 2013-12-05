@@ -28,48 +28,34 @@ class LatestISISRuns(object):
             print "DataMountPoint is missing from the config.xml file."
             raise
         
-        self.__cycleMap = self.makeList()
-        print self.__cycleMap
+        self.getPaths()
         
-    def __list(self, list, element, base_path, instr_path):
-        journal_file = element.attrib.get('name')
-        journal_path = os.path.join(base_path, journal_file)
-        cycle_id = self.__findCycleId(journal_path)
-        cycle = 'cycle_'+ cycle_id
-        cycle_dir_path = os.path.join(instr_path, 'data', cycle)
-        list = journal_path, cycle_dir_path
-        self.__most_recent_cycle = cycle
-        
-    def makeMappings(self):
+    def getPaths(self):
         instr_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument')
         self.__checkPath(instr_path)
-            
+        
         base_path =  os.path.join(instr_path, 'logs', 'journal')
         self.__checkPath(base_path)
         
         path = os.path.join(base_path, 'journal_main.xml') 
         tree = xml.parse(path)
-        list = []
-
         dom = tree.getroot()
-        self.__list(list, dom[-1], base_path, instr_path)
-        return list
+        element = dom[-1]
+        journal_file = element.attrib.get('name')
+        journal_path = os.path.join(base_path, journal_file)
+        
+        cycle_id = self.__findCycleId(journal_path)
+        cycle = 'cycle_'+ cycle_id
+        cycle_dir_path = os.path.join(instr_path, 'data', cycle)
+        
+        self.runPaths = journal_path, cycle_dir_path
+        self.__most_recent_cycle = cycle
     
     def getLatestCycle(self):
         return self.__most_recent_cycle
     
     def getInstrument(self):
         return self.__instrument
-    
-    def getCycles(self):
-        cached_cycle_keys = list(self.__cycleMap.keys())
-        if len(cached_cycle_keys) == 1:
-            journal_path, cycle_dir_path = self.__cycleMap[self.__most_recent_cycle]
-            parent_dir = os.path.abspath(os.path.join(cycle_dir_path,".."))
-            print parent_dir
-            all_cycles_dirs = [d for d in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, d))] 
-            return all_cycles_dirs
-        return cached_cycle_keys
     
     def __findCycleId(self, path):
         tree = xml.parse(path)    
@@ -111,13 +97,8 @@ class LatestISISRuns(object):
             if not cycle_dir in current_search_dir:
                 config.appendDataSearchDir(cycle_dir)
                    
-    def getJournalRuns(self, cycle=None):
-        if not cycle:
-            journal_path, cycle_dir_path = self.__cycleMap[self.__most_recent_cycle]
-        else:
-            if len(self.__cycleMap) == 1:
-                self.__cycleMap = self.makeMappings() # This will take some time
-            journal_path, cycle_dir_path = self.__cycleMap[str(cycle).strip()]
+    def getJournalRuns(self, eID):
+        journal_path, cycle_dir_path = self.__cycleMap[self.__most_recent_cycle]
             
         # side effect.
         self.__addSettingDirToManagedUserDirs(cycle_dir_path)
@@ -126,5 +107,28 @@ class LatestISISRuns(object):
         tree = xml.parse(journal_path)    
         root = tree.getroot()
         for  run in root:
-            runnames.append(run.get('name'))
+            if run.findall('experiment_identifier')[0].text == eID:
+                #i think this way is more inefficent, i'll check it vs iterating and breaking
+                #runno = run.findall('run_number')[0].text
+                #title = run.findall('title')[0].text
+                runno = None
+                title = None
+                for curTag in run
+                    #if curTag.tag.split('}')[-1] == 'run_number':
+                    if curTag.tag == 'run_number':
+                        runno = curTag.text
+                    #elif curTag.tag.split('}')[-1] == 'title':
+                    elif curTag.tag == 'title':
+                        title = curTag.text
+                    if title && runno:
+                        break
+                    # print "RB",run[3].text, runno, run[0].text
+                journalentry = runno + ": " + title
+                runnames.append(journalentry)
+            '''
+            for elem in run:
+                print elem.tag
+                print elem.tag.split('}')
+                if (elem.tag.split('}')[-1] == 'experiment_identifier') && (elem.text == eID):
+            '''
         return runnames
