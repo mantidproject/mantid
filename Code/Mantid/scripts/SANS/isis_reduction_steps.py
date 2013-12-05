@@ -237,8 +237,12 @@ class LoadRun(object):
                 spec_min = dimension*dimension*2
                 spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
 
-        try:
-            if self._is_trans:
+        try:            
+            if self._is_trans and reducer.instrument.name() != 'LOQ':
+                # Unfortunatelly, LOQ in transmission acquire 3 monitors the 3 monitor usually
+                # is the first spectrum for detector. This causes the following method to fail
+                # when it tries to load only monitors. Hence, we are forced to skip this method
+                # for LOQ. ticket #8559
                 self._load_transmission(reducer.instrument, extra_options=spectrum_limits)
             else:
                 # the spectrum_limits is not the default only for transmission data
