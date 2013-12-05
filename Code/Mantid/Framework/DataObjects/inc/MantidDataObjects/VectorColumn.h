@@ -139,18 +139,25 @@ namespace DataObjects
     /// Create another copy of the column 
     virtual VectorColumn* clone() const
     {
-      // TODO: implement
+      VectorColumn* newColumn = new VectorColumn<Type>();
+      newColumn->m_data = m_data;
+      newColumn->setName(m_name);
+      newColumn->setPlotType(m_plotType);
+      return newColumn;
     }
 
     /// Cast to double
     virtual double toDouble(size_t i) const
     {
+      UNUSED_ARG(i);
       throw std::runtime_error("VectorColumn is not convertible to double.");
     }
 
     /// Assign from double
     virtual void fromDouble(size_t i, double value)
     {
+      UNUSED_ARG(i);
+      UNUSED_ARG(value);
       throw std::runtime_error("VectorColumn is not assignable from double.");
     }
 
@@ -164,12 +171,14 @@ namespace DataObjects
     /// Inserts an item.
     virtual void insert(size_t index)
     {
-      // TODO: implement
+      // Insert empty vector at the given position
+      m_data.insert( m_data.begin() + index, std::vector<Type>() );
     }
 
     /// Removes an item.
     virtual void remove(size_t index)
     {
+      m_data.erase(m_data.begin() + index);
     }
 
     /// Pointer to a data element
@@ -197,6 +206,8 @@ namespace DataObjects
 } // namespace Mantid
 
 #define DECLARE_VECTORCOLUMN(Type,TypeName) \
-  template<> std::string VectorColumn<Type>::typeName() { return #TypeName; };
+  template<> std::string VectorColumn<Type>::typeName() { return #TypeName; }; \
+  Kernel::RegistrationHelper register_column_##TypeName(  \
+    ( API::ColumnFactory::Instance().subscribe< VectorColumn<Type> >(#TypeName), 0) ); \
 
 #endif  /* MANTID_DATAOBJECTS_VECTORCOLUMN_H_ */

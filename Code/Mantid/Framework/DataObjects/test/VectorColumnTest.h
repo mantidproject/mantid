@@ -28,6 +28,9 @@ public:
   {
     VectorColumn<int> col;
     TS_ASSERT_EQUALS( col.type(), "vector_int"); 
+
+    VectorColumn<double> col2;
+    TS_ASSERT_EQUALS( col2.type(), "vector_double");
   }
 
   void test_read()
