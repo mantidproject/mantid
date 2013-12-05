@@ -5,8 +5,11 @@ This fitting function models the dynamics structure factor of a particle undergo
 evenly distributed in a circle. The particle can only jump to neighboring sites.
 This is the most common type of discrete rotational diffusion in a circle.
 
-The fitting parameters are the inverse of the transition rate, <math>\tau</math>
-and the circle radius <math>r</math>
+Markov model for jumps between neighboring sites:
+
+<center><math> \frac{d}{dt} p_j(t) = \frac{1}{\tau} [p_{j-1}(t) -2 p_j(t) + p_{j+1}(t)] </math></center>
+
+The Decay fitting parameter <math>\tau</math> is the inverse of the transition rate. This, along with the circle radius <math>r</math>, conform the two fundamental fitting parameters of the structure factor <math>S(Q,E)</math>:
 
 <center><math> S(Q,E) = A_0(Q,r) \delta (\omega) + \frac{1}{\pi} \sum_{l=1}^{N-1} A_l (Q,r) \frac{\tau_l}{1+(\omega \tau_l)^2} </math></center>
 
@@ -54,7 +57,6 @@ Then the following equalities hold:
 
 
 [[Category:Fit_functions]]
-
 *WIKI*/
 
 //----------------------------------------------------------------------
