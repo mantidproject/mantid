@@ -90,7 +90,7 @@ void LoadIDFFromNexus::runLoadParameterFile(const MatrixWorkspace_sptr & workspa
   const std::string paramFile = directory + instrumentName + "_Parameters.xml";
 
   try {
-    LoadParameterFile::execManually(paramFile, workspace);
+    LoadParameterFile::execManually(false, paramFile,"", workspace);
   } catch ( std::runtime_error& ) {
     g_log.notice() << "File " << paramFile << " not found or un-parsable. "
                        "However, the instrument has been loaded successfully.\n";

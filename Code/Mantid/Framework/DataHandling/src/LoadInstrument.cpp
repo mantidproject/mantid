@@ -237,7 +237,7 @@ namespace Mantid
         try
         {
           // To allow the use of ExperimentInfo instead of workspace, we call it manually
-          LoadParameterFile::execManually(fullPathParamIDF, m_workspace);
+          LoadParameterFile::execManually(false, fullPathParamIDF, "", m_workspace);
           g_log.debug("Parameters loaded successfully.");
         } catch (std::invalid_argument& e)
         {

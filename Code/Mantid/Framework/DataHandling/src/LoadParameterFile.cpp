@@ -59,8 +59,8 @@ DECLARE_ALGORITHM(LoadParameterFile)
 /// Sets documentation strings for this algorithm
 void LoadParameterFile::initDocs()
 {
-  this->setWikiSummary("Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]])."); 
-  this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF).");
+  this->setWikiSummary("Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) or a string consisting of the contents of such.."); 
+  this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF) or a string consisting of the contents of such.");
 }
 
 
@@ -80,8 +80,9 @@ void LoadParameterFile::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace to load the instrument parameters into." );
-  declareProperty(new FileProperty("Filename","", FileProperty::Load, ".xml"),
-                  "The filename (including its full or relative path) of a parameter defintion file. The file extension must either be .xml or .XML.");
+  declareProperty(new FileProperty("Filename","", FileProperty::OptionalLoad, ".xml"),
+                  "The filename (including its full or relative path) of a parameter definition file. The file extension must either be .xml or .XML.");
+  declareProperty("ParameterXML","","The parameter definition XML as a string.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -95,13 +96,16 @@ void LoadParameterFile::exec()
   // Retrieve the filename from the properties
   std::string filename = getPropertyValue("Filename");
 
+  // Retrieve the parameter XML string from the properties
+  std::string parameterXML = getPropertyValue("ParameterXML");
+
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  execManually(filename, localWorkspace);
+  execManually(false, filename, parameterXML, localWorkspace);
 }
 
-void LoadParameterFile::execManually(std::string filename, Mantid::API::ExperimentInfo_sptr localWorkspace)
+void LoadParameterFile::execManually(bool useString, std::string filename, std::string parameterXML,  Mantid::API::ExperimentInfo_sptr localWorkspace)
 {
   // TODO: Refactor to remove the need for the const cast
   Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
