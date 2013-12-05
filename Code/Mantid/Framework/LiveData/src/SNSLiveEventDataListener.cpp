@@ -923,17 +923,27 @@ namespace LiveData
         std::string pvType;
         while ( pvNode )
         {
-          if (pvNode->nodeName() == "pv_name")
-            pvName = pvNode->firstChild()->nodeValue();
-          else if (pvNode->nodeName() == "pv_id")
+          const Poco::XML::Node * textElement = pvNode->firstChild();
+          if ( textElement )
           {
-            pvId = pvNode->firstChild()->nodeValue();
-            std::istringstream(pvId) >> pvIdNum;
+            if (pvNode->nodeName() == "pv_name")
+            {
+              pvName = textElement->nodeValue();
+            }
+            else if (pvNode->nodeName() == "pv_id")
+            {
+              pvId = textElement->nodeValue();
+              std::istringstream(pvId) >> pvIdNum;
+            }
+            else if (pvNode->nodeName() == "pv_type")
+            {
+              pvType = textElement->nodeValue();
+            }
+            else if (pvNode->nodeName() == "pv_units")
+            {
+              pvUnits = textElement->nodeValue();
+            }
           }
-          else if (pvNode->nodeName() == "pv_type")
-            pvType = pvNode->firstChild()->nodeValue();
-          else if (pvNode->nodeName() == "pv_units")
-            pvUnits = pvNode->firstChild()->nodeValue();
 
           pvNode = pvNode->nextSibling();
         }
