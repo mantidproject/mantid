@@ -815,6 +815,7 @@ namespace Mantid
         absUnitsRed->setProperty("OutputWorkspace", absWsName);
         absUnitsRed->executeAsChildAlg();
         MatrixWorkspace_sptr absUnitsWS = absUnitsRed->getProperty("OutputWorkspace");
+//!!! There is Property outputMaskWorkspace to get masks? It looks like one is using wrong property for masks
         MatrixWorkspace_sptr absMaskWS = absUnitsRed->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
