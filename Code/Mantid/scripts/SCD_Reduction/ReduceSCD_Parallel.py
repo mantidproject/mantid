@@ -3,9 +3,9 @@
 #
 # Version 2.0, modified to work with Mantid's new python interface.
 #
-# This script will run multiple instances of the script ReduceOneSCD_Run.py
+# This script will run multiple instances of the script ReduceSCD_OneRun.py
 # in parallel, using either local processes or a slurm partition.  After
-# using the ReduceOneSCD_Run script to find, index and integrate peaks from
+# using the ReduceSCD_OneRun script to find, index and integrate peaks from
 # multiple runs, this script merges the integrated peaks files and re-indexes
 # them in a consistent way.  If desired, the indexing can also be changed to a
 # specified conventional cell.
@@ -13,7 +13,7 @@
 # to a specified output_directory.  This output directory must be created
 # before running this script, and must be specified in the configuration file.
 # The user should first make sure that all parameters are set properly in
-# the configuration file for the ReduceOneSCD_Run.py script, and that that 
+# the configuration file for the ReduceSCD_OneRun.py script, and that that 
 # script will properly reduce one scd run.  Once a single run can be properly
 # reduced, set the additional parameters in the configuration file that specify 
 # how the the list of runs will be processed in parallel. 
