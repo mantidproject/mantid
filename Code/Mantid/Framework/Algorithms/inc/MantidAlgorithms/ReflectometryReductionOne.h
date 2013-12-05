@@ -61,6 +61,9 @@ namespace Mantid
           const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
           const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep);
 
+      /// Convert to an IvsQ workspace. Performs detector posistional corrections based on the component name and the theta value.
+      Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool correctPosition, const bool isPointDetector, const double& thetaInDeg);
+
     private:
 
       /** Overridden Algorithm methods **/
@@ -112,6 +115,9 @@ namespace Mantid
           const OptionalDouble& stitchingStartOverlapQ, const OptionalDouble& stitchingEndOverlapQ,
           const double& wavelengthStep
       );
+
+      /// Correct detector positions.
+      void correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg);
 
     };
 

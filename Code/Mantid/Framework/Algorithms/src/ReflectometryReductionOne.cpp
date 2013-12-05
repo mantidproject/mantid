@@ -3,6 +3,7 @@
  *WIKI*/
 
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -638,7 +639,79 @@ namespace Mantid
 
         MatrixWorkspace_sptr normalizedIvsLam = IvsLam / denominator;
         return normalizedIvsLam;
+    }
 
+    /**
+     * Correct the position of the detectors based on the input theta value.
+     * @param toCorrect : Workspace to correct detector posisitions on.
+     * @param isPointDetector : Flag to indicate that this is a point detector run.
+     * @param thetaInDeg : Theta in degrees to use in correction calculations.
+     */
+    void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg)
+    {
+      const std::string componentToCorrect = isPointDetector ? "point-detector" : "line-detector"; // TODO : This is not a good way to do things. I would rather inject these names.
+      std::stringstream message;
+      message << "Position correction. Looking for " << componentToCorrect << " in the IDF " << std::endl;
+      g_log.debug(message.str());
+
+      auto instrument = toCorrect->getInstrument();
+      const V3D detectorPosition = instrument->getComponentByName(componentToCorrect)->getPos();
+
+      const std::string surfaceHolder = "some-surface-holder";
+      g_log.debug("Position correction. Looking for " + surfaceHolder);
+      const V3D samplePosition = instrument->getComponentByName(surfaceHolder)->getPos(); // TODO : likewise, this is not a good way to do things. Should be injected.
+
+      const V3D sampleToDetector = detectorPosition - samplePosition;
+
+      auto referenceFrame = instrument->getReferenceFrame();
+
+      const double sampleToDetectorAlongBeam = sampleToDetector.scalar_prod( referenceFrame->vecPointingAlongBeam() ) ;
+
+      const double thetaInRad = thetaInDeg * ( M_PI / 180.0 );
+
+      const double accrossOffset = 0;
+
+      const double beamOffset = detectorPosition.scalar_prod( referenceFrame->vecPointingAlongBeam() );
+
+      const double upOffset = sampleToDetectorAlongBeam * std::sin( 2.0 * thetaInRad );
+
+      auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
+      moveComponentAlg->initialize();
+      moveComponentAlg->setProperty("InputWorkspace", toCorrect);
+      moveComponentAlg->setProperty("ComponentName", componentToCorrect);
+      moveComponentAlg->setProperty("RelativePosition", false);
+      // Movements
+      //moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(), beamOffset);
+      //moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
+      //moveComponentAlg->setProperty(referenceFrame->pointingUp(), upOffset);
+      // Execute the movement.
+      moveComponentAlg->execute();
+
+    }
+
+    /**
+     * Convert an input workspace into an IvsQ workspace.
+     *
+     * @param toConvert : Workspace to convert
+     * @param bCorrectPosition : Flag to indicate that detector positions should be corrected based on the input theta values.
+     * @param isPointDetector : Flag to indicate that this is a point detector reduction run.
+     * @param thetaInDeg : Theta in Degrees. Used for correction.
+     * @return
+     */
+    Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition, const bool isPointDetector, const double& thetaInDeg)
+    {
+      if( bCorrectPosition )
+      {
+        correctPosition(toConvert, isPointDetector, thetaInDeg);
+      }
+
+      auto convertUnits = this->createChildAlgorithm("ConvertUnits");
+      convertUnits->initialize();
+      convertUnits->setProperty("InputWorkspace", toConvert);
+      convertUnits->setProperty("Target", "MomentumTransfer");
+      convertUnits->execute();
+      MatrixWorkspace_sptr inQ = convertUnits->getProperty("OutputWorkspace");
+      return inQ;
     }
 
     //----------------------------------------------------------------------------------------------
