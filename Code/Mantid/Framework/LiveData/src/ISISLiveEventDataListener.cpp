@@ -100,7 +100,6 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     if (address.host().toString().compare( "0.0.0.0") == 0)
     {
         Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
-        //Poco::Net::SocketAddress tempAddress("NDXTESTFAA:10000");
       try {
         m_socket.connect( tempAddress);  // BLOCKING connect
       } catch (...) {
@@ -408,17 +407,32 @@ void ISISLiveEventDataListener::loadSpectraMap()
   */
 void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
 {
-    API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument",-1);
-    alg->initialize();
-    alg->setPropertyValue("InstrumentName",instrName);
-    alg->setProperty("Workspace", m_eventBuffer[0]);
-    alg->setProperty("RewriteSpectraMap", false);
-    alg->setChild(true);
-    alg->execute();
-    // check if the instrument was loaded
-    if ( !alg->isExecuted() )
+    // try to load the instrument. if it doesn't load give a warning and carry on
+    if ( instrName.empty() )
     {
-        throw std::runtime_error("Failed to load instrument " + instrName);
+        g_log.warning() << "Unable to read instrument name from DAE." << std::endl;
+        return;
+    }
+    const char *warningMessage = "Failed to load instrument ";
+    try
+    {
+        API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument",-1);
+        alg->initialize();
+        alg->setPropertyValue("InstrumentName",instrName);
+        alg->setProperty("Workspace", m_eventBuffer[0]);
+        alg->setProperty("RewriteSpectraMap", false);
+        alg->setChild(true);
+        alg->execute();
+        // check if the instrument was loaded
+        if ( !alg->isExecuted() )
+        {
+            g_log.warning() << warningMessage << instrName << std::endl;
+        }
+    }
+    catch(std::exception& e)
+    {
+        g_log.warning() << warningMessage << instrName << std::endl;
+        g_log.warning() << e.what() << instrName << std::endl;
     }
 }
 
