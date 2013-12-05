@@ -1,4 +1,3 @@
-
 #ifndef REFLECTOMETRYREDUCTIONONETEST_H_
 #define REFLECTOMETRYREDUCTIONONETEST_H_
 
@@ -12,7 +11,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Algorithms::ReflectometryReductionOne;
 
-class ReflectometryReductionOneTest : public CxxTest::TestSuite
+class ReflectometryReductionOneTest: public CxxTest::TestSuite
 {
 public:
 
@@ -43,11 +42,18 @@ public:
     // Define a wavelength range for the detector workspace
     const double wavelengthMin = 1.0;
     const double wavelengthMax = 15;
+    const double wavelengthStep = 0.05;
     const double backgroundWavelengthMin = 17;
     const double backgroundWavelengthMax = 20;
 
     ReflectometryReductionOne alg;
-    ReflectometryReductionOne::DetectorMonitorWorkspacePair inLam = alg.toLam(toConvert, detectorIndexRange, monitorIndex, boost::tuple<double, double>(wavelengthMin, wavelengthMax), boost::tuple<double, double>(backgroundWavelengthMin, backgroundWavelengthMax));
+
+    // Run the conversion.
+    ReflectometryReductionOne::DetectorMonitorWorkspacePair inLam = alg.toLam(toConvert,
+        detectorIndexRange, monitorIndex, boost::tuple<double, double>(wavelengthMin, wavelengthMax),
+        boost::tuple<double, double>(backgroundWavelengthMin, backgroundWavelengthMax), wavelengthStep);
+
+    // Unpack the results
     MatrixWorkspace_sptr detectorWS = inLam.get<0>();
     MatrixWorkspace_sptr monitorWS = inLam.get<1>();
 
@@ -85,7 +91,5 @@ public:
   }
 
 };
-
-
 
 #endif /* REFLECTOMETRYREDUCTIONONETEST_H_ */

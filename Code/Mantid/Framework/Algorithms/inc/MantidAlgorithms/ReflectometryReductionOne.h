@@ -59,7 +59,7 @@ namespace Mantid
       /// Convert the input workspace to wavelength, splitting according to the properties provided.
       DetectorMonitorWorkspacePair toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
           const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
-          const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax);
+          const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep);
 
     private:
 
@@ -100,7 +100,7 @@ namespace Mantid
 
       /// Convert the detector spectrum of the input workspace to wavelength
       API::MatrixWorkspace_sptr toLamDetector(const WorkspaceIndexList& detectorIndexRange,
-          const API::MatrixWorkspace_sptr& toConvert, const MinMax& wavelengthMinMax);
+          const API::MatrixWorkspace_sptr& toConvert, const MinMax& wavelengthMinMax, const double& wavelengthStep);
 
       /// Perform a transmission correction on the input IvsLam workspace
       API::MatrixWorkspace_sptr transmissonCorrection(API::MatrixWorkspace_sptr IvsLam,
@@ -109,7 +109,9 @@ namespace Mantid
           API::MatrixWorkspace_sptr firstTransmissionRun,
           OptionalMatrixWorkspace_sptr secondTransmissionRun, const OptionalDouble& stitchingStartQ,
           const OptionalDouble& stitchingDeltaQ, const OptionalDouble& stitchingEndQ,
-          const OptionalDouble& stitchingStartOverlapQ, const OptionalDouble& stitchingEndOverlapQ);
+          const OptionalDouble& stitchingStartOverlapQ, const OptionalDouble& stitchingEndOverlapQ,
+          const double& wavelengthStep
+      );
 
     };
 

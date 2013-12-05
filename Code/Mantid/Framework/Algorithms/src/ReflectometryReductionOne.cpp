@@ -129,11 +129,16 @@ namespace Mantid
       declareProperty(
           new PropertyWithValue<double>("WavelengthMin", Mantid::EMPTY_DBL(),
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength minimum");
+          "Wavelength minimum in angstroms");
       declareProperty(
           new PropertyWithValue<double>("WavelengthMax", Mantid::EMPTY_DBL(),
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength maximum");
+          "Wavelength maximum in angstroms");
+
+      declareProperty(
+                new PropertyWithValue<double>("WavelengthStep", 0.05,
+                    boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
+                "Wavelength rebinning step in angstroms. Defaults to 0.05. Used for rebinning intermediate workspaces converted into wavelength.");
 
       boost::shared_ptr<CompositeValidator> mandatoryWorkspaceIndex = boost::make_shared<
           CompositeValidator>();
@@ -152,21 +157,21 @@ namespace Mantid
       declareProperty(
           new PropertyWithValue<double>("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength minimum for monitor background. Taken to be WavelengthMin if not provided.");
+          "Wavelength minimum for monitor background in angstroms. Taken to be WavelengthMin if not provided.");
 
       declareProperty(
           new PropertyWithValue<double>("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength maximum for monitor background. Taken to be WavelengthMax if not provided.");
+          "Wavelength maximum for monitor background in angstroms. Taken to be WavelengthMax if not provided.");
 
       declareProperty(
           new PropertyWithValue<double>("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength minimum for integration. Taken to be WavelengthMin if not provided.");
+          "Wavelength minimum for integration in angstroms. Taken to be WavelengthMin if not provided.");
       declareProperty(
           new PropertyWithValue<double>("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength maximum for integration. Taken to be WavelengthMax if not provided.");
+          "Wavelength maximum for integration in angstroms. Taken to be WavelengthMax if not provided.");
 
       declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
 
@@ -418,11 +423,12 @@ namespace Mantid
      * @param detectorIndexRange : Workspace index ranges to keep
      * @param toConvert : TOF wavelength to convert.
      * @param wavelengthMinMax : Wavelength minmax to keep. Crop out the rest.
+     * @param wavelengthStep : Wavelength step for rebinning
      * @return Detector workspace in wavelength
      */
     MatrixWorkspace_sptr ReflectometryReductionOne::toLamDetector(
         const WorkspaceIndexList& detectorIndexRange, const MatrixWorkspace_sptr& toConvert,
-        const MinMax& wavelengthMinMax)
+        const MinMax& wavelengthMinMax, const double& wavelengthStep)
     {
       // Detector Workspace Processing
       MatrixWorkspace_sptr detectorWS;
@@ -471,7 +477,7 @@ namespace Mantid
 
       auto rebinWorkspaceAlg = this->createChildAlgorithm("Rebin");
       rebinWorkspaceAlg->initialize();
-      std::vector<double> params = boost::assign::list_of(0.05); // HARDCODED!!!!!
+      std::vector<double> params = boost::assign::list_of(wavelengthStep);
       rebinWorkspaceAlg->setProperty("Params", params);
       rebinWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
       rebinWorkspaceAlg->execute();
@@ -487,14 +493,15 @@ namespace Mantid
      * @param monitorIndex : Monitor index
      * @param wavelengthMinMax : Wavelength min max for detector workspace
      * @param backgroundMinMax : Wavelength min max for flat background correction of monitor workspace
+     * @param wavelengthStep : Wavlength step size for rebinning.
      * @return Tuple of detector and monitor workspaces
      */
     ReflectometryReductionOne::DetectorMonitorWorkspacePair ReflectometryReductionOne::toLam(MatrixWorkspace_sptr toConvert,
         const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
-        const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax)
+        const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep)
     {
       // Detector Workspace Processing
-      MatrixWorkspace_sptr detectorWS = toLamDetector(detectorIndexRange, toConvert, wavelengthMinMax);
+      MatrixWorkspace_sptr detectorWS = toLamDetector(detectorIndexRange, toConvert, wavelengthMinMax, wavelengthStep);
 
       // Monitor Workspace Processing
       MatrixWorkspace_sptr monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
@@ -546,6 +553,7 @@ namespace Mantid
      * @param stitchingEndQ : Stitching end Q (optional but dependent on secondTransmissionRun)
      * @param stitchingStartOverlapQ : Stitching start Q overlap (optional but dependent on secondTransmissionRun)
      * @param stitchingEndOverlapQ : Stitching end Q overlap (optional but dependent on secondTransmissionRun)
+     * @param wavelengthStep : Step in angstroms for rebinning for workspaces converted into wavelength.
      * @return Normalized run workspace by the transmission workspace, which have themselves been converted to Lam, normalized by monitors and possibly stitched together.
      */
     MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(MatrixWorkspace_sptr IvsLam,
@@ -559,12 +567,13 @@ namespace Mantid
         const OptionalDouble& stitchingDeltaQ,
         const OptionalDouble& stitchingEndQ,
         const OptionalDouble& stitchingStartOverlapQ,
-        const OptionalDouble& stitchingEndOverlapQ
+        const OptionalDouble& stitchingEndOverlapQ,
+        const double& wavelengthStep
     )
     {
       g_log.debug("Extracting first transmission run workspace indexes from spectra");
       const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam, firstTransmissionRun);
-      auto trans1InLam = toLam(firstTransmissionRun, detectorIndexes, i0MonitorIndex, wavelengthInterval, wavelengthMonitorBackgroundInterval); //TODO: Check index selection assumptions here!
+      auto trans1InLam = toLam(firstTransmissionRun, detectorIndexes, i0MonitorIndex, wavelengthInterval, wavelengthMonitorBackgroundInterval, wavelengthStep);
       MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
       MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
 
@@ -584,8 +593,11 @@ namespace Mantid
         auto transRun2 = secondTransmissionRun.get();
         g_log.debug("Extracting second transmission run workspace indexes from spectra");
         const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam, transRun2);
+
         auto trans2InLam = toLam(transRun2, detectorIndexes, i0MonitorIndex, wavelengthInterval,
-            wavelengthMonitorBackgroundInterval);
+            wavelengthMonitorBackgroundInterval, wavelengthStep);
+
+        // Unpack the conversion results.
         MatrixWorkspace_sptr trans2Detector = trans2InLam.get<0>();
         MatrixWorkspace_sptr trans2Monitor = trans2InLam.get<1>();
 
@@ -657,6 +669,7 @@ namespace Mantid
       const bool isPointDetector = (pointDetectorAnalysis.compare(strAnalysisMode) == 0);
 
       const MinMax wavelengthInterval = this->getMinMax("WavelengthMin","WavelengthMax");
+      const double wavelengthStep = getProperty("WavelengthStep");
       const MinMax monitorBackgroundWavelengthInterval = getMinMax("MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax");
       const MinMax monitorIntegrationWavelengthInterval = getMinMax("MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
 
@@ -670,7 +683,7 @@ namespace Mantid
 
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
-      DetectorMonitorWorkspacePair inLam = toLam(runWS, indexList, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval);
+      DetectorMonitorWorkspacePair inLam = toLam(runWS, indexList, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
       auto detectorWS = inLam.get<0>();
       auto monitorWS = inLam.get<1>();
 
@@ -690,7 +703,7 @@ namespace Mantid
 
           // Perform transmission correction.
           detectorWS = transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
-              i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
+              i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
         }
         else
         {
