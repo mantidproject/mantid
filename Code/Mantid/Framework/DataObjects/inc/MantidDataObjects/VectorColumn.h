@@ -129,8 +129,8 @@ namespace DataObjects
       long int size(0);
 
       for ( auto elemIt = m_data.begin(); elemIt != m_data.end(); ++elemIt )
-        size += elemIt->size() * sizeof(Type);
       {
+        size += static_cast<long int>( elemIt->size() * sizeof(Type) );
       }
 
       return size;
