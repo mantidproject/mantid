@@ -52,21 +52,23 @@
 
   <!-- FOILS  -->
 
-  <!-- midpoint positions -->
+  <!-- midpoint positions 
+       phi is simply set to put them all in the scattering plane
+  -->
   <component name="foil-pos0" type="foil">
    <!-- position 0 -->
-   <location t="-42" r="0.225" p="45"/>
-   <location t="-64" r="0.225" p="45"/>
-   <location t="35" r="0.225" p="45"/>
-   <location t="55" r="0.225" p="45"/>
+   <location t="-42" r="0.225" p="0"/>
+   <location t="-64" r="0.225" p="0"/>
+   <location t="35" r="0.225" p="0"/>
+   <location t="55" r="0.225" p="0"/>
   </component>
 
   <component name="foil-pos1" type="foil">
    <!-- position 1 -->
-   <location t="-31" r="0.225" p="45"/>
-   <location t="-50" r="0.225" p="45"/>
-   <location t="46" r="0.225" p="45"/>
-   <location t="67" r="0.225" p="45"/>
+   <location t="-31" r="0.225" p="0"/>
+   <location t="-50" r="0.225" p="0"/>
+   <location t="46" r="0.225" p="0"/>
+   <location t="67" r="0.225" p="0"/>
   </component>
 
   <!-- The foil shape is currently set to give the correct dTheta as seen
@@ -81,18 +83,20 @@
   </type>
   
   <!-- FOIL CHANGER -->
+  <!-- The shape & location are made up to provide inputs for the 
+       CalculateGammaBackground algorithm -->
   <component type="foil-changer">
   <location x="0" y ="0" z="0"/>
   </component>
   
-  <!-- The height is currently irrelevant, it is only the radius value
-       that is used by the background correction algorithm -->
+  <!-- Important quantity currently is the height. It defines the Z range
+       for the integration of the foil positions  (-0.2,0.2)-->
   <type name="foil-changer">
     <cylinder id="foil-changer-shape">
-    <centre-of-bottom-base x="0.0" y="-0.025" z="0.0" />
-    <axis x="0.0" y="1" z="0" /> 
-    <radius val="0.20" />
-    <height val="0.05" />
+    <centre-of-bottom-base x="0.0" y="-0.2" z="0.0" />
+    <axis x="0.0" y="1" z="0" />
+    <radius val="0.1" />
+    <height val="0.4" />
     </cylinder>
   </type>
   
