@@ -10,6 +10,7 @@
 
 using Mantid::Algorithms::MuonGroupDetectors;
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -36,6 +37,7 @@ public:
     const std::string outWSName("MuonGroupDetectorsTest_OutputWS");
 
     MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace123(5,3);
+
     TableWorkspace_sptr grouping = createDetectorGroupingTable(); 
 
     MuonGroupDetectors alg;
@@ -47,14 +49,34 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
-    // Retrieve the workspace from data service. TODO: Change to your desired type
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
     TS_ASSERT(ws);
 
     if ( ws )
     {
-      TSM_ASSERT( "You forgot to check the results!", 0);
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 2);
+      TS_ASSERT_EQUALS( ws->blocksize(), 3 );
+
+      TS_ASSERT_EQUALS( ws->readY(0)[0], 4 );
+      TS_ASSERT_EQUALS( ws->readY(1)[0], 6 );
+
+      TS_ASSERT_EQUALS( ws->readX(0)[1], 1 );
+      TS_ASSERT_EQUALS( ws->readX(1)[1], 1 );
+
+      TS_ASSERT_DELTA( ws->readE(0)[2], 4.243, 0.001);
+      TS_ASSERT_DELTA( ws->readE(1)[2], 5.196, 0.001);
+
+      TS_ASSERT_EQUALS( ws->getSpectrum(0)->getSpectrumNo(), 1);
+      TS_ASSERT_EQUALS( ws->getSpectrum(1)->getSpectrumNo(), 2);
+
+      std::set<detid_t> d1;
+      d1.insert(0); d1.insert(1);
+      TS_ASSERT_EQUALS( ws->getSpectrum(0)->getDetectorIDs(), d1 );
+
+      std::set<detid_t> d2;
+      d2.insert(2); d2.insert(3); d2.insert(4);
+      TS_ASSERT_EQUALS( ws->getSpectrum(1)->getDetectorIDs(), d2 );
     }
     
     // Remove workspace from the data service.
@@ -77,7 +99,7 @@ private:
     row1 << "Group" << "1" << group1;
 
     std::vector<int> group2;
-    group2.push_back(2); group2.push_back(2); group2.push_back(3);
+    group2.push_back(2); group2.push_back(3); group2.push_back(4);
     TableRow row2 = t->appendRow();
     row2 << "Group" << "2" << group2;
 
