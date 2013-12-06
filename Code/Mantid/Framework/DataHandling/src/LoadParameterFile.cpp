@@ -115,17 +115,35 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
   AutoPtr<Document> pDoc;
-  try
+
+  if(useString){
+    try
+    {
+      pDoc = pParser.parseString(parameterXML);
+    }
+    catch(Poco::Exception& exc)
+    {
+      throw Kernel::Exception::FileError (exc.displayText() + ". Unable to parse parameter XML string","ParameterXML");
+    }
+    catch(...)
+    {
+      throw Kernel::Exception::FileError("Unable to parse parameter XML string","ParameterXML");
+    }
+  } 
+  else
   {
-    pDoc = pParser.parse(filename);
-  }
-  catch(Poco::Exception& exc)
-  {
-    throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", filename);
-  }
-  catch(...)
-  {
-    throw Kernel::Exception::FileError("Unable to parse File:" , filename);
+    try
+    {
+      pDoc = pParser.parse(filename);
+    }
+    catch(Poco::Exception& exc)
+    {
+      throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", filename);
+    }
+    catch(...)
+    {
+      throw Kernel::Exception::FileError("Unable to parse File:" , filename);
+    }
   }
 
   // Get pointer to root element
