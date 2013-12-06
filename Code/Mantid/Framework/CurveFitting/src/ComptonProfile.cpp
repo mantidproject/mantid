@@ -222,6 +222,7 @@ namespace CurveFitting
    */
   void ComptonProfile::setAttribute(const std::string& name,const Attribute& value)
   {
+    IFunction::setAttribute(name,value); // Make sure the base-class stores it
     if(name == WSINDEX_NAME)  m_wsIndex = static_cast<size_t>(value.asInt());
     else if(name == MASS_NAME) m_mass = value.asDouble();
   }
