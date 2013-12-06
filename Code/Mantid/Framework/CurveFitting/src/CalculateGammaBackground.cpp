@@ -129,6 +129,12 @@ namespace Mantid
           {
             applyCorrection(i);
           }
+          else
+          {
+            g_log.information("Spectrum " + boost::lexical_cast<std::string>(spectrumNo) + " not in forward scatter range. Skipping correction.");
+            // Leave background at 0 and just copy data to corrected
+            m_correctedWS->dataY(i) = m_inputWS->readY(i);
+          }
         }
         catch(Exception::NotFoundError &)
         {

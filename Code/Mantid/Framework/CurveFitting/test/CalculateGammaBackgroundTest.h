@@ -17,24 +17,86 @@ public:
   static void destroySuite( CalculateGammaBackgroundTest *suite ) { delete suite; }
 
   //------------------------------------ Success cases ---------------------------------------
-  void test_Input_With_Single_Profile_Gives_Expected_Output_Workspaces()
+  void test_Input_With_Spectrum_Number_Inside_Forward_Scatter_Range_Gives_Expected_Correction()
   {
-    auto alg = createAlgorithm();
-    alg->setRethrows(true);
-
-    alg->setProperty("InputWorkspace",createTestWorkspaceWithFoilChanger());
-
-    alg->setPropertyValue("ComptonFunction", "name=GaussianComptonProfile,Mass=1.0079,Width=2.9e-2,Intensity=4.29");
-
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-
     using namespace Mantid::API;
+    auto inputWS = createTestWorkspaceWithFoilChanger(); //specNo=1
+    // Put spectrum in forward scatter range
+    inputWS->getSpectrum(0)->setSpectrumNo(135);
+    auto alg = runSuccessTestCase(inputWS);
+
     MatrixWorkspace_sptr backgroundWS = alg->getProperty("BackgroundWorkspace");
     MatrixWorkspace_sptr correctedWS = alg->getProperty("CorrectedWorkspace");
-    TS_ASSERT(backgroundWS);
-    TS_ASSERT(correctedWS);
+    TS_ASSERT(backgroundWS != 0);
+    TS_ASSERT(correctedWS != 0);
     TS_ASSERT(backgroundWS != correctedWS);
+
+    // Test some values in the range
+    const size_t npts(inputWS->blocksize());
+    const auto & inX(inputWS->readX(0));
+    const auto & backX(backgroundWS->readX(0));
+    const auto & corrX(backgroundWS->readX(0));
+
+    // X values are just straight copy
+    TS_ASSERT_DELTA(backX.front(),inX.front(),1e-08);
+    TS_ASSERT_DELTA(backX[npts/2],inX[npts/2],1e-08);
+    TS_ASSERT_DELTA(backX.back(),inX.back(),1e-08);
+    TS_ASSERT_DELTA(corrX.front(),inX.front(),1e-08);
+    TS_ASSERT_DELTA(corrX[npts/2], inX[npts/2],1e-08);
+    TS_ASSERT_DELTA(corrX.back(),inX.back(),1e-08);
+
+    // Corrected matches input the detector is not defined as forward scatter range - Currently hardcoded in algorithm
+    const auto & corrY(correctedWS->readY(0));
+    TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
+    TS_ASSERT_DELTA(corrY[npts/2], 0.15060372, 1e-08);
+    TS_ASSERT_DELTA(corrY.back(),  -0.01696477, 1e-08);
+
+    // Background Y values = 0.0
+    const auto & backY(backgroundWS->readY(0));
+    TS_ASSERT_DELTA(backY.front(), -0.00000138, 1e-08);
+    TS_ASSERT_DELTA(backY[npts/2], -0.00015056, 1e-08);
+    TS_ASSERT_DELTA(backY.back(), 0.01650629,1e-08);
+
+  }
+
+  void test_Input_With_Spectrum_Number_Outside_Range_Leaves_Data_Uncorrected_And_Background_Zeroed()
+  {
+    using namespace Mantid::API;
+    auto inputWS = createTestWorkspaceWithFoilChanger(); //specNo=1
+    auto alg = runSuccessTestCase(inputWS);
+
+    MatrixWorkspace_sptr backgroundWS = alg->getProperty("BackgroundWorkspace");
+    MatrixWorkspace_sptr correctedWS = alg->getProperty("CorrectedWorkspace");
+    TS_ASSERT(backgroundWS != 0);
+    TS_ASSERT(correctedWS != 0);
+    TS_ASSERT(backgroundWS != correctedWS);
+
+    // Test some values in the range
+    const size_t npts(inputWS->blocksize());
+    const auto & inX(inputWS->readX(0));
+    const auto & backX(backgroundWS->readX(0));
+    const auto & corrX(backgroundWS->readX(0));
+
+    // X values are just straight copy
+    TS_ASSERT_DELTA(backX.front(),inX.front(),1e-08);
+    TS_ASSERT_DELTA(backX[npts/2],inX[npts/2],1e-08);
+    TS_ASSERT_DELTA(backX.back(),inX.back(),1e-08);
+    TS_ASSERT_DELTA(corrX.front(),inX.front(),1e-08);
+    TS_ASSERT_DELTA(corrX[npts/2], inX[npts/2],1e-08);
+    TS_ASSERT_DELTA(corrX.back(),inX.back(),1e-08);
+
+    // Corrected matches input the detector is not defined as forward scatter range - Currently hardcoded in algorithm
+    const auto & inY(inputWS->readY(0));
+    const auto & corrY(correctedWS->readY(0));
+    TS_ASSERT_DELTA(corrY.front(),inY.front(),1e-08);
+    TS_ASSERT_DELTA(corrY[npts/2],inY[npts/2],1e-08);
+    TS_ASSERT_DELTA(corrY.back(),inY.back(),1e-08);
+
+    // Background Y values = 0.0
+    const auto & backY(backgroundWS->readY(0));
+    TS_ASSERT_DELTA(backY.front(),0.0,1e-08);
+    TS_ASSERT_DELTA(backY[npts/2],0.0,1e-08);
+    TS_ASSERT_DELTA(backY.back(),0.0,1e-08);
   }
 
 
@@ -72,12 +134,19 @@ public:
     TS_ASSERT(!alg->isExecuted());
   }
 
-
-  void test_InputWorkspace_Without_FoilChanger_Component_Throws_Error()
-  {
-  }
-
 private:
+
+  Mantid::API::IAlgorithm_sptr runSuccessTestCase(const Mantid::API::MatrixWorkspace_sptr & inputWS)
+  {
+    auto alg = createAlgorithm();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace",inputWS);
+    alg->setPropertyValue("ComptonFunction", "name=GaussianComptonProfile,Mass=1.0079,Width=2.9e-2,Intensity=4.29");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    return alg;
+  }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm()
   {
@@ -91,7 +160,7 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithFoilChanger()
   {
-    double x0(165.0),x1(166.0),dx(0.5);
+    double x0(50.0),x1(300.0),dx(0.5);
     return ComptonProfileTestHelpers::createSingleSpectrumWorkspaceWithSingleMass(x0,x1,dx);
   }
 
