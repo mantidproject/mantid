@@ -17,6 +17,8 @@ namespace ComptonProfileTestHelpers
   static Mantid::API::MatrixWorkspace_sptr createSingleSpectrumWorkspaceOfOnes(const double x0, const double x1, const double dx);
   static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr & ws,
                                       const Mantid::detid_t detID);
+  static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr & ws,
+                                const std::string & name);
 
   struct ones
   {
@@ -58,6 +60,8 @@ namespace ComptonProfileTestHelpers
     Mantid::detid_t id(1);
     ws2d->setInstrument(createTestInstrumentWithFoilChanger(id));
     addResolutionParameters(ws2d, id);
+    addFoilResolution(ws2d, "foil-pos0");
+    addFoilResolution(ws2d, "foil-pos1");
 
     // Link workspace with detector
     auto *spec0 = ws2d->getSpectrum(0);
@@ -140,10 +144,20 @@ namespace ComptonProfileTestHelpers
     pmap.addDouble(compID, "sigma_theta", 0.028);
     pmap.addDouble(compID, "efixed", 4908);
     pmap.addDouble(compID, "t0", -0.32);
-    pmap.addDouble(compID, "hwhm_analyser_lorentz", 24);
-    pmap.addDouble(compID, "sigma_analyser_gauss", 73);
-    pmap.addDouble(compID, "hwhm_foil_lorentz", 144);
-    pmap.addDouble(compID, "sigma_foil_gauss", 20);
+    pmap.addDouble(compID, "hwhm_lorentz", 24);
+    pmap.addDouble(compID, "sigma_gauss", 73);
+  }
+
+  static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr & ws,
+                                const std::string & name)
+  {
+    // Parameters
+    auto & pmap = ws->instrumentParameters();
+    auto comp = ws->getInstrument()->getComponentByName(name);
+    auto compID = comp->getComponentID();
+
+    pmap.addDouble(compID, "hwhm_lorentz", 144);
+    pmap.addDouble(compID, "sigma_gauss", 20);
   }
 }
 

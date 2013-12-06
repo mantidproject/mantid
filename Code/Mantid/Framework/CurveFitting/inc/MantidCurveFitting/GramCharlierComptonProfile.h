@@ -69,6 +69,9 @@ namespace CurveFitting
     void convoluteVoigt(double * result, const size_t nData, const std::vector<double> & profile) const;
     /// Called by the framework when a workspace is set
     void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+    /// Pre-calculate the Y-space values
+    void cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
+                           const DetectorParams & detpar,const ResolutionParams & respar);
 
     /// The active hermite coefficents
     std::vector<short> m_hermite;
