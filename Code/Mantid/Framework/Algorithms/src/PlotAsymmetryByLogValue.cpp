@@ -270,21 +270,31 @@ namespace Mantid
 
         if(m_autogroup)
         {
-          IAlgorithm_sptr applyGrouping = createChildAlgorithm("ApplyGroupingFromMuonNexus");
-          applyGrouping->initialize();
-          applyGrouping->setProperty("InputWorkspace", loadedWs);
-          applyGrouping->setPropertyValue("Filename", fn.str());
+          Workspace_sptr loadedDetGrouping = load->getProperty("DetectorGroupingTable");
+
+          if ( ! loadedDetGrouping )
+            throw std::runtime_error("No grouping info in the file.\n\nPlease specify grouping manually");
+
+          // Could be groups of workspaces, so need to work with ADS
+          ScopedWorkspace inWS(loadedWs);
+          ScopedWorkspace grouping(loadedDetGrouping);
+          ScopedWorkspace outWS;
 
           try
           {
+            IAlgorithm_sptr applyGrouping = createChildAlgorithm("MuonGroupDetectors", -1, -1, false);
+            applyGrouping->initialize();
+            applyGrouping->setPropertyValue( "InputWorkspace", inWS.name() );
+            applyGrouping->setPropertyValue( "DetectorGroupingTable", grouping.name() );
+            applyGrouping->setPropertyValue( "OutputWorkspace", outWS.name() );
             applyGrouping->execute();
+
+            loadedWs = outWS.retrieve(); 
           }
           catch(...)
           {
-            throw std::runtime_error("Unable to auto-group the workspace. Please specify grouping manually");
+            throw std::runtime_error("Unable to group detectors.\n\nPlease specify grouping manually.");
           }
-
-          loadedWs = applyGrouping->getProperty("OutputWorkspace");
         }
 
         WorkspaceGroup_sptr loadedGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
