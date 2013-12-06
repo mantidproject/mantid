@@ -863,11 +863,18 @@ void ConfigDialog::addDialog()
 //Edit a program
 void ConfigDialog::editDialog()
 {
-  QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
+  auto firstSelectedItem = treePrograms->selectedItems()[0];
+  auto selectedProgram = m_sendToSettings.find(firstSelectedItem->text(0).toStdString());
+  // If the program name itself isn't initially selected, recurse up.
+  while ( selectedProgram == m_sendToSettings.end() )
+  {
+    firstSelectedItem = treePrograms->itemAbove(firstSelectedItem);
+    // It shouldn't happen that we get to the top without finding anything, but should this happen just return
+    if ( firstSelectedItem == treePrograms->invisibleRootItem() ) return;
+    selectedProgram = m_sendToSettings.find(firstSelectedItem->text(0).toStdString());
+  }
 
-  std::map<std::string,std::string> programKeysAndDetails = m_sendToSettings.find(selectedItems[0]->text(0).toStdString())->second;
-
-  SendToProgramDialog* editProgram = new SendToProgramDialog(this, selectedItems[0]->text(0), programKeysAndDetails);
+  SendToProgramDialog* editProgram = new SendToProgramDialog(this, firstSelectedItem->text(0), selectedProgram->second);
 
   editProgram->setWindowTitle(tr("Edit a Program"));
   editProgram->setModal(true);
