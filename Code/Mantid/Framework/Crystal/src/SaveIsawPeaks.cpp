@@ -117,7 +117,8 @@ namespace Crystal
 	  // Save the "bank" part once to check whether it really is a bank
 	  if( bankPart == "?")  bankPart = bankName.substr(0,4);
       // Take out the "bank" part of the bank name and convert to an int
-      bankName = bankName.substr(4, bankName.size()-4);
+	  if( bankPart == "bank")bankName = bankName.substr(4, bankName.size()-4);
+	  else if( bankPart == "WISH")bankName = bankName.substr(9, bankName.size()-9);
 	  Strings::convert(bankName, bank);
 
       // Save in the map
@@ -126,10 +127,10 @@ namespace Crystal
       uniqueBanks.insert(bank);
     }
 
-    Instrument_const_sptr inst = ws->getInstrument();
+    inst = ws->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
 
-	if( bankPart != "bank" && bankPart != "?" ) {
+	if( bankPart != "bank" && bankPart != "WISH" && bankPart != "?" ) {
 		  std::ostringstream mess;		  mess << "Detector module of type " << bankPart << " not supported in ISAWPeaks. Cannot save peaks file";
 		  throw std::runtime_error( mess.str() );
 	}
@@ -180,10 +181,12 @@ namespace Crystal
         // Build up the bank name
         int bank = *it;
         std::ostringstream mess;
-        mess << "bank" << bank;
+		if( bankPart == "bank")mess << "bank" << bank;
+		else if( bankPart == "WISH")mess << "WISHpanel0" << bank;
+
         std::string bankName = mess.str();
         // Retrieve it
-        RectangularDetector_const_sptr det = boost::dynamic_pointer_cast<const RectangularDetector>(inst->getComponentByName(bankName));
+        boost::shared_ptr<const IComponent> det = inst->getComponentByName(bankName);
         if (det)
         {
           // Center of the detector
@@ -192,19 +195,22 @@ namespace Crystal
           double detd = (center - inst->getSample()->getPos()).norm();
 
           // Base unit vector (along the horizontal, X axis)
-          V3D base = det->getAtXY(det->xpixels()-1,0)->getPos() - det->getAtXY(0,0)->getPos();
+          V3D base = findPixelPos(bankName,1,0) - findPixelPos(bankName,0,0);
           base.normalize();
           // Up unit vector (along the vertical, Y axis)
-          V3D up = det->getAtXY(0,det->ypixels()-1)->getPos() - det->getAtXY(0,0)->getPos();
+          V3D up = findPixelPos(bankName,0,1) - findPixelPos(bankName,0,0);
           up.normalize();
+          int NCOLS, NROWS;
+          double xsize, ysize;
+          sizeBanks(bankName, NCOLS, NROWS, xsize, ysize);
 
           // Write the line
           out << "5 "
            << std::setw(6) << std::right << bank << " "
-           << std::setw(6) << std::right << det->xpixels() << " "
-           << std::setw(6) << std::right << det->ypixels() << " "
-           << std::setw(7) << std::right << std::fixed << std::setprecision(4) << 100.0*det->xsize() << " "
-           << std::setw(7) << std::right << std::fixed << std::setprecision(4) << 100.0*det->ysize() << " "
+           << std::setw(6) << std::right << NCOLS << " "
+           << std::setw(6) << std::right << NROWS << " "
+           << std::setw(7) << std::right << std::fixed << std::setprecision(4) << 100.0*xsize << " "
+           << std::setw(7) << std::right << std::fixed << std::setprecision(4) << 100.0*ysize << " "
            << "  0.2000 "
            << std::setw(6) << std::right << std::fixed << std::setprecision(2) << 100.0*detd << " "
            << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0*center.X() << " "
@@ -376,8 +382,61 @@ namespace Crystal
 
   }
 
+  V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row)
+  {
+	  boost::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
+	  if (parent->type().compare("RectangularDetector") == 0)
+	  {
+          boost::shared_ptr<const RectangularDetector> RDet = boost::dynamic_pointer_cast<
+					const RectangularDetector>(parent);
 
+		  boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+		  return pixel->getPos();
+	  }
+	  else
+	  {
+		  std::string bankName0 = bankName;
+                  //Only works for WISH
+		  bankName0.erase(0,4);
+		  std::ostringstream pixelString;
+		  pixelString << inst->getName() << "/" << bankName0 << "/" <<bankName
+		  << "/tube" << std::setw(3) << std::setfill('0') << col+1
+		  << "/pixel" << std::setw(4) << std::setfill('0') << row+1;
+		  boost::shared_ptr<const Geometry::IComponent> component = inst->getComponentByName(pixelString.str());
+		  boost::shared_ptr<const Detector> pixel = boost::dynamic_pointer_cast<const Detector>(component);
+		  return pixel->getPos();
+	  }
+  }
+  void SaveIsawPeaks::sizeBanks(std::string bankName, int& NCOLS, int& NROWS, double& xsize, double& ysize)
+  {
+	  if (bankName.compare("None") == 0) return;
+	  boost::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
+	  if (parent->type().compare("RectangularDetector") == 0)
+	  {
+		  boost::shared_ptr<const RectangularDetector> RDet = boost::dynamic_pointer_cast<
+					const RectangularDetector>(parent);
 
+	      NCOLS = RDet->xpixels();
+	      NROWS = RDet->ypixels();
+	      xsize = RDet->xsize();
+	      ysize = RDet->ysize();
+	  }
+	  else
+	  {
+          std::vector<Geometry::IComponent_const_sptr> children;
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+          asmb->getChildren(children, false);
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+          std::vector<Geometry::IComponent_const_sptr> grandchildren;
+          asmb2->getChildren(grandchildren,false);
+          NROWS = static_cast<int>(grandchildren.size());
+          NCOLS = static_cast<int>(children.size());
+          //Geometry::IComponent_const_sptr first = children[0];
+          //Geometry::IComponent_const_sptr last = children[NCOLS-1];
+          //xsize = (first.getPos() - last.getPos()).norm();
+          //ysize = (grandchildren[0].getPos() - grandchildren[NROWS-1].getPos()).norm();
+	  }
+  }
 
 
 } // namespace Mantid
