@@ -52,17 +52,17 @@ start_time = time.time()
 # Get the config file name and the run number to process from the command line
 #
 if (len(sys.argv) < 3):
-  print "You MUST give the config file name and run number on the command line"
+  print "You MUST give the config file name(s) and run number on the command line"
   exit(0)
 
-config_file_name = sys.argv[1]
-run              = sys.argv[2]
+config_files = sys.argv[1:-1]
+run          = sys.argv[-1]
 
 #
 # Load the parameter names and values from the specified configuration file 
 # into a dictionary and set all the required parameters from the dictionary.
 #
-params_dictionary = ReduceDictionary.LoadDictionary( config_file_name )
+params_dictionary = ReduceDictionary.LoadDictionary( *config_files )
 
 instrument_name           = params_dictionary[ "instrument_name" ]
 calibration_file_1        = params_dictionary.get('calibration_file_1', None)
@@ -337,7 +337,7 @@ if not use_ellipse_integration:
 
 end_time = time.time()
 print '\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec'
-print 'using config file ' + config_file_name 
+print 'using config file(s) ' + ", ".join(config_files)
 
 #
 # Try to get this to terminate when run by ReduceSCD_Parallel.py, from NX session

@@ -72,14 +72,14 @@ if (len(sys.argv) < 2):
   print "You MUST give the config file name on the command line"
   exit(0)
 
-config_file_name = sys.argv[1]
+config_files = sys.argv[1:]
 
 #
 # Load the parameter names and values from the specified configuration file 
 # into a dictionary and set all the required parameters from the dictionary.
 #
 
-params_dictionary = ReduceDictionary.LoadDictionary( config_file_name )
+params_dictionary = ReduceDictionary.LoadDictionary( *config_files )
 
 exp_name              = params_dictionary[ "exp_name" ]
 output_directory      = params_dictionary[ "output_directory" ]
@@ -115,7 +115,7 @@ list=[]
 index = 0
 for r_num in run_nums:
   list.append( ProcessThread() )
-  cmd = '%s %s %s %s' % (python, reduce_one_run_script, config_file_name, str(r_num))
+  cmd = '%s %s %s %s' % (python, reduce_one_run_script, " ".join(config_files), str(r_num))
   if slurm_queue_name is not None:
     console_file = output_directory + "/" + str(r_num) + "_output.txt"
     cmd =  'srun -p ' + slurm_queue_name + \
@@ -262,6 +262,6 @@ print   "****************************** DONE PROCESSING ALL RUNS ***************
 print   "**************************************************************************************\n"
 
 print 'Total time:   ' + str(end_time - start_time) + ' sec'
-print 'Connfig file: ' + config_file_name 
+print 'Config file: ' + ", ".join(config_files)
 print 'Script file:  ' + reduce_one_run_script + '\n'
 print
