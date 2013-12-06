@@ -1,7 +1,7 @@
-#ifndef MANTID_MDEVENTS_MDCENTROIDPEAKSTEST_H_
-#define MANTID_MDEVENTS_MDCENTROIDPEAKSTEST_H_
+#ifndef MANTID_MDEVENTS_MDCENTROIDPEAKS2TEST_H_
+#define MANTID_MDEVENTS_MDCENTROIDPEAKS2TEST_H_
 
-#include "MantidMDAlgorithms/CentroidPeaksMD.h"
+#include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -33,13 +33,13 @@ using namespace Mantid::MDAlgorithms;
 using Mantid::Kernel::V3D;
 
 
-class CentroidPeaksMDTest : public CxxTest::TestSuite
+class CentroidPeaksMD2Test : public CxxTest::TestSuite
 {
 public:
 
   void test_Init()
   {
-    CentroidPeaksMD alg;
+    CentroidPeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -58,7 +58,7 @@ public:
         "Units", "-,-,-",
         "SplitInto", "5",
         "MaxRecursionDepth", "2",
-        "OutputWorkspace", "CentroidPeaksMDTest_MDEWS");
+        "OutputWorkspace", "CentroidPeaksMD2Test_MDEWS");
   }
 
 
@@ -69,7 +69,7 @@ public:
     std::ostringstream mess;
     mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
     FrameworkManager::Instance().exec("FakeMDEventData", 6,
-        "InputWorkspace", "CentroidPeaksMDTest_MDEWS",
+        "InputWorkspace", "CentroidPeaksMD2Test_MDEWS",
         "PeakParams", mess.str().c_str(),
         "RandomSeed", "1234");
 
@@ -77,9 +77,9 @@ public:
 
 
   //-------------------------------------------------------------------------------
-  /** Run the CentroidPeaksMD with the given peak radius param */
+  /** Run the CentroidPeaksMD2 with the given peak radius param */
   void doRun( V3D startPos, double PeakRadius, V3D expectedResult, std::string message,
-      std::string OutputWorkspace = "CentroidPeaksMDTest_Peaks")
+      std::string OutputWorkspace = "CentroidPeaksMD2Test_Peaks")
   {
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
@@ -97,13 +97,13 @@ public:
     peakWS->addPeak( pIn );
 
     TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
-    AnalysisDataService::Instance().addOrReplace("CentroidPeaksMDTest_Peaks", peakWS);
+    AnalysisDataService::Instance().addOrReplace("CentroidPeaksMD2Test_Peaks", peakWS);
 
-    CentroidPeaksMD alg;
+    CentroidPeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "CentroidPeaksMDTest_MDEWS" ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "CentroidPeaksMDTest_Peaks" ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "CentroidPeaksMD2Test_MDEWS" ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "CentroidPeaksMD2Test_Peaks" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
@@ -130,7 +130,7 @@ public:
     for (size_t i=0; i<3; i++)
       TSM_ASSERT_DELTA( message, result[i], expectedResult[i], 0.05);
 
-    AnalysisDataService::Instance().remove("CentroidPeaksMDTest_Peaks");
+    AnalysisDataService::Instance().remove("CentroidPeaksMD2Test_Peaks");
   }
 
   //-------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ public:
     addPeak(1000, 2.,3.,4., 0.5);
     addPeak(1000, 6.,6.,6., 2.0);
 
-    MDEventWorkspace3Lean::sptr mdews = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("CentroidPeaksMDTest_MDEWS");
+    MDEventWorkspace3Lean::sptr mdews = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("CentroidPeaksMD2Test_MDEWS");
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
@@ -173,7 +173,7 @@ public:
 
     doRun(V3D( 6.,6.,6.), 0.1, V3D( 6.,6.,6.), "Small radius still works");
 
-    AnalysisDataService::Instance().remove("CentroidPeaksMDTest_MDEWS");
+    AnalysisDataService::Instance().remove("CentroidPeaksMD2Test_MDEWS");
   }
 
   void test_exec_HKL()
@@ -200,7 +200,7 @@ public:
     createMDEW();
     addPeak(1000, 0,0.,0., 1.0);
     doRun(V3D( 0.,0.,0.), 1.0, V3D( 0.,0.,0.), "Start at the center, get the center",
-        "CentroidPeaksMDTest_MDEWS_outputCopy");
+        "CentroidPeaksMD2Test_MDEWS_outputCopy");
 
   }
 
@@ -211,5 +211,5 @@ private:
 
 };
 
-#endif /* MANTID_MDEVENTS_MDCENTROIDPEAKSTEST_H_ */
+#endif /* MANTID_MDEVENTS_MDCENTROIDPEAKS2TEST_H_ */
 
