@@ -107,13 +107,17 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.listMain.clear()
         # Fill with ADS workspaces
         self.populateListADSWorkspaces()
+        self.comboCycle.setVisible(False)
         try:
             selectedInstrument = config['default.instrument'].strip().upper()
             if not self.__instrumentRuns:
                 self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
             elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
                 self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
-            self.populateListCycle(selected_cycle)
+            runs = self.__instrumentRuns.getJournalRuns(self.textRB.text())
+            for run in runs:
+                self.listMain.addItem(run)
+            #self.populateListCycle(selected_cycle)
         except Exception as ex:
             self.comboCycle.setVisible(False)
             logger.notice("Could not list archive runs")
@@ -121,7 +125,7 @@ class ReflGui(refl_window.Ui_windowRefl):
 
     #Functionality which will hopefully be moved into a new file
     def populateListCycle(self, selected_cycle=None):
-        runs = self.__instrumentRuns.getJournalRuns(cycle=selected_cycle)
+        runs = self.__instrumentRuns.getJournalRuns(self.textRB.text())
         for run in runs:
             self.listMain.addItem(run)
         # Get possible cycles for this instrument.
