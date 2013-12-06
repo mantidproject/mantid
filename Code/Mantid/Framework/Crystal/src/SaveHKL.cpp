@@ -44,6 +44,7 @@ Last line must have all 0's
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
@@ -119,6 +120,13 @@ namespace Crystal
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
         "Path to an hkl file to save.");
+
+    std::vector<std::string> histoTypes;
+    histoTypes.push_back("Bank" );
+    histoTypes.push_back("RunNumber" );
+    histoTypes.push_back("");
+    declareProperty("SortBy", histoTypes[2],boost::make_shared<StringListValidator>(histoTypes),
+      "Sort the histograms by bank, run number or both (default).");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -134,6 +142,7 @@ namespace Crystal
     double dMin = getProperty("MinDSpacing");
     double wlMin = getProperty("MinWavelength");
     double wlMax = getProperty("MaxWavelength");
+    std::string type = getProperty("SortBy");
 
     // Sequence and run number
     int seqNum = 1;
@@ -180,7 +189,9 @@ namespace Crystal
 
     // We must sort the peaks by bank #
     std::vector< std::pair<std::string, bool> > criteria;
-    criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+    if(type.compare(0,2,"Ba")==0) criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+    else if(type.compare(0,2,"Ru")==0) criteria.push_back( std::pair<std::string, bool>("RunNumber", true) );
+    else criteria.push_back( std::pair<std::string, bool>("BankName", true) );
     ws->sort(criteria);
 
     bool correctPeaks = getProperty("ApplyAnvredCorrections");
@@ -361,8 +372,9 @@ namespace Crystal
 
       out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) <<
     		  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*correc*p.getIntensity(),2));
-
-      out << std::setw( 4 ) << runSequence;
+      if(type.compare(0,2,"Ba")==0) out << std::setw( 4 ) << bankSequence;
+      else if(type.compare(0,2,"Ru")==0) out << std::setw( 4 ) << runSequence;
+      else out << std::setw( 4 ) << runSequence;
 
       out << std::setw( 8 ) << std::fixed << std::setprecision( 4 ) << lambda;
 
