@@ -708,6 +708,9 @@ namespace Mantid
      */
     int64_t ICat4Catalog::getDatasetIdFromFileName(std::string &dataFileName)
     {
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
+
       ns1__search request;
       ns1__searchResponse response;
 
@@ -721,7 +724,7 @@ namespace Mantid
 
       int64_t datafileId;
       
-      int result = m_icat.search(&request, &response);
+      int result = icat.search(&request, &response);
 
       if (result == 0)
       {
@@ -736,7 +739,7 @@ namespace Mantid
       }
       else
       {
-        throwErrorMessage(m_icat);
+        throwErrorMessage(icat);
       }
 
       return datafileId;
