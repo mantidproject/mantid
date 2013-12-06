@@ -245,6 +245,7 @@ if use_sphere_integration:
                     SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
   peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
+                  CoordinatesToUse="Q (sample frame)",
 	          BackgroundOuterRadius=bkg_outer_radius, 
                   BackgroundInnerRadius=bkg_inner_radius,
 	          PeaksWorkspace=peaks_ws, 
@@ -262,6 +263,7 @@ elif use_cylinder_integration:
                     SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
   peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
+                  CoordinatesToUse="Q (sample frame)",
 	              BackgroundOuterRadius=bkg_outer_radius, 
                   BackgroundInnerRadius=bkg_inner_radius,
 	              PeaksWorkspace=peaks_ws, 
