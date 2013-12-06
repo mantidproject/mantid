@@ -157,21 +157,9 @@ void SendToProgramDialog::validateTarget()
 */
 void SendToProgramDialog::validateSaveUsing()
 {
-  validSaveUsing = true;
-  try
-  {
-    Mantid::API::AlgorithmManager::Instance().create(m_uiform.saveUsingText->text().toStdString() );
-  }
-  catch(std::exception&)
-  {
-    m_uiform.validateSaveUsing->setVisible(true); 
-    validSaveUsing = false;
-  }
-  
-  if (validSaveUsing == true)
-  {
-    m_uiform.validateSaveUsing->setVisible(false); 
-  }
+  validSaveUsing = Mantid::API::AlgorithmFactory::Instance().exists( m_uiform.saveUsingText->text().toStdString() );
+  m_uiform.validateSaveUsing->setVisible( ! validSaveUsing );
+
   validateAll();
 }
 
