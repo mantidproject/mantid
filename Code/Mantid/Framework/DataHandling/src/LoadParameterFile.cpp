@@ -35,6 +35,7 @@ This algorithm allows instrument parameters to be specified in a separate file f
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/File.h>
 #include <sstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
@@ -46,6 +47,7 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using Poco::XML::AutoPtr;
 using Mantid::Geometry::InstrumentDefinitionParser;
 
 
@@ -112,7 +114,7 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
-  Document* pDoc;
+  AutoPtr<Document> pDoc;
   try
   {
     pDoc = pParser.parse(filename);
@@ -127,7 +129,7 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
   }
 
   // Get pointer to root element
-  Element* pRootElem = pDoc->documentElement();
+  AutoPtr<Element> pRootElem = pDoc->documentElement();
   if ( !pRootElem->hasChildNodes() )
   {
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML Parameter file", filename);
@@ -140,7 +142,6 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
   // populate parameter map of workspace 
   localWorkspace->populateInstrumentParameters();
 
-  pDoc->release();
 }
 
 } // namespace DataHandling
