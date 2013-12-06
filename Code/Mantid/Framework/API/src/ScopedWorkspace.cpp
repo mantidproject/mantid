@@ -55,12 +55,7 @@ namespace API
    */
   ScopedWorkspace::operator bool() const
   {
-    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
-
-    if ( ads.doesExist(m_name) )
-      return ads.retrieveWS<Workspace>(m_name);
-    else
-      return false;
+    return AnalysisDataService::Instance().doesExist(m_name);
   }
  
   /**
