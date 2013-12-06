@@ -12,33 +12,46 @@
 # The run numbers themselves may be specified as a comma separated list of
 # individual run numbers, or ranges specified with a colon separator.
 #
-def LoadDictionary( filename ):
-  params_dictionary = {}
-  run_nums = []
-  file = open(filename)
+def LoadDictionary( *filenames, **kwargs ):
+  # create a dictionary to load into
+  params_dictionary = kwargs.get("existing", {})
+  # create a list of run numbers
+  run_nums = params_dictionary.get("run_nums", [])
+  
+  file = open(filenames[0])
   for line in file:
     line = line.strip();
     line = line.rstrip();
     if (not line.startswith('#')) and len(line) > 2:
       words = line.split()
-      if len(words) > 1:
-        if words[1] == "None":
-          params_dictionary[words[0]] = None
-        elif words[1] == "True":
-          params_dictionary[words[0]] = True
-        elif words[1] == "False":
-          params_dictionary[words[0]] = False
-        elif words[0] == "run_nums":
-          run_list = ParseRunList(words[1])
-          for i in range(0,len(run_list)):
-            run_nums.append(run_list[i])
-        else:
-          params_dictionary[words[0]] = words[1]
-      else:
+      # error check the number of values
+      if len(words) < 2:
         print "Syntax Error On Line: " + line
+      # set the value
+      else:
+        (key, value) = words[0:2]
 
-    params_dictionary["run_nums"]=run_nums
-  return params_dictionary;
+        # fix up special values
+        if value.lower() == "none":
+          value = None
+        elif value.lower() == "true":
+          value = True
+        elif value.lower() == "false":
+          value = False
+
+        # set the values
+        if key == "run_nums":
+          run_nums.extend(ParseRunList(value))
+        else:
+          params_dictionary[key] = value
+
+  params_dictionary["run_nums"]=run_nums
+
+  # it isn't awesome without recursion
+  if len(filenames) > 1:
+    return LoadDictionary(*filenames[1:], existing=params_dictionary)
+  else:
+    return params_dictionary;
 
 #
 # Return a list of run numbers from a string containing a comma separated
