@@ -65,6 +65,8 @@ public:
   virtual void getFileLocation(const long long&,std::string& )=0;
   /// get URLs of the files
   virtual void getDownloadURL(const long long& fileid,std::string&)=0;
+  /// get URL of where to PUT (publish) files.
+  virtual std::string getUploadURL(std::string &fileName, std::string &dataFileName)=0;
   /// keep alive
   virtual void keepAlive()=0;
   ///keep alive in minutes

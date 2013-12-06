@@ -679,6 +679,14 @@ namespace Mantid
     }
 
     /**
+     * Get the URL where the datafiles will be uploaded to.
+     * @param dataFileName   :: The name of the datafile to use.
+     * @param createFileName :: The name to give to the file being saved.
+     * @return URL to PUT datafiles to.
+     */
+    std::string ICat4Catalog::getUploadURL(std::string &dataFileName, std::string &createFileName)
+    {
+    }
      * Keep the current session alive.
      */
     void ICat4Catalog::keepAlive()
