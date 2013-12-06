@@ -90,7 +90,7 @@ max_pred_dspacing         = params_dictionary[ "max_pred_dspacing" ]
 use_sphere_integration    = params_dictionary.get('use_sphere_integration', True)
 use_ellipse_integration   = params_dictionary.get('use_ellipse_integration', False)
 use_fit_peaks_integration = params_dictionary.get('use_fit_peaks_integration', False)
-use_cylinder_integration  = params_dictionary.get('use_cylinder_integration', False)
+use_cylindrical_integration  = params_dictionary.get('use_cylindrical_integration', False)
 
 peak_radius               = params_dictionary[ "peak_radius" ]
 bkg_inner_radius          = params_dictionary[ "bkg_inner_radius" ]
