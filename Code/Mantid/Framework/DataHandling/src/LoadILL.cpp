@@ -9,8 +9,6 @@ The property FilenameVanadium is optional. If it is present the EPP will be load
 
 To date this algorithm only supports: IN4, IN5 and IN6
 
-
-
 *WIKI*/
 //---------------------------------------------------
 // Includes
@@ -121,36 +119,6 @@ namespace Mantid
         "The name to use for the output workspace");
 
     }
-
-    /**
-     *
-     */
-	int LoadILL::validateVanadium(const std::string &filenameVanadium) {
-		NeXus::NXRoot vanaRoot(filenameVanadium);
-		NXEntry vanaFirstEntry = vanaRoot.openFirstEntry();
-
-		double wavelength = vanaFirstEntry.getFloat("wavelength");
-
-		// read in the data
-		NXData dataGroup = vanaFirstEntry.openNXData("data");
-		NXInt data = dataGroup.openIntData();
-
-		size_t numberOfTubes = static_cast<size_t>(data.dim0());
-		size_t numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
-		size_t numberOfChannels = static_cast<size_t>(data.dim2());
-
-		if (wavelength != m_wavelength || numberOfTubes != m_numberOfTubes
-				|| numberOfPixelsPerTube != m_numberOfPixelsPerTube
-				|| numberOfChannels != m_numberOfChannels) {
-			throw std::runtime_error(
-					"Vanadium and Data were not collected in the same conditions!");
-		}
-
-		data.load();
-		int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
-				data);
-		return calculatedDetectorElasticPeakPosition;
-	}
 
 
     /**
@@ -467,6 +435,43 @@ namespace Mantid
       return calculatedDetectorElasticPeakPosition;
 
     }
+
+	/**
+	 * It loads the vanadium nexus file and cross checks it against the
+	 * data file already loaded (same wavelength and same instrument configuration).
+	 * If matches looks for the elastic peak in the vanadium file and returns
+	 * it position.
+	 *
+	 * @param filenameVanadium :: The path for the vanadium nexus file.
+	 * @return The elastic peak position inside the tof channels.
+	 */
+	int LoadILL::validateVanadium(const std::string &filenameVanadium) {
+		NeXus::NXRoot vanaRoot(filenameVanadium);
+		NXEntry vanaFirstEntry = vanaRoot.openFirstEntry();
+
+		double wavelength = vanaFirstEntry.getFloat("wavelength");
+
+		// read in the data
+		NXData dataGroup = vanaFirstEntry.openNXData("data");
+		NXInt data = dataGroup.openIntData();
+
+		size_t numberOfTubes = static_cast<size_t>(data.dim0());
+		size_t numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
+		size_t numberOfChannels = static_cast<size_t>(data.dim2());
+
+		if (wavelength != m_wavelength || numberOfTubes != m_numberOfTubes
+				|| numberOfPixelsPerTube != m_numberOfPixelsPerTube
+				|| numberOfChannels != m_numberOfChannels) {
+			throw std::runtime_error(
+					"Vanadium and Data were not collected in the same conditions!");
+		}
+
+		data.load();
+		int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
+				data);
+		return calculatedDetectorElasticPeakPosition;
+	}
+
     /**
     * Loads all the spectra into the workspace, including that from the monitor
     *
@@ -550,29 +555,23 @@ namespace Mantid
     /**
     * Run the Child Algorithm LoadInstrument.
     */
-    void LoadILL::runLoadInstrument() 
-    {
+	void LoadILL::runLoadInstrument() {
 
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+		IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-      try 
-      {
+		// Now execute the Child Algorithm. Catch and log any error, but don't stop.
+		try {
 
-        // TODO: depending on the m_numberOfPixelsPerTube we might need to load a different IDF
+			// TODO: depending on the m_numberOfPixelsPerTube we might need to load a different IDF
 
-        loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-        loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",
-          m_localWorkspace);
-        loadInst->execute();
-      } catch (...) 
-      {
-        g_log.information("Cannot load the instrument definition.");
-      }
-    }
-
-
-
+			loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+			loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",
+					m_localWorkspace);
+			loadInst->execute();
+		} catch (...) {
+			g_log.information("Cannot load the instrument definition.");
+		}
+	}
 
 
 
