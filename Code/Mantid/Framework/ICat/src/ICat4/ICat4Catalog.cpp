@@ -686,7 +686,63 @@ namespace Mantid
      */
     std::string ICat4Catalog::getUploadURL(std::string &dataFileName, std::string &createFileName)
     {
+      // Obtain the URL from the Facilities.xml file.
+      std::string url = "https://isisoxfordvmsrv.isis.cclrc.ac.uk/ids/";
+
+      // Set the elements of the URL.
+      std::string session   = "sessionId="  + Session::Instance().getSessionId();
+      std::string name      = "&name="      + createFileName;
+      std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetIdFromFileName(dataFileName));
+
+      // Add pieces of URL together.
+      url += ("put?" + session + name + datasetId + "&datafileFormatId=1");
+      g_log.debug() << "ICat4Catalog::getUploadURL url is: " << url << std::endl;
+      return url;
     }
+
+
+    /**
+     * Search the archive & obtain the dataset ID based on the filename.
+     * @param dataFileName :: Used to get datafile ID.
+     * @return ID of the dataset the datafile is located in.
+     */
+    int64_t ICat4Catalog::getDatasetIdFromFileName(std::string &dataFileName)
+    {
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::string query = "Dataset <-> Datafile[name LIKE'%" + dataFileName + "%']";
+      request.query     = &query;
+
+      g_log.debug() << "ICat4Catalog::getDatasetIdFromFileName -> { " << query << " }" << std::endl;
+
+      int64_t datafileId;
+      
+      int result = m_icat.search(&request, &response);
+
+      if (result == 0)
+      {
+        if (response.return_.size() <= 0)
+        {
+          throw std::runtime_error("The datafile you tried to publish has no related dataset."
+              "(Based on the filename: " + dataFileName + ")\n"
+              "Please select a filename that contains the investigation number.");
+        }
+        ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(response.return_.at(0));
+        if (dataset && dataset->id) datafileId = *(dataset->id);
+      }
+      else
+      {
+        throwErrorMessage(m_icat);
+      }
+
+      return datafileId;
+    }
+
+    /**
      * Keep the current session alive.
      */
     void ICat4Catalog::keepAlive()

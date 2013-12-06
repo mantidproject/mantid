@@ -85,6 +85,8 @@ namespace Mantid
         std::string bytesToString(int64_t &fileSize);
         // Helper method that formats a given timestamp.
         std::string formatDateTime(const time_t &timestamp, const std::string &format);
+        // Search the archive & obtain the dataset ID based on the filename
+        int64_t getDatasetIdFromFileName(std::string &fileName);
         // Reference to the logger class.
         Kernel::Logger& g_log;
 
