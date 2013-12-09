@@ -4,6 +4,7 @@ import mantid.api
 
 import inspect
 import re
+import math
 
 def make_decorator(algorithm_to_decorate):
     """
@@ -230,9 +231,10 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_InputWorkspace(real_run)
         alg.set_WorkspaceIndexList([3,4])
         alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
-        alg.set_Theta(0.2)
+        alg.set_ThetaIn(0.2)
         
-        out_ws_q, out_ws_lam = alg.execute()
+        out_ws_q, out_ws_lam, theta = alg.execute()
+        self.assertEqual(0.2, theta, "Theta in and out should be the same")
         
         self.assertTrue(isinstance(out_ws_lam, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
         self.assertEqual("Wavelength", out_ws_lam.getAxis(0).getUnit().unitID())
@@ -258,9 +260,9 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_Params([1.5, 0.02, 17])
         alg.set_StartOverlapQ( 10.0 )
         alg.set_EndOverlapQ( 12.0 )
-        alg.set_Theta(0.2)
+        alg.set_ThetaIn(0.2)
         
-        out_ws_q, out_ws_lam = alg.execute()
+        out_ws_q, out_ws_lam, theta = alg.execute()
         
         self.assertTrue(isinstance(out_ws_lam, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
         self.assertEqual("Wavelength", out_ws_lam.getAxis(0).getUnit().unitID())
@@ -274,6 +276,19 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         DeleteWorkspace(trans_run1)
         DeleteWorkspace(trans_run2)
         
+    def test_calculate_theta(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('INTER00013460.nxs')
+        alg.set_InputWorkspace(real_run)
+        alg.set_WorkspaceIndexList([3,4])
+        alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
+        
+        out_ws_q, out_ws_lam, theta = alg.execute()
+        self.assertAlmostEqual(0.7, theta*(180/math.pi), 1)
+        
+        DeleteWorkspace(real_run)
+        
+
         
 if __name__ == '__main__':
     unittest.main()

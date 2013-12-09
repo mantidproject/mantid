@@ -103,11 +103,13 @@ public:
     ReflectometryReductionOne alg;
 
     auto instrument = toConvert->getInstrument();
-    auto detector = instrument->getComponentByName("point-detector");
+    auto detector = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>( instrument->getComponentByName("point-detector") );
     auto sample = instrument->getComponentByName("some-surface-holder");
 
+    boost::optional<double> theta = 0.7;
+
     MatrixWorkspace_const_sptr inQ = alg.toIvsQ(toConvert, true /*correct position*/,
-        true /*is point detector*/, 0.7, sample, detector);
+        true /*is point detector*/, theta, sample, detector);
 
     TS_ASSERT_EQUALS("MomentumTransfer", inQ->getAxis(0)->unit()->unitID());
 
