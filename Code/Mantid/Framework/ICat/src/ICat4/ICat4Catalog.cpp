@@ -721,8 +721,8 @@ namespace Mantid
       request.query     = &query;
 
       g_log.debug() << "ICat4Catalog::getDatasetIdFromFileName -> { " << query << " }" << std::endl;
-
-      int64_t datafileId;
+      
+      int64_t datafileId = 0;
       
       int result = icat.search(&request, &response);
 
