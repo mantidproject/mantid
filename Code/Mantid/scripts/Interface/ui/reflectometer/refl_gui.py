@@ -188,129 +188,136 @@ class ReflGui(refl_window.Ui_windowRefl):
             self.tableMain.cellWidget(row, 17).children()[1].setCheckState(state)
     def process(self):
 #--------- If "Process" button pressed, convert raw files to IvsLam and IvsQ and combine if checkbox ticked -------------
-        rows = []
-        for idx in self.tableMain.selectionModel().selectedRows():
-            rows.append(idx.row())
-        noOfRows = range(self.tableMain.rowCount())
-        if len(rows):
-            noOfRows = rows
-        for row in noOfRows:  # range(self.tableMain.rowCount()):
-            runno = []
-            wksp = []
-            wkspBinned = []
-            overlapLow = []
-            overlapHigh = []
-            g = ['g1', 'g2', 'g3']
-            theta = [0, 0, 0]
-            if (self.tableMain.item(row, 0).text() != ''):
-                for i in range(3):
-                    r = str(self.tableMain.item(row, i * 5).text())
-                    if (r != ''):
-                        runno.append(r)
-                    ovLow = str(self.tableMain.item(row, i * 5 + 3).text())
-                    if (ovLow != ''):
-                        overlapLow.append(float(ovLow))
-                    ovHigh = str(self.tableMain.item(row, i * 5 + 4).text())
-                    if (ovHigh != ''):
-                        overlapHigh.append(float(ovHigh))
-                print len(runno), "runs: ", runno
-                # Determine resolution
-                # if (runno[0] != ''):
-                if (self.tableMain.item(row, 15).text() == ''):
-                    dqq = calcRes(runno[0])
-                    item = QtGui.QTableWidgetItem()
-                    item.setText(str(dqq))
-                    self.tableMain.setItem(row, 15, item)
-                    print "Calculated resolution: ", dqq
-                else:
-                    dqq = float(self.tableMain.item(row, 15).text())
-                # Populate runlist
-                for i in range(len(runno)):
-                    [theta, qmin, qmax] = self.dorun(runno[i], row, i)
-                    theta = round(theta, 3)
-                    qmin = round(qmin, 3)
-                    qmax = round(qmax, 3)
-                    wksp.append(runno[i] + '_IvsQ')
-                    if (self.tableMain.item(row, i * 5 + 1).text() == ''):
+        willProcess = True
+        rows = self.tableMain.selectionModel().selectedRows()
+        rowIndexes=[]
+        for idx in rows:
+            rowIndexes.append(idx.row())
+        if not len(rowIndexes):
+            reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',"This will process all rows in the table. Continue?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.No:
+                print "Cancelled!"
+                willProcess = False
+            else:
+                rowIndexes = range(self.tableMain.rowCount())
+        if willProcess:
+            for row in rowIndexes:  # range(self.tableMain.rowCount()):
+                runno = []
+                wksp = []
+                wkspBinned = []
+                overlapLow = []
+                overlapHigh = []
+                g = ['g1', 'g2', 'g3']
+                theta = [0, 0, 0]
+                if (self.tableMain.item(row, 0).text() != ''):
+                    for i in range(3):
+                        r = str(self.tableMain.item(row, i * 5).text())
+                        if (r != ''):
+                            runno.append(r)
+                        ovLow = str(self.tableMain.item(row, i * 5 + 3).text())
+                        if (ovLow != ''):
+                            overlapLow.append(float(ovLow))
+                        ovHigh = str(self.tableMain.item(row, i * 5 + 4).text())
+                        if (ovHigh != ''):
+                            overlapHigh.append(float(ovHigh))
+                    print len(runno), "runs: ", runno
+                    # Determine resolution
+                    # if (runno[0] != ''):
+                    if (self.tableMain.item(row, 15).text() == ''):
+                        dqq = calcRes(runno[0])
                         item = QtGui.QTableWidgetItem()
-                        item.setText(str(theta))
-                        self.tableMain.setItem(row, i * 5 + 1, item)
-                    if (self.tableMain.item(row, i * 5 + 3).text() == ''):
-                        item = QtGui.QTableWidgetItem()
-                        item.setText(str(qmin))
-                        self.tableMain.setItem(row, i * 5 + 3, item)
-                        overlapLow.append(qmin)
-                    if (self.tableMain.item(row, i * 5 + 4).text() == ''):
-                        item = QtGui.QTableWidgetItem()
-                        if i == len(runno) - 1:
-                        # allow full high q-range for last angle
-                            qmax = 4 * math.pi / ((4 * math.pi / qmax * math.sin(theta * math.pi / 180)) - 0.5) * math.sin(theta * math.pi / 180)
-                        item.setText(str(qmax))
-                        self.tableMain.setItem(row, i * 5 + 4, item)
-                        overlapHigh.append(qmax)
-                    if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
-                        runlist = []
-                        l1 = wksp[i].split(',')
-                        for subs in l1:
-                            l2 = subs.split(':')
-                            for l3 in l2:
-                                runlist.append(l3)
-                        wksp[i] = runlist[0] + '_IvsQ'
-                    ws_name_binned = wksp[i] + '_binned'
-                    ws = getWorkspace(wksp[i])
-                    w1 = getWorkspace(wksp[0])
-                    w2 = getWorkspace(wksp[len(wksp) - 1])
-                    if len(overlapLow):
-                        Qmin = overlapLow[0]
+                        item.setText(str(dqq))
+                        self.tableMain.setItem(row, 15, item)
+                        print "Calculated resolution: ", dqq
                     else:
-                        Qmin = w1.readX(0)[0]
-                    if len(overlapHigh):
-                        Qmax = overlapHigh[len(overlapHigh) - 1]
-                    else:
-                        Qmax = max(w2.readX(0))
-                    Rebin(InputWorkspace=wksp[i], Params=str(overlapLow[i]) + ',' + str(-dqq) + ',' + str(overlapHigh[i]), OutputWorkspace=ws_name_binned)
-                    wkspBinned.append(ws_name_binned)
-                    wsb = getWorkspace(ws_name_binned)
-                    Imin = min(wsb.readY(0))
-                    Imax = max(wsb.readY(0))
-                    if canMantidPlot:
-                        g[i] = plotSpectrum(ws_name_binned, 0, True)
-                        titl = groupGet(ws_name_binned, 'samp', 'run_title')
-                        if (i > 0):
-                            mergePlots(g[0], g[i])
-                        if (type(titl) == str):
-                            g[0].activeLayer().setTitle(titl)
-                        g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
-                        g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-                        g[0].activeLayer().setAutoScale()
-                if (self.tableMain.cellWidget(row, 17).children()[1].checkState() > 0):
-                    if (len(runno) == 1):
-                        print "Nothing to combine!"
-                    elif (len(runno) == 2):
-                        outputwksp = runno[0] + '_' + runno[1][3:5]
-                    else:
-                        outputwksp = runno[0] + '_' + runno[2][3:5]
-                    print runno
-                    w1 = getWorkspace(wksp[0])
-                    w2 = getWorkspace(wksp[len(wksp) - 1])
-                    begoverlap = w2.readX(0)[0]
-                    # Qmin = w1.readX(0)[0]
-                    # Qmax = max(w2.readX(0))
-                    # get Qmax
-                    if (self.tableMain.item(row, i * 5 + 4).text() == ''):
-                        overlapHigh = 0.3 * max(w1.readX(0))
-                    print overlapLow, overlapHigh
-                    wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
-                    if (self.tableMain.item(row, 16).text() != ''):
-                        Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, 16).text()))
-                    Qmin = getWorkspace(outputwksp).readX(0)[0]
-                    Qmax = max(getWorkspace(outputwksp).readX(0))
-                    if canMantidPlot:
-                        gcomb = plotSpectrum(outputwksp, 0, True)
-                        titl = groupGet(outputwksp, 'samp', 'run_title')
-                        gcomb.activeLayer().setTitle(titl)
-                        gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
-                        gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                        dqq = float(self.tableMain.item(row, 15).text())
+                    # Populate runlist
+                    for i in range(len(runno)):
+                        [theta, qmin, qmax] = self.dorun(runno[i], row, i)
+                        theta = round(theta, 3)
+                        qmin = round(qmin, 3)
+                        qmax = round(qmax, 3)
+                        wksp.append(runno[i] + '_IvsQ')
+                        if (self.tableMain.item(row, i * 5 + 1).text() == ''):
+                            item = QtGui.QTableWidgetItem()
+                            item.setText(str(theta))
+                            self.tableMain.setItem(row, i * 5 + 1, item)
+                        if (self.tableMain.item(row, i * 5 + 3).text() == ''):
+                            item = QtGui.QTableWidgetItem()
+                            item.setText(str(qmin))
+                            self.tableMain.setItem(row, i * 5 + 3, item)
+                            overlapLow.append(qmin)
+                        if (self.tableMain.item(row, i * 5 + 4).text() == ''):
+                            item = QtGui.QTableWidgetItem()
+                            if i == len(runno) - 1:
+                            # allow full high q-range for last angle
+                                qmax = 4 * math.pi / ((4 * math.pi / qmax * math.sin(theta * math.pi / 180)) - 0.5) * math.sin(theta * math.pi / 180)
+                            item.setText(str(qmax))
+                            self.tableMain.setItem(row, i * 5 + 4, item)
+                            overlapHigh.append(qmax)
+                        if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
+                            runlist = []
+                            l1 = wksp[i].split(',')
+                            for subs in l1:
+                                l2 = subs.split(':')
+                                for l3 in l2:
+                                    runlist.append(l3)
+                            wksp[i] = runlist[0] + '_IvsQ'
+                        ws_name_binned = wksp[i] + '_binned'
+                        ws = getWorkspace(wksp[i])
+                        w1 = getWorkspace(wksp[0])
+                        w2 = getWorkspace(wksp[len(wksp) - 1])
+                        if len(overlapLow):
+                            Qmin = overlapLow[0]
+                        else:
+                            Qmin = w1.readX(0)[0]
+                        if len(overlapHigh):
+                            Qmax = overlapHigh[len(overlapHigh) - 1]
+                        else:
+                            Qmax = max(w2.readX(0))
+                        Rebin(InputWorkspace=wksp[i], Params=str(overlapLow[i]) + ',' + str(-dqq) + ',' + str(overlapHigh[i]), OutputWorkspace=ws_name_binned)
+                        wkspBinned.append(ws_name_binned)
+                        wsb = getWorkspace(ws_name_binned)
+                        Imin = min(wsb.readY(0))
+                        Imax = max(wsb.readY(0))
+                        if canMantidPlot:
+                            g[i] = plotSpectrum(ws_name_binned, 0, True)
+                            titl = groupGet(ws_name_binned, 'samp', 'run_title')
+                            if (i > 0):
+                                mergePlots(g[0], g[i])
+                            if (type(titl) == str):
+                                g[0].activeLayer().setTitle(titl)
+                            g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
+                            g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                            g[0].activeLayer().setAutoScale()
+                    if (self.tableMain.cellWidget(row, 17).children()[1].checkState() > 0):
+                        if (len(runno) == 1):
+                            print "Nothing to combine!"
+                        elif (len(runno) == 2):
+                            outputwksp = runno[0] + '_' + runno[1][3:5]
+                        else:
+                            outputwksp = runno[0] + '_' + runno[2][3:5]
+                        print runno
+                        w1 = getWorkspace(wksp[0])
+                        w2 = getWorkspace(wksp[len(wksp) - 1])
+                        begoverlap = w2.readX(0)[0]
+                        # Qmin = w1.readX(0)[0]
+                        # Qmax = max(w2.readX(0))
+                        # get Qmax
+                        if (self.tableMain.item(row, i * 5 + 4).text() == ''):
+                            overlapHigh = 0.3 * max(w1.readX(0))
+                        print overlapLow, overlapHigh
+                        wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
+                        if (self.tableMain.item(row, 16).text() != ''):
+                            Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, 16).text()))
+                        Qmin = getWorkspace(outputwksp).readX(0)[0]
+                        Qmax = max(getWorkspace(outputwksp).readX(0))
+                        if canMantidPlot:
+                            gcomb = plotSpectrum(outputwksp, 0, True)
+                            titl = groupGet(outputwksp, 'samp', 'run_title')
+                            gcomb.activeLayer().setTitle(titl)
+                            gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
+                            gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
     def dorun(self, runno, row, which):
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
