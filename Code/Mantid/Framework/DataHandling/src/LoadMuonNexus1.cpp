@@ -557,7 +557,9 @@ namespace Mantid
         {
           // Simpliest case - one grouping entry per spectra
           TableWorkspace_sptr table = createDetectorGroupingTable( grouping.begin(), grouping.end() );
-          setProperty("DetectorGroupingTable", table);
+
+          if ( table->rowCount() != 0 )
+            setProperty("DetectorGroupingTable", table);
         }
         else
         {
@@ -573,8 +575,14 @@ namespace Mantid
 
           for ( auto it = grouping.begin(); it != grouping.end(); it += m_numberOfSpectra )
           {
-            tableGroup->addWorkspace( createDetectorGroupingTable(it, it + m_numberOfSpectra) );
+            TableWorkspace_sptr table = createDetectorGroupingTable(it, it + m_numberOfSpectra);
+
+            if ( table->rowCount() != 0 ) 
+              tableGroup->addWorkspace(table);
           }
+
+          if ( tableGroup->size() != static_cast<size_t>(m_numberOfPeriods) )
+            throw Exception::FileError("Zero grouping for some of the periods", m_filename);
 
           setProperty("DetectorGroupingTable", tableGroup);
         }
@@ -632,8 +640,11 @@ namespace Mantid
 
       for ( auto it = grouping.begin(); it != grouping.end(); ++it )
       {
+        if ( it->first != 0) // Skip 0 group
+        {
           TableRow newRow = detectorGroupingTable->appendRow();
           newRow << it->second;
+        }
       }
 
       return detectorGroupingTable;
