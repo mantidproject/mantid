@@ -2483,77 +2483,8 @@ bool MuonAnalysis::isGroupingSet()
  */
 int MuonAnalysis::numOfDetectors(const std::string& str) const
 {
-  return static_cast<int>(spectrumIDs(str).size());
+  return static_cast<int>(Strings::parseRange(str).size());
 }
-
-
-/**
- * Return a vector of IDs for row number from string of type 1-3, 5, 10-15
- *
- * @param str :: String of type "1-3, 5, 10-15"
- * @return Vector of IDs
- */
-std::vector<int> MuonAnalysis::spectrumIDs(const std::string& str) const
-{
-  std::vector<int> retVal;
-
-  if (str.empty())
-    return retVal;
-
-  typedef Poco::StringTokenizer tokenizer;
-  tokenizer values(str, ",", tokenizer::TOK_TRIM);
-
-  for (int i = 0; i < static_cast<int>(values.count()); i++)
-  {
-    std::size_t found= values[i].find("-");
-    if (found!=std::string::npos)
-    {
-      tokenizer aPart(values[i], "-", tokenizer::TOK_TRIM);
-
-      if ( aPart.count() != 2 )
-      {
-        retVal.clear();
-        return retVal;
-      }
-      else
-      {
-        if ( !(isNumber(aPart[0]) && isNumber(aPart[1])) )
-        {
-          retVal.clear();
-          return retVal;
-        }
-      }
-
-      int leftInt;
-      std::stringstream leftRead(aPart[0]);
-      leftRead >> leftInt;
-      int rightInt;
-      std::stringstream rightRead(aPart[1]);
-      rightRead >> rightInt;
-
-      if (leftInt > rightInt)
-      {
-        retVal.clear();
-        return retVal;
-      }
-      for (int step = leftInt; step <= rightInt; step++)
-        retVal.push_back(step);
-    }
-    else
-    {
-
-      if (isNumber(values[i]))
-        retVal.push_back(boost::lexical_cast<int>(values[i].c_str()));
-      else
-      {
-        retVal.clear();
-        return retVal;
-      }
-    }
-  }
-  return retVal;
-}
-
 
 /**
 * Change the workspace group name to the instrument and run number if load current run was pressed.
@@ -2902,7 +2833,7 @@ void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
   QTableWidgetItem *item = m_uiForm.groupTable->item(row,1);
 
   // row of IDs to compare against
-  std::vector<int> idsNew = spectrumIDs(item->text().toStdString());
+  std::vector<int> idsNew = Strings::parseRange(item->text().toStdString());
 
   int numG = numGroups();
   int rowInFocus = getGroupNumberFromRow(row);
@@ -2910,7 +2841,7 @@ void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
   {
     if (iG != rowInFocus)
     {
-      std::vector<int> ids = spectrumIDs(m_uiForm.groupTable->item(m_groupToRow[iG],1)->text().toStdString());
+      std::vector<int> ids = Strings::parseRange(m_uiForm.groupTable->item(m_groupToRow[iG],1)->text().toStdString());
 
       for (unsigned int i = 0; i < ids.size(); i++)
       {
@@ -3742,7 +3673,7 @@ ITableWorkspace_sptr MuonAnalysis::parseGrouping()
     const std::string detectorsString = m_uiForm.groupTable->item(*it,1)->text().toStdString();
 
     TableRow newRow = newTable->appendRow(); 
-    newRow << spectrumIDs(detectorsString);
+    newRow << Strings::parseRange(detectorsString);
   }
 
   return newTable;

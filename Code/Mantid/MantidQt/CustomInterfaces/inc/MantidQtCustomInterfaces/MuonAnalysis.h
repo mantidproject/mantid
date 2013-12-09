@@ -259,9 +259,6 @@ private:
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
 
-  /// Return a vector of IDs for row number from string of type 1-3, 5, 10-15
-  std::vector<int> spectrumIDs(const std::string& str) const;
-
   void changeCurrentRun(std::string& workspaceGroupName);
 
   /// is string a number?
