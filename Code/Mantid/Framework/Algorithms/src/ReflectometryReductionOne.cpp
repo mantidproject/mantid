@@ -18,6 +18,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -174,9 +175,15 @@ namespace Mantid
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
           "Wavelength maximum for integration in angstroms. Taken to be WavelengthMax if not provided.");
 
+      declareProperty(new PropertyWithValue<std::string>("DetectorComponentName", "", Direction::Input),
+          "Name of the detector component i.e. point-detector. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
+
+      declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "", Direction::Input),
+                "Name of the sample component i.e. some-surface-holder. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
+
       declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "Output Workspace IvsQ.");
 
-      declareProperty(new WorkspaceProperty<>("OutputWorkspaceWavelength", "", Direction::Output), "Output Workspace IvsLam. Intermediate workspace.");
+      declareProperty(new WorkspaceProperty<>("OutputWorkspaceWavelength", "", Direction::Output, PropertyMode::Optional), "Output Workspace IvsLam. Intermediate workspace.");
 
       declareProperty(new PropertyWithValue<double>("Theta", -1, Direction::Input),
                 "Final theta value.");
@@ -649,19 +656,14 @@ namespace Mantid
      * @param isPointDetector : Flag to indicate that this is a point detector run.
      * @param thetaInDeg : Theta in degrees to use in correction calculations.
      */
-    void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg)
+    void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg, IComponent_const_sptr sample, IComponent_const_sptr detector)
     {
-      const std::string componentToCorrect = isPointDetector ? "point-detector" : "line-detector"; // TODO : This is not a good way to do things. I would rather inject these names.
-      std::stringstream message;
-      message << "Position correction. Looking for " << componentToCorrect << " in the IDF " << std::endl;
-      g_log.debug(message.str());
 
       auto instrument = toCorrect->getInstrument();
-      const V3D detectorPosition = instrument->getComponentByName(componentToCorrect)->getPos();
 
-      const std::string surfaceHolder = "some-surface-holder";
-      g_log.debug("Position correction. Looking for " + surfaceHolder);
-      const V3D samplePosition = instrument->getComponentByName(surfaceHolder)->getPos(); // TODO : likewise, this is not a good way to do things. Should be injected.
+      const V3D detectorPosition = detector->getPos();
+
+      const V3D samplePosition = sample->getPos();
 
       const V3D sampleToDetector = detectorPosition - samplePosition;
 
@@ -680,7 +682,7 @@ namespace Mantid
       auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
       moveComponentAlg->initialize();
       moveComponentAlg->setProperty("Workspace", toCorrect);
-      moveComponentAlg->setProperty("ComponentName", componentToCorrect);
+      moveComponentAlg->setProperty("ComponentName", detector->getName());
       moveComponentAlg->setProperty("RelativePosition", false);
       // Movements
       moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(), beamOffset);
@@ -698,16 +700,19 @@ namespace Mantid
      * @param bCorrectPosition : Flag to indicate that detector positions should be corrected based on the input theta values.
      * @param isPointDetector : Flag to indicate that this is a point detector reduction run.
      * @param thetaInDeg : Theta in Degrees. Used for correction.
+     * @param sample : Sample component
+     * @param detector : Detector component
      * @return
      */
-    Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition, const bool isPointDetector, const double& thetaInDeg)
+    Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition,
+        const bool isPointDetector, const double& thetaInDeg, IComponent_const_sptr sample, IComponent_const_sptr detector)
     {
 
       // TODO. Warn if the detector is not in the right place. The previous quick algorithm handled this by doing a detector.getPos().getY() != 0 check. But the problem is that this means we need to hard-code for detector names!!!
 
       if( bCorrectPosition ) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
       {
-        correctPosition(toConvert, isPointDetector, thetaInDeg);
+        correctPosition(toConvert, isPointDetector, thetaInDeg, sample, detector);
       }
 
       auto convertUnits = this->createChildAlgorithm("ConvertUnits");
@@ -717,6 +722,51 @@ namespace Mantid
       convertUnits->execute();
       MatrixWorkspace_sptr inQ = convertUnits->getProperty("OutputWorkspace");
       return inQ;
+    }
+
+    /**
+     * Get the sample component. Use the name provided as a property as the basis for the lookup as a priority.
+     *
+     * Throws if the name is invalid.
+     * @param inst : Instrument to search through
+     * @return : The component : The component object found.
+     */
+    Mantid::Geometry::IComponent_const_sptr ReflectometryReductionOne::getSurfaceSampleComponent(Mantid::Geometry::Instrument_const_sptr inst)
+    {
+      std::string sampleComponent = "some-surface-holder";
+      if (!isPropertyDefault("SampleComponentName"))
+      {
+        sampleComponent = this->getPropertyValue("SampleComponentName");
+      }
+      auto searchResult = inst->getComponentByName(sampleComponent);
+      if (searchResult == NULL)
+      {
+        throw std::invalid_argument(sampleComponent + " does not exist. Check input properties.");
+      }
+      return searchResult;
+    }
+
+    /**
+     * Get the detector component. Use the name provided as a property as the basis for the lookup as a priority.
+     *
+     * Throws if the name is invalid.
+     * @param inst : Instrument to search through.
+     * @param isPointDetector : True if this is a point detector. Used to guess a name.
+     * @return The component : The component object found.
+     */
+    Mantid::Geometry::IComponent_const_sptr ReflectometryReductionOne::getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector)
+    {
+      std::string componentToCorrect = isPointDetector ? "point-detector" : "line-detector";
+      if(!isPropertyDefault("DetectorComponentName"))
+      {
+        componentToCorrect = this->getPropertyValue("DetectorComponentName");
+      }
+      auto searchResult = inst->getComponentByName(componentToCorrect);
+      if(searchResult == NULL)
+      {
+        throw std::invalid_argument(componentToCorrect + " does not exist. Check input properties");
+      }
+      return searchResult;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -761,6 +811,10 @@ namespace Mantid
 
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
+      auto instrument = runWS->getInstrument();
+      IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
+      IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+
       DetectorMonitorWorkspacePair inLam = toLam(runWS, indexList, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
       auto detectorWS = inLam.get<0>();
       auto monitorWS = inLam.get<1>();
@@ -786,7 +840,8 @@ namespace Mantid
               i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
 
           // Now, if a theta value has been provided we just run the toLam
-          IvsQ = this->toIvsQ(IvsLam, true /*HACK*/, isPointDetector, theta.get());
+
+          IvsQ = this->toIvsQ(IvsLam, true /*HACK*/, isPointDetector, theta.get(), sample, detector);
 
           // TODO: If no theta value has been provided, we attempt to calculate it given the detector position and sample poition, and then just run run the convert units portion (no point in doing position corrections)
 

@@ -102,8 +102,12 @@ public:
 
     ReflectometryReductionOne alg;
 
+    auto instrument = toConvert->getInstrument();
+    auto detector = instrument->getComponentByName("point-detector");
+    auto sample = instrument->getComponentByName("some-surface-holder");
+
     MatrixWorkspace_const_sptr inQ = alg.toIvsQ(toConvert, true /*correct position*/,
-        true /*is point detector*/, 0.7);
+        true /*is point detector*/, 0.7, sample, detector);
 
     TS_ASSERT_EQUALS("MomentumTransfer", inQ->getAxis(0)->unit()->unitID());
 

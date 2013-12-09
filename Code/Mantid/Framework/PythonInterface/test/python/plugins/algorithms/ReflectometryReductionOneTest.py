@@ -214,6 +214,16 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_RegionOfDirectBeam([1, 0]);
         self.assertRaises(ValueError, alg.execute)
         
+    def test_bad_detector_component_name_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_DetectorComponentName("made-up")
+        self.assertRaises(ValueError, alg.execute)
+    
+    def test_bad_sample_component_name_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_SampleComponentName("made-up")
+        self.assertRaises(ValueError, alg.execute)
+        
     def test_point_detector_run_with_single_transmission_workspace(self):
         alg = self.construct_standard_algorithm()
         real_run = Load('INTER00013460.nxs')

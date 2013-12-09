@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include <boost/optional.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <vector>
@@ -62,7 +64,8 @@ namespace Mantid
           const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep);
 
       /// Convert to an IvsQ workspace. Performs detector posistional corrections based on the component name and the theta value.
-      Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool correctPosition, const bool isPointDetector, const double& thetaInDeg);
+      Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool correctPosition, const bool isPointDetector,
+          const double& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
 
     private:
 
@@ -116,8 +119,15 @@ namespace Mantid
           const double& wavelengthStep
       );
 
+      /// Get the surface sample component
+      Mantid::Geometry::IComponent_const_sptr getSurfaceSampleComponent(Mantid::Geometry::Instrument_const_sptr inst);
+
+      /// Get the detector component
+      Mantid::Geometry::IComponent_const_sptr getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector);
+
       /// Correct detector positions.
-      void correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg);
+      void correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg,
+          Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
 
     };
 
