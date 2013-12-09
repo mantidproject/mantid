@@ -229,8 +229,9 @@ namespace Mantid
       m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
     }
     /**function calculates the size of temporary memory used to keep convertTo MD data before these data should be added to MDEvents
-    * @param nThreads  -- number of threads used to process data
-    * @param specSize  -- the size of single spectra in matrix workspace;
+    * @param nThreads        -- number of threads used to process data
+    * @param specSize        -- the size of single spectra in matrix workspace;
+    * @param nPointsToProcess -- total number of data points in the workspace
     */
     void ConvToMDHistoWS::estimateThreadWork(size_t nThreads,size_t specSize,size_t nPointsToProcess)
     {

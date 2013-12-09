@@ -4,7 +4,7 @@ Reads a McStas Nexus file into a Mantid WorkspaceGroup with a user-supplied name
 
 
 LoadMcStas replaces LoadMcStasEventNexus.
-LoadMcStas can be used for reading McStas 2.1 histogram and evnet data. 
+LoadMcStas can be used for reading McStas 2.1 histogram and event data. 
 LoadMcStasNexus can be used for reading McStas 2.0 histogram data. 
 
 
@@ -219,7 +219,6 @@ namespace DataHandling
 	{
 		std::string filename = getPropertyValue("Filename");
 		auto entries = nxFile.getEntries();
-		auto itend = entries.end();
 
 		// will assume that each top level entry contain one mcstas
 		// generated IDF and any event data entries within this top level

@@ -89,9 +89,8 @@ namespace Mantid
       declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
       declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)", Direction::Output);
       
-      std::vector<double> defaultDeadTimes;
-      declareProperty("DeadTimes", defaultDeadTimes, 
-                      "The name of the vector in which to store the list of deadtimes for each spectrum", Direction::Output);
+      declareProperty(new WorkspaceProperty<Workspace>("DeadTimeTable", "", Direction::Output, PropertyMode::Optional), 
+        "Table or a group of tables containing detector dead times");
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set

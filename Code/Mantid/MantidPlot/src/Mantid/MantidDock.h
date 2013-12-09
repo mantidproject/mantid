@@ -53,6 +53,7 @@ public:
   ~MantidDockWidget();
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
+  void dropEvent(QDropEvent *de);
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
@@ -165,11 +166,11 @@ public:
   void logWarningMessage(const std::string&);
   void disableNodes(bool);
   void sort();
+  void dropEvent(QDropEvent *de);
 
 protected:
-  void dropEvent(QDropEvent *de);
   void dragMoveEvent(QDragMoveEvent *de);
-  void dragEnterEvent(QDragEnterEvent *event);
+  void dragEnterEvent(QDragEnterEvent *de);
 
 private:
   QPoint m_dragStartPosition;

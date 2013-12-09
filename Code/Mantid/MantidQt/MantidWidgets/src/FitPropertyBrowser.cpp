@@ -39,6 +39,7 @@
   #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 #include "qteditorfactory.h"
+#include "StringEditorFactory.h"
 #include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
 #if defined(__INTEL_COMPILER)
@@ -429,7 +430,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
-  QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
+  StringEditorFactory* stringEditFactory = new StringEditorFactory(w);
   StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(w);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(w);
 
@@ -438,7 +439,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_stringManager, stringEditFactory);
   m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);

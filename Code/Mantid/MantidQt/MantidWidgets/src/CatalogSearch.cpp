@@ -1102,7 +1102,7 @@ namespace MantidQt
       std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
 
       // Create & initialize the load algorithm we will use to load the file by path to a workspace.
-      auto loadAlgorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      auto loadAlgorithm = Mantid::API::AlgorithmManager::Instance().create("Load");
       loadAlgorithm->initialize();
 
       // For all the files downloaded (or in archive) we want to load them.

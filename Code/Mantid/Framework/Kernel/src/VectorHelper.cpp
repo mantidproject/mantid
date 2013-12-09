@@ -257,12 +257,12 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
   
   double frac, fracE;
   double oneOverWidth, overlap;
-  double temp, xold_of_iold, xold_of_iold_p_1;
+  double temp;
 
   //loop over old vector from starting point calculated above
   for ( ; iold<size_yold; ++iold )
   {
-    xold_of_iold_p_1 = xold[iold+1]; // cache for speed
+    double xold_of_iold_p_1 = xold[iold+1]; // cache for speed
     // If current old bin is fully enclosed by new bin, just unload the counts
     if ( xold_of_iold_p_1 <= xnew[inew+1] )
     {
@@ -274,7 +274,7 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
     }
     else
     {
-      xold_of_iold = xold[iold]; // cache for speed
+      double xold_of_iold = xold[iold]; // cache for speed
       // This is the counts per unit X in current old bin
       oneOverWidth = 1. / (xold_of_iold_p_1 - xold_of_iold); // cache 1/width to speed things up
       frac = yold[iold] * oneOverWidth;

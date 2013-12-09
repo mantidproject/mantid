@@ -351,10 +351,8 @@ std::string LoadNexusProcessed::loadWorkspaceName(NXRoot & root, const std::stri
   }
   catch (std::runtime_error&)
   {
-    return std::string("");
+    return std::string();
   }
-
-  return std::string("");
 }
 
 
@@ -559,16 +557,15 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
           workspace->setRowCount(nRows);
           hasNumberOfRowBeenSet = true;
         }
-        int maxStr = info.dims[1];
 
-        std::string fromCrap(maxStr,' ');
-
+        const int maxStr = info.dims[1];
         data.load();
-        for (int iR = 0; iR < nRows; iR++)
+        for (int iR = 0; iR < nRows; ++iR)
         {
-          for (int i = 0; i < maxStr; i++)
-            fromCrap[i] = *(data()+i+maxStr*iR);
-          workspace->cell<std::string>(iR,columnNumber-1) = fromCrap;
+          auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
+          auto startPoint = data() + maxStr*iR;
+          cellContents.assign(startPoint,startPoint+maxStr);
+          boost::trim_right(cellContents);
         }
       }
     } 
@@ -1252,7 +1249,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 */
 void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_workspace, NXData & data)
 {
-  Mantid::API::Axis* axis = local_workspace->getAxis(1);
+  Axis* axis = local_workspace->getAxis(1);
 
   if ( axis->isNumeric() )
   {
@@ -1265,20 +1262,18 @@ void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_work
   }
   else if ( axis->isText() )
   {
-    // We must cast the axis object to TextAxis so we may use ->setLabel
-    Mantid::API::TextAxis* textAxis = dynamic_cast<Mantid::API::TextAxis*>(axis);
     NXChar axisData = data.openNXChar("axis2");
     axisData.load();
     std::string axisLabels = axisData();    
     // Use boost::tokenizer to split up the input
     boost::char_separator<char> sep("\n");
     boost::tokenizer<boost::char_separator<char> > tokenizer(axisLabels, sep);
-    boost::tokenizer<boost::char_separator<char> >::iterator tokIter;
+    // We must cast the axis object to TextAxis so we may use ->setLabel
+    TextAxis* textAxis = static_cast<TextAxis*>(axis);
     int i = 0;
-    for ( tokIter = tokenizer.begin(); tokIter != tokenizer.end(); ++tokIter )
+    for ( auto tokIter = tokenizer.begin(); tokIter != tokenizer.end(); ++tokIter, ++i )
     {
       textAxis->setLabel(i, *tokIter);
-      ++i;
     }
   }
 }

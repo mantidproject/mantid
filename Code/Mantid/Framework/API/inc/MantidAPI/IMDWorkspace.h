@@ -120,6 +120,7 @@ namespace Mantid
       virtual ITableWorkspace_sptr makeBoxTable(size_t /*start*/, size_t /* num*/)
       {throw Kernel::Exception::NotImplementedError("This method is not generally implemented ");}
 
+   
     protected:
       virtual const std::string toString() const;
     };

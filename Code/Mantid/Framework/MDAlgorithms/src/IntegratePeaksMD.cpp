@@ -139,7 +139,7 @@ namespace MDAlgorithms
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
     declareProperty("CoordinatesToUse", "Q (lab frame)",boost::make_shared<StringListValidator>(propOptions),
-       "Deprecated:  algorithm uses the InputWorkspace's coordinates.");
+       "Ignored:  algorithm uses the InputWorkspace's coordinates.");
 
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
         "Fixed radius around each peak position in which to integrate (in the same units as the workspace).");

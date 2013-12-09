@@ -328,11 +328,11 @@ namespace Mantid
       readDataset->ComputeBounds();
       readDataset->GetBounds(bounds);
 
-      auto dimX = boost::make_shared<MDHistoDimension>("X", "X", "", bounds[0], bounds[1],
+      auto dimX = boost::make_shared<MDHistoDimension>("X", "X", "",  static_cast<coord_t>(bounds[0]), static_cast<coord_t>(bounds[1]),
           dimensions[0]);
-      auto dimY = boost::make_shared<MDHistoDimension>("Y", "Y", "", bounds[2], bounds[3],
+      auto dimY = boost::make_shared<MDHistoDimension>("Y", "Y", "", static_cast<coord_t>(bounds[2]), static_cast<coord_t>(bounds[3]),
           dimensions[1]);
-      auto dimZ = boost::make_shared<MDHistoDimension>("Z", "Z", "", bounds[4], bounds[5],
+      auto dimZ = boost::make_shared<MDHistoDimension>("Z", "Z", "", static_cast<coord_t>(bounds[4]), static_cast<coord_t>(bounds[5]),
           dimensions[2]);
 
       const int64_t nPoints = static_cast<int64_t>( readDataset->GetNumberOfPoints() );

@@ -887,8 +887,6 @@ namespace LoadSQWHelper
    { // we do not need this header  at the moment -> just calculating its length; or may be we do soon?
       std::vector<char> data_buffer(8);
 
-      // cppcheck-suppress redundantAssignment
-      std::streamoff end_location = start_location;
       std::streamoff shift = start_location-dataStream.tellg();
       // move to specified location, which should be usually 0;
       dataStream.seekg(shift,std::ios_base::cur);
@@ -932,7 +930,7 @@ namespace LoadSQWHelper
       // skip labels
       dataStream.seekg(nRows*nCols,std::ios_base::cur);
 
-      end_location = dataStream.tellg();
+      std::streamoff end_location = dataStream.tellg();
       return end_location;
 
     }
@@ -945,8 +943,6 @@ namespace LoadSQWHelper
     { //
       std::vector<char> data_buffer(8);
 
-      // cppcheck-suppress redundantAssignment
-      std::streamoff end_location = start_location;
       std::streamoff shift = start_location-dataStream.tellg();
       // move to specified location, which should be usually 0;
       dataStream.seekg(shift,std::ios_base::cur);              
@@ -967,7 +963,7 @@ namespace LoadSQWHelper
       //skip detector information
       dataStream.seekg(num_detectors*6*4,std::ios_base::cur);  
 
-      end_location = dataStream.tellg();
+      std::streamoff end_location = dataStream.tellg();
       return end_location;
 
     }

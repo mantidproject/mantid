@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/ISISRunLogs.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
+	src/LoadAscii2.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -99,6 +100,7 @@ set ( SRC_FILES
 	src/SNSDataArchive.cpp
 	src/SNSDataArchiveICAT2.cpp
 	src/SaveAscii.cpp
+	src/SaveAscii2.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
@@ -148,6 +150,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
+	inc/MantidDataHandling/LoadAscii2.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -223,6 +226,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SNSDataArchiveICAT2.h
 	inc/MantidDataHandling/SaveAscii.h
+	inc/MantidDataHandling/SaveAscii2.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
@@ -276,6 +280,7 @@ set ( TEST_FILES
 	ISISDataArchiveTest.h
 	InstrumentRayTracerTest.h
 	LoadAsciiTest.h
+	LoadAscii2Test.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
@@ -344,6 +349,7 @@ set ( TEST_FILES
 	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
 	SaveAsciiTest.h
+	SaveAscii2Test.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h

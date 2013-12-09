@@ -136,6 +136,24 @@ public:
     TS_ASSERT_EQUALS(1, z_vec[2]);
   }
 
+  void testAxisLabelReturns()
+  {
+    ReferenceFrame x(Y, X, Right, "source");
+    TS_ASSERT_EQUALS("Y", x.pointingUpAxis());
+    TS_ASSERT_EQUALS("X", x.pointingAlongBeamAxis());
+    TS_ASSERT_EQUALS("Z", x.pointingHorizontalAxis());
+
+    ReferenceFrame y(X, Y, Right, "source");
+    TS_ASSERT_EQUALS("X", y.pointingUpAxis());
+    TS_ASSERT_EQUALS("Y", y.pointingAlongBeamAxis());
+    TS_ASSERT_EQUALS("Z", y.pointingHorizontalAxis());
+
+    ReferenceFrame z(X, Z, Right, "source");
+    TS_ASSERT_EQUALS("X", z.pointingUpAxis());
+    TS_ASSERT_EQUALS("Z", z.pointingAlongBeamAxis());
+    TS_ASSERT_EQUALS("Y", z.pointingHorizontalAxis());
+
+  }
 
 };
 

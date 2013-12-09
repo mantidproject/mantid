@@ -275,13 +275,6 @@ namespace CurveFitting
           coeff[8+i*3] = 0.0;
           coeff[9+i*3] = 0.0;
         }
-      }else if(m_nlayer < m_nlayer_old){
-        for (int i = 0; i < m_nlayer; ++i)
-        {
-          coeff[7+i*3] = getParameter(7+i*3);
-          coeff[8+i*3] = getParameter(8+i*3);
-          coeff[9+i*3] = getParameter(9+i*3);
-        }
       }else {
         for (int i = 0; i < m_nlayer; ++i)
         {

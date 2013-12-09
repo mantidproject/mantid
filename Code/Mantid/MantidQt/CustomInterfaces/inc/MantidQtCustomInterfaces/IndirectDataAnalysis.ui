@@ -1160,7 +1160,7 @@
                </item>
                <item>
                 <property name="text">
-                 <string>HWHM</string>
+                 <string>FWHM</string>
                 </property>
                </item>
               </widget>
