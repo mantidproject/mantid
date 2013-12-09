@@ -161,13 +161,13 @@ private:
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithFoilChanger()
   {
     double x0(50.0),x1(300.0),dx(0.5);
-    return ComptonProfileTestHelpers::createSingleSpectrumWorkspaceWithSingleMass(x0,x1,dx);
+    return ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx, true,true);
   }
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithNoFoilChanger()
   {
     double x0(165.0),x1(166.0),dx(0.5);
-    return ComptonProfileTestHelpers::createSingleSpectrumWorkspaceOfOnes(x0,x1,dx);
+    return ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx,false);
 
   }
 
