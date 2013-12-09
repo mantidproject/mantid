@@ -56,7 +56,7 @@ public:
     using namespace Mantid::API;
     IFunction_sptr func = createFunctionNoBackground(); // No equality matrix set
     double x0(165.0),x1(166.0),dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
 
     TS_ASSERT_THROWS_NOTHING(func->setWorkspace(testWS));
   }
@@ -66,7 +66,7 @@ public:
      using namespace Mantid::API;
      IFunction_sptr func = createFunctionNoBackground();
      double x0(165.0),x1(166.0),dx(0.5);
-     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
      auto & dataX = testWS->dataX(0);
      std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
      func->setWorkspace(testWS);
@@ -86,7 +86,7 @@ public:
      using namespace Mantid::API;
      IFunction_sptr func = createFunctionWithBackground();
      double x0(165.0),x1(166.0),dx(0.5);
-     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
      auto & dataX = testWS->dataX(0);
      std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
      func->setWorkspace(testWS);
@@ -108,7 +108,7 @@ public:
     using namespace Mantid::API;
     IFunction_sptr func = createFunctionNoBackground();
     double x0(165.0),x1(166.0),dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
     func->setWorkspace(testWS);
@@ -127,7 +127,7 @@ public:
     func->setAttributeValue("IntensityConstraints", "Matrix(1|2)1|-2"); // I_1 = 2I_2
 
     double x0(165.0),x1(166.0),dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
     func->setWorkspace(testWS);
@@ -146,7 +146,7 @@ public:
     IFunction_sptr func = createFunctionNoBackground(useTwoIntensityFuncAsFirst);
 
     double x0(165.0),x1(166.0),dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
 
@@ -168,7 +168,7 @@ public:
     func->setAttributeValue("IntensityConstraints", "Matrix(1|2)1|-2"); // I_1 = 2I_2
 
     double x0(165.0),x1(166.0),dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
 
