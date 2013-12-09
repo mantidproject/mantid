@@ -198,6 +198,8 @@ class ReflGui(refl_window.Ui_windowRefl):
             if reply == QtGui.QMessageBox.No:
                 print "Cancelled!"
                 willProcess = False
+            else:
+                rowIndexes = range(self.tableMain.rowCount())
         if willProcess:
             for row in rowIndexes:  # range(self.tableMain.rowCount()):
                 runno = []
