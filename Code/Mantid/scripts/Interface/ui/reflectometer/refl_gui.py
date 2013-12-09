@@ -27,8 +27,6 @@ class ReflGui(refl_window.Ui_windowRefl):
 
     def on_buttonAuto_clicked(self):
         self.autoFill()
-    def on_comboCycle_activated(self, cycle):
-        self.populateList(selected_cycle=cycle)
     def on_buttonTransfer_clicked(self):
         self.transfer()
     def on_checkTickAll_stateChanged(self,state):
@@ -91,7 +89,7 @@ class ReflGui(refl_window.Ui_windowRefl):
     def connectSlots(self):
         QtCore.QObject.connect(self.buttonAuto, QtCore.SIGNAL(_fromUtf8("clicked()")), self.on_buttonAuto_clicked)
         QtCore.QObject.connect(self.checkTickAll, QtCore.SIGNAL(_fromUtf8("stateChanged(int)")), self.on_checkTickAll_stateChanged)
-        QtCore.QObject.connect(self.comboCycle, QtCore.SIGNAL(_fromUtf8("activated(QString)")), self.on_comboCycle_activated)
+        #QtCore.QObject.connect(self.comboCycle, QtCore.SIGNAL(_fromUtf8("activated(QString)")), self.on_comboCycle_activated)
         QtCore.QObject.connect(self.comboInstrument, QtCore.SIGNAL(_fromUtf8("activated(QString)")), self.on_comboInstrument_activated)
         QtCore.QObject.connect(self.textRB, QtCore.SIGNAL(_fromUtf8("editingFinished()")), self.on_textRB_editingFinished)
         QtCore.QObject.connect(self.buttonClear, QtCore.SIGNAL(_fromUtf8("clicked()")), self.on_buttonClear_clicked)
@@ -102,12 +100,11 @@ class ReflGui(refl_window.Ui_windowRefl):
         QtCore.QObject.connect(self.actionRe_Load_Table, QtCore.SIGNAL(_fromUtf8("triggered()")), self.on_actionRe_Load_Table_triggered)
         QtCore.QObject.connect(self.actionSave_Workspaces, QtCore.SIGNAL(_fromUtf8("triggered()")), self.on_actionSave_Workspaces_triggered)
         QtCore.QObject.connect(self.actionMantid_Help, QtCore.SIGNAL(_fromUtf8("triggered()")), self.on_actionMantid_Help_triggered)
-    def populateList(self, selected_cycle=None):
+    def populateList(self):
         # Clear existing
         self.listMain.clear()
         # Fill with ADS workspaces
         self.populateListADSWorkspaces()
-        self.comboCycle.setVisible(False)
         try:
             selectedInstrument = config['default.instrument'].strip().upper()
             if not self.__instrumentRuns:
@@ -117,30 +114,9 @@ class ReflGui(refl_window.Ui_windowRefl):
             runs = self.__instrumentRuns.getJournalRuns(self.textRB.text())
             for run in runs:
                 self.listMain.addItem(run)
-            #self.populateListCycle(selected_cycle)
         except Exception as ex:
-            self.comboCycle.setVisible(False)
             logger.notice("Could not list archive runs")
             logger.notice(str(ex))
-
-    #Functionality which will hopefully be moved into a new file
-    def populateListCycle(self, selected_cycle=None):
-        runs = self.__instrumentRuns.getJournalRuns(self.textRB.text())
-        for run in runs:
-            self.listMain.addItem(run)
-        # Get possible cycles for this instrument.
-        cycles = self.__instrumentRuns.getCycles()
-        # Setup the list of possible cycles. And choose the latest as the default
-        if not selected_cycle:
-            cycle_count = 0
-            self.comboCycle.clear()
-            for cycle in cycles:
-                self.comboCycle.addItem(cycle)
-                if cycle == self.__instrumentRuns.getLatestCycle():
-                    self.comboCycle.setCurrentIndex(cycle_count)
-                cycle_count+=1
-        # Ensure that the cycle widget is shown.
-        self.comboCycle.setVisible(True)
     def populateListADSWorkspaces(self):
         names = mtd.getObjectNames()
         for ws in names:

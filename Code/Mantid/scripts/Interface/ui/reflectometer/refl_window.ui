@@ -63,9 +63,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboCycle"/>
-      </item>
-      <item>
        <widget class="QLabel" name="labelRB">
         <property name="text">
          <string>RB:</string>

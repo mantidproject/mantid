@@ -112,4 +112,25 @@ class LatestISISRuns(object):
                             break
             except:
                 print "Could not fetch Journal runs, an error occurred during searching"
+        else:
+            try:
+                journal_path, cycle_dir_path = self.runPaths
+                # side effect.
+                self.__addSettingDirToManagedUserDirs(cycle_dir_path)
+                tree = xml.parse(journal_path)
+                root = tree.getroot()
+                for run in root:
+                    runno = None
+                    title = None
+                    for curTag in run:
+                        if curTag.tag.split('}')[-1] == 'run_number':
+                            runno = curTag.text.strip()
+                        elif curTag.tag.split('}')[-1] == 'title':
+                            title = curTag.text.strip()
+                        if title and runno:
+                            break
+                    journalentry = runno + ": " + title
+                    runnames.append(journalentry)
+            except:
+                print "Could not fetch Journal runs, an error occurred during searching"
         return runnames

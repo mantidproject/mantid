@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Fri Dec 06 12:25:52 2013
+# Created: Mon Dec 09 15:11:43 2013
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -43,9 +43,6 @@ class Ui_windowRefl(object):
         self.comboInstrument.addItem(_fromUtf8(""))
         self.comboInstrument.addItem(_fromUtf8(""))
         self.layoutTopRow.addWidget(self.comboInstrument)
-        self.comboCycle = QtGui.QComboBox(self.widgetMainRow)
-        self.comboCycle.setObjectName(_fromUtf8("comboCycle"))
-        self.layoutTopRow.addWidget(self.comboCycle)
         self.labelRB = QtGui.QLabel(self.widgetMainRow)
         self.labelRB.setObjectName(_fromUtf8("labelRB"))
         self.layoutTopRow.addWidget(self.labelRB)
