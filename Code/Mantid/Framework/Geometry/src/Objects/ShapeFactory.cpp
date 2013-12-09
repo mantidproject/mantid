@@ -259,11 +259,10 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 
     //std::string algebra;  // to hold algebra in a way Mantid can understand
     std::map<std::string,std::string>::iterator iter;
-    size_t found;
     std::map<size_t,std::string, std::greater<size_t> > allFound;
     for( iter = idMatching.begin(); iter != idMatching.end(); ++iter )
     {
-      found = algebraFromUser.find(iter->first);
+      size_t found = algebraFromUser.find(iter->first);
 
       if (found==std::string::npos)
       {

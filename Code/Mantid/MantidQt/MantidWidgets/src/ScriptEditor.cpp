@@ -23,6 +23,7 @@
 #include <QClipboard>
 #include <QShortcut>
 #include <QSettings>
+#include <QMimeData>
 
 // Qscintilla
 #include <Qsci/qscilexer.h> 
@@ -485,6 +486,44 @@ void ScriptEditor::updateCompletionAPI(const QStringList & keywords)
   m_completer->prepare();
 }
 
+
+/**
+ * Accept a drag move event and selects whether to accept the action
+ * @param de :: The drag move event
+ */
+void ScriptEditor::dragMoveEvent(QDragMoveEvent *de)
+{
+    if(!de->mimeData()->hasUrls())
+      //pass to base class - This handles text appropriately
+      QsciScintilla::dragMoveEvent(de);
+}
+ 
+/**
+ * Accept a drag enter event and selects whether to accept the action
+ * @param de :: The drag enter event
+ */
+void ScriptEditor::dragEnterEvent(QDragEnterEvent *de)
+{
+    if(!de->mimeData()->hasUrls())
+      //pass to base class - This handles text appropriately
+      QsciScintilla::dragEnterEvent(de);
+}
+ 
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void ScriptEditor::dropEvent(QDropEvent *de)
+{
+    QStringList filenames;
+    const QMimeData *mimeData = de->mimeData();
+    if(!mimeData->hasUrls())
+    {
+      //pass to base class - This handles text appropriately
+      QsciScintilla::dropEvent(de);
+    }
+}
+
 /**
  * Print the current text
  */
@@ -584,4 +623,5 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event)
   }  
 #endif
 #endif
+
 }

@@ -155,7 +155,7 @@ gsl_multimin_fminimizer * Fit::fitSimplex(gsl_multimin_function f, int &iteratio
 
 	gsl_multimin_fminimizer *s_min = gsl_multimin_fminimizer_alloc (T, f.n);
 	status = gsl_multimin_fminimizer_set (s_min, &f, d_param_init, ss);
-	double size;
+
 	size_t iter = 0;
 	bool inRange = true;
 	for (int i=0; i<d_p; i++){
@@ -187,7 +187,7 @@ gsl_multimin_fminimizer * Fit::fitSimplex(gsl_multimin_function f, int &iteratio
 		for (int i=0; i<d_p; i++)
 			d_results[i] = gsl_vector_get(s_min->x, i);
 
-		size = gsl_multimin_fminimizer_size (s_min);
+		double size = gsl_multimin_fminimizer_size (s_min);
 		status = gsl_multimin_test_size (size, d_tolerance);
 	}
 	while (inRange && status == GSL_CONTINUE && (int)iter < d_max_iterations);

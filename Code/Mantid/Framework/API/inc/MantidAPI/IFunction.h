@@ -422,7 +422,8 @@ public:
   /// Set an attribute value
   template<typename T>
   void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}
-  void setAttributeValue(const std::string& attName,const char* value){setAttribute(attName,Attribute(std::string(value)));}
+  void setAttributeValue(const std::string& attName,const char* value);
+  void setAttributeValue(const std::string& attName,const std::string& value);
   //@}
 
   /// Set up the function for a fit.

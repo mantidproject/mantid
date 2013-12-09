@@ -44,6 +44,7 @@ Last line must have all 0's
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
@@ -119,6 +120,13 @@ namespace Crystal
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
         "Path to an hkl file to save.");
+
+    std::vector<std::string> histoTypes;
+    histoTypes.push_back("Bank" );
+    histoTypes.push_back("RunNumber" );
+    histoTypes.push_back("");
+    declareProperty("SortBy", histoTypes[2],boost::make_shared<StringListValidator>(histoTypes),
+      "Sort the histograms by bank, run number or both (default).");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -134,6 +142,7 @@ namespace Crystal
     double dMin = getProperty("MinDSpacing");
     double wlMin = getProperty("MinWavelength");
     double wlMax = getProperty("MaxWavelength");
+    std::string type = getProperty("SortBy");
 
     // Sequence and run number
     int seqNum = 1;
@@ -180,7 +189,9 @@ namespace Crystal
 
     // We must sort the peaks by bank #
     std::vector< std::pair<std::string, bool> > criteria;
-    criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+    if(type.compare(0,2,"Ba")==0) criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+    else if(type.compare(0,2,"Ru")==0) criteria.push_back( std::pair<std::string, bool>("RunNumber", true) );
+    else criteria.push_back( std::pair<std::string, bool>("BankName", true) );
     ws->sort(criteria);
 
     bool correctPeaks = getProperty("ApplyAnvredCorrections");
@@ -205,14 +216,15 @@ namespace Crystal
                      << "    Total = "      << sampleMaterial.totalScatterXSection() << " barns\n"
                      << "    Absorption = " << sampleMaterial.absorbXSection() << " barns\n";
     }
-    else  //Save input in Sample with wrong atomic number and name
+    else if (smu != EMPTY_DBL() && amu != EMPTY_DBL()) //Save input in Sample with wrong atomic number and name
     {
       NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
     			0.0, 0.0, smu, 0.0, smu, amu);
       Material mat("SetInAnvredCorrection", neutron, 1.0);
       ws->mutableSample().setMaterial(mat);
     }
-    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
+    if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
+      g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
                    << "LinearAbsorptionCoef = "   << amu << " 1/cm\n"
                    << "Radius = " << radius << " cm\n"
     			   << "Power Lorentz corrections = " << power_th << " \n";
@@ -252,13 +264,13 @@ namespace Crystal
 			for (int wi=0; wi < 8; wi++)getline(infile,STRING); // Saves the line in STRING.
 			while(!infile.eof()) // To get you all the lines.
 			{
-				double time0, spectra0;
 				time.resize(a+1);
 				spectra.resize(a+1);
 				getline(infile,STRING); // Saves the line in STRING.
 				std::stringstream ss(STRING);
 				if(STRING.find("Bank") == std::string::npos)
-				{
+				{				
+          double time0, spectra0;
 					ss >> time0 >> spectra0;
 					time[a].push_back(time0);
 					spectra[a].push_back(spectra0);
@@ -295,7 +307,11 @@ namespace Crystal
       double scattering = p.getScattering();
       double lambda =  p.getWavelength();
       double dsp = p.getDSpacing();
-      double transmission = absor_sphere(scattering, lambda, tbar);
+      double transmission = 0;
+      if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
+      {
+        transmission = absor_sphere(scattering, lambda, tbar);
+      }
       if(dsp < dMin || lambda < wlMin || lambda > wlMax) continue;
 
       // Anvred write from Art Schultz/
@@ -356,8 +372,9 @@ namespace Crystal
 
       out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) <<
     		  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*correc*p.getIntensity(),2));
-
-      out << std::setw( 4 ) << runSequence;
+      if(type.compare(0,2,"Ba")==0) out << std::setw( 4 ) << bankSequence;
+      else if(type.compare(0,2,"Ru")==0) out << std::setw( 4 ) << runSequence;
+      else out << std::setw( 4 ) << runSequence;
 
       out << std::setw( 8 ) << std::fixed << std::setprecision( 4 ) << lambda;
 

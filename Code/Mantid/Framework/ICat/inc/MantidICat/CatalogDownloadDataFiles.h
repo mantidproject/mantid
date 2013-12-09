@@ -72,8 +72,6 @@ namespace Mantid
       std::string testDownload(const std::string& URL,const std::string& fileName);
 
     private:
-      /// Throw a catalog error.
-      void throwCatalogError() const;
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// Overwrites Algorithm method.
@@ -92,11 +90,7 @@ namespace Mantid
     private:
       /// progress indicator
       double m_prog;
-
-
-
     };
-
   }
 }
 #endif

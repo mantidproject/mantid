@@ -100,6 +100,21 @@ def LOQ():
     except:
         return False
     return True
+
+def LARMOR():
+    """
+    Initialises the instrument settings for LARMOR
+    @return True on success
+    """
+    _printMessage('LARMOR()')
+    try:
+        instrument = isis_instrument.LARMOR()
+        
+        ReductionSingleton().set_instrument(instrument)
+        config['default.instrument']='LARMOR'
+    except:
+        return False
+    return True
     
 def Detector(det_name):
     """
@@ -138,6 +153,10 @@ def MaskFile(file_name):
         @param file_name: the settings file
     """
     _printMessage('#Opening "'+file_name+'"')
+
+    # ensure that no slice string is kept from previous executions.
+    ReductionSingleton().setSlicesLimits("")
+
     ReductionSingleton().user_settings = isis_reduction_steps.UserFile(
         file_name)
     status = ReductionSingleton().user_settings.execute(
@@ -208,6 +227,20 @@ def TransWorkspace(sample, can = None):
     ReductionSingleton().transmission_calculator.calculated_samp = sample 
     ReductionSingleton().transmission_calculator.calculated_can = can 
 
+def _return_old_compatibility_assign_methods(ws_name):
+    """For backward compatibility, AssignCan and AssignSample returns a tuple
+    with workspace name and the log entry if available.
+    
+    In the future, those methods should return just workspace name
+    """
+    logs = ""
+    if isinstance(ReductionSingleton().instrument, isis_instrument.SANS2D):
+        try:
+            logs = ReductionSingleton().instrument.get_detector_log(ws_name)
+        except:            
+            pass        
+    return ws_name, logs
+
 def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
     """
         The can is a scattering run under the same conditions as the experimental run but the
@@ -225,18 +258,10 @@ def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSE
         mes += ', ' + str(period)
     mes += ')'
     _printMessage(mes)
-
-    if (not can_run) or (isinstance(can_run,str) and can_run.startswith('.')):
-        ReductionSingleton().background_subtracter = None
-        return '', None
-
-    ReductionSingleton().background_subtracter = \
-        isis_reduction_steps.CanSubtraction(
-                                can_run, reload=reload, period=period)
-    #ideally this code should live in a separate load can object 
-    logs = ReductionSingleton().background_subtracter.assign_can(
-        ReductionSingleton())
-    return ReductionSingleton().background_subtracter.workspace.wksp_name, logs
+    
+    ReductionSingleton().set_can(can_run, reload, period)
+    return _return_old_compatibility_assign_methods(
+        ReductionSingleton().get_can().wksp_name)
 
 def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
     """
@@ -285,8 +310,7 @@ def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRu
     
     global LAST_SAMPLE
     LAST_SAMPLE = ReductionSingleton().get_sample().wksp_name
-    return ReductionSingleton().get_sample().wksp_name, \
-        ReductionSingleton().get_sample().log
+    return _return_old_compatibility_assign_methods(LAST_SAMPLE)
 
 def SetCentre(xcoord, ycoord, bank = 'rear'):
     """
@@ -309,25 +333,6 @@ def GetMismatchedDetList():
         Return the list of mismatched detector names
     """
     return ReductionSingleton().instrument.get_marked_dets()
-
-def _setUpPeriod(i):
-    trans_samp = ReductionSingleton().samp_trans_load
-    can = ReductionSingleton().background_subtracter
-    trans_can = ReductionSingleton().can_trans_load
-    new_sample_workspaces = AssignSample(ReductionSingleton().get_sample().loader._data_file, period=i)[0]
-    if can:
-        #replace one thing that gets overwritten
-        AssignCan(can.workspace._data_file, True, period=can.workspace.getCorrospondingPeriod(i, ReductionSingleton()))
-    if trans_samp:
-        trans = trans_samp.trans
-        direct = trans_samp.direct
-        TransmissionSample(trans._data_file, direct._data_file, True, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
-    if trans_can:
-        trans = trans_can.trans
-        direct = trans_can.direct
-        TransmissionCan(trans._data_file, direct._data_file, True, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
-
-    return new_sample_workspaces
 
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, resetSetup=True, out_fit_settings = dict()):
     """
@@ -426,8 +431,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 ReductionSingleton().instrument.setDetector('front')
                 ReductionSingleton()._sample_run.reload(ReductionSingleton())
                 #reassign can
-                if ReductionSingleton().background_subtracter:
-                    ReductionSingleton().background_subtracter.assign_can(ReductionSingleton())
+                if ReductionSingleton().get_can():
+                    ReductionSingleton().get_can().reload(ReductionSingleton())
                 if ReductionSingleton().samp_trans_load:
                     #refresh Transmission
                     ReductionSingleton().samp_trans_load.execute(ReductionSingleton(), None)
@@ -558,33 +563,37 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)          
         else:
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift")   
     elif rAnds.fitShift==False:
-        if rAnds.qRangeUserSelected:        
+        if rAnds.qRangeUserSelected:
+            function_input = 'name=TabulatedFunction, Workspace="'+str(frontData)+'"' +";name=FlatBackground"
+            ties = 'f1.A0='+str(rAnds.shift*rAnds.scale)
+            logger.warning('function input ' + str(function_input))
+
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)               
         else:           
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift")   
     else:
         if rAnds.qRangeUserSelected:          
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground",
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
-            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground",Output="__fitRescaleAndShift")
                         
     param = mtd['__fitRescaleAndShift_Parameters']
@@ -618,36 +627,70 @@ def _WavRangeReduction(name_suffix=None):
     """
         Run a reduction that has been set up, from loading the raw data to calculating Q
     """
+    def _setUpPeriod(period):
+        assert(ReductionSingleton().get_sample().loader.move2ws(period))
+        can = ReductionSingleton().get_can()
+        if can and can.loader.periods_in_file > 1:
+            can.loader.move2ws(period)
 
-    try:
-        # do a reduction
-        calculated = [ReductionSingleton()._reduce()]
+        for trans in [ReductionSingleton().samp_trans_load, ReductionSingleton().can_trans_load]:
+            if trans and trans.direct.periods_in_file > 1 and trans.trans.periods_in_file > 1:
+                trans.direct.move2ws(period)
+                trans.trans.move2next(period)
+        return
 
-        periods = ReductionSingleton().get_sample().loader.entries    
-        if len(periods) > 1:
-            run_setup = ReductionSingleton().settings()
-            for i in periods[1:len(periods)]:
-                ReductionSingleton.replace(copy.deepcopy(run_setup))
-                temp_workspaces = _setUpPeriod(i)
-                # do a reduction for period i
-                calculated.append(ReductionSingleton()._reduce())
-                delete_workspaces(temp_workspaces)
-            result = ReductionSingleton().get_out_ws_name(show_period=False)
-            all_results = calculated[0]
-            for name in calculated[1:len(calculated)]:
-                all_results += ',' + name
-            GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=all_results)
+    def _applySuffix(result, name_suffix):
+        if name_suffix:
+            old = result
+            result += name_suffix
+            RenameWorkspace(InputWorkspace=old,OutputWorkspace= result)
+        return result
+
+    def _common_substring(val1, val2):
+        l = []
+        for i in range(len(val1)):
+            if val1[i]==val2[i]: l.append(val1[i])
+            else:
+                return ''.join(l)
+
+    def _group_workspaces(list_of_values, outputname):
+        allnames = ','.join(list_of_values)
+        GroupWorkspaces(InputWorkspaces=allnames, OutputWorkspace=outputname)
+
+    def _reduceAllSlices():
+        if ReductionSingleton().getNumSlices() > 1:
+            slices = []
+            for index in range(ReductionSingleton().getNumSlices()):
+                ReductionSingleton().setSliceIndex(index)
+                slices.append(ReductionSingleton()._reduce())
+            ReductionSingleton().setSliceIndex(0)
+            group_name = _common_substring(slices[0], slices[1])
+            if group_name[-2] == "_":
+                group_name = group_name[:-2]
+            _group_workspaces(slices, group_name)
+            return group_name
         else:
-            result = calculated[0]            
-    finally:
-        f=1 #_refresh_singleton()
+            return ReductionSingleton()._reduce()
+            
+            
 
-    if name_suffix:
-        old = result
-        result += name_suffix
-        RenameWorkspace(InputWorkspace=old,OutputWorkspace= result)
-        
-    return result
+    result = ""
+    if ReductionSingleton().get_sample().loader.periods_in_file == 1:
+        result = _reduceAllSlices()
+        return _applySuffix(result, name_suffix)
+
+    calculated = []
+    try:
+        for period in ReductionSingleton().get_sample().loader.entries:
+            _setUpPeriod(period)
+            calculated.append(_reduceAllSlices())                
+    
+    finally:
+        if len(calculated) > 0:
+            result = ReductionSingleton().get_out_ws_name(show_period=False)
+            _group_workspaces(calculated, result)
+
+    return _applySuffix(result, name_suffix)
 
 def delete_workspaces(workspaces):
     """
@@ -890,6 +933,12 @@ def LimitsQXY(qmin, qmax, step, type):
         raise RuntimeError('MaskFile() first')
 
     settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type, ReductionSingleton())
+
+def SetEventSlices(input_str):
+    """    
+    """
+    ReductionSingleton().setSlicesLimits(input_str)
+
 
 def PlotResult(workspace, canvas=None):
     """

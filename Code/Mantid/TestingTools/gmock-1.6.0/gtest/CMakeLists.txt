@@ -11,10 +11,15 @@ option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 
 # When other libraries are using a shared version of runtime libraries,
 # Google Test also has to use one.
+if(gtest_force_shared_crt) # May have been defined by gmock & they need to be the same
+  set( _default_force_crt ${gtest_force_shared_crt} )
+else()
+  set( _default_force_crt OFF )
+endif()
 option(
   gtest_force_shared_crt
   "Use shared (DLL) run-time lib even when Google Test is built as static lib."
-  OFF)
+  ${_default_force_crt})
 
 option(gtest_build_tests "Build all of gtest's own tests." OFF)
 
@@ -67,9 +72,10 @@ link_directories(${gtest_BINARY_DIR}/src)
 # Google Test libraries.  We build them using more strict warnings than what
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  set ( cxx_strict "/MD ${cxx_strict}")
-endif()
+## MANTID: Not required, this is done by cmake & has been removed in gmock-1.7.0 ##
+#if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+#  set ( cxx_strict "/MD ${cxx_strict}")
+#endif()
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
 #cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 #target_link_libraries(gtest_main gtest)

@@ -7,7 +7,13 @@ namespace MantidQt
     /**
     Constructor
     */
-    ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter(boost::shared_ptr<CompositePeaksPresenter> composite) : m_compositePresenter(composite)
+    ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter(boost::shared_ptr<CompositePeaksPresenter> composite) : m_compositePresenter(composite),
+        m_updateableView(NULL)
+    {
+      m_compositePresenter->registerOwningPresenter(this);
+    }
+
+    ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter()
     {
     }
 
@@ -64,6 +70,11 @@ namespace MantidQt
       return m_compositePresenter->getForegroundColour(ws);
     }
 
+    bool ProxyCompositePeaksPresenter::getShowBackground(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
+    {
+      return m_compositePresenter->getShowBackground(ws);
+    }
+
     /**
     Get all the presented workspaces.
     */
@@ -104,5 +115,39 @@ namespace MantidQt
     {
       m_compositePresenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
     }
+
+    PeaksPresenter* ProxyCompositePeaksPresenter::getPeaksPresenter(const QString& name)
+    {
+      return m_compositePresenter->getPeaksPresenter(name);
+    }
+
+    void ProxyCompositePeaksPresenter::performUpdate()
+    {
+      if(m_updateableView)
+      {
+        m_updateableView->performUpdate();
+      }
+    }
+
+    bool ProxyCompositePeaksPresenter::getIsHidden(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const
+    {
+      return m_compositePresenter->getIsHidden(peaksWS);
+    }
+
+    void ProxyCompositePeaksPresenter::registerView(UpdateableOnDemand* updateableView)
+    {
+      m_updateableView = updateableView;
+    }
+
+    boost::optional<PeaksPresenter_sptr> ProxyCompositePeaksPresenter::getZoomedPeakPresenter() const
+    {
+      return m_compositePresenter->getZoomedPeakPresenter();
+    }
+
+    int ProxyCompositePeaksPresenter::getZoomedPeakIndex() const
+    {
+      return m_compositePresenter->getZoomedPeakIndex();
+    }
+
   }
 }

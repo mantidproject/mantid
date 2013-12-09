@@ -67,7 +67,6 @@ class QToolBar;
 //class QAssistantClient;
 class QLocale;
 class QMdiArea;
-class QUndoView;
 class QSignalMapper;
 
 class Matrix;
@@ -609,6 +608,10 @@ public slots:
   //! Creates a new empty multilayer plot
   MultiLayer* newGraph(const QString& caption = tr("Graph"));
 
+  /// Prepares MultiLayer for plotting - creates if necessary, clears, applies initial settings 
+  MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph", 
+    bool clearWindow = false);
+
   //! \name Reading from a Project File
   //@{
 
@@ -1029,20 +1032,6 @@ public slots:
 
   //Slot for writing to log window
   void writeToLogWindow(const MantidQt::API::Message& message);
-  /// execute loadraw asynchronously
-  void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute loadnexus asynchronously
-  void executeLoadNexusAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute load asynchronously
-  void executeLoadAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute loadraw/nexus without popingup load dialogs.
-  void executeloadAlgorithm(const QString&, const QString&, const QString&);
-
-  /// slot to execute download datafiles algorithm - called  from ICat interface
-  void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
   /// Activate a subwindow (docked or floating) other than current active one
   void activateNewWindow();
@@ -1168,18 +1157,12 @@ private:
   /// for zooming the selected graph using mouse drag tool
   void panOnPlot();
 
-  /// Handler for ICat login menu 
-  void ICatLogin();
-  /// Handler for ICat search menu
-  void ICatIsisSearch();
-  /// Handler for NEW ICat search GUI (ICatSearch2)
-  void ICatSearch2();
-  /// Handler for ICatMyData serch menu
-  void ICatMyDataSearch();
-  // Handler for ICat CatalogLogout
-  void ICatLogout();
-
-  void ICatAdvancedSearch();
+  /// Handler for catalog login.
+  void CatalogLogin();
+  /// Handler for catalog search.
+  void CatalogSearch();
+  // Handler for catalog logout.
+  void CatalogLogout();
 
   /// method to create widgets from mantid qt;
   void setGeometry(MdiSubWindow* usr_win,QWidget* user_interface);
@@ -1391,7 +1374,7 @@ private:
   ScriptingWindow *scriptingWindow; //Mantid
   Script *m_iface_script;
   QTranslator *appTranslator, *qtTranslator;
-  QDockWidget *explorerWindow, *undoStackWindow;
+  QDockWidget *explorerWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QMdiArea *d_workspace;
 
@@ -1401,7 +1384,7 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QWidget* icatsearch;
+  QWidget* catalogSearch;
 
   QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
   
@@ -1414,11 +1397,11 @@ private:
   QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
   QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
   QAction *actionOpen, *actionLoadImage, *actionScriptRepo, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj;
-  QAction *actionLoad, *actionUndo, *actionRedo;
+  QAction *actionLoad;
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch,*actionICatSearch2,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
+  QAction *actionCatalogLogin,*actionCatalogSearch,*actionCatalogLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
@@ -1478,7 +1461,6 @@ private:
   QAction *Box, *Frame, *None;
   QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;
   QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
-  QAction *actionShowUndoStack;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
@@ -1488,7 +1470,6 @@ private:
   
   QList<QAction *> m_interfaceActions;
 
-  QUndoView *d_undo_view;
   /// list of mantidmatrix windows opened from project file.
   QList<MantidMatrix*> m_mantidmatrixWindows;
 

@@ -64,13 +64,12 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_simpleDisplay(NULL),
   m_workspaceName(wsName),
   m_instrumentActor(NULL),
+  m_surfaceType(FULL3D),
+  m_savedialog_dir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
   mViewChanged(false), 
   m_blocked(false),
   m_instrumentDisplayContextMenuOn(false)
 {
-  m_surfaceType = FULL3D;
-  m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-
   setFocusPolicy(Qt::StrongFocus);
   QVBoxLayout* mainLayout = new QVBoxLayout(this);
   QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
@@ -715,8 +714,14 @@ void InstrumentWindow::saveImage(QString filename)
     }
   }
   
-  if ( m_InstrumentDisplay )
+  if ( isGLEnabled() )
+  {
     m_InstrumentDisplay->saveToFile(filename);
+  }
+  else
+  {
+    m_simpleDisplay->saveToFile(filename);
+  }
 }
 
 /**
@@ -1010,8 +1015,8 @@ void InstrumentWindow::setViewType(const QString& type)
 
 void InstrumentWindow::dragEnterEvent( QDragEnterEvent* e )
 {
-  QString text = e->mimeData()->text();
-  if (text.startsWith("Workspace::"))
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace")
   {
     e->accept();
   }
@@ -1023,11 +1028,23 @@ void InstrumentWindow::dragEnterEvent( QDragEnterEvent* e )
 
 void InstrumentWindow::dropEvent( QDropEvent* e )
 {
-  QString text = e->mimeData()->text();
-  if (text.startsWith("Workspace::"))
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace")
   {
-    QStringList wsName = text.split("::");
-    if(this->overlay(wsName[1])) e->accept();    
+    QString text = e->mimeData()->text();
+    int endIndex = 0;
+    QStringList wsNames;
+    while (text.indexOf("[\"",endIndex) > -1)
+    {
+      int startIndex = text.indexOf("[\"",endIndex) + 2;
+      endIndex = text.indexOf("\"]",startIndex);
+      wsNames.append(text.mid(startIndex,endIndex-startIndex));
+    }
+
+    foreach (const auto& wsName, wsNames)
+    {
+      if(this->overlay(wsName)) e->accept();  
+    }   
   }
   e->ignore();
 }

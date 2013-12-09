@@ -20,6 +20,7 @@
 #include <Poco/Path.h>
 
 #include <algorithm>
+#include <sstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -102,6 +103,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),Qt::QueuedConnection);
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(populateChildData(QTreeWidgetItem*)));
+  m_tree->setDragEnabled(true);
 }
 
 MantidDockWidget::~MantidDockWidget()
@@ -203,11 +205,11 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showTransposed = new QAction(tr("Show Transposed"),this);
   connect(m_showTransposed,SIGNAL(triggered()),m_mantidUI,SLOT(importTransposed()));
 
-  m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkspace"),this);
   m_convertToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertToMatrixWorkspace()));
 
-  m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkspace"),this);
   m_convertMDHistoToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertMDHistoToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertMDHistoToMatrixWorkspace()));
 
@@ -1139,6 +1141,15 @@ void MantidDockWidget::clearUB()
   m_mantidUI->clearUB(selctedWSNames);
 }
 
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void MantidDockWidget::dropEvent(QDropEvent *de)
+{
+  m_tree->dropEvent(de);
+}
+
 //------------ MantidTreeWidget -----------------------//
 
 MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
@@ -1146,6 +1157,80 @@ MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
 {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
+  setAcceptDrops(true);
+}
+
+/**
+ * Accept a drag move event and selects whether to accept the action
+ * @param de :: The drag move event
+ */
+void MantidTreeWidget::dragMoveEvent(QDragMoveEvent *de)
+{
+    // The event needs to be accepted here
+    if (de->mimeData()->hasUrls())
+      de->accept();
+}
+ 
+/**
+ * Accept a drag enter event and selects whether to accept the action
+ * @param de :: The drag enter event
+ */
+void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
+{
+    // Set the drop action to be the proposed action.
+    if (de->mimeData()->hasUrls())
+        de->acceptProposedAction();
+}
+
+
+ 
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void MantidTreeWidget::dropEvent(QDropEvent *de)
+{
+    QStringList filenames;
+    const QMimeData *mimeData = de->mimeData();  
+    if (mimeData->hasUrls()) 
+    {
+      QList<QUrl> urlList = mimeData->urls();
+      for (int i = 0; i < urlList.size(); ++i) 
+      {
+            QString fName = urlList[i].toLocalFile();
+            if (fName.size()>0)
+            {
+              filenames.append(fName);
+            }
+      }
+    }
+    de->acceptProposedAction();
+
+    for (int i = 0; i < filenames.size(); ++i) 
+    {
+      try
+      {
+        QFileInfo fi(filenames[i]);
+        QString basename = fi.baseName();
+        IAlgorithm_sptr alg = m_mantidUI->createAlgorithm("Load");
+        alg->initialize();
+        alg->setProperty("Filename",filenames[i].toStdString());
+        alg->setProperty("OutputWorkspace",basename.toStdString());
+        m_mantidUI->executeAlgorithmAsync(alg,true);
+      }
+      catch (std::runtime_error& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }      
+      catch (std::logic_error& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }
+      catch (std::exception& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }
+    }
 }
 
 void MantidTreeWidget::mousePressEvent (QMouseEvent *e)
@@ -1172,7 +1257,18 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e)
 
   QStringList wsnames = getSelectedWorkspaceNames();
   if (wsnames.size() == 0) return;
-  mimeData->setText("Workspace::"+getSelectedWorkspaceNames()[0]);
+  QString importStatement = "";
+  foreach( const QString wsname, wsnames )
+  {
+    QString prefix = "";
+    if (wsname[0].isDigit()) prefix = "ws";
+    if (importStatement.size() > 0) importStatement += "\n";
+    importStatement += prefix + wsname + " = mtd[\"" + wsname + "\"]";
+  }
+ 
+  mimeData->setText(importStatement);
+  mimeData->setObjectName("MantidWorkspace");
+          
   drag->setMimeData(mimeData);
 
   Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);

@@ -1,4 +1,37 @@
 /*WIKI* 
+
+=== Additional properties for a 1D function and a MatrixWorkspace ===
+If Function defines a one-dimensional function and InputWorkspace is a [[MatrixWorkspace]]
+the algorithm will have these additional properties:
+
+{| border="1" cellpadding="5" cellspacing="0"
+!Name
+!Direction
+!Type
+!Default
+!Description
+|-
+|WorkspaceIndex
+|Input
+|integer
+|0
+|The spectrum to fit, using the workspace numbering of the spectra
+|-
+|StartX
+|Input
+|double
+|Start of the spectrum
+|An X value in the first bin to be included in the fit
+|-
+|EndX
+|Input
+|double
+|End of the spectrum
+|An X value in the last bin to be included in the fit
+|}
+
+=== Overview ===
+
 This is a generic algorithm for fitting data in a Workspace with a function.
 The workspace must have the type supported by the algorithm. Currently supported
 types are: [[MatrixWorkspace]] for fitting with a [[IFunction1D]] and
@@ -187,36 +220,6 @@ This example repeats the previous one but with the Sigmas of the two Gaussians t
  Output:          res
 
 [[Image:Gaussian2Fit_Ties.jpg]]
-
-=== Additional properties for a 1D function and a MatrixWorkspace ===
-If Function defines a one-dimensional function and InputWorkspace is a [[MatrixWorkspace]]
-the algorithm will have these additional properties:
-
-{| border="1" cellpadding="5" cellspacing="0"
-!Name
-!Direction
-!Type
-!Default
-!Description
-|-
-|WorkspaceIndex
-|Input
-|integer
-|0
-|The spectrum to fit, using the workspace numbering of the spectra 
-|-
-|StartX
-|Input
-|double
-|Start of the spectrum
-|An X value in the first bin to be included in the fit
-|-
-|EndX
-|Input
-|double
-|End of the spectrum
-|An X value in the last bin to be included in the fit
-|}
 
 *WIKI*/
 

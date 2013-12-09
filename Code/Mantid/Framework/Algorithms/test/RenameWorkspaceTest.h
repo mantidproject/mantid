@@ -68,6 +68,7 @@ public:
 
   void testExecSameNames()
   {
+    AnalysisDataService::Instance().clear();
     MatrixWorkspace_sptr inputWS = createWorkspace();
     AnalysisDataService::Instance().add("InputWS", inputWS);
 

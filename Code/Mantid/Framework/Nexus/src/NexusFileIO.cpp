@@ -727,8 +727,6 @@ using namespace DataObjects;
    * */
   int NexusFileIO::writeEventList( const DataObjects::EventList & el, std::string group_name) const
   {
-    int dims_array[1];
-
     //write data entry
     NXstatus status=NXmakegroup(fileID, group_name.c_str(), "NXdata");
     if(status==NX_ERROR) return(2);
@@ -741,6 +739,7 @@ using namespace DataObjects;
     if (!dets.empty())
     {
       std::vector<detid_t> detectorIDs(dets.begin(),dets.end());
+      int dims_array[1];
       NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs.data()), false );
     }
 
@@ -829,8 +828,7 @@ using namespace DataObjects;
     char sbuf[NX_MAXNAMELEN];
     int len=NX_MAXNAMELEN;
     type=NX_CHAR;
-    //
-    len=NX_MAXNAMELEN;
+
     if(checkAttributeName("units"))
     {
       status=NXgetattr(fileID,const_cast<char*>("units"),(void *)sbuf,&len,&type);
@@ -1144,7 +1142,7 @@ using namespace DataObjects;
           // if one of the two names we are looking for
           if(nxn.compare("definition")==0 || nxn.compare("analysis")==0)
           {
-            stat=NXopendata(fileH,nxname);
+            NXopendata(fileH,nxname);
             stat=NXgetinfo(fileH,&rank,dims,&type);
             if(stat==NX_ERROR)
               continue;
@@ -1157,7 +1155,7 @@ using namespace DataObjects;
             definition.push_back(value);
             entryName.push_back(entryList[i]);
             delete[] value;
-            stat=NXclosegroup(fileH); // close data group, then entry
+            NXclosegroup(fileH); // close data group, then entry
             stat=NXclosegroup(fileH);
             break;
           }

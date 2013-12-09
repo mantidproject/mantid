@@ -81,7 +81,7 @@ SurfaceDialog::SurfaceDialog( QWidget* parent, Qt::WFlags fl )
 	vl->addWidget(optionStack);
 	vl->addLayout(bl2);
 
-	ApplicationWindow *app = (ApplicationWindow *)parent;
+	ApplicationWindow *app = static_cast<ApplicationWindow *>(parent);
 	if (app){
 		boxFunction->insertItems(0, app->surfaceFunc);
 		boxX->setCompleter (new QCompleter(app->d_param_surface_func));
@@ -264,7 +264,7 @@ void SurfaceDialog::initParametricSurfacePage()
 
 void SurfaceDialog::clearList()
 {
-    ApplicationWindow *app = (ApplicationWindow *)this->parent();
+    ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
 
     if (app && boxType->currentIndex()){
         app->d_param_surface_func.clear();
@@ -307,7 +307,7 @@ void SurfaceDialog::accept()
 
 void SurfaceDialog::acceptParametricSurface()
 {
-	ApplicationWindow *app = (ApplicationWindow *)this->parent();
+	ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
 
 	MyParser parser;
 	double u = 1.0, v = 1.0;
@@ -420,7 +420,7 @@ void SurfaceDialog::acceptParametricSurface()
 
 void SurfaceDialog::acceptFunction()
 {
-ApplicationWindow *app = (ApplicationWindow *)this->parent();
+ApplicationWindow *app = static_cast<ApplicationWindow *>(this->parent());
 
 QString Xfrom=boxXFrom->text().lower();
 QString Xto=boxXTo->text().lower();
@@ -525,7 +525,9 @@ try
 
 	
 	parser.Eval();
+  // cppcheck-suppress unreadVariable
 	x=toX; 
+  // cppcheck-suppress unreadVariable
 	y=toY;
 	parser.Eval();
 	}

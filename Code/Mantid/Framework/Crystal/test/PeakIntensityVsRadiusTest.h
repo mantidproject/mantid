@@ -82,7 +82,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "PeakIntensityVsRadiusTest_peaks") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "PeakIntensityVsRadiusTest_OutputWS") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", "HKL") );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("RadiusStart", 0.0) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("RadiusEnd", 1.5) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumSteps", 16) );
@@ -121,7 +120,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "PeakIntensityVsRadiusTest_MDEWS") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "PeakIntensityVsRadiusTest_peaks") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", "HKL") );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("RadiusStart", 0.0) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("RadiusEnd", 1.5) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumSteps", 16) );

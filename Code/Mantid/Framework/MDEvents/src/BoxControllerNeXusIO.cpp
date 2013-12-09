@@ -132,7 +132,8 @@ namespace MDEvents
           else
               throw Kernel::Exception::FileError("Can not open file to read ",m_fileName);
       }
-      m_File = MDBoxFlatTree::createOrOpenMDWSgroup(m_fileName,this->m_bc->getNDims(), m_EventsTypesSupported[m_EventType],m_ReadOnly);
+      int nDims = static_cast<int>(this->m_bc->getNDims());
+      m_File = MDBoxFlatTree::createOrOpenMDWSgroup(m_fileName,nDims, m_EventsTypesSupported[m_EventType],m_ReadOnly);
       // we are in MD workspace Class  group now
       std::map<std::string, std::string> groupEntries;
       m_File->getEntries(groupEntries);
@@ -466,8 +467,7 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t
                  {
                      std::vector<int64_t> free_dims(2,2);
                      free_dims[0] = int64_t(freeSpaceBlocks.size()/2);
-                     std::vector<int64_t> free_chunk(2,2);
-                     free_chunk[0] =int64_t(m_dataChunk);
+
                      m_File->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
                  }
              }

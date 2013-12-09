@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/BivariateNormal.cpp
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
+	src/CalculateGammaBackground.cpp
 	src/Chebyshev.cpp
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
@@ -66,7 +67,7 @@ set ( SRC_FILES
 	src/Quadratic.cpp
 	src/RefinePowderInstrumentParameters.cpp
 	src/RefinePowderInstrumentParameters3.cpp
-  src/ReflectivityMulf.cpp
+	src/ReflectivityMulf.cpp
 	src/Resolution.cpp
 	src/SeqDomain.cpp
 	src/SimplexMinimizer.cpp
@@ -106,6 +107,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
+	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/ComptonProfile.h
@@ -167,7 +169,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters3.h
-  inc/MantidCurveFitting/ReflectivityMulf.h
+	inc/MantidCurveFitting/ReflectivityMulf.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
@@ -205,6 +207,7 @@ set ( TEST_FILES
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
+	CalculateGammaBackgroundTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonProfileTest.h
@@ -252,7 +255,7 @@ set ( TEST_FILES
 	ProductQuadraticExpTest.h
 	QuadraticTest.h
 	RefinePowderInstrumentParameters3Test.h
-  ReflectivityMulfTest.h
+	ReflectivityMulfTest.h
 	ResolutionTest.h
 	SimplexTest.h
 	SpecialFunctionSupportTest.h

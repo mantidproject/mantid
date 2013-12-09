@@ -139,7 +139,7 @@ def ReadWidthFile(readWidth,widthFile,numSampleGroups,Verbose):
 # QLines programs
 def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot,Save):
 	StartTime(program)
-
+	
 	#expand fit options
 	elastic, background, width, resnorm = Fit
 	
@@ -249,6 +249,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 		numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin]
 		rscl = 1.0
 		reals = [efix, theta[m], rscl, bnorm]
+
 		if prog == 'QLr':
 			nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
 												   Xdat,Xb,Yb,Wy,We,dtn,xsc,
@@ -361,6 +362,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 		if Verbose:
 			logger.notice('Output fit file created : ' + fit_path)
 			logger.notice('Output paramter file created : ' + out_path)
+
 	EndTime(program)
 
 
@@ -717,16 +719,27 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 		if (m > 0):
 			Qaxis += ','
 		Qaxis += str(Q[m])
+		
+		dataXz = []
+		dataYz = []
+		dataEz = []
+		
 		for n in range(0,Nsig):
 			yfit_list = np.split(zpout[:Nsig*Nbet],Nsig)
 			dataYzp = yfit_list[n]
-			if n == 0:
-				CreateWorkspace(OutputWorkspace=zpWS, DataX=xbout[:Nbet], DataY=dataYzp[:Nbet], DataE=eBet0,
-					Nspec=1, UnitX='MomentumTransfer')
-			else:
-				CreateWorkspace(OutputWorkspace='__Zpt', DataX=xbout[:Nbet], DataY=dataYzp[:Nbet], DataE=eBet0,
-					Nspec=1, UnitX='MomentumTransfer')
-				ConjoinWorkspaces(InputWorkspace1=zpWS, InputWorkspace2='__Zpt', CheckOverlapping=False)				
+
+			dataXz = np.append(dataXz,xbout[:Nbet])
+			dataYz = np.append(dataYz,dataYzp[:Nbet])
+			dataEz = np.append(dataEz,eBet0)
+
+		CreateWorkspace(OutputWorkspace=zpWS, DataX=dataXz, DataY=dataYz, DataE=dataEz,
+			Nspec=Nsig, UnitX='MomentumTransfer', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=dataXs)
+		
+		unitx = mtd[zpWS].getAxis(0).setUnit("Label")
+		unitx.setLabel('beta' , '')
+		unity = mtd[zpWS].getAxis(1).setUnit("Label")
+		unity.setLabel('sigma' , '')
+
 		if m == 0:
 			xSig = dataXs
 			ySig = dataYs
@@ -743,10 +756,18 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 			yBet = np.append(yBet,dataYb)
 			eBet = np.append(eBet,eBet0)
 			groupZ = groupZ +','+ zpWS
+	
+	#create workspaces for sigma and beta
 	CreateWorkspace(OutputWorkspace=fname+'_Sigma', DataX=xSig, DataY=ySig, DataE=eSig,
 		Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+	unitx = mtd[fname+'_Sigma'].getAxis(0).setUnit("Label")
+	unitx.setLabel('sigma' , '')
+
 	CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=xBet, DataY=yBet, DataE=eBet,
 		Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+	unitx = mtd[fname+'_Beta'].getAxis(0).setUnit("Label")
+	unitx.setLabel('beta' , '')
+
 	group = fname + '_Sigma,'+ fname + '_Beta'
 	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Fit')	
 	GroupWorkspaces(InputWorkspaces=groupZ,OutputWorkspace=fname+'_Contour')
@@ -759,17 +780,16 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 		if Verbose:
 			logger.notice('Output file for Fit : ' + fpath)
 			logger.notice('Output file for Contours : ' + cpath)
+
 	if (Plot != 'None'):
 		QuestPlot(fname,Plot)
 	EndTime('Quest')
 
 def QuestPlot(inputWS,Plot):
-	if (Plot == 'Sigma'):
-		sig_plot=mp.plotSpectrum(inputWS+'_Sigma',0,True)
-	if (Plot == 'Beta'):
-		beta_plot = mp.plotSpectrum(inputWS+'_Beta',0,True)
-	if(Plot == 'All'):
-		mp.plotSpectrum([inputWS+'_Sigma',inputWS+'_Beta'], 0, True)
+	if (Plot == 'Sigma' or Plot == 'All'):
+		sig_plot=mp.importMatrixWorkspace(inputWS+'_Sigma').plotGraph2D()
+	if (Plot == 'Beta' or Plot == 'All'):
+		beta_plot=mp.importMatrixWorkspace(inputWS+'_Beta').plotGraph2D()
 
 # ResNorm programs
 def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
@@ -840,6 +860,7 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	group = fname + '_ResNorm_Intensity,'+ fname + '_ResNorm_Stretch'
 	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_ResNorm')
 	GroupWorkspaces(InputWorkspaces='Data,Fit',OutputWorkspace=fname+'_ResNorm_Fit')
+	
 	if Save:
 		par_path = os.path.join(workdir,fname+'_ResNorm.nxs')
 		SaveNexusProcessed(InputWorkspace=fname+'_ResNorm', Filename=par_path)
@@ -848,6 +869,7 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 		if Verbose:
 			logger.notice('Parameter file created : ' + par_path)
 			logger.notice('Fit file created : ' + fit_path)
+
 	if (Plot != 'None'):
 		ResNormPlot(fname,Plot)
 	EndTime('ResNorm')

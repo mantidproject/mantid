@@ -105,7 +105,7 @@ void RangeSelectorTool::pointSelected(const QPoint &pos)
 	const int curve_key = d_graph->plotWidget()->closestCurve(pos.x(), pos.y(), dist, point);
 	if (curve_key < 0 || dist >= 5) // 5 pixels tolerance
 		return;
-	QwtPlotCurve *curve = (QwtPlotCurve *)d_graph->plotWidget()->curve(curve_key);
+	QwtPlotCurve *curve = static_cast<QwtPlotCurve *>(d_graph->plotWidget()->curve(curve_key));
 	if (!curve)
 		return;
 
@@ -151,7 +151,7 @@ void RangeSelectorTool::setActivePoint(int point)
 void RangeSelectorTool::emitStatusText()
 {
     QLocale locale = d_graph->plotWidget()->locale();
-    if (((PlotCurve *)d_selected_curve)->type() == Graph::Function){
+    if ((static_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function){
          emit statusText(QString("%1 <=> %2[%3]: x=%4; y=%5")
 			.arg(d_active_marker.xValue() > d_inactive_marker.xValue() ? tr("Right") : tr("Left"))
 			.arg(d_selected_curve->title().text())
@@ -159,17 +159,17 @@ void RangeSelectorTool::emitStatusText()
 			.arg(locale.toString(d_selected_curve->x(d_active_point), 'G', 16))
 			.arg(locale.toString(d_selected_curve->y(d_active_point), 'G', 16)));
     } else {
-        Table *t = ((DataCurve*)d_selected_curve)->table();
+        Table *t = (static_cast<DataCurve*>(d_selected_curve))->table();
         if (!t)
             return;
 
-        int row = ((DataCurve*)d_selected_curve)->tableRow(d_active_point);
+        int row = (static_cast<DataCurve*>(d_selected_curve))->tableRow(d_active_point);
 
         emit statusText(QString("%1 <=> %2[%3]: x=%4; y=%5")
 			.arg(d_active_marker.xValue() > d_inactive_marker.xValue() ? tr("Right") : tr("Left"))
 			.arg(d_selected_curve->title().text())
 			.arg(row + 1)
-			.arg(t->text(row, t->colIndex(((DataCurve*)d_selected_curve)->xColumnName())))
+			.arg(t->text(row, t->colIndex((static_cast<DataCurve*>(d_selected_curve))->xColumnName())))
 			.arg(t->text(row, t->colIndex(d_selected_curve->title().text()))));
     }
 }
@@ -283,14 +283,14 @@ void RangeSelectorTool::clearSelection()
     if (!d_selected_curve)
         return;
 
-    if (((PlotCurve *)d_selected_curve)->type() != Graph::Function){
-        Table *t = ((DataCurve*)d_selected_curve)->table();
+    if ((static_cast<PlotCurve *>(d_selected_curve))->type() != Graph::Function){
+        Table *t = (static_cast<DataCurve*>(d_selected_curve))->table();
         if (!t)
             return;
 
-		if (t->isReadOnlyColumn(t->colIndex(((DataCurve *)d_selected_curve)->xColumnName()))){
+		if (t->isReadOnlyColumn(t->colIndex((static_cast<DataCurve *>(d_selected_curve))->xColumnName()))){
     		QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
-        	tr("The column '%1' is read-only! Operation aborted!").arg(((DataCurve *)d_selected_curve)->xColumnName()));
+        	tr("The column '%1' is read-only! Operation aborted!").arg((static_cast<DataCurve *>(d_selected_curve))->xColumnName()));
 		return;
 		} else if (t->isReadOnlyColumn(t->colIndex(d_selected_curve->title().text()))){
     		QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
@@ -299,9 +299,9 @@ void RangeSelectorTool::clearSelection()
    		} 
 		
         int start_point = QMIN(d_active_point, d_inactive_point);
-        int start_row = ((DataCurve*)d_selected_curve)->tableRow(start_point);
+        int start_row = (static_cast<DataCurve*>(d_selected_curve))->tableRow(start_point);
         int end_point = QMAX(d_active_point, d_inactive_point);
-        int end_row = ((DataCurve*)d_selected_curve)->tableRow(end_point);
+        int end_row = (static_cast<DataCurve*>(d_selected_curve))->tableRow(end_point);
         int col = t->colIndex(d_selected_curve->title().text());
         bool ok_update = (end_point - start_point + 1) < d_selected_curve->dataSize() ? true : false;
         for (int i = start_row; i <= end_row; i++)
@@ -327,16 +327,16 @@ void RangeSelectorTool::pasteSelection()
 	if (text.isEmpty())
 		return;
 
-    if (((PlotCurve *)d_selected_curve)->type() == Graph::Function)
+    if ((static_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function)
         return;
 
-    Table *t = ((DataCurve*)d_selected_curve)->table();
+    Table *t = (static_cast<DataCurve*>(d_selected_curve))->table();
     if (!t)
         return;
 	
-	if (t->isReadOnlyColumn(t->colIndex(((DataCurve *)d_selected_curve)->xColumnName()))){
+	if (t->isReadOnlyColumn(t->colIndex((static_cast<DataCurve *>(d_selected_curve))->xColumnName()))){
     	QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
-        tr("The column '%1' is read-only! Operation aborted!").arg(((DataCurve *)d_selected_curve)->xColumnName()));
+        tr("The column '%1' is read-only! Operation aborted!").arg((static_cast<DataCurve *>(d_selected_curve))->xColumnName()));
 	return;
 	} else if (t->isReadOnlyColumn(t->colIndex(d_selected_curve->title().text()))){
     	QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
@@ -348,9 +348,9 @@ void RangeSelectorTool::pasteSelection()
 
 	QTextStream ts( &text, QIODevice::ReadOnly );
     int start_point = QMIN(d_active_point, d_inactive_point);
-    int start_row = ((DataCurve*)d_selected_curve)->tableRow(start_point);
+    int start_row = (static_cast<DataCurve*>(d_selected_curve))->tableRow(start_point);
     int end_point = QMAX(d_active_point, d_inactive_point);
-    int end_row = ((DataCurve*)d_selected_curve)->tableRow(end_point);
+    int end_row = (static_cast<DataCurve*>(d_selected_curve))->tableRow(end_point);
     int col = t->colIndex(d_selected_curve->title().text());
 
     int prec; char f;
@@ -391,8 +391,8 @@ void RangeSelectorTool::setCurveRange()
     if (!d_selected_curve)
         return;
 
-    if (((PlotCurve *)d_selected_curve)->type() != Graph::Function){
-        ((DataCurve*)d_selected_curve)->setRowRange(QMIN(d_active_point, d_inactive_point),
+    if ((static_cast<PlotCurve *>(d_selected_curve))->type() != Graph::Function){
+        (static_cast<DataCurve*>(d_selected_curve))->setRowRange(QMIN(d_active_point, d_inactive_point),
                                     QMAX(d_active_point, d_inactive_point));
         d_graph->updatePlot();
         d_graph->notifyChanges();

@@ -564,18 +564,13 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
   // the reference to X bins (the limits for each pixel in the horizontal direction)
   auto xvec = ws->dataX(spectrum_index);
 
-  double xpos; 
-  double diffx;
-  double distance;
-  double angle; 
-
   // for each pixel inside this row
   for (size_t i = 0; i< xvec.size()-1; i++){
 
-    xpos = (xvec[i] + xvec[i+1])/2.0; // the x position is the centre of the bins boundaries
-    diffx = xpos - centre_x; 
+    double xpos = (xvec[i] + xvec[i+1])/2.0; // the x position is the centre of the bins boundaries
+    double diffx = xpos - centre_x; 
     // calculate the distance => norm of pixel position - centre
-    distance = sqrt(pow(diffx, 2.0) + diffy_quad);
+    double distance = sqrt(pow(diffx, 2.0) + diffy_quad);
     
     // check if the distance is inside the ring
     if (distance < min_radius || distance > max_radius || distance == 0){
@@ -583,7 +578,7 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
       continue;
     }
     
-    angle = atan2(diffy, diffx);
+    double angle = atan2(diffy, diffx);
 
     // call fromAngleToBin (radians)
     bins_pos[i] = fromAngleToBin(angle, false); 

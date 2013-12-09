@@ -87,6 +87,9 @@ namespace IDA
     // Set any default values
     m_elwDblMng->setValue(m_elwProp["R1S"], -0.02);
     m_elwDblMng->setValue(m_elwProp["R1E"], 0.02);
+
+    m_elwDblMng->setValue(m_elwProp["R2S"], -0.24);
+    m_elwDblMng->setValue(m_elwProp["R2E"], -0.22);
   }
 
   void Elwin::run()
@@ -166,6 +169,9 @@ namespace IDA
         double res = params[0];
         m_elwDblMng->setValue(m_elwProp["R1S"], -res);
         m_elwDblMng->setValue(m_elwProp["R1E"], res);
+
+        m_elwDblMng->setValue(m_elwProp["R2S"], -10*res);
+        m_elwDblMng->setValue(m_elwProp["R2E"], -9*res);
       }
 
     }

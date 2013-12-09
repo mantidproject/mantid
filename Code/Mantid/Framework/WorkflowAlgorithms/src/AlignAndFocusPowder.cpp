@@ -537,11 +537,10 @@ namespace WorkflowAlgorithms
     if (ews)
     {
       size_t numhighevents = ews->getNumberEvents();
-      size_t numlowevents = 0;
       if (m_processLowResTOF)
       {
         EventWorkspace_sptr lowes = boost::dynamic_pointer_cast<EventWorkspace>(m_lowResW);
-        numlowevents = lowes->getNumberEvents();
+        size_t numlowevents = lowes->getNumberEvents();
         g_log.information() << "Number of high TOF events = " << numhighevents << "; "
                             << "Number of low TOF events = " << numlowevents << ".\n";
       }

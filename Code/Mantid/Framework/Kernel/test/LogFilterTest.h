@@ -203,6 +203,9 @@ public:
     filter.addFilter(*running);
     filter.addFilter(*period);
     TS_ASSERT_EQUALS(filter.data()->size(), 4);
+    delete p;
+    delete period;
+    delete running;
   }
 
   void testF3()

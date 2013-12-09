@@ -308,7 +308,7 @@ void FunctionDialog::acceptFunction()
 		parser.DefineVar("x", &x);
 		parser.SetExpr(formula.ascii());
 		parser.Eval();
-
+    // cppcheck-suppress unreadVariable
 		x=end;
 		parser.Eval();
 	}
@@ -389,7 +389,7 @@ void FunctionDialog::acceptParametric()
 		parser.DefineVar((boxParameter->text()).ascii(), &parameter);
 		parser.SetExpr(xformula.ascii());
 		parser.Eval();
-
+    // cppcheck-suppress unreadVariable
 		parameter=end;
 		parser.Eval();
 	}
@@ -406,7 +406,7 @@ void FunctionDialog::acceptParametric()
 		parser.DefineVar((boxParameter->text()).ascii(), &parameter);
 		parser.SetExpr(yformula.ascii());
 		parser.Eval();
-
+    // cppcheck-suppress unreadVariable
 		parameter=end;
 		parser.Eval();
 	}
@@ -487,7 +487,7 @@ void FunctionDialog::acceptPolar()
 		parser.DefineVar((boxPolarParameter->text()).ascii(), &parameter);
 		parser.SetExpr(rformula.ascii());
 		parser.Eval();
-
+    // cppcheck-suppress unreadVariable
 		parameter=end;
 		parser.Eval();
 	}
@@ -504,7 +504,7 @@ void FunctionDialog::acceptPolar()
 		parser.DefineVar((boxPolarParameter->text()).ascii(), &parameter);
 		parser.SetExpr(tformula.ascii());
 		parser.Eval();
-
+    // cppcheck-suppress unreadVariable
 		parameter=end;
 		parser.Eval();
 	}

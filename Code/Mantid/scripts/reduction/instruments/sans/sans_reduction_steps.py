@@ -750,46 +750,45 @@ class SampleGeomCor(ReductionStep):
         ORNL only divides by thickness, in the absolute scaling step
 
     """
-    def __init__(self, geometry):
-        """
-            Takes a reference to the sample geometry
-            @param geometry: A GetSampleGeom object to load the sample dimensions from
-            @raise TypeError: if an object of the wrong type is passed to it
-        """
-        super(SampleGeomCor, self).__init__()
+    def __init__(self):
+        self.volume = 1.0
 
-        if issubclass(geometry.__class__, GetSampleGeom):
-            self.geo = geometry
-        else:
-            raise TypeError, 'Sample geometry correction requires a GetSampleGeom object'
+    def calculate_volume(self, reducer):
+        geo = reducer.get_sample().geometry
+        assert( issubclass(geo.__class__, GetSampleGeom))
+
+        try:
+            if geo.shape == 'cylinder-axis-up':
+                # Volume = circle area * height
+                # Factor of four comes from radius = width/2
+                volume = geo.height*math.pi
+                volume *= math.pow(geo.width,2)/4.0
+            elif geo.shape == 'cuboid':
+                # Flat plate sample
+                volume = geo.width
+                volume *= geo.height*geo.thickness
+            elif geo.shape == 'cylinder-axis-along':
+                # Factor of four comes from radius = width/2
+                # Disc - where height is not used
+                volume = geo.thickness*math.pi
+                volume *= math.pow(geo.width, 2)/4.0
+            else:
+                raise NotImplemented('Shape "'+geo.shape+'" is not in the list of supported shapes')
+        except TypeError:
+            raise TypeError('Error calculating sample volume with width='+str(geo.width) + ' height='+str(geo.height) + 'and thickness='+str(geo.thickness)) 
+                
+        return volume
 
     def execute(self, reducer, workspace):
         """
             Divide the counts by the volume of the sample
         """
-
-        try:
-            if self.geo.shape == 'cylinder-axis-up':
-                # Volume = circle area * height
-                # Factor of four comes from radius = width/2
-                volume = self.geo.height*math.pi
-                volume *= math.pow(self.geo.width,2)/4.0
-            elif self.geo.shape == 'cuboid':
-                # Flat plate sample
-                volume = self.geo.width
-                volume *= self.geo.height*self.geo.thickness
-            elif self.geo.shape == 'cylinder-axis-along':
-                # Factor of four comes from radius = width/2
-                # Disc - where height is not used
-                volume = self.geo.thickness*math.pi
-                volume *= math.pow(self.geo.width, 2)/4.0
-            else:
-                raise NotImplemented('Shape "'+self.geo.shape+'" is not in the list of supported shapes')
-        except TypeError:
-            raise TypeError('Error calculating sample volume with width='+str(self._width) + ' height='+str(self._height) + 'and thickness='+str(self._thickness)) 
-        
-        ws = mtd[workspace]
-        ws /= volume
+        if not reducer.is_can():
+            # it calculates the volume for the sample and may or not apply to the can as well.
+            self.volume = self.calculate_volume(reducer)
+            
+        ws = mtd[str(workspace)]
+        ws /= self.volume
 
 class StripEndZeros(ReductionStep):
     # ISIS only

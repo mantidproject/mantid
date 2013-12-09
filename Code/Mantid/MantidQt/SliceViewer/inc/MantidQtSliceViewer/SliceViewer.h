@@ -99,7 +99,7 @@ public:
 
   /// Methods relating to peaks overlays.
   boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
-  void setPeaksWorkspaces(const QStringList& list); // For python binding
+  ProxyCompositePeaksPresenter* setPeaksWorkspaces(const QStringList& list); // For python binding
   void clearPeaksWorkspaces(); // For python binding
 
   /* -- Methods from implementation of ZoomablePeaksView. --*/
@@ -302,6 +302,8 @@ private:
 
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter>  m_peaksPresenter;
+
+  boost::shared_ptr<ProxyCompositePeaksPresenter> m_proxyPeaksPresenter;
 
   /// Pointer to widget used for peaks sliding.
   DimensionSliceWidget* m_peaksSliderWidget;

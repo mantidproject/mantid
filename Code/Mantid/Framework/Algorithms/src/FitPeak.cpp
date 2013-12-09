@@ -43,6 +43,9 @@
 
 #include "MantidAPI/MultiDomainFunction.h"
 
+#include "boost/algorithm/string.hpp"
+#include "boost/algorithm/string/trim.hpp"
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -105,7 +108,8 @@ namespace Algorithms
     declareProperty("WorkspaceIndex", 0, mustBeNonNegative, "Workspace index ");
 
     std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-    declareProperty("PeakFunctionType", "Gaussian", boost::make_shared<StringListValidator>(peakNames),
+    vector<string> peakFullNames = addFunctionParameterNames(peakNames);
+    declareProperty("PeakFunctionType", "", boost::make_shared<StringListValidator>(peakFullNames),
                     "Peak function type. ");
 
     declareProperty(new ArrayProperty<string>("PeakParameterNames"),
@@ -119,8 +123,11 @@ namespace Algorithms
 
     vector<string> bkgdtypes;
     bkgdtypes.push_back("Flat");
+    bkgdtypes.push_back("Flat (A0)");
     bkgdtypes.push_back("Linear");
+    bkgdtypes.push_back("Linear (A0, A1)");
     bkgdtypes.push_back("Quadratic");
+    bkgdtypes.push_back("Quadratic (A0, A1, A2)");
     declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
                     "Type of Background.");
 
@@ -178,6 +185,9 @@ namespace Algorithms
       Kernel::IValidator_sptr(new Kernel::StartsWithValidator(minimizerOptions)),
       "Minimizer to use for fitting. Minimizers available are \"Levenberg-Marquardt\", \"Simplex\","
                     "\"Conjugate gradient (Fletcher-Reeves imp.)\", \"Conjugate gradient (Polak-Ribiere imp.)\", \"BFGS\", and \"Levenberg-MarquardtMD\"");
+
+    declareProperty("CostFunctionValue", DBL_MAX, "Value of cost function of the fitted peak. ", Kernel::Direction::Output);
+
     return;
   }
 
@@ -212,56 +222,37 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Create functions from input properties
+  /** Add function's parameter names after peak function name
     */
-  void FitPeak::createFunctions()
+  std::vector<std::string> FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames)
   {
-    // Generate background function
-    string bkgdtype = getPropertyValue("BackgroundType");
-    // Fix the inconsistency in nameing the background
-    if (bkgdtype == "Flat" || bkgdtype == "Linear")
-      bkgdtype += "Background";
+    vector<string> vec_funcparnames;
 
-    m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
-          FunctionFactory::Instance().createFunction(bkgdtype));
-    g_log.debug() << "Created background function of type " << bkgdtype << "\n";
-
-    // Set background function parameter values
-    vector<string> vec_bkgdparnames = getProperty("BackgroundParameterNames");
-    vector<double> vec_bkgdparvalues = getProperty("BackgroundParameterValues");
-    if (vec_bkgdparnames.size() != vec_bkgdparvalues.size() || vec_bkgdparnames.size() == 0)
+    for (size_t i = 0; i < funcnames.size(); ++i)
     {
-      throw runtime_error("Input background properties' arrays are not correct!");
+      // Add original name in
+      vec_funcparnames.push_back(funcnames[i]);
+
+      // Add a full function name and parameter names in
+      IFunction_sptr tempfunc = FunctionFactory::Instance().createFunction(funcnames[i]);
+
+      stringstream parnamess;
+      parnamess << funcnames[i] << " (";
+      vector<string> funcpars = tempfunc->getParameterNames();
+      for (size_t j = 0; j < funcpars.size(); ++j)
+      {
+        parnamess << funcpars[j];
+        if (j != funcpars.size()-1)
+          parnamess << ", ";
+      }
+      parnamess << ")";
+
+      vec_funcparnames.push_back(parnamess.str());
     }
 
-    // Set parameter values
-    for (size_t i = 0; i < vec_bkgdparnames.size(); ++i)
-    {
-      m_bkgdFunc->setParameter(vec_bkgdparnames[i], vec_bkgdparvalues[i]);
-    }
-
-    // Generate peak function
-    string peaktype = getPropertyValue("PeakFunctionType");
-    m_peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(
-          FunctionFactory::Instance().createFunction(peaktype));
-    g_log.debug() << "Create peak function of type " << peaktype << "\n";
-
-    // Given by arrays
-    vector<string> vec_peakparnames = getProperty("PeakParameterNames");
-    vector<double> vec_peakparvalues = getProperty("PeakParameterValues");
-    if (vec_peakparnames.size() != vec_peakparvalues.size() || vec_peakparnames.size() == 0)
-    {
-      throw runtime_error("Input peak properties' arrays are not correct!");
-    }
-
-    // Set peak parameter values
-    for (size_t i = 0; i < vec_peakparnames.size(); ++i)
-    {
-      m_peakFunc->setParameter(vec_peakparnames[i], vec_peakparvalues[i]);
-    }
-
-    return;
+    return vec_funcparnames;
   }
+
 
   //----------------------------------------------------------------------------------------------
   /** Process input properties
@@ -328,10 +319,8 @@ namespace Algorithms
     i_minPeakX = getVectorIndex(vecX, m_minPeakX);
     i_maxPeakX = getVectorIndex(vecX, m_maxPeakX);
 
-    //
     m_fitBkgdFirst = getProperty("FitBackgroundFirst");
 
-    //
     m_outputRawParams = getProperty("RawParams");
 
     // Trying FWHM in a certain range
@@ -380,6 +369,128 @@ namespace Algorithms
     m_minimizer = getPropertyValue("Minimizer");
 
     return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Create functions from input properties
+    */
+  void FitPeak::createFunctions()
+  {
+    //=========================================================================
+    // Generate background function
+    //=========================================================================
+    // Get background type
+    string bkgdtyperaw = getPropertyValue("BackgroundType");
+    bool usedefaultbkgdparorder = false;
+    string bkgdtype = parseFunctionTypeFull(bkgdtyperaw, usedefaultbkgdparorder);
+
+    // FIXME - Fix the inconsistency in nameing the background
+    if (bkgdtype == "Flat" || bkgdtype == "Linear")
+      bkgdtype += "Background";
+
+    // Generate background function
+    m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
+          FunctionFactory::Instance().createFunction(bkgdtype));
+    g_log.debug() << "Created background function of type " << bkgdtype << "\n";
+
+    // Set background function parameter values
+    m_bkgdParameterNames = getProperty("BackgroundParameterNames");
+    if (usedefaultbkgdparorder && m_bkgdParameterNames.size() == 0)
+    {
+      m_bkgdParameterNames = m_bkgdFunc->getParameterNames();
+    }
+    else if (m_bkgdParameterNames.size() == 0)
+    {
+      throw runtime_error("In the non-default background parameter name mode, "
+                          "user must give out parameter names. ");
+    }
+
+    vector<double> vec_bkgdparvalues = getProperty("BackgroundParameterValues");
+    if (m_bkgdParameterNames.size() != vec_bkgdparvalues.size())
+    {
+      stringstream errss;
+      errss << "Input background properties' arrays are incorrect: # of parameter names = "
+            << m_bkgdParameterNames.size()
+            << ", # of parameter values = " << vec_bkgdparvalues.size() << "\n";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    // Set parameter values
+    for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i)
+    {
+      m_bkgdFunc->setParameter(m_bkgdParameterNames[i], vec_bkgdparvalues[i]);
+    }
+
+    //=========================================================================
+    // Generate peak function
+    //=========================================================================
+    string peaktypeprev = getPropertyValue("PeakFunctionType");
+    bool defaultparorder = true;
+    string peaktype = parseFunctionTypeFull(peaktypeprev, defaultparorder);
+    m_peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(
+          FunctionFactory::Instance().createFunction(peaktype));
+    g_log.debug() << "Create peak function of type " << peaktype << "\n";
+
+    // Peak parameters' names
+    m_peakParameterNames = getProperty("PeakParameterNames");
+    if (m_peakParameterNames.size() == 0)
+    {
+      if (defaultparorder)
+      {
+        // Use default peak parameter names' order
+        m_peakParameterNames = m_peakFunc->getParameterNames();
+      }
+      else
+      {
+        throw runtime_error("Peak parameter names' input is not in default mode. "
+                            "It cannot be left empty. ");
+      }
+    }
+
+    // Peak parameters' value
+    vector<double> vec_peakparvalues = getProperty("PeakParameterValues");
+    if (m_peakParameterNames.size() != vec_peakparvalues.size())
+    {
+      stringstream errss;
+      errss << "Input peak properties' arrays are incorrect: # of parameter names = "
+            << m_peakParameterNames.size()
+            << ", # of parameter values = " << vec_peakparvalues.size() << "\n";
+      throw runtime_error(errss.str());
+    }
+
+    // Set peak parameter values
+    for (size_t i = 0; i < m_peakParameterNames.size(); ++i)
+    {
+      m_peakFunc->setParameter(m_peakParameterNames[i], vec_peakparvalues[i]);
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Parse peak type from full peak type/parameter names string
+    */
+  std::string FitPeak::parseFunctionTypeFull(const std::string& fullstring, bool& defaultparorder)
+  {
+    string peaktype;
+
+    size_t n = std::count(fullstring.begin(), fullstring.end(), '(');
+    if (n > 0)
+    {
+      peaktype = fullstring.substr(0, fullstring.find("("));
+      boost::algorithm::trim(peaktype);
+      defaultparorder = true;
+    }
+    else
+    {
+      peaktype = fullstring;
+      defaultparorder = false;
+    }
+
+    return peaktype;
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -441,14 +552,18 @@ namespace Algorithms
     // Fit background
     m_bkgdFunc = fitBackground(m_bkgdFunc);
 
+    // print background function and original input workspace
+
     // Backup original data due to pure peak data to be made
-    backupOriginalData();
+    MatrixWorkspace_sptr purePeakWS = genPurePeakWS();
 
     // Make pure peak
-    makePurePeakWS();
+    makePurePeakWS(purePeakWS);
+
+    // print this pure workspace out;
 
     // Estimate the peak height
-    double est_peakheight = estimatePeakHeight(m_peakFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
+    double est_peakheight = estimatePeakHeight(m_peakFunc, purePeakWS, 0, 0, purePeakWS->readX(0).size()-1);
     m_peakFunc->setHeight(est_peakheight);
 
     // Calculate guessed FWHM
@@ -472,23 +587,19 @@ namespace Algorithms
                     << vec_FWHM[i] << "\n";
 
       // Fit
-      double rwp = fitPeakFunction(m_peakFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
+      double rwp = fitPeakFunction(m_peakFunc, purePeakWS, 0, m_minFitX, m_maxFitX);
 
       // Store result
       processNStoreFitResult(rwp,false);
     }
 
-    // Make a combo fit
-
-    // Get best fitting peak function
+    // Get best fitting peak function and Make a combo fit
     pop(m_bestPeakFunc, m_peakFunc);
-    g_log.information() << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString() << "\n";
 
-    // Recover the original Y value from pure peak data range
-    recoverOriginalData();
-
-    m_finalGoodnessValue = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
-    g_log.information() << "Final " << m_costFunction << " = " << m_finalGoodnessValue << "\n";
+    m_finalGoodnessValue = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex,
+                                                m_minFitX, m_maxFitX);
+    g_log.information() << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString()
+                        << "Final " << m_costFunction << " = " << m_finalGoodnessValue << "\n";
 
     return;
   }
@@ -572,28 +683,28 @@ namespace Algorithms
     TableWorkspace_sptr peaktablews = genOutputTableWS(m_peakFunc, m_fitErrorPeakFunc, m_bkgdFunc, m_fitErrorBkgdFunc);
     setProperty("ParameterTableWorkspace", peaktablews);
 
-    // Parameter vector
-    vector<string> vec_peaknames = getProperty("PeakParameterNames");
+    // Parameter vector    
     vector<double> vec_fitpeak;
-    for (size_t i = 0; i < vec_peaknames.size(); ++i)
+    for (size_t i = 0; i < m_peakParameterNames.size(); ++i)
     {
-      double value = m_peakFunc->getParameter(vec_peaknames[i]);
+      double value = m_peakFunc->getParameter(m_peakParameterNames[i]);
       vec_fitpeak.push_back(value);
     }
 
     setProperty("FittedPeakParameterValues", vec_fitpeak);
 
     // Background
-    vector<string> vec_bkgdnames = getProperty("BackgroundParameterNames");
     vector<double> vec_fitbkgd;
-
-    for (size_t i = 0; i < vec_bkgdnames.size(); ++i)
+    for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i)
     {
-      double value = m_bkgdFunc->getParameter(vec_bkgdnames[i]);
+      double value = m_bkgdFunc->getParameter(m_bkgdParameterNames[i]);
       vec_fitbkgd.push_back(value);
     }
 
     setProperty("FittedBackgroundParameterValues", vec_fitbkgd);
+
+    // Output chi^2 or Rwp
+    setProperty("CostFunctionValue", m_finalGoodnessValue);
 
     return;
   }
@@ -604,11 +715,10 @@ namespace Algorithms
     */
   IBackgroundFunction_sptr FitPeak::fitBackground(IBackgroundFunction_sptr bkgdfunc)
   {
-    // backkup
+    // Backkup
     map<string, double> errormap;
     push(bkgdfunc, m_bkupBkgdFunc, errormap);
 
-    std::vector<double> vec_bkgd;
     vector<double> vec_xmin(2);
     vector<double> vec_xmax(2);
     vec_xmin[0] = m_minFitX;
@@ -629,21 +739,21 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Make a pure peak WS in the fit window region from m_background_function
     */
-  void FitPeak::makePurePeakWS()
+  void FitPeak::makePurePeakWS(MatrixWorkspace_sptr purePeakWS)
   {
     // Calculate background
-    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
-    FunctionDomain1DVector domain(vecX.begin()+i_minFitX, vecX.begin()+i_maxFitX);
+    const MantidVec& vecX = purePeakWS->readX(0);
+    FunctionDomain1DVector domain(vecX);
     FunctionValues bkgdvalues(domain);
     m_bkgdFunc->function(domain, bkgdvalues);
 
     // Calculate pure background and put weight on peak if using Rwp
-    MantidVec& vecY = m_dataWS->dataY(m_wsIndex);
-    MantidVec& vecE = m_dataWS->dataE(m_wsIndex);
-    for (size_t i = i_minFitX; i < i_maxFitX; ++i)
+    MantidVec& vecY = purePeakWS->dataY(0);
+    MantidVec& vecE = purePeakWS->dataE(0);
+    for (size_t i = 0; i < vecY.size(); ++i)
     {
       double y = vecY[i];
-      y -= bkgdvalues[i-i_minFitX];
+      y -= bkgdvalues[i];
       if (y < 0.)
         y = 0.;
       vecY[i] = y;
@@ -761,6 +871,10 @@ namespace Algorithms
         push(m_bkgdFunc, m_bestBkgdFunc, m_fitErrorBkgdFunc);
       m_bestRwp = rwp;
     }
+    else if (!fitsuccess)
+    {
+      g_log.debug() << "Reason of fit's failure: " << failreason << "\n";
+    }
 
     return;
   }
@@ -875,9 +989,9 @@ namespace Algorithms
   /** Estimate the peak height from a set of data containing pure peaks
     */
   double FitPeak::estimatePeakHeight(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_sptr dataws,
-                                     size_t wsindex, double startx, double endx)
+                                     size_t wsindex, size_t ixmin, size_t ixmax)
   {
-    // Get current peak height
+    // Get current peak height: from current peak centre (previously setup)
     double peakcentre = peakfunc->centre();
     vector<double> svvec(1, peakcentre);
     FunctionDomain1DVector svdomain(svvec);
@@ -889,8 +1003,6 @@ namespace Algorithms
 
     // Get maximum peak value among
     const MantidVec& vecX = dataws->readX(wsindex);
-    size_t ixmin = getVectorIndex(vecX, startx);
-    size_t ixmax = getVectorIndex(vecX, endx);
 
     const MantidVec& vecY = dataws->readY(wsindex);
     double ymax = vecY[ixmin+1];
@@ -904,8 +1016,8 @@ namespace Algorithms
         iymax = i;
       }
     }
-    g_log.debug() << "Estimate-Peak-Height: Maximum Y value between " << startx << " and "
-                  << endx << " is "
+    g_log.debug() << "Estimate-Peak-Height: Maximum Y value between " << vecX[ixmin] << " and "
+                  << vecX[ixmax] << " is "
                   << ymax << " at X = " << vecX[iymax] << ".\n";
 
     // Compute new peak
@@ -941,18 +1053,18 @@ namespace Algorithms
     double goodness = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
     string errorreason;
     goodness = checkFittedPeak(peakfunc, goodness, errorreason);
+    if (errorreason.size() > 0)
+      g_log.notice() << "Error reason: " << errorreason << "\n";
 
     double goodness_final = DBL_MAX;
     if (goodness < goodness_init)
     {
       // Fit for composite function renders a better result
       goodness_final = goodness;
-      errorreason = "";
     }
     else if (goodness_init <= goodness && goodness_init < DBL_MAX)
     {
       goodness_final = goodness_init;
-      errorreason = "";
       g_log.information("Fit peak/background composite function FAILS to render a better solution.");
       pop(bkuppeakmap, peakfunc);
       pop(bkupbkgdmap, bkgdfunc);
@@ -994,31 +1106,26 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Backup original data from i_minFitX to i_maxFitX
+  /** Generate a new temporary workspace for removed background peak
     */
-  void FitPeak::backupOriginalData()
+  API::MatrixWorkspace_sptr FitPeak::genPurePeakWS()
   {
+    size_t size = i_maxFitX-i_minFitX+1;
+    MatrixWorkspace_sptr purePeakWS = WorkspaceFactory::Instance().create("Workspace2D",
+                                                                          1, size, size);
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
     const MantidVec& vecY = m_dataWS->readY(m_wsIndex);
     const MantidVec& vecE = m_dataWS->readE(m_wsIndex);
 
-    m_vecybkup.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
-    m_vecebkup.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
+    MantidVec& dataX = purePeakWS->dataX(0);
+    MantidVec& dataY = purePeakWS->dataY(0);
+    MantidVec& dataE = purePeakWS->dataE(0);
 
-    return;
-  }
+    dataX.assign(vecX.begin() + i_minFitX, vecX.begin() + i_maxFitX+1);
+    dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
+    dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
 
-  //----------------------------------------------------------------------------------------------
-  /** Backup original data from i_minFitX to i_maxFitX
-    */
-  void FitPeak::recoverOriginalData()
-  {
-    MantidVec& dataY = m_dataWS->dataY(m_wsIndex);
-    MantidVec& dataE = m_dataWS->dataE(m_wsIndex);
-
-    copy(m_vecybkup.begin(), m_vecybkup.end(), dataY.begin() + i_minFitX);
-    copy(m_vecebkup.begin(), m_vecebkup.end(), dataE.begin() + i_minFitX);
-
-    return;
+    return purePeakWS;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1044,9 +1151,7 @@ namespace Algorithms
     else
     {
       // Unfix all parameters
-      // FIXME - Remove this after 0-error is solved.
-      parnames = fitfunc->getParameterNames();
-      for (size_t i = 0; i < parnames.size(); ++i)
+      for (size_t i = 0; i < fitfunc->nParams(); ++i)
         fitfunc->unfix(i);
     }
 
@@ -1101,9 +1206,9 @@ namespace Algorithms
         fitfunc->unfix(i);
     }
 
-    g_log.information() << "FitSingleDomain Fitted-Function " << fitfunc->asString()
-                        << ": Fit-status = " << fitStatus
-                        << ", chi^2 = " << chi2 << ".\n";
+    g_log.debug() << "FitSingleDomain Fitted-Function " << fitfunc->asString()
+                  << ": Fit-status = " << fitStatus
+                  << ", chi^2 = " << chi2 << ".\n";
 
     return chi2;
   }
@@ -1159,7 +1264,7 @@ namespace Algorithms
     fit->setProperty("Minimizer", m_minimizer);
     fit->setProperty("CostFunction", "Least squares");
 
-    g_log.information() << "FitMultiDomain: Funcion " << funcmd->asString() << "\n";
+    g_log.debug() << "FitMultiDomain: Funcion " << funcmd->asString() << "\n";
 
     // Execute
     fit->execute();
@@ -1176,8 +1281,8 @@ namespace Algorithms
     if (fitStatus == "success")
     {
       chi2 = fit->getProperty("OutputChi2overDoF");
-      g_log.information() << "FitMultidomain: Successfully-Fitted Function " <<fitfunc->asString()
-                          << ", Chi^2 = "<< chi2 << "\n";
+      g_log.debug() << "FitMultidomain: Successfully-Fitted Function " <<fitfunc->asString()
+                    << ", Chi^2 = "<< chi2 << "\n";
     }
 
     return chi2;

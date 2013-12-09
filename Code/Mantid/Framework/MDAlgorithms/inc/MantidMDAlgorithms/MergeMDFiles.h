@@ -60,14 +60,11 @@ namespace MDAlgorithms
     /// Run the algorithm
     void exec();
 
-    template<typename MDE, size_t nd>
     void loadBoxData();
 
-    template<typename MDE, size_t nd>
-    void doExecByCloning(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+    void doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,const std::string &outputFile);
 
-    template<typename MDE, size_t nd>
-    void finalizeOutput(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr outWS);
+    void finalizeOutput(const std::string &outputFile);
 
 
     uint64_t loadEventsFromSubBoxes(API::IMDNode *TargetBox);
@@ -76,7 +73,13 @@ namespace MDAlgorithms
     MDEvents::MDBoxFlatTree m_BoxStruct;
     // the vector of box structures for contributing files components
     std::vector<MDEvents::MDBoxFlatTree> m_fileComponentsStructure;
-  public:
+  protected:
+    /// number of workspace dimensions
+    int m_nDims;
+    /// string describes type of the event, stored in the workspaces.
+    std::string m_MDEventType;
+
+    /// if the workspace is indeed file-based
     bool m_fileBasedTargetWS;
     /// Files to load
     std::vector<std::string> m_Filenames;

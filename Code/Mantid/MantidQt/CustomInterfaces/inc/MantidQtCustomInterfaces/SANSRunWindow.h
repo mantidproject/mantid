@@ -156,9 +156,9 @@ private:
   /// Create a mask string
   void addUserMaskStrings(QString & exec_script,const QString& importCommand,enum MaskType mType);
   /// Set geometry details
-  void setGeometryDetails(const QString & sample_logs, const QString & can_logs);
+  void setGeometryDetails();
   /// Set the SANS2D geometry
-  void setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const QString & logs, int wscode);
+  void setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode);
   /// Set LOQ geometry
   void setLOQGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode);
   /// Mark an error on a label
@@ -168,7 +168,7 @@ private:
   /// Run an assign command
   bool runAssign(int key, QString & logs);
   /// Load a scatter sample file or can run via Python objects using the passed Python command
-  bool assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const QString & assignFn, QString & logs);
+  bool assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const QString & assignFn);
   /// runs that contain only monitor counts can be direct or transmission runs
   bool assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWidgets::MWRunFiles & direct, const QString & assignFn);
   /// Get the detectors' names
@@ -257,6 +257,8 @@ private slots:
   void transSelectorChanged(int );
   void loadTransmissionSettings();
   
+  void handleSlicePushButton();
+
 private:
   /// used to specify the range of validation to do
   enum ValCheck
@@ -349,6 +351,8 @@ private:
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
   static Mantid::Kernel::Logger & g_centreFinderLog;
+
+  UserSubWindow * slicingWindow;
 
 };
 

@@ -5,10 +5,7 @@ This algorithm retrieves logged in users investigations data from the informatio
 *WIKI*/
 
 #include "MantidICat/CatalogMyDataSearch.h"
-#include "MantidAPI/CatalogFactory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidAPI/ICatalog.h"
+#include "MantidICat/CatalogAlgorithmHelper.h"
 
 namespace Mantid
 {
@@ -37,35 +34,10 @@ namespace Mantid
     /// Execution method.
     void CatalogMyDataSearch::exec()
     {
-
-
-      ICatalog_sptr catalog_sptr;
-      try
-      {
-        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
-      }
-      catch(Kernel::Exception::NotFoundError&)
-      {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
-      }
-      if(!catalog_sptr)
-      {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
-      }
-
-      API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      try
-      {
-        catalog_sptr->myData(outputws);
-      }
-      catch(std::runtime_error&)
-      {
-        setProperty("IsValid",false);
-        throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
-      }
+      // Create and use the catalog the user has specified in Facilities.xml
+      auto outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      CatalogAlgorithmHelper().createCatalog()->myData(outputws);
       setProperty("OutputWorkspace",outputws);
-
     }
-
   }
 }
