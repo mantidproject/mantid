@@ -99,12 +99,13 @@ void LoadParameterFile::exec()
   std::string filename = getPropertyValue("Filename");
 
   // Retrieve the parameter XML string from the properties
+  const Property * const parameterXMLProperty = getProperty("ParameterXML"); // to check whether it is default
   std::string parameterXML = getPropertyValue("ParameterXML");
 
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  execManually(false, filename, parameterXML, localWorkspace);
+  execManually(!parameterXMLProperty->isDefault(), filename, parameterXML, localWorkspace);
 }
 
 void LoadParameterFile::execManually(bool useString, std::string filename, std::string parameterXML,  Mantid::API::ExperimentInfo_sptr localWorkspace)
@@ -147,7 +148,7 @@ void LoadParameterFile::execManually(bool useString, std::string filename, std::
   }
 
   // Get pointer to root element
-  AutoPtr<Element> pRootElem = pDoc->documentElement();
+  Element* pRootElem = pDoc->documentElement();
   if ( !pRootElem->hasChildNodes() )
   {
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML Parameter file", filename);
