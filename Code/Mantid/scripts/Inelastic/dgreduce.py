@@ -508,6 +508,10 @@ def process_legacy_parameters(**kwargs) :
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
+        if key == 'hardmaskPlus': # legacy key defines other mask file here
+            params["hard_mask_file"] = value;
+            params["use_hard_mask_only"] = False;
+            
         else:
             params[key]=value;    
 
