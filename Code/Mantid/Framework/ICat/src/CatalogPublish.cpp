@@ -74,7 +74,7 @@ namespace Mantid
       {
         throw std::runtime_error(error.displayText());
       }
-      catch(Poco::Exception& e) {}
+      catch(Poco::Exception&) {}
     }
   }
 }
