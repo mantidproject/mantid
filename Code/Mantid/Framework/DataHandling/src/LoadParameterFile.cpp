@@ -102,6 +102,11 @@ void LoadParameterFile::exec()
   const Property * const parameterXMLProperty = getProperty("ParameterXML"); // to check whether it is default
   std::string parameterXML = getPropertyValue("ParameterXML");
 
+  // Check the two properties (at least one must be set)
+  if( filename.empty() && parameterXMLProperty->isDefault()){
+    throw Kernel::Exception::FileError("Either the Filename or ParameterXML property of LoadInstrument most be specified to load an IDF" , filename);
+  }
+
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
