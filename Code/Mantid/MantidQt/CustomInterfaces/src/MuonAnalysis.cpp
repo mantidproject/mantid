@@ -625,16 +625,9 @@ void MuonAnalysis::runLoadCurrent()
   }
 
   if ( !isGroupingSet() )
-  {
-    std::stringstream idstr;
-    idstr << "1-" << matrix_workspace->getNumberHistograms();
-    m_uiForm.groupTable->setItem(0, 0, new QTableWidgetItem("NoGroupingDetected"));
-    m_uiForm.groupTable->setItem(0, 1, new QTableWidgetItem(idstr.str().c_str()));
-    updateFrontAndCombo();
-  }
+    setDummyGrouping( matrix_workspace->getInstrument() );
 
-  if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
-    return;
+  groupLoadedWorkspace();
 
   // Populate instrument fields
   std::stringstream str;
@@ -823,9 +816,11 @@ void MuonAnalysis::groupTableChanged(int row, int column)
     }
   }
   whichGroupToWhichRow(m_uiForm, m_groupToRow);
-  applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped");
   updatePairTable();
   updateFrontAndCombo();
+  
+  if ( m_loaded && ! m_updating )
+    groupLoadedWorkspace();
 }
 
 
@@ -1194,39 +1189,68 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       }
     }
 
-    // Make the options available
-    m_optionTab->nowDataAvailable();
-
-    // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
-    Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
-    WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
+    // Get hold of a pointer to a matrix workspace
     MatrixWorkspace_sptr matrix_workspace;
-    int numPeriods = 1;   // 1 may mean either a group with one period or simply just 1 normal matrix workspace
-    if (wsPeriods)
-    {
-      numPeriods = wsPeriods->getNumberOfEntries();
+    int numPeriods;
 
-      Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
-      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
+    Workspace_sptr loadedWS = AnalysisDataService::Instance().retrieve(m_workspace_name);
+
+    if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
+    {
+      numPeriods = static_cast<int>( group->size() );
+      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
+    }
+    else 
+    {
+      numPeriods = 1;
+      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS);
+    }
+
+    if ( isGroupingSet() )
+    {
+      // If grouping set already - it means it wasn't reset and we can use it
+      g_log.information("Using custom grouping");
+      groupLoadedWorkspace();
     }
     else
     {
-      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+      setGroupingFromIDF( matrix_workspace->getInstrument(), mainFieldDirection );
+
+      if ( isGroupingSet() )
+      {
+        g_log.information("Using grouping loaded from IDF");
+        groupLoadedWorkspace();
+      }
+      else if ( loadedDetGrouping )
+      {
+        g_log.information("Using grouping loaded from Nexus file");
+
+        Workspace_sptr groupingWS = loadedDetGrouping.retrieve();
+        ITableWorkspace_sptr groupingTable;
+
+        if ( auto table = boost::dynamic_pointer_cast<ITableWorkspace>(groupingWS) )
+        {
+          groupingTable = table;
+        }
+        else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(groupingWS) )
+        {
+          g_log.information("Multi-period grouping loaded from the Nexus file. Using the first one.");
+          groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>( group->getItem(0) );
+        }
+
+        setGrouping(groupingTable);
+        groupLoadedWorkspace(groupingTable);
+      }
+      else 
+      {
+        g_log.information("Using dummy grouping");
+        setDummyGrouping( matrix_workspace->getInstrument() );
+        groupLoadedWorkspace();
+      }
     }
 
-    // if grouping not set, first see if grouping defined in Nexus
-    if ( !isGroupingSet() )
-      setGroupingFromNexus(files[0]);
-    // if grouping still not set, then take grouping from IDF
-    if ( !isGroupingSet() )
-      setGroupingFromIDF(mainFieldDirection, matrix_workspace);
-    // finally if nothing else works set dummy grouping and display
-    // message to user
-    if ( !isGroupingSet() )
-      setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size()));
-
-    if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
-      throw std::runtime_error("Couldn't apply grouping");
+    // Make the options available
+    m_optionTab->nowDataAvailable();
 
     // Populate instrument fields
     std::stringstream str;
