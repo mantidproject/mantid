@@ -69,7 +69,6 @@ class LatestISISRuns(object):
         if len(cached_cycle_keys) == 1:
             journal_path, cycle_dir_path = self.__cycleMap[self.__most_recent_cycle]
             parent_dir = os.path.abspath(os.path.join(cycle_dir_path,".."))
-            print parent_dir
             all_cycles_dirs = [d for d in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, d))] 
             return all_cycles_dirs
         return cached_cycle_keys
