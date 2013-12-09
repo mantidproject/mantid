@@ -532,11 +532,11 @@ public:
       TS_ASSERT_EQUALS( e1.size(), 16);
       TS_ASSERT_EQUALS( e2.size(), 16);
 
-      TS_ASSERT_EQUALS( e1[0], 0 );
-      TS_ASSERT_EQUALS( e1[15], 15);
+      TS_ASSERT_EQUALS( e1[0], 1 );
+      TS_ASSERT_EQUALS( e1[15], 16);
 
-      TS_ASSERT_EQUALS( e2[0], 16 );
-      TS_ASSERT_EQUALS( e2[15], 31 );
+      TS_ASSERT_EQUALS( e2[0], 17 );
+      TS_ASSERT_EQUALS( e2[15], 32 );
     }
 
     AnalysisDataService::Instance().remove(outWSName);
@@ -586,11 +586,11 @@ public:
         TS_ASSERT_EQUALS( e1.size(), 32);
         TS_ASSERT_EQUALS( e2.size(), 32);
 
-        TS_ASSERT_EQUALS( e1[0], 32 );
-        TS_ASSERT_EQUALS( e1[31], 63 );
+        TS_ASSERT_EQUALS( e1[0], 33 );
+        TS_ASSERT_EQUALS( e1[31], 64 );
 
-        TS_ASSERT_EQUALS( e2[0], 0 );
-        TS_ASSERT_EQUALS( e2[31], 31 );
+        TS_ASSERT_EQUALS( e2[0], 1 );
+        TS_ASSERT_EQUALS( e2[31], 32 );
       }
 
       TableWorkspace_sptr table2 = boost::dynamic_pointer_cast<TableWorkspace>( detectorGrouping->getItem(1) );
@@ -608,11 +608,11 @@ public:
         TS_ASSERT_EQUALS( e1.size(), 32);
         TS_ASSERT_EQUALS( e2.size(), 32);
 
-        TS_ASSERT_EQUALS( e1[0], 32 );
-        TS_ASSERT_EQUALS( e1[31], 63 );
+        TS_ASSERT_EQUALS( e1[0], 33 );
+        TS_ASSERT_EQUALS( e1[31], 64 );
 
-        TS_ASSERT_EQUALS( e2[0], 0 );
-        TS_ASSERT_EQUALS( e2[31], 31);
+        TS_ASSERT_EQUALS( e2[0], 1 );
+        TS_ASSERT_EQUALS( e2[31], 32);
 
       }
     }

@@ -38,6 +38,9 @@ public:
 
     MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace123(5,3);
 
+    for ( size_t i = 0; i < inWS->getNumberHistograms(); ++i )
+      inWS->getSpectrum(i)->setDetectorID( static_cast<detid_t>(i + 1) ); // To be consistent with how LoadMuonNexus works
+
     TableWorkspace_sptr grouping = createDetectorGroupingTable(); 
 
     MuonGroupDetectors alg;
@@ -71,11 +74,11 @@ public:
       TS_ASSERT_EQUALS( ws->getSpectrum(1)->getSpectrumNo(), 2);
 
       std::set<detid_t> d1;
-      d1.insert(0); d1.insert(1);
+      d1.insert(1); d1.insert(2);
       TS_ASSERT_EQUALS( ws->getSpectrum(0)->getDetectorIDs(), d1 );
 
       std::set<detid_t> d2;
-      d2.insert(2); d2.insert(3); d2.insert(4);
+      d2.insert(3); d2.insert(4); d2.insert(5);
       TS_ASSERT_EQUALS( ws->getSpectrum(1)->getDetectorIDs(), d2 );
     }
     
@@ -92,12 +95,12 @@ private:
     t->addColumn("vector_int", "Detectors");
 
     std::vector<int> group1;
-    group1.push_back(0); group1.push_back(1);
+    group1.push_back(1); group1.push_back(2);
     TableRow row1 = t->appendRow();
     row1 << group1;
 
     std::vector<int> group2;
-    group2.push_back(2); group2.push_back(3); group2.push_back(4);
+    group2.push_back(3); group2.push_back(4); group2.push_back(5);
     TableRow row2 = t->appendRow();
     row2 << group2;
 

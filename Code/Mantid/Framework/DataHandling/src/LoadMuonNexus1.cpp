@@ -635,7 +635,9 @@ namespace Mantid
 
       for ( auto it = begin; it != end; ++it )
       {
-        grouping[*it].push_back( static_cast<int>( std::distance(begin,it) ) );
+        // Add detector ID to the list of group detectors. Detector ID is always 
+        // spectra index + 1
+        grouping[*it].push_back( static_cast<int>( std::distance(begin,it) ) + 1 );
       }
 
       for ( auto it = grouping.begin(); it != grouping.end(); ++it )

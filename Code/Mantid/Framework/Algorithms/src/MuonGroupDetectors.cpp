@@ -104,17 +104,22 @@ namespace Algorithms
     // Compile the groups
     for ( auto rowIt = nonEmptyRows.begin(); rowIt != nonEmptyRows.end(); ++rowIt )
     {    
-      // Not "detectors" as such, but workspace indices. For Muons there is only one detector for
-      // workspace index in the data before grouping.
-      std::vector<int>& detectors = table->cell< std::vector<int> >(*rowIt, 0);
-
       // Group index in the output workspace
       size_t groupIndex = static_cast<size_t>( std::distance(nonEmptyRows.begin(), rowIt) );
+
+      std::vector<int>& detectorIDs = table->cell< std::vector<int> >(*rowIt, 0);
+
+      // Recieve detector IDs, but need workspace indices to group, so convert
+      std::vector<size_t> wsIndices;
+      inWS->getIndicesFromDetectorIDs(detectorIDs, wsIndices);
+
+      if ( wsIndices.size() != detectorIDs.size() )
+        throw std::invalid_argument("Some of the detector IDs were not found");
 
       // We will be setting them anew
       outWS->getSpectrum(groupIndex)->clearDetectorIDs();
 
-      for(auto detIt = detectors.begin(); detIt != detectors.end(); detIt++)
+      for(auto detIt = wsIndices.begin(); detIt != wsIndices.end(); detIt++)
       {
         for( size_t i = 0; i < inWS->blocksize(); ++i )
         {
@@ -131,7 +136,7 @@ namespace Algorithms
       }
 
       // Using the first detector X values
-      outWS->dataX(groupIndex) = inWS->dataX(detectors.front());
+      outWS->dataX(groupIndex) = inWS->dataX(wsIndices.front());
 
       outWS->getSpectrum(groupIndex)->setSpectrumNo( static_cast<specid_t>(groupIndex + 1) );
     }
