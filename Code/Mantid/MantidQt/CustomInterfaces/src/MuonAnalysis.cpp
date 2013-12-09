@@ -1053,7 +1053,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     std::string mainFieldDirection("");
     double timeZero(0.0);
     double firstGoodData(0.0);
+
     ScopedWorkspace loadedDeadTimes;
+    ScopedWorkspace loadedDetGrouping;
 
     for (int i=0; i<files.size(); ++i)
     {
@@ -1092,19 +1094,23 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       // Setup Load Nexus Algorithm
       Mantid::API::IAlgorithm_sptr loadMuonAlg = Mantid::API::AlgorithmManager::Instance().create("LoadMuonNexus");
       loadMuonAlg->setPropertyValue("Filename", filename.toStdString() );
-      loadMuonAlg->setPropertyValue("DeadTimeTable", loadedDeadTimes.name());
+      loadMuonAlg->setProperty("AutoGroup", false);
 
-      if (i > 0)
+      if ( i == 0 )
+      {
+        // Get dead times/grouping from first file only
+        loadMuonAlg->setPropertyValue( "DeadTimeTable", loadedDeadTimes.name() );
+        loadMuonAlg->setPropertyValue( "DetectorGroupingTable", loadedDetGrouping.name() );
+
+        loadMuonAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
+      }
+      else
       {
         QString tempRangeNum;
         tempRangeNum.setNum(i);
         loadMuonAlg->setPropertyValue("OutputWorkspace", m_workspace_name + tempRangeNum.toStdString() );
       }
-      else
-      {
-        loadMuonAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
-      }
-      loadMuonAlg->setProperty("AutoGroup", false);
+
       if (loadMuonAlg->execute() )
       {
         
