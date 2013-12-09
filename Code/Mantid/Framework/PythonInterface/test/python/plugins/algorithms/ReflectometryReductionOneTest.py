@@ -17,13 +17,16 @@ def make_decorator(algorithm_to_decorate):
             self.__alg_subject = alg_subject
             self.__parameters__ = dict()
         
-        def execute(self, verbose=False):
+        def execute(self, additional=None, verbose=False):
             if verbose:
                 print "Algorithm Parameters:"
                 print self.__parameters__
                 print 
             out = self.__alg_subject(**self.__parameters__)
             return out
+        
+        def set_additional(self, additional):
+            self.__parameters__.update(**additional)
 
     def add_getter_setter(type, name):
         
@@ -63,6 +66,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_MonitorBackgroundWavelengthMax(1.0)
         alg.set_MonitorIntegrationWavelengthMin(0.0)
         alg.set_MonitorIntegrationWavelengthMax(1.0)
+        alg.set_additional({'OutputWorkspaceWavelength': 'out_ws_wav'})
         return alg
     
     def setUp(self):
@@ -75,6 +79,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         DeleteWorkspace(self.__tof)
         DeleteWorkspace(self.__not_tof)
     
+    
     def test_check_input_workpace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_InputWorkspace(self.__not_tof)
@@ -84,15 +89,6 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg = self.construct_standard_algorithm()
         alg.set_FirstTransmissionRun(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)
-        
-    ''' TODO: Need to check that the following rule is valid. If not, which spectra do we use?
-    def test_first_transmission_workspace_not_single_spectra_throws(self):
-        alg = self.construct_standard_algorithm()
-        two_spectra = CreateWorkspace(UnitX="TOF", DataX=[0,0,0,0], DataY=[0,0], NSpec=2)
-        alg.set_FirstTransmissionRun(two_spectra)
-        self.assertRaises(ValueError, alg.execute)
-        DeleteWorkspace(two_spectra)
-    '''
         
     def test_check_second_transmission_workspace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
@@ -224,13 +220,20 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_InputWorkspace(real_run)
         alg.set_WorkspaceIndexList([3,4])
         alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
-        out_ws = alg.execute()
+        alg.set_Theta(0.2)
         
-        self.assertTrue(isinstance(out_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
+        out_ws_q, out_ws_lam = alg.execute()
         
-        self.assertEqual(2, out_ws.getNumberHistograms())
+        self.assertTrue(isinstance(out_ws_lam, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("Wavelength", out_ws_lam.getAxis(0).getUnit().unitID())
+        
+        self.assertTrue(isinstance(out_ws_q, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("MomentumTransfer", out_ws_q.getAxis(0).getUnit().unitID())
+        
+        self.assertEqual(2, out_ws_lam.getNumberHistograms())
         DeleteWorkspace(real_run)
+    
+    
         
     def test_point_detector_run_with_two_transmission_workspaces(self):
         alg = self.construct_standard_algorithm()
@@ -245,13 +248,18 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_Params([1.5, 0.02, 17])
         alg.set_StartOverlapQ( 10.0 )
         alg.set_EndOverlapQ( 12.0 )
+        alg.set_Theta(0.2)
         
-        out_ws = alg.execute()
+        out_ws_q, out_ws_lam = alg.execute()
         
-        self.assertTrue(isinstance(out_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
+        self.assertTrue(isinstance(out_ws_lam, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("Wavelength", out_ws_lam.getAxis(0).getUnit().unitID())
         
-        self.assertEqual(2, out_ws.getNumberHistograms())
+        self.assertTrue(isinstance(out_ws_q, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("MomentumTransfer", out_ws_q.getAxis(0).getUnit().unitID())
+        
+        
+        self.assertEqual(2, out_ws_lam.getNumberHistograms())
         DeleteWorkspace(real_run)
         DeleteWorkspace(trans_run1)
         DeleteWorkspace(trans_run2)

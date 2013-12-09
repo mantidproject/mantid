@@ -174,7 +174,9 @@ namespace Mantid
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
           "Wavelength maximum for integration in angstroms. Taken to be WavelengthMax if not provided.");
 
-      declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "Output Workspace IvsQ.");
+
+      declareProperty(new WorkspaceProperty<>("OutputWorkspaceWavelength", "", Direction::Output), "Output Workspace IvsLam. Intermediate workspace.");
 
       declareProperty(new PropertyWithValue<double>("Theta", -1, Direction::Input),
                 "Final theta value.");
@@ -763,6 +765,8 @@ namespace Mantid
       auto detectorWS = inLam.get<0>();
       auto monitorWS = inLam.get<1>();
 
+      MatrixWorkspace_sptr IvsLam; // Output workspace
+      MatrixWorkspace_sptr IvsQ; // Output workspace
       if(isPointDetector)
       {
         if(firstTransmissionRun.is_initialized())
@@ -775,17 +779,18 @@ namespace Mantid
           integrationAlg->execute();
           MatrixWorkspace_sptr integratedMonitor =  integrationAlg->getProperty("OutputWorkspace");
 
-          MatrixWorkspace_sptr IvsLam = detectorWS / integratedMonitor; // Normalize by the integrated monitor counts.
+          IvsLam = detectorWS / integratedMonitor; // Normalize by the integrated monitor counts.
 
           // Perform transmission correction.
-          detectorWS = transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
+          IvsLam = this->transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
               i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
 
           // Now, if a theta value has been provided we just run the toLam
+          IvsQ = this->toIvsQ(IvsLam, true /*HACK*/, isPointDetector, theta.get());
 
-          // If no theta value has been provided, we attempt to calculate it given the detector position and sample poition, and then just run run the convert units portion (no point in doing position corrections)
+          // TODO: If no theta value has been provided, we attempt to calculate it given the detector position and sample poition, and then just run run the convert units portion (no point in doing position corrections)
 
-          // ... and that's it for the point detector processing! just return the value in wavelength.
+
 
         }
         else
@@ -799,7 +804,8 @@ namespace Mantid
       }
 
 
-      setProperty("OutputWorkspace", detectorWS);
+      setProperty("OutputWorkspaceWavelength", IvsLam);
+      setProperty("OutputWorkspace", IvsQ);
 
     }
 
