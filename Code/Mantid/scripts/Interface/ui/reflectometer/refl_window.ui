@@ -71,9 +71,15 @@
       </item>
       <item>
        <widget class="QLineEdit" name="textRB">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>55</width>
+          <width>70</width>
           <height>16777215</height>
          </size>
         </property>
@@ -91,9 +97,15 @@
       </item>
       <item>
        <widget class="QLineEdit" name="textRuns">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>120</width>
           <height>16777215</height>
          </size>
         </property>

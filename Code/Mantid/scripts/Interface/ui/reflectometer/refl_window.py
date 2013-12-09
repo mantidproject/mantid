@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Mon Dec 09 15:11:43 2013
+# Created: Mon Dec 09 16:38:16 2013
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,7 +47,8 @@ class Ui_windowRefl(object):
         self.labelRB.setObjectName(_fromUtf8("labelRB"))
         self.layoutTopRow.addWidget(self.labelRB)
         self.textRB = QtGui.QLineEdit(self.widgetMainRow)
-        self.textRB.setMaximumSize(QtCore.QSize(55, 16777215))
+        self.textRB.setMinimumSize(QtCore.QSize(40, 0))
+        self.textRB.setMaximumSize(QtCore.QSize(70, 16777215))
         self.textRB.setCursorPosition(0)
         self.textRB.setObjectName(_fromUtf8("textRB"))
         self.layoutTopRow.addWidget(self.textRB)
@@ -55,7 +56,8 @@ class Ui_windowRefl(object):
         self.labelRuns.setObjectName(_fromUtf8("labelRuns"))
         self.layoutTopRow.addWidget(self.labelRuns)
         self.textRuns = QtGui.QLineEdit(self.widgetMainRow)
-        self.textRuns.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.textRuns.setMinimumSize(QtCore.QSize(90, 0))
+        self.textRuns.setMaximumSize(QtCore.QSize(120, 16777215))
         self.textRuns.setObjectName(_fromUtf8("textRuns"))
         self.layoutTopRow.addWidget(self.textRuns)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
