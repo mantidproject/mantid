@@ -1468,7 +1468,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         throw std::runtime_error("Muon file " + filename.toStdString() + " not recognised.");
 
       // Setup Load Nexus Algorithm
-      Mantid::API::IAlgorithm_sptr loadMuonAlg = Mantid::API::AlgorithmManager::Instance().create("LoadMuonNexus");
+      Mantid::API::IAlgorithm_sptr loadMuonAlg = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
+      loadMuonAlg->initialize();
+      loadMuonAlg->setLogging(false);
       loadMuonAlg->setPropertyValue("Filename", filename.toStdString() );
       loadMuonAlg->setProperty("AutoGroup", false);
 
@@ -1607,6 +1609,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         g_log.information("Using grouping loaded from Nexus file");
 
         Workspace_sptr groupingWS = loadedDetGrouping.retrieve();
+        loadedDetGrouping.remove(); // Don't need it in the ADS any more
+
         ITableWorkspace_sptr groupingTable;
 
         if ( auto table = boost::dynamic_pointer_cast<ITableWorkspace>(groupingWS) )
@@ -3587,25 +3591,19 @@ void MuonAnalysis::groupLoadedWorkspace(ITableWorkspace_sptr detGroupingTable)
     detGroupingTable = groupingFromUI;
   }
 
+  // Make sure grouping table is in the ADS
+  ScopedWorkspace table(detGroupingTable);
+
   try
   {
     IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors"); 
     groupAlg->initialize();
+    groupAlg->setLogging(false); // Don't want to clutter the log
     groupAlg->setRethrows(true);
     groupAlg->setPropertyValue("InputWorkspace", m_workspace_name);
     groupAlg->setPropertyValue("OutputWorkspace", m_grouped_name);
-
-    if ( detGroupingTable->name().empty() )
-    {
-      ScopedWorkspace table(detGroupingTable);
-      groupAlg->setPropertyValue("DetectorGroupingTable", table.name());
-      groupAlg->execute();
-    }
-    else
-    {
-      groupAlg->setPropertyValue("DetectorGroupingTable", detGroupingTable->name());
-      groupAlg->execute();
-    }
+    groupAlg->setPropertyValue("DetectorGroupingTable", table.name());
+    groupAlg->execute();
   }
   catch(std::exception& e)
   {
