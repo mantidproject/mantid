@@ -366,20 +366,6 @@ namespace Crystal
     out.flush();
     out.close();
 
-//    //REMOVE:
-//    std::string line;
-//    std::ifstream myfile (filename.c_str());
-//    if (myfile.is_open())
-//    {
-//      while ( myfile.good() )
-//      {
-//        getline (myfile,line);
-//        std::cout << line << std::endl;
-//      }
-//      myfile.close();
-//    }
-
-
   }
 
   V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row)
@@ -431,10 +417,12 @@ namespace Crystal
           asmb2->getChildren(grandchildren,false);
           NROWS = static_cast<int>(grandchildren.size());
           NCOLS = static_cast<int>(children.size());
-          //Geometry::IComponent_const_sptr first = children[0];
-          //Geometry::IComponent_const_sptr last = children[NCOLS-1];
-          //xsize = (first.getPos() - last.getPos()).norm();
-          //ysize = (grandchildren[0].getPos() - grandchildren[NROWS-1].getPos()).norm();
+          Geometry::IComponent_const_sptr first = children[0];
+          Geometry::IComponent_const_sptr last = children[NCOLS-1];
+          xsize = first->getDistance(*last);
+          first = grandchildren[0];
+          last = grandchildren[NROWS-1];
+          ysize = first->getDistance(*last);
 	  }
   }
 
