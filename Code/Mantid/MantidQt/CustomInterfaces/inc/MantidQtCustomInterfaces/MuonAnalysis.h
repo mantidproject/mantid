@@ -247,9 +247,6 @@ private:
   void createPlotWS(const std::string& groupName, 
                     const std::string& inputWS, const std::string& outWS);
 
-  /// Apply whatever grouping is specified in GUI tables to workspace
-  bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
-
   /// Update front 
   void updateFront();
 
@@ -398,10 +395,6 @@ private:
 
   /// Get the new plot name
   QString getNewPlotName(const QString & cropWSfirstPart);
-
-  /// set grouping in table from information from nexus raw file
-  void setGroupingFromNexus(const QString& nexusFile); 
-
 
   /// title of run
   std::string m_title;
