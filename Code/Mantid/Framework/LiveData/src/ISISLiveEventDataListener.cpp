@@ -13,10 +13,6 @@
 
 #include "LoadDAE/idc.h"
 
-// Time we'll wait on a receive call (in seconds)
-const long RECV_TIMEOUT = 30;
-// Sleep time in case we need to wait for the data to become available (in milliseconds)
-const long RECV_WAIT = 100;
 const char* PROTON_CHARGE_PROPERTY = "proton_charge";
 const char* RUN_NUMBER_PROPERTY = "run_number";
 
@@ -340,7 +336,7 @@ void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutr
 {
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
-    if ( period >= m_numberOfPeriods )
+    if ( period >= static_cast<size_t>(m_numberOfPeriods) )
     {
       period = 0;
     }
