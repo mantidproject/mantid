@@ -46,7 +46,10 @@ namespace Mantid
         /// Log the user out of the catalog system.
         virtual void logout();
         /// Search the catalog for data.
-        virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws);
+        virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws,
+            const int &offset, const int &limit);
+        /// Obtain the number of results returned by the search method.
+        virtual int64_t getNumberOfSearchResults(const CatalogSearchParam& inputs);
         /// Show the logged in user's investigations search results.
         virtual void myData(Mantid::API::ITableWorkspace_sptr& outputws);
         /// Get datasets.
@@ -74,7 +77,7 @@ namespace Mantid
         // Saves "MyData" query result to output workspace.
         void saveInvestigations(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Creates a search query string based on inputs provided by the user.
-        std::string getSearchQuery(const CatalogSearchParam& inputs);
+        std::string buildSearchQuery(const CatalogSearchParam& inputs);
         // Saves "DataFiles" result to output workspace.
         void saveDataFiles(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Saves "DataSets" information to the output workspace.

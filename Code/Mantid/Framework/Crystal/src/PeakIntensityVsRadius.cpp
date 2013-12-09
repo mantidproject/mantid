@@ -113,13 +113,6 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::Input),
         "The list of peaks to integrate, matching the InputWorkspace.");
 
-    std::vector<std::string> propOptions;
-    propOptions.push_back("Q (lab frame)");
-    propOptions.push_back("Q (sample frame)");
-    propOptions.push_back("HKL");
-    declareProperty("CoordinatesToUse", "Q (lab frame)", boost::make_shared<StringListValidator>(propOptions),
-    		"Deprecated:  algorithm uses the InputWorkspace's coordinates.");
-
     declareProperty("RadiusStart", 0.0, "Radius at which to start integrating." );
     declareProperty("RadiusEnd", 1.0, "Radius at which to stop integrating." );
     declareProperty("NumSteps", 10, "Number of steps, between start and end, to calculate radius." );
@@ -235,7 +228,6 @@ namespace Crystal
       IAlgorithm_sptr alg = this->createChildAlgorithm("IntegratePeaksMD", progStep*double(step), progStep*double(step+1), false);
       alg->setProperty("InputWorkspace", inWS);
       alg->setProperty("PeaksWorkspace", peaksWS);
-      alg->setPropertyValue("CoordinatesToUse", this->getPropertyValue("CoordinatesToUse"));
       alg->setProperty("PeakRadius", radius);
       alg->setProperty("BackgroundOuterRadius", OuterRadius);
       alg->setProperty("BackgroundInnerRadius", InnerRadius);

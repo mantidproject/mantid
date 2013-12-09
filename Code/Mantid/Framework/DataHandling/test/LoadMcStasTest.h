@@ -14,6 +14,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h" 
 #include "MantidDataHandling/LoadInstrument.h" 
 #include <Poco/Path.h>
+#include <Poco/TemporaryFile.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -50,6 +51,13 @@ public:
     // specify name of file to load workspace from
     inputFile = "mcstas_event_hist.h5";
     algToBeTested.setPropertyValue("Filename", inputFile);
+
+    // mark the temp file to be deleted upon end of execution
+    { // limit variable scope
+      std::string tempFile = algToBeTested.getPropertyValue("Filename");
+      tempFile = tempFile.substr(0, tempFile.size()-2) + "vtp";
+      Poco::TemporaryFile::registerForDeletion(tempFile);
+    }
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
     TS_ASSERT( algToBeTested.isExecuted() );

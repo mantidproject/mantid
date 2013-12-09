@@ -16,7 +16,7 @@ from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
                          getFilePathFromWorkspace, getWorkspaceReference,
-                         getMonitor4event)
+                         getMonitor4event, slice2histogram)
 import isis_instrument
 import os
 import math
@@ -87,6 +87,25 @@ class LoadRun(object):
             return self._wksp_name
   
     wksp_name = property(get_wksp_name, None, None, None)
+
+    def _load_transmission(self, inst=None, is_can=False, extra_options=dict()):
+        if '.raw' in self._data_file or '.RAW' in self._data_file:
+            self._load(inst, is_can, extra_options)
+            return
+      
+        workspace = self._get_workspace_name()
+
+        # For sans, in transmission, we care only about the monitors. Hence,
+        # by trying to load only the monitors we speed up the reduction process. 
+        # besides, we avoid loading events which is uselles for transmission. 
+        # it may fail, if the input file was not a nexus file, in this case, 
+        # it pass the job to the default _load method.
+        try:
+            outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
+            self.periods_in_file = 1
+            self._wksp_name = workspace
+        except:
+            self._load(inst, is_can, extra_options)
 
     def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
@@ -218,9 +237,16 @@ class LoadRun(object):
                 spec_min = dimension*dimension*2
                 spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
 
-        try:
-            # the spectrum_limits is not the default only for transmission data
-            self._load(reducer.instrument, extra_options=spectrum_limits)
+        try:            
+            if self._is_trans and reducer.instrument.name() != 'LOQ':
+                # Unfortunatelly, LOQ in transmission acquire 3 monitors the 3 monitor usually
+                # is the first spectrum for detector. This causes the following method to fail
+                # when it tries to load only monitors. Hence, we are forced to skip this method
+                # for LOQ. ticket #8559
+                self._load_transmission(reducer.instrument, extra_options=spectrum_limits)
+            else:
+                # the spectrum_limits is not the default only for transmission data
+                self._load(reducer.instrument, extra_options=spectrum_limits)
         except RuntimeError, details:
             sanslog.warning(str(details))
             self._wksp_name = ''
@@ -1589,9 +1615,15 @@ class SliceEvent(ReductionStep):
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
             return
-        self.monitor = getMonitor4event(ws_pointer)
-        hist = fromEvent2Histogram(ws_pointer, self.monitor)
-        self.monitor = str(self.monitor)
+        start, stop = reducer.getCurrSliceLimit()
+        
+        _monitor = getMonitor4event(ws_pointer)
+
+        hist, others = slice2histogram(ws_pointer, start, stop, _monitor)
+        
+        # get the monitors scaled for the sliced event
+        self.monitor = '_scaled_monitor'
+        CropWorkspace(hist, EndWorkspaceIndex=_monitor.getNumberHistograms()-1, OutputWorkspace=self.monitor)
 
 class UserFile(ReductionStep):
     """
