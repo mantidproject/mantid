@@ -519,26 +519,15 @@ public:
 
     if ( detectorGrouping )
     {
-      TS_ASSERT_EQUALS( detectorGrouping->columnCount(), 3 );
+      TS_ASSERT_EQUALS( detectorGrouping->columnCount(), 1 );
       TS_ASSERT_EQUALS( detectorGrouping->rowCount(), 2 );
 
-      TS_ASSERT_EQUALS( detectorGrouping->getColumn(0)->type(), "str" );
-      TS_ASSERT_EQUALS( detectorGrouping->getColumn(1)->type(), "str" );
-      TS_ASSERT_EQUALS( detectorGrouping->getColumn(2)->type(), "vector_int" );
-
-      TS_ASSERT_EQUALS( detectorGrouping->getColumn(0)->name(), "ItemType" );
-      TS_ASSERT_EQUALS( detectorGrouping->getColumn(1)->name(), "ItemName" );
-      TS_ASSERT_EQUALS( detectorGrouping->getColumn(2)->name(), "Elements" );
-
-      TS_ASSERT_EQUALS( detectorGrouping->cell<std::string>(0,0), "Group" );
-      TS_ASSERT_EQUALS( detectorGrouping->cell<std::string>(1,0), "Group" );
-
-      TS_ASSERT_EQUALS( detectorGrouping->cell<std::string>(0,1), "1" );
-      TS_ASSERT_EQUALS( detectorGrouping->cell<std::string>(1,1), "2" );
+      TS_ASSERT_EQUALS( detectorGrouping->getColumn(0)->type(), "vector_int" );
+      TS_ASSERT_EQUALS( detectorGrouping->getColumn(0)->name(), "Detectors" );
 
       std::vector<int> e1, e2;
-      TS_ASSERT_THROWS_NOTHING( e1 = detectorGrouping->cell< std::vector<int> >(0,2) );
-      TS_ASSERT_THROWS_NOTHING( e2 = detectorGrouping->cell< std::vector<int> >(1,2) );
+      TS_ASSERT_THROWS_NOTHING( e1 = detectorGrouping->cell< std::vector<int> >(0,0) );
+      TS_ASSERT_THROWS_NOTHING( e2 = detectorGrouping->cell< std::vector<int> >(1,0) );
 
       TS_ASSERT_EQUALS( e1.size(), 16);
       TS_ASSERT_EQUALS( e2.size(), 16);
@@ -587,12 +576,12 @@ public:
 
       if ( table1 )
       {
-        TS_ASSERT_EQUALS( table1->columnCount(), 3 );
+        TS_ASSERT_EQUALS( table1->columnCount(), 1 );
         TS_ASSERT_EQUALS( table1->rowCount(), 2 );
 
         std::vector<int> e1, e2;
-        TS_ASSERT_THROWS_NOTHING( e1 = table1->cell< std::vector<int> >(0,2) );
-        TS_ASSERT_THROWS_NOTHING( e2 = table1->cell< std::vector<int> >(1,2) );
+        TS_ASSERT_THROWS_NOTHING( e1 = table1->cell< std::vector<int> >(0,0) );
+        TS_ASSERT_THROWS_NOTHING( e2 = table1->cell< std::vector<int> >(1,0) );
 
         TS_ASSERT_EQUALS( e1.size(), 32);
         TS_ASSERT_EQUALS( e2.size(), 32);
@@ -609,12 +598,12 @@ public:
 
       if ( table2 )
       {
-        TS_ASSERT_EQUALS( table2->columnCount(), 3 );
+        TS_ASSERT_EQUALS( table2->columnCount(), 1 );
         TS_ASSERT_EQUALS( table2->rowCount(), 2 );
 
         std::vector<int> e1, e2;
-        TS_ASSERT_THROWS_NOTHING( e1 = table2->cell< std::vector<int> >(0,2) );
-        TS_ASSERT_THROWS_NOTHING( e2 = table2->cell< std::vector<int> >(1,2) );
+        TS_ASSERT_THROWS_NOTHING( e1 = table2->cell< std::vector<int> >(0,0) );
+        TS_ASSERT_THROWS_NOTHING( e2 = table2->cell< std::vector<int> >(1,0) );
 
         TS_ASSERT_EQUALS( e1.size(), 32);
         TS_ASSERT_EQUALS( e2.size(), 32);

@@ -89,25 +89,17 @@ private:
   {
     auto t = boost::make_shared<TableWorkspace>();
 
-    t->addColumn("str", "ItemType");
-    t->addColumn("str", "ItemName");
-    t->addColumn("vector_int", "Elements");
+    t->addColumn("vector_int", "Detectors");
 
     std::vector<int> group1;
     group1.push_back(0); group1.push_back(1);
     TableRow row1 = t->appendRow();
-    row1 << "Group" << "1" << group1;
+    row1 << group1;
 
     std::vector<int> group2;
     group2.push_back(2); group2.push_back(3); group2.push_back(4);
     TableRow row2 = t->appendRow();
-    row2 << "Group" << "2" << group2;
-
-    // Just to make sure groups are used only
-    std::vector<int> pair;
-    pair.push_back(0); pair.push_back(1);
-    TableRow row3 = t->appendRow();
-    row3 << "Pair" << "ThePair" << pair;
+    row2 << group2;
 
     return t;
   }

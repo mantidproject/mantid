@@ -621,9 +621,7 @@ namespace Mantid
       auto detectorGroupingTable = boost::dynamic_pointer_cast<TableWorkspace>(
         WorkspaceFactory::Instance().createTable("TableWorkspace") );
 
-      detectorGroupingTable->addColumn("str", "ItemType");
-      detectorGroupingTable->addColumn("str", "ItemName");
-      detectorGroupingTable->addColumn("vector_int", "Elements");
+      detectorGroupingTable->addColumn("vector_int", "Detectors");
 
       std::map<int, std::vector<int>> grouping;
 
@@ -634,8 +632,8 @@ namespace Mantid
 
       for ( auto it = grouping.begin(); it != grouping.end(); ++it )
       {
-        TableRow newRow = detectorGroupingTable->appendRow();
-         newRow << "Group" << boost::lexical_cast<std::string>(it->first) << it->second;
+          TableRow newRow = detectorGroupingTable->appendRow();
+          newRow << it->second;
       }
 
       return detectorGroupingTable;

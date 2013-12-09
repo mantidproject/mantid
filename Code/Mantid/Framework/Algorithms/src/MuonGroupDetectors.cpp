@@ -76,50 +76,40 @@ namespace Algorithms
   {
     TableWorkspace_sptr table = getProperty("DetectorGroupingTable");
 
-    // Check that table does have expected format
+    // Check that table does have expected format 
+    if ( table->columnCount() != 1 )
+      throw std::invalid_argument("Grouping table should have one column only");
 
-    if ( table->columnCount() != 3 )
-      throw std::invalid_argument("Detector Grouping Table should have 3 columns");
-
-    if ( table->getColumn(0)->type() != "str" )
-      throw std::invalid_argument("Invalid type of the first column. Should be string.");
-
-    if ( table->getColumn(1)->type() != "str" )
-      throw std::invalid_argument("Invalid type of the second column. Should be string.");
-
-    if ( table->getColumn(2)->type() != "vector_int" )
-      throw std::invalid_argument("Invalid type of the third column. Should be vector of ints.");
-
-    std::vector<size_t> groupRows; // Rows with non-empty groups
-    groupRows.reserve(table->rowCount()); // Most of rows will be groups
+    if ( table->getColumn(0)->type() != "vector_int" )
+      throw std::invalid_argument("Column should be of integer vector type"); 
+    
+    std::vector<size_t> nonEmptyRows; // Rows with non-empty groups
+    nonEmptyRows.reserve(table->rowCount()); // Most of rows will be non-empty 
 
     // First pass to determine how many non-empty groups we have
     for ( size_t row = 0; row < table->rowCount(); ++row )
     {
-      std::string& itemName = table->cell<std::string>(row, 0);
-      std::vector<int>& elements = table->cell< std::vector<int> >(row, 2);
-
-      if ( itemName == "Group" && elements.size() != 0 )
-        groupRows.push_back(row);
-
+      if ( table->cell< std::vector<int> >(row, 0).size() != 0 )
+        nonEmptyRows.push_back(row);
     }
 
-    if ( groupRows.size() == 0 )
+    if ( nonEmptyRows.size() == 0 )
       throw std::invalid_argument("Detector Grouping Table doesn't contain any non-empty groups");
 
     MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
     // Create output workspace with all the same parameters as an input one except number of histograms
-    MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create( inWS, groupRows.size() );
+    MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create( inWS, nonEmptyRows.size() );
 
     // Compile the groups
-    for ( auto groupIt = groupRows.begin(); groupIt != groupRows.end(); ++groupIt )
+    for ( auto rowIt = nonEmptyRows.begin(); rowIt != nonEmptyRows.end(); ++rowIt )
     {    
-      size_t groupIndex = static_cast<size_t>( std::distance(groupRows.begin(),groupIt) );
-
       // Not "detectors" as such, but workspace indices. For Muons there is only one detector for
       // workspace index in the data before grouping.
-      std::vector<int>& detectors = table->cell< std::vector<int> >(*groupIt,2);
+      std::vector<int>& detectors = table->cell< std::vector<int> >(*rowIt, 0);
+
+      // Group index in the output workspace
+      size_t groupIndex = static_cast<size_t>( std::distance(nonEmptyRows.begin(), rowIt) );
 
       // We will be setting them anew
       outWS->getSpectrum(groupIndex)->clearDetectorIDs();
