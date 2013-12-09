@@ -113,7 +113,7 @@ namespace Mantid
      * @param inputs :: reference to a class contains search inputs.
      * @return a query string constructed from user input.
      */
-    std::string ICat4Catalog::getSearchQuery(const CatalogSearchParam& inputs)
+    std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam& inputs)
     {
       // Contain the related where and join clauses for the search query based on user-input.
       std::vector<std::string> whereClause, joinClause;
@@ -219,19 +219,19 @@ namespace Mantid
       // This prevents the user searching the entire archive (E.g. there is no "default" query).
       if (!whereClause.empty() || !joinClause.empty())
       {
-        std::string select, from, join, where, orderBy, includes;
+        std::string from, join, where, orderBy, includes;
 
-        select   = "SELECT DISTINCT inves";
         from     = " FROM Investigation inves ";
         join     = Strings::join(joinClause.begin(), joinClause.end(), " ");
         where    = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
-        where.insert(0, " WHERE ");
-        orderBy  = " ORDER BY inves.id ASC";
+        orderBy  = " ORDER BY inves.id DESC";
         includes = " INCLUDE inves.investigationInstruments.instrument, inves.parameters";
-        query    = select + from + join + where + orderBy + includes;
-      }
 
-      g_log.debug() << "ICat4Catalog::getSearchQuery: { " << query << " }" << std::endl;
+        // As we joined all WHERE clause with AND we need to include the WHERE at the start of the where segment.
+        where.insert(0, " WHERE ");
+        // Build the query from the result.
+        query = from + join + where + orderBy + includes;
+      }
 
       return (query);
     }
@@ -240,16 +240,22 @@ namespace Mantid
      * Searches for the relevant data based on user input.
      * @param inputs   :: reference to a class contains search inputs
      * @param outputws :: shared pointer to search results workspace
+     * @param offset   :: skip this many rows and start returning rows from this point.
+     * @param limit    :: limit the number of rows returned by the query.
      */
-    void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws)
+    void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws,
+        const int &offset, const int &limit)
     {
-      // Obtain the query from user input.
-      std::string query = getSearchQuery(inputs);
+      std::string query = buildSearchQuery(inputs);
 
-      if (query.empty())
-      {
-        throw std::runtime_error("You have not input any terms to search for.");
-      }
+      // Check if the query built was valid (e.g. if they user has input any search terms).
+      if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
+
+      // Modify the query to include correct SELECT and LIMIT clauses.
+      query.insert(0, "SELECT DISTINCT inves");
+      query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit));
+
+      g_log.debug() << "ICat4Catalog::search -> Query is: { " << query << " }" << std::endl;
 
       ICat4::ICATPortBindingProxy icat;
       setSSLContext(icat);
@@ -271,6 +277,49 @@ namespace Mantid
       {
         throwErrorMessage(icat);
       }
+    }
+
+    /**
+     * Obtain the number of investigations to be returned by the catalog.
+     * @return The number of investigations returned by the search performed.
+     */
+    int64_t ICat4Catalog::getNumberOfSearchResults(const CatalogSearchParam& inputs)
+    {
+      ICat4::ICATPortBindingProxy icat;
+      setSSLContext(icat);
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::string query     = buildSearchQuery(inputs);
+
+      if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
+
+      query.insert(0, "SELECT COUNT(DISTINCT inves)");
+      request.query         = &query;
+
+      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Query is: { " << query << " }" << std::endl;
+
+      int result = icat.search(&request, &response);
+
+      int64_t numOfResults = 0;
+
+      if (result == 0)
+      {
+        xsd__long * numRes = dynamic_cast<xsd__long*>(response.return_.at(0));
+        numOfResults = numRes->__item;
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
+
+      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Number of results returned is: { " << numOfResults << " }" << std::endl;
+
+      return numOfResults;
     }
 
     /**
@@ -368,7 +417,6 @@ namespace Mantid
           }
           catch(std::runtime_error&)
           {
-            g_log.information("An error occurred when saving the ICat search results data to Workspace");
             throw;
           }
         }
@@ -443,7 +491,6 @@ namespace Mantid
         }
         catch(std::runtime_error&)
         {
-          g_log.information("An error occurred when saving file data to workspace.");
           throw;
         }
       }
@@ -518,7 +565,6 @@ namespace Mantid
           }
           catch(std::runtime_error&)
           {
-            g_log.information("An error occurred when saving file data to workspace.");
             throw;
           }
         }
