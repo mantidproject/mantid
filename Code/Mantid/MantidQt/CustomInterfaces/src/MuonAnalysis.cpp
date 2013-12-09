@@ -2,9 +2,9 @@
 // Includes
 //----------------------
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -80,11 +80,17 @@ const QString MuonAnalysis::NOT_AVAILABLE("N/A");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(),
-  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), m_currentTab(NULL),
-  m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-  m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay(""), m_dataTimeZero(0.0), 
-  m_dataFirstGoodData(0.0)
+  UserSubWindow(parent), 
+  m_last_dir(), 
+  m_workspace_name("MuonAnalysis"), m_grouped_name(m_workspace_name + "Grouped"), 
+  m_currentDataName(),
+  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), 
+  m_currentTab(NULL),
+  m_groupNames(), 
+  m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
+  m_updating(false), m_loaded(false), m_deadTimesChanged(false), 
+  m_textToDisplay(""), 
+  m_dataTimeZero(0.0), m_dataFirstGoodData(0.0)
 {}
 
 /**
@@ -1716,6 +1722,8 @@ void MuonAnalysis::clearTablesAndCombo()
     m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
     m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
   }
+
+  m_uiForm.groupDescription->clear();
 }
 
 
