@@ -18,7 +18,7 @@ LabQ = ConvertToDiffractionMDWorkspace(InputWorkspace=ws, LorentzCorrection='0',
 PeaksLattice = FindPeaksMD(InputWorkspace=LabQ,MaxPeaks=100)
 
 # 3d integration to centroid peaks
-PeaksLattice = CentroidPeaksMD(InputWorkspace=LabQ, CoordinatesToUse='Q (lab frame)',
+PeaksLattice = CentroidPeaksMD(InputWorkspace=LabQ,
 	PeakRadius=0.12, PeaksWorkspace=PeaksLattice)
 	
 # Find the UB matrix using the peaks and known lattice parameters
@@ -44,7 +44,7 @@ SaveHKL(InputWorkspace=PeaksLattice, Filename=ws_name + '.hkl')
 PeaksLatticeFFT = FindPeaksMD(InputWorkspace=LabQ, MaxPeaks=100)
 
 # 3d integration to centroid peaks
-PeaksLatticeFFT = CentroidPeaksMD(InputWorkspace=LabQ, CoordinatesToUse='Q (lab frame)',
+PeaksLatticeFFT = CentroidPeaksMD(InputWorkspace=LabQ,
 	PeakRadius=0.12, PeaksWorkspace=PeaksLatticeFFT)
 	
 # Find the UB matrix using FFT

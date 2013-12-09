@@ -26,6 +26,9 @@ void export_ReferenceFrame()
       .def( "pointingUp", &ReferenceFrame::pointingUp)
       .def( "vecPointingUp", &ReferenceFrame::vecPointingUp )
       .def( "vecPointingAlongBeam", &ReferenceFrame::vecPointingAlongBeam )
+      .def( "pointingAlongBeamAxis", &ReferenceFrame::pointingAlongBeamAxis )
+      .def( "pointingUpAxis", &ReferenceFrame::pointingUpAxis )
+      .def( "pointingHorizontalAxis", &ReferenceFrame::pointingHorizontalAxis )
 
 
 	;

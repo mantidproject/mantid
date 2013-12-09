@@ -38,6 +38,8 @@
 #include <boost/lexical_cast.hpp>
 #include "MantidGeometry/IDetector.h"
 
+#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
+
 using Mantid::detid_t;
 
 //Add this class to the list of specialised dialogs in this namespace
@@ -72,7 +74,8 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
-  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
+  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""),
+  slicingWindow(NULL)
 {
   ConfigService::Instance().addObserver(m_newInDir);
 }
@@ -202,6 +205,7 @@ void SANSRunWindow::initLayout()
   connect(m_uiForm.detbank_sel, SIGNAL(currentIndexChanged(int)), this, SLOT(phiMaskingChanged(int))); 
   connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
+  connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
 
   readSettings();
 }
@@ -2087,6 +2091,10 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
 
   //mask strings that the user has entered manually on to the GUI
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
+
+  // add slicing definition
+  exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
+
   return exec_reduce;
 }
 ///Reads the sample geometry, these settings will override what is stored in the run file
@@ -3039,23 +3047,18 @@ bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWi
   assignCom.append(", r'"+direct.getFirstFilename()+"'");
 
   int period = trans.getEntryNum();
-  //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    trans.setEntryNum(period);
+    assignCom.append(", period_t="+QString::number(period));
   }
-  assignCom.append(", period_t="+QString::number(period));
 
   period = direct.getEntryNum();
   //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    direct.setEntryNum(period);
+    assignCom.append(", period_d="+QString::number(period)); 
   }
-  assignCom.append(", period_d="+QString::number(period)+")");
-  
+  assignCom.append(")");  
   //assign the workspace name to a Python variable and read back some details
   QString pythonC="t1, t2 = " + assignCom + ";print '"+PYTHON_SEP+"',t1,'"+PYTHON_SEP+"',t2";
   QString ws_names = runReduceScriptFunction(pythonC);
@@ -3092,13 +3095,13 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
   QString assignCom("i."+assignFn+"(r'" + runFile.getFirstFilename() + "'");
   assignCom.append(", reload = True");
   int period = runFile.getEntryNum();
-  //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    runFile.setEntryNum(period);
+    assignCom.append(", period = " + QString::number(period));
   }
-  assignCom.append(", period = " + QString::number(period)+")");
+  
+  assignCom.append(")");
 
   //assign the workspace name to a Python variable and read back some details
 
@@ -3535,6 +3538,20 @@ void SANSRunWindow::loadTransmissionSettings(){
    m_uiForm.trans_selector_opt->setCurrentIndex(separated?1:0);
 
 
+}
+
+void SANSRunWindow::handleSlicePushButton(){
+  if (!slicingWindow){
+    slicingWindow = new SANSEventSlicing(this);
+    connect(slicingWindow, SIGNAL(runAsPythonScript(const QString&, bool)),
+            this, SIGNAL(runAsPythonScript(const QString&, bool)));
+    //    slicingWindow->setParent(this);
+    slicingWindow->initializeLayout();
+    slicingWindow->initializeLocalPython();
+  }
+
+  slicingWindow->show(); 
+  slicingWindow->raise();
 }
 
 } //namespace CustomInterfaces

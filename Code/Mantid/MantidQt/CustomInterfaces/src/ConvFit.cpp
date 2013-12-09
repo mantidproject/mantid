@@ -101,7 +101,7 @@ namespace IDA
 
     connect(m_cfDblMng, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
 
-    // Have HWHM Range linked to Fit Start/End Range
+    // Have FWHM Range linked to Fit Start/End Range
     connect(m_cfRangeS, SIGNAL(rangeChanged(double, double)), m_cfHwhmRange, SLOT(setRange(double, double)));
     m_cfHwhmRange->setRange(-1.0,1.0);
     hwhmUpdateRS(0.02);
@@ -221,7 +221,7 @@ namespace IDA
       QString pref = prefBase + QString::number(funcIndex) + ".";
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Amplitude"], parameters[pref+"Amplitude"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.HWHM"], parameters[pref+"HWHM"]);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], parameters[pref+"FWHM"]);
       funcIndex++;
     }
 
@@ -231,7 +231,7 @@ namespace IDA
       QString pref = prefBase + QString::number(funcIndex) + ".";
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.HWHM"], parameters[pref+"HWHM"]);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
     }
 
     // Plot Output
@@ -494,14 +494,14 @@ namespace IDA
     m_cfProp[name+".Amplitude"] = m_cfDblMng->addProperty("Amplitude");
     // m_cfDblMng->setRange(m_cfProp[name+".Amplitude"], 0.0, 1.0); // 0 < Amplitude < 1
     m_cfProp[name+".PeakCentre"] = m_cfDblMng->addProperty("PeakCentre");
-    m_cfProp[name+".HWHM"] = m_cfDblMng->addProperty("HWHM");
+    m_cfProp[name+".FWHM"] = m_cfDblMng->addProperty("FWHM");
     m_cfDblMng->setDecimals(m_cfProp[name+".Amplitude"], NUM_DECIMALS);
     m_cfDblMng->setDecimals(m_cfProp[name+".PeakCentre"], NUM_DECIMALS);
-    m_cfDblMng->setDecimals(m_cfProp[name+".HWHM"], NUM_DECIMALS);
-    m_cfDblMng->setValue(m_cfProp[name+".HWHM"], 0.02);
+    m_cfDblMng->setDecimals(m_cfProp[name+".FWHM"], NUM_DECIMALS);
+    m_cfDblMng->setValue(m_cfProp[name+".FWHM"], 0.02);
     lorentzGroup->addSubProperty(m_cfProp[name+".Amplitude"]);
     lorentzGroup->addSubProperty(m_cfProp[name+".PeakCentre"]);
-    lorentzGroup->addSubProperty(m_cfProp[name+".HWHM"]);
+    lorentzGroup->addSubProperty(m_cfProp[name+".FWHM"]);
     return lorentzGroup;
   }
 
@@ -841,15 +841,12 @@ namespace IDA
   void ConvFit::hwhmChanged(double val)
   {
     const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
-    // Always want HWHM to display as positive.
-    if ( val > peakCentre )
-    {
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.HWHM"], val-peakCentre);
-    }
-    else
-    {
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.HWHM"], peakCentre-val);
-    }
+    // Always want FWHM to display as positive.
+    const double hwhm = std::fabs(val-peakCentre);
+    // Update the property
+    m_cfHwhmRange->blockSignals(true);
+    m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], hwhm*2);
+    m_cfHwhmRange->blockSignals(false);
   }
 
   void ConvFit::backgLevel(double val)
@@ -862,14 +859,18 @@ namespace IDA
     if ( prop == m_cfProp["StartX"] ) { m_cfRangeS->setMinimum(val); }
     else if ( prop == m_cfProp["EndX"] ) { m_cfRangeS->setMaximum(val); }
     else if ( prop == m_cfProp["BGA0"] ) { m_cfBackgS->setMinimum(val); }
-    else if ( prop == m_cfProp["Lorentzian 1.HWHM"] ) { hwhmUpdateRS(val); }
+    else if ( prop == m_cfProp["Lorentzian 1.FWHM"] ) { hwhmUpdateRS(val); }
+    else if ( prop == m_cfProp["Lorentzian 1.PeakCentre"] )
+    {
+        hwhmUpdateRS(m_cfDblMng->value(m_cfProp["Lorentzian 1.FWHM"]));
+    }
   }
 
   void ConvFit::hwhmUpdateRS(double val)
   {
     const double peakCentre = m_cfDblMng->value(m_cfProp["Lorentzian 1.PeakCentre"]);
-    m_cfHwhmRange->setMinimum(peakCentre-val);
-    m_cfHwhmRange->setMaximum(peakCentre+val);
+    m_cfHwhmRange->setMinimum(peakCentre-val/2);
+    m_cfHwhmRange->setMaximum(peakCentre+val/2);
   }
 
   void ConvFit::checkBoxUpdate(QtProperty* prop, bool checked)

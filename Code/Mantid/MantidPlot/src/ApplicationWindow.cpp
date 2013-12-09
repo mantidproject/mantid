@@ -9468,42 +9468,13 @@ void ApplicationWindow::timerEvent ( QTimerEvent *e)
 
 void ApplicationWindow::dropEvent( QDropEvent* e )
 {
-  if (mantidUI->drop(e)) return;//Mantid
-
-  QStringList fileNames;
-  if (Q3UriDrag::decodeLocalFiles(e, fileNames)){
-    QList<QByteArray> lst = QImageReader::supportedImageFormats() << "JPG";
-    QStringList asciiFiles;
-
-    for(int i = 0; i<(int)fileNames.count(); i++){
-      QString fn = fileNames[i];
-      QFileInfo fi (fn);
-      QString ext = fi.extension().lower();
-      QStringList tempList;
-      QByteArray temp;
-      // convert QList<QByteArray> to QStringList to be able to 'filter'
-      foreach(temp,lst)
-      tempList.append(QString(temp));
-      QStringList l = tempList.filter(ext, Qt::CaseInsensitive);
-      if (l.count()>0)
-        loadImage(fn);
-      else if ( ext == "opj" || ext == "qti")
-        open(fn);
-      else
-        asciiFiles << fn;
-    }
-
-    importASCII(asciiFiles, ImportASCIIDialog::NewTables, columnSeparator, ignoredLines,
-        renameColumns, strip_spaces, simplify_spaces, d_ASCII_import_comments,
-        d_import_dec_separators, d_ASCII_import_locale, d_ASCII_comment_string,
-        d_ASCII_import_read_only, d_ASCII_end_line,"");
-  }
+    mantidUI->drop(e);
 }
+
 
 void ApplicationWindow::dragEnterEvent( QDragEnterEvent* e )
 {
   if (e->source()){
-    //e->ignore();//Mantid
     e->accept();//Mantid
     return;
   }
@@ -11129,27 +11100,27 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
   }
 }
 
-/** This method opens script window when  project file is loaded
+/** This method opens script window with a list of scripts loaded
  */
 void ApplicationWindow::openScriptWindow(const QStringList &list)
 {	
   showScriptWindow();
   if(!scriptingWindow) 
     return;
+
   scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->languageName() + " Window");
-  QString s=list[0];
-  QStringList scriptnames=s.split("\t");
-  int count=scriptnames.size();
-  if(count==0) 
-    return;
-  // don't create a new tab when the first script file from theproject file  opened
-  if(!scriptnames[1].isEmpty()) 
-    scriptingWindow->open(scriptnames[1],false);
-  // create a new tab  and open the script for all otehr filenames
-  for(int i=2;i<count;++i)
-  {   
-    if(!scriptnames[i].isEmpty())
-      scriptingWindow->open(scriptnames[i],true);
+  QStringList scriptnames;
+
+  foreach (QString fileNameEntry, list)
+  {
+    scriptnames.append(fileNameEntry.split("\t"));
+  }
+
+  bool newTab = false;
+  foreach (QString scriptname, scriptnames)
+  {
+    scriptingWindow->open(scriptname,newTab);
+    newTab=false;
   }
 }
 

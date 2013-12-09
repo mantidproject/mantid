@@ -104,7 +104,6 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "CentroidPeaksMDTest_MDEWS" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "CentroidPeaksMDTest_Peaks" ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", CoordinatesToUse ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );

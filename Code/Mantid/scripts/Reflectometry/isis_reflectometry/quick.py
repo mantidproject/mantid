@@ -171,13 +171,8 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
             _monInt = Integration(InputWorkspace=_I0P,RangeLower=intmin,RangeUpper=intmax)
             IvsLam = Divide(LHSWorkspace=_detector_ws,RHSWorkspace=_monInt)
             names = mtd.getObjectNames()
-            if trans in names:
-                trans = RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch=IvsLam,OutputWorkspace=trans)
-                IvsLam = Divide(LHSWorkspace=IvsLam,RHSWorkspace=trans,OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
-            else:
-                IvsLam = transCorr(trans, IvsLam)
-                print type(IvsLam)
-                RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
+            IvsLam = transCorr(trans, IvsLam)
+            RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
                 
         
         # Convert to I vs Q
@@ -196,17 +191,9 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
             PI = 3.1415926535
             theta = inst.getComponentByName('point-detector').getTwoTheta(sampleLocation, beamPos)*180.0/PI/2.0
             print "Det location: ", detLocation, "Calculated theta = ",theta
-            if detLocation.getY() == 0:  # detector is not in correct place
-                print "det at 0"
-                # Load corresponding NeXuS file
-                runno = '_' + str(run)
-                #templist.append(runno)
-                if type(run)==type(int()):
-                    LoadNexus(Filename=run,OutputWorkspace=runno)
-                else:
-                    LoadNexus(Filename=run.replace("raw","nxs",1),OutputWorkspace=runno)
+            if detLocation.getY() == 0:  # detector is not in correct place   
                 # Get detector angle theta from NeXuS
-                theta = groupGet(runno,'samp','theta')
+                theta = groupGet(run_ws,'samp','theta')
                 print 'Nexus file theta =', theta
                 IvsQ = l2q(mtd['IvsLam'], 'point-detector', theta)
             else:
