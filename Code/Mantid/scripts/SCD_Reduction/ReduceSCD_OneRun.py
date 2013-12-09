@@ -90,7 +90,7 @@ max_pred_dspacing         = params_dictionary[ "max_pred_dspacing" ]
 use_sphere_integration    = params_dictionary.get('use_sphere_integration', True)
 use_ellipse_integration   = params_dictionary.get('use_ellipse_integration', False)
 use_fit_peaks_integration = params_dictionary.get('use_fit_peaks_integration', False)
-use_cylinder_integration  = params_dictionary.get('use_cylinder_integration', False)
+use_cylindrical_integration  = params_dictionary.get('use_cylindrical_integration', False)
 
 peak_radius               = params_dictionary[ "peak_radius" ]
 bkg_inner_radius          = params_dictionary[ "bkg_inner_radius" ]
@@ -250,7 +250,7 @@ if use_sphere_integration:
                   BackgroundInnerRadius=bkg_inner_radius,
 	          PeaksWorkspace=peaks_ws, 
                   IntegrateIfOnEdge=integrate_if_edge_peak )
-elif use_cylinder_integration:
+elif use_cylindrical_integration:
 #
 # Integrate found or predicted peaks in Q space using spheres, and save 
 # integrated intensities, with Niggli indexing.  First get an un-weighted 
@@ -268,7 +268,7 @@ elif use_cylinder_integration:
                   BackgroundInnerRadius=bkg_inner_radius,
 	              PeaksWorkspace=peaks_ws, 
                   IntegrateIfOnEdge=integrate_if_edge_peak, 
-                  Cylinder=use_cylinder_integration,CylinderLength=cylinder_length,
+                  Cylinder=use_cylindrical_integration,CylinderLength=cylinder_length,
                   PercentBackground=cylinder_percent_bkg,
                   IntegrationOption=cylinder_int_option,
                   ProfileFunction=cylinder_profile_fit)
@@ -289,7 +289,7 @@ elif use_ellipse_integration:
                                  BackgroundOuterSize = bkg_outer_radius,
                                  BackgroundInnerSize = bkg_inner_radius )
 
-elif use_cylinder_integration:
+elif use_cylindrical_integration:
   profiles_filename = output_directory + "/" + instrument_name + '_' + run + '.profiles'
   MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                     dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
@@ -315,7 +315,7 @@ SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
                Filename=run_niggli_integrate_file )
 
 # Print warning if user is trying to integrate using the cylindrical method and transorm the cell
-if use_cylinder_integration:
+if use_cylindrical_integration:
   if (not cell_type is None) or (not centering is None):
     print "WARNING: Cylindrical profiles are NOT transformed!!!"
 #
