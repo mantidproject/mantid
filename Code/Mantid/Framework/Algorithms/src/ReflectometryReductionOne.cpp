@@ -149,9 +149,6 @@ namespace Mantid
       boundedIndex->setLower(0);
       mandatoryWorkspaceIndex->add(boundedIndex);
 
-      declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-          "Indices of the spectra in pairs (lower, upper) that mark the ranges that correspond to detectors of interest.");
-
       declareProperty(
           new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT(), mandatoryWorkspaceIndex),
           "I0 monitor index");
@@ -175,6 +172,9 @@ namespace Mantid
               boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
           "Wavelength maximum for integration in angstroms. Taken to be WavelengthMax if not provided.");
 
+      declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+               "Indices of the spectra in pairs (lower, upper) that mark the ranges that correspond to detectors of interest.");
+
       declareProperty(new PropertyWithValue<std::string>("DetectorComponentName", "", Direction::Input),
           "Name of the detector component i.e. point-detector. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
 
@@ -190,6 +190,11 @@ namespace Mantid
 
       declareProperty(new PropertyWithValue<double>("ThetaOut", Mantid::EMPTY_DBL(), Direction::Output), "Calculated final theta.");
 
+      declareProperty(new PropertyWithValue<bool>("CorrectDetectorPositions", true, Direction::Input), "Correct detector positions using ThetaIn (if given)");
+
+      setPropertySettings("CorrectDetectorPositions",new Kernel::EnabledWhenProperty("ThetaIn", IS_NOT_DEFAULT));
+      setPropertySettings("RegionOfInterest",new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
+      setPropertySettings("RegionOfDirectBeam",new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
     }
 
     /**
@@ -832,6 +837,8 @@ namespace Mantid
 
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
+      const bool correctDetctorPositions = getProperty("CorrectDetectorPositions");
+
       auto instrument = runWS->getInstrument();
       IDetector_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
       IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
@@ -844,32 +851,34 @@ namespace Mantid
       MatrixWorkspace_sptr IvsQ; // Output workspace
       if(isPointDetector)
       {
+        auto integrationAlg = this->createChildAlgorithm("Integration");
+        integrationAlg->initialize();
+        integrationAlg->setProperty("InputWorkspace", monitorWS);
+        integrationAlg->setProperty("RangeLower", monitorIntegrationWavelengthInterval.get<0>());
+        integrationAlg->setProperty("RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
+        integrationAlg->execute();
+        MatrixWorkspace_sptr integratedMonitor = integrationAlg->getProperty("OutputWorkspace");
+
+        IvsLam = detectorWS / integratedMonitor; // Normalize by the integrated monitor counts.
+
         if(firstTransmissionRun.is_initialized())
         {
-          auto integrationAlg = this->createChildAlgorithm("Integration");
-          integrationAlg->initialize();
-          integrationAlg->setProperty("InputWorkspace", monitorWS);
-          integrationAlg->setProperty("RangeLower", monitorIntegrationWavelengthInterval.get<0>());
-          integrationAlg->setProperty("RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
-          integrationAlg->execute();
-          MatrixWorkspace_sptr integratedMonitor =  integrationAlg->getProperty("OutputWorkspace");
-
-          IvsLam = detectorWS / integratedMonitor; // Normalize by the integrated monitor counts.
 
           // Perform transmission correction.
           IvsLam = this->transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
               i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
 
-          IvsQ = this->toIvsQ(IvsLam, true /*HACK*/, isPointDetector, theta, sample, detector);
-
         }
         else
         {
-          throw std::runtime_error("Cannot yet handle no transmission runs.");
+          g_log.warning("No transmission correction will be applied.");
         }
+
+        IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, isPointDetector, theta, sample, detector)
       }
       else
       {
+        //TODO
         throw std::runtime_error("Multi-detector processing is not yet implemented.");
       }
 
