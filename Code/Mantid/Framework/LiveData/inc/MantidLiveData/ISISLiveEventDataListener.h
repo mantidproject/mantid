@@ -127,7 +127,7 @@ namespace Mantid
       // Initialize the event buffer
       void initEventBuffer(const TCPStreamEventDataSetup& setup);
       // Save received event data in the buffer workspace
-      void saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Kernel::DateAndTime &pulseTime, const size_t period);
+      void saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Kernel::DateAndTime &pulseTime, size_t period);
       // Set the spectra-detector map
       void loadSpectraMap();
       // Load the instrument
@@ -136,6 +136,31 @@ namespace Mantid
       int getInt(const std::string& par) const;
       // Get an integer array ising the IDC interface
       void getIntArray(const std::string& par, std::vector<int>& arr, const size_t dim);
+
+      // receive a header and check if it's valid
+      template <typename T>
+      void Receive(T buffer, const std::string& head, const std::string &msg)
+      {
+          long timeout = 0;
+          while( m_socket.available() < static_cast<int>(sizeof(buffer)) )
+          {
+              Poco::Thread::sleep(RECV_WAIT);
+              timeout += RECV_WAIT;
+              if ( timeout > RECV_TIMEOUT * 1000 ) throw std::runtime_error("Operation of receiving " + head + " timed out.");
+          }
+          m_socket.receiveBytes(&buffer, sizeof(buffer));
+          if ( !buffer.isValid() )
+          {
+              throw std::runtime_error(msg);
+          }
+      }
+
+      // receive data that cannot be processed
+      template <typename T>
+      void CollectJunk(T head) 
+      {
+        m_socket.receiveBytes(junk_buffer, head.length - static_cast<uint32_t>(sizeof(head)));
+      }
 
       /// The socket communicating with the DAE
       Poco::Net::StreamSocket m_socket;
@@ -165,6 +190,9 @@ namespace Mantid
 
       /// number of spectra
       int m_numberOfSpectra;
+
+      /// buffer to collect data that cannot be processed
+      char* junk_buffer[1000];
 
       /// reference to the logger class
       static Kernel::Logger& g_log;
