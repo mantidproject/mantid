@@ -5,12 +5,16 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-#include "MantidQtAPI/UserSubWindow.h"
 
-#include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+
+#include "MantidGeometry/Instrument.h"
+
+#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtMantidWidgets/pythonCalc.h"
+#include "MantidQtMantidWidgets/MWDiag.h"
 
 #include <map>
 
@@ -26,6 +30,9 @@ namespace Muon
   class MuonAnalysisResultTableTab;
 }
 
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 /** 
 This is the main class for the MuonAnalysis interface
@@ -327,8 +334,11 @@ private:
   /// The last directory that was viewed
   QString m_last_dir;
 
-  /// name of workspace
+  /// Name of the loaded workspace
   std::string m_workspace_name;
+
+  /// Name of the loaded AND grouped workspace
+  std::string m_grouped_name;
 
   /// name of the loaded data
   QString m_currentDataName;
@@ -392,11 +402,6 @@ private:
   /// set grouping in table from information from nexus raw file
   void setGroupingFromNexus(const QString& nexusFile); 
 
-  ///
-  void setDummyGrouping(const int numDetectors);
-
-  ///
-  void setGroupingFromIDF(const std::string& mainFieldDirection, Mantid::API::MatrixWorkspace_sptr matrix_workspace);
 
   /// title of run
   std::string m_title;
@@ -445,6 +450,21 @@ private:
 
   /// Saves the value of the widget which called the slot
   void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
+
+  // Groups loaded workspace (m_workspace_name)
+  void groupLoadedWorkspace(ITableWorkspace_sptr detGroupingTable = ITableWorkspace_sptr());
+
+  /// Parses grouping information from the UI table.
+  ITableWorkspace_sptr parseGrouping();  
+
+  /// Updated UI table using the grouping information provided.
+  void setGrouping(ITableWorkspace_sptr detGroupingTable);
+
+  /// Updates UI grouping table - creates dummy grouping 
+  void setDummyGrouping(Instrument_const_sptr instrument);
+
+  /// Updates UI grouping table using default grouping of the instrument
+  void setGroupingFromIDF(Instrument_const_sptr instrument, const std::string& mainFieldDirection);
 
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
