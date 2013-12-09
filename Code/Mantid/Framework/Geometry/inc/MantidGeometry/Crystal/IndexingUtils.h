@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -298,6 +299,10 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   /// Construct a newUB corresponding to a Niggli cell from the given UB
   static bool MakeNiggliUB( const Kernel::DblMatrix  & UB,
                                   Kernel::DblMatrix  & newUB );
+private:
+ 
+    /// Static reference to the logger class
+    static Mantid::Kernel::Logger& g_Log;
 };
 
 

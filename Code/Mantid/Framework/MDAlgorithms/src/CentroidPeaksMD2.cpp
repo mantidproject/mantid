@@ -12,7 +12,7 @@ This algorithm starts with a PeaksWorkspace containing the expected positions of
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-#include "MantidMDAlgorithms/CentroidPeaksMD.h"
+#include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 
 
 using Mantid::DataObjects::PeaksWorkspace;
@@ -23,7 +23,7 @@ namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(CentroidPeaksMD)
+  DECLARE_ALGORITHM(CentroidPeaksMD2)
   
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
@@ -35,21 +35,21 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  CentroidPeaksMD::CentroidPeaksMD()
+  CentroidPeaksMD2::CentroidPeaksMD2()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  CentroidPeaksMD::~CentroidPeaksMD()
+  CentroidPeaksMD2::~CentroidPeaksMD2()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void CentroidPeaksMD::initDocs()
+  void CentroidPeaksMD2::initDocs()
   {
     this->setWikiSummary("Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.");
     this->setOptionalMessage("Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.");
@@ -58,7 +58,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void CentroidPeaksMD::init()
+  void CentroidPeaksMD2::init()
   {
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
 
@@ -66,8 +66,6 @@ namespace MDAlgorithms
     propOptions.push_back("Q (lab frame)");
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
-    declareProperty("CoordinatesToUse", "HKL",boost::make_shared<StringListValidator>(propOptions),
-    	"Ignored:  algorithm uses the InputWorkspace's coordinates.");
 
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
         "Fixed radius around each peak position in which to calculate the centroid.");
@@ -85,7 +83,7 @@ namespace MDAlgorithms
    * @param ws ::  MDEventWorkspace to integrate
    */
   template<typename MDE, size_t nd>
-  void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     if (nd != 3)
       throw std::invalid_argument("For now, we expect the input MDEventWorkspace to have 3 dimensions only.");
@@ -98,15 +96,7 @@ namespace MDAlgorithms
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
 
-    std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
     int CoordinatesToUse =  ws->getSpecialCoordinateSystem();
-    if (CoordinatesToUse == 1 && CoordinatesToUseStr != "Q (lab frame)")
-      g_log.warning() << "Warning: used Q (lab frame) coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
-    else if (CoordinatesToUse == 2 && CoordinatesToUseStr != "Q (sample frame)")
-      g_log.warning() << "Warning: used Q (sample frame) coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
-    else if (CoordinatesToUse == 3 && CoordinatesToUseStr != "HKL")
-      g_log.warning() << "Warning: used HKL coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
-
 
     /// Radius to use around peaks
     double PeakRadius = getProperty("PeakRadius");
@@ -192,7 +182,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void CentroidPeaksMD::exec()
+  void CentroidPeaksMD2::exec()
   {
     inWS = getProperty("InputWorkspace");
 

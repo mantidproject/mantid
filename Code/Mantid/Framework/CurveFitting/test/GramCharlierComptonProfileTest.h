@@ -79,7 +79,7 @@ public:
 
      auto func = createFunctionWithParamsSet();
      double x0(165.0),x1(166.0),dx(0.5); //chosen to give put us near the peak for this mass & spectrum
-     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
      auto & dataX = testWS->dataX(0);
      std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
      func->setWorkspace(testWS);

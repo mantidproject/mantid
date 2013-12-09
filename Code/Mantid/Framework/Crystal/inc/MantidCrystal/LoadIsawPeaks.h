@@ -49,6 +49,7 @@ namespace Crystal
     std::string readHeader( Mantid::DataObjects::PeaksWorkspace_sptr outWS, std::ifstream& in,double &T0 );
 
     void appendFile( Mantid::DataObjects::PeaksWorkspace_sptr outWS, std::string filename);
+    void checkNumberPeaks( Mantid::DataObjects::PeaksWorkspace_sptr outWS, std::string filename );
 
   };
 
