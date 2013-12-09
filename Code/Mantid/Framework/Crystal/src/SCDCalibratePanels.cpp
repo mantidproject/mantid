@@ -1564,8 +1564,6 @@ namespace Mantid
 
       declareProperty(string("PreProcessInstrument"), string("A)No PreProcessing"), boost::make_shared<
         Kernel::StringListValidator>(preProcessOptions), "Select PreProcessing info");
-      // declareProperty("PreProcessInstrument", string("No PreProcessing"), boost::shared_ptr<
-      //        Kernel::ValidatorAnyList<string> >(new Kernel::ValidatorAnyList<string>(preProcessOptions)), "Select PreProcessing info");
 
       vector< string > exts2;
       exts2.push_back(".DetCal");

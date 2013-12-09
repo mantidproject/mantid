@@ -119,12 +119,16 @@ optimize_UB               = params_dictionary[ "optimize_UB" ]
 # Get the fully qualified input run file name, either from a specified data 
 # directory or from findnexus
 #
+short_filename = "%s_%s_event.nxs" % (instrument_name, str(run))
 if data_directory is not None:
-  full_name = data_directory + "/" + instrument_name + "_" + run + "_event.nxs"
+  full_name = data_directory + "/" + short_filename
 else:
-  temp_buffer = os.popen("findnexus --event -i "+instrument_name+" "+str(run) )
-  full_name = temp_buffer.readline()
-  full_name=full_name.strip()
+  candidates = FileFinder.findRuns(short_filename)
+  full_name = ""
+  for item in candidates:
+    if os.path.exists(item):
+      full_name = str(item)
+
   if not full_name.endswith('nxs'):
     print "Exiting since the data_directory was not specified and"
     print "findnexus failed for event NeXus file: " + instrument_name + " " + str(run)

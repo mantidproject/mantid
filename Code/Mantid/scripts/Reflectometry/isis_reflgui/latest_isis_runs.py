@@ -51,7 +51,6 @@ class LatestISISRuns(object):
     
     def getInstrument(self):
         return self.__instrument
-    
     def __findCycleId(self, path):
         tree = xml.parse(path)    
         root = tree.getroot()
