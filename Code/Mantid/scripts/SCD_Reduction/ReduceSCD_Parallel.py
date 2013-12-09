@@ -160,7 +160,7 @@ if not use_cylindrical_integration:
     one_run_file = output_directory + '/' + str(r_num) + '_Niggli.integrate'
     peaks_ws = LoadIsawPeaks( Filename=one_run_file )
     if first_time:
-      if UseFirstLattice:
+      if UseFirstLattice and not read_UB:
 	# Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
         FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
         uc_a = peaks_ws.sample().getOrientedLattice().a()
