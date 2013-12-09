@@ -501,7 +501,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
 
 def process_legacy_parameters(**kwargs) :
     """ The method to deal with old parameters which have logic different from default and easy to process using 
-        subprogram. All other parameters just copiet to output 
+        subprogram. All other parameters just copiet to output       
     """
     params = dict();
     for key,value in kwargs.iteritems():
