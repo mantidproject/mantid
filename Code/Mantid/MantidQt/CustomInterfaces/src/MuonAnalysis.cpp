@@ -794,6 +794,7 @@ void MuonAnalysis::runSaveGroupButton()
 void MuonAnalysis::runLoadGroupButton()
 {
   m_updating = true;
+
   // Get grouping file
   QSettings prevValues;
   prevValues.beginGroup(m_settingsGroup + "LoadGroupFile");
@@ -829,30 +830,12 @@ void MuonAnalysis::runLoadGroupButton()
 
   clearTablesAndCombo();
   fillGroupingTable(loadedGrouping, m_uiForm);
-
-  // add number of detectors column to group table
-  int numRows = m_uiForm.groupTable->rowCount();
-  for (int i = 0; i < numRows; i++)
-  {
-    QTableWidgetItem *item = m_uiForm.groupTable->item(i,1);
-    if (!item)
-      break;
-    if ( item->text().isEmpty() )
-      break;
-
-    std::stringstream detNumRead;
-    try
-    {
-      detNumRead << numOfDetectors(item->text().toStdString());
-      m_uiForm.groupTable->setItem(i, 2, new QTableWidgetItem(detNumRead.str().c_str()));
-    }
-    catch (...)
-    {
-      m_uiForm.groupTable->setItem(i, 2, new QTableWidgetItem("Invalid"));
-    }
-  }
   updateFront();
+
   m_updating = false;
+
+  if ( m_loaded )
+    groupLoadedWorkspace();
 }
 
 /**
