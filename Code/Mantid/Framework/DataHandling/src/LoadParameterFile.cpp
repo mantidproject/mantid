@@ -104,7 +104,7 @@ void LoadParameterFile::exec()
 
   // Check the two properties (at least one must be set)
   if( filename.empty() && parameterXMLProperty->isDefault()){
-    throw Kernel::Exception::FileError("Either the Filename or ParameterXML property of LoadInstrument most be specified to load an IDF" , filename);
+    throw Kernel::Exception::FileError("Either the Filename or ParameterXML property of LoadParameterFile most be specified to load an IDF" , filename);
   }
 
   // Get the input workspace

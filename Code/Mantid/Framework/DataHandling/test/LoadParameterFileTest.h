@@ -135,6 +135,19 @@ public:
 
   }
 
+  void test_failure_if_no_file_or_string()
+  {
+     // Create workspace
+     load_IDF2();
+
+     // Run algorithm without file or string properties set
+    LoadParameterFile loaderPF;
+    TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
+    loaderPF.setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
+    TS_ASSERT( ! loaderPF.execute() )
+  }
+
   void load_IDF2()
   {
     LoadInstrument loaderIDF2;
