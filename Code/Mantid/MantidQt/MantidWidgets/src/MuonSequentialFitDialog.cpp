@@ -204,10 +204,25 @@ namespace MantidWidgets
     if ( m_state == Running )
       throw std::runtime_error("Couln't start: already running");
 
+    const std::string label = m_ui.labelInput->text().toStdString();
+    const std::string labelGroupName = "MuonSeqFit_" + label;
+
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
+    if ( ads.doesExist(labelGroupName) )
+    {
+      // TODO: confirm that 
+      ads.deepRemoveGroup(labelGroupName);
+    }
+   
+    // Create a group for label
+    ads.add(labelGroupName, boost::make_shared<WorkspaceGroup>());
+
     QStringList runFilenames = m_ui.runs->getFilenames();
 
     // Tell progress bar how many iterations we will need to make and reset it
     m_ui.progress->setRange( 0, runFilenames.size() );
+    m_ui.progress->setFormat("%p%");
     m_ui.progress->setValue(0);
 
     setState(Running);
@@ -223,8 +238,6 @@ namespace MantidWidgets
         break;
 
       Workspace_sptr loadedWS;
-      // Update progress
-      m_ui.progress->setValue( m_ui.progress->value() + 1 );
 
       try
       {
@@ -245,8 +258,53 @@ namespace MantidWidgets
         g_log.error(e.what());
         break;
       }
+
+      MatrixWorkspace_sptr ws;
+
+      if ( auto single = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) )
       {
+        ws = single;
       }
+      else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
+      {
+        auto first = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
+        ws = first;
+      }
+
+      const std::string runTitle = getRunTitle(ws);
+      const std::string wsBaseName = labelGroupName + "_" + runTitle; 
+
+      try 
+      {
+        IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
+        fit->initialize();
+        fit->setProperty("Function", m_fitPropBrowser->getFittingFunction());
+        fit->setProperty("InputWorkspace", ws);
+        fit->setProperty("WorkspaceIndex", 0);
+        fit->setProperty("StartX", m_fitPropBrowser->startX());
+        fit->setProperty("EndX", m_fitPropBrowser->endX());
+        fit->setProperty("Output", wsBaseName);
+        fit->setProperty("Minimizer", m_fitPropBrowser->minimizer());
+        fit->setProperty("CostFunction", m_fitPropBrowser->costFunction());
+        fit->execute();
+      }
+      catch(std::exception& e)
+      {
+        QMessageBox::critical(this, "Fitting failed", 
+            "Unable to fit one of the files.\n\nCheck log for details");
+        g_log.error(e.what());
+        break;
+      }
+
+      // Make sure created fit workspaces end-up in the group
+      // TODO: this really should use loop
+      ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
+      ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
+      ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
+
+      // Update progress
+      m_ui.progress->setFormat("%p% - " + QString::fromStdString(runTitle) );
+      m_ui.progress->setValue( m_ui.progress->value() + 1 );
     }
 
     setState(Stopped);
