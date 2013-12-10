@@ -3,7 +3,7 @@
 Teixeira's model for water
 
 Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D), 
-residence times (tau) and jump lengths (l) to extract the associated long range diffusive
+residence times (tau) and jump lengths (length) to extract the associated long range diffusive
 motions of molecules.
 The this model (1961) has the form
 Gamma(Q) = D*Q^2/(1 + D*Q^2*tau)
@@ -50,21 +50,22 @@ class TeixeiraWater(IFunction1D):
        
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
-        l = self.getParameterValue("L")
-        hwhm = []
-        for x in xvals:
-            h = x*x*l/(tau*(1+x*x*l))
-            hwhm.append(h)
-        return np.array(hwhm)
+        length = self.getParameterValue("L")
+        
+        xvals = np.array(xvals)
+        hwhm = xvals * xvals * length / (tau * (1 + xvals * xvals * length))
+
+        return hwhm
     
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
-        l = self.getParameterValue("L")
+        length = self.getParameterValue("L")
+
         i = 0
         for x in xvals:
-            h = x*x*l/(tau*(1+x*x*l))
+            h = x*x*length/(tau*(1+x*x*length))
             jacobian.set(i,0,-h/tau);
-            jacobian.set(i,1,h*(1.0-h*tau)/l);
+            jacobian.set(i,1,h*(1.0-h*tau)/length);
             i += 1
 
 # Required to have Mantid recognise the new function

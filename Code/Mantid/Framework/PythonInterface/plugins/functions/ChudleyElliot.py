@@ -3,7 +3,7 @@
 ChudleyElliot jump fit
 
 Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D), 
-residence times (tau) and jump lengths (l) to extract the associated long range diffusive
+residence times (tau) and jump lengths (length) to extract the associated long range diffusive
 motions of molecules.
 The Chudley-Elliot Jump diffusion model (1961) has the form
 Gamma(Q) = (1 - sin(Ql)/Ql)/tau
@@ -50,23 +50,22 @@ class ChudleyElliot(IFunction1D):
        
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
-        l = self.getParameterValue("L")
+        length = self.getParameterValue("L")
 
-        hwhm = []
-        for x in xvals:
-            h = (1.0-math.sin(x*l)/(x*l))/tau
-            hwhm.append(h)
-        return np.array(hwhm)
+        xvals = np.array(xvals)
+        hwhm = (1.0 - np.sin(xvals * length) / (xvals * length)) / tau
+
+        return hwhm
     
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
-        l = self.getParameterValue("L")
+        length = self.getParameterValue("L")
         i = 0
         for x in xvals:
-            s = math.sin(x*l)/(x*l)
+            s = math.sin(x*length)/(x*length)
             h = (1.0-s)/tau
             jacobian.set(i,0,-h/tau);
-            jacobian.set(i,1,(math.cos(x*l)-s)/(l*tau));
+            jacobian.set(i,1,(math.cos(x*length)-s)/(length*tau));
             i += 1
 
 # Required to have Mantid recognise the new function

@@ -51,15 +51,16 @@ class SingwiSjolander(IFunction1D):
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         l = self.getParameterValue("L")
-        hwhm = []
-        for x in xvals:
-            h = (1.0-math.exp(-l*x*x))/tau
-            hwhm.append(h)
-        return np.array(hwhm)
+
+        xvals = np.array(xvals)
+        hwhm = (1.0 - np.exp( -l * xvals * xvals )) / tau
+
+        return hwhm
     
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
         l = self.getParameterValue("L")
+
         i = 0
         for x in xvals:
             ex = math.exp(-l*x*x)
