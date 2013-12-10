@@ -382,13 +382,13 @@ public:
     TimeWaster mywaster;
     size_t num = 30000;
     mywaster.total = 0;
-    Mutex * lastMutex = NULL;
+    boost::shared_ptr<Mutex> lastMutex;
     for (size_t i=0; i<=num; i++)
     {
         Task * task = new FunctionTask( boost::bind(&TimeWaster::add_to_number, &mywaster, i), static_cast<double>(i) );
       // Create a new mutex every 1000 tasks. This is more relevant to the ThreadSchedulerMutexes; others ignore it.
       if (i % 1000 == 0)
-        lastMutex = new Mutex();
+        lastMutex = boost::shared_ptr<Mutex>(new Mutex());
       task->setMutex(lastMutex);
       p.schedule( task );
     }

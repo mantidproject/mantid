@@ -22,7 +22,7 @@ public:
   class TaskWithMutex : public Task
   {
   public:
-    TaskWithMutex(Mutex * mutex, double cost)
+    TaskWithMutex(boost::shared_ptr<Mutex> mutex, double cost)
     {
       m_mutex = mutex;
       m_cost = cost;
@@ -44,8 +44,8 @@ public:
   void test_push()
   {
     ThreadSchedulerMutexes sc;
-    Mutex * mut1 = new Mutex();
-    Mutex * mut2 = new Mutex();
+    boost::shared_ptr<Mutex> mut1(new Mutex());
+    boost::shared_ptr<Mutex> mut2(new Mutex());
     TaskWithMutex * task1 = new TaskWithMutex(mut1, 10.0);
     TaskWithMutex * task2 = new TaskWithMutex(mut2,  9.0);
 
@@ -56,23 +56,23 @@ public:
 
 //    delete task1;
 //    delete task2;
-    delete mut1;
-    delete mut2;
+//    delete mut1;
+//    delete mut2;
   }
 
   void test_queue()
   {
     ThreadSchedulerMutexes sc;
-    Mutex * mut1 = new Mutex();
-    Mutex * mut2 = new Mutex();
-    Mutex * mut3 = new Mutex();
+    boost::shared_ptr<Mutex> mut1(new Mutex());
+    boost::shared_ptr<Mutex> mut2(new Mutex());
+    boost::shared_ptr<Mutex> mut3(new Mutex());
     TaskWithMutex * task1 = new TaskWithMutex(mut1, 10.0);
     TaskWithMutex * task2 = new TaskWithMutex(mut1,  9.0);
     TaskWithMutex * task3 = new TaskWithMutex(mut1,  8.0);
     TaskWithMutex * task4 = new TaskWithMutex(mut2,  7.0);
     TaskWithMutex * task5 = new TaskWithMutex(mut2,  6.0);
     TaskWithMutex * task6 = new TaskWithMutex(mut3,  5.0);
-    TaskWithMutex * task7 = new TaskWithMutex(NULL,  4.0);
+    TaskWithMutex * task7 = new TaskWithMutex(boost::shared_ptr<Mutex>(),  4.0);
     sc.push(task1);
     sc.push(task2);
     sc.push(task3);
@@ -130,9 +130,9 @@ public:
 //    delete task5;
 //    delete task6;
 //    delete task7;
-    delete mut1;
-    delete mut2;
-    delete mut3;
+//    delete mut1;
+//    delete mut2;
+//    delete mut3;
   }
 
   void test_clear()
@@ -140,7 +140,7 @@ public:
     ThreadSchedulerMutexes sc;
     for (size_t i=0; i<10; i++)
     {
-      TaskWithMutex * task = new TaskWithMutex(new Mutex(), 10.0);
+      TaskWithMutex * task = new TaskWithMutex(boost::shared_ptr<Mutex>(new Mutex()), 10.0);
       sc.push(task);
     }
     TS_ASSERT_EQUALS(sc.size(), 10);
@@ -155,7 +155,7 @@ public:
   {
     ThreadSchedulerMutexes sc;
     Timer tim0;
-    Mutex * mut1 = new Mutex();
+    boost::shared_ptr<Mutex> mut1(new Mutex());
     size_t num = 500;
     for (size_t i=0; i < num; i++)
     {
@@ -172,7 +172,7 @@ public:
     //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), 0);
 
-    delete mut1;
+//    delete mut1;
   }
 
   void test_performance_lotsOfMutexes()
@@ -182,7 +182,7 @@ public:
     size_t num = 500;
     for (size_t i=0; i < num; i++)
     {
-      sc.push(new TaskWithMutex(new Mutex(), 10.0));
+      sc.push(new TaskWithMutex(boost::shared_ptr<Mutex>(new Mutex()), 10.0));
     }
     //std::cout << tim0.elapsed() << " secs to push." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), num);
