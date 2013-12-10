@@ -20,9 +20,16 @@ namespace MantidWidgets
   {
     m_ui.setupUi(this);
 
-    // TODO: set initial values 
-    initDiagnosisTable();
     setState(Stopped);
+
+    // Set initial runs text 
+    Workspace_const_sptr fitWS = m_fitPropBrowser->getWorkspace();
+    m_ui.runs->setText( QString::fromStdString( getRunTitle(fitWS) ) + "-" );
+
+    // TODO: find a better initial one, e.g. previously used
+    m_ui.labelInput->setText("Label");
+
+    initDiagnosisTable();
 
     // After initial values are set, update depending elements accordingly. We don't rely on
     // slot/signal update, as element might be left with default values which means these will
