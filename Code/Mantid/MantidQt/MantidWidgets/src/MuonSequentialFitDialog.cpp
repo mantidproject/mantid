@@ -99,7 +99,7 @@ namespace MantidWidgets
     headerLabels << "Run" << "Fit quality";
 
     // Add remaining columns - one for every fit function parameter
-    CompositeFunction_const_sptr fitFunc = m_fitPropBrowser->compositeFunction();
+    IFunction_sptr fitFunc = m_fitPropBrowser->getFittingFunction();
 
     for(size_t i = 0; i < fitFunc->nParams(); i++)
       headerLabels << QString::fromStdString( fitFunc->parameterName(i) );
