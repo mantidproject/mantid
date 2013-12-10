@@ -46,22 +46,24 @@ namespace MantidWidgets
     MuonSequentialFitDialog(MuonFitPropertyBrowser* parent);
     virtual ~MuonSequentialFitDialog();
 
-  private:
-    enum ControlButtonType {
-      Start,
-      Stop
+    enum DialogState 
+    {
+      Running,
+      Stopped
     };
+
+  signals:
+    void stateChanged(DialogState newState);
+
+  private:
 
     // -- FUNCTIONS -----------------------------------------------------------
 
     /// Check if all the input field are valid 
     bool isInputValid();
 
-    /// Set the type of the control button
-    void setControlButtonType(ControlButtonType type);
-
-    /// Update enabled state off all the input widgets (except for control ones) 
-    void setInputEnabled(bool enabled);
+    /// Set current dialog state
+    void setState(DialogState newState);
 
     /// Initialize diagnosis table 
     void initDiagnosisTable();
@@ -73,6 +75,12 @@ namespace MantidWidgets
 
     /// Fit properties browser used to start the dialog
     MuonFitPropertyBrowser* m_fitPropBrowser;
+
+    /// Current state of the dialog
+    DialogState m_state;
+
+    /// Whether user requested fitting to be stopped
+    bool m_stopRequested;
 
     // -- STATIC MEMBERS ------------------------------------------------------
 
@@ -88,6 +96,12 @@ namespace MantidWidgets
 
     /// Enables/disables start button depending on wether we are allowed to start
     void updateControlButtonState();
+
+    /// Sets control button to be start/stop depending on new dialog state 
+    void updateControlButtonType(DialogState newState);
+
+    /// Update enabled state off all the input widgets depending on new dialog state
+    void updateInputEnabled(DialogState newState); 
 
     /// Start fitting process
     void startFit();
