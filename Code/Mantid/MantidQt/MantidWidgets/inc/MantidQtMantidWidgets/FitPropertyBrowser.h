@@ -96,8 +96,13 @@ public:
 
   /// Create a new function
   PropertyHandler* addFunction(const std::string& fnName);
+
   /// Get Composite Function
   boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction()const{return m_compositeFunction;}
+
+  /// Return the fitting function
+  Mantid::API::IFunction_sptr getFittingFunction() const;
+
   /// Get the default function type
   std::string defaultFunctionType()const;
   /// Set the default function type
@@ -208,6 +213,7 @@ public:
   QStringList getWorkspaceNames();
   /// Create a MatrixWorkspace from a TableWorkspace
   Mantid::API::Workspace_sptr createMatrixFromTableWorkspace()const;
+
 
 public slots:
   virtual void fit(){ doFit(500); }
@@ -337,8 +343,6 @@ protected:
   void minimizerChanged();
   /// Do the fitting
   void doFit(int maxIterations);
-  /// Return the fitting function
-  Mantid::API::IFunction_sptr getFittingFunction() const;
 
   /// Property managers:
   QtGroupPropertyManager  *m_groupManager;
