@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidCurveFitting/ComptonProfile.h"
 #include "MantidAPI/FunctionFactory.h"
-
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include <gsl/gsl_poly.h>
 
 namespace Mantid
@@ -19,6 +19,47 @@ namespace CurveFitting
 
     const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
     ///@endcond
+  }
+
+  /**
+   * If a DetectorGroup is encountered then the parameters are averaged over the group
+   * @param comp A pointer to the component that should contain the parameter
+   * @param pmap A reference to the ParameterMap that stores the parameters
+   * @param name The name of the parameter
+   * @returns The value of the parameter if it exists
+   * @throws A std::invalid_argument error if the parameter does not exist
+   */
+  double ComptonProfile::getComponentParameter(const Geometry::IComponent_const_sptr & comp, const Geometry::ParameterMap &pmap,
+                                               const std::string &name)
+  {
+    if(!comp) throw std::invalid_argument("ComptonProfile - Cannot retrieve parameter from NULL component");
+
+    double result(0.0);
+    if(const auto group = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp))
+    {
+      const auto dets = group->getDetectors();
+      double avg(0.0);
+      for(auto it = dets.begin(); it!= dets.end(); ++it)
+      {
+        auto param = pmap.getRecursive((*it)->getComponentID(), name);
+        if(param) avg += param->value<double>();
+        else throw std::invalid_argument("ComptonProfile - Unable to find DetectorGroup component parameter \"" + name + "\".");
+      }
+      result = avg/static_cast<double>(group->nDets());
+    }
+    else
+    {
+      auto param = pmap.getRecursive(comp->getComponentID(), name);
+      if(param)
+      {
+        result = param->value<double>();
+      }
+      else
+      {
+        throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
+      }
+    }
+    return result;
   }
 
   /**
@@ -89,18 +130,19 @@ namespace CurveFitting
     }
 
     DetectorParams detpar;
+    const auto & pmap = workspace->constInstrumentParameters();
     detpar.l1 = sample->getDistance(*source);
     detpar.l2 = det->getDistance(*sample);
     detpar.theta = workspace->detectorTwoTheta(det);
-    detpar.t0 = getComponentParameter(*det,"t0")*1e-6; // Convert to seconds
-    detpar.efixed = getComponentParameter(*det,"efixed");
+    detpar.t0 = getComponentParameter(det, pmap, "t0")*1e-6; // Convert to seconds
+    detpar.efixed = getComponentParameter(det, pmap, "efixed");
 
     ResolutionParams respar;
-    respar.dl1 = getComponentParameter(*det, "sigma_l1");
-    respar.dl2 = getComponentParameter(*det, "sigma_l2");
-    respar.dthe = getComponentParameter(*det,"sigma_theta"); //radians
-    respar.dEnLorentz = getComponentParameter(*det, "hwhm_lorentz");
-    respar.dEnGauss = getComponentParameter(*det, "sigma_gauss");
+    respar.dl1 = getComponentParameter(det, pmap, "sigma_l1");
+    respar.dl2 = getComponentParameter(det, pmap, "sigma_l2");
+    respar.dthe = getComponentParameter(det, pmap, "sigma_theta"); //radians
+    respar.dEnLorentz = getComponentParameter(det, pmap, "hwhm_lorentz");
+    respar.dEnGauss = getComponentParameter(det, pmap, "sigma_gauss");
 
     this->cacheYSpaceValues(workspace->readX(m_wsIndex), workspace->isHistogramData(), detpar, respar);
   }
@@ -303,26 +345,6 @@ namespace CurveFitting
     const double norm = 1.0/(0.5*M_PI*lorentzWidth);
     std::transform(voigt.begin(), voigt.end(), voigt.begin(), std::bind2nd(std::multiplies<double>(), norm));
   }
-
-  /**
-   * @param comp A reference to the component that should contain the parameter
-   * @param name The name of the parameter
-   * @returns The value of the parameter if it exists
-   * @throws A std::invalid_argument error if the parameter does not exist
-   */
-  double ComptonProfile::getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const
-  {
-    std::vector<double> pars = comp.getNumberParameter(name);
-    if(!pars.empty())
-    {
-      return pars[0];
-    }
-    else
-    {
-      throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
-    }
-  }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

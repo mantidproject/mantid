@@ -58,6 +58,10 @@ namespace CurveFitting
   class MANTID_CURVEFITTING_DLL ComptonProfile : public virtual API::ParamFunction, public virtual API::IFunction1D
   {
   public:
+    /// Retrieve a component parameter
+    static double getComponentParameter(const Geometry::IComponent_const_sptr & comp, const Geometry::ParameterMap &pmap,
+                                        const std::string &name);
+
     /// Default constructor required for factory
     ComptonProfile();
 
@@ -115,10 +119,6 @@ namespace CurveFitting
   protected:
     /// Logger
     Kernel::Logger & m_log;
-
-  private:
-    /// Retrieve a component parameter
-    double getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const;
 
     /// Current workspace index, required to access instrument parameters
     size_t m_wsIndex;
