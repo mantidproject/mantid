@@ -42,7 +42,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
                                    /* Create either a FileValidator or a DirectoryValidator, depending on Action */
                                    (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
                                    boost::make_shared<DirectoryValidator>(action == FileProperty::Directory) :
-                                   boost::make_shared<FileValidator>(exts, (action == FileProperty::Load) )
+                                   boost::make_shared<FileValidator>(exts, (action == FileProperty::Load), (action == FileProperty::Save) )
                                    , direction),
     m_action(action),
     m_defaultExt(""),
@@ -69,7 +69,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
       /* Create either a FileValidator or a DirectoryValidator, depending on Action */
       (action == FileProperty::Directory || action == FileProperty::OptionalDirectory) ?
           boost::make_shared<DirectoryValidator>(action == FileProperty::Directory) :
-          boost::make_shared<FileValidator>(std::vector<std::string>(1,ext), (action == FileProperty::Load) )
+          boost::make_shared<FileValidator>(std::vector<std::string>(1,ext), (action == FileProperty::Load), (action == FileProperty::Save) )
       , direction),
     m_action(action),
     m_defaultExt(ext),
@@ -370,7 +370,7 @@ std::string FileProperty::createDirectory(const std::string & path) const
   {
     stempath.makeParent();
   }
-  std::string error("");
+
   if( !stempath.toString().empty() )
   {
     Poco::File stem(stempath);
@@ -378,19 +378,22 @@ std::string FileProperty::createDirectory(const std::string & path) const
     {
       try
       {
-	stem.createDirectories();
+        stem.createDirectories();
       }
       catch(Poco::Exception &e)
       {
-	error = e.what();
+        std::stringstream msg;
+        msg << "Failed to create directory \"" << stempath.toString()
+            << "\": " << e.what() ;
+        return msg.str();
       }
     }
   }
   else
   {
-    error = "Invalid directory.";
+    return "Invalid directory.";
   }
-  return error;
+  return ""; // everything went fine
 }
 
 /**

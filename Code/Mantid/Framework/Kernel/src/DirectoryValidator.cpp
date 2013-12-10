@@ -18,7 +18,7 @@ Logger& DirectoryValidator::g_log = Logger::get("DirectoryValidator");
 DirectoryValidator::DirectoryValidator(bool testDirectoryExists)
   : FileValidator()
 {
-  this->m_fullTest = testDirectoryExists;
+  this->m_testExist = testDirectoryExists;
 }
 
 /// Destructor
@@ -52,7 +52,7 @@ std::string DirectoryValidator::checkValidity(const std::string& value) const
   }
 
   //If the path is required to exist check it is there
-  if ( m_fullTest )
+  if ( m_testExist )
   {
    if ( value.empty() || !Poco::File(value).exists() )
     return "Directory \"" + value + "\" not found";
