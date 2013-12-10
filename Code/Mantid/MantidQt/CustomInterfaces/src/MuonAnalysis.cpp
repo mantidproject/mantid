@@ -835,7 +835,18 @@ void MuonAnalysis::runLoadGroupButton()
   m_updating = false;
 
   if ( m_loaded )
-    groupLoadedWorkspace();
+  {
+    try
+    {
+      groupLoadedWorkspace();
+    }
+    catch(std::exception& e)
+    {
+      g_log.error( e.what() );
+      QMessageBox::critical(this, "MantidPlot - MuonAnalysis",
+          "Unable to group the workspace. See log for details.");
+    }
+  }
 }
 
 /**
@@ -1184,7 +1195,19 @@ void MuonAnalysis::groupTableChanged(int row, int column)
   updateFrontAndCombo();
   
   if ( m_loaded && ! m_updating )
-    groupLoadedWorkspace();
+  {
+    try
+    {
+      groupLoadedWorkspace();
+    }
+    catch(std::exception& e)
+    {
+      g_log.error( e.what() );
+
+      QMessageBox::critical(this, "MantidPlot - MuonAnalysis", 
+          "Unable to group the workspace. See log for details");
+    }
+  }
 }
 
 
