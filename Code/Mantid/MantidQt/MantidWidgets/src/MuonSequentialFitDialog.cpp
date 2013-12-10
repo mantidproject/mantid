@@ -213,17 +213,16 @@ namespace MantidWidgets
     setState(Running);
     m_stopRequested = false;
 
-    for ( auto runIt = runFilenames.constBegin(); runIt != runFilenames.constEnd(); ++runIt )
+    for ( auto fileIt = runFilenames.constBegin(); fileIt != runFilenames.constEnd(); ++fileIt )
     {
       // Process events (so that Stop button press is processed)
       QApplication::processEvents();
 
+      // Stop if requested by user
       if ( m_stopRequested )
-      {
-        setState(Stopped);
-        return;
-      }
+        break;
 
+      Workspace_sptr loadedWS;
       // Update progress
       m_ui.progress->setValue( m_ui.progress->value() + 1 );
 
@@ -231,15 +230,22 @@ namespace MantidWidgets
       {
         // TODO: should be MuonLoad here
         IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
+        loadAlg->setChild(true);
         loadAlg->initialize();
-        loadAlg->setPropertyValue( "Filename", runIt->toStdString() );
-        loadAlg->setPropertyValue( "OutputWorkspace", "Loaded" );
+        loadAlg->setPropertyValue( "Filename", fileIt->toStdString() );
+        loadAlg->setPropertyValue( "OutputWorkspace", "__YouDontSeeMeIAmNinja" ); // Is not used
         loadAlg->execute();
+
+        loadedWS = loadAlg->getProperty("OutputWorkspace");
       }
-      catch(std::exception)
+      catch(std::exception& e)
       {
-        // TODO: probably should show QMEssageBox
-        setState(Stopped);
+        QMessageBox::critical(this, "Loading failed", 
+            "Unable to load one of the files.\n\nCheck log for details");
+        g_log.error(e.what());
+        break;
+      }
+      {
       }
     }
 
