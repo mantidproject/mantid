@@ -66,6 +66,29 @@ namespace MantidWidgets
   }
 
   /**
+   * Returns displayable title for the given workspace;
+   * @param ws :: Workpspace to get title from
+   * @return The title, or empty string if unable to get one
+   */
+  std::string MuonSequentialFitDialog::getRunTitle(Workspace_const_sptr ws)
+  {
+    auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+
+    if ( ! matrixWS )
+      return "";
+
+    const std::string& instrName = matrixWS->getInstrument()->getName();
+    const int runNumber = matrixWS->getRunNumber();
+
+    if ( instrName.empty() || runNumber == 0 )
+      return "";
+
+    std::ostringstream runTitle;
+    runTitle << instrName << runNumber;
+    return runTitle.str();
+  }
+
+  /**
    * Initialize diagnosis table.
    */
   void MuonSequentialFitDialog::initDiagnosisTable()

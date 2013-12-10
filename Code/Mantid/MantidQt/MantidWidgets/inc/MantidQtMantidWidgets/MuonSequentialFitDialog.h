@@ -14,6 +14,8 @@ namespace MantidQt
 {
 namespace MantidWidgets
 {
+  using namespace Mantid::Kernel;
+  using namespace Mantid::API;
 
   /** MuonSequentialFitDialog : TODO: DESCRIPTION
     
@@ -86,6 +88,9 @@ namespace MantidWidgets
 
     /// Checks if specified name is valid as a name for label. 
     static std::string isValidLabel(const std::string& label);
+
+    /// Returns displayable title for the given workspace
+    static std::string getRunTitle(Workspace_const_sptr ws);
 
     /// Instance used to print log messages
     static Mantid::Kernel::Logger& g_log;
