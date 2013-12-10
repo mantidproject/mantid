@@ -1671,7 +1671,7 @@ void Indirect::calPlotEnergy()
   //something went wrong in the python
   if(pyOutput == "None")
   {
-    showInformationBox("Failed to plot energy. See log for details.");
+    showInformationBox("Failed to convert to energy. See log for details.");
     return;
   }
   
