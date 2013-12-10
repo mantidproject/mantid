@@ -3630,9 +3630,13 @@ void MuonAnalysis::setGrouping(ITableWorkspace_sptr detGroupingTable)
 {
   for ( size_t row = 0; row < detGroupingTable->rowCount(); ++row )
   {
-    const std::vector<int>& detectors = detGroupingTable->cell< std::vector<int> >(row,0);
+    std::vector<int> detectors = detGroupingTable->cell< std::vector<int> >(row,0);
 
-    const std::string& detectorRange = Strings::join(detectors.begin(), detectors.end(), ",");
+    // toString() expects the sequence to be sorted
+    std::sort( detectors.begin(), detectors.end() );
+
+    // Convert to a range string, i.e. 1-5,6-8,9
+    const std::string& detectorRange = Strings::toString(detectors);
 
     m_uiForm.groupTable->setItem( static_cast<int>(row), 0, 
         new QTableWidgetItem( QString::number(row + 1) ) );
