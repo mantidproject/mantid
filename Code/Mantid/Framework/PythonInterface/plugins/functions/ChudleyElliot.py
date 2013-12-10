@@ -50,7 +50,7 @@ class ChudleyElliot(IFunction1D):
        
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
-        length = self.getParameterValue("L")
+        l = self.getParameterValue("L")
 
         hwhm = []
         for x in xvals:
