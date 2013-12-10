@@ -701,10 +701,9 @@ namespace Mantid
     /**
      * Correct the position of the detectors based on the input theta value.
      * @param toCorrect : Workspace to correct detector posisitions on.
-     * @param isPointDetector : Flag to indicate that this is a point detector run.
      * @param thetaInDeg : Theta in degrees to use in correction calculations.
      */
-    void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg, IComponent_const_sptr sample, IComponent_const_sptr detector)
+    void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& thetaInDeg, IComponent_const_sptr sample, IComponent_const_sptr detector)
     {
 
       auto instrument = toCorrect->getInstrument();
@@ -779,7 +778,7 @@ namespace Mantid
       else if( bCorrectPosition ) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
       {
         g_log.debug("Correcting detector position");
-        correctPosition(toConvert, isPointDetector, thetaInDeg.get(), sample, detector);
+        correctPosition(toConvert, thetaInDeg.get(), sample, detector);
       }
 
       // Always convert units.

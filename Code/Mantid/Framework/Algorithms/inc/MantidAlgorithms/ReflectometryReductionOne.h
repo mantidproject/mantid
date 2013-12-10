@@ -127,7 +127,7 @@ namespace Mantid
       Mantid::Geometry::IComponent_const_sptr getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector);
 
       /// Correct detector positions.
-      void correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg,
+      void correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& thetaInDeg,
           Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
 
       /// Sum spectra.
