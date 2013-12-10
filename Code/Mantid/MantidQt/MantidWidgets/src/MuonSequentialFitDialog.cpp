@@ -140,6 +140,8 @@ namespace MantidWidgets
       double value = fittedFunction->getParameter(paramName);
       m_ui.diagnosisTable->setItem(newRow, i, new QTableWidgetItem( QString::number(value) ) );
     }
+
+    m_ui.diagnosisTable->scrollToBottom();
   }
 
   /**
@@ -235,7 +237,13 @@ namespace MantidWidgets
 
     if ( ads.doesExist(labelGroupName) )
     {
-      // TODO: confirm that 
+      QMessageBox::StandardButton answer = QMessageBox::question(this, "Label already exists", 
+          "Label you specified was used for one of the previous fits. Do you want to overwrite it?", 
+          QMessageBox::Yes | QMessageBox::Cancel);
+
+      if ( answer != QMessageBox::Yes )
+        return;
+
       ads.deepRemoveGroup(labelGroupName);
     }
    
@@ -271,6 +279,7 @@ namespace MantidWidgets
         // TODO: should be MuonLoad here
         IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
         loadAlg->setChild(true);
+        loadAlg->setRethrows(true);
         loadAlg->initialize();
         loadAlg->setPropertyValue( "Filename", fileIt->toStdString() );
         loadAlg->setPropertyValue( "OutputWorkspace", "__YouDontSeeMeIAmNinja" ); // Is not used
@@ -282,7 +291,6 @@ namespace MantidWidgets
       {
         QMessageBox::critical(this, "Loading failed", 
             "Unable to load one of the files.\n\nCheck log for details");
-        g_log.error(e.what());
         break;
       }
 
@@ -303,10 +311,13 @@ namespace MantidWidgets
 
       double fitQuality;
 
+      // TODO: fitting function logic
+
       try 
       {
         IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
         fit->initialize();
+        fit->setRethrows(true);
         fit->setProperty("Function", m_fitPropBrowser->getFittingFunction());
         fit->setProperty("InputWorkspace", ws);
         fit->setProperty("WorkspaceIndex", 0);
@@ -323,7 +334,6 @@ namespace MantidWidgets
       {
         QMessageBox::critical(this, "Fitting failed", 
             "Unable to fit one of the files.\n\nCheck log for details");
-        g_log.error(e.what());
         break;
       }
 
