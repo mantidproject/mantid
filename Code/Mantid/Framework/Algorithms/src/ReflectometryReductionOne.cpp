@@ -46,7 +46,7 @@ namespace Mantid
         for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it)
         {
           specid_t specId = (*it).first;
-          translatedIndexList.push_back(hostWS->getIndexFromSpectrumNumber(specId)); // Could be slow to do it like this.
+          translatedIndexList.push_back(static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId))); // Could be slow to do it like this.
         }
         return translatedIndexList;
       }
@@ -70,7 +70,7 @@ namespace Mantid
         for (size_t i = 0; i < originIndexes.size(); ++i)
         {
           const specid_t specNumber = originWS->getSpectrum(i)->getSpectrumNo();
-          translatedIndexList.push_back(spectrumMap[specNumber]);
+          translatedIndexList.push_back(static_cast<int>(spectrumMap[specNumber]));
         }
         return translatedIndexList;
       }
