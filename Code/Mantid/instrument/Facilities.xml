@@ -7,7 +7,7 @@
   </archive>
   
   <catalog name="ICat4Catalog">
-    <soapendpoint url="​https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
+    <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
     <filelocation>
       <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
