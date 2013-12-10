@@ -138,31 +138,6 @@ namespace Mantid
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, inputValidator),
           "Run to reduce.");
-      declareProperty(
-          new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input,
-              PropertyMode::Optional, inputValidator->clone()),
-          "First transmission run, or the low wavelength transmision run if SecondTransmissionRun is also provided.");
-      declareProperty(
-          new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input,
-              PropertyMode::Optional, inputValidator->clone()),
-          "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
-
-      declareProperty(
-          new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
-          "A comma separated list of first bin boundary, width, last bin boundary. "
-              "These parameters are used for stitching together transmission runs. "
-              "Values are in q. This input is only needed if a SecondTransmission run is provided.");
-
-      declareProperty(new PropertyWithValue<double>("StartOverlapQ", Mantid::EMPTY_DBL(), Direction::Input), "Start Q for stitching transmission runs together");
-      declareProperty(
-          new PropertyWithValue<double>("EndOverlapQ", Mantid::EMPTY_DBL(), Direction::Input),
-          "End Q for stitching transmission runs together");
-
-      setPropertyGroup("FirstTransmissionRun", "Transmission");
-      setPropertyGroup("SecondTransmissionRun", "Transmission");
-      setPropertyGroup("Params", "Transmission");
-      setPropertyGroup("StartOverlapQ", "Transmission");
-      setPropertyGroup("EndOverlapQ", "Transmission");
 
       std::vector<std::string> propOptions;
       propOptions.push_back(pointDetectorAnalysis);
@@ -241,9 +216,48 @@ namespace Mantid
 
       declareProperty(new PropertyWithValue<bool>("CorrectDetectorPositions", true, Direction::Input), "Correct detector positions using ThetaIn (if given)");
 
-      setPropertySettings("CorrectDetectorPositions",new Kernel::EnabledWhenProperty("ThetaIn", IS_NOT_DEFAULT));
-      setPropertySettings("RegionOfInterest",new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
-      setPropertySettings("RegionOfDirectBeam",new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
+      declareProperty(
+          new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input,
+              PropertyMode::Optional, inputValidator->clone()),
+          "First transmission run, or the low wavelength transmision run if SecondTransmissionRun is also provided.");
+      declareProperty(
+          new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input,
+              PropertyMode::Optional, inputValidator->clone()),
+          "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
+
+      declareProperty(
+          new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
+          "A comma separated list of first bin boundary, width, last bin boundary. "
+              "These parameters are used for stitching together transmission runs. "
+              "Values are in q. This input is only needed if a SecondTransmission run is provided.");
+
+      declareProperty(
+          new PropertyWithValue<double>("StartOverlapQ", Mantid::EMPTY_DBL(), Direction::Input),
+          "Start Q for stitching transmission runs together");
+      declareProperty(
+          new PropertyWithValue<double>("EndOverlapQ", Mantid::EMPTY_DBL(), Direction::Input),
+          "End Q for stitching transmission runs together");
+
+      setPropertyGroup("FirstTransmissionRun", "Transmission");
+      setPropertyGroup("SecondTransmissionRun", "Transmission");
+      setPropertyGroup("Params", "Transmission");
+      setPropertyGroup("StartOverlapQ", "Transmission");
+      setPropertyGroup("EndOverlapQ", "Transmission");
+
+      // Only do transmission corrections when point detector.
+      setPropertySettings("FirstTransmissionRun", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("SecondTransmissionRun", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("Params", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("StartOverlapQ", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("EndOverlapQ", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+
+      // Only use region of interest when in multi-detector analysis mode
+      setPropertySettings("RegionOfInterest",
+          new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
+
+      // Only use region of direct beam when in multi-detector analysis mode.
+      setPropertySettings("RegionOfDirectBeam",
+          new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
     }
 
     /**
