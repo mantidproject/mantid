@@ -32,6 +32,8 @@ namespace Mantid
       ICat::Session::Instance().setSoapEndPoint(url);
       // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
       ICat4::ICATPortBindingProxy icat = getICATProxy();
+      // Output the soap end-point in use for debugging purposes.
+      g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << "\n";
 
       // Used to authenticate the user.
       ns1__login login;
