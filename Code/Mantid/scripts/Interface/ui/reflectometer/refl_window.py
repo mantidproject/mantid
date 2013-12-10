@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Mon Dec 09 16:38:16 2013
+# Created: Tue Dec 10 13:42:57 2013
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -38,10 +38,6 @@ class Ui_windowRefl(object):
         font.setBold(True)
         self.comboInstrument.setFont(font)
         self.comboInstrument.setObjectName(_fromUtf8("comboInstrument"))
-        self.comboInstrument.addItem(_fromUtf8(""))
-        self.comboInstrument.addItem(_fromUtf8(""))
-        self.comboInstrument.addItem(_fromUtf8(""))
-        self.comboInstrument.addItem(_fromUtf8(""))
         self.layoutTopRow.addWidget(self.comboInstrument)
         self.labelRB = QtGui.QLabel(self.widgetMainRow)
         self.labelRB.setObjectName(_fromUtf8("labelRB"))
@@ -218,10 +214,6 @@ class Ui_windowRefl(object):
 
     def retranslateUi(self, windowRefl):
         windowRefl.setWindowTitle(QtGui.QApplication.translate("windowRefl", "ISIS Reflectometry", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboInstrument.setItemText(0, QtGui.QApplication.translate("windowRefl", "Inter", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboInstrument.setItemText(1, QtGui.QApplication.translate("windowRefl", "SURF", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboInstrument.setItemText(2, QtGui.QApplication.translate("windowRefl", "CRISP", None, QtGui.QApplication.UnicodeUTF8))
-        self.comboInstrument.setItemText(3, QtGui.QApplication.translate("windowRefl", "PolRef", None, QtGui.QApplication.UnicodeUTF8))
         self.labelRB.setText(QtGui.QApplication.translate("windowRefl", "RB:", None, QtGui.QApplication.UnicodeUTF8))
         self.labelRuns.setText(QtGui.QApplication.translate("windowRefl", "Transmission run(s):", None, QtGui.QApplication.UnicodeUTF8))
         self.labelPolarCorrect.setText(QtGui.QApplication.translate("windowRefl", "Polarisation corrections", None, QtGui.QApplication.UnicodeUTF8))

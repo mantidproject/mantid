@@ -40,26 +40,6 @@
           <bold>true</bold>
          </font>
         </property>
-        <item>
-         <property name="text">
-          <string>Inter</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>SURF</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>CRISP</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>PolRef</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item>

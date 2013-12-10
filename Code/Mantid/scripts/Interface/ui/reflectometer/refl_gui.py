@@ -42,8 +42,9 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_buttonProcess_clicked(self):
         self.process()
     def on_comboInstrument_activated(self, instrument):
-        config['default.instrument'] = str(instrument)
-        print "Instrument is now: ", str(instrument)
+        config['default.instrument'] = self.instrumentList[instrument]
+        print "Instrument is now: ", config['default.instrument']
+        self.textRB.clear()
         self.populateList()
     def on_actionOpen_Table_triggered(self):
         self.loadTable()
@@ -67,6 +68,9 @@ class ReflGui(refl_window.Ui_windowRefl):
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
         self.loading = False
+        self.instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
+        for inst in self.instrumentList:
+            self.comboInstrument.addItem(inst)
         self.initTable()
         self.populateList()
         self.windowRefl = windowRefl
@@ -75,10 +79,9 @@ class ReflGui(refl_window.Ui_windowRefl):
     def initTable(self):
         self.currentTable = None
         self.tableMain.resizeColumnsToContents()
-        instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
-        currentInstrument = config['default.instrument']
-        if currentInstrument in instrumentList:
-            self.comboInstrument.setCurrentIndex(instrumentList.index(config['default.instrument'].upper()))
+        currentInstrument = config['default.instrument'].upper()
+        if currentInstrument in self.instrumentList:
+            self.comboInstrument.setCurrentIndex(self.instrumentList.index(currentInstrument))
         else:
             self.comboInstrument.setCurrentIndex(0)
             config['default.instrument'] = 'INTER'
