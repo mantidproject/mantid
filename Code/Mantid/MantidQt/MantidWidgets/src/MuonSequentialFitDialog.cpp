@@ -119,6 +119,30 @@ namespace MantidWidgets
   }
 
   /**
+   * Add a new entry to the diagnosis table.
+   * @param runTitle       :: Title of the run fitted
+   * @param fitQuality     :: Number representing a goodness of the fit
+   * @param fittedFunction :: Function containing fitted parameters 
+   */
+  void MuonSequentialFitDialog::addDiagnosisEntry(const std::string& runTitle, double fitQuality,
+      IFunction_sptr fittedFunction)
+  {
+    int newRow = m_ui.diagnosisTable->rowCount();
+
+    m_ui.diagnosisTable->insertRow(newRow);
+
+    m_ui.diagnosisTable->setItem(newRow, 0, new QTableWidgetItem( QString::fromStdString(runTitle) ) );
+    m_ui.diagnosisTable->setItem(newRow, 1, new QTableWidgetItem( QString::number(fitQuality) ) );
+
+    for(int i = 2; i < m_ui.diagnosisTable->columnCount(); ++i)
+    {
+      std::string paramName = m_ui.diagnosisTable->horizontalHeaderItem(i)->text().toStdString();
+      double value = fittedFunction->getParameter(paramName);
+      m_ui.diagnosisTable->setItem(newRow, i, new QTableWidgetItem( QString::number(value) ) );
+    }
+  }
+
+  /**
    * Updates visibility/tooltip of label error asterisk.
    * @param label :: New label as specified by user 
    */
@@ -225,6 +249,9 @@ namespace MantidWidgets
     m_ui.progress->setFormat("%p%");
     m_ui.progress->setValue(0);
 
+    // Clear diagnosis table for new fit
+    m_ui.diagnosisTable->setRowCount(0);
+
     setState(Running);
     m_stopRequested = false;
 
@@ -274,6 +301,8 @@ namespace MantidWidgets
       const std::string runTitle = getRunTitle(ws);
       const std::string wsBaseName = labelGroupName + "_" + runTitle; 
 
+      double fitQuality;
+
       try 
       {
         IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
@@ -287,6 +316,8 @@ namespace MantidWidgets
         fit->setProperty("Minimizer", m_fitPropBrowser->minimizer());
         fit->setProperty("CostFunction", m_fitPropBrowser->costFunction());
         fit->execute();
+
+        fitQuality = fit->getProperty("OutputChi2overDoF");
       }
       catch(std::exception& e)
       {
@@ -301,6 +332,9 @@ namespace MantidWidgets
       ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
       ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
       ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
+
+      // Add information about the fit to the diagnosis table
+      addDiagnosisEntry(runTitle, fitQuality, m_fitPropBrowser->getFittingFunction());
 
       // Update progress
       m_ui.progress->setFormat("%p% - " + QString::fromStdString(runTitle) );

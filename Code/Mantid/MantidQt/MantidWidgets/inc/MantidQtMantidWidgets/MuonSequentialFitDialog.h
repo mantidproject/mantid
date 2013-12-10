@@ -70,6 +70,10 @@ namespace MantidWidgets
     /// Initialize diagnosis table 
     void initDiagnosisTable();
 
+    /// Add a new entry to the diagnosis table 
+    void addDiagnosisEntry(const std::string& runTitle, double fitQuality,
+        IFunction_sptr fittedFunction);
+
     // -- VARIABLES -----------------------------------------------------------
 
     /// UI form
