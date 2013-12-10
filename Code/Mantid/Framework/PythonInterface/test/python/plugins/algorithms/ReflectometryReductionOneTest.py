@@ -245,8 +245,6 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         self.assertEqual(2, out_ws_lam.getNumberHistograms())
         DeleteWorkspace(real_run)
     
-    
-        
     def test_point_detector_run_with_two_transmission_workspaces(self):
         alg = self.construct_standard_algorithm()
         real_run = Load('INTER00013460.nxs')
@@ -288,7 +286,42 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         
         DeleteWorkspace(real_run)
         
-
+    def test_throw_if_no_roi_for_multidetector_run(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('POLREF00004699.nxs')
+        alg.set_InputWorkspace(real_run[0])
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_RegionOfDirectBeam([0,1])
+        alg.set_DetectorComponentName('lineardetector')
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_throw_if_no_db_for_multidetector_run(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('POLREF00004699.nxs')
+        alg.set_InputWorkspace(real_run[0])
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_DetectorComponentName('lineardetector')
+        alg.set_RegionOfInterest([0,1])
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_multidetector_run(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('POLREF00004699.nxs')
+        alg.set_InputWorkspace(real_run[0])
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_DetectorComponentName('lineardetector')
+        alg.set_RegionOfInterest([3, 10]) # Fictional values
+        alg.set_RegionOfDirectBeam([20, 30]) # Fictional values
+        alg.set_ThetaIn(0.1) # Fictional values
+        
+        out_ws_q, out_ws_lam, theta =  alg.execute()
+        
+        self.assertTrue(isinstance(out_ws_lam, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("Wavelength", out_ws_lam.getAxis(0).getUnit().unitID())
+        
+        self.assertTrue(isinstance(out_ws_q, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("MomentumTransfer", out_ws_q.getAxis(0).getUnit().unitID())
+        
         
 if __name__ == '__main__':
     unittest.main()

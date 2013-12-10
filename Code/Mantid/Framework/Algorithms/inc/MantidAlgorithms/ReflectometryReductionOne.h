@@ -66,7 +66,7 @@ namespace Mantid
 
       /// Convert to an IvsQ workspace. Performs detector positional corrections based on the component name and the theta value.
       Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool correctPosition, const bool isPointDetector,
-           OptionalDouble& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IDetector_const_sptr detector);
+           OptionalDouble& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
 
     private:
 
@@ -124,11 +124,14 @@ namespace Mantid
       Mantid::Geometry::IComponent_const_sptr getSurfaceSampleComponent(Mantid::Geometry::Instrument_const_sptr inst);
 
       /// Get the detector component
-      Mantid::Geometry::IDetector_const_sptr getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector);
+      Mantid::Geometry::IComponent_const_sptr getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector);
 
       /// Correct detector positions.
       void correctPosition(API::MatrixWorkspace_sptr toCorrect, const bool isPointDetector, const double& thetaInDeg,
           Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
+
+      /// Sum spectra.
+      Mantid::API::MatrixWorkspace_sptr sumSpectraOverRange(API::MatrixWorkspace_sptr inWS, const int startIndex, const int endIndex);
 
     };
 

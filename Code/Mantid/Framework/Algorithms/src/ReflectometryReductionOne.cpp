@@ -25,6 +25,61 @@ namespace Mantid
   namespace Algorithms
   {
 
+    /*Anonomous namespace */
+    namespace
+    {
+      /**
+       * Helper non-member function for translating all the workspace indexes in an origin workspace into workspace indexes
+       * of a host end-point workspace. This is done using spectrum numbers as the intermediate.
+       *
+       * This function will throw a runtime error if the specId are not found to exist on the host end-point workspace.
+       *
+       * @param originWS : Origin workspace, which provides the original workspace index to spectrum id mapping.
+       * @param hostWS : Workspace onto which the resulting workspace indexes will be hosted
+       * @return Remapped wokspace indexes applicable for the host workspace.
+       */
+      ReflectometryReductionOne::WorkspaceIndexList createWorkspaceIndexListFromDetectorWorkspace(
+          MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS)
+      {
+        auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
+        ReflectometryReductionOne::WorkspaceIndexList translatedIndexList;
+        for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it)
+        {
+          specid_t specId = (*it).first;
+          translatedIndexList.push_back(hostWS->getIndexFromSpectrumNumber(specId)); // Could be slow to do it like this.
+        }
+        return translatedIndexList;
+      }
+
+      /**
+       * Helper non-member function
+       * Get indexes in terms of an end-point host workspace.
+       *
+       * Throws if the spectrum id cannot be found.
+       * @param hostWS : The host end point workspace, which the return values will be generated with reference to.
+       * @param originWS : The origin workspace
+       * @param originIndexes : Indexes in terms of the origin workspace
+       * @return WorkspaceIndexes in terms of the host workspace
+       */
+      ReflectometryReductionOne::WorkspaceIndexList getIndexesInTermsOf(MatrixWorkspace_const_sptr hostWS,
+          MatrixWorkspace_sptr originWS,
+          const ReflectometryReductionOne::WorkspaceIndexList& originIndexes)
+      {
+        auto spectrumMap = hostWS->getSpectrumToWorkspaceIndexMap();
+        ReflectometryReductionOne::WorkspaceIndexList translatedIndexList;
+        for (size_t i = 0; i < originIndexes.size(); ++i)
+        {
+          const specid_t specNumber = originWS->getSpectrum(i)->getSpectrumNo();
+          translatedIndexList.push_back(spectrumMap[specNumber]);
+        }
+        return translatedIndexList;
+      }
+
+      const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
+      const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
+    }
+    /* End of ananomous namespace */
+
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(ReflectometryReductionOne)
 
@@ -70,12 +125,6 @@ namespace Mantid
       this->setWikiSummary(
           "Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.");
       this->setOptionalMessage(this->getWikiSummary());
-    }
-
-    namespace
-    {
-      const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
-      const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
     }
 
     //----------------------------------------------------------------------------------------------
@@ -535,28 +584,6 @@ namespace Mantid
     }
 
     /**
-     * Helper non-member function for translating all the workspace indexes in an origin workspace into workspace indexes
-     * of a host end-point workspace. This is done using spectrum numbers as the intermediate.
-     *
-     * This function will throw a runtime error if the specId are not found to exist on the host end-point workspace.
-     *
-     * @param originWS : Origin workspace, which provides the original workspaceindex to spectrum id mapping.
-     * @param hostWS : Workspace onto which the resulting workspace indexes will be hosted
-     * @return Remapped wokspace indexes applicable for the host workspace.
-     */
-    ReflectometryReductionOne::WorkspaceIndexList createWorkspaceIndexListFromDetectorWorkspace(MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS)
-    {
-      auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
-      ReflectometryReductionOne::WorkspaceIndexList transmissionDetectorIndexList;
-      for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it)
-      {
-        specid_t specId = (*it).first;
-        transmissionDetectorIndexList.push_back(hostWS->getIndexFromSpectrumNumber(specId)); // Could be slow to do it like this.
-      }
-      return transmissionDetectorIndexList;
-    }
-
-    /**
      * Perform Transmission Corrections.
      * @param IvsLam : Run workspace which is to be normalized by the results of the transmission corrections.
      * @param wavelengthInterval : Wavelength interval for the run workspace.
@@ -712,7 +739,7 @@ namespace Mantid
      * @return
      */
     Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition,
-        const bool isPointDetector,  OptionalDouble& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IDetector_const_sptr detector)
+        const bool isPointDetector,  OptionalDouble& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector)
     {
       /*
        * Can either calculate a missing theta value for the purposes of reporting, or correct positions based on a theta value,
@@ -722,11 +749,17 @@ namespace Mantid
       {
         g_log.debug("Calculating final theta.");
         const double thetaToRad = 180 / M_PI;
-        const V3D sampleToDetectorPos = detector->getPos() - sample->getPos();
+
         Instrument_const_sptr instrument = toConvert->getInstrument();
+
+        const V3D sampleToDetectorPos = detector->getPos() - sample->getPos();
+
         const V3D sourcePos = instrument->getSource()->getPos();
         const V3D beamPos = sample->getPos() - sourcePos;
-        const double calculatedTheta = detector->getTwoTheta(sample->getPos(), beamPos) * thetaToRad * 1 / 2;
+
+        const V3D sampleDetVec = detector->getPos() - sample->getPos();
+        const double calculatedTheta =  sampleDetVec.angle(beamPos) * thetaToRad * 1 / 2;
+
         thetaInDeg = calculatedTheta / thetaToRad; // Assign calculated value it.
       }
       else if( bCorrectPosition ) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
@@ -775,7 +808,7 @@ namespace Mantid
      * @param isPointDetector : True if this is a point detector. Used to guess a name.
      * @return The component : The component object found.
      */
-    Mantid::Geometry::IDetector_const_sptr ReflectometryReductionOne::getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector)
+    boost::shared_ptr<const Mantid::Geometry::IComponent> ReflectometryReductionOne::getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector)
     {
       std::string componentToCorrect = isPointDetector ? "point-detector" : "line-detector";
       if(!isPropertyDefault("DetectorComponentName"))
@@ -787,12 +820,26 @@ namespace Mantid
       {
         throw std::invalid_argument(componentToCorrect + " does not exist. Check input properties.");
       }
-      IDetector_const_sptr detector = boost::dynamic_pointer_cast<const IDetector>(searchResult);
-      if(!detector)
-      {
-        throw std::invalid_argument(componentToCorrect + " is not of type detector.");
-      }
-      return detector;
+      return searchResult;
+    }
+
+    /**
+     * Sum spectra over a specified range.
+     * @param inWS
+     * @param startIndex
+     * @param endIndex
+     * @return Workspace with spectra summed over the specified range.
+     */
+    MatrixWorkspace_sptr ReflectometryReductionOne::sumSpectraOverRange(MatrixWorkspace_sptr inWS, const int startIndex, const int endIndex)
+    {
+      auto sumSpectra = this->createChildAlgorithm("SumSpectra");
+      sumSpectra->initialize();
+      sumSpectra->setProperty("InputWorkspace", inWS);
+      sumSpectra->setProperty("StartWorkspaceIndex", startIndex);
+      sumSpectra->setProperty("EndWorkspaceIndex", endIndex);
+      sumSpectra->execute();
+      MatrixWorkspace_sptr outWS = sumSpectra->getProperty("OutputWorkspace");
+      return outWS;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -840,7 +887,7 @@ namespace Mantid
       const bool correctDetctorPositions = getProperty("CorrectDetectorPositions");
 
       auto instrument = runWS->getInstrument();
-      IDetector_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
+      IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
       IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
 
       DetectorMonitorWorkspacePair inLam = toLam(runWS, indexList, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
@@ -873,15 +920,27 @@ namespace Mantid
         {
           g_log.warning("No transmission correction will be applied.");
         }
-
-        IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, isPointDetector, theta, sample, detector)
       }
       else
       {
-        //TODO
-        throw std::runtime_error("Multi-detector processing is not yet implemented.");
+        if(!regionOfInterest.is_initialized())
+        {
+          throw std::invalid_argument("RegionOfInterest must be provided for a multi-detector run.");
+        }
+        if(!directBeam.is_initialized())
+        {
+          throw std::invalid_argument("RegionOfDirectBeam must be provided for a multi-detector run.");
+        }
+        const WorkspaceIndexList roi = getIndexesInTermsOf(detectorWS, runWS, regionOfInterest.get());
+        const WorkspaceIndexList db = getIndexesInTermsOf(detectorWS, runWS, directBeam.get());
+
+        MatrixWorkspace_sptr regionOfInterestWS = this->sumSpectraOverRange(detectorWS, roi.front(), roi.back());
+        MatrixWorkspace_sptr regionOfDirectBeamWS = this->sumSpectraOverRange(detectorWS, db.front(), db.back());
+
+        IvsLam = regionOfInterestWS / regionOfDirectBeamWS; // TODO. This needs checking.
       }
 
+      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, isPointDetector, theta, sample, detector);
 
       setProperty("ThetaOut", theta.get());
       setProperty("OutputWorkspaceWavelength", IvsLam);
