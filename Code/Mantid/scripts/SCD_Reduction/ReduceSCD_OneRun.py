@@ -24,13 +24,15 @@
 # and the posibility to load a UB matrix which will be used for integration of the individual
 # runs and to index the combined file (Code from Xiapoing).
 #
-
-#
 # _v2: December 3rd 2013. Mads Joergensen
 # Adds the posibility to optimize the loaded UB for each run for a better peak prediction
 # It is also possible to find the common UB by using lattice parameters of the first
 # run or the loaded matirix instead of the default FFT method
 #
+# _v3: December 5 2013. A. J. Schultz
+# This version includes the Boolean parameter use_monitor_counts to allow
+# the use of either monitor counts (True) or proton charge (False) for
+# scaling.
 
 import os
 import sys
@@ -161,13 +163,15 @@ if (calibration_file_1 is not None ) or (calibration_file_2 is not None):
                   Filename=calibration_file_1, Filename2=calibration_file_2 )  
 
 monitor_ws = LoadNexusMonitors( Filename=full_name )
+proton_charge = monitor_ws.getRun().getProtonCharge() * 1000.0  # get proton charge
+print "\n", run, " has integrated proton charge x 1000 of", proton_charge, "\n"
 
 integrated_monitor_ws = Integration( InputWorkspace=monitor_ws, 
                                      RangeLower=min_monitor_tof, RangeUpper=max_monitor_tof, 
                                      StartWorkspaceIndex=monitor_index, EndWorkspaceIndex=monitor_index )
 
 monitor_count = integrated_monitor_ws.dataY(0)[0]
-print "\n", run, " has calculated monitor count", monitor_count, "\n"
+print "\n", run, " has integrated monitor count", monitor_count, "\n"
 
 minVals= "-"+max_Q +",-"+max_Q +",-"+max_Q
 maxVals = max_Q +","+max_Q +","+ max_Q
@@ -234,7 +238,14 @@ else:
 num_peaks = peaks_ws.getNumberPeaks()
 for i in range(num_peaks):
   peak = peaks_ws.getPeak(i)
-  peak.setMonitorCount( monitor_count )
+  if use_monitor_counts:
+    peak.setMonitorCount( monitor_count )
+  else:
+    peak.setMonitorCount( proton_charge )
+if use_monitor_counts:
+  print '\n*** Beam monitor counts used for scaling.'
+else:
+  print '\n*** Proton charge x 1000 used for scaling.\n'
     
 if use_sphere_integration:
 #
