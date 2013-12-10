@@ -32,6 +32,9 @@ To determine if a file contains data from more than one period the field ''switc
 If this value is greater than one it is taken to be the number of periods, <math>N_p</math> of the data.
 In this case the <math>N_s</math> spectra in the ''histogram_data'' field are split with <math>N_s/N_p</math> assigned to each period.
 
+===Dead times and detector grouping===
+Muon Nexus v1 files might contain dead time and detector grouping informationl. These are loaded as TableWorkspaces of the format accepted by ApplyDeadTimeCorr and MuonGroupDetectors accordingly. These are returned if and only if names are specified for the properties. For multi-period data workspace groups might be returned, if information in the Nexus files contains this information for each period.
+
 ===ChildAlgorithms used===
 
 The ChildAlgorithms used by LoadMuonNexus are:
