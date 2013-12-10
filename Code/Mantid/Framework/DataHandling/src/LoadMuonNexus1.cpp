@@ -584,10 +584,13 @@ namespace Mantid
               tableGroup->addWorkspace(table);
           }
 
-          if ( tableGroup->size() != static_cast<size_t>(m_numberOfPeriods) )
-            throw Exception::FileError("Zero grouping for some of the periods", m_filename);
+          if ( tableGroup->size() != 0 )
+          {
+            if ( tableGroup->size() != static_cast<size_t>(m_numberOfPeriods) )
+              throw Exception::FileError("Zero grouping for some of the periods", m_filename);
 
-          setProperty("DetectorGroupingTable", tableGroup);
+            setProperty("DetectorGroupingTable", tableGroup);
+          }
         }
       }
     }
