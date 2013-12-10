@@ -21,7 +21,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 
 	CropWorkspace(InputWorkspace=spectumWs, OutputWorkspace=spectumWs,XMin=qmin, XMax=qmax)
 
-	#give the user some extra infromation is required
+	#give the user some extra infromation if required
 	if Verbose:
 		inGR = mtd[samWS].getRun()
 		log = inGR.getLogData('Fit Program')
@@ -33,9 +33,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 		logger.notice('Parameters in ' + samWS)
 
 	x = mtd[samWS].readX(0)
-	y = mtd[samWS].readY(0)
-	xmax = x[len(x)-1]
-	diff = (y[2]-y[0])/((x[2]-x[0])*(x[2]-x[0]))
+	xmax = x[-1]
 	
 	#select fit function to use
 	if jumpFunc == 'CE':
@@ -56,7 +54,9 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 
 	elif jumpFunc == 'Fick':
 		# Fick: HWHM=D*Q^2
-
+		
+		y = mtd[samWS].readY(0)
+		diff = (y[2]-y[0])/((x[2]-x[0])*(x[2]-x[0]))
 		func = 'name=FickDiffusion, D='+str(diff)
 
 	elif jumpFunc == 'Teixeira':
