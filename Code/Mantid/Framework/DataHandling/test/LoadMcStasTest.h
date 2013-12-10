@@ -51,34 +51,35 @@ public:
     inputFile = "mcstas_event_hist.h5";
     algToBeTested.setPropertyValue("Filename", inputFile);
 
-   
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
     TS_ASSERT( algToBeTested.isExecuted() );
+
+    std::string postfix = "_" + outputSpace;
     //
     //  test workspace created by LoadMcStas
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
     TS_ASSERT_EQUALS( output->getNumberOfEntries(), 5); // 5 NXdata groups
     //
     //
-    MatrixWorkspace_sptr outputItem1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_1");
+    MatrixWorkspace_sptr outputItem1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EventData" + postfix);
     TS_ASSERT_EQUALS( outputItem1->getNumberHistograms(), 8192);  
     //
     //
-    MatrixWorkspace_sptr outputItem2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_2");
+    MatrixWorkspace_sptr outputItem2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Wavelength_monitor" + postfix);
     TS_ASSERT_EQUALS( outputItem2->getNumberHistograms(), 1);  
     TS_ASSERT_EQUALS( outputItem2->getNPoints(), 1000); 
     //
     //
-    MatrixWorkspace_sptr outputItem3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_3");
+    MatrixWorkspace_sptr outputItem3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor" + postfix);
     TS_ASSERT_EQUALS( outputItem3->getNumberHistograms(), 128);   
     //
     //
-    MatrixWorkspace_sptr outputItem4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_4");
+    MatrixWorkspace_sptr outputItem4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor_radial_average" + postfix);
     TS_ASSERT_EQUALS( outputItem4->getNumberHistograms(), 1);  
     TS_ASSERT_EQUALS( outputItem4->getNPoints(), 100);
     //
     //
-    MatrixWorkspace_sptr outputItem5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace+"_5");
+    MatrixWorkspace_sptr outputItem5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor_radial_sum" + postfix);
     TS_ASSERT_EQUALS( outputItem5->getNumberHistograms(), 1);  
     TS_ASSERT_EQUALS( outputItem5->getNPoints(), 100);     
   } // testExec()

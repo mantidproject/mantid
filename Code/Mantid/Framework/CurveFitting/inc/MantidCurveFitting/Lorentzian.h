@@ -51,10 +51,10 @@ namespace Mantid
       /// overwrite IPeakFunction base class methods
       virtual double centre()const {return getParameter("PeakCentre");}
       virtual double height()const {return getParameter("Amplitude");}
-      virtual double fwhm()const {return 2*getParameter("HWHM");}
+      virtual double fwhm()const {return getParameter("FWHM");}
       virtual void setCentre(const double c) {setParameter("PeakCentre",c);}
       virtual void setHeight(const double h) {setParameter("Amplitude",h);}
-      virtual void setFwhm(const double w) {setParameter("HWHM",w/2.0);}
+      virtual void setFwhm(const double w) {setParameter("FWHM",w);}
 
       /// overwrite IFunction base class methods
       std::string name()const{return "Lorentzian";}

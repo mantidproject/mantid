@@ -103,6 +103,28 @@ namespace MantidQt
     }
 
     /**
+     * Check that the given MWRunFiles widget has valid files.
+     *
+     * @param name   :: the "name" of the widget so as to be recognised by the user.
+     * @param widget :: the widget to check
+     */
+    void UserInputValidator::checkDataSelectorIsValid(const QString & name, DataSelector * widget)
+    {
+      if( ! widget->isValid() )
+      {
+        switch(widget->getCurrentView())
+        {
+          case 0:
+            m_errorMessages.append(name + " file error: file could not be found");
+            break;
+          case 1:
+            m_errorMessages.append(name + " workspace error: workspace could not be found");
+            break;
+        }
+      }
+    }
+
+    /**
      * Check that the given start and end range is valid.
      *
      * @param name  :: the name of the range
