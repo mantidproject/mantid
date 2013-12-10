@@ -71,6 +71,12 @@ namespace MantidQt
 				case 1:
 					fitFunction = "SS"; // Use Singwi-Sjolander
 					break;
+				case 2:
+					fitFunction = "Fick";
+					break;
+				case 3:
+					fitFunction = "Teixeira";
+					break;
 			}
 
 			// width should be 0, 2 or 4
