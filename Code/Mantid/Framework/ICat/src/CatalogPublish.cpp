@@ -60,10 +60,15 @@ namespace Mantid
 
         // Send the HTTP request, and obtain the output stream to write to. E.g. the data to publish to the server.
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_PUT, path, Poco::Net::HTTPMessage::HTTP_1_1);
+        // Sets the encoding type of the request. This enables us to stream data to the server.
+        request.setChunkedTransferEncoding(true);
         std::ostream& os = session.sendRequest(request);
 
+        // Obtain the mode to used base on file extension.
+        std::ios_base::openmode mode = isDataFile(filePath) ? std::ios_base::binary : std::ios_base::in;
         // Stream the contents of the file the user wants to publish & store it in file.
-        std::ifstream file(filePath.c_str());
+        std::ifstream file(filePath.c_str(), mode);
+        // Copy data from the input stream to the server (request) output stream.
         Poco::StreamCopier::copyStream(file, os);
         
         // Close the request by requesting a response.
@@ -76,5 +81,18 @@ namespace Mantid
       }
       catch(Poco::Exception&) {}
     }
+
+    /**
+    * Checks to see if the file to be downloaded is a datafile.
+    * @param filePath :: Path of data file to download.
+    * @returns True if the file in the path is a data file.
+    */
+    bool CatalogPublish::isDataFile(const std::string & filePath)
+    {
+      std::string extension = Poco::Path(filePath).getExtension();
+      std::transform(extension.begin(),extension.end(),extension.begin(),tolower);
+      return extension.compare("raw") == 0 || extension.compare("nxs") == 0;
+    }
+
   }
 }

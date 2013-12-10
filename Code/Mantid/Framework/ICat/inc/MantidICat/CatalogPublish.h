@@ -53,6 +53,8 @@ namespace Mantid
         void init();
         /// Override algorithm execute method.
         void exec();
+        /// True if the extension of the file is a datafile.
+        bool isDataFile(const std::string & filePath);
     };
   }
 }
