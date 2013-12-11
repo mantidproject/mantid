@@ -115,7 +115,7 @@ void LoadParameterFile::exec()
 
 void LoadParameterFile::execManually(bool useString, std::string filename, std::string parameterXML,  Mantid::API::ExperimentInfo_sptr localWorkspace)
 {
-  // TODO: Refactor to remove the need for the const cast
+  // TODO: Refactor to remove the need for the const cast (ticket #8521)
   Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
 
   // Set up the DOM parser and parse xml file
