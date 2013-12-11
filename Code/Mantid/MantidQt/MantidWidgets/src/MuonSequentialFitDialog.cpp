@@ -109,13 +109,21 @@ namespace MantidWidgets
     IFunction_sptr fitFunc = m_fitPropBrowser->getFittingFunction();
 
     for(size_t i = 0; i < fitFunc->nParams(); i++)
-      headerLabels << QString::fromStdString( fitFunc->parameterName(i) );
+    {
+      QString paramName = QString::fromStdString( fitFunc->parameterName(i) ); 
+      headerLabels << paramName;
+      headerLabels << paramName + "_Err";
+    }
 
     m_ui.diagnosisTable->setColumnCount( headerLabels.size() );
     m_ui.diagnosisTable->setHorizontalHeaderLabels(headerLabels);
 
-    // Make the table fill all the available space
-    m_ui.diagnosisTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    // Make the table fill all the available space and columns be resized to fit contents
+    m_ui.diagnosisTable->horizontalHeader()->setStretchLastSection(true);
+    m_ui.diagnosisTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
+    // Make rows alternate bg colors for better user experience 
+    m_ui.diagnosisTable->setAlternatingRowColors(true);
   }
 
   /**
@@ -134,11 +142,16 @@ namespace MantidWidgets
     m_ui.diagnosisTable->setItem(newRow, 0, new QTableWidgetItem( QString::fromStdString(runTitle) ) );
     m_ui.diagnosisTable->setItem(newRow, 1, new QTableWidgetItem( QString::number(fitQuality) ) );
 
-    for(int i = 2; i < m_ui.diagnosisTable->columnCount(); ++i)
+    for(int i = 2; i < m_ui.diagnosisTable->columnCount(); i += 2)
     {
       std::string paramName = m_ui.diagnosisTable->horizontalHeaderItem(i)->text().toStdString();
-      double value = fittedFunction->getParameter(paramName);
-      m_ui.diagnosisTable->setItem(newRow, i, new QTableWidgetItem( QString::number(value) ) );
+      size_t paramIndex = fittedFunction->parameterIndex(paramName);
+
+      QString value = QString::number( fittedFunction->getParameter(paramIndex) );
+      QString error = QString::number( fittedFunction->getError(paramIndex) );
+
+      m_ui.diagnosisTable->setItem(newRow, i, new QTableWidgetItem(value) );
+      m_ui.diagnosisTable->setItem(newRow, i + 1, new QTableWidgetItem(error) );
     }
 
     m_ui.diagnosisTable->scrollToBottom();
