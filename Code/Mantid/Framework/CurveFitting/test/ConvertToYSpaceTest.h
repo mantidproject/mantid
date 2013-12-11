@@ -27,9 +27,39 @@ public:
   
   void test_exec_with_TOF_input_gives_correct_X_values()
   {
-    double x0(370.0),x1(371.0),dx(0.5); //chosen to give put us near the peak for this mass & spectrum
-    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx);
+    using namespace Mantid::API;
 
+    auto alg = createAlgorithm();
+    double x0(50.0),x1(300.0),dx(0.5);
+    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx, true,true);
+    alg->setProperty("InputWorkspace", testWS);
+    alg->setProperty("Mass", 1.0097);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS != 0)
+
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), outputWS->getNumberHistograms());
+
+    // Test a few values
+    const auto &outX = outputWS->readX(0);
+    const auto &outY = outputWS->readY(0);
+    const auto &outE = outputWS->readE(0);
+    const size_t npts = outputWS->blocksize();
+
+    // X
+    TS_ASSERT_DELTA(-18.71348856, outX.front(), 1e-08);
+    TS_ASSERT_DELTA(-1.670937938, outX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(17.99449408, outX.back(), 1e-08);
+    // Y
+    TS_ASSERT_DELTA(-0.01152733, outY.front(), 1e-08);
+    TS_ASSERT_DELTA(5.56667697, outY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.35141703, outY.back(), 1e-08);
+    // E
+    TS_ASSERT_DELTA(25.14204252, outE.front(), 1e-08);
+    TS_ASSERT_DELTA(36.99940026, outE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(138.38603736, outE.back(), 1e-08);
   }
   
   // --------------------------------- Failure cases -----------------------------------

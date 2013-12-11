@@ -116,7 +116,6 @@ namespace CurveFitting
                                    const double k1, const double v1,
                                    const DetectorParams & detpar)
   {
-
     const double tsec = tmicro*1e-06;
     const double v0 = detpar.l1/(tsec - detpar.t0 - (detpar.l2/v1));
     ei = MASS_TO_MEV*v0*v0;
@@ -193,37 +192,40 @@ namespace CurveFitting
    */
   void ConvertToYSpace::convert(const size_t index)
   {
-      auto det = m_inputWS->getDetector(index);
-      const auto & pmap = m_inputWS->constInstrumentParameters();
-      auto detPos = det->getPos();
+    auto det = m_inputWS->getDetector(index);
+    const auto & pmap = m_inputWS->constInstrumentParameters();
+    auto detPos = det->getPos();
 
-      // -- Setup detector & resolution parameters --
-      DetectorParams detPar;
-      detPar.l1 = m_l1;
-      detPar.l2 = m_samplePos.distance(detPos);
-      detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-      detPar.t0 = getComponentParameter(det, pmap, "t0"); // micro-seconds
-      detPar.efixed = getComponentParameter(det, pmap,"efixed");
-      const double v1 = std::sqrt(detPar.efixed/MASS_TO_MEV);
-      const double k1 = std::sqrt(detPar.efixed/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+    // -- Setup detector & resolution parameters --
+    DetectorParams detPar;
+    detPar.l1 = m_l1;
+    detPar.l2 = m_samplePos.distance(detPos);
+    detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
+    detPar.t0 = getComponentParameter(det, pmap, "t0")*1e-06; // seconds
+    detPar.efixed = getComponentParameter(det, pmap,"efixed");
+    const double v1 = std::sqrt(detPar.efixed/MASS_TO_MEV);
+    const double k1 = std::sqrt(detPar.efixed/PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
-      auto & outX = m_outputWS->dataX(index);
-      auto & outY = m_outputWS->dataY(index);
-      auto & outE = m_outputWS->dataE(index);
-      const auto & inX = m_inputWS->dataX(index);
-      const auto & inY = m_inputWS->dataY(index);
-      const auto & inE = m_inputWS->dataE(index);
+    auto & outX = m_outputWS->dataX(index);
+    auto & outY = m_outputWS->dataY(index);
+    auto & outE = m_outputWS->dataE(index);
+    const auto & inX = m_inputWS->readX(index);
+    const auto & inY = m_inputWS->readY(index);
+    const auto & inE = m_inputWS->readE(index);
 
-      const size_t npts = inY.size();
-      for(size_t j = 0; j < npts; ++j)
-      {
-        double ys(0.0),qs(0.0),ei(0.0);
-        calculateY(ys,qs,ei,m_mass,inX[j],k1,v1,detPar);
-        outX[j] = ys;
-        const double prefactor = qs/pow(ei,0.1);
-        outY[j] = prefactor*inY[j];
-        outE[j] = prefactor*inE[j];
-      }
+    // The t->y mapping flips the order of the axis so we need to reverse it to have a monotonically
+    // increasing axis
+    const size_t npts = inY.size();
+    for(size_t j = 0; j < npts; ++j)
+    {
+      double ys(0.0),qs(0.0),ei(0.0);
+      calculateY(ys,qs,ei,m_mass,inX[j],k1,v1,detPar);
+      const size_t outIndex = (npts - j - 1);
+      outX[outIndex] = ys;
+      const double prefactor = qs/pow(ei,0.1);
+      outY[outIndex] = prefactor*inY[j];
+      outE[outIndex] = prefactor*inE[j];
+    }
   }
 
 
@@ -253,8 +255,8 @@ namespace CurveFitting
     auto inst = m_inputWS->getInstrument();
     auto source = inst->getSource();
     auto sample = inst->getSample();
+    m_l1 = sample->getDistance(*source);
     m_samplePos = sample->getPos();
-    m_l1 = m_samplePos.distance(source->getPos());
   }
 
 
