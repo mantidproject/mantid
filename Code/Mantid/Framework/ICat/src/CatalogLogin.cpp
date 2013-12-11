@@ -30,8 +30,9 @@ namespace Mantid
       declareProperty("Username","", requireValue,"The username to log into the catalog.");
       declareProperty(new Kernel::MaskedProperty<std::string>("Password","", requireValue),
                       "The password of the related username to use.");
-      declareProperty("FacilityName", "", boost::make_shared<Kernel::StringListValidator>(Kernel::ConfigService::Instance().getFacilityNames()),
-        "Select a facility to log in to.");
+      declareProperty("FacilityName",Mantid::Kernel::ConfigService::Instance().getFacility().name(),
+    		  boost::make_shared<Kernel::StringListValidator>(Kernel::ConfigService::Instance().getFacilityNames()),
+    		  "Select a facility to log in to.");
     }
 
     /// execute the algorithm
