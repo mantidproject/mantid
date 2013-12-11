@@ -62,6 +62,19 @@ public:
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS), std::invalid_argument);
   }
 
+  void test_Input_Workspace_In_TOF_With_Instrument_But_No_Detector_Parameters_Throws_Error_On_Execution()
+  {
+    auto alg = createAlgorithm();
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,10);
+    testWS->getAxis(0)->setUnit("TOF");
+
+    alg->setProperty("InputWorkspace", testWS);
+    alg->setProperty("Mass", 1.0097);
+    alg->setRethrows(true);
+
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
 private:
   Mantid::API::IAlgorithm_sptr createAlgorithm()
   {

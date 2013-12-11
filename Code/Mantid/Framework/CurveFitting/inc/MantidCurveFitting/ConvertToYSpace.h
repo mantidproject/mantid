@@ -7,10 +7,17 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-  //---------------------------------------------------------------------------
-  // Forward declarations
-  //---------------------------------------------------------------------------
-  struct DetectorParams;
+
+  /// Simple data structure to store nominal detector values
+  /// It avoids some functions taking a huge number of arguments
+  struct DetectorParams
+  {
+    double l1; ///< source-sample distance in metres
+    double l2; ///< sample-detector distance in metres
+    double theta; ///< scattering angle in radians
+    double t0; ///< time delay in microseconds
+    double efixed; ///< final energy
+  };
 
   /**
     Takes a workspace with X axis in TOF and converts it to Y-space where the transformation is defined
@@ -46,6 +53,10 @@ namespace CurveFitting
     int version() const;
     const std::string category() const;
 
+    /// Retrieve a component parameter
+    static double getComponentParameter(const Geometry::IComponent_const_sptr & comp,
+                                        const Geometry::ParameterMap &pmap,
+                                        const std::string &name);
     /// Convert single time value to Y,Q & Ei values
     static void calculateY(double & yspace, double & qspace, double &ei,
                            const double mass, const double tmicro,
@@ -57,6 +68,8 @@ namespace CurveFitting
     void init();
     void exec();
 
+    /// Perform the conversion to Y-space
+    void convert(const size_t i);
     /// Check and store appropriate input data
     void retrieveInputs();
     /// Create the output workspace
@@ -66,6 +79,8 @@ namespace CurveFitting
 
     /// Input workspace
     API::MatrixWorkspace_sptr m_inputWS;
+    /// The input mass in AMU
+    double m_mass;
     /// Source-sample distance
     double m_l1;
     /// Sample position

@@ -5,6 +5,8 @@
 
 #include <boost/bind.hpp>
 
+#include <sstream>
+
 namespace Mantid
 {
 namespace CurveFitting

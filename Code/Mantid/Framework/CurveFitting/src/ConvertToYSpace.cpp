@@ -3,9 +3,9 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 *WIKI*/
 
 #include "MantidCurveFitting/ConvertToYSpace.h"
-#include "MantidCurveFitting/ComptonProfile.h"
 
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/make_shared.hpp>
@@ -31,7 +31,7 @@ namespace CurveFitting
   /** Constructor
    */
   ConvertToYSpace::ConvertToYSpace()
-    : Algorithm(), m_inputWS(), m_l1(0.0), m_samplePos(),m_outputWS()
+    : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(),m_outputWS()
   {
   }
     
@@ -50,11 +50,57 @@ namespace CurveFitting
   /// Sets documentation strings for this algorithm
   void ConvertToYSpace::initDocs()
   {
-    this->setWikiSummary("Converts in workspace in units of TOF to Y-space as defined in Compton scattering field");
-    this->setOptionalMessage("Converts in workspace in units of TOF to Y-space as defined in Compton scattering field");
+    this->setWikiSummary("Converts workspace in units of TOF to Y-space as defined in Compton scattering field");
+    this->setOptionalMessage("Converts workspace in units of TOF to Y-space as defined in Compton scattering field");
   }
 
   //----------------------------------------------------------------------------------------------
+
+  /**
+   * If a DetectorGroup is encountered then the parameters are averaged over the group
+   * @param comp A pointer to the component that should contain the parameter
+   * @param pmap A reference to the ParameterMap that stores the parameters
+   * @param name The name of the parameter
+   * @returns The value of the parameter if it exists
+   * @throws A std::invalid_argument error if the parameter does not exist
+   */
+  double ConvertToYSpace::getComponentParameter(const Geometry::IComponent_const_sptr & comp,
+                                                const Geometry::ParameterMap &pmap,
+                                                const std::string &name)
+  {
+    if(!comp) throw std::invalid_argument("ComptonProfile - Cannot retrieve parameter from NULL component");
+
+    double result(0.0);
+    if(const auto group = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp))
+    {
+      const auto dets = group->getDetectors();
+      double avg(0.0);
+      for(auto it = dets.begin(); it!= dets.end(); ++it)
+      {
+        auto param = pmap.getRecursive((*it)->getComponentID(), name);
+        if(param) avg += param->value<double>();
+        else
+          throw std::invalid_argument("ComptonProfile - Unable to find DetectorGroup component parameter \"" + name + "\".");
+      }
+      result = avg/static_cast<double>(group->nDets());
+    }
+    else
+    {
+      auto param = pmap.getRecursive(comp->getComponentID(), name);
+      if(param)
+      {
+        result = param->value<double>();
+      }
+      else
+      {
+        throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
+      }
+    }
+    return result;
+  }
+
+  //----------------------------------------------------------------------------------------------
+
   /**
    * @param yspace Output yspace value
    * @param qspace Output qspace value
@@ -89,8 +135,9 @@ namespace CurveFitting
   void ConvertToYSpace::init()
   {
     auto wsValidator = boost::make_shared<CompositeValidator>();
-    wsValidator->add<WorkspaceUnitValidator>("TOF");
+    wsValidator->add<HistogramValidator>(false); // point data
     wsValidator->add<InstrumentValidator>();
+    wsValidator->add<WorkspaceUnitValidator>("TOF");
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
                     "An input workspace.");
 
@@ -102,6 +149,9 @@ namespace CurveFitting
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
 
   }
+
+
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -109,7 +159,73 @@ namespace CurveFitting
   {
     retrieveInputs();
     createOutputWorkspace();
+
+    const int64_t nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+    const int64_t nreports = nhist;
+    auto progress = boost::make_shared<Progress>(this, 0.0, 1.0, nreports);
+
+    PARALLEL_FOR2(m_inputWS, m_outputWS)
+    for(int64_t i = 0; i < nhist; ++i)
+    {
+      PARALLEL_START_INTERUPT_REGION
+
+      try
+      {
+        convert(i);
+      }
+      catch(Exception::NotFoundError &)
+      {
+        g_log.warning("No detector defined for index=" + boost::lexical_cast<std::string>(i) + ". Zeroing spectrum.");
+        m_outputWS->maskWorkspaceIndex(i);
+      }
+
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    setProperty("OutputWorkspace", m_outputWS);
   }
+
+  /**
+   * Convert the spectrum at the given index on the input workspace
+   * and place the output in the pre-allocated output workspace
+   * @param index Index on the input & output workspaces giving the spectrum to convert
+   */
+  void ConvertToYSpace::convert(const size_t index)
+  {
+      auto det = m_inputWS->getDetector(index);
+      const auto & pmap = m_inputWS->constInstrumentParameters();
+      auto detPos = det->getPos();
+
+      // -- Setup detector & resolution parameters --
+      DetectorParams detPar;
+      detPar.l1 = m_l1;
+      detPar.l2 = m_samplePos.distance(detPos);
+      detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
+      detPar.t0 = getComponentParameter(det, pmap, "t0"); // micro-seconds
+      detPar.efixed = getComponentParameter(det, pmap,"efixed");
+      const double v1 = std::sqrt(detPar.efixed/MASS_TO_MEV);
+      const double k1 = std::sqrt(detPar.efixed/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+
+      auto & outX = m_outputWS->dataX(index);
+      auto & outY = m_outputWS->dataY(index);
+      auto & outE = m_outputWS->dataE(index);
+      const auto & inX = m_inputWS->dataX(index);
+      const auto & inY = m_inputWS->dataY(index);
+      const auto & inE = m_inputWS->dataE(index);
+
+      const size_t npts = inY.size();
+      for(size_t j = 0; j < npts; ++j)
+      {
+        double ys(0.0),qs(0.0),ei(0.0);
+        calculateY(ys,qs,ei,m_mass,inX[j],k1,v1,detPar);
+        outX[j] = ys;
+        const double prefactor = qs/pow(ei,0.1);
+        outY[j] = prefactor*inY[j];
+        outE[j] = prefactor*inE[j];
+      }
+  }
+
 
   /**
    * Caches input details for the peak information
@@ -117,6 +233,7 @@ namespace CurveFitting
   void ConvertToYSpace::retrieveInputs()
   {
     m_inputWS = getProperty("InputWorkspace");
+    m_mass = getProperty("Mass");
     cacheInstrumentGeometry();
   }
 
