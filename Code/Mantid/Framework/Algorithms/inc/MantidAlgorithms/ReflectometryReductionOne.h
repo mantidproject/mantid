@@ -7,9 +7,6 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidAlgorithms/ReflectometryWorkflowBase.h"
-#include <boost/optional.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <vector>
 
 namespace Mantid
 {
@@ -42,14 +39,6 @@ namespace Mantid
     {
     public:
 
-      // Class typedefs
-      typedef boost::tuple<double, double> MinMax;
-      typedef boost::optional<double> OptionalDouble;
-      typedef boost::optional<Mantid::API::MatrixWorkspace_sptr> OptionalMatrixWorkspace_sptr;
-      typedef std::vector<int> WorkspaceIndexList;
-      typedef boost::optional<std::vector<int> > OptionalWorkspaceIndexes;
-      typedef boost::tuple<Mantid::API::MatrixWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr> DetectorMonitorWorkspacePair;
-
       /// Constructor
       ReflectometryReductionOne();
       /// Destructor
@@ -58,11 +47,6 @@ namespace Mantid
       virtual const std::string name() const;
       virtual int version() const;
       virtual const std::string category() const;
-
-      /// Convert the input workspace to wavelength, splitting according to the properties provided.
-      DetectorMonitorWorkspacePair toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
-          const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
-          const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep);
 
       /// Convert to an IvsQ workspace. Performs detector positional corrections based on the component name and the theta value.
       Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool correctPosition,
@@ -100,14 +84,6 @@ namespace Mantid
       void validateTransmissionInputs() const;
 
       /** Algorithm running methods **/
-
-      /// Convert the monitor parts of the input workspace to wavelength
-      API::MatrixWorkspace_sptr toLamMonitor(const API::MatrixWorkspace_sptr& toConvert,
-          const int monitorIndex, const MinMax& backgroundMinMax);
-
-      /// Convert the detector spectrum of the input workspace to wavelength
-      API::MatrixWorkspace_sptr toLamDetector(const WorkspaceIndexList& detectorIndexRange,
-          const API::MatrixWorkspace_sptr& toConvert, const MinMax& wavelengthMinMax, const double& wavelengthStep);
 
       /// Perform a transmission correction on the input IvsLam workspace
       API::MatrixWorkspace_sptr transmissonCorrection(API::MatrixWorkspace_sptr IvsLam,
