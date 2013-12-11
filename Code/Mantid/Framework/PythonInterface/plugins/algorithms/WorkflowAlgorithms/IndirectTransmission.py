@@ -9,7 +9,6 @@ from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid import config
-from IndirectCommon import StartTime, EndTime
 import os.path, math
 
 class IndirectTransmission(PythonAlgorithm):
@@ -26,7 +25,8 @@ class IndirectTransmission(PythonAlgorithm):
 		self.declareProperty(name='Thickness', defaultValue=0.1, doc='Sample thickness. Default=0.1')
  
 	def PyExec(self):
-
+		from IndirectCommon import StartTime, EndTime
+		
 		StartTime('IndirectTransmission')
 		
 		instrumentName = self.getPropertyValue('Instrument')
