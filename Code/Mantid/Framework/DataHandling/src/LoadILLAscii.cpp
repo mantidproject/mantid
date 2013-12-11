@@ -129,27 +129,21 @@ void LoadILLAscii::exec() {
 	std::vector<std::map<std::string, std::string> >::const_iterator iSpectraHeader;
 
 	Progress progress(this, 0, 1, spectraList.size());
-	for (iSpectra = spectraList.begin(), iSpectraHeader =
-			spectraHeaderList.begin();
-			iSpectra < spectraList.end()
-					&& iSpectraHeader < spectraHeaderList.end();
+	for (iSpectra = spectraList.begin(), iSpectraHeader = spectraHeaderList.begin();
+			iSpectra < spectraList.end() && iSpectraHeader < spectraHeaderList.end();
 			++iSpectra, ++iSpectraHeader) {
 
-		g_log.debug() << "Reading Spectrum: "
-				<< std::distance(spectraList.begin(), iSpectra) << std::endl;
+		g_log.debug() << "Reading Spectrum: " << std::distance(spectraList.begin(), iSpectra) << std::endl;
 
 		std::vector<int> thisSpectrum = *iSpectra;
-		API::MatrixWorkspace_sptr thisWorkspace =
-				WorkspaceFactory::Instance().create("Workspace2D",
-						thisSpectrum.size(), 2, 1);
+		API::MatrixWorkspace_sptr thisWorkspace = WorkspaceFactory::Instance().create("Workspace2D",
+				thisSpectrum.size(), 2, 1);
 
-		thisWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(
-				"Wavelength");
+		thisWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 		thisWorkspace->setYUnitLabel("Counts");
 		loadIDF(thisWorkspace);
 
-		double currentPositionAngle = p.getValue<double>("angles*1000",
-				*iSpectraHeader) / 1000;
+		double currentPositionAngle = p.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
 		moveDetector(thisWorkspace, currentPositionAngle);
 
 		//
@@ -160,10 +154,8 @@ void LoadILLAscii::exec() {
 
 		// JUUST TO SEE the WS in mantiplot
 		std::stringstream outWorkspaceNameStream;
-		outWorkspaceNameStream << "test"
-				<< std::distance(spectraList.begin(), iSpectra);
-		AnalysisDataService::Instance().addOrReplace(
-				outWorkspaceNameStream.str(), thisWorkspace);
+		outWorkspaceNameStream << "test" << std::distance(spectraList.begin(), iSpectra);
+		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(), thisWorkspace);
 
 		progress.report();
 	}

@@ -1,6 +1,12 @@
 /*WIKI*
 
- ILL File parser.
+ This file contains a class responsible for parsing the ILL ASCII data - aka  'Ron Ghosh' format.
+
+ NOTE: To date only tested for D2B!
+ The format may very among the other ILL instruments!
+
+ The data format is fully described here:
+ http://www.ill.eu/instruments-support/computing-for-science/data-analysis/raw-data/
 
  The file format is the following:
 
@@ -150,7 +156,8 @@ namespace DataHandling {
 
 
 /*
- * @param filepath for the raw file
+ * Constructor
+ * @param filepath :: The filepath for the raw file.
  */
 ILLParser::ILLParser(const std::string &filepath) {
 	fin.open(filepath);
@@ -312,6 +319,7 @@ void ILLParser::parseFieldNumeric(std::map<std::string, std::string> &header,
 
 /**
  * Parses the field I in the spectrum block
+ * @param fieldWith :: will be either intWith or floatWith
  */
 std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
 	std::string line;
