@@ -11,8 +11,8 @@ namespace MantidWidgets
   using namespace Mantid::API;
 
   Logger& MuonSequentialFitDialog::g_log(Logger::get("MuonSequentialFitDialog"));
-
   /** 
+
    * Constructor
    */
   MuonSequentialFitDialog::MuonSequentialFitDialog(MuonFitPropertyBrowser* fitPropBrowser) :
@@ -360,7 +360,7 @@ namespace MantidWidgets
   void MuonSequentialFitDialog::stopFit()
   {
     if ( m_state != Running )
-      throw std::runtime_error("Coulnd't stop: is not running");
+      throw std::runtime_error("Couldn't stop: is not running");
 
     m_stopRequested = true;
   }

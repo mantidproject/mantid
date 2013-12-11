@@ -45,7 +45,7 @@ namespace MantidWidgets
     Q_OBJECT
 
   public:
-    MuonSequentialFitDialog(MuonFitPropertyBrowser* parent);
+    MuonSequentialFitDialog(MuonFitPropertyBrowser* fitPropBrowser);
     virtual ~MuonSequentialFitDialog();
 
     enum DialogState 
