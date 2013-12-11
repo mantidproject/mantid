@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   ConjoinSpectraTest.py
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
+  CreateTransmissionWorkspaceTest.py
   DakotaChiSquaredTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
