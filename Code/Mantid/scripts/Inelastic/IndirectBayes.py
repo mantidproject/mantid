@@ -20,6 +20,19 @@ from IndirectCommon import *
 import sys, platform, math, os.path, numpy as np
 mp = import_mantidplot()
 
+def readASCIIFile(file_name):
+	workdir = config['defaultsave.directory']
+
+	file_path = os.path.join(workdir, file_name)
+	asc = []
+	
+	with open(file_path, 'r') as handle:
+		for line in handle:
+			line = line.rstrip()
+			asc.append(line)
+
+	return asc
+
 def CalcErange(inWS,ns,er,nbin):
 	rscl = 1.0
 	array_len = 4096                           # length of array in Fortran
@@ -422,7 +435,6 @@ def LorBlock(a,first,nl):                                 #read Ascii block of I
 	return first,Q,int0,fw,int                                      #values as list
 
 def C2Fw(prog,sname):
-	workdir = config['defaultsave.directory']
 	outWS = sname+'_Workspace'
 	Vaxis = []
 
@@ -431,52 +443,46 @@ def C2Fw(prog,sname):
 	dataE = np.array([])
 
 	nhist = 0
+	names = ['Amplitude', 'Height', 'Width']
+
 	for nl in range(1,4):
-		file = sname + '.ql' +str(nl)
-		handle = open(os.path.join(workdir, file), 'r')
-		asc = []
-		for line in handle:
-			line = line.rstrip()
-			asc.append(line)
-		handle.close()
+
+		#read ASCII file output from Fortran code
+		file_name = sname + '.ql' +str(nl)
+		asc = readASCIIFile(file_name)
 		lasc = len(asc)
-		var = asc[3].split()							#split line on spaces
-		nspec = var[0]
-		ndat = var[1]
-		var = ExtractInt(asc[6])
+
+		var = asc[3].split()
+		nspec = int(var[0])
 		first = 7
+
 		Xout = []
-
-		ns = int(nspec)
-
-		YData = [[] for i in range(6)]
-		EData = [[] for i in range(6)]
-
-		for m in range(0,ns):
+		amplitude, height, width = [], [], []
+		amplitude_error, height_error, width_error  = [], [], []
+		for m in range(0,nspec):
 			first,Q,i0,fw,it = LorBlock(asc,first,nl)
 			Xout.append(Q)
 
 			for i in range(0,nl):
-				#collect amplitude and width data
-				YData[i*2].append(fw[i])
-				YData[i*2+1].append(it[i])
-				EData[i*2].append(fw[nl+i])
-				EData[i*2+1].append(it[nl+i])
-
-		nhist += nl*2
+				#collect amplitude, height and width data
+				width.append(fw[i])
+				amplitude.append(it[i])
+				height.append(i0[0])
+				
+				#collect amplitude, height and width error data
+				width_error.append(fw[nl+i])
+				amplitude_error.append(it[nl+i])
+				height_error.append(i0[1])
 		
-		for i in range(0,nl):
-			#append amplitude
-			dataX = np.append(dataX, np.array(Xout))
-			dataY = np.append(dataY, np.array(YData[i*2+1]))
-			dataE = np.append(dataE, np.array(EData[i*2+1]))
-			Vaxis.append('ampl.'+str(nl)+'.'+str(i+1))
+		nhist += nl*len(names)
 
-			#append width
-			dataX = np.append(dataX, np.array(Xout))
-			dataY = np.append(dataY, np.array(YData[i*2]))
-			dataE = np.append(dataE, np.array(EData[i*2]))
-			Vaxis.append('width.'+str(nl)+'.'+str(i+1))
+		#Create a spectrum for each set of amplitude, height and width data
+		data = zip(names, [amplitude, height, width], [amplitude_error, height_error, width_error])
+		for name, array, error in data:
+				dataX = np.concatenate(dataX, np.array(Xout))
+				dataY = np.concatenate(dataY, np.array(array))
+				dataE = np.concatenate(dataE, np.array(error))
+				Vaxis.append(name+'.'+str(nl)+'.'+str(i+1))
 
 	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
 		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
@@ -558,19 +564,19 @@ def C2Se(sname):
 	dataY = np.append(dataY,np.array(Yi))
 	dataE = np.append(dataE,np.array(Ei))
 	nhist = 1
-	Vaxis.append('ampl')
+	Vaxis.append('Amplitude')
 
 	dataX = np.append(dataX, np.array(Xout))
 	dataY = np.append(dataY, np.array(Yf))
 	dataE = np.append(dataE, np.array(Ef))
 	nhist += 1
-	Vaxis.append('width')
+	Vaxis.append('Width')
 
 	dataX = np.append(dataX,np.array(Xout))
 	dataY = np.append(dataY,np.array(Yb))
 	dataE = np.append(dataE,np.array(Eb))
 	nhist += 1
-	Vaxis.append('beta')
+	Vaxis.append('Beta')
 
 	logger.notice('Vaxis=' + str(Vaxis))
 	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
