@@ -260,6 +260,13 @@ namespace MantidWidgets
     // Clear diagnosis table for new fit
     m_ui.diagnosisTable->setRowCount(0);
 
+    // Get fit function as specified by user in the fit browser
+    IFunction_sptr fitFunction = FunctionFactory::Instance().createInitialized(
+        m_fitPropBrowser->getFittingFunction()->asString() );
+
+    // Whether we should use initial function for every fit
+    bool useInitFitFunction = (m_ui.paramTypeGroup->checkedButton() == m_ui.paramTypeInitial);
+
     setState(Running);
     m_stopRequested = false;
 
@@ -309,26 +316,39 @@ namespace MantidWidgets
       const std::string runTitle = getRunTitle(ws);
       const std::string wsBaseName = labelGroupName + "_" + runTitle; 
 
-      double fitQuality;
 
-      // TODO: fitting function logic
+      IFunction_sptr functionToFit;
+
+      if ( useInitFitFunction )
+        // Create a copy so that the original function is not changed
+        functionToFit = FunctionFactory::Instance().createInitialized( fitFunction->asString() );
+      else
+        // Use the same function over and over, so that previous fitted params are used for the next fit
+        functionToFit = fitFunction;
+
+      IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
 
       try 
       {
-        IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
         fit->initialize();
         fit->setRethrows(true);
-        fit->setProperty("Function", m_fitPropBrowser->getFittingFunction());
+
+        // Set function. Gets updated when fit is done. 
+        fit->setProperty("Function", functionToFit);
+
         fit->setProperty("InputWorkspace", ws);
+        fit->setProperty("Output", wsBaseName);
+
+        // We should have one spectra only in the workspace, so use the first one.
         fit->setProperty("WorkspaceIndex", 0);
+
+        // Various properties from the fit prop. browser
         fit->setProperty("StartX", m_fitPropBrowser->startX());
         fit->setProperty("EndX", m_fitPropBrowser->endX());
-        fit->setProperty("Output", wsBaseName);
         fit->setProperty("Minimizer", m_fitPropBrowser->minimizer());
         fit->setProperty("CostFunction", m_fitPropBrowser->costFunction());
-        fit->execute();
 
-        fitQuality = fit->getProperty("OutputChi2overDoF");
+        fit->execute();
       }
       catch(std::exception& e)
       {
@@ -344,7 +364,7 @@ namespace MantidWidgets
       ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
 
       // Add information about the fit to the diagnosis table
-      addDiagnosisEntry(runTitle, fitQuality, m_fitPropBrowser->getFittingFunction());
+      addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"), functionToFit); 
 
       // Update progress
       m_ui.progress->setFormat("%p% - " + QString::fromStdString(runTitle) );
