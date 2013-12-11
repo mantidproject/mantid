@@ -78,20 +78,17 @@ class IndirectTransmission(PythonAlgorithm):
 		tableWs.addColumn("str", "Value")
 
 		# Names for each of the output values
-		outputNames = ['Absorption Xsection at wavelength', 'Coherent Xsection', 'Incoherent Xsection',
+		outputNames = ['Wavelength', 'Absorption Xsection', 'Coherent Xsection', 'Incoherent Xsection',
 								'Total scattering Xsection', 'Number density', 'Thickness', 'Transmission (abs+scatt)', 'Total scattering']
 
 		# List of the calculated values
-		outputValues = [str(wave) + ' A = '+ str(absorptionXSection), coherentXSection, incoherentXSection, scatteringXSection,
-								density, thickness, transmission, scattering]
-
-		# Convert all values to string
-		outputValues = map (str, outputValues)
+		outputValues = [wave, absorptionXSection, coherentXSection, incoherentXSection, 
+								scatteringXSection, density, thickness, transmission, scattering]
 		
-		output = zip (outputNames, outputValues)
-
+		outputValues = map(str, outputValues)
+		
 		#build table of values
-		for data in output:
+		for data in zip (outputNames, outputValues):
 			tableWs.addRow(list(data))
 			logger.information(': '.join(list(data)))
 
