@@ -2,11 +2,11 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidAlgorithms/ReflectometryWorkflowBase.h"
 #include <boost/optional.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <vector>
@@ -38,7 +38,7 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport ReflectometryReductionOne: public API::DataProcessorAlgorithm
+    class DLLExport ReflectometryReductionOne: public ReflectometryWorkflowBase
     {
     public:
 

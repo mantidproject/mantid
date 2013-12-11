@@ -1,15 +1,16 @@
-#ifndef MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE_H_
-#define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE_H_
+#ifndef MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE_H_
+#define MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAlgorithms/ReflectometryWorkflowBase.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
 
-  /** CreateTransmissionWorkspace : Create a transmission run workspace in Wavelength given one or more TOF workspaces
+  /** ReflectometryWorkflowBase : Abstract workflow algortithm base class containing common implementation functionality usable
+   *  by concrete reflectometry workflow algorithms.
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,20 +32,14 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport CreateTransmissionWorkspace  : public ReflectometryWorkflowBase
+  class DLLExport ReflectometryWorkflowBase  : public API::DataProcessorAlgorithm
   {
   public:
-    CreateTransmissionWorkspace();
-    virtual ~CreateTransmissionWorkspace();
+    ReflectometryWorkflowBase();
+    virtual ~ReflectometryWorkflowBase();
     
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
 
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
+  //protected:
 
 
   };
@@ -53,4 +48,4 @@ namespace Algorithms
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE_H_ */
+#endif  /* MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE_H_ */
