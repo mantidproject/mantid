@@ -51,7 +51,7 @@ namespace Mantid
 
     /// Default constructor
     CalculateGammaBackground::CalculateGammaBackground()
-      : Algorithm(), m_inputWS(), m_profileFunction(), m_npeaks(0), m_reversed(),
+      : Algorithm(), m_inputWS(), m_indices(), m_profileFunction(), m_npeaks(0), m_reversed(),
         m_samplePos(), m_l1(0.0), m_foilRadius(0.0), m_foilUpMin(0.0),m_foilUpMax(0.0), m_foils0(), m_foils1(),
         m_backgroundWS(), m_correctedWS(), m_progress(NULL)
     {
@@ -102,6 +102,10 @@ namespace Mantid
                       "Function that is able to compute the mass spectrum for the input data"
                       "This will usually be the output from the Fitting");
 
+      declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+        "Indices of the spectra to include in the correction. If provided, the output only include these spectra\n"
+        "(Default: all spectra from input)");
+
       declareProperty(new WorkspaceProperty<>("BackgroundWorkspace", "", Direction::Output));
       declareProperty(new WorkspaceProperty<>("CorrectedWorkspace", "", Direction::Output));
     }
@@ -111,7 +115,7 @@ namespace Mantid
       retrieveInputs();
       createOutputWorkspaces();
 
-      const int64_t nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+      const int64_t nhist = static_cast<int64_t>(m_indices.size());
       const int64_t nreports = 10 + nhist*(m_npeaks + 2*m_foils0.size()*NTHETA*NUP*m_npeaks);
       m_progress = new Progress(this, 0.0, 1.0, nreports);
 
@@ -120,25 +124,34 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
 
-        m_backgroundWS->setX(i,m_inputWS->refX(i));
-        m_correctedWS->setX(i,m_inputWS->refX(i));
+        const size_t outputIndex = i;
+        auto indexIter = m_indices.cbegin();
+        std::advance(indexIter, i);
+        const size_t inputIndex = indexIter->second;
+
+        m_backgroundWS->setX(outputIndex,m_inputWS->refX(inputIndex));
+        m_correctedWS->setX(outputIndex,m_inputWS->refX(inputIndex));
         try
         {
-          specid_t spectrumNo = m_inputWS->getSpectrum(i)->getSpectrumNo();
+          const auto * inSpec = m_inputWS->getSpectrum(inputIndex);
+          const specid_t spectrumNo(inSpec->getSpectrumNo());
+          m_backgroundWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
+          m_correctedWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
+
           if(spectrumNo >= FORWARD_SCATTER_SPECMIN && spectrumNo <= FORWARD_SCATTER_SPECMAX )
           {
-            applyCorrection(i);
+            applyCorrection(inputIndex,outputIndex);
           }
           else
           {
             g_log.information("Spectrum " + boost::lexical_cast<std::string>(spectrumNo) + " not in forward scatter range. Skipping correction.");
             // Leave background at 0 and just copy data to corrected
-            m_correctedWS->dataY(i) = m_inputWS->readY(i);
+            m_correctedWS->dataY(outputIndex) = m_inputWS->readY(inputIndex);
           }
         }
         catch(Exception::NotFoundError &)
         {
-          g_log.information("No detector defined for index=" + boost::lexical_cast<std::string>(i) + ". Skipping correction.");
+          g_log.information("No detector defined for index=" + boost::lexical_cast<std::string>(inputIndex) + ". Skipping correction.");
         }
 
         PARALLEL_END_INTERUPT_REGION
@@ -153,26 +166,28 @@ namespace Mantid
     /**
      * Calculate & apply gamma correction for the given index of the
      * input workspace
-     * @param wsIndex A workspace index that defines the spectrum to correct
+     * @param inputIndex A workspace index that defines the input spectrum to correct
+     * @param outputIndex A workspace index that defines the output to hold the results
      */
-    void CalculateGammaBackground::applyCorrection(const size_t wsIndex)
+    void CalculateGammaBackground::applyCorrection(const size_t inputIndex, const size_t outputIndex)
     {
       m_progress->report("Computing TOF from detector");
+
       // results go straight in m_correctedWS to save memory allocations
-      calculateSpectrumFromDetector(wsIndex);
+      calculateSpectrumFromDetector(inputIndex,outputIndex);
 
       m_progress->report("Computing TOF foils");
       // Output goes to m_background to save memory allocations
-      calculateBackgroundFromFoils(wsIndex);
+      calculateBackgroundFromFoils(inputIndex,outputIndex);
 
       m_progress->report("Computing correction to input");
       // Compute total counts from input data, (detector-foil) contributions
       //assume constant binning
       const size_t nbins = m_correctedWS->blocksize();
-      const auto & inY = m_inputWS->readY(wsIndex);
-      auto & detY = m_correctedWS->dataY(wsIndex);
-      auto & foilY = m_backgroundWS->dataY(wsIndex);
-      const double deltaT = m_correctedWS->readX(wsIndex)[1] - m_correctedWS->readX(wsIndex)[0];
+      const auto & inY = m_inputWS->readY(inputIndex);
+      auto & detY = m_correctedWS->dataY(outputIndex);
+      auto & foilY = m_backgroundWS->dataY(outputIndex);
+      const double deltaT = m_correctedWS->readX(outputIndex)[1] - m_correctedWS->readX(outputIndex)[0];
 
       double dataCounts(0.0), simulCounts(0.0);
       for(size_t j = 0; j < nbins; ++j)
@@ -196,12 +211,13 @@ namespace Mantid
     }
 
     /**
-     * Results are placed in the corresponding index on the output corrected workspace
-     * @param wsIndex The spectrum to compute
+     * Results are placed in the mapped index on the output corrected workspace
+     * @param inputIndex Workspace index that defines the input spectrum to correct
+     * @param outputIndex Workspace index that defines the spectrum to hold the results
      */
-    void CalculateGammaBackground::calculateSpectrumFromDetector(const size_t wsIndex)
+    void CalculateGammaBackground::calculateSpectrumFromDetector(const size_t inputIndex, const size_t outputIndex)
     {
-      auto det = m_inputWS->getDetector(wsIndex);
+      auto det = m_inputWS->getDetector(inputIndex);
       auto detPos = det->getPos();
 
       // -- Setup detector & resolution parameters --
@@ -221,9 +237,9 @@ namespace Mantid
 
       // Compute a time of flight spectrum convolved with a Voigt resolution function for each mass
       // at the detector point & sum to a single spectrum
-      auto & ctdet = m_correctedWS->dataY(wsIndex);
+      auto & ctdet = m_correctedWS->dataY(outputIndex);
       std::vector<double> tmpWork(ctdet.size());
-      calculateTofSpectrum(ctdet,tmpWork, wsIndex, detPar, detRes);
+      calculateTofSpectrum(ctdet,tmpWork, outputIndex, detPar, detRes);
       //Correct for distance to the detector: 0.5/l2^2
       const double detDistCorr = 0.5/detPar.l2/detPar.l2;
       std::transform(ctdet.begin(),ctdet.end(),ctdet.begin(),
@@ -233,11 +249,12 @@ namespace Mantid
     /**
      * Calculate & apply gamma correction for the given index of the
      * input workspace
-     * @param wsIndex A workspace index that defines the spectrum to correct
+     * @param inputIndex Workspace index that defines the input spectrum to correct
+     * @param outputIndex Workspace index that defines the spectrum to hold the results
      */
-    void CalculateGammaBackground::calculateBackgroundFromFoils(const size_t wsIndex)
+    void CalculateGammaBackground::calculateBackgroundFromFoils(const size_t inputIndex, const size_t outputIndex)
     {
-      auto det = m_inputWS->getDetector(wsIndex);
+      auto det = m_inputWS->getDetector(inputIndex);
       auto detPos = det->getPos();
 
       // -- Setup detector & resolution parameters --
@@ -257,25 +274,25 @@ namespace Mantid
 
       const size_t nxvalues = m_backgroundWS->blocksize();
       std::vector<double> foilSpectrum(nxvalues);
-      auto & ctfoil = m_backgroundWS->dataY(wsIndex);
+      auto & ctfoil = m_backgroundWS->dataY(outputIndex);
 
       // Compute (C1 - C0) where C1 is counts in pos 1 and C0 counts in pos 0
       assert(m_foils0.size() == m_foils1.size());
       for(size_t i = 0; i < m_foils0.size(); ++i)
       {
         foilSpectrum.assign(nxvalues,0.0);
-        calculateBackgroundSingleFoil(foilSpectrum, wsIndex,m_foils1[i], detPos, detPar, detRes);
+        calculateBackgroundSingleFoil(foilSpectrum, outputIndex,m_foils1[i], detPos, detPar, detRes);
         // sum spectrum values from first position
         std::transform(ctfoil.begin(), ctfoil.end(), foilSpectrum.begin(), ctfoil.begin(),
                        std::plus<double>());
 
         foilSpectrum.assign(nxvalues,0.0);
-        calculateBackgroundSingleFoil(foilSpectrum, wsIndex,m_foils0[i], detPos, detPar, detRes);
+        calculateBackgroundSingleFoil(foilSpectrum, outputIndex,m_foils0[i], detPos, detPar, detRes);
         // subtract spectrum values from zeroth position
         std::transform(ctfoil.begin(), ctfoil.end(), foilSpectrum.begin(), ctfoil.begin(),
                        std::minus<double>());
       }
-      bool reversed = (m_reversed.count(m_inputWS->getSpectrum(wsIndex)->getSpectrumNo()));
+      bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)->getSpectrumNo()));
       // This is quicker than the if within the loop
       if(reversed)
       {
@@ -290,7 +307,7 @@ namespace Mantid
      * Integrates over the foil area defined by the foil radius to accumulate an estimate of the counts
      * resulting from this region
      * @param ctfoil Output vector to hold results
-     * @param wsIndex Index on workspaces currently operating on
+     * @param wsIndex Index on output background workspaces currently operating
      * @param foilInfo Foil description object
      * @param detPos The pre-calculated detector V3D
      * @param detPar DetectorParams object that defines information on the detector associated with spectrum at wsIndex
@@ -356,7 +373,7 @@ namespace Mantid
      * Uses the compton profile functions to compute a particular mass spectrum
      * @param result [Out] The value of the computed spectrum
      * @param tmpWork [In] Pre-allocated working area that will be overwritten
-     * @param wsIndex Index on the input workspace that defines the detector parameters
+     * @param wsIndex Index on the output background workspace that gives the X values to use
      * @param detpar Struct containing parameters about the detector
      * @param respar Struct containing parameters about the resolution
      */
@@ -424,7 +441,6 @@ namespace Mantid
                                     "composite of ComptonProfiles or a single ComptonProfile.");
       }
 
-      cacheInstrumentGeometry();
       // Spectrum numbers whose calculation of background from foils is reversed
       m_reversed.clear();
       for(specid_t i = 143; i < 199; ++i)
@@ -433,6 +449,26 @@ namespace Mantid
             (i >= 175 && i <= 182) || (i >= 191 && i <= 198) )
         m_reversed.insert(i);
       }
+
+      // Workspace indices mapping input->output
+      m_indices.clear();
+      std::vector<int> requestedIndices = getProperty("WorkspaceIndexList");
+      if(requestedIndices.empty())
+      {
+        for(size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i)
+        {
+          m_indices[i] = i; // 1-to-1
+        }
+      }
+      else
+      {
+        for(size_t i = 0; i < requestedIndices.size(); ++i)
+        {
+          m_indices[i] = static_cast<size_t>(requestedIndices[i]); //user-requested->increasing on output
+        }
+      }
+
+      cacheInstrumentGeometry();
     }
 
 
@@ -441,8 +477,9 @@ namespace Mantid
      */
     void CalculateGammaBackground::createOutputWorkspaces()
     {
-      m_backgroundWS = WorkspaceFactory::Instance().create(m_inputWS);
-      m_correctedWS = WorkspaceFactory::Instance().create(m_inputWS);
+      const size_t nhist = m_indices.size();
+      m_backgroundWS = WorkspaceFactory::Instance().create(m_inputWS,nhist);
+      m_correctedWS = WorkspaceFactory::Instance().create(m_inputWS,nhist);
     }
 
     /**

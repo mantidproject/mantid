@@ -10,6 +10,8 @@ namespace ICatTestHelper
     loginobj.initialize();
     loginobj.setPropertyValue("Username", "mantid_test");
     loginobj.setPropertyValue("Password", "mantidtestuser");
+    loginobj.setPropertyValue("FacilityName", "ISIS");
+
     loginobj.execute();
     if (!loginobj.isExecuted())
     {
