@@ -218,6 +218,7 @@ namespace Mantid
     void CalculateGammaBackground::calculateSpectrumFromDetector(const size_t inputIndex, const size_t outputIndex)
     {
       auto det = m_inputWS->getDetector(inputIndex);
+      const auto & pmap = m_inputWS->constInstrumentParameters();
       auto detPos = det->getPos();
 
       // -- Setup detector & resolution parameters --
@@ -225,15 +226,15 @@ namespace Mantid
       detPar.l1 = m_l1;
       detPar.l2 = m_samplePos.distance(detPos);
       detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-      detPar.t0 = getComponentParameter(*det, "t0")*1e-6; // seconds
-      detPar.efixed = getComponentParameter(*det,"efixed");
+      detPar.t0 = ComptonProfile::getComponentParameter(det, pmap, "t0")*1e-6; // seconds
+      detPar.efixed = ComptonProfile::getComponentParameter(det, pmap,"efixed");
 
       ResolutionParams detRes;
-      detRes.dl1 = getComponentParameter(*det, "sigma_l1"); // DL0
-      detRes.dl2 = getComponentParameter(*det, "sigma_l2"); // DL1
-      detRes.dthe = getComponentParameter(*det, "sigma_theta"); //DTH in radians
-      detRes.dEnGauss = getComponentParameter(*det, "sigma_gauss");
-      detRes.dEnLorentz = getComponentParameter(*det, "hwhm_lorentz");
+      detRes.dl1 = ComptonProfile::getComponentParameter(det, pmap, "sigma_l1"); // DL0
+      detRes.dl2 = ComptonProfile::getComponentParameter(det, pmap, "sigma_l2"); // DL1
+      detRes.dthe = ComptonProfile::getComponentParameter(det, pmap, "sigma_theta"); //DTH in radians
+      detRes.dEnGauss = ComptonProfile::getComponentParameter(det, pmap, "sigma_gauss");
+      detRes.dEnLorentz = ComptonProfile::getComponentParameter(det, pmap, "hwhm_lorentz");
 
       // Compute a time of flight spectrum convolved with a Voigt resolution function for each mass
       // at the detector point & sum to a single spectrum
@@ -255,6 +256,7 @@ namespace Mantid
     void CalculateGammaBackground::calculateBackgroundFromFoils(const size_t inputIndex, const size_t outputIndex)
     {
       auto det = m_inputWS->getDetector(inputIndex);
+      const auto & pmap = m_inputWS->constInstrumentParameters();
       auto detPos = det->getPos();
 
       // -- Setup detector & resolution parameters --
@@ -262,15 +264,15 @@ namespace Mantid
       detPar.l1 = m_l1;
       detPar.l2 = m_samplePos.distance(detPos);
       detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-      detPar.t0 = getComponentParameter(*det, "t0")*1e-6; // seconds
-      detPar.efixed = getComponentParameter(*det,"efixed");
+      detPar.t0 = ComptonProfile::getComponentParameter(det, pmap, "t0")*1e-6; // seconds
+      detPar.efixed = ComptonProfile::getComponentParameter(det, pmap,"efixed");
 
       ResolutionParams detRes;
-      detRes.dl1 = getComponentParameter(*det, "sigma_l1"); // DL0
-      detRes.dl2 = getComponentParameter(*det, "sigma_l2"); // DL1
-      detRes.dthe = getComponentParameter(*det, "sigma_theta"); //DTH in radians
-      detRes.dEnGauss = getComponentParameter(*det, "sigma_gauss");
-      detRes.dEnLorentz = getComponentParameter(*det, "hwhm_lorentz");
+      detRes.dl1 = ComptonProfile::getComponentParameter(det, pmap, "sigma_l1"); // DL0
+      detRes.dl2 = ComptonProfile::getComponentParameter(det, pmap, "sigma_l2"); // DL1
+      detRes.dthe = ComptonProfile::getComponentParameter(det, pmap, "sigma_theta"); //DTH in radians
+      detRes.dEnGauss = ComptonProfile::getComponentParameter(det, pmap, "sigma_gauss");
+      detRes.dEnLorentz = ComptonProfile::getComponentParameter(det, pmap, "hwhm_lorentz");
 
       const size_t nxvalues = m_backgroundWS->blocksize();
       std::vector<double> foilSpectrum(nxvalues);
@@ -510,6 +512,7 @@ namespace Mantid
 
       // foil geometry
       // there should be the same number in each position
+      const auto & pmap = m_inputWS->constInstrumentParameters();
       auto foils0 = inst->getAllComponentsWithName("foil-pos0");
       auto foils1 = inst->getAllComponentsWithName("foil-pos1");
       const size_t nfoils = foils0.size();
@@ -534,16 +537,16 @@ namespace Mantid
         FoilInfo descr;
         descr.thetaMin = thetaRng0.first;
         descr.thetaMax = thetaRng0.second;
-        descr.lorentzWidth = getComponentParameter(*foil0, "hwhm_lorentz");
-        descr.gaussWidth = getComponentParameter(*foil0, "sigma_gauss");
+        descr.lorentzWidth = ComptonProfile::getComponentParameter(foil0, pmap, "hwhm_lorentz");
+        descr.gaussWidth = ComptonProfile::getComponentParameter(foil0, pmap, "sigma_gauss");
         m_foils0[i] = descr; //copy
 
         const auto & foil1 = foils1[i];
         auto thetaRng1 = calculateThetaRange(foil1, m_foilRadius,refFrame->pointingHorizontal());
         descr.thetaMin = thetaRng1.first;
         descr.thetaMax = thetaRng1.second;
-        descr.lorentzWidth = getComponentParameter(*foil1, "hwhm_lorentz");
-        descr.gaussWidth = getComponentParameter(*foil1, "sigma_gauss");
+        descr.lorentzWidth = ComptonProfile::getComponentParameter(foil1, pmap, "hwhm_lorentz");
+        descr.gaussWidth = ComptonProfile::getComponentParameter(foil1, pmap, "sigma_gauss");
         m_foils1[i] = descr; //copy
       }
 
@@ -594,25 +597,6 @@ namespace Mantid
       double xmax = box.maxPoint()[0];
       double dtheta = std::asin(xmax/radius)*180.0/M_PI; //degrees
       return std::make_pair(theta - dtheta, theta + dtheta);
-    }
-
-    /**
-     * @param comp A reference to the component that should contain the parameter
-     * @param name The name of the parameter
-     * @returns The value of the parameter if it exists
-     * @throws A std::invalid_argument error if the parameter does not exist
-     */
-    double CalculateGammaBackground::getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const
-    {
-      std::vector<double> pars = comp.getNumberParameter(name);
-      if(!pars.empty())
-      {
-        return pars[0];
-      }
-      else
-      {
-        throw std::invalid_argument("CalculateGammaBackground - Cannot find component parameter \"" + name + "\".");
-      }
     }
 
   } // namespace CurveFitting
