@@ -108,8 +108,7 @@ public:
 
     boost::optional<double> theta = 0.7;
 
-    MatrixWorkspace_const_sptr inQ = alg.toIvsQ(toConvert, true /*correct position*/,
-        true /*is point detector*/, theta, sample, detector);
+    MatrixWorkspace_const_sptr inQ = alg.toIvsQ(toConvert, true /*correct position*/, theta, sample, detector);
 
     TS_ASSERT_EQUALS("MomentumTransfer", inQ->getAxis(0)->unit()->unitID());
 
