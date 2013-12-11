@@ -9,7 +9,7 @@ namespace Mantid
 namespace WorkflowAlgorithms
 {
 
-  /** MuonLoad : TODO: DESCRIPTION
+  /** MuonLoad : loads Muon workspace ready for analysis. 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
