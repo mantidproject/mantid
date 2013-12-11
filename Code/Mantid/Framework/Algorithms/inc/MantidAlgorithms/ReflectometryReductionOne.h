@@ -61,27 +61,6 @@ namespace Mantid
 
       void exec();
 
-      /** Auxillary getters and validators **/
-      bool isPropertyDefault(const std::string& propertyName) const;
-
-      /// Get a workspace index list.
-      WorkspaceIndexList getWorkspaceIndexList() const;
-
-      /// Get min max indexes.
-      void fetchOptionalLowerUpperPropertyValue(const std::string& propertyName, bool isPointDetector,
-          OptionalWorkspaceIndexes& optionalUpperLower) const;
-
-      /// Get the min/max property values
-      MinMax getMinMax(const std::string& minProperty, const std::string& maxProperty) const;
-
-      /// Get the transmission correction properties
-      void getTransmissionRunInfo(OptionalMatrixWorkspace_sptr& firstTransmissionRun,
-          OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
-          OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
-          OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ) const;
-
-      /// Validate the transmission correction property inputs
-      void validateTransmissionInputs() const;
 
       /** Algorithm running methods **/
 

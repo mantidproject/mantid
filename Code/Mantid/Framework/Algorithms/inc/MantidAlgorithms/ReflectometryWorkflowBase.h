@@ -56,7 +56,31 @@ namespace Mantid
           const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
           const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep);
 
+    protected:
+
+      /// Determine if the property has it's default value.
+      bool isPropertyDefault(const std::string& propertyName) const;
+
+      /// Get a workspace index list.
+      WorkspaceIndexList getWorkspaceIndexList() const;
+
+      /// Get min max indexes.
+      void fetchOptionalLowerUpperPropertyValue(const std::string& propertyName, bool isPointDetector,
+          OptionalWorkspaceIndexes& optionalUpperLower) const;
+
+      /// Get the min/max property values
+      MinMax getMinMax(const std::string& minProperty, const std::string& maxProperty) const;
+
+      /// Get the transmission correction properties
+      void getTransmissionRunInfo(OptionalMatrixWorkspace_sptr& firstTransmissionRun,
+          OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
+          OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
+          OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ) const;
+
     private:
+
+      /// Validate the transmission correction property inputs
+      void validateTransmissionInputs() const;
 
       /// Convert the monitor parts of the input workspace to wavelength
       API::MatrixWorkspace_sptr toLamMonitor(const API::MatrixWorkspace_sptr& toConvert,
@@ -68,6 +92,7 @@ namespace Mantid
           const double& wavelengthStep);
 
     };
+
 
   } // namespace Algorithms
 } // namespace Mantid
