@@ -40,10 +40,9 @@ namespace Mantid
     /// Initialisation method.
     void CatalogSearch::init()
     {
-      auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
       auto isDate = boost::make_shared<DateValidator>();
-      mustBePositive->setLower(0.0);
 
+      // Properties related to the search fields the user will fill in to improve search.
       declareProperty("InvestigationName", "", "The name of the investigation to search.");
       declareProperty("Instrument","","The name of the instrument used for investigation search.");
       declareProperty("RunRange","","The range of runs to search for related investigations.");
@@ -55,9 +54,15 @@ namespace Mantid
       declareProperty("DataFileName","", "The name of the data file to search.");
       declareProperty("InvestigationType", "", "The type  of the investigation to search.");
       declareProperty("MyData",false, "Boolean option to do my data only search.");
+
+      // These are needed for paging on the interface, and to minimise the amount of results returned by the query.
+      declareProperty("CountOnly",false,"Boolean option to perform COUNT search only.");
+      declareProperty<int>("Limit", 0, "");
+      declareProperty<int>("Offset",0, "");
+
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
           "The name of the workspace that will be created to store the ICat investigations search result.");
-
+      declareProperty<int64_t>("NumberOfSearchResults", 0, "", Direction::Output);
     }
 
     /// Execution method.
@@ -69,10 +74,19 @@ namespace Mantid
       getInputProperties(params);
       // Create output workspace.
       auto workspace = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      // Search for investigations in the archives.
-      CatalogAlgorithmHelper().createCatalog()->search(params,workspace);
+      // Create a catalog since we use it twice on execution.
+      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
+      // Do not perform a full search if we only want a COUNT search.
+      if (getProperty("CountOnly"))
+      {
+        // Set the related property needed for paging.
+        setProperty("NumberOfSearchResults", catalog->getNumberOfSearchResults(params));
+        return;
+      }
+      // Search for investigations in the archives.
+      catalog->search(params,workspace,getProperty("Offset"),getProperty("Limit"));
     }
 
     /**
@@ -83,7 +97,7 @@ namespace Mantid
     {
       params.setInvestigationName(getPropertyValue("InvestigationName"));
       params.setInstrument(getPropertyValue("Instrument"));
-      std::string runRange = getProperty("runRange");
+      std::string runRange = getProperty("RunRange");
       setRunRanges(runRange,params);
       params.setStartDate(params.getTimevalue(getPropertyValue("StartDate")));
       params.setEndDate(params.getTimevalue(getPropertyValue("EndDate")));

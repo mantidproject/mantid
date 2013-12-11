@@ -93,10 +93,6 @@ namespace MantidQt
 
       /// Outputs the results of the query into a table.
       void populateResultTable();
-      /// Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
-      void resultInfoUpdate();
-      /// Updates the page numbers (e.g. m & n in: Page m of n )
-      void pageNumberUpdate();
 
       ///////////////////////////////////////////////////////////////////////////////
       // Methods for: "Datafile information"
@@ -190,6 +186,8 @@ namespace MantidQt
       CatalogHelper * m_icatHelper;
       /// The directory to save the downloaded dataFiles.
       QString m_downloadSaveDir;
+      /// The current page the user is on in the results window. Used for paging.
+      int m_currentPageNumber;
     };
   }
 }

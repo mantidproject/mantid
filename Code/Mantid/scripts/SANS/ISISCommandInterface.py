@@ -153,6 +153,10 @@ def MaskFile(file_name):
         @param file_name: the settings file
     """
     _printMessage('#Opening "'+file_name+'"')
+
+    # ensure that no slice string is kept from previous executions.
+    ReductionSingleton().setSlicesLimits("")
+
     ReductionSingleton().user_settings = isis_reduction_steps.UserFile(
         file_name)
     status = ReductionSingleton().user_settings.execute(
@@ -559,33 +563,37 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)          
         else:
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift")   
     elif rAnds.fitShift==False:
-        if rAnds.qRangeUserSelected:        
+        if rAnds.qRangeUserSelected:
+            function_input = 'name=TabulatedFunction, Workspace="'+str(frontData)+'"' +";name=FlatBackground"
+            ties = 'f1.A0='+str(rAnds.shift*rAnds.scale)
+            logger.warning('function input ' + str(function_input))
+
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)               
         else:           
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift")   
     else:
         if rAnds.qRangeUserSelected:          
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground",
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
-            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground",Output="__fitRescaleAndShift")
                         
     param = mtd['__fitRescaleAndShift_Parameters']
@@ -638,23 +646,49 @@ def _WavRangeReduction(name_suffix=None):
             RenameWorkspace(InputWorkspace=old,OutputWorkspace= result)
         return result
 
+    def _common_substring(val1, val2):
+        l = []
+        for i in range(len(val1)):
+            if val1[i]==val2[i]: l.append(val1[i])
+            else:
+                return ''.join(l)
+
+    def _group_workspaces(list_of_values, outputname):
+        allnames = ','.join(list_of_values)
+        GroupWorkspaces(InputWorkspaces=allnames, OutputWorkspace=outputname)
+
+    def _reduceAllSlices():
+        if ReductionSingleton().getNumSlices() > 1:
+            slices = []
+            for index in range(ReductionSingleton().getNumSlices()):
+                ReductionSingleton().setSliceIndex(index)
+                slices.append(ReductionSingleton()._reduce())
+            ReductionSingleton().setSliceIndex(0)
+            group_name = _common_substring(slices[0], slices[1])
+            if group_name[-2] == "_":
+                group_name = group_name[:-2]
+            _group_workspaces(slices, group_name)
+            return group_name
+        else:
+            return ReductionSingleton()._reduce()
+            
+            
 
     result = ""
     if ReductionSingleton().get_sample().loader.periods_in_file == 1:
-        result = ReductionSingleton()._reduce()
+        result = _reduceAllSlices()
         return _applySuffix(result, name_suffix)
 
     calculated = []
     try:
         for period in ReductionSingleton().get_sample().loader.entries:
             _setUpPeriod(period)
-            calculated.append(ReductionSingleton()._reduce())
+            calculated.append(_reduceAllSlices())                
     
     finally:
         if len(calculated) > 0:
-            allnames = ','.join(calculated)
             result = ReductionSingleton().get_out_ws_name(show_period=False)
-            GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=allnames)
+            _group_workspaces(calculated, result)
 
     return _applySuffix(result, name_suffix)
 
@@ -899,6 +933,12 @@ def LimitsQXY(qmin, qmax, step, type):
         raise RuntimeError('MaskFile() first')
 
     settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type, ReductionSingleton())
+
+def SetEventSlices(input_str):
+    """    
+    """
+    ReductionSingleton().setSlicesLimits(input_str)
+
 
 def PlotResult(workspace, canvas=None):
     """

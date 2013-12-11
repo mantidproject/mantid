@@ -257,6 +257,8 @@ private slots:
   void transSelectorChanged(int );
   void loadTransmissionSettings();
   
+  void handleSlicePushButton();
+
 private:
   /// used to specify the range of validation to do
   enum ValCheck
@@ -349,6 +351,8 @@ private:
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
   static Mantid::Kernel::Logger & g_centreFinderLog;
+
+  UserSubWindow * slicingWindow;
 
 };
 

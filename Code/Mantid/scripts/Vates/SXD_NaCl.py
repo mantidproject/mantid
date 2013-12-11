@@ -28,7 +28,7 @@ peaks_qLab = FindPeaksMD(InputWorkspace='QLab', MaxPeaks=300, DensityThresholdFa
 #  Fewer peaks index if Centroiding is used.  This indicates that there may be an error in the centroiding algorithm,
 #  since the peaks seem to be less accurate.
 #
-#peaks_qLab = CentroidPeaksMD(InputWorkspace='QLab',CoordinatesToUse='Q (lab frame)',PeaksWorkspace=peaks_qLab)
+#peaks_qLab = CentroidPeaksMD(InputWorkspace='QLab',PeaksWorkspace=peaks_qLab)
 
 use_fft = True
 use_cubic_lat_par = False

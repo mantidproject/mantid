@@ -10,6 +10,27 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  /// Simple data structure to store nominal detector values
+  /// It avoids some functions taking a huge number of arguments
+  struct DetectorParams
+  {
+    double l1; ///< source-sample distance in metres
+    double l2; ///< sample-detector distance in metres
+    double theta; ///< scattering angle in radians
+    double t0; ///< time delay in microseconds
+    double efixed; ///< final energy
+  };
+
+  /// Simple data structure to store resolution parameter values
+  /// It avoids some functions taking a huge number of arguments
+  struct ResolutionParams
+  {
+    double dl1; ///< spread in source-sample distance
+    double dl2; ///< spread in sample-detector distance
+    double dthe; ///< spread in scattering angle
+    double dEnLorentz; ///< lorentz width in energy
+    double dEnGauss; ///< gaussian width in energy
+  };
 
   /**
     This class serves as a base-class for ComptonProfile type functions. @see GaussianComptonProfile, GramCharlierComptonProfile
@@ -46,10 +67,17 @@ namespace CurveFitting
     void function1D(double* out, const double* xValues, const size_t nData) const;
     /// Ensure the object is ready to be fitted
     void setUpForFit();
-    /// Cache a copy of the workspace pointer and pul out the parameters
+    /// Cache a copy of the workspace pointer and pull out the parameters
     void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+    /// Pre-calculate the Y-space values
+    virtual void cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
+                                   const DetectorParams & detpar,const ResolutionParams & respar);
+    /// Turn off logger
+    void disableLogging() { m_log.setEnabled(false); }
     ///@}
 
+    /// Override to calculate the value of the profile for this mass and store in the given array
+    virtual void massProfile(double * result, const size_t nData) const = 0;
     /// Returns the indices of the intensity parameters
     virtual std::vector<size_t> intensityParameterIndices() const = 0;
     /// Fill the appropriate columns of the given matrix with the values
@@ -63,8 +91,6 @@ namespace CurveFitting
     /// Set an attribute value (and possibly cache its value)
     void setAttribute(const std::string& name,const Attribute& value);
 
-    /// Override to calculate the value of the profile for this mass and store in the given array
-    virtual void massProfile(double * result, const size_t nData) const = 0;
 
     /// Access y-values cache
     inline const std::vector<double> & ySpace() const { return m_yspace; }
@@ -94,8 +120,6 @@ namespace CurveFitting
     /// Retrieve a component parameter
     double getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const;
 
-    /// The workspace providing the data
-    API::MatrixWorkspace_const_sptr m_workspace;
     /// Current workspace index, required to access instrument parameters
     size_t m_wsIndex;
     /// Store the mass values
