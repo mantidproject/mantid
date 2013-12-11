@@ -65,7 +65,7 @@ namespace Mantid
           const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep);
 
       /// Convert to an IvsQ workspace. Performs detector positional corrections based on the component name and the theta value.
-      Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool correctPosition, const bool isPointDetector,
+      Mantid::API::MatrixWorkspace_sptr toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool correctPosition,
            OptionalDouble& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
 
     private:

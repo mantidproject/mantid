@@ -81,8 +81,8 @@ namespace Mantid
        * @param originIndexes : Indexes in terms of the origin workspace
        * @return WorkspaceIndexes in terms of the host workspace
        */
-      ReflectometryReductionOne::WorkspaceIndexList getIndexesInTermsOf(MatrixWorkspace_const_sptr hostWS,
-          MatrixWorkspace_sptr originWS,
+      ReflectometryReductionOne::WorkspaceIndexList getIndexesInTermsOf(
+          MatrixWorkspace_const_sptr hostWS, MatrixWorkspace_sptr originWS,
           const ReflectometryReductionOne::WorkspaceIndexList& originIndexes)
       {
         auto spectrumMap = hostWS->getSpectrumToWorkspaceIndexMap();
@@ -93,6 +93,16 @@ namespace Mantid
           translatedIndexList.push_back(static_cast<int>(spectrumMap[specNumber]));
         }
         return translatedIndexList;
+      }
+
+      /**
+       *  Helper method used with the stl to determine whether values are negative
+       * @param value : Value to check
+       * @return : True if negative.
+       */
+      bool checkNotPositive(const int value)
+      {
+        return value < 0;
       }
 
       const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
@@ -290,16 +300,6 @@ namespace Mantid
     {
       Property* property = this->getProperty(propertyName);
       return property->isDefault();
-    }
-
-    /**
-     *  Helper method used with the stl to determine whether values are negative
-     * @param value : Value to check
-     * @return : True if negative.
-     */
-    bool checkNotPositive(const int value)
-    {
-      return value < 0;
     }
 
     /**
@@ -765,14 +765,13 @@ namespace Mantid
      *
      * @param toConvert : Workspace to convert
      * @param bCorrectPosition : Flag to indicate that detector positions should be corrected based on the input theta values.
-     * @param isPointDetector : Flag to indicate that this is a point detector reduction run.
      * @param thetaInDeg : Theta in Degrees. Used for correction.
      * @param sample : Sample component
      * @param detector : Detector component
      * @return
      */
     Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition,
-        const bool isPointDetector,  OptionalDouble& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector)
+        OptionalDouble& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector)
     {
       /*
        * Can either calculate a missing theta value for the purposes of reporting, or correct positions based on a theta value,
@@ -973,7 +972,7 @@ namespace Mantid
         IvsLam = regionOfInterestWS / regionOfDirectBeamWS; // TODO. This needs checking.
       }
 
-      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, isPointDetector, theta, sample, detector);
+      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, theta, sample, detector);
 
       setProperty("ThetaOut", theta.get());
       setProperty("OutputWorkspaceWavelength", IvsLam);
