@@ -171,19 +171,16 @@ def confitParsToWS(Table, Data, specMin=0, specMax=-1):
 ##############################################################################
 
 def confitPlotSeq(inputWS, Plot):
-    nhist = mtd[inputWS].getNumberHistograms()
+    ws = mtd[inputWS]
+    nhist = ws.getNumberHistograms()
+    
     if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nhist), True)
-        return    
-    plotSpecs = []
-    if ( Plot == 'Intensity' ):
-        res = 'Amplitude$'
-    elif ( Plot == 'FWHM' ):
-        res = 'FWHM$'
-    for i in range(0,nhist):
-        title = mtd[inputWS].getAxis(1).label(i)
-        if re.search(res, title):
-            plotSpecs.append(i)
+        #plot all spectra
+        plotSpecs = range(0, nhist)
+    else:
+        #Plot all spectra matching the plot option
+        plotSpecs = [i for i in range(0,nhist) if Plot in ws.getAxis(1).label(i)]
+    
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
 ##############################################################################
