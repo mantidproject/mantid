@@ -135,38 +135,38 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties
 ##############################################################################
 
 def confitParsToWS(Table, Data, specMin=0, specMax=-1):
+    
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
-    dataX = createQaxis(Data)
-    xAxisVals = []
-    xAxisTrimmed = []
-    dataY = []
-    dataE = []
-    names = ''
+
     ws = mtd[Table]
-    cName =  ws.getColumnNames()
-    nSpec = ( ws.columnCount() - 1 ) / 2
-    for spec in range(0,nSpec):
-        yCol = (spec*2)+1
-        yAxis = cName[(spec*2)+1]
-        if re.search('FWHM$', yAxis) or re.search('Amplitude$', yAxis):
-            xAxisVals += dataX
-            if (len(names) > 0):
-                names += ","
-            names += yAxis
-            eCol = (spec*2)+2
-            eAxis = cName[(spec*2)+2]
-            for row in range(0, ws.rowCount()):
-                dataY.append(ws.cell(row,yCol))
-                dataE.append(ws.cell(row,eCol))
-        else:
-            nSpec -= 1
-    outNm = Table + "_Workspace"
-    xAxisTrimmed = trimData(nSpec, xAxisVals, specMin, specMax)
-    CreateWorkspace(OutputWorkspace=outNm, DataX=xAxisTrimmed, DataY=dataY, DataE=dataE, 
-        Nspec=nSpec, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-        VerticalAxisValues=names)
-    return outNm
+
+    xAxisVals = createQaxis(Data)
+    dataX, dataY, dataE = [], [], []
+
+    #find all relevant column names
+    names = ['FWHM', 'Amplitude', 'Height']
+    colNames = [name for name in ws.getColumnNames() for substr in names if substr in name]
+
+    nSpec = len(colNames)
+
+    #extract columns from table
+    columns = [ws.column(name) for name in colNames]
+    columns = zip(columns[::2], columns[1::2])
+
+    #build data arrays for workspace
+    nSpec = len(columns)
+    for y, error in columns:
+        dataX += xAxisVals
+        dataY += y
+        dataE += error
+
+    outputName = Table + "_Workspace"
+    dataX = trimData(nSpec, dataX, specMin, specMax)
+    CreateWorkspace(OutputWorkspace=outputName, DataX=dataX, DataY=dataY, DataE=dataE, NSpec=nSpec,
+        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=colNames[::2])
+    
+    return outputName
 
 ##############################################################################
 
