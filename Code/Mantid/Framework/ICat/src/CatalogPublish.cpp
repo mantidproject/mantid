@@ -94,5 +94,18 @@ namespace Mantid
       return extension.compare("raw") == 0 || extension.compare("nxs") == 0;
     }
 
+    /**
+     * Extract the name of the file from a given path.
+     * @param filePath :: Path of data file to use.
+     * @returns The filename of the given path
+     */
+    const std::string CatalogPublish::extractFileName(const std::string &filePath)
+    {
+      // Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
+      std::string dataFileName = Poco::Path(Poco::Path(filePath).getFileName()).getBaseName();
+      // Extracts the specific file name (e.g. CSP74683) from the file path.
+      return dataFileName.substr(0, dataFileName.find_first_of('_'));
+    }
+
   }
 }

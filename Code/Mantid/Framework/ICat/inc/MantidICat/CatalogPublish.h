@@ -55,6 +55,8 @@ namespace Mantid
         void exec();
         /// True if the extension of the file is a datafile.
         bool isDataFile(const std::string & filePath);
+        /// Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
+        const std::string extractFileName(const std::string &filePath);
     };
   }
 }
