@@ -34,7 +34,15 @@ public:
   {
     ScopedWorkspace output;
 
-    TableWorkspace_sptr grouping = createGroupingTable();
+    std::vector<int> group1, group2;
+
+    for ( int i = 1; i <= 16; ++i )
+      group1.push_back(i);
+
+    for ( int i = 17; i <= 32; ++i )
+      group2.push_back(i);
+
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
   
     MuonLoad alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -70,31 +78,70 @@ public:
     }
   }
 
-  TableWorkspace_sptr createGroupingTable()
+  void test_multiPeriod()
+  {
+    ScopedWorkspace output;
+
+    std::vector<int> group1, group2;
+
+    for ( int i = 33; i <= 64; ++i )
+      group1.push_back(i);
+    for ( int i = 1; i <= 32; ++i )
+      group2.push_back(i);
+
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+  
+    MuonLoad alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "MUSR00015189.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FirstPeriod", 0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("SecondPeriod", 1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeriodOperation", "+") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DetectorGroupingTable", grouping) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputType", "GroupCounts") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupIndex", 1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", output.name()) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+    
+    // Retrieve the workspace from data service.
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( output.retrieve() );
+
+    TS_ASSERT(ws);
+    if (ws)
+    {
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
+      TS_ASSERT_EQUALS( ws->blocksize(), 2000 );
+
+      TS_ASSERT_EQUALS( ws->readY(0)[0], 23); 
+      TS_ASSERT_EQUALS( ws->readY(0)[1000], 3); 
+      TS_ASSERT_EQUALS( ws->readY(0)[1701], 1); 
+
+      TS_ASSERT_DELTA( ws->readE(0)[0], 4.796, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readE(0)[1000], 1.732, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readE(0)[1701], 1.000, 0.001 ); 
+
+      TS_ASSERT_DELTA( ws->readX(0)[0], -0.550, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readX(0)[1000], 15.450, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readX(0)[1701], 26.666, 0.001 ); 
+    }
+  }
+
+  TableWorkspace_sptr createGroupingTable(const std::vector<int>& group1, const std::vector<int>& group2)
   {
     auto t = boost::make_shared<TableWorkspace>();
 
     t->addColumn("vector_int", "Detectors");
 
-    std::vector<int> group1;
-    for ( int i = 1; i <= 16; ++i )
-    {
-      group1.push_back(i);
-    }
     TableRow row1 = t->appendRow();
     row1 << group1;
 
-    std::vector<int> group2;
-    for ( int i = 17; i <= 32; ++i )
-    {
-      group2.push_back(i);
-    }
     TableRow row2 = t->appendRow();
     row2 << group2;
 
     return t;
   }
-
 
 };
 
