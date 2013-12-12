@@ -468,10 +468,11 @@ namespace Mantid
     }
 
 
-
-
     /**
-     * Perform Transmission Corrections.
+     * Create a transmission corrections workspace utilising one or two workspaces.
+     *
+     * Input workspaces are in TOF. These are converted to lambda, normalized and stitched together (if two given).
+     *
      * @param IvsLam : Run workspace which is to be normalized by the results of the transmission corrections.
      * @param wavelengthInterval : Wavelength interval for the run workspace.
      * @param wavelengthMonitorBackgroundInterval : Wavelength interval for the monitor background
@@ -485,9 +486,10 @@ namespace Mantid
      * @param stitchingStartOverlapQ : Stitching start Q overlap (optional but dependent on secondTransmissionRun)
      * @param stitchingEndOverlapQ : Stitching end Q overlap (optional but dependent on secondTransmissionRun)
      * @param wavelengthStep : Step in angstroms for rebinning for workspaces converted into wavelength.
-     * @return Normalized run workspace by the transmission workspace, which have themselves been converted to Lam, normalized by monitors and possibly stitched together.
+     * @return A transmission workspace in Wavelength units.
      */
-    MatrixWorkspace_sptr ReflectometryWorkflowBase::transmissonCorrection(MatrixWorkspace_sptr IvsLam,
+    MatrixWorkspace_sptr ReflectometryWorkflowBase::makeTransmissionCorrection(
+        const WorkspaceIndexList& detectorIndexes,
         const MinMax& wavelengthInterval,
         const MinMax& wavelengthMonitorBackgroundInterval,
         const MinMax& wavelengthMonitorIntegrationInterval,
@@ -499,12 +501,10 @@ namespace Mantid
         const OptionalDouble& stitchingEndQ,
         const OptionalDouble& stitchingStartOverlapQ,
         const OptionalDouble& stitchingEndOverlapQ,
-        const double& wavelengthStep
-    )
+        const double& wavelengthStep)
     {
-      g_log.debug("Extracting first transmission run workspace indexes from spectra");
-      const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam, firstTransmissionRun);
-      auto trans1InLam = toLam(firstTransmissionRun, detectorIndexes, i0MonitorIndex, wavelengthInterval, wavelengthMonitorBackgroundInterval, wavelengthStep);
+      auto trans1InLam = toLam(firstTransmissionRun, detectorIndexes, i0MonitorIndex, wavelengthInterval,
+          wavelengthMonitorBackgroundInterval, wavelengthStep);
       MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
       MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
 
@@ -517,13 +517,14 @@ namespace Mantid
       integrationAlg->execute();
       trans1Monitor = integrationAlg->getProperty("OutputWorkspace");
 
-      MatrixWorkspace_sptr denominator = trans1Detector / trans1Monitor;
+      MatrixWorkspace_sptr transmissionWS = trans1Detector / trans1Monitor;
 
       if (secondTransmissionRun.is_initialized())
       {
+        // TODO check that the spectra to workspace index maps match for both First and Second transmsisson runs. If they don't THROW because the detectorIndexList won't work.
+
         auto transRun2 = secondTransmissionRun.get();
         g_log.debug("Extracting second transmission run workspace indexes from spectra");
-        const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam, transRun2);
 
         auto trans2InLam = toLam(transRun2, detectorIndexes, i0MonitorIndex, wavelengthInterval,
             wavelengthMonitorBackgroundInterval, wavelengthStep);
@@ -546,30 +547,71 @@ namespace Mantid
         // Stitch the results.
         auto stitch1DAlg = this->createChildAlgorithm("Stitch1D");
         stitch1DAlg->initialize();
-        AnalysisDataService::Instance().addOrReplace("denominator", denominator);
+        AnalysisDataService::Instance().addOrReplace("transmissionWS", transmissionWS);
         AnalysisDataService::Instance().addOrReplace("normalizedTrans2", normalizedTrans2);
-        stitch1DAlg->setProperty("LHSWorkspace", denominator);
+        stitch1DAlg->setProperty("LHSWorkspace", transmissionWS);
         stitch1DAlg->setProperty("RHSWorkspace", normalizedTrans2);
-        stitch1DAlg->setProperty("StartOverlap", stitchingStartOverlapQ.get() );
-        stitch1DAlg->setProperty("EndOverlap", stitchingEndOverlapQ.get() );
-        const std::vector<double> params = boost::assign::list_of(stitchingStartQ.get())(stitchingDeltaQ.get())(stitchingEndQ.get()).convert_to_container<std::vector< double > >();
+        stitch1DAlg->setProperty("StartOverlap", stitchingStartOverlapQ.get());
+        stitch1DAlg->setProperty("EndOverlap", stitchingEndOverlapQ.get());
+        const std::vector<double> params = boost::assign::list_of(stitchingStartQ.get())(
+            stitchingDeltaQ.get())(stitchingEndQ.get()).convert_to_container<std::vector<double> >();
         stitch1DAlg->setProperty("Params", params);
         stitch1DAlg->execute();
-        denominator = stitch1DAlg->getProperty("OutputWorkspace");
-        AnalysisDataService::Instance().remove("denominator");
+        transmissionWS = stitch1DAlg->getProperty("OutputWorkspace");
+        AnalysisDataService::Instance().remove("transmissionWS");
         AnalysisDataService::Instance().remove("normalizedTrans2");
       }
 
-        auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
-        rebinToWorkspaceAlg->initialize();
-        rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", IvsLam);
-        rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", denominator);
-        rebinToWorkspaceAlg->execute();
-        denominator = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+      return transmissionWS;
+    }
 
-        // Do normalization.
-        MatrixWorkspace_sptr normalizedIvsLam = IvsLam / denominator;
-        return normalizedIvsLam;
+
+    /**
+     * Perform Transmission Corrections.
+     * @param IvsLam : Run workspace which is to be normalized by the results of the transmission corrections.
+     * @param wavelengthInterval : Wavelength interval for the run workspace.
+     * @param wavelengthMonitorBackgroundInterval : Wavelength interval for the monitor background
+     * @param wavelengthMonitorIntegrationInterval : Wavelength interval for the monitor integration
+     * @param i0MonitorIndex : Monitor index for the I0 monitor
+     * @param firstTransmissionRun : The first transmission run
+     * @param secondTransmissionRun : The second transmission run (optional)
+     * @param stitchingStartQ : Stitching start Q (optional but dependent on secondTransmissionRun)
+     * @param stitchingDeltaQ : Stitching delta Q (optional but dependent on secondTransmissionRun)
+     * @param stitchingEndQ : Stitching end Q (optional but dependent on secondTransmissionRun)
+     * @param stitchingStartOverlapQ : Stitching start Q overlap (optional but dependent on secondTransmissionRun)
+     * @param stitchingEndOverlapQ : Stitching end Q overlap (optional but dependent on secondTransmissionRun)
+     * @param wavelengthStep : Step in angstroms for rebinning for workspaces converted into wavelength.
+     * @return Normalized run workspace by the transmission workspace, which have themselves been converted to Lam, normalized by monitors and possibly stitched together.
+     */
+    MatrixWorkspace_sptr ReflectometryWorkflowBase::transmissonCorrection(MatrixWorkspace_sptr IvsLam,
+        const MinMax& wavelengthInterval, const MinMax& wavelengthMonitorBackgroundInterval,
+        const MinMax& wavelengthMonitorIntegrationInterval, const int& i0MonitorIndex,
+        MatrixWorkspace_sptr firstTransmissionRun, OptionalMatrixWorkspace_sptr secondTransmissionRun,
+        const OptionalDouble& stitchingStartQ, const OptionalDouble& stitchingDeltaQ,
+        const OptionalDouble& stitchingEndQ, const OptionalDouble& stitchingStartOverlapQ,
+        const OptionalDouble& stitchingEndOverlapQ, const double& wavelengthStep)
+    {
+      g_log.debug("Extracting first transmission run workspace indexes from spectra");
+      const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
+          firstTransmissionRun);
+
+      // Make the transmission run.
+      MatrixWorkspace_sptr denominator = makeTransmissionCorrection(detectorIndexes, wavelengthInterval,
+          wavelengthMonitorBackgroundInterval, wavelengthMonitorIntegrationInterval, i0MonitorIndex,
+          firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ,
+          stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
+
+      // Rebin the transmission run to be the same as the input.
+      auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
+      rebinToWorkspaceAlg->initialize();
+      rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", IvsLam);
+      rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", denominator);
+      rebinToWorkspaceAlg->execute();
+      denominator = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+
+      // Do normalization.
+      MatrixWorkspace_sptr normalizedIvsLam = IvsLam / denominator;
+      return normalizedIvsLam;
     }
 
   } // namespace Algorithms

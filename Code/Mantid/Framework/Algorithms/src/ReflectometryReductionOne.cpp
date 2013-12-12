@@ -48,28 +48,6 @@ namespace Mantid
     /*Anonomous namespace */
     namespace
     {
-      /**
-       * Helper non-member function for translating all the workspace indexes in an origin workspace into workspace indexes
-       * of a host end-point workspace. This is done using spectrum numbers as the intermediate.
-       *
-       * This function will throw a runtime error if the specId are not found to exist on the host end-point workspace.
-       *
-       * @param originWS : Origin workspace, which provides the original workspace index to spectrum id mapping.
-       * @param hostWS : Workspace onto which the resulting workspace indexes will be hosted
-       * @return Remapped wokspace indexes applicable for the host workspace.
-       */
-      ReflectometryWorkflowBase::WorkspaceIndexList createWorkspaceIndexListFromDetectorWorkspace(
-          MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS)
-      {
-        auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
-        ReflectometryWorkflowBase::WorkspaceIndexList translatedIndexList;
-        for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it)
-        {
-          specid_t specId = (*it).first;
-          translatedIndexList.push_back(static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId))); // Could be slow to do it like this.
-        }
-        return translatedIndexList;
-      }
 
       /**
        * Helper non-member function
