@@ -238,6 +238,30 @@ public:
     }
   }
 
+  void test_errorReporting()
+  {
+    ScopedWorkspace output;
+
+    auto emptyGrouping = createGroupingTable(std::vector<int>(), std::vector<int>());
+
+    MuonLoad alg;
+    alg.setRethrows(true);
+
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+
+    TS_ASSERT_THROWS( alg.setPropertyValue("Filename", "non-existent-file.nxs"), std::invalid_argument );
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006473.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DetectorGroupingTable", emptyGrouping) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputType", "GroupCounts") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupIndex", 0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", output.name()) );
+
+    TS_ASSERT_THROWS( alg.execute(), std::invalid_argument );
+    TS_ASSERT( ! alg.isExecuted() );
+  }
+
   TableWorkspace_sptr createGroupingTable(const std::vector<int>& group1, const std::vector<int>& group2)
   {
     auto t = boost::make_shared<TableWorkspace>();
