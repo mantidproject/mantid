@@ -29,7 +29,7 @@
 <parameter name="hard_mask_file" type="string">
     <value val="None"/>
 </parameter>
-<!-- Parameter specifies if one wants to run diagnostics or not-->
+<!-- Parameter specifies if one wants to run diagnostics (which include applying hard mask file) or not-->
 <parameter name="run_diagnostics" type="bool">
   <value val="True"/>
 </parameter>
