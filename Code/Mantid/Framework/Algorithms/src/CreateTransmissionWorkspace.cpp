@@ -117,9 +117,11 @@ namespace Mantid
       OptionalDouble stitchingStartOverlapQ;
       OptionalDouble stitchingEndOverlapQ;
 
+      // Get the transmission run property information.
       getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStartQ,
           stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
 
+      // Get wavelength intervals.
       const MinMax wavelengthInterval = this->getMinMax("WavelengthMin", "WavelengthMax");
       const double wavelengthStep = getProperty("WavelengthStep");
       const MinMax monitorBackgroundWavelengthInterval = getMinMax("MonitorBackgroundWavelengthMin",
@@ -127,11 +129,20 @@ namespace Mantid
       const MinMax monitorIntegrationWavelengthInterval = getMinMax("MonitorIntegrationWavelengthMin",
           "MonitorIntegrationWavelengthMax");
 
+      // Get the index list
       const WorkspaceIndexList indexList = getWorkspaceIndexList();
 
+      // Get the monitor i0 index
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
-      setProperty("OutputWorkspace", firstTransmissionRun.get());
+      // Create the transmission workspace.
+      MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(indexList, wavelengthInterval,
+          monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex,
+          firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ,
+          stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
+
+
+      setProperty("OutputWorkspace", outWS);
     }
 
   } // namespace Algorithms

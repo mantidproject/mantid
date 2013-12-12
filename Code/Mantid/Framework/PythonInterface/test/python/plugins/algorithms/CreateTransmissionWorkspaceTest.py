@@ -1,5 +1,6 @@
 import unittest
-from mantid.simpleapi import CreateTransmissionWorkspace, CreateWorkspace, DeleteWorkspace
+import mantid.api
+from mantid.simpleapi import CreateTransmissionWorkspace, CreateWorkspace, DeleteWorkspace, Load
 
 import inspect
 import re
@@ -127,8 +128,8 @@ class CreateTransmissionWorkspaceTest(unittest.TestCase):
         self.assertRaises(ValueError, alg.execute)
         
     def test_must_provide_wavelengths(self):
-        self.assertRaises(RuntimeError, CreateTransmissionWorkspace, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMin=1.0)
-        self.assertRaises(RuntimeError, CreateTransmissionWorkspace, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMax=1.0)
+        self.assertRaises(RuntimeError, CreateTransmissionWorkspace, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMin=1.0)
+        self.assertRaises(RuntimeError, CreateTransmissionWorkspace, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMax=1.0)
         
     def test_wavelength_min_greater_wavelength_max_throws(self):
         alg = self.construct_standard_algorithm()
@@ -168,9 +169,88 @@ class CreateTransmissionWorkspaceTest(unittest.TestCase):
         alg.set_WorkspaceIndexList([1, 0]) # 1 > 0
         self.assertRaises(ValueError, alg.execute)
         
-    def test_execute(self):
+    def test_spectrum_map_mismatch_throws(self):
         alg = self.construct_standard_algorithm()
-        alg.execute()
+        trans_run1 = Load('INTER00013463.nxs')
+        trans_run2 = self.__tof
+        
+        alg.set_WorkspaceIndexList([3,4])
+        alg.set_FirstTransmissionRun(trans_run1) 
+        alg.set_SecondTransmissionRun(trans_run2)
+        alg.set_Params([0, 0.1, 1])
+        alg.set_StartOverlapQ(1)
+        alg.set_EndOverlapQ(2)
+        self.assertRaises(ValueError, alg.execute)
+        
+        DeleteWorkspace(trans_run1)
+        
+    def test_execute_one_tranmission(self):
+        alg = make_decorator(CreateTransmissionWorkspace)
+        
+        trans_run1 = Load('INTER00013463.nxs')
+        
+        alg.set_WorkspaceIndexList([3,4])
+        alg.set_FirstTransmissionRun(trans_run1) 
+        alg.set_I0MonitorIndex(0)
+        alg.set_WavelengthMin(0.0)
+        alg.set_WavelengthMax(17.9)
+        alg.set_WavelengthStep(0.5)
+        alg.set_MonitorBackgroundWavelengthMin(15.0)
+        alg.set_MonitorBackgroundWavelengthMax(17.0)
+        alg.set_MonitorIntegrationWavelengthMin(4.0)
+        alg.set_MonitorIntegrationWavelengthMax(10.0)
+        
+        transmission_ws = alg.execute()
+        
+        self.assertTrue(isinstance(transmission_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("Wavelength", transmission_ws.getAxis(0).getUnit().unitID())
+        
+        # Because we have one transmission workspaces, binning should come from the WavelengthStep.
+        x = transmission_ws.readX(0)
+        actual_binning = x[1] - x[0]
+        step = alg.get_WavelengthStep()
+        self.assertAlmostEqual( actual_binning, step, 6)
+        
+        DeleteWorkspace(trans_run1)
+        DeleteWorkspace(transmission_ws)
+        
+    def test_execute_two_tranmissions(self):
+        alg = make_decorator(CreateTransmissionWorkspace)
+        
+        trans_run1 = Load('INTER00013463.nxs')
+        trans_run2 = Load('INTER00013464.nxs')
+        
+        alg.set_WorkspaceIndexList([3,4])
+        alg.set_FirstTransmissionRun(trans_run1) 
+        alg.set_SecondTransmissionRun(trans_run2)
+        alg.set_I0MonitorIndex(0)
+        alg.set_WavelengthMin(0.0)
+        alg.set_WavelengthMax(17.9)
+        alg.set_WavelengthStep(0.5)
+        alg.set_MonitorBackgroundWavelengthMin(15.0)
+        alg.set_MonitorBackgroundWavelengthMax(17.0)
+        alg.set_MonitorIntegrationWavelengthMin(4.0)
+        alg.set_MonitorIntegrationWavelengthMax(10.0)
+        alg.set_Params([1.5, 0.02, 17])
+        alg.set_StartOverlapQ( 10.0 )
+        alg.set_EndOverlapQ( 12.0 )
+        
+        transmission_ws = alg.execute()
+        
+        self.assertTrue(isinstance(transmission_ws, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual("Wavelength", transmission_ws.getAxis(0).getUnit().unitID())
+        
+        # Because we have two transmission workspaces, binning should come from the Params for stitching.
+        x = transmission_ws.readX(0)
+        actual_binning = x[1] - x[0]
+        params = alg.get_Params()
+        self.assertAlmostEqual( actual_binning, params[1], 6)
+        self.assertAlmostEqual( 1.5, params[0], 6)
+        self.assertAlmostEqual( 17, params[2], 6)
+        
+        DeleteWorkspace(trans_run1)
+        DeleteWorkspace(trans_run2)
+        DeleteWorkspace(transmission_ws)
             
  
 if __name__ == '__main__':

@@ -272,6 +272,19 @@ namespace Mantid
         throw std::invalid_argument("EndOverlapQ must be > StartOverlapQ");
       }
 
+      if( !isPropertyDefault("SecondTransmissionRun") )
+      {
+        MatrixWorkspace_sptr trans1 = this->getProperty("FirstTransmissionRun");
+        MatrixWorkspace_sptr trans2 = this->getProperty("SecondTransmissionRun");
+
+        auto firstMap = trans1->getSpectrumToWorkspaceIndexMap();
+        auto secondMap = trans2->getSpectrumToWorkspaceIndexMap();
+        if(firstMap != secondMap)
+        {
+          throw std::invalid_argument("Spectrum maps differ between the transmission runs. They must be the same.");
+        }
+      }
+
     }
 
     /**
@@ -521,8 +534,6 @@ namespace Mantid
 
       if (secondTransmissionRun.is_initialized())
       {
-        // TODO check that the spectra to workspace index maps match for both First and Second transmsisson runs. If they don't THROW because the detectorIndexList won't work.
-
         auto transRun2 = secondTransmissionRun.get();
         g_log.debug("Extracting second transmission run workspace indexes from spectra");
 
