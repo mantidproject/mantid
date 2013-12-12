@@ -40,8 +40,6 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogPublish::exec()
     {
-      try
-      {
         std::string filePath       = getPropertyValue("Filepath");
         std::string createFileName = getPropertyValue("CreateFileName");
 
@@ -49,6 +47,17 @@ namespace Mantid
         // Create a catalog & obtain the url to PUT (publish) the file to.
         std::string url = CatalogAlgorithmHelper().createCatalog()->getUploadURL(dataFileName, createFileName);
         Poco::URI uri(url);
+
+    /**
+     * Upload a given file (based on file path) to a given URL.
+     * @param pathToFileToUpload  :: The path to the file we want to publish.
+     * @param uploadURL           :: The REST URL to stream the data from the file to.
+     */
+    void CatalogPublish::publish(const std::string &pathToFileToUpload, const std::string &uploadURL)
+    {
+      try
+      {
+        Poco::URI uri(uploadURL);
         std::string path(uri.getPathAndQuery());
 
         // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
@@ -62,9 +71,10 @@ namespace Mantid
         std::ostream& os = session.sendRequest(request);
 
         // Obtain the mode to used base on file extension.
-        std::ios_base::openmode mode = isDataFile(filePath) ? std::ios_base::binary : std::ios_base::in;
+        std::ios_base::openmode mode = isDataFile(pathToFileToUpload) ? std::ios_base::binary : std::ios_base::in;
         // Stream the contents of the file the user wants to publish & store it in file.
-        std::ifstream file(filePath.c_str(), mode);
+        std::ifstream file(pathToFileToUpload.c_str(), mode);
+
         // Copy data from the input stream to the server (request) output stream.
         Poco::StreamCopier::copyStream(file, os);
         
