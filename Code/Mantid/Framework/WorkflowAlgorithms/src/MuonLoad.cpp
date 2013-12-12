@@ -146,6 +146,7 @@ namespace WorkflowAlgorithms
       throw std::runtime_error("Loaded workspace is of invalid type");
     }
 
+
     // Deal with dead time correction (if required
     bool applyDtc = getProperty("ApplyDeadTimeCorrection");
     if ( applyDtc )
@@ -155,7 +156,16 @@ namespace WorkflowAlgorithms
       if ( ! deadTimes )
       {
         // If no dead times specified - try to use ones from the file
-        deadTimes = load->getProperty("DeadTimeTable");
+        Workspace_sptr loadedDeadTimes = load->getProperty("DeadTimeTable");
+
+        if ( auto table = boost::dynamic_pointer_cast<TableWorkspace>(loadedDeadTimes) )
+        {
+          deadTimes = table;
+        }
+        else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedDeadTimes) )
+        {
+          deadTimes = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(0) );
+        }
 
         if ( ! deadTimes )
           throw std::runtime_error("File doesn't contain any dead times");
