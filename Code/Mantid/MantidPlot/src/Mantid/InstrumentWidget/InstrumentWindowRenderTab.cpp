@@ -2,6 +2,7 @@
 #include "ProjectionSurface.h"
 #include "UnwrappedSurface.h"
 #include "Projection3D.h"
+#include "RotationSurface.h"
 
 #include <QMenu>
 #include <QVBoxLayout>
@@ -18,6 +19,7 @@
 #include <QSignalMapper>
 #include <QMessageBox>
 #include <QToolTip>
+#include <QInputDialog>
 
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
@@ -26,6 +28,8 @@
 #include "InstrumentWindow.h"
 #include "BinDialog.h"
 #include "ColorMapWidget.h"
+
+#include <limits>
 
 
 InstrumentWindowRenderTab::InstrumentWindowRenderTab(InstrumentWindow* instrWindow):
@@ -128,6 +132,8 @@ InstrumentWindowTab(instrWindow)
   m_wireframe->setCheckable(true);
   m_wireframe->setChecked(false);
   connect(m_wireframe, SIGNAL(toggled(bool)), m_instrWindow, SLOT(setWireframe(bool)));
+  m_UCorrection = new QAction("U Correction",this);
+  connect(m_UCorrection, SIGNAL(triggered()),this,SLOT(setUCorrection()));
   
   // Create "Use OpenGL" action
   m_GLView = new QAction("Use OpenGL",this);
@@ -147,6 +153,8 @@ InstrumentWindowTab(instrWindow)
   displaySettingsMenu->addAction(m_wireframe);
   displaySettingsMenu->addAction(m_lighting);
   displaySettingsMenu->addAction(m_GLView);
+  displaySettingsMenu->addAction(m_UCorrection);
+
   displaySettings->setMenu(displaySettingsMenu);
   connect(displaySettingsMenu,SIGNAL(hovered(QAction*)),this,SLOT(showMenuToolTip(QAction*)));
 
@@ -251,20 +259,47 @@ void InstrumentWindowRenderTab::enable3DSurface(bool on)
     }
 }
 
+/**
+  * Surface-specific adjustments. 
+  */
 void InstrumentWindowRenderTab::initSurface()
 {
   setAxis(QString::fromStdString(m_instrWindow->getInstrumentActor()->getInstrument()->getDefaultAxis()));
   auto surface = getSurface();
+
+  // 3D axes switch needs to be shown for the 3D surface
   auto p3d = boost::dynamic_pointer_cast<Projection3D>(surface);
   if ( p3d )
   {
       p3d->set3DAxesState(areAxesOn());
   }
+
   bool detectorsOnly = !m_instrWindow->getInstrumentActor()->areGuidesShown();
   m_displayDetectorsOnly->blockSignals(true);
   m_displayDetectorsOnly->setChecked(detectorsOnly);
   m_displayDetectorsOnly->blockSignals(false);
   setPrecisionMenuItemChecked(surface->getPeakLabelPrecision());
+  
+  // enable u-correction for surfaces of rotation. correction applied in the last
+  // session is loaded and re-applied in the new session
+  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  if ( rotSurface )
+  {
+    m_UCorrection->setEnabled(true);
+    QString groupName = m_instrWindow->getInstrumentSettingsGroupName();
+    QSettings settings;
+    settings.beginGroup(  groupName );
+    bool isManualUCorrection = settings.value("ManualUCorrection",false).asBool();
+    if ( isManualUCorrection )
+    {
+      double ucorr = settings.value("UCorrection",0.0).asDouble();
+      rotSurface->setUCorrection( ucorr );
+    }
+  }
+  else
+  {
+    m_UCorrection->setEnabled(false);
+  }
 }
 
 /**
@@ -491,7 +526,7 @@ void InstrumentWindowRenderTab::setColorMapAutoscaling(bool on)
 QMenu* InstrumentWindowRenderTab::createPeaksMenu()
 {
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWindow");
+  settings.beginGroup( m_instrWindow->getSettingsGroupName() );
   QMenu* menu = new QMenu(this);
 
   // show/hide peak hkl labels
@@ -629,5 +664,48 @@ void InstrumentWindowRenderTab::glOptionChanged(bool on)
 void InstrumentWindowRenderTab::showMenuToolTip(QAction *action)
 {
     QToolTip::showText(QCursor::pos(),action->toolTip(),this);
+}
+
+/**
+  * Set the offset in u-coordinate of a 2d (unwrapped) surface
+  * @param ucorr :: New value for the correction.
+  */
+void InstrumentWindowRenderTab::setUCorrection()
+{
+  auto surface = getSurface();
+  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  if ( rotSurface )
+  {
+    bool ok;
+    double oldUCorr = rotSurface->getUCorrection();
+    // ask the user to enter a number for the u-correction
+    double ucorr = QInputDialog::getDouble(this, "MantiPplot - Input",
+      "U Correction", oldUCorr, -std::numeric_limits<double>::max(),std::numeric_limits<double>::max(), 4, &ok);
+    // update the surface only if the correction changes
+    if (ok && ucorr != oldUCorr)
+    {
+      rotSurface->setUCorrection( ucorr ); // manually set the correction
+      rotSurface->requestRedraw();         // redraw the view
+      QSettings settings;
+      settings.beginGroup( m_instrWindow->getInstrumentSettingsGroupName() );
+      settings.setValue("ManualUCorrection",true);
+      settings.setValue("UCorrection",ucorr);
+    }
+  }
+}
+
+/**
+  * Get current value for the u-correction for a RotationSurface.
+  * Return 0 if it's not a RotationSurface.
+  */
+double InstrumentWindowRenderTab::getUCorrection() const
+{
+  auto surface = getSurface();
+  auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
+  if ( rotSurface )
+  {
+    return rotSurface->getUCorrection();
+  }
+  return 0.0;
 }
 

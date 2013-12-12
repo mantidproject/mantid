@@ -55,6 +55,9 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
+// Name of the QSettings group to store the InstrumentWindw settings
+const char* InstrumentWindowSettingsGroup = "Mantid/InstrumentWindow";
+
 /**
  * Constructor.
  */
@@ -1343,4 +1346,21 @@ void InstrumentWindow::createTabs(QSettings& settings)
 
     m_tabs << m_renderTab << pickTab << maskTab << treeTab;
 
+}
+
+/**
+  * Return a name for a group in QSettings to store InstrumentWindow configuration.
+  */
+QString InstrumentWindow::getSettingsGroupName() const
+{
+  return QString::fromAscii( InstrumentWindowSettingsGroup );
+}
+
+/**
+  * Construct a name for a group in QSettings to store instrument-specific configuration.
+  */
+QString InstrumentWindow::getInstrumentSettingsGroupName() const
+{
+  return QString::fromAscii( InstrumentWindowSettingsGroup ) + "/" +
+      QString::fromStdString( getInstrumentActor()->getInstrument()->getName() );
 }

@@ -10,7 +10,8 @@ RotationSurface::RotationSurface(const InstrumentActor* rootActor,const Mantid::
     UnwrappedSurface(rootActor),
     m_pos(origin),
     m_zaxis(axis),
-    m_u_correction(0)
+    m_u_correction(0),
+    m_manual_u_correction(false)
 {
 }
 
@@ -22,7 +23,10 @@ void RotationSurface::init()
     // the actor calls this->callback for each detector
     m_unwrappedDetectors.clear();
     m_assemblies.clear();
-    m_u_correction = 0.0;
+    if ( !m_manual_u_correction )
+    {
+      m_u_correction = 0.0;
+    }
 
     size_t ndet = m_instrActor->ndetectors();
     m_unwrappedDetectors.resize(ndet);
@@ -67,10 +71,13 @@ void RotationSurface::init()
       m_yaxis = m_zaxis.cross_prod(m_xaxis);
     }
 
-    // give some valid values to u bounds in case some code checks
-    // on u to be within them
-    m_u_min = -DBL_MAX;
-    m_u_max =  DBL_MAX;
+    if ( !m_manual_u_correction )
+    {
+      // give some valid values to u bounds in case some code checks
+      // on u to be within them
+      m_u_min = -DBL_MAX;
+      m_u_max =  DBL_MAX;
+    }
 
     // For each detector in the order of actors
     // cppcheck-suppress syntaxError
@@ -130,7 +137,10 @@ void RotationSurface::init()
       if (udet.v > m_v_max) m_v_max = udet.v;
     }
 
-    findAndCorrectUGap();
+    if ( !m_manual_u_correction )
+    {
+      findAndCorrectUGap();
+    }
 
     double dU = fabs(m_u_max - m_u_min);
     double dV = fabs(m_v_max - m_v_min);
@@ -156,7 +166,8 @@ void RotationSurface::init()
     m_u_max += du;
     m_v_min -= dv;
     m_v_max += dv;
-    m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
+
+  m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
 
 }
 
@@ -249,12 +260,24 @@ double RotationSurface::applyUCorrection(double u)const
   u += m_u_correction;
   if (u < m_u_min)
   {
-    u += period;
+    double periods = floor( (m_u_max - u) / period ) * period;
+    u += periods;
   }
   if (u > m_u_max)
   {
-    u -= period;
+    double periods = floor( (u - m_u_min) / period ) * period;
+    u -= periods;
   }
   return u;
 }
 
+/**
+  * Set new value for the u-correction. 
+  * Correct all uv corrdinates of detectors.
+  */
+void RotationSurface::setUCorrection(double ucorr) 
+{
+  m_u_correction = ucorr;
+  m_manual_u_correction = true;
+  this->updateDetectors();
+}

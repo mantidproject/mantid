@@ -12,6 +12,10 @@ class RotationSurface: public UnwrappedSurface
 public:
   RotationSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   void init();
+  // Get the value of the u-correction - a shift in the u-coord added to automatically determined uv coordinates
+  double getUCorrection() const {return m_u_correction;}
+  // Set new value for the u-correction
+  void setUCorrection(double ucorr);
 
 protected:
 
@@ -32,7 +36,7 @@ protected:
   Mantid::Kernel::V3D m_xaxis;       ///< The x axis
   Mantid::Kernel::V3D m_yaxis;       ///< The y axis
   double m_u_correction;             ///< Correction to u calculated by project() after findAndCorrectUGap()
-
+  bool m_manual_u_correction;        ///< Flag set to prevent automatic FindAndCorrectUGap()
 };
 
 #endif // ROTATIONSURFACE_H
