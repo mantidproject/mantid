@@ -69,7 +69,8 @@ namespace WorkflowAlgorithms
     declareProperty("SecondPeriod", EMPTY_INT(), "Group index of the first period workspace to use");
 
     std::vector<std::string> allowedOperations;
-    allowedOperations.push_back("+"); allowedOperations.push_back("-");
+    allowedOperations.push_back("+"); 
+    allowedOperations.push_back("-");
     declareProperty("PeriodOperation","+", boost::make_shared<StringListValidator>(allowedOperations),
       "If two periods specified, what operation to apply to workspaces to get a final one.");
 
@@ -78,9 +79,8 @@ namespace WorkflowAlgorithms
     declareProperty(new FileProperty("CustomDeadTimeFile", "", FileProperty::OptionalLoad, ".nxs"),
         "Nexus file with custom dead time table. See LoadMuonNexus for format expected.");
 
-    declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable","",Direction::Input,
-        PropertyMode::Optional), "Table with detector grouping information."
-        " See LoadMuonNexus for format expected.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable","",Direction::Input), 
+        "Table with detector grouping information. See LoadMuonNexus for format expected.");
 
     declareProperty("TimeZero", EMPTY_DBL(), "Value used for Time Zero correction.");
     declareProperty(new ArrayProperty<double>("RebinParams"),
@@ -144,12 +144,25 @@ namespace WorkflowAlgorithms
     {
       throw std::runtime_error("Loaded workspace is of invalid type");
     }
-    
+
+    // TODO: deal with dead time correction
+
+    // Deal with grouping
+    firstPeriodWS = groupWorkspace(firstPeriodWS);
+
+    if ( secondPeriodWS )
+      secondPeriodWS = groupWorkspace(secondPeriodWS);
+
+    // TODO: offsetting, cropping, rebinning
+
     IAlgorithm_sptr calcAssym = createChildAlgorithm("MuonCalculateAsymmetry");
 
-    // Set period workspaces
+    // Set first period workspace
     calcAssym->setProperty("FirstPeriodWorkspace", firstPeriodWS);
-    calcAssym->setProperty("SecondPeriodWorkspace", secondPeriodWS);
+
+    // Set second period workspace, if have one
+    if ( secondPeriodWS )
+      calcAssym->setProperty("SecondPeriodWorkspace", secondPeriodWS);
 
     // Copy similar properties over
     calcAssym->setProperty("PeriodOperation",
@@ -216,6 +229,23 @@ namespace WorkflowAlgorithms
     }
 
     return resultWS;
+  }
+
+  /**
+   * Groups specified workspace according to specified DetectorGroupingTable.
+   * @param ws :: Workspace to group
+   * @return Grouped workspace
+   */
+  MatrixWorkspace_sptr MuonLoad::groupWorkspace(MatrixWorkspace_sptr ws)
+  {
+    TableWorkspace_sptr grouping = getProperty("DetectorGroupingTable");
+
+    IAlgorithm_sptr group = createChildAlgorithm("MuonGroupDetectors");
+    group->setProperty("InputWorkspace", ws);
+    group->setProperty("DetectorGroupingTable", grouping);
+    group->execute();
+
+    return group->getProperty("OutputWorkspace");
   }
 
 } // namespace WorkflowAlgorithms

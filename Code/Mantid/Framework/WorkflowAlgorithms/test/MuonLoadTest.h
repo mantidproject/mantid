@@ -53,7 +53,20 @@ public:
     TS_ASSERT(ws);
     if (ws)
     {
-      TSM_ASSERT( "You forgot to check the results!", 0);
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
+      TS_ASSERT_EQUALS( ws->blocksize(), 2000 );
+
+      TS_ASSERT_EQUALS( ws->readY(0)[0], 461 ); 
+      TS_ASSERT_EQUALS( ws->readY(0)[1000], 192 ); 
+      TS_ASSERT_EQUALS( ws->readY(0)[1752], 5 ); 
+
+      TS_ASSERT_DELTA( ws->readE(0)[0], 21.471, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readE(0)[1000], 13.856, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readE(0)[1752], 2.236, 0.001 ); 
+
+      TS_ASSERT_DELTA( ws->readX(0)[0], -0.254, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readX(0)[1000], 15.746, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readX(0)[1752], 27.778, 0.001 ); 
     }
   }
 
@@ -64,7 +77,7 @@ public:
     t->addColumn("vector_int", "Detectors");
 
     std::vector<int> group1;
-    for ( int i = 33; i <= 64; ++i )
+    for ( int i = 1; i <= 16; ++i )
     {
       group1.push_back(i);
     }
@@ -72,7 +85,7 @@ public:
     row1 << group1;
 
     std::vector<int> group2;
-    for ( int i = 1; i <= 32; ++i )
+    for ( int i = 17; i <= 32; ++i )
     {
       group2.push_back(i);
     }

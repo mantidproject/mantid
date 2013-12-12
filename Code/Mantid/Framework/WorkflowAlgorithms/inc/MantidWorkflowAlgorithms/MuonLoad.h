@@ -53,6 +53,9 @@ namespace WorkflowAlgorithms
 
     /// Returns a workspace for the second period as specified using SecondPeriod property.
     MatrixWorkspace_sptr getSecondPeriodWS(WorkspaceGroup_sptr ws);
+
+    /// Groups specified workspace according to specified DetectorGroupingTable.
+    MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws);
   };
 
 
