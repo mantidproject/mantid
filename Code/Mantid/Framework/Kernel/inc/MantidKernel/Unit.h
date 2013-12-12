@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Exception.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -155,12 +156,16 @@ public:
   /// @return true if the unit was initialized and so can use singleToTOF()
   bool isInitialized() const
   { return initialized; }
-  /// some units can be converted into TOF only in some range of values or have ranges where the conversion is ;
-  /// This function returns minimal TOF value still convertable into reasonable unit. Max TOF range is always +Inf for all units
-  virtual double conversionTOFMin()const
-  {
-    return -DBL_MAX;
-  };
+
+  /// some units can be converted from TOF only in the range of TOF ;
+  /// This function returns minimal TOF value still reversively convertable into reasonable unit. 
+  virtual double conversionTOFMin()const //=0;
+  {throw Kernel::Exception::NotImplementedError("Not yet implemented");}
+  /// This function returns maximal TOF value still reversively convertable into reasonable unit. 
+  virtual double conversionTOFMax()const //=0;
+  {throw Kernel::Exception::NotImplementedError("Not yet implemented");}
+
+
   /**The range where conversion to TOF from given units is monotonic */
   virtual std::vector<double> conversionRange()const
   {
@@ -228,6 +233,13 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+  ///@return NaN as emty unit can not be converted from TOF
+  virtual double conversionTOFMin()const
+  {return std::numeric_limits<double>::quiet_NaN();}
+
+  ///@return NaN as emty unit can not be converted from TOF
+  virtual double conversionTOFMax()const
+  {return std::numeric_limits<double>::quiet_NaN();}
 
   /// Constructor
   Empty() : Unit() {}
@@ -248,6 +260,14 @@ public:
   Label(const std::string& caption, const std::string& label);
   void setLabel(const std::string& cpt, const std::string& lbl = "");
   virtual Unit * clone() const;
+
+ ///@return NaN as Label can not be obtained from TOF in any reasonable manner
+  virtual double conversionTOFMin()const
+  {return std::numeric_limits<double>::quiet_NaN();}
+ ///@return NaN as Label can not be obtained from TOF in any reasonable manner
+  virtual double conversionTOFMax()const
+  {return std::numeric_limits<double>::quiet_NaN();}
+
 
   /// Destructor
   ~Label() {}
@@ -271,6 +291,13 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+ ///@return -DBL_MAX as ToF convetanble to TOF for in any time range
+  virtual double conversionTOFMin()const
+  {return -DBL_MAX; }
+ ///@return DBL_MAX as ToF convetanble to TOF for in any time range
+  virtual double conversionTOFMax()const
+  {return DBL_MAX; }
+
 
   /// Constructor
   TOF() : Unit() {}
@@ -293,12 +320,13 @@ public:
   virtual Unit * clone() const;
 
   virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMax()const;  
   virtual std::vector<double> conversionRange()const;
   /// Constructor
   Wavelength();
   /// Destructor
   ~Wavelength() {}
-
+  
 protected:
   double sfpTo; ///< Extra correction factor in to conversion
   double factorTo; ///< Constant factor for to conversion
@@ -571,7 +599,7 @@ public:
   virtual void init();
   virtual Unit * clone() const;
   virtual double conversionTOFMin()const;
-  virtual std::vector<double> conversionRange()const;
+//virtual std::vector<double> conversionRange()const;
   /// Constructor
   SpinEchoTime();
   /// Destructor

@@ -5,9 +5,34 @@
 
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
+
+// function checks if conversion within limits works reversibly
+void convert_unit_twice(const Unit &aUnit,std::vector<double> &samples,std::vector<double> &results)
+{
+
+  samples.resize(4);
+  results.resize(4);
+  double tof_min = aUnit.conversionTOFMin();
+  double tof_max = aUnit.conversionTOFMax();
+  samples[0] = tof_min;
+  samples[1] = tof_max;
+
+  double initValMin = aUnit.singleFromTOF(tof_min); 
+  double initValMax = aUnit.singleFromTOF(tof_max);
+  samples[2] = initValMin;
+  samples[3] = initValMax ;
+
+  results[0]= aUnit.singleToTOF(initValMin); // tof1
+  results[1]= aUnit.singleToTOF(initValMax); // tof2
+  results[2]= aUnit.singleFromTOF(results[0]); // unit 1
+  results[3]= aUnit.singleFromTOF(results[1]); // unit 2
+
+
+}
 
 class UnitTest : public CxxTest::TestSuite
 {
@@ -72,6 +97,14 @@ public:
     TS_ASSERT_EQUALS(label.caption(), "Temperature");
     TS_ASSERT_EQUALS(label.label(), "K");
   }
+  void testLabel_limits()
+  {    
+    double volatile lim_min=label.conversionTOFMin();
+    TS_ASSERT(lim_min!=label.conversionTOFMin());
+    double volatile lim_max=label.conversionTOFMax();
+    TS_ASSERT(lim_max!=label.conversionTOFMax());
+  }
+
 
   //----------------------------------------------------------------------
   // Base Unit class tests
@@ -157,6 +190,16 @@ public:
     TS_ASSERT( xx == x )
     TS_ASSERT( yy == y )
   }
+  void testTOFrange()
+  {    
+    std::vector<double> sample,rezult;
+    convert_unit_twice(tof,sample,rezult);
+    for(size_t i=0;i<sample.size();i++)
+    {
+      TS_ASSERT_DELTA(sample[i],rezult[i],FLT_EPSILON);
+    }
+  }
+
 
   //----------------------------------------------------------------------
   // Wavelength tests
@@ -225,6 +268,16 @@ public:
     lambda.toTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
     energyk.fromTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x2[0], result2, 1.0e-10 )
+  }
+
+  void testWavelengthrange()
+  {    
+    std::vector<double> sample,rezult;
+    convert_unit_twice(lambda,sample,rezult);
+    for(size_t i=0;i<sample.size();i++)
+    {
+      TSM_ASSERT_DELTA(" Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],FLT_EPSILON);
+    }
   }
 
   //----------------------------------------------------------------------

@@ -339,7 +339,6 @@ void Wavelength::init()
   factorFrom *= toAngstroms / TOFisinMicroseconds;
 }
 
-
 double Wavelength::singleToTOF(const double x) const
 {
   double tof = x * factorTo;
@@ -348,14 +347,6 @@ double Wavelength::singleToTOF(const double x) const
     tof += sfpTo;
   return tof;
 }
-double Wavelength::conversionTOFMin()const
-{
-  double range(0);
-  if( emode == 1 || emode == 2 )
-    range=sfpTo;
-  return range;
-}
-
 double Wavelength::singleFromTOF(const double tof) const
 {
   double x = tof;
@@ -369,6 +360,29 @@ std::vector<double> Wavelength::conversionRange()const
     double tmp[]={-DBL_MAX,DBL_MAX};
     return std::vector<double>(tmp,tmp+2);
 }
+///@return  Minimal time of flight, which can be reversively converted into wavelength
+double Wavelength::conversionTOFMin()const
+{
+  double min_tof(0);
+  if( emode == 1 || emode == 2 )
+    min_tof=sfpTo;
+  return min_tof;
+}
+///@return  Maximal time of flight, which can be reversively converted into wavelength
+double Wavelength::conversionTOFMax()const
+{
+  double max_tof;
+  if(factorTo>1)
+  {
+    max_tof = (DBL_MAX-sfpTo)/factorTo;
+  }
+  else
+  {
+    max_tof = DBL_MAX-sfpTo/factorTo;
+  }
+  return max_tof;
+}
+
 
 
 Unit * Wavelength::clone() const
@@ -417,10 +431,10 @@ double Energy::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
 }
-
+///@return  Minimal time of flight which can be reasonably converted into energy
 double Energy::conversionTOFMin()const
 {
-  return 0.;
+  return factorTo/sqrt(std::numeric_limits<double>::max());
 }
 std::vector<double> Energy::conversionRange()const
 {
@@ -481,13 +495,13 @@ void Energy_inWavenumber::init()
 double Energy_inWavenumber::singleToTOF(const double x) const
 {
   double temp = x;
-  if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
+  if (temp <= DBL_MIN) temp = DBL_MIN; // Protect against divide by zero and define conversion range
   return factorTo / sqrt(temp);
 }
-
+///@return  Minimal time which can be reasonably converted into energy in wavenumner units
 double Energy_inWavenumber::conversionTOFMin()const
 {
-  return 0;
+  return factorTo / sqrt(std::numeric_limits<double>::max());
 }
 std::vector<double> Energy_inWavenumber::conversionRange()const
 {
