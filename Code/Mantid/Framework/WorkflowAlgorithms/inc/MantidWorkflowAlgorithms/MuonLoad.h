@@ -8,6 +8,8 @@ namespace Mantid
 {
 namespace WorkflowAlgorithms
 {
+  using namespace Kernel;
+  using namespace API;
 
   /** MuonLoad : loads Muon workspace ready for analysis. 
     
@@ -46,7 +48,11 @@ namespace WorkflowAlgorithms
     void init();
     void exec();
 
+    /// Returns a workspace for the first period as specified using FirstPeriod property.
+    MatrixWorkspace_sptr getFirstPeriodWS(WorkspaceGroup_sptr ws);
 
+    /// Returns a workspace for the second period as specified using SecondPeriod property.
+    MatrixWorkspace_sptr getSecondPeriodWS(WorkspaceGroup_sptr ws);
   };
 
 
