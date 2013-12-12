@@ -4,7 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/SSLException.h>
@@ -14,7 +14,6 @@
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 
-#include <iostream>
 #include <fstream>
 
 namespace Mantid
@@ -32,8 +31,10 @@ namespace Mantid
     /// Init method to declare algorithm properties
     void CatalogPublish::init()
     {
-      declareProperty(new Mantid::API::FileProperty("Filepath", "", Mantid::API::FileProperty::Load), "The file to publish.");
-      declareProperty("CreateFileName","","The name to give to the file being saved");
+      declareProperty(new Mantid::API::FileProperty("Filepath", "", Mantid::API::FileProperty::OptionalLoad), "The file to publish.");
+      declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
+            "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"An input workspace to publish.");
+      declareProperty("CreateFileName","",boost::make_shared<Kernel::MandatoryValidator<std::string>>(),"The name to give to the file being saved");
     }
 
     /// Execute the algorithm
@@ -44,10 +45,6 @@ namespace Mantid
         std::string filePath       = getPropertyValue("Filepath");
         std::string createFileName = getPropertyValue("CreateFileName");
 
-        // Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
-        std::string dataFileName = Poco::Path(Poco::Path(filePath).getFileName()).getBaseName();
-        // Extracts the specific file name (e.g. CSP74683) from the file path.
-        dataFileName = dataFileName.substr(0, dataFileName.find_first_of('_'));
 
         // Create a catalog & obtain the url to PUT (publish) the file to.
         std::string url = CatalogAlgorithmHelper().createCatalog()->getUploadURL(dataFileName, createFileName);
@@ -84,7 +81,7 @@ namespace Mantid
 
     /**
     * Checks to see if the file to be downloaded is a datafile.
-    * @param filePath :: Path of data file to download.
+    * @param filePath :: Path of data file to use.
     * @returns True if the file in the path is a data file.
     */
     bool CatalogPublish::isDataFile(const std::string & filePath)
