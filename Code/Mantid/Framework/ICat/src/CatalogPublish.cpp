@@ -40,13 +40,32 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogPublish::exec()
     {
-        std::string filePath       = getPropertyValue("Filepath");
-        std::string createFileName = getPropertyValue("CreateFileName");
+      Mantid::API::Workspace_sptr workspace = getProperty("InputWorkspace");
 
+      std::string ws             = getPropertyValue("InputWorkspace");
+      std::string filePath       = getPropertyValue("Filepath");
+      std::string createFileName = getPropertyValue("CreateFileName");
 
-        // Create a catalog & obtain the url to PUT (publish) the file to.
-        std::string url = CatalogAlgorithmHelper().createCatalog()->getUploadURL(dataFileName, createFileName);
-        Poco::URI uri(url);
+      // Error checking to ensure a workspace OR a file is selected. Never both.
+      if ((ws.empty() && filePath.empty()) || (!ws.empty() && !filePath.empty()))
+      {
+        throw std::runtime_error("Please select a workspace or a file to publish. Not both.");
+      }
+
+      std::string dataFileName;
+
+      // The user want to upload a file.
+      if (!filePath.empty())
+      {
+        dataFileName = extractFileName(filePath);
+      }
+      else
+      {
+      }
+
+      std::string uploadURL = CatalogAlgorithmHelper().createCatalog()->getUploadURL(dataFileName, createFileName);
+      publish(filePath,uploadURL);
+    }
 
     /**
      * Upload a given file (based on file path) to a given URL.
