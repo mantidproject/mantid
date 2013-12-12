@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <iterator>     // std::distance
+#include <sstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -33,6 +34,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
  */
 LoadILLAscii::LoadILLAscii() :
 		m_instrumentName(""), m_wavelength(0) {
+	// Add here supported instruments by this loader
 	m_supportedInstruments.push_back("D2B");
 }
 
@@ -109,18 +111,20 @@ void LoadILLAscii::init() {
 /** Execute the algorithm.
  */
 void LoadILLAscii::exec() {
-	// Init
+
 	std::string filename = getPropertyValue("Filename");
-	ILLParser p(filename);
-	loadInstrumentName(p);
-	p.parse();
-	loadInstrumentDetails(p);
+
+	// Parses ascii file and fills the data scructures
+	ILLParser illAsciiParser(filename);
+	loadInstrumentName(illAsciiParser);
+	illAsciiParser.parse();
+	loadExperimentDetails(illAsciiParser);
 
 	// get local references to the parsed file
-	const std::vector<std::vector<int> > &spectraList = p.getSpectraList();
-	const std::vector<std::map<std::string, std::string> > &spectraHeaderList =
-			p.getSpectraHeaderList();
+	const std::vector<std::vector<int> > &spectraList = illAsciiParser.getSpectraList();
+	const std::vector<std::map<std::string, std::string> > &spectraHeaderList = illAsciiParser.getSpectraHeaderList();
 
+	// list containing all parsed scans. 1 scan => 1 ws
 	std::vector<API::MatrixWorkspace_sptr> workspaceList;
 	workspaceList.reserve(spectraList.size());
 
@@ -143,7 +147,7 @@ void LoadILLAscii::exec() {
 		thisWorkspace->setYUnitLabel("Counts");
 		loadIDF(thisWorkspace);
 
-		double currentPositionAngle = p.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
+		double currentPositionAngle = illAsciiParser.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
 		moveDetector(thisWorkspace, currentPositionAngle);
 
 		//
@@ -152,7 +156,8 @@ void LoadILLAscii::exec() {
 
 		workspaceList.push_back(thisWorkspace);
 
-		// JUUST TO SEE the WS in mantiplot
+		// just to see the list of WS in MantidPlot
+		// TODO: delete this at the end!
 		std::stringstream outWorkspaceNameStream;
 		outWorkspaceNameStream << "test" << std::distance(spectraList.begin(), iSpectra);
 		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(), thisWorkspace);
@@ -162,19 +167,18 @@ void LoadILLAscii::exec() {
 
 	//p.showHeader();
 
-	// TODO: Merge workspaces
+	// Merge the workspace list into a single WS with a virtual instrument
+	// TODO : Not done yet!
 	MatrixWorkspace_sptr outWorkspace = mergeWorkspaces(workspaceList);
-
-	// TODO : Correct (this is like this to work!)
 	setProperty("OutputWorkspace",outWorkspace);
-			//WorkspaceFactory::Instance().create("Workspace2D", 128, 2, 1));
+
 
 }
 
 /**
  * Load instrument details
  */
-void LoadILLAscii::loadInstrumentDetails(ILLParser &p) {
+void LoadILLAscii::loadExperimentDetails(ILLParser &p) {
 
 	m_wavelength = p.getValueFromHeader<double>("wavelength");
 	g_log.debug() << "Wavelength: " << m_wavelength << std::endl;
@@ -250,11 +254,9 @@ void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle) {
 		// current position
 		Geometry::Instrument_const_sptr instrument = ws->getInstrument();
 
-		Geometry::IComponent_const_sptr component =
-				instrument->getComponentByName(componentName);
+		Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
 		Geometry::ICompAssembly_const_sptr componentAssembly =
-				boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-						component);
+				boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
 
 		if (componentAssembly) {
 			// Get a vector of children (recursively)
@@ -264,8 +266,7 @@ void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle) {
 			for (unsigned int i = 0; i < children.size(); ++i) {
 				std::string tubeName = children.at(i)->getName();
 
-				Geometry::IComponent_const_sptr tube =
-						instrument->getComponentByName(tubeName);
+				Geometry::IComponent_const_sptr tube = instrument->getComponentByName(tubeName);
 
 				// position - set all detector distance to constant l2
 				double r, theta, phi, refTheta, newTheta;
@@ -284,8 +285,7 @@ void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle) {
 
 				//g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " << newTheta << "\n";
 				Geometry::ParameterMap& pmap = ws->instrumentParameters();
-				Geometry::ComponentHelper::moveComponent(*tube, pmap, newPos,
-						Geometry::ComponentHelper::Absolute);
+				Geometry::ComponentHelper::moveComponent(*tube, pmap, newPos, Geometry::ComponentHelper::Absolute);
 
 			}
 		}
@@ -299,19 +299,93 @@ void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle) {
 
 }
 
+/*
+ * Changes the assembly
+ * Copies componentName nTimes
+ *
+ */
+void duplicateCompAssembly(Geometry::CompAssembly *assembly,const std::string &componentName, int ntimes) {
+
+	for (int i = 0; i < assembly->nelements(); i++) {
+
+			boost::shared_ptr<Geometry::IComponent> it = (*assembly)[i];
+			Geometry::CompAssembly* children = dynamic_cast<Geometry::CompAssembly*>(it.get());
+			if (children) {
+				if (children->getName() == componentName) {
+					std::cout << "right component " << std::endl;
+					for (int i =0; i < ntimes -1; ++i){
+						std::ostringstream newComponentName;
+						newComponentName << componentName << "_"<< i;
+						children->addCopy(children,  newComponentName.str() );
+					}
+					return;
+				}
+				else {
+					duplicateCompAssembly(children,componentName,ntimes);
+				}
+			}
+		}
+
+}
+
+void printInstrument(Geometry::CompAssembly *assembly) {
+	for (int i = 0; i < assembly->nelements(); i++) {
+		std::cout << "**** Element " << i << " of " << assembly->nelements() << std::endl;
+
+		boost::shared_ptr<Geometry::IComponent> it = (*assembly)[i];
+
+
+		//it->printSelf(std::cout);
+
+		Geometry::CompAssembly* children = dynamic_cast<Geometry::CompAssembly*>(it.get());
+
+		std::cout << "Element number = " << i << " : ";
+		if (children) {
+			std::cout <<  " with name: " << children->getName() << std::endl;
+			std::cout << "Children :******** " << std::endl;
+			printInstrument(children);
+		} else {
+			std::cout << " with name: " << it->getName() << std::endl;
+		}
+	}
+}
+
+
+void printWorkspace(const API::MatrixWorkspace_sptr &workspace) {
+	Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
+
+	//duplicateCompAssembly(const_cast < Geometry::Instrument* >( instrument.get()), "bank_uniq", 3 );
+	printInstrument( const_cast < Geometry::Instrument* > ( instrument.get() ) );
+
+}
+
+
+
+
 /**
  * Merge all workspaces and create a virtual new instrument.
- * @return new workspace with all data and the new virtual instrument
+ * @return new workspace with all the scans and a new virtual instrument
+ *
+ * TODO:
+ * See : CompAssembly::printTree
+ *
+ * 1. duplicate object assembly?
+ *    E.g. bank_uniq
+ *    Problem is CompAssembly::addCopy() does not accept parametrized CompAssembly.
+ *
+ *
+ *
+ * Options:
+ *
+ * 1. Make detectorId writable
+ *    - copy thisWorkspace->getDetector(i) and then set the detector
+ *
+ *
  */
 MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 		std::vector<API::MatrixWorkspace_sptr> &workspaceList) {
 
-
-
 	if (workspaceList.size() > 0) {
-
-
-
 		// 1st workspace will be the reference
 		API::MatrixWorkspace_sptr &refWorkspace = workspaceList[0];
 		size_t numberOfHistograms = refWorkspace->getNumberHistograms() * workspaceList.size();
@@ -322,42 +396,51 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 		outWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 		outWorkspace->setYUnitLabel("Counts");
 
-		// This is not corect : i copies also teh detectors!
+		// This is not correct : i copies also the detectors!
 		// copy base instrument
-		outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument()); // if baseInstrument the ParameterMap is empty!
+		// if baseInstrument the ParameterMap is empty!
+		outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument());
 
-		// let's modify the instrument!
+
+		// outInstrument will be modified
 		Geometry::Instrument_const_sptr outInstrument = outWorkspace->getInstrument();
 
 		std::size_t numberOfDetectorsPerScan = outInstrument->getNumberDetectors(true);
-		g_log.debug() << "numberOfDetectorsPerScan: " << numberOfDetectorsPerScan << std::endl;
+		g_log.debug() << "NumberOfDetectorsPerScan: " << numberOfDetectorsPerScan << std::endl;
 
 
+		// outParameterMap is empty as only (see above!)
+		boost::shared_ptr<Geometry::ParameterMap> outParameterMap = outInstrument->getParameterMap();
+		g_log.debug() << outParameterMap->asString() << std::endl;
 
+		//outInstrument->printTree(g_log.debug());
 
+		printWorkspace(outWorkspace);
 
-		auto it = workspaceList.begin();
-		for (++it; it < workspaceList.end(); ++it) { // just the first
-			std::size_t pos = std::distance(workspaceList.begin(),it);
-			API::MatrixWorkspace_sptr thisWorkspace = *it;
-
-			g_log.debug() << "Merging the workspace: " << pos << std::endl;
-
-			// current position
-			Geometry::Instrument_const_sptr thisInstrument = thisWorkspace->getInstrument();
-			boost::shared_ptr<Geometry::ParameterMap> outParameterMap = thisInstrument->getParameterMap();
-
-			g_log.debug() << outParameterMap->asString() << std::endl;
-
-			//outInstrument->printTree(g_log.debug());
-
-			//g_log.debug() << "outParameterMap Map size: " << outParameterMap->size() << std::endl;
-
-
-			long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
-
-
-		}
+//		auto it = workspaceList.begin();
+//		for (++it; it < workspaceList.end(); ++it) { // jumps the first
+//			std::size_t pos = std::distance(workspaceList.begin(),it);
+//			API::MatrixWorkspace_sptr thisWorkspace = *it;
+//
+//			g_log.debug() << "Merging the workspace: " << pos << std::endl;
+//
+//			// current position
+//			Geometry::Instrument_const_sptr thisInstrument = thisWorkspace->getInstrument();
+//			boost::shared_ptr<Geometry::ParameterMap> outParameterMap = thisInstrument->getParameterMap();
+//
+//
+//
+//			g_log.debug() << outParameterMap->asString() << std::endl;
+//
+//			//outInstrument->printTree(g_log.debug());
+//
+//			//g_log.debug() << "outParameterMap Map size: " << outParameterMap->size() << std::endl;
+//
+//
+//			long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
+//
+//
+//		}
 		return outWorkspace;
 	}
 	else{

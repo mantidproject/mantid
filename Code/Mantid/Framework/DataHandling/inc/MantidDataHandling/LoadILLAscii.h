@@ -54,7 +54,7 @@ private:
 	void init();
 	void exec();
 	void loadInstrumentName(ILLParser &);
-	void loadInstrumentDetails(ILLParser &p);
+	void loadExperimentDetails(ILLParser &p);
 	void loadIDF(API::MatrixWorkspace_sptr &workspace);
 	void loadsDataIntoTheWS(API::MatrixWorkspace_sptr &, const std::vector<int> &);
 	void moveDetector(API::MatrixWorkspace_sptr &, double angle);

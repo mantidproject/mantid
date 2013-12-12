@@ -45,8 +45,15 @@ public:
 	void parse();
 	void showHeader();
 	std::string getInstrumentName();
+
+	// Those are large vectors: returning references => no copy constructors
+	// std::vector< std::vector<int> > & getSpectraList() {return spectraList;}
+	// std::vector<std::map<std::string, std::string> > & getSpectraHeaderList() {return spectraHeaders;}
+	// No difference in running times :(
+
 	std::vector< std::vector<int> > getSpectraList() const {return spectraList;}
 	std::vector<std::map<std::string, std::string> > getSpectraHeaderList() const {return spectraHeaders;}
+
 	template<typename T> T getValueFromHeader(const std::string &);
 	template<typename T> T getValue(const std::string &, const std::map<std::string, std::string> &);
 private:
@@ -67,9 +74,10 @@ private:
 	static const int floatWith = 16;
 
 	std::ifstream fin;
-	std::map<std::string, std::string> header;
-	std::vector<std::map<std::string, std::string> > spectraHeaders;
-	std::vector<std::vector<int> > spectraList;
+	// Not great, but to date there's 3 containers:
+	std::map<std::string, std::string> header; // file global header
+	std::vector<std::map<std::string, std::string> > spectraHeaders; // list with every spectrum header
+	std::vector<std::vector<int> > spectraList; // same size list but with spectra contents
 
 };
 
