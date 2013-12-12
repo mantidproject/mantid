@@ -74,7 +74,7 @@ namespace Kernel
     /** Get the mutex object for this Task
      * @return Mutex pointer, or NULL
      */
-     boost::shared_ptr<Mutex> getMutex()
+    boost::shared_ptr<Mutex> getMutex()
     {
       return m_mutex;
     }

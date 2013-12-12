@@ -1606,7 +1606,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  boost::shared_ptr<Mutex> diskIOMutex(new Mutex());
+  auto diskIOMutex = boost::make_shared<Mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 

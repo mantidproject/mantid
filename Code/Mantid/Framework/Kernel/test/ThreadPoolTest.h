@@ -12,6 +12,7 @@
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 #include <iostream>
 #include <iomanip>
 #include <Poco/Mutex.h>
@@ -388,7 +389,7 @@ public:
         Task * task = new FunctionTask( boost::bind(&TimeWaster::add_to_number, &mywaster, i), static_cast<double>(i) );
       // Create a new mutex every 1000 tasks. This is more relevant to the ThreadSchedulerMutexes; others ignore it.
       if (i % 1000 == 0)
-        lastMutex = boost::shared_ptr<Mutex>(new Mutex());
+        lastMutex = boost::make_shared<Mutex>();
       task->setMutex(lastMutex);
       p.schedule( task );
     }
