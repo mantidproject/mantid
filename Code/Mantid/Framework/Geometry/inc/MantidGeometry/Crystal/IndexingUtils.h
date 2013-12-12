@@ -51,10 +51,6 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL IndexingUtils
 {
   public:
-  
-  /// Convenience method for sorting list of V3D objects based on magnitude
-  static bool CompareMagnitude( const Kernel::V3D & v1, 
-                                const Kernel::V3D & v2 );
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values 
   /// given the lattice parameters 
@@ -269,18 +265,6 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                               const  std::vector<Kernel::V3D> direction_list,
                                      double plane_spacing,
                                      double required_tolerance );
-
-  /// Get the UB matix corresponding to the real space edge vectors a, b, c
-  static bool GetUB(       Kernel::DblMatrix  & UB,
-                     const Kernel::V3D        & a_dir,
-                     const Kernel::V3D        & b_dir,
-                     const Kernel::V3D        & c_dir  );
-
-  /// Get the real space edge vectors a, b, c corresponding to the UB matrix
-  static bool GetABC( const Kernel::DblMatrix  & UB,
-                            Kernel::V3D        & a_dir,
-                            Kernel::V3D        & b_dir,
-                            Kernel::V3D        & c_dir  );
 
   /// Get the lattice parameters for the specified orientation matrix
   static bool GetLatticeParameters( const Kernel::DblMatrix   & UB,

@@ -42,8 +42,8 @@ static bool CompareABCsum( const DblMatrix & UB_1, const DblMatrix & UB_2 )
   V3D a2;
   V3D b2;
   V3D c2;
-  IndexingUtils::GetABC( UB_1, a1, b1, c1 );
-  IndexingUtils::GetABC( UB_2, a2, b2, c2 );
+  OrientedLattice::GetABC( UB_1, a1, b1, c1 );
+  OrientedLattice::GetABC( UB_2, a2, b2, c2 );
 
   double sum_1 = a1.norm() + b1.norm() + c1.norm();
   double sum_2 = a2.norm() + b2.norm() + c2.norm();
@@ -65,7 +65,7 @@ static double GetDiffFrom90Sum( const DblMatrix & UB )
   V3D b;
   V3D c;
 
-  if ( !IndexingUtils::GetABC( UB, a, b, c ) )
+  if ( !OrientedLattice::GetABC( UB, a, b, c ) )
     return -1;
 
   double alpha = b.angle( c ) * RAD_TO_DEG;
@@ -92,19 +92,6 @@ static bool CompareDiffFrom90( const DblMatrix & UB_1, const DblMatrix & UB_2 )
   return ( sum_2 < sum_1 );
 }
 
-
-/**
-   Comparator function for sorting list of 3D vectors based on their magnitude.
-   @param v1  first vector
-   @param v2  seconde vector
-   @return true if v1.norm() < v2.norm().
- */
-bool IndexingUtils::CompareMagnitude( const V3D & v1, const V3D & v2 )
-{
-  double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
-  double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
-  return (mag_sq_1 < mag_sq_2);
-}
 
 
 /** 
@@ -213,7 +200,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                     // specified by the base_peak parameter
     if ( base_index < 0 || base_index >= (int)q_vectors.size() )
     {
-      std::sort( shifted_qs.begin(), shifted_qs.end(), CompareMagnitude );
+      std::sort( shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude );
     }
     else
     {
@@ -237,7 +224,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
       sorted_qs.push_back( q_vectors[i] );
   }
 
-  std::sort( sorted_qs.begin(), sorted_qs.end(), CompareMagnitude );
+  std::sort( sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude );
 
   if ( num_initial > sorted_qs.size() )
     num_initial = sorted_qs.size();
@@ -428,7 +415,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                     // specified by the base_peak parameter
     if ( base_index < 0 || base_index >= (int)q_vectors.size() )
     {
-      std::sort( shifted_qs.begin(), shifted_qs.end(), CompareMagnitude );
+      std::sort( shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude );
     }
     else
     {
@@ -452,7 +439,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
       sorted_qs.push_back( q_vectors[i] );
   }
 
-  std::sort( sorted_qs.begin(), sorted_qs.end(), CompareMagnitude );
+  std::sort( sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude );
 
   if ( num_initial > sorted_qs.size() )
     num_initial = sorted_qs.size();
@@ -475,7 +462,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                  "Find_UB(): Could not find at least three possible lattice directions");
   }
 
-  std::sort( directions.begin(), directions.end(), CompareMagnitude );
+  std::sort( directions.begin(), directions.end(), V3D::CompareMagnitude );
 
   if ( ! FormUB_From_abc_Vectors(UB, directions, 0, min_d, max_d )  )
   {
@@ -639,7 +626,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
    throw std::invalid_argument("Find_UB(): Could not find enough a,b,c vectors");
   }
 
-  std::sort( directions.begin(), directions.end(), CompareMagnitude );
+  std::sort( directions.begin(), directions.end(), V3D::CompareMagnitude );
 
   double    min_vol = min_d * min_d * min_d / 4.0;
 
@@ -1216,7 +1203,7 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
     }
   }
 
-  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  if ( !OrientedLattice::GetUB( UB, a_dir, b_dir, c_dir ) )
   {
     throw std::runtime_error( "UB could not be formed, invert matrix failed");
   }
@@ -1585,7 +1572,7 @@ size_t IndexingUtils::FFTScanFor_Directions( std::vector<V3D>  & directions,
       temp_dirs.push_back( current_dir );
   }
 
-  std::sort( temp_dirs.begin(), temp_dirs.end(), CompareMagnitude );
+  std::sort( temp_dirs.begin(), temp_dirs.end(), V3D::CompareMagnitude );
 
                                       // discard duplicates:
   double len_tol = 0.1;               // 10% tolerance for lengths
@@ -1837,7 +1824,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     return false;
   }
                                      // now build the UB matrix from a,b,c
-  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  if ( !OrientedLattice::GetUB( UB, a_dir, b_dir, c_dir ) )
   {
     throw std::runtime_error( "UB could not be formed, invert matrix failed");
   }
@@ -1934,7 +1921,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     c_dir = c_dir * (-1.0);
   } 
                                      // now build the UB matrix from a,b,c
-  if ( !GetUB( UB, a_dir, b_dir, c_dir ) )
+  if ( !OrientedLattice::GetUB( UB, a_dir, b_dir, c_dir ) )
   {
     throw std::runtime_error( "UB could not be formed, invert matrix failed");
   }
@@ -2278,9 +2265,7 @@ bool IndexingUtils::CheckUB( const DblMatrix & UB )
       }
     }
 
-  double det =   UB[0][0] * ( UB[1][1] * UB[2][2] - UB[1][2] * UB[2][1] )
-               - UB[0][1] * ( UB[1][0] * UB[2][2] - UB[1][2] * UB[2][0] )
-               + UB[0][2] * ( UB[1][0] * UB[2][1] - UB[1][1] * UB[2][0] );
+  double det =   UB.determinant();
 
   double abs_det = fabs(det);
   if ( abs_det > 10 || abs_det < 1e-12 ) // UB not found correctly
@@ -2962,86 +2947,6 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
 }
 
 
-/**
-  Get the UB matrix corresponding to the real space edge vectors a,b,c.
-  The inverse of the matrix with vectors a,b,c as rows will be stored in UB.
-  
-  @param  UB      A 3x3 matrix that will be set to the UB matrix.
-  @param  a_dir   The real space edge vector for side a of the unit cell
-  @param  b_dir   The real space edge vector for side b of the unit cell
-  @param  c_dir   The real space edge vector for side c of the unit cell
-
-  @return true if UB was set to the new matrix and false if UB could not be
-          set since the matrix with a,b,c as rows could not be inverted.
- */
-bool IndexingUtils::GetUB(       DblMatrix  & UB,
-                           const V3D        & a_dir,
-                           const V3D        & b_dir,
-                           const V3D        & c_dir  )
-{
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
-  }
-
-  UB.setRow( 0, a_dir );
-  UB.setRow( 1, b_dir );
-  UB.setRow( 2, c_dir );
-  try
-  {
-    UB.Invert();
-  }
-  catch (...)
-  {
-    return false;
-  }
-  return true;
-}
-
-
-/**
-  Get the real space edge vectors a,b,c corresponding to the UB matrix.
-  The rows of the inverse of the matrix with will be stored in a_dir, 
-  b_dir, c_dir.
-  
-  @param  UB      A 3x3 matrix containing a UB matrix.
-  @param  a_dir   Will be set to the real space edge vector for side a 
-                  of the unit cell
-  @param  b_dir   Will be set to the real space edge vector for side b 
-                  of the unit cell
-  @param  c_dir   Will be set to the real space edge vector for side c
-                  of the unit cell
-
-  @return true if the inverse of the matrix UB could be found and the
-          a_dir, b_dir and c_dir vectors have been set to the rows of
-          UB inverse.
- */
-bool IndexingUtils::GetABC( const DblMatrix  & UB,
-                                  V3D        & a_dir,
-                                  V3D        & b_dir,
-                                  V3D        & c_dir  )
-{
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("GetABC(): UB matrix NULL or not 3X3");
-  }
-
-  DblMatrix UB_inverse( UB );
-  try
-  {
-    UB_inverse.Invert();
-  }
-  catch (...)
-  {
-    return false;
-  }
-  a_dir( UB_inverse[0][0], UB_inverse[0][1], UB_inverse[0][2] );
-  b_dir( UB_inverse[1][0], UB_inverse[1][1], UB_inverse[1][2] );
-  c_dir( UB_inverse[2][0], UB_inverse[2][1], UB_inverse[2][2] );
-
-  return true;
-}
-
 
 /**
  *  Get the lattice parameters, a, b, c, alpha, beta, gamma and cell volume
@@ -3061,7 +2966,7 @@ bool IndexingUtils::GetLatticeParameters( const DblMatrix   & UB,
   V3D b_dir;
   V3D c_dir;
 
-  if ( ! GetABC( UB, a_dir, b_dir, c_dir ) )
+  if ( ! OrientedLattice::GetABC( UB, a_dir, b_dir, c_dir ) )
   {
     return false;
   }
@@ -3171,7 +3076,7 @@ bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
   V3D b;
   V3D c;
   
-  if ( !GetABC( UB, a, b, c ) )
+  if ( !OrientedLattice::GetABC( UB, a, b, c ) )
   {
     return false;
   }
@@ -3204,7 +3109,7 @@ bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
    }
                                 // next sort the list of linear combinations
                                 // in order of increasing length
-  std::sort( directions.begin(), directions.end(), CompareMagnitude );
+  std::sort( directions.begin(), directions.end(), V3D::CompareMagnitude );
 
                                 // next form a list of possible UB matrices
                                 // using sides from the list of linear 
@@ -3238,7 +3143,7 @@ bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
           if ( vol > min_vol && HasNiggliAngles( a, b, c, 0.01 ) )
           {
             Matrix<double> new_tran(3,3,false);
-            GetUB( new_tran, a, b, c );
+            OrientedLattice::GetUB( new_tran, a, b, c );
             UB_list.push_back( new_tran );
           }
         }
@@ -3265,14 +3170,14 @@ bool IndexingUtils::MakeNiggliUB( const DblMatrix  & UB,
 
   std::vector<DblMatrix> short_list;
   short_list.push_back( UB_list[0] );
-  GetABC( short_list[0], a, b, c );
+  OrientedLattice::GetABC( short_list[0], a, b, c );
   total_length = a.norm() + b.norm() + c.norm();
 
   bool got_short_list = false;
   size_t i = 1;
   while ( i < UB_list.size() && !got_short_list )
   {
-    GetABC( UB_list[i], v1, v2, v3 );
+    OrientedLattice::GetABC( UB_list[i], v1, v2, v3 );
     double next_length = v1.norm() + v2.norm() + v3.norm();
     if ( fabs(next_length - total_length)/total_length < length_tol )
       short_list.push_back( UB_list[i] );

@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <MantidKernel/V3D.h>
 #include <MantidKernel/Matrix.h>
-
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <MantidGeometry/Crystal/IndexingUtils.h>
 
 using namespace Mantid::Geometry;
@@ -959,7 +959,7 @@ public:
 
     Matrix<double> UB(3,3,false);
    
-    IndexingUtils::GetUB( UB, a_dir, b_dir, c_dir );
+    OrientedLattice::GetUB( UB, a_dir, b_dir, c_dir );
 
     for ( size_t row = 0; row < 3; row++ )
     {
@@ -980,7 +980,7 @@ public:
     V3D b;
     V3D c;
 
-    IndexingUtils::GetABC( UB, a, b, c );
+    OrientedLattice::GetABC( UB, a, b, c );
 
     a = a - a_dir;
     b = b - b_dir;
@@ -1063,7 +1063,7 @@ public:
     V3D a(10,0,0);
     V3D b(-5,5,0);
     V3D c(0,5,5);
-    IndexingUtils::GetUB(UB, a,b,c);
+    OrientedLattice::GetUB(UB, a,b,c);
 
     Matrix<double> newUB(3,3,false);
 
@@ -1073,7 +1073,7 @@ public:
     V3D a_dir;
     V3D b_dir;
     V3D c_dir;
-    IndexingUtils::GetABC(newUB, a_dir,b_dir,c_dir);
+    OrientedLattice::GetABC(newUB, a_dir,b_dir,c_dir);
     double alpha = b_dir.angle( c_dir ) * 180.0/PI;
     double beta  = c_dir.angle( a_dir ) * 180.0/PI;
     double gamma = a_dir.angle( b_dir ) * 180.0/PI;
