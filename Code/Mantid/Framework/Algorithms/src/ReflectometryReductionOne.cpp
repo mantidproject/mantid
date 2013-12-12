@@ -544,14 +544,6 @@ namespace Mantid
       alg->execute();
       MatrixWorkspace_sptr denominator = alg->getProperty("OutputWorkspace");
 
-      /*
-      // Make the transmission run.
-      MatrixWorkspace_sptr denominator = makeTransmissionCorrection(detectorIndexes, wavelengthInterval,
-          wavelengthMonitorBackgroundInterval, wavelengthMonitorIntegrationInterval, i0MonitorIndex,
-          firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ,
-          stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
-      */
-
       // Rebin the transmission run to be the same as the input.
       auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
       rebinToWorkspaceAlg->initialize();

@@ -84,16 +84,6 @@ namespace Mantid
       /// Init common stitching inputs
       void initStitchingInputs();
 
-      /// Make a transmission correction workspace
-      API::MatrixWorkspace_sptr makeTransmissionCorrection(
-          const WorkspaceIndexList& detectorIndexes, const MinMax& wavelengthInterval,
-          const MinMax& wavelengthMonitorBackgroundInterval,
-          const MinMax& wavelengthMonitorIntegrationInterval, const int& i0MonitorIndex,
-          API::MatrixWorkspace_sptr firstTransmissionRun, OptionalMatrixWorkspace_sptr secondTransmissionRun,
-          const OptionalDouble& stitchingStartQ, const OptionalDouble& stitchingDeltaQ,
-          const OptionalDouble& stitchingEndQ, const OptionalDouble& stitchingStartOverlapQ,
-          const OptionalDouble& stitchingEndOverlapQ, const double& wavelengthStep);
-
     private:
 
       /// Validate the transmission correction property inputs
