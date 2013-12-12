@@ -7,6 +7,7 @@ from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
 from isis_reflectometry.combineMulti import *
+from isis_reflectometry.LoadInstrumentRuns import *
 from isis_reflgui.latest_isis_runs import *
 from mantid.api import Workspace, WorkspaceGroup
 
@@ -220,6 +221,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         if willProcess:
             for row in rowIndexes:  # range(self.tableMain.rowCount()):
                 runno = []
+                loadedRuns = []
                 wksp = []
                 wkspBinned = []
                 overlapLow = []
@@ -240,8 +242,14 @@ class ReflGui(refl_window.Ui_windowRefl):
                     print len(runno), "runs: ", runno
                     # Determine resolution
                     # if (runno[0] != ''):
+                    for run in runno:
+                        if self.zeroCheck(run):
+                            StartLiveData(Instrument=config['default.instrument'],UpdateEvery='0',Outputworkspace='_LiveOut')
+                            loadedRuns.append(mtd['_LiveOut'])
+                        else:
+                            loadedRuns.append(Load(Filename=run, outputWorkspace=run))
                     if (self.tableMain.item(row, 15).text() == ''):
-                        dqq = calcRes(runno[0])
+                        dqq = calcRes(loadedRuns[0])
                         item = QtGui.QTableWidgetItem()
                         item.setText(str(dqq))
                         self.tableMain.setItem(row, 15, item)
@@ -340,6 +348,9 @@ class ReflGui(refl_window.Ui_windowRefl):
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         names = mtd.getObjectNames()
+        if self.zeroCheck(runno):
+            StartLiveData(Instrument=config['default.instrument'],UpdateEvery='0',Outputworkspace='_LiveOut')
+            runno = '_LiveOut'
         [wlam, wq, th] = quick(runno, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
@@ -470,12 +481,15 @@ class ReflGui(refl_window.Ui_windowRefl):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
-def calcRes(run):
-    runno = '_' + str(run) + 'temp'
-    if type(run) == type(int()):
-        Load(Filename=run, OutputWorkspace=runno)
+def calcRes(run, runno = ''):
+    if not type(run) == type(Workspace):
+        runno = '_' + str(run) + 'temp'
+        if type(run) == type(int()):
+            Load(Filename=run, OutputWorkspace=runno)
+        else:
+            Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
     else:
-        Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+        runno = str(run)
     # Get slits and detector angle theta from NeXuS
     theta = groupGet(runno, 'samp', 'THETA')
     inst = groupGet(runno, 'inst')
@@ -493,7 +507,8 @@ def calcRes(run):
     #1500.0 is the S1-S2 distance in mm for SURF!!!
     resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
     print "dq/q=", resolution
-    DeleteWorkspace(runno)
+    if not type(run) == type(Workspace):
+        DeleteWorkspace(runno)
     return resolution
 def groupGet(wksp, whattoget, field=''):
     '''
