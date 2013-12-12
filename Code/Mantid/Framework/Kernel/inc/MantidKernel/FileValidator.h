@@ -42,8 +42,7 @@ bool has_ending(const std::string &value, const std::string & ending);
 class MANTID_KERNEL_DLL FileValidator : public TypedValidator<std::string>
 {
 public:
-  FileValidator();
-  explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true);
+  explicit FileValidator(const std::vector<std::string>& extensions=std::vector<std::string>(), bool testFileExists = true, bool testCanWrite=false);
   virtual ~FileValidator();
   virtual std::set<std::string> allowedValues() const;
   IValidator_sptr clone() const;
@@ -52,7 +51,9 @@ protected:
   /// The list of permitted extensions
   const std::set<std::string> m_extensions;
   /// Flag indicating whether to test for existence of filename
-  bool m_fullTest;
+  bool m_testExist;
+  /// Flag indicating whether to test for the file being writable
+  bool m_testCanWrite;
   
 private:
   virtual std::string checkValidity(const std::string &value) const;

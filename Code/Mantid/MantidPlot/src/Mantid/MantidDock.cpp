@@ -20,6 +20,7 @@
 #include <Poco/Path.h>
 
 #include <algorithm>
+#include <sstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -204,11 +205,11 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showTransposed = new QAction(tr("Show Transposed"),this);
   connect(m_showTransposed,SIGNAL(triggered()),m_mantidUI,SLOT(importTransposed()));
 
-  m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  m_convertToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkspace"),this);
   m_convertToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertToMatrixWorkspace()));
 
-  m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
+  m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkspace"),this);
   m_convertMDHistoToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertMDHistoToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertMDHistoToMatrixWorkspace()));
 
@@ -1140,6 +1141,15 @@ void MantidDockWidget::clearUB()
   m_mantidUI->clearUB(selctedWSNames);
 }
 
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void MantidDockWidget::dropEvent(QDropEvent *de)
+{
+  m_tree->dropEvent(de);
+}
+
 //------------ MantidTreeWidget -----------------------//
 
 MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
@@ -1171,6 +1181,8 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de)
     if (de->mimeData()->hasUrls())
         de->acceptProposedAction();
 }
+
+
  
 /**
  * Accept a drag drop event and process the data appropriately
@@ -1214,6 +1226,10 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
       {
         logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }
+      catch (std::exception& error)
+      {
+        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+      }
     }
 }
 
@@ -1241,7 +1257,18 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e)
 
   QStringList wsnames = getSelectedWorkspaceNames();
   if (wsnames.size() == 0) return;
-  mimeData->setText("Workspace::"+getSelectedWorkspaceNames()[0]);
+  QString importStatement = "";
+  foreach( const QString wsname, wsnames )
+  {
+    QString prefix = "";
+    if (wsname[0].isDigit()) prefix = "ws";
+    if (importStatement.size() > 0) importStatement += "\n";
+    importStatement += prefix + wsname + " = mtd[\"" + wsname + "\"]";
+  }
+ 
+  mimeData->setText(importStatement);
+  mimeData->setObjectName("MantidWorkspace");
+          
   drag->setMimeData(mimeData);
 
   Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);

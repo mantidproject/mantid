@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidCurveFitting/ComptonProfile.h"
 #include "MantidAPI/FunctionFactory.h"
-
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include <gsl/gsl_poly.h>
 
 namespace Mantid
@@ -22,31 +22,82 @@ namespace CurveFitting
   }
 
   /**
+   * If a DetectorGroup is encountered then the parameters are averaged over the group
+   * @param comp A pointer to the component that should contain the parameter
+   * @param pmap A reference to the ParameterMap that stores the parameters
+   * @param name The name of the parameter
+   * @returns The value of the parameter if it exists
+   * @throws A std::invalid_argument error if the parameter does not exist
+   */
+  double ComptonProfile::getComponentParameter(const Geometry::IComponent_const_sptr & comp, const Geometry::ParameterMap &pmap,
+                                               const std::string &name)
+  {
+    if(!comp) throw std::invalid_argument("ComptonProfile - Cannot retrieve parameter from NULL component");
+
+    double result(0.0);
+    if(const auto group = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp))
+    {
+      const auto dets = group->getDetectors();
+      double avg(0.0);
+      for(auto it = dets.begin(); it!= dets.end(); ++it)
+      {
+        auto param = pmap.getRecursive((*it)->getComponentID(), name);
+        if(param) avg += param->value<double>();
+        else throw std::invalid_argument("ComptonProfile - Unable to find DetectorGroup component parameter \"" + name + "\".");
+      }
+      result = avg/static_cast<double>(group->nDets());
+    }
+    else
+    {
+      auto param = pmap.getRecursive(comp->getComponentID(), name);
+      if(param)
+      {
+        result = param->value<double>();
+      }
+      else
+      {
+        throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
+      }
+    }
+    return result;
+  }
+
+  /**
    */
   ComptonProfile::ComptonProfile() : API::ParamFunction(), API::IFunction1D(),
       m_log(Kernel::Logger::get("ComptonProfile")),
-      m_workspace(), m_wsIndex(0), m_mass(0.0),  m_l1(0.0), m_sigmaL1(0.0),
+      m_wsIndex(0), m_mass(0.0),  m_l1(0.0), m_sigmaL1(0.0),
       m_l2(0.0), m_sigmaL2(0.0), m_theta(0.0), m_sigmaTheta(0.0), m_e1(0.0),
       m_t0(0.0), m_hwhmGaussE(0.0), m_hwhmLorentzE(0.0), m_voigt(),
       m_yspace(), m_modQ(), m_e0(),m_resolutionSigma(0.0), m_lorentzFWHM(0.0)
   {}
 
-  /**
-   */
-  void ComptonProfile::declareAttributes()
-  {
-    declareAttribute(WSINDEX_NAME, IFunction::Attribute(static_cast<int>(m_wsIndex)));
-    declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
-  }
+  //-------------------------------------- Function evaluation -----------------------------------------
+
 
   /**
-   * @param name The name of the attribute
-   * @param value The attribute's value
+   * Calculates the value of the function for each x value and stores in the given output array
+   * @param out An array of size nData to store the results
+   * @param xValues The input X data array of size nData. It is assumed to be times in microseconds
+   * @param nData The length of the out & xValues arrays
    */
-  void ComptonProfile::setAttribute(const std::string& name,const Attribute& value)
+  void ComptonProfile::function1D(double* out, const double* xValues, const size_t nData) const
   {
-    if(name == WSINDEX_NAME)  m_wsIndex = static_cast<size_t>(value.asInt());
-    else if(name == MASS_NAME) m_mass = value.asDouble();
+    UNUSED_ARG(xValues); // Y-space values have already been pre-cached
+
+    this->massProfile(out, nData);
+
+    m_log.setEnabled(false);
+  }
+
+  /*
+   * Creates the internal caches
+   */
+  void ComptonProfile::setUpForFit()
+  {
+    // Voigt
+    using namespace Mantid::API;
+    m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Voigt"));
   }
 
   /**
@@ -56,12 +107,12 @@ namespace CurveFitting
    */
   void ComptonProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
   {
-    m_workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
-    if(!m_workspace)
+    auto workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
+    if(!workspace)
     {
       throw std::invalid_argument("ComptonProfile expected an object of type MatrixWorkspace, type=" + ws->id());
     }
-    auto inst = m_workspace->getInstrument();
+    auto inst = workspace->getInstrument();
     auto sample = inst->getSample();
     auto source = inst->getSource();
     if(!sample || !source)
@@ -71,25 +122,52 @@ namespace CurveFitting
     Geometry::IDetector_const_sptr det;
     try
     {
-     det = m_workspace->getDetector(m_wsIndex);
+     det = workspace->getDetector(m_wsIndex);
     }
     catch (Kernel::Exception::NotFoundError &)
     {
       throw std::invalid_argument("ComptonProfile - Workspace has no detector attached to histogram at index " + boost::lexical_cast<std::string>(m_wsIndex));
     }
 
-    m_l1 = sample->getDistance(*source);
-    m_l2 = det->getDistance(*sample);
-    m_theta = m_workspace->detectorTwoTheta(det);
+    DetectorParams detpar;
+    const auto & pmap = workspace->constInstrumentParameters();
+    detpar.l1 = sample->getDistance(*source);
+    detpar.l2 = det->getDistance(*sample);
+    detpar.theta = workspace->detectorTwoTheta(det);
+    detpar.t0 = getComponentParameter(det, pmap, "t0")*1e-6; // Convert to seconds
+    detpar.efixed = getComponentParameter(det, pmap, "efixed");
 
-    // parameters
-    m_sigmaL1 = getComponentParameter(*det, "sigma_l1");
-    m_sigmaL2 = getComponentParameter(*det, "sigma_l2");
-    m_sigmaTheta = getComponentParameter(*det, "sigma_theta");
-    m_e1 = getComponentParameter(*det,"efixed");
-    m_t0 = getComponentParameter(*det,"t0")*1e-6; // Convert to seconds
-    m_hwhmLorentzE = getComponentParameter(*det, "hwhm_energy_lorentz");
-    m_hwhmGaussE = STDDEV_TO_HWHM*getComponentParameter(*det, "sigma_energy_gauss");
+    ResolutionParams respar;
+    respar.dl1 = getComponentParameter(det, pmap, "sigma_l1");
+    respar.dl2 = getComponentParameter(det, pmap, "sigma_l2");
+    respar.dthe = getComponentParameter(det, pmap, "sigma_theta"); //radians
+    respar.dEnLorentz = getComponentParameter(det, pmap, "hwhm_lorentz");
+    respar.dEnGauss = getComponentParameter(det, pmap, "sigma_gauss");
+
+    this->cacheYSpaceValues(workspace->readX(m_wsIndex), workspace->isHistogramData(), detpar, respar);
+  }
+
+  /**
+   * @param tseconds A vector containing the time-of-flight values in seconds
+   * @param isHistogram True if histogram tof values have been passed in
+   * @param detpar Structure containing detector parameters
+   * @param respar Structure containing resolution parameters
+   */
+  void ComptonProfile::cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
+                                         const DetectorParams & detpar, const ResolutionParams & respar)
+  {
+    //geometry
+    m_l1 = detpar.l1;
+    m_l2 = detpar.l2;
+    m_theta = detpar.theta;
+    m_e1 = detpar.efixed;
+    m_t0 = detpar.t0;
+    //resolution
+    m_sigmaL1 = respar.dl1;
+    m_sigmaL2 = respar.dl2;
+    m_sigmaTheta = respar.dthe;
+    m_hwhmLorentzE = respar.dEnLorentz;
+    m_hwhmGaussE = STDDEV_TO_HWHM*respar.dEnGauss;
 
     // ------ Fixed coefficients related to resolution & Y-space transforms ------------------
     const double mn = PhysicalConstants::NeutronMassAMU;
@@ -153,17 +231,15 @@ namespace CurveFitting
     m_log.notice() << "w_foil_gauss (FWHM)=" << wgauss << std::endl;
 
     // Calculate energy dependent factors and transform q to Y-space
-    const auto & xValues = m_workspace->readX(m_wsIndex);
-    const bool isHistogram = m_workspace->isHistogramData();
-    const size_t nData = (isHistogram) ? xValues.size() - 1: xValues.size();
+    const size_t nData = (isHistogram) ? tseconds.size() - 1 : tseconds.size();
 
     m_e0.resize(nData);
     m_modQ.resize(nData);
     m_yspace.resize(nData);
     for(size_t i = 0; i < nData; ++i)
     {
-      const double tseconds = (isHistogram) ? 0.5*(xValues[i] + xValues[i+1]) : xValues[i];
-      const double v0 = m_l1/(tseconds - m_t0 - (m_l2/v1));
+      const double tsec = (isHistogram) ? 0.5*(tseconds[i] + tseconds[i+1]) : tseconds[i];
+      const double v0 = m_l1/(tsec - m_t0 - (m_l2/v1));
       const double ei = massToMeV*v0*v0;
       m_e0[i] = ei;
       const double w = ei - m_e1;
@@ -174,33 +250,23 @@ namespace CurveFitting
     }
   }
 
-  /*
-   * Creates the internal caches
+  /**
    */
-  void ComptonProfile::setUpForFit()
+  void ComptonProfile::declareAttributes()
   {
-    // Voigt
-    using namespace Mantid::API;
-    m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Voigt"));
+    declareAttribute(WSINDEX_NAME, IFunction::Attribute(static_cast<int>(m_wsIndex)));
+    declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
   }
 
-  //-------------------------------------- Function evaluation -----------------------------------------
-
-
   /**
-   * Calculates the value of the function for each x value and stores in the given output array
-   * @param out An array of size nData to store the results
-   * @param xValues The input X data array of size nData. It is assumed to be times in microseconds
-   * @param nData The length of the out & xValues arrays
+   * @param name The name of the attribute
+   * @param value The attribute's value
    */
-  void ComptonProfile::function1D(double* out, const double* xValues, const size_t nData) const
+  void ComptonProfile::setAttribute(const std::string& name,const Attribute& value)
   {
-    UNUSED_ARG(xValues);
-
-    // ------------------------------- Profile factor ---------------------------
-    this->massProfile(out, nData);
-
-    m_log.setEnabled(false);
+    IFunction::setAttribute(name,value); // Make sure the base-class stores it
+    if(name == WSINDEX_NAME)  m_wsIndex = static_cast<size_t>(value.asInt());
+    else if(name == MASS_NAME) m_mass = value.asDouble();
   }
 
   /**
@@ -279,26 +345,6 @@ namespace CurveFitting
     const double norm = 1.0/(0.5*M_PI*lorentzWidth);
     std::transform(voigt.begin(), voigt.end(), voigt.begin(), std::bind2nd(std::multiplies<double>(), norm));
   }
-
-  /**
-   * @param comp A reference to the component that should contain the parameter
-   * @param name The name of the parameter
-   * @returns The value of the parameter if it exists
-   * @throws A std::invalid_argument error if the parameter does not exist
-   */
-  double ComptonProfile::getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const
-  {
-    std::vector<double> pars = comp.getNumberParameter(name);
-    if(!pars.empty())
-    {
-      return pars[0];
-    }
-    else
-    {
-      throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
-    }
-  }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

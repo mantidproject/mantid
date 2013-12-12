@@ -29,6 +29,7 @@ namespace Mantid
   }
 }
 
+
 /** @class ScriptingWindow    
     This class displays a seperate window for editing and executing scripts
 */

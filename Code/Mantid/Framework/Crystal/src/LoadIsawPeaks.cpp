@@ -584,8 +584,29 @@ namespace Crystal
     }
 
   }
+  //-----------------------------------------------------------------------------------------------
+  /** Count the peaks from a .peaks file and compare with the workspace
+   * @param outWS :: the workspace in which to place the information
+   * @param filename :: path to the .peaks file
+   */
+  void LoadIsawPeaks::checkNumberPeaks( PeaksWorkspace_sptr outWS, std::string filename )
+  {
 
-
+    // Open the file
+    std::ifstream in( filename.c_str() );
+    std::string first;
+    int NumberPeaks = 0;
+    while (getline(in,first))
+    {
+    	if (first[0] == '3')NumberPeaks++;
+    }
+    if(NumberPeaks != outWS->getNumberPeaks())
+    {
+      g_log.error()<<"Number of peaks in file is " << NumberPeaks << " but only read "
+    		  <<outWS->getNumberPeaks() << std::endl;
+      throw std::length_error("Wrong number of peaks read");
+    }
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
@@ -600,6 +621,8 @@ namespace Crystal
 
     // Save it in the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+
+    this->checkNumberPeaks(ws, getPropertyValue("Filename"));
   }
 
 

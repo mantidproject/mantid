@@ -1228,14 +1228,74 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
 bool MantidUI::drop(QDropEvent* e)
 {
-  if (e->source() == m_exploreMantid->m_tree)
+  
+
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace")
   {
-    QString wsName = getSelectedWorkspaceName();
-    importWorkspace(wsName,false);
+    QString text = e->mimeData()->text();
+    int endIndex = 0;
+    QStringList wsNames;
+    while (text.indexOf("[\"",endIndex) > -1)
+    {
+      int startIndex = text.indexOf("[\"",endIndex) + 2;
+      endIndex = text.indexOf("\"]",startIndex);
+      wsNames.append(text.mid(startIndex,endIndex-startIndex));
+    }
+
+    foreach (const auto& wsName, wsNames)
+    {
+      importWorkspace(wsName,false);
+    }
+    return true;
+  }
+  else if (e->mimeData()->hasUrls())
+  {
+    QStringList pyFiles = extractPyFiles(e->mimeData()->urls());
+    if (pyFiles.size() > 0)
+    {
+      try
+      {
+        m_appWindow->openScriptWindow(pyFiles);
+      }
+      catch (std::runtime_error& error)
+      {
+        g_log.error()<<"Failed to Load the python files. The reason for failure is: "<< error.what()<<std::endl;
+      }      
+      catch (std::logic_error& error)
+      {
+        g_log.error()<<"Failed to Load the python files. The reason for failure is: "<< error.what()<<std::endl;
+      }
+    }
+    else
+    {
+      //pass to Loading of mantid workspaces
+      m_exploreMantid->dropEvent(e);
+    }
     return true;
   }
 
   return false;
+}
+
+///extracts the files from a mimedata object that have a .py extension
+QStringList MantidUI::extractPyFiles(const QList<QUrl>& urlList) const
+{
+  QStringList filenames;
+  for (int i = 0; i < urlList.size(); ++i) 
+  {
+    QString fName = urlList[i].toLocalFile();
+    if (fName.size()>0)
+    {
+      QFileInfo fi(fName);
+      
+      if (fi.suffix().upper()=="PY")
+      {
+        filenames.append(fName);
+      }
+    }
+  }
+  return filenames;
 }
 
 /**

@@ -493,9 +493,6 @@ void ScriptEditor::updateCompletionAPI(const QStringList & keywords)
  */
 void ScriptEditor::dragMoveEvent(QDragMoveEvent *de)
 {
-    // The event needs to be accepted here
-    if (de->mimeData()->text().startsWith("Workspace::"))
-      de->accept();
     if(!de->mimeData()->hasUrls())
       //pass to base class - This handles text appropriately
       QsciScintilla::dragMoveEvent(de);
@@ -507,9 +504,6 @@ void ScriptEditor::dragMoveEvent(QDragMoveEvent *de)
  */
 void ScriptEditor::dragEnterEvent(QDragEnterEvent *de)
 {
-    // Set the drop action to be the proposed action.
-    if (de->mimeData()->text().startsWith("Workspace::"))
-        de->acceptProposedAction();
     if(!de->mimeData()->hasUrls())
       //pass to base class - This handles text appropriately
       QsciScintilla::dragEnterEvent(de);
@@ -521,32 +515,13 @@ void ScriptEditor::dragEnterEvent(QDragEnterEvent *de)
  */
 void ScriptEditor::dropEvent(QDropEvent *de)
 {
-    const QString WORKSPACE_PREFIX = "Workspace::";
-
     QStringList filenames;
     const QMimeData *mimeData = de->mimeData();
     if(!mimeData->hasUrls())
     {
-      if(mimeData->text().startsWith(WORKSPACE_PREFIX) )
-      {
-        int line, index;
-        this->getCursorPosition(&line,&index);
-        QMimeData myMimeData;
-        QString wsName = mimeData->text().mid(WORKSPACE_PREFIX.size());
-        QString importStatement = wsName + " = mtd[\"" + wsName + "\"]\n";
-        myMimeData.setText(importStatement);
-
-        QDropEvent myDropEvent(de->pos(),de->possibleActions(),&myMimeData, de->mouseButtons(),de->keyboardModifiers(),de->type());
-        QsciScintilla::dropEvent(&myDropEvent);
-        de->acceptProposedAction();
-        //this->insertAt(importStatement,line,index);
-      } 
-      else
-      {
-        //pass to base class - This handles text appropriately
-        QsciScintilla::dropEvent(de);
-      }
-  }
+      //pass to base class - This handles text appropriately
+      QsciScintilla::dropEvent(de);
+    }
 }
 
 /**

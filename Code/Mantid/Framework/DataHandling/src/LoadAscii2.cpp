@@ -298,7 +298,7 @@ namespace Mantid
 
         //start from the top again, this time filling in the list
         file.seekg(0,std::ios_base::beg);
-        for(int i = 0;i < m_lineNo;i++)
+        for(size_t i = 0;i < m_lineNo;i++)
         {
           getline(file,line);
         }
@@ -314,10 +314,10 @@ namespace Mantid
       // Most files will have some sort of header. If we've haven't been told how many lines to 
       // skip then try and guess 
       int numToSkip = getProperty("SkipNumLines");
-      size_t numCols = 0;
       if( numToSkip == EMPTY_INT() )
       {
-        const int rowsToMatch(5);
+        size_t numCols = 0;
+        const size_t rowsToMatch(5);
         // Have a guess where the data starts. Basically say, when we have say "rowsToMatch" lines of pure numbers
         // in a row then the line that started block is the top of the data
         size_t matchingRows = 0;
@@ -442,10 +442,9 @@ namespace Mantid
         // We've read the header plus a number of validRows
         numToSkip = row - validRows;
       }
-      int i(0);
       m_lineNo = 0;
       std::string line;
-      while( m_lineNo < numToSkip && getline(file, line) )
+      while( m_lineNo < static_cast<size_t>(numToSkip) && getline(file, line) )
       {
         ++m_lineNo;
       }

@@ -56,7 +56,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "IntegratePeaksMDTest_MDEWS" ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", "HKL" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundOuterRadius", BackgroundRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundInnerRadius", BackgroundStartRadius ) );

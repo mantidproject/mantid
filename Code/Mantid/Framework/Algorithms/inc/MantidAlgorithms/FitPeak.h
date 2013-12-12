@@ -83,11 +83,11 @@ namespace Algorithms
                               double startx, double endx);
 
     /// Make a pure peak WS in the fit window region
-    void makePurePeakWS();
+    void makePurePeakWS(API::MatrixWorkspace_sptr purePeakWS);
 
     /// Estimate the peak height from a set of data containing pure peaks
     double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
-                              size_t wsindex, double startx, double endx);
+                              size_t wsindex, size_t ixmin, size_t ixmax);
 
     /// Fit a function.
     double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws,
@@ -111,10 +111,7 @@ namespace Algorithms
     void pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func);
 
     /// Backup data
-    void backupOriginalData();
-
-    /// Backup original data from i_minFitX to i_maxFitX
-    void recoverOriginalData();
+    API::MatrixWorkspace_sptr genPurePeakWS();
 
     /// Create functions
     void createFunctions();
@@ -130,6 +127,13 @@ namespace Algorithms
                                                       std::map<std::string, double> peakerrormap,
                                                       API::IBackgroundFunction_sptr bkgdfunc,
                                                       std::map<std::string, double> bkgderrormap);
+
+
+    /// Add function's parameter names after peak function name
+    std::vector<std::string> addFunctionParameterNames(std::vector<std::string> funcnames);
+
+    /// Parse peak type from full peak type/parameter names string
+    std::string parseFunctionTypeFull(const std::string& fullstring, bool &defaultparorder);
 
     /// Input data workspace
     API::MatrixWorkspace_sptr m_dataWS;
@@ -184,6 +188,11 @@ namespace Algorithms
 
     DataObjects::TableWorkspace_sptr m_peakParameterTableWS;
     DataObjects::TableWorkspace_sptr m_bkgdParameterTableWS;
+
+    /// Peak
+    std::vector<std::string> m_peakParameterNames;
+    /// Background
+    std::vector<std::string> m_bkgdParameterNames;
 
     /// Minimizer
     std::string m_minimizer;

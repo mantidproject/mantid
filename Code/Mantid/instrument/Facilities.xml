@@ -7,7 +7,7 @@
   </archive>
   
   <catalog name="ICat4Catalog">
-    <soapendpoint url="​https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
+    <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
     <filelocation>
       <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
@@ -543,6 +543,11 @@
     <technique>Muon spectroscopy</technique>
   </instrument>
 
+  <instrument name="GPS">
+    <zeropadding size="3"/>
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+  
 </facility>
 
 <!--  Reactor Orphee (France) -->

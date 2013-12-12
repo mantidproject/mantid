@@ -67,7 +67,6 @@ class QToolBar;
 //class QAssistantClient;
 class QLocale;
 class QMdiArea;
-class QUndoView;
 class QSignalMapper;
 
 class Matrix;
@@ -1375,7 +1374,7 @@ private:
   ScriptingWindow *scriptingWindow; //Mantid
   Script *m_iface_script;
   QTranslator *appTranslator, *qtTranslator;
-  QDockWidget *explorerWindow, *undoStackWindow;
+  QDockWidget *explorerWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QMdiArea *d_workspace;
 
@@ -1398,7 +1397,7 @@ private:
   QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
   QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
   QAction *actionOpen, *actionLoadImage, *actionScriptRepo, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj;
-  QAction *actionLoad, *actionUndo, *actionRedo;
+  QAction *actionLoad;
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
@@ -1462,7 +1461,6 @@ private:
   QAction *Box, *Frame, *None;
   QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;
   QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
-  QAction *actionShowUndoStack;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
@@ -1472,7 +1470,6 @@ private:
   
   QList<QAction *> m_interfaceActions;
 
-  QUndoView *d_undo_view;
   /// list of mantidmatrix windows opened from project file.
   QList<MantidMatrix*> m_mantidmatrixWindows;
 

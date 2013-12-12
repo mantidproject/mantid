@@ -1,20 +1,17 @@
-#ifndef MANTID_DATAHANDLING_APPLYGROUPINGFROMMUONNEXUS_H_
-#define MANTID_DATAHANDLING_APPLYGROUPINGFROMMUONNEXUS_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_MUONCALCULATEASYMMETRY_H_
+#define MANTID_WORKFLOWALGORITHMS_MUONCALCULATEASYMMETRY_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
-namespace DataHandling
+namespace WorkflowAlgorithms
 {
-  using namespace DataObjects;
-  /** 
-    Applies grouping information from Muon Nexus file to the workspace. 
+  using namespace Kernel;
+  using namespace API;
 
-    @author Arturs Bekasovs
-    @date 10/10/2013 
+  /** MuonCalculateAsymmetry : converts loaded/prepared Muon data to a data suitable for analysis. 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -36,9 +33,12 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ApplyGroupingFromMuonNexus  : public API::Algorithm
+  class DLLExport MuonCalculateAsymmetry  : public API::Algorithm
   {
   public:
+    MuonCalculateAsymmetry();
+    virtual ~MuonCalculateAsymmetry();
+    
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
@@ -48,15 +48,15 @@ namespace DataHandling
     void init();
     void exec();
 
-    bool checkGroups();
-    bool processGroups();
-
-    /// Applies grouping to a given workspace
-    Workspace2D_sptr applyGrouping(const std::vector<int>& detectorGrouping, Workspace2D_const_sptr inputWs);
+    /// Converts given workspace according to the OutputType
+    MatrixWorkspace_sptr convertWorkspace(MatrixWorkspace_sptr ws);
+  
+    /// Merges two period workspaces according to PeriodOperation specified
+    MatrixWorkspace_sptr mergePeriods(MatrixWorkspace_sptr ws1, MatrixWorkspace_sptr ws2);
   };
 
 
-} // namespace DataHandling
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_APPLYGROUPINGFROMMUONNEXUS_H_ */
+#endif  /* MANTID_WORKFLOWALGORITHMS_MUONCALCULATEASYMMETRY_H_ */

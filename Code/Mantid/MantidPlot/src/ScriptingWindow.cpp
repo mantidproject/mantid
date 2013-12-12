@@ -160,6 +160,7 @@ void ScriptingWindow::showEvent(QShowEvent *event)
  */
 void ScriptingWindow::open(const QString & filename, bool newtab)
 {
+  std::string file = filename.toStdString();
   m_manager->open(newtab, filename);
 }
 
@@ -645,18 +646,15 @@ QStringList ScriptingWindow::extractPyFiles(const QList<QUrl>& urlList) const
   for (int i = 0; i < urlList.size(); ++i) 
   {
     QString fName = urlList[i].toLocalFile();
-    g_log.debug() << "Filename from URL: " << fName.toStdString();
     if (fName.size()>0)
     {
       QFileInfo fi(fName);
       
-      g_log.debug() << " Ext: " << fi.suffix().toStdString();
       if (fi.suffix().upper()=="PY")
       {
         filenames.append(fName);
       }
     }
-    g_log.debug()<<std::endl;
   }
   return filenames;
 }

@@ -925,7 +925,7 @@ void CheckWorkspacesMatch::doTableComparison(API::ITableWorkspace_const_sptr tws
     r2s << r2;
     if ( r1s.str() != r2s.str() )
     {
-      g_log.debug() << "Table data mismatch at row " << i << " (" << r1s << " vs " << r2s << ")\n";
+      g_log.debug() << "Table data mismatch at row " << i << " (" << r1s.str() << " vs " << r2s.str() << ")\n";
       result = "Table data mismatch";
       if ( !checkAllData ) return;
     }
