@@ -172,52 +172,9 @@ namespace Mantid
       declareProperty(new ArrayProperty<int>("RegionOfDirectBeam"),
           "Indices of the spectra a pair (lower, upper) that mark the ranges that correspond to the direct beam in multi-detector mode.");
 
-      declareProperty(
-          new PropertyWithValue<double>("WavelengthMin", Mantid::EMPTY_DBL(),
-              boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength minimum in angstroms");
-      declareProperty(
-          new PropertyWithValue<double>("WavelengthMax", Mantid::EMPTY_DBL(),
-              boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength maximum in angstroms");
+      this->initIndexInputs();
+      this->initWavelengthInputs();
 
-      declareProperty(
-                new PropertyWithValue<double>("WavelengthStep", 0.05,
-                    boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-                "Wavelength rebinning step in angstroms. Defaults to 0.05. Used for rebinning intermediate workspaces converted into wavelength.");
-
-      boost::shared_ptr<CompositeValidator> mandatoryWorkspaceIndex = boost::make_shared<
-          CompositeValidator>();
-      mandatoryWorkspaceIndex->add(boost::make_shared<MandatoryValidator<int> >());
-      auto boundedIndex = boost::make_shared<BoundedValidator<int> >();
-      boundedIndex->setLower(0);
-      mandatoryWorkspaceIndex->add(boundedIndex);
-
-      declareProperty(
-          new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT(), mandatoryWorkspaceIndex),
-          "I0 monitor index");
-
-      declareProperty(
-          new PropertyWithValue<double>("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-              boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength minimum for monitor background in angstroms. Taken to be WavelengthMin if not provided.");
-
-      declareProperty(
-          new PropertyWithValue<double>("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-              boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength maximum for monitor background in angstroms. Taken to be WavelengthMax if not provided.");
-
-      declareProperty(
-          new PropertyWithValue<double>("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-              boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength minimum for integration in angstroms. Taken to be WavelengthMin if not provided.");
-      declareProperty(
-          new PropertyWithValue<double>("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-              boost::make_shared<MandatoryValidator<double> >(), Direction::Input),
-          "Wavelength maximum for integration in angstroms. Taken to be WavelengthMax if not provided.");
-
-      declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-               "Indices of the spectra in pairs (lower, upper) that mark the ranges that correspond to detectors of interest.");
 
       declareProperty(new PropertyWithValue<std::string>("DetectorComponentName", "", Direction::Input),
           "Name of the detector component i.e. point-detector. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
@@ -245,18 +202,7 @@ namespace Mantid
               PropertyMode::Optional, inputValidator->clone()),
           "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
 
-      declareProperty(
-          new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
-          "A comma separated list of first bin boundary, width, last bin boundary. "
-              "These parameters are used for stitching together transmission runs. "
-              "Values are in q. This input is only needed if a SecondTransmission run is provided.");
-
-      declareProperty(
-          new PropertyWithValue<double>("StartOverlapQ", Mantid::EMPTY_DBL(), Direction::Input),
-          "Start Q for stitching transmission runs together");
-      declareProperty(
-          new PropertyWithValue<double>("EndOverlapQ", Mantid::EMPTY_DBL(), Direction::Input),
-          "End Q for stitching transmission runs together");
+      this->initStitchingInputs();
 
       setPropertyGroup("FirstTransmissionRun", "Transmission");
       setPropertyGroup("SecondTransmissionRun", "Transmission");

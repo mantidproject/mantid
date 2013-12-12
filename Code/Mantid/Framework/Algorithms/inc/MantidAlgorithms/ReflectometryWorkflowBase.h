@@ -77,6 +77,13 @@ namespace Mantid
           OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
           OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ) const;
 
+      /// Init common index inputs
+      void initIndexInputs();
+      /// Init common wavelength inputs
+      void initWavelengthInputs();
+      /// Init common stitching inputs
+      void initStitchingInputs();
+
     private:
 
       /// Validate the transmission correction property inputs

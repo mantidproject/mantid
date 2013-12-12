@@ -78,7 +78,7 @@ class CreateTransmissionWorkspaceTest(unittest.TestCase):
     
     def construct_standard_algorithm(self):
         alg = make_decorator(CreateTransmissionWorkspace)
-        alg.set_InputWorkspace(self.__tof)
+        alg.set_FirstTransmissionRun(self.__tof)
         alg.set_WavelengthMin(0.0)
         alg.set_WavelengthMax(1.0)
         alg.set_I0MonitorIndex(0)
@@ -91,45 +91,82 @@ class CreateTransmissionWorkspaceTest(unittest.TestCase):
     
     def test_input_workspace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
-        alg.set_InputWorkspace(self.__not_tof)
+        alg.set_FirstTransmissionRun(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)
       
     def test_second_transmission_workspace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
-        alg.set_SecondTransmissionWorkspace(self.__not_tof)
+        alg.set_SecondTransmissionRun(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)
         
     def test_provide_second_transmission_run_without_params_throws(self):
         alg = self.construct_standard_algorithm()
-        alg.set_SecondTransmissionWorkspace(self.__tof)
+        alg.set_SecondTransmissionRun(self.__tof)
         self.assertRaises(ValueError, alg.execute)
         
     def test_provide_second_transmission_run_without_start_overlap_q_throws(self):
         alg = self.construct_standard_algorithm()
-        alg.set_SecondTransmissionWorkspace(self.__tof)
+        alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
         alg.set_EndOverlapQ( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_provide_end_transmission_run_without_end_overlap_q_throws(self):
         alg = self.construct_standard_algorithm()
-        alg.set_SecondTransmissionWorkspace(self.__tof)
+        alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
         alg.set_StartOverlapQ( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_end_overlap_q_must_be_greater_than_start_overlap_q_or_throw(self):
         alg = self.construct_standard_algorithm()
-        alg.set_SecondTransmissionWorkspace(self.__tof)
+        alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
         alg.set_StartOverlapQ( 0.6 )
         alg.set_EndOverlapQ( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_must_provide_wavelengths(self):
-        self.assertRaises(RuntimeError, ReflectometryReductionOne, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMin=1.0)
-        self.assertRaises(RuntimeError, ReflectometryReductionOne, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMax=1.0)
+        self.assertRaises(RuntimeError, CreateTransmissionWorkspace, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMin=1.0)
+        self.assertRaises(RuntimeError, CreateTransmissionWorkspace, InputWorkspace=self.__tof, FirstTransmissionRun=self.__tof, SecondTransmissionRun=self.__tof, WavelengthMax=1.0)
         
+    def test_wavelength_min_greater_wavelength_max_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_WavelengthMin(1.0)
+        alg.set_WavelengthMax(0.0)
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_monitor_background_wavelength_min_greater_monitor_background_wavelength_max_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_MonitorBackgroundWavelengthMin(1.0)
+        alg.set_MonitorBackgroundWavelengthMax(0.0)
+        self.assertRaises(ValueError, alg.execute)
+    
+    def test_monitor_integration_wavelength_min_greater_monitor_integration_wavelength_max_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_MonitorIntegrationWavelengthMin(1.0)
+        alg.set_MonitorIntegrationWavelengthMax(0.0)
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_monitor_index_positive(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_I0MonitorIndex(-1)
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_workspace_index_list_throw_if_not_pairs(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_WorkspaceIndexList([0])
+        self.assertRaises(ValueError, alg.execute)
+        
+    def test_workspace_index_list_values_not_positive_throws(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_WorkspaceIndexList([-1, 0]) # -1 is not acceptable.
+        self.assertRaises(ValueError, alg.execute)
+    
+    def test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max(self):
+        alg = self.construct_standard_algorithm()
+        alg.set_WorkspaceIndexList([1, 0]) # 1 > 0
+        self.assertRaises(ValueError, alg.execute)
         
     def test_execute(self):
         alg = self.construct_standard_algorithm()
