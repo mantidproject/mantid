@@ -33,6 +33,7 @@ ISISLiveEventDataListener::ISISLiveEventDataListener():API::ILiveListener(),
     m_isConnected(false),
     m_stopThread(false)
 {
+  m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }
 
 /**
@@ -69,7 +70,7 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     // localhost on the default port
     if (address.host().toString().compare( "0.0.0.0") == 0)
     {
-        Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
+      Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
       try {
         m_socket.connect( tempAddress);  // BLOCKING connect
       } catch (...) {
@@ -110,6 +111,9 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     m_numberOfPeriods = getInt("NPER");
     m_numberOfSpectra = getInt("NSP1");
 
+    g_log.information() << "Number of periods " << m_numberOfPeriods << std::endl;
+    g_log.information() << "Number of spectra " << m_numberOfSpectra << std::endl;
+
     TCPStreamEventDataSetup setup;
     Receive(setup, "Setup", "Wrong version");
     m_startTime.set_from_time_t(setup.head_setup.start_time);
@@ -131,7 +135,7 @@ void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime)
 // return a workspace with collected events
 boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData()
 {
-    if ( !m_eventBuffer[0] )
+  if ( m_eventBuffer.empty() || !m_eventBuffer[0] || m_stopThread )
     {
         throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
     }
@@ -201,6 +205,7 @@ void ISISLiveEventDataListener::run()
         TCPStreamEventDataNeutron events;
         while (m_stopThread == false)
         {
+            g_log.warning() << "Reading events.head" << std::endl;
             // get the header with the type of the packet
             Receive(events.head, "Events header","Corrupt stream - you should reconnect.");
             if ( !(events.head.type == TCPStreamEventHeader::Neutron) )
@@ -210,6 +215,7 @@ void ISISLiveEventDataListener::run()
             }
             CollectJunk( events.head );
 
+            g_log.warning() << "Reading events.head_n" << std::endl;
             // get the header with the sream size
             Receive(events.head_n, "Neutrons header","Corrupt stream - you should reconnect.");
             CollectJunk( events.head_n );
@@ -221,6 +227,7 @@ void ISISLiveEventDataListener::run()
             m_eventBuffer[0]->mutableRun().getTimeSeriesProperty<double>( PROTON_CHARGE_PROPERTY)
                           ->addValue( pulseTime, protons );
 
+            g_log.warning() << "Received " << events.head_n.nevents << " events." << std::endl;
             events.data.resize(events.head_n.nevents);
             uint32_t nread = 0;
             // receive the events
@@ -336,8 +343,17 @@ void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutr
 {
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
+    g_log.debug() << "Saving events " << data.size() << std::endl;
+    std::cerr << "Saving events " << data.size() << std::endl;
+
     if ( period >= static_cast<size_t>(m_numberOfPeriods) )
     {
+      auto warn = m_warnings.find("period");
+      if ( warn != m_warnings.end() )
+      {
+        g_log.warning() << warn->second << std::endl;
+        m_warnings.erase( warn );
+      }
       period = 0;
     }
 
@@ -345,6 +361,7 @@ void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutr
     {
         Mantid::DataObjects::TofEvent event( it->time_of_flight, pulseTime );
         m_eventBuffer[period]->getEventList( it->spectrum ).addEventQuickly( event );
+        std::cerr << it->spectrum << ' ' << it->time_of_flight << std::endl;
     }
 }
 
@@ -406,6 +423,7 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
         g_log.warning() << warningMessage << instrName << std::endl;
         g_log.warning() << e.what() << instrName << std::endl;
     }
+    g_log.information() << "Instrument loaded." << std::endl;
 }
 
 int ISISLiveEventDataListener::getInt(const std::string &par) const
