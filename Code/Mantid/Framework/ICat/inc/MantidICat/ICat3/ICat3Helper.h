@@ -135,8 +135,8 @@ namespace Mantid
       // Defines the SSL authentication scheme.
       void setSSLContext(ICat3::ICATPortBindingProxy& icat);
 
-      // Sets the soap-endpoint & SSL context for the proxy being returned.
-      ICat3::ICATPortBindingProxy getICATProxy();
+      // Sets the soap-endpoint & SSL context for the given ICAT proxy.
+      void setICATProxySettings(ICat3::ICATPortBindingProxy& icat);
 
       /** This is a template method to save data to table workspace
        * @param input :: pointer to input value
