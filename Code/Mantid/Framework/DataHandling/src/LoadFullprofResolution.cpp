@@ -12,6 +12,10 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into th
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/AutoPtr.h>
+
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/iter_find.hpp>
@@ -25,6 +29,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace std;
+using namespace Poco::XML;
 
 using Geometry::Instrument;
 using Geometry::Instrument_sptr;
@@ -751,18 +756,174 @@ namespace DataHandling
   }
 
   void LoadFullprofResolution::putParametersIntoWorkspace( const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws)
-  {
-     Instrument_const_sptr instrument = ws->getInstrument();
-     //Instrument_const_sptr baseInstrument = ws->getInstrument()->baseInstrument();
+  {  
 
-     //InstrumentDefinitionParser loadInstr;
-     //loadInstr.setComponentLinks(instrument, pRootElem);
+    // Get instrument name from matrix workspace
+    std::string instrumentName = ws->getInstrument()->getName();
 
-     auto & pmap = ws->instrumentParameters();
+    // Convert table workspace into DOM XML document
+    //   Set up writer to Paremeter file
+    DOMWriter writer;
+    writer.setNewLine("\n");
+    writer.setOptions(XMLWriter::PRETTY_PRINT);
 
-     //pmap.addString(instrument->getComponentID(), blah);  // What do I do here?
+    //   Get current time
+    Kernel::DateAndTime date = Kernel::DateAndTime::getCurrentTime();
+    std::string ISOdate = date.toISO8601String();
+    std::string ISOdateShort = ISOdate.substr(0,19); // Remove fraction of seconds
+
+    //   Create document
+    AutoPtr<Document> mDoc = new Document();
+    AutoPtr<Element> rootElem = mDoc->createElement("parameter-file");
+    rootElem->setAttribute("date", ISOdateShort);
+    mDoc->appendChild(rootElem);
+
+    //   Add instrument
+    AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
+    instrumentElem->setAttribute("name",instrumentName);
+    rootElem->appendChild(instrumentElem);
+    API::Column_const_sptr column1 = tws->getColumn( 1 );
+    addALFBEParameter( column1, mDoc, instrumentElem, "Alph0");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Beta0");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Alph1");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Beta1");
+
+    //   Add banks
+    if(tws->columnCount() < 2){
+      throw std::runtime_error("No banks found");
+    }
+    size_t num_banks = tws->columnCount()-1;
+
+    for( size_t i=0; i<num_banks; ++i)
+    {
+      API::Column_const_sptr column = tws->getColumn( i+1 );
+      const double bankNumber = column->cell<double>(0);
+      std::ostringstream bankName;
+      bankName << "bank" << bankNumber;
+      AutoPtr<Element> bankElem = mDoc->createElement("component-link");
+      bankElem->setAttribute("name",bankName.str());
+      addSigmaParameters( column, mDoc, bankElem );
+      addGammaParameters( column, mDoc, bankElem );
+      rootElem->appendChild(bankElem);
+    }
+
+    // Convert DOM XML document into string
+    // ? std::ofstream outFile();
+    // ? writer.writeNode(outFile, mDoc);  // How do I do this?
+
+
+    // Load the string into the workspace
 
   }
+
+  /* Add an ALFBE parameter to the XML document according to the table workspace
+  *
+  *  paramName is the name of the parameter as it appears in the table workspace
+  */
+  void LoadFullprofResolution::addALFBEParameter(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
+  {
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", getXMLParameterName(paramName));
+    parameterElem->setAttribute("type","fitting");
+
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+    formulaElem->setAttribute("eq",getXMLEqValue(column, paramName));
+    if(paramName != "Beta1") formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
+
+    AutoPtr<Element> fixedElem = mDoc->createElement("fixed");
+    parameterElem->appendChild(fixedElem);
+
+    parent->appendChild(parameterElem);
+  }
+
+    /* Add a set of SIGMA paraters to the XML document according to the table workspace
+   * for the bank at the given column of the table workspace
+   */
+  void LoadFullprofResolution::addSigmaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+     AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+     parameterElem->setAttribute("name", "IkedaCarpenterPV:SigmaSquared");
+     parameterElem->setAttribute("type","fitting");
+
+     AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+     std::string eqValue = getXMLEqValue(column, "Sig1")+"*centre^2+"+getXMLEqValue(column, "Sig0");
+     formulaElem->setAttribute("eq", eqValue);
+     formulaElem->setAttribute("unit","dSpacing");
+     formulaElem->setAttribute("result-unit","TOF^2");
+     parameterElem->appendChild(formulaElem);
+
+     parent->appendChild(parameterElem);
+  }
+
+   /* Add a set of GAMMA paraters to the XML document according to the table workspace
+   * for the bank at the given column of the table workspace
+   */
+  void LoadFullprofResolution::addGammaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+     AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+     parameterElem->setAttribute("name", "IkedaCarpenterPV:Gamma");
+     parameterElem->setAttribute("type","fitting");
+
+     AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+     std::string eqValue = getXMLEqValue(column, "Gam1" )+"*centre";
+     formulaElem->setAttribute("eq", eqValue);
+     formulaElem->setAttribute("unit","dSpacing");
+     formulaElem->setAttribute("result-unit","TOF");
+     parameterElem->appendChild(formulaElem);
+
+     parent->appendChild(parameterElem);
+  }
+
+
+
+  /*
+  *  Get the XML name of a parameter given its Table Workspace name
+  */
+  std::string LoadFullprofResolution::getXMLParameterName( const std::string& name )
+  {
+    // Only used for ALFBE parameters
+    std::string prefix = "IkedaCarpenterPV:";
+    if(name == "Alph0") return prefix+"Alpha0";
+    if(name == "Beta0") return prefix+"Beta0";
+    if(name == "Alph1") return prefix+"Alpha1";
+    if(name == "Beta1") return prefix+"Kappa";
+    return "?"+name;
+  }
+
+  /*
+  * Get the value string to put in the XML eq attribute of the formula element of the paramenter element
+  * given the name of the parameter in the table workspace.
+  */
+  std::string LoadFullprofResolution::getXMLEqValue( const API::Column_const_sptr column, const std::string& name )
+  {
+    size_t paramNumber = m_rowNumbers[name];
+    //API::Column_const_sptr column = tablews->getColumn( columnIndex );
+    double eqValue = column->cell<double>(paramNumber);
+    if(name.substr(0,3) == "Sig") eqValue = eqValue*eqValue; // Square the sigma values
+    return boost::lexical_cast<std::string>(eqValue);
+  }
+
+  /* This function fills in a list of the row numbers starting 0 of the parameters
+     in the table workspace, so one can find the position in a column of
+     the value of the given parameter.
+  */
+  void LoadFullprofResolution::getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap)
+  {
+    parammap.clear();
+
+    size_t numrows = tablews->rowCount();
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      TableRow row = tablews->getRow(i);
+      std::string name;
+      row >> name;
+      parammap.insert(std::make_pair(name, i));
+    }
+
+    return;
+  }
+
 
 } // namespace DataHandling
 } // namespace Mantid
