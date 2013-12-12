@@ -452,7 +452,7 @@ public:
    */
   LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& entry_name, const std::string & entry_type,
                        const std::size_t numEvents, const bool oldNeXusFileNames,
-                       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
+                       Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
   : Task(),
     alg(alg), entry_name(entry_name), entry_type(entry_type),
     pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
@@ -653,6 +653,15 @@ public:
         if (temp < m_min_id) m_min_id = temp;
         if (temp > m_max_id) m_max_id = temp;
       }
+
+      if ( m_min_id > static_cast<uint32_t>(alg->eventid_max) )
+      {
+        // All the detector IDs in the bank are higher than the highest 'known' (from the IDF)
+        // ID. Setting this will abort the loading of the bank.
+        m_loadError = true;
+      }
+      // fixup the maximum pixel id in the case that it's higher than the highest 'known' id
+      if (m_max_id > static_cast<uint32_t>(alg->eventid_max)) m_max_id = static_cast<uint32_t>(alg->eventid_max);
     }
   }
 
@@ -861,9 +870,6 @@ public:
     boost::shared_array<float> event_time_of_flight_shrd(m_event_time_of_flight);
     boost::shared_array<float> event_weight_shrd(m_event_weight);
     boost::shared_ptr<std::vector<uint64_t> > event_index_shrd(event_index_ptr);
-
-    // fixup the maximum pixel id
-    if (m_max_id > static_cast<uint32_t>(alg->eventid_max)) m_max_id = static_cast<uint32_t>(alg->eventid_max);
 
     // schedule the job to generate the event lists
     auto mid_id = m_max_id;
@@ -1600,7 +1606,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  Mutex * diskIOMutex = new Mutex();
+  auto diskIOMutex = boost::make_shared<Mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
@@ -1674,7 +1680,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
   // Start and end all threads
   pool.joinAll();
-  delete diskIOMutex;
+  diskIOMutex.reset();
   delete prog2;
 
 

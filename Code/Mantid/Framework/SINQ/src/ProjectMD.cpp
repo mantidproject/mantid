@@ -172,7 +172,6 @@ void ProjectMD::putValue(IMDHistoWorkspace_sptr ws, int dim[], double value)
 void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr outWS,
 		  int *sourceDim, int *targetDim, int targetDimCount, int dimNo, int start, int end, int currentDim)
 {
-	  double sumVal = 0;
 	  boost::shared_ptr<const IMDDimension> dimi;
 
 	  /*
@@ -181,7 +180,7 @@ void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr outW
 	   */
 	  if (currentDim == static_cast<int>(inWS->getNumDims())) {
 	    int length = end - start;
-	    sumVal = getValue(outWS, targetDim);
+	    double sumVal = getValue(outWS, targetDim);
 	    for (int i = 0; i < length; i++) {
 	      sourceDim[dimNo] = start + i;
 	      double val = getValue(inWS, sourceDim);

@@ -85,7 +85,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Plot.cpp
                    src/PlotCurve.cpp
                    src/PlotDialog.cpp
-                   src/PlotEnrichement.cpp
                    src/PlotWizard.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
@@ -320,7 +319,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Plot3DDialog.h
                    src/PlotCurve.h
                    src/PlotDialog.h
-                   src/PlotEnrichement.h
                    src/Plot.h
                    src/PlotToolInterface.h
                    src/PlotWizard.h

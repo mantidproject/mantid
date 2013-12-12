@@ -707,7 +707,7 @@ namespace Mantid
        * @return a string
        */
       template<typename T>
-      std::string toString(const T value)
+      std::string toString(const T &value)
       {
         std::ostringstream mess;
         mess << value;
@@ -1153,15 +1153,15 @@ namespace Mantid
       template MANTID_KERNEL_DLL int convert(const char*,int&);
       template MANTID_KERNEL_DLL int convert(const char*,std::size_t&);
 
-      template MANTID_KERNEL_DLL std::string toString(const double value);
-      template MANTID_KERNEL_DLL std::string toString(const float value);
-      template MANTID_KERNEL_DLL std::string toString(const int value);
-      template MANTID_KERNEL_DLL std::string toString(const uint16_t value);
-      template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches uint64_t on Linux 64 & Win 64
+      template MANTID_KERNEL_DLL std::string toString(const double &value);
+      template MANTID_KERNEL_DLL std::string toString(const float &value);
+      template MANTID_KERNEL_DLL std::string toString(const int &value);
+      template MANTID_KERNEL_DLL std::string toString(const uint16_t &value);
+      template MANTID_KERNEL_DLL std::string toString(const size_t &value); // Matches uint64_t on Linux 64 & Win 64
 #if defined(__APPLE__) || ( defined(_WIN32) && !defined(_WIN64)) || (defined(__GNUC__) && !defined(__LP64__)) // Mac or 32-bit compiler
-      template MANTID_KERNEL_DLL std::string toString(const uint64_t value);
+      template MANTID_KERNEL_DLL std::string toString(const uint64_t &value);
 #endif
-      template MANTID_KERNEL_DLL std::string toString(const std::string value);
+      template MANTID_KERNEL_DLL std::string toString(const std::string &value);
 
       template MANTID_KERNEL_DLL std::string toString(const std::vector<int> &value);
 

@@ -29,7 +29,7 @@
 #ifndef ARROWMARKER_H
 #define ARROWMARKER_H
 
-#include "PlotEnrichement.h"
+#include <qwt_plot_marker.h>
 
 /**\brief Draws lines and arrows on a QwtPlot.
  *
@@ -40,7 +40,7 @@
  *
  * \sa ImageMarker, Legend
  */
-class ArrowMarker: public QObject, public PlotEnrichement
+class ArrowMarker: public QObject, public QwtPlotMarker
 {
 public:
 	enum Operation { None, MoveStart, MoveEnd, MoveBoth };

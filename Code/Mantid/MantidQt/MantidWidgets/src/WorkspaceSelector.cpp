@@ -22,6 +22,7 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(par
   m_remObserver(*this, &WorkspaceSelector::handleRemEvent),
   m_clearObserver(*this, &WorkspaceSelector::handleClearEvent),
   m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
+  m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent),
   m_init(init), m_workspaceTypes(), m_showHidden(false), m_optional(false),
   m_suffix(), m_algName(), m_algPropName(), m_algorithm()
 {
@@ -33,6 +34,7 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(par
     ads.notificationCenter.addObserver(m_remObserver);
     ads.notificationCenter.addObserver(m_renameObserver);
     ads.notificationCenter.addObserver(m_clearObserver);
+    ads.notificationCenter.addObserver(m_replaceObserver);
 
     refresh();
   }
@@ -50,6 +52,7 @@ WorkspaceSelector::~WorkspaceSelector()
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   }
 }
 
@@ -85,6 +88,11 @@ void WorkspaceSelector::showHiddenWorkspaces(bool show)
       refresh();
     }
   }
+}
+
+bool WorkspaceSelector::isValid() const
+{
+  return (this->currentText() != "");
 }
 
 bool WorkspaceSelector::isOptional() const
@@ -211,6 +219,30 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
     }
   }
 }
+
+void WorkspaceSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+{
+
+  QString name = QString::fromStdString(pNf->object_name());
+  auto& ads = Mantid::API::AnalysisDataService::Instance();
+
+  bool eligible = checkEligibility(name , ads.retrieve(pNf->object_name())); 
+  int index = findText(name); 
+
+  // if it is inside and it is eligible do nothing
+  // if it is not inside and it is eligible insert
+  // if it is inside and it is not eligible remove
+  // if it is not inside and it is not eligible do nothing
+  bool inside = (index != -1); 
+  if ( (inside && eligible) || (!inside && !eligible) )
+    return;
+  else if (!inside && eligible)
+    addItem(name);
+  else // (inside && !eligible)
+    removeItem(index);    
+ 
+}
+
 
 bool WorkspaceSelector::checkEligibility(const QString & name, Mantid::API::Workspace_sptr object) const
 {

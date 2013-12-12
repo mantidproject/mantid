@@ -104,16 +104,9 @@ namespace IDA
     double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
 
     uiv.checkBins(eLow, eWidth, eHigh);
+    uiv.checkDataSelectorIsValid("Input", uiForm().fury_dsInput);
 
     QString message = uiv.generateErrorMessage();
-    
-    if(message.isEmpty())
-    {
-      if(uiForm().fury_dsInput->getCurrentDataName().isEmpty())
-      {
-        message = "Please correct the following:\n\n  The specified data file could not be found";
-      }
-    }
 
     return message;
   }

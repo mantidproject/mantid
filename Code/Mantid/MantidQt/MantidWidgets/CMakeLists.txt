@@ -42,7 +42,6 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
-    inc/MantidQtMantidWidgets/CatalogHelper.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
@@ -67,7 +66,8 @@ set ( MOC_FILES
 
 # Add the include files are NOT already in MOC_FILES
 set ( INC_FILES
-	${MOC_FILES}
+    ${MOC_FILES}
+    inc/MantidQtMantidWidgets/CatalogHelper.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
 

@@ -23,8 +23,11 @@ using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Quat;
 
 #define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
-#define PI 3.141592653589793238
-
+namespace
+{
+  const double DEG_TO_RAD = M_PI / 180.;
+  const double RAD_TO_DEG = 180. / M_PI;
+}
 
 /**
    Comparator function for sorting list of UB matrices based on the sum
@@ -65,9 +68,9 @@ static double GetDiffFrom90Sum( const DblMatrix & UB )
   if ( !IndexingUtils::GetABC( UB, a, b, c ) )
     return -1;
 
-  double alpha = b.angle( c ) * 180.0/PI;
-  double beta  = c.angle( a ) * 180.0/PI;
-  double gamma = a.angle( b ) * 180.0/PI;
+  double alpha = b.angle( c ) * RAD_TO_DEG;
+  double beta  = c.angle( a ) * RAD_TO_DEG;
+  double gamma = a.angle( b ) * RAD_TO_DEG;
 
   double sum = fabs( alpha - 90.0 ) +
                fabs( beta  - 90.0 ) +
@@ -1091,7 +1094,7 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
   V3D c_dir;
 
   int    num_a_steps   = round( 90.0 / degrees_per_step );
-  double gamma_radians = gamma * PI / 180.0;
+  double gamma_radians = gamma * DEG_TO_RAD;
 
   int num_b_steps = round( 4 * sin( gamma_radians ) * num_a_steps );
 
@@ -1771,7 +1774,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
                                          // the possible range of d-values
                                          // implies a bound on the minimum
                                          // angle between a,b, c vectors.
-  double min_deg = (180.0/PI) * atan(2.0 * min_d/max_d);
+  double min_deg = (RAD_TO_DEG) * atan(2.0 * min_d/max_d);
 
   double epsilon = 5;                    //  tolerance on right angle (degrees)
   V3D b_dir;
@@ -1779,9 +1782,9 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
   while ( !b_found && index < directions.size() )
   {
     V3D    vec   = directions[ index ];
-    double gamma = a_dir.angle( vec ) * 180 / PI;
+    double gamma = a_dir.angle( vec ) * RAD_TO_DEG;
 
-    if ( gamma >= min_deg && (180 - gamma) >= min_deg )
+    if ( gamma >= min_deg && (180. - gamma) >= min_deg )
     {
       b_dir = vec;
       if ( gamma > 90 + epsilon )       // try for Nigli cell with angles <= 90
@@ -1812,14 +1815,14 @@ bool IndexingUtils::FormUB_From_abc_Vectors( DblMatrix         & UB,
     {
       c_dir = vec;
       c_dir *= factor;
-      perp_ang = perp.angle( c_dir )  * 180 / PI;
-      alpha    = b_dir.angle( c_dir ) * 180 / PI;
-      beta     = a_dir.angle( c_dir ) * 180 / PI;
+      perp_ang = perp.angle( c_dir )  * RAD_TO_DEG;
+      alpha    = b_dir.angle( c_dir ) * RAD_TO_DEG;
+      beta     = a_dir.angle( c_dir ) * RAD_TO_DEG;
                                        // keep a,b,c right handed by choosing
                                        // c in general directiion of a X b
-      if ( perp_ang < 90 - epsilon                      &&
-           alpha >= min_deg && (180 - alpha) >= min_deg &&
-           beta  >= min_deg && (180 - beta ) >= min_deg  )
+      if ( perp_ang < 90. - epsilon                      &&
+           alpha >= min_deg && (180. - alpha) >= min_deg &&
+           beta  >= min_deg && (180. - beta ) >= min_deg  )
       {
         c_found = true;
       }
@@ -1963,10 +1966,10 @@ V3D IndexingUtils::Make_c_dir( const V3D  & a_dir,
                                      double c,
                                      double alpha, double beta, double gamma )
 {
-  double cos_alpha = cos( PI/180.0 * alpha );
-  double cos_beta  = cos( PI/180.0 * beta  );
-  double cos_gamma = cos( PI/180.0 * gamma );
-  double sin_gamma = sin( PI/180.0 * gamma );
+  double cos_alpha = cos( DEG_TO_RAD * alpha );
+  double cos_beta  = cos( DEG_TO_RAD * beta  );
+  double cos_gamma = cos( DEG_TO_RAD * gamma );
+  double sin_gamma = sin( DEG_TO_RAD * gamma );
 
   double c1 = c * cos_beta;
   double c2 = c * ( cos_alpha - cos_gamma * cos_beta )/sin_gamma;
@@ -2059,7 +2062,7 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
           length_diff = fabs( next_dir.norm() - current_length );
           if ( ( length_diff/current_length ) < len_tol )  // continue scan
           {
-            angle = current_dir.angle( next_dir ) * 180.0/PI;
+            angle = current_dir.angle( next_dir ) * RAD_TO_DEG;
             if ( (boost::math::isnan)(angle) )
               angle = 0;
             if ( (angle < ang_tol) || (angle > (180.0-ang_tol)) )
@@ -2125,6 +2128,20 @@ void IndexingUtils::RoundHKLs( std::vector<V3D> & hkl_list )
   }
 }
 
+/**
+ * @param value The value to check.
+ * @param tolerance Allowable distance from integer.
+ * @return True if the value is within tolerance of a whole number
+ */
+inline bool withinTol(const double value, const double tolerance)
+{
+  double myVal = fabs(value);
+  if (myVal - floor(myVal) < tolerance)
+    return true;
+  if (floor(myVal+1.) - myVal < tolerance)
+    return true;
+  return false;
+}
 
 /**
   Check whether or not the components of the specified vector are within
@@ -2141,26 +2158,12 @@ void IndexingUtils::RoundHKLs( std::vector<V3D> & hkl_list )
 
 bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
 {
-  bool valid_index = false;
+  if ((hkl[0] == 0.) && (hkl[1] == 0.) && (hkl[2] == 0.))
+    return false;
 
-  int h,k,l;
-                                        // since C++ lacks a round() we need
-                                        // to do it ourselves!
-  h = round( hkl[0] );
-  k = round( hkl[1] );
-  l = round( hkl[2] );
-
-  if ( h != 0 || k != 0 || l != 0 )   // check if indexed, but not as (0,0,0)
-  {
-    if ( (fabs( hkl[0] - h ) <= tolerance) &&
-         (fabs( hkl[1] - k ) <= tolerance) &&
-         (fabs( hkl[2] - l ) <= tolerance) )
-    {
-      valid_index = true;
-    }
-  }
-
-  return valid_index;
+  return (withinTol(hkl[0], tolerance)
+      && withinTol(hkl[1], tolerance)
+      && withinTol(hkl[2], tolerance));
 }
 
 /**
@@ -2764,29 +2767,29 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
 
   std::vector<V3D> direction_list;
 
-  double angle_step = PI / (2*n_steps);
+  double angle_step = M_PI / (2*n_steps);
 
-  for ( double phi = 0; phi <= (1.0001)*PI/2; phi += angle_step )
+  for ( double phi = 0; phi <= (1.0001)*M_PI/2.; phi += angle_step )
   {
     double r = sin(phi);
 
-    int n_theta = (int)( 2 * PI * r / angle_step + 0.5 );
+    int n_theta = (int)( 2. * M_PI * r / angle_step + 0.5 );
      
     double theta_step;
       
     if ( n_theta == 0 )                     // n = ( 0, 1, 0 ).  Just
-      theta_step = 2 * PI + 1;              // use one vector at the pole
+      theta_step = 2. * M_PI + 1.;              // use one vector at the pole
 
     else
-      theta_step = 2 * PI / n_theta;
+      theta_step = 2. * M_PI / n_theta;
       
-    double last_theta = 2 * PI - theta_step / 2;
+    double last_theta = 2. * M_PI - theta_step / 2.;
 
-    if ( fabs(phi - PI/2) < angle_step/2 )  // use half the equator to avoid
-     last_theta = PI - theta_step/2;        // vectors that are the negatives
+    if ( fabs(phi - M_PI/2.) < angle_step/2. )  // use half the equator to avoid
+     last_theta = M_PI - theta_step/2.;        // vectors that are the negatives
                                             // of other vectors in the list.
 
-    for ( double theta = 0; theta < last_theta; theta += theta_step )
+    for ( double theta = 0.; theta < last_theta; theta += theta_step )
     {
       V3D direction( r*cos(theta), cos(phi), r*sin(theta) );
       direction_list.push_back( direction );
@@ -3068,9 +3071,9 @@ bool IndexingUtils::GetLatticeParameters( const DblMatrix   & UB,
   lattice_par.push_back( b_dir.norm() );
   lattice_par.push_back( c_dir.norm() );
  
-  double alpha = b_dir.angle( c_dir ) * 180.0/PI;
-  double beta  = c_dir.angle( a_dir ) * 180.0/PI;
-  double gamma = a_dir.angle( b_dir ) * 180.0/PI;
+  double alpha = b_dir.angle( c_dir ) * RAD_TO_DEG;
+  double beta  = c_dir.angle( a_dir ) * RAD_TO_DEG;
+  double gamma = a_dir.angle( b_dir ) * RAD_TO_DEG;
 
   lattice_par.push_back( alpha );
   lattice_par.push_back( beta  );
@@ -3130,9 +3133,9 @@ bool IndexingUtils::HasNiggliAngles( const V3D    & a_dir,
                                      const V3D    & c_dir,
                                            double   epsilon  )
 {
-  double alpha = b_dir.angle( c_dir ) * 180.0/PI;
-  double beta  = c_dir.angle( a_dir ) * 180.0/PI;
-  double gamma = a_dir.angle( b_dir ) * 180.0/PI;
+  double alpha = b_dir.angle( c_dir ) * RAD_TO_DEG;
+  double beta  = c_dir.angle( a_dir ) * RAD_TO_DEG;
+  double gamma = a_dir.angle( b_dir ) * RAD_TO_DEG;
 
   if ( alpha < 90+epsilon && beta < 90+epsilon && gamma < 90+epsilon )
   {

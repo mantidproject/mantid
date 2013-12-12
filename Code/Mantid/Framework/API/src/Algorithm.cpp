@@ -715,22 +715,53 @@ namespace Mantid
     void Algorithm::store()
     {
       const std::vector< Property*> &props = getProperties();
+			std::vector<int> groupWsIndicies;
+
+      //add any regular/child workspaces first, then add the groups
       for (unsigned int i = 0; i < props.size(); ++i)
       {
         IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
         if (wsProp)
-        {
-          try
-          {
-            wsProp->store();
-          }
-          catch (std::runtime_error&)
-          {
-            g_log.error("Error storing output workspace in AnalysisDataService");
-            throw;
-          }
+        { 
+					//check if the workspace is a group, if so remember where it is and add it later
+					auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( wsProp->getWorkspace() );
+					if ( !group )
+					{
+						try
+						{
+							wsProp->store();
+						}
+						catch (std::runtime_error&)
+						{
+							g_log.error("Error storing output workspace in AnalysisDataService");
+							throw;
+						}
+					}
+					else
+					{
+						groupWsIndicies.push_back(i);
+					}
         }
       }
+
+			//now store workspace groups once their members have been added
+			std::vector<int>::const_iterator wsIndex;
+			for (wsIndex = groupWsIndicies.begin(); wsIndex != groupWsIndicies.end(); ++wsIndex)
+			{
+				IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[*wsIndex]);
+				if(wsProp)
+				{
+					try
+					{
+						wsProp->store();
+					}
+					catch (std::runtime_error&)
+					{
+						g_log.error("Error storing output workspace in AnalysisDataService");
+						throw;
+					}
+				}
+			}
     }
 
     //---------------------------------------------------------------------------------------------

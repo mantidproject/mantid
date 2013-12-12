@@ -209,6 +209,8 @@ public:
     virtual coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const=0;
     virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)=0;
 
+    // to avoid casting (which need also the number of dimensions) method say if Node is a box. if not, it is gridbox
+    virtual bool isBox()const=0;
   // ----------------------------- Helper Methods --------------------------------------------------------
   //-----------------------------------------------------------------------------------------------
   /** Helper method for sorting MDBoxBasees by file position.

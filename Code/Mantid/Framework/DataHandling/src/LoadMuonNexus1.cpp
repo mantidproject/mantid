@@ -32,6 +32,9 @@ To determine if a file contains data from more than one period the field ''switc
 If this value is greater than one it is taken to be the number of periods, <math>N_p</math> of the data.
 In this case the <math>N_s</math> spectra in the ''histogram_data'' field are split with <math>N_s/N_p</math> assigned to each period.
 
+===Dead times and detector grouping===
+Muon Nexus v1 files might contain dead time and detector grouping informationl. These are loaded as TableWorkspaces of the format accepted by ApplyDeadTimeCorr and MuonGroupDetectors accordingly. These are returned if and only if names are specified for the properties. For multi-period data workspace groups might be returned, if information in the Nexus files contains this information for each period.
+
 ===ChildAlgorithms used===
 
 The ChildAlgorithms used by LoadMuonNexus are:
@@ -43,21 +46,23 @@ The ChildAlgorithms used by LoadMuonNexus are:
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+
 
 #include <Poco/Path.h>
 #include <limits>
@@ -129,22 +134,6 @@ namespace Mantid
       catch (...)
       {}
 
-      try
-      { 
-        std::vector<double>defaultDeadTimes;
-        NXFloat deadTimes = root.openNXFloat("run/instrument/detector/deadtimes");
-        deadTimes.load();
-
-        int length = deadTimes.dim0();
-        for (int i = 0; i < length; i++)
-        {
-          defaultDeadTimes.push_back(static_cast<double>(*(deadTimes() + i) ) );
-        }
-        setProperty("DeadTimes", defaultDeadTimes);
-      }
-      catch (...)
-      {}
-
       NXEntry nxRun = root.openEntry("run");
       std::string title;
       std::string notes;
@@ -183,6 +172,13 @@ namespace Mantid
         // Read the number of periods in this file
         m_numberOfPeriods = nxload.t_nper;
       }
+
+      // Try to load dead time info
+      loadDeadTimes(root);
+
+      // Try to load detector grouping info
+      loadDetectorGrouping(root);
+
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
@@ -463,6 +459,203 @@ namespace Mantid
 
       // Clean up
       delete[] timeChannels;
+    }
+
+    /**
+     * Loads dead time table for the detector.
+     * @param root :: Root entry of the Nexus to read dead times from
+     */
+    void LoadMuonNexus1::loadDeadTimes(NXRoot& root)
+    {
+      // If dead times workspace name is empty - caller doesn't need dead times 
+      if ( getPropertyValue("DeadTimeTable").empty() )
+        return;
+
+      NXEntry detector = root.openEntry("run/instrument/detector");
+
+      NXInfo infoDeadTimes = detector.getDataSetInfo("deadtimes");
+      if (infoDeadTimes.stat != NX_ERROR)
+      {
+        NXFloat deadTimesData = detector.openNXFloat("deadtimes");
+        deadTimesData.load();
+
+        int numDeadTimes = deadTimesData.dim0();
+
+        std::vector<double> deadTimes;
+        deadTimes.reserve(numDeadTimes);
+
+        for (int i = 0; i < numDeadTimes; i++)
+          deadTimes.push_back(deadTimesData[i]);
+
+        if ( numDeadTimes < m_numberOfSpectra )
+        {
+          throw Exception::FileError("Number of dead times specified is less than number of spectra",
+            m_filename);
+        }
+        else if( numDeadTimes == m_numberOfSpectra )
+        {
+          // Simpliest case - one dead time for one detector
+
+          TableWorkspace_sptr table = createDeadTimeTable( deadTimes.begin(), deadTimes.end() );
+          setProperty("DeadTimeTable", table); 
+        }
+        else
+        {
+          // More complex case - different dead times for different periods
+
+          if( numDeadTimes != m_numberOfSpectra * m_numberOfPeriods )
+          {
+            throw Exception::FileError("Number of dead times doesn't cover every spectra in every period",
+              m_filename);
+          }
+
+          WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+
+          for(auto it = deadTimes.begin(); it != deadTimes.end(); it += m_numberOfSpectra)
+          {
+            TableWorkspace_sptr table = createDeadTimeTable(it, it + m_numberOfSpectra);
+
+            tableGroup->addWorkspace(table);
+          }
+
+          setProperty("DeadTimeTable", tableGroup); 
+        }
+      }
+
+      // It is expected that file might not contain any dead times, so not finding them is not an 
+      // error
+    }
+
+    /**
+     * Loads detector grouping.
+     * @param root :: Root entry of the Nexus file to read from 
+     */
+    void LoadMuonNexus1::loadDetectorGrouping(NXRoot& root)
+    {
+      if ( getPropertyValue("DetectorGroupingTable").empty() )
+        return;
+
+      NXEntry dataEntry = root.openEntry("run/histogram_data_1");
+
+      NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
+      if ( infoGrouping.stat != NX_ERROR )
+      {
+        NXInt groupingData = dataEntry.openNXInt("grouping");
+        groupingData.load();
+
+        int numGroupingEntries = groupingData.dim0();
+
+        std::vector<int> grouping;
+        grouping.reserve(numGroupingEntries);
+
+        for ( int i = 0; i < numGroupingEntries; i++ )
+          grouping.push_back(groupingData[i]);
+
+        if ( numGroupingEntries < m_numberOfSpectra )
+        {
+          throw Exception::FileError("Number of grouping entries is less than number of spectra",
+            m_filename);
+        }
+        else if ( numGroupingEntries == m_numberOfSpectra)
+        {
+          // Simpliest case - one grouping entry per spectra
+          TableWorkspace_sptr table = createDetectorGroupingTable( grouping.begin(), grouping.end() );
+
+          if ( table->rowCount() != 0 )
+            setProperty("DetectorGroupingTable", table);
+        }
+        else
+        {
+          // More complex case - grouping information for every period
+          
+          if ( numGroupingEntries != m_numberOfSpectra * m_numberOfPeriods )
+          {
+            throw Exception::FileError("Number of grouping entries doesn't cover every spectra in every period",
+              m_filename);
+          }
+
+          WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+
+          for ( auto it = grouping.begin(); it != grouping.end(); it += m_numberOfSpectra )
+          {
+            TableWorkspace_sptr table = createDetectorGroupingTable(it, it + m_numberOfSpectra);
+
+            if ( table->rowCount() != 0 ) 
+              tableGroup->addWorkspace(table);
+          }
+
+          if ( tableGroup->size() != 0 )
+          {
+            if ( tableGroup->size() != static_cast<size_t>(m_numberOfPeriods) )
+              throw Exception::FileError("Zero grouping for some of the periods", m_filename);
+
+            setProperty("DetectorGroupingTable", tableGroup);
+          }
+        }
+      }
+    }
+
+    /**
+     * Creates Dead Time Table using all the data between begin and end.
+     *
+     * @param begin :: Iterator to the first element of the data to use
+     * @param   end :: Iterator to the last element of the data to use
+     * @return Dead Time Table create using the data
+     */
+    TableWorkspace_sptr LoadMuonNexus1::createDeadTimeTable(
+      std::vector<double>::const_iterator begin, std::vector<double>::const_iterator end)
+    {
+      TableWorkspace_sptr deadTimeTable = boost::dynamic_pointer_cast<TableWorkspace>(
+        WorkspaceFactory::Instance().createTable("TableWorkspace") );
+
+      deadTimeTable->addColumn("int","spectrum");
+      deadTimeTable->addColumn("double","dead-time");
+
+      int s = 1; // Current spectrum
+
+      for(auto it = begin; it != end; it++)
+      {
+        TableRow row = deadTimeTable->appendRow();
+        row << s++ << *it;
+      }
+
+      return deadTimeTable;
+    }
+
+    /**
+     * Creates Detector Grouping Table using all the data between begin and end.
+     *
+     * @param begin :: Iterator to the first element of the data to use
+     * @param   end :: Iterator to the last element of the data to use
+     * @return Detector Grouping Table create using the data
+     */
+    TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
+        std::vector<int>::const_iterator begin, std::vector<int>::const_iterator end)
+    {
+      auto detectorGroupingTable = boost::dynamic_pointer_cast<TableWorkspace>(
+        WorkspaceFactory::Instance().createTable("TableWorkspace") );
+
+      detectorGroupingTable->addColumn("vector_int", "Detectors");
+
+      std::map<int, std::vector<int>> grouping;
+
+      for ( auto it = begin; it != end; ++it )
+      {
+        // Add detector ID to the list of group detectors. Detector ID is always 
+        // spectra index + 1
+        grouping[*it].push_back( static_cast<int>( std::distance(begin,it) ) + 1 );
+      }
+
+      for ( auto it = grouping.begin(); it != grouping.end(); ++it )
+      {
+        if ( it->first != 0) // Skip 0 group
+        {
+          TableRow newRow = detectorGroupingTable->appendRow();
+          newRow << it->second;
+        }
+      }
+
+      return detectorGroupingTable;
     }
 
     /** Load in a single spectrum taken from a NeXus file

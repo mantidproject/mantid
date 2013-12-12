@@ -10,10 +10,14 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <sstream>
+#include <algorithm>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -22,6 +26,36 @@ using namespace Mantid::CurveFitting;
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
+
+namespace
+{
+  struct Fun
+  {
+    double operator()(double, int i)
+    {
+        return double(i + 1);
+    }
+  };
+
+  class PLOTPEAKBYLOGVALUETEST_Fun: public IFunction1D, public ParamFunction
+  {
+  public:
+      PLOTPEAKBYLOGVALUETEST_Fun():IFunction1D(),ParamFunction()
+      {
+          declareParameter("A");
+          declareAttribute("WorkspaceIndex", Attribute(0));
+      }
+      std::string name() const {return "PLOTPEAKBYLOGVALUETEST_Fun";}
+      void function1D(double *out, const double *, const size_t nData) const
+      {
+          if ( nData == 0 ) return;
+          const double a = getParameter("A") + static_cast<double>( getAttribute("WorkspaceIndex").asInt() );
+          std::fill_n( out, nData, a );
+      }
+  };
+
+  DECLARE_FUNCTION(PLOTPEAKBYLOGVALUETEST_Fun)
+}
 
 class PlotPeak_Expression
 {
@@ -199,6 +233,89 @@ public:
     deleteData();
     WorkspaceCreationHelper::removeWS("PlotPeakResult");
 
+  }
+
+  void test_passWorkspaceIndexToFunction()
+  {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(Fun(),3,-5.0,5.0,0.1,false);
+    AnalysisDataService::Instance().add( "PLOTPEAKBYLOGVALUETEST_WS", ws );
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PLOTPEAKBYLOGVALUETEST_WS,v1:3");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setProperty("PassWSIndexToFunction",true);
+    alg.setPropertyValue("Function","name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.execute();
+
+    TS_ASSERT( alg.isExecuted() );
+
+    TWS_type result =  WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT( result );
+
+    // each spectrum contains values equal to its spectrum number (from 1 to 3)
+    TableRow row = result->getFirstRow();
+    do{
+        TS_ASSERT_DELTA( row.Double(1), 1.0, 1e-15 );
+    }
+    while( row.next() );
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_dont_passWorkspaceIndexToFunction()
+  {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(Fun(),3,-5.0,5.0,0.1,false);
+    AnalysisDataService::Instance().add( "PLOTPEAKBYLOGVALUETEST_WS", ws );
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PLOTPEAKBYLOGVALUETEST_WS,v1:3");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setProperty("PassWSIndexToFunction",false);
+    alg.setPropertyValue("Function","name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.execute();
+
+    TS_ASSERT( alg.isExecuted() );
+
+    TWS_type result =  WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT( result );
+
+    // each spectrum contains values equal to its spectrum number (from 1 to 3)
+    double a = 1.0;
+    TableRow row = result->getFirstRow();
+    do{
+        TS_ASSERT_DELTA( row.Double(1), a, 1e-15 );
+        a += 1.0;
+    }
+    while( row.next() );
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_passWorkspaceIndexToFunction_composit_function_case()
+  {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(Fun(),3,-5.0,5.0,0.1,false);
+    AnalysisDataService::Instance().add( "PLOTPEAKBYLOGVALUETEST_WS", ws );
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PLOTPEAKBYLOGVALUETEST_WS,v1:3");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setProperty("PassWSIndexToFunction",true);
+    alg.setPropertyValue("Function","name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.execute();
+
+    TS_ASSERT( alg.isExecuted() );
+
+    TWS_type result =  WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT( result );
+
+    // each spectrum contains values equal to its spectrum number (from 1 to 3)
+    TableRow row = result->getFirstRow();
+    do{
+        TS_ASSERT_DELTA( row.Double(1), 0.5, 1e-15 );
+    }
+    while( row.next() );
+
+    AnalysisDataService::Instance().clear();
   }
 
 private:

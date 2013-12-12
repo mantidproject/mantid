@@ -255,12 +255,12 @@ bool SaveCanSAS1D::openForAppending(const std::string & filename)
  */
 void SaveCanSAS1D::findEndofLastEntry()
 {
-  static const int LAST_TAG_LEN = 11;
-
   const int rootTagLen = static_cast<int>(std::string("</SASroot>").length());
 
   try
   {
+    static const int LAST_TAG_LEN = 11;
+
     //move to the place _near_ the end of the file where the data will be appended to
     m_outFile.seekg(-LAST_TAG_LEN-rootTagLen, std::ios::end);
     char test_tag[LAST_TAG_LEN+1];

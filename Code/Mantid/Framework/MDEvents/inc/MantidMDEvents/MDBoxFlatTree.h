@@ -1,6 +1,7 @@
 #ifndef MDBOX_FLAT_TREE_H_
 #define MDBOX_FLAT_TREE_H_
 
+#include "MantidKernel/Matrix.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
@@ -62,7 +63,7 @@ namespace MDEvents
     /// convert MDWS box structure into flat structure used for saving/loading on hdd 
     void initFlatStructure(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
 
-    uint64_t restoreBoxTree(std::vector<API::IMDNode *>&Boxes ,API::BoxController_sptr bc, bool FileBackEnd,bool NoFileInfo=false);
+    uint64_t restoreBoxTree(std::vector<API::IMDNode *>&Boxes ,API::BoxController_sptr &bc, bool FileBackEnd,bool NoFileInfo=false);
 
     /*** this function tries to set file positions of the boxes to 
           make data physiclly located close to each otger to be as close as possible on the HDD */
@@ -70,8 +71,11 @@ namespace MDEvents
 
     /**Save flat box structure into a file, defined by the file name*/
     void saveBoxStructure(const std::string &fileName);
-    void loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType,bool onlyEventInfo=false);
+    void loadBoxStructure(const std::string &fileName,int &nDim,const std::string &EventType,bool onlyEventInfo=false,bool restoreExperimentInfo=false);
 
+    /**Export existing experiment info defined in the box structure to target workspace (or other experiment info) */
+    void exportExperiment(Mantid::API::IMDEventWorkspace_sptr &targetWS);
+   
     /// Return number of dimensions this class is initiated for (or not initiated if -1)
     int getNDims()const{return m_nDim;}
   protected: // for testing
@@ -105,19 +109,26 @@ namespace MDEvents
     std::string m_bcXMLDescr;
     /// name of the event type
     std::string m_eventType;
-
+    /// shared pointer to multiple experiment info stored within the workspace
+    boost::shared_ptr<Mantid::API::MultipleExperimentInfos> m_mEI;
   /// Reference to the logger class
     static Kernel::Logger& g_log;
   public:
-    static ::NeXus::File * createOrOpenMDWSgroup(const std::string &fileName,size_t nDims, const std::string &WSEventType, bool readOnly);
+    static ::NeXus::File * createOrOpenMDWSgroup(const std::string &fileName,int &nDims, const std::string &WSEventType, bool readOnly);
     // save each experiment info into its own NeXus group within an existing opened group
     static void saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws);
     // load experiment infos, previously saved through the the saveExperimentInfo function
-    static void loadExperimentInfos(::NeXus::File * const file, boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
+    static void loadExperimentInfos(::NeXus::File * const file, boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ei);
 
+    static void saveAffineTransformMatricies(::NeXus::File *const file,API::IMDWorkspace_const_sptr ws);
+    static void saveAffineTransformMatrix(::NeXus::File *const file,API::CoordTransform *transform,std::string entry_name);
+
+    static void saveWSGenericInfo(::NeXus::File *const file,API::IMDWorkspace_const_sptr ws);
   };
 
-
+  template<typename T>
+  void saveMatrix(::NeXus::File *const file, std::string name,
+                         Kernel::Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag);
 }
 }
 #endif

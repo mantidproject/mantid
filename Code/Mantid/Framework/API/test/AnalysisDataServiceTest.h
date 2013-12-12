@@ -430,6 +430,17 @@ public:
 
   }
 
+  void test_adding_null_workspace()
+  {
+    auto nullWS = MockWorkspace_sptr();
+
+    // Shouldn't be able to add null pointers
+    TS_ASSERT_THROWS( ads.add("null_workspace", nullWS ), std::runtime_error );
+    TS_ASSERT_THROWS( ads.addOrReplace("null_workspace", nullWS ), std::runtime_error );
+
+    TS_ASSERT( ! ads.doesExist("null_workspace") );
+  }
+
 private:
 
   /// If replace=true then usea addOrReplace

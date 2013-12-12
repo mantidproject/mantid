@@ -1,20 +1,19 @@
-#ifndef MANTID_DATAHANDLING_APPLYGROUPINGFROMMUONNEXUS_H_
-#define MANTID_DATAHANDLING_APPLYGROUPINGFROMMUONNEXUS_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
+#define MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
 {
-namespace DataHandling
+namespace WorkflowAlgorithms
 {
+  using namespace Kernel;
+  using namespace API;
   using namespace DataObjects;
-  /** 
-    Applies grouping information from Muon Nexus file to the workspace. 
 
-    @author Arturs Bekasovs
-    @date 10/10/2013 
+  /** MuonLoad : loads Muon workspace ready for analysis. 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -36,9 +35,12 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ApplyGroupingFromMuonNexus  : public API::Algorithm
+  class DLLExport MuonLoad  : public API::Algorithm
   {
   public:
+    MuonLoad();
+    virtual ~MuonLoad();
+    
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
@@ -48,15 +50,24 @@ namespace DataHandling
     void init();
     void exec();
 
-    bool checkGroups();
-    bool processGroups();
+    /// Returns a workspace for the first period as specified using FirstPeriod property.
+    MatrixWorkspace_sptr getFirstPeriodWS(WorkspaceGroup_sptr ws);
 
-    /// Applies grouping to a given workspace
-    Workspace2D_sptr applyGrouping(const std::vector<int>& detectorGrouping, Workspace2D_const_sptr inputWs);
+    /// Returns a workspace for the second period as specified using SecondPeriod property.
+    MatrixWorkspace_sptr getSecondPeriodWS(WorkspaceGroup_sptr ws);
+
+    /// Groups specified workspace according to specified DetectorGroupingTable.
+    MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws);
+
+    /// Applies dead time correction to the workspace.
+    MatrixWorkspace_sptr applyDTC(MatrixWorkspace_sptr ws, TableWorkspace_sptr dt);
+
+    /// Applies offset, crops and rebin the workspace according to specified params 
+    MatrixWorkspace_sptr correctWorkspace(MatrixWorkspace_sptr ws, double loadedTimeZero);
   };
 
 
-} // namespace DataHandling
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_APPLYGROUPINGFROMMUONNEXUS_H_ */
+#endif  /* MANTID_WORKFLOWALGORITHMS_MUONLOAD_H_ */

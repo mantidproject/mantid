@@ -55,9 +55,6 @@ RangeSelector::RangeSelector(QwtPlot* plot, SelectType type,
     break;
   }
 
-  connect(this, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-  connect(this, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
-
   m_minChanging = false;
   m_maxChanging = false;
 
@@ -152,15 +149,29 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
     {
       if ( m_minChanging )
       {
-        setMin(x);
-        if ( x > m_max )
-          setMax(x);
+        if ( x <= m_max )
+        {
+            setMin(x);
+        }
+        else
+        {
+            setMax(x);
+            m_minChanging = false;
+            m_maxChanging = true;
+        }
       }
       else
       {
-        setMax(x);
-        if ( x < m_min )
-          setMin(x);
+        if ( x >= m_min )
+        {
+            setMax(x);
+        }
+        else
+        {
+            setMin(x);
+            m_minChanging = true;
+            m_maxChanging = false;
+        }
       }
     }
     else
@@ -184,27 +195,6 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
       if ( m_minChanging || m_maxChanging )
       {
         m_canvas->setCursor(Qt::PointingHandCursor);
-        QPoint p = ((QMouseEvent*)evn)->pos();
-        double x(0.0);
-        switch ( m_type )
-        {
-        case XMINMAX:
-        case XSINGLE:
-          x = m_plot->invTransform(QwtPlot::xBottom, p.x());
-          break;
-        case YMINMAX:
-        case YSINGLE:
-          x = m_plot->invTransform(QwtPlot::yLeft, p.y());
-          break;
-        }
-        if ( inRange(x) )
-        {
-          if ( m_minChanging )
-            setMin(x);
-          else
-            setMax(x);
-        }
-        m_plot->replot();
         m_minChanging = false;
         m_maxChanging = false;
         emit selectionChangedLazy(m_min, m_max);
@@ -240,7 +230,7 @@ void RangeSelector::setRange(std::pair<double,double> range)
   this->setRange(range.first, range.second);
 }
 
-void RangeSelector::minChanged(double val)
+void RangeSelector::setMinLinePos(double val)
 {
   switch ( m_type )
   {
@@ -256,7 +246,7 @@ void RangeSelector::minChanged(double val)
   m_plot->replot();
 }
 
-void RangeSelector::maxChanged(double val)
+void RangeSelector::setMaxLinePos(double val)
 {
   switch ( m_type )
   {
@@ -336,6 +326,8 @@ void RangeSelector::setMaxMin(const double min, const double max)
   }
   m_min = min;
   m_max = max;
+  setMinLinePos(m_min);
+  setMaxLinePos(m_max);
   emit selectionChanged(m_min, m_max);
   emit minValueChanged(m_min);
   emit maxValueChanged(m_max);
@@ -349,6 +341,7 @@ void RangeSelector::setMin(double val)
   if ( val != m_min )
   {
     m_min = val;
+    setMinLinePos(m_min);
     emit minValueChanged(val);
     emit selectionChanged(val, m_max);
   }
@@ -362,6 +355,7 @@ void RangeSelector::setMax(double val)
   if ( val != m_max )
   {
     m_max = val;
+    setMaxLinePos(m_max);
     emit maxValueChanged(val);
     emit selectionChanged(m_min, val);
   }
@@ -381,21 +375,21 @@ void RangeSelector::verify()
 {
   double min(m_min);
   double max(m_max);
-  if ( m_min < m_lower || m_min > m_higher )
+
+  if ( min > max )
+  {
+    std::swap(min,max);
+  }
+
+  if ( min < m_lower || min > m_higher )
   {
     min = m_lower;
   }
-  if ( max < m_lower || m_max > m_higher )
+  if ( max < m_lower || max > m_higher )
   {
     max = m_higher;
   }
 
-  if ( min > max )
-  {
-    double tmp = min;
-    min = max;
-    max = tmp;
-  }
   setMaxMin(min, max);
 }
 

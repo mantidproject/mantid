@@ -65,14 +65,10 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.showErrorBars, SIGNAL(toggled(bool)), this, SLOT(errorBarsChanged(bool)));
   connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(toolbarsChanged(bool)));
   connect(m_uiForm.hideGraphs, SIGNAL(toggled(bool)), this, SLOT(hideGraphsChanged(bool)));
-
   ////////////// Data Binning slots ///////////////
-  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, 
-           SLOT(runRebinComboBox(int)));
-  connect(m_uiForm.optionStepSizeText, SIGNAL(lostFocus()), this, 
-           SLOT(runOptionStepSizeText()));
-  connect(m_uiForm.binBoundaries, SIGNAL(lostFocus()), this, 
-           SLOT(runBinBoundaries()));
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(runRebinComboBox(int)));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed()), this, SLOT(runOptionStepSizeText()));
+  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this, SLOT(runBinBoundaries()));
 
   ////////////// Auto-update plot style //////////////
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
@@ -85,9 +81,6 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   
   // Save settings
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(editingFinished()), this, SLOT(storeCustomTimeValue()));
@@ -132,6 +125,8 @@ void MuonAnalysisOptionTab::runRebinComboBox(int index)
   QSettings group;
   group.beginGroup(m_settingsGroup + "BinningOptions");
   group.setValue("rebinComboBoxIndex", index); 
+
+  emit settingsTabUpdatePlot();
 }
 
 
@@ -147,6 +142,8 @@ void MuonAnalysisOptionTab::runOptionStepSizeText()
     QSettings group;
     group.beginGroup(m_settingsGroup + "BinningOptions");
     group.setValue("constStepSize", boevs); 
+
+    emit settingsTabUpdatePlot();
   }
   catch (...)
   {
@@ -164,6 +161,8 @@ void MuonAnalysisOptionTab::runBinBoundaries()
     QSettings group;
     group.beginGroup(m_settingsGroup + "BinningOptions");
     group.setValue("rebinVariable", m_uiForm.binBoundaries->text());
+
+    emit settingsTabUpdatePlot();
 }
 
 

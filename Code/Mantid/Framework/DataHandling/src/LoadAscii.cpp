@@ -76,7 +76,7 @@ namespace Mantid
       }
       else if(descriptor.isAscii())
       {
-        confidence = 10; // Low so that others may try
+        confidence = 9; // Low so that others may try but not stopping version 2
       }
       return confidence;
     }
@@ -88,7 +88,7 @@ namespace Mantid
     */
     bool LoadAscii::isAscii(FILE *file)
     {
-          char data[256];
+      char data[256];
       char *pend = &data[fread(data, 1, sizeof(data), file)];
       fseek(file,0,SEEK_SET);
       /*

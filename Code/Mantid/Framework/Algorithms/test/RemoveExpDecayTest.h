@@ -3,12 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAlgorithms/RemoveExpDecay.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidAlgorithms/RemoveExpDecay.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
@@ -88,6 +90,30 @@ public:
     {
       TS_FAIL(e.what());
     }
+  }
+
+  void test_yUnitLabel()
+  {
+    const std::string outputWSName = "RemoveExpDecayTest_yUnitLabel_OutputWS";
+
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
+
+    MuonRemoveExpDecay alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("OutputWorkspace", outputWSName);
+    alg.execute();
+
+    auto result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
+
+    TS_ASSERT(result);
+
+    if( result )
+    {
+      TS_ASSERT_EQUALS( result->YUnitLabel(), "Asymmetry" );
+    }
+
+    AnalysisDataService::Instance().remove(outputWSName);
   }
 
 

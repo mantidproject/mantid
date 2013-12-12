@@ -46,8 +46,8 @@ set ( SRC_FILES
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
 	src/CopyInstrumentParameters.cpp
-	src/CopySample.cpp
 	src/CopyLogs.cpp
+	src/CopySample.cpp
 	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
@@ -100,8 +100,8 @@ set ( SRC_FILES
 	src/FindDeadDetectors.cpp
 	src/FindDetectorsOutsideLimits.cpp
 	src/FindPeakBackground.cpp
-	src/FitPeak.cpp
 	src/FindPeaks.cpp
+	src/FitPeak.cpp
 	src/FixGSASInstrumentFile.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
@@ -139,6 +139,7 @@ set ( SRC_FILES
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
+	src/MuonGroupDetectors.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseByDetector.cpp
 	src/NormaliseToMonitor.cpp
@@ -167,6 +168,7 @@ set ( SRC_FILES
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
+	src/ReflectometryReductionOne.cpp
 	src/Regroup.cpp
 	src/RemoveBins.cpp
 	src/RemoveExpDecay.cpp
@@ -266,8 +268,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
-	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CopyLogs.h
+	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
@@ -320,8 +322,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindDeadDetectors.h
 	inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
 	inc/MantidAlgorithms/FindPeakBackground.h
-	inc/MantidAlgorithms/FitPeak.h
 	inc/MantidAlgorithms/FindPeaks.h
+	inc/MantidAlgorithms/FitPeak.h
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
@@ -360,6 +362,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
+	inc/MantidAlgorithms/MuonGroupDetectors.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseByDetector.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
@@ -388,6 +391,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
+	inc/MantidAlgorithms/ReflectometryReductionOne.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBins.h
 	inc/MantidAlgorithms/RemoveExpDecay.h
@@ -498,8 +502,8 @@ set ( TEST_FILES
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
 	CopyInstrumentParametersTest.h
-	CopySampleTest.h
 	CopyLogsTest.h
+	CopySampleTest.h
 	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
@@ -546,8 +550,8 @@ set ( TEST_FILES
 	FindDeadDetectorsTest.h
 	FindDetectorsOutsideLimitsTest.h
 	FindPeakBackgroundTest.h
-	FitPeakTest.h
 	FindPeaksTest.h
+	FitPeakTest.h
 	FixGSASInstrumentFileTest.h
 	FlatPlateAbsorptionTest.h
 	GenerateEventsFilterTest.h
@@ -579,6 +583,7 @@ set ( TEST_FILES
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
+	MuonGroupDetectorsTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
@@ -604,6 +609,7 @@ set ( TEST_FILES
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
+	ReflectometryReductionOneTest.h
 	RegroupTest.h
 	RemoveBinsTest.h
 	RemoveExpDecayTest.h

@@ -342,6 +342,19 @@ namespace Mantid
     {
       ComptonProfile::setWorkspace(ws); // Do base-class calculation first
 
+    }
+
+    /**
+     * @param tseconds A vector containing the time-of-flight values in seconds
+     * @param isHistogram True if histogram tof values have been passed in
+     * @param detpar Structure containing detector parameters
+     * @param respar Structure containing resolution parameters
+     */
+    void GramCharlierComptonProfile::cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
+                                                       const DetectorParams & detpar, const ResolutionParams & respar)
+    {
+      ComptonProfile::cacheYSpaceValues(tseconds,isHistogram,detpar, respar); // base-class calculations
+
       // Is FSE fixed at the moment?
       // The ComptonScatteringCountRate fixes it but we still need to know if the user wanted it fixed
       m_userFixedFSE = this->isFixed(this->parameterIndex(KFSE_NAME));
@@ -407,7 +420,6 @@ namespace Mantid
 
       m_voigtProfile.resize(NFINE_Y); // Value holder for later to avoid repeated memory allocations when creating a new vector
     }
-
 
   } // namespace CurveFitting
 } // namespace Mantid

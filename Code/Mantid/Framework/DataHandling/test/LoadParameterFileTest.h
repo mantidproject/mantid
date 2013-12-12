@@ -30,24 +30,9 @@ public:
 
   void testExecIDF_for_unit_testing2() // IDF stands for Instrument Definition File
   {
-    LoadInstrument loaderIDF2;
 
-    TS_ASSERT_THROWS_NOTHING(loaderIDF2.initialize());
-
-    //create a workspace with some sample data
-    wsName = "LoadParameterFileTestIDF2";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    // Path to test input file assumes Test directory checked out from SVN
-    loaderIDF2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
-    //inputFile = loaderIDF2.getPropertyValue("Filename");
-    loaderIDF2.setPropertyValue("Workspace", wsName);
-    TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
-    TS_ASSERT( loaderIDF2.isExecuted() );
+    // Create workspace wsName
+    load_IDF2(); 
 
     // load in additional parameters
     LoadParameterFile loaderPF;
@@ -88,6 +73,101 @@ public:
     TS_ASSERT_DELTA (dummy[0], 2000.0, 0.0001);
 
 	AnalysisDataService::Instance().remove(wsName);
+
+  }
+
+  void testExec_withIDFString()  // Test use of string instead of file
+  {
+
+    // Create workspace
+     load_IDF2();
+
+    // Define parameter XML string
+    std::string parameterXML = 
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+      "<parameter-file instrument=\"IDF_for_UNIT_TESTING2\" valid-from=\"blah...\">"
+      "	<component-link name=\"nickel-holder\">"
+      "  <parameter name=\"fjols-test-paramfile\"> <value val=\"2010.0\" /> </parameter>"
+      " </component-link>"
+      " <component-link name=\"IDF_for_UNIT_TESTING2.xml/combined translation6\" >"
+      "  <parameter name=\"fjols-test-paramfile\"> <value val=\"52.0\" /> </parameter>"
+      "	</component-link>"
+      "</parameter-file>";
+
+    // load in additional parameters
+    LoadParameterFile loaderPF;
+    TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
+    loaderPF.setPropertyValue("ParameterXML", parameterXML);
+    loaderPF.setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
+    TS_ASSERT( loaderPF.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    ParameterMap& paramMap = output->instrumentParameters();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
+    TS_ASSERT_EQUALS( ptrDet->getID(), 1008);
+    TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation6");
+    Parameter_sptr param = paramMap.get(&(*ptrDet), "fjols");
+    TS_ASSERT_DELTA( param->value<double>(), 20.0, 0.0001);
+    param = paramMap.get(&(*ptrDet), "nedtur");
+    TS_ASSERT_DELTA( param->value<double>(), 77.0, 0.0001);
+    param = paramMap.get(&(*ptrDet), "fjols-test-paramfile");
+    TS_ASSERT_DELTA( param->value<double>(), 52.0, 0.0001);
+
+    std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
+    TS_ASSERT_DELTA( dummy[0], 1.0, 0.0001);
+    dummy = paramMap.getDouble("nickel-holder", "pos");
+    TS_ASSERT_EQUALS (dummy.size(), 0);
+    dummy = paramMap.getDouble("nickel-holder", "rot");
+    TS_ASSERT_EQUALS (dummy.size(), 0);
+    dummy = paramMap.getDouble("nickel-holder", "taabe");
+    TS_ASSERT_DELTA (dummy[0], 200.0, 0.0001);
+    dummy = paramMap.getDouble("nickel-holder", "mistake");
+    TS_ASSERT_EQUALS (dummy.size(), 0);
+    dummy = paramMap.getDouble("nickel-holder", "fjols-test-paramfile");
+    TS_ASSERT_DELTA (dummy[0], 2010.0, 0.0001);
+
+	  AnalysisDataService::Instance().remove(wsName);
+
+  }
+
+  void test_failure_if_no_file_or_string()
+  {
+     // Create workspace
+     load_IDF2();
+
+     // Run algorithm without file or string properties set
+    LoadParameterFile loaderPF;
+    TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
+    loaderPF.setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
+    TS_ASSERT( ! loaderPF.execute() )
+  }
+
+  void load_IDF2()
+  {
+    LoadInstrument loaderIDF2;
+
+    TS_ASSERT_THROWS_NOTHING(loaderIDF2.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadParameterFileTestIDF2";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Path to test input file assumes Test directory checked out from git
+    loaderIDF2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+    //inputFile = loaderIDF2.getPropertyValue("Filename");
+    loaderIDF2.setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
+    TS_ASSERT( loaderIDF2.isExecuted() );
 
   }
 

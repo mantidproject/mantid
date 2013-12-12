@@ -28,11 +28,12 @@ namespace Mantid
      */
     void ICat4Catalog::login(const std::string& username, const std::string& password, const std::string& url)
     {
-      UNUSED_ARG(url)
-      ICat4::ICATPortBindingProxy icat;
-
-      // Define ssl authentication scheme
-      setSSLContext(icat);
+      // Store the soap end-point in the session for use later.
+      ICat::Session::Instance().setSoapEndPoint(url);
+      // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
+      // Output the soap end-point in use for debugging purposes.
+      g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << "\n";
 
       // Used to authenticate the user.
       ns1__login login;
@@ -86,8 +87,7 @@ namespace Mantid
      */
     void ICat4Catalog::logout()
     {
-      ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
 
       ns1__logout request;
       ns1__logoutResponse response;
@@ -113,7 +113,7 @@ namespace Mantid
      * @param inputs :: reference to a class contains search inputs.
      * @return a query string constructed from user input.
      */
-    std::string ICat4Catalog::getSearchQuery(const CatalogSearchParam& inputs)
+    std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam& inputs)
     {
       // Contain the related where and join clauses for the search query based on user-input.
       std::vector<std::string> whereClause, joinClause;
@@ -219,19 +219,19 @@ namespace Mantid
       // This prevents the user searching the entire archive (E.g. there is no "default" query).
       if (!whereClause.empty() || !joinClause.empty())
       {
-        std::string select, from, join, where, orderBy, includes;
+        std::string from, join, where, orderBy, includes;
 
-        select   = "SELECT DISTINCT inves";
         from     = " FROM Investigation inves ";
         join     = Strings::join(joinClause.begin(), joinClause.end(), " ");
         where    = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
-        where.insert(0, " WHERE ");
-        orderBy  = " ORDER BY inves.id ASC";
+        orderBy  = " ORDER BY inves.id DESC";
         includes = " INCLUDE inves.investigationInstruments.instrument, inves.parameters";
-        query    = select + from + join + where + orderBy + includes;
-      }
 
-      g_log.debug() << "ICat4Catalog::getSearchQuery: { " << query << " }" << std::endl;
+        // As we joined all WHERE clause with AND we need to include the WHERE at the start of the where segment.
+        where.insert(0, " WHERE ");
+        // Build the query from the result.
+        query = from + join + where + orderBy + includes;
+      }
 
       return (query);
     }
@@ -240,19 +240,24 @@ namespace Mantid
      * Searches for the relevant data based on user input.
      * @param inputs   :: reference to a class contains search inputs
      * @param outputws :: shared pointer to search results workspace
+     * @param offset   :: skip this many rows and start returning rows from this point.
+     * @param limit    :: limit the number of rows returned by the query.
      */
-    void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws)
+    void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws,
+        const int &offset, const int &limit)
     {
-      // Obtain the query from user input.
-      std::string query = getSearchQuery(inputs);
+      std::string query = buildSearchQuery(inputs);
 
-      if (query.empty())
-      {
-        throw std::runtime_error("You have not input any terms to search for.");
-      }
+      // Check if the query built was valid (e.g. if they user has input any search terms).
+      if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
 
-      ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      // Modify the query to include correct SELECT and LIMIT clauses.
+      query.insert(0, "SELECT DISTINCT inves");
+      query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit));
+
+      g_log.debug() << "ICat4Catalog::search -> Query is: { " << query << " }" << std::endl;
+
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
 
       ns1__search request;
       ns1__searchResponse response;
@@ -274,13 +279,54 @@ namespace Mantid
     }
 
     /**
+     * Obtain the number of investigations to be returned by the catalog.
+     * @return The number of investigations returned by the search performed.
+     */
+    int64_t ICat4Catalog::getNumberOfSearchResults(const CatalogSearchParam& inputs)
+    {
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::string query     = buildSearchQuery(inputs);
+
+      if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
+
+      query.insert(0, "SELECT COUNT(DISTINCT inves)");
+      request.query         = &query;
+
+      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Query is: { " << query << " }" << std::endl;
+
+      int result = icat.search(&request, &response);
+
+      int64_t numOfResults = 0;
+
+      if (result == 0)
+      {
+        xsd__long * numRes = dynamic_cast<xsd__long*>(response.return_.at(0));
+        numOfResults = numRes->__item;
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
+
+      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Number of results returned is: { " << numOfResults << " }" << std::endl;
+
+      return numOfResults;
+    }
+
+    /**
      * Returns the logged in user's investigations data.
      * @param outputws :: Pointer to table workspace that stores the data.
      */
     void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
 
       ns1__search request;
       ns1__searchResponse response;
@@ -368,7 +414,6 @@ namespace Mantid
           }
           catch(std::runtime_error&)
           {
-            g_log.information("An error occurred when saving the ICat search results data to Workspace");
             throw;
           }
         }
@@ -386,8 +431,7 @@ namespace Mantid
      */
     void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
 
       ns1__search request;
       ns1__searchResponse response;
@@ -443,7 +487,6 @@ namespace Mantid
         }
         catch(std::runtime_error&)
         {
-          g_log.information("An error occurred when saving file data to workspace.");
           throw;
         }
       }
@@ -456,8 +499,7 @@ namespace Mantid
      */
     void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
 
       ns1__search request;
       ns1__searchResponse response;
@@ -518,7 +560,6 @@ namespace Mantid
           }
           catch(std::runtime_error&)
           {
-            g_log.information("An error occurred when saving file data to workspace.");
             throw;
           }
         }
@@ -535,8 +576,7 @@ namespace Mantid
      */
     void ICat4Catalog::listInstruments(std::vector<std::string>& instruments)
     {
-      ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
 
       ns1__search request;
       ns1__searchResponse response;
@@ -576,8 +616,7 @@ namespace Mantid
      */
     void ICat4Catalog::listInvestigationTypes(std::vector<std::string>& invstTypes)
     {
-      ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
 
       ns1__search request;
       ns1__searchResponse response;
@@ -618,8 +657,7 @@ namespace Mantid
      */
     void ICat4Catalog::getFileLocation(const long long & fileID, std::string & fileLocation)
     {
-      ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      ICat4::ICATPortBindingProxy icat = getICATProxy();
 
       ns1__get request;
       ns1__getResponse response;
@@ -771,5 +809,18 @@ namespace Mantid
       return (dateTime.toFormattedString(format));
     }
 
+    /**
+     * Sets the soap-endpoint & SSL context for the proxy being returned.
+     * @return ICATPortBindingProxy :: The proxy with set endpoint & SSL context.
+     */
+    ICat4::ICATPortBindingProxy ICat4Catalog::getICATProxy()
+    {
+      ICat4::ICATPortBindingProxy icat;
+      // Set the soap-endpoint of the catalog we want to use.
+      icat.soap_endpoint = ICat::Session::Instance().getSoapEndPoint().c_str();
+      // Sets SSL authentication scheme
+      setSSLContext(icat);
+      return icat;
+    }
   }
 }

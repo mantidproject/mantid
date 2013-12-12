@@ -709,7 +709,6 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
 
     alg = AlgorithmManager::Instance().create("IntegratePeaksMD");
     alg->setProperty("InputWorkspace", temp_MD_ws_name);
-    alg->setProperty("CoordinatesToUse","Q (sample frame)");
     alg->setProperty("PeakRadius",peak_radius);
     alg->setProperty("BackgroundInnerRadius",inner_radius);
     alg->setProperty("BackgroundOuterRadius",outer_radius);

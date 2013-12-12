@@ -45,7 +45,7 @@ class CentreFinder(object):
     
         self._group_into_quadrants(setup, 'centre', trial[0], trial[1], suffix='_tmp')
     
-        if setup.background_subtracter:
+        if setup.get_can():
             #reduce the can here
             setup.reduce_can('centre_can', run_Q=False)
             
@@ -100,8 +100,8 @@ class CentreFinder(object):
         y = -y
         MoveInstrumentComponent(Workspace=setup.get_sample().wksp_name,
             ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
-        if setup.background_subtracter:
-            MoveInstrumentComponent(Workspace=setup.background_subtracter.workspace.wksp_name,
+        if setup.get_can():
+            MoveInstrumentComponent(Workspace=setup.get_can().wksp_name,
                 ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
 
     # Create a workspace with a quadrant value in it 

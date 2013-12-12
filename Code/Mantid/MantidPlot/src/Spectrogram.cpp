@@ -304,9 +304,26 @@ void Spectrogram::setGrayScale()
 
 void Spectrogram::setDefaultColorMap()
 {
-  //Use the default (__standard) colormap from MantidColorMap.
-  mColorMap.setupDefaultMap();
+  // option 1 use last used colour map
+  QSettings settings;
+  settings.beginGroup("Mantid/2DPlotSpectrogram");
+  //Load Colormap. If the file is invalid the default stored colour map is used
+  QString lastColormapFile = settings.value("ColormapFile", "").toString();
+  settings.endGroup();
+
+  if (lastColormapFile.size() > 0)
+  {
+      mCurrentColorMap = lastColormapFile;
+      mColorMap.loadMap(lastColormapFile);
+  }
+  else
+  {
+    //option 2 use the default colormap from MantidColorMap.
+    mColorMap.setupDefaultMap();
+  }
+  
   setColorMap(mColorMap);
+      
   color_map_policy = Default;
 
   QwtPlot *plot = this->plot();

@@ -87,9 +87,9 @@ checkargs() {
         START_MODE=1
         ARG_TEST_BRANCH=$2
     elif [ $# -eq 1 ]; then
-	if [ "$1" = "review" ]; then
-	    REVIEW_MODE=1
-	elif [ "$1" = "pass" ]; then
+        if [ "$1" = "review" ]; then
+            REVIEW_MODE=1
+        elif [ "$1" = "pass" ]; then
             RESULT_MODE=1
             TEST_PASSED=1
         elif [ "$1" = "fail" ]; then
@@ -109,9 +109,9 @@ start_testing() {
     # Check we are not in the middle of testing something else that wasn't finished
     testing=$(git config ${BRANCH_CFG_KEY})
     if [ ! -z "${testing}" ]; then
-	echo "It looks like you have already run 'git test start' without a corresponding git test pass/fail."
-	echo "If you are unsure run 'git test fail'. This will drop any merges and reset master back to origin/${PRODUCTION_BRANCH}."
-	exit 1
+        echo "It looks like you have already run 'git test start' without a corresponding git test pass/fail."
+        echo "If you are unsure run 'git test fail'. This will drop any merges and reset master back to origin/${PRODUCTION_BRANCH}."
+        exit 1
     fi    
 
     # We need a clean slate
@@ -128,28 +128,28 @@ start_testing() {
     # Reset a merge
     merge_in_progress
     if [ $? -eq 1 ]; then
-	git merge --abort
+        git merge --abort
     fi
     # Reset a rebase
     rebase_in_progress
     if [ $? -eq 1 ]; then
-	git rebase --abort
+        git rebase --abort
     fi
  
     # find the test branch
     remote_testbranch=$(find_branch_on_remote ${ARG_TEST_BRANCH})
     if [ -z "$remote_testbranch" ]; then
-	echo "Cannot find branch on remote using hint '${ARG_TEST_BRANCH}'."
-	echo "Please give full name (without origin/ prefix)."
-	exit 1
+        echo "Cannot find branch on remote using hint '${ARG_TEST_BRANCH}'."
+        echo "Please give full name (without origin/ prefix)."
+        exit 1
     fi
 
     # Check whether the branch has not been started from develop or had develop merged in
     local_testbranch=${remote_testbranch#"origin/"}
     merges=$(git log -${NCOMMITS_LOG} ${remote_testbranch} | grep Merge.*into.*develop)
     if [ -n "$merges" ]; then
-	author_name=$(get_author_name ${remote_testbranch})
-	author_email=$(get_author_email ${remote_testbranch})
+        author_name=$(get_author_name ${remote_testbranch})
+        author_email=$(get_author_email ${remote_testbranch})
         echo "ERROR: The branch '${local_testbranch}' appears to have been based off of develop, or has had develop merged into it."
         echo "This needs to be fixed. Reopen the ticket & contact ${author_name} on ${author_email} (or via skype)."
         exit 1
@@ -158,15 +158,15 @@ start_testing() {
     # Check if the branch has been fully merged to develop
     branch_is_merged ${remote_testbranch} origin/${BUILDER_BRANCH}
     if [ $? -eq 0 ]; then
-	author_name=$(get_author_name ${remote_testbranch})
-	author_email=$(get_author_email ${remote_testbranch})
-	echo "ERROR: Branch '${local_testbranch}' has not been fully merged to ${BUILDER_BRANCH},"
-	echo "meaning it is not possible to know whether the code is valid on all environments."
-	echo
-	echo "Contact ${author_name} on ${author_email} (or via skype) and ask them to merge the code"
-	echo "to ${BUILDER_BRANCH} using 'git checkbuild' from their branch ${local_testbranch} and let you know when"
-	echo "it passes testing on the buildservers so you can start testing."
-	exit 1
+        author_name=$(get_author_name ${remote_testbranch})
+        author_email=$(get_author_email ${remote_testbranch})
+        echo "ERROR: Branch '${local_testbranch}' has not been fully merged to ${BUILDER_BRANCH},"
+        echo "meaning it is not possible to know whether the code is valid on all environments."
+        echo
+        echo "Contact ${author_name} on ${author_email} (or via skype) and ask them to merge the code"
+        echo "to ${BUILDER_BRANCH} using 'git checkbuild' from their branch ${local_testbranch} and let you know when"
+        echo "it passes testing on the buildservers so you can start testing."
+        exit 1
     fi
 
     startbranch=$(current_branch)
@@ -187,11 +187,11 @@ start_testing() {
     # Merge test branch (name includes remote name)
     git_ignore_errors merge --no-ff ${remote_testbranch}
     if [ $? -gt 0 ]; then
-	echo
-	echo "WARNING: There were conflicts during the merge. If they are trivial please fix them, "
+        echo
+        echo "WARNING: There were conflicts during the merge. If they are trivial please fix them, "
         echo "resolve the merge with 'git add' & 'git commit' and rerun this command."
-	echo "If you are unsure fail the ticket, run 'git merge --abort' and talk to the develop about solving the issues."
-	exit 1
+        echo "If you are unsure fail the ticket, run 'git merge --abort' and talk to the develop about solving the issues."
+        exit 1
     fi
 
     # Prompt user to examine changes
@@ -226,24 +226,24 @@ end_testing() {
             exit 1
         fi
 
-	publish=""
-	while [ "$publish" != "y" -a "$publish" != "n" ];
-	do
-	    echo -n "Testing passed on ${local_testbranch}. Push master to remote (y/n): "
-	    read publish
-	done
-	if [ "${publish}" = "y" ]; then
-	    update_branch_from_remote ${PRODUCTION_BRANCH}
-	    publish_branch ${PRODUCTION_BRANCH}
-	    delete_remote_branch ${local_testbranch}
-	    delete_local_branch ${local_testbranch}
-	else
-	    echo "Warning: Branch is still merged locally but has NOT been pushed to the remote."
-	    exit 0
-	fi
+        publish=""
+        while [ "$publish" != "y" -a "$publish" != "n" ];
+        do
+            echo -n "Testing passed on ${local_testbranch}. Push master to remote (y/n): "
+            read publish
+        done
+        if [ "${publish}" = "y" ]; then
+            update_branch_from_remote ${PRODUCTION_BRANCH}
+            publish_branch ${PRODUCTION_BRANCH}
+            delete_remote_branch ${local_testbranch}
+            delete_local_branch ${local_testbranch}
+        else
+            echo "Warning: Branch is still merged locally but has NOT been pushed to the remote."
+            exit 0
+        fi
     else
-	echo "Resetting ${PRODUCTION_BRANCH} reset to origin/${PRODUCTION_BRANCH}"
-	reset_to_remote_production  
+        echo "Resetting ${PRODUCTION_BRANCH} reset to origin/${PRODUCTION_BRANCH}"
+        reset_to_remote_production  
     fi
 
     # Clear any saved config
@@ -257,13 +257,13 @@ reset_to_remote_production() {
     # Abort a merge in progress
     merge_in_progress
     if [ $? -eq 1 ]; then
-	git_halt_on_error merge --abort
+        git_halt_on_error merge --abort
     fi
 
     # Abort a rebase if in progress
     rebase_in_progress
     if [ $? -eq 1 ]; then
-	git_halt_on_error rebase --abort
+        git_halt_on_error rebase --abort
     fi
     # The reset should succeed now
     git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
@@ -288,7 +288,7 @@ main() {
     if [ $START_MODE -eq 1 ]; then
         start_testing
     elif [ $REVIEW_MODE -eq 1 ]; then
-	review_changes
+        review_changes
     elif [ $RESULT_MODE -eq 1 ]; then
         end_testing
     fi

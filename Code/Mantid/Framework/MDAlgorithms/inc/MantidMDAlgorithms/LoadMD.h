@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -77,7 +78,7 @@ namespace MDAlgorithms
     API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
     /// Open file handle
-    ::NeXus::File * file;
+    boost::scoped_ptr< ::NeXus::File> m_file;
 
     /// Name of that file
     std::string m_filename;
@@ -87,6 +88,8 @@ namespace MDAlgorithms
 
     /// Each dimension object loaded.
     std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
+    ///load only the box structure with empty boxes but do not tload boxes events
+    bool m_BoxStructureAndMethadata;
 
   };
 

@@ -134,29 +134,14 @@ namespace MDAlgorithms
 
     //-----------------------------------------------------------------------------------------------------
     // create or open WS group and put there additional information about WS and its dimesnions
-    auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nd,MDE::getTypeName(),false));
+    int nDims = static_cast<int>(nd);
+    auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nDims,MDE::getTypeName(),false));
+
     // Save each NEW ExperimentInfo to a spot in the file
     MDBoxFlatTree::saveExperimentInfos(file.get(),ws);
-
     if(!update)
     {
-      // Save the algorithm history under "process"
-      ws->getHistory().saveNexus(file.get());
-
-      // Write out the affine matrices
-      this->saveAffineTransformMatricies(file.get(),
-                                         boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
-
-      // Save some info as attributes. (Note: need to use attributes, not data sets because those cannot be resized).
-      file->putAttr("definition",  ws->id());
-      file->putAttr("title",  ws->getTitle() );
-      // Save each dimension, as their XML representation
-      for (size_t d=0; d<nd; d++)
-      {
-        std::ostringstream mess;
-        mess << "dimension" << d;
-        file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
-      }
+      MDBoxFlatTree::saveWSGenericInfo(file.get(),ws);
     }
     file->closeGroup();
     file->close();
@@ -290,7 +275,7 @@ namespace MDAlgorithms
     }
 
     // Write out the affine matrices
-    this->saveAffineTransformMatricies(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+    MDBoxFlatTree::saveAffineTransformMatricies(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     // Check that the typedef has not been changed. The NeXus types would need changing if it does!
     assert(sizeof(signal_t) == sizeof(double));
@@ -345,80 +330,8 @@ namespace MDAlgorithms
       throw std::runtime_error("SaveMD can only save MDEventWorkspaces and MDHistoWorkspaces.\nPlease use SaveNexus or another algorithm appropriate for this workspace type.");
   }
 
-  /**
-   * Save the affine matricies to both directional conversions to the
-   * data.
-   * @param file : pointer to the NeXus file
-   * @param ws : workspace to get matrix from
-   */
-  void SaveMD::saveAffineTransformMatricies(::NeXus::File *const file,
-                                            IMDWorkspace_const_sptr ws)
-  {
-    try {
-      this->saveAffineTransformMatrix(file,
-                                      ws->getTransformToOriginal(),
-                                      "transform_to_orig");
-    }
-    catch (std::runtime_error &)
-    {
-      // Do nothing
-    }
-    try {
-      this->saveAffineTransformMatrix(file,
-                                      ws->getTransformFromOriginal(),
-                                      "transform_from_orig");
-    }
-    catch (std::runtime_error &)
-    {
-      // Do nothing
-    }
-  }
-
-  /**
-   * Extract and save the requested affine matrix.
-   * @param file : pointer to the NeXus file
-   * @param transform : the object to extract the affine matrix from
-   * @param entry_name : the tag in the NeXus file to save under
-   */
-  void SaveMD::saveAffineTransformMatrix(::NeXus::File *const file,
-                                         CoordTransform *transform,
-                                         std::string entry_name)
-  {
-    Matrix<coord_t> matrix = transform->makeAffineMatrix();
-    g_log.debug() << "TRFM: " << matrix.str() << std::endl;
-    this->saveMatrix<coord_t>(file, entry_name, matrix,
-                              ::NeXus::FLOAT32, transform->id());
-  }
-
-
-  /**
-   * Save routine for a generic matrix
-   * @param file : pointer to the NeXus file
-   * @param name : the tag in the NeXus file to save under
-   * @param m : matrix to save
-   * @param type : NXnumtype for the matrix data
-   * @param tag : id for an affine matrix conversion
-   */
-  template<typename T>
-  void SaveMD::saveMatrix(::NeXus::File *const file, std::string name,
-                         Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag)
-  {
-    std::vector<T> v = m.getVector();
-    // Number of data points
-    int nPoints = static_cast<int>(v.size());
-
-    file->makeData(name, type, nPoints, true);
-    // Need a pointer
-    file->putData(&v[0]);
-    if (!tag.empty())
-    {
-      file->putAttr("type", tag);
-      file->putAttr("rows", static_cast<int>(m.numRows()));
-      file->putAttr("columns", static_cast<int>(m.numCols()));
-    }
-    file->closeData();
-  }
-
+  
+  
 
 } // namespace Mantid
 } // namespace MDEvents
