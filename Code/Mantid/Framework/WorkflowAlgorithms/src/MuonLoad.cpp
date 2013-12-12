@@ -76,8 +76,8 @@ namespace WorkflowAlgorithms
 
     declareProperty("ApplyDeadTimeCorrection", false, 
         "Whether dead time correction should be applied to loaded workspace");
-    declareProperty(new FileProperty("CustomDeadTimeFile", "", FileProperty::OptionalLoad, ".nxs"),
-        "Nexus file with custom dead time table. See LoadMuonNexus for format expected.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("CustomDeadTimeTable", "",Direction::Input,
+        PropertyMode::Optional), "Table with dead time information. See LoadMuonNexus for format expected.");
 
     declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable","",Direction::Input), 
         "Table with detector grouping information. See LoadMuonNexus for format expected.");
@@ -116,6 +116,7 @@ namespace WorkflowAlgorithms
     // Load the file
     IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
     load->setProperty("Filename", filename);
+    load->setProperty("DeadTimeTable", "__YouDontSeeMeIAmNinja"); // Name is not used (child alg.)
     load->execute();
 
     Workspace_sptr loadedWS = load->getProperty("OutputWorkspace");
@@ -145,7 +146,26 @@ namespace WorkflowAlgorithms
       throw std::runtime_error("Loaded workspace is of invalid type");
     }
 
-    // TODO: deal with dead time correction
+    // Deal with dead time correction (if required
+    bool applyDtc = getProperty("ApplyDeadTimeCorrection");
+    if ( applyDtc )
+    {
+      TableWorkspace_sptr deadTimes = getProperty("CustomDeadTimeTable");
+
+      if ( ! deadTimes )
+      {
+        // If no dead times specified - try to use ones from the file
+        deadTimes = load->getProperty("DeadTimeTable");
+
+        if ( ! deadTimes )
+          throw std::runtime_error("File doesn't contain any dead times");
+      }
+
+      firstPeriodWS = applyDTC(firstPeriodWS, deadTimes);
+
+      if ( secondPeriodWS )
+        secondPeriodWS = applyDTC(secondPeriodWS, deadTimes);
+    }
 
     // Deal with grouping
     firstPeriodWS = groupWorkspace(firstPeriodWS);
@@ -252,6 +272,22 @@ namespace WorkflowAlgorithms
     group->execute();
 
     return group->getProperty("OutputWorkspace");
+  }
+
+  /**
+   * Applies dead time correction to the workspace.
+   * @param ws :: Workspace to apply correction 
+   * @param dt :: Dead time table to use
+   * @return Corrected workspace
+   */
+  MatrixWorkspace_sptr MuonLoad::applyDTC(MatrixWorkspace_sptr ws, TableWorkspace_sptr dt)
+  {
+    IAlgorithm_sptr dtc = createChildAlgorithm("ApplyDeadTimeCorr");
+    dtc->setProperty("InputWorkspace", ws);
+    dtc->setProperty("DeadTimeTable", dt);
+    dtc->execute();
+
+    return dtc->getProperty("OutputWorkspace");
   }
 
   /**

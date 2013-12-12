@@ -179,6 +179,65 @@ public:
     }
   }
 
+  void test_deadTimeCorrection()
+  {
+    ScopedWorkspace output;
+
+    std::vector<int> group1, group2;
+
+    for ( int i = 1; i <= 16; ++i )
+      group1.push_back(i);
+    for ( int i = 17; i <= 32; ++i )
+      group2.push_back(i);
+
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+
+    auto deadTimes = boost::make_shared<TableWorkspace>();
+    deadTimes->addColumn("int", "spectrum");
+    deadTimes->addColumn("double", "dead-time");
+
+    for ( int i = 0; i < 32; ++i )
+    {
+      TableRow newRow = deadTimes->appendRow();
+      newRow << (i+1) << 1.0;
+    }
+  
+    MuonLoad alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006473.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DetectorGroupingTable", grouping) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ApplyDeadTimeCorrection", true) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("CustomDeadTimeTable", deadTimes) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputType", "GroupCounts") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupIndex", 0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", output.name()) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+    
+    // Retrieve the workspace from data service.
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( output.retrieve() );
+
+    TS_ASSERT(ws);
+    if (ws)
+    {
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
+      TS_ASSERT_EQUALS( ws->blocksize(), 2000 );
+
+      TS_ASSERT_DELTA( ws->readY(0)[0], 463.383, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readY(0)[1000], 192.468, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readY(0)[1752], 5.00075, 0.00001 ) ; 
+
+      TS_ASSERT_DELTA( ws->readE(0)[0], 21.471, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readE(0)[1000], 13.856, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readE(0)[1752], 2.236, 0.001 ); 
+
+      TS_ASSERT_DELTA( ws->readX(0)[0], -0.254, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readX(0)[1000], 15.746, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readX(0)[1752], 27.778, 0.001 ); 
+    }
+  }
+
   TableWorkspace_sptr createGroupingTable(const std::vector<int>& group1, const std::vector<int>& group2)
   {
     auto t = boost::make_shared<TableWorkspace>();

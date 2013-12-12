@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
 {
@@ -10,6 +11,7 @@ namespace WorkflowAlgorithms
 {
   using namespace Kernel;
   using namespace API;
+  using namespace DataObjects;
 
   /** MuonLoad : loads Muon workspace ready for analysis. 
     
@@ -56,6 +58,9 @@ namespace WorkflowAlgorithms
 
     /// Groups specified workspace according to specified DetectorGroupingTable.
     MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws);
+
+    /// Applies dead time correction to the workspace.
+    MatrixWorkspace_sptr applyDTC(MatrixWorkspace_sptr ws, TableWorkspace_sptr dt);
 
     /// Applies offset, crops and rebin the workspace according to specified params 
     MatrixWorkspace_sptr correctWorkspace(MatrixWorkspace_sptr ws, double loadedTimeZero);
