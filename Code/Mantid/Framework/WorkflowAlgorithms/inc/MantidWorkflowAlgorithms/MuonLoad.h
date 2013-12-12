@@ -56,6 +56,9 @@ namespace WorkflowAlgorithms
 
     /// Groups specified workspace according to specified DetectorGroupingTable.
     MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws);
+
+    /// Applies offset, crops and rebin the workspace according to specified params 
+    MatrixWorkspace_sptr correctWorkspace(MatrixWorkspace_sptr ws, double loadedTimeZero);
   };
 
 

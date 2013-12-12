@@ -128,6 +128,57 @@ public:
     }
   }
 
+  void test_binCorrectionParams()
+  {
+    ScopedWorkspace output;
+
+    std::vector<int> group1, group2;
+
+    for ( int i = 1; i <= 16; ++i )
+      group1.push_back(i);
+    for ( int i = 17; i <= 32; ++i )
+      group2.push_back(i);
+
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+  
+    MuonLoad alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006473.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DetectorGroupingTable", grouping) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputType", "GroupCounts") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupIndex", 0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("TimeZero", 0.5) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Xmin", 0.1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Xmax", 16.0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("RebinParams", "0.08") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", output.name()) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+    
+    // Retrieve the workspace from data service.
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( output.retrieve() );
+
+    TS_ASSERT(ws);
+    if (ws)
+    {
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
+      TS_ASSERT_EQUALS( ws->blocksize(), 198 );
+
+      TS_ASSERT_DELTA( ws->readX(0)[0], 0.102, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readX(0)[100], 8.102, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readX(0)[198], 15.942, 0.001 ); 
+
+      TS_ASSERT_DELTA( ws->readY(0)[0], 1024372.2, 0.1); 
+      TS_ASSERT_DELTA( ws->readY(0)[100], 24589.0, 0.1); 
+      TS_ASSERT_DELTA( ws->readY(0)[197], 730.0, 0.1); 
+
+      TS_ASSERT_DELTA( ws->readE(0)[0], 1012.113, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readE(0)[100], 156.809, 0.001 ); 
+      TS_ASSERT_DELTA( ws->readE(0)[197], 27.019, 0.001 ); 
+    }
+  }
+
   TableWorkspace_sptr createGroupingTable(const std::vector<int>& group1, const std::vector<int>& group2)
   {
     auto t = boost::make_shared<TableWorkspace>();

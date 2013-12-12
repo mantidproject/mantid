@@ -153,7 +153,13 @@ namespace WorkflowAlgorithms
     if ( secondPeriodWS )
       secondPeriodWS = groupWorkspace(secondPeriodWS);
 
-    // TODO: offsetting, cropping, rebinning
+    // Correct bin values
+    double loadedTimeZero = load->getProperty("TimeZero");
+
+    firstPeriodWS = correctWorkspace(firstPeriodWS, loadedTimeZero);
+
+    if ( secondPeriodWS )
+      secondPeriodWS = correctWorkspace(secondPeriodWS, loadedTimeZero);
 
     IAlgorithm_sptr calcAssym = createChildAlgorithm("MuonCalculateAsymmetry");
 
@@ -246,6 +252,79 @@ namespace WorkflowAlgorithms
     group->execute();
 
     return group->getProperty("OutputWorkspace");
+  }
+
+  /**
+   * Applies offset, crops and rebin the workspace according to specified params.
+   * @param ws :: Workspace to correct
+   * @param loadedTimeZero :: Time zero of the data, so we can calculate the offset
+   * @return Corrected workspace
+   */
+  MatrixWorkspace_sptr MuonLoad::correctWorkspace(MatrixWorkspace_sptr ws, double loadedTimeZero)
+  {
+    // Offset workspace, if need to
+    double timeZero = getProperty("TimeZero");
+    if ( timeZero != EMPTY_DBL() )
+    {
+      double offset = loadedTimeZero - timeZero;
+      
+      IAlgorithm_sptr changeOffset = createChildAlgorithm("ChangeBinOffset");
+      changeOffset->setProperty("InputWorkspace", ws);
+      changeOffset->setProperty("Offset", offset);
+      changeOffset->execute();
+
+      ws = changeOffset->getProperty("OutputWorkspace");
+    }
+
+    // Crop workspace, if need to
+    double Xmin = getProperty("Xmin");
+    double Xmax = getProperty("Xmax");
+    if ( Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL() )
+    {
+      IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+      crop->setProperty("InputWorkspace", ws);
+      
+      if ( Xmin != EMPTY_DBL() )
+        crop->setProperty("Xmin", Xmin);
+
+      if ( Xmax != EMPTY_DBL() )
+        crop->setProperty("Xmax", Xmax);
+
+      crop->execute();
+
+      ws = crop->getProperty("OutputWorkspace");
+    }
+   
+    // Rebin workspace if need to
+    std::vector<double> rebinParams = getProperty("RebinParams");
+    if ( ! rebinParams.empty() )
+    {
+      IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
+      rebin->setProperty("InputWorkspace", ws);
+      rebin->setProperty("Params", rebinParams);
+      rebin->execute();
+
+      ws = rebin->getProperty("OutputWorkspace");
+
+      // TODO: following should be removed when FullBinsOnly function is added to Rebin algorithm
+
+      // Muon group don't want last bin if shorter than previous bins
+      double binSize = ws->dataX(0)[1] - ws->dataX(0)[0]; 
+      size_t numBins = ws->dataX(0).size();
+
+      if ( (ws->dataX(0)[numBins-1] - ws->dataX(0)[numBins-2]) != binSize )
+      {
+        IAlgorithm_sptr crop2 = createChildAlgorithm("CropWorkspace");
+        crop2->setProperty("InputWorkspace", ws);
+        crop2->setProperty("Xmax", ws->dataX(0)[numBins-2]);
+        crop2->execute();
+
+        ws = crop2->getProperty("OutputWorkspace");
+      }
+    }
+
+
+    return ws;
   }
 
 } // namespace WorkflowAlgorithms
