@@ -61,20 +61,6 @@ namespace Mantid
 
       void exec();
 
-
-      /** Algorithm running methods **/
-
-      /// Perform a transmission correction on the input IvsLam workspace
-      API::MatrixWorkspace_sptr transmissonCorrection(API::MatrixWorkspace_sptr IvsLam,
-          const MinMax& wavelengthInterval, const MinMax& wavelengthMonitorBackgroundInterval,
-          const MinMax& wavelengthMonitorIntegrationInterval, const int& i0MonitorIndex,
-          API::MatrixWorkspace_sptr firstTransmissionRun,
-          OptionalMatrixWorkspace_sptr secondTransmissionRun, const OptionalDouble& stitchingStartQ,
-          const OptionalDouble& stitchingDeltaQ, const OptionalDouble& stitchingEndQ,
-          const OptionalDouble& stitchingStartOverlapQ, const OptionalDouble& stitchingEndOverlapQ,
-          const double& wavelengthStep
-      );
-
       /// Get the surface sample component
       Mantid::Geometry::IComponent_const_sptr getSurfaceSampleComponent(Mantid::Geometry::Instrument_const_sptr inst);
 
