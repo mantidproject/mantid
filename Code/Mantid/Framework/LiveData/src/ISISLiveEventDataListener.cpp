@@ -111,8 +111,8 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     m_numberOfPeriods = getInt("NPER");
     m_numberOfSpectra = getInt("NSP1");
 
-    g_log.information() << "Number of periods " << m_numberOfPeriods << std::endl;
-    g_log.information() << "Number of spectra " << m_numberOfSpectra << std::endl;
+    g_log.notice() << "Number of periods " << m_numberOfPeriods << std::endl;
+    g_log.notice() << "Number of spectra " << m_numberOfSpectra << std::endl;
 
     TCPStreamEventDataSetup setup;
     Receive(setup, "Setup", "Wrong version");
@@ -135,9 +135,16 @@ void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime)
 // return a workspace with collected events
 boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData()
 {
-  if ( m_eventBuffer.empty() || !m_eventBuffer[0] || m_stopThread )
+    if ( m_eventBuffer.empty() || !m_eventBuffer[0] )
     {
-        throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
+      // extractData() is called too early
+      throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
+    }
+
+    if ( !m_isConnected )
+    {
+      // the background thread stopped because of an error. the error message has been logged at this point
+      throw std::runtime_error("Background thread stopped.");
     }
 
     Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
@@ -259,26 +266,23 @@ void ISISLiveEventDataListener::run()
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
 
-      g_log.fatal() << "Caught a runtime exception." << std::endl
-                    << "Exception message: " << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.error() << "Caught a runtime exception." << std::endl
+                    << "Exception message: " << e.what() << std::endl;
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
     } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some other things) can
                                         // can throw these errors
-      g_log.fatal() << "Caught an invalid argument exception." << std::endl
-                    << "Exception message: "  << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.error() << "Caught an invalid argument exception." << std::endl
+                    << "Exception message: "  << e.what() << std::endl;
       m_isConnected = false;
       std::string newMsg( "Invalid argument exception thrown from the background thread: ");
       newMsg += e.what();
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( newMsg) );
 
     } catch (...) {  // Default exception handler
-      g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
-                    << "  Thread is exiting." << std::endl;
+      g_log.error() << "Uncaught exception in ISISLiveEventDataListener network read thread." << std::endl;
       m_isConnected = false;
       m_backgroundException =
           boost::shared_ptr<std::runtime_error>( new std::runtime_error( "Unknown error in backgound thread") );
@@ -405,6 +409,7 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
     const char *warningMessage = "Failed to load instrument ";
     try
     {
+        g_log.notice() << "Loading instrument " << instrName << " ... " << std::endl;
         API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument",-1);
         alg->initialize();
         alg->setPropertyValue("InstrumentName",instrName);
@@ -417,13 +422,13 @@ void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
         {
             g_log.warning() << warningMessage << instrName << std::endl;
         }
+        g_log.notice() << "Instrument loaded." << std::endl;
     }
     catch(std::exception& e)
     {
         g_log.warning() << warningMessage << instrName << std::endl;
         g_log.warning() << e.what() << instrName << std::endl;
     }
-    g_log.information() << "Instrument loaded." << std::endl;
 }
 
 int ISISLiveEventDataListener::getInt(const std::string &par) const
