@@ -456,7 +456,7 @@ def C2Fw(prog,sname):
 		first = 7
 
 		x_data = []
-		amplitude, height, width = [], [], []
+		amplitude_data, height_data, width_data = [], [], []
 		amplitude_error, height_error, width_error  = [], [], []
 		
 		for m in range(nspec):
@@ -464,25 +464,18 @@ def C2Fw(prog,sname):
 			x_data += [Q for i in range(nl*n_params)]
 
 			#collect amplitude, height and width data
-			width += fw[:nl]
-			amplitude += it[:nl]
-			height += [i0[0] for i in range(nl)]
+			width_data += fw[:nl]
+			amplitude_data += it[:nl]
+			height_data += [i0[0] for i in range(nl)]
 				
 			#collect amplitude, height and width error data
 			width_error += fw[nl:nl+nl]
 			amplitude_error += it[nl:nl+nl]
 			height_error += [i0[1] for i in range(nl)]
 
-		#transpose data
-		data = list(zip(*[amplitude, height, width]))
-		error_data = list(zip(*[amplitude_error, height_error, width_error]))
-
 		x += x_data
-		
-		#Create a spectrum for each set of amplitude, height and width data
-		for i, (y_data, e_data) in enumerate(zip(data, error_data)):
-				y += y_data
-				e += e_data
+		y += amplitude_data + height_data + width_data
+		e += amplitude_error + height_error + width_error
 
 		for j in range(1, nl+1):
 			for name in names:
