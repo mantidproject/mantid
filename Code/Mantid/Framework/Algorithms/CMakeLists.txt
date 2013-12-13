@@ -520,7 +520,6 @@ set ( TEST_FILES
 	CreatePSDBleedMaskTest.h
 	CreatePeaksWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
-	CreateTransmissionWorkspaceTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
