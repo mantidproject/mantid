@@ -217,16 +217,46 @@ namespace Mantid
     }
 
     /**
+     * Check the first transmission run units.
+     *
+     * @return True only if the units of the first transmission run are in wavelength.
+     *
+     */
+    bool ReflectometryWorkflowBase::validateFirstTransmissionInputs() const
+    {
+      WorkspaceUnitValidator tofValidator("TOF");
+      WorkspaceUnitValidator wavelengthValidator("Wavelength");
+      MatrixWorkspace_sptr firstTransmissionRun = this->getProperty("FirstTransmissionRun");
+      if (!tofValidator.isValid(firstTransmissionRun).empty()
+          && !wavelengthValidator.isValid(firstTransmissionRun).empty())
+      {
+        throw std::invalid_argument("FirstTransmissionRun must be either in TOF or Wavelength");
+      }
+
+      const bool bInWavelength = (!wavelengthValidator.isValid(firstTransmissionRun).empty());
+      return bInWavelength;
+    }
+
+    /**
      * Validate the transmission workspace inputs when a second transmission run is provided.
      * Throws if any of the property values do not make sense.
+     * @param firstTransmissionInWavelength: Indicates that the first transmission run is in units of wavlength.
      */
-    void ReflectometryWorkflowBase::validateTransmissionInputs() const
+    void ReflectometryWorkflowBase::validateSecondTransmissionInputs(const bool firstTransmissionInWavelength) const
     {
       // Verify that all the required inputs for the second transmission run are now given.
       if (isPropertyDefault("FirstTransmissionRun"))
       {
         throw std::invalid_argument(
             "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
+        if (firstTransmissionInWavelength)
+        {
+          this->g_log.warning(
+              "The first transmission run is in wavelength so is assumed to be correctly stitched in wavelength. "
+                  "The second transmission run and associated inputs will be ignored."
+                  "Run CreateTransmissionWorkspace to create a transmission workspace from TOF runs.");
+          return;
+        }
       }
       if (isPropertyDefault("Params"))
       {
@@ -283,8 +313,11 @@ namespace Mantid
         OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
         OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ) const
     {
+      bool bFirstTransInWavelength = false;
       if (!isPropertyDefault("FirstTransmissionRun"))
       {
+        bFirstTransInWavelength = validateFirstTransmissionInputs();
+
         MatrixWorkspace_sptr temp = this->getProperty("FirstTransmissionRun");
         firstTransmissionRun = temp;
       }
@@ -292,7 +325,7 @@ namespace Mantid
       if (!isPropertyDefault("SecondTransmissionRun"))
       {
         // Check that the property values provided make sense together.
-        validateTransmissionInputs();
+        validateSecondTransmissionInputs(bFirstTransInWavelength);
 
         // Set the values.
         {

@@ -36,7 +36,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_InputWorkspace(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)
     
-    def test_check_first_transmission_workspace_not_tof_throws(self):
+    def test_check_first_transmission_workspace_not_tof_or_wavelength_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_FirstTransmissionRun(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)

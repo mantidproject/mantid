@@ -87,7 +87,10 @@ namespace Mantid
     private:
 
       /// Validate the transmission correction property inputs
-      void validateTransmissionInputs() const;
+      void validateSecondTransmissionInputs(const bool firstTransmissionInWavelength) const;
+
+      /// Validate the the first transmission workspace.
+      bool validateFirstTransmissionInputs() const;
 
       /// Convert the monitor parts of the input workspace to wavelength
       API::MatrixWorkspace_sptr toLamMonitor(const API::MatrixWorkspace_sptr& toConvert,

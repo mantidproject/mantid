@@ -98,6 +98,8 @@ namespace Mantid
 
       const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
       const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
+      const std::string tofUnitId = "TOF";
+      const std::string wavelengthUnitId = "Wavelength";
     }
     /* End of ananomous namespace */
 
@@ -196,7 +198,7 @@ namespace Mantid
 
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input,
-              PropertyMode::Optional, inputValidator->clone()),
+              PropertyMode::Optional),
           "First transmission run, or the low wavelength transmision run if SecondTransmissionRun is also provided.");
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("SecondTransmissionRun", "", Direction::Input,
@@ -520,29 +522,39 @@ namespace Mantid
       const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
           firstTransmissionRun);
 
-      // Make the transmission run.
-      auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
-      alg->initialize();
-      alg->setProperty("FirstTransmissionRun", firstTransmissionRun);
-      if(secondTransmissionRun.is_initialized())
+      // TODO if firstInputWorkspace is in wavelength, do not create the transmission workspace, just do the division.
+
+      MatrixWorkspace_sptr denominator = firstTransmissionRun;
+      Unit_const_sptr xUnit = firstTransmissionRun->getAxis(0)->unit();
+      if (xUnit->unitID() == tofUnitId)
       {
-        alg->setProperty("SecondTransmissionRun", secondTransmissionRun.get());
-        const std::vector<double> params = boost::assign::list_of(stitchingStartQ.get())(stitchingDeltaQ.get())(stitchingEndQ.get()).convert_to_container<std::vector<double> >();
-        alg->setProperty("Params", params);
-        alg->setProperty("StartOverlapQ", stitchingStartOverlapQ.get());
-        alg->setProperty("EndOverlapQ", stitchingEndOverlapQ.get());
+        // Make the transmission run.
+        auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
+        alg->initialize();
+        alg->setProperty("FirstTransmissionRun", firstTransmissionRun);
+        if (secondTransmissionRun.is_initialized())
+        {
+          alg->setProperty("SecondTransmissionRun", secondTransmissionRun.get());
+          const std::vector<double> params = boost::assign::list_of(stitchingStartQ.get())(
+              stitchingDeltaQ.get())(stitchingEndQ.get()).convert_to_container<std::vector<double> >();
+          alg->setProperty("Params", params);
+          alg->setProperty("StartOverlapQ", stitchingStartOverlapQ.get());
+          alg->setProperty("EndOverlapQ", stitchingEndOverlapQ.get());
+        }
+        alg->setProperty("WorkspaceIndexList", detectorIndexes);
+        alg->setProperty("I0MonitorIndex", i0MonitorIndex);
+        alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
+        alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
+        alg->setProperty("WavelengthStep", wavelengthStep);
+        alg->setProperty("MonitorBackgroundWavelengthMin", wavelengthMonitorBackgroundInterval.get<0>());
+        alg->setProperty("MonitorBackgroundWavelengthMax", wavelengthMonitorBackgroundInterval.get<1>());
+        alg->setProperty("MonitorIntegrationWavelengthMin",
+            wavelengthMonitorIntegrationInterval.get<0>());
+        alg->setProperty("MonitorIntegrationWavelengthMax",
+            wavelengthMonitorIntegrationInterval.get<1>());
+        alg->execute();
+        denominator = alg->getProperty("OutputWorkspace");
       }
-      alg->setProperty("WorkspaceIndexList", detectorIndexes);
-      alg->setProperty("I0MonitorIndex", i0MonitorIndex);
-      alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
-      alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
-      alg->setProperty("WavelengthStep", wavelengthStep);
-      alg->setProperty("MonitorBackgroundWavelengthMin", wavelengthMonitorBackgroundInterval.get<0>());
-      alg->setProperty("MonitorBackgroundWavelengthMax", wavelengthMonitorBackgroundInterval.get<1>());
-      alg->setProperty("MonitorIntegrationWavelengthMin", wavelengthMonitorIntegrationInterval.get<0>());
-      alg->setProperty("MonitorIntegrationWavelengthMax", wavelengthMonitorIntegrationInterval.get<1>());
-      alg->execute();
-      MatrixWorkspace_sptr denominator = alg->getProperty("OutputWorkspace");
 
       // Rebin the transmission run to be the same as the input.
       auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
