@@ -3689,6 +3689,161 @@ void MuonAnalysis::openSequentialFitDialog()
   MuonSequentialFitDialog* dialog = new MuonSequentialFitDialog(m_uiForm.fitBrowser, loadAlg);
   dialog->exec();
 
+
+/**
+ * Returns custom dead time table file name as set on the interface.
+ * @return The filename
+ */
+std::string MuonAnalysis::deadTimeFilename()
+{
+  if(!m_uiForm.mwRunDeadTimeFile->isValid())
+    throw std::runtime_error("Specified Dead Time file is not valid.");
+
+  return m_uiForm.mwRunDeadTimeFile->getFirstFilename().toStdString();
+}
+
+/**
+ * Loads dead time table (group of table) from the file.
+ * @param filename :: File to load dead times from
+ * @return Table (group of tables) with dead times
+ */
+Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename)
+{
+  try
+  {
+    IAlgorithm_sptr loadDeadTimes = AlgorithmManager::Instance().create("LoadNexusProcessed");
+    loadDeadTimes->setChild(true);
+    loadDeadTimes->setPropertyValue("Filename", filename);
+    loadDeadTimes->setPropertyValue("OutputWorkspace", "__NotUsed");
+    loadDeadTimes->execute();
+
+    return loadDeadTimes->getProperty("OutputWorkspace");
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Unable to load dead times from the spefied file");
+  }
+}
+
+/**
+ * Creates and algorithm with all the properties set according to widget values on the interface.
+ * @return The algorithm with properties set
+ */
+Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
+{
+  Algorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("MuonLoad");
+  loadAlg->initialize();
+
+  // -- Dead Time Correction --------------------------------------------------
+
+  if (m_uiForm.deadTimeType->currentIndex() != 0)
+  {
+    loadAlg->setProperty("ApplyDeadTimeCorrection", true);
+
+    if (m_uiForm.deadTimeType->currentIndex() == 2) // From Specified File
+    {
+
+      Workspace_sptr deadTimes = loadDeadTimes( deadTimeFilename() );
+
+      loadAlg->setProperty("CustomDeadTimeTable", deadTimes);
+    }
+  }
+
+  // -- Grouping --------------------------------------------------------------
+
+  ITableWorkspace_sptr grouping = parseGrouping(); 
+  loadAlg->setProperty("DetectorGroupingTable", grouping);
+
+  // -- X axis options --------------------------------------------------------
+
+  double Xmin = m_uiForm.timeAxisStartAtInput->text().toDouble();
+  loadAlg->setProperty("Xmin", Xmin);
+
+  double Xmax = m_uiForm.timeAxisFinishAtInput->text().toDouble();
+  loadAlg->setProperty("Xmax", Xmax);
+
+  double timeZero = m_uiForm.timeZeroFront->text().toDouble(); 
+  loadAlg->setProperty("TimeZero", timeZero);
+
+  // -- Rebin options ---------------------------------------------------------
+
+  if ( m_uiForm.rebinComboBox->currentIndex() != 0)
+  {
+    std::string rebinParams;
+
+    if(m_uiForm.rebinComboBox->currentIndex() == 1) // Fixed
+    {
+      auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
+      MatrixWorkspace_sptr ws;
+
+      if ( ! ( ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) ) )
+      {
+        auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS);
+        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+      }
+
+      double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
+
+      double bunchedBinSize = binSize * m_uiForm.optionStepSizeText->text().toDouble();
+
+      rebinParams = boost::lexical_cast<std::string>(bunchedBinSize);
+    }
+    else // Variable
+    {
+      rebinParams = m_uiForm.binBoundaries->text().toStdString();
+    }
+
+    loadAlg->setPropertyValue("RebinParams", rebinParams);
+  }
+
+  // -- Group/pair properties -------------------------------------------------
+
+  int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+
+  if (index >= numGroups())
+  {
+    loadAlg->setProperty("OutputType", "PairAsymmetry");
+    int tableRow = m_pairToRow[index - numGroups()];
+
+    QTableWidget* t = m_uiForm.pairTable;
+
+    double alpha = t->item(tableRow,3)->text().toDouble();
+    int index1 = static_cast<QComboBox*>( t->cellWidget(tableRow,1) )->currentIndex();
+    int index2 = static_cast<QComboBox*>( t->cellWidget(tableRow,2) )->currentIndex();
+
+    loadAlg->setProperty("PairFirstIndex", index1);
+    loadAlg->setProperty("PairSecondIndex", index2);
+    loadAlg->setProperty("Alpha", alpha);
+  }
+  else
+  {
+    if ( parsePlotType(m_uiForm.frontPlotFuncs) == Asymmetry )
+      loadAlg->setProperty("OutputType", "GroupAsymmetry");
+    else
+      loadAlg->setProperty("OutputType", "GroupCounts");
+
+    int groupIndex = getGroupNumberFromRow(m_groupToRow[index]);
+    loadAlg->setProperty("GroupIndex", groupIndex);
+  }
+
+  // -- Period options --------------------------------------------------------
+
+  QString periodLabel1 = m_uiForm.homePeriodBox1->currentText();
+
+  int periodIndex1 = periodLabel1.toInt() - 1;
+  loadAlg->setProperty("FirstPeriod", periodIndex1);
+
+  QString periodLabel2 = m_uiForm.homePeriodBox2->currentText();
+  if ( periodLabel2 != "None" )
+  {
+    int periodIndex2 = periodLabel2.toInt() - 1;
+    loadAlg->setProperty("SecondPeriod", periodIndex2);
+
+    std::string op = m_uiForm.homePeriodBoxMath->currentText().toStdString();
+    loadAlg->setProperty("PeriodOperation", op);
+  }
+
+  return loadAlg;
 }
 
 }//namespace MantidQT
