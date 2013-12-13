@@ -52,20 +52,25 @@ public:
       TS_ASSERT( alg.isInitialized() );
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", workspaceName) ); 
       TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "GeneratePythonScriptTest.py") );
+      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ScriptText", "") );
       TS_ASSERT_THROWS_NOTHING( alg.execute(); );
       TS_ASSERT( alg.isExecuted() );
-
 
       // Compare the contents of the file to the expected result line-by-line.
       std::string filename = alg.getProperty("Filename");
       std::ifstream file(filename.c_str(), std::ifstream::in);
       std::string scriptLine;
       int lineCount(0);
+
       while(std::getline(file, scriptLine))
       {
         TS_ASSERT_EQUALS(scriptLine,result[lineCount]);
         lineCount++;
       }
+
+      // Verify that if we set the content of ScriptText that it is set correctly.
+      alg.setPropertyValue("ScriptText", result[4]);
+      TS_ASSERT_EQUALS(alg.getPropertyValue("ScriptText"), "CropWorkspace(InputWorkspace='testGeneratePython',OutputWorkspace='testGeneratePython',XMin='2',XMax='5')");
 
       file.close();
       if (Poco::File(filename).exists()) Poco::File(filename).remove();
