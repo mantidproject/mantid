@@ -508,10 +508,7 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
 
   alg->initialize();
 
-  // TODO: should really be global
-  const std::string loadedWSName = m_workspace_name + "Grouped";
-
-  auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(loadedWSName);
+  auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
 
   if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
   {
@@ -576,7 +573,7 @@ MatrixWorkspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType, in
 
     QTableWidget* t = m_uiForm.pairTable;
 
-    double alpha = t->item(m_pairTableRowInFocus,3)->text().toDouble();
+    double alpha = t->item(tableRow,3)->text().toDouble();
     int index1 = static_cast<QComboBox*>( t->cellWidget(tableRow,1) )->currentIndex();
     int index2 = static_cast<QComboBox*>( t->cellWidget(tableRow,2) )->currentIndex();
 
