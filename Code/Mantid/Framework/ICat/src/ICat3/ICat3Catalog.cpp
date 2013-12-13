@@ -103,7 +103,7 @@ namespace Mantid
      * @param createFileName :: The name to give to the file being saved.
      * @return URL to PUT datafiles to.
      */
-    std::string ICat3Catalog::getUploadURL(std::string &dataFileName, std::string &createFileName)
+    const std::string ICat3Catalog::getUploadURL(const std::string &dataFileName, const std::string &createFileName)
     {
       UNUSED_ARG(dataFileName);
       UNUSED_ARG(createFileName);

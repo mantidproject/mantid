@@ -733,7 +733,7 @@ namespace Mantid
      * @param createFileName :: The name to give to the file being saved.
      * @return URL to PUT datafiles to.
      */
-    std::string ICat4Catalog::getUploadURL(std::string &dataFileName, std::string &createFileName)
+    const std::string ICat4Catalog::getUploadURL(const std::string &dataFileName, const std::string &createFileName)
     {
       // Obtain the URL from the Facilities.xml file.
       std::string url = "https://isisoxfordvmsrv.isis.cclrc.ac.uk/ids/";
@@ -755,7 +755,7 @@ namespace Mantid
      * @param dataFileName :: Used to get datafile ID.
      * @return ID of the dataset the datafile is located in.
      */
-    int64_t ICat4Catalog::getDatasetIdFromFileName(std::string &dataFileName)
+    int64_t ICat4Catalog::getDatasetIdFromFileName(const std::string &dataFileName)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
