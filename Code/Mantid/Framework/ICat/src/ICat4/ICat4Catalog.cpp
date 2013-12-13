@@ -736,7 +736,7 @@ namespace Mantid
     const std::string ICat4Catalog::getUploadURL(const std::string &dataFileName, const std::string &createFileName)
     {
       // Obtain the URL from the Facilities.xml file.
-      std::string url = "https://isisoxfordvmsrv.isis.cclrc.ac.uk/ids/";
+      std::string url = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
 
       // Set the elements of the URL.
       std::string session   = "sessionId="  + Session::Instance().getSessionId();
