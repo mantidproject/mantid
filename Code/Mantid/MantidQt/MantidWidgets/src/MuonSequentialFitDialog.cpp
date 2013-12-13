@@ -324,6 +324,9 @@ namespace MantidWidgets
       const std::string runTitle = getRunTitle(ws);
       const std::string wsBaseName = labelGroupName + "_" + runTitle; 
 
+      ads.add(wsBaseName, ws);
+      ads.addToGroup(labelGroupName, wsBaseName);
+
       IFunction_sptr functionToFit;
 
       if ( useInitFitFunction )
