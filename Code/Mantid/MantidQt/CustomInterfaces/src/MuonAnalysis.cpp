@@ -1535,38 +1535,28 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS") 
             throw std::runtime_error("Dead times are currently not implemented in ARGUS files.");
 
-        IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
-
-        applyCorrAlg->setPropertyValue("InputWorkspace", m_workspace_name); 
-        applyCorrAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
-
-        ScopedWorkspace customDeadTimes;
+        ScopedWorkspace deadTimes;
 
         if (m_uiForm.deadTimeType->currentIndex() == 1) // From Run Data
         {
           if( ! loadedDeadTimes )
             throw std::runtime_error("Data file doesn't appear to contain dead time values");
- 
-          applyCorrAlg->setPropertyValue("DeadTimeTable", loadedDeadTimes.name());
+
+          Workspace_sptr ws = loadedDeadTimes.retrieve();
+          loadedDeadTimes.remove();
+
+          deadTimes.set(ws);
         }
         else if (m_uiForm.deadTimeType->currentIndex() == 2) // From Specified File
         {
-          if(!m_uiForm.mwRunDeadTimeFile->isValid())
-            throw std::runtime_error("Specified Dead Time file is not valid.");
-
-          std::string deadTimeFile = m_uiForm.mwRunDeadTimeFile->getFirstFilename().toStdString();
-
-          IAlgorithm_sptr loadDeadTimes = AlgorithmManager::Instance().create("LoadNexusProcessed");
-          loadDeadTimes->setPropertyValue("Filename", deadTimeFile);
-          loadDeadTimes->setPropertyValue("OutputWorkspace", customDeadTimes.name());
-          loadDeadTimes->execute();
-
-          if ( ! customDeadTimes )
-            throw std::runtime_error("Unable to load dead times from the spefied file");
-
-          applyCorrAlg->setPropertyValue("DeadTimeTable", customDeadTimes.name());
+          Workspace_sptr ws = loadDeadTimes( deadTimeFilename() );
+          deadTimes.set(ws);
         }
 
+        IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+        applyCorrAlg->setPropertyValue("InputWorkspace", m_workspace_name); 
+        applyCorrAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
+        applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimes.name());
         applyCorrAlg->execute();
       }
       catch(std::exception& e)
