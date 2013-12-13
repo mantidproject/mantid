@@ -163,7 +163,7 @@ namespace Geometry
   {
     DblMatrix UBinv = this->getUB();
     UBinv.Invert();
-    V3D out = UBinv*Q; //transform back to HKL
+    V3D out = UBinv*Q/TWO_PI; //transform back to HKL
     return out;
   }
 
