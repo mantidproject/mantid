@@ -246,6 +246,11 @@ namespace CurveFitting
   void ConvertToYSpace::createOutputWorkspace()
   {
     m_outputWS = WorkspaceFactory::Instance().create(m_inputWS);
+    // Units
+    auto xLabel = boost::make_shared<Units::Label>("Momentum", "A^-1");
+    m_outputWS->getAxis(0)->unit() = xLabel;
+    m_outputWS->setYUnit("");
+    m_outputWS->setYUnitLabel("");
   }
 
   /**
