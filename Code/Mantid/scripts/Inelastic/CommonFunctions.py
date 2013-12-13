@@ -69,7 +69,7 @@ def mark_as_loaded(filename):
         logger.notice("Marking %s as loaded." % filename)
         _loaded_data.append(data_name)
 
-def load_runs(runs, sum=True):
+def load_runs(runs, sum=True,event_mode = False):
     """
     Loads a list of files, summing if the required.    
     """
@@ -95,9 +95,10 @@ def load_runs(runs, sum=True):
                 return loaded
     else:
         # Try a single run
-        return load_run(runs)
+        force = False
+        return load_run(runs,force,event_mode)
 
-def load_run(run_number, force=False):
+def load_run(run_number, force=False,event_mode = False):
     """Loads run into the given workspace. 
     
     The AddSampleLog algorithm is used to add a Filename property
@@ -136,7 +137,10 @@ def load_run(run_number, force=False):
     if filename.endswith("_event.nxs"):
         LoadEventNexus(Filename=filename, OutputWorkspace=output_name) 
     elif ext.startswith(".n"):
-        LoadNexus(Filename=filename,OutputWorkspace=output_name)
+        if event_mode : 
+            LoadEventNexus(Filename=filename,OutputWorkspace=output_name,LoadMonitors='1')
+        else:
+            LoadNexus(Filename=filename,OutputWorkspace=output_name)
     elif filename.endswith("_event.dat"):
         #load the events
         LoadEventPreNexus(EventFilename=filename, OutputWorkspace=output_name)       
