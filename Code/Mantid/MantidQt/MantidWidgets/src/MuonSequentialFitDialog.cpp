@@ -120,7 +120,6 @@ namespace MantidWidgets
     m_ui.diagnosisTable->setHorizontalHeaderLabels(headerLabels);
 
     // Make the table fill all the available space and columns be resized to fit contents
-    m_ui.diagnosisTable->horizontalHeader()->setStretchLastSection(true);
     m_ui.diagnosisTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     // Make rows alternate bg colors for better user experience 
@@ -140,8 +139,11 @@ namespace MantidWidgets
 
     m_ui.diagnosisTable->insertRow(newRow);
 
-    m_ui.diagnosisTable->setItem(newRow, 0, new QTableWidgetItem( QString::fromStdString(runTitle) ) );
-    m_ui.diagnosisTable->setItem(newRow, 1, new QTableWidgetItem( QString::number(fitQuality) ) );
+    QString runTitleDisplay = QString::fromStdString(runTitle);
+    m_ui.diagnosisTable->setItem( newRow, 0, createTableWidgetItem(runTitleDisplay) );
+
+    QString fitQualityDisplay = QString::number(fitQuality);
+    m_ui.diagnosisTable->setItem( newRow, 1, createTableWidgetItem(fitQualityDisplay) );
 
     for(int i = 2; i < m_ui.diagnosisTable->columnCount(); i += 2)
     {
@@ -151,11 +153,22 @@ namespace MantidWidgets
       QString value = QString::number( fittedFunction->getParameter(paramIndex) );
       QString error = QString::number( fittedFunction->getError(paramIndex) );
 
-      m_ui.diagnosisTable->setItem(newRow, i, new QTableWidgetItem(value) );
-      m_ui.diagnosisTable->setItem(newRow, i + 1, new QTableWidgetItem(error) );
+      m_ui.diagnosisTable->setItem(newRow, i, createTableWidgetItem(value) );
+      m_ui.diagnosisTable->setItem(newRow, i + 1, createTableWidgetItem(error) );
     }
 
     m_ui.diagnosisTable->scrollToBottom();
+  }
+
+  /**
+   * Helper function to create new item for Diagnosis table.
+   * @return Created and initialized item with text
+   */
+  QTableWidgetItem* MuonSequentialFitDialog::createTableWidgetItem(const QString& text)
+  {
+    auto newItem = new QTableWidgetItem(text);
+    newItem->setFlags(newItem->flags() ^ Qt::ItemIsEditable);
+    return newItem;
   }
 
   /**

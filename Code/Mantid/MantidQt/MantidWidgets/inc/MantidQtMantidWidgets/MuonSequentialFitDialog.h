@@ -74,6 +74,9 @@ namespace MantidWidgets
     void addDiagnosisEntry(const std::string& runTitle, double fitQuality,
         IFunction_sptr fittedFunction);
 
+    /// Helper function to create new item for Diagnosis table
+    QTableWidgetItem* createTableWidgetItem(const QString& text);
+    
     // -- VARIABLES -----------------------------------------------------------
 
     /// UI form
