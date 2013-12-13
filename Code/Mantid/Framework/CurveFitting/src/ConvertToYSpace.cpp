@@ -55,6 +55,41 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
+  /**
+   * @param ws The workspace with attached instrument
+   * @param index Index of the spectrum
+   * @return DetectorParams structure containing the relevant parameters
+   */
+  DetectorParams ConvertToYSpace::getDetectorParameters(const API::MatrixWorkspace_const_sptr & ws,
+                                                        const size_t index)
+  {
+    auto inst = ws->getInstrument();
+    auto sample = inst->getSample();
+    auto source = inst->getSource();
+    if(!sample || !source)
+    {
+      throw std::invalid_argument("ConvertToYSpace - Workspace has no source/sample.");
+    }
+    Geometry::IDetector_const_sptr det;
+    try
+    {
+     det = ws->getDetector(index);
+    }
+    catch (Kernel::Exception::NotFoundError &)
+    {
+      throw std::invalid_argument("ConvertToYSpace - Workspace has no detector attached to histogram at index " + \
+                                  boost::lexical_cast<std::string>(index));
+    }
+
+    DetectorParams detpar;
+    const auto & pmap = ws->constInstrumentParameters();
+    detpar.l1 = sample->getDistance(*source);
+    detpar.l2 = det->getDistance(*sample);
+    detpar.theta = ws->detectorTwoTheta(det);
+    detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0")*1e-6; // Convert to seconds
+    detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");
+    return detpar;
+  }
 
   /**
    * If a DetectorGroup is encountered then the parameters are averaged over the group

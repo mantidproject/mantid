@@ -86,13 +86,8 @@ namespace CurveFitting
       throw std::invalid_argument("ComptonProfile - Workspace has no detector attached to histogram at index " + boost::lexical_cast<std::string>(m_wsIndex));
     }
 
-    DetectorParams detpar;
+    DetectorParams detpar = ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
     const auto & pmap = workspace->constInstrumentParameters();
-    detpar.l1 = sample->getDistance(*source);
-    detpar.l2 = det->getDistance(*sample);
-    detpar.theta = workspace->detectorTwoTheta(det);
-    detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0")*1e-6; // Convert to seconds
-    detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");
 
     ResolutionParams respar;
     respar.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1");

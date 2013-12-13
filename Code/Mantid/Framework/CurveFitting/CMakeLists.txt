@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/BoundaryConstraint.cpp
 	src/CalculateGammaBackground.cpp
 	src/Chebyshev.cpp
+	src/ComptonPeakProfile.cpp
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
 	src/ConvertToYSpace.cpp
@@ -112,6 +113,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
+	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/ConvertToYSpace.h
@@ -214,6 +216,7 @@ set ( TEST_FILES
 	CalculateGammaBackgroundTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
+	ComptonPeakProfileTest.h
 	ComptonProfileTest.h
 	ComptonScatteringCountRateTest.h
 	ConvertToYSpaceTest.h

@@ -53,6 +53,8 @@ namespace CurveFitting
     int version() const;
     const std::string category() const;
 
+    /// Creates a POD struct containing the required detector parameters for this spectrum
+    static DetectorParams getDetectorParameters(const API::MatrixWorkspace_const_sptr & ws, const size_t index);
     /// Retrieve a component parameter
     static double getComponentParameter(const Geometry::IComponent_const_sptr & comp,
                                         const Geometry::ParameterMap &pmap,
