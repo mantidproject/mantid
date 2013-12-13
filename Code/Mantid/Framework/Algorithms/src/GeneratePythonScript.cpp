@@ -58,8 +58,9 @@ void GeneratePythonScript::init()
   std::vector<std::string> exts;
   exts.push_back(".py");
 
-  declareProperty(new API::FileProperty("Filename","", API::FileProperty::Save, exts),
+  declareProperty(new API::FileProperty("Filename","", API::FileProperty::OptionalSave, exts),
   "The file into which the Python script will be generated.");
+  declareProperty("ScriptText", "",Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -104,9 +105,15 @@ void GeneratePythonScript::exec()
     generatedScript += *m3_pIter + "\n";
   }
 
-  file << generatedScript;
-  file.flush();
-  file.close();
+  setPropertyValue("ScriptText", generatedScript);
+
+  if (!filename.empty())
+  {
+    file << generatedScript;
+    file.flush();
+    file.close();
+  }
+
 }
 //----------------------------------------------------------------------------------------------
 /** Generate the line of script corresponding to the given AlgorithmHistory
