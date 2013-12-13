@@ -212,7 +212,6 @@ void ISISLiveEventDataListener::run()
         TCPStreamEventDataNeutron events;
         while (m_stopThread == false)
         {
-            g_log.warning() << "Reading events.head" << std::endl;
             // get the header with the type of the packet
             Receive(events.head, "Events header","Corrupt stream - you should reconnect.");
             if ( !(events.head.type == TCPStreamEventHeader::Neutron) )
@@ -222,7 +221,6 @@ void ISISLiveEventDataListener::run()
             }
             CollectJunk( events.head );
 
-            g_log.warning() << "Reading events.head_n" << std::endl;
             // get the header with the sream size
             Receive(events.head_n, "Neutrons header","Corrupt stream - you should reconnect.");
             CollectJunk( events.head_n );
@@ -234,7 +232,6 @@ void ISISLiveEventDataListener::run()
             m_eventBuffer[0]->mutableRun().getTimeSeriesProperty<double>( PROTON_CHARGE_PROPERTY)
                           ->addValue( pulseTime, protons );
 
-            g_log.warning() << "Received " << events.head_n.nevents << " events." << std::endl;
             events.data.resize(events.head_n.nevents);
             uint32_t nread = 0;
             // receive the events
@@ -347,9 +344,6 @@ void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutr
 {
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
-    g_log.debug() << "Saving events " << data.size() << std::endl;
-    std::cerr << "Saving events " << data.size() << std::endl;
-
     if ( period >= static_cast<size_t>(m_numberOfPeriods) )
     {
       auto warn = m_warnings.find("period");
@@ -365,7 +359,6 @@ void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutr
     {
         Mantid::DataObjects::TofEvent event( it->time_of_flight, pulseTime );
         m_eventBuffer[period]->getEventList( it->spectrum ).addEventQuickly( event );
-        std::cerr << it->spectrum << ' ' << it->time_of_flight << std::endl;
     }
 }
 
