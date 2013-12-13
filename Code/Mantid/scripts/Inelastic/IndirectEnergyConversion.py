@@ -63,7 +63,13 @@ def resolution(files, iconOpt, rebinParam, bground,
     reducer.set_parameter_file(parfile)
     reducer.set_grouping_policy('All')
     reducer.set_sum_files(True)
-    reducer.reduce()
+    
+    try:
+        reducer.reduce()
+    except Exception, e:
+        logger.error(str(e))
+        return
+    
     iconWS = reducer.get_result_workspaces()[0]
     
     if factor != None:
