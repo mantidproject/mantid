@@ -404,7 +404,7 @@ class DirectEnergyConversion(object):
                         self.__det_cal_file_ws = self.det_cal_file
 
                     if self.__det_cal_file_ws == None :
-                        self.log('_do_mono: Loading detector info from file ' +str(self.det_cal_file),'debug')    
+                        self.log('_do_mono: Loading detector info from file : ' +str(self.det_cal_file),'debug')    
                         file = FileFinder.getFullPath(str(self.det_cal_file))
                         if len(file) == 0: # try to find run
                             file = common.find_file(self.det_cal_file)
@@ -412,7 +412,7 @@ class DirectEnergyConversion(object):
                         LoadDetectorInfo(Workspace=result_name,DataFilename=file,RelocateDets= self.relocate_dets)
                         self.log('_do_mono: Loading detector info completed ','debug')                                            
                     else:
-                        self.log('_do_mono: Copying detectors positions from det_cal_file workspace: '+self.__det_cal_file_ws.name())                    
+                        self.log('_do_mono: Copying detectors positions from det_cal_file workspace : '+self.__det_cal_file_ws.name())                    
                         CopyInstrumentParameters(InputWorkspace=self.__det_cal_file_ws,OutputWorkspace=result_name)
                         self.log('_do_mono: Copying detectors positions complete','debug')
 
@@ -447,7 +447,7 @@ class DirectEnergyConversion(object):
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
-        self.log("_do_mono: finished ConvertUnits for "+result_name)
+        self.log("_do_mono: finished ConvertUnits for : "+result_name)
       
 
                 
@@ -462,13 +462,13 @@ class DirectEnergyConversion(object):
                 ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
             else:
                 DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
-                self.log("_do_mono: finished DetectorEfficiencyCor for: "+result_name)
+                self.log("_do_mono: finished DetectorEfficiencyCor for : "+result_name)
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
             self.log('Start Applying ki/kf corrections to the workpsace : '+result_name)                                
             CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
-            self.log('finished applying ki/kf corrections for'+result_name)                                            
+            self.log('finished applying ki/kf corrections for : '+result_name)                                            
 
         # Make sure that our binning is consistent
         if not self.energy_bins is None:
@@ -580,14 +580,14 @@ class DirectEnergyConversion(object):
         monitor_ws = input_ws;
         monitors_from_separate_ws=False;
         if type(monitor_ws) is str:
-            pws = mtd[monitor_ws]
-        else:
-            pws = monitor_ws;
+            monitor_ws = mtd[monitor_ws]
+
         try: 
-            nsp = pws.getSpectrum(int(self.ei_mon_spectra[0]));
+            nsp = monitor_ws.getSpectrum(int(self.ei_mon_spectra[0]));
         except:
             monitors_from_separate_ws = True
-            monitor_ws = pws.getName()+'_monitors'
+            mon_ws = monitor_ws.getName()+'_monitors'
+            monitor_ws = mtd[mon_ws];
             
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
@@ -601,7 +601,7 @@ class DirectEnergyConversion(object):
             
         # Adjust the TOF such that the first monitor peak is at t=0
         ChangeBinOffset(InputWorkspace=input_ws,OutputWorkspace= resultws_name,Offset= -float(str(mon1_peak)))
-        mon1_det = input_ws.getDetector(mon1_index)
+        mon1_det = monitor_ws.getDetector(mon1_index)
         mon1_pos = mon1_det.getPos()
         src_name = input_ws.getInstrument().getSource().getName()
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)

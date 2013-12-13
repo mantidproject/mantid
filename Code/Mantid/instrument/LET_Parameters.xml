@@ -36,7 +36,7 @@
 
 <!-- Parameter describes if nexus data files are written in event mode or not -->
 <parameter name="nexus_in_event_mode" type="bool">
-    <value val = "True"/>
+    <value val = "False"/>
 </parameter>
 
 
