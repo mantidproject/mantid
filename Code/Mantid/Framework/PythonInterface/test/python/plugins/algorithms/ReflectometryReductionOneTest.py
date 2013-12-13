@@ -62,7 +62,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_FirstTransmissionRun(self.__tof)
         alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
-        alg.set_EndOverlapQ( 0.4 )
+        alg.set_EndOverlap( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_provide_end_transmission_run_without_end_overlap_q_throws(self):
@@ -70,7 +70,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_FirstTransmissionRun(self.__tof)
         alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
-        alg.set_StartOverlapQ( 0.4 )
+        alg.set_StartOverlap( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_end_overlap_q_must_be_greater_than_start_overlap_q_or_throw(self):
@@ -78,8 +78,8 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_FirstTransmissionRun(self.__tof)
         alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
-        alg.set_StartOverlapQ( 0.6 )
-        alg.set_EndOverlapQ( 0.4 )
+        alg.set_StartOverlap( 0.6 )
+        alg.set_EndOverlap( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_must_provide_wavelengths(self):
@@ -207,8 +207,8 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_SecondTransmissionRun(trans_run2)
         
         alg.set_Params([1.5, 0.02, 17])
-        alg.set_StartOverlapQ( 10.0 )
-        alg.set_EndOverlapQ( 12.0 )
+        alg.set_StartOverlap( 10.0 )
+        alg.set_EndOverlap( 12.0 )
         alg.set_ThetaIn(0.2)
         
         out_ws_q, out_ws_lam, theta = alg.execute()

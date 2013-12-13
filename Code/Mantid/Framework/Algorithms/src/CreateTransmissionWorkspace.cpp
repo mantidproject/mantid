@@ -97,10 +97,10 @@ namespace Mantid
       setPropertySettings("Params",
           new Kernel::EnabledWhenProperty("SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 
-      setPropertySettings("StartOverlapQ",
+      setPropertySettings("StartOverlap",
           new Kernel::EnabledWhenProperty("SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 
-      setPropertySettings("EndOverlapQ",
+      setPropertySettings("EndOverlap",
           new Kernel::EnabledWhenProperty("SecondTransmissionWorkspace", IS_NOT_DEFAULT));
 
     }
@@ -112,15 +112,15 @@ namespace Mantid
     {
       OptionalMatrixWorkspace_sptr firstTransmissionRun;
       OptionalMatrixWorkspace_sptr secondTransmissionRun;
-      OptionalDouble stitchingStartQ;
-      OptionalDouble stitchingDeltaQ;
-      OptionalDouble stitchingEndQ;
-      OptionalDouble stitchingStartOverlapQ;
-      OptionalDouble stitchingEndOverlapQ;
+      OptionalDouble stitchingStart;
+      OptionalDouble stitchingDelta;
+      OptionalDouble stitchingEnd;
+      OptionalDouble stitchingStartOverlap;
+      OptionalDouble stitchingEndOverlap;
 
       // Get the transmission run property information.
-      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStartQ,
-          stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
+      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStart,
+          stitchingDelta, stitchingEnd, stitchingStartOverlap, stitchingEndOverlap);
 
       // Get wavelength intervals.
       const MinMax wavelengthInterval = this->getMinMax("WavelengthMin", "WavelengthMax");
@@ -139,8 +139,8 @@ namespace Mantid
       // Create the transmission workspace.
       MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(indexList, wavelengthInterval,
           monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex,
-          firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ,
-          stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
+          firstTransmissionRun.get(), secondTransmissionRun, stitchingStart, stitchingDelta, stitchingEnd,
+          stitchingStartOverlap, stitchingEndOverlap, wavelengthStep);
 
 
       setProperty("OutputWorkspace", outWS);
@@ -160,11 +160,11 @@ namespace Mantid
      * @param i0MonitorIndex : Monitor index for the I0 monitor
      * @param firstTransmissionRun : The first transmission run
      * @param secondTransmissionRun : The second transmission run (optional)
-     * @param stitchingStartQ : Stitching start Q (optional but dependent on secondTransmissionRun)
-     * @param stitchingDeltaQ : Stitching delta Q (optional but dependent on secondTransmissionRun)
-     * @param stitchingEndQ : Stitching end Q (optional but dependent on secondTransmissionRun)
-     * @param stitchingStartOverlapQ : Stitching start Q overlap (optional but dependent on secondTransmissionRun)
-     * @param stitchingEndOverlapQ : Stitching end Q overlap (optional but dependent on secondTransmissionRun)
+     * @param stitchingStart : Stitching start (optional but dependent on secondTransmissionRun)
+     * @param stitchingDelta : Stitching delta (optional but dependent on secondTransmissionRun)
+     * @param stitchingEnd : Stitching end (optional but dependent on secondTransmissionRun)
+     * @param stitchingStartOverlap : Stitching start overlap (optional but dependent on secondTransmissionRun)
+     * @param stitchingEndOverlap : Stitching end overlap (optional but dependent on secondTransmissionRun)
      * @param wavelengthStep : Step in angstroms for rebinning for workspaces converted into wavelength.
      * @return A transmission workspace in Wavelength units.
      */
@@ -176,11 +176,11 @@ namespace Mantid
         const int& i0MonitorIndex,
         MatrixWorkspace_sptr firstTransmissionRun,
         OptionalMatrixWorkspace_sptr secondTransmissionRun,
-        const OptionalDouble& stitchingStartQ,
-        const OptionalDouble& stitchingDeltaQ,
-        const OptionalDouble& stitchingEndQ,
-        const OptionalDouble& stitchingStartOverlapQ,
-        const OptionalDouble& stitchingEndOverlapQ,
+        const OptionalDouble& stitchingStart,
+        const OptionalDouble& stitchingDelta,
+        const OptionalDouble& stitchingEnd,
+        const OptionalDouble& stitchingStartOverlap,
+        const OptionalDouble& stitchingEndOverlap,
         const double& wavelengthStep)
     {
       auto trans1InLam = toLam(firstTransmissionRun, detectorIndexes, i0MonitorIndex, wavelengthInterval,
@@ -229,10 +229,10 @@ namespace Mantid
         AnalysisDataService::Instance().addOrReplace("normalizedTrans2", normalizedTrans2);
         stitch1DAlg->setProperty("LHSWorkspace", transmissionWS);
         stitch1DAlg->setProperty("RHSWorkspace", normalizedTrans2);
-        stitch1DAlg->setProperty("StartOverlap", stitchingStartOverlapQ.get());
-        stitch1DAlg->setProperty("EndOverlap", stitchingEndOverlapQ.get());
-        const std::vector<double> params = boost::assign::list_of(stitchingStartQ.get())(
-            stitchingDeltaQ.get())(stitchingEndQ.get()).convert_to_container<std::vector<double> >();
+        stitch1DAlg->setProperty("StartOverlap", stitchingStartOverlap.get());
+        stitch1DAlg->setProperty("EndOverlap", stitchingEndOverlap.get());
+        const std::vector<double> params = boost::assign::list_of(stitchingStart.get())(
+            stitchingDelta.get())(stitchingEnd.get()).convert_to_container<std::vector<double> >();
         stitch1DAlg->setProperty("Params", params);
         stitch1DAlg->execute();
         transmissionWS = stitch1DAlg->getProperty("OutputWorkspace");

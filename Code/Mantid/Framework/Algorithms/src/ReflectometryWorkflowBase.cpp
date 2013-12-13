@@ -113,15 +113,15 @@ namespace Mantid
           new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
           "A comma separated list of first bin boundary, width, last bin boundary. "
               "These parameters are used for stitching together transmission runs. "
-              "Values are in q. This input is only needed if a SecondTransmission run is provided.");
+              "Values are in wavelength (angstroms). This input is only needed if a SecondTransmission run is provided.");
 
       declareProperty(
-          new PropertyWithValue<double>("StartOverlapQ", Mantid::EMPTY_DBL(), Direction::Input),
-          "Start Q for stitching transmission runs together");
+          new PropertyWithValue<double>("StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+          "Start wavelength for stitching transmission runs together");
 
       declareProperty(
-          new PropertyWithValue<double>("EndOverlapQ", Mantid::EMPTY_DBL(), Direction::Input),
-          "End Q for stitching transmission runs together");
+          new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+          "End wavelength (angstroms) for stitching transmission runs together");
 
     }
 
@@ -266,21 +266,21 @@ namespace Mantid
         throw std::invalid_argument(
             "If a SecondTransmissionRun has been given, then stitching Params for the transmission runs are also required.");
       }
-      if (isPropertyDefault("StartOverlapQ"))
+      if (isPropertyDefault("StartOverlap"))
       {
         throw std::invalid_argument(
-            "If a SecondTransmissionRun has been given, then a stitching StartOverlapQ for the transmission runs is also required.");
+            "If a SecondTransmissionRun has been given, then a stitching StartOverlap for the transmission runs is also required.");
       }
-      if (isPropertyDefault("EndOverlapQ"))
+      if (isPropertyDefault("EndOverlap"))
       {
         throw std::invalid_argument(
-            "If a SecondTransmissionRun has been given, then a stitching EndOverlapQ for the transmission runs is also required.");
+            "If a SecondTransmissionRun has been given, then a stitching EndOverlap for the transmission runs is also required.");
       }
-      const double startOverlapQ = this->getProperty("StartOverlapQ");
-      const double endOverlapQ = this->getProperty("EndOverlapQ");
-      if (startOverlapQ >= endOverlapQ)
+      const double startOverlap = this->getProperty("StartOverlap");
+      const double endOverlap = this->getProperty("EndOverlap");
+      if (startOverlap >= endOverlap)
       {
-        throw std::invalid_argument("EndOverlapQ must be > StartOverlapQ");
+        throw std::invalid_argument("EndOverlap must be > StartOverlap");
       }
 
       if( !isPropertyDefault("SecondTransmissionRun") )
@@ -306,15 +306,15 @@ namespace Mantid
      *
      * @param firstTransmissionRun
      * @param secondTransmissionRun
-     * @param stitchingStartQ
-     * @param stitchingDeltaQ
-     * @param stitchingEndQ
+     * @param stitchingStart
+     * @param stitchingDelta
+     * @param stitchingEnd
      */
     void ReflectometryWorkflowBase::getTransmissionRunInfo(
         OptionalMatrixWorkspace_sptr& firstTransmissionRun,
-        OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
-        OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
-        OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ) const
+        OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStart,
+        OptionalDouble& stitchingDelta, OptionalDouble& stitchingEnd,
+        OptionalDouble& stitchingStartOverlap, OptionalDouble& stitchingEndOverlap) const
     {
       bool bFirstTransInWavelength = false;
       if (!isPropertyDefault("FirstTransmissionRun"))
@@ -337,15 +337,15 @@ namespace Mantid
         }
         {
           std::vector<double> params = getProperty("Params");
-          stitchingStartQ = params[0];
-          stitchingDeltaQ = params[1];
-          stitchingEndQ = params[2];
+          stitchingStart = params[0];
+          stitchingDelta = params[1];
+          stitchingEnd = params[2];
         }
         {
-          double temp = this->getProperty("StartOverlapQ");
-          stitchingStartOverlapQ = temp;
-          temp = this->getProperty("EndOverlapQ");
-          stitchingEndOverlapQ = temp;
+          double temp = this->getProperty("StartOverlap");
+          stitchingStartOverlap = temp;
+          temp = this->getProperty("EndOverlap");
+          stitchingEndOverlap = temp;
         }
       }
 

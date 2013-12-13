@@ -210,15 +210,15 @@ namespace Mantid
       setPropertyGroup("FirstTransmissionRun", "Transmission");
       setPropertyGroup("SecondTransmissionRun", "Transmission");
       setPropertyGroup("Params", "Transmission");
-      setPropertyGroup("StartOverlapQ", "Transmission");
-      setPropertyGroup("EndOverlapQ", "Transmission");
+      setPropertyGroup("StartOverlap", "Transmission");
+      setPropertyGroup("EndOverlap", "Transmission");
 
       // Only do transmission corrections when point detector.
       setPropertySettings("FirstTransmissionRun", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
       setPropertySettings("SecondTransmissionRun", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
       setPropertySettings("Params", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-      setPropertySettings("StartOverlapQ", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-      setPropertySettings("EndOverlapQ", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("StartOverlap", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("EndOverlap", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
 
       // Only use region of interest when in multi-detector analysis mode
       setPropertySettings("RegionOfInterest",
@@ -395,13 +395,13 @@ namespace Mantid
 
       OptionalMatrixWorkspace_sptr firstTransmissionRun;
       OptionalMatrixWorkspace_sptr secondTransmissionRun;
-      OptionalDouble stitchingStartQ;
-      OptionalDouble stitchingDeltaQ;
-      OptionalDouble stitchingEndQ;
-      OptionalDouble stitchingStartOverlapQ;
-      OptionalDouble stitchingEndOverlapQ;
+      OptionalDouble stitchingStart;
+      OptionalDouble stitchingDelta;
+      OptionalDouble stitchingEnd;
+      OptionalDouble stitchingStartOverlap;
+      OptionalDouble stitchingEndOverlap;
 
-      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ);
+      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStart, stitchingDelta, stitchingEnd, stitchingStartOverlap, stitchingEndOverlap);
 
       OptionalDouble theta;
       if (!isPropertyDefault("ThetaIn"))
@@ -457,7 +457,7 @@ namespace Mantid
 
           // Perform transmission correction.
           IvsLam = this->transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
-              i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStartQ, stitchingDeltaQ, stitchingEndQ, stitchingStartOverlapQ, stitchingEndOverlapQ, wavelengthStep);
+              i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStart, stitchingDelta, stitchingEnd, stitchingStartOverlap, stitchingEndOverlap, wavelengthStep);
 
         }
         else
@@ -502,11 +502,11 @@ namespace Mantid
      * @param i0MonitorIndex : Monitor index for the I0 monitor
      * @param firstTransmissionRun : The first transmission run
      * @param secondTransmissionRun : The second transmission run (optional)
-     * @param stitchingStartQ : Stitching start Q (optional but dependent on secondTransmissionRun)
-     * @param stitchingDeltaQ : Stitching delta Q (optional but dependent on secondTransmissionRun)
-     * @param stitchingEndQ : Stitching end Q (optional but dependent on secondTransmissionRun)
-     * @param stitchingStartOverlapQ : Stitching start Q overlap (optional but dependent on secondTransmissionRun)
-     * @param stitchingEndOverlapQ : Stitching end Q overlap (optional but dependent on secondTransmissionRun)
+     * @param stitchingStart : Stitching start in wavelength (optional but dependent on secondTransmissionRun)
+     * @param stitchingDelta : Stitching delta in wavelength (optional but dependent on secondTransmissionRun)
+     * @param stitchingEnd : Stitching end in wavelength (optional but dependent on secondTransmissionRun)
+     * @param stitchingStartOverlap : Stitching start wavelength overlap (optional but dependent on secondTransmissionRun)
+     * @param stitchingEndOverlap : Stitching end wavelength overlap (optional but dependent on secondTransmissionRun)
      * @param wavelengthStep : Step in angstroms for rebinning for workspaces converted into wavelength.
      * @return Normalized run workspace by the transmission workspace, which have themselves been converted to Lam, normalized by monitors and possibly stitched together.
      */
@@ -514,9 +514,9 @@ namespace Mantid
         const MinMax& wavelengthInterval, const MinMax& wavelengthMonitorBackgroundInterval,
         const MinMax& wavelengthMonitorIntegrationInterval, const int& i0MonitorIndex,
         MatrixWorkspace_sptr firstTransmissionRun, OptionalMatrixWorkspace_sptr secondTransmissionRun,
-        const OptionalDouble& stitchingStartQ, const OptionalDouble& stitchingDeltaQ,
-        const OptionalDouble& stitchingEndQ, const OptionalDouble& stitchingStartOverlapQ,
-        const OptionalDouble& stitchingEndOverlapQ, const double& wavelengthStep)
+        const OptionalDouble& stitchingStart, const OptionalDouble& stitchingDelta,
+        const OptionalDouble& stitchingEnd, const OptionalDouble& stitchingStartOverlap,
+        const OptionalDouble& stitchingEndOverlap, const double& wavelengthStep)
     {
       g_log.debug("Extracting first transmission run workspace indexes from spectra");
       const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
@@ -535,11 +535,11 @@ namespace Mantid
         if (secondTransmissionRun.is_initialized())
         {
           alg->setProperty("SecondTransmissionRun", secondTransmissionRun.get());
-          const std::vector<double> params = boost::assign::list_of(stitchingStartQ.get())(
-              stitchingDeltaQ.get())(stitchingEndQ.get()).convert_to_container<std::vector<double> >();
+          const std::vector<double> params = boost::assign::list_of(stitchingStart.get())(
+              stitchingDelta.get())(stitchingEnd.get()).convert_to_container<std::vector<double> >();
           alg->setProperty("Params", params);
-          alg->setProperty("StartOverlapQ", stitchingStartOverlapQ.get());
-          alg->setProperty("EndOverlapQ", stitchingEndOverlapQ.get());
+          alg->setProperty("StartOverlap", stitchingStartOverlap.get());
+          alg->setProperty("EndOverlap", stitchingEndOverlap.get());
         }
         alg->setProperty("WorkspaceIndexList", detectorIndexes);
         alg->setProperty("I0MonitorIndex", i0MonitorIndex);

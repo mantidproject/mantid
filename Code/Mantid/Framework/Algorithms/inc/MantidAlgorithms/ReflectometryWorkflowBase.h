@@ -73,9 +73,9 @@ namespace Mantid
 
       /// Get the transmission correction properties
       void getTransmissionRunInfo(OptionalMatrixWorkspace_sptr& firstTransmissionRun,
-          OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStartQ,
-          OptionalDouble& stitchingDeltaQ, OptionalDouble& stitchingEndQ,
-          OptionalDouble& stitchingStartOverlapQ, OptionalDouble& stitchingEndOverlapQ) const;
+          OptionalMatrixWorkspace_sptr& secondTransmissionRun, OptionalDouble& stitchingStart,
+          OptionalDouble& stitchingDelta, OptionalDouble& stitchingEnd,
+          OptionalDouble& stitchingStartOverlap, OptionalDouble& stitchingEndOverlap) const;
 
       /// Init common index inputs
       void initIndexInputs();
