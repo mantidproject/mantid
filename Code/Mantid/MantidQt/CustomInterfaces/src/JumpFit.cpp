@@ -131,7 +131,8 @@ namespace MantidQt
 			{
 				m_uiForm.cbWidth->setEnabled(true);
 
-				plotMiniPlot(filename, 1);
+				std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
+				plotMiniPlot(filename, spectraList[currentWidth]);
 				std::pair<double,double> res;
 				std::pair<double,double> range = getCurveRange();
 
