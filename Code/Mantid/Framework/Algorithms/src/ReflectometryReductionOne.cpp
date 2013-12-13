@@ -156,7 +156,7 @@ namespace Mantid
     void ReflectometryReductionOne::init()
     {
       boost::shared_ptr<CompositeValidator> inputValidator = boost::make_shared<CompositeValidator>();
-      inputValidator->add(boost::make_shared<WorkspaceUnitValidator>("TOF"));
+      inputValidator->add(boost::make_shared<WorkspaceUnitValidator>(tofUnitId));
 
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, inputValidator),

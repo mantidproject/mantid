@@ -43,7 +43,7 @@ namespace Mantid
     }
 
     /**
-     *
+     * Init index properties.
      */
     void ReflectometryWorkflowBase::initIndexInputs()
     {
@@ -65,7 +65,7 @@ namespace Mantid
     }
 
     /**
-     * Init common wavlength inputs.
+     * Init common wavelength inputs.
      */
     void ReflectometryWorkflowBase::initWavelengthInputs()
     {
@@ -104,6 +104,9 @@ namespace Mantid
           "Wavelength maximum for integration in angstroms.");
     }
 
+    /**
+     * Init stitching inputs
+     */
     void ReflectometryWorkflowBase::initStitchingInputs()
     {
       declareProperty(
