@@ -398,7 +398,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
     setCurrentDataName( wsNameQ );
   }
-  catch(std::exception& e)
+  catch(...)
   { 
     QMessageBox::critical( this, "MuonAnalysis - Error", "Unable to plot the item. Check log for details." ); 
   }
@@ -3706,7 +3706,7 @@ std::string MuonAnalysis::deadTimeFilename()
 }
 
 /**
- * Loads dead time table (group of table) from the file.
+ * Loads dead time table (group of tables) from the file.
  * @param filename :: File to load dead times from
  * @return Table (group of tables) with dead times
  */

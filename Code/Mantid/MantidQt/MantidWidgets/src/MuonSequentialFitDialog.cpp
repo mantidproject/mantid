@@ -314,7 +314,7 @@ namespace MantidWidgets
 
         ws = load->getProperty("OutputWorkspace");
       }
-      catch(std::exception& e)
+      catch(...)
       {
         QMessageBox::critical(this, "Loading failed", 
             "Unable to load one of the files.\n\nCheck log for details");
@@ -356,7 +356,7 @@ namespace MantidWidgets
 
         fit->execute();
       }
-      catch(std::exception& e)
+      catch(...)
       {
         QMessageBox::critical(this, "Fitting failed", 
             "Unable to fit one of the files.\n\nCheck log for details");
