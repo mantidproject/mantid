@@ -370,7 +370,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
     // Find names for new workspaces
     const std::string wsName = getNewAnalysisWSName(groupName, itemType, tableRow, plotType); 
-    const std::string wsRawName = wsName + "; Raw"; 
+    const std::string wsRawName = wsName + "_Raw"; 
 
     // Make sure they end up in the ADS
     ads.addOrReplace(wsName, ws);
