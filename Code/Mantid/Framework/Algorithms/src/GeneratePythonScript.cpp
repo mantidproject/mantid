@@ -72,13 +72,6 @@ void GeneratePythonScript::exec()
   const std::string filename = getPropertyValue("Filename");
   std::ofstream file(filename.c_str(), std::ofstream::trunc);
 
-
-  if (NULL == file)
-  {
-    g_log.error("Unable to create file: " + filename);
-    throw Exception::FileError("Unable to create file: " , filename);
-  }
-
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
 
