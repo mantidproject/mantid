@@ -2,6 +2,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidAPI/AnalysisDataService.h" 
+#include "MantidAPI/AlgorithmProxy.h"
 
 namespace MantidQt
 {
@@ -12,11 +13,11 @@ namespace MantidWidgets
 
   Logger& MuonSequentialFitDialog::g_log(Logger::get("MuonSequentialFitDialog"));
   /** 
-
    * Constructor
    */
-  MuonSequentialFitDialog::MuonSequentialFitDialog(MuonFitPropertyBrowser* fitPropBrowser) :
-    QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser)
+  MuonSequentialFitDialog::MuonSequentialFitDialog(MuonFitPropertyBrowser* fitPropBrowser,
+      Algorithm_sptr loadAlg) :
+    QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser), m_loadAlg(loadAlg)
   {
     m_ui.setupUi(this);
 
@@ -292,20 +293,26 @@ namespace MantidWidgets
       if ( m_stopRequested )
         break;
 
-      Workspace_sptr loadedWS;
+      MatrixWorkspace_sptr ws;
+
+      auto load = boost::dynamic_pointer_cast<AlgorithmProxy>( AlgorithmManager::Instance().create("MuonLoad") );
+      load->setChild(true);
+      load->setRethrows(true);
+      load->copyPropertiesFrom(*m_loadAlg);
 
       try
       {
-        // TODO: should be MuonLoad here
-        IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
-        loadAlg->setChild(true);
-        loadAlg->setRethrows(true);
-        loadAlg->initialize();
-        loadAlg->setPropertyValue( "Filename", fileIt->toStdString() );
-        loadAlg->setPropertyValue( "OutputWorkspace", "__YouDontSeeMeIAmNinja" ); // Is not used
-        loadAlg->execute();
+        load->initialize();
 
-        loadedWS = loadAlg->getProperty("OutputWorkspace");
+        load->setPropertyValue( "Filename", fileIt->toStdString() );
+        load->setPropertyValue( "OutputWorkspace", "__YouDontSeeMeIAmNinja" ); // Is not used
+
+        if ( m_fitPropBrowser->rawData() ) // TODO: or vice verca?
+          load->setPropertyValue( "RebinParams", "" );
+
+        load->execute();
+
+        ws = load->getProperty("OutputWorkspace");
       }
       catch(std::exception& e)
       {
@@ -314,21 +321,8 @@ namespace MantidWidgets
         break;
       }
 
-      MatrixWorkspace_sptr ws;
-
-      if ( auto single = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) )
-      {
-        ws = single;
-      }
-      else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
-      {
-        auto first = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
-        ws = first;
-      }
-
       const std::string runTitle = getRunTitle(ws);
       const std::string wsBaseName = labelGroupName + "_" + runTitle; 
-
 
       IFunction_sptr functionToFit;
 
@@ -339,12 +333,11 @@ namespace MantidWidgets
         // Use the same function over and over, so that previous fitted params are used for the next fit
         functionToFit = fitFunction;
 
-      IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
+      IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
+      fit->setRethrows(true);
 
       try 
       {
-        fit->initialize();
-        fit->setRethrows(true);
 
         // Set function. Gets updated when fit is done. 
         fit->setProperty("Function", functionToFit);
