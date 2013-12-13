@@ -244,8 +244,7 @@ namespace MDEvents
     case VolumeNormalization:
       return m_ws->getSignalAt(m_pos) * m_ws->getInverseVolume();
     case NumEventsNormalization:
-      /// TODO: # of events normalization
-      return m_ws->getSignalAt(m_pos);
+      return m_ws->getSignalAt(m_pos) / m_ws->getNumEventsAt(m_pos);
     }
     // Should not reach here
     return std::numeric_limits<signal_t>::quiet_NaN();
@@ -263,8 +262,7 @@ namespace MDEvents
     case VolumeNormalization:
       return m_ws->getErrorAt(m_pos) * m_ws->getInverseVolume();
     case NumEventsNormalization:
-      /// TODO: # of events normalization
-      return m_ws->getErrorAt(m_pos);
+      return m_ws->getErrorAt(m_pos) / m_ws->getNumEventsAt(m_pos);
     }
     // Should not reach here
     return std::numeric_limits<signal_t>::quiet_NaN();
@@ -317,7 +315,7 @@ namespace MDEvents
   /// @return 1 always: e.g. there is one (fake) event in the middle of the box.
   size_t MDHistoWorkspaceIterator::getNumEvents() const
   {
-    return 1;
+    return static_cast<size_t>(m_ws->getNumEventsAt(m_pos));
   }
 
   //----------------------------------------------------------------------------------------------

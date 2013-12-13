@@ -1,8 +1,6 @@
 // Includes
 #include "MantidMDAlgorithms/Quantification/Models/Strontium122.h"
 
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/Math/Distributions/BoseEinsteinDistribution.h"
 
 #include <cmath>
 
@@ -74,8 +72,8 @@ namespace Mantid
     /**
      * Calculates the scattering intensity
      * @param exptSetup :: Details of the current experiment
-     * @param point :: The axis values for the current point in Q-W space: Qx, Qy, Qz, DeltaE. These contain the U matrix
-     * rotation already.
+     * @param point :: The axis values for the current point in Q-W space: Qx, Qy, Qz, DeltaE. These are in
+     * crystal cartesian coordinates
      * @return The weight contributing from this point
      */
     double Strontium122::scatteringIntensity(const API::ExperimentInfo & exptSetup, const std::vector<double> & point) const
