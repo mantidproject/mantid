@@ -381,16 +381,14 @@ namespace Crystal
 	  }
 	  else
 	  {
-		  std::string bankName0 = bankName;
-                  //Only works for WISH
-		  bankName0.erase(0,4);
-		  std::ostringstream pixelString;
-		  pixelString << inst->getName() << "/" << bankName0 << "/" <<bankName
-		  << "/tube" << std::setw(3) << std::setfill('0') << col+1
-		  << "/pixel" << std::setw(4) << std::setfill('0') << row+1;
-		  boost::shared_ptr<const Geometry::IComponent> component = inst->getComponentByName(pixelString.str());
-		  boost::shared_ptr<const Detector> pixel = boost::dynamic_pointer_cast<const Detector>(component);
-		  return pixel->getPos();
+          std::vector<Geometry::IComponent_const_sptr> children;
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+          asmb->getChildren(children, false);
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col]);
+          std::vector<Geometry::IComponent_const_sptr> grandchildren;
+          asmb2->getChildren(grandchildren,false);
+          Geometry::IComponent_const_sptr first = grandchildren[row];
+		  return first->getPos();
 	  }
   }
   void SaveIsawPeaks::sizeBanks(std::string bankName, int& NCOLS, int& NROWS, double& xsize, double& ysize)
