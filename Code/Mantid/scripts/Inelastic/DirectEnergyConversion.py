@@ -578,6 +578,7 @@ class DirectEnergyConversion(object):
 
         self.incident_energy= ei_guess
         monitor_ws = input_ws;
+        monitors_from_separate_ws=False;
         if type(monitor_ws) is str:
             pws = mtd[monitor_ws]
         else:
@@ -585,6 +586,7 @@ class DirectEnergyConversion(object):
         try: 
             nsp = pws.getSpectrum(int(self.ei_mon_spectra[0]));
         except:
+            monitors_from_separate_ws = True
             monitor_ws = pws.getName()+'_monitors'
             
         # Calculate the incident energy
@@ -594,7 +596,8 @@ class DirectEnergyConversion(object):
 
 
         self.incident_energy = ei
-        AddSampleLog(Workspace=input_ws,LogName='Ei',LogText=str(ei),LogType='Number')
+        if monitors_from_separate_ws:
+            AddSampleLog(Workspace=input_ws,LogName='Ei',LogText=str(ei),LogType='Number')
             
         # Adjust the TOF such that the first monitor peak is at t=0
         ChangeBinOffset(InputWorkspace=input_ws,OutputWorkspace= resultws_name,Offset= -float(str(mon1_peak)))
