@@ -69,8 +69,6 @@ void GeneratePythonScript::init()
 void GeneratePythonScript::exec()
 {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
-  const std::string filename = getPropertyValue("Filename");
-  std::ofstream file(filename.c_str(), std::ofstream::trunc);
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
@@ -100,8 +98,11 @@ void GeneratePythonScript::exec()
 
   setPropertyValue("ScriptText", generatedScript);
 
+  const std::string filename = getPropertyValue("Filename");
+
   if (!filename.empty())
   {
+    std::ofstream file(filename.c_str(), std::ofstream::trunc);
     file << generatedScript;
     file.flush();
     file.close();
