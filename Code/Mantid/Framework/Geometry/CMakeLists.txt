@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/ComponentParser.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/IndexingUtils.cpp
+	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/PointGroup.cpp
 	src/Crystal/ReducedCell.cpp
@@ -101,6 +102,7 @@ set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
+	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
@@ -233,6 +235,7 @@ set ( TEST_FILES
 	ObjCompAssemblyTest.h
 	ObjComponentTest.h
 	ObjectTest.h
+	NiggliCellTest.h
 	OrientedLatticeTest.h
 	ParCompAssemblyTest.h
 	ParComponentFactoryTest.h
