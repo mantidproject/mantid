@@ -214,6 +214,8 @@ private slots:
   /// Saves the value of the widget which called the slot
   void saveWidgetValue();
 
+  /// Opens a sequential fit dialog
+  void openSequentialFitDialog();
 
 private:
  

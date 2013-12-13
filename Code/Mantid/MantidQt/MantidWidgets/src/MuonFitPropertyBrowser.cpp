@@ -1,5 +1,4 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidAPI/FunctionFactory.h"
 
@@ -316,8 +315,7 @@ void MuonFitPropertyBrowser::fit()
  */
 void MuonFitPropertyBrowser::sequentialFit()
 {
-  MuonSequentialFitDialog* dialog = new MuonSequentialFitDialog(this);
-  dialog->exec();
+  emit sequentialFitRequested();
 }
 
 /**
@@ -345,7 +343,6 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)con
   else
     return false;
 }
-
 
 } // MantidQt
 } // API

@@ -28,6 +28,7 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -148,6 +149,8 @@ void MuonAnalysis::initLayout()
   }
 
   m_uiForm.fitBrowser->init();
+  connect( m_uiForm.fitBrowser, SIGNAL(sequentialFitRequested()), 
+           this, SLOT(openSequentialFitDialog()) );
 
   // alow appending files
   m_uiForm.mwRunFiles->allowMultipleFiles(true);
@@ -3676,6 +3679,16 @@ void MuonAnalysis::setGrouping(ITableWorkspace_sptr detGroupingTable)
 
   updatePairTable();
   updateFrontAndCombo();
+}
+
+/**
+ * Opens a sequential fit dialog.
+ */
+void MuonAnalysis::openSequentialFitDialog()
+{
+  MuonSequentialFitDialog* dialog = new MuonSequentialFitDialog(m_uiForm.fitBrowser, loadAlg);
+  dialog->exec();
+
 }
 
 }//namespace MantidQT

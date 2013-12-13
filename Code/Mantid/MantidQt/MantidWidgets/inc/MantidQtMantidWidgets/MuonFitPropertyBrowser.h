@@ -50,6 +50,9 @@ public slots:
   /// Open sequential fit dialog
   virtual void sequentialFit();
 
+signals:
+  /// Emitted when sequential fit is requested by user
+  void sequentialFitRequested();
 
 protected:
   virtual void showEvent(QShowEvent* e);
