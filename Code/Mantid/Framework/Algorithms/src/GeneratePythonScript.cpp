@@ -58,8 +58,9 @@ void GeneratePythonScript::init()
   std::vector<std::string> exts;
   exts.push_back(".py");
 
-  declareProperty(new API::FileProperty("Filename","", API::FileProperty::Save, exts),
+  declareProperty(new API::FileProperty("Filename","", API::FileProperty::OptionalSave, exts),
   "The file into which the Python script will be generated.");
+  declareProperty("ScriptText", "",Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -68,15 +69,6 @@ void GeneratePythonScript::init()
 void GeneratePythonScript::exec()
 {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
-  const std::string filename = getPropertyValue("Filename");
-  std::ofstream file(filename.c_str(), std::ofstream::trunc);
-
-
-  if (NULL == file)
-  {
-    g_log.error("Unable to create file: " + filename);
-    throw Exception::FileError("Unable to create file: " , filename);
-  }
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
@@ -104,9 +96,18 @@ void GeneratePythonScript::exec()
     generatedScript += *m3_pIter + "\n";
   }
 
-  file << generatedScript;
-  file.flush();
-  file.close();
+  setPropertyValue("ScriptText", generatedScript);
+
+  const std::string filename = getPropertyValue("Filename");
+
+  if (!filename.empty())
+  {
+    std::ofstream file(filename.c_str(), std::ofstream::trunc);
+    file << generatedScript;
+    file.flush();
+    file.close();
+  }
+
 }
 //----------------------------------------------------------------------------------------------
 /** Generate the line of script corresponding to the given AlgorithmHistory
