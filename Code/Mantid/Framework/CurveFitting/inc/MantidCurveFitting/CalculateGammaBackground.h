@@ -81,8 +81,6 @@ namespace Mantid
       /// Compute the theta range for a given foil
       std::pair<double,double> calculateThetaRange(const Geometry::IComponent_const_sptr & foilComp,
                                                    const double radius, const unsigned int horizDir) const;
-      /// Retrieve parameter for given component
-      double getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const;
 
       /// Input TOF data
       API::MatrixWorkspace_const_sptr m_inputWS;
