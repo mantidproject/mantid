@@ -61,6 +61,8 @@ namespace Mantid
         bool isDataFile(const std::string & filePath);
         /// Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
         const std::string extractFileName(const std::string &filePath);
+        /// Saves the workspace as a nexus file to the user's default directory.
+        void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
     };
   }
 }

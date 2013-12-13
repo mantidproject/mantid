@@ -1,6 +1,7 @@
 #include "MantidICat/CatalogPublish.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -40,11 +41,9 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogPublish::exec()
     {
-      Mantid::API::Workspace_sptr workspace = getProperty("InputWorkspace");
-
-      std::string ws             = getPropertyValue("InputWorkspace");
-      std::string filePath       = getPropertyValue("Filepath");
-      std::string createFileName = getPropertyValue("CreateFileName");
+      // Used for error checking.
+      std::string ws       = getPropertyValue("InputWorkspace");
+      std::string filePath = getPropertyValue("Filepath");
 
       // Error checking to ensure a workspace OR a file is selected. Never both.
       if ((ws.empty() && filePath.empty()) || (!ws.empty() && !filePath.empty()))
@@ -52,6 +51,7 @@ namespace Mantid
         throw std::runtime_error("Please select a workspace or a file to publish. Not both.");
       }
 
+      // The name of the file, which is used to obtain the dataset ID in getUploadURL below.
       std::string dataFileName;
 
       // The user want to upload a file.
@@ -59,10 +59,16 @@ namespace Mantid
       {
         dataFileName = extractFileName(filePath);
       }
-      else
+      else // The user wants to upload a workspace.
       {
+        Mantid::API::Workspace_sptr workspace = getProperty("InputWorkspace");
+        dataFileName = extractFileName(workspace->name());
+        saveWorkspaceToNexus(workspace);
+        // Overwrite the filePath string to the location of the file (from which the workspace was saved to).
+        filePath = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + workspace->name() + ".nxs";
       }
 
+      std::string createFileName = getPropertyValue("CreateFileName");
       std::string uploadURL = CatalogAlgorithmHelper().createCatalog()->getUploadURL(dataFileName, createFileName);
       publish(filePath,uploadURL);
     }
@@ -131,6 +137,21 @@ namespace Mantid
       std::string dataFileName = Poco::Path(Poco::Path(filePath).getFileName()).getBaseName();
       // Extracts the specific file name (e.g. CSP74683) from the file path.
       return dataFileName.substr(0, dataFileName.find_first_of('_'));
+    }
+
+    /**
+     * Saves the workspace (given the property) as a nexus file to the user's default directory.
+     * This is then used to publish the workspace (as a file) for ease of use later.
+     */
+    void CatalogPublish::saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace)
+    {
+      // Create the save nexus algorithm to use.
+      auto saveNexus = Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
+      saveNexus->initialize();
+      // Set the required properties & execute.
+      saveNexus->setProperty("InputWorkspace", workspace->name());
+      saveNexus->setProperty("FileName", Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + workspace->name() + ".nxs");
+      saveNexus->execute();
     }
 
   }
