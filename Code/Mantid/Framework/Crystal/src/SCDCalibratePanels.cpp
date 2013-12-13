@@ -99,6 +99,7 @@ To do so select the workspace, which you have calibrated as the InputWorkspace a
 #include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::DataObjects;
 using namespace  Mantid::API;
@@ -669,7 +670,17 @@ namespace Mantid
       double alpha = getProperty("alpha");
       double beta = getProperty("beta");
       double gamma = getProperty("gamma");
-
+      if ((a == EMPTY_DBL()  || b == EMPTY_DBL() || c == EMPTY_DBL() || alpha == EMPTY_DBL() ||
+    		  beta == EMPTY_DBL() || gamma == EMPTY_DBL()) && peaksWs->sample().hasOrientedLattice())
+	  {
+		OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
+		a = latt.a();
+		b = latt.b();
+		c = latt.c();
+		alpha = latt.alpha();
+		beta = latt.beta();
+		gamma = latt.gamma();
+	  }
       double tolerance = getProperty("tolerance");
 
       if( !GoodStart( peaksWs, a,b,c,alpha,beta,gamma,tolerance))
@@ -1371,12 +1382,12 @@ namespace Mantid
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
 
-      declareProperty("a", 0.0, mustBePositive, "Lattice Parameter a");
-      declareProperty("b", 0.0, mustBePositive, "Lattice Parameter b");
-      declareProperty("c", 0.0, mustBePositive, "Lattice Parameter c");
-      declareProperty("alpha", 0.0, mustBePositive, "Lattice Parameter alpha in degrees");
-      declareProperty("beta",  0.0, mustBePositive, "Lattice Parameter beta in degrees");
-      declareProperty("gamma", 0.0, mustBePositive, "Lattice Parameter gamma in degrees");
+      declareProperty("a", EMPTY_DBL(), mustBePositive, "Lattice Parameter a (Leave empty to use lattice constants in peaks workspace)");
+      declareProperty("b", EMPTY_DBL(), mustBePositive, "Lattice Parameter b (Leave empty to use lattice constants in peaks workspace)");
+      declareProperty("c", EMPTY_DBL(), mustBePositive, "Lattice Parameter c (Leave empty to use lattice constants in peaks workspace)");
+      declareProperty("alpha", EMPTY_DBL(), mustBePositive, "Lattice Parameter alpha in degrees (Leave empty to use lattice constants in peaks workspace)");
+      declareProperty("beta",  EMPTY_DBL(), mustBePositive, "Lattice Parameter beta in degrees (Leave empty to use lattice constants in peaks workspace)");
+      declareProperty("gamma", EMPTY_DBL(), mustBePositive, "Lattice Parameter gamma in degrees (Leave empty to use lattice constants in peaks workspace)");
 
       declareProperty("useL0", true, "Fit the L0(source to sample) distance");
       declareProperty("usetimeOffset", true, "Fit the time offset value");
