@@ -214,6 +214,8 @@ private slots:
   /// Saves the value of the widget which called the slot
   void saveWidgetValue();
 
+  /// Opens a sequential fit dialog
+  void openSequentialFitDialog();
 
 private:
  
@@ -319,6 +321,15 @@ private:
 
   /// Return number of groups defined (not including pairs)
   int numGroups();
+
+  /// Returns custom dead time table file name as set on the interface
+  std::string deadTimeFilename();
+
+  /// Loads dead time table (group of tables) from the file.
+  Workspace_sptr loadDeadTimes(const std::string& filename);
+
+  /// Creates and algorithm with all the properties set according to widget values on the interface
+  Algorithm_sptr createLoadAlgorithm();
 
   // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
   //       (as we are doing with pairs)

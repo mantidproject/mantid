@@ -9,6 +9,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <QLineEdit>
 #include <QFileDialog>
@@ -27,8 +28,10 @@ namespace CustomInterfaces
 {
 namespace Muon
 {
-  using namespace MantidQt::API;
   using namespace Mantid::Kernel;
+  using namespace Mantid::API;
+
+  using namespace MantidQt::API;
   using namespace MantidQt::MantidWidgets;
 
   const std::string MuonAnalysisResultTableTab::RUN_NO_LOG = "run_number";
@@ -207,11 +210,45 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
   // Clear the previous table values
   m_logValues.clear();
   QVector<QString> fittedWsList;
+
   // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
   for (int i(0); i<wsList.size(); ++i)
   {
     if((Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_Parameters"))&&(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString()))) 
       fittedWsList.append(wsList[i]);
+  }
+
+  // Add all the fittings made by seq. fit dialog
+  std::map<std::string, Workspace_sptr> items = 
+    Mantid::API::AnalysisDataService::Instance().topLevelItems();
+
+  for ( auto it = items.begin(); it != items.end(); ++it )
+  {
+    if ( ! boost::starts_with(it->first, "MuonSeqFit_") )
+      continue;
+
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(it->second);
+
+    if ( ! group )
+      continue;
+
+    for ( size_t i = 0; i < group->size(); ++i )
+    {
+      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(i) );
+
+      if ( ! ws )
+        continue;
+
+      std::string name = ws->name();
+      size_t pos = name.find("_Workspace"); 
+
+      if ( pos == std::string::npos)
+        continue;
+
+      name.erase(pos);
+
+      fittedWsList << QString::fromStdString(name);
+    }
   }
 
   if(fittedWsList.size() > 0)
