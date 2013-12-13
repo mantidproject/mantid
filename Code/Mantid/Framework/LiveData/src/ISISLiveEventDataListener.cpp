@@ -374,15 +374,6 @@ void ISISLiveEventDataListener::loadSpectraMap()
     std::vector<int> spec;
     getIntArray( "UDET", udet, ndet);
     getIntArray( "SPEC", spec, ndet);
-
-    // Assign spectra ids to the spectra
-    int nspec = m_numberOfSpectra;
-    if ( ndet < nspec ) nspec = ndet;
-    for(size_t i = 0; i < static_cast<size_t>(nspec); ++i)
-    {
-        m_eventBuffer[0]->getSpectrum(i)->setSpectrumNo( spec[i] );
-    }
-
     // set up the mapping
     m_eventBuffer[0]->updateSpectraUsing(API::SpectrumDetectorMapping(spec, udet));
 }
