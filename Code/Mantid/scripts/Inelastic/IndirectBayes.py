@@ -488,8 +488,6 @@ def C2Fw(prog,sname):
 			for name in names:
 				vAxisNames.append('f'+str(nl)+'.f'+str(j)+'.'+name)
 
-
-	print len(x), len(y), len(e)
 	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=nhist,
 		UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=vAxisNames)
 
