@@ -17,6 +17,7 @@ set ( TEST_PY_FILES
   MaskWorkspaceToCalFileTest.py
   MeanTest.py
   MergeCalFilesTest.py
+  ReflectometryReductionOneTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SortXAxisTest.py

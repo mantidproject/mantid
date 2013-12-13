@@ -45,7 +45,7 @@ namespace Kernel
       m_queueLock.lock();
       m_cost += newTask->cost();
 
-      Mutex * mut = newTask->getMutex();
+      boost::shared_ptr<Mutex> mut = newTask->getMutex();
       m_supermap[mut].insert( std::pair<double, Task*>(newTask->cost(), newTask) );
       m_queueLock.unlock();
     }
@@ -68,7 +68,7 @@ namespace Kernel
         for (; it != it_end; ++it)
         {
           // The key is the mutex associated with the inner map
-          Mutex * mapMutex = it->first;
+          boost::shared_ptr<Mutex> mapMutex = it->first;
           if ((!mapMutex) || (m_mutexes.empty()) || (m_mutexes.find(mapMutex) == m_mutexes.end()))
           {
             // The mutex of this map is free!
@@ -112,7 +112,7 @@ namespace Kernel
       // --- Add the mutex (if any) to the list of "busy" ones ---
       if (temp)
       {
-        Mutex * mut = temp->getMutex();
+        boost::shared_ptr<Mutex> mut = temp->getMutex();
         if (mut)
           m_mutexes.insert(mut);
       }
@@ -134,7 +134,7 @@ namespace Kernel
     virtual void finished(Task * task, size_t threadnum)
     {
       UNUSED_ARG(threadnum);
-      Mutex * mut = task->getMutex();
+      boost::shared_ptr<Mutex> mut = task->getMutex();
       if (mut)
       {
         m_queueLock.lock();
@@ -199,14 +199,14 @@ namespace Kernel
     /// Map to tasks, sorted by cost
     typedef std::multimap<double, Task*> InnerMap;
     /// Map to maps, sorted by Mutex*
-    typedef std::map<Mutex*, InnerMap> SuperMap;
+    typedef std::map<boost::shared_ptr<Mutex>, InnerMap> SuperMap;
 
     /** A super map; first key = a Mutex *
      * Inside it: second key = the cost. */
     SuperMap m_supermap;
 
     /// Vector of currently used mutexes.
-    std::set<Mutex *> m_mutexes;
+    std::set<boost::shared_ptr<Mutex> > m_mutexes;
 
   };
 

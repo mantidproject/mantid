@@ -45,6 +45,10 @@ namespace Mantid
       const std::string & getUserName() const { return m_userName; }
       ///set username
       void setUserName(const std::string& userName) { m_userName=userName; }
+      /// Get the soap end-point.
+      const std::string & getSoapEndPoint() const { return m_soapEndPoint; }
+      /// Set the soap end-point.
+      void setSoapEndPoint(const std::string& soapEndPoint) { m_soapEndPoint = soapEndPoint; }
 
     private:
       /// used to create singleton
@@ -61,6 +65,8 @@ namespace Mantid
       std::string m_sessionId;
       /// user name
       std::string m_userName;
+      /// Cache soap end-point
+      std::string m_soapEndPoint;
     };
 
 #ifdef _WIN32

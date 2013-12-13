@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/ComptonScatteringCountRate.h"
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
 #include <boost/bind.hpp>
 
@@ -64,11 +65,42 @@ namespace CurveFitting
 
   namespace
   {
-    /// Defines a helper struct to compute 0.5*||Cx-d||^2
-    struct Norm2
+    /// Struct to compute norm2,0.5*||Cx-d||^2, when the background is NOT included and the
+    /// optimizer expects constraints specified as >= 0
+    struct NoBkgdNorm2
     {
       /// Compute the value of the objective function
-      Norm2(const Kernel::DblMatrix & cmatrix, const std::vector<double> & data)
+      NoBkgdNorm2(const Kernel::DblMatrix & cmatrix, const std::vector<double> & data)
+        : cm(cmatrix), nrows(cmatrix.numRows()), ncols(cmatrix.numCols()), rhs(data) {}
+
+      double eval(const std::vector<double> & xpt) const
+      {
+        double norm2(0.0);
+        for(size_t i = 0; i < nrows; ++i)
+        {
+          const double *cmRow = cm[i];
+          double cx(0.0);
+          for(size_t j = 0; j < ncols; ++j)
+          {
+            cx += cmRow[j]*xpt[j];
+          }
+          cx -= rhs[i];
+          norm2 += cx*cx;
+        }
+        return 0.5*norm2;
+      }
+      const Kernel::DblMatrix & cm;
+      size_t nrows;
+      size_t ncols;
+      const std::vector<double> & rhs;
+    };
+    /// Struct to compute norm2 when the background is included and the
+    /// optimizer expects constraints specified as <= 0.
+    /// It is assumed the CM matrix has been multiplied by -1
+    struct BkgdNorm2
+    {
+      /// Compute the value of the objective function
+      BkgdNorm2(const Kernel::DblMatrix & cmatrix, const std::vector<double> & data)
         : cm(cmatrix), nrows(cmatrix.numRows()), ncols(cmatrix.numCols()), rhs(data) {}
 
       double eval(const size_t n, const double * xpt) const
@@ -93,6 +125,7 @@ namespace CurveFitting
       size_t ncols;
       const std::vector<double> & rhs;
     };
+
   }
 
   /**
@@ -120,14 +153,23 @@ namespace CurveFitting
     // Compute the constraint matrix
     this->updateCMatrixValues();
 
-    Norm2 objf(m_cmatrix, m_dataErrorRatio);
-    //boost::function<double(const size_t,const double *)> objfunc =
-    AugmentedLagrangianOptimizer::ObjFunction objfunc = boost::bind(&Norm2::eval, objf, _1, _2);
-    AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
-    lsqmin.minimize(x0);
-
-    // Set the parameters for the 'real' function calls
-    setFixedParameterValues(x0);
+    if(m_bkgdPolyN > 0)
+    {
+       BkgdNorm2 objf(m_cmatrix, m_dataErrorRatio);
+       AugmentedLagrangianOptimizer::ObjFunction objfunc = boost::bind(&BkgdNorm2::eval, objf, _1, _2);
+       AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
+       lsqmin.minimize(x0);
+       // Set the parameters for the 'real' function calls
+       setFixedParameterValues(x0);
+    }
+    else
+    {
+      NoBkgdNorm2 objfunc(m_cmatrix, m_dataErrorRatio);
+      Kernel::Math::SLSQPMinimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
+      auto res = lsqmin.minimize(x0);
+      // Set the parameters for the 'real' function calls
+      setFixedParameterValues(res);
+    }
   }
 
   /**
@@ -167,7 +209,12 @@ namespace CurveFitting
       const size_t numFilled = profile->fillConstraintMatrix(m_cmatrix,start,m_errors);
       start += numFilled;
     }
-    m_cmatrix *= -1.0;
+    // Using different minimizer for background constraints as the original is not stable
+    // The background one requires the contraints are specified as <= 0
+    if(m_bkgdPolyN > 0)
+    {
+      m_cmatrix *= -1.0;
+    }
 
     if(g_log.is(Logger::Priority::PRIO_DEBUG))
     {

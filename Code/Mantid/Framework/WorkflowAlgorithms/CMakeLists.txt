@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/HFIRLoad.cpp
 	src/HFIRSANSNormalise.cpp
 	src/MuonCalculateAsymmetry.cpp
+	src/MuonLoad.cpp
 	src/RefReduction.cpp
 	src/RefRoi.cpp
 	src/SANSBeamFinder.cpp
@@ -56,6 +57,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
 	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
 	inc/MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h
+	inc/MantidWorkflowAlgorithms/MuonLoad.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
@@ -70,6 +72,7 @@ set ( INC_FILES
               
 set ( TEST_FILES
 	MuonCalculateAsymmetryTest.h
+	MuonLoadTest.h
 	SANSSolidAngleCorrectionTest.h
 	StepScanTest.h
 )

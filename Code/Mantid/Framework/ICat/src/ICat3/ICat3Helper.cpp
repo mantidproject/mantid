@@ -25,19 +25,8 @@ namespace Mantid
      */
     int CICatHelper::doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response)
     {
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-                         server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
+
       clock_t start=clock();
       int ret_advsearch=icat.searchByAdvanced(request.get(),&response);
       if(ret_advsearch!=0)
@@ -288,19 +277,7 @@ namespace Mantid
     {
       //ICAt proxy object
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
 
       ns1__getInvestigationIncludes request;
       //get the sessionid which is cached in session class during login
@@ -437,19 +414,7 @@ namespace Mantid
     {
       //ICAt proxy object
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
 
       // request object
       ns1__getInvestigationIncludes request;
@@ -546,20 +511,7 @@ namespace Mantid
     {
       //ICAt proxy object
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
-
+      setICATProxySettings(icat);
 
       ns1__listInstruments request;
       //get the sessionid which is cached in session class during login
@@ -611,20 +563,7 @@ namespace Mantid
     {
       //ICAt proxy object
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
-
+      setICATProxySettings(icat);
 
       ns1__listInvestigationTypes request;
       //get the sessionid which is cached in session class during login
@@ -687,20 +626,7 @@ namespace Mantid
     int CICatHelper::doLogout()
     {
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
 
       ns1__logout request;
       ns1__logoutResponse response;
@@ -723,20 +649,7 @@ namespace Mantid
     void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr)
     {
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
 
       ns1__getMyInvestigationsIncludes request;
       ns1__getMyInvestigationsIncludesResponse response;
@@ -817,21 +730,8 @@ namespace Mantid
       request.startIndex      = offset;
       request.advancedSearchDetails = buildSearchQuery(inputs);
 
-      //ICAt proxy object
       ICATPortBindingProxy icat;
-
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-                         server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
 
       int result = icat.searchByAdvancedPagination(&request, &response);
 
@@ -951,19 +851,7 @@ namespace Mantid
     int64_t CICatHelper::getNumberOfSearchResults(const CatalogSearchParam& inputs)
     {
       ICATPortBindingProxy icat;
-
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-                         server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
 
       ns1__searchByAdvanced request;
       ns1__searchByAdvancedResponse response;
@@ -995,22 +883,8 @@ namespace Mantid
      */
     bool CICatHelper::isvalidSession()
     {
-
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
 
       ns1__isSessionValid request;
       ns1__isSessionValidResponse response;
@@ -1029,22 +903,15 @@ namespace Mantid
      */
     void CICatHelper::doLogin(const std::string& name,const std::string& password,const std::string & url)
     {
-      UNUSED_ARG(url)
-
+      // Store the soap end-point in the session for use later.
+      ICat::Session::Instance().setSoapEndPoint(url);
+      
+      // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-                                  server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
+
+      // Output the soap end-point in use for debugging purposes.
+      g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << "\n";
 
       // CatalogLogin to icat
       ns1__login login;
@@ -1075,21 +942,8 @@ namespace Mantid
 
     void CICatHelper::getdownloadURL(const long long& fileId,std::string& url)
     {
-
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
+      setICATProxySettings(icat);
 
       ns1__downloadDatafile request;
 
@@ -1120,22 +974,9 @@ namespace Mantid
 
     void CICatHelper::getlocationString(const long long& fileid,std::string& filelocation)
     {
-
       ICATPortBindingProxy icat;
-      // Define ssl authentication scheme
-      if (soap_ssl_client_context(&icat,
-          SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
-          NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
-          NULL,       /* password to read the keyfile */
-          NULL,      /* optional cacert file to store trusted certificates */
-          NULL,      /* optional capath to directory with trusted certificates */
-          NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
-      ))
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
-
+      setICATProxySettings(icat);
+      
       ns1__getDatafile request;
 
       boost::shared_ptr<std::string >sessionId_sptr(new std::string);
@@ -1157,7 +998,35 @@ namespace Mantid
       }
     }
 
+    /**
+     * Sets the soap-endpoint & SSL context for the given ICAT proxy.
+     */
+    void CICatHelper::setICATProxySettings(ICat3::ICATPortBindingProxy& icat)
+    {
+      // Set the soap-endpoint of the catalog we want to use.
+      icat.soap_endpoint = ICat::Session::Instance().getSoapEndPoint().c_str();
+      // Sets SSL authentication scheme
+      setSSLContext(icat);
+    }
 
-
+    /**
+     * Defines the SSL authentication scheme.
+     * @param icat :: ICATPortBindingProxy object.
+     */
+    void CICatHelper::setSSLContext(ICat3::ICATPortBindingProxy& icat)
+    {
+      if (soap_ssl_client_context(&icat,
+        SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
+        NULL,       /* keyfile: required only when client must authenticate to
+                    server (see SSL docs on how to obtain this file) */
+        NULL,       /* password to read the keyfile */
+        NULL,      /* optional cacert file to store trusted certificates */
+        NULL,      /* optional capath to directory with trusted certificates */
+        NULL      /* if randfile!=NULL: use a file with random data to seed randomness */
+        ))
+      {
+        CErrorHandling::throwErrorMessages(icat);
+      }
+    }
   }
 }
