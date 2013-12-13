@@ -3686,9 +3686,25 @@ void MuonAnalysis::setGrouping(ITableWorkspace_sptr detGroupingTable)
  */
 void MuonAnalysis::openSequentialFitDialog()
 {
+  Algorithm_sptr loadAlg;
+
+  try
+  {
+    loadAlg = createLoadAlgorithm();
+  }
+  catch(...)
+  {
+    QMessageBox::critical(this, "Unable to open dialog", "Error while setting load properties");
+    return;
+  }
+
+  m_uiForm.fitBrowser->blockSignals(true);
+
   MuonSequentialFitDialog* dialog = new MuonSequentialFitDialog(m_uiForm.fitBrowser, loadAlg);
   dialog->exec();
 
+  m_uiForm.fitBrowser->blockSignals(false);
+}
 
 /**
  * Returns custom dead time table file name as set on the interface.
