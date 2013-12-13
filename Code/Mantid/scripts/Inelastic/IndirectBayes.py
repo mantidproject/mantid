@@ -461,7 +461,7 @@ def C2Fw(prog,sname):
 		
 		for m in range(nspec):
 			first,Q,i0,fw,it = LorBlock(asc,first,nl)
-			x_data += [Q for i in range(n_params)]
+			x_data += [Q for i in range(nl*n_params)]
 
 			#collect amplitude, height and width data
 			width += fw[:nl]
@@ -477,15 +477,19 @@ def C2Fw(prog,sname):
 		data = list(zip(*[amplitude, height, width]))
 		error_data = list(zip(*[amplitude_error, height_error, width_error]))
 
+		x += x_data
+		
 		#Create a spectrum for each set of amplitude, height and width data
 		for i, (y_data, e_data) in enumerate(zip(data, error_data)):
-			 	x += x_data
 				y += y_data
 				e += e_data
 
-				for name in names:			
-					vAxisNames.append(name+'.'+str(nl)+'.'+str(i+1))
+		for j in range(1, nl+1):
+			for name in names:
+				vAxisNames.append('f'+str(nl)+'.f'+str(j)+'.'+name)
 
+
+	print len(x), len(y), len(e)
 	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=nhist,
 		UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=vAxisNames)
 
