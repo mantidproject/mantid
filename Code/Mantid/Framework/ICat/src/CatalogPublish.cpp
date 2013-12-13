@@ -44,6 +44,7 @@ namespace Mantid
       // Used for error checking.
       std::string ws       = getPropertyValue("InputWorkspace");
       std::string filePath = getPropertyValue("Filepath");
+      Mantid::API::Workspace_sptr workspace = getProperty("InputWorkspace");
 
       // Error checking to ensure a workspace OR a file is selected. Never both.
       if ((ws.empty() && filePath.empty()) || (!ws.empty() && !filePath.empty()))
@@ -54,6 +55,9 @@ namespace Mantid
       // The name of the file, which is used to obtain the dataset ID in getUploadURL below.
       std::string dataFileName;
 
+      // Create a catalog as getUploadURL is called twice if workspace is selected.
+      auto catalog = CatalogAlgorithmHelper().createCatalog();
+
       // The user want to upload a file.
       if (!filePath.empty())
       {
@@ -61,24 +65,33 @@ namespace Mantid
       }
       else // The user wants to upload a workspace.
       {
-        Mantid::API::Workspace_sptr workspace = getProperty("InputWorkspace");
         dataFileName = extractFileName(workspace->name());
+        // Save workspace to a .nxs file in the user's default directory.
         saveWorkspaceToNexus(workspace);
         // Overwrite the filePath string to the location of the file (from which the workspace was saved to).
         filePath = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + workspace->name() + ".nxs";
       }
 
-      std::string createFileName = getPropertyValue("CreateFileName");
-      std::string uploadURL = CatalogAlgorithmHelper().createCatalog()->getUploadURL(dataFileName, createFileName);
-      publish(filePath,uploadURL);
+      // Obtain the mode to used base on file extension.
+      std::ios_base::openmode mode = isDataFile(filePath) ? std::ios_base::binary : std::ios_base::in;
+      // Stream the contents of the file the user wants to publish & store it in file.
+      std::ifstream fileStream(filePath.c_str(), mode);
+      // Verify that the file can be opened correctly.
+      if (fileStream.rdstate() & std::ios::failbit) throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
+
+      // Publish the contents of the file to the server.
+      publish(fileStream,catalog->getUploadURL(dataFileName, getPropertyValue("CreateFileName")));
+
+      // If a workspace was published, then we want to also publish the history of a workspace.
+      if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
     }
 
     /**
-     * Upload a given file (based on file path) to a given URL.
-     * @param pathToFileToUpload  :: The path to the file we want to publish.
-     * @param uploadURL           :: The REST URL to stream the data from the file to.
+     * Stream the contents of a file to a given URL.
+     * @param fileContents :: The contents of the file to publish.
+     * @param uploadURL    :: The REST URL to stream the data from the file to.
      */
-    void CatalogPublish::publish(const std::string &pathToFileToUpload, const std::string &uploadURL)
+    void CatalogPublish::publish(std::istream& fileContents, const std::string &uploadURL)
     {
       try
       {
@@ -95,13 +108,8 @@ namespace Mantid
         request.setChunkedTransferEncoding(true);
         std::ostream& os = session.sendRequest(request);
 
-        // Obtain the mode to used base on file extension.
-        std::ios_base::openmode mode = isDataFile(pathToFileToUpload) ? std::ios_base::binary : std::ios_base::in;
-        // Stream the contents of the file the user wants to publish & store it in file.
-        std::ifstream file(pathToFileToUpload.c_str(), mode);
-
         // Copy data from the input stream to the server (request) output stream.
-        Poco::StreamCopier::copyStream(file, os);
+        Poco::StreamCopier::copyStream(fileContents, os);
         
         // Close the request by requesting a response.
         Poco::Net::HTTPResponse response;
@@ -142,6 +150,7 @@ namespace Mantid
     /**
      * Saves the workspace (given the property) as a nexus file to the user's default directory.
      * This is then used to publish the workspace (as a file) for ease of use later.
+     * @param workspace :: The workspace to save to a file.
      */
     void CatalogPublish::saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace)
     {
@@ -152,6 +161,37 @@ namespace Mantid
       saveNexus->setProperty("InputWorkspace", workspace->name());
       saveNexus->setProperty("FileName", Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + workspace->name() + ".nxs");
       saveNexus->execute();
+    }
+
+    /**
+     * Publish the history of a given workspace.
+     * @param catalog   :: The catalog to use to publish the file.
+     * @param workspace :: The workspace to obtain the history from.
+     */
+    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace)
+    {
+      std::stringstream ss;
+      // Obtain the workspace history as a string.
+      ss << generateWorkspaceHistory(workspace);
+      // Use the name the use wants to save the file to the server as and append .py
+      std::string fileName = Poco::Path(Poco::Path(getPropertyValue("CreateFileName")).getFileName()).getBaseName() + ".py";
+      // Publish the workspace history to the server.
+      publish(ss, catalog->getUploadURL(extractFileName(workspace->name()), fileName));
+    }
+
+    /**
+     * Generate the history of a given workspace.
+     * @param workspace :: The workspace to obtain the history from.
+     * @return The history of a given workspace.
+     */
+    const std::string CatalogPublish::generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace)
+    {
+      auto wsHistory = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
+      wsHistory->initialize();
+      wsHistory->setProperty("InputWorkspace", workspace->name());
+      wsHistory->setProperty("FileName", Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + workspace->name() + ".py");
+      wsHistory->execute();
+      return wsHistory->getPropertyValue("ScriptText");
     }
 
   }

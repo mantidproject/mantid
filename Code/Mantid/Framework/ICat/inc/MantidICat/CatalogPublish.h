@@ -2,6 +2,7 @@
 #define MATIND_ICAT_CATALOGPUBLISH_H
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidICat/CatalogAlgorithmHelper.h"
 
 namespace Mantid
 {
@@ -53,8 +54,8 @@ namespace Mantid
         void init();
         /// Override algorithm execute method.
         void exec();
-        /// Upload a given file (based on file path) to a given URL.
-        void publish(const std::string &pathToFileToUpload, const std::string &uploadURL);
+        /// Stream the contents of a file to a given URL.
+        void publish(std::istream& fileContents, const std::string &uploadURL);
         /// We want "SaveNexus" to take care of checking groups. Not this algorithm.
         bool checkGroups() { return false; }
         /// True if the extension of the file is a datafile.
@@ -63,6 +64,10 @@ namespace Mantid
         const std::string extractFileName(const std::string &filePath);
         /// Saves the workspace as a nexus file to the user's default directory.
         void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
+        /// Publish the history of a given workspace.
+        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace);
+        /// Generate the history of a given workspace.
+        const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
     };
   }
 }
