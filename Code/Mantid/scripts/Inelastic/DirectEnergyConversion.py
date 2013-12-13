@@ -577,25 +577,12 @@ class DirectEnergyConversion(object):
             raise TypeError('Unknown option passed to get_ei "%s"' % fix_ei)
 
         self.incident_energy= ei_guess
-        monitor_ws = input_ws;
-        if type(monitor_ws) is str:
-            pws = mtd[monitor_ws]
-        else:
-            pws = monitor_ws;
-        try: 
-            nsp = pws.getSpectrum(int(self.ei_mon_spectra[0]));
-        except:
-            monitor_ws = pws.getName()+'_monitors'
-            
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
-            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
+            GetEi(InputWorkspace=input_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
                   EnergyEstimate=ei_guess,FixEi=self.fix_ei)
 
-
         self.incident_energy = ei
-        AddSampleLog(Workspace=input_ws,LogName='Ei',LogText=str(ei),LogType='Number')
-            
         # Adjust the TOF such that the first monitor peak is at t=0
         ChangeBinOffset(InputWorkspace=input_ws,OutputWorkspace= resultws_name,Offset= -float(str(mon1_peak)))
         mon1_det = input_ws.getDetector(mon1_index)
@@ -781,12 +768,7 @@ class DirectEnergyConversion(object):
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
-        event_mode = False;
-        if hasattr(self, 'nexus_in_event_mode') and self.nexus_in_event_mode:
-            event_mode = True;
-
-        sum = True
-        result_ws = common.load_runs(runs, sum,event_mode)
+        result_ws = common.load_runs(runs, sum=True)
         if new_ws_name != None :
             if keep_previous_ws:
                 result_ws = CloneWorkspace(InputWorkspace = result_ws,OutputWorkspace = new_ws_name)

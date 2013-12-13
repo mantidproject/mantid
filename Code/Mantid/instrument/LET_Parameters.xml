@@ -34,10 +34,7 @@
    <value val="LET_rings_123.map"/>
 </parameter>
 
-<!-- Parameter describes if nexus data files are written in event mode or not -->
-<parameter name="nexus_in_event_mode" type="bool">
-    <value val = "True"/>
-</parameter>
+
 
 
 <!-- RunNumber to use for diag instead of the input run number if none - use input run -->
