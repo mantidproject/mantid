@@ -435,59 +435,61 @@ def LorBlock(a,first,nl):                                 #read Ascii block of I
 	return first,Q,int0,fw,int                                      #values as list
 
 def C2Fw(prog,sname):
-	outWS = sname+'_Workspace'
-	Vaxis = []
+	output_workspace = sname+'_Workspace'
+	vAxisNames = []
+	x, y, e = [], [], []
 
-	dataX = np.array([])
-	dataY = np.array([])
-	dataE = np.array([])
-
-	nhist = 0
 	names = ['Amplitude', 'Height', 'Width']
+	n_params = len(names)
+	nhist = 0
 
 	for nl in range(1,4):
 
+		nhist += nl*n_params
+		
 		#read ASCII file output from Fortran code
 		file_name = sname + '.ql' +str(nl)
 		asc = readASCIIFile(file_name)
-		lasc = len(asc)
 
 		var = asc[3].split()
 		nspec = int(var[0])
 		first = 7
 
-		Xout = []
+		x_data = []
 		amplitude, height, width = [], [], []
 		amplitude_error, height_error, width_error  = [], [], []
-		for m in range(0,nspec):
-			first,Q,i0,fw,it = LorBlock(asc,first,nl)
-			Xout.append(Q)
-
-			for i in range(0,nl):
-				#collect amplitude, height and width data
-				width.append(fw[i])
-				amplitude.append(it[i])
-				height.append(i0[0])
-				
-				#collect amplitude, height and width error data
-				width_error.append(fw[nl+i])
-				amplitude_error.append(it[nl+i])
-				height_error.append(i0[1])
 		
-		nhist += nl*len(names)
+		for m in range(nspec):
+			first,Q,i0,fw,it = LorBlock(asc,first,nl)
+			x_data += [Q for i in range(n_params)]
+
+			#collect amplitude, height and width data
+			width += fw[:nl]
+			amplitude += it[:nl]
+			height += [i0[0] for i in range(nl)]
+				
+			#collect amplitude, height and width error data
+			width_error += fw[nl:nl+nl]
+			amplitude_error += it[nl:nl+nl]
+			height_error += [i0[1] for i in range(nl)]
+
+		#transpose data
+		data = list(zip(*[amplitude, height, width]))
+		error_data = list(zip(*[amplitude_error, height_error, width_error]))
 
 		#Create a spectrum for each set of amplitude, height and width data
-		data = zip(names, [amplitude, height, width], [amplitude_error, height_error, width_error])
-		for name, array, error in data:
-				dataX = np.concatenate(dataX, np.array(Xout))
-				dataY = np.concatenate(dataY, np.array(array))
-				dataE = np.concatenate(dataE, np.array(error))
-				Vaxis.append(name+'.'+str(nl)+'.'+str(i+1))
+		for i, (y_data, e_data) in enumerate(zip(data, error_data)):
+			 	x += x_data
+				y += y_data
+				e += e_data
 
-	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
-		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+				for name in names:			
+					vAxisNames.append(name+'.'+str(nl)+'.'+str(i+1))
 
-	return outWS
+	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=nhist,
+		UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=vAxisNames)
+
+	return output_workspace
 
 def SeBlock(a,first):                                 #read Ascii block of Integers
 	line1 = a[first]
