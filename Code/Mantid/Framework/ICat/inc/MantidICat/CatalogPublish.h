@@ -55,6 +55,8 @@ namespace Mantid
         void exec();
         /// Upload a given file (based on file path) to a given URL.
         void publish(const std::string &pathToFileToUpload, const std::string &uploadURL);
+        /// We want "SaveNexus" to take care of checking groups. Not this algorithm.
+        bool checkGroups() { return false; }
         /// True if the extension of the file is a datafile.
         bool isDataFile(const std::string & filePath);
         /// Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
