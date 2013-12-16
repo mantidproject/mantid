@@ -59,6 +59,7 @@ set ( SRC_FILES
 	src/MultiDomainCreator.cpp
 	src/MuonFInteraction.cpp
 	src/NeutronBk2BkExpConvPVoigt.cpp
+	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
@@ -164,6 +165,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/MultiDomainCreator.h
 	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/NeutronBk2BkExpConvPVoigt.h
+	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
@@ -255,6 +257,7 @@ set ( TEST_FILES
 	MultiDomainFunctionTest.h
 	MuonFInteractionTest.h
 	NeutronBk2BkExpConvPVoigtTest.h
+	NormaliseByPeakAreaTest.h
 	PRConjugateGradientTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
