@@ -11,6 +11,7 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into th
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
@@ -808,11 +809,12 @@ namespace DataHandling
     }
 
     // Convert DOM XML document into string
-    // ? std::ofstream outFile();
-    // ? writer.writeNode(outFile, mDoc);  // How do I do this?
-
+    std::ostringstream outFile;
+    writer.writeNode(outFile, mDoc);  
+    std::string parameterXMLString = outFile.str();
 
     // Load the string into the workspace
+    LoadParameterFile::execManually(true, "", parameterXMLString, ws);
 
   }
 
