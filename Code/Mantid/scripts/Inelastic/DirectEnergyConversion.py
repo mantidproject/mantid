@@ -789,7 +789,7 @@ class DirectEnergyConversion(object):
             event_mode = True;
 
         sum = True
-        result_ws = common.load_runs(runs, sum,event_mode)
+        result_ws = common.load_runs(runs, sum)
         if new_ws_name != None :
             if keep_previous_ws:
                 result_ws = CloneWorkspace(InputWorkspace = result_ws,OutputWorkspace = new_ws_name)
