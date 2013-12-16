@@ -71,7 +71,7 @@ private:
   {
     Mantid::API::IFunction_sptr profile = boost::make_shared<ComptonPeakProfile>();
     profile->initialize();
-    auto paramWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(300,351,0.5,true,true); // Only using for parameters
+    auto paramWS = ComptonProfileTestHelpers::createTestWorkspace(1,300,351,0.5,true,true); // Only using for parameters
     profile->setAttributeValue("Mass", 1.0079);
     TS_ASSERT_THROWS_NOTHING(profile->setWorkspace(paramWS));
     profile->setUpForFit();

@@ -31,7 +31,7 @@ public:
 
     auto alg = createAlgorithm();
     double x0(50.0),x1(300.0),dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx, true,true);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx, true,true);
     alg->setProperty("InputWorkspace", testWS);
     alg->setProperty("Mass", 1.0097);
     alg->execute();
