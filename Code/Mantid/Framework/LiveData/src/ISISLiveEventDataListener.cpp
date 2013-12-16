@@ -99,6 +99,12 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
       daeName.erase( i );
     }
 
+    if ( daeName == "0.0.0.0" )
+    {
+      // to connect to fake dae
+      daeName = "127.0.0.1";
+    }
+
     // set IDC reporter function for errors
     IDCsetreportfunc(&ISISLiveEventDataListener::IDCReporter);
 

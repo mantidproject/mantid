@@ -145,7 +145,7 @@ namespace Mantid
 
       // receive a header and check if it's valid
       template <typename T>
-      void Receive(T buffer, const std::string& head, const std::string &msg)
+      void Receive(T &buffer, const std::string& head, const std::string &msg)
       {
           long timeout = 0;
           while( m_socket.available() < static_cast<int>(sizeof(buffer)) )
