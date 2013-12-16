@@ -109,12 +109,13 @@ class StretchedExpFT(IFunction1D):
                 for name in self._parmset: p[name] = optparms[name]
 
         de = (xvals[1]-xvals[0]) / 2 # increase the long-time range, increase the low-frequency resolution
-        emax = 32 * max(abs(xvals))  # increase short-times resolution, increase the resolution of the structure factor tail
-        tmax = self._h / de
-        tmin = self._h / emax
-        N = int( tmax / tmin )
-        dt = N * tmin / ( 2 *N + 1 ) # extent to negative times and t==0
-        sampled_times = dt * np.arange(-N, N+1)
+        emax = max( abs(xvals) )
+        Nmax = 16000 # increase short-times resolution, increase the resolution of the structure factor tail
+        while ( emax / de ) < Nmax:
+            emax = 2 * emax
+        N = int( emax / de )
+        dt = ( float(N) / ( 2 * N + 1 ) ) * (self._h / emax)  # extent to negative times and t==0
+        sampled_times = dt * np.arange(-N, N+1) # len( sampled_times ) < 64000
         exponent = -(np.abs(sampled_times)/p['tau'])**p['beta']
         freqs = de * np.arange(-N, N+1)
         fourier = p['height']*np.abs( scipy.fftpack.fft( np.exp(exponent) ).real )
