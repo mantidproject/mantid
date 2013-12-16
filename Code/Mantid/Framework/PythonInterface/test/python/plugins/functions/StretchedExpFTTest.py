@@ -63,7 +63,7 @@ class _InternalMakeSEFTData(PythonAlgorithm):
         wspace.dataE(0)[:] = error
         
         self.setProperty('OutputWorkspace', wspace) # Stores the workspace as the given name
-            
+
 class StretchedExpFTTest(unittest.TestCase):
 
     def skipTest(self):
