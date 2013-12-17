@@ -81,6 +81,8 @@ DECLARE_FUNCTION(DiffRotDiscreteCircle);
 ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle(){
   //declareParameter("Height", 1.0); //parameter "Height" already declared in constructor of base class DeltaFunction
   declareParameter( "Radius", 1.0, "Circle radius [Angstroms] " );
+  declareAttribute( "Q", API::IFunction::Attribute(0.5) );
+  declareAttribute( "N", API::IFunction::Attribute(3) );
 
   // Ensure positive values for Height and Radius
   BoundaryConstraint* HeightConstraint = new BoundaryConstraint( this, "Height", std::numeric_limits<double>::epsilon(), true );
@@ -88,10 +90,6 @@ ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle(){
 
   BoundaryConstraint* RadiusConstraint = new BoundaryConstraint( this, "Radius", std::numeric_limits<double>::epsilon(), true );
   addConstraint( RadiusConstraint );
-
-  declareAttribute( "Q", API::IFunction::Attribute(0.5) );
-  declareAttribute( "N", API::IFunction::Attribute(3) );
-
 }
 
 double ElasticDiffRotDiscreteCircle::HeightPrefactor() const{
@@ -108,7 +106,7 @@ double ElasticDiffRotDiscreteCircle::HeightPrefactor() const{
   return aN / N;
 }
 
-InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle() : m_t2e(4.136)
+InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle() : m_h(4.135665616)
 {
   declareParameter( "Intensity",1.0, "scaling factor [arbitrary units]" );
   declareParameter( "Radius", 1.0, "Circle radius [Angstroms]" );
@@ -126,15 +124,13 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle() : m_t2e(4.136)
 
   BoundaryConstraint* DecayConstraint = new BoundaryConstraint( this, "Decay", std::numeric_limits< double >::epsilon(), true );
   addConstraint( DecayConstraint );
-
 }
-
 
 void InelasticDiffRotDiscreteCircle::function1D( double *out, const double* xValues, const size_t nData ) const
 {
   const double I = getParameter( "Intensity" );
   const double R = getParameter( "Radius" );
-  const double rate = m_t2e / getParameter( "Decay" ); // micro-eV or mili-eV
+  const double rate = m_h / getParameter( "Decay" ); // micro-eV or mili-eV
   const double Q = getAttribute( "Q" ).asDouble();
   const int N = getAttribute( "N" ).asInt();
 

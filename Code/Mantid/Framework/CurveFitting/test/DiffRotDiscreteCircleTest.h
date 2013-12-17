@@ -338,7 +338,8 @@ private:
    */
   Mantid::DataObjects::Workspace2D_sptr generateN3Workspace( const double & I, const double & R, const double & tao, const double & Q )
   {
-    const double rate = 4.136 / tao; // conversion from picosec to mili-eV, or from nanosec to micro-eV
+    const double h = 4.135665616; // plank constant in meV*THz (or ueV*PHz)
+    const double rate = h / tao; // conversion from picosec to mili-eV, or from nanosec to micro-eV
 
     // calculate prefix A1. Better be verbose for clarity
     const double x = Q * R * sqrt( 3.0 );

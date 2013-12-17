@@ -53,6 +53,9 @@ public:
   /// overwrite IFunction base class methods
   virtual std::string name()const{ return "ElasticDiffRotDiscreteCircle"; }
 
+  /// overwrite IFunction base class method, which declare function parameters
+  // virtual void init();
+
   /// A rescaling of the peak intensity
   double HeightPrefactor() const;
 
@@ -74,13 +77,15 @@ public:
 
   virtual std::string name() const { return "InelasticDiffRotDiscreteCircle"; }
 
+  // virtual void init();
+
 protected:
 
   virtual void function1D( double * out, const double* xValues, const size_t nData ) const;
 
 private:
 
-  const double m_t2e; // converstion from picosec to mili-eV, or from nanosec to micro-eV
+  const double m_h; // Plank constant, in meV*THz (or ueV*PHz)
 };
 
 
