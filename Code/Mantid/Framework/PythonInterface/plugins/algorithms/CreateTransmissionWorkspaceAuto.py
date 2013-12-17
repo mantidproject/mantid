@@ -102,7 +102,6 @@ class CreateTransmissionWorkspaceAuto(PythonAlgorithm):
         wavelength_min = self.value_to_apply("WavelengthMin", instrument, "LambdaMin")
         
         wavelength_max = self.value_to_apply("WavelengthMax", instrument, "LambdaMax")
-        print wavelength_min, wavelength_max
         
         wavelength_step = self.value_or_none("WavelengthStep", instrument)
         

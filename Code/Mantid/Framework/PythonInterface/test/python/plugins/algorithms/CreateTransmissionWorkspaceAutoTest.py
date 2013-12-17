@@ -1,40 +1,33 @@
 import unittest
-from testhelpers.algorithm_decorator import make_decorator
 import mantid.api
-from CreateTransmissionWorkspaceTest import CreateTransmissionWorkspaceTest
+#from CreateTransmissionWorkspaceTest import CreateTransmissionWorkspaceTest
 from mantid.simpleapi import *
 
-class CreateTransmissionWorkspaceAutoTest(CreateTransmissionWorkspaceTest):
+class CreateTransmissionWorkspaceAutoTest(unittest.TestCase):
     
-    def __init__(self, *args, **kwargs):
-        super(CreateTransmissionWorkspaceAutoTest, self).__init__(*args, **kwargs)
+    
+    def test_minimal(self):
+
         trans1 = Load('INTER00013463.nxs', OutputWorkspace="trans1")
-        trans2 = Load('INTER00013464.nxs', OutputWorkspace="trans2")
-        self.__trans1 = trans1
-        self.__trans2 = trans2
         
-    def setUp(self):
-        super(CreateTransmissionWorkspaceAutoTest, self).setUp()
-        standard_alg = make_decorator(self.algorithm_type())
-        self.__standard_alg = standard_alg
+        inst = trans1.getInstrument()
         
-    def __del__(self):
-        pass
-        #DeleteWorkspace(self.__trans1)
-        #DeleteWorkspace(self.__trans2)
-    
-    
-    def algorithm_type(self):
-        return CreateTransmissionWorkspaceAuto
-    
-    def test_use_point_detector_start(self):
-        alg = self.__standard_alg
-        print self.__trans1
-        alg.set_FirstTransmissionRun(self.__trans1)
-        alg.set_AnalysisMode("PointDetectorAnalysis")
-        alg.execute()
+        out_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, AnalysisMode="PointDetectorAnalysis")
+        history = out_ws.getHistory()
+        alg = history.lastAlgorithm()
         
-    
+        '''
+        Here we are checking that the applied values (passed to CreateTransmissionWorkspace come from the instrument parameters.
+        '''
+        self.assertEqual(inst.getNumberParameter("LambdaMin")[0], alg.getProperty("WavelengthMin").value)
+        self.assertEqual(inst.getNumberParameter("LambdaMax")[0], alg.getProperty("WavelengthMax").value)
+        self.assertEqual(inst.getNumberParameter("MonitorBackgroundMin")[0], alg.getProperty("MonitorBackgroundWavelengthMin").value)
+        self.assertEqual(inst.getNumberParameter("MonitorBackgroundMax")[0], alg.getProperty("MonitorBackgroundWavelengthMax").value)
+        self.assertEqual(inst.getNumberParameter("MonitorIntegralMin")[0], alg.getProperty("MonitorIntegrationWavelengthMin").value)
+        self.assertEqual(inst.getNumberParameter("MonitorIntegralMax")[0], alg.getProperty("MonitorIntegrationWavelengthMax").value)
+        self.assertEqual(inst.getNumberParameter("I0MonitorIndex")[0], alg.getProperty("I0MonitorIndex").value)
+        self.assertEqual(inst.getNumberParameter("PointDetectorStart")[0], alg.getProperty("WorkspaceIndexList").value[0])
+        self.assertEqual(inst.getNumberParameter("PointDetectorStop")[0], alg.getProperty("WorkspaceIndexList").value[1])
     
     
  

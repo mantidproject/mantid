@@ -9,7 +9,6 @@ import re
 
 class CreateTransmissionWorkspaceTest(unittest.TestCase):
     
-    @abstractmethod
     def algorithm_type(self):
         return CreateTransmissionWorkspace
     
