@@ -24,28 +24,225 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec_with_TOF_input_gives_correct_X_values()
+  void test_exec_nosum_spectrum_gives_correct_values()
   {
     using namespace Mantid::API;
 
     auto alg = createAlgorithm();
-    double x0(50.0),x1(300.0),dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx, true,true);
+    auto testWS = createTwoSpectrumWorkspace();
     alg->setProperty("InputWorkspace", testWS);
     alg->setProperty("Mass", 1.0097);
+    alg->setProperty("Sum", false);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS != 0)
+    MatrixWorkspace_sptr yspaceWS = alg->getProperty("YSpaceDataWorkspace");
+    MatrixWorkspace_sptr fittedWS = alg->getProperty("FittedWorkspace");
+    MatrixWorkspace_sptr symmetrisedWS = alg->getProperty("SymmetrisedWorkspace");
+    TS_ASSERT(outputWS != 0);
+    TS_ASSERT(yspaceWS != 0);
+    TS_ASSERT(fittedWS != 0);
+    TS_ASSERT(symmetrisedWS != 0);
 
+    // Dimensions
     TS_ASSERT_EQUALS(testWS->getNumberHistograms(), outputWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), yspaceWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), fittedWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), symmetrisedWS->getNumberHistograms());
+
+    TS_ASSERT_EQUALS(testWS->blocksize(), outputWS->blocksize());
+    TS_ASSERT_EQUALS(testWS->blocksize(), yspaceWS->blocksize());
+    TS_ASSERT_EQUALS(testWS->blocksize(), fittedWS->blocksize());
+    TS_ASSERT_EQUALS(testWS->blocksize(), symmetrisedWS->blocksize());
 
     // Test a few values
+    // ====== TOF data ======
     const auto &outX = outputWS->readX(0);
     const auto &outY = outputWS->readY(0);
     const auto &outE = outputWS->readE(0);
     const size_t npts = outputWS->blocksize();
+
+    // X
+    TS_ASSERT_DELTA(50.0, outX.front(), 1e-08);
+    TS_ASSERT_DELTA(175.0, outX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(300.0, outX.back(), 1e-08);
+    // Y
+    TS_ASSERT_DELTA(-0.00005081, outY.front(), 1e-08);
+    TS_ASSERT_DELTA(0.00301015, outY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.00000917, outY.back(), 1e-08);
+    // E
+    TS_ASSERT_DELTA(0.02000724, outE.front(), 1e-08);
+    TS_ASSERT_DELTA(0.02000724, outE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(0.02000724, outE.back(), 1e-08);
+
+    // ====== Y-space =====
+    const auto &ysX = yspaceWS->readX(0);
+    const auto &ysY = yspaceWS->readY(0);
+    const auto &ysE = yspaceWS->readE(0);
+    // X
+    TS_ASSERT_DELTA(-18.71348856, ysX.front(), 1e-08);
+    TS_ASSERT_DELTA(-1.670937938, ysX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(17.99449408, ysX.back(), 1e-08);
+    // Y
+    TS_ASSERT_DELTA(-0.01152733, ysY.front(), 1e-08);
+    TS_ASSERT_DELTA(5.56667697, ysY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.35141703, ysY.back(), 1e-08);
+    // E
+    TS_ASSERT_DELTA(25.14204252, ysE.front(), 1e-08);
+    TS_ASSERT_DELTA(36.99940026, ysE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(138.38603736, ysE.back(), 1e-08);
+
+    // ====== Fitted ======
+    const auto &fitX = fittedWS->readX(0);
+    const auto &fitY = fittedWS->readY(0);
+    const auto &fitE = fittedWS->readE(0);
+
+    // X
+    TS_ASSERT_DELTA(-18.71348856, fitX.front(), 1e-08);
+    TS_ASSERT_DELTA(-1.670937938, fitX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(17.99449408, fitX.back(), 1e-08);
+    // Y
+    TS_ASSERT_DELTA(-0.00556080, fitY.front(), 1e-08);
+    TS_ASSERT_DELTA(6.03793125, fitY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.00656332, fitY.back(), 1e-08);
+    // E
+    TS_ASSERT_DELTA(25.14204252, fitE.front(), 1e-08);
+    TS_ASSERT_DELTA(36.99940026, fitE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(138.38603736, fitE.back(), 1e-08);
+
+    // ====== Symmetrised ======
+    const auto &symX = symmetrisedWS->readX(0);
+    const auto &symY = symmetrisedWS->readY(0);
+    const auto &symE = symmetrisedWS->readE(0);
+
+    // X
+    TS_ASSERT_DELTA(-18.71348856, symX.front(), 1e-08);
+    TS_ASSERT_DELTA(-1.670937938, symX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(17.99449408, symX.back(), 1e-08);
+    // Y
+    std::cerr << std::fixed << std::setprecision(8) << symY.front() << " " << symY[npts/2] << "  " << symY.back() << "\n";
+    TS_ASSERT_DELTA(0.23992597, symY.front(), 1e-08);
+    TS_ASSERT_DELTA(6.19840840, symY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.03738811, symY.back(), 1e-08);
+    // E
+    std::cerr << std::fixed << std::setprecision(8) << symE.front() << " " << symE[npts/2] << "  " << symE.back() << "\n";
+    TS_ASSERT_DELTA(17.78587720, symE.front(), 1e-08);
+    TS_ASSERT_DELTA(15.98016067, symE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(14.59086103, symE.back(), 1e-08);
+  }
+
+  void xtest_exec_sum_spectrum_gives_original_TOF_plus_single_spectrum_yspace_values()
+  {
+    using namespace Mantid::API;
+
+    auto alg = createAlgorithm();
+    auto testWS = createTwoSpectrumWorkspace();
+    alg->setProperty("InputWorkspace", testWS);
+    alg->setProperty("Mass", 1.0097);
+    alg->setProperty("Sum", true);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr yspaceWS = alg->getProperty("YSpaceDataWorkspace");
+    MatrixWorkspace_sptr fittedWS = alg->getProperty("FittedWorkspace");
+    MatrixWorkspace_sptr symmetrisedWS = alg->getProperty("SymmetrisedWorkspace");
+    TS_ASSERT(outputWS != 0);
+    TS_ASSERT(yspaceWS != 0);
+    TS_ASSERT(fittedWS != 0);
+    TS_ASSERT(symmetrisedWS != 0);
+
+    // Dimensions
+    TS_ASSERT_EQUALS(testWS->getNumberHistograms(), outputWS->getNumberHistograms()); // TOF is original size
+    TS_ASSERT_EQUALS(1, yspaceWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(1, fittedWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(1, symmetrisedWS->getNumberHistograms());
+
+    TS_ASSERT_EQUALS(testWS->blocksize(), outputWS->blocksize());
+    TS_ASSERT_EQUALS(testWS->blocksize(), yspaceWS->blocksize());
+    TS_ASSERT_EQUALS(testWS->blocksize(), fittedWS->blocksize());
+    TS_ASSERT_EQUALS(testWS->blocksize(), symmetrisedWS->blocksize());
+
+    // Test a few values
+    // ====== TOF data ======
+    const auto &outX = outputWS->readX(0);
+    const auto &outY = outputWS->readY(0);
+    const auto &outE = outputWS->readE(0);
+    const size_t npts = outputWS->blocksize();
+
+    // X
+    TS_ASSERT_DELTA(50.0, outX.front(), 1e-08);
+    TS_ASSERT_DELTA(175.0, outX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(300.0, outX.back(), 1e-08);
+    // Y
+    TS_ASSERT_DELTA(-0.00005081, outY.front(), 1e-08);
+    TS_ASSERT_DELTA(0.00301015, outY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.00000917, outY.back(), 1e-08);
+    // E
+    TS_ASSERT_DELTA(0.02000724, outE.front(), 1e-08);
+    TS_ASSERT_DELTA(0.02000724, outE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(0.02000724, outE.back(), 1e-08);
+
+    // ====== Y-space =====
+    const auto &ysX = yspaceWS->readX(0);
+    const auto &ysY = yspaceWS->readY(0);
+    const auto &ysE = yspaceWS->readE(0);
+    // X
+    TS_ASSERT_DELTA(-18.71348856, ysX.front(), 1e-08);
+    TS_ASSERT_DELTA(-1.670937938, ysX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(17.99449408, ysX.back(), 1e-08);
+    // Y
+    std::cerr << std::fixed << std::setprecision(8) << ysY.front() << " " << ysY[npts/2] << "  " << ysY.back() << "\n";
+    TS_ASSERT_DELTA(-0.01152733, ysY.front(), 1e-08);
+    TS_ASSERT_DELTA(5.56667697, ysY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.35141703, ysY.back(), 1e-08);
+    // E
+    std::cerr << std::fixed << std::setprecision(8) << ysE.front() << " " << ysE[npts/2] << "  " << ysE.back() << "\n";
+    TS_ASSERT_DELTA(25.14204252, ysE.front(), 1e-08);
+    TS_ASSERT_DELTA(36.99940026, ysE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(138.38603736, ysE.back(), 1e-08);
+
+
+    // ====== Fitted ======
+    const auto &fitX = fittedWS->readX(0);
+    const auto &fitY = fittedWS->readY(0);
+    const auto &fitE = fittedWS->readE(0);
+
+    // X
+    TS_ASSERT_DELTA(-18.71348856, fitX.front(), 1e-08);
+    TS_ASSERT_DELTA(-1.670937938, fitX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(17.99449408, fitX.back(), 1e-08);
+    // Y
+    std::cerr << std::fixed << std::setprecision(8) << fitY.front() << " " << fitY[npts/2] << "  " << fitY.back() << "\n";
+    TS_ASSERT_DELTA(-0.00556080, fitY.front(), 1e-08);
+    TS_ASSERT_DELTA(6.03793125, fitY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.00656332, fitY.back(), 1e-08);
+    // E
+    std::cerr << std::fixed << std::setprecision(8) << fitE.front() << " " << fitE[npts/2] << "  " << fitE.back() << "\n";
+    TS_ASSERT_DELTA(0.0, fitE.front(), 1e-08);
+    TS_ASSERT_DELTA(0.0, fitE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(0.0, fitE.back(), 1e-08);
+
+    // ====== Symmetrised ======
+    const auto &symX = symmetrisedWS->readX(0);
+    const auto &symY = symmetrisedWS->readY(0);
+    const auto &symE = symmetrisedWS->readE(0);
+
+    // X
+    TS_ASSERT_DELTA(-18.71348856, symX.front(), 1e-08);
+    TS_ASSERT_DELTA(-1.670937938, symX[npts/2], 1e-08);
+    TS_ASSERT_DELTA(17.99449408, symX.back(), 1e-08);
+    // Y
+    std::cerr << std::fixed << std::setprecision(8) << symY.front() << " " << symY[npts/2] << "  " << symY.back() << "\n";
+    TS_ASSERT_DELTA(0.23992597, symY.front(), 1e-08);
+    TS_ASSERT_DELTA(6.19840840, symY[npts/2], 1e-08);
+    TS_ASSERT_DELTA(-0.03738811, symY.back(), 1e-08);
+    // E
+    std::cerr << std::fixed << std::setprecision(8) << symE.front() << " " << symE[npts/2] << "  " << symE.back() << "\n";
+    TS_ASSERT_DELTA(17.78587720, symE.front(), 1e-08);
+    TS_ASSERT_DELTA(15.98016067, symE[npts/2], 1e-08);
+    TS_ASSERT_DELTA(14.59086103, symE.back(), 1e-08);
   }
 
 private:
@@ -55,8 +252,19 @@ private:
     alg->initialize();
     alg->setChild(true);
     alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
+    alg->setPropertyValue("YSpaceDataWorkspace", "__UNUSED__");
+    alg->setPropertyValue("FittedWorkspace", "__UNUSED__");
+    alg->setPropertyValue("SymmetrisedWorkspace", "__UNUSED__");
     return alg;
   }
+
+  Mantid::API::MatrixWorkspace_sptr createTwoSpectrumWorkspace()
+  {
+    double x0(50.0),x1(300.0),dx(0.5);
+    auto twoSpectrum = ComptonProfileTestHelpers::createTestWorkspace(2,x0,x1,dx, true,true);
+    return twoSpectrum;
+  }
+
 
 };
 

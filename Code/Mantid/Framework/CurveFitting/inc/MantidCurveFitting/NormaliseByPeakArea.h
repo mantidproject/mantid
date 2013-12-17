@@ -47,17 +47,40 @@ namespace Mantid
 
       /// Convert input workspace to Y coordinates for fitting
       API::MatrixWorkspace_sptr convertInputToY();
+      /// Fit the mass peak & find the area value
+      double fitToMassPeak(const API::MatrixWorkspace_sptr & yspace, const size_t index);
+      /// Normalise given TOF spectrum
+      void normaliseTOFData(const double area, const size_t index);
+      /// Stores/accumulates the results
+      void saveToOutput(const API::MatrixWorkspace_sptr & accumWS,
+                        const std::vector<double> & yValues, const std::vector<double> & eValues,
+                        const size_t index);
+      /// Symmetrises the data in yspace about the origin
+      void symmetriseYSpace();
 
       /// Check and store appropriate input data
       void retrieveInputs();
       /// Create the output workspace
-      void createOutputWorkspace();
+      void createOutputWorkspaces();
+      /// Set the units meta-data
+      void setUnitsToMomentum(const API::MatrixWorkspace_sptr & workspace);
 
       API::MatrixWorkspace_sptr m_inputWS;
       /// The input mass in AMU
       double m_mass;
-      /// Output workspace
-      API::MatrixWorkspace_sptr m_outputWS;
+      /// Flag to indicate if results are to be summed
+      bool m_sumResults;
+      /// Normalised output in TOF
+      API::MatrixWorkspace_sptr m_normalisedWS;
+      /// Input data converted to Y space
+      API::MatrixWorkspace_sptr m_yspaceWS;
+      /// Fitted output
+      API::MatrixWorkspace_sptr m_fittedWS;
+      /// Fitted output
+      API::MatrixWorkspace_sptr m_symmetrisedWS;
+
+      /// Reporting
+      API::Progress *m_progress;
     };
 
 
