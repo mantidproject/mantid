@@ -144,7 +144,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             IvsLam = Divide(LHSWorkspace=_detector_ws,RHSWorkspace=_monInt)
             names = mtd.getObjectNames()
 
-            IvsLam = transCorr(trans, IvsLam)
+            IvsLam = transCorr(trans, IvsLam, lambda_min, lambda_max, background_min, background_max, 
+                               int_min, int_max, detector_index_ranges, i0_monitor_index)
             RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
                 
         
