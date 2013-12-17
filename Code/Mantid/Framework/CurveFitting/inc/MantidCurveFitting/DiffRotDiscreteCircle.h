@@ -54,7 +54,7 @@ public:
   virtual std::string name()const{ return "ElasticDiffRotDiscreteCircle"; }
 
   /// overwrite IFunction base class method, which declare function parameters
-  // virtual void init();
+  virtual void init();
 
   /// A rescaling of the peak intensity
   double HeightPrefactor() const;

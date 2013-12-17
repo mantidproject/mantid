@@ -83,7 +83,10 @@ ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle(){
   declareParameter( "Radius", 1.0, "Circle radius [Angstroms] " );
   declareAttribute( "Q", API::IFunction::Attribute(0.5) );
   declareAttribute( "N", API::IFunction::Attribute(3) );
+}
 
+void ElasticDiffRotDiscreteCircle::init()
+{
   // Ensure positive values for Height and Radius
   BoundaryConstraint* HeightConstraint = new BoundaryConstraint( this, "Height", std::numeric_limits<double>::epsilon(), true );
   addConstraint( HeightConstraint );
