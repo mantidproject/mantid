@@ -2,6 +2,7 @@
 #so this file provides any extra GUI tweaks not easily doable in the designer
 #for the time being this also includes non-GUI behaviour
 import refl_window
+import refl_save
 import csv
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
@@ -460,12 +461,11 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.loading = False
         self.windowRefl.modFlag = False
     def saveWorkspaces(self):
-        #Dialog = QtGui.QDialog()
-        #u = Ui_SaveWindow()
-        #u.setupUi(Dialog)
-        #Dialog.exec_()
-        #print "Disabled until decision about old dialog has been reached"
-        print "Disabled - Run desired save algorithm from main MantidPlot window instead"
+        Dialog = QtGui.QDialog()
+        u = refl_save.Ui_SaveWindow()
+        u.setupUi(Dialog)
+        Dialog.exec_()
+        #print "Disabled - Run desired save algorithm from main MantidPlot window instead"
     def showHelp(self):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
