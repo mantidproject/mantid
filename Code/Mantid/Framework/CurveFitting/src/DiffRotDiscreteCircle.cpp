@@ -208,26 +208,27 @@ void DiffRotDiscreteCircle::setAttribute( const std::string& name, const Attribu
   trickleDownAttribute( name );
 }
 
-DiffRotDiscreteCircle::DiffRotDiscreteCircle()
+//DiffRotDiscreteCircle::DiffRotDiscreteCircle()
+void DiffRotDiscreteCircle::init()
 {
   m_elastic = boost::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>( API::FunctionFactory::Instance().createFunction( "ElasticDiffRotDiscreteCircle" ) );
   addFunction( m_elastic );
   m_inelastic = boost::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>( API::FunctionFactory::Instance().createFunction( "InelasticDiffRotDiscreteCircle" ) );
   addFunction( m_inelastic );
 
-  this->setAttributeValue( "NumDeriv", true );
+  setAttributeValue( "NumDeriv", true );
 
-  this->declareAttribute( "Q", API::IFunction::Attribute( 0.5 ) );
-  this->declareAttribute( "N", API::IFunction::Attribute( 3 ) );
+  declareAttribute( "Q", API::IFunction::Attribute( 0.5 ) );
+  declareAttribute( "N", API::IFunction::Attribute( 3 ) );
 
   //Set the aliases
-  this->setAlias( "f1.Intensity", "Intensity" );
-  this->setAlias( "f1.Radius", "Radius" );
-  this->setAlias( "f1.Decay", "Decay" );
+  setAlias( "f1.Intensity", "Intensity" );
+  setAlias( "f1.Radius", "Radius" );
+  setAlias( "f1.Decay", "Decay" );
 
   //Set the ties between Elastic and Inelastic parameters
-  this->addDefaultTies( "f0.Height=f1.Intensity,f0.Radius=f1.Radius" );
-  this->applyTies();
+  addDefaultTies( "f0.Height=f1.Intensity,f0.Radius=f1.Radius" );
+  applyTies();
 
 }
 

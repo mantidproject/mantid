@@ -189,6 +189,7 @@ public:
     const double Q = 0.7;
     const int N = 4;
     Mantid::CurveFitting::DiffRotDiscreteCircle func;
+    func.init();
     func.setParameter( "f1.Intensity", I );
     func.setParameter( "f1.Radius" , R );
     func.setParameter( "f1.Decay", tao );
@@ -221,6 +222,7 @@ public:
 
     // This should set parameters of the inelastic part
     Mantid::CurveFitting::DiffRotDiscreteCircle func;
+    func.init();
     func.setParameter( "Intensity", I );
     func.setParameter( "Radius", R );
     func.setParameter( "Decay", tao );

@@ -98,9 +98,6 @@ class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction
 {
 public:
 
-  /// Constructor
-  DiffRotDiscreteCircle();
-
   /// Destructor
   ~DiffRotDiscreteCircle() {};
 
@@ -109,6 +106,8 @@ public:
   virtual const std::string category() const { return "QENS"; }
 
   virtual int version() const { return 1; }
+
+  virtual void init();
 
   /// Propagate an attribute to member functions
   virtual void trickleDownAttribute( const std::string &name );
