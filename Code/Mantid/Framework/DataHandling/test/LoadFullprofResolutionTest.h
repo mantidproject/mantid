@@ -6,12 +6,15 @@
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <fstream>
 #include <Poco/File.h>
 
 using Mantid::DataHandling::LoadFullprofResolution;
 
 using namespace Mantid;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -268,6 +271,38 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test that when the workspace property is used
+  **  that parameters are correctly loaded into this workspace
+  *   The GEM instrument is used
+  */
+  void test_workspace()
+  {
+    // Generate file
+    string filename("TestWorskpace.irf");
+    generate1BankIrfFile(filename);
+
+    // Load workspace wsName
+    load_GEM();
+
+    // Set up algorithm to load into the workspace
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Banks", "1");
+    alg.setProperty("Workspace", wsName);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check parameters in workspace
+
+    // Clean
+    Poco::File("TestWorskpace.irf").remove();
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test that the number from the NPROF is read correctly 
   **  and has correct name in table.
   */
@@ -378,6 +413,33 @@ public:
     }
 
     return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate a GEM workspace
+    */
+  void load_GEM()
+  {
+    LoadInstrument loaderGEM;
+
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadFullprofResolutionWorkspace";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Path to test input file 
+    loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
+    //inputFile = loaderIDF2.getPropertyValue("Filename");
+    loaderGEM.setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
+    TS_ASSERT( loaderGEM.isExecuted() );
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -572,6 +634,9 @@ public:
   {
     return 29;  // Change this value if you add or remove any rows from the OutputTableWorkspace
   }
+
+  private:
+  std::string wsName;  // For Workspace property
 
 };
 
