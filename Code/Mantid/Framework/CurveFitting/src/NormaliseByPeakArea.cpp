@@ -23,6 +23,8 @@ namespace Mantid
     double PEAK_POS_GUESS = -0.1;
     /// Starting value of width in y-space for fit
     double PEAK_WIDTH_GUESS = 4.0;
+    /// Bin width for rebinning workspace converted from TOF
+    double SUMMEDY_BIN_WIDTH = 0.5;
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(NormaliseByPeakArea)
@@ -91,27 +93,19 @@ namespace Mantid
     void NormaliseByPeakArea::exec()
     {
       retrieveInputs();
-      createOutputWorkspaces();
-
-      auto yspaceIn = convertInputToY();
-      if(m_sumResults) // set X values
-      {
-        m_normalisedWS->setX(0, m_inputWS->readX(0)); // TOF
-        m_yspaceWS->setX(0, yspaceIn->readX(0)); // momentum
-        m_fittedWS->setX(0, yspaceIn->readX(0)); // momentum
-        m_symmetrisedWS->setX(0, yspaceIn->readX(0)); // momentum
-      }
+      const auto yspaceIn = convertInputToY();
+      createOutputWorkspaces(yspaceIn);
 
       const int64_t nhist = static_cast<int64_t>(yspaceIn->getNumberHistograms());
       const int64_t nreports = \
-          static_cast<int64_t>(yspaceIn->getNumberHistograms() + m_normalisedWS->getNumberHistograms());
-      m_progress = new API::Progress(this,0.33,1.0,nreports);
+          static_cast<int64_t>(yspaceIn->getNumberHistograms() + 2*m_symmetrisedWS->getNumberHistograms()*m_symmetrisedWS->blocksize());
+      m_progress = new API::Progress(this,0.10,1.0,nreports);
 
       for(int64_t i = 0; i < nhist; ++i)
       {
+        m_normalisedWS->setX(i, m_inputWS->readX(i)); // TOF
         if(!m_sumResults) // avoid setting multiple times if we are summing
         {
-          m_normalisedWS->setX(i, m_inputWS->readX(i)); // TOF
           m_yspaceWS->setX(i, yspaceIn->readX(i)); // momentum
           m_fittedWS->setX(i, yspaceIn->readX(i)); // momentum
           m_symmetrisedWS->setX(i, yspaceIn->readX(i)); // momentum
@@ -132,14 +126,94 @@ namespace Mantid
       setProperty("SymmetrisedWorkspace", m_symmetrisedWS);
     }
 
+    /**
+     * Caches input details for the peak information
+     */
+    void NormaliseByPeakArea::retrieveInputs()
+    {
+      m_inputWS = getProperty("InputWorkspace");
+      m_mass = getProperty("Mass");
+      m_sumResults = getProperty("Sum");
+    }
+
+    /**
+     * Creates & cache output workspaces.
+     * @param yspaceIn Workspace containing TOF input values converted to Y-space
+     */
+    void NormaliseByPeakArea::createOutputWorkspaces(const API::MatrixWorkspace_sptr & yspaceIn)
+    {
+      m_normalisedWS = WorkspaceFactory::Instance().create(m_inputWS); // TOF data is not resized
+
+      const size_t nhist = m_sumResults ? 1 : yspaceIn->getNumberHistograms();
+      const size_t npts = yspaceIn->blocksize();
+
+      m_yspaceWS = WorkspaceFactory::Instance().create(yspaceIn, nhist);
+      m_fittedWS = WorkspaceFactory::Instance().create(yspaceIn, nhist);
+      m_symmetrisedWS = WorkspaceFactory::Instance().create(yspaceIn, nhist);
+      if(m_sumResults)
+      {
+        // Copy over xvalues & assign "high" initial error values to simplify symmetrisation calculation
+        double high(1e6);
+        const auto & yInputX = yspaceIn->readX(0);
+
+        auto & ysX = m_yspaceWS->dataX(0);
+        auto & ysE = m_yspaceWS->dataE(0);
+        auto & fitX = m_fittedWS->dataX(0);
+        auto & fitE = m_fittedWS->dataE(0);
+        auto & symX = m_symmetrisedWS->dataX(0);
+        auto & symE = m_symmetrisedWS->dataE(0);
+        for(size_t j = 0; j < npts; ++j)
+        {
+          ysX[j] = yInputX[j];
+          fitX[j] = yInputX[j];
+          symX[j] = yInputX[j];
+          ysE[j] = high;
+          fitE[j] = high;
+          symE[j] = high;
+        }
+      }
+
+      setUnitsToMomentum(m_yspaceWS);
+      setUnitsToMomentum(m_fittedWS);
+      setUnitsToMomentum(m_symmetrisedWS);
+    }
+
+    /**
+     * @param workspace Workspace whose units should be altered
+     */
+    void NormaliseByPeakArea::setUnitsToMomentum(const API::MatrixWorkspace_sptr & workspace)
+    {
+      // Units
+      auto xLabel = boost::make_shared<Units::Label>("Momentum", "A^-1");
+      workspace->getAxis(0)->unit() = xLabel;
+      workspace->setYUnit("");
+      workspace->setYUnitLabel("");
+    }
+
+
     /*
-     * Returns a workspace converted to Y-space coordinates. @see ConvertToYSpace
+     * Returns a workspace converted to Y-space coordinates. @see ConvertToYSpace. If summing is requested
+     * then the output is rebinned to a common grid to allow summation onto a common grid. The rebin min/max
+     * is found from the converted workspace
      */
     MatrixWorkspace_sptr NormaliseByPeakArea::convertInputToY()
     {
-      auto alg = createChildAlgorithm("ConvertToYSpace",0.0, 0.33,false);
+      auto alg = createChildAlgorithm("ConvertToYSpace",0.0, 0.05,false);
       alg->setProperty("InputWorkspace", m_inputWS);
       alg->setProperty("Mass", m_mass);
+      alg->execute();
+      MatrixWorkspace_sptr tofInY = alg->getProperty("OutputWorkspace");
+      if(!m_sumResults) return tofInY;
+
+      // Rebin to common grid
+      double xmin(0.0), xmax(0.0);
+      tofInY->getXMinMax(xmin,xmax);
+      std::vector<double> params(3);
+      params[0] = xmin; params[1] = SUMMEDY_BIN_WIDTH; params[2] = xmax;
+
+      alg = createChildAlgorithm("Rebin",0.05, 0.1,false);
+      alg->setProperty("InputWorkspace", tofInY);
+      alg->setProperty("Params", params);
       alg->execute();
       return alg->getProperty("OutputWorkspace");
     }
@@ -237,6 +311,7 @@ namespace Mantid
         {
           double accumYj(accumYCopy[j]), accumEj(accumECopy[j]);
           double rhsYj(yValues[j]), rhsEj(eValues[j]);
+          if(accumEj < 1e-12 || rhsEj < 1e-12) continue;
           double err = 1.0/(accumEj*accumEj) + 1.0/(rhsEj*rhsEj);
           accumY[j] = accumYj/(accumEj*accumEj) + rhsYj/(rhsEj*rhsEj);
           accumY[j] /= err;
@@ -305,49 +380,9 @@ namespace Mantid
           }
           ySymOut[j] = yout;
           eSymOut[j] = eout;
+          m_progress->report();
         }
-
-        m_progress->report();
       }
-    }
-
-    /**
-     * Caches input details for the peak information
-     */
-    void NormaliseByPeakArea::retrieveInputs()
-    {
-      m_inputWS = getProperty("InputWorkspace");
-      m_mass = getProperty("Mass");
-      m_sumResults = getProperty("Sum");
-    }
-
-    /**
-     * Create & cache output workspaces
-     */
-    void NormaliseByPeakArea::createOutputWorkspaces()
-    {
-      m_normalisedWS = WorkspaceFactory::Instance().create(m_inputWS);
-
-      const size_t nhist = m_sumResults ? 1 : m_inputWS->getNumberHistograms();
-      m_yspaceWS = WorkspaceFactory::Instance().create(m_inputWS, nhist);
-      m_fittedWS = WorkspaceFactory::Instance().create(m_inputWS, nhist);
-      m_symmetrisedWS = WorkspaceFactory::Instance().create(m_inputWS, nhist);
-
-      setUnitsToMomentum(m_yspaceWS);
-      setUnitsToMomentum(m_fittedWS);
-      setUnitsToMomentum(m_symmetrisedWS);
-    }
-
-    /**
-     * @param workspace Workspace whose units should be altered
-     */
-    void NormaliseByPeakArea::setUnitsToMomentum(const API::MatrixWorkspace_sptr & workspace)
-    {
-      // Units
-      auto xLabel = boost::make_shared<Units::Label>("Momentum", "A^-1");
-      workspace->getAxis(0)->unit() = xLabel;
-      workspace->setYUnit("");
-      workspace->setYUnitLabel("");
     }
 
   } // namespace CurveFitting

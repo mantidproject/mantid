@@ -45,6 +45,13 @@ namespace Mantid
       void init();
       void exec();
 
+      /// Check and store appropriate input data
+      void retrieveInputs();
+      /// Create the output workspaces
+      void createOutputWorkspaces(const API::MatrixWorkspace_sptr & yspaceIn);
+      /// Set the units meta-data
+      void setUnitsToMomentum(const API::MatrixWorkspace_sptr & workspace);
+
       /// Convert input workspace to Y coordinates for fitting
       API::MatrixWorkspace_sptr convertInputToY();
       /// Fit the mass peak & find the area value
@@ -58,12 +65,6 @@ namespace Mantid
       /// Symmetrises the data in yspace about the origin
       void symmetriseYSpace();
 
-      /// Check and store appropriate input data
-      void retrieveInputs();
-      /// Create the output workspace
-      void createOutputWorkspaces();
-      /// Set the units meta-data
-      void setUnitsToMomentum(const API::MatrixWorkspace_sptr & workspace);
 
       API::MatrixWorkspace_sptr m_inputWS;
       /// The input mass in AMU
@@ -72,7 +73,7 @@ namespace Mantid
       bool m_sumResults;
       /// Normalised output in TOF
       API::MatrixWorkspace_sptr m_normalisedWS;
-      /// Input data converted to Y space
+      /// Input data converted (and possible summed) to Y space
       API::MatrixWorkspace_sptr m_yspaceWS;
       /// Fitted output
       API::MatrixWorkspace_sptr m_fittedWS;
