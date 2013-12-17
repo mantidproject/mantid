@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Tue Dec 10 13:42:57 2013
+# Created: Fri Dec 13 16:46:34 2013
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -48,6 +48,11 @@ class Ui_windowRefl(object):
         self.textRB.setCursorPosition(0)
         self.textRB.setObjectName(_fromUtf8("textRB"))
         self.layoutTopRow.addWidget(self.textRB)
+        self.buttonSearch = QtGui.QPushButton(self.widgetMainRow)
+        self.buttonSearch.setObjectName(_fromUtf8("buttonSearch"))
+        self.layoutTopRow.addWidget(self.buttonSearch)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.layoutTopRow.addItem(spacerItem)
         self.labelRuns = QtGui.QLabel(self.widgetMainRow)
         self.labelRuns.setObjectName(_fromUtf8("labelRuns"))
         self.layoutTopRow.addWidget(self.labelRuns)
@@ -56,8 +61,8 @@ class Ui_windowRefl(object):
         self.textRuns.setMaximumSize(QtCore.QSize(120, 16777215))
         self.textRuns.setObjectName(_fromUtf8("textRuns"))
         self.layoutTopRow.addWidget(self.textRuns)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.layoutTopRow.addItem(spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.layoutTopRow.addItem(spacerItem1)
         self.labelPolarCorrect = QtGui.QLabel(self.widgetMainRow)
         self.labelPolarCorrect.setObjectName(_fromUtf8("labelPolarCorrect"))
         self.layoutTopRow.addWidget(self.labelPolarCorrect)
@@ -72,15 +77,15 @@ class Ui_windowRefl(object):
         self.comboPolarCorrect.addItem(_fromUtf8(""))
         self.comboPolarCorrect.addItem(_fromUtf8(""))
         self.layoutTopRow.addWidget(self.comboPolarCorrect)
-        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.layoutTopRow.addItem(spacerItem1)
+        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.layoutTopRow.addItem(spacerItem2)
         self.checkTickAll = QtGui.QCheckBox(self.widgetMainRow)
         self.checkTickAll.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.checkTickAll.setTristate(False)
         self.checkTickAll.setObjectName(_fromUtf8("checkTickAll"))
         self.layoutTopRow.addWidget(self.checkTickAll)
-        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.layoutTopRow.addItem(spacerItem2)
+        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.layoutTopRow.addItem(spacerItem3)
         self.buttonAuto = QtGui.QPushButton(self.widgetMainRow)
         self.buttonAuto.setObjectName(_fromUtf8("buttonAuto"))
         self.layoutTopRow.addWidget(self.buttonAuto)
@@ -185,6 +190,9 @@ class Ui_windowRefl(object):
         self.menuHelp = QtGui.QMenu(self.menuBar)
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
         windowRefl.setMenuBar(self.menuBar)
+        self.statusMain = QtGui.QStatusBar(windowRefl)
+        self.statusMain.setObjectName(_fromUtf8("statusMain"))
+        windowRefl.setStatusBar(self.statusMain)
         self.actionSave_As = QtGui.QAction(windowRefl)
         self.actionSave_As.setObjectName(_fromUtf8("actionSave_As"))
         self.actionOpen_Table = QtGui.QAction(windowRefl)
@@ -215,6 +223,7 @@ class Ui_windowRefl(object):
     def retranslateUi(self, windowRefl):
         windowRefl.setWindowTitle(QtGui.QApplication.translate("windowRefl", "ISIS Reflectometry", None, QtGui.QApplication.UnicodeUTF8))
         self.labelRB.setText(QtGui.QApplication.translate("windowRefl", "RB:", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSearch.setText(QtGui.QApplication.translate("windowRefl", "Search", None, QtGui.QApplication.UnicodeUTF8))
         self.labelRuns.setText(QtGui.QApplication.translate("windowRefl", "Transmission run(s):", None, QtGui.QApplication.UnicodeUTF8))
         self.labelPolarCorrect.setText(QtGui.QApplication.translate("windowRefl", "Polarisation corrections", None, QtGui.QApplication.UnicodeUTF8))
         self.comboPolarCorrect.setItemText(0, QtGui.QApplication.translate("windowRefl", "None", None, QtGui.QApplication.UnicodeUTF8))

@@ -71,11 +71,14 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
         for inst in self.instrumentList:
             self.comboInstrument.addItem(inst)
+        self.statusMain.clearMessage()
+        self.statusMain.showMessage("Ready")
+        #self.labelStatus = QtGui.QLabel("Ready")
+        #self.statusMain.addWidget(self.labelStatus)
         self.initTable()
         self.populateList()
         self.windowRefl = windowRefl
         self.connectSlots()
-        #self.windowRefl.modFlag = True
     def initTable(self):
         self.currentTable = None
         self.tableMain.resizeColumnsToContents()
@@ -107,7 +110,8 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
-        self.textRB.editingFinished.connect(self.on_textRB_editingFinished)
+        self.textRB.returnPressed.connect(self.on_textRB_editingFinished)
+        self.buttonSearch.clicked.connect(self.on_textRB_editingFinished)
         self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
         self.buttonProcess.clicked.connect(self.on_buttonProcess_clicked)
         self.buttonTransfer.clicked.connect(self.on_buttonTransfer_clicked)
@@ -130,9 +134,20 @@ class ReflGui(refl_window.Ui_windowRefl):
                 self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
             elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
                 self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
-            runs = self.__instrumentRuns.getJournalRuns(self.textRB.text())
-            for run in runs:
-                self.listMain.addItem(run)
+            if self.textRB.text():
+                runs = []
+                self.statusMain.clearMessage()
+                self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
+                try:
+                    runs = self.__instrumentRuns.getJournalRuns(self.textRB.text())
+                except:
+                    print "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives."
+                    QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
+                    runs = []
+                self.statusMain.clearMessage()
+                self.statusMain.showMessage("Ready")
+                for run in runs:
+                    self.listMain.addItem(run)
         except Exception as ex:
             logger.notice("Could not list archive runs")
             logger.notice(str(ex))
@@ -169,9 +184,13 @@ class ReflGui(refl_window.Ui_windowRefl):
             if mtd.doesExist(first_contents):
                 runnumber = groupGet(mtd[first_contents], "samp", "run_number")
             else:
-                temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
-                runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
-                DeleteWorkspace(temp)
+                try:
+                    temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
+                    runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
+                    DeleteWorkspace(temp)
+                except:
+                    print "Unable to load file. Please check your managed user directories."
+                    QtGui.QMessageBox.critical(self.tableMain, 'Error Loading File',"Unable to load file. Please check your managed user directories.")
             item = QtGui.QTableWidgetItem()
             item.setText(runnumber)
             self.tableMain.setItem(row, col, item)
