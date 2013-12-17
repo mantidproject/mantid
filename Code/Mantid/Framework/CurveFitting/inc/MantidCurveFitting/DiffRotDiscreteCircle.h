@@ -77,7 +77,7 @@ public:
 
   virtual std::string name() const { return "InelasticDiffRotDiscreteCircle"; }
 
-  // virtual void init();
+  virtual void init();
 
 protected:
 

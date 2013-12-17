@@ -117,7 +117,10 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle() : m_h(4.1356656
 
   declareAttribute( "Q", API::IFunction::Attribute( 0.5 ) );
   declareAttribute( "N", API::IFunction::Attribute( 3 ) );
+}
 
+void InelasticDiffRotDiscreteCircle::init()
+{
   // Ensure positive values for Intensity, Radius, and decay
   BoundaryConstraint* IntensityConstraint = new BoundaryConstraint( this, "Intensity", std::numeric_limits< double >::epsilon(), true );
   addConstraint(IntensityConstraint);
