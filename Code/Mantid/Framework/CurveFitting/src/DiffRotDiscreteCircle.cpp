@@ -17,7 +17,7 @@ The Decay fitting parameter <math>\tau</math> is the inverse of the transition r
 
 <center><math> \tau_l^{-1} = 4 \tau^{-1} sin^2(\frac{\pi l}{N}) </math></center>
 
-If the unit of <math>\omega</math> is energy, and the energy unit is <math>\mu</math>eV, then <math>\tau</math> is expressed in nano-seconds. If E-unit is meV then <math>\tau</math> is expressed in pico-seconds. The conversion equation used between the jump transition rate <math>k</math>, expressed in energy units, and <math>\tau</math> is: <math>k\cdot \tau=4.136\, meV\cdot ps=4.136\, \mu eV\cdot ns</math>
+The transition rate, expressed in units of energy is <math>h\tau^{-1}</math>, with h = 4.135665616 meV THz.
 
 == Example: Methyl Rotations ==
 Methyl Rotations can be modelled setting N=3. In this case, the inelastic part reduces to a single Lorentzian:
@@ -26,10 +26,10 @@ Methyl Rotations can be modelled setting N=3. In this case, the inelastic part r
 
 If, alternatively, one models these dynamics using the [[Lorentzian]] function provided in Mantid:
 
-<center><math> S(Q,E) = A \delta (\omega) + \frac{B}{\pi} \left( \frac{\frac{\Gamma}{2}}{(\frac{\Gamma}{2})^2 + \omega^2}\right) </math></center>
-Then the following equalities hold:
-<center><math>B = 2\,A_1</math></center>
-<center><math>\Gamma = 6\cdot 4.126/\tau</math></center>
+<center><math> S(Q,E) = A \delta (\omega) + \frac{B}{\pi} \left( \frac{\frac{\Gamma}{2}}{(\frac{\Gamma}{2})^2 + (\hbar\omega)^2}\right) </math></center>
+Then:
+<center><math>B = \frac{1}{\pi}h A_1</math></center>
+<center><math>\Gamma = \frac{3}{\pi} h\tau^{-1} = 3.949269754 meV\cdot THz \cdot \tau^{-1}</math></center>
 
 == Properties ==
 
@@ -54,7 +54,6 @@ Then the following equalities hold:
 |1.0
 |inverse of the transition rate (ps if energy in meV; ns if energy in <math>\mu</math>eV)
 |}
-
 
 [[Category:Fit_functions]]
 *WIKI*/
