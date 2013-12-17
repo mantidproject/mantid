@@ -28,7 +28,8 @@ namespace Mantid
     Workspace2D::~Workspace2D()
     {
       // Clear out the memory
-      for (size_t i=0; i<data.size(); i++)
+      PARALLEL_FOR1(this)
+      for (int64_t i=0; i < static_cast<int64_t>(data.size()); i++)
       {
         delete data[i];
       }
