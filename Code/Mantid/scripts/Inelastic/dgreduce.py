@@ -516,6 +516,18 @@ def process_legacy_parameters(**kwargs) :
         else:
             params[key]=value;    
 
+    # Check all possible ways to define hard mask file:
+    if not params['hard_mask_file'] is None:
+        if type(params['hard_mask_file']) == str and params['hard_mask_file']=="None":
+            params['hard_mask_file'] = None;
+        elif type(params['hard_mask_file']) == bool:
+           if  params['hard_mask_file']:
+               raise  TypeError("hard_mask_file has to be a file name or None. It can not be boolean True")
+           else:
+               params['hard_mask_file'] = None;
+        elif len(params['hard_mask_file']) == 0:
+             params['hard_mask_file'] = None;
+
         
     return params
 

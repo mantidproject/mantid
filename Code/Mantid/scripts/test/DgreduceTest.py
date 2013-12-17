@@ -33,6 +33,35 @@ class DgreduceTest(unittest.TestCase):
         self.assertEqual(params['normalise_method'],'Monitor-1')
         self.assertEqual(params['use_hard_mask_only'],True)
         self.assertEqual(params['hard_mask_file'],"someFileName")
+    def test_process_leg_param_hardmaskfile(self):
+        kw=dict();
+        kw["hard_mask_file"]="someFileName"
+        params = process_legacy_parameters(**kw);
+        self.assertEqual(params['hard_mask_file'],"someFileName")
+
+        kw["hard_mask_file"]=""
+        params = process_legacy_parameters(**kw);
+        self.assertTrue(params['hard_mask_file'] is None)
+
+        kw["hard_mask_file"]=[]
+        params = process_legacy_parameters(**kw);
+        self.assertTrue(params['hard_mask_file'] is None)
+
+        kw["hard_mask_file"]=None
+        params = process_legacy_parameters(**kw);
+        self.assertTrue(params['hard_mask_file'] is None)
+
+        kw["hard_mask_file"]="None"
+        params = process_legacy_parameters(**kw);
+        self.assertTrue(params['hard_mask_file'] is None)
+
+        kw["hard_mask_file"]=False
+        params = process_legacy_parameters(**kw);
+        self.assertTrue(params['hard_mask_file'] is None)
+
+        kw["hard_mask_file"]=True
+        self.assertRaises(TypeError,process_legacy_parameters,**kw)
+
 
     def test_process_leg_par_harmaskPlus(self):
         kw=dict();
