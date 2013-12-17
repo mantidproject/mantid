@@ -794,6 +794,9 @@ class DirectEnergyConversion(object):
 
         if not (instr_name is None or len(instr_name)==0 or instr_name == '__empty_') : # first time run or empty run
             self.initialise(instr_name)
+        else: # just reinitialize idf parameters to defaults
+            self.init_idf_params(True);
+
 
 #----------------------------------------------------------------------------------
 #              Complex setters/getters
@@ -1054,11 +1057,11 @@ class DirectEnergyConversion(object):
             self.instr_name = self.instrument.getName()
  
 
-    def init_idf_params(self, reload_instrument=False):
+    def init_idf_params(self, reinitialize_parameters=False):
         """
         Initialise some default parameters and add the one from the IDF file
         """
-        if self._idf_values_read == True and reload_instrument == False:
+        if self._idf_values_read == True and reinitialize_parameters == False:
             return
            
         """

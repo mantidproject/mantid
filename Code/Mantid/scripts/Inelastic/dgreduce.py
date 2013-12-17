@@ -34,6 +34,8 @@ def setup(instname=None,reload=False):
     if not (Reducer is None) :
         if  Reducer.instr_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :
+                # reinitialize idf parameters to defaults.
+                Reducer.init_idf_params(True);
                 return  # has been already defined
 
     Reducer = DRC.setup_reducer(instname)
@@ -501,17 +503,13 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
 
 def process_legacy_parameters(**kwargs) :
     """ The method to deal with old parameters which have logic different from default and easy to process using 
-        subprogram. All other parameters just copiet to output       
+        subprogram. All other parameters just copiet to output 
     """
     params = dict();
     for key,value in kwargs.iteritems():
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
-        if key == 'hardmaskPlus': # legacy key defines other mask file here
-            params["hard_mask_file"] = value;
-            params["use_hard_mask_only"] = False;
-            
         else:
             params[key]=value;    
 
