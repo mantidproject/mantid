@@ -81,32 +81,6 @@ namespace Mantid
       return confidence;
     }
 
-    /**
-    * Check if a file is a text file
-    * @param file :: The file pointer
-    * @returns true if the file an ascii text file, false otherwise
-    */
-    bool LoadAscii::isAscii(FILE *file)
-    {
-      char data[256];
-      char *pend = &data[fread(data, 1, sizeof(data), file)];
-      fseek(file,0,SEEK_SET);
-      /*
-      * Call it a binary file if we find a non-ascii character in the 
-      * first 256 bytes of the file.
-      */
-      for( char *p = data;  p < pend; ++p )
-      {
-        unsigned long ch = (unsigned long)*p;
-        if( !(ch <= 0x7F) )
-        {
-          return false;
-        }
-
-      }
-      return true;
-    }
-
     //--------------------------------------------------------------------------
     // Protected methods
     //--------------------------------------------------------------------------
