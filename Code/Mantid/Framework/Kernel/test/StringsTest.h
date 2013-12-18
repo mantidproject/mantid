@@ -120,6 +120,18 @@ public:
       TSM_ASSERT_THROWS(" this path should go out of range",split_path("/aaaa\\bbbbb/../../../",result),std::invalid_argument);
 
   }
+  void testSkipLine()
+  {
+    TS_ASSERT(skipLine("#blah blah"));
+    TS_ASSERT(!skipLine("blah blah"));
+  }
+  void testpeekLine()
+  {
+    std::istringstream text("blah blah\nfoo bar\n");
+    TS_ASSERT(peekLine(text) == "blah blah");
+    std::cout << peekLine(text) << std::endl;
+    TS_ASSERT(peekLine(text) == "blah blah");
+  }
   void testExtractWord()
   /**
      Applies a test to the extractWord

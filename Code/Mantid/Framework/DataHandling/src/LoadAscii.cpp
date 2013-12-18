@@ -27,6 +27,7 @@ This algorithm cannot load a file created by [[SaveAscii]] if it has X errors wr
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 #include <fstream>
 
 #include <boost/tokenizer.hpp>
@@ -285,9 +286,7 @@ namespace Mantid
     */
     void LoadAscii::peekLine(std::ifstream & is, std::string & str) const
     {
-      getline(is, str);
-      is.seekg(-(int)str.length(),std::ios::cur);
-      boost::trim(str);
+      str = Kernel::Strings::peekLine(is);
     }
 
     /**
@@ -297,8 +296,7 @@ namespace Mantid
     */
     bool LoadAscii::skipLine(const std::string & line) const
     {
-      // Empty or comment
-      return ( line.empty() || boost::starts_with(line, "#") );
+      return Kernel::Strings::skipLine(line);
     }
 
     /**
