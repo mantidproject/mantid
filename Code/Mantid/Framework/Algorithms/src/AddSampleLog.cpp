@@ -84,9 +84,14 @@ void AddSampleLog::exec()
     double val;
     if (!Strings::convert(propValue, val))
       throw std::invalid_argument("Error interpreting string '" + propValue + "' as a number.");
-    Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
+    Kernel::DateAndTime startTime;
+    try {
+      startTime = theRun.startTime();
+    } catch (std::runtime_error&) {
+      // Swallow the error - startTime will just be 0
+    }
     TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>(propName);
-    tsp->addValue(now, val);
+    tsp->addValue(startTime, val);
     theRun.addLogData(tsp);
   }
 
