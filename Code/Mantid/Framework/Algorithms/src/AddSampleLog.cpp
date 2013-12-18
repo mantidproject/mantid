@@ -94,8 +94,6 @@ void AddSampleLog::exec()
     tsp->addValue(startTime, val);
     theRun.addLogData(tsp);
   }
-
-  setProperty("Workspace", wSpace);
 }
 
 } // namespace Algorithms
