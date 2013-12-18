@@ -15,6 +15,7 @@ set ( TEST_PY_FILES
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
+  MaskAngleTest.py
   MaskWorkspaceToCalFileTest.py
   MeanTest.py
   MergeCalFilesTest.py

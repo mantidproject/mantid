@@ -24,7 +24,8 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         return "MaskAngle"
     
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "", direction=mantid.kernel.Direction.Input), "Input workspace")
+	instvalid=
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input,validator=mantid.api.InstrumentValidator()), "Input workspace")
         angleValidator=mantid.kernel.FloatBoundedValidator()
         angleValidator.setBounds(0.,180.)
         self.declareProperty(name="MinAngle", defaultValue=0.0, validator=angleValidator, direction=mantid.kernel.Direction.Input, doc="Angles above StartAngle are going to be masked")
@@ -42,10 +43,12 @@ class MaskAngle(mantid.api.PythonAlgorithm):
 
 
         numspec = ws.getNumberHistograms()
+	source=ws.getInstrument().getSource().getPos()
+	sample=ws.getInstrument().getSample().getPos()
         for i in range(numspec):
             det=ws.getDetector(i)
             if not det.isMonitor():
-                tt=numpy.degrees(det.getTwoTheta(mantid.kernel.V3D(0,0,0),mantid.kernel.V3D(0,0,1)))
+                tt=numpy.degrees(det.getTwoTheta(sample,sample-source))
                 if tt>= ttmin and tt<= ttmax:
                     detlist.append(det.getID())
 
