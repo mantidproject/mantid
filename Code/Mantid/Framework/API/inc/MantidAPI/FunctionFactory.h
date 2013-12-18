@@ -80,6 +80,12 @@ namespace API
     template<typename FunctionType>
     const std::vector<std::string>& getFunctionNames() const;
 
+    using Kernel::DynamicFactory<IFunction>::subscribe;
+    void subscribe(const std::string& className, AbstractFactory* pAbstractFactory,
+                   Kernel::DynamicFactory<IFunction>::SubscribeAction replace=ErrorIfExists);
+
+    void unsubscribe(const std::string& className);
+
   private:
     friend struct Mantid::Kernel::CreateUsingNew<FunctionFactoryImpl>;
 
