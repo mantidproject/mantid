@@ -54,6 +54,10 @@ namespace Mantid
       V3D operator+(const V3D& v) const;
       V3D& operator+=(const V3D& v);
 
+      /// Convenience method for sorting list of V3D objects based on magnitude
+      static bool CompareMagnitude( const Kernel::V3D & v1,
+                                    const Kernel::V3D & v2 );
+
       // explicit conversion into vector
       operator std::vector<double>()const{std::vector<double> tmp(3); tmp[0]=x;tmp[1]=y; tmp[2]=z;return  tmp;}
 

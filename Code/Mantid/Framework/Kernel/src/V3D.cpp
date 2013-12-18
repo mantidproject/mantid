@@ -864,6 +864,19 @@ double V3D::toMillerIndexes(double eps)
 }
 
 
+/**
+   Comparator function for sorting list of 3D vectors based on their magnitude.
+   @param v1  first vector
+   @param v2  seconde vector
+   @return true if v1.norm() < v2.norm().
+ */
+bool V3D::CompareMagnitude( const V3D & v1, const V3D & v2 )
+{
+  double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
+  double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
+  return (mag_sq_1 < mag_sq_2);
+}
+
 
 } // Namespace Kernel
 } // Namespace Mantid
