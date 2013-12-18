@@ -90,11 +90,12 @@ namespace Mantid
         if( !(ch <= 0x7F) )
         {
           result = false;
+          break;
         }
 
       }
       delete data;
-      delete pend;
+
       return result;
     }
 

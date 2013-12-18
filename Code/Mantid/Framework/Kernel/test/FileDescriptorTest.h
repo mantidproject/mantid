@@ -81,23 +81,23 @@ public:
     TS_ASSERT_EQUALS(1, is.tellg());
   }
 
-  void test_isAscii_Returns_True_For_Stream_Pointing_At_Ascii()
+  void test_isAscii_Returns_True_For_C_Handle()
   {
     FILE* handle = fopen(m_testAsciiPath.c_str(), "r");
     if (handle)
     {
-      TS_ASSERT(!FileDescriptor::isAscii(handle));
+      TS_ASSERT(FileDescriptor::isAscii(handle));
       TS_ASSERT_EQUALS(0, ftell(handle));
       fclose(handle);
     }
   }
 
-  void test_isAscii_Returns_False_For_Stream_Pointing_At_Ascii()
+  void test_isAscii_Returns_False_For_C_Handle()
   {
     FILE* handle = fopen(m_testNonNexusPath.c_str(), "r");
     if (handle)
     {
-      TS_ASSERT(FileDescriptor::isAscii(handle));
+      TS_ASSERT(!FileDescriptor::isAscii(handle));
       TS_ASSERT_EQUALS(0, ftell(handle));
       fclose(handle);
     }
