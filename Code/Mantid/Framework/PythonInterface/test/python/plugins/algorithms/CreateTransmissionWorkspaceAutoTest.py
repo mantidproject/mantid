@@ -1,10 +1,22 @@
 import unittest
-import mantid.api
-#from CreateTransmissionWorkspaceTest import CreateTransmissionWorkspaceTest
+from CreateTransmissionWorkspaceTest import CreateTransmissionWorkspaceTest
 from mantid.simpleapi import *
 
-class CreateTransmissionWorkspaceAutoTest(unittest.TestCase):
+from CreateTransmissionWorkspaceBaseTest import CreateTransmissionWorkspaceBaseTest
+
+class CreateTransmissionWorkspaceAutoTest(unittest.TestCase, CreateTransmissionWorkspaceBaseTest):
     
+    def algorithm_type(self):
+        return CreateTransmissionWorkspaceAuto
+    
+    def setUp(self):
+        CreateTransmissionWorkspaceBaseTest.setUp(self)
+        
+    def tearDown(self):
+        CreateTransmissionWorkspaceBaseTest.setUp(self)
+    
+    def __init__(self, *args, **kwargs):
+        super(CreateTransmissionWorkspaceAutoTest,self).__init__(*args, **kwargs)
     
     def test_minimal(self):
 
