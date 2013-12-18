@@ -56,10 +56,25 @@ void LoadSassena::initDocs()
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadSassena::confidence(Kernel::NexusDescriptor & descriptor) const
+int LoadSassena::confidence( Kernel::NexusDescriptor & descriptor ) const
 {
-  if(descriptor.hasRootAttr("sassena_version")) return 99;
-  return 0;
+  if( descriptor.hasRootAttr( "sassena_version" ) )
+  {
+    return 99;
+  }
+  else
+  {
+    // Older sassena files do not have a sassena_version. Find out if "qvectors" is a dataset of the file
+    const hid_t h5file = H5Fopen( descriptor.filename().c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
+    const std::string setName( "qvectors");
+    hsize_t dims[3];
+    herr_t errorcode = dataSetInfo( h5file, setName, dims );
+    if( errorcode < 0 )
+    {
+      return 0;
+    }
+    return 99;
+  }
 }
 
 /**
@@ -82,15 +97,18 @@ void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::st
  * @param setName string name of dataset
  * @param dims storing dimensionality
  */
-void LoadSassena::dataSetInfo( const hid_t& h5file, const std::string setName, hsize_t* dims)
+
+herr_t LoadSassena::dataSetInfo( const hid_t& h5file, const std::string setName, hsize_t* dims ) const
 {
   H5T_class_t class_id;
   size_t type_size;
-  if( H5LTget_dataset_info( h5file, setName.c_str(), dims, &class_id, &type_size ) < 0 )
+  herr_t errorcode;
+  errorcode = H5LTget_dataset_info( h5file, setName.c_str(), dims, &class_id, &type_size );
+  if( errorcode < 0 )
   {
-    this->g_log.error("Unable to read "+setName+" dataset info");
-    throw Kernel::Exception::FileError("Unable to read "+setName+" dataset info:" , m_filename);
+    g_log.error( "Unable to read " + setName + " dataset info" );
   }
+  return errorcode;
 }
 
 /**
@@ -119,10 +137,13 @@ void LoadSassena::dataSetDouble( const hid_t& h5file, const std::string setName,
 const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGroup_sptr gws)
 {
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
-  std::string setName("qvectors");
+  const std::string setName("qvectors");
 
   hsize_t dims[3];
-  this->dataSetInfo(h5file, setName, dims);
+  if ( dataSetInfo(h5file, setName, dims) < 0 )
+  {
+    throw Kernel::Exception::FileError( "Unable to read " + setName + " dataset info:" , m_filename );
+  }
   int nq = static_cast<int>( dims[0] ); //number of q-vectors
   double* buf = new double[nq*3];
   this->dataSetDouble(h5file,"qvectors",buf);
@@ -201,7 +222,10 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
   int nq = static_cast<int>( qvmod.size() ); //number of q-vectors
   const double dt = getProperty("TimeUnit"); //time unit increment, in picoseconds;
   hsize_t dims[3];
-  this->dataSetInfo(h5file, setName, dims);
+  if( dataSetInfo( h5file, setName, dims ) < 0 )
+  {
+    throw Kernel::Exception::FileError( "Unable to read " + setName + " dataset info:" , m_filename );
+  }
   int nnt = static_cast<int>( dims[1] ); //number of non-negative time points
   int nt = 2*nnt - 1; //number of time points
   int origin = nnt-1;
@@ -334,7 +358,7 @@ void LoadSassena::exec()
   char cversion[16];
   if ( H5LTget_attribute_string( h5file, "/", "sassena_version", cversion ) < 0 )
   {
-    throw Kernel::Exception::FileError("Unable to read Sassena version" , m_filename);
+    this->g_log.error("Unable to read Sassena version");
   }
   //const std::string version(cversion);
   //determine which loader protocol to use based on the version
