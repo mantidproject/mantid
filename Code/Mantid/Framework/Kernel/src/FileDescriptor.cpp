@@ -77,22 +77,25 @@ namespace Mantid
     bool FileDescriptor::isAscii(FILE* file, const size_t nbytes)
     {
       // read the data and reset the seek index back to the beginning
-      char data[nbytes];
-      char *pend = &data[fread(data, 1, sizeof(data), file)];
+      char *data = new char[nbytes];
+      char *pend = &data[fread(data, 1, nbytes, file)];
       fseek(file,0,SEEK_SET);
 
       // Call it a binary file if we find a non-ascii character in the
       // first nbytes bytes of the file.
+      bool result = true;
       for( char *p = data;  p < pend; ++p )
       {
         unsigned long ch = (unsigned long)*p;
         if( !(ch <= 0x7F) )
         {
-          return false;
+          result = false;
         }
 
       }
-      return true;
+      delete data;
+      delete pend;
+      return result;
     }
 
     //----------------------------------------------------------------------------------------------
