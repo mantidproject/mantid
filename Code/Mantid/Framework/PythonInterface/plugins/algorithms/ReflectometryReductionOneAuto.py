@@ -82,9 +82,9 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
     def PyExec(self):
         
         in_ws = self.getProperty("InputWorkspace").value
-        instrument = in_ws.getInstrument()
         
         first_ws = self.getProperty("FirstTransmissionRun").value
+        instrument = first_ws.getInstrument()
         
         '''
         Get all the inputs.
@@ -147,31 +147,14 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         '''
         Pass the arguments and execute the main algorithm.
         '''
-        new_IvsQ1, new_IvsLam1, thetaOut1 = ReflectometryReductionOne(
-                                                                      InputWorkspace=in_ws, 
-                                                                      AnalysisMode = analysis_mode, 
-                                                                      FirstTransmissionRun=first_ws, 
-                                                                      SecondTransmissionRun=second_ws, 
-                                                                      OutputWorkspace=output_workspace_name, 
-                                                                      OutputWorkspaceWavelength=output_workspace_lam_name,
-                                                                      StartOverlap=start_overlap, 
-                                                                      EndOverlap=end_overlap, 
-                                                                      Params=params, 
-                                                                      I0MonitorIndex=i0_monitor_index, 
-                                                                      WorkspaceIndexList=workspace_index_list, 
-                                                                      WavelengthMin=wavelength_min, 
-                                                                      WavelengthStep=wavelength_step, 
-                                                                      WavelengthMax=wavelength_max,
-                                                                      MonitorBackgroundWavelengthMin=wavelength_back_min, 
-                                                                      MonitorBackgroundWavelengthMax=wavelength_back_max,
-                                                                      MonitorIntegrationWavelengthMin=wavelength_integration_min, 
-                                                                      MonitorIntegrationWavelengthMax=wavelength_integration_max,
-                                                                      RegionOfInterest=region_of_interest, 
-                                                                      RegionOfDirectBeam=region_of_direct_beam, 
-                                                                      DetectorComponentName=detector_component_name,
-                                                                      SampleComponentName=sample_component_name, 
-                                                                      ThetaIn=theta_in, 
-                                                                      CorrectPositions=correct_positions)
+        new_IvsQ1, new_IvsLam1, thetaOut1 = ReflectometryReductionOne(InputWorkspace=in_ws, FirstTransmissionRun=first_ws, SecondTransmissionRun=second_ws, 
+                                    OutputWorkspace=output_workspace_name, OutputWorkspaceWavelength=output_workspace_lam_name,
+                                    StartOverlap=start_overlap, EndOverlap=end_overlap, Params=params, I0MonitorIndex=i0_monitor_index,
+                                    WorkspaceIndexList=workspace_index_list, WavelengthMin=wavelength_min, WavelengthStep=wavelength_step, WavelengthMax=wavelength_max,
+                                    MonitorBackgroundWavelengthMin=wavelength_back_min, MonitorBackgroundWavelengthMax=wavelength_back_max,
+                                    MonitorIntegrationWavelengthMin=wavelength_integration_min, MonitorIntegrationWavelengthMax=wavelength_integration_max,
+                                    RegionOfInterest=region_of_interest, RegionOfDirectBeam=region_of_direct_beam, DetectorComponentName=detector_component_name,
+                                    SampleComponentName=sample_component_name)
                                     
         self.setProperty("OutputWorkspace", new_IvsQ1)
         self.setProperty("OutputWorkspaceWavelength", new_IvsLam1)
