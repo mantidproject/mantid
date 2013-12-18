@@ -532,7 +532,6 @@ namespace Algorithms
       }
       else
       {
-        // FIXME - is there a way to avoid multiplying 1.0 to all TOF?  Which can save CPU time
         input_el.splitByFullTime(m_splitters, outputs, 1.0, m_doTOFCorrection);
       }
 
@@ -542,8 +541,9 @@ namespace Algorithms
       // FIXME - Turn on parallel
       // PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0
-    // FIXME - Turn on parallel
     // PARALLEL_CHECK_INTERUPT_REGION
+    // FIXME - Turn on parallel
+
 
     // Finish (1) adding events and splitting the sample logs in each target workspace.
     progress(0.1+progressamount, "Splitting logs");
