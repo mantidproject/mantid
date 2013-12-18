@@ -24,7 +24,6 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         return "MaskAngle"
     
     def PyInit(self):
-	instvalid=
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input,validator=mantid.api.InstrumentValidator()), "Input workspace")
         angleValidator=mantid.kernel.FloatBoundedValidator()
         angleValidator.setBounds(0.,180.)
