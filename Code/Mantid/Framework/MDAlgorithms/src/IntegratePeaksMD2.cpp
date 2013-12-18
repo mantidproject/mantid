@@ -594,7 +594,7 @@ namespace MDAlgorithms
 			}
       	  }
           checkOverlap (i, peakWS, CoordinatesToUse,
-        		  std::max(PeakRadiusVector[i],BackgroundOuterRadiusVector[i]));
+        		  2.0 * std::max(PeakRadiusVector[i],BackgroundOuterRadiusVector[i]));
 		  // Save it back in the peak object.
 		  if (signal != 0. || replaceIntensity)
 		  {
