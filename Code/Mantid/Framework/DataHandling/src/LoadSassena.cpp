@@ -62,6 +62,7 @@ int LoadSassena::confidence( Kernel::NexusDescriptor & descriptor ) const
   {
     return 99;
   }
+  /*
   else
   {
     // Older sassena files do not have a sassena_version. Find out if "qvectors" is a dataset of the file
@@ -75,6 +76,7 @@ int LoadSassena::confidence( Kernel::NexusDescriptor & descriptor ) const
     }
     return 99;
   }
+  */
 }
 
 /**
