@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <iostream>
+#include <iosfwd>
 #include <set>
 #include <sstream>
 #include <vector>

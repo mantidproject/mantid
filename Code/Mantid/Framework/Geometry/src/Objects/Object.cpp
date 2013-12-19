@@ -18,6 +18,7 @@
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
 #include <deque>
+#include <iostream>
 #include <stack>
 
 namespace Mantid

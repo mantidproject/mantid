@@ -1,7 +1,6 @@
 #ifndef BINARYFILE_H_
 #define BINARYFILE_H_
 
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
