@@ -94,7 +94,7 @@ namespace Mantid
         }
 
       }
-      delete data;
+      delete[] data;
 
       return result;
     }
