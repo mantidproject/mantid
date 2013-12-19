@@ -52,7 +52,8 @@ class NullCorrectionStrategy(CorrectionStrategy):
         return out
         
 
-def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', debug=False):
+def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', 
+          debug=False, stitch_start_overlap=10, stitch_end_overlap=12, stitch_params=[1.5, 0.02, 17]):
     '''
     Original quick parameters fetched from IDF
     '''
@@ -76,11 +77,14 @@ def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, 
                    point_detector_start = point_detector_start, point_detector_stop = point_detector_stop, 
                    multi_detector_start = multi_detector_start, background_min = background_min, background_max = background_max, 
                    int_min = int_min, int_max = int_max, theta = theta, pointdet = pointdet, roi = roi, db = db, trans = trans, 
-                   debug = debug, correction_strategy = correction_strategy )
+                   debug = debug, correction_strategy = correction_strategy, stitch_start_overlap=stitch_start_overlap, 
+                   stitch_end_overlap=stitch_end_overlap, stitch_params=stitch_params )
     
     
 def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_min, background_max, int_min, int_max,
-                   point_detector_start=0, point_detector_stop=0, multi_detector_start=0, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', debug=False, correction_strategy=NullCorrectionStrategy):
+                   point_detector_start=0, point_detector_stop=0, multi_detector_start=0, theta=0, 
+                   pointdet=True,roi=[0,0], db=[0,0], trans='', debug=False, correction_strategy=NullCorrectionStrategy,
+                   stitch_start_overlap=None, stitch_end_overlap=None, stitch_params=None):
     '''
     Version of quick where all parameters are explicitly provided.
     '''
@@ -144,7 +148,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             names = mtd.getObjectNames()
 
             IvsLam = transCorr(trans, IvsLam, lambda_min, lambda_max, background_min, background_max, 
-                               int_min, int_max, detector_index_ranges, i0_monitor_index)
+                               int_min, int_max, detector_index_ranges, i0_monitor_index, stitch_start_overlap, 
+                               stitch_end_overlap, stitch_params )
             RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
                 
         
@@ -187,7 +192,10 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
-def make_trans_corr(transrun, lambda_min=None, lambda_max=None, background_min=None, background_max=None, int_min=None, int_max=None, detector_index_ranges=None, i0_monitor_index=None):
+def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params,
+                    lambda_min=None, lambda_max=None, background_min=None, 
+                    background_max=None, int_min=None, int_max=None, detector_index_ranges=None, 
+                    i0_monitor_index=None):
     '''
     Make the transmission correction workspace.
     '''
@@ -244,8 +252,9 @@ def make_trans_corr(transrun, lambda_min=None, lambda_max=None, background_min=N
         _mon_int_trans = Integration(InputWorkspace=_i0p_llam, RangeLower=int_min,RangeUpper=int_max)
         _detector_ws_llam = Divide(LHSWorkspace=_detector_ws_llam, RHSWorkspace=_mon_int_trans)
         
-        # TODO: HARDCODED STITCHING VALUES!!!!!
-        _transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=10, EndOverlap=12,  Params="%f,%f,%f" % (1.5, 0.02, 17))
+        print stitch_start_overlap, stitch_end_overlap, stitch_params
+        _transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=stitch_start_overlap, 
+                                           EndOverlap=stitch_end_overlap,  Params=stitch_params)
 
     else:
         
@@ -259,7 +268,8 @@ def make_trans_corr(transrun, lambda_min=None, lambda_max=None, background_min=N
     return _transWS
 
 
-def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index):
+def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index,
+              stitch_start_overlap, stitch_end_overlap, stitch_params ):
     """
     Perform transmission corrections on i_vs_lam.
     return the corrected result.
@@ -268,7 +278,9 @@ def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, backgr
         _transWS = transrun
     else:    
          # Make the transmission correction workspace.
-         _transWS = make_trans_corr(transrun, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index)
+         _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params, 
+                                    lambda_min, lambda_max, background_min, background_max, 
+                                    int_min, int_max, detector_index_ranges, i0_monitor_index,)
     
     #got sometimes very slight binning diferences, so do this again:
     _i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=_transWS, WorkspaceToMatch=i_vs_lam)
