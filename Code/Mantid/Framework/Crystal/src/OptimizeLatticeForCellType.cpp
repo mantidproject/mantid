@@ -206,12 +206,9 @@ namespace Mantid
    //-----------------------------------------------------------------------------------------
     /**
      * Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
-     * @param mosaic
-     * @param rcrystallite
      * @param inname
-     * @param corrOption
-     * @param pointOption
-     * @param tofParams
+     * @param cell_type
+     * @param params
      * @return
      */
     double OptimizeLatticeForCellType::optLattice(std::string inname, std::string cell_type, std::vector<double> & params)
