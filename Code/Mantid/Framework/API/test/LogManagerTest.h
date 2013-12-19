@@ -131,7 +131,39 @@ public:
     TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
   }
 
-  
+  void testEndTime()
+  {
+    LogManager runInfo;
+    // Nothing there yet
+    TS_ASSERT_THROWS( runInfo.endTime(), std::runtime_error );
+    // Add run_end and see that get picked up
+    const std::string run_end("2013-12-19T13:38:00");
+    auto run_end_prop = new PropertyWithValue<std::string>("run_end",run_end);
+    runInfo.addProperty(run_end_prop);
+    TS_ASSERT_EQUALS( runInfo.endTime(), DateAndTime(run_end) );
+    // Add end_time and see that get picked up in preference
+    const std::string end_time("2013-12-19T13:40:00");
+    auto end_time_prop = new PropertyWithValue<std::string>("end_time",end_time);
+    runInfo.addProperty(end_time_prop);
+    TS_ASSERT_EQUALS( runInfo.endTime(), DateAndTime(end_time) );
+
+    // Set run_end back to valid value and make end_time contain nonsense
+    run_end_prop->setValue(run_end);
+    end_time_prop->setValue("__");
+    TS_ASSERT_EQUALS( runInfo.endTime(), DateAndTime(run_end) );
+    // Now make end_time a completely different property type
+    runInfo.removeProperty("end_time");
+    runInfo.addProperty(new PropertyWithValue<double>("end_time",3.33));
+    TS_ASSERT_EQUALS( runInfo.endTime(), DateAndTime(run_end) );
+    // Now make run_end something invalid
+    run_end_prop->setValue("notADate");
+    TS_ASSERT_THROWS( runInfo.endTime(), std::runtime_error );
+    // And check things if it's the wrong property type
+    runInfo.removeProperty("run_end");
+    addTimeSeriesEntry(runInfo,"run_end",4.44);
+    TS_ASSERT_THROWS( runInfo.endTime(), std::runtime_error );
+  }
+
   void testMemory()
   {
     LogManager runInfo;
