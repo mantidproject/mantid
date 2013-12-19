@@ -11,7 +11,7 @@
 from l2q import *
 from combineMulti import *
 from mantid.simpleapi import *  # New API
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, MatrixWorkspace
 from mantid.kernel import logger
 from convert_to_wavelength import ConvertToWavelength
 import math
@@ -84,7 +84,6 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     '''
     Version of quick where all parameters are explicitly provided.
     '''
-
     run_ws = ConvertToWavelength.to_workspace(run)
     to_lam = ConvertToWavelength(run_ws)
     nHist = run_ws.getNumberHistograms()
@@ -188,15 +187,45 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
-
-def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index):
-    """
-    Perform transmission corrections on i_vs_lam.
-    return the corrected result.
-    """
+def make_trans_corr(transrun, lambda_min=None, lambda_max=None, background_min=None, background_max=None, int_min=None, int_max=None, detector_index_ranges=None, i0_monitor_index=None):
+    '''
+    Make the transmission correction workspace.
+    '''
+    
+    '''
+    Check to see whether all optional inputs have been provide. If not we have to get them from the IDF. 
+    '''
+    if not all((lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index)):
+        logger.notice("make_trans_corr: Fetching missing arguments from the IDF")
+        instrument_source = transrun
+        if isinstance(transrun, str):
+            instrument_source = transrun.split(',')[0]
+        trans_ws = ConvertToWavelength.to_workspace(instrument_source)
+        idf_defaults = get_defaults(trans_ws)
+        
+        # Fetch defaults for anything not specified
+        if not i0_monitor_index:
+            i0_monitor_index = idf_defaults['I0MonitorIndex']
+        if not lambda_min:
+            lambda_min = idf_defaults['LambdaMin']
+        if not lambda_max:
+            lambda_max = idf_defaults['LambdaMax']
+        if not detector_index_ranges:
+            point_detector_start = idf_defaults['PointDetectorStart']
+            point_detector_stop =  idf_defaults['PointDetectorStop']
+            detector_index_ranges = (point_detector_start, point_detector_stop)
+        if not background_min:
+            background_min = idf_defaults['MonitorBackgroundMin']
+        if not background_max:
+            background_max = idf_defaults['MonitorBackgroundMax']
+        if not int_min:
+            int_min = idf_defaults['MonitorIntegralMin']
+        if not int_max:
+            int_max = idf_defaults['MonitorIntegralMax']
+    
     
     transWS = None
-    if ',' in transrun:
+    if isinstance(transrun, str) and (',' in transrun):
         slam = transrun.split(',')[0]
         llam = transrun.split(',')[1]
         print "Transmission runs: ", transrun
@@ -227,7 +256,20 @@ def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, backgr
         _mon_int_trans = Integration( InputWorkspace=_i0p_trans, RangeLower=int_min, RangeUpper=int_max )
         _transWS = Divide( LHSWorkspace=_detector_ws_trans, RHSWorkspace=_mon_int_trans )
     
-   
+    return _transWS
+
+
+def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index):
+    """
+    Perform transmission corrections on i_vs_lam.
+    return the corrected result.
+    """
+    if isinstance(transrun, MatrixWorkspace) and transrun.getAxis(0).getUnit().unitID() == "Wavelength" :
+        _transWS = transrun
+    else:    
+         # Make the transmission correction workspace.
+         _transWS = make_trans_corr(transrun, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index)
+    
     #got sometimes very slight binning diferences, so do this again:
     _i_vs_lam_trans = RebinToWorkspace(WorkspaceToRebin=_transWS, WorkspaceToMatch=i_vs_lam)
     # Normalise by transmission run.    
