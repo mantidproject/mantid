@@ -59,6 +59,9 @@ private:
 	void loadsDataIntoTheWS(API::MatrixWorkspace_sptr &, const std::vector<int> &);
 	void moveDetector(API::MatrixWorkspace_sptr &, double angle);
 	API::MatrixWorkspace_sptr mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> &);
+	void addCompAssemblyToReferenceInstrument(Geometry::CompAssembly *refInstrument,
+			Geometry::CompAssembly *instrumentFrom, const std::string &componentName);
+
 	//LoadHelper m_loader;
 	std::string m_instrumentName; ///< Name of the instrument
 	double m_wavelength;

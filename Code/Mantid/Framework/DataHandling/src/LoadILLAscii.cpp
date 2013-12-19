@@ -134,7 +134,7 @@ void LoadILLAscii::exec() {
 
 	Progress progress(this, 0, 1, spectraList.size());
 	for (iSpectra = spectraList.begin(), iSpectraHeader = spectraHeaderList.begin();
-			iSpectra < spectraList.end() && iSpectraHeader < spectraHeaderList.end();
+			iSpectra < spectraList.end()-23 && iSpectraHeader < spectraHeaderList.end()-23;
 			++iSpectra, ++iSpectraHeader) {
 
 		g_log.debug() << "Reading Spectrum: " << std::distance(spectraList.begin(), iSpectra) << std::endl;
@@ -304,59 +304,113 @@ void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle) {
  * Copies componentName nTimes
  *
  */
-void duplicateCompAssembly(Geometry::CompAssembly *assembly,const std::string &componentName, int ntimes) {
+//void duplicateCompAssembly(Geometry::CompAssembly *assembly,const std::string &componentName, int ntimes) {
+//
+//	for (int i = 0; i < assembly->nelements(); i++) {
+//
+//			boost::shared_ptr<Geometry::IComponent> it = (*assembly)[i];
+//			Geometry::CompAssembly* children = dynamic_cast<Geometry::CompAssembly*>(it.get());
+//			if (children) {
+//				if (children->getName() == componentName) {
+//					std::cout << "right component " << std::endl;
+//					for (int i =0; i < ntimes -1; ++i){
+//						std::ostringstream newComponentName;
+//						newComponentName << componentName << "_"<< i;
+//						children->addCopy(children,  newComponentName.str() );
+//					}
+//					return;
+//				}
+//				else {
+//					duplicateCompAssembly(children,componentName,ntimes);
+//				}
+//			}
+//		}
+//
+//}
 
-	for (int i = 0; i < assembly->nelements(); i++) {
+//void printInstrument(Geometry::CompAssembly *assembly) {
+//	for (int i = 0; i < assembly->nelements(); i++) {
+//		std::cout << "**** Element " << i << " of " << assembly->nelements() << std::endl;
+//
+//		boost::shared_ptr<Geometry::IComponent> it = (*assembly)[i];
+//
+//
+//		//it->printSelf(std::cout);
+//
+//		Geometry::CompAssembly* children = dynamic_cast<Geometry::CompAssembly*>(it.get());
+//
+//		std::cout << "Element number = " << i << " : ";
+//		if (children) {
+//			std::cout <<  " with name: " << children->getName() << std::endl;
+//			std::cout << "Children :******** " << std::endl;
+//			printInstrument(children);
+//		} else {
+//			std::cout << " with name: " << it->getName() << std::endl;
+//		}
+//	}
+//}
 
-			boost::shared_ptr<Geometry::IComponent> it = (*assembly)[i];
-			Geometry::CompAssembly* children = dynamic_cast<Geometry::CompAssembly*>(it.get());
-			if (children) {
-				if (children->getName() == componentName) {
-					std::cout << "right component " << std::endl;
-					for (int i =0; i < ntimes -1; ++i){
-						std::ostringstream newComponentName;
-						newComponentName << componentName << "_"<< i;
-						children->addCopy(children,  newComponentName.str() );
-					}
-					return;
-				}
-				else {
-					duplicateCompAssembly(children,componentName,ntimes);
-				}
+
+//void printWorkspace(const API::MatrixWorkspace_sptr &workspace) {
+//	Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
+//
+//	//duplicateCompAssembly(const_cast < Geometry::Instrument* >( instrument.get()), "bank_uniq", 3 );
+//	printInstrument( const_cast < Geometry::Instrument* > ( instrument.get() ) );
+//
+//}
+
+/* Duplicates the componentName in the given assembly
+ *
+ * Both components must have the same structure!
+ *
+ *
+ */
+void LoadILLAscii::addCompAssemblyToReferenceInstrument(Geometry::CompAssembly *refAssembly,
+		Geometry::CompAssembly *fromAssembly, const std::string &componentName) {
+
+	assert(refAssembly->nelements() == fromAssembly->nelements());
+
+	g_log.debug() << "refAssembly: " << refAssembly->getName()  <<
+					" :: fromAssembly: " << fromAssembly->getName() << std::endl;
+
+	for (int i = 0; i < refAssembly->nelements(); i++) {
+
+		g_log.debug() << "refAssembly_" << i  << " : " << (*refAssembly)[i]->getName()  <<
+				" :: fromAssembly_" << i  << " : "  << (*refAssembly)[i]->getName() << std::endl;
+
+
+		boost::shared_ptr<Geometry::IComponent> itRefAssembly = (*refAssembly)[i];
+		boost::shared_ptr<Geometry::IComponent> itFromAssembly = (*fromAssembly)[i];
+
+		Geometry::CompAssembly* childrenRefInst = dynamic_cast<Geometry::CompAssembly*>(itRefAssembly.get());
+		Geometry::CompAssembly* childrenFromInst = dynamic_cast<Geometry::CompAssembly*>(itFromAssembly.get());
+
+		if (childrenFromInst && childrenRefInst) {
+			g_log.debug() << "\tchildrenRefInst: " << childrenRefInst->getName()  <<
+					" :: childrenFromInst: " << childrenFromInst->getName() << std::endl;
+
+			if (childrenFromInst->getName() == componentName) {
+				g_log.debug() << "Add Copy: " << componentName << std::endl;
+
+				// TODO:
+
+				// Copy from childrenFromInst to ref Inst
+				// code below same as:
+				int childrenSize = childrenRefInst->addCopy(childrenFromInst);
+//				Geometry::IComponent* newcomp = childrenFromInst->clone();
+//				newcomp->setParent(childrenRefInst);
+//				childrenRefInst->add(newcomp);
+
+				g_log.debug() << "Before = " << refAssembly->nelements() << " afer = " << childrenSize << std::endl;
+				//
+
+				return;
+			} else {
+				addCompAssemblyToReferenceInstrument(childrenRefInst,
+						childrenFromInst, componentName);
 			}
 		}
-
-}
-
-void printInstrument(Geometry::CompAssembly *assembly) {
-	for (int i = 0; i < assembly->nelements(); i++) {
-		std::cout << "**** Element " << i << " of " << assembly->nelements() << std::endl;
-
-		boost::shared_ptr<Geometry::IComponent> it = (*assembly)[i];
-
-
-		//it->printSelf(std::cout);
-
-		Geometry::CompAssembly* children = dynamic_cast<Geometry::CompAssembly*>(it.get());
-
-		std::cout << "Element number = " << i << " : ";
-		if (children) {
-			std::cout <<  " with name: " << children->getName() << std::endl;
-			std::cout << "Children :******** " << std::endl;
-			printInstrument(children);
-		} else {
-			std::cout << " with name: " << it->getName() << std::endl;
-		}
 	}
-}
-
-
-void printWorkspace(const API::MatrixWorkspace_sptr &workspace) {
-	Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-
-	//duplicateCompAssembly(const_cast < Geometry::Instrument* >( instrument.get()), "bank_uniq", 3 );
-	printInstrument( const_cast < Geometry::Instrument* > ( instrument.get() ) );
-
 }
 
 
@@ -388,6 +442,7 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 	if (workspaceList.size() > 0) {
 		// 1st workspace will be the reference
 		API::MatrixWorkspace_sptr &refWorkspace = workspaceList[0];
+
 		size_t numberOfHistograms = refWorkspace->getNumberHistograms() * workspaceList.size();
 		size_t xWidth = refWorkspace->blocksize()+1;
 		size_t yWidth = refWorkspace->blocksize();
@@ -396,51 +451,52 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 		outWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 		outWorkspace->setYUnitLabel("Counts");
 
-		// This is not correct : i copies also the detectors!
-		// copy base instrument
-		// if baseInstrument the ParameterMap is empty!
-		outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument());
+		// Fully copy the instrument
+		outWorkspace->setInstrument( boost::shared_ptr<Geometry::Instrument>(refWorkspace->getInstrument()->clone()));
+		// OR copy base instrument => ParameterMap is empty!
+		// outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument());
 
-
-		// outInstrument will be modified
+		// outInstrument: The instrument that will be modified
 		Geometry::Instrument_const_sptr outInstrument = outWorkspace->getInstrument();
 
 		std::size_t numberOfDetectorsPerScan = outInstrument->getNumberDetectors(true);
-		g_log.debug() << "NumberOfDetectorsPerScan: " << numberOfDetectorsPerScan << std::endl;
+		g_log.debug() << "***** NumberOfDetectorsPerScan: " << numberOfDetectorsPerScan << std::endl;
 
-
-		// outParameterMap is empty as only (see above!)
+		//DEBUG: print outParameterMap
 		boost::shared_ptr<Geometry::ParameterMap> outParameterMap = outInstrument->getParameterMap();
-		g_log.debug() << outParameterMap->asString() << std::endl;
-
+		// g_log.debug() << outParameterMap->asString() << std::endl;
+		//DEBUG: print intrument tree
 		//outInstrument->printTree(g_log.debug());
 
-		printWorkspace(outWorkspace);
 
-//		auto it = workspaceList.begin();
-//		for (++it; it < workspaceList.end(); ++it) { // jumps the first
-//			std::size_t pos = std::distance(workspaceList.begin(),it);
-//			API::MatrixWorkspace_sptr thisWorkspace = *it;
-//
-//			g_log.debug() << "Merging the workspace: " << pos << std::endl;
-//
-//			// current position
-//			Geometry::Instrument_const_sptr thisInstrument = thisWorkspace->getInstrument();
-//			boost::shared_ptr<Geometry::ParameterMap> outParameterMap = thisInstrument->getParameterMap();
-//
-//
-//
-//			g_log.debug() << outParameterMap->asString() << std::endl;
-//
-//			//outInstrument->printTree(g_log.debug());
-//
-//			//g_log.debug() << "outParameterMap Map size: " << outParameterMap->size() << std::endl;
-//
-//
-//			long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
-//
-//
-//		}
+		auto it = workspaceList.begin();
+		for (++it; it < workspaceList.end(); ++it) { // jumps the first
+			std::size_t pos = std::distance(workspaceList.begin(),it);
+			API::MatrixWorkspace_sptr thisWorkspace = *it;
+
+			g_log.debug() << "Merging the workspace: " << pos << std::endl;
+
+			// current position
+			Geometry::Instrument_const_sptr thisInstrument = thisWorkspace->getInstrument();
+
+
+			long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
+
+			// FUN STARTS HERE!
+			//addCompAssemblyToReferenceInstrument( const_cast < Geometry::Instrument* >( thisInstrument.get()),"bank_uniq");
+			addCompAssemblyToReferenceInstrument(const_cast < Geometry::Instrument* >(outInstrument.get()),
+					const_cast < Geometry::Instrument* >(thisInstrument.get()),"bank_uniq");
+
+
+
+
+
+			// Debug:
+			outInstrument->printTree(g_log.debug());
+			boost::shared_ptr<Geometry::ParameterMap> thisParameterMap = thisInstrument->getParameterMap();
+			g_log.debug() << outParameterMap->asString() << std::endl;
+
+		}
 		return outWorkspace;
 	}
 	else{

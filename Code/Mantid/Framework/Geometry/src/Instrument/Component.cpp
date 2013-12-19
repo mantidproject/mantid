@@ -92,6 +92,9 @@ namespace Geometry
    */
   IComponent* Component::clone() const
   {
+	  // TODO : overload to copy the new pmap
+	  // Create a new one with pmap parameter
+	  /// if pmap not present throw
     return new Component(*this);
   }
 
