@@ -1109,10 +1109,12 @@ namespace Algorithms
   }
   //-----------------------------------------------------------------------------------------------
   /** Generate filters for an integer log
+    * @param splitters :: splitting interval array
     * @param minvalue :: minimum allowed log value
     * @param maxvalue :: maximum allowed log value
     * @param filterIncrease :: include log value increasing period;
     * @param filterDecrease :: include log value decreasing period
+    * @param runend :: end of run date and time
     */
   void GenerateEventsFilter::processIntegerValueFilter(TimeSplitterType& splitters, int minvalue, int maxvalue,
                                                        bool filterIncrease, bool filterDecrease, DateAndTime runend)

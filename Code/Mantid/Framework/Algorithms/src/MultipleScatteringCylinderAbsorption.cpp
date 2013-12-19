@@ -306,10 +306,22 @@ inline double MultipleScatteringCylinderAbsorption::wavelength( double path_leng
 
 
 /**
- * Alter the values in the y_vals[] to account for multiple scattering.
- * Parameter total_path is in meters, and the sample radius is in cm.
+ *  This method will change the values in the y_val array to correct for
+ *  multiple scattering absorption. Parameter total_path is in meters, and
+ *  the sample radius is in cm.
+ *
+ *  @param total_path ::  The total flight path in meters
+ *  @param angle_deg ::   The scattering angle (two theta) in degrees
+ *  @param radius ::      The sample rod radius in cm
+ *  @param coeff1 ::      The absorption cross section / 1.81
+ *  @param coeff2 ::      The density
+ *  @param coeff3 ::      The total scattering cross section
+ *  @param tof ::         Array of times-of-flight at bin boundaries
+ *                     (or bin centers) for the spectrum, in microseconds
+ *  @param y_val ::       The spectrum values
+ *  @param errors ::      The spectrum errors
  */
-void MultipleScatteringCylinderAbsorption::apply_msa_correction(double total_path, double angle_rad, double radius,
+void MultipleScatteringCylinderAbsorption::apply_msa_correction(double total_path, double angle_deg, double radius,
                 double coeff1,  double coeff2, double coeff3,
                 vector<double>& tof, vector<double>& y_val, std::vector<double> &errors)
 {
@@ -323,7 +335,7 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(double total_pat
     is_histogram = false;
 
   vector<double> Z(Z_initial, Z_initial+Z_size);   // initialize Z array for this angle
-  ZSet(angle_rad, Z);
+  ZSet(angle_deg, Z);
 
   double Q2     = coeff1 * coeff2;
   double sigsct = coeff2 * coeff3;

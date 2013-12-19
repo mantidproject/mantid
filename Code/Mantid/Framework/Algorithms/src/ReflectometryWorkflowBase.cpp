@@ -309,6 +309,8 @@ namespace Mantid
      * @param stitchingStart
      * @param stitchingDelta
      * @param stitchingEnd
+     * @param stitchingStartOverlap
+     * @param stitchingEndOverlap
      */
     void ReflectometryWorkflowBase::getTransmissionRunInfo(
         OptionalMatrixWorkspace_sptr& firstTransmissionRun,

@@ -234,6 +234,8 @@ namespace Mantid
      * Correct the position of the detectors based on the input theta value.
      * @param toCorrect : Workspace to correct detector posisitions on.
      * @param thetaInDeg : Theta in degrees to use in correction calculations.
+     * @param sample : Pointer to the sample
+     * @param detector : Pointer to a given detector
      */
     void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& thetaInDeg, IComponent_const_sptr sample, IComponent_const_sptr detector)
     {

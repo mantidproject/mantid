@@ -23,7 +23,7 @@ namespace Mantid
       {
         void apply(Kernel::FileDescriptor & descriptor) { descriptor.resetStreamToStart(); }
       };
-      ///endcond
+      /// @endcond
 
       /**
        * @param filename A string giving a filename
