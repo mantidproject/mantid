@@ -113,6 +113,22 @@ public:
     // And back to failure if they're both that
     run_start_prop->setValue(epoch);
     TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
+
+    // Set run_start back to valid value and make start_time contain nonsense
+    run_start_prop->setValue(run_start);
+    start_time_prop->setValue("__");
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(run_start) );
+    // Now make start_time a completely different property type
+    runInfo.removeProperty("start_time");
+    runInfo.addProperty(new PropertyWithValue<double>("start_time",3.33));
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(run_start) );
+    // Now make run_start something invalid
+    run_start_prop->setValue("notADate");
+    TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
+    // And check things if it's the wrong property type
+    runInfo.removeProperty("run_start");
+    addTimeSeriesEntry(runInfo,"run_start",4.44);
+    TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
   }
 
   
