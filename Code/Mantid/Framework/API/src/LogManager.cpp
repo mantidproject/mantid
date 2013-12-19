@@ -89,24 +89,28 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
     const std::string start_prop("start_time");
     if (this->hasProperty(start_prop))
     {
-      std::string start = this->getProperty(start_prop)->value();
-      if (DateAndTime(start) != DateAndTimeHelpers::GPS_EPOCH)
-      {
-        return DateAndTime(start);
-      }
+      try {
+        DateAndTime start_time(getProperty(start_prop)->value());
+        if (start_time != DateAndTimeHelpers::GPS_EPOCH)
+        {
+          return start_time;
+        }
+      } catch (std::invalid_argument&) { /*Swallow and move on*/ }
     }
 
     const std::string run_start_prop("run_start");
     if (this->hasProperty(run_start_prop))
     {
-      std::string start = this->getProperty(run_start_prop)->value();
-      if (DateAndTime(start) != DateAndTimeHelpers::GPS_EPOCH)
-      {
-        return DateAndTime(start);
-      }
+      try {
+        DateAndTime start_time(getProperty(run_start_prop)->value());
+        if (start_time != DateAndTimeHelpers::GPS_EPOCH)
+        {
+          return start_time;
+        }
+      } catch (std::invalid_argument&) { /*Swallow and move on*/ }
     }
 
-    throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
+    throw std::runtime_error("No valid start time has been set for this run.");
   }
 
   /** Return the run end time as given by the 'end_time' or 'run_end' property.
