@@ -91,7 +91,29 @@ public:
     TS_ASSERT_EQUALS( runInfo.getProperties().size(), 0 );
   }
 
- 
+  void testStartTime()
+  {
+    LogManager runInfo;
+    // Nothing there yet
+    TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
+    // Add run_start and see that get picked up
+    const std::string run_start("2013-12-19T13:38:00");
+    auto run_start_prop = new PropertyWithValue<std::string>("run_start",run_start);
+    runInfo.addProperty(run_start_prop);
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(run_start) );
+    // Add start_time and see that get picked up in preference
+    const std::string start_time("2013-12-19T13:40:00");
+    auto start_time_prop = new PropertyWithValue<std::string>("start_time",start_time);
+    runInfo.addProperty(start_time_prop);
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(start_time) );
+    // But get back run_start again if start_time is equal to the epoch
+    const std::string epoch("1990-01-01T00:00:00");
+    start_time_prop->setValue(epoch);
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(run_start) );
+    // And back to failure if they're both that
+    run_start_prop->setValue(epoch);
+    TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
+  }
 
   
   void testMemory()
