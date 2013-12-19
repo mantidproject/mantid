@@ -80,7 +80,7 @@ set ( SRC_FILES
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
-	src/LoadSassena.cpp
+#	src/LoadSassena.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadTOFRawNexus.cpp
@@ -205,7 +205,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
-	inc/MantidDataHandling/LoadSassena.h
+#	inc/MantidDataHandling/LoadSassena.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
@@ -326,7 +326,7 @@ set ( TEST_FILES
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
-	LoadSassenaTest.h
+#	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
 	LoadSpice2dTest.h
 	LoadTOFRawNexusTest.h
