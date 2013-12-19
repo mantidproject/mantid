@@ -87,7 +87,7 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
   const Kernel::DateAndTime LogManager::startTime() const
   {
     const std::string start_prop("start_time");
-    if (this->hasProperty(start_prop))
+    if ( hasProperty(start_prop) )
     {
       try {
         DateAndTime start_time(getProperty(start_prop)->value());
@@ -99,7 +99,7 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
     }
 
     const std::string run_start_prop("run_start");
-    if (this->hasProperty(run_start_prop))
+    if ( hasProperty(run_start_prop) )
     {
       try {
         DateAndTime start_time(getProperty(run_start_prop)->value());
@@ -121,21 +121,22 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
   const Kernel::DateAndTime LogManager::endTime() const
   {
     const std::string end_prop("end_time");
+    if ( hasProperty(end_prop) )
+    {
+      try {
+        return DateAndTime(getProperty(end_prop)->value());
+      } catch (std::invalid_argument&) { /*Swallow and move on*/ }
+    }
+
     const std::string run_end_prop("run_end");
-    if (this->hasProperty(end_prop))
+    if (hasProperty(run_end_prop))
     {
-      std::string end = this->getProperty(end_prop)->value();
-      return DateAndTime(end);
+      try {
+        return DateAndTime(getProperty(run_end_prop)->value());
+      } catch (std::invalid_argument&) { /*Swallow and move on*/ }
     }
-    else if (this->hasProperty(run_end_prop))
-    {
-      std::string end = this->getProperty(run_end_prop)->value();
-      return DateAndTime(end);
-    }
-    else
-    {
-      throw std::runtime_error("Run::endTime() - No end time has been set for this run.");
-    }
+
+    throw std::runtime_error("No valid end time has been set for this run.");
   }
 
 
