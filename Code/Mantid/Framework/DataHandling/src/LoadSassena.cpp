@@ -58,25 +58,11 @@ void LoadSassena::initDocs()
  */
 int LoadSassena::confidence( Kernel::NexusDescriptor & descriptor ) const
 {
-  if( descriptor.hasRootAttr( "sassena_version" ) )
+  if( descriptor.hasRootAttr( "sassena_version" ) || descriptor.pathExists("/qvectors") )
   {
     return 99;
   }
-  /*
-  else
-  {
-    // Older sassena files do not have a sassena_version. Find out if "qvectors" is a dataset of the file
-    const hid_t h5file = H5Fopen( descriptor.filename().c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
-    const std::string setName( "qvectors");
-    hsize_t dims[3];
-    herr_t errorcode = dataSetInfo( h5file, setName, dims );
-    if( errorcode < 0 )
-    {
-      return 0;
-    }
-    return 99;
-  }
-  */
+  return 0;
 }
 
 /**
