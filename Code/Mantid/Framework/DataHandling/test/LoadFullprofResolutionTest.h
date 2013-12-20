@@ -8,6 +8,9 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include <fstream>
 #include <Poco/File.h>
 
@@ -297,6 +300,18 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check parameters in workspace
+    MatrixWorkspace_sptr ws;
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    Mantid::Geometry::ParameterMap& paramMap = ws->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getInstrument();
+
+
+    Mantid::Geometry::Parameter_sptr alpha0Param = paramMap.get(&(*instr), "IkedaCarpenterPV:Alpha0", "fitting");
+    TS_ASSERT(alpha0Param);
+    if(alpha0Param) {
+      const Mantid::Geometry::FitParameter& fitParam1 = alpha0Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( fitParam1.getValue(), 100.0, 0.0001);
+    }
 
     // Clean
     Poco::File("TestWorskpace.irf").remove();
