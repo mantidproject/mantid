@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "DeltaFunction.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionDomain.h"
@@ -41,6 +42,24 @@ namespace CurveFitting
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+
+class DLLExport ElasticDiffSphere : public DeltaFunction
+{
+public:
+
+  /// Constructor
+  ElasticDiffSphere();
+
+  /// Destructor
+  virtual ~ElasticDiffSphere() {};
+
+  /// overwrite IFunction base class methods
+  virtual std::string name()const{return "ElasticDiffSphere";}
+
+  /// A rescaling of the peak intensity
+  double HeightPrefactor() const;
+
+};
 
 class DLLExport DiffSphere : public API::ImmutableCompositeFunction
 {
