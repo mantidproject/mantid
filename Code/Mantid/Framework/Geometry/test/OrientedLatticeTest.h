@@ -41,7 +41,7 @@ public:
     // Convert to and from HKL
     V3D hkl = u.hklFromQ(V3D(1.0, 2.0, 3.0));
     double dstar = u.dstar(hkl[0], hkl[1], hkl[2]);
-    TS_ASSERT_DELTA( dstar, sqrt(1+4.0+9.0), 1e-4); // The d-spacing after a round trip matches the Q we put in
+    TS_ASSERT_DELTA( dstar, .5*sqrt(1+4.0+9.0)/M_PI, 1e-4); // The d-spacing after a round trip matches the Q we put in
   }
 
 

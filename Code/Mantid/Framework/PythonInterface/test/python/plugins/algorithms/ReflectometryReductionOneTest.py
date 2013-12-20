@@ -36,7 +36,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_InputWorkspace(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)
     
-    def test_check_first_transmission_workspace_not_tof_throws(self):
+    def test_check_first_transmission_workspace_not_tof_or_wavelength_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_FirstTransmissionRun(self.__not_tof)
         self.assertRaises(ValueError, alg.execute)
@@ -62,7 +62,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_FirstTransmissionRun(self.__tof)
         alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
-        alg.set_EndOverlapQ( 0.4 )
+        alg.set_EndOverlap( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_provide_end_transmission_run_without_end_overlap_q_throws(self):
@@ -70,7 +70,7 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_FirstTransmissionRun(self.__tof)
         alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
-        alg.set_StartOverlapQ( 0.4 )
+        alg.set_StartOverlap( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_end_overlap_q_must_be_greater_than_start_overlap_q_or_throw(self):
@@ -78,8 +78,8 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_FirstTransmissionRun(self.__tof)
         alg.set_SecondTransmissionRun(self.__tof)
         alg.set_Params([0, 0.1, 1])
-        alg.set_StartOverlapQ( 0.6 )
-        alg.set_EndOverlapQ( 0.4 )
+        alg.set_StartOverlap( 0.6 )
+        alg.set_EndOverlap( 0.4 )
         self.assertRaises(ValueError, alg.execute)
         
     def test_must_provide_wavelengths(self):
@@ -205,24 +205,33 @@ class ReflectometryReductionOneTest(unittest.TestCase):
         alg.set_WorkspaceIndexList([3,4])
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_SecondTransmissionRun(trans_run2)
+        
         alg.set_Params([1.5, 0.02, 17])
-        alg.set_StartOverlapQ( 10.0 )
-        alg.set_EndOverlapQ( 12.0 )
+        alg.set_StartOverlap( 10.0 )
+        alg.set_EndOverlap( 12.0 )
         alg.set_ThetaIn(0.2)
         
         out_ws_q, out_ws_lam, theta = alg.execute()
         
-        self.assertTrue(isinstance(out_ws_lam, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("Wavelength", out_ws_lam.getAxis(0).getUnit().unitID())
-        
-        self.assertTrue(isinstance(out_ws_q, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("MomentumTransfer", out_ws_q.getAxis(0).getUnit().unitID())
-        
-        
-        self.assertEqual(2, out_ws_lam.getNumberHistograms())
         DeleteWorkspace(real_run)
         DeleteWorkspace(trans_run1)
         DeleteWorkspace(trans_run2)
+    
+    def test_spectrum_map_mismatch_throws(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('INTER00013460.nxs')
+        trans_run1 = Load('INTER00013463.nxs')
+        trans_run2 = self.__tof
+        
+        alg.set_InputWorkspace(real_run)
+        alg.set_WorkspaceIndexList([3,4])
+        alg.set_FirstTransmissionRun(trans_run1) 
+        alg.set_SecondTransmissionRun(trans_run2)
+        
+        self.assertRaises(ValueError, alg.execute)
+        
+        DeleteWorkspace(real_run)
+        DeleteWorkspace(trans_run1)
         
     def test_calculate_theta(self):
         alg = self.construct_standard_algorithm()
