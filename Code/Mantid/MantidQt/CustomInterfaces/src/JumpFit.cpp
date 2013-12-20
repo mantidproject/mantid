@@ -171,8 +171,8 @@ namespace MantidQt
 				std::string title = axis->label(i);
 
 				//check if the axis labels indicate this spectrum is width data 
-				size_t qLinesWidthIndex = title.find("Width");
-				size_t convFitWidthIndex = title.find("FWHM");
+				size_t qLinesWidthIndex = title.find(".Width");
+				size_t convFitWidthIndex = title.find(".FWHM");
 
 				bool qLinesWidth = qLinesWidthIndex != std::string::npos;
 				bool convFitWidth = convFitWidthIndex != std::string::npos;
