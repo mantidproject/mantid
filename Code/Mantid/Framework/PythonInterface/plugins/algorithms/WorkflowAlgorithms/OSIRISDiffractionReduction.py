@@ -52,6 +52,18 @@ class DRangeToWsMap(object):
         # Add the workspace to the map, alongside its DRange.
         if dRange not in self._map:
             self._map[dRange] = [wsname]
+        else:
+            #check if x ranges matchs and existing run
+            for ws_name in self._map[dRange]:
+                map_lastx = mtd[ws_name].readX(0)[-1]
+                ws_lastx = ws.readX(0)[-1]
+                
+                #if it matches ignore it
+                if map_lastx == ws_lastx:
+                    DeleteWorkspace(ws)
+                    return
+
+            self._map[dRange].append(wsname)
             
     def setItem(self, dRange, wsname):
         """ Set a dRange and corresponding *single* ws.
