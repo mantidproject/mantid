@@ -138,15 +138,12 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
  *  @param file_name        Name of the NeXus file to load
  *  @param ev_ws_name       Name of the event workspace to create
  *  @param md_ws_name       Name of the MD workspace to create
- *  @param minQ             The smallest absolute value of any component
- *                          of Q to include. When ConvertToMD is called,
  *  @param maxQ             The largest absolute value of any component
  *                          of Q to include. When ConvertToMD is called,
  *                          MinValues = -maxQ,-maxQ,-maxQ   and 
  *                          MaxValues =  maxQ, maxQ, maxQ 
  *  @param do_lorentz_corr  Set true to do the Lorentz correction when
  *                          converting to reciprocal space. 
- *  @param load_data        Set true to load data.
  *  @param load_det_cal     Set true to call LoadIsawDetCal after loading
  *                          the event file.
  *  @param det_cal_file     Fully qualified name of the .DetCal file.
@@ -380,7 +377,6 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
  *  peaks workspace.
  * 
  *  @param peaks_ws_name   The name of the peaks workspace.
- *  @param tolerance       Tolerance for the peak finding.
  *
  *  @return true if FindUBusingIndexedPeaks completed successfully.
  */
@@ -665,11 +661,6 @@ bool MantidEVWorker::changeHKL(  const std::string & peaks_ws_name,
  *                         region.
  *  @param integrate_edge  If true, integrate peaks for which the sphere
  *                         goes off the edge of the detector.
- *  @param use_cylinder_integration  Set true to use cylinder integration
- *  @param cylinder_length Set the cylinder length
- *  @param cylinder_percent_bkg      Percentage background to use in the
- *                                   cylinder
- *  @param cylinder_profile_fit      String to some use.
  *
  *  @return true if the unweighted workspace was successfully created and
  *          integrated using IntegratePeaksMD.

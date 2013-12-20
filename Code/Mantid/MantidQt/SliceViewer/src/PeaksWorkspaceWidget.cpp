@@ -167,6 +167,7 @@ namespace MantidQt
 
     /**
     Handler to hide/show the widget on request.
+    @param hidden: flag indicating what to do.
     */
     void PeaksWorkspaceWidget::onToggleHideInPlot()
     {

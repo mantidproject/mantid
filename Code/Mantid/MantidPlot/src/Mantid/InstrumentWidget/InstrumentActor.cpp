@@ -156,7 +156,6 @@ InstrumentActor::~InstrumentActor()
  * When selecting a component in the InstrumentTreeWidget
  *
  * @param visitor
- * @param rule
  * @return
  */
 bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)

@@ -25,7 +25,7 @@ namespace SpectrumView
  *  parts of the SpectrumView are constructed here and are deleted when the
  *  SpectrumView destructor is called.
  *
- *  @param parent :: The parent widget.
+ *  @param data_source  The source of the data that will be displayed. 
  */
 SpectrumView::SpectrumView(QWidget *parent) :
   QMainWindow(parent, 0),
