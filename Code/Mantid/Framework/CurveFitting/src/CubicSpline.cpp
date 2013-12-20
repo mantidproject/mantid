@@ -190,9 +190,8 @@ namespace Mantid
 
     /**Evaluate a point on the spline. Includes basic error handling
      *
-     * @param out :: The array to store the calculated values
-     * @param xValues :: The array of x values we wish to interpolate
-     * @param nData :: The size of the arrays
+     * @param x :: Point to evaluate
+     * @return :: the value of the spline at the given point
      */
     double CubicSpline::splineEval(const double x) const
     {

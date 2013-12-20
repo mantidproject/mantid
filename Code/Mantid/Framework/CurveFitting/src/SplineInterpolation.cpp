@@ -248,7 +248,6 @@ namespace Mantid
      * @param inputWorkspace :: The input workspace
      * @param outputWorkspace :: The output workspace
      * @param order :: The order of derivatives to calculate
-     * @param row :: The row of spectra to use
      */
     void SplineInterpolation::calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int order) const
