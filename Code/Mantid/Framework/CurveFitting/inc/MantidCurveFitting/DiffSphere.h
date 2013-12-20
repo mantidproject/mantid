@@ -44,32 +44,34 @@ namespace CurveFitting
 
 class DLLExport DiffSphere : public API::ImmutableCompositeFunction
 {
+
 public:
-  /// Constructor
-  DiffSphere();
 
   /// Destructor
   ~DiffSphere() {};
 
   /// overwrite IFunction base class methods
-  std::string name()const{return "DiffSphere";}
+  std::string name()const{ return "DiffSphere"; }
 
-  virtual const std::string category() const { return "QuasiElastic";}
+  virtual const std::string category() const { return "QENS"; }
 
-  virtual int version() const { return 1;}
+  virtual int version() const { return 1; }
 
   /// Propagate an attribute to member functions
   virtual void trickleDownAttribute( const std::string& name );
 
   /// Override parent definition
-  virtual void declareAttribute(const std::string & name,const API::IFunction::Attribute & defaultValue);
+  virtual void declareAttribute(const std::string & name,const API::IFunction::Attribute & defaultValue );
 
   /// Override parent definition
-  virtual void setAttribute(const std::string& attName,const Attribute& att);
+  virtual void setAttribute( const std::string& attName, const Attribute& att );
+
+  /// overwrite IFunction base class method, which declare function parameters
+  virtual void init();
 
 private:
-  //API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor
-  boost::shared_ptr<ElasticDiffSphere> m_elastic;
+
+  boost::shared_ptr<ElasticDiffSphere> m_elastic;  //elastic intensity of the DiffSphere structure factor
   boost::shared_ptr<InelasticDiffSphere> m_inelastic;  //inelastic intensity of the DiffSphere structure factor
 };
 
