@@ -181,17 +181,35 @@ namespace Mantid
         " Method used = " << " Simplex" << 
         " Iteration = " << iter << 
         " Status = " << report << 
-        " Chisq = " << s->fval ; 
+        " Chisq = " << s->fval <<"\n";
       std::vector<double>Params;
       for ( size_t i = 0; i < s->x->size; i++ )Params.push_back(gsl_vector_get(s->x,i));
       optLattice(inname, type, Params);
+      std::vector<double> sigabc(7);
+      OrientedLattice latt=ws->mutableSample().getOrientedLattice();
+      DblMatrix UBnew = latt.getUB();
+      const std::vector<Peak> &peaks = ws->getPeaks();
+      size_t n_peaks = ws->getNumberPeaks();
+      std::vector<V3D> hkl_vector;
+
+      for ( size_t i = 0; i < n_peaks; i++ )
+      {
+        hkl_vector.push_back(peaks[i].getHKL());
+      }
+      IndexingUtils::Calculate_Errors(UBnew, hkl_vector, sigabc, s->fval);
+      OrientedLattice o_lattice;
+      o_lattice.setUB( UBnew );
+      o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+
+      // Show the modified lattice parameters
+      g_log.notice() << o_lattice << "\n";
+
+      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
       gsl_vector_free(x);
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
       setProperty("OutputChi2", s->fval);
-      // Show the modified lattice parameters
-      OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-      g_log.notice() << o_lattice << "\n";
+
       if ( apply )
       {
 		  // Reindex peaks with new UB
