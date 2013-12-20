@@ -136,7 +136,7 @@ namespace IDA
    * @param plot      :: the QwtPlot object
    * @param curve     :: the QwtPlotCurve object
    * @param workspace :: A pointer to the workspace to use
-   * @param wsIndex   :: the workspace index
+   * @param index   :: the workspace index
    *
    * @returns the resulting QwtPlotCurve object
    */

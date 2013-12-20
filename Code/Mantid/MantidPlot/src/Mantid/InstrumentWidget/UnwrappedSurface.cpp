@@ -730,8 +730,6 @@ void UnwrappedSurface::calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos
 /** Calculate the size of the detector in U/V
  *
  * @param udet
- * @param X
- * @param Y
  */
 void UnwrappedSurface::calcSize(UnwrappedDetector& udet)
 {

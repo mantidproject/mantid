@@ -2049,7 +2049,7 @@ void MuonAnalysis::updateFrontAndCombo()
 
 /**
  * Updates widgets related to period algebra
- * @param newNumPeriods Number of periods available
+ * @param numPeriods Number of periods available
  */
 void MuonAnalysis::updatePeriodWidgets(int numPeriods)
 {
@@ -2177,6 +2177,7 @@ QStringList MuonAnalysis::getPeriodLabels() const
  * plots specific WS spectrum (used by plotPair and plotGroup)
  * @param wsName workspace name
  * @param wsIndex workspace index
+ * @param ylogscale use log scaling on y
  */
 void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale)
 {
@@ -3172,7 +3173,7 @@ void MuonAnalysis::getFullCode(int originalSize, QString & run)
 /**
  * Is called every time when tab gets changed
  *
- * @param tabNumber The index value of the current tab
+ * @param newTabNumber The index value of the current tab
  */
 void MuonAnalysis::changeTab(int newTabNumber)
 {

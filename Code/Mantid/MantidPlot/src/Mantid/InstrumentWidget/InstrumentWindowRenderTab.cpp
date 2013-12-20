@@ -573,7 +573,7 @@ void InstrumentWindowRenderTab::setSurfaceType(int index)
 
 /**
   * Respond to surface change from script.
-  * @param typeIndex :: Index selected in the surface type combo box.
+  * @param index :: Index selected in the surface type combo box.
   */
 void InstrumentWindowRenderTab::surfaceTypeChanged(int index)
 {
