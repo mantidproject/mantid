@@ -75,7 +75,7 @@ class IndirectTransmission(PythonAlgorithm):
 		tableWs = nameStem + '_Transmission'
 		tableWs = CreateEmptyTableWorkspace(OutputWorkspace=tableWs)
 		tableWs.addColumn("str", "Name")
-		tableWs.addColumn("str", "Value")
+		tableWs.addColumn("double", "Value")
 
 		# Names for each of the output values
 		outputNames = ['Wavelength', 'Absorption Xsection', 'Coherent Xsection', 'Incoherent Xsection',
@@ -84,13 +84,11 @@ class IndirectTransmission(PythonAlgorithm):
 		# List of the calculated values
 		outputValues = [wave, absorptionXSection, coherentXSection, incoherentXSection, 
 								scatteringXSection, density, thickness, transmission, scattering]
-		
-		outputValues = map(str, outputValues)
-		
+				
 		#build table of values
 		for data in zip (outputNames, outputValues):
 			tableWs.addRow(list(data))
-			logger.information(': '.join(list(data)))
+			logger.information(': '.join(map(str,list(data))))
 
 		#remove idf/ipf workspace
 		DeleteWorkspace(workspace)
