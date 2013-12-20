@@ -60,6 +60,7 @@ public:
   /** Constructor
    * @param lowerBound :: The lower bounding value
    * @param upperBound :: The upper bounding value
+   * @param exclusive :: make bounds exclusive (default inclusive)
    */
   BoundedValidator(const TYPE lowerBound, const TYPE upperBound, bool exclusive=false)
   : TypedValidator<TYPE>(),
