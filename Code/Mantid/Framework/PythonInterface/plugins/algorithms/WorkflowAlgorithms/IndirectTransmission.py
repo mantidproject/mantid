@@ -6,8 +6,8 @@ The instrument analyser reflection is selected to obtain the wavelength to calcu
 *WIKI*"""
 
 from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory
-from mantid.kernel import StringListValidator, StringMandatoryValidator
+from mantid.api import *
+from mantid.kernel import *
 from mantid import config
 import os.path, math
 
@@ -23,7 +23,8 @@ class IndirectTransmission(PythonAlgorithm):
 		self.declareProperty(name='ChemicalFormula',defaultValue='',validator=StringMandatoryValidator(), doc='Sample chemical formula')
 		self.declareProperty(name='NumberDensity', defaultValue=0.1, doc='Number denisty. Default=0.1')
 		self.declareProperty(name='Thickness', defaultValue=0.1, doc='Sample thickness. Default=0.1')
- 
+		self.declareProperty(WorkspaceProperty('OutputWorkspace', "", Direction.Output), doc="The name of the output workspace.")
+
 	def PyExec(self):
 		from IndirectCommon import StartTime, EndTime
 		
@@ -72,7 +73,7 @@ class IndirectTransmission(PythonAlgorithm):
 		scattering = 1.0 - math.exp(-density*scatteringXSection*thickness)
 		
 		#Create table workspace to store calculations
-		tableWs = nameStem + '_Transmission'
+		tableWs = self.getPropertyValue('OutputWorkspace')
 		tableWs = CreateEmptyTableWorkspace(OutputWorkspace=tableWs)
 		tableWs.addColumn("str", "Name")
 		tableWs.addColumn("double", "Value")
@@ -92,7 +93,7 @@ class IndirectTransmission(PythonAlgorithm):
 
 		#remove idf/ipf workspace
 		DeleteWorkspace(workspace)
-
+		self.setProperty("OutputWorkspace", tableWs)
 		EndTime('IndirectTransmission')
 
 # Register algorithm with Mantid
