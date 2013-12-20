@@ -181,7 +181,7 @@ namespace MantidQt
 				if(convFitWidth || qLinesWidth)
 				{
 					std::string cbItemName = "";
-					size_t substrIndex;
+					size_t substrIndex = 0;
 					
 					if (qLinesWidth)
 					{
