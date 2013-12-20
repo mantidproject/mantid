@@ -67,8 +67,8 @@ public:
 /// structure to hold info on Volino's coefficients
 struct xnlc {
   double x;
-  unsigned int l;
-  unsigned int n;
+  size_t n;
+  size_t l;
 };
 
 /// simple structure to hold a linear interpolation of factor J around its numerical divergence point
@@ -85,7 +85,10 @@ class DLLExport InelasticDiffSphere : public API::ParamFunction, public API::IFu
 public:
 
   InelasticDiffSphere();
+
   virtual ~InelasticDiffSphere() {}
+
+  virtual void init();
 
   virtual std::string name()const{return "InelasticDiffSphere"; }
 
@@ -104,29 +107,26 @@ private:
   /// initialize the Xnl coefficients
   void initXnlCoeff();
 
-  /// initialize the alpha coefficients
+  /// initialize the m_alpha coefficients
   void initAlphaCoeff();
 
   /// initialize the list of Linearized J values
   void initLinJlist();
 
   /// xnl coefficients
-  std::vector< xnlc > xnl;
+  std::vector< xnlc > m_xnl;
 
   /// certain coefficients invariant during fitting
-  std::vector< double > alpha;
+  std::vector< double > m_alpha;
 
   /// maximum value of l in xnlist
-  unsigned int lmax;
-
-  /// number of coefficients
-  unsigned int ncoeff;
+  size_t lmax;
 
   /// linear interpolation zone around the numerical divergence of factor J
   double m_divZone;
 
   /// list of linearized J values
-  std::vector< linearJ > linearJlist;
+  std::vector< linearJ > m_linearJlist;
 
 }; // end of class InelasticDiffSphere
 
