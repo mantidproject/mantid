@@ -533,6 +533,21 @@ public:
     TS_ASSERT(wsg);
     TS_ASSERT_EQUALS(wsg->getNames().size(), 3);
   }
+
+  void test_cleanupAfterMultifileLoading()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189-15192:2.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    TS_ASSERT_EQUALS(3, AnalysisDataService::Instance().size());
+
+    const auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
+    TS_ASSERT(wsg);
+    TS_ASSERT_EQUALS(wsg->getNames().size(), 2);
+  }
 };
 
 
