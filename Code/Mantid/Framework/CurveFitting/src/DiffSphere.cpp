@@ -209,8 +209,8 @@ void InelasticDiffSphere::function1D( double* out, const double* xValues, const 
   const double Q = getAttribute( "Q" ).asDouble();
 
   // explicit check of boundaries. Should not be necessary
-  if ( I < std::numeric_limits<double>::epsilon() or
-      R < std::numeric_limits<double>::epsilon() or
+  if ( I < std::numeric_limits<double>::epsilon() ||
+      R < std::numeric_limits<double>::epsilon() ||
       D < std::numeric_limits<double>::epsilon() )
   {
     for (size_t i = 0;  i < nData;  i++)
