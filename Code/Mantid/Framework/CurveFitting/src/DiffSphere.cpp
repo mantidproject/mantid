@@ -47,10 +47,13 @@ double ElasticDiffSphere::HeightPrefactor() const
 {
   const double R = getParameter( "Radius" );
   const double Q = getAttribute( "Q" ).asDouble();
+
+  // explicit check of boundaries. Should not be necessary
   if ( R < std::numeric_limits<double>::epsilon() )
   {
     return 0.0;
   }
+
   return pow( 3 * boost::math::sph_bessel( 1, Q * R ) / ( Q * R ), 2 );
 }
 
@@ -148,13 +151,13 @@ InelasticDiffSphere::InelasticDiffSphere() : lmax( 24 ), m_divZone( 0.1 )
 void InelasticDiffSphere::init()
 {
   // Ensure positive values for Intensity, Radius, and Diffusion coefficient
-  BoundaryConstraint* IntensityConstraint = new BoundaryConstraint( this, "Intensity", 0, true );
+  BoundaryConstraint* IntensityConstraint = new BoundaryConstraint( this, "Intensity", std::numeric_limits<double>::epsilon(), true );
   addConstraint(IntensityConstraint);
 
-  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint( this, "Radius", 0, true );
+  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint( this, "Radius", std::numeric_limits<double>::epsilon(), true );
   addConstraint( RadiusConstraint );
 
-  BoundaryConstraint* DiffusionConstraint = new BoundaryConstraint( this, "Diffusion", 0, true );
+  BoundaryConstraint* DiffusionConstraint = new BoundaryConstraint( this, "Diffusion", std::numeric_limits<double>::epsilon(), true );
   addConstraint( DiffusionConstraint );
 
   initXnlCoeff();   // initialize m_xnl with the list of coefficients xnlist
@@ -204,6 +207,18 @@ void InelasticDiffSphere::function1D( double* out, const double* xValues, const 
   const double R = getParameter( "Radius" );
   const double D = getParameter( "Diffusion" );
   const double Q = getAttribute( "Q" ).asDouble();
+
+  // explicit check of boundaries. Should not be necessary
+  if ( I < std::numeric_limits<double>::epsilon() or
+      R < std::numeric_limits<double>::epsilon() or
+      D < std::numeric_limits<double>::epsilon() )
+  {
+    for (size_t i = 0;  i < nData;  i++)
+    {
+      out[ i ] = 0.0;
+    }
+    return;
+  }
 
   std::vector<double> YJ;
   YJ = LorentzianCoefficients( Q * R );
