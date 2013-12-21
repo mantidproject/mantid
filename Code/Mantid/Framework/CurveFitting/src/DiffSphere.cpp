@@ -1,10 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <cmath>
+#include <limits>
+
 #include "MantidCurveFitting/DiffSphere.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <cmath>
 #include <boost/math/special_functions/bessel.hpp>
 #include "MantidAPI/ParameterTie.h"
 
@@ -20,6 +22,8 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
+DECLARE_FUNCTION(ElasticDiffSphere);
+DECLARE_FUNCTION(InelasticDiffSphere);
 DECLARE_FUNCTION(DiffSphere);
 
 ElasticDiffSphere::ElasticDiffSphere()
@@ -32,10 +36,10 @@ ElasticDiffSphere::ElasticDiffSphere()
 void ElasticDiffSphere::init()
 {
   // Ensure positive values for Height and Radius
-  BoundaryConstraint* HeightConstraint = new BoundaryConstraint( this, "Height" , 0 , true );
+  BoundaryConstraint* HeightConstraint = new BoundaryConstraint( this, "Height" , std::numeric_limits<double>::epsilon() , true );
   addConstraint( HeightConstraint );
 
-  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint( this, "Radius", 0 , true );
+  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint( this, "Radius", std::numeric_limits<double>::epsilon() , true );
   addConstraint( RadiusConstraint );
 }
 
@@ -43,10 +47,12 @@ double ElasticDiffSphere::HeightPrefactor() const
 {
   const double R = getParameter( "Radius" );
   const double Q = getAttribute( "Q" ).asDouble();
+  if ( R < std::numeric_limits<double>::epsilon() )
+  {
+    return 0.0;
+  }
   return pow( 3 * boost::math::sph_bessel( 1, Q * R ) / ( Q * R ), 2 );
 }
-
-DECLARE_FUNCTION(InelasticDiffSphere);
 
 // initialize class attribute m_xnl with a list of coefficients in string format
 void InelasticDiffSphere::initXnlCoeff(){

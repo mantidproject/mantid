@@ -97,9 +97,9 @@ public:
   void calNumericalDeriv2( const API::FunctionDomain& domain, API::Jacobian& out );
 
 protected:
+
   virtual void function1D( double* out, const double* xValues, const size_t nData ) const;
-  virtual void functionDeriv1D( API::Jacobian* out, const double* xValues, const size_t nData );
-  virtual void functionDeriv( const API::FunctionDomain& domain, API::Jacobian& jacobian );
+
   std::vector< double > LorentzianCoefficients( double a ) const;
 
 private:
