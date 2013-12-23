@@ -324,6 +324,40 @@ namespace Mantid
           "Output processed workspace");
     }
 
+    VecCommands interpret(const std::string& processingInstructions)
+    {
+      std::vector<std::string> processingInstructionsSplit;
+      boost::split(processingInstructionsSplit, processingInstructions, boost::is_any_of(","));
+
+      VecCommandParsers commandParsers;
+      commandParsers.push_back(boost::make_shared<AdditionParser>());
+      commandParsers.push_back(boost::make_shared<CropParserRange>());
+      commandParsers.push_back(boost::make_shared<CropParserIndex>());
+
+      VecCommands commands;
+      for (auto it = processingInstructionsSplit.begin(); it != processingInstructionsSplit.end(); ++it)
+      {
+        const std::string candidate = *it;
+        bool parserFound = false;
+        for (auto parserIt = commandParsers.begin(); parserIt != commandParsers.end(); ++parserIt)
+        {
+          auto commandParser = *parserIt;
+          Command* command = commandParser->interpret(candidate);
+          boost::shared_ptr<Command> commandSptr(command);
+          if (commandSptr->isValid())
+          {
+            parserFound = true;
+            commands.push_back(commandSptr);
+          }
+        }
+        if (!parserFound)
+        {
+          throw std::invalid_argument("Cannot interpret " + candidate);
+        }
+      }
+      return commands;
+    }
+
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
      */
@@ -351,36 +385,7 @@ namespace Mantid
       }
       else
       {
-        std::vector<std::string> processingInstructionsSplit;
-        boost::split(processingInstructionsSplit, processingInstructions, boost::is_any_of(","));
-
-        VecCommandParsers commandParsers;
-        commandParsers.push_back(boost::make_shared<AdditionParser>());
-        commandParsers.push_back(boost::make_shared<CropParserRange>());
-        commandParsers.push_back(boost::make_shared<CropParserIndex>());
-
-        VecCommands commands;
-        for (auto it = processingInstructionsSplit.begin(); it != processingInstructionsSplit.end(); ++it)
-        {
-          const std::string candidate = *it;
-          bool parserFound = false;
-          for (auto parserIt = commandParsers.begin(); parserIt != commandParsers.end(); ++parserIt)
-          {
-            auto commandParser = *parserIt;
-            Command* command = commandParser->interpret(candidate);
-            boost::shared_ptr<Command> commandSptr(command);
-            if(commandSptr->isValid())
-            {
-              parserFound = true;
-              commands.push_back(commandSptr);
-            }
-          }
-          if(!parserFound)
-          {
-            throw std::invalid_argument("Cannot interpret " + candidate);
-          }
-        }
-
+        VecCommands commands = interpret(processingInstructions);
         auto command = commands[0];
         MatrixWorkspace_sptr outWS = command->execute(inputWorkspace);
         for (int j = 1; j < commands.size(); ++j)
