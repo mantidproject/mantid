@@ -363,13 +363,21 @@ namespace Mantid
         for (auto it = processingInstructionsSplit.begin(); it != processingInstructionsSplit.end(); ++it)
         {
           const std::string candidate = *it;
+          bool parserFound = false;
           for (auto parserIt = commandParsers.begin(); parserIt != commandParsers.end(); ++parserIt)
           {
             auto commandParser = *parserIt;
             Command* command = commandParser->interpret(candidate);
             boost::shared_ptr<Command> commandSptr(command);
             if(commandSptr->isValid())
+            {
+              parserFound = true;
               commands.push_back(commandSptr);
+            }
+          }
+          if(!parserFound)
+          {
+            throw std::invalid_argument("Cannot interpret " + candidate);
           }
         }
 

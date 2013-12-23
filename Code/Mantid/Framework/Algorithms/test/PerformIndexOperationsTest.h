@@ -79,7 +79,7 @@ public:
     TSM_ASSERT_THROWS("Not a positive index", doExecute(m_testWS, "-1"), std::invalid_argument&);
     TSM_ASSERT_THROWS("One negative, one positive index", doExecute(m_testWS, "-1,1"), std::invalid_argument&);
     TSM_ASSERT_THROWS("Invalid separator", doExecute(m_testWS, "1@2"), std::invalid_argument&);
-    //TSM_ASSERT_THROWS("Dangling end separator", doExecute(m_testWS, "1,2,"), std::invalid_argument&);
+    TSM_ASSERT_THROWS("Dangling end separator", doExecute(m_testWS, "1,2,"), std::invalid_argument&);
     TSM_ASSERT_THROWS("Test non-integer index", doExecute(m_testWS, "1.0"), std::invalid_argument&);
   }
 
