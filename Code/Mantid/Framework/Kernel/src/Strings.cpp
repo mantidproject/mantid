@@ -341,8 +341,7 @@ namespace Mantid
         getline(fh, str);
         fh.seekg(pos);
 
-        strip(str);
-        return str;
+        return strip(str);
       }
 
       //------------------------------------------------------------------------------------------------

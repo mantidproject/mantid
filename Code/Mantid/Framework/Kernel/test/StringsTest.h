@@ -127,11 +127,22 @@ public:
   }
   void testpeekLine()
   {
-    std::istringstream text("blah blah\nfoo bar\n");
-    TS_ASSERT(peekLine(text) == "blah blah");
-    std::cout << peekLine(text) << std::endl;
-    TS_ASSERT(peekLine(text) == "blah blah");
+    std::istringstream text1("blah blah\nfoo bar\n");
+    TS_ASSERT(peekLine(text1) == "blah blah");
+    TS_ASSERT(peekLine(text1) == "blah blah");
+
+    std::istringstream text2("\tblah blah \nfoo bar\n");
+    TS_ASSERT(peekLine(text2) == "blah blah");
+    TS_ASSERT(peekLine(text2) == "blah blah");
   }
+  void testStrip()
+  {
+    TS_ASSERT(strip("blah") == "blah");
+    TS_ASSERT(strip("   blah") == "blah");
+    TS_ASSERT(strip("\nblah \t  ") == "blah");
+    TS_ASSERT(strip("\tblah\t\n") == "blah");
+  }
+
   void testExtractWord()
   /**
      Applies a test to the extractWord
