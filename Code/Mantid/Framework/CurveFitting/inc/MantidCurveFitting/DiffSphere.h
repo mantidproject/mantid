@@ -88,19 +88,21 @@ public:
 
   virtual ~InelasticDiffSphere() {}
 
+  /// overwrite IFunction base class methods
   virtual void init();
 
+  /// overwrite IFunction base class methods
   virtual std::string name()const{return "InelasticDiffSphere"; }
 
+  /// overwrite IFunction base class methods
   virtual const std::string category() const { return "QENS"; }
 
-  void calNumericalDeriv2( const API::FunctionDomain& domain, API::Jacobian& out );
+  /// Calculate the (2l+1)*A_{n,l} coefficients for each Lorentzian
+  std::vector< double > LorentzianCoefficients( double a ) const;
 
 protected:
 
   virtual void function1D( double* out, const double* xValues, const size_t nData ) const;
-
-  std::vector< double > LorentzianCoefficients( double a ) const;
 
 private:
 
@@ -110,7 +112,7 @@ private:
   /// initialize the m_alpha coefficients
   void initAlphaCoeff();
 
-  /// initialize the list of Linearized J values
+  /// initialize the list of parameters for A_{n,l} linear interpolation around the indeterminacy point
   void initLinJlist();
 
   /// xnl coefficients
@@ -120,10 +122,13 @@ private:
   std::vector< double > m_alpha;
 
   /// maximum value of l in xnlist
-  size_t lmax;
+  size_t m_lmax;
 
   /// linear interpolation zone around the numerical divergence of factor J
   double m_divZone;
+
+  /// Plank's constant divided by 2\pi, in units of meV*THz
+  double m_hbar;
 
   /// list of linearized J values
   std::vector< linearJ > m_linearJlist;
@@ -142,8 +147,10 @@ public:
   /// overwrite IFunction base class methods
   std::string name()const{ return "DiffSphere"; }
 
+  /// overwrite IFunction base class methods
   virtual const std::string category() const { return "QENS"; }
 
+  /// overwrite IFunction base class methods
   virtual int version() const { return 1; }
 
   /// Propagate an attribute to member functions

@@ -29,7 +29,7 @@ DECLARE_FUNCTION(DiffSphere);
 ElasticDiffSphere::ElasticDiffSphere()
 {
   //declareParameter("Height", 1.0); //parameter "Height" already declared in constructor of base class DeltaFunction
-  declareParameter( "Radius", 1.0, "Sphere radius" );
+  declareParameter( "Radius", 2.0, "Sphere radius" );
   declareAttribute( "Q", API::IFunction::Attribute( 1.0 ) );
 }
 
@@ -48,7 +48,7 @@ double ElasticDiffSphere::HeightPrefactor() const
   const double R = getParameter( "Radius" );
   const double Q = getAttribute( "Q" ).asDouble();
 
-  // explicit check of boundaries. Should not be necessary
+  // Penalize negative parameters
   if ( R < std::numeric_limits<double>::epsilon() )
   {
     return 0.0;
@@ -98,7 +98,7 @@ void InelasticDiffSphere::initXnlCoeff(){
     6, 1, 7, 4, 2, 3, 0, 5, 1, 6, 4, 7, 8, 2, 0, 3
   };
 
-  for( size_t i = 0;  i < ncoeff;  i += 3 )
+  for( size_t i = 0;  i < ncoeff;  i ++ )
   {
     xnlc coeff;
     coeff.x = xvalues[ i ];
@@ -108,13 +108,13 @@ void InelasticDiffSphere::initXnlCoeff(){
   }
 }
 
-//initialize a set of coefficients that will remain constant during fitting
+/// Initialize a set of coefficients that will remain constant during fitting
 void InelasticDiffSphere::initAlphaCoeff(){
   for( std::vector< xnlc >::const_iterator it = m_xnl.begin();  it != m_xnl.end();  ++it )
   {
     double x = it->x;   // eigenvalue for a (n, l) pair
     double l = ( double )( it->l );
-    m_alpha.push_back( ( 2.0 * l + 1 ) * ( 6.0 * x*x / ( x*x - l*(l + 1) ) ) / M_PI );
+    m_alpha.push_back( ( 2.0 * l + 1 ) * 6.0 * x*x / ( x*x - l*(l + 1) ) );
   }
 }
 
@@ -139,38 +139,29 @@ void InelasticDiffSphere::initLinJlist()
   }
 }
 
-InelasticDiffSphere::InelasticDiffSphere() : lmax( 24 ), m_divZone( 0.1 )
+InelasticDiffSphere::InelasticDiffSphere() : m_lmax( 24 ), m_divZone( 0.1 ), m_hbar(0.658211626)
 {
   declareParameter( "Intensity", 1.0, "scaling factor" );
-  declareParameter( "Radius", 1.0, "Sphere radius" );
-  declareParameter( "Diffusion", 1.0, "Diffusion coefficient, in units of" );
+  declareParameter( "Radius", 2.0, "Sphere radius, in Angstroms" );
+  declareParameter( "Diffusion", 0.05, "Diffusion coefficient, in units of A^2*THz, if energy in meV, or A^2*PHz if energy in ueV" );
 
   declareAttribute( "Q", API::IFunction::Attribute( 1.0 ) );
 }
 
+/// Initialize a set of coefficients and terms that are invariant during fitting
 void InelasticDiffSphere::init()
 {
-  // Ensure positive values for Intensity, Radius, and Diffusion coefficient
-  BoundaryConstraint* IntensityConstraint = new BoundaryConstraint( this, "Intensity", std::numeric_limits<double>::epsilon(), true );
-  addConstraint(IntensityConstraint);
-
-  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint( this, "Radius", std::numeric_limits<double>::epsilon(), true );
-  addConstraint( RadiusConstraint );
-
-  BoundaryConstraint* DiffusionConstraint = new BoundaryConstraint( this, "Diffusion", std::numeric_limits<double>::epsilon(), true );
-  addConstraint( DiffusionConstraint );
-
   initXnlCoeff();   // initialize m_xnl with the list of coefficients xnlist
   initAlphaCoeff(); // initialize m_alpha, certain factors constant over the fit
   initLinJlist();   // initialize m_linearJlist, linear interpolation around numerical divergence
 }
 
-//calculate the coefficients for each Lorentzian
+/// Calculate the (2l+1)*A_{n,l} coefficients for each Lorentzian
 std::vector< double > InelasticDiffSphere::LorentzianCoefficients( double a ) const
 {
-  //precompute the 2+lmax spherical bessel functions (26 in total)
-  std::vector< double > jl( 2 + lmax );
-  for( size_t l = 0;  l < 2 + lmax;  l++ )
+  //precompute the 2+m_lmax spherical bessel functions (26 in total)
+  std::vector< double > jl( 2 + m_lmax );
+  for( size_t l = 0;  l < 2 + m_lmax;  l++ )
   {
     jl[ l ] = boost::math::sph_bessel( ( unsigned int )( l ), a );
   }
@@ -183,8 +174,7 @@ std::vector< double > InelasticDiffSphere::LorentzianCoefficients( double a ) co
   {
     double x  = m_xnl[ i ].x;
     unsigned int l  = ( unsigned int )( m_xnl[ i ].l );
-    //compute  factors Y and J
-    double Y = m_alpha[ i ]; //Y is independent of parameters a and w, and independent of data x
+
     double J;
     if( fabs( a - x ) > m_divZone )
     {
@@ -194,7 +184,8 @@ std::vector< double > InelasticDiffSphere::LorentzianCoefficients( double a ) co
     {
       J = m_linearJlist[ i ].slope * a + m_linearJlist[ i ].intercept; // linear interpolation instead
     }
-    YJ[ i ] = Y * J * J;
+
+    YJ[ i ] = m_alpha[ i ] * ( J * J );
   }
 
   return YJ;
@@ -208,7 +199,7 @@ void InelasticDiffSphere::function1D( double* out, const double* xValues, const 
   const double D = getParameter( "Diffusion" );
   const double Q = getAttribute( "Q" ).asDouble();
 
-  // explicit check of boundaries. Should not be necessary
+  // // Penalize negative parameters
   if ( I < std::numeric_limits<double>::epsilon() ||
       R < std::numeric_limits<double>::epsilon() ||
       D < std::numeric_limits<double>::epsilon() )
@@ -220,96 +211,28 @@ void InelasticDiffSphere::function1D( double* out, const double* xValues, const 
     return;
   }
 
-  std::vector<double> YJ;
-  YJ = LorentzianCoefficients( Q * R );
+  // List of Lorentzian HWHM
+  std::vector< double > HWHM;
+  size_t ncoeff = m_xnl.size();
+  for ( size_t n = 0;  n < ncoeff;  n++ )
+  {
+    double x = m_xnl[ n ].x;  // eigenvalue
+    HWHM.push_back( m_hbar * x * x * D / ( R * R ) );
+  }
+
+  std::vector< double > YJ;
+  YJ = LorentzianCoefficients( Q * R ); // The (2l+1)*A_{n,l}
   for (size_t i = 0;  i < nData;  i++)
   {
-    double x = xValues[ i ];
+    double energy = xValues[ i ]; // from meV to THz (or from micro-eV to PHz)
     out[ i ] = 0.0;
-    size_t ncoeff = m_xnl.size();
     for ( size_t n = 0;  n < ncoeff;  n++ )
     {
-      double z = m_xnl[ n ].x;  // eigenvalue
-      double zw = z * z * D / ( R * R );   // HWHM
-      double L = zw / ( zw * zw + x * x ); //Lorentzian
+      double L = ( 1.0 / M_PI ) * HWHM[n] / ( HWHM[n] * HWHM[n] + energy * energy ); //Lorentzian
       out[i] += I * YJ[ n ] * L;
     }
   }
 }
-
-/** Calculate numerical derivatives.
- * @param domain :: The domain of the function
- * @param jacobian :: A Jacobian matrix. It is expected to have dimensions of domain.size() by nParams().
-
-void InelasticDiffSphere::calNumericalDeriv2( const API::FunctionDomain& domain, API::Jacobian& jacobian )
-{
-  const double minDouble = std::numeric_limits< double >::min();
-  const double epsilon = std::numeric_limits< double >::epsilon() * 100;
-  double stepPercentage = 0.001; // step percentage
-  double step; // real step
-  double cutoff = 100.0 * minDouble / stepPercentage;
-  size_t nParam = nParams();
-  size_t nData = domain.size();
-
-  FunctionValues minusStep( domain );
-  FunctionValues plusStep( domain );
-
-  //PARALLEL_CRITICAL(numeric_deriv)
-  {
-    applyTies(); // just in case
-    function( domain, minusStep );
-  }
-
-  for (size_t iP = 0; iP < nParam; iP++ )
-  {
-    if ( isActive( iP ) )
-    {
-      const double val = activeParameter( iP );
-      if ( fabs( val ) < cutoff )
-      {
-        step = epsilon;
-      }
-      else
-      {
-        step = val * stepPercentage;
-      }
-
-      double paramPstep = val + step;
-      //PARALLEL_CRITICAL(numeric_deriv)
-      {
-        setActiveParameter( iP, paramPstep );
-        applyTies();
-        function( domain, plusStep );
-        setActiveParameter( iP, val );
-      }
-
-      step = paramPstep - val;
-      for ( size_t i = 0;  i < nData;  i++ )
-      {
-        jacobian.set( i, iP, ( plusStep.getCalculated( i ) - minusStep.getCalculated( i ) ) / step );
-      }
-    }
-  }
-} // calNumericalDeriv()
-*/
-
-/*
-/// Using numerical derivative
-void InelasticDiffSphere::functionDeriv( const API::FunctionDomain& domain, API::Jacobian& jacobian )
-{
-  this->calNumericalDeriv( domain, jacobian );
-  return;
-}
-*/
-
-/*
-/// Using numerical derivative
-void InelasticDiffSphere::functionDeriv1D( Jacobian* jacobian, const double* xValues, const size_t nData )
-{
-  FunctionDomain1DView domain( xValues, nData );
-  this->calNumericalDeriv( domain, *jacobian );
-}
-*/
 
 /* Propagate the attribute to its member functions.
  * NOTE: we pass this->getAttribute(name) by reference, thus the same
@@ -352,20 +275,17 @@ void DiffSphere::init()
   m_inelastic = boost::dynamic_pointer_cast< InelasticDiffSphere >( API::FunctionFactory::Instance().createFunction( "InelasticDiffSphere" ) );
   addFunction( m_inelastic );
 
-  this->setAttributeValue( "NumDeriv", true );
-
-  this->declareAttribute( "Q", API::IFunction::Attribute( 1.0 ) );
+  setAttributeValue( "NumDeriv", true );
+  declareAttribute( "Q", API::IFunction::Attribute( 1.0 ) );
 
   //Set the aliases
-  this->setAlias( "f0.Height", "elasticHeight" );
-  this->setAlias( "f0.Radius", "elasticRadius" );
-  this->setAlias( "f1.Intensity", "Intensity" );
-  this->setAlias( "f1.Radius", "Radius" );
-  this->setAlias( "f1.Diffusion", "Diffusion" );
+  setAlias( "f1.Intensity", "Intensity" );
+  setAlias( "f1.Radius", "Radius" );
+  setAlias( "f1.Diffusion", "Diffusion" );
 
   //Set the ties between Elastic and Inelastic parameters
-  this->addDefaultTies( "f0.Height=f1.Intensity,f0.Radius=f1.Radius" );
-  this->applyTies();
+  addDefaultTies( "f0.Height=f1.Intensity,f0.Radius=f1.Radius" );
+  applyTies();
 }
 
 } // namespace CurveFitting
