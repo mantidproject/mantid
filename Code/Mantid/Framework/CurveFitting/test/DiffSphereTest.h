@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <numeric>
 #include <cxxtest/TestSuite.h>
 #include <boost/lexical_cast.hpp>
 
@@ -24,11 +25,11 @@ public:
   static DiffSphereTest *createSuite() { return new DiffSphereTest(); }
   static void destroySuite( DiffSphereTest *suite ) { delete suite; }
 
-  // convolve the elastic part with a resolution function, here a Gaussian
+  /// Convolve the elastic part with a resolution function, here a Gaussian
   void testDiffSphereElastic()
   {
 
-    // initialize the fitting function in a Fit algorithm
+    // define the fit function
     std::string funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=0.0,Sigma=0.002);name=ElasticDiffSphere,Q=0.5,Height=47.014,Radius=3.567)";
 
     // Initialize the fit function in the Fit algorithm
@@ -77,7 +78,7 @@ public:
   }
 
   /* The weighted sum of the A_{n,l} coefficients is one
-   * \sum_{n=0,l=0}^{n=\infty,l=\infty} (2*l+1) * A_{n,l}(Q*Radius) = 1 for all Q and Radius
+   * \sum_{n=0,l=0}^{n=\infty,l=\infty} (2*l+1) * A_{n,l}(Q*Radius) = 1, for all values of parameter Q and Radius
    * We don't have infinity terms, but 99 (including A_{0,0}) thus the sum will be close to one. The
    * sum is closer to 1 as the product Q*Radius decreases.
    */
@@ -87,7 +88,7 @@ public:
     const double Q(1.0);
     const double D(1.0);
 
-    double R(0.1);
+    double R(0.1); // We vary parameter R while keeping the other constant, same as varying Q*Radius
     const double dR(0.1);
 
     const double QR_max(20); // suggested value by Volino for the approximation of the 99 coefficients to break down
@@ -115,14 +116,14 @@ public:
       inelastic_part -> setParameter( "Radius", R );
       std::vector< double > YJ = inelastic_part -> LorentzianCoefficients( Q * R ); // (2*l+1) * A_{n,l} coefficients
       double inelastic_intensity = std::accumulate( YJ.begin(), YJ.end(), 0.0 );
-      TS_ASSERT_DELTA( elastic_intensity + inelastic_intensity, 1.0, 0.02 );
+      TS_ASSERT_DELTA( elastic_intensity + inelastic_intensity, 1.0, 0.02 ); // Allow for a 2% deviation
       R += dR;
     }
   }
 
   void testDiffSphereInelastic()
   {
-    // target parameters
+    // target fitting parameters
     const double I_0(47.014);
     const double R_0(2.1);
     const double D_0(0.049);
@@ -144,7 +145,7 @@ public:
     auto data_workspace = generateWorkspaceFromFitAlgorithm( fitalg );
     //saveWorkspace( data_workspace, "/tmp/junk_data.nxs" ); // for debugging purposes only
 
-    // override the function with new parameters.
+    // override the function with new parameters, our initial guess.
     double I = I_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
     double R = R_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
     double D = D_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
@@ -182,7 +183,7 @@ public:
     TS_ASSERT_DELTA( fitalg_resolution -> getParameter( "Sigma" ), 0.002,  0.002* 0.001 ); // allow for a small percent variation
     //std::cout << "\nPeakCentre = " << fitalg_resolution->getParameter("PeakCentre") << "  Height= " << fitalg_resolution->getParameter("Height") << "  Sigma=" << fitalg_resolution->getParameter("Sigma") << "\n"; // only for debugging purposes
 
-    // check the parameters of the inelastic part
+    // check the parameters of the inelastic part close to the target parameters
     Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg_conv->getFunction( 1 );
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Intensity" ), I_0, I_0 * 0.05 ); // allow for a small percent variation
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Radius" ), R_0, R_0 * 0.05 );      // allow for a small percent variation
@@ -234,7 +235,7 @@ public:
     TS_ASSERT_DELTA( fitalg_inelastic -> getAttribute( "Q" ).asDouble(), Q, std::numeric_limits<double>::epsilon() );
     //std::cout << "Intensity=" << fitalg_inelastic->getParameter( "Intensity" ) << " Radius=" << fitalg_inelastic->getParameter( "Radius" ) << " Diffusion=" << fitalg_inelastic->getParameter( "Diffusion" ) <<"\n"; // for debugging purposes only
 
-    // override the function with new parameters.
+    // override the function with new parameters, our initial guess.
     double I = I_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
     double R = R_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
     double D = D_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
@@ -269,7 +270,7 @@ public:
     TS_ASSERT_DELTA( fitalg_resolution -> getParameter( "Sigma" ), 0.002,  0.002* 0.001 ); // allow for a small percent variation
     //std::cout << "\nPeakCentre = " << fitalg_resolution->getParameter("PeakCentre") << "  Height= " << fitalg_resolution->getParameter("Height") << "  Sigma=" << fitalg_resolution->getParameter("Sigma") << "\n"; // only for debugging purposes
 
-    // check the parameters of the DiffSphere
+    // check the parameters of the DiffSphere close to the target parameters
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Intensity" ), I_0, I_0 * 0.05 ); // allow for a small percent variation
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Radius" ), R_0, R_0 * 0.05 ); // allow for a small percent variation
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Diffusion" ), D_0, D_0 * 0.05 ); // allow for a small percent variation
