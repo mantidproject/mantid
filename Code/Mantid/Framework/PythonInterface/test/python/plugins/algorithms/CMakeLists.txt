@@ -5,6 +5,7 @@
 set ( TEST_PY_FILES
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
+  CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
   CreateTransmissionWorkspaceTest.py
@@ -16,6 +17,7 @@ set ( TEST_PY_FILES
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   MaskAngleTest.py
+  MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
   MeanTest.py
   MergeCalFilesTest.py
