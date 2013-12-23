@@ -800,30 +800,26 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   //Replace current workspace
   if (wsName == m_workspaceName.toStdString())
   {
-    bool resetGeometry = true;
-    bool autoscaling = true;
-    double scaleMin = 0.0;
-    double scaleMax = 0.0;
     if (m_instrumentActor)
     {
       // try to detect if the instrument changes with the workspace
       auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
-      resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
+      bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
 
       // if instrument doesn't change keep the scaling
       if ( !resetGeometry )
       {
-        autoscaling = m_instrumentActor->autoscaling();
-        scaleMin = m_instrumentActor->minValue();
-        scaleMax = m_instrumentActor->maxValue();
+        m_instrumentActor->updateColors();
       }
-
-      delete m_instrumentActor;
-      m_instrumentActor = NULL;
+      else
+      {
+        delete m_instrumentActor;
+        m_instrumentActor = NULL;
+        init( resetGeometry, true, 0.0, 0.0, false );
+        updateInstrumentDetectors();
+      }
     }
 
-    init( resetGeometry, autoscaling, scaleMin, scaleMax, false );
-    updateInstrumentDetectors();
   }
 }
 

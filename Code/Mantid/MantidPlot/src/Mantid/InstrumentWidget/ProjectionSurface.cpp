@@ -412,6 +412,7 @@ void ProjectionSurface::colorMapChanged()
 {
   this->changeColorMap();
   updateView(false);
+  requestRedraw();
 }
 
 /**
