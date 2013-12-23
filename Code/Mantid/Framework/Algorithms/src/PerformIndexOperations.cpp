@@ -6,9 +6,11 @@
 
 #include "MantidAlgorithms/PerformIndexOperations.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Strings.h"
-#include "boost/regex.hpp"
+#include <boost/regex.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -18,18 +20,74 @@ namespace
   class Command
   {
   public:
-    virtual MatrixWorkspace_sptr execute(MatrixWorkspace_const_sptr input) const = 0;
-    virtual ~Command(){}
+    virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr input) const = 0;
+
+    virtual MatrixWorkspace_sptr executeAndAppend(MatrixWorkspace_sptr inputWS,
+        MatrixWorkspace_sptr toAppend) const
+    {
+
+      MatrixWorkspace_sptr current = this->execute(inputWS);
+      if (current == NULL)
+      {
+        return toAppend;
+      }
+      else if (toAppend == NULL)
+      {
+        return current;
+      }
+      else
+      {
+
+        Mantid::API::AlgorithmManagerImpl& factory = Mantid::API::AlgorithmManager::Instance();
+        auto conjoinWorkspaceAlg = factory.create("ConjoinWorkspaces");
+        conjoinWorkspaceAlg->setChild(true);
+        conjoinWorkspaceAlg->initialize();
+        conjoinWorkspaceAlg->setProperty("InputWorkspace1", toAppend);
+        conjoinWorkspaceAlg->setProperty("InputWorkspace2", current);
+        conjoinWorkspaceAlg->execute();
+        MatrixWorkspace_sptr outWS = conjoinWorkspaceAlg->getProperty("InputWorkspace1");
+        return outWS;
+      }
+    }
+
+    virtual ~Command()
+    {
+    }
   };
+
+  typedef std::vector<boost::shared_ptr<Command> > VecCommands;
 
   class AdditionCommand: public Command
   {
+  private:
+    std::vector<int> m_indexes;
   public:
-    virtual MatrixWorkspace_sptr execute(MatrixWorkspace_const_sptr input) const
+    AdditionCommand(const std::vector<int>& indexes) :
+        m_indexes(indexes)
     {
-      throw std::runtime_error("Not implemented");
     }
-    virtual ~AdditionCommand(){}
+
+    virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const
+    {
+      MatrixWorkspace_sptr outWS;
+      if (m_indexes.size() > 0)
+      {
+        Mantid::API::AlgorithmManagerImpl& factory = Mantid::API::AlgorithmManager::Instance();
+        auto sumSpectraAlg = factory.create("SumSpectra");
+        sumSpectraAlg->setChild(true);
+        sumSpectraAlg->initialize();
+        sumSpectraAlg->setProperty("InputWorkspace", inputWS);
+        sumSpectraAlg->setProperty("ListOfWorkspaceIndices", m_indexes);
+        sumSpectraAlg->setPropertyValue("OutputWorkspace", "outWS");
+        sumSpectraAlg->execute();
+        outWS = sumSpectraAlg->getProperty("OutputWorkspace");
+      }
+      return outWS;
+    }
+
+    virtual ~AdditionCommand()
+    {
+    }
   };
 
   class CropCommand: public Command
@@ -37,25 +95,20 @@ namespace
   private:
     std::vector<int> m_indexes;
   public:
-    CropCommand(std::vector<int> indexes) :
+    CropCommand(const std::vector<int>& indexes) :
         m_indexes(indexes)
     {
     }
 
-    MatrixWorkspace_sptr execute(MatrixWorkspace_const_sptr inputWS) const
+    MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const
     {
-      auto cloneWS = Mantid::API::AlgorithmFactory::Instance().create("CloneWorkspace");
-      cloneWS->setChild(true);
-      cloneWS->initialize();
-      cloneWS->setProperty("InputWorkspace", inputWS);
-      cloneWS->setPropertyValue("OutputWorkspace", "outWS");
-      cloneWS->execute();
-      Workspace_sptr tmp = cloneWS->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+
+      MatrixWorkspace_sptr outWS;
 
       for (size_t i = 0; i < m_indexes.size(); ++i)
       {
-        auto cropWorkspaceAlg = Mantid::API::AlgorithmFactory::Instance().create("CropWorkspace");
+        Mantid::API::AlgorithmManagerImpl& factory = Mantid::API::AlgorithmManager::Instance();
+        auto cropWorkspaceAlg = factory.create("CropWorkspace");
         cropWorkspaceAlg->setChild(true);
         cropWorkspaceAlg->initialize();
         cropWorkspaceAlg->setProperty("InputWorkspace", inputWS);
@@ -70,59 +123,122 @@ namespace
         }
         else
         {
-          auto conjoinWorkspaceAlg = Mantid::API::AlgorithmFactory::Instance().create(
-              "ConjoinWorkspaces");
+          auto conjoinWorkspaceAlg = factory.create("ConjoinWorkspaces");
           conjoinWorkspaceAlg->setChild(true);
           conjoinWorkspaceAlg->initialize();
           conjoinWorkspaceAlg->setProperty("InputWorkspace1", outWS);
           conjoinWorkspaceAlg->setProperty("InputWorkspace2", subRange);
-          conjoinWorkspaceAlg->setPropertyValue("OutputWorkspace", "outWS");
           conjoinWorkspaceAlg->execute();
           outWS = conjoinWorkspaceAlg->getProperty("InputWorkspace1");
         }
       }
       return outWS;
     }
-    virtual ~CropCommand(){}
+    virtual ~CropCommand()
+    {
+    }
   };
 
   class CommandParser
   {
   public:
-    virtual Command* interpret(const std::string& instructions) = 0;
-    virtual std::string removeInstructions(const std::string& from) const = 0;
-    virtual ~CommandParser(){}
+    virtual VecCommands interpret(const std::vector<std::string>& instructions) const = 0;
+
+    virtual ~CommandParser()
+    {
+    }
   };
 
-  class AdditionParser: public CommandParser
+  template<typename ProductType>
+  class CommandParserBase: public CommandParser
   {
   public:
-    Command* interpret(const std::string& instructions) const
+    virtual VecCommands interpret(const std::vector<std::string>& instructions) const
     {
-      throw std::runtime_error("Not implemented");
+      VecCommands commands;
+      boost::regex ex = getRegex();
+      for (auto it = instructions.begin(); it != instructions.end(); ++it)
+      {
+        const std::string candidate = *it;
+        if (boost::regex_match(candidate, ex))
+        {
+          auto indexes = Mantid::Kernel::Strings::parseRange(candidate, ",", getSeparator());
+          commands.push_back(boost::make_shared<ProductType>(indexes));
+        }
+      }
+      return commands;
     }
-    std::string removeInstructions(const std::string& from) const
+    virtual ~CommandParserBase()
     {
-      throw std::runtime_error("Not implemented");
     }
-    virtual ~AdditionParser(){}
+  private:
+    virtual std::string getSeparator() const = 0;
+    virtual boost::regex getRegex() const = 0;
   };
 
-  class CropParser: public CommandParser
+  class AdditionParser: public CommandParserBase<AdditionCommand>
   {
   public:
-    Command* interpret(const std::string& instructions) const
+
+    virtual ~AdditionParser()
     {
-      auto indexes = Mantid::Kernel::Strings::parseRange(instructions, ",", ":");
-      return new CropCommand(indexes);
     }
-    std::string removeInstructions(const std::string& from) const
+
+  private:
+    boost::regex getRegex() const
     {
-      boost::regex re("([0-9]+\\s*:\\s*[0-9]+)|([0-9]+\\s*,\\s*[0-9]+)");
-      const std::string to = "";
-      return boost::regex_replace(from, re, to);
+      return boost::regex("\\s*[0-9]+\\s*\\-\\s*[0-9]+\\s*");
     }
-    virtual ~CropParser(){}
+    std::string getSeparator() const
+    {
+      return "-";
+    }
+  };
+
+  class CropParserRange: public CommandParserBase<CropCommand>
+  {
+  public:
+
+    virtual ~CropParserRange()
+    {
+    }
+  private:
+    boost::regex getRegex() const
+    {
+      return boost::regex("\\s*[0-9]+\\s*:\\s*[0-9]+\\s*");
+    }
+    std::string getSeparator() const
+    {
+      return ":";
+    }
+  };
+
+  class CropParserIndex: public CommandParser
+  {
+  public:
+
+    virtual ~CropParserIndex()
+    {
+    }
+
+    virtual VecCommands interpret(const std::vector<std::string>& instructions) const
+    {
+      VecCommands commands;
+      boost::regex ex("^\\s*[0-9]+\\s*$");
+      for (auto it = instructions.begin(); it != instructions.end(); ++it)
+      {
+        const std::string candidate = *it;
+        if (boost::regex_match(candidate, ex))
+        {
+          int index = -1;
+          Mantid::Kernel::Strings::convert<int>(candidate, index);
+          std::vector<int> indexes(1, index);
+          commands.push_back(boost::make_shared<CropCommand>( indexes ));
+        }
+      }
+      return commands;
+    }
+
   };
 
 }
@@ -199,47 +315,57 @@ namespace Mantid
       MatrixWorkspace_sptr inputWorkspace = this->getProperty("InputWorkspace");
       const std::string processingInstructions = this->getProperty("ProcessingInstructions");
 
-      boost::regex re("^\\s*[0-9]\\s*$|^(\\s*,*[0-9](\\s*(,|:|\\+|\\-)\\s*)[0-9])*$");
+      boost::regex re("^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
       if (!boost::regex_match(processingInstructions, re))
       {
         throw std::invalid_argument(
             "ProcessingInstructions are not well formed: " + processingInstructions);
       }
 
-      auto cloneWS = this->createChildAlgorithm("CloneWorkspace");
-      cloneWS->initialize();
-      cloneWS->setProperty("InputWorkspace", inputWorkspace);
-      cloneWS->execute();
-      Workspace_sptr tmp = cloneWS->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
-
-      // Loop over pairs of detector index ranges. Peform the cropping and then conjoin the results into a single workspace.
-      auto allIndexes = Kernel::Strings::parseRange(processingInstructions, ",", ":");
-      for (size_t i = 0; i < allIndexes.size(); ++i)
+      if (processingInstructions.empty())
       {
-        auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
-        cropWorkspaceAlg->initialize();
-        cropWorkspaceAlg->setProperty("InputWorkspace", inputWorkspace);
-        cropWorkspaceAlg->setProperty("StartWorkspaceIndex", allIndexes[i]);
-        cropWorkspaceAlg->setProperty("EndWorkspaceIndex", allIndexes[i]);
-        cropWorkspaceAlg->execute();
-        MatrixWorkspace_sptr subRange = cropWorkspaceAlg->getProperty("OutputWorkspace");
-        if (i == 0)
+        auto cloneWS = this->createChildAlgorithm("CloneWorkspace");
+        cloneWS->initialize();
+        cloneWS->setProperty("InputWorkspace", inputWorkspace);
+        cloneWS->execute();
+        Workspace_sptr tmp = cloneWS->getProperty("OutputWorkspace");
+        MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+        this->setProperty("OutputWorkspace", outWS);
+      }
+      else
+      {
+        std::vector<std::string> processingInstructionsSplit;
+        boost::split(processingInstructionsSplit, processingInstructions, boost::is_any_of(","));
+
+        //TODO bring loop over command parsers out here in order to preserve the spectrum ordering.
+
+        VecCommands commands;
+
+        // Do the addition operations
+        AdditionParser additionParser;
+        VecCommands additionCommands = additionParser.interpret(processingInstructionsSplit);
+
+        // Do the cropping operations
+        CropParserRange cropParserRange;
+        VecCommands cropCommandsRange = cropParserRange.interpret(processingInstructionsSplit);
+
+        CropParserIndex cropParserIndex;
+        VecCommands cropCommandsIndex = cropParserIndex.interpret(processingInstructionsSplit);
+
+        commands.insert(commands.end(), additionCommands.begin(), additionCommands.end());
+        commands.insert(commands.end(), cropCommandsRange.begin(), cropCommandsRange.end());
+        commands.insert(commands.end(), cropCommandsIndex.begin(), cropCommandsIndex.end());
+
+        MatrixWorkspace_sptr outWS = commands[0]->execute(inputWorkspace);
+        for (int i = 1; i < commands.size(); ++i)
         {
-          outWS = subRange;
+          outWS = commands[i]->executeAndAppend(inputWorkspace, outWS);
         }
-        else
-        {
-          auto conjoinWorkspaceAlg = this->createChildAlgorithm("ConjoinWorkspaces");
-          conjoinWorkspaceAlg->initialize();
-          conjoinWorkspaceAlg->setProperty("InputWorkspace1", outWS);
-          conjoinWorkspaceAlg->setProperty("InputWorkspace2", subRange);
-          conjoinWorkspaceAlg->execute();
-          outWS = conjoinWorkspaceAlg->getProperty("InputWorkspace1");
-        }
+
+        this->setProperty("OutputWorkspace", outWS);
+
       }
 
-      this->setProperty("OutputWorkspace", outWS);
     }
 
   } // namespace Algorithms

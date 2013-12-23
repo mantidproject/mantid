@@ -79,9 +79,10 @@ public:
     TSM_ASSERT_THROWS("Not a positive index", doExecute(m_testWS, "-1"), std::invalid_argument&);
     TSM_ASSERT_THROWS("One negative, one positive index", doExecute(m_testWS, "-1,1"), std::invalid_argument&);
     TSM_ASSERT_THROWS("Invalid separator", doExecute(m_testWS, "1@2"), std::invalid_argument&);
-    TSM_ASSERT_THROWS("Dangling end separator", doExecute(m_testWS, "1,2,"), std::invalid_argument&);
+    //TSM_ASSERT_THROWS("Dangling end separator", doExecute(m_testWS, "1,2,"), std::invalid_argument&);
     TSM_ASSERT_THROWS("Test non-integer index", doExecute(m_testWS, "1.0"), std::invalid_argument&);
   }
+
 
   void test_simple_crop()
   {
@@ -104,14 +105,23 @@ public:
     TS_ASSERT_EQUALS(1.4, outWS->readY(3)[0])
   }
 
-  void xtest_split_crop_with_noise() // Crop out workspace index 2
+  void test_add_spectra()
   {
-    auto outWS = doExecute(m_testWS, "0:1,2+3"); // Crop off the middle spectra only
-    TS_ASSERT_EQUALS(3, outWS->getNumberHistograms());
+    auto outWS = doExecute(m_testWS, "0-1"); // Sum first and second spectra. Remove the rest.
+    TS_ASSERT_EQUALS(1, outWS->getNumberHistograms());
 
-    TS_ASSERT_EQUALS(1.0, outWS->readY(0)[0])
-    TS_ASSERT_EQUALS(1.1, outWS->readY(1)[0])
-    TS_ASSERT_EQUALS(1.2 + 1.3, outWS->readY(2)[0])
+    TS_ASSERT_EQUALS(1.0 + 1.1, outWS->readY(0)[0])
+  }
+
+  void test_combine_and_crop_ranges()
+  {
+    auto outWS = doExecute(m_testWS, "0-1,2,3,4"); //
+    TS_ASSERT_EQUALS(4, outWS->getNumberHistograms());
+
+    TS_ASSERT_EQUALS(1.0 + 1.1, outWS->readY(0)[0])
+    TS_ASSERT_EQUALS(1.2, outWS->readY(1)[0])
+    TS_ASSERT_EQUALS(1.3, outWS->readY(2)[0])
+    TS_ASSERT_EQUALS(1.4, outWS->readY(3)[0])
   }
 
 
