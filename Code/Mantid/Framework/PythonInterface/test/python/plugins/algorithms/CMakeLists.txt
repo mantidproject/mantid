@@ -20,6 +20,7 @@ set ( TEST_PY_FILES
   MeanTest.py
   MergeCalFilesTest.py
   ReflectometryReductionOneTest.py
+  ReflectometryReductionOneAutoTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SortXAxisTest.py
