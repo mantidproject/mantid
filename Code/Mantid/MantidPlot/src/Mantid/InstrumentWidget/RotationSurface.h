@@ -22,6 +22,10 @@ protected:
   /// Period in the u coordinate. 2pi by default.
   virtual double uPeriod() const {return 2 * M_PI;}
 
+  /// Given the u and v coords for all detectors find their min and max values
+  /// and set m_u_min, m_u_max, m_v_min, m_v_max
+  void findUVBounds();
+
   /// Automatic generation of the projection coordinates may leave a gap
   /// in u when the surface is unwrapped. This method tries to minimize
   /// this gap by shifting the origin of the u axis.

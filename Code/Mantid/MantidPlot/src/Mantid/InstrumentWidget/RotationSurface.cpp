@@ -23,10 +23,12 @@ void RotationSurface::init()
     // the actor calls this->callback for each detector
     m_unwrappedDetectors.clear();
     m_assemblies.clear();
-    if ( !m_manual_u_correction )
+    double manual_u_correction = 0.0;
+    if ( m_manual_u_correction )
     {
-      m_u_correction = 0.0;
+      manual_u_correction = m_u_correction;
     }
+    m_u_correction = 0.0;
 
     size_t ndet = m_instrActor->ndetectors();
     m_unwrappedDetectors.resize(ndet);
@@ -71,13 +73,10 @@ void RotationSurface::init()
       m_yaxis = m_zaxis.cross_prod(m_xaxis);
     }
 
-    if ( !m_manual_u_correction )
-    {
-      // give some valid values to u bounds in case some code checks
-      // on u to be within them
-      m_u_min = -DBL_MAX;
-      m_u_max =  DBL_MAX;
-    }
+    // give some valid values to u bounds in case some code checks
+    // on u to be within them
+    m_u_min = -DBL_MAX;
+    m_u_max =  DBL_MAX;
 
     // For each detector in the order of actors
     // cppcheck-suppress syntaxError
@@ -122,24 +121,26 @@ void RotationSurface::init()
       } // is a real detectord
     } // for each detector in pick order
 
-    // Now find the overall edges in U and V coords.
-    m_u_min =  DBL_MAX;
-    m_u_max = -DBL_MAX;
-    m_v_min =  DBL_MAX;
-    m_v_max = -DBL_MAX;
-    for(size_t i=0;i<m_unwrappedDetectors.size();++i)
-    {
-      const UnwrappedDetector& udet = m_unwrappedDetectors[i];
-      if (! udet.detector ) continue;
-      if (udet.u < m_u_min) m_u_min = udet.u;
-      if (udet.u > m_u_max) m_u_max = udet.u;
-      if (udet.v < m_v_min) m_v_min = udet.v;
-      if (udet.v > m_v_max) m_v_max = udet.v;
-    }
+    // find the overall edges in u and v coords
+    findUVBounds();
 
+    // apply a shift in u-coord either found automatically
+    // or set manually
     if ( !m_manual_u_correction )
     {
+      // automatic gap correction
       findAndCorrectUGap();
+    }
+    else
+    {
+      // apply manually set shift
+      m_u_correction = manual_u_correction;
+      for(size_t i=0;i<m_unwrappedDetectors.size();++i)
+      {
+        auto &udet = m_unwrappedDetectors[i];
+        udet.u = applyUCorrection( udet.u );
+      }
+      findUVBounds();
     }
 
     double dU = fabs(m_u_max - m_u_min);
@@ -169,6 +170,23 @@ void RotationSurface::init()
 
   m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
 
+}
+
+void RotationSurface::findUVBounds()
+{
+    m_u_min =  DBL_MAX;
+    m_u_max = -DBL_MAX;
+    m_v_min =  DBL_MAX;
+    m_v_max = -DBL_MAX;
+    for(size_t i=0;i<m_unwrappedDetectors.size();++i)
+    {
+      const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+      if (! udet.detector ) continue;
+      if (udet.u < m_u_min) m_u_min = udet.u;
+      if (udet.u > m_u_max) m_u_max = udet.u;
+      if (udet.v < m_v_min) m_v_min = udet.v;
+      if (udet.v > m_v_max) m_v_max = udet.v;
+    }
 }
 
 void RotationSurface::findAndCorrectUGap()
