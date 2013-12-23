@@ -1,3 +1,49 @@
+/*WIKI*
+== Summary ==
+
+This fitting function models the dynamics structure factor of a particle undergoing continuous diffusion and confined to a spherical volume. According to Volino and Dianoux
+[http://apps.webofknowledge.com/InboundService.do?SID=4Bayo9ujffV3CUc9Qx8&product=WOS&UT=A1980KQ74800002&SrcApp=EndNote&DestFail=http%3A%2F%2Fwww.webofknowledge.com&Init=Yes&action=retrieve&Func=Frame&customersID=ResearchSoft&SrcAuth=ResearchSoft&IsProductCode=Yes&mode=FullRecord],
+
+<center>
+<math>S(Q,E\equiv \hbar \omega) = A_{0,0}(Q\cdot R) \delta (\omega) + \frac{1}{\pi} \sum_{l=1}^{N-1} (2l+1) A_{n,l} (Q\cdot R) \frac{x_{n,l}^2 D/R^2}{[x_{n,l}^2 D/R^2]^21+\omega^2}</math>,
+
+<math>A_{n,l} = \frac{6x_{n,l}^2}{x_{n,l}^2-l(l+1)} [\frac{QRj_{l+1}(QR) - lj_l(QR)}{(QR)^2 - x_{n,l}^2}]^2</math>
+</center>
+
+Numerical coefficients <math>x_{n,l}</math> are the eigenvalues of the confined diffusion problem, and <math>j_l(z)</math> are the spherical Besell functions.
+
+The fit function DiffSphere has an elastic part, modelled by fitting function <i>ElasticDiffSphere</i> and an inelastic part, modelled by <i>InelasticDiffSphere</i>.
+
+
+
+
+== Properties ==
+
+{| border="1" cellpadding="5" cellspacing="0"
+!Order
+!Name
+!Default
+!Description
+|-
+|1
+|Intensity
+|1.0
+|Intensity of the peak [arbitrary units]
+|-
+|2
+|Radius
+|2.0
+|Sphere radius [Å]
+|-
+|3
+|Diffusion
+|0.05
+|Diffusion constant [<i>Å</i><math>{}^2/ps \equiv 10 \cdot (10^{-5} cm^2/s)</math>]
+|}
+
+[[Category:Fit_functions]]
+*WIKI*/
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
