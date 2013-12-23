@@ -104,6 +104,16 @@ public:
     TS_ASSERT_EQUALS(1.4, outWS->readY(3)[0])
   }
 
+  void xtest_split_crop_with_noise() // Crop out workspace index 2
+  {
+    auto outWS = doExecute(m_testWS, "0:1,2+3"); // Crop off the middle spectra only
+    TS_ASSERT_EQUALS(3, outWS->getNumberHistograms());
+
+    TS_ASSERT_EQUALS(1.0, outWS->readY(0)[0])
+    TS_ASSERT_EQUALS(1.1, outWS->readY(1)[0])
+    TS_ASSERT_EQUALS(1.2 + 1.3, outWS->readY(2)[0])
+  }
+
 
 
 };
