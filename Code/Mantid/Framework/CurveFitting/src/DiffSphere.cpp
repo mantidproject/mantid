@@ -97,7 +97,7 @@ double ElasticDiffSphere::HeightPrefactor() const
   // Penalize negative parameters
   if ( R < std::numeric_limits<double>::epsilon() )
   {
-    return 0.0;
+    return std::numeric_limits<double>::infinity();
   }
 
   return pow( 3 * boost::math::sph_bessel( 1, Q * R ) / ( Q * R ), 2 );
@@ -252,7 +252,7 @@ void InelasticDiffSphere::function1D( double* out, const double* xValues, const 
   {
     for (size_t i = 0;  i < nData;  i++)
     {
-      out[ i ] = 0.0;
+      out[ i ] = std::numeric_limits<double>::infinity();
     }
     return;
   }
