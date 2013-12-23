@@ -19,7 +19,6 @@
 
 // std
 #include <map>
-#include <iostream>
 #include <vector>
 
 namespace Mantid

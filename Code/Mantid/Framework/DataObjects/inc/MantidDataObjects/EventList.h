@@ -14,7 +14,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include <cstddef>
-#include <iostream>
+#include <iosfwd>
 #include <set>
 #include <vector>
 #include "MantidKernel/MultiThreaded.h"

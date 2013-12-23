@@ -7,7 +7,6 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <stdexcept>
-#include <iostream>
 
 namespace Mantid
 {

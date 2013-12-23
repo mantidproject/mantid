@@ -7,6 +7,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include <cfloat>
 #include <functional>
+#include <iostream>
 #include <limits>
 #include <math.h>
 #include <Poco/ScopedLock.h>
