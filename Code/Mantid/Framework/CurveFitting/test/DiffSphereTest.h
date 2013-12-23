@@ -146,9 +146,9 @@ public:
     //saveWorkspace( data_workspace, "/tmp/junk_data.nxs" ); // for debugging purposes only
 
     // override the function with new parameters, our initial guess.
-    double I = I_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
-    double R = R_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
-    double D = D_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
+    double I = I_0 * ( 0.5 + ( 1.0 * std::rand() ) / RAND_MAX );
+    double R = R_0 * ( 0.5 + ( 1.0 * std::rand() ) / RAND_MAX );
+    double D = D_0 * ( 0.5 + ( 1.0 * std::rand() ) / RAND_MAX );
     funtion_stream.str( std::string() );
     funtion_stream.clear();
     funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,Height=1.0,"
@@ -236,9 +236,9 @@ public:
     //std::cout << "Intensity=" << fitalg_inelastic->getParameter( "Intensity" ) << " Radius=" << fitalg_inelastic->getParameter( "Radius" ) << " Diffusion=" << fitalg_inelastic->getParameter( "Diffusion" ) <<"\n"; // for debugging purposes only
 
     // override the function with new parameters, our initial guess.
-    double I = I_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
-    double R = R_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
-    double D = D_0 * ( 0.1 + ( 2.0 * std::rand() ) / RAND_MAX );
+    double I = I_0 * ( 0.5 + ( 1.0 * std::rand() ) / RAND_MAX );
+    double R = R_0 * ( 0.5 + ( 1.0 * std::rand() ) / RAND_MAX );
+    double D = D_0 * ( 0.5 + ( 1.0 * std::rand() ) / RAND_MAX );
     funtion_stream.str( std::string() );
     funtion_stream.clear();
     funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,Height=1.0,"
