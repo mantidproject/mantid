@@ -20,24 +20,24 @@ namespace
   class Command
   {
   public:
+
+    virtual bool isValid() const
+    {
+      return true;
+    }
+
     virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr input) const = 0;
 
     virtual MatrixWorkspace_sptr executeAndAppend(MatrixWorkspace_sptr inputWS,
         MatrixWorkspace_sptr toAppend) const
     {
-
-      MatrixWorkspace_sptr current = this->execute(inputWS);
-      if (current == NULL)
+      if (!this->isValid())
       {
         return toAppend;
       }
-      else if (toAppend == NULL)
-      {
-        return current;
-      }
       else
       {
-
+        MatrixWorkspace_sptr current = this->execute(inputWS);
         Mantid::API::AlgorithmManagerImpl& factory = Mantid::API::AlgorithmManager::Instance();
         auto conjoinWorkspaceAlg = factory.create("ConjoinWorkspaces");
         conjoinWorkspaceAlg->setChild(true);
@@ -56,6 +56,21 @@ namespace
   };
 
   typedef std::vector<boost::shared_ptr<Command> > VecCommands;
+
+  class NullCommand: public Command
+  {
+    virtual bool isValid() const
+    {
+      return false;
+    }
+    virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const
+    {
+      throw std::runtime_error("Should not be attempting ::execute on a NullCommand");
+    }
+    virtual ~NullCommand()
+    {
+    }
+  };
 
   class AdditionCommand: public Command
   {
@@ -142,31 +157,33 @@ namespace
   class CommandParser
   {
   public:
-    virtual VecCommands interpret(const std::vector<std::string>& instructions) const = 0;
+    virtual Command* interpret(const std::string& instruction) const = 0;
 
     virtual ~CommandParser()
     {
     }
   };
 
+  typedef std::vector<boost::shared_ptr<CommandParser> > VecCommandParsers;
+
   template<typename ProductType>
   class CommandParserBase: public CommandParser
   {
   public:
-    virtual VecCommands interpret(const std::vector<std::string>& instructions) const
+    virtual Command* interpret(const std::string& instruction) const
     {
-      VecCommands commands;
+      Command* command = NULL;
       boost::regex ex = getRegex();
-      for (auto it = instructions.begin(); it != instructions.end(); ++it)
+      if (boost::regex_match(instruction, ex))
       {
-        const std::string candidate = *it;
-        if (boost::regex_match(candidate, ex))
-        {
-          auto indexes = Mantid::Kernel::Strings::parseRange(candidate, ",", getSeparator());
-          commands.push_back(boost::make_shared<ProductType>(indexes));
-        }
+        auto indexes = Mantid::Kernel::Strings::parseRange(instruction, ",", getSeparator());
+        command = new ProductType(indexes);
       }
-      return commands;
+      else
+      {
+        command = new NullCommand;
+      }
+      return command;
     }
     virtual ~CommandParserBase()
     {
@@ -221,22 +238,22 @@ namespace
     {
     }
 
-    virtual VecCommands interpret(const std::vector<std::string>& instructions) const
+    virtual Command* interpret(const std::string& instruction) const
     {
-      VecCommands commands;
+      Command* command = NULL;
       boost::regex ex("^\\s*[0-9]+\\s*$");
-      for (auto it = instructions.begin(); it != instructions.end(); ++it)
+      if (boost::regex_match(instruction, ex))
       {
-        const std::string candidate = *it;
-        if (boost::regex_match(candidate, ex))
-        {
-          int index = -1;
-          Mantid::Kernel::Strings::convert<int>(candidate, index);
-          std::vector<int> indexes(1, index);
-          commands.push_back(boost::make_shared<CropCommand>( indexes ));
-        }
+        int index = -1;
+        Mantid::Kernel::Strings::convert<int>(instruction, index);
+        std::vector<int> indexes(1, index);
+        command = new CropCommand(indexes);
       }
-      return commands;
+      else
+      {
+        command = new NullCommand;
+      }
+      return command;
     }
 
   };
@@ -337,29 +354,30 @@ namespace Mantid
         std::vector<std::string> processingInstructionsSplit;
         boost::split(processingInstructionsSplit, processingInstructions, boost::is_any_of(","));
 
-        //TODO bring loop over command parsers out here in order to preserve the spectrum ordering.
+        VecCommandParsers commandParsers;
+        commandParsers.push_back(boost::make_shared<AdditionParser>());
+        commandParsers.push_back(boost::make_shared<CropParserRange>());
+        commandParsers.push_back(boost::make_shared<CropParserIndex>());
 
         VecCommands commands;
-
-        // Do the addition operations
-        AdditionParser additionParser;
-        VecCommands additionCommands = additionParser.interpret(processingInstructionsSplit);
-
-        // Do the cropping operations
-        CropParserRange cropParserRange;
-        VecCommands cropCommandsRange = cropParserRange.interpret(processingInstructionsSplit);
-
-        CropParserIndex cropParserIndex;
-        VecCommands cropCommandsIndex = cropParserIndex.interpret(processingInstructionsSplit);
-
-        commands.insert(commands.end(), additionCommands.begin(), additionCommands.end());
-        commands.insert(commands.end(), cropCommandsRange.begin(), cropCommandsRange.end());
-        commands.insert(commands.end(), cropCommandsIndex.begin(), cropCommandsIndex.end());
-
-        MatrixWorkspace_sptr outWS = commands[0]->execute(inputWorkspace);
-        for (int i = 1; i < commands.size(); ++i)
+        for (auto it = processingInstructionsSplit.begin(); it != processingInstructionsSplit.end(); ++it)
         {
-          outWS = commands[i]->executeAndAppend(inputWorkspace, outWS);
+          const std::string candidate = *it;
+          for (auto parserIt = commandParsers.begin(); parserIt != commandParsers.end(); ++parserIt)
+          {
+            auto commandParser = *parserIt;
+            Command* command = commandParser->interpret(candidate);
+            boost::shared_ptr<Command> commandSptr(command);
+            if(commandSptr->isValid())
+              commands.push_back(commandSptr);
+          }
+        }
+
+        auto command = commands[0];
+        MatrixWorkspace_sptr outWS = command->execute(inputWorkspace);
+        for (int j = 1; j < commands.size(); ++j)
+        {
+          outWS = commands[j]->executeAndAppend(inputWorkspace, outWS);
         }
 
         this->setProperty("OutputWorkspace", outWS);
