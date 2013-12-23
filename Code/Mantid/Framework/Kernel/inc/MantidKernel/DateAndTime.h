@@ -56,7 +56,7 @@ public:
   std::string toISO8601String() const;
 
   /// Stream output operator
-  friend std::ostream& operator<< (std::ostream& stream, const DateAndTime & t);
+  friend MANTID_KERNEL_DLL std::ostream& operator<< (std::ostream& stream, const DateAndTime & t);
 
   void setToMaximum();
   void setToMinimum();
@@ -195,7 +195,7 @@ public:
     std::string end_str()const;
 
     /** Stream output operator  */
-    friend std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t);
+    friend MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t);
 
 private:
     /// begin
