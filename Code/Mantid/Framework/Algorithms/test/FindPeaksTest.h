@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/FindPeaks.h"
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -20,6 +21,14 @@ using namespace Mantid::API;
 class FindPeaksTest : public CxxTest::TestSuite
 {
 public:
+  static FindPeaksTest *createSuite() { return new FindPeaksTest(); }
+  static void destroySuite( FindPeaksTest *suite ) { delete suite; }
+
+  FindPeaksTest()
+  {
+    FrameworkManager::Instance();
+  }
+
   void testTheBasics()
   {
     FindPeaks finder;
