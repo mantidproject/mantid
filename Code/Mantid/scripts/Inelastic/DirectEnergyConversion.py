@@ -449,6 +449,7 @@ class DirectEnergyConversion(object):
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file,None)
             result_ws /= white_ws
+            #result_ws = Divide(LHSWorkspace=result_ws,RHSWorkspace=white_ws,BeQuet='1');
         # Overall scale factor
         result_ws *= self.scale_factor
         return result_ws
