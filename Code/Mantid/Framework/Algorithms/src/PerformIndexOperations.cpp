@@ -123,7 +123,7 @@ namespace
     {
       return false;
     }
-    virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr inputWS) const
+    virtual MatrixWorkspace_sptr execute(MatrixWorkspace_sptr) const
     {
       throw std::runtime_error("Should not be attempting ::execute on a NullCommand");
     }
@@ -501,7 +501,7 @@ namespace Mantid
         // Execute the commands.
         auto command = commands[0];
         MatrixWorkspace_sptr outWS = command->execute(inputWorkspace);
-        for (int j = 1; j < commands.size(); ++j)
+        for (size_t j = 1; j < commands.size(); ++j)
         {
           outWS = commands[j]->executeAndAppend(inputWorkspace, outWS);
         }
