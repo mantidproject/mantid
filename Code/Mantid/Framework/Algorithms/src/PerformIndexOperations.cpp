@@ -1,7 +1,60 @@
 /*WIKI*
- *
- * Peforms index operations on a workspace which involve cropping out spectra and summing spectra together. See [[MultiFileLoading]] for the syntax to use.
- *
+
+ Performs index operations on a workspace which involve cropping out spectra and summing spectra together. See [[MultiFileLoading]] for similar syntax used during loading, though operations
+ using step sizes are not supported here.
+
+== Basic Instructions ==
+
+{| class="wikitable"
+!rowspan="2" |Name
+!width=200 rowspan="2" |Usage
+!rowspan="2" |Description
+!colspan="2" |Example
+|-
+!Input
+!Result
+|-
+!align="center" |List
+|align="center" |<code><workspace_index>,<workspace_index></code>
+|Used to list workspace_indexes to keep.
+|<code>0,1,2</code>
+|Keeps spectrum with workspace indexes 0,1,2 others are cropped out.
+|-
+!align="center" |Plus
+|align="center" |<code><workspace_index>+<workspace_index></code>
+|Used to specify which spectrum are to be summed together via [[SumSpectra]]. For summing ranges use ''Added Range''
+|<code>1+2</code>
+|Sum spectrum with workspace indexes 1, 2 together.
+|-
+!align="center" |Range
+|align="center" |<code><workspace_index>:<workspace_index></code>
+|Used to specify a range of N spectrum to keep.
+|<code>0:4</code>
+|Keeps spectrum with workspace indexes between 0 and 4.
+|-
+!align="center" |Added Range
+|align="center" |<code><workspace_index>-<workspace_index></code>
+|Used to specify a range of spectrum that are to be summed together via [[SumSpectra]]. This is an alternative to the binary ''Plus'' operator.
+|<code>1-4</code>
+|Sum spectra corresponding to the workspace indexes between 1 and 4.
+|-
+|}
+
+== Complex Instructions ==
+
+The basic instructions listed above can be used in combination because ''', can be used to separate out sets of instructions as well as indexes to keep'''. For example, ''0-2, 3:6'' will add
+spectrum with workspace indexes 0-2 together into a single spectrum and then append spectra that correspond to workspace indexes 3-6 from the original workspace (you will have 4 spectra
+in the output workspace).
+
+== Limitations ==
+
+* The ''+'' operator is binary only and works like 0+1, but cannot be used like 0+1+2. Use the Add Range operator ''-'' in these scenarios.
+
+== Order of operations ==
+The spectra will appear in the output workspace in the same order that they are defined in the instructions. For example ''1+2, 0'' will have the results of 1+2 as workspace index 0 in the output
+workspace and index 0 in the original workspace will be mapped to workspace index 1 in the output workspace.
+
+
  *WIKI*/
 
 #include "MantidAlgorithms/PerformIndexOperations.h"
@@ -17,6 +70,9 @@ using namespace Mantid::API;
 
 namespace
 {
+  /**
+   * Command class for executing algorithms on workspaces and appending resulting workspace together.
+   */
   class Command
   {
   public:
@@ -55,8 +111,12 @@ namespace
     }
   };
 
+  /// Helper typedef
   typedef std::vector<boost::shared_ptr<Command> > VecCommands;
 
+  /**
+   * Command yielding no result.
+   */
   class NullCommand: public Command
   {
     virtual bool isValid() const
@@ -72,6 +132,9 @@ namespace
     }
   };
 
+  /**
+   * Addition command for summing spectra together.
+   */
   class AdditionCommand: public Command
   {
   private:
@@ -105,6 +168,9 @@ namespace
     }
   };
 
+  /**
+   * Command for cropping spectra out of a workspace as a new workspace
+   */
   class CropCommand: public Command
   {
   private:
@@ -119,7 +185,6 @@ namespace
     {
 
       MatrixWorkspace_sptr outWS;
-
       for (size_t i = 0; i < m_indexes.size(); ++i)
       {
         Mantid::API::AlgorithmManagerImpl& factory = Mantid::API::AlgorithmManager::Instance();
@@ -154,6 +219,9 @@ namespace
     }
   };
 
+  /**
+   * Abstract type. Command parsing interface.
+   */
   class CommandParser
   {
   public:
@@ -164,8 +232,12 @@ namespace
     }
   };
 
+  /// Helper typedef for vector of command parsers
   typedef std::vector<boost::shared_ptr<CommandParser> > VecCommandParsers;
 
+  /**
+   * Command parser base class for common concrete command parser types.
+   */
   template<typename ProductType>
   class CommandParserBase: public CommandParser
   {
@@ -193,6 +265,31 @@ namespace
     virtual boost::regex getRegex() const = 0;
   };
 
+  /**
+   * Parser to interpret Range Addition instructions.
+   */
+  class AdditionParserRange: public CommandParserBase<AdditionCommand>
+  {
+  public:
+
+    virtual ~AdditionParserRange()
+    {
+    }
+
+  private:
+    boost::regex getRegex() const
+    {
+      return boost::regex("^\\s*[0-9]+\\s*\\-\\s*[0-9]+\\s*$");
+    }
+    std::string getSeparator() const
+    {
+      return "-";
+    }
+  };
+
+  /**
+   * Parser to interpret Addition instructions.
+   */
   class AdditionParser: public CommandParserBase<AdditionCommand>
   {
   public:
@@ -204,14 +301,17 @@ namespace
   private:
     boost::regex getRegex() const
     {
-      return boost::regex("\\s*[0-9]+\\s*\\-\\s*[0-9]+\\s*");
+      return boost::regex("^\\s*[0-9]+\\s*\\+\\s*[0-9]+\\s*$");
     }
     std::string getSeparator() const
     {
-      return "-";
+      return "+";
     }
   };
 
+  /**
+   * Parser to interpret Crop Range instructions.
+   */
   class CropParserRange: public CommandParserBase<CropCommand>
   {
   public:
@@ -222,7 +322,7 @@ namespace
   private:
     boost::regex getRegex() const
     {
-      return boost::regex("\\s*[0-9]+\\s*:\\s*[0-9]+\\s*");
+      return boost::regex("^\\s*[0-9]+\\s*:\\s*[0-9]+\\s*$");
     }
     std::string getSeparator() const
     {
@@ -230,6 +330,9 @@ namespace
     }
   };
 
+  /**
+   * Parser to interpret single index cropping instructions
+   */
   class CropParserIndex: public CommandParser
   {
   public:
@@ -324,15 +427,22 @@ namespace Mantid
           "Output processed workspace");
     }
 
+    /**
+     * Interpret the instructions as an ordered list of commands that can be executed later.
+     *
+     * @param processingInstructions : Instructions to process
+     * @return Vector of Commands. Commands wrap mantid-algorithmic steps to achieve the desired result.
+     */
     VecCommands interpret(const std::string& processingInstructions)
     {
       std::vector<std::string> processingInstructionsSplit;
       boost::split(processingInstructionsSplit, processingInstructions, boost::is_any_of(","));
 
       VecCommandParsers commandParsers;
-      commandParsers.push_back(boost::make_shared<AdditionParser>());
+      commandParsers.push_back(boost::make_shared<AdditionParserRange>());
       commandParsers.push_back(boost::make_shared<CropParserRange>());
       commandParsers.push_back(boost::make_shared<CropParserIndex>());
+      commandParsers.push_back(boost::make_shared<AdditionParser>());
 
       VecCommands commands;
       for (auto it = processingInstructionsSplit.begin(); it != processingInstructionsSplit.end(); ++it)
@@ -344,7 +454,7 @@ namespace Mantid
           auto commandParser = *parserIt;
           Command* command = commandParser->interpret(candidate);
           boost::shared_ptr<Command> commandSptr(command);
-          if (commandSptr->isValid())
+          if (commandSptr->isValid()) // Do not record invalid commands.
           {
             parserFound = true;
             commands.push_back(commandSptr);
@@ -385,7 +495,10 @@ namespace Mantid
       }
       else
       {
+        // Interpret the instructions.
         VecCommands commands = interpret(processingInstructions);
+
+        // Execute the commands.
         auto command = commands[0];
         MatrixWorkspace_sptr outWS = command->execute(inputWorkspace);
         for (int j = 1; j < commands.size(); ++j)
@@ -394,7 +507,6 @@ namespace Mantid
         }
 
         this->setProperty("OutputWorkspace", outWS);
-
       }
 
     }
