@@ -112,6 +112,13 @@ public:
     TS_ASSERT_EQUALS(1.0 + 1.1, outWS->readY(0)[0])
   }
 
+  void test_add_spectra_that_are_not_neighbours()
+  {
+    auto outWS = doExecute(m_testWS, "0+4");
+    TS_ASSERT_EQUALS(1, outWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(1.0 + 1.4, outWS->readY(0)[0])
+  }
+
   void test_add_spectra_range()
   {
     auto outWS = doExecute(m_testWS, "0-2"); // Sum first and second spectra. Remove the rest.
