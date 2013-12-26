@@ -9,9 +9,12 @@ class GetEiT0atSNSTest(unittest.TestCase):
             
     def testGETS(self):
         w=Load('ADARAMonitors.nxs')
+        LoadInstrument(Workspace=w,InstrumentName='SEQUOIA',RewriteSpectraMap='0')
+        AddSampleLog(Workspace=w,LogName='vChTrans',LogText='1',LogType='Number Series')
+        AddSampleLog(Workspace=w,LogName='EnergyRequest',LogText='20',LogType='Number Series')
         res=GetEiT0atSNS(w)
-        self.assertAlmostEqual(res[0],20.118,delta=0.01)
-        self.assertAlmostEqual(res[1],36.056,delta=0.01)
+        self.assertAlmostEqual(res[0],20.09,delta=0.01)
+        self.assertAlmostEqual(res[1],30.41,delta=0.01)
         try:
             res=GetEiT0atSNS(w,0.1)
         except Exception as e:
