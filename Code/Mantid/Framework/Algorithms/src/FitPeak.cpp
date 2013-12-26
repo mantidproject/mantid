@@ -59,6 +59,344 @@ namespace Mantid
 {
 namespace Algorithms
 {
+  //----------------------------------------------------------------------------------------------
+  /** Constructor for FitOneSinglePeak
+    */
+  FitOneSinglePeak::FitOneSinglePeak()
+  {
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Destructor for FitOneSinglePeak
+    */
+  FitOneSinglePeak::~FitOneSinglePeak()
+  {
+  }
+
+  void FitOneSinglePeak::setFunctions(std::string peaktype, std::string bkgdtype)
+  {
+    //=========================================================================
+    // Generate background function
+    //=========================================================================
+    // FIXME - Fix the inconsistency in nameing the background
+    if (bkgdtype == "Flat" || bkgdtype == "Linear")
+      bkgdtype += "Background";
+
+    // Generate background function
+    m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
+          FunctionFactory::Instance().createFunction(bkgdtype));
+    g_log.debug() << "Created background function of type " << bkgdtype << "\n";
+
+    /* Set background function parameter values
+    m_bkgdParameterNames = getProperty("BackgroundParameterNames");
+    if (usedefaultbkgdparorder && m_bkgdParameterNames.size() == 0)
+    {
+      m_bkgdParameterNames = m_bkgdFunc->getParameterNames();
+    }
+    else if (m_bkgdParameterNames.size() == 0)
+    {
+      throw runtime_error("In the non-default background parameter name mode, "
+                          "user must give out parameter names. ");
+    }
+
+
+    vector<double> vec_bkgdparvalues = getProperty("BackgroundParameterValues");
+    if (m_bkgdParameterNames.size() != vec_bkgdparvalues.size())
+    {
+      stringstream errss;
+      errss << "Input background properties' arrays are incorrect: # of parameter names = "
+            << m_bkgdParameterNames.size()
+            << ", # of parameter values = " << vec_bkgdparvalues.size() << "\n";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    // Set parameter values
+    for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i)
+    {
+      m_bkgdFunc->setParameter(m_bkgdParameterNames[i], vec_bkgdparvalues[i]);
+    }
+    */
+
+    //=========================================================================
+    // Generate peak function
+    //=========================================================================
+    m_peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(
+          FunctionFactory::Instance().createFunction(peaktype));
+    g_log.debug() << "Create peak function of type " << peaktype << "\n";
+
+    /* Peak parameters' names
+    m_peakParameterNames = getProperty("PeakParameterNames");
+    if (m_peakParameterNames.size() == 0)
+    {
+      if (defaultparorder)
+      {
+        // Use default peak parameter names' order
+        m_peakParameterNames = m_peakFunc->getParameterNames();
+      }
+      else
+      {
+        throw runtime_error("Peak parameter names' input is not in default mode. "
+                            "It cannot be left empty. ");
+      }
+    }
+
+    // Peak parameters' value
+    vector<double> vec_peakparvalues = getProperty("PeakParameterValues");
+    if (m_peakParameterNames.size() != vec_peakparvalues.size())
+    {
+      stringstream errss;
+      errss << "Input peak properties' arrays are incorrect: # of parameter names = "
+            << m_peakParameterNames.size()
+            << ", # of parameter values = " << vec_peakparvalues.size() << "\n";
+      throw runtime_error(errss.str());
+    }
+
+    // Set peak parameter values
+    for (size_t i = 0; i < m_peakParameterNames.size(); ++i)
+    {
+      m_peakFunc->setParameter(m_peakParameterNames[i], vec_peakparvalues[i]);
+    }
+    */
+  }
+
+
+  void FitOneSinglePeak::fitPeakOneStep()
+  {
+    // Set up a composite function
+    CompositeFunction_sptr compfunc = boost::make_shared<CompositeFunction>();
+    compfunc->addFunction(m_peakFunc);
+    compfunc->addFunction(m_bkgdFunc);
+
+    g_log.information() << "One-Step-Fit Function: " << compfunc->asString() << "\n";
+
+    // Set up a list of guessed FWHM
+    // Calculate guessed FWHM
+    std::vector<double> vec_FWHM;
+    setupGuessedFWHM(vec_FWHM);
+
+    // Store starting setup
+    map<string, double> temperrormap;
+    push(m_peakFunc, m_bkupPeakFunc, temperrormap);
+    push(m_bkgdFunc, m_bkupBkgdFunc, temperrormap);
+
+    // Fit with different starting values of peak width
+    size_t numfits = vec_FWHM.size();
+    for (size_t i = 0; i < numfits; ++i)
+    {
+      // set FWHM
+      g_log.debug() << "[SingleStepFit] FWHM = " << vec_FWHM[i] << "\n";
+      m_peakFunc->setFwhm(vec_FWHM[i]);
+
+      // fit and process result
+      double goodndess = fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX, false);
+      processNStoreFitResult(goodndess, true);
+
+      // restore the function parameters
+      if (i != numfits-1)
+      {
+        pop(m_bkupPeakFunc, m_peakFunc);
+        pop(m_bkupBkgdFunc, m_bkgdFunc);
+      }
+    }
+
+    // Retrieve the best result stored
+    pop(m_bestPeakFunc, m_peakFunc);
+    pop(m_bestBkgdFunc, m_bkgdFunc);
+#if 0
+    m_finalGoodnessValue = m_bestRwp;
+#endif
+
+    g_log.information() << "One-Step-Fit Best Fitted Function: " << compfunc->asString() << "\n";
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Push/store a fit result
+    */
+  void FitOneSinglePeak::push(IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
+                     std::map<std::string, double>& paramerrormap)
+  {
+    // Clear map
+    funcparammap.clear();
+    paramerrormap.clear();
+
+    // Set up
+    vector<string> funcparnames = func->getParameterNames();
+    size_t nParam = funcparnames.size();
+    for (size_t i = 0; i < nParam; ++i)
+    {
+      double parvalue = func->getParameter(i);
+      funcparammap.insert(make_pair(funcparnames[i], parvalue));
+
+      double parerror = func->getError(i);
+      paramerrormap.insert(make_pair(funcparnames[i], parerror));
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Restore the parameters value to a function from a string/double map
+    */
+  void FitOneSinglePeak::pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func)
+  {
+
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up a set of starting values for FWHM (which is the most tricky part)
+    */
+  void FitOneSinglePeak::setupGuessedFWHM(std::vector<double>& vec_FWHM)
+  {
+    // From user specified guess value
+    vec_FWHM.push_back(m_userGuessedFWHM);
+
+    // From user specified minimum value to maximim value
+#if 0
+    if (!m_fitWithStepPeakWidth)
+      return;
+#endif
+
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
+
+    int i_centre = static_cast<int>(getVectorIndex(m_dataWS->readX(m_wsIndex), m_peakFunc->centre()));
+    int i_maxindex = static_cast<int>(vecX.size())-1;
+
+    for (int iwidth = m_minGuessedPeakWidth; iwidth <= m_maxGuessedPeakWidth; iwidth +=
+         m_fwhmFitStep)
+    {
+      // There are 3 possible situation: peak at left edge, peak in proper range, peak at righ edge
+      int ileftside = i_centre - iwidth/2;
+      if (ileftside < 0)
+        ileftside = 0;
+
+      int irightside = i_centre + iwidth/2;
+      if (irightside > i_maxindex)
+        irightside = i_maxindex;
+
+      double in_fwhm = vecX[irightside] - vecX[ileftside];
+
+      if (in_fwhm < 1.0E-20)
+      {
+        g_log.warning() << "It is impossible to have zero peak width as iCentre = "
+                        << i_centre << ", iWidth = " << iwidth << "\n"
+                        << "More information: Spectrum = " << m_wsIndex << "; Range of X is "
+                        << vecX.front() << ", " << vecX.back()
+                        << "; Peak centre = " << vecX[i_centre];
+      }
+      else
+      {
+        g_log.debug() << "Fx330 i_width = " << iwidth << ", i_left = " << ileftside << ", i_right = "
+                      << irightside << ", FWHM = " << in_fwhm << ".\n";
+      }
+
+      vec_FWHM.push_back(in_fwhm);
+    }
+
+    return;
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Fit function in single domain
+    * @exception :: (1) Fit cannot be called. (2) Fit.isExecuted is false (cannot be executed)
+    * @return :: chi^2 or Rwp depending on input.  If fit is not SUCCESSFUL, return DBL_MAX
+    */
+  double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc, MatrixWorkspace_const_sptr dataws,
+                                         size_t wsindex, double xmin, double xmax, bool calmode)
+  {
+    // Set up calculation mode: for pure chi-square/Rwp
+    int maxiteration = 50;
+    vector<string> parnames;
+    if (calmode)
+    {
+      // Fix all parameters
+      parnames = fitfunc->getParameterNames();
+      for (size_t i = 0; i < parnames.size(); ++i)
+        fitfunc->fix(i);
+
+      maxiteration = 1;
+    }
+    else
+    {
+      // Unfix all parameters
+      for (size_t i = 0; i < fitfunc->nParams(); ++i)
+        fitfunc->unfix(i);
+    }
+
+    // Set up sub algorithm fit
+    IAlgorithm_sptr fit;
+    try
+    {
+
+      fit = createChildAlgorithm("Fit", -1, -1, true);
+    }
+    catch (Exception::NotFoundError &)
+    {
+      std::stringstream errss;
+      errss << "The FitPeak algorithm requires the CurveFitting library";
+      g_log.error(errss.str());
+      throw std::runtime_error(errss.str());
+    }
+
+    // Set the properties
+    fit->setProperty("Function", fitfunc);
+    fit->setProperty("InputWorkspace", dataws);
+    fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+    fit->setProperty("MaxIterations", maxiteration);
+    fit->setProperty("StartX", xmin);
+    fit->setProperty("EndX", xmax);
+    fit->setProperty("Minimizer", m_minimizer);
+    fit->setProperty("CostFunction", m_costFunction);
+    fit->setProperty("CalcErrors", true);
+
+    // Execute fit and get result of fitting background
+    g_log.debug() << "FitSingleDomain: Fit " << fit->asString() << ".\n";
+
+    fit->executeAsChildAlg();
+    if (!fit->isExecuted())
+    {
+      g_log.error("Fit for background is not executed. ");
+      throw std::runtime_error("Fit for background is not executed. ");
+    }
+
+    // Retrieve result
+    std::string fitStatus = fit->getProperty("OutputStatus");
+    double chi2 = EMPTY_DBL();
+    if (fitStatus == "success" || calmode)
+    {
+      chi2 = fit->getProperty("OutputChi2overDoF");
+      fitfunc = fit->getProperty("Function");
+    }
+
+    // Release the ties
+    if (calmode)
+    {
+      for (size_t i = 0; i < parnames.size(); ++i)
+        fitfunc->unfix(i);
+    }
+
+    g_log.debug() << "FitSingleDomain Fitted-Function " << fitfunc->asString()
+                  << ": Fit-status = " << fitStatus
+                  << ", chi^2 = " << chi2 << ".\n";
+
+    return chi2;
+  }
+
+
+
+
+
+
+
+
+
+
+  //----------------------------------------------------------------------------------------------
+  // FitPeak Methods
+  //----------------------------------------------------------------------------------------------
 
   DECLARE_ALGORITHM(FitPeak)
 
@@ -1080,7 +1418,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Get an index of a value in a sorted vector.  The index should be the item with value nearest to X
     */
-  size_t FitPeak::getVectorIndex(const MantidVec& vecx, double x)
+  size_t getVectorIndex(const MantidVec& vecx, double x)
   {
     size_t index;
     if (x <= vecx.front())

@@ -13,6 +13,100 @@ namespace Mantid
 {
 namespace Algorithms
 {
+  /// Get an index of a value in a sorted vector.  The index should be the item with value nearest to X
+  size_t getVectorIndex(const MantidVec& vecx, double x);
+
+  /** FitOneSinglePeak: a class to perform peak fitting on a single peak
+    */
+  class DLLExport FitOneSinglePeak : public API::Algorithm
+  {
+  public:
+    /// Constructor
+    FitOneSinglePeak();
+    /// Desctructor
+    virtual ~FitOneSinglePeak();
+
+    void setFunctions(std::string peaktype, std::string bkgdtype);
+
+    void setPeakParameterValues();
+
+    void setBackgroundParameterValues();
+
+    void setWorskpace();
+
+    void setFitRange();
+
+    void setFitWindow();
+
+    void setGuessedPeakFWHM();
+
+    void fitPeakOneStep();
+
+    void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
+              std::map<std::string, double>& paramerrormap);
+
+    void pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func);
+
+    void setFittingTool();
+
+
+  private:
+    ///
+    void setupGuessedFWHM(std::vector<double>& vec_FWHM);
+
+    ///
+    double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
+                         double xmin, double xmax, bool calmode);
+
+    ///
+    void processNStoreFitResult(double, bool);
+
+
+    /// Peak function
+    API::IPeakFunction_sptr m_peakFunc;
+    /// Background function
+    API::IBackgroundFunction_sptr m_bkgdFunc;
+
+    /// Input data workspace
+    API::MatrixWorkspace_const_sptr m_dataWS;
+    /// Input worskpace index
+    size_t m_wsIndex;
+
+    /// Lower boundary of fitting range
+    double m_minFitX;
+    /// Upper boundary of fitting range
+    double m_maxFitX;
+
+    ///
+    double m_userGuessedFWHM;
+    ///
+    double m_minGuessedPeakWidth;
+    ///
+    double m_maxGuessedPeakWidth;
+    ///
+    double m_fwhmFitStep;
+
+    /// Best peak parameters
+    std::map<std::string, double> m_bestPeakFunc;
+    /// Best background parameters
+    std::map<std::string, double> m_bestBkgdFunc;
+
+    /// Backed up peak function parameters
+    std::map<std::string, double> m_bkupPeakFunc;
+    /// Backed up background function parameters
+    std::map<std::string, double> m_bkupBkgdFunc;
+
+    ///
+    std::string m_minimizer;
+    ///
+    std::string m_costFunction;
+
+    /// Log
+    // Kernel::Logger& g_log;
+
+  };
+
+
 
   /** FitPeak : Fit a single peak
     
@@ -116,8 +210,10 @@ namespace Algorithms
     /// Create functions
     void createFunctions();
 
+#if 0
     /// Get an index of a value in a sorted vector.  The index should be the item with value nearest to X
     size_t getVectorIndex(const MantidVec& vecx, double x);
+#endif
 
     /// Check the fitted peak value to see whether it is valud
     double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
