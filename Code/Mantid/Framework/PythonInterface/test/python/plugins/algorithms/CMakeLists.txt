@@ -12,6 +12,7 @@ set ( TEST_PY_FILES
   DakotaChiSquaredTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
+  GetEiT0atSNSTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
