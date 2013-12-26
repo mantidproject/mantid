@@ -13,8 +13,8 @@ class GetEiT0atSNSTest(unittest.TestCase):
         AddSampleLog(Workspace=w,LogName='vChTrans',LogText='1',LogType='Number Series')
         AddSampleLog(Workspace=w,LogName='EnergyRequest',LogText='20',LogType='Number Series')
         res=GetEiT0atSNS(w)
-        self.assertAlmostEqual(res[0],20.09,delta=0.01)
-        self.assertAlmostEqual(res[1],30.41,delta=0.01)
+        self.assertAlmostEqual(res[0],20.09,places=2)
+        self.assertAlmostEqual(res[1],30.415,places=2)
         try:
             res=GetEiT0atSNS(w,0.1)
         except Exception as e:
