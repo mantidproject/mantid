@@ -12,9 +12,9 @@ class MaskAngleTest(unittest.TestCase):
         masklist = MaskAngle(w,10,20)
         for i in arange(w.getNumberHistograms())+1:
             if (i<10) or (i>19):
-                self.assertTrue(not w.getInstrument().getDetector(i).isMasked())
+                self.assertTrue(not w.getInstrument().getDetector(int(i)).isMasked())
             else:
-                self.assertTrue(w.getInstrument().getDetector(i).isMasked())
+                self.assertTrue(w.getInstrument().getDetector(int(i)).isMasked())
         DeleteWorkspace(w)
         self.assertTrue(array_equal(masklist,arange(10)+10))
     

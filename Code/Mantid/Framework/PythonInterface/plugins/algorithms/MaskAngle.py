@@ -42,8 +42,8 @@ class MaskAngle(mantid.api.PythonAlgorithm):
 
 
         numspec = ws.getNumberHistograms()
-	source=ws.getInstrument().getSource().getPos()
-	sample=ws.getInstrument().getSample().getPos()
+        source=ws.getInstrument().getSource().getPos()
+        sample=ws.getInstrument().getSample().getPos()
         for i in range(numspec):
             det=ws.getDetector(i)
             if not det.isMonitor():
