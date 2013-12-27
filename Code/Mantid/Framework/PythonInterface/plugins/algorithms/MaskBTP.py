@@ -1,4 +1,4 @@
-""" 
+"""*WIKI* 
 Algorithm to mask detectors in particular banks, tube, or pixels. It applies to the following instruments only: ARCS, CNCS, HYSPEC, SEQUOIA.
 If one of Bank, Tube, Pixel entries is left blank, it will apply to all elements of that type. For example:
 
@@ -9,7 +9,7 @@ The algorithm allows ranged inputs: Pixel = "1-8,121-128" is equivalent to Pixel
 
 Either the input workspace or the instrument must be set
 
-"""
+*WIKI*"""
 
 import mantid.simpleapi  
 import mantid.api
