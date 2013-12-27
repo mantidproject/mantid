@@ -23,35 +23,64 @@ namespace Algorithms
   public:
     /// Constructor
     FitOneSinglePeak();
+
     /// Desctructor
     virtual ~FitOneSinglePeak();
 
-    void setFunctions(std::string peaktype, std::string bkgdtype);
+    /// Set fitting method
+    void setFittingMethod(std::string minimizer, std::string costfunction);
+
+    /// Set functions
+    void setFunctions(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc);
+
+    /// Create functions from sctrach
+    void createFunctions(std::string peaktype, std::string bkgdtype);
+
+    /// Set workspaces
+    void setWorskpace(API::MatrixWorkspace_const_sptr dataws, size_t wsindex);
+
+    /// Set fit window
+    void setFitWindow(double xmin, double xmax);
+
+    /// Set peak range
+    void setPeakRange(double xpeakleft, double xpeakright);
+
+    /// Set peak width to guess
+    void setupGuessedFWHM(int width);
+
+    /// Fit peak and background together
+    bool simpleFit(size_t numsteps);
+
+    /// Fit peak first considering high background
+    bool highBkgdFit(size_t numsteps);
+
+    /// Get peak
+    API::IPeakFunction_sptr getPeakFunction();
+
+    /// Get background
+    API::IBackgroundFunction_sptr getBackgroundFunction();
+
+
 
     void setPeakParameterValues();
 
     void setBackgroundParameterValues();
 
-    void setWorskpace();
-
-    void setFitRange();
-
-    void setFitWindow();
-
-    void setGuessedPeakFWHM();
-
-    void fitPeakOneStep();
-
-    void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
-              std::map<std::string, double>& paramerrormap);
-
-    void pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func);
-
-    void setFittingTool();
-
 
   private:
+
     ///
+    virtual const std::string name() const;
+
+    ///
+    virtual int version() const;
+
+    ///
+    void init();
+
+    ///
+    void exec();
+
     void setupGuessedFWHM(std::vector<double>& vec_FWHM);
 
     ///
@@ -60,6 +89,13 @@ namespace Algorithms
 
     ///
     void processNStoreFitResult(double, bool);
+
+    void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
+              std::map<std::string, double>& paramerrormap);
+
+    void pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func);
+
+    API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
 
 
     /// Peak function

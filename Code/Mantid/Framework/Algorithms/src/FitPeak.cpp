@@ -73,7 +73,26 @@ namespace Algorithms
   {
   }
 
-  void FitOneSinglePeak::setFunctions(std::string peaktype, std::string bkgdtype)
+
+  //----------------------------------------------------------------------------------------------
+  /** Set peaks
+    */
+  void FitOneSinglePeak::setFunctions(IPeakFunction_sptr peakfunc, IBackgroundFunction_sptr bkgdfunc)
+  {
+    if (peakfunc)
+      m_peakFunc = peakfunc;
+
+    if (bkgdfunc)
+      m_bkgdFunc = bkgdfunc;
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Set peaks
+    */
+  void FitOneSinglePeak::createFunctions(std::string peaktype, std::string bkgdtype)
   {
     //=========================================================================
     // Generate background function
@@ -161,7 +180,9 @@ namespace Algorithms
   }
 
 
-  void FitOneSinglePeak::fitPeakOneStep()
+  /** Fit peak with simple schemem
+    */
+  bool FitOneSinglePeak::simpleFit(size_t numsteps)
   {
     // Set up a composite function
     CompositeFunction_sptr compfunc = boost::make_shared<CompositeFunction>();
@@ -208,6 +229,73 @@ namespace Algorithms
 #endif
 
     g_log.information() << "One-Step-Fit Best Fitted Function: " << compfunc->asString() << "\n";
+
+    return false;
+  }
+
+
+  /** Fit peak with high background
+    */
+  bool FitOneSinglePeak::highBkgdFit(size_t numsteps)
+  {
+    // Fit background
+    m_bkgdFunc = fitBackground(m_bkgdFunc);
+
+    // print background function and original input workspace
+
+    // Backup original data due to pure peak data to be made
+    // TODO
+    MatrixWorkspace_sptr purePeakWS = genPurePeakWS();
+
+    // Make pure peak
+    // TODO
+    makePurePeakWS(purePeakWS);
+
+    // print this pure workspace out;
+
+    // Estimate the peak height
+    // TODO
+    double est_peakheight = estimatePeakHeight(m_peakFunc, purePeakWS, 0, 0, purePeakWS->readX(0).size()-1);
+    m_peakFunc->setHeight(est_peakheight);
+
+    // Calculate guessed FWHM
+    std::vector<double> vec_FWHM;
+    setupGuessedFWHM(vec_FWHM);
+
+    // Store starting setup
+    map<string, double> bkupPeakErrorMap;
+    push(m_peakFunc, m_bkupPeakFunc, bkupPeakErrorMap);
+
+    // Fit with different starting values of peak width
+    for (size_t i = 0; i < vec_FWHM.size(); ++i)
+    {
+      // Restore
+      if (i > 0)
+        pop(m_bkupPeakFunc, m_peakFunc);
+
+      // Set FWHM
+      m_peakFunc->setFwhm(vec_FWHM[i]);
+      g_log.debug() << "Round " << i << " of " << vec_FWHM.size() << ". Using proposed FWHM = "
+                    << vec_FWHM[i] << "\n";
+
+      // Fit
+      // TODO
+      double rwp = fitPeakFunction(m_peakFunc, purePeakWS, 0, m_minFitX, m_maxFitX);
+
+      // Store result
+      processNStoreFitResult(rwp,false);
+    }
+
+    // Get best fitting peak function and Make a combo fit
+    pop(m_bestPeakFunc, m_peakFunc);
+
+    // TODO
+    m_finalGoodnessValue = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex,
+                                                m_minFitX, m_maxFitX);
+    g_log.information() << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString()
+                        << "Final " << m_costFunction << " = " << m_finalGoodnessValue << "\n";
+
+    return false;
   }
 
 
@@ -544,13 +632,27 @@ namespace Algorithms
     prescreenInputData();
 
     // Fit peak
+
+    FitOneSinglePeak fitalg;
+
+    // Set parameters
+    fitalg.setFunctions(m_peakFunc, m_bkgdFunc);
+    fitalg.setWorskpace(m_dataWS, m_wsIndex);
+
+    fitalg.setFittingMethod(m_minimizer, m_costFunction);
+    fitalg.setFitWindow(m_minFitX, m_maxFitX);
+    fitalg.setPeakRange(m_minPeakX, m_maxPeakX);
+    fitalg.setupGuessedFWHM(4);
+
+
     if (m_fitBkgdFirst)
     {
       fitPeakMultipleStep();
     }
     else
     {
-      fitPeakOneStep();
+      fitalg.simpleFit();
+      // fitPeakOneStep();
     }
 
     // Output
