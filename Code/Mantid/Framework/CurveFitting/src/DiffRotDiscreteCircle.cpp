@@ -11,7 +11,7 @@ Markov model for jumps between neighboring sites:
 
 The Decay fitting parameter <math>\tau</math> is the inverse of the transition rate. This, along with the circle radius <math>r</math>, conform the two fundamental fitting parameters of the structure factor <math>S(Q,E)</math>:
 
-<center><math> S(Q,E) = A_0(Q,r) \delta (\omega) + \frac{1}{\pi} \sum_{l=1}^{N-1} A_l (Q,r) \frac{\tau_l}{1+(\omega \tau_l)^2} </math></center>
+<center><math> S(Q,E) \equiv = \int e^{-iEt/\hbar} I(Q,t) dt = A_0(Q,r) \delta (E) + \frac{1}{\pi} \sum_{l=1}^{N-1} A_l (Q,r) \frac{\hbar \tau_l^{-1}}{(\hbar \tau_l^{-1})^2+E^2} </math></center>
 
 <center><math> A_l(Q,r) = \frac{1}{N} \sum_{k=1}^{N} j_0( 2 Q r sin(\frac{\pi k}{N}) ) cos(\frac{2\pi lk}{N}) </math></center>
 
@@ -22,14 +22,14 @@ The transition rate, expressed in units of energy is <math>h\tau^{-1}</math>, wi
 == Example: Methyl Rotations ==
 Methyl Rotations can be modelled setting N=3. In this case, the inelastic part reduces to a single Lorentzian:
 
-<center><math> S(Q,E) = A_0(Q,r) \delta (\omega) + \frac{2}{\pi} A_1 (Q,r) \frac{3 \tau}{9+(\omega \tau)^2} </math></center>
+<center><math> S(Q,E) = A_0(Q,r) \delta (E) + \frac{2}{\pi} A_1 (Q,r) \frac{3 \hbar \tau^{-1}}{(3 \hbar \tau^{-1})^2+E^2} </math></center>
 
 If, alternatively, one models these dynamics using the [[Lorentzian]] function provided in Mantid:
 
 <center><math> S(Q,E) = A \delta (\omega) + \frac{B}{\pi} \left( \frac{\frac{\Gamma}{2}}{(\frac{\Gamma}{2})^2 + (\hbar\omega)^2}\right) </math></center>
 Then:
 <center><math>B = \frac{1}{\pi}h A_1</math></center>
-<center><math>\Gamma = \frac{3}{\pi} h\tau^{-1} = 3.949269754 meV\cdot THz \cdot \tau^{-1}</math></center>
+<center><math>\Gamma = \frac{3}{\pi} h\tau^{-1} = 3.949269754 meV\cdot THz\cdot \tau^{-1}</math></center>
 
 == Properties ==
 
@@ -108,7 +108,7 @@ double ElasticDiffRotDiscreteCircle::HeightPrefactor() const{
   return aN / N;
 }
 
-InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle() : m_h(4.135665616)
+InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle() : m_hbar(0.658211626)
 {
   declareParameter( "Intensity",1.0, "scaling factor [arbitrary units]" );
   declareParameter( "Radius", 1.0, "Circle radius [Angstroms]" );
@@ -135,7 +135,7 @@ void InelasticDiffRotDiscreteCircle::function1D( double *out, const double* xVal
 {
   const double I = getParameter( "Intensity" );
   const double R = getParameter( "Radius" );
-  const double rate = m_h / getParameter( "Decay" ); // micro-eV or mili-eV
+  const double rate = m_hbar / getParameter( "Decay" ); // micro-eV or mili-eV
   const double Q = getAttribute( "Q" ).asDouble();
   const int N = getAttribute( "N" ).asInt();
 
