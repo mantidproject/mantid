@@ -53,6 +53,8 @@ public:
   /// overwrite IFunction base class methods
   virtual std::string name()const{ return "ElasticDiffRotDiscreteCircle"; }
 
+  virtual const std::string category() const { return "QENS"; }
+
   /// overwrite IFunction base class method, which declare function parameters
   virtual void init();
 
@@ -76,6 +78,8 @@ public:
   virtual ~InelasticDiffRotDiscreteCircle() {}
 
   virtual std::string name() const { return "InelasticDiffRotDiscreteCircle"; }
+
+  virtual const std::string category() const { return "QENS"; }
 
   virtual void init();
 
