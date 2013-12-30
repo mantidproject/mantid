@@ -148,6 +148,7 @@ set ( SRC_FILES
 	src/OneMinusExponentialCor.cpp
 	src/PDFFourierTransform.cpp
 	src/Pause.cpp
+	src/PerformIndexOperations.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
@@ -373,6 +374,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
+	inc/MantidAlgorithms/PerformIndexOperations.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -594,6 +596,7 @@ set ( TEST_FILES
 	OneMinusExponentialCorTest.h
 	PDFFourierTransformTest.h
 	PauseTest.h
+	PerformIndexOperationsTest.h
 	PlotAsymmetryByLogValueTest.h
 	PlusTest.h
 	PointByPointVCorrectionTest.h
