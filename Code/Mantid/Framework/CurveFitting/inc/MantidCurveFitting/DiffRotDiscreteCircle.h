@@ -85,7 +85,7 @@ protected:
 
 private:
 
-  const double m_h; // Plank constant, in meV*THz (or ueV*PHz)
+  const double m_hbar; // Plank constant, in meV*THz (or ueV*PHz)
 };
 
 
