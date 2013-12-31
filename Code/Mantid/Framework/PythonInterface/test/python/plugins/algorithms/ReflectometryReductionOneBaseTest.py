@@ -136,24 +136,6 @@ class ReflectometryReductionOneBaseTest(object):
         alg.set_I0MonitorIndex(-1)
         self.assertRaises(Exception, alg.execute)
         
-    def test_cannot_set_region_of_interest_without_multidetector_run(self):
-        alg = self.construct_standard_algorithm()
-        alg.set_AnalysisMode("PointDetectorAnalysis")
-        alg.set_RegionOfInterest([1, 2])
-        self.assertRaises(Exception, alg.execute)
-        
-    def test_region_of_interest_indexes_cannot_be_negative_or_throws(self):
-        alg = self.construct_standard_algorithm()
-        alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_RegionOfInterest([0, -1]);
-        self.assertRaises(Exception, alg.execute)
-        
-    def test_region_of_integrest_indexes_must_be_provided_as_min_max_order_or_throws(self):
-        alg = self.construct_standard_algorithm()
-        alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_RegionOfInterest([1, 0]);
-        self.assertRaises(Exception, alg.execute)
-        
     def test_cannot_set_direct_beam_region_of_interest_without_multidetector_run(self):
         alg = self.construct_standard_algorithm()
         alg.set_AnalysisMode("PointDetectorAnalysis")
@@ -252,32 +234,14 @@ class ReflectometryReductionOneBaseTest(object):
         
         DeleteWorkspace(real_run)
         
-    def test_throw_if_no_roi_for_multidetector_run(self):
-        alg = self.construct_standard_algorithm()
-        real_run = Load('POLREF00004699.nxs')
-        alg.set_InputWorkspace(real_run[0])
-        alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_RegionOfDirectBeam([0,1])
-        alg.set_DetectorComponentName('lineardetector')
-        self.assertRaises(Exception, alg.execute)
-        
-    def test_throw_if_no_db_for_multidetector_run(self):
-        alg = self.construct_standard_algorithm()
-        real_run = Load('POLREF00004699.nxs')
-        alg.set_InputWorkspace(real_run[0])
-        alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_DetectorComponentName('lineardetector')
-        alg.set_RegionOfInterest([0,1])
-        self.assertRaises(Exception, alg.execute)
-        
     def test_multidetector_run(self):
         alg = self.construct_standard_algorithm()
         real_run = Load('POLREF00004699.nxs')
         alg.set_InputWorkspace(real_run[0])
         alg.set_AnalysisMode("MultiDetectorAnalysis")
         alg.set_DetectorComponentName('lineardetector')
-        alg.set_RegionOfInterest([3, 10]) # Fictional values
-        alg.set_RegionOfDirectBeam([20, 30]) # Fictional values
+        alg.set_ProcessingInstructions("3, 10") # Fictional values
+        alg.set_RegionOfDirectBeam("20, 30") # Fictional values
         alg.set_ThetaIn(0.1) # Fictional values
         
         out_ws_q, out_ws_lam, theta =  alg.execute()

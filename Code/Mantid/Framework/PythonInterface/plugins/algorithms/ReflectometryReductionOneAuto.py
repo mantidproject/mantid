@@ -29,7 +29,6 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         analysis_modes = ["PointDetectorAnalysis", "MultiDetectorAnalysis"]
         analysis_mode_validator = StringListValidator(analysis_modes)
         
-        self.declareProperty(IntArrayProperty(name="RegionOfInterest", direction=Direction.Input), doc="Indices of the spectra a pair (lower, upper) that mark the ranges that correspond to the region of interest (reflected beam) in multi-detector mode.")
         self.declareProperty(IntArrayProperty(name="RegionOfDirectBeam", direction=Direction.Input), doc="Indices of the spectra a pair (lower, upper) that mark the ranges that correspond to the direct beam in multi-detector mode.")
 
         self.declareProperty(name="AnalysisMode", defaultValue=analysis_modes[0], validator=analysis_mode_validator, direction = Direction.Input, doc="Analysis Mode to Choose")
@@ -142,8 +141,6 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         
         correct_positions = self.value_or_none("CorrectDetectorPositions")
         
-        region_of_interest = self.value_or_none("RegionOfInterest")
-        
         region_of_direct_beam = self.value_or_none("RegionOfDirectBeam")
         
         '''
@@ -168,7 +165,6 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
                                                                       MonitorBackgroundWavelengthMax=wavelength_back_max,
                                                                       MonitorIntegrationWavelengthMin=wavelength_integration_min, 
                                                                       MonitorIntegrationWavelengthMax=wavelength_integration_max,
-                                                                      RegionOfInterest=region_of_interest, 
                                                                       RegionOfDirectBeam=region_of_direct_beam, 
                                                                       DetectorComponentName=detector_component_name,
                                                                       SampleComponentName=sample_component_name, 
