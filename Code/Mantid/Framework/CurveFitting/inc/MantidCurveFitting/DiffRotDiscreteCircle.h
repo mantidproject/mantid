@@ -53,6 +53,8 @@ public:
   /// overwrite IFunction base class methods
   virtual std::string name()const{ return "ElasticDiffRotDiscreteCircle"; }
 
+  virtual const std::string category() const { return "QENS"; }
+
   /// overwrite IFunction base class method, which declare function parameters
   virtual void init();
 
@@ -77,6 +79,8 @@ public:
 
   virtual std::string name() const { return "InelasticDiffRotDiscreteCircle"; }
 
+  virtual const std::string category() const { return "QENS"; }
+
   virtual void init();
 
 protected:
@@ -85,7 +89,7 @@ protected:
 
 private:
 
-  const double m_h; // Plank constant, in meV*THz (or ueV*PHz)
+  const double m_hbar; // Plank constant, in meV*THz (or ueV*PHz)
 };
 
 
