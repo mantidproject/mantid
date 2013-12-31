@@ -23,6 +23,7 @@ set ( TEST_PY_FILES
   ReflectometryReductionOneAutoTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
+  SortDetectorsTest.py
   SortXAxisTest.py
   Stitch1DTest.py
   Stitch1DManyTest.py
