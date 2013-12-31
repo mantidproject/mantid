@@ -9,7 +9,7 @@ import  mantid,math,numpy
 
 
 class SortDetectors(PythonAlgorithm):
-    """ Get chi squared by comparing two mantid nexus files
+    """ Sort detectors by distance
     """
     def category(self):
         """ Return category
