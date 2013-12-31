@@ -35,10 +35,12 @@ public:
 
     // Define one spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
-    detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
     // Define another spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep2));
-    detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep2));
+    std::stringstream buffer;
+    buffer << workspaceIndexToKeep1 << "," << workspaceIndexToKeep2;
+    const std::string detectorIndexRangesStr = buffer.str();
+
     // Define a wavelength range for the detector workspace
     const double wavelengthMin = 1.0;
     const double wavelengthMax = 15;
@@ -50,7 +52,7 @@ public:
 
     // Run the conversion.
     ReflectometryWorkflowBase::DetectorMonitorWorkspacePair inLam = alg.toLam(toConvert,
-        detectorIndexRange, monitorIndex, boost::tuple<double, double>(wavelengthMin, wavelengthMax),
+        detectorIndexRangesStr, monitorIndex, boost::tuple<double, double>(wavelengthMin, wavelengthMax),
         boost::tuple<double, double>(backgroundWavelengthMin, backgroundWavelengthMax), wavelengthStep);
 
     // Unpack the results

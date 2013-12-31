@@ -39,7 +39,7 @@ class CreateTransmissionWorkspaceAuto(PythonAlgorithm):
         index_bounds = IntBoundedValidator()
         index_bounds.setLower(0)
         self.declareProperty(name="I0MonitorIndex", defaultValue=sys.maxint, validator=index_bounds, doc="I0 monitor index" )
-        self.declareProperty(IntArrayProperty(name="WorkspaceIndexList", values=[sys.maxint]), doc="Workspace index list")
+        self.declareProperty(name="ProcessingInstructions", direction=Direction.Input, defaultValue="", doc="Processing instructions to extract spectra belonging to detector workspace, see [[PerformIndexOperations]] for syntax.")
         self.declareProperty(name="WavelengthMin", direction=Direction.Input, defaultValue=sys.float_info.max, doc="Wavelength Min in angstroms")
         self.declareProperty(name="WavelengthMax", direction=Direction.Input, defaultValue=sys.float_info.max, doc="Wavelength Max in angstroms")
         self.declareProperty(name="WavelengthStep", direction=Direction.Input, defaultValue=sys.float_info.max, doc="Wavelength step in angstroms")
@@ -88,16 +88,18 @@ class CreateTransmissionWorkspaceAuto(PythonAlgorithm):
         
         i0_monitor_index = int(self.value_to_apply("I0MonitorIndex", instrument, "I0MonitorIndex"))
         
+        processing_commands = str()
         workspace_index_list = list()
-        if self.getProperty("WorkspaceIndexList").isDefault:
+        if self.getProperty("ProcessingInstructions").isDefault:
             if analysis_mode == "PointDetectorAnalysis":
                 workspace_index_list.append( int(instrument.getNumberParameter("PointDetectorStart")[0]) )
                 workspace_index_list.append( int(instrument.getNumberParameter("PointDetectorStop")[0]) )
             else:
                 workspace_index_list.append( int(instrument.getNumberParameter("MultiDetectorStart")[0]) )
                 workspace_index_list.append( first_ws.getNumberHistograms() - 1)
+            processing_commands = ','.join(map(str, workspace_index_list))
         else:
-            workspace_index_list = self.getProperty("WorkspaceIndexList").value
+            processing_commands = self.getProperty("ProcessingInstructions").value
         
         wavelength_min = self.value_to_apply("WavelengthMin", instrument, "LambdaMin")
         
@@ -118,7 +120,7 @@ class CreateTransmissionWorkspaceAuto(PythonAlgorithm):
         '''
         output_ws = CreateTransmissionWorkspace(FirstTransmissionRun=first_ws, SecondTransmissionRun=second_ws, OutputWorkspace=outputWorkspaceName, 
                                     StartOverlap=start_overlap, EndOverlap=end_overlap, Params=params, I0MonitorIndex=i0_monitor_index,
-                                    WorkspaceIndexList=workspace_index_list, WavelengthMin=wavelength_min, WavelengthStep=wavelength_step, WavelengthMax=wavelength_max,
+                                    ProcessingInstructions=processing_commands, WavelengthMin=wavelength_min, WavelengthStep=wavelength_step, WavelengthMax=wavelength_max,
                                     MonitorBackgroundWavelengthMin=wavelength_back_min, MonitorBackgroundWavelengthMax=wavelength_back_max,
                                     MonitorIntegrationWavelengthMin=wavelength_integration_min, MonitorIntegrationWavelengthMax=wavelength_integration_max)
                                     

@@ -44,7 +44,7 @@ namespace Mantid
     private:
 
       /// Make a transmission correction workspace
-      API::MatrixWorkspace_sptr makeTransmissionCorrection(const WorkspaceIndexList& detectorIndexes,
+      API::MatrixWorkspace_sptr makeTransmissionCorrection(const std::string& processingCommands,
           const MinMax& wavelengthInterval, const MinMax& wavelengthMonitorBackgroundInterval,
           const MinMax& wavelengthMonitorIntegrationInterval, const int& i0MonitorIndex,
           API::MatrixWorkspace_sptr firstTransmissionRun,

@@ -56,19 +56,23 @@ namespace Mantid
        *
        * @param originWS : Origin workspace, which provides the original workspace index to spectrum id mapping.
        * @param hostWS : Workspace onto which the resulting workspace indexes will be hosted
-       * @return Remapped wokspace indexes applicable for the host workspace.
+       * @return Remapped wokspace indexes applicable for the host workspace. results as comma separated string.
        */
-      ReflectometryWorkflowBase::WorkspaceIndexList createWorkspaceIndexListFromDetectorWorkspace(
+      std::string createWorkspaceIndexListFromDetectorWorkspace(
           MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS)
       {
         auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
-        ReflectometryWorkflowBase::WorkspaceIndexList translatedIndexList;
-        for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it)
+        auto it = spectrumMap.begin();
+        std::stringstream result;
+        specid_t specId = (*it).first;
+        result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
+        ++it;
+        for (; it != spectrumMap.end(); ++it)
         {
-          specid_t specId = (*it).first;
-          translatedIndexList.push_back(static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId))); // Could be slow to do it like this.
+          specId = (*it).first;
+          result << "," << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
         }
-        return translatedIndexList;
+        return result.str();
       }
 
 
@@ -418,7 +422,7 @@ namespace Mantid
       const MinMax monitorBackgroundWavelengthInterval = getMinMax("MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax");
       const MinMax monitorIntegrationWavelengthInterval = getMinMax("MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
 
-      const WorkspaceIndexList indexList = getWorkspaceIndexList();
+      const std::string processingCommands = getWorkspaceIndexList();
 
       OptionalWorkspaceIndexes regionOfInterest;
       fetchOptionalLowerUpperPropertyValue("RegionOfInterest", isPointDetector, regionOfInterest);
@@ -434,7 +438,7 @@ namespace Mantid
       IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
       IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
 
-      DetectorMonitorWorkspacePair inLam = toLam(runWS, indexList, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
+      DetectorMonitorWorkspacePair inLam = toLam(runWS, processingCommands, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
       auto detectorWS = inLam.get<0>();
       auto monitorWS = inLam.get<1>();
 
@@ -519,10 +523,8 @@ namespace Mantid
         const OptionalDouble& stitchingEndOverlap, const double& wavelengthStep)
     {
       g_log.debug("Extracting first transmission run workspace indexes from spectra");
-      const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
+      const std::string detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
           firstTransmissionRun);
-
-      // TODO if firstInputWorkspace is in wavelength, do not create the transmission workspace, just do the division.
 
       MatrixWorkspace_sptr denominator = firstTransmissionRun;
       Unit_const_sptr xUnit = firstTransmissionRun->getAxis(0)->unit();
@@ -541,7 +543,7 @@ namespace Mantid
           alg->setProperty("StartOverlap", stitchingStartOverlap.get());
           alg->setProperty("EndOverlap", stitchingEndOverlap.get());
         }
-        alg->setProperty("WorkspaceIndexList", detectorIndexes);
+        alg->setProperty("ProcessingInstructions", detectorIndexes);
         alg->setProperty("I0MonitorIndex", i0MonitorIndex);
         alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
         alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
