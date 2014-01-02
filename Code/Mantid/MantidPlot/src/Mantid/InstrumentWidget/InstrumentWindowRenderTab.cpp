@@ -684,7 +684,7 @@ void InstrumentWindowRenderTab::setUCorrection()
   {
     QPointF oldUCorr = rotSurface->getUCorrection();
     // ask the user to enter a number for the u-correction
-    auto dlg = UCorrectionDialog(this, oldUCorr, rotSurface->isManualUCorrection());
+    UCorrectionDialog dlg(this, oldUCorr, rotSurface->isManualUCorrection());
     if ( dlg.exec() != QDialog::Accepted ) return;
     
     QSettings settings;
