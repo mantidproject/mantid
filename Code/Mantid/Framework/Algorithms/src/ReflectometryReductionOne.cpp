@@ -287,13 +287,11 @@ namespace Mantid
      * @param toConvert : Workspace to convert
      * @param bCorrectPosition : Flag to indicate that detector positions should be corrected based on the input theta values.
      * @param thetaInDeg : Theta in Degrees. Used for correction.
-     * @param sample : Sample component
-     * @param detector : Detector component
+     * @param isPointDetector: Is point detector analysis
      * @return
      */
     Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
-        API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition, OptionalDouble& thetaInDeg,
-        Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector)
+        API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition, OptionalDouble& thetaInDeg, const bool isPointDetector)
     {
       /*
        * Can either calculate a missing theta value for the purposes of reporting, or correct positions based on a theta value,
@@ -305,6 +303,9 @@ namespace Mantid
         const double thetaToRad = 180 / M_PI;
 
         Instrument_const_sptr instrument = toConvert->getInstrument();
+
+        IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
+        IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
 
         const V3D sampleToDetectorPos = detector->getPos() - sample->getPos();
 
@@ -319,6 +320,11 @@ namespace Mantid
       else if (bCorrectPosition) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
       {
         g_log.debug("Correcting detector position");
+
+        auto instrument = toConvert->getInstrument();
+        IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
+        IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+
         correctPosition(toConvert, thetaInDeg.get(), sample, detector);
       }
 
@@ -444,10 +450,6 @@ namespace Mantid
 
       const bool correctDetctorPositions = getProperty("CorrectDetectorPositions");
 
-      auto instrument = runWS->getInstrument();
-      IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
-      IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
-
       DetectorMonitorWorkspacePair inLam = toLam(runWS, processingCommands, i0MonitorIndex,
           wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
       auto detectorWS = inLam.get<0>();
@@ -502,7 +504,7 @@ namespace Mantid
         g_log.warning("No transmission correction will be applied.");
       }
 
-      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, theta, sample, detector);
+      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, theta, isPointDetector);
 
       setProperty("ThetaOut", theta.get());
       setProperty("OutputWorkspaceWavelength", IvsLam);

@@ -92,30 +92,6 @@ public:
     AnalysisDataService::Instance().remove(toConvert->getName());
   }
 
-  void testIvsQ()
-  {
-    auto loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", "INTER13460_IvsLam.nxs");
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-
-    MatrixWorkspace_sptr toConvert = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("demo");
-
-    ReflectometryReductionOne alg;
-
-    auto instrument = toConvert->getInstrument();
-    auto detector = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>( instrument->getComponentByName("point-detector") );
-    auto sample = instrument->getComponentByName("some-surface-holder");
-
-    boost::optional<double> theta = 0.7;
-
-    MatrixWorkspace_const_sptr inQ = alg.toIvsQ(toConvert, true /*correct position*/, theta, sample, detector);
-
-    TS_ASSERT_EQUALS("MomentumTransfer", inQ->getAxis(0)->unit()->unitID());
-
-    AnalysisDataService::Instance().remove(toConvert->getName());
-  }
 
 };
 

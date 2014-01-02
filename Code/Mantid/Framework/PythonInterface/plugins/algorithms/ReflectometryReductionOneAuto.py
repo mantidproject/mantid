@@ -169,7 +169,7 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
                                                                       DetectorComponentName=detector_component_name,
                                                                       SampleComponentName=sample_component_name, 
                                                                       ThetaIn=theta_in, 
-                                                                      CorrectPositions=correct_positions)
+                                                                      CorrectDetectorPositions=correct_positions)
                                     
         self.setProperty("OutputWorkspace", new_IvsQ1)
         self.setProperty("OutputWorkspaceWavelength", new_IvsLam1)
