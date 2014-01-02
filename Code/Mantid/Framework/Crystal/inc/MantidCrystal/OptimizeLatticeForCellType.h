@@ -66,6 +66,7 @@ private:
   static Kernel::Logger& g_log;
   /// Function to find peaks near detector edge
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName, int col, int row, int Edge);
+  Kernel::DblMatrix A_matrix( std::vector<double> lattice );
 };
 
 } // namespace Algorithm

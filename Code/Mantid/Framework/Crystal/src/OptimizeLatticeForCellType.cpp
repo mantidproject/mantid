@@ -361,13 +361,23 @@ namespace Mantid
       ws = alg->getProperty("PeaksWorkspace");
       OrientedLattice latt=ws->mutableSample().getOrientedLattice();
       DblMatrix UB = latt.getUB();
+      DblMatrix A = A_matrix(lattice_parameters);
+      DblMatrix Bc = A;
+      Bc.Invert();
+      DblMatrix U1_B1 = UB * A;
+      OrientedLattice o_lattice;
+      o_lattice.setUB( U1_B1 );
+      DblMatrix U1 = o_lattice.getU();
+      DblMatrix U1_Bc = U1 * Bc;
     
       double result = 0;
       for ( size_t i = 0; i < hkl_vector.size(); i++ ) 
       {
-         V3D error = UB * hkl_vector[i] - q_vector[i] / (2.0 * M_PI);
+         V3D error = U1_Bc * hkl_vector[i] - q_vector[i] / (2.0 * M_PI);
          result += error.norm();
       }
+      for ( int i = 0; i < 6; i++ ) std::cout<<lattice_parameters[i]<<"  ";
+      std::cout << result << "\n";
     return result;
     }
     bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws, std::string bankName, int col, int row, int Edge)
@@ -399,5 +409,42 @@ namespace Mantid
   	  }
   	  return false;
     }
+    DblMatrix OptimizeLatticeForCellType::A_matrix( std::vector<double> lattice )
+    {
+      double degrees_to_radians = M_PI / 180;
+      double alpha = lattice[3] * degrees_to_radians;
+      double beta  = lattice[4] * degrees_to_radians;
+      double gamma = lattice[5] * degrees_to_radians;
+
+      double l1 = lattice[0];
+      double l2 = 0;
+      double l3 = 0;
+
+      double m1 = lattice[1]*std::cos(gamma);
+      double m2 = lattice[1]*std::sin(gamma);
+      double m3 = 0;
+
+      double n1 = std::cos(beta);
+      double n2 = (std::cos(alpha)- std::cos(beta)*std::cos(gamma)) /
+                   std::sin(gamma);
+      double n3 = std::sqrt( 1 - n1*n1 - n2*n2 );
+      n1 *= lattice[2];
+      n2 *= lattice[2];
+      n3 *= lattice[2];
+
+      DblMatrix result(3,3);
+      result[0][0] = l1;
+      result[0][1] = l2;
+      result[0][2] = l3;
+      result[1][0] = m1;
+      result[1][1] = m2;
+      result[1][2] = m3;
+      result[2][0] = n1;
+      result[2][1] = n2;
+      result[2][2] = n3;
+
+      return result;
+    }
+
   } // namespace Algorithm
 } // namespace Mantid
