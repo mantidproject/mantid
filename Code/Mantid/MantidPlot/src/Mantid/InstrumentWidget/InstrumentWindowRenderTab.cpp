@@ -3,6 +3,7 @@
 #include "UnwrappedSurface.h"
 #include "Projection3D.h"
 #include "RotationSurface.h"
+#include "UCorrectionDialog.h"
 
 #include <QMenu>
 #include <QVBoxLayout>
@@ -19,7 +20,6 @@
 #include <QSignalMapper>
 #include <QMessageBox>
 #include <QToolTip>
-#include <QInputDialog>
 
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
@@ -31,6 +31,10 @@
 
 #include <limits>
 
+// QSettings entry names
+const char *EntryManualUCorrection = "ManualUCorrection";
+const char *EntryUCorrectionMin = "UCorrectionMin";
+const char *EntryUCorrectionMax = "UCorrectionMax";
 
 InstrumentWindowRenderTab::InstrumentWindowRenderTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow)
@@ -133,6 +137,7 @@ InstrumentWindowTab(instrWindow)
   m_wireframe->setChecked(false);
   connect(m_wireframe, SIGNAL(toggled(bool)), m_instrWindow, SLOT(setWireframe(bool)));
   m_UCorrection = new QAction("U Correction",this);
+  m_UCorrection->setToolTip("Manually set the limits on the horizontal axis.");
   connect(m_UCorrection, SIGNAL(triggered()),this,SLOT(setUCorrection()));
   
   // Create "Use OpenGL" action
@@ -289,11 +294,12 @@ void InstrumentWindowRenderTab::initSurface()
     QString groupName = m_instrWindow->getInstrumentSettingsGroupName();
     QSettings settings;
     settings.beginGroup(  groupName );
-    bool isManualUCorrection = settings.value("ManualUCorrection",false).asBool();
+    bool isManualUCorrection = settings.value(EntryManualUCorrection,false).asBool();
     if ( isManualUCorrection )
     {
-      double ucorr = settings.value("UCorrection",0.0).asDouble();
-      rotSurface->setUCorrection( ucorr );
+      double ucorrMin = settings.value(EntryUCorrectionMin,0.0).asDouble();
+      double ucorrMax = settings.value(EntryUCorrectionMax,0.0).asDouble();
+      rotSurface->setUCorrection( ucorrMin, ucorrMax );
     }
   }
   else
@@ -676,20 +682,34 @@ void InstrumentWindowRenderTab::setUCorrection()
   auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
   if ( rotSurface )
   {
-    bool ok;
-    double oldUCorr = rotSurface->getUCorrection();
+    QPointF oldUCorr = rotSurface->getUCorrection();
     // ask the user to enter a number for the u-correction
-    double ucorr = QInputDialog::getDouble(this, "MantiPplot - Input",
-      "U Correction", oldUCorr, -std::numeric_limits<double>::max(),std::numeric_limits<double>::max(), 4, &ok);
-    // update the surface only if the correction changes
-    if (ok && ucorr != oldUCorr)
+    auto dlg = UCorrectionDialog(this, oldUCorr, rotSurface->isManualUCorrection());
+    if ( dlg.exec() != QDialog::Accepted ) return;
+    
+    QSettings settings;
+    settings.beginGroup( m_instrWindow->getInstrumentSettingsGroupName() );
+
+    if ( dlg.applyCorrection() )
     {
-      rotSurface->setUCorrection( ucorr ); // manually set the correction
+      QPointF ucorr = dlg.getValue();
+      // update the surface only if the correction changes
+      if ( ucorr != oldUCorr )
+      {
+        rotSurface->setUCorrection( ucorr.x(), ucorr.y() ); // manually set the correction
+        rotSurface->requestRedraw();         // redraw the view
+        settings.setValue(EntryManualUCorrection,true);
+        settings.setValue(EntryUCorrectionMin,ucorr.x());
+        settings.setValue(EntryUCorrectionMax,ucorr.y());
+      }
+    }
+    else
+    {
+      rotSurface->setAutomaticUCorrection(); // switch to automatic correction
       rotSurface->requestRedraw();         // redraw the view
-      QSettings settings;
-      settings.beginGroup( m_instrWindow->getInstrumentSettingsGroupName() );
-      settings.setValue("ManualUCorrection",true);
-      settings.setValue("UCorrection",ucorr);
+      settings.removeEntry(EntryManualUCorrection);
+      settings.removeEntry(EntryUCorrectionMin);
+      settings.removeEntry(EntryUCorrectionMax);
     }
   }
 }
@@ -698,7 +718,7 @@ void InstrumentWindowRenderTab::setUCorrection()
   * Get current value for the u-correction for a RotationSurface.
   * Return 0 if it's not a RotationSurface.
   */
-double InstrumentWindowRenderTab::getUCorrection() const
+QPointF InstrumentWindowRenderTab::getUCorrection() const
 {
   auto surface = getSurface();
   auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
@@ -706,6 +726,6 @@ double InstrumentWindowRenderTab::getUCorrection() const
   {
     return rotSurface->getUCorrection();
   }
-  return 0.0;
+  return QPointF();
 }
 

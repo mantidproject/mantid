@@ -13,9 +13,13 @@ public:
   RotationSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   void init();
   // Get the value of the u-correction - a shift in the u-coord added to automatically determined uv coordinates
-  double getUCorrection() const {return m_u_correction;}
+  QPointF getUCorrection() const {return QPointF(m_u_min,m_u_max);}
   // Set new value for the u-correction
-  void setUCorrection(double ucorr);
+  void setUCorrection(double umin, double umax);
+  // Set automatic u-correction
+  void setAutomaticUCorrection();
+  // Is u-correction applied manually?
+  bool isManualUCorrection() const {return m_manual_u_correction;}
 
 protected:
 
@@ -39,7 +43,6 @@ protected:
   const Mantid::Kernel::V3D m_zaxis; ///< The z axis of the surface specific coord system
   Mantid::Kernel::V3D m_xaxis;       ///< The x axis
   Mantid::Kernel::V3D m_yaxis;       ///< The y axis
-  double m_u_correction;             ///< Correction to u calculated by project() after findAndCorrectUGap()
   bool m_manual_u_correction;        ///< Flag set to prevent automatic FindAndCorrectUGap()
 };
 

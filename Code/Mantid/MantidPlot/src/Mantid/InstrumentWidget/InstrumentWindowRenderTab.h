@@ -75,7 +75,7 @@ private:
   QFrame * setupAxisFrame();
   void setPrecisionMenuItemChecked(int n);
   void enable3DSurface( bool on );
-  double getUCorrection() const;
+  QPointF getUCorrection() const;
 
   QPushButton *m_surfaceTypeButton;
   QPushButton *mSaveImage;
