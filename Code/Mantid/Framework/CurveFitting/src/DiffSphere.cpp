@@ -1,7 +1,7 @@
 /*WIKI*
 == Summary ==
 
-This fitting function models the dynamics structure factor of a particle undergoing continuous diffusion and confined to a spherical volume. According to Volino and Dianoux
+This fitting function models the dynamics structure factor of a particle undergoing continuous diffusion but confined to a spherical volume. According to Volino and Dianoux
 [http://apps.webofknowledge.com/InboundService.do?SID=4Bayo9ujffV3CUc9Qx8&product=WOS&UT=A1980KQ74800002&SrcApp=EndNote&DestFail=http%3A%2F%2Fwww.webofknowledge.com&Init=Yes&action=retrieve&Func=Frame&customersID=ResearchSoft&SrcAuth=ResearchSoft&IsProductCode=Yes&mode=FullRecord],
 
 <center>
@@ -10,12 +10,13 @@ This fitting function models the dynamics structure factor of a particle undergo
 <math>A_{n,l} = \frac{6x_{n,l}^2}{x_{n,l}^2-l(l+1)} [\frac{QRj_{l+1}(QR) - lj_l(QR)}{(QR)^2 - x_{n,l}^2}]^2</math>
 </center>
 
-Numerical coefficients <math>x_{n,l}</math> are the eigenvalues of the confined diffusion problem, and <math>j_l(z)</math> are the spherical Besell functions.
+Because of the spherical symmetry of the problem, the structure factor is expressed in terms of the <math>j_l(z)</math> spherical Bessel functions. Furthermore, the requirement that no particle flux can escape the sphere leads to the following boundary condition[http://apps.webofknowledge.com/InboundService.do?SID=4Bayo9ujffV3CUc9Qx8&product=WOS&UT=A1980KQ74800002&SrcApp=EndNote&DestFail=http%3A%2F%2Fwww.webofknowledge.com&Init=Yes&action=retrieve&Func=Frame&customersID=ResearchSoft&SrcAuth=ResearchSoft&IsProductCode=Yes&mode=FullRecord]:
+
+<center><math> \frac{d}{dr}j_l(rx_{n,l}/R)|_{r=R}=0 \,\,\,\, \forall l</math></center>
+
+The roots of this set of equations are the numerical coefficients <math> x_{n,l} </math>.
 
 The fit function DiffSphere has an elastic part, modelled by fitting function <i>ElasticDiffSphere</i> and an inelastic part, modelled by <i>InelasticDiffSphere</i>.
-
-
-
 
 == Properties ==
 
