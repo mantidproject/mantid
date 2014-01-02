@@ -202,10 +202,47 @@ namespace Mantid
       {
         hkl_vector.push_back(peaks[i].getHKL());
       }
-      IndexingUtils::Calculate_Errors(UBnew, hkl_vector, sigabc, s->fval);
+      Calculate_Errors(n_peaks, inname, type, Params, atoi(edge.c_str()), sigabc, s->fval);
       OrientedLattice o_lattice;
       o_lattice.setUB( UBnew );
-      o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+
+      if (type == "Cubic")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],0,0,0);
+      }
+      else if (type == "Tetragonal")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
+      }
+      else if (type == "Orthorhombic")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,0);
+      }
+      else if (type == "Rhombohedral")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],sigabc[1],sigabc[1],sigabc[1]);
+      }
+      else if (type == "Hexagonal")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
+      }
+      else if (type == "Monoclinic ( a unique )")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],0,0);
+      }
+      else if (type == "Monoclinic ( b unique )")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,sigabc[3],0);
+
+      }
+      else if (type == "Monoclinic ( c unique )")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,sigabc[3]);
+      }
+      else if (type == "Triclinic")
+      {
+    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+      }
 
       // Show the modified lattice parameters
       g_log.notice() << o_lattice << "\n";
@@ -445,6 +482,119 @@ namespace Mantid
 
       return result;
     }
+    /**
+      STATIC method Optimize_UB: Calculates the matrix that most nearly maps
+      the specified hkl_vectors to the specified q_vectors.  The calculated
+      UB minimizes the sum squared differences between UB*(h,k,l) and the
+      corresponding (qx,qy,qz) for all of the specified hkl and Q vectors.
+      The sum of the squares of the residual errors is returned.  This method is
+      used to optimize the UB matrix once an initial indexing has been found.
 
+      @param  UB           3x3 matrix that will be set to the UB matrix
+      @param  hkl_vectors  std::vector of V3D objects that contains the
+                           list of hkl values
+      @param  q_vectors    std::vector of V3D objects that contains the list of
+                           q_vectors that are indexed by the corresponding hkl
+                           vectors.
+      @param  sigabc      error in the crystal lattice parameter values if length
+                          is at least 6. NOTE: Calculation of these errors is based on
+                          SCD FORTRAN code base at IPNS. Contributors to the least
+                          squares application(1979) are J.Marc Overhage, G.Anderson,
+                          P. C. W. Leung, R. G. Teller, and  A. J. Schultz
+      NOTE: The number of hkl_vectors and q_vectors must be the same, and must
+            be at least 3.
+
+      @return  This will return the sum of the squares of the residual differences
+               between the Q vectors provided and the UB*hkl values, in
+               reciprocal space.
+
+      @throws  std::invalid_argument exception if there are not at least 3
+                                     hkl and q vectors, or if the numbers of
+                                     hkl and q vectors are not the same, or if
+                                     the UB matrix is not a 3x3 matrix.
+
+      @throws  std::runtime_error    exception if the QR factorization fails or
+                                     the UB matrix can't be calculated or if
+                                     UB is a singular matrix.
+    */
+    void OptimizeLatticeForCellType::Calculate_Errors(size_t npeaks, std::string inname, std::string cell_type,
+    		                          std::vector<double> & Params, int edgePixels,
+                                      std::vector<double> & sigabc, double chisq)
+    {
+      double result = chisq;
+      if( sigabc.size() <Params.size())
+      {
+        sigabc.clear();
+      }else
+        for( size_t i=0;i<Params.size();i++)
+          sigabc[i]=0.0;
+
+      size_t nDOF= 3*(npeaks-3);
+      int MAX_STEPS = 10;        // evaluate approximation using deltas
+                                       // ranging over 10 orders of magnitudue
+      double START_DELTA = 1.0e-2;     // start with change of 1%
+      std::vector<double> approx;   // save list of approximations
+
+      double a_save;
+      double delta;
+      for ( int k = 0; k < 6; k++ )
+      {
+    	std::vector<double> a = Params;
+        double diff = 0.0;
+
+        a_save = a[k];
+
+        if ( a_save < 1.0e-8 )             // if parameter essentially 0, use
+          delta = 1.0e-8;                  // a "small" step
+        else
+          delta = START_DELTA * a_save;
+
+        for ( int count = 0; count < MAX_STEPS; count++ )
+        {
+          a[k] = a_save + delta;
+          double chi_3 = optLattice(inname, cell_type, a, edgePixels);
+
+          a[k] = a_save - delta;
+          double chi_1 = optLattice(inname, cell_type, a, edgePixels);
+
+          a[k] = a_save;
+          double chi_2 = optLattice(inname, cell_type, a, edgePixels);
+
+          diff = chi_1-2*chi_2+chi_3;
+          if ( diff > 0 )
+          {
+            approx.push_back(std::abs(delta) *
+                               std::sqrt(2.0/std::abs(diff)));
+          }
+          delta = delta / 10;
+        }
+        if ( approx.size() == 0 )
+        	sigabc[k] = Mantid::EMPTY_DBL();    // no reasonable value
+
+        else if ( approx.size() == 1 )
+        	sigabc[k] = approx[0];                   // only one possible value
+
+        else                                        // use one with smallest diff
+        {
+          double min_diff = Mantid::EMPTY_DBL();
+          for ( size_t i = 0; i < approx.size(); i++ )
+          {
+            diff = std::abs( (approx[i+1]-approx[i])/approx[i] );
+            if ( diff < min_diff )
+            {
+              sigabc[k] = approx[i+1];
+              min_diff = diff;
+            }
+          }
+        }
+      }
+
+
+      delta = result /(double)nDOF;
+
+      for( size_t i = 0; i < std::min<size_t>(7,sigabc.size()); i++ )
+                sigabc[i] = sqrt( delta) * sigabc[i];
+
+    }
   } // namespace Algorithm
 } // namespace Mantid

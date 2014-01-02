@@ -67,6 +67,9 @@ private:
   /// Function to find peaks near detector edge
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName, int col, int row, int Edge);
   Kernel::DblMatrix A_matrix( std::vector<double> lattice );
+  void Calculate_Errors(size_t npeaks, std::string inname, std::string cell_type,
+          std::vector<double> & Params, int edgePixels,
+          std::vector<double> & sigabc, double chisq);
 };
 
 } // namespace Algorithm
