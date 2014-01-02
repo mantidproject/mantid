@@ -118,7 +118,7 @@ InstrumentActor::~InstrumentActor()
 
 /**
   * Set up the workspace: calculate the value ranges, set the colours.
-  * @param shaperdWorkspace :: A shared pointer to the workspace.
+  * @param sharedWorkspace :: A shared pointer to the workspace.
   * @param scaleMin :: Minimum limit on the color map axis. If autoscale this value is ignored.
   * @param scaleMax :: Maximum limit on the color map axis. If autoscale this value is ignored.
   */
@@ -177,8 +177,8 @@ void InstrumentActor::setUpWorkspace(boost::shared_ptr<const Mantid::API::Matrix
 /** Used to set visibility of an actor corresponding to a particular component
  * When selecting a component in the InstrumentTreeWidget
  *
- * @param visitor
- * @return
+ * @param visitor :: Visitor to be accepted bu this actor.
+ * @param rule :: A rule defining visitor acceptance by assembly actors.
  */
 bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
 {
