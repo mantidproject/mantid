@@ -122,7 +122,7 @@ InstrumentActor::~InstrumentActor()
   * @param scaleMin :: Minimum limit on the color map axis. If autoscale this value is ignored.
   * @param scaleMax :: Maximum limit on the color map axis. If autoscale this value is ignored.
   */
-void InstrumentActor::setUpWorkspace(Mantid::API::MatrixWorkspace_const_sptr sharedWorkspace, double scaleMin, double scaleMax)
+void InstrumentActor::setUpWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace, double scaleMin, double scaleMax)
 {
   const size_t nHist = sharedWorkspace->getNumberHistograms();
   m_WkspBinMinValue = DBL_MAX;

@@ -164,7 +164,7 @@ signals:
 
 private:
 
-  void setUpWorkspace(Mantid::API::MatrixWorkspace_const_sptr sharedWorkspace, double scaleMin, double scaleMax);
+  void setUpWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace, double scaleMin, double scaleMax);
   void resetColors();
   void loadSettings();
   void saveSettings();
