@@ -38,8 +38,8 @@ class CreateTransmissionWorkspaceAutoTest(unittest.TestCase, CreateTransmissionW
         self.assertEqual(inst.getNumberParameter("MonitorIntegralMin")[0], alg.getProperty("MonitorIntegrationWavelengthMin").value)
         self.assertEqual(inst.getNumberParameter("MonitorIntegralMax")[0], alg.getProperty("MonitorIntegrationWavelengthMax").value)
         self.assertEqual(inst.getNumberParameter("I0MonitorIndex")[0], alg.getProperty("I0MonitorIndex").value)
-        self.assertEqual(inst.getNumberParameter("PointDetectorStart")[0], alg.getProperty("WorkspaceIndexList").value[0])
-        self.assertEqual(inst.getNumberParameter("PointDetectorStop")[0], alg.getProperty("WorkspaceIndexList").value[1])
+        self.assertEqual(inst.getNumberParameter("PointDetectorStart")[0], float(alg.getProperty("ProcessingInstructions").value.split(',')[0]))
+        self.assertEqual(inst.getNumberParameter("PointDetectorStop")[0], float(alg.getProperty("ProcessingInstructions").value.split(',')[1]))
     
     
  

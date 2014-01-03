@@ -29,7 +29,6 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         analysis_modes = ["PointDetectorAnalysis", "MultiDetectorAnalysis"]
         analysis_mode_validator = StringListValidator(analysis_modes)
         
-        self.declareProperty(IntArrayProperty(name="RegionOfInterest", direction=Direction.Input), doc="Indices of the spectra a pair (lower, upper) that mark the ranges that correspond to the region of interest (reflected beam) in multi-detector mode.")
         self.declareProperty(IntArrayProperty(name="RegionOfDirectBeam", direction=Direction.Input), doc="Indices of the spectra a pair (lower, upper) that mark the ranges that correspond to the direct beam in multi-detector mode.")
 
         self.declareProperty(name="AnalysisMode", defaultValue=analysis_modes[0], validator=analysis_mode_validator, direction = Direction.Input, doc="Analysis Mode to Choose")
@@ -46,7 +45,7 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         index_bounds.setLower(0)
         
         self.declareProperty(name="I0MonitorIndex", defaultValue=sys.maxint, validator=index_bounds, doc="I0 monitor index" )
-        self.declareProperty(IntArrayProperty(name="WorkspaceIndexList", values=[sys.maxint]), doc="Workspace index list")
+        self.declareProperty(name="ProcessingInstructions", direction=Direction.Input, defaultValue="", doc="Processing commands to select and add spectrum to make a detector workspace. See [[PeformIndexOperations]] for syntax.")
         self.declareProperty(name="WavelengthMin", direction=Direction.Input, defaultValue=sys.float_info.max, doc="Wavelength Min in angstroms")
         self.declareProperty(name="WavelengthMax", direction=Direction.Input, defaultValue=sys.float_info.max, doc="Wavelength Max in angstroms")
         self.declareProperty(name="WavelengthStep", direction=Direction.Input, defaultValue=sys.float_info.max, doc="Wavelength step in angstroms")
@@ -107,16 +106,18 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         
         i0_monitor_index = int(self.value_to_apply("I0MonitorIndex", instrument, "I0MonitorIndex"))
         
+        processing_commands = str()
         workspace_index_list = list()
-        if self.getProperty("WorkspaceIndexList").isDefault:
+        if self.getProperty("ProcessingInstructions").isDefault:
             if analysis_mode == "PointDetectorAnalysis":
                 workspace_index_list.append( int(instrument.getNumberParameter("PointDetectorStart")[0]) )
                 workspace_index_list.append( int(instrument.getNumberParameter("PointDetectorStop")[0]) )
             else:
                 workspace_index_list.append( int(instrument.getNumberParameter("MultiDetectorStart")[0]) )
                 workspace_index_list.append( first_ws.getNumberHistograms() - 1)
+            processing_commands = ','.join(map(str, workspace_index_list))
         else:
-            workspace_index_list = self.getProperty("WorkspaceIndexList").value
+            processing_commands = self.getProperty("ProcessingInstructions").value
         
         wavelength_min = self.value_to_apply("WavelengthMin", instrument, "LambdaMin")
         
@@ -140,8 +141,6 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         
         correct_positions = self.value_or_none("CorrectDetectorPositions")
         
-        region_of_interest = self.value_or_none("RegionOfInterest")
-        
         region_of_direct_beam = self.value_or_none("RegionOfDirectBeam")
         
         '''
@@ -158,7 +157,7 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
                                                                       EndOverlap=end_overlap, 
                                                                       Params=params, 
                                                                       I0MonitorIndex=i0_monitor_index, 
-                                                                      WorkspaceIndexList=workspace_index_list, 
+                                                                      ProcessingInstructions=processing_commands, 
                                                                       WavelengthMin=wavelength_min, 
                                                                       WavelengthStep=wavelength_step, 
                                                                       WavelengthMax=wavelength_max,
@@ -166,12 +165,11 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
                                                                       MonitorBackgroundWavelengthMax=wavelength_back_max,
                                                                       MonitorIntegrationWavelengthMin=wavelength_integration_min, 
                                                                       MonitorIntegrationWavelengthMax=wavelength_integration_max,
-                                                                      RegionOfInterest=region_of_interest, 
                                                                       RegionOfDirectBeam=region_of_direct_beam, 
                                                                       DetectorComponentName=detector_component_name,
                                                                       SampleComponentName=sample_component_name, 
                                                                       ThetaIn=theta_in, 
-                                                                      CorrectPositions=correct_positions)
+                                                                      CorrectDetectorPositions=correct_positions)
                                     
         self.setProperty("OutputWorkspace", new_IvsQ1)
         self.setProperty("OutputWorkspaceWavelength", new_IvsLam1)
