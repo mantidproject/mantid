@@ -124,10 +124,16 @@ m_freezePlot(false)
   m_unitsMapper->setMapping(m_phiUnits,PHI);
   connect(m_phiUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
 
+  m_outOfPlaneAngleUnits = new QAction("Out of plane angle",this);
+  m_outOfPlaneAngleUnits->setCheckable(true);
+  m_unitsMapper->setMapping(m_outOfPlaneAngleUnits,OUT_OF_PLANE_ANGLE);
+  connect(m_outOfPlaneAngleUnits,SIGNAL(triggered()),m_unitsMapper,SLOT(map()));
+
   m_unitsGroup = new QActionGroup(this);
   m_unitsGroup->addAction(m_detidUnits);
   m_unitsGroup->addAction(m_lengthUnits);
   m_unitsGroup->addAction(m_phiUnits); // re #4169 disabled until fixed or removed
+  m_unitsGroup->addAction(m_outOfPlaneAngleUnits);
   connect(m_unitsMapper,SIGNAL(mapped(int)),this,SLOT(setTubeXUnits(int)));
 
   // Instrument display context menu actions
@@ -351,6 +357,7 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
       case DETECTOR_ID: xUnits = "Detector ID"; break;
       case LENGTH: xUnits = "Length"; break;
       case PHI: xUnits = "Phi"; break;
+      case OUT_OF_PLANE_ANGLE: xUnits = "Out of plane angle"; break;
       default: xUnits = "Detector ID";
       }
     }
@@ -397,6 +404,7 @@ void InstrumentWindowPickTab::plotContextMenu()
     else
     {
         m_sumDetectors->setChecked(m_plotSum);
+        m_integrateTimeBins->setChecked(!m_plotSum);
         m_integrateTimeBins->setEnabled(true);
     }
     context.addSeparator();
@@ -445,6 +453,7 @@ void InstrumentWindowPickTab::plotContextMenu()
     case DETECTOR_ID: m_detidUnits->setChecked(true); break;
     case LENGTH: m_lengthUnits->setChecked(true); break;
     case PHI: m_phiUnits->setChecked(true); break;
+    case OUT_OF_PLANE_ANGLE: m_outOfPlaneAngleUnits->setChecked(true); break;
     default: m_detidUnits->setChecked(true);
     }
   }
@@ -957,6 +966,7 @@ void InstrumentWindowPickTab::prepareDataForSumsPlot(
  *   DETECTOR_ID
  *   LENGTH
  *   PHI
+ *   OUT_OF_PLANE_ANGLE
  * The units can be set with setTubeXUnits(...) method.
  * @param detid :: A detector id. The miniplot will display data for a component containing the detector 
  *   with this id.
@@ -990,6 +1000,8 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
   size_t imin,imax;
   instrActor->getBinMinMaxIndex(wi,imin,imax);
 
+  Mantid::Kernel::V3D samplePos = instrActor->getInstrument()->getSample()->getPos();
+
   const int n = ass->nelements();
   if (n == 0)
   {
@@ -1000,6 +1012,8 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
   std::map<double,double> xymap,errmap;
   // get the first detector in the tube for lenth calculation
   Mantid::Geometry::IDetector_sptr idet0 = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[0]);
+  Mantid::Kernel::V3D normal = (*ass)[1]->getPos() - idet0->getPos();
+  normal.normalize();
   for(int i = 0; i < n; ++i)
   {
     Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
@@ -1007,14 +1021,22 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
     {
       try {
         const int id = idet->getID();
+        // get the x-value for detector idet
         double xvalue = 0;
         switch(m_tubeXUnits)
         {
         case LENGTH: xvalue = idet->getDistance(*idet0); break;
         case PHI: xvalue = bOffsetPsi ? idet->getPhiOffset(M_PI) : idet->getPhi(); break;
+        case OUT_OF_PLANE_ANGLE: 
+          {
+            Mantid::Kernel::V3D pos = idet->getPos();
+            xvalue = getOutOfPlaneAngle(pos, samplePos, normal);
+            break;
+          }
         default: xvalue = static_cast<double>(id);
         }
         size_t index = instrActor->getWorkspaceIndex(id);
+        // get the y-value for detector idet
         const Mantid::MantidVec& Y = ws->readY(index);
         double sum = std::accumulate(Y.begin() + imin,Y.begin() + imax,0);
         xymap[xvalue] = sum;
@@ -1067,24 +1089,6 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
 }
 
 /**
- * Return value of TubeXUnits for its symbolic name.
- * @param name :: Symbolic name of the units, caseless: Detector_ID, Length, Phi
- */
-InstrumentWindowPickTab::TubeXUnits InstrumentWindowPickTab::getTubeXUnits(const QString& name) const
-{
-  QString caseless_name = name.toUpper();
-  if (caseless_name == "LENGTH")
-  {
-    return LENGTH;
-  }
-  if (caseless_name == "PHI")
-  {
-    return PHI;
-  }
-  return DETECTOR_ID;
-}
-
-/**
  * Return symbolic name of a TubeXUnit.
  * @param unit :: One of TubeXUnits.
  * @return :: Symbolic name of the units, caseless: Detector_ID, Length, Phi
@@ -1095,6 +1099,7 @@ QString InstrumentWindowPickTab::getTubeXUnitsName(InstrumentWindowPickTab::Tube
   {
   case LENGTH: return "Length";
   case PHI: return "Phi";
+  case OUT_OF_PLANE_ANGLE: return "Out of plane angle";
   default: return "Detector_ID";
   }
   return "Detector_ID";
@@ -1300,6 +1305,7 @@ void InstrumentWindowPickTab::initSurface()
 void InstrumentWindowPickTab::saveSettings(QSettings &settings) const
 {
     settings.setValue("TubeXUnits",getTubeXUnits());
+    settings.setValue("PlotSum", m_plotSum);
 }
 
 /**
@@ -1309,6 +1315,8 @@ void InstrumentWindowPickTab::loadSettings(const QSettings &settings)
 {
     int unitsNum = settings.value("TubeXUnits",0).toInt();
     m_tubeXUnits = TubeXUnits( unitsNum );
+    m_plotSum = settings.value("PlotSum",true).toBool();
+    setPlotCaption();
 }
 
 /**
@@ -1420,3 +1428,17 @@ void InstrumentWindowPickTab::updatePlotMultipleDetectors()
     m_plot->replot();
 }
 
+/**
+  * Calculate the angle between a vector ( == pos - origin ) and a plane ( orthogonal to normal ).
+  * The angle is positive if the vector and the normal make an acute angle.
+  * @param pos :: Vector's end.
+  * @param origin :: Vector's origin.
+  * @param normal :: Normal to the plane.
+  * @return :: Angle between the vector and the plane in radians in [-pi/2, pi/2]. 
+  */
+double InstrumentWindowPickTab::getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal)
+{
+  Mantid::Kernel::V3D vec = pos - origin;
+  vec.normalize();
+  return asin(vec.scalar_prod(normal));
+}
