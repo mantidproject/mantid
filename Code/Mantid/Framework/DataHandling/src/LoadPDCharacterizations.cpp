@@ -126,8 +126,8 @@ namespace DataHandling
     wksp->addColumn("int", "vanadium");
     wksp->addColumn("int", "container");
     wksp->addColumn("int", "empty");
-    wksp->addColumn("double", "d_min");
-    wksp->addColumn("double", "d_max");
+    wksp->addColumn("str", "d_min"); // b/c it is an array for NOMAD
+    wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
     wksp->addColumn("double", "tof_min");
     wksp->addColumn("double", "tof_max");
     this->readCharInfo(file, wksp);
@@ -218,8 +218,8 @@ namespace DataHandling
       row << boost::lexical_cast<int32_t>(splitted[3]); // vanadium
       row << boost::lexical_cast<int32_t>(splitted[4]); // container
       row << boost::lexical_cast<int32_t>(splitted[5]); // empty
-      row << boost::lexical_cast<double>(splitted[6]);  // d_min
-      row << boost::lexical_cast<double>(splitted[7]);  // d_max
+      row << splitted[6];                               // d_min
+      row << splitted[7];                               // d_max
       row << boost::lexical_cast<double>(splitted[8]);  // tof_min
       row << boost::lexical_cast<double>(splitted[9]);  // tof_max
     }
