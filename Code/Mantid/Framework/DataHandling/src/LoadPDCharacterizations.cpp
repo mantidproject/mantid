@@ -95,8 +95,6 @@ namespace DataHandling
    */
   void LoadPDCharacterizations::exec()
   {
-
-
     // open the file for reading
     std::string filename = this->getProperty("Filename");
     std::ifstream file(filename.c_str());
@@ -131,6 +129,11 @@ namespace DataHandling
     this->setProperty("OutputWorkspace", wksp);
   }
 
+  /**
+   * Parse the stream for the focus positions and instrument parameter filename.
+   *
+   * @param file The stream to parse.
+   */
   void LoadPDCharacterizations::readFocusInfo(std::ifstream &file)
   {
     // end early if already at the end of the file
@@ -175,6 +178,12 @@ namespace DataHandling
     this->setProperty("Azimuthal", azi);
   }
 
+  /**
+   * Parse the stream for the characterization file information.
+   *
+   * @param file The stream to parse.
+   * @param wksp The table workspace to fill in.
+   */
   void LoadPDCharacterizations::readCharInfo(std::ifstream &file, ITableWorkspace_sptr &wksp)
   {
     // end early if already at the end of the file
