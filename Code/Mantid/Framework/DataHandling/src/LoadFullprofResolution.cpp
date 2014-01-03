@@ -187,14 +187,14 @@ namespace DataHandling
     // Generate output table workspace
     API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
 
+
+    // Output the output table workspace
+    setProperty("OutputTableWorkspace", outTabWs);
+
     // If workspace, put parameters there
     if(workspace){
       putParametersIntoWorkspace( outTabWs, workspace );
     } 
-    else
-    {  // else,  output the output table workspace
-      setProperty("OutputTableWorkspace", outTabWs);
-    }
 
     return;
   }
@@ -813,6 +813,11 @@ namespace DataHandling
     std::ostringstream outFile;
     writer.writeNode(outFile, mDoc);  
     std::string parameterXMLString = outFile.str();
+
+    //std::ofstream outfileDebug("C:/Temp/test_fullprof.xml");
+   // outfileDebug << parameterXMLString;
+    //outfileDebug.close();
+
 
     // Load the string into the workspace
     LoadParameterFile::execManually(true, "", parameterXMLString, ws);

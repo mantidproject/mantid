@@ -306,12 +306,20 @@ public:
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getInstrument();
 
 
-    Mantid::Geometry::Parameter_sptr alpha0Param = paramMap.get(&(*instr), "IkedaCarpenterPV:Alpha0", "fitting");
+    Mantid::Geometry::Parameter_sptr alpha0Param = paramMap.get(&(*instr), "Alpha0", "fitting");
     TS_ASSERT(alpha0Param);
     if(alpha0Param) {
       const Mantid::Geometry::FitParameter& fitParam1 = alpha0Param->value<Mantid::Geometry::FitParameter>();
-      TS_ASSERT_DELTA( fitParam1.getValue(), 100.0, 0.0001);
+      TS_ASSERT_DELTA( fitParam1.getValue(), 0.000008, 0.0000001);
     }
+
+    Mantid::Geometry::Parameter_sptr beta0Param = paramMap.get(&(*instr), "Beta0", "fitting");
+    TS_ASSERT(beta0Param);
+    if(beta0Param) {
+      const Mantid::Geometry::FitParameter& fitParam1 = beta0Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( fitParam1.getValue(), 6.251096, 0.0000001);
+    }
+    
 
     // Clean
     Poco::File("TestWorskpace.irf").remove();
