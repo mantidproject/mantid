@@ -158,7 +158,7 @@ namespace Mantid
     
       /* Set initial step sizes to 0.001 */
       ss = gsl_vector_alloc (nopt);
-      gsl_vector_set_all (ss, 0.001);
+      gsl_vector_set_all (ss, 0.0001);
     
       /* Initialize method and iterate */
       minex_func.n = nopt;
@@ -191,7 +191,7 @@ namespace Mantid
       std::vector<double>Params;
       for ( size_t i = 0; i < s->x->size; i++ )Params.push_back(gsl_vector_get(s->x,i));
       optLattice(inname, type, Params, atoi(edge.c_str()) );
-      std::vector<double> sigabc(7);
+      std::vector<double> sigabc(Params.size());
       OrientedLattice latt=ws->mutableSample().getOrientedLattice();
       DblMatrix UBnew = latt.getUB();
       const std::vector<Peak> &peaks = ws->getPeaks();
@@ -413,8 +413,6 @@ namespace Mantid
          V3D error = U1_Bc * hkl_vector[i] - q_vector[i] / (2.0 * M_PI);
          result += error.norm();
       }
-      for ( int i = 0; i < 6; i++ ) std::cout<<lattice_parameters[i]<<"  ";
-      std::cout << result << "\n";
     return result;
     }
     bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws, std::string bankName, int col, int row, int Edge)
@@ -483,50 +481,21 @@ namespace Mantid
       return result;
     }
     /**
-      STATIC method Optimize_UB: Calculates the matrix that most nearly maps
-      the specified hkl_vectors to the specified q_vectors.  The calculated
-      UB minimizes the sum squared differences between UB*(h,k,l) and the
-      corresponding (qx,qy,qz) for all of the specified hkl and Q vectors.
-      The sum of the squares of the residual errors is returned.  This method is
-      used to optimize the UB matrix once an initial indexing has been found.
 
-      @param  UB           3x3 matrix that will be set to the UB matrix
-      @param  hkl_vectors  std::vector of V3D objects that contains the
-                           list of hkl values
-      @param  q_vectors    std::vector of V3D objects that contains the list of
-                           q_vectors that are indexed by the corresponding hkl
-                           vectors.
-      @param  sigabc      error in the crystal lattice parameter values if length
-                          is at least 6. NOTE: Calculation of these errors is based on
-                          SCD FORTRAN code base at IPNS. Contributors to the least
-                          squares application(1979) are J.Marc Overhage, G.Anderson,
-                          P. C. W. Leung, R. G. Teller, and  A. J. Schultz
-      NOTE: The number of hkl_vectors and q_vectors must be the same, and must
-            be at least 3.
-
-      @return  This will return the sum of the squares of the residual differences
-               between the Q vectors provided and the UB*hkl values, in
-               reciprocal space.
-
-      @throws  std::invalid_argument exception if there are not at least 3
-                                     hkl and q vectors, or if the numbers of
-                                     hkl and q vectors are not the same, or if
-                                     the UB matrix is not a 3x3 matrix.
-
-      @throws  std::runtime_error    exception if the QR factorization fails or
-                                     the UB matrix can't be calculated or if
-                                     UB is a singular matrix.
+      @param  npeaks       Number of peaks
+      @param  inname       Name of workspace containing peaks
+      @param  cell_type    type from dropdown list
+      @param  Params       optimized cell parameters
+      @param  edgePixels   pixels to ignore at edge of detectors
+      @param  sigabc       errors of optimized parameters
+      @param  chisq        chisq from optimization
     */
     void OptimizeLatticeForCellType::Calculate_Errors(size_t npeaks, std::string inname, std::string cell_type,
     		                          std::vector<double> & Params, int edgePixels,
                                       std::vector<double> & sigabc, double chisq)
     {
       double result = chisq;
-      if( sigabc.size() <Params.size())
-      {
-        sigabc.clear();
-      }else
-        for( size_t i=0;i<Params.size();i++)
+      for( size_t i=0;i<sigabc.size();i++)
           sigabc[i]=0.0;
 
       size_t nDOF= 3*(npeaks-3);
@@ -537,7 +506,7 @@ namespace Mantid
 
       double a_save;
       double delta;
-      for ( int k = 0; k < 6; k++ )
+      for ( size_t k = 0; k < Params.size(); k++ )
       {
     	std::vector<double> a = Params;
         double diff = 0.0;
