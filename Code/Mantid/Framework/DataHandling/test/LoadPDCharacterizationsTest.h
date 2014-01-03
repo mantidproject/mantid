@@ -104,10 +104,9 @@ public:
       TS_ASSERT_EQUALS(azi[0], 0.);
   }
 
-  //  Test/AutoTestData/Test_characterizations_char.txt
-  void test_Focus()
+  void test_FocusAndChar2()
   {
-    const std::string CHAR_FILE("Test_characterizations_focus.txt");
+    const std::string CHAR_FILE("Test_characterizations_focus_and_char2.txt");
     ITableWorkspace_sptr wksp;
 
     // initialize and run the algorithm
@@ -129,6 +128,63 @@ public:
     TS_ASSERT_EQUALS(wksp->String(0,7), "13.66,5.83,3.93,2.09,1.57,31.42");
     TS_ASSERT_EQUALS(wksp->Double(0,8), 300.00);
     TS_ASSERT_EQUALS(wksp->Double(0,9), 16666.67);
+
+    // test the other output properties
+    TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"), std::string("NOMAD_11_22_11.prm"));
+    double l1 = alg.getProperty("PrimaryFlightPath");
+    TS_ASSERT_EQUALS(l1, 19.5);
+
+    const int NUM_SPEC = 6;
+
+    std::vector<int32_t> specIds = alg.getProperty("SpectrumIDs");
+    TS_ASSERT_EQUALS(specIds.size(), NUM_SPEC);
+    if (!specIds.empty())
+    {
+      for (int i = 0; i < NUM_SPEC; ++i)
+        TS_ASSERT_EQUALS(specIds[i], i+1);
+    }
+
+    std::vector<double> l2 = alg.getProperty("L2");
+    TS_ASSERT_EQUALS(l2.size(), NUM_SPEC);
+    if (!l2.empty())
+    {
+      for (int i = 0; i < NUM_SPEC; ++i)
+        TS_ASSERT_EQUALS(l2[i], 2.);
+    }
+
+    std::vector<double> polar = alg.getProperty("Polar");
+    TS_ASSERT_EQUALS(polar.size(), NUM_SPEC);
+    if (!polar.empty())
+    {
+      TS_ASSERT_EQUALS(polar[0], 15.);
+      TS_ASSERT_EQUALS(polar[1], 31.);
+      TS_ASSERT_EQUALS(polar[2], 67.);
+      TS_ASSERT_EQUALS(polar[3], 122.);
+      TS_ASSERT_EQUALS(polar[4], 154.);
+      TS_ASSERT_EQUALS(polar[5], 7.);
+    }
+
+    std::vector<double> azi = alg.getProperty("Azimuthal");
+    TS_ASSERT_EQUALS(azi.size(), NUM_SPEC);
+    if (!azi.empty())
+    {
+      for (int i = 0; i < NUM_SPEC; ++i)
+        TS_ASSERT_EQUALS(azi[0], 0.);
+    }
+  }
+
+  void test_Focus()
+  {
+    const std::string CHAR_FILE("Test_characterizations_focus.txt");
+    ITableWorkspace_sptr wksp;
+
+    // initialize and run the algorithm
+    LoadPDCharacterizations alg;
+    runAlg(alg, wksp, CHAR_FILE);
+
+    // test the table workspace
+    TS_ASSERT_EQUALS(wksp->columnCount(), 10);
+    TS_ASSERT_EQUALS(wksp->rowCount(), 0);
 
     // test the other output properties
     TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"), std::string("NOMAD_11_22_11.prm"));
