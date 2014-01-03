@@ -781,6 +781,7 @@ namespace DataHandling
     mDoc->appendChild(rootElem);
 
     //   Add instrument
+    getTableRowNumbers( tws, m_rowNumbers);
     AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name",instrumentName);
     rootElem->appendChild(instrumentElem);
@@ -814,8 +815,8 @@ namespace DataHandling
     writer.writeNode(outFile, mDoc);  
     std::string parameterXMLString = outFile.str();
 
-    //std::ofstream outfileDebug("C:/Temp/test_fullprof.xml");
-   // outfileDebug << parameterXMLString;
+    //std::ofstream outfileDebug("C:/Temp/test2_fullprof.xml");
+    //outfileDebug << parameterXMLString;
     //outfileDebug.close();
 
 
