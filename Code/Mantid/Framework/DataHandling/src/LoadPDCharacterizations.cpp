@@ -111,6 +111,11 @@ namespace DataHandling
       this->setProperty("IParmFilename", firstLine);
       this->readFocusInfo(file);
     }
+    else
+    {
+      // things expect the L1 to be zero if it isn't set
+      this->setProperty("PrimaryFlightPath", 0.);
+    }
 
     // now the rest of the file
     // setup the default table workspace for the characterization runs
