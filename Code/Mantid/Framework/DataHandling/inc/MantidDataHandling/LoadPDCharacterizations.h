@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include <iosfwd>
 
 namespace Mantid
 {
@@ -45,8 +46,8 @@ namespace DataHandling
     virtual void initDocs();
     void init();
     void exec();
-
-
+    void readFocusInfo(std::ifstream &file);
+    void readCharInfo(std::ifstream &file, API::ITableWorkspace_sptr &wksp);
   };
 
 
