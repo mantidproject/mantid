@@ -151,8 +151,6 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
                                int_min, int_max, detector_index_ranges, i0_monitor_index, stitch_start_overlap, 
                                stitch_end_overlap, stitch_params )
             RenameWorkspace(InputWorkspace=IvsLam, OutputWorkspace="IvsLam") # TODO: Hardcoded names are bad
-                
-        
         # Convert to I vs Q
         # check if detector in direct beam
         if (theta == 0 or theta == ''):
