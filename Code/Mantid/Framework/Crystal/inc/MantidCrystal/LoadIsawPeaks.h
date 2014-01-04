@@ -31,6 +31,7 @@ namespace Crystal
 
     /// Returns a confidence value that this algorithm can load a file
     virtual int confidence(Kernel::FileDescriptor & descriptor) const;
+    int findPixelID(Geometry::Instrument_const_sptr inst, std::string bankName, int col, int row);
     
   private:
     /// Sets documentation strings for this algorithm

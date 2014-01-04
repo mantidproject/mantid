@@ -30,7 +30,7 @@ class CreateTransmissionWorkspaceBaseTest(object):
         alg.set_WavelengthMin(0.0)
         alg.set_WavelengthMax(1.0)
         alg.set_I0MonitorIndex(0)
-        alg.set_WorkspaceIndexList([0, 1])
+        alg.set_ProcessingInstructions("0, 1")
         alg.set_MonitorBackgroundWavelengthMin(0.0)
         alg.set_MonitorBackgroundWavelengthMax(1.0)
         alg.set_MonitorIntegrationWavelengthMin(0.0)
@@ -103,17 +103,17 @@ class CreateTransmissionWorkspaceBaseTest(object):
         
     def test_workspace_index_list_throw_if_not_pairs(self):
         alg = self.construct_standard_algorithm()
-        alg.set_WorkspaceIndexList([0])
+        alg.set_ProcessingInstructions("0")
         self.assertRaises(Exception, alg.execute)
         
     def test_workspace_index_list_values_not_positive_throws(self):
         alg = self.construct_standard_algorithm()
-        alg.set_WorkspaceIndexList([-1, 0]) # -1 is not acceptable.
+        alg.set_ProcessingInstructions("-1, 0") # -1 is not acceptable.
         self.assertRaises(Exception, alg.execute)
     
     def test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max(self):
         alg = self.construct_standard_algorithm()
-        alg.set_WorkspaceIndexList([1, 0]) # 1 > 0
+        alg.set_ProcessingInstructions("1, 0") # 1 > 0
         self.assertRaises(Exception, alg.execute)
         
     def test_spectrum_map_mismatch_throws(self):
@@ -121,7 +121,7 @@ class CreateTransmissionWorkspaceBaseTest(object):
         trans_run1 = Load('INTER00013463.nxs')
         trans_run2 = self.__tof
         
-        alg.set_WorkspaceIndexList([3,4])
+        alg.set_ProcessingInstructions("3,4")
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_SecondTransmissionRun(trans_run2)
         alg.set_Params([0, 0.1, 1])
@@ -136,7 +136,7 @@ class CreateTransmissionWorkspaceBaseTest(object):
         
         trans_run1 = Load('INTER00013463.nxs')
         
-        alg.set_WorkspaceIndexList([3,4])
+        alg.set_ProcessingInstructions("3,4")
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_I0MonitorIndex(0)
         alg.set_WavelengthMin(0.0)
@@ -167,7 +167,7 @@ class CreateTransmissionWorkspaceBaseTest(object):
         trans_run1 = Load('INTER00013463.nxs')
         trans_run2 = Load('INTER00013464.nxs')
         
-        alg.set_WorkspaceIndexList([3,4])
+        alg.set_ProcessingInstructions("3,4")
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_SecondTransmissionRun(trans_run2)
         alg.set_I0MonitorIndex(0)

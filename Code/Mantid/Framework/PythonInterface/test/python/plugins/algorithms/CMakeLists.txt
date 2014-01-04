@@ -5,6 +5,7 @@
 set ( TEST_PY_FILES
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
+  CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CreateWorkspaceTest.py
   CreateTransmissionWorkspaceTest.py
@@ -12,10 +13,13 @@ set ( TEST_PY_FILES
   DakotaChiSquaredTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
+  GetEiT0atSNSTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
+  MaskAngleTest.py
+  MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
   MeanTest.py
   MergeCalFilesTest.py

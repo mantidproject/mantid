@@ -19,7 +19,7 @@ class ReflectometryReductionOneBaseTest(object):
         alg.set_WavelengthMin(0.0)
         alg.set_WavelengthMax(1.0)
         alg.set_I0MonitorIndex(0)
-        alg.set_WorkspaceIndexList([0, 1])
+        alg.set_ProcessingInstructions("0, 1")
         alg.set_MonitorBackgroundWavelengthMin(0.0)
         alg.set_MonitorBackgroundWavelengthMax(1.0)
         alg.set_MonitorIntegrationWavelengthMin(0.0)
@@ -118,40 +118,22 @@ class ReflectometryReductionOneBaseTest(object):
         
     def test_workspace_index_list_throw_if_not_pairs(self):
         alg = self.construct_standard_algorithm()
-        alg.set_WorkspaceIndexList([0])
+        alg.set_ProcessingInstructions("0")
         self.assertRaises(Exception, alg.execute)
         
     def test_workspace_index_list_values_not_positive_throws(self):
         alg = self.construct_standard_algorithm()
-        alg.set_WorkspaceIndexList([-1, 0]) # -1 is not acceptable.
+        alg.set_ProcessingInstructions("-1, 0") # -1 is not acceptable.
         self.assertRaises(Exception, alg.execute)
     
     def test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max(self):
         alg = self.construct_standard_algorithm()
-        alg.set_WorkspaceIndexList([1, 0]) # 1 > 0
+        alg.set_ProcessingInstructions("1, 0") # 1 > 0
         self.assertRaises(Exception, alg.execute)
         
     def test_region_of_interest_throws_if_i0monitor_index_negative(self):
         alg = self.construct_standard_algorithm()
         alg.set_I0MonitorIndex(-1)
-        self.assertRaises(Exception, alg.execute)
-        
-    def test_cannot_set_region_of_interest_without_multidetector_run(self):
-        alg = self.construct_standard_algorithm()
-        alg.set_AnalysisMode("PointDetectorAnalysis")
-        alg.set_RegionOfInterest([1, 2])
-        self.assertRaises(Exception, alg.execute)
-        
-    def test_region_of_interest_indexes_cannot_be_negative_or_throws(self):
-        alg = self.construct_standard_algorithm()
-        alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_RegionOfInterest([0, -1]);
-        self.assertRaises(Exception, alg.execute)
-        
-    def test_region_of_integrest_indexes_must_be_provided_as_min_max_order_or_throws(self):
-        alg = self.construct_standard_algorithm()
-        alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_RegionOfInterest([1, 0]);
         self.assertRaises(Exception, alg.execute)
         
     def test_cannot_set_direct_beam_region_of_interest_without_multidetector_run(self):
@@ -186,7 +168,7 @@ class ReflectometryReductionOneBaseTest(object):
         alg = self.construct_standard_algorithm()
         real_run = Load('INTER00013460.nxs')
         alg.set_InputWorkspace(real_run)
-        alg.set_WorkspaceIndexList([3,4])
+        alg.set_ProcessingInstructions("3,4")
         alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
         alg.set_ThetaIn(0.2)
         
@@ -209,7 +191,7 @@ class ReflectometryReductionOneBaseTest(object):
         trans_run2 = Load('INTER00013464.nxs')
         
         alg.set_InputWorkspace(real_run)
-        alg.set_WorkspaceIndexList([3,4])
+        alg.set_ProcessingInstructions("3,4")
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_SecondTransmissionRun(trans_run2)
         
@@ -231,7 +213,7 @@ class ReflectometryReductionOneBaseTest(object):
         trans_run2 = self.__tof
         
         alg.set_InputWorkspace(real_run)
-        alg.set_WorkspaceIndexList([3,4])
+        alg.set_ProcessingInstructions("3,4")
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_SecondTransmissionRun(trans_run2)
         
@@ -244,7 +226,7 @@ class ReflectometryReductionOneBaseTest(object):
         alg = self.construct_standard_algorithm()
         real_run = Load('INTER00013460.nxs')
         alg.set_InputWorkspace(real_run)
-        alg.set_WorkspaceIndexList([3,4])
+        alg.set_ProcessingInstructions("3,4")
         alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
         
         out_ws_q, out_ws_lam, theta = alg.execute()
@@ -252,32 +234,14 @@ class ReflectometryReductionOneBaseTest(object):
         
         DeleteWorkspace(real_run)
         
-    def test_throw_if_no_roi_for_multidetector_run(self):
-        alg = self.construct_standard_algorithm()
-        real_run = Load('POLREF00004699.nxs')
-        alg.set_InputWorkspace(real_run[0])
-        alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_RegionOfDirectBeam([0,1])
-        alg.set_DetectorComponentName('lineardetector')
-        self.assertRaises(Exception, alg.execute)
-        
-    def test_throw_if_no_db_for_multidetector_run(self):
-        alg = self.construct_standard_algorithm()
-        real_run = Load('POLREF00004699.nxs')
-        alg.set_InputWorkspace(real_run[0])
-        alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_DetectorComponentName('lineardetector')
-        alg.set_RegionOfInterest([0,1])
-        self.assertRaises(Exception, alg.execute)
-        
     def test_multidetector_run(self):
         alg = self.construct_standard_algorithm()
         real_run = Load('POLREF00004699.nxs')
         alg.set_InputWorkspace(real_run[0])
         alg.set_AnalysisMode("MultiDetectorAnalysis")
         alg.set_DetectorComponentName('lineardetector')
-        alg.set_RegionOfInterest([3, 10]) # Fictional values
-        alg.set_RegionOfDirectBeam([20, 30]) # Fictional values
+        alg.set_ProcessingInstructions("3, 10") # Fictional values
+        alg.set_RegionOfDirectBeam("20, 30") # Fictional values
         alg.set_ThetaIn(0.1) # Fictional values
         
         out_ws_q, out_ws_lam, theta =  alg.execute()

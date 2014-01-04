@@ -25,9 +25,7 @@ using Mantid::Kernel::V3D;
 
 /**
   * The constructor.
-  * @param rootActor :: The instrument actor containning all info about the instrument
-  * @param origin :: Defines the origin of the projection reference system (if applicable)
-  * @param axis :: 
+  * @param rootActor :: The instrument actor containing all info about the instrument
   */
 ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
     m_instrActor(rootActor),
@@ -412,6 +410,7 @@ void ProjectionSurface::colorMapChanged()
 {
   this->changeColorMap();
   updateView(false);
+  requestRedraw();
 }
 
 /**
