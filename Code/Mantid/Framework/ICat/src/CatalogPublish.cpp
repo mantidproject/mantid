@@ -39,6 +39,7 @@ namespace Mantid
       declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
             "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"An input workspace to publish.");
       declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default.");
+      declareProperty("InvestigationNumber","","The investigation number to save the file to. Extracted from filename or workspace name, but can be overridden.");
     }
 
     /// Execute the algorithm
@@ -56,7 +57,7 @@ namespace Mantid
       }
 
       // The name of the file, which is used to obtain the dataset ID in getUploadURL below.
-      std::string dataFileName;
+      std::string dataFileName = getPropertyValue("InvestigationNumber");
 
       // Create a catalog as getUploadURL is called twice if workspace is selected.
       auto catalog = CatalogAlgorithmHelper().createCatalog();
@@ -64,12 +65,14 @@ namespace Mantid
       // The user want to upload a file.
       if (!filePath.empty())
       {
-        dataFileName = extractFileName(filePath);
+        // If the user has not specified then an investigation number to use then obtain it from the filename.
+        if (dataFileName.empty()) dataFileName = extractFileName(filePath);
+        // If the user has not set the name to save the file as, then use the filename of the file being uploaded.
         if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", Poco::Path(Poco::Path(filePath).getFileName()).getBaseName());
       }
       else // The user wants to upload a workspace.
       {
-        dataFileName = extractFileName(workspace->name());
+       if (dataFileName.empty()) dataFileName = extractFileName(workspace->name());
         if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", workspace->name());
         // Save workspace to a .nxs file in the user's default directory.
         saveWorkspaceToNexus(workspace);
@@ -84,6 +87,7 @@ namespace Mantid
       // Verify that the file can be opened correctly.
       if (fileStream.rdstate() & std::ios::failbit) throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
       // Publish the contents of the file to the server.
+
       publish(fileStream,catalog->getUploadURL(dataFileName, getPropertyValue("NameInCatalog")));
       // If a workspace was published, then we want to also publish the history of a workspace.
       if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
