@@ -107,25 +107,6 @@ class SortXAxisTest(unittest.TestCase):
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
         
-    def test_complex_schenario(self):
-        dataX = [4, 1, 3, 2] 
-        dataY = [1, 2, 3, 4]
-        dataE = [1, 2, 3, 4]
-        unsortedws = CreateWorkspace(DataX=dataX,DataY=dataY,DataE=dataE,UnitX='TOF',Distribution=True)
-        # Run the algorithm
-        sortedws = SortXAxis(InputWorkspace=unsortedws)
-        sortedX = sortedws.readX(0)
-        sortedY = sortedws.readY(0)
-        sortedE = sortedws.readE(0)
-        # Check the resulting data values. Sorting operation should have resulted in no changes
-        self.assertEqual(sorted(dataX), sortedX.tolist())
-        
-        self.assertEqual([2,4,3,1], sortedY.tolist())
-        self.assertEqual([2,4,3,1], sortedE.tolist())
-        
-        DeleteWorkspace(unsortedws)
-        DeleteWorkspace(sortedws)
-     
         
         
 if __name__ == '__main__':
