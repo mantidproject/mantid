@@ -12,8 +12,9 @@ namespace Mantid
 namespace Geometry
 {
 
-  // Get a reference to the logger
-  Kernel::Logger& FitParameter::g_log = Kernel::Logger::get("FitParameter");
+  // Get a reference to the logger, here stored in statis variable to
+  // have access to in operator<< and operator>>
+  static Kernel::Logger& g_log = Kernel::Logger::get("FitParameter");
 
 
   /**
@@ -181,6 +182,15 @@ namespace Geometry
     getline(in, str);
     tokenizer values(str, ",", tokenizer::TOK_TRIM);
 
+    if ( values.count() == 0 )
+    {
+      g_log.warning() << "Expecting a comma separated list to set information about a fitting parameter"
+                      << ", instead of: " << str << std::endl;
+    }    
+
+    // output warning if value for paraemter is not a double
+    bool warning = false; 
+
     try
     {
       f.setValue() = atof(values[0].c_str());
@@ -188,6 +198,7 @@ namespace Geometry
     catch (...)
     {
       f.setValue() = 0.0;
+      warning = true;
     }
 
     try
@@ -206,6 +217,14 @@ namespace Geometry
     catch (...)
     {
       f.setName() = "";
+    }
+
+    // output notice if value paraemter value is not a double
+    if ( warning )
+    {
+      g_log.warning() << "Could not process: " << values[0].c_str() << " as a double." 
+                      << " Therefore for fitting parameter: " << values[1] << ":" << values[2]
+                      << " the value of this parameter is default to 0.0" << std::endl; 
     }
 
     try
