@@ -68,7 +68,7 @@ namespace Mantid
         // If the user has not specified then an investigation number to use then obtain it from the filename.
         if (dataFileName.empty()) dataFileName = extractFileName(filePath);
         // If the user has not set the name to save the file as, then use the filename of the file being uploaded.
-        if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", Poco::Path(Poco::Path(filePath).getFileName()).getBaseName());
+        if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", Poco::Path(filePath).getFileName());
       }
       else // The user wants to upload a workspace.
       {
