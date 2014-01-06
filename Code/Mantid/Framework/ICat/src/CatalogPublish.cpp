@@ -35,10 +35,10 @@ namespace Mantid
     /// Init method to declare algorithm properties
     void CatalogPublish::init()
     {
-      declareProperty(new Mantid::API::FileProperty("Filepath", "", Mantid::API::FileProperty::OptionalLoad), "The file to publish.");
+      declareProperty(new Mantid::API::FileProperty("FileName", "", Mantid::API::FileProperty::OptionalLoad), "The file to publish.");
       declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
             "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"An input workspace to publish.");
-      declareProperty("CreateFileName","",boost::make_shared<Kernel::MandatoryValidator<std::string>>(),"The name to give to the file being saved");
+      declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default.");
     }
 
     /// Execute the algorithm
@@ -46,7 +46,7 @@ namespace Mantid
     {
       // Used for error checking.
       std::string ws       = getPropertyValue("InputWorkspace");
-      std::string filePath = getPropertyValue("Filepath");
+      std::string filePath = getPropertyValue("FileName");
       Mantid::API::Workspace_sptr workspace = getProperty("InputWorkspace");
 
       // Error checking to ensure a workspace OR a file is selected. Never both.
@@ -65,10 +65,12 @@ namespace Mantid
       if (!filePath.empty())
       {
         dataFileName = extractFileName(filePath);
+        if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", Poco::Path(Poco::Path(filePath).getFileName()).getBaseName());
       }
       else // The user wants to upload a workspace.
       {
         dataFileName = extractFileName(workspace->name());
+        if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", workspace->name());
         // Save workspace to a .nxs file in the user's default directory.
         saveWorkspaceToNexus(workspace);
         // Overwrite the filePath string to the location of the file (from which the workspace was saved to).
@@ -81,10 +83,8 @@ namespace Mantid
       std::ifstream fileStream(filePath.c_str(), mode);
       // Verify that the file can be opened correctly.
       if (fileStream.rdstate() & std::ios::failbit) throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
-
       // Publish the contents of the file to the server.
-      publish(fileStream,catalog->getUploadURL(dataFileName, getPropertyValue("CreateFileName")));
-
+      publish(fileStream,catalog->getUploadURL(dataFileName, getPropertyValue("NameInCatalog")));
       // If a workspace was published, then we want to also publish the history of a workspace.
       if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
     }
@@ -180,7 +180,7 @@ namespace Mantid
       // Obtain the workspace history as a string.
       ss << generateWorkspaceHistory(workspace);
       // Use the name the use wants to save the file to the server as and append .py
-      std::string fileName = Poco::Path(Poco::Path(getPropertyValue("CreateFileName")).getFileName()).getBaseName() + ".py";
+      std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
       // Publish the workspace history to the server.
       publish(ss, catalog->getUploadURL(extractFileName(workspace->name()), fileName));
     }
