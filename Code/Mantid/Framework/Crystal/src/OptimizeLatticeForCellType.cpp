@@ -54,17 +54,7 @@ namespace Mantid
     OptimizeLatticeForCellType::~OptimizeLatticeForCellType()
     {}
   
-    static double gsl_costFunction(const gsl_vector *v, void *params)
-    {
-      std::string *p = (std::string *)params;
-      std::string inname = p[0];
-      std::string cell_type = p[1];
-      int edgePixels = atoi(p[2].c_str());
-      std::vector<double>Params;
-      for ( size_t i = 0; i < v->size; i++ )Params.push_back(gsl_vector_get(v,i));
-      Mantid::Crystal::OptimizeLatticeForCellType u;
-      return u.optLattice(inname, cell_type, Params, edgePixels);
-    }
+
   
     //-----------------------------------------------------------------------------------------
     /** Initialisation method. Declares properties to be used in algorithm.
@@ -113,11 +103,7 @@ namespace Mantid
       par[2] = edge;
       DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
 
-      const gsl_multimin_fminimizer_type *T =
-      gsl_multimin_fminimizer_nmsimplex;
-      gsl_multimin_fminimizer *s = NULL;
-      gsl_vector *ss, *x;
-      gsl_multimin_function minex_func;
+      std::vector<double> x;
     
       // finally do the optimization
     
@@ -128,81 +114,85 @@ namespace Mantid
       else if(type.compare(0,2,"He")==0)nopt = 2;
       else if(type.compare(0,2,"Mo")==0)nopt = 4;
       else if(type.compare(0,2,"Tr")==0)nopt = 6;
-      size_t iter = 0;
-      int status = 0;
-     
-      /* Starting point */
-      x = gsl_vector_alloc (nopt);
+
       const DblMatrix UB = ws->sample().getOrientedLattice().getUB();
       std::vector<double>lat(6);
       IndexingUtils::GetLatticeParameters( UB, lat);
       // initialize parameters for optimization
-      gsl_vector_set (x, 0, lat[0]);
-      if(type.compare(0,2,"Te")==0)gsl_vector_set (x, 1, lat[2]);
+      x.push_back(lat[0]);
+      if(type.compare(0,2,"Te")==0)x.push_back(lat[2]);
       else if(type.compare(0,2,"Or")==0)
       {
-        gsl_vector_set (x, 1, lat[1]);
-        gsl_vector_set (x, 2, lat[2]);
+    	  x.push_back( lat[1]);
+    	  x.push_back(lat[2]);
       }
-      else if(type.compare(0,2,"Rh")==0)gsl_vector_set (x, 1, lat[3]);
-      else if(type.compare(0,2,"He")==0)gsl_vector_set (x, 1, lat[2]);
+      else if(type.compare(0,2,"Rh")==0)x.push_back( lat[3]);
+      else if(type.compare(0,2,"He")==0)x.push_back( lat[2]);
       else if(type.compare(0,2,"Mo")==0)
       {
-        gsl_vector_set (x, 1, lat[1]);
-        gsl_vector_set (x, 2, lat[2]);
-        if(type.compare(13,1,"a")==0)gsl_vector_set (x, 3, lat[3]);
-        else if(type.compare(13,1,"b")==0)gsl_vector_set (x, 3, lat[4]);
-        else if(type.compare(13,1,"c")==0)gsl_vector_set (x, 3, lat[5]);
+    	  x.push_back(lat[1]);
+    	  x.push_back(lat[2]);
+        if(type.compare(13,1,"a")==0)x.push_back( lat[3]);
+        else if(type.compare(13,1,"b")==0)x.push_back(lat[4]);
+        else if(type.compare(13,1,"c")==0)x.push_back(lat[5]);
       }
-      else if(type.compare(0,2,"Tr")==0)for ( size_t i = 1; i < nopt; i++ )gsl_vector_set (x, i, lat[i]);
-    
-      /* Set initial step sizes to 0.001 */
-      ss = gsl_vector_alloc (nopt);
-      gsl_vector_set_all (ss, 0.0001);
-    
-      /* Initialize method and iterate */
-      minex_func.n = nopt;
-      minex_func.f = &Mantid::Crystal::gsl_costFunction;
-      minex_func.params = &par;
-    
-      s = gsl_multimin_fminimizer_alloc (T, nopt);
-      gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
-    
-      do
+      else if(type.compare(0,2,"Tr")==0)for ( size_t i = 1; i < nopt; i++ )x.push_back( lat[i]);
+      size_t n_peaks = ws->getNumberPeaks();
+      MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
+                 std::string("Workspace2D"), 1, n_peaks, n_peaks);
+      for(size_t i = 0; i < data->blocksize(); i++)
       {
-        iter++;
-        status = gsl_multimin_fminimizer_iterate(s);
-        if (status)
-          break;
-    
-        double size = gsl_multimin_fminimizer_size (s);
-        status = gsl_multimin_test_size (size, 1e-4);
-    
+          data->dataX(0)[i] = static_cast<double>(i);
+          data->dataY(0)[i] = 0.0;
+          data->dataE(0)[i] = 1.0;
       }
-      while (status == GSL_CONTINUE && iter < 5000);
-    
-      // Output summary to log file
-      std::string report = gsl_strerror(status);
-      g_log.notice() <<
-        " Method used = " << " Simplex" << 
-        " Iteration = " << iter << 
-        " Status = " << report << 
-        " Chisq = " << s->fval <<"\n";
-      std::vector<double>Params;
-      for ( size_t i = 0; i < s->x->size; i++ )Params.push_back(gsl_vector_get(s->x,i));
-      optLattice(inname, type, Params, atoi(edge.c_str()) );
+
+      std::ostringstream fun_str;
+      fun_str << "name=LatticeErrors";
+      for ( size_t i = 0; i < nopt; i++ )fun_str << ",p" << i <<"="<<x[i];
+
+      IAlgorithm_sptr fit_alg;
+      try
+      {
+        fit_alg = createChildAlgorithm("Fit", -1, -1, false);
+      } catch (Exception::NotFoundError&)
+      {
+        g_log.error("Can't locate Fit algorithm");
+        throw ;
+      }
+
+      fit_alg->setPropertyValue("Function", fun_str.str());
+      fit_alg->setProperty("InputWorkspace", data);
+      fit_alg->setProperty("WorkspaceIndex", 0);
+      fit_alg->setProperty("MaxIterations", 5000);
+      fit_alg->setProperty("CreateOutput", true);
+      fit_alg->setProperty("Output", "fit");
+      fit_alg->executeAsChildAlg();
+      MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+
+      double chisq = fit_alg->getProperty("OutputChi2overDoF");
+      std::vector<double> Params;
+      IFunction_sptr out = fit_alg->getProperty("Function");
+
+      Params.push_back(out->getParameter("p0"));
+      Params.push_back(out->getParameter("p1"));
+      Params.push_back(out->getParameter("p2"));
+      Params.push_back(out->getParameter("p3"));
+      Params.push_back(out->getParameter("p4"));
+      Params.push_back(out->getParameter("p5"));
+
+
       std::vector<double> sigabc(Params.size());
       OrientedLattice latt=ws->mutableSample().getOrientedLattice();
       DblMatrix UBnew = latt.getUB();
       const std::vector<Peak> &peaks = ws->getPeaks();
-      size_t n_peaks = ws->getNumberPeaks();
       std::vector<V3D> hkl_vector;
 
       for ( size_t i = 0; i < n_peaks; i++ )
       {
         hkl_vector.push_back(peaks[i].getHKL());
       }
-      Calculate_Errors(n_peaks, inname, type, Params, atoi(edge.c_str()), sigabc, s->fval);
+      Calculate_Errors(n_peaks, inname, type, Params, atoi(edge.c_str()), sigabc, chisq);
       OrientedLattice o_lattice;
       o_lattice.setUB( UBnew );
 
@@ -248,10 +238,8 @@ namespace Mantid
       g_log.notice() << o_lattice << "\n";
 
       ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
-      gsl_vector_free(x);
-      gsl_vector_free(ss);
-      gsl_multimin_fminimizer_free (s);
-      setProperty("OutputChi2", s->fval);
+
+      setProperty("OutputChi2", chisq);
 
       if ( apply )
       {
@@ -263,7 +251,16 @@ namespace Mantid
       }
     }
 
-
+    double OptimizeLatticeForCellType::optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & Params, int edge)
+    {
+        size_t nData = 15500;
+        double* out = new double[nData];
+        optLattice(inname, cell_type, Params, edge, out);
+        double ChiSqTot=0;
+        for( size_t i = 0; i<nData; i++ )ChiSqTot += out[i];
+        delete[] out;
+    	return ChiSqTot;
+    }
    //-----------------------------------------------------------------------------------------
     /**
      * Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
@@ -275,7 +272,7 @@ namespace Mantid
      * @param tofParams
      * @return
      */
-    double OptimizeLatticeForCellType::optLattice(std::string inname, std::string cell_type, std::vector<double> & params, int edge)
+    void OptimizeLatticeForCellType::optLattice(std::string inname, std::string cell_type, std::vector<double> & params, int edge, double *out)
     {
       PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>
            (AnalysisDataService::Instance().retrieve(inname));
@@ -384,7 +381,6 @@ namespace Mantid
         lattice_parameters[5] = params[5];
       }
     
-    
       Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("CalculateUMatrix");
       alg->setPropertyValue("PeaksWorkspace", inname);
       alg->setProperty("a",lattice_parameters[0]);
@@ -406,14 +402,14 @@ namespace Mantid
       o_lattice.setUB( U1_B1 );
       DblMatrix U1 = o_lattice.getU();
       DblMatrix U1_Bc = U1 * Bc;
-    
-      double result = 0;
+
       for ( size_t i = 0; i < hkl_vector.size(); i++ ) 
       {
          V3D error = U1_Bc * hkl_vector[i] - q_vector[i] / (2.0 * M_PI);
-         result += error.norm();
+         out[i] = error.norm2();
       }
-    return result;
+
+      return;
     }
     bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws, std::string bankName, int col, int row, int Edge)
     {
@@ -521,13 +517,13 @@ namespace Mantid
         for ( int count = 0; count < MAX_STEPS; count++ )
         {
           a[k] = a_save + delta;
-          double chi_3 = optLattice(inname, cell_type, a, edgePixels);
+          double chi_3 = optLatticeSum(inname, cell_type, a, edgePixels);
 
           a[k] = a_save - delta;
-          double chi_1 = optLattice(inname, cell_type, a, edgePixels);
+          double chi_1 = optLatticeSum(inname, cell_type, a, edgePixels);
 
           a[k] = a_save;
-          double chi_2 = optLattice(inname, cell_type, a, edgePixels);
+          double chi_2 = optLatticeSum(inname, cell_type, a, edgePixels);
 
           diff = chi_1-2*chi_2+chi_3;
           if ( diff > 0 )

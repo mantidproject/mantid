@@ -54,7 +54,8 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Crystal"; }
   /// Call TOFLattice as a Child Algorithm to get statistics of the peaks
-  double optLattice(std::string inname, std::string cell_type, std::vector<double> & params, int edge);
+  double optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & params, int edge);
+  void optLattice(std::string inname, std::string cell_type, std::vector<double> & params, int edge, double *out);
 
 private:
   /// Sets documentation strings for this algorithm
