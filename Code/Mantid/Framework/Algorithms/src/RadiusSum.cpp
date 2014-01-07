@@ -323,7 +323,7 @@ namespace Algorithms
    *  It is important that the input workspace must be a numeric image, and not an instrument related workspace.
    *  The function will raise exception (std::invalid_argument) if an invalid input is give.
    * 
-   *  @see ::inputWorkspaceHasInstrumentAssociated for reference. 
+   *  @see RadiusSum::inputWorkspaceHasInstrumentAssociated for reference.
    *
    *  @param inWS reference to the workspace
    *  @return a list of values that defines the limits of the image in this order: Xmin, Xmax, Ymin, Ymax

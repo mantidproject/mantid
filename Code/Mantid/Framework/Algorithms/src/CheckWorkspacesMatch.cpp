@@ -99,7 +99,8 @@ bool CheckWorkspacesMatch::processGroups()
  * @param groupOne :: Input group 1
  * @param groupTwo :: Input group 2
  */
-void CheckWorkspacesMatch::processGroups(WorkspaceGroup_const_sptr groupOne, WorkspaceGroup_const_sptr groupTwo)
+void CheckWorkspacesMatch::processGroups(boost::shared_ptr<const API::WorkspaceGroup> groupOne,
+                                         boost::shared_ptr<const API::WorkspaceGroup> groupTwo)
 {
   // Check their sizes
   const size_t totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());

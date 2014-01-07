@@ -112,7 +112,8 @@ namespace CurveFitting
   /** Calculate powder diffraction pattern by Le Bail algorithm
     * @param out :: output vector
     * @param xvalues :: input vector
-    * @param includebkgd :: if true, then calculate background and add to output.  otherwise, assume zero background
+    * @param calpeaks :: if true, calculate peaks
+    * @param calbkgd :: if true, then calculate background and add to output.  otherwise, assume zero background
     */
   void LeBailFunction::function(std::vector<double>& out, const std::vector<double>& xvalues, bool calpeaks, bool calbkgd) const
   {
@@ -179,7 +180,7 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Check whether a parameter is a profile parameter
-    * @param parammane :: parameter name to check with
+   * @param paramname :: parameter name to check with
    */
   bool LeBailFunction::hasProfileParameter(std::string paramname)
   {
@@ -256,7 +257,9 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Set peak position tolerance during importing/adding peaks
-    * @param peakhkls :: list of Miller indexes (HKL)
+    * @param peakpostol :: tolerance for peak position
+    * @param tofmin :: minimum TOF for peak position
+    * @param tofmax :: maximum TOF for peak position
    */
   void LeBailFunction::setPeakCentreTolerance(double peakpostol,  double tofmin, double tofmax)
   {
@@ -777,6 +780,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Group peaks together
     * @param peakgroupvec:  output vector containing peaks grouped together.
+    * @param outboundpeakvec: output vector containing peaks out of bound range
     * @param xmin : minimim x value of the data
     * @param xmax : maximum x value of the data
     * Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
@@ -902,6 +906,8 @@ namespace CurveFitting
   /** Add background function.
     * The supported background types are Polynomial/Linear/Flat and Chebyshev
     * @param backgroundtype :: string, type of background, such as Polynomial, Chebyshev
+    * @param order :: polynomial order for the background
+    * @param vecparnames :: vector of parameter names
     * @param vecparvalues :: vector of parameter values from order 0.
     * @param startx :: background's StartX.  Used by Chebyshev
     * @param endx :: background's EndX.  Used by Chebyshev
@@ -1046,7 +1052,7 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Reset all peaks' height
-    * @param peakheights :: list of peak heights corresponding to each peak
+    * @param inheights :: list of peak heights corresponding to each peak
    */
   void LeBailFunction::setPeakHeights(std::vector<double> inheights)
   {

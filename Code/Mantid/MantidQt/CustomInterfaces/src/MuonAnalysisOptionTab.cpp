@@ -496,8 +496,6 @@ void MuonAnalysisOptionTab::storeCustomTimeValue()
  *   - ShowErrors: True of False
  *   - YAxisAuto: True or False
  *   - YAxisMin/YAxisMax: Double values
- *
- * @param workspace :: The workspace name of the plot to be created.
  */
 QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
 {

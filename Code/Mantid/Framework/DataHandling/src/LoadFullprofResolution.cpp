@@ -328,6 +328,7 @@ namespace DataHandling
     * @param bankid :: [input] ID of the bank to get parsed
     * @param startlineindex :: [input] index of the first line of the bank in vector of lines
     * @param endlineindex :: [input] index of the last line of the bank in vector of lines
+    * @param profNumber :: [input] index of the profile number
     */
   void LoadFullprofResolution::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines,
                                                       int bankid, int startlineindex, int endlineindex, int profNumber)
