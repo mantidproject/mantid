@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include <QIcon>
 #include <QPixmap>
 using namespace MantidQt::API;

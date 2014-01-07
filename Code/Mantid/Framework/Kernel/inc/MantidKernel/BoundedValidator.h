@@ -5,8 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/TypedValidator.h"
-#include <iostream>
-#include <sstream>
 #include <string>
 
 

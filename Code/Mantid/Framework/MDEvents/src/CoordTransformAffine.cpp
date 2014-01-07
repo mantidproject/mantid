@@ -8,6 +8,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidMDEvents/CoordTransformAligned.h"
 #include "MantidAPI/CoordTransform.h"
+#include <iostream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

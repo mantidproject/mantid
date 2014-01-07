@@ -130,14 +130,13 @@ namespace Mantid
       const MinMax monitorIntegrationWavelengthInterval = getMinMax("MonitorIntegrationWavelengthMin",
           "MonitorIntegrationWavelengthMax");
 
-      // Get the index list
-      const WorkspaceIndexList indexList = getWorkspaceIndexList();
+      const std::string processingCommands = getWorkspaceIndexList();
 
       // Get the monitor i0 index
       const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
       // Create the transmission workspace.
-      MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(indexList, wavelengthInterval,
+      MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(processingCommands, wavelengthInterval,
           monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex,
           firstTransmissionRun.get(), secondTransmissionRun, stitchingStart, stitchingDelta, stitchingEnd,
           stitchingStartOverlap, stitchingEndOverlap, wavelengthStep);
@@ -169,7 +168,7 @@ namespace Mantid
      * @return A transmission workspace in Wavelength units.
      */
     MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
-        const WorkspaceIndexList& detectorIndexes,
+        const std::string& processingCommands,
         const MinMax& wavelengthInterval,
         const MinMax& wavelengthMonitorBackgroundInterval,
         const MinMax& wavelengthMonitorIntegrationInterval,
@@ -183,7 +182,7 @@ namespace Mantid
         const OptionalDouble& stitchingEndOverlap,
         const double& wavelengthStep)
     {
-      auto trans1InLam = toLam(firstTransmissionRun, detectorIndexes, i0MonitorIndex, wavelengthInterval,
+      auto trans1InLam = toLam(firstTransmissionRun, processingCommands, i0MonitorIndex, wavelengthInterval,
           wavelengthMonitorBackgroundInterval, wavelengthStep);
       MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
       MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
@@ -204,7 +203,7 @@ namespace Mantid
         auto transRun2 = secondTransmissionRun.get();
         g_log.debug("Extracting second transmission run workspace indexes from spectra");
 
-        auto trans2InLam = toLam(transRun2, detectorIndexes, i0MonitorIndex, wavelengthInterval,
+        auto trans2InLam = toLam(transRun2, processingCommands, i0MonitorIndex, wavelengthInterval,
             wavelengthMonitorBackgroundInterval, wavelengthStep);
 
         // Unpack the conversion results.

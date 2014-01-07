@@ -151,7 +151,24 @@ namespace Geometry
   }
 
   /**
-    Reads in parameter value
+    Reads in information about a fitting parameter. The expected format is a comma separated
+    list that can have varying length but the entries in the list will be read according to:
+
+       1st (0) : parameter value (which is converted to float)
+       2nd (1) : fitting function this parameter belong to  
+       3rd (2) : parameter name
+       4th (3) : constrain min
+       5th (4) : constrain max
+       6th (5) : constrain penalty factor
+       7th (6) : set tie
+       8th (7) : set formula
+       9th (8) : set formula unit
+       10th (9) : set result unit
+       11th onwards (10-) : read lookup table values
+    
+    Information about fitting \<parameter\> can be found on www.mantidproject.org/IDF.
+    Note also printSelf() does the reverse of the this method, i.e. print of the information
+    of a parameter as listed above.
     @param in :: Input Stream
     @param f :: FitParameter to write to
     @return Current state of stream
