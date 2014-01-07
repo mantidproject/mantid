@@ -309,28 +309,62 @@ public:
 
     Mantid::Geometry::Parameter_sptr alpha0Param = paramMap.get(&(*instr), "Alpha0", "fitting");
     TS_ASSERT(alpha0Param);
-    if(alpha0Param) {
-      const Mantid::Geometry::FitParameter& fitParam1 = alpha0Param->value<Mantid::Geometry::FitParameter>();
-      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam1.getFormula()), 0.000008, 0.0000001);
+    if(alpha0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = alpha0Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.000008, 0.0000001);
     }
 
     Mantid::Geometry::Parameter_sptr beta0Param = paramMap.get(&(*instr), "Beta0", "fitting");
     TS_ASSERT(beta0Param);
-    if(beta0Param) {
-      const Mantid::Geometry::FitParameter& fitParam1 = beta0Param->value<Mantid::Geometry::FitParameter>();
-      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam1.getFormula()), 6.251096, 0.0000001);
+    if(beta0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta0Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 6.251096, 0.0000001);
     }
+
+    Mantid::Geometry::Parameter_sptr alpha1Param = paramMap.get(&(*instr), "Alpha1", "fitting");
+    TS_ASSERT(alpha1Param);
+    if(alpha1Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = alpha1Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.0, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr beta1Param = paramMap.get(&(*instr), "Kappa", "fitting");
+    TS_ASSERT(beta1Param);
+    if(beta0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta1Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.0, 0.0000001);
+    }
+
 
     boost::shared_ptr<const Mantid::Geometry::IComponent> bank = instr->getComponentByName("bank1");
     Mantid::Geometry::Parameter_sptr sigmaSqParam = paramMap.get(&(*bank), "SigmaSquared", "fitting");
     TS_ASSERT(sigmaSqParam);
-    if(sigmaSqParam) {
-      const Mantid::Geometry::FitParameter& fitParam1 = sigmaSqParam->value<Mantid::Geometry::FitParameter>();
-      double formulaValueCantreAt0 = fitParam1.getValue( 0.0 );  // Value for centre=0.0
+    if(sigmaSqParam) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = sigmaSqParam->value<Mantid::Geometry::FitParameter>();
+      double formulaValueCantreAt0 = fitParam.getValue( 0.0 );    // Value for centre=0.0
       TS_ASSERT_DELTA( formulaValueCantreAt0, 0.355, 0.0000001);
-      double formulaValueCantreAt10 = fitParam1.getValue( 10.0 );  // Value for centre=10.0
+      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );  // Value for centre=10.0
       TS_ASSERT_DELTA( formulaValueCantreAt10, 0.399, 0.0000001);
     }
+
+    Mantid::Geometry::Parameter_sptr gammaParam = paramMap.get(&(*bank), "Gamma", "fitting");
+    TS_ASSERT(gammaParam);
+    if(gammaParam) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = gammaParam->value<Mantid::Geometry::FitParameter>();
+      double formulaValueCantreAt0 = fitParam.getValue( 0.0 );    // Value for centre=0.0
+      TS_ASSERT_DELTA( formulaValueCantreAt0, 0.0, 0.0000001);
+      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );  // Value for centre=10.0
+      TS_ASSERT_DELTA( formulaValueCantreAt10, 0.0, 0.0000001);
+    }
+
+
+
     
 
     // Clean
