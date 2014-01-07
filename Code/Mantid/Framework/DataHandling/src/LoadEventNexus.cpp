@@ -1425,11 +1425,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
       // get the number of events
       std::size_t num = numEvents(file, hasTotalCounts, oldNeXusFileNames);
-      if (num == 0)
-      {
-        file.closeGroup();
-        continue;
-      }
       bankNames.push_back( entry_name );
       bankNumEvents.push_back(num);
       total_events += num;

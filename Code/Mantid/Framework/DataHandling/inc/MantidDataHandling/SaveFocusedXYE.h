@@ -56,7 +56,7 @@ namespace DataHandling
 class DLLExport SaveFocusedXYE : public API::Algorithm
 {
 public:
-  enum HeaderType {XYE, MAUD};
+  enum HeaderType {XYE, MAUD, TOPAS};
   /// (Empty) Constructor
   SaveFocusedXYE() : API::Algorithm(){}
   /// Virtual destructor
@@ -99,6 +99,8 @@ private:
 
   /// Header type
   HeaderType m_headerType;
+  /// Comment character
+  std::string m_comment;
 };
 
 }

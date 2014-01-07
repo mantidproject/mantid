@@ -9,7 +9,7 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Algorithms::ReflectometryReductionOne;
+using namespace Mantid::Algorithms;
 
 class ReflectometryReductionOneTest: public CxxTest::TestSuite
 {
@@ -49,7 +49,7 @@ public:
     ReflectometryReductionOne alg;
 
     // Run the conversion.
-    ReflectometryReductionOne::DetectorMonitorWorkspacePair inLam = alg.toLam(toConvert,
+    ReflectometryWorkflowBase::DetectorMonitorWorkspacePair inLam = alg.toLam(toConvert,
         detectorIndexRange, monitorIndex, boost::tuple<double, double>(wavelengthMin, wavelengthMax),
         boost::tuple<double, double>(backgroundWavelengthMin, backgroundWavelengthMax), wavelengthStep);
 
