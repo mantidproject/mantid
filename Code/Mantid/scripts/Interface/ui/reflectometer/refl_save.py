@@ -1,5 +1,9 @@
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
+import xml.etree.ElementTree as xml
+from isis_reflectometry.quick import *
+from isis_reflectometry.combineMulti import *
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -9,6 +13,7 @@ except AttributeError:
 class Ui_SaveWindow(object):
 
     def setupUi(self, SaveWindow):
+        self.SavePath=""
         SaveWindow.setObjectName(_fromUtf8("SaveWindow"))
         SaveWindow.resize(700, 450)
         SaveWindow.setAcceptDrops(True)
@@ -84,8 +89,6 @@ class Ui_SaveWindow(object):
         self.titleCheckBox = QtGui.QCheckBox("Title", self.centralWidget)
         #self.gridLayout.addWidget(self.titleCheckBox, 3, 6, 1, 1)
 
-
-
 # Tab check box
         #self.tabCheckBox = QtGui.QCheckBox("tab", self.centralWidget)
         #self.gridLayout.addWidget(self.titleCheckBox, 3, 6, 1, 1)
@@ -111,7 +114,6 @@ class Ui_SaveWindow(object):
         #self.gridLayout.addWidget(self.separatorEdit, 4, 7, 1, 1)
 
         self.groupBox = QtGui.QGroupBox("Custom format options")
-
         self.vbox = QtGui.QVBoxLayout()
         self.hbox = QtGui.QHBoxLayout()
         self.vbox.addWidget(self.titleCheckBox)
@@ -122,7 +124,6 @@ class Ui_SaveWindow(object):
         self.radio1=QtGui.QRadioButton("Comma", self.centralWidget)
         self.radio2=QtGui.QRadioButton("Space", self.centralWidget)
         self.radio3=QtGui.QRadioButton("Tab", self.centralWidget)
-        
 
         self.radio1.setChecked(1)
         self.hbox.addWidget(self.radio1)
@@ -140,15 +141,12 @@ class Ui_SaveWindow(object):
         self.groupBox.setLayout(self.vbox)
         self.gridLayout.addWidget(self.groupBox, 3, 6, 3, 3)
 
-
 # spectralist
         self.spectraLabel = QtGui.QLabel("Spectra list: ", self.centralWidget)
         self.gridLayout.addWidget(self.spectraLabel,3,2,1,1)
         self.spectraEdit = QtGui.QLineEdit(self.centralWidget)
         self.spectraEdit.setObjectName(_fromUtf8("spectraEdit"))
         self.gridLayout.addWidget(self.spectraEdit, 3, 3, 1, 1)
-
-
 
 # file format selector
         self.fileFormatLabel = QtGui.QLabel("File format: ", self.centralWidget)
@@ -192,8 +190,6 @@ class Ui_SaveWindow(object):
 
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
 
-
-
         self.retranslateUi(SaveWindow)
         self.populateList()
         #self.workspaceSelected()
@@ -212,13 +208,13 @@ class Ui_SaveWindow(object):
         self.pushButton_2.setText(QtGui.QApplication.translate("SaveWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
 
     def setPath():
-        Ui_MainWindow.SavePath=self.lineEdit.text()
+        self.SavePath=self.lineEdit.text()
 
     def workspaceSelected(self):
         self.listWidget2.clear()
         #self.listWidget.setCurrentRow(0)
         print str(self.listWidget.currentItem().text())
-        logs = mantid[str(self.listWidget.currentItem().text())].getSampleDetails().getLogData()
+        logs = mtd[str(self.listWidget.currentItem().text())].getRun().getLogData()
         for i in range(0,len(logs)):
             self.listWidget2.addItem(logs[i].name)
     
@@ -236,8 +232,8 @@ class Ui_SaveWindow(object):
             self.listWidget.setCurrentItem(self.listWidget.item(0))
             # try to get correct user directory
             currentInstrument=config['default.instrument']
-            if (Ui_MainWindow.SavePath!=''):
-                self.lineEdit.setText(Ui_MainWindow.SavePath)
+            if (self.SavePath!=''):
+                self.lineEdit.setText(self.SavePath)
             else:
                 tree1=xml.parse(r'\\isis\inst$\NDX'+currentInstrument+'\Instrument\logs\journal\journal_main.xml')
                 root1=tree1.getroot()
@@ -275,7 +271,7 @@ class Ui_SaveWindow(object):
             if (self.comboBox.currentIndex() == 0):
                 fname+='.dat'
                 print "FILENAME: ", fname
-                a1=mantid.getMatrixWorkspace(str(idx.text()))
+                a1=mtd.getMatrixWorkspace(str(idx.text()))
                 titl='#'+a1.getTitle()+'\n'
                 x1=a1.readX(0)
                 X1=n.zeros((len(x1)-1))
@@ -293,7 +289,7 @@ class Ui_SaveWindow(object):
                 f=open(fname,'w')
                 if self.titleCheckBox.isChecked():
                     f.write(titl)
-                samp = a1.getSampleDetails()
+                samp = a1.getRun()
                 for log in self.listWidget2.selectedItems():
                     
                     prop = samp.getLogData(str(log.text()))
@@ -319,19 +315,18 @@ class Ui_SaveWindow(object):
                 print "ILL MFT format"
                 self.saveMFT(idx,fname)
 
-
         # for idx in self.listWidget.selectedItems():
             # fname=str(path+prefix+idx.text()+'.dat')
             # print "FILENAME: ", fname
             # wksp=str(idx.text())
             # SaveAscii(InputWorkspace=wksp,Filename=fname)
             
-        Ui_MainWindow.SavePath=self.lineEdit.text()
+        self.SavePath=self.lineEdit.text()
 
     def saveANSTO(self,idx,fname):
         fname+='.txt'
         print "FILENAME: ", fname
-        a1=mantid.getMatrixWorkspace(str(idx.text()))
+        a1=mtd.getMatrixWorkspace(str(idx.text()))
         titl='#'+a1.getTitle()+'\n'
         x1=a1.readX(0)
         X1=n.zeros((len(x1)-1))
@@ -352,7 +347,7 @@ class Ui_SaveWindow(object):
     def saveMFT(self,idx,fname):
         fname+='.mft'
         print "FILENAME: ", fname
-        a1=mantid.getMatrixWorkspace(str(idx.text()))
+        a1=mtd.getMatrixWorkspace(str(idx.text()))
         titl=a1.getTitle()+'\n'
         x1=a1.readX(0)
         X1=n.zeros((len(x1)-1))
@@ -366,7 +361,7 @@ class Ui_SaveWindow(object):
         f.write('Instrument: '+a1.getInstrument().getName()+'\n')
         f.write('User-local contact: \n')
         f.write('Title: \n')
-        samp = a1.getSampleDetails()
+        samp = a1.getRun()
         s = 'Subtitle: '+samp.getLogData('run_title').value+'\n'
         f.write(s)
         s = 'Start date + time: '+samp.getLogData('run_start').value+'\n'
@@ -392,3 +387,77 @@ class Ui_SaveWindow(object):
             s="\t%e" % X1[i] +sep+"%e" % y1[i] +sep + "%e" % e1[i] + sep + "%e" % dq +"\n"
             f.write(s)
         f.close()
+
+def calcRes(run):
+    runno = '_' + str(run) + 'temp'
+    if type(run) == type(int()):
+        Load(Filename=run, OutputWorkspace=runno)
+    else:
+        Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+    # Get slits and detector angle theta from NeXuS
+    theta = groupGet(runno, 'samp', 'THETA')
+    inst = groupGet(runno, 'inst')
+    s1z = inst.getComponentByName('slit1').getPos().getZ() * 1000.0  # distance in mm
+    s2z = inst.getComponentByName('slit2').getPos().getZ() * 1000.0  # distance in mm
+    s1vg = inst.getComponentByName('slit1')
+    s1vg = s1vg.getNumberParameter('vertical gap')[0]
+    s2vg = inst.getComponentByName('slit2')
+    s2vg = s2vg.getNumberParameter('vertical gap')[0]
+
+    if type(theta) != float:
+        th = theta[len(theta) - 1]
+    else:
+        th = theta
+
+    print "s1vg=", s1vg, "s2vg=", s2vg, "theta=", theta
+    #1500.0 is the S1-S2 distance in mm for SURF!!!
+    resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
+    print "dq/q=", resolution
+    DeleteWorkspace(runno)
+    return resolution
+
+def groupGet(wksp, whattoget, field=''):
+    '''
+    returns information about instrument or sample details for a given workspace wksp,
+    also if the workspace is a group (info from first group element)
+    '''
+    if (whattoget == 'inst'):
+        if isinstance(mtd[wksp], WorkspaceGroup):
+            return mtd[wksp + '_1'].getInstrument()
+        else:
+            return mtd[wksp].getInstrument()
+    elif (whattoget == 'samp' and field != ''):
+        if isinstance(mtd[wksp], WorkspaceGroup):
+            try:
+                log = mtd[wksp + '_1'].getRun().getLogData(field).value
+                if (type(log) is int or type(log) is str):
+                    res = log
+                else:
+                    res = log[len(log) - 1]
+            except RuntimeError:
+                res = 0
+                print "Block " + field + " not found."
+        else:
+            try:
+                log = mtd[wksp].getRun().getLogData(field).value
+                if (type(log) is int or type(log) is str):
+                    res = log
+                else:
+                    res = log[len(log) - 1]
+            except RuntimeError:
+                res = 0
+                print "Block " + field + " not found."
+        return res
+    elif (whattoget == 'wksp'):
+        if isinstance(mtd[wksp], WorkspaceGroup):
+            return mtd[wksp + '_1'].getNumberHistograms()
+        else:
+            return mtd[wksp].getNumberHistograms()
+
+def getWorkspace(wksp):
+
+    if isinstance(mtd[wksp], WorkspaceGroup):
+        wout = mtd[wksp + '_1']
+    else:
+        wout = mtd[wksp]
+    return wout
