@@ -165,7 +165,7 @@ namespace MantidQt
 			m_uiForm.cbWidth->clear();
 			spectraList.clear();
 
-			for (int i = 0; i < ws->getNumberHistograms(); ++i)
+			for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
 			{
 				auto axis = dynamic_cast<Mantid::API::TextAxis*>(ws->getAxis(1));
 				std::string title = axis->label(i);
@@ -181,7 +181,7 @@ namespace MantidQt
 				if(convFitWidth || qLinesWidth)
 				{
 					std::string cbItemName = "";
-					size_t substrIndex;
+					size_t substrIndex = 0;
 					
 					if (qLinesWidth)
 					{
@@ -193,7 +193,7 @@ namespace MantidQt
 					}
 
 					cbItemName = title.substr(0, substrIndex);
-					spectraList[cbItemName] = i;
+					spectraList[cbItemName] = static_cast<int>(i);
 					m_uiForm.cbWidth->addItem(QString(cbItemName.c_str()));
 				}
 			}
@@ -209,7 +209,7 @@ namespace MantidQt
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
 			QString samplePath = m_uiForm.dsSample->getFullFilePath();
 
-			if(!sampleName.isEmpty())
+			if(!sampleName.isEmpty() && spectraList.size() > 0)
 			{
 				if(checkFileLoaded(sampleName, samplePath))
 				{
