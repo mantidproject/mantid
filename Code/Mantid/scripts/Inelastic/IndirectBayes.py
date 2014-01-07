@@ -439,7 +439,7 @@ def C2Fw(prog,sname):
 	vAxisNames = []
 	x, y, e = [], [], []
 
-	names = ['Amplitude', 'Height', 'Width']
+	names = ['Amplitude', 'Height', 'FWHM']
 	n_params = len(names)
 	nhist = 0
 
@@ -518,15 +518,9 @@ def SeBlock(a,first):                                 #read Ascii block of Integ
 	return first,Q,int0,fw,int,be                                      #values as list
 	
 def C2Se(sname):
-	workdir = config['defaultsave.directory']
 	prog = 'QSe'
 	outWS = sname+'_Workspace'
-	handle = open(os.path.join(workdir, sname+'.qse'), 'r')
-	asc = []
-	for line in handle:
-		line = line.rstrip()
-		asc.append(line)
-	handle.close()
+	asc = readASCIIFile(sname+'.qse')
 	lasc = len(asc)
 	var = asc[3].split()							#split line on spaces
 	nspec = var[0]
@@ -567,7 +561,7 @@ def C2Se(sname):
 	dataY = np.append(dataY, np.array(Yf))
 	dataE = np.append(dataE, np.array(Ef))
 	nhist += 1
-	Vaxis.append('Width')
+	Vaxis.append('FWHM')
 
 	dataX = np.append(dataX,np.array(Xout))
 	dataY = np.append(dataY,np.array(Yb))
@@ -582,41 +576,45 @@ def C2Se(sname):
 
 def QLPlotQL(inputWS,Plot,res_plot,Loop):
 	if Loop:
+		ws_name = inputWS + '_Workspace'
+		nhist = mtd[ws_name].getNumberHistograms()
+
+		if (Plot == 'Amplitude' or Plot == 'All'):
+			plotSpectra(ws_name, 'Amplitude', indicies=range(0,nhist,3))
+		
+		if (Plot == 'FWHM' or Plot == 'All'):
+			plotSpectra(ws_name, 'Full width half maximum (meV)', indicies=range(2,nhist,3))
+
 		if (Plot == 'Prob' or Plot == 'All'):
 			pWS = inputWS+'_Prob'
 			p_plot=mp.plotSpectrum(pWS,[1,2],False)
 
-		if (Plot == 'FwHm' or Plot == 'All'):
-			ilist = [0,2,4]
-			i_plot=mp.plotSpectrum(inputWS+'_Workspace',ilist,True)
-			i_layer = i_plot.activeLayer()
-			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
-		if (Plot == 'Intensity' or Plot == 'All'):
-			wlist = [1,3,5]
-			w_plot=mp.plotSpectrum(inputWS+'_Workspace',wlist,True)
-			w_layer = w_plot.activeLayer()
-			w_layer.setAxisTitle(mp.Layer.Left,'Full width half maximum (meV)')
 	if (Plot == 'Fit' or Plot == 'All'):
 		fWS = inputWS+'_Result_0'
 		f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
 def QLPlotQSe(inputWS,Plot,res_plot,Loop):
+	ws_name = inputWS+'_Workspace'
+
 	if Loop:
-		if (Plot == 'FwHm' or Plot == 'All'):
-			i_plot=mp.plotSpectrum(inputWS+'_Workspace',1,True)
-			i_layer = i_plot.activeLayer()
-			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
-		if (Plot == 'Intensity' or Plot == 'All'):
-			w_plot=mp.plotSpectrum(inputWS+'_Workspace',0,True)
-			w_layer = w_plot.activeLayer()
-			w_layer.setAxisTitle(mp.Layer.Left,'Full width half maximum (meV)')
+		if (Plot == 'Amplitude' or Plot == 'All'):
+			plotSpectra(ws_name, 'Amplitude', indicies=[0])
+		
+		if (Plot == 'FWHM' or Plot == 'All'):
+			plotSpectra(ws_name, 'Full width half maximum (meV)', indicies=[1])
+		
 		if (Plot == 'Beta' or Plot == 'All'):
-			b_plot=mp.plotSpectrum(inputWS+'_Workspace',2,True)
-			b_layer = b_plot.activeLayer()
-			b_layer.setAxisTitle(mp.Layer.Left,'Beta')
+			plotSpectra(ws_name, 'Beta', indicies=[2])
+
 	if (Plot == 'Fit' or Plot == 'All'):
 		fWS = inputWS+'_Result_0'
 		f_plot=mp.plotSpectrum(fWS,res_plot,False)
+
+def plotSpectra(ws, axis_title, indicies=[]):
+	if len(indicies) > 0:
+		plot = mp.plotSpectrum(ws, indicies, True)
+		layer = plot.activeLayer()
+		layer.setAxisTitle(mp.Layer.Left, axis_title)
 
 # Quest programs
 def CheckBetSig(nbs):
