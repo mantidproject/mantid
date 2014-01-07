@@ -717,16 +717,13 @@ double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
   @param  UB           3x3 matrix that will be set to the UB matrix
   @param  hkl_vectors  std::vector of V3D objects that contains the
                        list of hkl values
-  @param  q_vectors    std::vector of V3D objects that contains the list of
-                       q_vectors that are indexed by the corresponding hkl
-                       vectors.
   @param  sigabc      error in the crystal lattice parameter values if length
                       is at least 6. NOTE: Calculation of these errors is based on
                       SCD FORTRAN code base at IPNS. Contributors to the least
                       squares application(1979) are J.Marc Overhage, G.Anderson,
                       P. C. W. Leung, R. G. Teller, and  A. J. Schultz
-  NOTE: The number of hkl_vectors and q_vectors must be the same, and must
-        be at least 3.
+  @param  chisq       The chi-squared for the calculation.
+  NOTE: The number of hkl_vectors must be at least 3.
 
   @return  This will return the sum of the squares of the residual differences
            between the Q vectors provided and the UB*hkl values, in
