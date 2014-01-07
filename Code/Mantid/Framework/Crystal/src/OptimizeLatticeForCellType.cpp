@@ -1,6 +1,6 @@
 /*WIKI* 
-
-
+This does a least squares fit between indexed peaks and Q values
+for a set of runs producing an overall leastSquare orientation matrix.
 *WIKI*/
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidCrystal/GSLFunctions.h"
@@ -78,7 +78,7 @@ namespace Mantid
       "Select the cell type.");
     declareProperty( "Apply", false, "Re-index the peaks");
     declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
-    declareProperty("EdgePixels",0, "The number of pixels where peaks are removed at edges. " );
+    declareProperty("EdgePixels",0, "Remove peaks that are at pixels this close to edge. " );
     declareProperty("OutputChi2", 0.0,Direction::Output);
 
       //Disable default gsl error handler (which is to call abort!)
@@ -94,10 +94,22 @@ namespace Mantid
     {
       bool   apply          = this->getProperty("Apply");
       double tolerance      = this->getProperty("Tolerance");
-      std::string edge 		= this->getProperty("EdgePixels");
+      int edge 		= this->getProperty("EdgePixels");
       std::string inname = getProperty("PeaksWorkspace");
       std::string cell_type = getProperty("CellType");
       DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
+      DataObjects::PeaksWorkspace_sptr peakWS (new PeaksWorkspace());
+      peakWS = ws->clone();
+
+      for (int i= int(peakWS->getNumberPeaks())-1; i>=0; --i)
+      {
+    	const std::vector<Peak> &peaks = peakWS->getPeaks();
+        if (edgePixel(peakWS, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge))
+        {
+          peakWS->removePeak(i);
+        }
+      }
+      AnalysisDataService::Instance().addOrReplace("_peaks",peakWS);
 
       std::vector<double> x;
     
@@ -107,7 +119,7 @@ namespace Mantid
       std::vector<double>lat(6);
       IndexingUtils::GetLatticeParameters( UB, lat);
       // initialize parameters for optimization
-      size_t n_peaks = ws->getNumberPeaks();
+      size_t n_peaks = peakWS->getNumberPeaks();
       MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
                  std::string("Workspace2D"), 1, n_peaks, n_peaks);
       for(size_t i = 0; i < data->blocksize(); i++)
@@ -201,10 +213,10 @@ namespace Mantid
 
 
       std::vector<double> sigabc(Params.size());
-      OrientedLattice latt=ws->mutableSample().getOrientedLattice();
+      OrientedLattice latt=peakWS->mutableSample().getOrientedLattice();
       DblMatrix UBnew = latt.getUB();
 
-      Calculate_Errors(n_peaks, inname, cell_type, Params, atoi(edge.c_str()), sigabc, chisq);
+      calculateErrors(n_peaks, inname, cell_type, Params, sigabc, chisq);
       OrientedLattice o_lattice;
       o_lattice.setUB( UBnew );
 
@@ -261,9 +273,10 @@ namespace Mantid
 		  alg->setProperty("Tolerance", tolerance);
 		  alg->executeAsChildAlg();
       }
+      AnalysisDataService::Instance().remove("_peaks");
     }
 
-    double OptimizeLatticeForCellType::optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & params, int edge)
+    double OptimizeLatticeForCellType::optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & params)
     {
       std::vector<double> lattice_parameters;
       lattice_parameters.assign (6,0);
@@ -358,13 +371,15 @@ namespace Mantid
         lattice_parameters[5] = params[5];
       }
 
-        size_t nData = 15500;
-        double* out = new double[nData];
-        optLattice(inname, lattice_parameters, edge, out);
-        double ChiSqTot=0;
-        for( size_t i = 0; i<nData; i++ )ChiSqTot += out[i];
-        delete[] out;
-    	return ChiSqTot;
+      PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>
+           (AnalysisDataService::Instance().retrieve(inname));
+      size_t n_peaks = ws->getNumberPeaks();
+	  double* out = new double[n_peaks];
+	  optLattice(inname, lattice_parameters, out);
+	  double ChiSqTot=0;
+	  for( size_t i = 0; i<n_peaks; i++ )ChiSqTot += out[i];
+	  delete[] out;
+	  return ChiSqTot;
     }
    //-----------------------------------------------------------------------------------------
     /**
@@ -377,7 +392,7 @@ namespace Mantid
      * @param tofParams
      * @return
      */
-    void OptimizeLatticeForCellType::optLattice(std::string inname, std::vector<double> & params, int edge, double *out)
+    void OptimizeLatticeForCellType::optLattice(std::string inname, std::vector<double> & params, double *out)
     {
       PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>
            (AnalysisDataService::Instance().retrieve(inname));
@@ -389,7 +404,6 @@ namespace Mantid
       for ( size_t i = 0; i < params.size(); i++ )params[i]=std::abs(params[i]);
       for ( size_t i = 0; i < n_peaks; i++ )
       {
-        if (edgePixel(ws, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge))continue;
         q_vector.push_back(peaks[i].getQSampleFrame());
         hkl_vector.push_back(peaks[i].getHKL());
       }
@@ -407,7 +421,7 @@ namespace Mantid
       ws = alg->getProperty("PeaksWorkspace");
       OrientedLattice latt=ws->mutableSample().getOrientedLattice();
       DblMatrix UB = latt.getUB();
-      DblMatrix A = A_matrix(params);
+      DblMatrix A = aMatrix(params);
       DblMatrix Bc = A;
       Bc.Invert();
       DblMatrix U1_B1 = UB * A;
@@ -453,7 +467,7 @@ namespace Mantid
   	  }
   	  return false;
     }
-    DblMatrix OptimizeLatticeForCellType::A_matrix( std::vector<double> lattice )
+    DblMatrix OptimizeLatticeForCellType::aMatrix( std::vector<double> lattice )
     {
       double degrees_to_radians = M_PI / 180;
       double alpha = lattice[3] * degrees_to_radians;
@@ -494,12 +508,11 @@ namespace Mantid
       @param  npeaks       Number of peaks
       @param  inname       Name of workspace containing peaks
       @param  Params       optimized cell parameters
-      @param  edgePixels   pixels to ignore at edge of detectors
       @param  sigabc       errors of optimized parameters
       @param  chisq        chisq from optimization
     */
-    void OptimizeLatticeForCellType::Calculate_Errors(size_t npeaks, std::string inname, std::string cell_type,
-    		                          std::vector<double> & Params, int edgePixels,
+    void OptimizeLatticeForCellType::calculateErrors(size_t npeaks, std::string inname, std::string cell_type,
+    		                          std::vector<double> & Params,
                                       std::vector<double> & sigabc, double chisq)
     {
       double result = chisq;
@@ -556,13 +569,13 @@ namespace Mantid
         for ( int count = 0; count < MAX_STEPS; count++ )
         {
           x[k] = x_save + delta;
-          double chi_3 = optLatticeSum(inname, cell_type, x, edgePixels);
+          double chi_3 = optLatticeSum(inname, cell_type, x);
 
           x[k] = x_save - delta;
-          double chi_1 = optLatticeSum(inname, cell_type, x, edgePixels);
+          double chi_1 = optLatticeSum(inname, cell_type, x);
 
           x[k] = x_save;
-          double chi_2 = optLatticeSum(inname, cell_type, x, edgePixels);
+          double chi_2 = optLatticeSum(inname, cell_type, x);
 
           diff = chi_1-2*chi_2+chi_3;
           if ( diff > 0 )

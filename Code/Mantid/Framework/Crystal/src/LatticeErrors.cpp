@@ -78,8 +78,7 @@ namespace Mantid
      void LatticeErrors::function1D  ( double *out, const double *xValues, const size_t nData )const
      {
         UNUSED_ARG( xValues);
-        std::string PeakWorkspaceName = "sapphire_peaks";
-        int edgePixels = 0; //Edge Pixels already removed
+        std::string PeakWorkspaceName = "_peaks";
         std::vector<double>Params;
         Params.push_back( getParameter("p0"));
         Params.push_back( getParameter("p1"));
@@ -89,7 +88,7 @@ namespace Mantid
         Params.push_back( getParameter("p5"));
 
         Mantid::Crystal::OptimizeLatticeForCellType u;
-        u.optLattice(PeakWorkspaceName, Params, edgePixels, out);
+        u.optLattice(PeakWorkspaceName, Params, out);
         double ChiSqTot=0;
         for( size_t i = 0; i<nData; i++ )
 		{
