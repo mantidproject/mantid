@@ -127,7 +127,7 @@ private:
   /// linear interpolation zone around the numerical divergence of factor J
   double m_divZone;
 
-  /// Plank's constant divided by \f$ 2\pi \f$, in units of meV*THz
+  /// Plank's constant divided by 2\pi, in units of meV*THz
   double m_hbar;
 
   /// list of linearized J values

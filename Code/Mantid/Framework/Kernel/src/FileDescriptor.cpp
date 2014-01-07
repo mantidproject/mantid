@@ -72,7 +72,6 @@ namespace Mantid
     /**
     * Check if a file is a text file
     * @param file :: The file pointer
-    * @param nbytes The number of bytes of the file to check (Default=256)
     * @returns true if the file an ascii text file, false otherwise
     */
     bool FileDescriptor::isAscii(FILE* file, const size_t nbytes)
