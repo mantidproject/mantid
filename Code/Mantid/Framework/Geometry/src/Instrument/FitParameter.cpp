@@ -153,7 +153,7 @@ namespace Geometry
 
   /**
     Reads in information about a fitting parameter. The expected format is a comma separated
-    list of 3 or more entries. The list will be read according to:
+    list that can have varying length but the entries in the list will be read according to:
 
        1st (0) : parameter value (which is converted to float)
        2nd (1) : fitting function this parameter belong to  
@@ -182,36 +182,50 @@ namespace Geometry
     getline(in, str);
     tokenizer values(str, ",", tokenizer::TOK_TRIM);
 
-    if ( values.count() <= 2 )
+    if ( values.count() == 0 )
     {
-      g_log.warning() << "Expecting a comma separated list of at each three entries"
-                      << " (any of which may be empty strings) to set information about a fitting parameter"
-                      << " instead of: " << str << std::endl;
-      return in;
+      g_log.warning() << "Expecting a comma separated list to set information about a fitting parameter"
+                      << ", instead of: " << str << std::endl;
     }    
+
+    // output warning if value for paraemter is not a double
+    bool warning = false; 
 
     try
     {
-      f.setValue() = boost::lexical_cast<double>(values[0]);
+      f.setValue() = atof(values[0].c_str());
     }
-    catch (boost::bad_lexical_cast &)
+    catch (...)
     {
       f.setValue() = 0.0;
-
-      if ( !values[0].empty() )
-      {
-        g_log.warning() << "Could not read " << values[0] << " as double for "
-                        << " fitting parameter: " << values[1] << ":" << values[2] << std::endl;
-      }
+      warning = true;
     }
 
-    // read remaining required entries
+    try
+    {
+      f.setFunction() = values[1];
+    }
+    catch (...)
+    {
+      f.setFunction() = "";
+    }
 
-    f.setFunction() = values[1];
-    f.setName() = values[2];
+    try
+    {
+      f.setName() = values[2];
+    }
+    catch (...)
+    {
+      f.setName() = "";
+    }
 
-
-    // read optional entries
+    // output notice if value paraemter value is not a double
+    if ( warning )
+    {
+      g_log.warning() << "Could not process: " << values[0].c_str() << " as a double." 
+                      << " Therefore for fitting parameter: " << values[1] << ":" << values[2]
+                      << " the value of this parameter is default to 0.0" << std::endl; 
+    }
 
     try
     {
