@@ -9297,6 +9297,17 @@ void ApplicationWindow::windowsMenuAboutToShow()
   reloadCustomActions();
 }
 
+namespace // anonymous
+{
+  /**
+   * Helper function used with Qt's qSort to make sure interfaces are in alphabetical order.
+   */
+  bool interfaceNameComparator(const QPair<QString, QString> & lhs, const QPair<QString, QString> & rhs)
+  {
+    return lhs.first.toLower() < rhs.first.toLower();
+  }
+} // anonymous namespace
+
 void ApplicationWindow::interfaceMenuAboutToShow()
 {
   interfaceMenu->clear();
@@ -9320,6 +9331,10 @@ void ApplicationWindow::interfaceMenuAboutToShow()
     interfaceMenu->insertItem(tr(category), categoryMenu);
     categoryMenus[category] = categoryMenu;
   }
+
+  // Show the interfaces in alphabetical order in their respective submenus.
+  qSort(m_interfaceNameDataPairs.begin(), m_interfaceNameDataPairs.end(), 
+    interfaceNameComparator);
 
   // Turn the name/data pairs into QActions with which we populate the menus.
   foreach(const auto interfaceNameDataPair, m_interfaceNameDataPairs)

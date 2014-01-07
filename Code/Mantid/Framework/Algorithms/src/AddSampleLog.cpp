@@ -1,7 +1,7 @@
 /*WIKI* 
 Workspaces contain information in logs. Often these detail what happened to the sample during the experiment. This algorithm allows one named log to be entered. 
 
-The log can be either a String, a Number, or a Number Series. If you select Number Series, the current time will be used as the time of the log entry, and the number in the text used as the (only) value.
+The log can be either a String, a Number, or a Number Series. If you select Number Series, the workspace start time will be used as the time of the log entry, and the number in the text used as the (only) value.
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -84,13 +84,16 @@ void AddSampleLog::exec()
     double val;
     if (!Strings::convert(propValue, val))
       throw std::invalid_argument("Error interpreting string '" + propValue + "' as a number.");
-    Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
+    Kernel::DateAndTime startTime;
+    try {
+      startTime = theRun.startTime();
+    } catch (std::runtime_error&) {
+      // Swallow the error - startTime will just be 0
+    }
     TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>(propName);
-    tsp->addValue(now, val);
+    tsp->addValue(startTime, val);
     theRun.addLogData(tsp);
   }
-
-  setProperty("Workspace", wSpace);
 }
 
 } // namespace Algorithms

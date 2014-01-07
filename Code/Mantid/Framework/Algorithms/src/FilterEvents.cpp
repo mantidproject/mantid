@@ -18,6 +18,17 @@ Some events are not inside any splitters.  They are put to a workspace name ende
 
 If input property 'OutputWorkspaceIndexedFrom1' is set to True, then this workspace shall not be outputed.
 
+==== Difference from FilterByLogValue ====
+In FilterByLogValue(), EventList.splitByTime() is used.
+
+In FilterEvents(), if FilterByPulse is selected true, EventList.SplitByTime is called;
+otherwise, EventList.SplitByFullTime() is called instead.
+
+The difference between splitByTime and splitByFullTime is that splitByTime filters events by pulse time,
+and splitByFullTime considers both pulse time and TOF.
+
+Therefore, FilterByLogValue is not suitable for fast log filtering.
+
 *WIKI*/
 
 #include "MantidAlgorithms/FilterEvents.h"
@@ -379,10 +390,11 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Parse TOF-correction table workspace to vectors
+    * Default correction value is equal to 1.
    */
   void FilterEvents::importDetectorTOFCalibration()
   {
-    // 1. Prepare output
+    // Prepare output (class variables)
     m_detectorIDs.clear();
     m_detTofOffsets.clear();
 
@@ -390,7 +402,7 @@ namespace Algorithms
     m_detectorIDs.resize(numhist, 0);
     m_detTofOffsets.resize(numhist, 1.0);
 
-    // 2. Set the detector IDs
+    // Set up the detector IDs to m_detectorIDs[]
     for (size_t i = 0; i < numhist; ++i)
     {
       // FIXME - current implementation assumes one detector per spectra
@@ -411,19 +423,19 @@ namespace Algorithms
       m_detectorIDs[i] = detid;
     }
 
-    // 3. Apply the correction table if it applies
+    // Calculate TOF correction value for all detectors
     if (m_detCorrectWorkspace)
     {
-      // If a detector calibration workspace is present
+      // Obtain correction from detector calibration workspace
 
-      // a) Check input workspace
+      // Check input workspace
       vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
       if (colnames.size() < 2)
         throw runtime_error("Input table workspace is not valide.");
       else if (colnames[0].compare("DetectorID") || colnames[1].compare("Correction"))
         throw runtime_error("Input table workspace has wrong column definition.");
 
-      // b) Parse detector to a map
+      // Parse detector and its TOF offset (i.e., correction) to a map
       map<detid_t, double> correctmap;
       size_t numrows = m_detCorrectWorkspace->rowCount();
       for (size_t i = 0; i < numrows; ++i)
@@ -437,7 +449,7 @@ namespace Algorithms
         correctmap.insert(make_pair(detid, offset));
       }
 
-      // c) Map correction map to list
+      // Check size of TOF correction map
       if (correctmap.size() > numhist)
       {
         g_log.warning() << "Input correction table workspace has more detectors (" << correctmap.size()
@@ -454,6 +466,7 @@ namespace Algorithms
         throw runtime_error(errss.str());
       }
 
+      // Map correction map to list
       map<detid_t, double>::iterator fiter;
       for (size_t i = 0; i < numhist; ++i)
       {
@@ -509,7 +522,11 @@ namespace Algorithms
       const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
 
       // Perform the filtering (using the splitting function and just one output)
-      if (m_doTOFCorrection)
+      if (mFilterByPulseTime)
+      {
+        input_el.splitByPulseTime(m_splitters, outputs);
+      }
+      else if (m_doTOFCorrection)
       {
         input_el.splitByFullTime(m_splitters, outputs, m_detTofOffsets[iws], m_doTOFCorrection);
       }
@@ -524,8 +541,9 @@ namespace Algorithms
       // FIXME - Turn on parallel
       // PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0
-    // FIXME - Turn on parallel
     // PARALLEL_CHECK_INTERUPT_REGION
+    // FIXME - Turn on parallel
+
 
     // Finish (1) adding events and splitting the sample logs in each target workspace.
     progress(0.1+progressamount, "Splitting logs");
@@ -573,8 +591,8 @@ namespace Algorithms
   }
 
 
-  /*
-   * Generate splitters for specified workspace index
+  //----------------------------------------------------------------------------------------------
+  /** Generate splitters for specified workspace index as a subset of m_splitters
    */
   void FilterEvents::generateSplitters(int wsindex, Kernel::TimeSplitterType& splitters)
   {

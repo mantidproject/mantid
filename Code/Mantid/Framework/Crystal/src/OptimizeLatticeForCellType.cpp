@@ -14,6 +14,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <iomanip>
@@ -58,10 +59,11 @@ namespace Mantid
       std::string *p = (std::string *)params;
       std::string inname = p[0];
       std::string cell_type = p[1];
+      int edgePixels = atoi(p[2].c_str());
       std::vector<double>Params;
       for ( size_t i = 0; i < v->size; i++ )Params.push_back(gsl_vector_get(v,i));
       Mantid::Crystal::OptimizeLatticeForCellType u;
-      return u.optLattice(inname, cell_type, Params);
+      return u.optLattice(inname, cell_type, Params, edgePixels);
     }
   
     //-----------------------------------------------------------------------------------------
@@ -76,6 +78,7 @@ namespace Mantid
     cellTypes.push_back("Cubic" );
     cellTypes.push_back("Tetragonal" );
     cellTypes.push_back("Orthorhombic");
+    cellTypes.push_back("Hexagonal");
     cellTypes.push_back("Rhombohedral");
     cellTypes.push_back("Monoclinic ( a unique )");
     cellTypes.push_back("Monoclinic ( b unique )");
@@ -85,6 +88,7 @@ namespace Mantid
       "Select the cell type.");
     declareProperty( "Apply", false, "Re-index the peaks");
     declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
+    declareProperty("EdgePixels",0, "The number of pixels where peaks are removed at edges. " );
     declareProperty("OutputChi2", 0.0,Direction::Output);
 
       //Disable default gsl error handler (which is to call abort!)
@@ -100,12 +104,14 @@ namespace Mantid
     {
       bool   apply          = this->getProperty("Apply");
       double tolerance      = this->getProperty("Tolerance");
+      std::string edge 		= this->getProperty("EdgePixels");
       std::string par[6];
       std::string inname = getProperty("PeaksWorkspace");
       par[0] = inname;
       std::string type = getProperty("CellType");
       par[1] = type;
-      PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
+      par[2] = edge;
+      DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
 
       const gsl_multimin_fminimizer_type *T =
       gsl_multimin_fminimizer_nmsimplex;
@@ -181,17 +187,35 @@ namespace Mantid
         " Method used = " << " Simplex" << 
         " Iteration = " << iter << 
         " Status = " << report << 
-        " Chisq = " << s->fval ; 
+        " Chisq = " << s->fval <<"\n";
       std::vector<double>Params;
       for ( size_t i = 0; i < s->x->size; i++ )Params.push_back(gsl_vector_get(s->x,i));
-      optLattice(inname, type, Params);
+      optLattice(inname, type, Params, atoi(edge.c_str()) );
+      std::vector<double> sigabc(7);
+      OrientedLattice latt=ws->mutableSample().getOrientedLattice();
+      DblMatrix UBnew = latt.getUB();
+      const std::vector<Peak> &peaks = ws->getPeaks();
+      size_t n_peaks = ws->getNumberPeaks();
+      std::vector<V3D> hkl_vector;
+
+      for ( size_t i = 0; i < n_peaks; i++ )
+      {
+        hkl_vector.push_back(peaks[i].getHKL());
+      }
+      IndexingUtils::Calculate_Errors(UBnew, hkl_vector, sigabc, s->fval);
+      OrientedLattice o_lattice;
+      o_lattice.setUB( UBnew );
+      o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+
+      // Show the modified lattice parameters
+      g_log.notice() << o_lattice << "\n";
+
+      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
       gsl_vector_free(x);
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
       setProperty("OutputChi2", s->fval);
-      // Show the modified lattice parameters
-      OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-      g_log.notice() << o_lattice << "\n";
+
       if ( apply )
       {
 		  // Reindex peaks with new UB
@@ -211,7 +235,7 @@ namespace Mantid
      * @param params
      * @return
      */
-    double OptimizeLatticeForCellType::optLattice(std::string inname, std::string cell_type, std::vector<double> & params)
+    double OptimizeLatticeForCellType::optLattice(std::string inname, std::string cell_type, std::vector<double> & params, int edge)
     {
       PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>
            (AnalysisDataService::Instance().retrieve(inname));
@@ -223,6 +247,7 @@ namespace Mantid
       for ( size_t i = 0; i < params.size(); i++ )params[i]=std::abs(params[i]);
       for ( size_t i = 0; i < n_peaks; i++ )
       {
+        if (edgePixel(ws, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge))continue;
         q_vector.push_back(peaks[i].getQSampleFrame());
         hkl_vector.push_back(peaks[i].getHKL());
       }
@@ -340,7 +365,36 @@ namespace Mantid
          V3D error = UB * hkl_vector[i] - q_vector[i] / (2.0 * M_PI);
          result += error.norm();
       }
-      return result;
-      }
+    return result;
+    }
+    bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws, std::string bankName, int col, int row, int Edge)
+    {
+  	  if (bankName.compare("None") == 0) return false;
+  	  Geometry::Instrument_const_sptr Iptr = ws->getInstrument();
+  	  boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
+  	  if (parent->type().compare("RectangularDetector") == 0)
+  	  {
+  		  boost::shared_ptr<const RectangularDetector> RDet = boost::dynamic_pointer_cast<
+  					const RectangularDetector>(parent);
+
+  	      if (col < Edge || col >= (RDet->xpixels()-Edge) || row < Edge || row >= (RDet->ypixels()-Edge)) return true;
+  	      else return false;
+  	  }
+  	  else
+  	  {
+            std::vector<Geometry::IComponent_const_sptr> children;
+            boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+            asmb->getChildren(children, false);
+            boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+            std::vector<Geometry::IComponent_const_sptr> grandchildren;
+            asmb2->getChildren(grandchildren,false);
+            int NROWS = static_cast<int>(grandchildren.size());
+            int NCOLS = static_cast<int>(children.size());
+            // Wish pixels and tubes start at 1 not 0
+            if (col-1 < Edge || col-1 >= (NCOLS-Edge) || row-1 < Edge || row-1 >= (NROWS-Edge)) return true;
+      	  else return false;
+  	  }
+  	  return false;
+    }
   } // namespace Algorithm
 } // namespace Mantid

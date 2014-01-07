@@ -73,6 +73,17 @@ namespace Geometry
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       /// Load the lattice to from an open NeXus file
       void loadNexus(::NeXus::File * file, const std::string & group);
+      /// Get the UB matix corresponding to the real space edge vectors a, b, c
+      static bool GetUB(       Kernel::DblMatrix  & UB,
+                         const Kernel::V3D        & a_dir,
+                         const Kernel::V3D        & b_dir,
+                         const Kernel::V3D        & c_dir  );
+
+      /// Get the real space edge vectors a, b, c corresponding to the UB matrix
+      static bool GetABC( const Kernel::DblMatrix  & UB,
+                                Kernel::V3D        & a_dir,
+                                Kernel::V3D        & b_dir,
+                                Kernel::V3D        & c_dir  );
 
     private:
       Kernel::DblMatrix U;

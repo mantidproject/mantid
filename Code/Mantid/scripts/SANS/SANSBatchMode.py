@@ -30,6 +30,7 @@
 #Make the reduction module available
 from ISISCommandInterface import *
 from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
 sanslog = Logger.get("SANS")
 import copy
@@ -217,8 +218,15 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
         if file:
+            save_names = []
+            for n in names:
+                w = mtd[n]
+                if isinstance(w,WorkspaceGroup):
+                    save_names.extend(w.getNames())
+                else:
+                    save_names.append(n)
             for algor in saveAlgs.keys():
-                for workspace_name in names:
+                for workspace_name in save_names:
                     #add the file extension, important when saving different types of file so they don't over-write each other
                     ext = saveAlgs[algor]
                     if not ext.startswith('.'):

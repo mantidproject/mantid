@@ -29,6 +29,10 @@
 <parameter name="hard_mask_file" type="string">
     <value val="None"/>
 </parameter>
+<!-- Parameter specifies if one wants to run diagnostics (which include applying hard mask file) or not-->
+<parameter name="run_diagnostics" type="bool">
+  <value val="True"/>
+</parameter>
 <!-- The map file used when calculating absolute units conversion integrals 
      This map usually groups together large areas of detectors to obtain proper vanadium statistics  -->
 <parameter name="monovan_mapfile" type="string">

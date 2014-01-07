@@ -131,6 +131,7 @@ void RectangularDetectorActor::draw(bool picking)const
  * detector, and sets the visibility of the whole panel to true if so.
  *
  * @param visitor :: A visitor.
+ * @param rule :: A rule defining visitor acceptance by assembly actors. Unused.
  *
  */
 bool RectangularDetectorActor::accept(GLActorVisitor& visitor, VisitorAcceptRule)

@@ -12,7 +12,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <iostream>
 #include <string>
 
 namespace Mantid
