@@ -11,7 +11,7 @@ import numpy as np
 import re
 import os.path
 import math
- 
+
 class DensityOfStates(PythonAlgorithm):
  
 		def PyInit(self):
@@ -236,17 +236,21 @@ class DensityOfStates(PythonAlgorithm):
 			self.computeDos(freqs, crossSections, weights)
 
 		def readDataFromFile(self, fname):
+			'''
+			Select the appropriate file parser and check data was successfully 
+			loaded from file.
 
-			with open(fname, 'r') as fhandle:
-				content = fhandle.read()
-				
+			@param fname - path to the file.
+			@return tuple of the frequencies, ir and raman intensities and weights
+			'''
 			ext = os.path.splitext(fname)[1]
 			self.fileType = ext
 
 			if ext == '.phonon':
-				freqs, irIntens, ramanIntens, weights = self.readPhononFile(content)
+				freqs, irIntens, ramanIntens, weights = self.parsePhononFile(fname)
+
 			elif ext == '.castep':
-				freqs, irIntens, ramanIntens, weights = self.readCastepFile(content)
+				freqs, irIntens, ramanIntens, weights = self.parseCastepFile(fname)
 
 			if ( len(freqs) == 0 ):
 				raise ValueError("Failed to load any frequencies from file.")
@@ -256,127 +260,208 @@ class DensityOfStates(PythonAlgorithm):
 
 			return freqs, irIntens, ramanIntens, weights
 
-		def readCastepFile(self, content):
-			'''
-			Read frequencies from <>.castep file
+		def parseBlockHeader(self, header_match, block_count):
+			"""
+			Parse the header of a block of frequencies and intensities
 
-			@param content - string of the data read from file
+			@param header_match - the regex match to the header
+			@param block_count - the count of blocks found so far 
+			@return weight for this block of values
+			"""
+			#found header block at start of frequencies
+			q1, q2, q3, weight = map(float, header_match.groups())
+			if block_count > 1 and sum([q1,q2,q3]) == 0 and self.specType != 'DOS':
+				weight = 0.0
+			return weight
+						
+		def parsePhononFileHeader(self, f_handle):
+			'''
+			Read information from the header of a <>.phonon file
+
+			@param f_handle - handle to the file.
+			@return tuple of the number of ions and branches in the file
+			'''
+
+			while True:
+				line = f_handle.readline()
+
+				if not line:
+					raise IOError("Could not find any header information.")
+
+				if 'Number of ions' in line:
+					num_ions = int(line.strip().split()[-1])
+				elif 'Number of branches' in line:
+					num_branches = int(line.strip().split()[-1])
+
+				if 'END header' in line: 
+					return num_ions, num_branches
+
+		def parsePhononFile(self, fname):
+			'''
+			Read frequencies from a <>.phonon file
+
+			@param fname - file path of the file to read
 			@return the frequencies, infra red and raman intensities and weights of frequency blocks
 			'''
-			#regex patterns to extract data the header and data information from each block
-
-			#Header regex. Looks for lines in the following format:
-			# +  q-pt=    1 (  0.000000  0.000000  0.000000)     1.0000000000              +
-			headerRegexStr = r" +\+ +q-pt= +\d+ \( *(?: *(%(s)s)) *(%(s)s) *(%(s)s)\) +(%(s)s) +\+" % {'s' : self.fnumber}
-
-			#Data regex. Looks for lines in the following format:
- 			# +     1      -0.051481   a          0.0000000  N            0.0000000  N     + 
-			dataRegexStr = r" +\+ +\d+ +(%(s)s)(?: +\w)? *((?: *%(s)s?(?: +[YN])?){0,2}) *\+"% {'s': self.fnumber}
-
-			# Find all of the frequency data blocks, also splits text into header and data groups 
-			freqBlockRegexStr = r" \+ \-+ \+\s+( +\+ +q-pt= +\d+ \( *(?: *%(s)s) *%(s)s *%(s)s\) +%(s)s +\+)((?:[\+\w\-\d\s\<\>\=\(\)\*\/\\]|\-?%(s)s|Frequency irrep\.)*) +\+" % {'s': self.fnumber}
-
-			return self.parseFrequencies(content, freqBlockRegexStr, headerRegexStr, dataRegexStr)
-
-		def readPhononFile(self, content):
-			'''
-			Read frequencies from <>.phonon file
-
-			@param content - string of the data read from file
-			@return the frequencies, infra red and raman intensities and weights of frequency blocks
-			'''
-			#regex patterns to extract data the header and data information from each block
-
+			
 			#Header regex. Looks for lines in the following format:
 			#     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
 			headerRegexStr = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': self.fnumber}
-
-			#Data regex. Looks for lines in the following format:
-			#       1      -0.051481              0.0000000               0.0000000  
-			dataRegexStr = r"\s+\d+ +(%(s)s)((?: +%(s)s){0,2})"% {'s': self.fnumber}
-
-			# Find all of the frequency data blocks, also splits text into header and data groups 
-			freqBlockRegexStr = r"( +q-pt=\s+\d+ +%(s)s +%(s)s +%(s)s (?: *%(s)s){0,4})((?:\s|%(s)s)*)Phonon Eigenvectors" % {'s': self.fnumber}
-
-			return self.parseFrequencies(content, freqBlockRegexStr, headerRegexStr, dataRegexStr)
-
-		def parseFrequencies(self, content, blockRegex, headerRegexStr, dataRegexStr):
-			'''
-			Extract frequencies, infra-red and raman intensities from the contents of a file.
-
-			@param content - string of the data read from file
-			@param freqBlockRegexStr - regex to split the frequncy blocks
-			@param headerRegexStr - regex to extract the header from the block
-			@param dataRegexStr - regex to extract a line of data from the block
-			@return the frequencies, infra red and raman intensities and weights of frequency blocks
-			'''
-
 			headerRegex = re.compile(headerRegexStr)
-			dataRegex = re.compile(dataRegexStr)
 
-			freqBlocks = re.findall(blockRegex, content)
-			nFreqBlocks = len(freqBlocks)
-
-			if(nFreqBlocks <= 0): 
-				raise Exception('Error parsing file. Failed to find any frequency blocks.')
+			eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
 
 			freqs, ir_intensities, raman_intensities, weights = [], [], [], []
+			with open(fname, 'r') as f_handle:
+				num_ions, num_branches = self.parsePhononFileHeader(f_handle)
+				block_count = 0
+				prog_reporter = Progress(self,start=0.0,end=1.0, nreports=1)
 
-			#iterate over each block of frequencies and intensities
-			for i, freqBlock in enumerate(freqBlocks):
-				header, data = freqBlock
+				while True:
+					line = f_handle.readline()
+					#check we've reached the end of file
+					if not line: break
 
-				#extract data from header
-				freqHeaderData = headerRegex.match(header)
-				freqHeaderData = map (float, freqHeaderData.groups())
-				q1, q2, q3, weight = freqHeaderData
+					header_match = headerRegex.match(line)
+					if header_match:
+						#found header block at start of frequencies
+						block_count+=1
+						weight = self.parseBlockHeader(header_match, block_count)
+						weights.append(weight)
+						prog_reporter.setNumSteps(block_count+1)
+						
+						#parse block of frequencies
+						block_freqs, block_ir, block_raman = [], [], []
+						for _ in xrange(num_branches):
+							line = f_handle.readline()
+							line_data = line.strip().split()[1:]
 
-				if i > 0 and sum([q1,q2,q3]) == 0 and self.specType != 'DOS':
-					weight = 0.0
-				
-				#extract the frequency and intensity data from this block
-				block_freqs, block_ir, block_raman = [], [], []
-				for freq, intensities in dataRegex.findall(data):
-					block_freqs.append(freq)
+							data_lists = (block_freqs, block_ir, block_raman)
+							for data_list, data_item in zip(data_lists, line_data):
+								if data_item:
+									data_list.append(float(data_item))
 
-					#reformat intensities into list
-					intensities = intensities.strip()
-					
-					if self.fileType == '.castep':
-						#if using IR active we need to check which intensities were active
-						if self.specType == 'IR Active':
+						freqs.append(block_freqs)
+						ir_intensities.append(block_ir)
+						raman_intensities.append(block_raman)
 
-							intensities = intensities.split()
-							ir, active = intensities[:2]
+						prog_reporter.report("Reading intensities.")
 
-							if active == 'N':
-								intensities[0] = '0.0'
-
-							intensities = ' '.join(intensities)
-					
-					intensities = re.sub('[YN]', '', intensities)
-					intensities = intensities.split()
-
-					#append any intensities found on this line to our arrays
-					for value, arr in zip(intensities, (block_ir, block_raman)):
-						arr.append(value.strip())
-
-				#convert to numpy arrays and convert to floats
-				block_freqs = np.array(block_freqs).astype(np.float)
-				block_ir = np.array(block_ir).astype(np.float)
-				block_raman = np.array(block_raman).astype(np.float)
-				
-				#append any columns found to the existing arrays
-				for column, arr in zip((block_freqs, block_ir, block_raman), (freqs, ir_intensities, raman_intensities)):
-					if len(column) > 0:
-						arr.append(column)
-
-				weights.append(weight)
+					#skip over eigenvectors
+					vector_match = eigenvectors_regex.match(line)
+					if vector_match:
+						for _ in xrange(num_ions*num_branches):
+							line = f_handle.readline()
+							if not line:
+								raise IOError("Could not parse file. Invalid file format.")
 			
-			#convert weights into list of weights
+			freqs = np.asarray(freqs) 
+			ir_intensities = np.asarray(ir_intensities)
+			raman_intensities = np.asarray(raman_intensities)
 			warray = np.repeat(weights, len(freqs[0]))
-			
-			return np.array(freqs), np.array(ir_intensities), np.array(raman_intensities), np.array(warray)
+
+			return freqs, ir_intensities, raman_intensities, warray
+
+		def parseCastepFileHeader(self, f_handle):
+			'''
+			Read information from the header of a <>.castep file
+
+			@param f_handle - handle to the file.
+			@return tuple of the number of ions and branches in the file
+			'''
+
+			num_species, num_ions = 0,0
+			while True:
+				line = f_handle.readline()
+
+				if not line:
+					raise IOError("Could not find any header information.")
+
+				if 'Total number of ions in cell =' in line:
+					num_ions = int(line.strip().split()[-1])
+				elif 'Total number of species in cell = ' in line:
+					num_species = int(line.strip().split()[-1])
+
+				if num_species > 0 and num_ions > 0:
+					num_branches = num_species*num_ions 
+					return num_ions, num_branches
+
+		def parseCastepFile(self, fname):
+			'''
+			Read frequencies from a <>.castep file
+
+			@param fname - file path of the file to read
+			@return the frequencies, infra red and raman intensities and weights of frequency blocks
+			'''
+			#Header regex. Looks for lines in the following format:
+			# +  q-pt=    1 (  0.000000  0.000000  0.000000)     1.0000000000              +
+			headerRegexStr = r" +\+ +q-pt= +\d+ \( *(?: *(%(s)s)) *(%(s)s) *(%(s)s)\) +(%(s)s) +\+" % {'s' : self.fnumber}
+			headerRegex = re.compile(headerRegexStr)
+
+			#Data regex. Looks for lines in the following format:
+ 			# +     1      -0.051481   a          0.0000000  N            0.0000000  N     + 
+			dataRegexStr = r" +\+ +\d+ +(%(s)s)(?: +\w)? *(%(s)s)? *([YN])? *(%(s)s)? *([YN])? *\+"% {'s': self.fnumber}
+			dataRegex = re.compile(dataRegexStr)
+
+			freqs, ir_intensities, raman_intensities, weights = [], [], [], []
+			with open(fname, 'r') as f_handle:
+				num_ions, num_branches = self.parseCastepFileHeader(f_handle)
+				block_count = 0
+				prog_reporter = Progress(self,start=0.0,end=1.0, nreports=1)
+
+				while True:
+					line = f_handle.readline()
+					#check we've reached the end of file
+					if not line: break
+
+					header_match = headerRegex.match(line)
+					if header_match:
+						#found header block at start of frequencies
+						block_count+=1
+						weight = self.parseBlockHeader(header_match, block_count)
+						weights.append(weight)
+						prog_reporter.setNumSteps(block_count+1)
+						
+						#move file pointer forward to start of intensity data
+						while True:
+							line = f_handle.readline()
+							if not line: 
+								raise IOError("Could not parse frequency block. Invalid file format.")
+							if dataRegex.match(line): break
+
+						#parse block of frequencies
+						block_freqs, block_ir, block_raman = [], [], []
+						for _ in xrange(num_branches):
+							line_data = line.strip().split()[1:-1]
+							freq = line_data[1]
+							intensity_data = line_data[3:]
+
+							#remove non-active intensities from data
+							intensities = []
+							for value, active in zip(intensity_data[::2], intensity_data[1::2]):
+								if active == 'N':	value = 0.0
+								intensities.append(value)
+
+							#append data to block lists
+							data_lists = (block_freqs, block_ir, block_raman)
+							for data_list, data_item in zip(data_lists, [freq] + intensities):
+								if data_item:
+									data_list.append(float(data_item))
+
+							line = f_handle.readline()
+
+						freqs.append(block_freqs)
+						ir_intensities.append(block_ir)
+						raman_intensities.append(block_raman)
+
+						prog_reporter.report("Reading intensities.")
+
+			freqs = np.asarray(freqs) 
+			ir_intensities = np.asarray(ir_intensities)
+			raman_intensities = np.asarray(raman_intensities)
+			warray = np.repeat(weights, len(freqs[0]))
+
+			return freqs, ir_intensities, raman_intensities, warray
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(DensityOfStates)
