@@ -320,6 +320,17 @@ public:
       const Mantid::Geometry::FitParameter& fitParam1 = beta0Param->value<Mantid::Geometry::FitParameter>();
       TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam1.getFormula()), 6.251096, 0.0000001);
     }
+
+    boost::shared_ptr<const Mantid::Geometry::IComponent> bank = instr->getComponentByName("bank1");
+    Mantid::Geometry::Parameter_sptr sigmaSqParam = paramMap.get(&(*bank), "SigmaSquared", "fitting");
+    TS_ASSERT(sigmaSqParam);
+    if(sigmaSqParam) {
+      const Mantid::Geometry::FitParameter& fitParam1 = sigmaSqParam->value<Mantid::Geometry::FitParameter>();
+      double formulaValueCantreAt0 = fitParam1.getValue( 0.0 );  // Value for centre=0.0
+      TS_ASSERT_DELTA( formulaValueCantreAt0, 0.355, 0.0000001);
+      double formulaValueCantreAt10 = fitParam1.getValue( 10.0 );  // Value for centre=10.0
+      TS_ASSERT_DELTA( formulaValueCantreAt10, 0.399, 0.0000001);
+    }
     
 
     // Clean
