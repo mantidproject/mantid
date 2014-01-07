@@ -95,7 +95,7 @@ public:
   void test_Input_Workspace_In_TOF_With_Instrument_But_No_Detector_Parameters_Throws_Error_On_Execution()
   {
     auto alg = createAlgorithm();
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,10, false);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,10, false, false, false);
     testWS->getAxis(0)->setUnit("TOF");
 
     alg->setProperty("InputWorkspace", testWS);
