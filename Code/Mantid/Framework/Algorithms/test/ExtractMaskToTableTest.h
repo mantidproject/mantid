@@ -56,7 +56,7 @@ public:
 
     TS_ASSERT_EQUALS(vecC.size(), vecA.size()-vecB.size());
 
-    // Case: Not all B's item are in A
+    // Case: A does not contain B; but the intersection between A and B is not empty
     vecA.clear();
     vecB.clear();
 
@@ -70,7 +70,7 @@ public:
 
     TS_ASSERT_EQUALS(vecC.size(), 7);
 
-    // Case: B has a large range than A
+    // Case: B has a larger range than A
     vecA.clear();
     vecB.clear();
 

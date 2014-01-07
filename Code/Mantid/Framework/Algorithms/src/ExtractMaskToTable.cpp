@@ -1,6 +1,6 @@
 /*WIKI* 
 
-==== InputWorskpace ===
+==== InputWorskpace ====
 It can be either a MaskWorkspace, containing the masking information, or a Data workspace (EventWorkspace or Workspace2D), having
 detectors masked.
 
