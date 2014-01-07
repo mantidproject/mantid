@@ -60,6 +60,9 @@ namespace API
     /// Retrieve workspace from the ADS
     Workspace_sptr retrieve() const;
 
+    /// Removes the workspace entry from the ADS
+    void remove();
+
     /// Operator for conversion to boolean
     operator bool() const;
 

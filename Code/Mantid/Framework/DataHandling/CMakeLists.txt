@@ -1,6 +1,5 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
-	src/ApplyGroupingFromMuonNexus.cpp
 	src/CompressEvents.cpp
 	src/ConvertFullprofToXML.cpp
 	src/CreateChopperModel.cpp
@@ -131,7 +130,6 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
-	inc/MantidDataHandling/ApplyGroupingFromMuonNexus.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/ConvertFullprofToXML.h
 	inc/MantidDataHandling/CreateChopperModel.h
@@ -262,7 +260,6 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
-	ApplyGroupingFromMuonNexusTest.h
 	CompressEventsTest.h
 	ConvertFullprofToXMLTest.h
 	CreateChopperModelTest.h
@@ -279,8 +276,8 @@ set ( TEST_FILES
 	GroupDetectorsTest.h
 	ISISDataArchiveTest.h
 	InstrumentRayTracerTest.h
-	LoadAsciiTest.h
 	LoadAscii2Test.h
+	LoadAsciiTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
@@ -304,8 +301,8 @@ set ( TEST_FILES
 	LoadLogTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
-	LoadMcStasTest.h
 	LoadMcStasNexusTest.h
+	LoadMcStasTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
@@ -348,8 +345,8 @@ set ( TEST_FILES
 	RotateInstrumentComponentTest.h
 	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
-	SaveAsciiTest.h
 	SaveAscii2Test.h
+	SaveAsciiTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h

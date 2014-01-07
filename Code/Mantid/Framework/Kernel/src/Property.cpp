@@ -223,11 +223,13 @@ void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * >
 namespace API
 {
   class Workspace;
+  class WorkspaceGroup;
   class MatrixWorkspace;
   class ITableWorkspace;
   class IMDEventWorkspace;
   class IMDWorkspace;
   class IEventWorkspace;
+  class IPeaksWorkspace;
   class IMDHistoWorkspace;
   class IFunction;
   class IAlgorithm;
@@ -297,8 +299,12 @@ std::string getUnmangledTypeName(const std::type_info& type)
                                       string("EventWorkspace")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<PeaksWorkspace>).name(), 
                                       string("PeaksWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<IPeaksWorkspace>).name(),
+                                      string("IPeaksWorkspace")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<GroupingWorkspace>).name(), 
                                       string("GroupingWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<WorkspaceGroup>).name(),
+                                      string("WorkspaceGroup")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<OffsetsWorkspace>).name(),
                                       string("OffsetsWorkspace")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<MaskWorkspace>).name(),

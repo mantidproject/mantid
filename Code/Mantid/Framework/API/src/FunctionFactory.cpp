@@ -335,6 +335,20 @@ namespace Mantid
       }
     }
 
+    void FunctionFactoryImpl::subscribe(const std::string& className, AbstractFactory* pAbstractFactory,
+                   Kernel::DynamicFactory<IFunction>::SubscribeAction replace)
+    {
+      // Clear the cache, then do all the work in the base class method
+      m_cachedFunctionNames.clear();
+      Kernel::DynamicFactory<IFunction>::subscribe(className,pAbstractFactory,replace);
+    }
+
+    void FunctionFactoryImpl::unsubscribe(const std::string& className)
+    {
+      // Clear the cache, then do all the work in the base class method
+      m_cachedFunctionNames.clear();
+      Kernel::DynamicFactory<IFunction>::unsubscribe(className);
+    }
 
   } // namespace API
 } // namespace Mantid

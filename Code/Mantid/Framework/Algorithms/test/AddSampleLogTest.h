@@ -59,6 +59,7 @@ public:
   void test_NumberSeries()
   {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),DateAndTime("2013-12-18T13:42:00"));
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234);
     ExecuteAlgorithm(ws, "My Name", "Number Series", "2.456", 2.456);
   }
@@ -111,6 +112,7 @@ public:
     {
       TimeSeriesProperty<double> *testProp = dynamic_cast<TimeSeriesProperty<double>*>(prop);
       TS_ASSERT(testProp);
+      TS_ASSERT_EQUALS(testProp->firstTime(),DateAndTime("2013-12-18T13:40:00"));
       TS_ASSERT_DELTA(testProp->firstValue(), expectedValue, 1e-5);
     }
     

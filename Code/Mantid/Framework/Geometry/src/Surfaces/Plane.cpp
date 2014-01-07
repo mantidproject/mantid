@@ -3,6 +3,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include <cfloat>
+#include <iostream>
 
 namespace Mantid
 {

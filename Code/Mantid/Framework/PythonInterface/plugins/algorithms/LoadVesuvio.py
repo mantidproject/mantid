@@ -19,6 +19,7 @@ MODE_PROP = "Mode"
 MODES=["SingleDifference", "DoubleDifference", "ThickDifference", "FoilOut", "FoilIn", "FoilInOut"]
 SPECTRA_PROP = "SpectrumList"
 INST_PAR_PROP = "InstrumentParFile"
+SUM_PROP = "SumSpectra"
 
 # Raw workspace names which are necessary at the moment
 SUMMED_WS, SUMMED_MON = "__loadraw_evs", "__loadraw_evs_monitors"
@@ -60,6 +61,10 @@ class LoadVesuvio(PythonAlgorithm):
                              doc="An optional IP file. If provided the values are used to correct "
                                   "the default instrument values and attach the t0 values to each detector") 
 
+        self.declareProperty(SUM_PROP, False,
+                             doc="If true then the final output is a single spectrum containing the sum "
+                                 "of all of the requested spectra. All detector angles/parameters are "
+                                 "averaged over the individual inputs")
 #----------------------------------------------------------------------------------------
     def PyExec(self):
         self._load_inst_parameters()
@@ -90,8 +95,14 @@ class LoadVesuvio(PythonAlgorithm):
                 self._normalise_by_monitor()
                 self._normalise_to_foil_out()
                 self._calculate_diffs()
-    
-            self._load_ip_file()
+            # end of differencing loop
+
+            ip_file = self.getPropertyValue(INST_PAR_PROP)
+            if len(ip_file) > 0:
+                self._load_ip_file(ip_file)
+            if self._sumspectra:
+                self._sum_all_spectra()
+            
             self._store_results()
         finally: # Ensures it happens whether there was an error or not
             self._cleanup_raw()
@@ -216,6 +227,7 @@ class LoadVesuvio(PythonAlgorithm):
         self._spectra = self.getProperty(SPECTRA_PROP).value.tolist()
         if self._mon_spectra in self._spectra:
             self._spectra.remove(self._spectra)
+        self._sumspectra = self.getProperty(SUM_PROP).value
 
 #----------------------------------------------------------------------------------------
 
@@ -608,14 +620,14 @@ class LoadVesuvio(PythonAlgorithm):
         np.sqrt((eout**2 + ethick**2), eout) # The second argument makes it happen in place
 
 #----------------------------------------------------------------------------------------
-    def _load_ip_file(self):
+    def _load_ip_file(self, ip_file):
         """
             If provided, load the instrument parameter file into the result
             workspace
+            @param ip_file A string containing the full path to an IP file
         """
-        ip_file = self.getProperty(INST_PAR_PROP).value
         if ip_file == "":
-            return
+            raise ValueError("Empty filename string for IP file")
 
         ip_header = self._get_header_format(ip_file)
         
@@ -630,6 +642,22 @@ class LoadVesuvio(PythonAlgorithm):
         update_inst.execute()
         
         self.foil_out = update_inst.getProperty("Workspace").value
+
+#----------------------------------------------------------------------------------------
+
+    def _sum_all_spectra(self):
+        """
+            Runs the SumSpectra algorithm to collapse all of the
+            spectra into 1
+        """
+        # More verbose until the child algorithm stuff is sorted
+        sum_spectra = self.createChildAlgorithm("SumSpectra")
+        sum_spectra.setLogging(_LOGGING_)
+        sum_spectra.setProperty("InputWorkspace", self.foil_out)
+        sum_spectra.setProperty("OutputWorkspace", self.foil_out)
+        sum_spectra.execute()
+        
+        self.foil_out = sum_spectra.getProperty("OutputWorkspace").value
 
 #----------------------------------------------------------------------------------------
     def _get_header_format(self, ip_filename):

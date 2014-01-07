@@ -1,6 +1,7 @@
 #ifndef MANTID_KERNEL_TASK_H_
 #define MANTID_KERNEL_TASK_H_
 
+#include <boost/shared_ptr.hpp>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -27,7 +28,7 @@ namespace Kernel
     //---------------------------------------------------------------------------------------------
     /** Default constructor */
     Task() :
-      m_cost(1.0), m_mutex(NULL)
+      m_cost(1.0)
     { }
 
     //---------------------------------------------------------------------------------------------
@@ -36,7 +37,7 @@ namespace Kernel
      * @param cost :: computational cost
      */
     Task(double cost) :
-      m_cost(cost), m_mutex(NULL)
+      m_cost(cost)
     { }
 
     /// Destructor
@@ -73,7 +74,7 @@ namespace Kernel
     /** Get the mutex object for this Task
      * @return Mutex pointer, or NULL
      */
-    Mutex * getMutex()
+    boost::shared_ptr<Mutex> getMutex()
     {
       return m_mutex;
     }
@@ -82,7 +83,7 @@ namespace Kernel
     /** Set the mutex object for this Task
      * @param mutex :: Mutex pointer, or NULL
      */
-    void setMutex(Mutex * mutex)
+    void setMutex( boost::shared_ptr<Mutex> &mutex)
     {
       m_mutex = mutex;
     }
@@ -94,7 +95,7 @@ namespace Kernel
     double m_cost;
 
     /// Mutex associated with this task (can be NULL)
-    Mutex * m_mutex;
+    boost::shared_ptr<Mutex> m_mutex;
   };
 
 

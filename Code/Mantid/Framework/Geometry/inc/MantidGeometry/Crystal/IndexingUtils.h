@@ -51,10 +51,6 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL IndexingUtils
 {
   public:
-  
-  /// Convenience method for sorting list of V3D objects based on magnitude
-  static bool CompareMagnitude( const Kernel::V3D & v1, 
-                                const Kernel::V3D & v2 );
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values 
   /// given the lattice parameters 
@@ -92,6 +88,11 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                     const std::vector<Kernel::V3D>  & hkl_vectors,
                                     const std::vector<Kernel::V3D>  & q_vectors ,
                                     std::vector<double> & sigabc);
+
+  /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
+  static double Calculate_Errors(      Kernel::DblMatrix         & UB,
+                                    const std::vector<Kernel::V3D>  & hkl_vectors,
+                                    std::vector<double> & sigabc, double chisq);
 
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double Optimize_UB(      Kernel::DblMatrix         & UB,
@@ -270,18 +271,6 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                      double plane_spacing,
                                      double required_tolerance );
 
-  /// Get the UB matix corresponding to the real space edge vectors a, b, c
-  static bool GetUB(       Kernel::DblMatrix  & UB,
-                     const Kernel::V3D        & a_dir,
-                     const Kernel::V3D        & b_dir,
-                     const Kernel::V3D        & c_dir  );
-
-  /// Get the real space edge vectors a, b, c corresponding to the UB matrix
-  static bool GetABC( const Kernel::DblMatrix  & UB,
-                            Kernel::V3D        & a_dir,
-                            Kernel::V3D        & b_dir,
-                            Kernel::V3D        & c_dir  );
-
   /// Get the lattice parameters for the specified orientation matrix
   static bool GetLatticeParameters( const Kernel::DblMatrix   & UB,
                                           std::vector<double> & lattice_par );
@@ -290,15 +279,7 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   static std::string GetLatticeParameterString( const Kernel::DblMatrix & UB );
 
 
-  /// Check if a,b,c cell has angles satifying Niggli condition within epsilon
-  static bool HasNiggliAngles( const Kernel::V3D  & a_dir,
-                               const Kernel::V3D  & b_dir,
-                               const Kernel::V3D  & c_dir,
-                                     double         epsilon  );
 
-  /// Construct a newUB corresponding to a Niggli cell from the given UB
-  static bool MakeNiggliUB( const Kernel::DblMatrix  & UB,
-                                  Kernel::DblMatrix  & newUB );
 private:
  
     /// Static reference to the logger class

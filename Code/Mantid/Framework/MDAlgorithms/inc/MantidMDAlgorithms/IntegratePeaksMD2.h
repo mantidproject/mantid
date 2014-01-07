@@ -51,6 +51,10 @@ namespace MDAlgorithms
     /// Instrument reference
     Geometry::Instrument_const_sptr inst;
 
+    /// Check if peaks overlap
+    void checkOverlap(int i,
+    		Mantid::DataObjects::PeaksWorkspace_sptr peakWS, int CoordinatesToUse, double radius);
+
   };
 
 

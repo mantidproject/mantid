@@ -134,9 +134,9 @@ public:
 
     func->iterationStarting();
     TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10); // width_1
-    TS_ASSERT_DELTA(func->getParameter(1),0.6666666667, 1e-10); // I_1
+    TS_ASSERT_DELTA(func->getParameter(1),0.6666666633, 1e-10); // I_1
     TS_ASSERT_DELTA(func->getParameter(2),10.0, 1e-10); // width_2
-    TS_ASSERT_DELTA(func->getParameter(3),0.3333333326, 1e-10); //I_2
+    TS_ASSERT_DELTA(func->getParameter(3),0.3333333317, 1e-10); //I_2
   }
 
   void test_Iteration_Starting_Resets_Intensity_Parameters_When_Number_Intensity_Pars_Does_Not_Match_Number_Masses()

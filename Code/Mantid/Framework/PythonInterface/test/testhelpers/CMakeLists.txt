@@ -4,6 +4,7 @@
 
 set ( PY_FILES
   __init__.py
+  algorithm_decorator.py
 )
 
 # Copy python files to output directory

@@ -452,7 +452,7 @@ public:
    */
   LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& entry_name, const std::string & entry_type,
                        const std::size_t numEvents, const bool oldNeXusFileNames,
-                       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
+                       Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
   : Task(),
     alg(alg), entry_name(entry_name), entry_type(entry_type),
     pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
@@ -1425,11 +1425,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
       // get the number of events
       std::size_t num = numEvents(file, hasTotalCounts, oldNeXusFileNames);
-      if (num == 0)
-      {
-        file.closeGroup();
-        continue;
-      }
       bankNames.push_back( entry_name );
       bankNumEvents.push_back(num);
       total_events += num;
@@ -1606,7 +1601,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  Mutex * diskIOMutex = new Mutex();
+  auto diskIOMutex = boost::make_shared<Mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
@@ -1680,7 +1675,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
   // Start and end all threads
   pool.joinAll();
-  delete diskIOMutex;
+  diskIOMutex.reset();
   delete prog2;
 
 

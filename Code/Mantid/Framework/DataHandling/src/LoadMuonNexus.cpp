@@ -91,6 +91,9 @@ namespace Mantid
       
       declareProperty(new WorkspaceProperty<Workspace>("DeadTimeTable", "", Direction::Output, PropertyMode::Optional), 
         "Table or a group of tables containing detector dead times");
+
+      declareProperty(new WorkspaceProperty<Workspace>("DetectorGroupingTable", "", Direction::Output, PropertyMode::Optional),
+        "Table or a group of tables with information about the detector grouping stored in the file (if any)");
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set

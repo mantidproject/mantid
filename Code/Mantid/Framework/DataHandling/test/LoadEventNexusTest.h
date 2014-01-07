@@ -332,6 +332,24 @@ public:
     doTestSingleBank(false, false, "bankDoesNotExist", true);
   }
 
+  void test_SingleBank_with_no_events()
+  {
+    LoadEventNexus load;
+    TS_ASSERT_THROWS_NOTHING( load.initialize() );
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("Filename", "HYSA_12509.nxs.h5") );
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("BankName", "bank10") );
+    const std::string outws("AnEmptyWS");
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("OutputWorkspace", outws) );
+    if ( !load.execute() )
+    {
+      TS_FAIL("LoadEventNexus shouldn't fail to load an empty bank");
+      return;
+    }
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
+    TS_ASSERT_EQUALS( ws->getNumberEvents(), 0 );
+  }
+
   void test_instrument_inside_nexus_file()
   {
     LoadEventNexus load;

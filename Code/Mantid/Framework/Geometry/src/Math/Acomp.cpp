@@ -5,6 +5,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Math/RotCounter.h"
 #include <algorithm>
+#include <iostream>
 #include <iterator>
 #include <functional>
 

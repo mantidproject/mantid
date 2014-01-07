@@ -84,7 +84,7 @@ namespace Mantid
 
     /**
      * Returns the value of the cross-section convoluted with the resolution an event. This assumes that
-     * the box forms a 4D point with axes: Qx, Qy, Qz, \f$\Delta E\f$
+     * the box forms a 4D point with axes: Qx, Qy, Qz, \f$\Delta E\f$ in the cartesian crystal frame
      * @param box :: An iterator pointing at the current box under examination
      * @param eventIndex :: An index of the current event in the box
      * @param innerRunIndex :: An index of the current run within the workspace. This is NOT the run number. The experiment
@@ -96,42 +96,95 @@ namespace Mantid
     {
       auto iter = m_exptCache.find(std::make_pair(innerRunIndex, box.getInnerDetectorID(eventIndex))); // Guaranteed to exist
       const CachedExperimentInfo & detCachedExperimentInfo = *(iter->second);
-      QOmegaPoint qOmega(box, eventIndex);
+      QOmegaPoint qCrystal(box, eventIndex);
+
+      // Transform to spectrometer coordinates for resolution calculation
+      // Done by hand to avoid expensive memory allocations when using Matrix classes
+      const Geometry::OrientedLattice & lattice = detCachedExperimentInfo.experimentInfo().sample().getOrientedLattice();
+      const Kernel::DblMatrix & gr = detCachedExperimentInfo.experimentInfo().run().getGoniometerMatrix();
+      const Kernel::DblMatrix & umat = lattice.getU();
+
+      QOmegaPoint qLab(0.0,0.0,0.0,qCrystal.deltaE);
+      for(unsigned int i = 0; i < 3; ++i)
+      {
+        qLab.qx += (gr[0][i]*umat[i][0]*qCrystal.qx +
+                    gr[0][i]*umat[i][1]*qCrystal.qy +
+                    gr[0][i]*umat[i][2]*qCrystal.qz);
+
+        qLab.qy += (gr[1][i]*umat[i][0]*qCrystal.qx +
+                    gr[1][i]*umat[i][1]*qCrystal.qy +
+                    gr[1][i]*umat[i][2]*qCrystal.qz);
+
+        qLab.qz += (gr[2][i]*umat[i][0]*qCrystal.qx +
+                    gr[2][i]*umat[i][1]*qCrystal.qy +
+                    gr[2][i]*umat[i][2]*qCrystal.qz);
+      }
 
       if(m_foregroundOnly)
       {
         std::vector<double> & nominalQ = m_deltaQE[PARALLEL_THREAD_NUMBER];
-        nominalQ[0] = qOmega.qx;
-        nominalQ[1] = qOmega.qy;
-        nominalQ[2] = qOmega.qz;
-        nominalQ[3] = qOmega.deltaE;
+        nominalQ[0] = qCrystal.qx;
+        nominalQ[1] = qCrystal.qy;
+        nominalQ[2] = qCrystal.qz;
+        nominalQ[3] = qCrystal.deltaE;
         return foregroundModel().scatteringIntensity(detCachedExperimentInfo.experimentInfo(), nominalQ);
       }
 
       // -- Add in perturbations to nominal Q from instrument resolution --
 
       // Calculate the matrix of coefficients that contribute to the resolution function (the B matrix in TobyFit).
-      calculateResolutionCoefficients(detCachedExperimentInfo, qOmega);
+      calculateResolutionCoefficients(detCachedExperimentInfo, qLab);
+
+      // Pre calculate the transform inverse (RU) matrix elements
+      double rb00(0.0), rb01(0.0), rb02(0.0),
+             rb10(0.0), rb11(0.0), rb12(0.0),
+             rb20(0.0), rb21(0.0), rb22(0.0);
+      for(unsigned int i = 0; i < 3; ++i)
+      {
+        rb00 += gr[0][i]*umat[i][0];
+        rb01 += gr[0][i]*umat[i][1];
+        rb02 += gr[0][i]*umat[i][2];
+
+        rb10 += gr[1][i]*umat[i][0];
+        rb11 += gr[1][i]*umat[i][1];
+        rb12 += gr[1][i]*umat[i][2];
+
+        rb20 += gr[2][i]*umat[i][0];
+        rb21 += gr[2][i]*umat[i][1];
+        rb22 += gr[2][i]*umat[i][2];
+      }
+      const double determinant = (rb00*(rb11*rb22 - rb12*rb21) -
+                                  rb01*(rb10*rb22 - rb12*rb20) +
+                                  rb02*(rb10*rb21 - rb11*rb20));
 
       // Start MC loop and check the relative error every min steps
       monteCarloLoopStarting();
       double sumSigma(0.0), sumSigmaSqr(0.0), avgSigma(0.0);
       for(int step = 1; step <= m_mcLoopMax; ++step)
       {
-        generateIntegrationVariables(detCachedExperimentInfo, qOmega);
-        calculatePerturbedQE(detCachedExperimentInfo, qOmega);
+        generateIntegrationVariables(detCachedExperimentInfo, qLab);
+        calculatePerturbedQE(detCachedExperimentInfo, qLab);
 
         std::vector<double> & q0 = m_deltaQE[PARALLEL_THREAD_NUMBER]; // Currently ordered beam,perp,up (z,x,y)
         // Reorder to X,Y,Z
         std::swap(q0[0],q0[1]);
         std::swap(q0[1],q0[2]);
 
+        // Transform to crystal frame for model
+        // Need to tidy this up when we confirm it is correct
+        const double qcx = ((rb11*rb22 - rb12*rb21)*q0[0] + (rb02*rb21 - rb01*rb22)*q0[1] + (rb01*rb12 - rb02*rb11)*q0[2])/determinant;
+        const double qcy = ((rb12*rb20 - rb10*rb22)*q0[0] + (rb00*rb22 - rb02*rb20)*q0[1] + (rb02*rb10 - rb00*rb12)*q0[2])/determinant;
+        const double qcz = ((rb10*rb21 - rb11*rb20)*q0[0] + (rb01*rb20 - rb00*rb21)*q0[1] + (rb00*rb11 - rb01*rb10)*q0[2])/determinant;
+        q0[0] = qcx;
+        q0[1] = qcy;
+        q0[2] = qcz;
+
         // Compute weight from the foreground at this point
         const double weight = foregroundModel().scatteringIntensity(detCachedExperimentInfo.experimentInfo(), q0);
         // Add on this contribution to the average
         sumSigma += weight;
         sumSigmaSqr += weight*weight;
-        
+
         // cppcheck-suppress zerodivcond
         avgSigma = sumSigma/step;
         if(checkForConvergence(step) && hasConverged(step, sumSigma, sumSigmaSqr, avgSigma))
