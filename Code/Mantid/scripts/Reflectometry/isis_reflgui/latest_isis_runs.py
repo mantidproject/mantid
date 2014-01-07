@@ -99,11 +99,13 @@ class LatestISISRuns(object):
                     item = line[3:8] + ": " + line[28:52].strip()
                     runnames.append(item)
         return runnames
-    def getxmlway(self, eID):
+    def getxmlway(self, eID, maxDepth):
         runnames = []
         tree = xml.parse(self.main_path)
         dom = tree.getroot()
-        for cycle in dom:
+        depth = 0
+        revDom = reversed(dom)
+        for cycle in revDom:
             journal_file = cycle.attrib.get('name')
             journal_path = os.path.join(self.base_path, journal_file)
             cycle_id = self.__findCycleId(journal_path)
@@ -122,6 +124,11 @@ class LatestISISRuns(object):
                     if title and runno:
                         journalentry = runno + ": " + title
                         runnames.append(journalentry)
+            depth = depth + 1
+            if depth == maxDepth:
+                break
         return runnames
-    def getJournalRuns(self, eID):
-        return self.gettextway(eID)
+    def getJournalRuns(self, eID, maxDepth = 1):
+        if maxDepth < 1:
+            maxDepth = 1
+        return self.getxmlway(eID, maxDepth)
