@@ -2,9 +2,12 @@
 <parameter-file instrument="HRPD" valid-from="blah...">
 
 <component-link name="bank_bsk" >
+
+  
   <parameter name="BackToBackExponential:S" type="fitting">
-    <formula eq="sqrt(7.429*centre^4+132.188*centre^2)" unit="dSpacing" result-unit="TOF" />
-  </parameter> 
+    <value val="gasgas" />
+  </parameter>  
+  
   <parameter name="BackToBackExponential:A" type="fitting">
     <formula eq="(0.086999/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>   
@@ -14,9 +17,12 @@
 </component-link>
 
 <component-link name="bank_90degnew" >
+
+  
   <parameter name="BackToBackExponential:S" type="fitting">
-    <formula eq="sqrt(158.011*centre^4+4166.279*centre^2)" unit="dSpacing" result-unit="TOF" />
-  </parameter>   
+    <value val="gasgas" />
+  </parameter>    
+  
   <parameter name="BackToBackExponential:A" type="fitting">
     <formula eq="(0.086999/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>    
@@ -26,9 +32,12 @@
 </component-link>
 
 <component-link name="bank_la" >
+
+  
   <parameter name="BackToBackExponential:S" type="fitting">
-    <formula eq="sqrt(188.149*centre^4+6520.945*centre^2)" unit="dSpacing" result-unit="TOF" />
-  </parameter>   
+    <value val="gasgas" />
+  </parameter>    
+  
   <parameter name="BackToBackExponential:A" type="fitting">
     <formula eq="(0.086999/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>  
