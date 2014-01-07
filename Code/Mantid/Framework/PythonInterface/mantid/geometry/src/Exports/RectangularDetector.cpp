@@ -1,11 +1,13 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include <boost/python/class.hpp>
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 
 using Mantid::Geometry::CompAssembly;
 using Mantid::Geometry::RectangularDetector;
-using Mantid::Geometry::IDetector;
+using Mantid::Geometry::RectangularDetectorPixel;
+using Mantid::Geometry::Detector;
 using Mantid::Geometry::IObjComponent;
 using namespace boost::python;
 
@@ -34,3 +36,8 @@ void export_RectangularDetector()
     ;
 }
 
+void export_RectangularDetectorPixel()
+{
+  class_<RectangularDetectorPixel, bases<Detector>, boost::noncopyable>("RectangularDetectorPixel", no_init)
+    ;
+}
