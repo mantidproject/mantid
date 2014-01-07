@@ -79,8 +79,7 @@ namespace Mantid
      {
         UNUSED_ARG( xValues);
         std::string PeakWorkspaceName = "sapphire_peaks";
-        std::string cell_type = "Triclinic"; //p[1];
-        int edgePixels = 0; //atoi(p[2].c_str());
+        int edgePixels = 0; //Edge Pixels already removed
         std::vector<double>Params;
         Params.push_back( getParameter("p0"));
         Params.push_back( getParameter("p1"));
@@ -90,7 +89,7 @@ namespace Mantid
         Params.push_back( getParameter("p5"));
 
         Mantid::Crystal::OptimizeLatticeForCellType u;
-        u.optLattice(PeakWorkspaceName, cell_type, Params, edgePixels, out);
+        u.optLattice(PeakWorkspaceName, Params, edgePixels, out);
         double ChiSqTot=0;
         for( size_t i = 0; i<nData; i++ )
 		{

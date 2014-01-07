@@ -95,48 +95,18 @@ namespace Mantid
       bool   apply          = this->getProperty("Apply");
       double tolerance      = this->getProperty("Tolerance");
       std::string edge 		= this->getProperty("EdgePixels");
-      std::string par[6];
       std::string inname = getProperty("PeaksWorkspace");
-      par[0] = inname;
-      std::string type = getProperty("CellType");
-      par[1] = type;
-      par[2] = edge;
+      std::string cell_type = getProperty("CellType");
       DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
 
       std::vector<double> x;
     
       // finally do the optimization
     
-      size_t nopt = 1;
-      if(type.compare(0,2,"Te")==0)nopt = 2;
-      else if(type.compare(0,2,"Or")==0)nopt = 3;
-      else if(type.compare(0,2,"Rh")==0)nopt = 2;
-      else if(type.compare(0,2,"He")==0)nopt = 2;
-      else if(type.compare(0,2,"Mo")==0)nopt = 4;
-      else if(type.compare(0,2,"Tr")==0)nopt = 6;
-
       const DblMatrix UB = ws->sample().getOrientedLattice().getUB();
       std::vector<double>lat(6);
       IndexingUtils::GetLatticeParameters( UB, lat);
       // initialize parameters for optimization
-      x.push_back(lat[0]);
-      if(type.compare(0,2,"Te")==0)x.push_back(lat[2]);
-      else if(type.compare(0,2,"Or")==0)
-      {
-    	  x.push_back( lat[1]);
-    	  x.push_back(lat[2]);
-      }
-      else if(type.compare(0,2,"Rh")==0)x.push_back( lat[3]);
-      else if(type.compare(0,2,"He")==0)x.push_back( lat[2]);
-      else if(type.compare(0,2,"Mo")==0)
-      {
-    	  x.push_back(lat[1]);
-    	  x.push_back(lat[2]);
-        if(type.compare(13,1,"a")==0)x.push_back( lat[3]);
-        else if(type.compare(13,1,"b")==0)x.push_back(lat[4]);
-        else if(type.compare(13,1,"c")==0)x.push_back(lat[5]);
-      }
-      else if(type.compare(0,2,"Tr")==0)for ( size_t i = 1; i < nopt; i++ )x.push_back( lat[i]);
       size_t n_peaks = ws->getNumberPeaks();
       MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
                  std::string("Workspace2D"), 1, n_peaks, n_peaks);
@@ -149,7 +119,7 @@ namespace Mantid
 
       std::ostringstream fun_str;
       fun_str << "name=LatticeErrors";
-      for ( size_t i = 0; i < nopt; i++ )fun_str << ",p" << i <<"="<<x[i];
+      for ( size_t i = 0; i < 6; i++ )fun_str << ",p" << i <<"="<<lat[i];
 
       IAlgorithm_sptr fit_alg;
       try
@@ -162,6 +132,54 @@ namespace Mantid
       }
 
       fit_alg->setPropertyValue("Function", fun_str.str());
+      if (cell_type == "Cubic")
+      {
+        std::ostringstream tie_str;
+        tie_str << "p1=p0,p2=p0,p3=90,p4=90,p5=90";
+        fit_alg->setProperty("Ties", tie_str.str());
+      }
+      else if (cell_type == "Tetragonal")
+      {
+        std::ostringstream tie_str;
+        tie_str << "p1=p0,p3=90,p4=90,p5=90";
+        fit_alg->setProperty("Ties", tie_str.str());
+      }
+      else if (cell_type == "Orthorhombic")
+      {
+        std::ostringstream tie_str;
+        tie_str << "p3=90,p4=90,p5=90";
+        fit_alg->setProperty("Ties", tie_str.str());
+      }
+      else if (cell_type == "Rhombohedral")
+      {
+        std::ostringstream tie_str;
+        tie_str << "p1=p0,p2=p0,p4=p3,p5=p3";
+        fit_alg->setProperty("Ties", tie_str.str());
+      }
+      else if (cell_type == "Hexagonal")
+      {
+        std::ostringstream tie_str;
+        tie_str << "p1=p0,p3=90,p4=90,p5=120";
+        fit_alg->setProperty("Ties", tie_str.str());
+      }
+      else if (cell_type == "Monoclinic ( a unique )")
+      {
+        std::ostringstream tie_str;
+        tie_str << "p4=90,p5=90";
+        fit_alg->setProperty("Ties", tie_str.str());
+      }
+      else if (cell_type == "Monoclinic ( b unique )")
+      {
+        std::ostringstream tie_str;
+        tie_str << "p3=90,p5=90";
+        fit_alg->setProperty("Ties", tie_str.str());
+      }
+      else if (cell_type == "Monoclinic ( c unique )")
+      {
+        std::ostringstream tie_str;
+        tie_str << "p3=90,p4=90";
+        fit_alg->setProperty("Ties", tie_str.str());
+      }
       fit_alg->setProperty("InputWorkspace", data);
       fit_alg->setProperty("WorkspaceIndex", 0);
       fit_alg->setProperty("MaxIterations", 5000);
@@ -185,51 +203,45 @@ namespace Mantid
       std::vector<double> sigabc(Params.size());
       OrientedLattice latt=ws->mutableSample().getOrientedLattice();
       DblMatrix UBnew = latt.getUB();
-      const std::vector<Peak> &peaks = ws->getPeaks();
-      std::vector<V3D> hkl_vector;
 
-      for ( size_t i = 0; i < n_peaks; i++ )
-      {
-        hkl_vector.push_back(peaks[i].getHKL());
-      }
-      Calculate_Errors(n_peaks, inname, type, Params, atoi(edge.c_str()), sigabc, chisq);
+      Calculate_Errors(n_peaks, inname, cell_type, Params, atoi(edge.c_str()), sigabc, chisq);
       OrientedLattice o_lattice;
       o_lattice.setUB( UBnew );
 
-      if (type == "Cubic")
+      if (cell_type == "Cubic")
       {
     	o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],0,0,0);
       }
-      else if (type == "Tetragonal")
+      else if (cell_type == "Tetragonal")
       {
     	o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
       }
-      else if (type == "Orthorhombic")
+      else if (cell_type == "Orthorhombic")
       {
     	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,0);
       }
-      else if (type == "Rhombohedral")
+      else if (cell_type == "Rhombohedral")
       {
     	o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],sigabc[1],sigabc[1],sigabc[1]);
       }
-      else if (type == "Hexagonal")
+      else if (cell_type == "Hexagonal")
       {
     	o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
       }
-      else if (type == "Monoclinic ( a unique )")
+      else if (cell_type == "Monoclinic ( a unique )")
       {
     	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],0,0);
       }
-      else if (type == "Monoclinic ( b unique )")
+      else if (cell_type == "Monoclinic ( b unique )")
       {
     	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,sigabc[3],0);
 
       }
-      else if (type == "Monoclinic ( c unique )")
+      else if (cell_type == "Monoclinic ( c unique )")
       {
     	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,sigabc[3]);
       }
-      else if (type == "Triclinic")
+      else if (cell_type == "Triclinic")
       {
     	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
       }
@@ -251,11 +263,104 @@ namespace Mantid
       }
     }
 
-    double OptimizeLatticeForCellType::optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & Params, int edge)
+    double OptimizeLatticeForCellType::optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & params, int edge)
     {
+      std::vector<double> lattice_parameters;
+      lattice_parameters.assign (6,0);
+      if (cell_type == "Cubic")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[0];
+        lattice_parameters[2] = params[0];
+
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Tetragonal")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[0];
+        lattice_parameters[2] = params[1];
+
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Orthorhombic")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2];
+
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Rhombohedral")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[0];
+        lattice_parameters[2] = params[0];
+
+        lattice_parameters[3] = params[1];
+        lattice_parameters[4] = params[1];
+        lattice_parameters[5] = params[1];
+      }
+      else if (cell_type == "Hexagonal")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[0];
+        lattice_parameters[2] = params[1];
+
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 120;
+      }
+      else if (cell_type == "Monoclinic ( a unique )")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2];
+
+        lattice_parameters[3] = params[3];
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Monoclinic ( b unique )")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2];
+
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = params[3];
+        lattice_parameters[5] = 90;
+      }
+      else if (cell_type == "Monoclinic ( c unique )")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2];
+
+        lattice_parameters[3] = 90;
+        lattice_parameters[4] = 90;
+        lattice_parameters[5] = params[3];
+      }
+      else if (cell_type == "Triclinic")
+      {
+        lattice_parameters[0] = params[0];
+        lattice_parameters[1] = params[1];
+        lattice_parameters[2] = params[2];
+
+        lattice_parameters[3] = params[3];
+        lattice_parameters[4] = params[4];
+        lattice_parameters[5] = params[5];
+      }
+
         size_t nData = 15500;
         double* out = new double[nData];
-        optLattice(inname, cell_type, Params, edge, out);
+        optLattice(inname, lattice_parameters, edge, out);
         double ChiSqTot=0;
         for( size_t i = 0; i<nData; i++ )ChiSqTot += out[i];
         delete[] out;
@@ -272,7 +377,7 @@ namespace Mantid
      * @param tofParams
      * @return
      */
-    void OptimizeLatticeForCellType::optLattice(std::string inname, std::string cell_type, std::vector<double> & params, int edge, double *out)
+    void OptimizeLatticeForCellType::optLattice(std::string inname, std::vector<double> & params, int edge, double *out)
     {
       PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>
            (AnalysisDataService::Instance().retrieve(inname));
@@ -288,113 +393,21 @@ namespace Mantid
         q_vector.push_back(peaks[i].getQSampleFrame());
         hkl_vector.push_back(peaks[i].getHKL());
       }
-      std::vector<double> lattice_parameters;
-      lattice_parameters.assign (6,0);
-      if (cell_type == "Cubic")
-      {
-        lattice_parameters[0] = params[0];       
-        lattice_parameters[1] = params[0];
-        lattice_parameters[2] = params[0];      
-    
-        lattice_parameters[3] = 90;
-        lattice_parameters[4] = 90;
-        lattice_parameters[5] = 90;
-      }
-      else if (cell_type == "Tetragonal")
-      {
-        lattice_parameters[0] = params[0];    
-        lattice_parameters[1] = params[0];
-        lattice_parameters[2] = params[1];   
-    
-        lattice_parameters[3] = 90;
-        lattice_parameters[4] = 90;
-        lattice_parameters[5] = 90;
-      }
-      else if (cell_type == "Orthorhombic")
-      {
-        lattice_parameters[0] = params[0];  
-        lattice_parameters[1] = params[1];
-        lattice_parameters[2] = params[2]; 
-    
-        lattice_parameters[3] = 90;
-        lattice_parameters[4] = 90;
-        lattice_parameters[5] = 90;
-      }
-      else if (cell_type == "Rhombohedral")
-      {
-        lattice_parameters[0] = params[0];
-        lattice_parameters[1] = params[0];
-        lattice_parameters[2] = params[0];  
-    
-        lattice_parameters[3] = params[1];
-        lattice_parameters[4] = params[1];
-        lattice_parameters[5] = params[1];
-      }
-      else if (cell_type == "Hexagonal")
-      {
-        lattice_parameters[0] = params[0]; 
-        lattice_parameters[1] = params[0];
-        lattice_parameters[2] = params[1];
-    
-        lattice_parameters[3] = 90;
-        lattice_parameters[4] = 90;
-        lattice_parameters[5] = 120;
-      }
-      else if (cell_type == "Monoclinic ( a unique )")
-      {
-        lattice_parameters[0] = params[0];
-        lattice_parameters[1] = params[1];
-        lattice_parameters[2] = params[2];
-    
-        lattice_parameters[3] = params[3];
-        lattice_parameters[4] = 90;
-        lattice_parameters[5] = 90;
-      }
-      else if (cell_type == "Monoclinic ( b unique )")
-      {
-        lattice_parameters[0] = params[0];
-        lattice_parameters[1] = params[1];
-        lattice_parameters[2] = params[2];
-    
-        lattice_parameters[3] = 90;
-        lattice_parameters[4] = params[3];
-        lattice_parameters[5] = 90;
-      }
-      else if (cell_type == "Monoclinic ( c unique )")
-      {
-        lattice_parameters[0] = params[0];
-        lattice_parameters[1] = params[1];
-        lattice_parameters[2] = params[2];
-    
-        lattice_parameters[3] = 90;
-        lattice_parameters[4] = 90;
-        lattice_parameters[5] = params[3];
-      }
-      else if (cell_type == "Triclinic")
-      {
-        lattice_parameters[0] = params[0];
-        lattice_parameters[1] = params[1];
-        lattice_parameters[2] = params[2]; 
-    
-        lattice_parameters[3] = params[3];
-        lattice_parameters[4] = params[4];
-        lattice_parameters[5] = params[5];
-      }
-    
+
       Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("CalculateUMatrix");
       alg->setPropertyValue("PeaksWorkspace", inname);
-      alg->setProperty("a",lattice_parameters[0]);
-      alg->setProperty("b",lattice_parameters[1]);
-      alg->setProperty("c",lattice_parameters[2]);
-      alg->setProperty("alpha",lattice_parameters[3]);
-      alg->setProperty("beta",lattice_parameters[4]);
-      alg->setProperty("gamma",lattice_parameters[5]);
+      alg->setProperty("a",params[0]);
+      alg->setProperty("b",params[1]);
+      alg->setProperty("c",params[2]);
+      alg->setProperty("alpha",params[3]);
+      alg->setProperty("beta",params[4]);
+      alg->setProperty("gamma",params[5]);
       alg->executeAsChildAlg();
     
       ws = alg->getProperty("PeaksWorkspace");
       OrientedLattice latt=ws->mutableSample().getOrientedLattice();
       DblMatrix UB = latt.getUB();
-      DblMatrix A = A_matrix(lattice_parameters);
+      DblMatrix A = A_matrix(params);
       DblMatrix Bc = A;
       Bc.Invert();
       DblMatrix U1_B1 = UB * A;
@@ -480,7 +493,6 @@ namespace Mantid
 
       @param  npeaks       Number of peaks
       @param  inname       Name of workspace containing peaks
-      @param  cell_type    type from dropdown list
       @param  Params       optimized cell parameters
       @param  edgePixels   pixels to ignore at edge of detectors
       @param  sigabc       errors of optimized parameters
@@ -500,30 +512,57 @@ namespace Mantid
       double START_DELTA = 1.0e-2;     // start with change of 1%
       std::vector<double> approx;   // save list of approximations
 
-      double a_save;
+      double x_save;
       double delta;
-      for ( size_t k = 0; k < Params.size(); k++ )
+      size_t nopt = 1;
+      if(cell_type.compare(0,2,"Te")==0)nopt = 2;
+      else if(cell_type.compare(0,2,"Or")==0)nopt = 3;
+      else if(cell_type.compare(0,2,"Rh")==0)nopt = 2;
+      else if(cell_type.compare(0,2,"He")==0)nopt = 2;
+      else if(cell_type.compare(0,2,"Mo")==0)nopt = 4;
+      else if(cell_type.compare(0,2,"Tr")==0)nopt = 6;
+
+      std::vector<double> x;
+      x.push_back(Params[0]);
+      if(cell_type.compare(0,2,"Te")==0)x.push_back(Params[2]);
+      else if(cell_type.compare(0,2,"Or")==0)
       {
-    	std::vector<double> a = Params;
+         x.push_back( Params[1]);
+         x.push_back(Params[2]);
+      }
+      else if(cell_type.compare(0,2,"Rh")==0)x.push_back( Params[3]);
+      else if(cell_type.compare(0,2,"He")==0)x.push_back( Params[2]);
+      else if(cell_type.compare(0,2,"Mo")==0)
+      {
+         x.push_back(Params[1]);
+         x.push_back(Params[2]);
+         if(cell_type.compare(13,1,"a")==0)x.push_back( Params[3]);
+         else if(cell_type.compare(13,1,"b")==0)x.push_back(Params[4]);
+         else if(cell_type.compare(13,1,"c")==0)x.push_back(Params[5]);
+      }
+      else if(cell_type.compare(0,2,"Tr")==0)for ( size_t i = 1; i < nopt; i++ )x.push_back( Params[i]);
+
+      for ( size_t k = 0; k < nopt; k++ )
+      {
         double diff = 0.0;
 
-        a_save = a[k];
+        x_save = x[k];
 
-        if ( a_save < 1.0e-8 )             // if parameter essentially 0, use
+        if ( x_save < 1.0e-8 )             // if parameter essentially 0, use
           delta = 1.0e-8;                  // a "small" step
         else
-          delta = START_DELTA * a_save;
+          delta = START_DELTA * x_save;
 
         for ( int count = 0; count < MAX_STEPS; count++ )
         {
-          a[k] = a_save + delta;
-          double chi_3 = optLatticeSum(inname, cell_type, a, edgePixels);
+          x[k] = x_save + delta;
+          double chi_3 = optLatticeSum(inname, cell_type, x, edgePixels);
 
-          a[k] = a_save - delta;
-          double chi_1 = optLatticeSum(inname, cell_type, a, edgePixels);
+          x[k] = x_save - delta;
+          double chi_1 = optLatticeSum(inname, cell_type, x, edgePixels);
 
-          a[k] = a_save;
-          double chi_2 = optLatticeSum(inname, cell_type, a, edgePixels);
+          x[k] = x_save;
+          double chi_2 = optLatticeSum(inname, cell_type, x, edgePixels);
 
           diff = chi_1-2*chi_2+chi_3;
           if ( diff > 0 )
