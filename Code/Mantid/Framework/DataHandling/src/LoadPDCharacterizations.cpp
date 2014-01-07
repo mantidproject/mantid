@@ -1,5 +1,8 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+This algorithm loads information into a [[TableWorkspace]] for the characterization
+information and a collection of output parameters for the focus positions to be used
+in [[EditInstrumentGeometry]]. If a section is missing then those parameters will be
+empty. This includes an empty table (zero rows) if that information is missing.
 *WIKI*/
 
 #include "MantidDataHandling/LoadPDCharacterizations.h"

@@ -10,7 +10,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadPDCharacterizations : TODO: DESCRIPTION
+  /** LoadPDCharacterizations : Load a characterization file used in Powder Diffraction Reduction.
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
