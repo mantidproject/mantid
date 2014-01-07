@@ -4,6 +4,7 @@ from mantid.api import WorkspaceGroup
 import xml.etree.ElementTree as xml
 from isis_reflectometry.quick import *
 from isis_reflectometry.combineMulti import *
+from isis_reflgui.settings import *
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -11,6 +12,16 @@ except AttributeError:
     _fromUtf8 = lambda s: s
 
 class Ui_SaveWindow(object):
+    def __init__(self):
+        
+        self.__instrument = config['default.instrument'].strip().upper()
+        
+        usersettings = Settings() # This will throw a missing config exception if no config file is available.
+        try:
+            self.__mountpoint = usersettings.get_named_setting("DataMountPoint")
+        except KeyError:
+            print "DataMountPoint is missing from the config.xml file."
+            raise
 
     def setupUi(self, SaveWindow):
         self.SavePath=""
@@ -235,10 +246,18 @@ class Ui_SaveWindow(object):
             if (self.SavePath!=''):
                 self.lineEdit.setText(self.SavePath)
             else:
-                tree1=xml.parse(r'\\isis\inst$\NDX'+currentInstrument+'\Instrument\logs\journal\journal_main.xml')
+                base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
+                print base_path
+                main_journal_path = os.path.join(base_path, 'journal_main.xml')
+                #tree1=xml.parse(r'\\isis\inst$\NDX'+currentInstrument+'\Instrument\logs\journal\journal_main.xml')
+                print main_journal_path
+                tree1=xml.parse(main_journal_path)
                 root1=tree1.getroot()
                 currentJournal=root1[len(root1)-1].attrib.get('name')
-                tree=xml.parse(r'\\isis\inst$\NDX'+currentInstrument+'\Instrument\logs\journal\\'+currentJournal)
+                cycle_journal_path = os.path.join(base_path, currentJournal)
+                print cycle_journal_path
+                #tree=xml.parse(r'\\isis\inst$\NDX'+currentInstrument+'\Instrument\logs\journal\\'+currentJournal)
+                tree=xml.parse(cycle_journal_path)
                 root=tree.getroot()
                 
                 i=0
@@ -249,7 +268,7 @@ class Ui_SaveWindow(object):
                         user=root[i][1].text[0:root[i][1].text.find(',')]
                     else:
                         user=root[i][1].text[0:root[i][1].text.find(' ')]
-                    SavePath='U:/'+user+'/'
+                    SavePath = os.path.join('U:', user)
                     self.lineEdit.setText(SavePath)
                 except LookupError:
                     print "Not found!"

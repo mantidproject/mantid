@@ -461,10 +461,14 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.loading = False
         self.windowRefl.modFlag = False
     def saveWorkspaces(self):
-        Dialog = QtGui.QDialog()
-        u = refl_save.Ui_SaveWindow()
-        u.setupUi(Dialog)
-        Dialog.exec_()
+        try:
+            Dialog = QtGui.QDialog()
+            u = refl_save.Ui_SaveWindow()
+            u.setupUi(Dialog)
+            Dialog.exec_()
+        except Exception as ex:
+            logger.notice("Could not open save workspace dialog")
+            logger.notice(str(ex))
         #print "Disabled - Run desired save algorithm from main MantidPlot window instead"
     def showHelp(self):
         import webbrowser
