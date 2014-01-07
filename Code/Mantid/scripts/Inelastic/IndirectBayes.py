@@ -455,13 +455,12 @@ def C2Fw(prog,sname):
 		nspec = int(var[0])
 		first = 7
 
-		x_data = []
 		amplitude_data, height_data, width_data = [], [], []
 		amplitude_error, height_error, width_error  = [], [], []
 		
 		for m in range(nspec):
 			first,Q,i0,fw,it = LorBlock(asc,first,nl)
-			x_data += [Q for i in range(nl*n_params)]
+			x.append(Q)
 
 			#collect amplitude, height and width data
 			width_data += fw[:nl]
@@ -473,7 +472,6 @@ def C2Fw(prog,sname):
 			amplitude_error += it[nl:nl+nl]
 			height_error += [i0[1] for i in range(nl)]
 
-		x += x_data
 		y += amplitude_data + height_data + width_data
 		e += amplitude_error + height_error + width_error
 
@@ -481,6 +479,8 @@ def C2Fw(prog,sname):
 			for name in names:
 				vAxisNames.append('f'+str(nl)+'.f'+str(j)+'.'+name)
 
+	#repeat x data for each of the histograms 
+	x = x * (nhist/3)
 	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=nhist,
 		UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=vAxisNames)
 
