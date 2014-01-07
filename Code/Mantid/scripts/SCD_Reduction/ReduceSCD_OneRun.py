@@ -330,6 +330,10 @@ elif use_cylindrical_integration:
 SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, 
                Filename=run_niggli_integrate_file )
 
+# Print warning if user is trying to integrate using the cylindrical method and transorm the cell
+if use_cylindrical_integration:
+  if (not cell_type is None) or (not centering is None):
+    print "WARNING: Cylindrical profiles are NOT transformed!!!"
 #
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
