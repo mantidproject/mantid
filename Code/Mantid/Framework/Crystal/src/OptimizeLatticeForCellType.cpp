@@ -608,7 +608,7 @@ namespace Mantid
         else                                        // use one with smallest diff
         {
           double min_diff = Mantid::EMPTY_DBL();
-          for ( size_t i = 0; i < approx.size(); i++ )
+          for ( size_t i = 0; i < approx.size()-1; i++ )
           {
             diff = std::abs( (approx[i+1]-approx[i])/approx[i] );
             if ( diff < min_diff )
