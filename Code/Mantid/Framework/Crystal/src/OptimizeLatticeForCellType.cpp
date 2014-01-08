@@ -111,8 +111,6 @@ namespace Mantid
       }
       AnalysisDataService::Instance().addOrReplace("_peaks",peakWS);
 
-      std::vector<double> x;
-    
       // finally do the optimization
     
       const DblMatrix UB = ws->sample().getOrientedLattice().getUB();
@@ -525,7 +523,6 @@ namespace Mantid
       double START_DELTA = 1.0e-2;     // start with change of 1%
       std::vector<double> approx;   // save list of approximations
 
-      double x_save;
       double delta;
       size_t nopt = 1;
       if(cell_type.compare(0,2,"Te")==0)nopt = 2;
@@ -559,7 +556,7 @@ namespace Mantid
       {
         double diff = 0.0;
 
-        x_save = x[k];
+        double x_save = x[k];
 
         if ( x_save < 1.0e-8 )             // if parameter essentially 0, use
           delta = 1.0e-8;                  // a "small" step
