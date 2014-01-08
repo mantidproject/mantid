@@ -60,8 +60,9 @@ namespace DataHandling
   /// Sets documentation strings for this algorithm
   void LoadPDCharacterizations::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    std::string descr("Load a characterization file used in Powder Diffraction Reduction.");
+    this->setWikiSummary(descr);
+    this->setOptionalMessage(descr);
   }
 
   //----------------------------------------------------------------------------------------------
