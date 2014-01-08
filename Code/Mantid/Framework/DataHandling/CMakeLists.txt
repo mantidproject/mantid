@@ -1,7 +1,6 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/CompressEvents.cpp
-	src/ConvertFullprofToXML.cpp
 	src/CreateChopperModel.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
@@ -131,7 +130,6 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/CompressEvents.h
-	inc/MantidDataHandling/ConvertFullprofToXML.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
@@ -261,7 +259,6 @@ set ( INC_FILES
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
-	ConvertFullprofToXMLTest.h
 	CreateChopperModelTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
