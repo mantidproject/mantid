@@ -3,6 +3,7 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 import xml.etree.ElementTree as xml
 from isis_reflectometry.quick import *
+from isis_reflectometry.procedures import *
 from isis_reflectometry.combineMulti import *
 from isis_reflgui.settings import *
 
@@ -228,7 +229,7 @@ class Ui_SaveWindow(object):
         logs = mtd[str(self.listWidget.currentItem().text())].getRun().getLogData()
         for i in range(0,len(logs)):
             self.listWidget2.addItem(logs[i].name)
-    
+
     def on_comboBox_Activated(self):
         print ""
 
@@ -249,14 +250,10 @@ class Ui_SaveWindow(object):
                 base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
                 print base_path
                 main_journal_path = os.path.join(base_path, 'journal_main.xml')
-                #tree1=xml.parse(r'\\isis\inst$\NDX'+currentInstrument+'\Instrument\logs\journal\journal_main.xml')
-                print main_journal_path
                 tree1=xml.parse(main_journal_path)
                 root1=tree1.getroot()
                 currentJournal=root1[len(root1)-1].attrib.get('name')
                 cycle_journal_path = os.path.join(base_path, currentJournal)
-                print cycle_journal_path
-                #tree=xml.parse(r'\\isis\inst$\NDX'+currentInstrument+'\Instrument\logs\journal\\'+currentJournal)
                 tree=xml.parse(cycle_journal_path)
                 root=tree.getroot()
                 
@@ -272,25 +269,25 @@ class Ui_SaveWindow(object):
                     self.lineEdit.setText(SavePath)
                 except LookupError:
                     print "Not found!"
-                    
+
 #--------- If "Save" button pressed, selcted workspaces are saved -------------
     def buttonClickHandler1(self):
         names = mtd.getObjectNames()
         dataToSave=[]
         prefix = str(self.lineEdit2.text())
-        if (self.lineEdit.text()[len(self.lineEdit.text())-1] != '/'):
-            path = self.lineEdit.text()+'/'
-        else:
-            path = self.lineEdit.text()
-
+        if not (self.lineEdit.text() and os.path.exists(self.lineEdit.text())):
+            logger.notice("Directory specified doesn't exist or was invalid for your operating system")
+            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',"Directory specified doesn't exist or was invalid for your operating system")
+            return
+        print self.listWidget.selectedItems()
         for idx in self.listWidget.selectedItems():
             runlist=parseRunList(str(self.spectraEdit.text()))
             print runlist
-            fname=str(path+prefix+idx.text())
+            fname=os.path.join(self.lineEdit.text(),prefix + idx.text())
             if (self.comboBox.currentIndex() == 0):
                 fname+='.dat'
                 print "FILENAME: ", fname
-                a1=mtd.getMatrixWorkspace(str(idx.text()))
+                a1=mtd[str(idx.text())]
                 titl='#'+a1.getTitle()+'\n'
                 x1=a1.readX(0)
                 X1=n.zeros((len(x1)-1))
@@ -304,7 +301,7 @@ class Ui_SaveWindow(object):
                     sep=' '
                 elif (self.radio3.isChecked()):
                     sep='\t'
-                    
+                print fname
                 f=open(fname,'w')
                 if self.titleCheckBox.isChecked():
                     f.write(titl)
@@ -333,7 +330,6 @@ class Ui_SaveWindow(object):
             elif (self.comboBox.currentIndex() == 3):
                 print "ILL MFT format"
                 self.saveMFT(idx,fname)
-
         # for idx in self.listWidget.selectedItems():
             # fname=str(path+prefix+idx.text()+'.dat')
             # print "FILENAME: ", fname
@@ -345,7 +341,7 @@ class Ui_SaveWindow(object):
     def saveANSTO(self,idx,fname):
         fname+='.txt'
         print "FILENAME: ", fname
-        a1=mtd.getMatrixWorkspace(str(idx.text()))
+        a1=mtd[str(idx.text())]
         titl='#'+a1.getTitle()+'\n'
         x1=a1.readX(0)
         X1=n.zeros((len(x1)-1))
@@ -366,7 +362,7 @@ class Ui_SaveWindow(object):
     def saveMFT(self,idx,fname):
         fname+='.mft'
         print "FILENAME: ", fname
-        a1=mtd.getMatrixWorkspace(str(idx.text()))
+        a1=mtd[str(idx.text())]
         titl=a1.getTitle()+'\n'
         x1=a1.readX(0)
         X1=n.zeros((len(x1)-1))
