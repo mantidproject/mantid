@@ -273,7 +273,14 @@ namespace Mantid
       }
       AnalysisDataService::Instance().remove("_peaks");
     }
-
+    //-----------------------------------------------------------------------------------------
+    /**
+      @param  inname       Name of workspace containing peaks
+      @param  cell_type    cell type to optimize
+      @param  params       optimized cell parameters
+      @param  out          residuals from optimization
+      @return  chisq of optimization
+    */
     double OptimizeLatticeForCellType::optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & params)
     {
       std::vector<double> lattice_parameters;
@@ -379,17 +386,12 @@ namespace Mantid
 	  delete[] out;
 	  return ChiSqTot;
     }
-   //-----------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------
     /**
-     * Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
-     * @param mosaic
-     * @param rcrystallite
-     * @param inname
-     * @param corrOption
-     * @param pointOption
-     * @param tofParams
-     * @return
-     */
+      @param  inname       Name of workspace containing peaks
+      @param  params       optimized cell parameters
+      @param  out          residuals from optimization
+    */
     void OptimizeLatticeForCellType::optLattice(std::string inname, std::vector<double> & params, double *out)
     {
       PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>
@@ -436,6 +438,15 @@ namespace Mantid
 
       return;
     }
+    //-----------------------------------------------------------------------------------------
+    /**
+      @param  ws           Name of workspace containing peaks
+      @param  bankName     Name of bank containing peak
+      @param  col          Column number containing peak
+      @param  row          Row number containing peak
+      @param  Edge         Number of edge points for each bank
+      @return True if peak is on edge
+    */
     bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws, std::string bankName, int col, int row, int Edge)
     {
   	  if (bankName.compare("None") == 0) return false;
@@ -465,6 +476,11 @@ namespace Mantid
   	  }
   	  return false;
     }
+    //-----------------------------------------------------------------------------------------
+    /**
+      @param  lattice       lattice parameters
+      @return the A matrix calculated
+    */
     DblMatrix OptimizeLatticeForCellType::aMatrix( std::vector<double> lattice )
     {
       double degrees_to_radians = M_PI / 180;
@@ -501,10 +517,12 @@ namespace Mantid
 
       return result;
     }
+    //-----------------------------------------------------------------------------------------
     /**
 
       @param  npeaks       Number of peaks
       @param  inname       Name of workspace containing peaks
+      @param  cell_type    cell type to optimize
       @param  Params       optimized cell parameters
       @param  sigabc       errors of optimized parameters
       @param  chisq        chisq from optimization
