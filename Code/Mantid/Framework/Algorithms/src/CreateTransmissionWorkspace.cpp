@@ -152,7 +152,7 @@ namespace Mantid
      *
      * Input workspaces are in TOF. These are converted to lambda, normalized and stitched together (if two given).
      *
-     * @param detectorIndexes : List of detector indexes to convert
+     * @param processingCommands : Processing instructions. Usually a list of detector indexes to keep.
      * @param wavelengthInterval : Wavelength interval for the run workspace.
      * @param wavelengthMonitorBackgroundInterval : Wavelength interval for the monitor background
      * @param wavelengthMonitorIntegrationInterval : Wavelength interval for the monitor integration
