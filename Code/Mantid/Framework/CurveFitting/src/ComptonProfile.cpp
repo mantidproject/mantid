@@ -184,7 +184,7 @@ namespace CurveFitting
     {
       const double tsec = (isHistogram) ? 0.5*(tseconds[i] + tseconds[i+1]) : tseconds[i];
       ConvertToYSpace::calculateY(m_yspace[i], m_modQ[i],m_e0[i],
-                                  m_mass,tsec*1e06,k1,v1,detpar);
+                                  m_mass,tsec,k1,v1,detpar);
     }
   }
 

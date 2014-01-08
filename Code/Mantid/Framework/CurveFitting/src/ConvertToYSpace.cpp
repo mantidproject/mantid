@@ -141,17 +141,16 @@ namespace CurveFitting
    * @param qspace Output qspace value
    * @param ei Output incident energy value
    * @param mass Mass value for the transformation
-   * @param tmicro Time-of-flight in microseconds
+   * @param tsec Time-of-flight in seconds
    * @param k1 Modulus of wavevector for final energy (sqrt(efixed/massToMeV)), avoids repeated calculation
    * @param v1 Velocity of neutron for final energy (sqrt(efixed/massToMeV)), avoids repeated calculation
    * @param detpar Struct defining Detector parameters @see ComptonProfile
    */
   void ConvertToYSpace::calculateY(double & yspace, double & qspace, double &ei,
-                                   const double mass, const double tmicro,
+                                   const double mass, const double tsec,
                                    const double k1, const double v1,
                                    const DetectorParams & detpar)
   {
-    const double tsec = tmicro*1e-06;
     const double v0 = detpar.l1/(tsec - detpar.t0 - (detpar.l2/v1));
     ei = MASS_TO_MEV*v0*v0;
     const double w = ei - detpar.efixed;
@@ -254,7 +253,7 @@ namespace CurveFitting
     for(size_t j = 0; j < npts; ++j)
     {
       double ys(0.0),qs(0.0),ei(0.0);
-      calculateY(ys,qs,ei,m_mass,inX[j],k1,v1,detPar);
+      calculateY(ys,qs,ei,m_mass,inX[j]*1e-06,k1,v1,detPar);
       const size_t outIndex = (npts - j - 1);
       outX[outIndex] = ys;
       const double prefactor = qs/pow(ei,0.1);

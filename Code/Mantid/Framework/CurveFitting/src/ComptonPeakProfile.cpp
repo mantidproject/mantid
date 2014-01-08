@@ -116,9 +116,9 @@ namespace CurveFitting
                                                "hwhm_lorentz");
     double yplus(0.0), yminus(0.0), dummy(0.0);
     detpar.efixed += dELorentz;
-    ConvertToYSpace::calculateY(yplus,dummy,dummy,m_mass,trec*1e6,k1,v1,detpar);
+    ConvertToYSpace::calculateY(yplus,dummy,dummy,m_mass,trec,k1,v1,detpar);
     detpar.efixed -= 2.0*dELorentz;
-    ConvertToYSpace::calculateY(yminus,dummy,dummy,m_mass,trec*1e6,k1,v1,detpar);
+    ConvertToYSpace::calculateY(yminus,dummy,dummy,m_mass,trec,k1,v1,detpar);
     // lorentzian width
     m_hwhmLorentz = 0.5*(yplus-yminus);
   }
