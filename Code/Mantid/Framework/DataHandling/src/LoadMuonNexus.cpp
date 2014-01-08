@@ -169,8 +169,9 @@ namespace Mantid
      * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    int LoadMuonNexus::confidence(Kernel::NexusDescriptor &) const
+    int LoadMuonNexus::confidence(Kernel::NexusDescriptor &descriptor) const
     {
+      UNUSED_ARG(descriptor);
       return 0; // Not to be used but LoadMuonNexus2, which inherits from this will
     }
 

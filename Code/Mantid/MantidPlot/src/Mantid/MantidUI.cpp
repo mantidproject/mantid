@@ -2365,7 +2365,7 @@ void MantidUI::importString(const QString &logName, const QString &data)
 *  @param logName :: the title of the table is based on this
 *  @param data :: the string to display
 *  @param sep :: the seperator character
-*  @param caption :: the caption to appear on the table window title bar, defualts to logname if left blank
+*  @param wsName :: add workspace name to the table window title bar, defaults to logname if left blank
 */
 void MantidUI::importString(const QString &logName, const QString &data, const QString &sep, const QString &wsName)
 {
@@ -2400,7 +2400,7 @@ void MantidUI::importString(const QString &logName, const QString &data, const Q
 /** Displays a string in a Qtiplot table
 *  @param logName :: the title of the table is based on this
 *  @param data :: a formated string with the time series data to display
-*  @param caption :: the caption to appear on the table window title bar, defualts to logname if left blank
+*  @param wsName :: add workspace name to the table window title bar, defaults to logname if left blank
 */
 void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, const QString &wsName)
 {
@@ -2451,7 +2451,6 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, c
 * - 1 filter by running status
 * - 2 filter by period
 * - 3 filter by status & period
-* @param caption :: the caption to appear on the table window title bar, defualts to logname if left blank
 */
 void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName, int filter)
 {
@@ -3003,7 +3002,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 
 /**
 Plots the spectra from the given workspaces
-@param ws_name :: List of ws names to plot
+@param ws_names :: List of ws names to plot
 @param spec_list :: List of spectra indices to plot for each workspace
 @param errs :: If true include the errors on the graph
 @param style :: Curve style for plot

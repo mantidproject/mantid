@@ -339,7 +339,7 @@ bool LoadNexusProcessed::checkForCommonNameStem(NXRoot & root, std::vector<std::
  * Load the workspace name, if the attribute exists
  *
  * @param root :: Root of NeXus file
- * @param entr_name :: Entry in NeXus file to look at
+ * @param entry_name :: Entry in NeXus file to look at
  * @return The workspace name. If none found an empty string is returned.
  */
 std::string LoadNexusProcessed::loadWorkspaceName(NXRoot & root, const std::string& entry_name)

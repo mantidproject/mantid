@@ -12,9 +12,9 @@ namespace Mantid
   {
     /**
     Provide lorentzian peak shape function interface to IPeakFunction.
-    I.e. the function: <math>\frac{A}{\pi}( \Gamma/2((x-PeakCentre)^2+(\Gamma/2)^2) ).
+    I.e. the function: \f$ \frac{A}{\pi}( \Gamma/2((x-PeakCentre)^2+(\Gamma/2)^2) )\f$.
 
-    \Gamma/2 (HWHM) - half-width at half-maximum
+    \f$\Gamma/2\f$ (HWHM) - half-width at half-maximum
 
     Lorentzian parameters:
     <UL>

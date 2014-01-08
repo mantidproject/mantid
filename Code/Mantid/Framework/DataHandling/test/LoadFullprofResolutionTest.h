@@ -6,12 +6,18 @@
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include <fstream>
 #include <Poco/File.h>
 
 using Mantid::DataHandling::LoadFullprofResolution;
 
 using namespace Mantid;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -268,6 +274,104 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test that when the workspace property is used
+  **  that parameters are correctly loaded into this workspace
+  *   The GEM instrument is used
+  */
+  void test_workspace()
+  {
+    // Generate file
+    string filename("TestWorskpace.irf");
+    generate1BankIrfFile(filename);
+
+    // Load workspace wsName
+    load_GEM();
+
+    // Set up algorithm to load into the workspace
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Banks", "1");
+    alg.setProperty("Workspace", wsName);
+    alg.setProperty("OutputTableWorkspace", "TestWorkspaceTable");
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check parameters in workspace
+    MatrixWorkspace_sptr ws;
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    Mantid::Geometry::ParameterMap& paramMap = ws->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getInstrument();
+
+
+    Mantid::Geometry::Parameter_sptr alpha0Param = paramMap.get(&(*instr), "Alpha0", "fitting");
+    TS_ASSERT(alpha0Param);
+    if(alpha0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = alpha0Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.000008, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr beta0Param = paramMap.get(&(*instr), "Beta0", "fitting");
+    TS_ASSERT(beta0Param);
+    if(beta0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta0Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 6.251096, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr alpha1Param = paramMap.get(&(*instr), "Alpha1", "fitting");
+    TS_ASSERT(alpha1Param);
+    if(alpha1Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = alpha1Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.0, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr beta1Param = paramMap.get(&(*instr), "Kappa", "fitting");
+    TS_ASSERT(beta1Param);
+    if(beta0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta1Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.0, 0.0000001);
+    }
+
+
+    boost::shared_ptr<const Mantid::Geometry::IComponent> bank = instr->getComponentByName("bank1");
+    Mantid::Geometry::Parameter_sptr sigmaSqParam = paramMap.get(&(*bank), "SigmaSquared", "fitting");
+    TS_ASSERT(sigmaSqParam);
+    if(sigmaSqParam) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = sigmaSqParam->value<Mantid::Geometry::FitParameter>();
+      double formulaValueCantreAt0 = fitParam.getValue( 0.0 );    // Value for centre=0.0
+      TS_ASSERT_DELTA( formulaValueCantreAt0, 0.355, 0.0000001);
+      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );  // Value for centre=10.0
+      TS_ASSERT_DELTA( formulaValueCantreAt10, 0.399, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr gammaParam = paramMap.get(&(*bank), "Gamma", "fitting");
+    TS_ASSERT(gammaParam);
+    if(gammaParam) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = gammaParam->value<Mantid::Geometry::FitParameter>();
+      double formulaValueCantreAt0 = fitParam.getValue( 0.0 );    // Value for centre=0.0
+      TS_ASSERT_DELTA( formulaValueCantreAt0, 0.0, 0.0000001);
+      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );  // Value for centre=10.0
+      TS_ASSERT_DELTA( formulaValueCantreAt10, 0.0, 0.0000001);
+    }
+
+
+
+    
+
+    // Clean
+    Poco::File("TestWorskpace.irf").remove();
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test that the number from the NPROF is read correctly 
   **  and has correct name in table.
   */
@@ -378,6 +482,33 @@ public:
     }
 
     return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate a GEM workspace
+    */
+  void load_GEM()
+  {
+    LoadInstrument loaderGEM;
+
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadFullprofResolutionWorkspace";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Path to test input file 
+    loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
+    //inputFile = loaderIDF2.getPropertyValue("Filename");
+    loaderGEM.setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
+    TS_ASSERT( loaderGEM.isExecuted() );
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -572,6 +703,9 @@ public:
   {
     return 29;  // Change this value if you add or remove any rows from the OutputTableWorkspace
   }
+
+  private:
+  std::string wsName;  // For Workspace property
 
 };
 

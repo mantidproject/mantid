@@ -168,8 +168,8 @@ namespace Geometry
   }
 
   /** Calculate the hkl corresponding to a given Q-vector
-   * @return Q :: Q-vector in $AA^-1 in the sample frame
-   * @param a V3D with H,K,L
+   * @param hkl a V3D with H,K,L
+   * @return Q-vector in $AA^-1 in the sample frame
    */
   V3D OrientedLattice::qFromHKL(const V3D & hkl) const
   {

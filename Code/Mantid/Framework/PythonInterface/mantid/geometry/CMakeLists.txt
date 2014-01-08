@@ -16,6 +16,7 @@ set ( EXPORT_FILES
   src/Exports/ObjCompAssembly.cpp
   src/Exports/Detector.cpp
   src/Exports/DetectorGroup.cpp
+  src/Exports/RectangularDetector.cpp
   src/Exports/Instrument.cpp
   src/Exports/UnitCell.cpp
   src/Exports/OrientedLattice.cpp

@@ -947,8 +947,8 @@ int LineViewer::getPlotAxis() const
 
 /**
  * Helper method to get the positive min value.
- * @param curveDat : CurveData to look through the data of.
- * @param to : Start value
+ * @param curveData : CurveData to look through the data of.
+ * @param from : Start value
  * @return : Positive min value.
  */
 double getPositiveMin(const MantidQwtWorkspaceData& curveData, const double from)
