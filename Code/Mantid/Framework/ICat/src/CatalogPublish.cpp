@@ -72,7 +72,7 @@ namespace Mantid
       }
       else // The user wants to upload a workspace.
       {
-       if (dataFileName.empty()) dataFileName = extractFileName(workspace->name());
+        if (dataFileName.empty()) dataFileName = extractFileName(workspace->name());
         if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", workspace->name());
         // Save workspace to a .nxs file in the user's default directory.
         saveWorkspaceToNexus(workspace);
@@ -90,7 +90,7 @@ namespace Mantid
 
       publish(fileStream,catalog->getUploadURL(dataFileName, getPropertyValue("NameInCatalog")));
       // If a workspace was published, then we want to also publish the history of a workspace.
-      if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
+      if (!ws.empty()) publishWorkspaceHistory(catalog, workspace, dataFileName);
     }
 
     /**
@@ -147,7 +147,7 @@ namespace Mantid
     /**
      * Extract the name of the file from a given path.
      * @param filePath :: Path of data file to use.
-     * @returns The filename of the given path
+     * @returns The filename of the given path.
      */
     const std::string CatalogPublish::extractFileName(const std::string &filePath)
     {
@@ -177,8 +177,9 @@ namespace Mantid
      * Publish the history of a given workspace.
      * @param catalog   :: The catalog to use to publish the file.
      * @param workspace :: The workspace to obtain the history from.
+     * @param datafileName :: The name of the file that is used to obtain the dataset ID.
      */
-    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace)
+    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace, std::string &datafileName)
     {
       std::stringstream ss;
       // Obtain the workspace history as a string.
@@ -186,7 +187,7 @@ namespace Mantid
       // Use the name the use wants to save the file to the server as and append .py
       std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
       // Publish the workspace history to the server.
-      publish(ss, catalog->getUploadURL(extractFileName(workspace->name()), fileName));
+      publish(ss, catalog->getUploadURL(datafileName, fileName));
     }
 
     /**

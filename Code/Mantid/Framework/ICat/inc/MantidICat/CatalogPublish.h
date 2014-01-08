@@ -65,7 +65,7 @@ namespace Mantid
         /// Saves the workspace as a nexus file to the user's default directory.
         void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
         /// Publish the history of a given workspace.
-        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace);
+        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace, std::string &datafileName);
         /// Generate the history of a given workspace.
         const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
     };
