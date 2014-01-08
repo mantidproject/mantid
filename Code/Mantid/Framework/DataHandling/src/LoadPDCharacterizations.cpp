@@ -54,7 +54,7 @@ namespace DataHandling
   int LoadPDCharacterizations::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string LoadPDCharacterizations::category() const { return "DataHandling";}
+  const std::string LoadPDCharacterizations::category() const { return "Workflow\\DataHandling";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
