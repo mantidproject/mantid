@@ -278,7 +278,6 @@ namespace Mantid
       @param  inname       Name of workspace containing peaks
       @param  cell_type    cell type to optimize
       @param  params       optimized cell parameters
-      @param  out          residuals from optimization
       @return  chisq of optimization
     */
     double OptimizeLatticeForCellType::optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & params)
