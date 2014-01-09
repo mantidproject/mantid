@@ -124,6 +124,14 @@ namespace Mantid
         // Close the request by requesting a response.
         Poco::Net::HTTPResponse response;
         session.receiveResponse(response);
+
+        // Throw an error if the server encounters an internal error.
+        // (Note: The IDS does not currently return any meta-data related to the errors caused.)
+        if (response.getStatus() == 500)
+        {
+          g_log.error("An error has occurred on the ICAT IDS server.\n"
+                      "Perhaps the file name already exists, or you have provided an invalid investigation ID.");
+        }
       }
       catch(Poco::Net::SSLException& error)
       {
