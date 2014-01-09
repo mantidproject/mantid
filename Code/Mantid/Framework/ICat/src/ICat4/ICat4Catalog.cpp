@@ -780,8 +780,8 @@ namespace Mantid
         if (response.return_.size() <= 0)
         {
           throw std::runtime_error("The datafile you tried to publish has no related dataset."
-              "(Based on the filename: " + dataFileName + ")\n"
-              "Please select a filename that contains the investigation number.");
+              " (Based on the filename or investigation number: " + dataFileName + ")\n"
+              "Please select a filename that contains the instrument name & investigation number. (E.G. EMU00035020)");
         }
         ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(response.return_.at(0));
         if (dataset && dataset->id) datafileId = *(dataset->id);
