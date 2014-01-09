@@ -239,6 +239,31 @@ void PythonScript::emit_error()
   PyObject *exception(NULL), *value(NULL), *traceback(NULL);
   PyErr_Fetch(&exception, &value, &traceback);
 
+  // special check for system exceptions
+  if (bool(exception)
+      && PyErr_GivenExceptionMatches(exception, PyExc_SystemExit)
+      && PyObject_HasAttrString(exception, "code"))
+  {
+    // value is the return code handed to sys.exit
+    long code = 0;
+    if (bool(value) && PyInt_Check(value))
+    {
+      code = PyInt_AsLong(value);
+    }
+
+    // if we are returning 0 then cleanup and return
+    if (code == 0)
+    {
+      // maybe shouldn't clear the error, but for now this
+      // is the agreed upon behavior
+      PyErr_Clear();
+      Py_XDECREF(traceback);
+      Py_XDECREF(exception);
+      Py_XDECREF(value);
+      return;
+    }
+  }
+
   // prework on the exception handling
   PyErr_NormalizeException(&exception, &value, &traceback);
   PyErr_Clear();
