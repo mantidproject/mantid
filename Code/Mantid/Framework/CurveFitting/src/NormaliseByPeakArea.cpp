@@ -289,6 +289,7 @@ namespace Mantid
     }
 
     /**
+     * @param accumWS Workspace used to accumulate the final data
      * @param yValues Input signal values for y-space
      * @param eValues Input errors values for y-space
      * @param index Index of the workspace. Only used when not summing.
@@ -367,7 +368,6 @@ namespace Mantid
                 double invE2 = 1/(ek*ek);
                 yout /= eout*eout;
                 yout += yk*invE2;
-                double wt = (1/(eout*eout)) + invE2;
                 yout /= wt;
                 eout = sqrt(1/wt);
               }
