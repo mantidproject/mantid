@@ -63,6 +63,10 @@ namespace
     return retcode;
   }
 
+  /// Message to emit when everything worked out fine
+  static const QString MSG_FINISHED = "Script execution finished.";
+  /// Message to emit when starting
+  static const QString MSG_STARTED = "Script execution started.";
 }
 
 
@@ -260,6 +264,7 @@ void PythonScript::emit_error()
       Py_XDECREF(traceback);
       Py_XDECREF(exception);
       Py_XDECREF(value);
+      emit finished(MSG_FINISHED);
       return;
     }
   }
@@ -596,7 +601,7 @@ bool PythonScript::executeImpl()
 /// Performs the call to Python
 bool PythonScript::executeString()
 {
-  emit started("Script execution started.");
+  emit started(MSG_STARTED);
   bool success(false);
   GlobalInterpreterLock gil;
 
@@ -615,8 +620,7 @@ bool PythonScript::executeString()
   }
   else
   {
-    QString msg = "Script execution finished.";
-    emit finished(msg);
+    emit finished(MSG_FINISHED);
     success = true;
   }
   if(isInteractive())
