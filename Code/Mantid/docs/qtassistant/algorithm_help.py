@@ -5,6 +5,7 @@ from mediawiki import MediaWiki
 import os
 import wiki_tools
 from parseLinks import fixLinks
+from fixQuotes import fixQuotes
 
 DIRECTION = {
     0:"input",
@@ -49,6 +50,7 @@ def propToList(property, number):
         text = "&nbsp;"
     else:
         text = text.replace("\n", "<br/>")
+    text=fixQuotes(text)
     #fix links
     fixer=fixLinks(text)
     text = fixer.parse()

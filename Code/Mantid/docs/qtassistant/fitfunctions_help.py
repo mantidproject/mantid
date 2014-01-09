@@ -6,6 +6,7 @@ from mediawiki import MediaWiki
 import wiki_tools
 from xml.dom.minidom import Document
 from parseLinks import fixLinks
+from fixQuotes import fixQuotes
 
 def propToList(func, number):
     #htmlfile.writeRow(["Order", "Name", "Default", "Description"], True)
@@ -22,6 +23,7 @@ def propToList(func, number):
         text = "&nbsp;"
     else:
         text = text.replace("\n", "<br/>")
+    text=fixQuotes(text)
     #fix links
     fixer=fixLinks(text)
     text = fixer.parse()
