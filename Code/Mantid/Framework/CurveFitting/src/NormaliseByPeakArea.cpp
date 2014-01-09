@@ -361,13 +361,13 @@ namespace Mantid
             const double absXk = fabs(xsym[k]);
             if(absXj >= (absXk - dy) && absXj <= (absXk + dy) &&  ein != 0.0)
             {
-              double wt(0.0);
+
               if(ein > 1e-12)
               {
                 double invE2 = 1/(ek*ek);
                 yout /= eout*eout;
                 yout += yk*invE2;
-                wt = (1/(eout*eout)) + invE2;
+                double wt = (1/(eout*eout)) + invE2;
                 yout /= wt;
                 eout = sqrt(1/wt);
               }
