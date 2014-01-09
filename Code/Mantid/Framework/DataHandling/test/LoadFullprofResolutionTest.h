@@ -362,17 +362,13 @@ public:
       TS_ASSERT_DELTA( formulaValueCantreAt10, 0.0, 0.0000001);
     }
 
-
-
-    
-
     // Clean
     Poco::File("TestWorskpace.irf").remove();
   }
 
   //----------------------------------------------------------------------------------------------
   /** Test that algorithm does not run, 
-  *   if neither the OytputTableWorkspace nor Workspace
+  *   if neither the OutputTableWorkspace nor Workspace
   **  property is set.
   */
   void test_no_output()
@@ -391,6 +387,9 @@ public:
     // Execute and check that execution failed
     alg.execute();
     TS_ASSERT(!alg.isExecuted());
+
+    // Clean
+    Poco::File("TestNoOutput.irf").remove();
   }
 
   //----------------------------------------------------------------------------------------------
