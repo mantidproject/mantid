@@ -3,7 +3,7 @@ import math
 from mantid.simpleapi import *  # New API
 from mantid.geometry import ReferenceFrame
 
-def l2q(ws,whichDet,theta):
+def l2q(ws,whichDet,theta, sample_component_name):
     '''    
     call signature::call signature::
 
@@ -15,6 +15,7 @@ def l2q(ws,whichDet,theta):
       ws : run to be converted into Q.
       whichDet : Name of the component detector
       theta : final theta angle to use.
+      sample_component_name: Name of the component that corresponds to the sample
 
     TODO:
         1) This is currently a point detector only function. This will either need 
@@ -30,7 +31,7 @@ def l2q(ws,whichDet,theta):
     else:
         inst = ws.getInstrument()
 
-    sampleLocation=inst.getComponentByName('some-surface-holder').getPos()
+    sampleLocation=inst.getComponentByName(sample_component_name).getPos()
     detLocation=inst.getComponentByName(whichDet).getPos()
     sample2detector=detLocation-sampleLocation    # meters
 
