@@ -21,7 +21,6 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Path.h>
-#include <Poco/SharedPtr.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 
@@ -168,7 +167,7 @@ namespace Mantid
         }
         start=clock();
 
-        Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
+        Poco::Net::InvalidCertificateHandler* certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
         // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
         const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
         // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
