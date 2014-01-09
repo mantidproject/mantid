@@ -11,7 +11,7 @@ MaskBTP(w,Pixel = "1,2") will mask all pixels 1 and 2, in all tubes, in all bank
 
 The algorithm allows ranged inputs: Pixel = "1-8,121-128" is equivalent to Pixel = "1,2,3,4,5,6,7,8,121,122,123,124,125,126,127,128"
 
-Either the input workspace or the instrument must be set.
+Either the input workspace or the instrument must be set. If the workspace is set, the instrument is ignored.
 
 *WIKI*"""
 
