@@ -11,7 +11,7 @@ MaskBTP(w,Pixel = "1,2") will mask all pixels 1 and 2, in all tubes, in all bank
 
 The algorithm allows ranged inputs: Pixel = "1-8,121-128" is equivalent to Pixel = "1,2,3,4,5,6,7,8,121,122,123,124,125,126,127,128"
 
-Either the input workspace or the instrument must be set. If the workspace is set, the instrument is ignored.
+'''Note: '''Either the input workspace or the instrument must be set. If the workspace is set, the instrument is ignored.
 
 *WIKI*"""
 
@@ -39,7 +39,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut, optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
         allowedInstrumentList=mantid.kernel.StringListValidator(["","ARCS","CNCS","HYSPEC","NOMAD","POWGEN","SEQUOIA","SNAP","TOPAZ"])
         self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: ARCS, CNCS, HYSPEC, NOMAD, POWGEN, SNAP, SEQUOIA, TOPAZ")
-        self.declareProperty("Bank","",doc="Bank(s) to be masked. If empty, will apply to all banks")
+        self.declareProperty("Bank","",doc="'''Bank(s)''' to be masked. If empty, will apply to all banks")
         self.declareProperty("Tube","",doc="Tube(s) to be masked. If empty, will apply to all tubes")
         self.declareProperty("Pixel","",doc="Pixel(s) to be masked. If empty, will apply to all pixels")          
         self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output), doc="List of  masked detectors") 
