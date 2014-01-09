@@ -187,14 +187,23 @@ namespace DataHandling
     // Generate output table workspace
     API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
 
+    if( getPropertyValue("OutputTableWorkspace") != "")
+    {
+      // Output the output table workspace
+      setProperty("OutputTableWorkspace", outTabWs);
+    }
 
-    // Output the output table workspace
-    setProperty("OutputTableWorkspace", outTabWs);
 
     // If workspace, put parameters there
-    if(workspace){
+    if(workspace)
+    {
       putParametersIntoWorkspace( outTabWs, workspace );
     } 
+    else if( getPropertyValue("OutputTableWorkspace") == "")
+    {
+      // We don't know where to output
+      throw std::runtime_error("Either the OutputTableWorkspace or Workspace property must be set.");
+    }
 
     return;
   }
