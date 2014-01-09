@@ -738,8 +738,10 @@ namespace Mantid
       // Obtain the URL from the Facilities.xml file.
       std::string url = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
 
+      std::string sessionID = Session::Instance().getSessionId();
       // Set the elements of the URL.
-      std::string session   = "sessionId="  + Session::Instance().getSessionId();
+      std::string session   = "sessionId="  + sessionID;
+      if (sessionID.empty()) throw std::runtime_error("You are not currently logged into the cataloging system.");
       std::string name      = "&name="      + createFileName;
       std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetIdFromFileName(dataFileName));
 
