@@ -13,7 +13,7 @@ def fixBoldItalic(text):
   return text
   
 def fixBold(text):
-  results=re.findall(r"\'\'\'\'\'(.+?)\'\'\'\'\'",text)
+  results=re.findall(r"\'\'\'(.+?)\'\'\'",text)
   for item in results:
     text = text.replace("'''"+item+"'''", "<b>"+item+"</b>")
   return text
