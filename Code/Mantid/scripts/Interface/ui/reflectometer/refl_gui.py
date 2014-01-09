@@ -139,7 +139,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 self.statusMain.clearMessage()
                 self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
                 try:
-                    runs = self.__instrumentRuns.getJournalRuns(self.textRB.text())
+                    runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
                 except:
                     print "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives."
                     QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
