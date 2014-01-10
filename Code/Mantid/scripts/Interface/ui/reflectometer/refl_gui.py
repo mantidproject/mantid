@@ -7,7 +7,7 @@ from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
 from isis_reflectometry.combineMulti import *
-from isis_reflectometry.LoadInstrumentRuns import *
+import isis_reflectometry.load_live_runs
 from isis_reflgui.latest_isis_runs import *
 from mantid.api import Workspace, WorkspaceGroup
 
@@ -241,15 +241,14 @@ class ReflGui(refl_window.Ui_windowRefl):
                             overlapHigh.append(float(ovHigh))
                     print len(runno), "runs: ", runno
                     # Determine resolution
-                    # if (runno[0] != ''):
-                    for run in runno:
-                        if self.zeroCheck(run):
-                            StartLiveData(Instrument=config['default.instrument'],UpdateEvery='0',Outputworkspace='_LiveOut')
-                            loadedRuns.append(mtd['_LiveOut'])
-                        else:
-                            loadedRuns.append(Load(Filename=run, outputWorkspace=run))
                     if (self.tableMain.item(row, 15).text() == ''):
-                        dqq = calcRes(loadedRuns[0])
+                        loadedRun = None
+                        if load_live_runs.is_live_run(runno[0]):
+                            loadedRun = load_live_runs.get_live_data(config['default.instrument'])
+                        else:
+                            Load(Filename=run, outputWorkspace="run")
+                            loadedRun = mtd["run"]
+                        dqq = calcRes(loadedRun)
                         item = QtGui.QTableWidgetItem()
                         item.setText(str(dqq))
                         self.tableMain.setItem(row, 15, item)
@@ -347,16 +346,19 @@ class ReflGui(refl_window.Ui_windowRefl):
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
-        names = mtd.getObjectNames()
-        if self.zeroCheck(runno):
-            StartLiveData(Instrument=config['default.instrument'],UpdateEvery='0',Outputworkspace='_LiveOut')
-            runno = '_LiveOut'
-        [wlam, wq, th] = quick(runno, trans=transrun, theta=angle)
+        #names = mtd.getObjectNames()
+        #if self.zeroCheck(runno):
+        #    StartLiveData(Instrument=config['default.instrument'],UpdateEvery='0',Outputworkspace='_LiveOut')
+        #    runno = '_LiveOut'
+        #[wlam, wq, th] = quick(runno, trans=transrun, theta=angle)
+        loadedRun = runno
+        if load_live_runs.is_live_run(runno):
+            loadedRun = load_live_runs.get_live_data(config['default.instrument'])
+        [wlam, wq, th] = quick(loadedRun, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-
         ws_name = str(runno) + '_IvsQ'
         inst = groupGet(ws_name, 'inst')
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
@@ -481,7 +483,8 @@ class ReflGui(refl_window.Ui_windowRefl):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
-def calcRes(run, runno = ''):
+def calcRes(run):
+    runno = None
     if not type(run) == type(Workspace):
         runno = '_' + str(run) + 'temp'
         if type(run) == type(int()):
