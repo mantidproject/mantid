@@ -8,6 +8,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <Poco/Net/AcceptCertificateHandler.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/SSLException.h>
 #include <Poco/Net/SSLManager.h>
@@ -105,7 +106,7 @@ namespace Mantid
         Poco::URI uri(uploadURL);
         std::string path(uri.getPathAndQuery());
 
-        Poco::Net::InvalidCertificateHandler* certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
+        Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
         // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
         const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
         // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
