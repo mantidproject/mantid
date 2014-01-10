@@ -147,7 +147,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             ReflectedBeam = ReflectedBeam / DirectBeam
         polCorr(pol_corr, IvsLam, crho, calpha, cAp, cPp)
         if (theta and correct_positions):
-            IvsQ = l2q(ReflectedBeam, 'linear-detector', theta)
+            IvsQ = l2q(ReflectedBeam, detector_component_name, theta, sample_component_name)
         else:
             IvsQ = ConvertUnits(InputWorkspace=ReflectedBeam, Target="MomentumTransfer")
         
