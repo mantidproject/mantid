@@ -15,6 +15,7 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include "MantidKernel/ArrayProperty.h"
 
 #include <Poco/Net/AcceptCertificateHandler.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/SSLException.h>
 #include <Poco/Net/SSLManager.h>
