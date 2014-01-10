@@ -294,7 +294,6 @@ public:
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "1");
     alg.setProperty("Workspace", wsName);
-    alg.setProperty("OutputTableWorkspace", "TestWorkspaceTable");
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -363,12 +362,34 @@ public:
       TS_ASSERT_DELTA( formulaValueCantreAt10, 0.0, 0.0000001);
     }
 
-
-
-    
-
     // Clean
     Poco::File("TestWorskpace.irf").remove();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that algorithm does not run, 
+  *   if neither the OutputTableWorkspace nor Workspace
+  **  property is set.
+  */
+  void test_no_output()
+  {
+    // Generate file
+    string filename("TestNoOutput.irf");
+    generate1BankIrfFile(filename);
+
+    // Set up algorithm without specifying OutputTableWorkspace or Workspace
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Banks", "1");
+
+    // Execute and check that execution failed
+    alg.execute();
+    TS_ASSERT(!alg.isExecuted());
+
+    // Clean
+    Poco::File("TestNoOutput.irf").remove();
   }
 
   //----------------------------------------------------------------------------------------------
