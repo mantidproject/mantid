@@ -126,12 +126,14 @@ namespace Mantid
         Poco::Net::HTTPResponse response;
         session.receiveResponse(response);
 
-        // Throw an error if the server encounters an internal error.
+        std::string HTTPStatus = boost::lexical_cast<std::string>(response.getStatus());
+
+        // Throw an error if publishing was not successful.
         // (Note: The IDS does not currently return any meta-data related to the errors caused.)
-        if (response.getStatus() == 500)
+        if (HTTPStatus.find("20") == std::string::npos)
         {
           g_log.error("An error has occurred on the ICAT IDS server.\n"
-                      "Perhaps the file name already exists, or you have provided an invalid investigation ID.");
+                      "A file with that name already exists or you do not have permissions to publish to that investigation.");
         }
       }
       catch(Poco::Net::SSLException& error)
