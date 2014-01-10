@@ -7,7 +7,6 @@ Loads a Nexus file created from an ISIS instrument.
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadISISNexus2.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -193,23 +192,23 @@ namespace Mantid
       local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       local_workspace->setYUnit("Counts");
 
-      //
-      // Load instrument and other data once then copy it later
-      //
-      m_progress->report("Loading instrument and run details");
-
-      // load run details
+      //Load instrument and other data once then copy it later
+      m_progress->report("Loading instrument");
       loadRunDetails(local_workspace, entry);
-
-      // Test if IDF exists in Nexus otherwise load default instrument
-      bool foundInstrument = LoadEventNexus::runLoadIDFFromNexus(m_filename, local_workspace, "raw_data_1", this);
-      if (!foundInstrument) 
-      {
-        runLoadInstrument(local_workspace);
-      }
-      
-      // Load logs
       m_cppFile->openPath(entry.path());
+      std::string parameterString;
+      try {  // Try to get instrument info from instrument and sample sections of Nexus file
+        local_workspace->loadExperimentInfoNexus( m_cppFile, parameterString );
+      } catch(std::exception & ) {  // No valid instrument and sample section found
+        parameterString="not found";
+      }
+      local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
+      if( parameterString == "not found") {
+        runLoadInstrument(local_workspace);
+      } else {  // Use parameters got from instrument section of Nexus file
+        local_workspace->readParameterMap(parameterString);
+      }
+
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");
       loadLogs(local_workspace, entry);
@@ -594,7 +593,6 @@ namespace Mantid
         g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
       }
     }
-
 
     /**
      * Creates period log data in the workspace
