@@ -42,7 +42,8 @@ set ( INC_FILES
     ${MOC_FILES}
 )
 
-set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
+set ( UI_FILES inc/MantidQtCustomDialogs/CatalogPublishDialog.ui
+               inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
                inc/MantidQtCustomDialogs/ConvertTableToMatrixWorkspaceDialog.ui
                inc/MantidQtCustomDialogs/DiagScriptInputDialog.ui
                inc/MantidQtCustomDialogs/LOQScriptInputDialog.ui

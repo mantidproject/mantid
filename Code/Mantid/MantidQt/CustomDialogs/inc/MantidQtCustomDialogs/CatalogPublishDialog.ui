@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Jay Rainey</author>
+ <class>CatalogPublishDialog</class>
+ <widget class="QWidget" name="CatalogPublishDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>463</width>
+    <height>184</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CatalogPublishDialog</string>
+  </property>
+  <layout class="QGridLayout" name="mainLayout">
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="buttonGrid"/>
+   </item>
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="inputGrid">
+     <item row="2" column="0">
+      <widget class="QLabel" name="nameInCatalog">
+       <property name="text">
+        <string>Name in catalog:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="fileName">
+       <property name="text">
+        <string>File name:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="inputWorkspace">
+       <property name="text">
+        <string>Input workspace:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="nameInCatalogTxt"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="fileNameTxt"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="investigationNumber">
+       <property name="text">
+        <string>Investigation number:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="investigationNumberCb"/>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="browseBtn">
+       <property name="text">
+        <string>Browse</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="inputWorkspaceCb">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
