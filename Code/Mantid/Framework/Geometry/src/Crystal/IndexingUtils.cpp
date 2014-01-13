@@ -706,6 +706,7 @@ double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
 
   return result;
 }
+
 /**
   STATIC method Optimize_UB: Calculates the matrix that most nearly maps
   the specified hkl_vectors to the specified q_vectors.  The calculated

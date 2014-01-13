@@ -319,8 +319,6 @@ elif use_cylindrical_integration:
                   ProfilesFile = profiles_filename,
 	          PeaksWorkspace=peaks_ws, 
                   )
-  if (not cell_type is None) and (not centering is None):
-    print "WARNING: Cylindrical profiles are NOT transformed!!!"
 
 #
 # Save the final integrated peaks, using the Niggli reduced cell.  
@@ -338,7 +336,7 @@ if use_cylindrical_integration:
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
 #
-if not use_ellipse_integration:
+else:
   if (not cell_type is None) and (not centering is None) :
     run_conventional_matrix_file = output_directory + "/" + run + "_" +    \
                                    cell_type + "_" + centering + ".mat"

@@ -27,7 +27,7 @@ const string WIKI_BASE_URL("http://mantidproject.org/");
 const string WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 
 /**
- * Default constructor shows the \link MantidQt::API::DEFAULT_URL.
+ * Default constructor shows the @link MantidQt::API::DEFAULT_URL @endlink.
  */
 HelpWindowImpl::HelpWindowImpl() :
     m_collectionFile(""),
@@ -69,7 +69,7 @@ void HelpWindowImpl::openWebpage(const string &url)
  * Have the help window show a specific url. If the url doesn't exist
  * this just pops up the default view for the help.
  *
- * \param url The url to open. This should start with \link MantidQt::API::BASE_URL.
+ * @param url The url to open. This should start with @link MantidQt::API::BASE_URL @endlink.
  * If it is empty show the default page.
  */
 void HelpWindowImpl::showURL(const string &url)
@@ -139,7 +139,7 @@ void HelpWindowImpl::showAlgorithm(const string &name, const int version)
 }
 
 /**
- * Convenience method for \link HelpWindowImpl::showAlgorithm(string, int).
+ * Convenience method for HelpWindowImpl::showAlgorithm(const string &, const int).
  *
  * @param name The name of the algorithm to show. If this is empty show
  * the algorithm index.

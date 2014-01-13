@@ -59,9 +59,9 @@ namespace Mantid
           new PropertyWithValue<int>("I0MonitorIndex", Mantid::EMPTY_INT(), mandatoryWorkspaceIndex),
           "I0 monitor index");
 
-      declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-          "Indices of the spectra in pairs (lower, upper) that mark the ranges that correspond to detectors of interest.");
-
+      declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions", "",
+          boost::make_shared<MandatoryValidator<std::string> >(), Direction::Input),
+          "Processing instructions on workspace indexes to yield only the detectors of interest. See [[PerformIndexOperations]] for details.");
     }
 
     /**
@@ -138,29 +138,12 @@ namespace Mantid
     }
 
     /**
-     * Get the workspace index list
-     * @return Workspace index list.
+     * @return The processing instructions.
      */
-    ReflectometryWorkflowBase::WorkspaceIndexList ReflectometryWorkflowBase::getWorkspaceIndexList() const
+    const std::string ReflectometryWorkflowBase::getWorkspaceIndexList() const
     {
-      WorkspaceIndexList indexList = getProperty("WorkspaceIndexList");
-      if (indexList.size() % 2 != 0 || indexList.size() == 0)
-      {
-        throw std::invalid_argument(
-            "WorkspaceIndex list must be composed of pairs of min index, max index.");
-      }
-
-      if (std::find_if(indexList.begin(), indexList.end(), checkNotPositive) != indexList.end())
-      {
-        throw std::invalid_argument("WorkspaceIndexList contains negative indexes");
-      }
-
-      for (size_t i = 0; (i + 1) < indexList.size(); i += 2)
-      {
-        if (indexList[i] > indexList[i + 1])
-          throw std::invalid_argument("WorkspaceIndexList pairs must be in min, max order");
-      }
-      return indexList;
+      const std::string instructions = getProperty("ProcessingInstructions");
+      return instructions;
     }
 
     /**
@@ -309,6 +292,8 @@ namespace Mantid
      * @param stitchingStart
      * @param stitchingDelta
      * @param stitchingEnd
+     * @param stitchingStartOverlap
+     * @param stitchingEndOverlap
      */
     void ReflectometryWorkflowBase::getTransmissionRunInfo(
         OptionalMatrixWorkspace_sptr& firstTransmissionRun,
@@ -395,43 +380,24 @@ namespace Mantid
 
     /**
      * Convert to a detector workspace in lambda.
-     * @param detectorIndexRange : Workspace index ranges to keep
+     * @param processingCommands : Commands to apply to crop and add spectra of the toConvert workspace.
      * @param toConvert : TOF wavelength to convert.
      * @param wavelengthMinMax : Wavelength minmax to keep. Crop out the rest.
      * @param wavelengthStep : Wavelength step for rebinning
      * @return Detector workspace in wavelength
      */
     MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamDetector(
-        const WorkspaceIndexList& detectorIndexRange, const MatrixWorkspace_sptr& toConvert,
+        const std::string& processingCommands, const MatrixWorkspace_sptr& toConvert,
         const MinMax& wavelengthMinMax, const double& wavelengthStep)
     {
-      // Detector Workspace Processing
-      MatrixWorkspace_sptr detectorWS;
+      // Process the input workspace according to the processingCommands to get a detector workspace
+      auto performIndexAlg = this->createChildAlgorithm("PerformIndexOperations");
+      performIndexAlg->initialize();
+      performIndexAlg->setProperty("ProcessingInstructions", processingCommands);
+      performIndexAlg->setProperty("InputWorkspace", toConvert);
+      performIndexAlg->execute();
+      MatrixWorkspace_sptr detectorWS = performIndexAlg->getProperty("OutputWorkspace");
 
-      // Loop over pairs of detector index ranges. Peform the cropping and then conjoin the results into a single workspace.
-      for (size_t i = 0; i < detectorIndexRange.size(); i += 2)
-      {
-        auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
-        cropWorkspaceAlg->initialize();
-        cropWorkspaceAlg->setProperty("InputWorkspace", toConvert);
-        cropWorkspaceAlg->setProperty("StartWorkspaceIndex", detectorIndexRange[i]);
-        cropWorkspaceAlg->setProperty("EndWorkspaceIndex", detectorIndexRange[i + 1]);
-        cropWorkspaceAlg->execute();
-        MatrixWorkspace_sptr subRange = cropWorkspaceAlg->getProperty("OutputWorkspace");
-        if (i == 0)
-        {
-          detectorWS = subRange;
-        }
-        else
-        {
-          auto conjoinWorkspaceAlg = this->createChildAlgorithm("ConjoinWorkspaces");
-          conjoinWorkspaceAlg->initialize();
-          conjoinWorkspaceAlg->setProperty("InputWorkspace1", detectorWS);
-          conjoinWorkspaceAlg->setProperty("InputWorkspace2", subRange);
-          conjoinWorkspaceAlg->execute();
-          detectorWS = conjoinWorkspaceAlg->getProperty("InputWorkspace1");
-        }
-      }
       // Now convert units. Do this after the conjoining step otherwise the x bins will not match up.
       auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
       convertUnitsAlg->initialize();
@@ -464,7 +430,7 @@ namespace Mantid
     /**
      * Convert From a TOF workspace into a detector and monitor workspace both in Lambda.
      * @param toConvert: TOF workspace to convert
-     * @param detectorIndexRange : Detector index ranges
+     * @param processingCommands : Detector index ranges
      * @param monitorIndex : Monitor index
      * @param wavelengthMinMax : Wavelength min max for detector workspace
      * @param backgroundMinMax : Wavelength min max for flat background correction of monitor workspace
@@ -472,12 +438,12 @@ namespace Mantid
      * @return Tuple of detector and monitor workspaces
      */
     ReflectometryWorkflowBase::DetectorMonitorWorkspacePair ReflectometryWorkflowBase::toLam(
-        MatrixWorkspace_sptr toConvert, const WorkspaceIndexList& detectorIndexRange,
+        MatrixWorkspace_sptr toConvert, const std::string& processingCommands,
         const int monitorIndex, const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax,
         const double& wavelengthStep)
     {
       // Detector Workspace Processing
-      MatrixWorkspace_sptr detectorWS = toLamDetector(detectorIndexRange, toConvert, wavelengthMinMax,
+      MatrixWorkspace_sptr detectorWS = toLamDetector(processingCommands, toConvert, wavelengthMinMax,
           wavelengthStep);
 
       // Monitor Workspace Processing

@@ -53,8 +53,13 @@ namespace Mantid
 
       /// Convert the input workspace to wavelength, splitting according to the properties provided.
       DetectorMonitorWorkspacePair toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
-          const WorkspaceIndexList& detectorIndexRange, const int monitorIndex,
+          const std::string& processingCommands, const int monitorIndex,
           const MinMax& wavelengthMinMax, const MinMax& backgroundMinMax, const double& wavelengthStep);
+
+      /// Convert the detector spectrum of the input workspace to wavelength
+      API::MatrixWorkspace_sptr toLamDetector(const std::string& processingCommands,
+          const API::MatrixWorkspace_sptr& toConvert, const MinMax& wavelengthMinMax,
+          const double& wavelengthStep);
 
     protected:
 
@@ -62,7 +67,7 @@ namespace Mantid
       bool isPropertyDefault(const std::string& propertyName) const;
 
       /// Get a workspace index list.
-      WorkspaceIndexList getWorkspaceIndexList() const;
+      const std::string getWorkspaceIndexList() const;
 
       /// Get min max indexes.
       void fetchOptionalLowerUpperPropertyValue(const std::string& propertyName, bool isPointDetector,
@@ -95,11 +100,6 @@ namespace Mantid
       /// Convert the monitor parts of the input workspace to wavelength
       API::MatrixWorkspace_sptr toLamMonitor(const API::MatrixWorkspace_sptr& toConvert,
           const int monitorIndex, const MinMax& backgroundMinMax);
-
-      /// Convert the detector spectrum of the input workspace to wavelength
-      API::MatrixWorkspace_sptr toLamDetector(const WorkspaceIndexList& detectorIndexRange,
-          const API::MatrixWorkspace_sptr& toConvert, const MinMax& wavelengthMinMax,
-          const double& wavelengthStep);
 
     };
 

@@ -2253,6 +2253,7 @@ void FitPropertyBrowser::clearAllPlots()
 
 /** Create a double property and set some settings
  * @param name :: The name of the new property
+ * @param manager :: The current property manager
  * @return Pointer to the created property
  */
 QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name, QtDoublePropertyManager *manager)const

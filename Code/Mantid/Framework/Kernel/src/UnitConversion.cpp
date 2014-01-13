@@ -62,13 +62,7 @@ namespace Mantid
 
     /**
      * Convert a single value between the given units (overload for Unit objects)
-     * @param srcUnit :: The starting unit
-     * @param destUnit :: The destination unit
-     * @param srcValue :: The value to convert
-     * @param l1 ::       The source-sample distance (in metres)
-     * @param l2 ::       The sample-detector distance (in metres)
      * @param twoTheta :: The scattering angle (in radians)
-     * @param emode ::    The energy mode enumeration
      * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
      * @return The value converted to the destination unit
      */

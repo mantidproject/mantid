@@ -301,9 +301,11 @@ namespace Mantid
     }
 
     /**
+     * @param lambda
+     * @param mu
+     * @param rho
      * @param xcur The starting parameters for the limited unconstrained optimization. They will
-     * be updated as it proceeds
-     * @param d
+     *             be updated as it proceeds
      */
     void AugmentedLagrangianOptimizer::unconstrainedOptimization(const std::vector<double> & lambda,
                                                                  const std::vector<double> & mu,

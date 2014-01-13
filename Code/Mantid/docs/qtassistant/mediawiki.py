@@ -3,6 +3,7 @@ from eqnparser import Equation
 import os
 import re
 from parseLinks import fixLinks
+from fixQuotes import fixQuotes
 
 IMG_NOT_FOUND = "ImageNotFound.png"
 
@@ -262,6 +263,7 @@ class MediaWiki:
         text = self.__fixUL(text)
         text = self.__fixPre(text)
         
+        text=fixQuotes(text)
 
         #fix links
         fixer=fixLinks(text)

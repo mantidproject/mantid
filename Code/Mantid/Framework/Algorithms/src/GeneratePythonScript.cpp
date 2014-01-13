@@ -124,33 +124,46 @@ std::string GeneratePythonScript::genAlgString(const API::AlgorithmHistory &algH
   const int version = algHist.version();
 
   // Create an unmanaged version of the algorithm, with witch we can compare the parameters later.
-  const IAlgorithm_sptr ialg_Sptr = AlgorithmManager::Instance().createUnmanaged(name,version);
-  if(ialg_Sptr)
+  try
   {
-    ialg_Sptr->initialize();
-  }
+    const IAlgorithm_sptr ialg_Sptr = AlgorithmManager::Instance().createUnmanaged(name,version);
 
-  // Get the properties of this algorithm history, loop through them, and generate
-  // a string with the appropriate parameters.
-  std::vector<Kernel::PropertyHistory> props = algHist.getProperties();
-  std::vector<Kernel::PropertyHistory>::iterator propsIter = props.begin();
-
-  for( ; propsIter != props.end(); ++propsIter)
-  {
-    std::string paramString = genParamString(*propsIter, ialg_Sptr, name);
-
-    // Miss out parameters that are empty.
-    if(paramString.length() != 0)
+    if(ialg_Sptr)
     {
-      if(algString.length() != 0)
-      {
-        algString += ",";
-      }
-      algString += paramString;
+      ialg_Sptr->initialize();
     }
+
+    // Get the properties of this algorithm history, loop through them, and generate
+    // a string with the appropriate parameters.
+    std::vector<Kernel::PropertyHistory> props = algHist.getProperties();
+    std::vector<Kernel::PropertyHistory>::iterator propsIter = props.begin();
+
+    for( ; propsIter != props.end(); ++propsIter)
+    {
+      std::string paramString = genParamString(*propsIter, ialg_Sptr, name);
+
+      // Miss out parameters that are empty.
+      if(paramString.length() != 0)
+      {
+        if(algString.length() != 0)
+        {
+          algString += ",";
+        }
+        algString += paramString;
+      }
+    }
+    return name + "(" + algString + ")";
+  }
+  catch (std::runtime_error &)
+  {
+    std::ostringstream os;
+    algHist.printSelf(os,4);
+    algString = "ERROR: MISSING ALGORITHM: "+name+ " with parameters" + os.str();
+    return algString;
   }
 
-  return name + "(" + algString + ")";
+
+
 }
 //----------------------------------------------------------------------------------------------
 /** Generate the parameter string (of format "[name]='[value]'") for the given PropertyHistory.

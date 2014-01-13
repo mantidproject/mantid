@@ -792,8 +792,8 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Find the index of a value (or nearest) in a given sorted vector (vector of x axis)
-    * @param X :: vector
-    * @param centre :: value to search
+    * @param vecX :: vector
+    * @param x :: value to search
     */
   int FindPeaks::getVectorIndex(const MantidVec &vecX, double x)
   {
@@ -1179,6 +1179,8 @@ namespace Algorithms
     * @param in_bg0: guessed value of a0 (output)
     * @param in_bg1: guessed value of a1 (output)
     * @param in_bg2: guessed value of a2 (output)
+    * @param i_peakmin :: index for minimum boundary of peak
+    * @param i_peakmax :: index for maximum boundary of peak
     */
   void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum,
                                         int i_centre, int i_min, int i_max,
@@ -1333,7 +1335,7 @@ namespace Algorithms
     * @param peak :: peak function to fit
     * @param in_centre :: starting value of peak centre
     * @param in_height :: starting value of peak height
-    * @param in_fhwm :: starting value of peak width
+    * @param in_fwhms :: starting value of peak width
     * @param peakleftboundary :: left boundary of peak
     * @param peakrightboundary :: right boundary of peak
     * @param user_centre :: peak centre input by user
@@ -1751,7 +1753,6 @@ namespace Algorithms
     * @param centre :: estimated peak centre (maximum position)
     * @param height :: maximum
     * @param fwhm :: 2 fwhm
-    * @param error :: reason for estimating peak parameters error.
     */
   std::string FindPeaks::estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
                                          size_t i_min, size_t i_max, double& centre, double& height, double& fwhm)
@@ -2103,7 +2104,7 @@ namespace Algorithms
   /** Check the results of the fit algorithm to see if they make sense and update the best parameters.
     * @param fitAlg :: algorithm object
     * @param bestEffparams :: vector of double for best effective parameters
-    * @param bestRarparams :: vector double for raw function parameters
+    * @param bestRawparams :: vector double for raw function parameters
     * @param mincost :: chi square
     * @param expPeakPos :: double as expected peak position
     * @param expPeakHeight :: double as expected peak height

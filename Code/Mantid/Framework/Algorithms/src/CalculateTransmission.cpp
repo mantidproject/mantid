@@ -361,7 +361,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
 /** Uses Polynomial as a ChildAlgorithm to fit the log of the exponential curve expected for the transmission.
  * @param[in] WS The single-spectrum workspace to fit
  * @param[in] order The order of the polynomial from 2 to 6
- * @param[out] the coeficients of the polynomial. c[0] + c[1]x + c[2]x^2 + ... 
+ * @param[out] coeficients of the polynomial. c[0] + c[1]x + c[2]x^2 + ...
  */
 API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order, std::vector<double> & coeficients)
 {

@@ -24,6 +24,7 @@ namespace MDEvents
    * @param center :: array of size[inD], with the coordinates at the center
    * @param dimensionsUsed :: bool array of size[inD] where True is set for those dimensions that are considered when
    *        calculating distance.
+   * @param outD :: # of output dimensions
    * @return
    */
   CoordTransformDistance::CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed, const size_t outD)

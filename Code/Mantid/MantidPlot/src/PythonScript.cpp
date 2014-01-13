@@ -63,6 +63,10 @@ namespace
     return retcode;
   }
 
+  /// Message to emit when everything worked out fine
+  static const QString MSG_FINISHED = "Script execution finished.";
+  /// Message to emit when starting
+  static const QString MSG_STARTED = "Script execution started.";
 }
 
 
@@ -223,27 +227,69 @@ void PythonScript::generateAutoCompleteList()
 }
 
 /**
- * Convert a python error state into a human-readable string
- *
- * @return A string containing the error message
+ * This emits the error signal and resets the error state
+ * of the python interpreter.
  */
-QString PythonScript::constructErrorMsg()
+void PythonScript::emit_error()
 {
+  // gil is necessary so other things don't continue
   GlobalInterpreterLock gil;
-  QString message;
-  if (!PyErr_Occurred()) 
-  {
-    return message;
-  }
+
+  // return early if nothing happened
+  if (!PyErr_Occurred())
+    return;
+
+  // get the error information out
   PyObject *exception(NULL), *value(NULL), *traceback(NULL);
   PyErr_Fetch(&exception, &value, &traceback);
+
+  // special check for system exceptions
+  if (bool(exception)
+      && PyErr_GivenExceptionMatches(exception, PyExc_SystemExit)
+      && PyObject_HasAttrString(exception, "code"))
+  {
+    // value is the return code handed to sys.exit
+    long code = 0;
+    if (bool(value) && PyInt_Check(value))
+    {
+      code = PyInt_AsLong(value);
+    }
+
+    // if we are returning 0 then cleanup and return
+    if (code == 0)
+    {
+      // maybe shouldn't clear the error, but for now this
+      // is the agreed upon behavior
+      PyErr_Clear();
+      Py_XDECREF(traceback);
+      Py_XDECREF(exception);
+      Py_XDECREF(value);
+      emit finished(MSG_FINISHED);
+      return;
+    }
+  }
+
+  // prework on the exception handling
   PyErr_NormalizeException(&exception, &value, &traceback);
   PyErr_Clear();
+
+  // convert the traceback into something useful
+  int lineNumber = 0;
+  QString filename;
+  if (traceback)
+  {
+    PyTracebackObject* tb = (PyTracebackObject*)traceback;
+    lineNumber = tb->tb_lineno;
+    filename = PyString_AsString(tb->tb_frame->f_code->co_filename);
+  }
+
+  // the error message is the full (formated) traceback
   PyObject *str_repr = PyObject_Str(value);
+  QString message;
   QTextStream msgStream(&message);
   if( value && str_repr )
   {
-    if(exception == PyExc_SyntaxError) 
+    if(exception == PyExc_SyntaxError)
     {
       msgStream << constructSyntaxErrorStr(value);
     }
@@ -253,7 +299,7 @@ QString PythonScript::constructErrorMsg()
       excTypeName = excTypeName.section(".", -1);
       msgStream << excTypeName << ": " << PyString_AsString(str_repr);
     }
-    
+
   }
   else
   {
@@ -265,7 +311,8 @@ QString PythonScript::constructErrorMsg()
   Py_XDECREF(traceback);
   Py_XDECREF(exception);
   Py_XDECREF(value);
-  return msgStream.readAll();
+
+  emit error(msgStream.readAll(), filename, lineNumber);
 }
 
 /**
@@ -468,7 +515,7 @@ QVariant PythonScript::evaluateImpl()
     }
     else
     {
-      emit error(constructErrorMsg(), "", 0);
+      emit_error();
       return QVariant();
     }
   }
@@ -538,7 +585,7 @@ QVariant PythonScript::evaluateImpl()
     }
     else
     {
-      emit error(constructErrorMsg(), "", 0);
+      emit_error();
     }
     return QVariant();
   }
@@ -554,7 +601,7 @@ bool PythonScript::executeImpl()
 /// Performs the call to Python
 bool PythonScript::executeString()
 {
-  emit started("Script execution started.");
+  emit started(MSG_STARTED);
   bool success(false);
   GlobalInterpreterLock gil;
 
@@ -567,13 +614,13 @@ bool PythonScript::executeString()
   // If an error has occurred we need to construct the error message
   // before any other python code is run
   QString msg;
-  if(!result) 
+  if(!result)
   {
-    msg = constructErrorMsg(); // Also clears error indicator
+    emit_error();
   }
   else
   {
-    msg = "Script execution finished.";
+    emit finished(MSG_FINISHED);
     success = true;
   }
   if(isInteractive())
@@ -583,8 +630,7 @@ bool PythonScript::executeString()
 
   Py_XDECREF(compiledCode);
   Py_XDECREF(result);
-  if(success) emit finished(msg);
-  else emit error(msg, "", 0);
+
   return success;
 }
 

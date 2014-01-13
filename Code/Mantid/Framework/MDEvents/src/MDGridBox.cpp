@@ -1316,9 +1316,11 @@ GCC_DIAG_OFF(array-bounds)
    *
    * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
    *        dimensions to the distance (squared) from the center of the sphere.
-   * @param radiusSquared :: radius^2 below which to integrate
+   * @param radius :: radius below which to integrate
+   * @param length :: length below which to integrate
    * @param signal [out] :: set to the integrated signal
    * @param errorSquared [out] :: set to the integrated squared error.
+   * @param[out] signal_fit :: evaluation parameter on fit
    */
   TMDE(
   void MDGridBox)::integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const

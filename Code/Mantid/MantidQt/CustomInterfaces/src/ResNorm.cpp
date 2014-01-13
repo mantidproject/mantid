@@ -94,7 +94,7 @@ namespace MantidQt
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
 		 *  
-		 * @param filename :: The name of the workspace to plot
+     * @param settings :: The current settings
 		 */
 		void ResNorm::loadSettings(const QSettings& settings)
 		{

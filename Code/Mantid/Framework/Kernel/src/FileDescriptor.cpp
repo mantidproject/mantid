@@ -16,7 +16,7 @@ namespace Mantid
      * first nbytes of the file and returns false if a non-ascii character is found.
      * If the file is shorter than nbytes then it checks until the end of the stream.
      * @param filename A string pointing to an existing file
-     * @param bytes The number of bytes of the file to check (Default=256)
+     * @param nbytes The number of bytes of the file to check (Default=256)
      * @returns True if the file is considered ASCII, false otherwise
      * @throws std::invalid_argument if the file cannot be opened
      * @throws std::runtime_error if an error is occurred while reading the stream
@@ -39,7 +39,7 @@ namespace Mantid
      * the result up to that point
      * The stream is reset to the position is was at when entering the function
      * @param data An input stream opened in binary mode
-     * @param bytes The number of bytes of the file to check (Default=256)
+     * @param nbytes The number of bytes of the file to check (Default=256)
      * @returns True if the stream is considered ASCII, false otherwise
      */
     bool FileDescriptor::isAscii(std::istream & data, const size_t nbytes)
@@ -66,6 +66,37 @@ namespace Mantid
       }
 
       data.seekg(startPos);
+      return result;
+    }
+
+    /**
+    * Check if a file is a text file
+    * @param file :: The file pointer
+    * @param nbytes The number of bytes of the file to check (Default=256)
+    * @returns true if the file an ascii text file, false otherwise
+    */
+    bool FileDescriptor::isAscii(FILE* file, const size_t nbytes)
+    {
+      // read the data and reset the seek index back to the beginning
+      char *data = new char[nbytes];
+      char *pend = &data[fread(data, 1, nbytes, file)];
+      fseek(file,0,SEEK_SET);
+
+      // Call it a binary file if we find a non-ascii character in the
+      // first nbytes bytes of the file.
+      bool result = true;
+      for( char *p = data;  p < pend; ++p )
+      {
+        unsigned long ch = (unsigned long)*p;
+        if( !(ch <= 0x7F) )
+        {
+          result = false;
+          break;
+        }
+
+      }
+      delete[] data;
+
       return result;
     }
 

@@ -56,21 +56,24 @@ namespace Mantid
        *
        * @param originWS : Origin workspace, which provides the original workspace index to spectrum id mapping.
        * @param hostWS : Workspace onto which the resulting workspace indexes will be hosted
-       * @return Remapped wokspace indexes applicable for the host workspace.
+       * @return Remapped wokspace indexes applicable for the host workspace. results as comma separated string.
        */
-      ReflectometryWorkflowBase::WorkspaceIndexList createWorkspaceIndexListFromDetectorWorkspace(
-          MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS)
+      std::string createWorkspaceIndexListFromDetectorWorkspace(MatrixWorkspace_const_sptr originWS,
+          MatrixWorkspace_const_sptr hostWS)
       {
         auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
-        ReflectometryWorkflowBase::WorkspaceIndexList translatedIndexList;
-        for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it)
+        auto it = spectrumMap.begin();
+        std::stringstream result;
+        specid_t specId = (*it).first;
+        result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
+        ++it;
+        for (; it != spectrumMap.end(); ++it)
         {
-          specid_t specId = (*it).first;
-          translatedIndexList.push_back(static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId))); // Could be slow to do it like this.
+          specId = (*it).first;
+          result << "," << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
         }
-        return translatedIndexList;
+        return result.str();
       }
-
 
       /**
        * Helper non-member function
@@ -178,23 +181,27 @@ namespace Mantid
       this->initIndexInputs();
       this->initWavelengthInputs();
 
-
       declareProperty(new PropertyWithValue<std::string>("DetectorComponentName", "", Direction::Input),
           "Name of the detector component i.e. point-detector. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
 
       declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "", Direction::Input),
-                "Name of the sample component i.e. some-surface-holder. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
+          "Name of the sample component i.e. some-surface-holder. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
 
-      declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "Output Workspace IvsQ.");
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+          "Output Workspace IvsQ.");
 
-      declareProperty(new WorkspaceProperty<>("OutputWorkspaceWavelength", "", Direction::Output, PropertyMode::Optional), "Output Workspace IvsLam. Intermediate workspace.");
+      declareProperty(
+          new WorkspaceProperty<>("OutputWorkspaceWavelength", "", Direction::Output,
+              PropertyMode::Optional), "Output Workspace IvsLam. Intermediate workspace.");
 
       declareProperty(new PropertyWithValue<double>("ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
-                "Final theta value in degrees. Optional, this value will be calculated internally and provided as ThetaOut if not provided.");
+          "Final theta value in degrees. Optional, this value will be calculated internally and provided as ThetaOut if not provided.");
 
-      declareProperty(new PropertyWithValue<double>("ThetaOut", Mantid::EMPTY_DBL(), Direction::Output), "Calculated final theta in degrees.");
+      declareProperty(new PropertyWithValue<double>("ThetaOut", Mantid::EMPTY_DBL(), Direction::Output),
+          "Calculated final theta in degrees.");
 
-      declareProperty(new PropertyWithValue<bool>("CorrectDetectorPositions", true, Direction::Input), "Correct detector positions using ThetaIn (if given)");
+      declareProperty(new PropertyWithValue<bool>("CorrectDetectorPositions", true, Direction::Input),
+          "Correct detector positions using ThetaIn (if given)");
 
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("FirstTransmissionRun", "", Direction::Input,
@@ -214,28 +221,31 @@ namespace Mantid
       setPropertyGroup("EndOverlap", "Transmission");
 
       // Only do transmission corrections when point detector.
-      setPropertySettings("FirstTransmissionRun", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-      setPropertySettings("SecondTransmissionRun", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-      setPropertySettings("Params", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-      setPropertySettings("StartOverlap", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-      setPropertySettings("EndOverlap", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
-
-      // Only use region of interest when in multi-detector analysis mode
-      setPropertySettings("RegionOfInterest",
-          new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
+      setPropertySettings("FirstTransmissionRun",
+          new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("SecondTransmissionRun",
+          new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("Params",
+          new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("StartOverlap",
+          new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
+      setPropertySettings("EndOverlap",
+          new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "PointDetectorAnalysis"));
 
       // Only use region of direct beam when in multi-detector analysis mode.
       setPropertySettings("RegionOfDirectBeam",
           new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
     }
 
-
     /**
      * Correct the position of the detectors based on the input theta value.
      * @param toCorrect : Workspace to correct detector posisitions on.
      * @param thetaInDeg : Theta in degrees to use in correction calculations.
+     * @param sample : Pointer to the sample
+     * @param detector : Pointer to a given detector
      */
-    void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& thetaInDeg, IComponent_const_sptr sample, IComponent_const_sptr detector)
+    void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect,
+        const double& thetaInDeg, IComponent_const_sptr sample, IComponent_const_sptr detector)
     {
 
       auto instrument = toCorrect->getInstrument();
@@ -248,15 +258,16 @@ namespace Mantid
 
       auto referenceFrame = instrument->getReferenceFrame();
 
-      const double sampleToDetectorAlongBeam = sampleToDetector.scalar_prod( referenceFrame->vecPointingAlongBeam() ) ;
+      const double sampleToDetectorAlongBeam = sampleToDetector.scalar_prod(
+          referenceFrame->vecPointingAlongBeam());
 
-      const double thetaInRad = thetaInDeg * ( M_PI / 180.0 );
+      const double thetaInRad = thetaInDeg * (M_PI / 180.0);
 
-      double  acrossOffset = 0;
+      double acrossOffset = 0;
 
-      double beamOffset = detectorPosition.scalar_prod( referenceFrame->vecPointingAlongBeam() );
+      double beamOffset = detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam());
 
-      double upOffset = sampleToDetectorAlongBeam * std::sin( 2.0 * thetaInRad );
+      double upOffset = sampleToDetectorAlongBeam * std::sin(2.0 * thetaInRad);
 
       auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
       moveComponentAlg->initialize();
@@ -278,12 +289,11 @@ namespace Mantid
      * @param toConvert : Workspace to convert
      * @param bCorrectPosition : Flag to indicate that detector positions should be corrected based on the input theta values.
      * @param thetaInDeg : Theta in Degrees. Used for correction.
-     * @param sample : Sample component
-     * @param detector : Detector component
+     * @param isPointDetector: Is point detector analysis
      * @return
      */
-    Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition,
-        OptionalDouble& thetaInDeg, Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector)
+    Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
+        API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition, OptionalDouble& thetaInDeg, const bool isPointDetector)
     {
       /*
        * Can either calculate a missing theta value for the purposes of reporting, or correct positions based on a theta value,
@@ -296,19 +306,27 @@ namespace Mantid
 
         Instrument_const_sptr instrument = toConvert->getInstrument();
 
+        IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
+        IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+
         const V3D sampleToDetectorPos = detector->getPos() - sample->getPos();
 
         const V3D sourcePos = instrument->getSource()->getPos();
         const V3D beamPos = sample->getPos() - sourcePos;
 
         const V3D sampleDetVec = detector->getPos() - sample->getPos();
-        const double calculatedTheta =  sampleDetVec.angle(beamPos) * thetaToRad * 1 / 2;
+        const double calculatedTheta = sampleDetVec.angle(beamPos) * thetaToRad * 1 / 2;
 
         thetaInDeg = calculatedTheta / thetaToRad; // Assign calculated value it.
       }
-      else if( bCorrectPosition ) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
+      else if (bCorrectPosition) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
       {
         g_log.debug("Correcting detector position");
+
+        auto instrument = toConvert->getInstrument();
+        IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
+        IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+
         correctPosition(toConvert, thetaInDeg.get(), sample, detector);
       }
 
@@ -329,7 +347,8 @@ namespace Mantid
      * @param inst : Instrument to search through
      * @return : The component : The component object found.
      */
-    Mantid::Geometry::IComponent_const_sptr ReflectometryReductionOne::getSurfaceSampleComponent(Mantid::Geometry::Instrument_const_sptr inst)
+    Mantid::Geometry::IComponent_const_sptr ReflectometryReductionOne::getSurfaceSampleComponent(
+        Mantid::Geometry::Instrument_const_sptr inst)
     {
       std::string sampleComponent = "some-surface-holder";
       if (!isPropertyDefault("SampleComponentName"))
@@ -352,15 +371,16 @@ namespace Mantid
      * @param isPointDetector : True if this is a point detector. Used to guess a name.
      * @return The component : The component object found.
      */
-    boost::shared_ptr<const Mantid::Geometry::IComponent> ReflectometryReductionOne::getDetectorComponent(Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector)
+    boost::shared_ptr<const Mantid::Geometry::IComponent> ReflectometryReductionOne::getDetectorComponent(
+        Mantid::Geometry::Instrument_const_sptr inst, const bool isPointDetector)
     {
       std::string componentToCorrect = isPointDetector ? "point-detector" : "line-detector";
-      if(!isPropertyDefault("DetectorComponentName"))
+      if (!isPropertyDefault("DetectorComponentName"))
       {
         componentToCorrect = this->getPropertyValue("DetectorComponentName");
       }
-      boost::shared_ptr<const IComponent>  searchResult = inst->getComponentByName(componentToCorrect);
-      if(searchResult == NULL)
+      boost::shared_ptr<const IComponent> searchResult = inst->getComponentByName(componentToCorrect);
+      if (searchResult == NULL)
       {
         throw std::invalid_argument(componentToCorrect + " does not exist. Check input properties.");
       }
@@ -374,7 +394,8 @@ namespace Mantid
      * @param endIndex
      * @return Workspace with spectra summed over the specified range.
      */
-    MatrixWorkspace_sptr ReflectometryReductionOne::sumSpectraOverRange(MatrixWorkspace_sptr inWS, const int startIndex, const int endIndex)
+    MatrixWorkspace_sptr ReflectometryReductionOne::sumSpectraOverRange(MatrixWorkspace_sptr inWS,
+        const int startIndex, const int endIndex)
     {
       auto sumSpectra = this->createChildAlgorithm("SumSpectra");
       sumSpectra->initialize();
@@ -401,7 +422,8 @@ namespace Mantid
       OptionalDouble stitchingStartOverlap;
       OptionalDouble stitchingEndOverlap;
 
-      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStart, stitchingDelta, stitchingEnd, stitchingStartOverlap, stitchingEndOverlap);
+      getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun, stitchingStart, stitchingDelta,
+          stitchingEnd, stitchingStartOverlap, stitchingEndOverlap);
 
       OptionalDouble theta;
       if (!isPropertyDefault("ThetaIn"))
@@ -412,16 +434,16 @@ namespace Mantid
 
       const std::string strAnalysisMode = getProperty("AnalysisMode");
       const bool isPointDetector = (pointDetectorAnalysis.compare(strAnalysisMode) == 0);
+      const bool isMultiDetector = (multiDetectorAnalysis.compare(strAnalysisMode) == 0);
 
-      const MinMax wavelengthInterval = this->getMinMax("WavelengthMin","WavelengthMax");
+      const MinMax wavelengthInterval = this->getMinMax("WavelengthMin", "WavelengthMax");
       const double wavelengthStep = getProperty("WavelengthStep");
-      const MinMax monitorBackgroundWavelengthInterval = getMinMax("MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax");
-      const MinMax monitorIntegrationWavelengthInterval = getMinMax("MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
+      const MinMax monitorBackgroundWavelengthInterval = getMinMax("MonitorBackgroundWavelengthMin",
+          "MonitorBackgroundWavelengthMax");
+      const MinMax monitorIntegrationWavelengthInterval = getMinMax("MonitorIntegrationWavelengthMin",
+          "MonitorIntegrationWavelengthMax");
 
-      const WorkspaceIndexList indexList = getWorkspaceIndexList();
-
-      OptionalWorkspaceIndexes regionOfInterest;
-      fetchOptionalLowerUpperPropertyValue("RegionOfInterest", isPointDetector, regionOfInterest);
+      const std::string processingCommands = getWorkspaceIndexList();
 
       OptionalWorkspaceIndexes directBeam;
       fetchOptionalLowerUpperPropertyValue("RegionOfDirectBeam", isPointDetector, directBeam);
@@ -430,68 +452,67 @@ namespace Mantid
 
       const bool correctDetctorPositions = getProperty("CorrectDetectorPositions");
 
-      auto instrument = runWS->getInstrument();
-      IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
-      IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
-
-      DetectorMonitorWorkspacePair inLam = toLam(runWS, indexList, i0MonitorIndex, wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
+      DetectorMonitorWorkspacePair inLam = toLam(runWS, processingCommands, i0MonitorIndex,
+          wavelengthInterval, monitorBackgroundWavelengthInterval, wavelengthStep);
       auto detectorWS = inLam.get<0>();
       auto monitorWS = inLam.get<1>();
 
       MatrixWorkspace_sptr IvsLam; // Output workspace
       MatrixWorkspace_sptr IvsQ; // Output workspace
-      if(isPointDetector)
+      if (isMultiDetector)
       {
-        auto integrationAlg = this->createChildAlgorithm("Integration");
-        integrationAlg->initialize();
-        integrationAlg->setProperty("InputWorkspace", monitorWS);
-        integrationAlg->setProperty("RangeLower", monitorIntegrationWavelengthInterval.get<0>());
-        integrationAlg->setProperty("RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
-        integrationAlg->execute();
-        MatrixWorkspace_sptr integratedMonitor = integrationAlg->getProperty("OutputWorkspace");
-
-        IvsLam = detectorWS / integratedMonitor; // Normalize by the integrated monitor counts.
-
-        if(firstTransmissionRun.is_initialized())
+        if (directBeam.is_initialized())
         {
+          // Sum over the direct beam.
+          WorkspaceIndexList db = directBeam.get();
+          std::stringstream buffer;
+          buffer << db.front() << "-" << db.back();
+          MatrixWorkspace_sptr regionOfDirectBeamWS = this->toLamDetector(buffer.str(), runWS,
+              wavelengthInterval, wavelengthStep);
 
-          // Perform transmission correction.
-          IvsLam = this->transmissonCorrection(IvsLam, wavelengthInterval, monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
-              i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun, stitchingStart, stitchingDelta, stitchingEnd, stitchingStartOverlap, stitchingEndOverlap, wavelengthStep);
+          // Rebin to the detector workspace
+          auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
+          rebinToWorkspaceAlg->initialize();
+          rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", regionOfDirectBeamWS);
+          rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
+          rebinToWorkspaceAlg->execute();
+          regionOfDirectBeamWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
 
+          // Normalize by the direct beam.
+          detectorWS = detectorWS / regionOfDirectBeamWS;
         }
-        else
-        {
-          g_log.warning("No transmission correction will be applied.");
-        }
+      }
+      auto integrationAlg = this->createChildAlgorithm("Integration");
+      integrationAlg->initialize();
+      integrationAlg->setProperty("InputWorkspace", monitorWS);
+      integrationAlg->setProperty("RangeLower", monitorIntegrationWavelengthInterval.get<0>());
+      integrationAlg->setProperty("RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
+      integrationAlg->execute();
+      MatrixWorkspace_sptr integratedMonitor = integrationAlg->getProperty("OutputWorkspace");
+
+      IvsLam = detectorWS / integratedMonitor; // Normalize by the integrated monitor counts.
+
+      if (firstTransmissionRun.is_initialized())
+      {
+
+        // Perform transmission correction.
+        IvsLam = this->transmissonCorrection(IvsLam, wavelengthInterval,
+            monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex,
+            firstTransmissionRun.get(), secondTransmissionRun, stitchingStart, stitchingDelta,
+            stitchingEnd, stitchingStartOverlap, stitchingEndOverlap, wavelengthStep);
       }
       else
       {
-        if(!regionOfInterest.is_initialized())
-        {
-          throw std::invalid_argument("RegionOfInterest must be provided for a multi-detector run.");
-        }
-        if(!directBeam.is_initialized())
-        {
-          throw std::invalid_argument("RegionOfDirectBeam must be provided for a multi-detector run.");
-        }
-        const WorkspaceIndexList roi = getIndexesInTermsOf(detectorWS, runWS, regionOfInterest.get());
-        const WorkspaceIndexList db = getIndexesInTermsOf(detectorWS, runWS, directBeam.get());
-
-        MatrixWorkspace_sptr regionOfInterestWS = this->sumSpectraOverRange(detectorWS, roi.front(), roi.back());
-        MatrixWorkspace_sptr regionOfDirectBeamWS = this->sumSpectraOverRange(detectorWS, db.front(), db.back());
-
-        IvsLam = regionOfInterestWS / regionOfDirectBeamWS; // TODO. This needs checking.
+        g_log.warning("No transmission correction will be applied.");
       }
 
-      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, theta, sample, detector);
+      IvsQ = this->toIvsQ(IvsLam, correctDetctorPositions, theta, isPointDetector);
 
       setProperty("ThetaOut", theta.get());
       setProperty("OutputWorkspaceWavelength", IvsLam);
       setProperty("OutputWorkspace", IvsQ);
 
     }
-
 
     /**
      * Perform Transmission Corrections.
@@ -519,10 +540,8 @@ namespace Mantid
         const OptionalDouble& stitchingEndOverlap, const double& wavelengthStep)
     {
       g_log.debug("Extracting first transmission run workspace indexes from spectra");
-      const WorkspaceIndexList detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
+      const std::string detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
           firstTransmissionRun);
-
-      // TODO if firstInputWorkspace is in wavelength, do not create the transmission workspace, just do the division.
 
       MatrixWorkspace_sptr denominator = firstTransmissionRun;
       Unit_const_sptr xUnit = firstTransmissionRun->getAxis(0)->unit();
@@ -541,7 +560,7 @@ namespace Mantid
           alg->setProperty("StartOverlap", stitchingStartOverlap.get());
           alg->setProperty("EndOverlap", stitchingEndOverlap.get());
         }
-        alg->setProperty("WorkspaceIndexList", detectorIndexes);
+        alg->setProperty("ProcessingInstructions", detectorIndexes);
         alg->setProperty("I0MonitorIndex", i0MonitorIndex);
         alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
         alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
