@@ -77,6 +77,7 @@ namespace Mantid
     declareProperty("CellType", cellTypes[0],boost::make_shared<StringListValidator>(cellTypes),
       "Select the cell type.");
     declareProperty( "Apply", false, "Re-index the peaks");
+    declareProperty( "PerRun", false, "Make per run orientation matrices");
     declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
     declareProperty("EdgePixels",0, "Remove peaks that are at pixels this close to edge. " );
     declareProperty("OutputChi2", 0.0,Direction::Output);
@@ -93,189 +94,234 @@ namespace Mantid
     void OptimizeLatticeForCellType::exec()
     {
       bool   apply          = this->getProperty("Apply");
+      bool   perRun          = this->getProperty("PerRun");
       double tolerance      = this->getProperty("Tolerance");
       int edge 		= this->getProperty("EdgePixels");
-      std::string inname = getProperty("PeaksWorkspace");
       std::string cell_type = getProperty("CellType");
       DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
-      DataObjects::PeaksWorkspace_sptr peakWS (new PeaksWorkspace());
-      peakWS = ws->clone();
+      std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
 
-      for (int i= int(peakWS->getNumberPeaks())-1; i>=0; --i)
+      for (int i= int(ws->getNumberPeaks())-1; i>=0; --i)
       {
-    	const std::vector<Peak> &peaks = peakWS->getPeaks();
-        if (edgePixel(peakWS, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge))
+    	const std::vector<Peak> &peaks = ws->getPeaks();
+        if (edgePixel(ws, peaks[i].getBankName(), peaks[i].getCol(), peaks[i].getRow(), edge))
         {
-          peakWS->removePeak(i);
+          ws->removePeak(i);
         }
       }
-      AnalysisDataService::Instance().addOrReplace("_peaks",peakWS);
+      runWS.push_back(ws);
 
+      if (perRun)
+      {
+		  std::vector< std::pair<std::string, bool> > criteria;
+		  // Sort by run number
+		  criteria.push_back( std::pair<std::string, bool>("runnumber", true) );
+		  ws->sort(criteria);
+		  const std::vector<Peak> &peaks_all = ws->getPeaks();
+		  int run = 0;
+          int count = 0;
+          for(size_t i = 0; i < peaks_all.size(); i++)
+		  {
+        	  if ( peaks_all[i].getRunNumber() != run)
+        	  {
+        		  count++; // first entry in runWS is input workspace
+        		  DataObjects::PeaksWorkspace_sptr cloneWS (new PeaksWorkspace());
+        		  cloneWS->setInstrument(ws->getInstrument());
+        		  cloneWS->copyExperimentInfoFrom(ws.get());
+        		  runWS.push_back(cloneWS);
+        		  runWS[count]->addPeak(peaks_all[i]);
+        		  run = peaks_all[i].getRunNumber();
+        		  AnalysisDataService::Instance().addOrReplace( boost::lexical_cast<std::string>(run)+ws->getName(),runWS[count]);
+        	  }
+        	  else
+        	  {
+        		  runWS[count]->addPeak(peaks_all[i]);
+        	  }
+		  }
+    }
       // finally do the optimization
-    
-      const DblMatrix UB = ws->sample().getOrientedLattice().getUB();
-      std::vector<double>lat(6);
-      IndexingUtils::GetLatticeParameters( UB, lat);
-      // initialize parameters for optimization
-      size_t n_peaks = peakWS->getNumberPeaks();
-      MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
-                 std::string("Workspace2D"), 1, n_peaks, n_peaks);
-      for(size_t i = 0; i < data->blocksize(); i++)
+      for(size_t i_run = 0; i_run < runWS.size(); i_run++)
       {
-          data->dataX(0)[i] = static_cast<double>(i);
-          data->dataY(0)[i] = 0.0;
-          data->dataE(0)[i] = 1.0;
-      }
+          DataObjects::PeaksWorkspace_sptr peakWS (new PeaksWorkspace());
+          peakWS = runWS[i_run]->clone();
+          AnalysisDataService::Instance().addOrReplace("_peaks",peakWS);
+		  const DblMatrix UB = peakWS->sample().getOrientedLattice().getUB();
+		  std::vector<double>lat(6);
+		  IndexingUtils::GetLatticeParameters( UB, lat);
+		  // initialize parameters for optimization
+		  size_t n_peaks = peakWS->getNumberPeaks();
+		  MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
+					 std::string("Workspace2D"), 1, n_peaks, n_peaks);
+		  for(size_t i = 0; i < data->blocksize(); i++)
+		  {
+			  data->dataX(0)[i] = static_cast<double>(i);
+			  data->dataY(0)[i] = 0.0;
+			  data->dataE(0)[i] = 1.0;
+		  }
 
-      std::ostringstream fun_str;
-      fun_str << "name=LatticeErrors";
-      for ( size_t i = 0; i < 6; i++ )fun_str << ",p" << i <<"="<<lat[i];
+		  std::ostringstream fun_str;
+		  fun_str << "name=LatticeErrors";
+		  for ( size_t i = 0; i < 6; i++ )fun_str << ",p" << i <<"="<<lat[i];
 
-      IAlgorithm_sptr fit_alg;
-      try
-      {
-        fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-      } catch (Exception::NotFoundError&)
-      {
-        g_log.error("Can't locate Fit algorithm");
-        throw ;
-      }
+		  IAlgorithm_sptr fit_alg;
+		  try
+		  {
+			fit_alg = createChildAlgorithm("Fit", -1, -1, false);
+		  } catch (Exception::NotFoundError&)
+		  {
+			g_log.error("Can't locate Fit algorithm");
+			throw ;
+		  }
 
-      fit_alg->setPropertyValue("Function", fun_str.str());
-      if (cell_type == "Cubic")
-      {
-        std::ostringstream tie_str;
-        tie_str << "p1=p0,p2=p0,p3=90,p4=90,p5=90";
-        fit_alg->setProperty("Ties", tie_str.str());
-      }
-      else if (cell_type == "Tetragonal")
-      {
-        std::ostringstream tie_str;
-        tie_str << "p1=p0,p3=90,p4=90,p5=90";
-        fit_alg->setProperty("Ties", tie_str.str());
-      }
-      else if (cell_type == "Orthorhombic")
-      {
-        std::ostringstream tie_str;
-        tie_str << "p3=90,p4=90,p5=90";
-        fit_alg->setProperty("Ties", tie_str.str());
-      }
-      else if (cell_type == "Rhombohedral")
-      {
-        std::ostringstream tie_str;
-        tie_str << "p1=p0,p2=p0,p4=p3,p5=p3";
-        fit_alg->setProperty("Ties", tie_str.str());
-      }
-      else if (cell_type == "Hexagonal")
-      {
-        std::ostringstream tie_str;
-        tie_str << "p1=p0,p3=90,p4=90,p5=120";
-        fit_alg->setProperty("Ties", tie_str.str());
-      }
-      else if (cell_type == "Monoclinic ( a unique )")
-      {
-        std::ostringstream tie_str;
-        tie_str << "p4=90,p5=90";
-        fit_alg->setProperty("Ties", tie_str.str());
-      }
-      else if (cell_type == "Monoclinic ( b unique )")
-      {
-        std::ostringstream tie_str;
-        tie_str << "p3=90,p5=90";
-        fit_alg->setProperty("Ties", tie_str.str());
-      }
-      else if (cell_type == "Monoclinic ( c unique )")
-      {
-        std::ostringstream tie_str;
-        tie_str << "p3=90,p4=90";
-        fit_alg->setProperty("Ties", tie_str.str());
-      }
-      fit_alg->setProperty("InputWorkspace", data);
-      fit_alg->setProperty("WorkspaceIndex", 0);
-      fit_alg->setProperty("MaxIterations", 5000);
-      fit_alg->setProperty("CreateOutput", true);
-      fit_alg->setProperty("Output", "fit");
-      fit_alg->executeAsChildAlg();
-      MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+		  fit_alg->setPropertyValue("Function", fun_str.str());
+		  if (cell_type == "Cubic")
+		  {
+			std::ostringstream tie_str;
+			tie_str << "p1=p0,p2=p0,p3=90,p4=90,p5=90";
+			fit_alg->setProperty("Ties", tie_str.str());
+		  }
+		  else if (cell_type == "Tetragonal")
+		  {
+			std::ostringstream tie_str;
+			tie_str << "p1=p0,p3=90,p4=90,p5=90";
+			fit_alg->setProperty("Ties", tie_str.str());
+		  }
+		  else if (cell_type == "Orthorhombic")
+		  {
+			std::ostringstream tie_str;
+			tie_str << "p3=90,p4=90,p5=90";
+			fit_alg->setProperty("Ties", tie_str.str());
+		  }
+		  else if (cell_type == "Rhombohedral")
+		  {
+			std::ostringstream tie_str;
+			tie_str << "p1=p0,p2=p0,p4=p3,p5=p3";
+			fit_alg->setProperty("Ties", tie_str.str());
+		  }
+		  else if (cell_type == "Hexagonal")
+		  {
+			std::ostringstream tie_str;
+			tie_str << "p1=p0,p3=90,p4=90,p5=120";
+			fit_alg->setProperty("Ties", tie_str.str());
+		  }
+		  else if (cell_type == "Monoclinic ( a unique )")
+		  {
+			std::ostringstream tie_str;
+			tie_str << "p4=90,p5=90";
+			fit_alg->setProperty("Ties", tie_str.str());
+		  }
+		  else if (cell_type == "Monoclinic ( b unique )")
+		  {
+			std::ostringstream tie_str;
+			tie_str << "p3=90,p5=90";
+			fit_alg->setProperty("Ties", tie_str.str());
+		  }
+		  else if (cell_type == "Monoclinic ( c unique )")
+		  {
+			std::ostringstream tie_str;
+			tie_str << "p3=90,p4=90";
+			fit_alg->setProperty("Ties", tie_str.str());
+		  }
+		  fit_alg->setProperty("InputWorkspace", data);
+		  fit_alg->setProperty("WorkspaceIndex", 0);
+		  fit_alg->setProperty("MaxIterations", 5000);
+		  fit_alg->setProperty("CreateOutput", true);
+		  fit_alg->setProperty("Output", "fit");
+		  fit_alg->executeAsChildAlg();
+		  MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
 
-      double chisq = fit_alg->getProperty("OutputChi2overDoF");
-      std::vector<double> Params;
-      IFunction_sptr out = fit_alg->getProperty("Function");
+		  double chisq = fit_alg->getProperty("OutputChi2overDoF");
+		  std::vector<double> Params;
+		  IFunction_sptr out = fit_alg->getProperty("Function");
 
-      Params.push_back(out->getParameter("p0"));
-      Params.push_back(out->getParameter("p1"));
-      Params.push_back(out->getParameter("p2"));
-      Params.push_back(out->getParameter("p3"));
-      Params.push_back(out->getParameter("p4"));
-      Params.push_back(out->getParameter("p5"));
+		  Params.push_back(out->getParameter("p0"));
+		  Params.push_back(out->getParameter("p1"));
+		  Params.push_back(out->getParameter("p2"));
+		  Params.push_back(out->getParameter("p3"));
+		  Params.push_back(out->getParameter("p4"));
+		  Params.push_back(out->getParameter("p5"));
 
 
-      std::vector<double> sigabc(Params.size());
-      OrientedLattice latt=peakWS->mutableSample().getOrientedLattice();
-      DblMatrix UBnew = latt.getUB();
+		  std::vector<double> sigabc(Params.size());
+		  OrientedLattice latt=peakWS->mutableSample().getOrientedLattice();
+		  DblMatrix UBnew = latt.getUB();
 
-      calculateErrors(n_peaks, inname, cell_type, Params, sigabc, chisq);
-      OrientedLattice o_lattice;
-      o_lattice.setUB( UBnew );
+		  calculateErrors(n_peaks, runWS[i_run]->getName(), cell_type, Params, sigabc, chisq);
+		  OrientedLattice o_lattice;
+		  o_lattice.setUB( UBnew );
 
-      if (cell_type == "Cubic")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],0,0,0);
-      }
-      else if (cell_type == "Tetragonal")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
-      }
-      else if (cell_type == "Orthorhombic")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,0);
-      }
-      else if (cell_type == "Rhombohedral")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],sigabc[1],sigabc[1],sigabc[1]);
-      }
-      else if (cell_type == "Hexagonal")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
-      }
-      else if (cell_type == "Monoclinic ( a unique )")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],0,0);
-      }
-      else if (cell_type == "Monoclinic ( b unique )")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,sigabc[3],0);
+		  if (cell_type == "Cubic")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],0,0,0);
+		  }
+		  else if (cell_type == "Tetragonal")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
+		  }
+		  else if (cell_type == "Orthorhombic")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,0);
+		  }
+		  else if (cell_type == "Rhombohedral")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[0],sigabc[0],sigabc[1],sigabc[1],sigabc[1]);
+		  }
+		  else if (cell_type == "Hexagonal")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[0],sigabc[1],0,0,0);
+		  }
+		  else if (cell_type == "Monoclinic ( a unique )")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],0,0);
+		  }
+		  else if (cell_type == "Monoclinic ( b unique )")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,sigabc[3],0);
 
-      }
-      else if (cell_type == "Monoclinic ( c unique )")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,sigabc[3]);
-      }
-      else if (cell_type == "Triclinic")
-      {
-    	o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
-      }
+		  }
+		  else if (cell_type == "Monoclinic ( c unique )")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],0,0,sigabc[3]);
+		  }
+		  else if (cell_type == "Triclinic")
+		  {
+			o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+		  }
 
-      // Show the modified lattice parameters
-      g_log.notice() << o_lattice << "\n";
+		  // Show the modified lattice parameters
+		  g_log.notice() << runWS[i_run]->getName() <<"  " << o_lattice << "\n";
 
-      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+		  runWS[i_run]->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
 
-      setProperty("OutputChi2", chisq);
+		  setProperty("OutputChi2", chisq);
 
-      if ( apply )
-      {
-		  // Reindex peaks with new UB
-		  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
-		  alg->setPropertyValue("PeaksWorkspace", inname);
-		  alg->setProperty("Tolerance", tolerance);
-		  alg->executeAsChildAlg();
+		  if ( apply )
+		  {
+			  // Reindex peaks with new UB
+			  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
+			  alg->setPropertyValue("PeaksWorkspace", runWS[i_run]->getName());
+			  alg->setProperty("Tolerance", tolerance);
+			  alg->executeAsChildAlg();
+		  }
+		  AnalysisDataService::Instance().remove("_peaks");
+		  // Save Peaks
+		  Mantid::API::IAlgorithm_sptr savePks_alg = createChildAlgorithm("SaveIsawPeaks");
+		  savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
+		  savePks_alg->setProperty("Filename", "ls"+runWS[i_run]->getName()+".integrate");
+		  savePks_alg->executeAsChildAlg();
+		  g_log.notice() <<"See output file: " << "ls"+runWS[i_run]->getName()+".integrate" << "\n";
+		  // Save UB
+		  Mantid::API::IAlgorithm_sptr saveUB_alg = createChildAlgorithm("SaveIsawUB");
+		  saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
+		  saveUB_alg->setProperty("Filename", "ls"+runWS[i_run]->getName()+".mat");
+		  saveUB_alg->executeAsChildAlg();
+		  // Show the names of files written
+		  g_log.notice() <<"See output file: " << "ls"+runWS[i_run]->getName()+".mat" << "\n";
       }
-      AnalysisDataService::Instance().remove("_peaks");
     }
     //-----------------------------------------------------------------------------------------
     /**
-      @param  inname       Name of workspace containing peaks
+      @param  inname       Name of Filename containing peaks
       @param  cell_type    cell type to optimize
       @param  params       optimized cell parameters
       @return  chisq of optimization
