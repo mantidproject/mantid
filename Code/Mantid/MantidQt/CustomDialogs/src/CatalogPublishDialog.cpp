@@ -1,5 +1,11 @@
 #include "MantidQtCustomDialogs/CatalogPublishDialog.h"
 
+#include "MantidAPI/CatalogFactory.h"
+#include "MantidAPI/ICatalog.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+
 namespace MantidQt
 {
   namespace CustomDialogs
@@ -37,6 +43,31 @@ namespace MantidQt
 
       // This allows the user NOT to select a workspace if there are any loaded into Mantid.
       m_uiForm.inputWorkspaceCb->insertItem("", 0);
+
+      // Display "investigationNumberCb" with the investigations that he user can publish to.
+      populateUserInvestigations();
+    }
+
+    /**
+     * Populate the investigation number combo-box with investigations that the user can publish to.
+     */
+    void CatalogPublishDialog::populateUserInvestigations()
+    {
+      auto workspace = Mantid::API::WorkspaceFactory::Instance().createTable();
+      std::string catalogName = Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo().catalogName();
+      auto catalog = Mantid::API::CatalogFactory::Instance().create(catalogName);
+      catalog->myData(workspace);
+
+      // Populate the form with investigations that the user can publish to.
+      for (size_t row = 0; row < workspace->rowCount(); row++)
+      {
+        m_uiForm.investigationNumberCb->addItem(QString::fromStdString(boost::lexical_cast<std::string>(workspace->cell<int64_t>(row, 0))));
+        // Add better tooltip for ease of use (much easier to recall the investigation if title and instrument are also provided).
+        m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
+            QString::fromStdString("The title of the investigation is: " + workspace->cell<std::string>(row, 1) +
+                ". The instrument is: " + workspace->cell<std::string>(row, 2)), Qt::ToolTipRole);
+      }
+    }
 
   }
 }
