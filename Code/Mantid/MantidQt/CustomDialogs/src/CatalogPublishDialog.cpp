@@ -67,8 +67,9 @@ namespace MantidQt
         m_uiForm.investigationNumberCb->addItem(QString::fromStdString(boost::lexical_cast<std::string>(workspace->cell<int64_t>(row, 0))));
         // Add better tooltip for ease of use (much easier to recall the investigation if title and instrument are also provided).
         m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
-            QString::fromStdString("The title of the investigation is: " + workspace->cell<std::string>(row, 1) +
-                ". The instrument is: " + workspace->cell<std::string>(row, 2)), Qt::ToolTipRole);
+            QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
+                                   "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",
+                                   Qt::ToolTipRole);
       }
     }
 
