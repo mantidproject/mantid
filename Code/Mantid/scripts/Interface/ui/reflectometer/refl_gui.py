@@ -7,7 +7,7 @@ from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
 from isis_reflectometry.combineMulti import *
-import isis_reflectometry.load_live_runs
+from isis_reflectometry import load_live_runs
 from isis_reflgui.latest_isis_runs import *
 from mantid.api import Workspace, WorkspaceGroup
 
@@ -77,6 +77,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         #self.windowRefl.modFlag = True
     def initTable(self):
         self.currentTable = None
+        self.accMethod = None
         self.tableMain.resizeColumnsToContents()
         instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
         currentInstrument = config['default.instrument']
@@ -204,6 +205,22 @@ class ReflGui(refl_window.Ui_windowRefl):
     def unTickAll(self,state):
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, 17).children()[1].setCheckState(state)
+    def getAccMethod(self):
+        msgBox = QtGui.QMessageBox()
+        msgBox.setText("The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?")
+        msgBox.setIcon(QtGui.QMessageBox.Question)
+        AddButton = msgBox.addButton("Add", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
+        ReplaceButton = msgBox.addButton("Replace", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
+        AppendButton = msgBox.addButton("Append", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
+        msgBox.setDefaultButton(AddButton)
+        msgBox.setEscapeButton(AddButton)
+        reply = msgBox.exec_()
+        if msgBox.clickedButton() == AppendButton:
+            return "Append"
+        elif msgBox.clickedButton() == ReplaceButton:
+            return "Replace"
+        else:
+            return "Add"
     def process(self):
 #--------- If "Process" button pressed, convert raw files to IvsLam and IvsQ and combine if checkbox ticked -------------
         willProcess = True
@@ -244,7 +261,10 @@ class ReflGui(refl_window.Ui_windowRefl):
                     if (self.tableMain.item(row, 15).text() == ''):
                         loadedRun = None
                         if load_live_runs.is_live_run(runno[0]):
-                            loadedRun = load_live_runs.get_live_data(config['default.instrument'])
+                            if not self.accMethod:
+                            #reply = QtGui.QMessageBox.question(self.tableMain, 'Accumulation Method?',"The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                                self.accMethod = self.getAccMethod()
+                            loadedRun = load_live_runs.get_live_data(config['default.instrument'], Accumulation = self.accMethod)
                         else:
                             Load(Filename=run, outputWorkspace="run")
                             loadedRun = mtd["run"]
@@ -342,6 +362,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                             gcomb.activeLayer().setTitle(titl)
                             gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                             gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+        self.accMethod = None
     def dorun(self, runno, row, which):
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
@@ -353,7 +374,9 @@ class ReflGui(refl_window.Ui_windowRefl):
         #[wlam, wq, th] = quick(runno, trans=transrun, theta=angle)
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
-            loadedRun = load_live_runs.get_live_data(config['default.instrument'])
+            if not self.accMethod:
+                self.accMethod = self.getAccMethod()
+            loadedRun = load_live_runs.get_live_data(InstrumentName = config['default.instrument'], Accumulation = self.accMethod)
         [wlam, wq, th] = quick(loadedRun, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
