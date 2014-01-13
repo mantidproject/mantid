@@ -5,6 +5,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
+
+#include <QDir>
 
 namespace MantidQt
 {
@@ -32,9 +35,6 @@ namespace MantidQt
       tie(m_uiForm.nameInCatalogTxt,"NameInCatalog");
       tie(m_uiForm.investigationNumberCb,"InvestigationNumber");
 
-      // Open a browsing dialog when the browse button is pressed.
-      connect(m_uiForm.browseBtn,SIGNAL(clicked()),this,SLOT(onBrowse()));
-
       // Allows the combo box to show workspaces when they are loaded into Mantid.
       m_uiForm.inputWorkspaceCb->setValidatingAlgorithm(m_algName);
 
@@ -46,6 +46,9 @@ namespace MantidQt
 
       // Display "investigationNumberCb" with the investigations that he user can publish to.
       populateUserInvestigations();
+
+      // Open a browsing dialog when the browse button is pressed.
+      connect(m_uiForm.browseBtn,SIGNAL(clicked()),this,SLOT(onBrowse()));
     }
 
     /**
@@ -69,5 +72,23 @@ namespace MantidQt
       }
     }
 
+    /**
+     * When the "browse" button is clicked open a file browser.
+     */
+    void CatalogPublishDialog::onBrowse()
+    {
+      if( !m_uiForm.fileNameTxt->text().isEmpty() )
+      {
+        QString lastdir = QFileInfo(m_uiForm.fileNameTxt->text()).absoluteDir().path();
+        MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(lastdir);
+      }
+
+      QString filepath = this->openFileDialog("FileName"); //name of algorithm property.
+      if( !filepath.isEmpty() )
+      {
+        m_uiForm.fileNameTxt->clear();
+        m_uiForm.fileNameTxt->setText(filepath.trimmed());
+      }
+    }
   }
 }
