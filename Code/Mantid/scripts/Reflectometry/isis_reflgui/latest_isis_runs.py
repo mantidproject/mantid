@@ -105,6 +105,7 @@ class LatestISISRuns(object):
         dom = tree.getroot()
         depth = 0
         revDom = reversed(dom)
+        print "Searching Journals for RB number: " + str(eID)
         for cycle in revDom:
             journal_file = cycle.attrib.get('name')
             journal_path = os.path.join(self.base_path, journal_file)
@@ -125,8 +126,9 @@ class LatestISISRuns(object):
                         journalentry = runno + ": " + title
                         runnames.append(journalentry)
             depth = depth + 1
-            if depth == maxDepth:
+            if depth >= maxDepth:
                 break
+        print "Search for RB number " + str(eID) + " complete."
         return runnames
     def getJournalRuns(self, eID, maxDepth = 1):
         if maxDepth < 1:
