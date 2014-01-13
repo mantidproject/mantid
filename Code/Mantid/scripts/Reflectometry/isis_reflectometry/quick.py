@@ -111,8 +111,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     Version of quick where all parameters are explicitly provided.
     '''
     sample_ws = ConvertToWavelength.to_single_workspace(run)
-    to_lam = ConvertToWavelength(run)
     nHist =  sample_ws.getNumberHistograms()
+    to_lam = ConvertToWavelength(run)
     
     if pointdet:
         detector_index_ranges = (point_detector_start, point_detector_stop)
@@ -227,7 +227,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     
     if debug != 0:
         cleanup()
-        
+    DeleteWorkspace(sample_ws)
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 

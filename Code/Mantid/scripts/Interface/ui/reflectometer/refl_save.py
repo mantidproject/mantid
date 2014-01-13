@@ -5,6 +5,7 @@ import xml.etree.ElementTree as xml
 from isis_reflectometry.quick import *
 from isis_reflectometry.procedures import *
 from isis_reflectometry.combineMulti import *
+from isis_reflectometry.saveModule import *
 from isis_reflgui.settings import *
 
 try:
@@ -208,7 +209,6 @@ class Ui_SaveWindow(object):
         QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), self.buttonClickHandler1)
         QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), self.populateList)
         QtCore.QObject.connect(self.lineEdit, QtCore.SIGNAL(_fromUtf8("textChanged()")), self.setPath)
-        QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL(_fromUtf8("activated(QString)")), self.on_comboBox_Activated)
         QtCore.QObject.connect(self.listWidget, QtCore.SIGNAL(_fromUtf8("itemActivated(QListWidgetItem*)")), self.workspaceSelected)
      #   QtCore.QObject.connect(self.actionSave_table, QtCore.SIGNAL(_fromUtf8("triggered()")), self.saveDialog)
      #   QtCore.QObject.connect(self.actionLoad_table, QtCore.SIGNAL(_fromUtf8("triggered()")), self.loadDialog)
@@ -229,9 +229,6 @@ class Ui_SaveWindow(object):
         logs = mtd[str(self.listWidget.currentItem().text())].getRun().getLogData()
         for i in range(0,len(logs)):
             self.listWidget2.addItem(logs[i].name)
-
-    def on_comboBox_Activated(self):
-        print ""
 
     def populateList(self):
         self.listWidget.clear()
@@ -279,57 +276,28 @@ class Ui_SaveWindow(object):
             logger.notice("Directory specified doesn't exist or was invalid for your operating system")
             QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',"Directory specified doesn't exist or was invalid for your operating system")
             return
-        print self.listWidget.selectedItems()
         for idx in self.listWidget.selectedItems():
             runlist=parseRunList(str(self.spectraEdit.text()))
-            print runlist
             fname=os.path.join(self.lineEdit.text(),prefix + idx.text())
             if (self.comboBox.currentIndex() == 0):
-                fname+='.dat'
-                print "FILENAME: ", fname
-                a1=mtd[str(idx.text())]
-                titl='#'+a1.getTitle()+'\n'
-                x1=a1.readX(0)
-                X1=n.zeros((len(x1)-1))
-                for i in range(0,len(x1)-1):
-                    X1[i]=(x1[i]+x1[i+1])/2.0
-                y1=a1.readY(0)
-                e1=a1.readE(0)
+                print "Custom Ascii format"
                 if (self.radio1.isChecked()):
                     sep=','
                 elif (self.radio2.isChecked()):
                     sep=' '
                 elif (self.radio3.isChecked()):
                     sep='\t'
-                print fname
-                f=open(fname,'w')
-                if self.titleCheckBox.isChecked():
-                    f.write(titl)
-                samp = a1.getRun()
-                for log in self.listWidget2.selectedItems():
-                    
-                    prop = samp.getLogData(str(log.text()))
-                    headerLine='#'+log.text() + ': ' + str(prop.value) + '\n'
-                    print headerLine
-                    f.write(headerLine)
-                qres=(X1[1]-X1[0])/X1[1]
-                print "Constant dq/q from file: ",qres
-                for i in range(len(X1)):
-                    if self.xErrorCheckBox.isChecked():
-                        dq=X1[i]*qres
-                        s="%e" % X1[i] +sep+"%e" % y1[i] +sep + "%e" % e1[i] + sep + "%e" % dq +"\n"
-                    else:
-                        s="%e" % X1[i] +sep+"%e" % y1[i] +sep + "%e" % e1[i]+ "\n"
-                    f.write(s)
-                f.close()
+                else:
+                    sep=' '
+                saveCustom(idx,fname,sep,self.listWidget2.selectedItems(),self.titleCheckBox.isChecked(),self.xErrorCheckBox.isChecked())
             elif (self.comboBox.currentIndex() == 1):
                 print "Not yet implemented!"
             elif (self.comboBox.currentIndex() == 2):
                 print "ANSTO format"
-                self.saveANSTO(idx,fname)
+                saveANSTO(idx,fname)
             elif (self.comboBox.currentIndex() == 3):
                 print "ILL MFT format"
-                self.saveMFT(idx,fname)
+                saveMFT(idx,fname,self.listWidget2.selectedItems())
         # for idx in self.listWidget.selectedItems():
             # fname=str(path+prefix+idx.text()+'.dat')
             # print "FILENAME: ", fname
@@ -337,71 +305,6 @@ class Ui_SaveWindow(object):
             # SaveAscii(InputWorkspace=wksp,Filename=fname)
             
         self.SavePath=self.lineEdit.text()
-
-    def saveANSTO(self,idx,fname):
-        fname+='.txt'
-        print "FILENAME: ", fname
-        a1=mtd[str(idx.text())]
-        titl='#'+a1.getTitle()+'\n'
-        x1=a1.readX(0)
-        X1=n.zeros((len(x1)-1))
-        for i in range(0,len(x1)-1):
-            X1[i]=(x1[i]+x1[i+1])/2.0
-        y1=a1.readY(0)
-        e1=a1.readE(0)
-        sep='\t'
-        f=open(fname,'w')
-        qres=(X1[1]-X1[0])/X1[1]
-        print "Constant dq/q from file: ",qres
-        for i in range(len(X1)):
-            dq=X1[i]*qres
-            s="%e" % X1[i] +sep+"%e" % y1[i] +sep + "%e" % e1[i] + sep + "%e" % dq +"\n"
-            f.write(s)
-        f.close()
-
-    def saveMFT(self,idx,fname):
-        fname+='.mft'
-        print "FILENAME: ", fname
-        a1=mtd[str(idx.text())]
-        titl=a1.getTitle()+'\n'
-        x1=a1.readX(0)
-        X1=n.zeros((len(x1)-1))
-        for i in range(0,len(x1)-1):
-            X1[i]=(x1[i]+x1[i+1])/2.0
-        y1=a1.readY(0)
-        e1=a1.readE(0)
-        sep='\t'
-        f=open(fname,'w')
-        f.write('MFT\n')
-        f.write('Instrument: '+a1.getInstrument().getName()+'\n')
-        f.write('User-local contact: \n')
-        f.write('Title: \n')
-        samp = a1.getRun()
-        s = 'Subtitle: '+samp.getLogData('run_title').value+'\n'
-        f.write(s)
-        s = 'Start date + time: '+samp.getLogData('run_start').value+'\n'
-        f.write(s)
-        s = 'End date + time: '+samp.getLogData('run_end').value+'\n'
-        f.write(s)
-        
-        for log in self.listWidget2.selectedItems():
-            
-            prop = samp.getLogData(str(log.text()))
-            headerLine=log.text() + ': ' + str(prop.value) + '\n'
-            print headerLine
-            f.write(headerLine)
-        f.write('Number of file format: 2\n')
-        s = 'Number of data points:\t' + str(len(X1))+'\n'
-        f.write(s)
-        f.write('\n')
-        f.write('\tq\trefl\trefl_err\tq_res\n')
-        qres=(X1[1]-X1[0])/X1[1]
-        print "Constant dq/q from file: ",qres
-        for i in range(len(X1)):
-            dq=X1[i]*qres
-            s="\t%e" % X1[i] +sep+"%e" % y1[i] +sep + "%e" % e1[i] + sep + "%e" % dq +"\n"
-            f.write(s)
-        f.close()
 
 def calcRes(run):
     runno = '_' + str(run) + 'temp'
