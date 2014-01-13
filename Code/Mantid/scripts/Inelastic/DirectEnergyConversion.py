@@ -433,7 +433,7 @@ class DirectEnergyConversion(object):
         if self.apply_kikf_correction:
             self.log('Start Applying ki/kf corrections to the workpsace : '+result_name)                                
             CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
-            self.log('finished applying ki/kf corrections for'+result_name)                                            
+            self.log('finished applying ki/kf corrections for '+result_name)                                            
 
         # Make sure that our binning is consistent
         if not self.energy_bins is None:
