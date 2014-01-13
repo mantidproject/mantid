@@ -40,6 +40,7 @@ public:
 
   void test_Init()
   {
+    FrameworkManager::Instance();
     IntegratePeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )

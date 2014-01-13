@@ -232,6 +232,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/SimpleWidget.cpp
                    src/Mantid/InstrumentWidget/Viewport.cpp
                    src/Mantid/InstrumentWidget/DetXMLFile.cpp
+                   src/Mantid/InstrumentWidget/UCorrectionDialog.cpp
 )
 
 ###########################################################################
@@ -465,6 +466,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/SimpleWidget.h
                    src/Mantid/InstrumentWidget/Viewport.h
                    src/Mantid/InstrumentWidget/DetXMLFile.h
+                   src/Mantid/InstrumentWidget/UCorrectionDialog.h
 )
 
 ###########################################################################
@@ -709,6 +711,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/InstrumentWidget/Projection3D.h
                        src/Mantid/InstrumentWidget/Shape2DCollection.h
                        src/Mantid/InstrumentWidget/UnwrappedSurface.h
+					   src/Mantid/InstrumentWidget/UCorrectionDialog.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
@@ -720,6 +723,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
+			   src/Mantid/InstrumentWidget/UCorrectionDialog.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )

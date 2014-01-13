@@ -663,7 +663,7 @@ NeutronAtom operator*(const NeutronAtom& left, const double right)
 }
 
 /**
- * This calls @link operator*(const NeutronAtom&, const double)
+ * This calls @link operator*(const NeutronAtom&, const double) @endlink
  * with the parameters reversed.
  */
 NeutronAtom operator*(const double left, const NeutronAtom& right)

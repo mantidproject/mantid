@@ -36,6 +36,12 @@ SNS DAS records log values upon its changing.  The frequency of log sampling is 
 
 The option to do interpolation is not supported at this moment.
 
+== Comparison to FilterByLogValue ==
+1. If the first log value is within the specified range and the first log time is after run star time,
+FilterByLogValue assumes that the log value before the first recorded log time is also within range, and thus
+the first splitter starts from the run star time, while GenerateEventFilter tends to be more conservative,
+and thus the first splitter will start from the first log time.
+
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -190,9 +196,8 @@ namespace Algorithms
     }
 
     Kernel::DateAndTime runstart = m_dataWS->run().startTime();
-    // (m_dataWS->run().getProperty("run_start")->value());
     g_log.debug() << "DB9441 Run Start = " << runstart << " / " << runstart.totalNanoseconds()
-                  << std::endl;
+                  << "\n";
 
     std::string title = getProperty("TitleOfSplitters");
     if (title.size() == 0)
@@ -844,7 +849,14 @@ namespace Algorithms
                                                          bool centre, bool filterIncrease, bool filterDecrease,
                                                          DateAndTime startTime, DateAndTime stopTime)
   {
-    // 0. Set up
+    // Return if the log is empty.
+    if (m_dblLog->size() == 0)
+    {
+      g_log.warning() << "There is no entry in this property " << m_dblLog->name() << std::endl;
+      return;
+    }
+
+    // Set up
     double timetolerance = 0.0;
     if (centre)
     {
@@ -852,49 +864,41 @@ namespace Algorithms
     }
     time_duration tol = DateAndTime::durationFromSeconds( timetolerance );
 
-    // 1. Do nothing if the log is empty.
-    if (m_dblLog->size() == 0)
-    {
-      g_log.warning() << "There is no entry in this property " << m_dblLog->name() << std::endl;
-      return;
-    }
-
-    // 2. Go through the whole log to set up time intervals
-    Kernel::DateAndTime ZeroTime(0);
+    // Go through the whole log to set up time intervals
+    const Kernel::DateAndTime ZeroTime(0);
     int lastindex = -1;
     int currindex = -1;
-    DateAndTime lastTime, currTime;
+    DateAndTime lastTime;
+    DateAndTime currTime = ZeroTime;
     DateAndTime start, stop;
     size_t progslot = 0;
 
     int logsize = m_dblLog->size();
-
     for (int i = 0; i < logsize; i ++)
     {
-      // a) Initialize status flags and new entry
-      lastTime = currTime;  // for loop i, currTime is not defined.
+      // Initialize status flags and new entry
       bool breakloop = false;
-      bool completehalf = false;
-      bool newsplitter = false;
+      bool createsplitter = false;
 
+      lastTime = currTime;
       currTime = m_dblLog->nthTime(i);
       double currValue = m_dblLog->nthValue(i);
 
-      // b) Filter out by time and direction (optional)
+      // Filter out by time and direction (optional)
       bool intime = false;
       if (currTime < startTime)
       {
         // case i.  Too early, do nothing
-        completehalf = false;
+        createsplitter = false;
       }
       else if (currTime > stopTime)
       {
-        // case ii. Too later.  Put to splitter if half of splitter is done.  But still within range
+        // case ii. Too late.  Put to splitter if half of splitter is done.  But still within range
         breakloop = true;
         stop = currTime;
         if (start.totalNanoseconds() > 0)
         {
-          completehalf = true;
+          createsplitter = true;
         }
       }
       else
@@ -903,12 +907,13 @@ namespace Algorithms
         intime = true;
       }
 
-      // c) Filter in time
+      // Check log within given time range
+      bool newsplitter = false; // Flag to start a new split in this loop
+
       if (intime)
       {
-        // c1) Determine direction
+        // Determine direction
         bool correctdir = true;
-
         if (filterIncrease && filterDecrease)
         {
           // Both direction is fine
@@ -933,11 +938,11 @@ namespace Algorithms
           if (!correctdir && start.totalNanoseconds() > 0)
           {
             stop = currTime;
-            completehalf = true;
+            createsplitter = true;
           }
         } // END-IF-ELSE: Direction
 
-        // c2) See whether this value falls into any range
+        // Check this value whether it falls into any range
         if (correctdir)
         {
           size_t index = searchValue(logvalueranges, currValue);
@@ -967,7 +972,7 @@ namespace Algorithms
             {
               // ii.  Time to close a region and new a region
               stop = currTime;
-              completehalf = true;
+              createsplitter = true;
               newsplitter = true;
             }
             else if (currindex == lastindex && start.totalNanoseconds() > 0)
@@ -977,7 +982,7 @@ namespace Algorithms
               {
                 // Last entry in the log.  Need to flag to close the pair
                 stop = currTime;
-                completehalf = true;
+                createsplitter = true;
                 newsplitter = false;
               }
               else
@@ -1009,7 +1014,7 @@ namespace Algorithms
             {
               // Close the interval pair if it has been started.
               stop = currTime;
-              completehalf = true;
+              createsplitter = true;
             }
           } // [In-bound: Between interval]
           else if (!valuewithin2boundaries)
@@ -1020,7 +1025,7 @@ namespace Algorithms
             {
               // End situation
               stop = currTime;
-              completehalf = true;
+              createsplitter = true;
             }
             else
             {
@@ -1039,7 +1044,7 @@ namespace Algorithms
             if (start.totalNanoseconds() > 0)
             {
               stop = currTime;
-              completehalf = true;
+              createsplitter = true;
               g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
             }
           }
@@ -1058,7 +1063,7 @@ namespace Algorithms
       }
 
       // d) Create Splitter
-      if (completehalf)
+      if (createsplitter)
       {
         if (centre)
         {
@@ -1091,7 +1096,6 @@ namespace Algorithms
       lastindex = currindex;
 
       // f) Progress
-      // Progress bar..
       size_t tmpslot = i*90/m_dblLog->size();
       if (tmpslot > progslot)
       {
@@ -1109,10 +1113,12 @@ namespace Algorithms
   }
   //-----------------------------------------------------------------------------------------------
   /** Generate filters for an integer log
+    * @param splitters :: splitting interval array
     * @param minvalue :: minimum allowed log value
     * @param maxvalue :: maximum allowed log value
     * @param filterIncrease :: include log value increasing period;
     * @param filterDecrease :: include log value decreasing period
+    * @param runend :: end of run date and time
     */
   void GenerateEventsFilter::processIntegerValueFilter(TimeSplitterType& splitters, int minvalue, int maxvalue,
                                                        bool filterIncrease, bool filterDecrease, DateAndTime runend)
@@ -1298,12 +1304,10 @@ namespace Algorithms
         // a) Found
         if (value == sorteddata[stop])
         {
-          // std::cout << "DB450  Found @ A " << dataranges[stop] << "  Index = " << stop << std::endl;
           return stop;
         }
         else
         {
-          // std::cout << "DB450  Found @ B " << dataranges[start] << "  Index = " << start << std::endl;
           return start;
         }
       }

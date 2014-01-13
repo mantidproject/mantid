@@ -126,7 +126,7 @@ namespace MDEvents
     }
 
     /** @return the direct pointer to the signal array. For speed */
-    signal_t * getSignalArray()
+    signal_t * getSignalArray() const
     {
       return m_signals;
     }
@@ -138,19 +138,19 @@ namespace MDEvents
     }
 
     /** @return the direct pointer to the error squared array. For speed */
-    signal_t * getErrorSquaredArray()
+    signal_t * getErrorSquaredArray() const
     {
       return m_errorsSquared;
     }
 
     /** @return the direct pointer to the array of the number of events. For speed */
-    signal_t * getNumEventsArray()
+    signal_t * getNumEventsArray() const
     {
       return m_numEvents;
     }
 
     /** @return the direct pointer to the array of mask bits (bool). For speed/testing */
-    bool * getMaskArray()
+    bool * getMaskArray() const
     {
       return m_masks;
     }
@@ -197,7 +197,7 @@ namespace MDEvents
     }
 
     /// Returns the number of contributing events from the bin at the specified index.
-    signal_t getNumEventsAt(size_t index)
+    signal_t getNumEventsAt(size_t index) const
     {
       return m_numEvents[index];
     }

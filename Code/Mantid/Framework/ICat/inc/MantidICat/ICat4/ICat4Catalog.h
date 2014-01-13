@@ -64,6 +64,8 @@ namespace Mantid
         virtual void getFileLocation(const long long&fileID,std::string& fileLocation);
         /// Get the url(s) based on the fileID.
         virtual void getDownloadURL(const long long& fileID,std::string & url);
+        /// get URL of where to PUT (publish) files.
+        virtual const std::string getUploadURL(const std::string &dataFileName, const std::string &createFileName);
         /// Keep current session alive
         virtual void keepAlive();
         /// Keep alive in minutes
@@ -86,8 +88,10 @@ namespace Mantid
         std::string bytesToString(int64_t &fileSize);
         // Helper method that formats a given timestamp.
         std::string formatDateTime(const time_t &timestamp, const std::string &format);
-        // Sets the soap-endpoint & SSL context for the proxy being returned.
-        ICat4::ICATPortBindingProxy getICATProxy();
+        // Search the archive & obtain the dataset ID based on the filename
+        int64_t getDatasetIdFromFileName(const std::string &fileName);
+        // Sets the soap-endpoint & SSL context for the given ICAT proxy.
+        void setICATProxySettings(ICat4::ICATPortBindingProxy& icat);
 
         // Reference to the logger class.
         Kernel::Logger& g_log;

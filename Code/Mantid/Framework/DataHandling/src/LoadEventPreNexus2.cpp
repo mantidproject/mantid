@@ -99,14 +99,16 @@ static const string  EVENT_EXTS[] = {"_neutron_event.dat",
                                      "_neutron1_event.dat",
                                      "_neutron2_event.dat",
                                      "_neutron3_event.dat",
+                                     "_neutron4_event.dat",
                                      "_live_neutron_event.dat"};
 static const string  PULSE_EXTS[] = {"_pulseid.dat",
                                      "_pulseid0.dat",
                                      "_pulseid1.dat",
                                      "_pulseid2.dat",
                                      "_pulseid3.dat",
+                                     "_pulseid4.dat",
                                      "_live_pulseid.dat"};
-static const int NUM_EXT = 6;
+static const int NUM_EXT = 7;
 
 //-----------------------------------------------------------------------------
 //Statistic Functions

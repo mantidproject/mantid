@@ -1667,6 +1667,13 @@ void Indirect::calPlotEnergy()
     "outWS = resolution(files, iconOpt, '', '', instrument, analyser, reflection, Res=False)\n"
     "print outWS\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
+
+  //something went wrong in the python
+  if(pyOutput == "None")
+  {
+    showInformationBox("Failed to convert to energy. See log for details.");
+    return;
+  }
   
   Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(pyOutput.toStdString()));
 

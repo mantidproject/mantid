@@ -34,6 +34,8 @@ def setup(instname=None,reload=False):
     if not (Reducer is None) :
         if  Reducer.instr_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :
+                # reinitialize idf parameters to defaults.
+                Reducer.init_idf_params(True);
                 return  # has been already defined
 
     Reducer = DRC.setup_reducer(instname)
@@ -257,8 +259,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     if Reducer.mask_run == None :
         mask_run=sample_run
 
-
+    masking = None;
     masks_done=False
+    if not Reducer.run_diagnostics:
+       header="Diagnostics skipped "
+       masks_done = True;	
     if Reducer.save_and_reuse_masks :
         raise NotImplementedError("Save and reuse masks option is not yet implemented")
         mask_file_name = common.create_resultname(str(mask_run),Reducer.instr_name,'_masks.xml')
@@ -268,7 +273,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
             #Reducer.hard_mask_file = mask_full_file;
             #Reducer.use_hard_mask_only = True
             masks_done=True
-            header="Masking loaded "
+            header="Masking fully skipped and processed {0} spectra and  {1} bad spectra "
         else:
             pass
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -278,7 +283,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     if not   masks_done:
         masking = Reducer.diagnose(wb_run,sample = mask_run,
                                     second_white = None,print_results=True)
-        header = "Diag Processed "
+        header = "Diag Processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
    # Calculate absolute units:    
@@ -308,7 +313,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
     nMaskedSpectra = len(failed_sp_list)
     # this tells turkey in case of hard mask only but everythin else semems work fine
-    print '{0} workspace with {1:d} spectra and masked {2:d} bad spectra'.format(header,nSpectra,nMaskedSpectra)
+    print header.format(nSpectra,nMaskedSpectra)
      #Run the conversion first on the sample
     deltaE_wkspace_sample = Reducer.convert_to_energy(sample_run, ei_guess, wb_run)
     
@@ -508,6 +513,9 @@ def process_legacy_parameters(**kwargs) :
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
+        if key == 'hardmaskPlus': # legacy key defines other mask file here
+            params["hard_mask_file"] = value;
+            params["use_hard_mask_only"] = False;
         else:
             params[key]=value;    
 
@@ -701,6 +709,9 @@ def get_failed_spectra_list_from_masks(masking_wksp):
         masking_wksp = mtd[masking_wksp]
     
     failed_spectra = []
+    if masking_wksp is None:
+       return (failed_spectra,0);
+
     n_spectra = masking_wksp.getNumberHistograms()
     for i in xrange(n_spectra):
         if masking_wksp.readY(i)[0] >0.99 : # spectrum is masked

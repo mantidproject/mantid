@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <string>
-#include <iostream>
 
 namespace Mantid
 {

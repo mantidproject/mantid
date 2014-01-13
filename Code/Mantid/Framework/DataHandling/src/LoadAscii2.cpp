@@ -149,7 +149,6 @@ namespace Mantid
     * Check the start of the file for the first data set, then set the number of columns that hsould be expected thereafter
     * @param[in] line : The current line of data
     * @param[in] columns : the columns of values in the current line of data
-    * @param[in] lineNo : the current line number
     */
     void LoadAscii2::parseLine(const std::string & line, std::list<std::string> & columns)
     {
@@ -500,7 +499,6 @@ namespace Mantid
 
     /**
     * Check if the file has been found to incosistantly include spectra IDs
-    * @param[in] spectraSize : the number of spectra recorded so far
     */
     void LoadAscii2::inconsistantIDCheck() const
     {
@@ -554,6 +552,7 @@ namespace Mantid
     /**
     * Return true if the line is to be skipped.
     * @param[in] line :: The line to be checked
+    * @param[in] header :: Flag for if this is header material
     * @return True if the line should be skipped
     */
     bool LoadAscii2::skipLine(const std::string & line, bool header) const

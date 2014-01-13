@@ -450,8 +450,8 @@ namespace Kernel
 
    /**
    * Log a given message at a given priority
-   * @param message :: The message to log
    * @param priority :: The priority level
+   * @return :: the stream
    */
   std::ostream& Logger::getLogStream(Logger::Priority priority)
   {

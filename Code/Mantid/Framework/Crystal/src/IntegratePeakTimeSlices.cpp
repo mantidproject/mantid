@@ -801,10 +801,10 @@ namespace Mantid
       /**
        * Checks and updates if needed the list of NeighborIDs
        * @param comp  Component with the neighboring pixels
-       * @CentPos    new Center
+       * @param CentPos    new Center
        * @param oldCenter   old Center
        * @param NewRadius   new Radius
-       * &param neighborRadius  old the new neighborhood radius
+       * @param neighborRadius  old the new neighborhood radius
        */
        bool IntegratePeakTimeSlices::updateNeighbors( boost::shared_ptr< Geometry::IComponent> &comp,
            V3D CentPos,  V3D oldCenter,double NewRadius, double &neighborRadius)
@@ -1549,15 +1549,17 @@ namespace Mantid
     }
     /**
      * Initial phase at converting Detector data to workspace data that will be sent to the Fit Function, BivariateNormal.
-     * @param Data  workspace that will be sent to the Fit Function, BivariateNormal
+     * @param Data  -workspace that will be sent to the Fit Function, BivariateNormal
      * @param inpWkSpace -The MatrixWorkspace with all the experimental data
-     * @param  comp  -The parent of all the pixels that are neighbors of the peak being considered
+     * @param comp -The parent of all the pixels that are neighbors of the peak being considered
      * @param chanMin -The minimum channel to use
-     * @param chanMax-The maximum channel to be collapsed to one channel
-     * @param CentNghbr- The center of the current and next(if changed) neighbor pixels
-     * @param  neighborRadius- The radius of the current neighbor pixels
-     * @param  Radius  The current starting Radius to use for neighbors.
-     * @param spec_idList-The list of spectral id's that are neighbors
+     * @param chanMax -The maximum channel to be collapsed to one channel
+     * @param CentX -The current peak row
+     * @param CentY -The current peak column
+     * @param CentNghbr -The center of the current and next(if changed) neighbor pixels
+     * @param neighborRadius -The radius of the current neighbor pixels
+     * @param Radius -The current starting Radius to use for neighbors.
+     * @param spec_idList -The list of spectral id's that are neighbors
      *
      */
     void IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr          & Data,
@@ -1987,12 +1989,12 @@ namespace Mantid
      * Utility method to calculate variances from data given background and means
      *
      * @param background - the background to use
-     * @param meanx- the mean x( col) value to use
-     * @param meany- the mean y( row) value to use
-     * @param Varxx-The resultant variance in the x values around above mean with background removed
-     * @param Varyy-The resultant variance in the y values around above mean with background removed
-     * @param Varxy-The resultant covariance in the x and values around above mean with background removed
-     * @param StatBase- The "data".
+     * @param meanx - the mean x( col) value to use
+     * @param meany - the mean y( row) value to use
+     * @param Varxx - The resultant variance in the x values around above mean with background removed
+     * @param Varyy - The resultant variance in the y values around above mean with background removed
+     * @param Varxy - The resultant covariance in the x and values around above mean with background removed
+     * @param StatBase - The "data".
      */
         void DataModeHandler::CalcVariancesFromData( double background, double meanx, double meany,
                                                             double &Varxx, double &Varxy, double &Varyy,
@@ -2026,6 +2028,7 @@ namespace Mantid
     /**
      * Calculates the string form of the constraints to be sent to the Fit Algorithm and also saves it in a vector form
      * @param   Bounds  The vector form for the constraints
+     * @param   CalcVariances The to trigger variance calculation
      */
         std::string DataModeHandler::CalcConstraints( std::vector< std::pair<double,double> > & Bounds,
                bool CalcVariances)
@@ -2127,7 +2130,7 @@ namespace Mantid
         * @param errs The parameter errorfrom the Fit Algorithm
         * @param lastRow  The previous row( for log info only)
         * @param lastCol  The previous col( for log info only)
-        * @param neighborhoodRadius The neighborhood radius( for log info only)
+        * @param neighborRadius The neighborhood radius( for log info only)
         */
        void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
                bool &done,       std::vector<string>&names, std::vector<double>&params,
@@ -2253,7 +2256,7 @@ namespace Mantid
         * @param errs The parameter errorfrom the Fit Algorithm
         * @param lastRow  The previous row( for log info only)
         * @param lastCol  The previous col( for log info only)
-        * @param neighborhoodRadius The neighborhood radius( for log info only)
+        * @param neighborRadius The neighborhood radius( for log info only)
         */
       void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
            bool &done,       std::vector<string>&names, std::vector<double>&params,
@@ -2469,7 +2472,8 @@ namespace Mantid
     /**
      * Calculates if there is enough data to for there to be a peak
      *
-     * @param  true if there is enough data, otherwise false
+     * @param ParameterValues pointer to the parameter values
+     * @return  true if there is enough data, otherwise false
      */
    bool DataModeHandler::IsEnoughData( const double *ParameterValues, Kernel::Logger&  )
     {
@@ -2515,10 +2519,10 @@ namespace Mantid
      * Calculates the error in integration closest to the latest ISAW calculations
      *
      * @param background    The background
-     * @param  backError    The error in this background value
-     * @param   ChiSqOverDOF  The fitting error
-     * @param  TotVariance    The Total square of the intensity errors in all the cells considered
-     * @param  ncell           The number of cells
+     * @param backError    The error in this background value
+     * @param ChiSqOverDOF  The fitting error
+     * @param TotVariance    The Total square of the intensity errors in all the cells considered
+     * @param ncells           The number of cells
      *
      * @return  The error in the integrated intensity
      */
@@ -2728,7 +2732,7 @@ namespace Mantid
    /**
     * Calculates the Intensity designed for Edge Peaks
     *
-    * @param  The Fitted parameters
+    * @param params The Fitted parameters
     *
     * @return this calculated intensity
     *
@@ -2752,7 +2756,7 @@ namespace Mantid
    /**
       * Calculates the Error in the Intensity designed for Edge Peaks
       *
-      * @param  The fitted parameter values
+      * @param params The fitted parameter values
       * @param errs    The error in these fitted parameters
       * @param chiSqOvDOF The fitting error
       *

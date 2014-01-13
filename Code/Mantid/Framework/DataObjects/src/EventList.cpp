@@ -7,6 +7,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include <cfloat>
 #include <functional>
+#include <iostream>
 #include <limits>
 #include <math.h>
 #include <Poco/ScopedLock.h>
@@ -3757,6 +3758,7 @@ namespace DataObjects
    *        be big enough to accommodate the indices.
    * @param events :: either this->events or this->weightedEvents.
    * @param tofcorrection :: a correction for each TOF to multiply with.
+   * @param docorrection :: flag to determine whether or not to apply correction
    */
   template< class T >
   void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
@@ -3894,6 +3896,133 @@ namespace DataObjects
 
     return;
   }
+
+
+  //------------------------------------------- --------------------------------------------------
+  /** Split the event list into n outputs by each event's pulse time only
+    */
+  template< class T >
+  void EventList::splitByPulseTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
+                                         typename std::vector<T> & events) const
+  {
+    // Prepare to TimeSplitter Iterate through the splitter at the same time
+    Kernel::TimeSplitterType::iterator itspl = splitter.begin();
+    Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
+    Kernel::DateAndTime start, stop;
+
+    // Prepare to Events Iterate through all events (sorted by tof)
+    typename std::vector<T>::iterator itev = events.begin();
+    typename std::vector<T>::iterator itev_end = events.end();
+
+    // Iterate (loop) on all splitters
+    while (itspl != itspl_end)
+    {
+      // Get the splitting interval times and destination group
+      start = itspl->start().totalNanoseconds();
+      stop = itspl->stop().totalNanoseconds();
+      const int index = itspl->index();
+
+      // Skip the events before the start of the time and put to 'unfiltered' EventList
+      EventList* myOutput = outputs[-1];
+      while (itev != itev_end)
+      {
+        if (itev->m_pulsetime < start)
+        {
+          // Record to index = -1 space
+          const T eventCopy(*itev);
+          myOutput->addEventQuickly(eventCopy);
+          ++ itev;
+        }
+        else
+        {
+          // Event within a splitter interval
+          break;
+        }
+      }
+
+      // Go through all the events that are in the interval (if any)
+      while (itev != itev_end)
+      {
+
+        if (itev->m_pulsetime < stop)
+        {
+          // Duplicate event
+          const T eventCopy(*itev);
+          EventList * myOutput = outputs[index];
+          //Add the copy to the output
+          myOutput->addEventQuickly(eventCopy);
+          ++itev;
+        }
+        else
+        {
+          // Out of interval
+          break;
+        }
+      }
+
+      //Go to the next interval
+      ++itspl;
+      //But if we reached the end, then we are done.
+      if (itspl==itspl_end)
+        break;
+
+      //No need to keep looping through the filter if we are out of events
+      if (itev == itev_end)
+        break;
+    } // END-WHILE Splitter
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Split the event list by pulse time
+    */
+  void EventList::splitByPulseTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs) const
+  {
+    // Check for supported event type
+    if (eventType == WEIGHTED_NOTIME)
+      throw std::runtime_error("EventList::splitByTime() called on an EventList that no longer has time information.");
+
+    // Start by sorting the event list by pulse time.
+    this->sortPulseTimeTOF();
+
+    // Initialize all the output event lists
+    std::map<int, EventList* >::iterator outiter;
+    for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter)
+    {
+      EventList* opeventlist = outiter->second;
+      opeventlist->clear();
+      opeventlist->detectorIDs = this->detectorIDs;
+      opeventlist->refX = this->refX;
+      // Match the output event type.
+      opeventlist->switchTo(eventType);
+    }
+
+    // Split
+    if (splitter.size() <= 0)
+    {
+      // No splitter: copy all events to group workspace = -1
+      (*outputs[-1]) = (*this);
+    }
+    else
+    {
+      // Split
+      switch (eventType)
+      {
+      case TOF:
+        splitByPulseTimeHelper(splitter, outputs, this->events);
+        break;
+      case WEIGHTED:
+        splitByPulseTimeHelper(splitter, outputs, this->weightedEvents);
+        break;
+      case WEIGHTED_NOTIME:
+        break;
+      }
+    }
+
+    return;
+  }
+
 
   //--------------------------------------------------------------------------
   /** Get the vector of events contained in an EventList;

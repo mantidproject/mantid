@@ -91,7 +91,6 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Call MaskBins
     * @param dataws :: MatrixWorkspace to mask bins for
-    * @param maskws :: TableWorkspace containing the mask bin information
     */
   void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws)
   {

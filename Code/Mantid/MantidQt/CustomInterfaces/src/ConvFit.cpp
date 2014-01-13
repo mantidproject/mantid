@@ -353,7 +353,7 @@ namespace IDA
    *          +-- Lorentzian 1 (yes/no)
    *          +-- Lorentzian 2 (yes/no)
    *
-   * @param tie :: whether to tie centres of the two lorentzians.
+   * @param tieCentres :: whether to tie centres of the two lorentzians.
    *
    * @returns the composite fitting function.
    */

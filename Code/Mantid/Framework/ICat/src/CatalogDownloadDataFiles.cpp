@@ -14,13 +14,17 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <Poco/Net/AcceptCertificateHandler.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/SSLException.h>
+#include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/StreamCopier.h>
 #include <Poco/Path.h>
+#include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
+
 #include <fstream>
 #include <iomanip>
 
@@ -164,8 +168,11 @@ namespace Mantid
         }
         start=clock();
 
+        Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
         // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
         const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
+        // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
+        Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,context);
         Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
 
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);

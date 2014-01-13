@@ -685,7 +685,7 @@ namespace LiveData
 
     // Add the run_start property
     char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
-    strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
+    strftime( timeString, 64, "%Y-%m-%dT%H:%M:%SZ", gmtime( &runStartTime));
     // addProperty() wants the time as an ISO 8601 string
     m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
   }

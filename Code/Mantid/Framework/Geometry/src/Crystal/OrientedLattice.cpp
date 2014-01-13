@@ -163,13 +163,13 @@ namespace Geometry
   {
     DblMatrix UBinv = this->getUB();
     UBinv.Invert();
-    V3D out = UBinv*Q; //transform back to HKL
+    V3D out = UBinv*Q/TWO_PI; //transform back to HKL
     return out;
   }
 
   /** Calculate the hkl corresponding to a given Q-vector
-   * @return Q :: Q-vector in $AA^-1 in the sample frame
-   * @param a V3D with H,K,L
+   * @param hkl a V3D with H,K,L
+   * @return Q-vector in $AA^-1 in the sample frame
    */
   V3D OrientedLattice::qFromHKL(const V3D & hkl) const
   {
@@ -282,5 +282,85 @@ namespace Geometry
     file->closeGroup();
   }
 
+
+  /**
+    Get the UB matrix corresponding to the real space edge vectors a,b,c.
+    The inverse of the matrix with vectors a,b,c as rows will be stored in UB.
+
+    @param  UB      A 3x3 matrix that will be set to the UB matrix.
+    @param  a_dir   The real space edge vector for side a of the unit cell
+    @param  b_dir   The real space edge vector for side b of the unit cell
+    @param  c_dir   The real space edge vector for side c of the unit cell
+
+    @return true if UB was set to the new matrix and false if UB could not be
+            set since the matrix with a,b,c as rows could not be inverted.
+   */
+  bool OrientedLattice::GetUB(       DblMatrix  & UB,
+                             const V3D        & a_dir,
+                             const V3D        & b_dir,
+                             const V3D        & c_dir  )
+  {
+    if ( UB.numRows() != 3 || UB.numCols() != 3 )
+    {
+     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
+    }
+
+    UB.setRow( 0, a_dir );
+    UB.setRow( 1, b_dir );
+    UB.setRow( 2, c_dir );
+    try
+    {
+      UB.Invert();
+    }
+    catch (...)
+    {
+      return false;
+    }
+    return true;
+  }
+
+
+  /**
+    Get the real space edge vectors a,b,c corresponding to the UB matrix.
+    The rows of the inverse of the matrix with will be stored in a_dir,
+    b_dir, c_dir.
+
+    @param  UB      A 3x3 matrix containing a UB matrix.
+    @param  a_dir   Will be set to the real space edge vector for side a
+                    of the unit cell
+    @param  b_dir   Will be set to the real space edge vector for side b
+                    of the unit cell
+    @param  c_dir   Will be set to the real space edge vector for side c
+                    of the unit cell
+
+    @return true if the inverse of the matrix UB could be found and the
+            a_dir, b_dir and c_dir vectors have been set to the rows of
+            UB inverse.
+   */
+  bool OrientedLattice::GetABC( const DblMatrix  & UB,
+                                    V3D        & a_dir,
+                                    V3D        & b_dir,
+                                    V3D        & c_dir  )
+  {
+    if ( UB.numRows() != 3 || UB.numCols() != 3 )
+    {
+     throw std::invalid_argument("GetABC(): UB matrix NULL or not 3X3");
+    }
+
+    DblMatrix UB_inverse( UB );
+    try
+    {
+      UB_inverse.Invert();
+    }
+    catch (...)
+    {
+      return false;
+    }
+    a_dir( UB_inverse[0][0], UB_inverse[0][1], UB_inverse[0][2] );
+    b_dir( UB_inverse[1][0], UB_inverse[1][1], UB_inverse[1][2] );
+    c_dir( UB_inverse[2][0], UB_inverse[2][1], UB_inverse[2][2] );
+
+    return true;
+  }
 }//Namespace Geometry
 }//Namespace Mantid

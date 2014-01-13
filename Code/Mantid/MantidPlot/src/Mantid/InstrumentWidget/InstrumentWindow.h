@@ -91,7 +91,7 @@ public:
   void setViewType(const QString& type);
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
-  InstrumentActor* getInstrumentActor(){return m_instrumentActor;}
+  InstrumentActor* getInstrumentActor() const {return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
@@ -99,6 +99,10 @@ public:
   InstrumentWindowTab *getTab(const Tab tab) const;
   /// Get a filename for saving
   QString getSaveFileName(const QString& title, const QString& filters, QString* selectedFilter = NULL);
+  /// Get a name for settings group
+  QString getSettingsGroupName() const;
+  /// Get a name for a instrument-specific settings group
+  QString getInstrumentSettingsGroupName() const;
 
 signals:
   void enableLighting(bool);

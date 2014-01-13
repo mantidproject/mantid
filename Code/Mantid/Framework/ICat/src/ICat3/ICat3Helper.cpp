@@ -25,7 +25,8 @@ namespace Mantid
      */
     int CICatHelper::doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response)
     {
-      icat = getICATProxy();
+      setICATProxySettings(icat);
+
       clock_t start=clock();
       int ret_advsearch=icat.searchByAdvanced(request.get(),&response);
       if(ret_advsearch!=0)
@@ -275,7 +276,8 @@ namespace Mantid
         API::ITableWorkspace_sptr& responsews_sptr)
     {
       //ICAt proxy object
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       ns1__getInvestigationIncludes request;
       //get the sessionid which is cached in session class during login
@@ -411,7 +413,8 @@ namespace Mantid
         API::ITableWorkspace_sptr& responsews_sptr)
     {
       //ICAt proxy object
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       // request object
       ns1__getInvestigationIncludes request;
@@ -507,7 +510,8 @@ namespace Mantid
     void CICatHelper::listInstruments(std::vector<std::string>& instruments)
     {
       //ICAt proxy object
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       ns1__listInstruments request;
       //get the sessionid which is cached in session class during login
@@ -558,7 +562,8 @@ namespace Mantid
     void  CICatHelper::listInvestigationTypes(std::vector<std::string>& investTypes)
     {
       //ICAt proxy object
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       ns1__listInvestigationTypes request;
       //get the sessionid which is cached in session class during login
@@ -620,7 +625,8 @@ namespace Mantid
      */
     int CICatHelper::doLogout()
     {
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       ns1__logout request;
       ns1__logoutResponse response;
@@ -642,7 +648,8 @@ namespace Mantid
      */
     void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr)
     {
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       ns1__getMyInvestigationsIncludes request;
       ns1__getMyInvestigationsIncludesResponse response;
@@ -723,8 +730,8 @@ namespace Mantid
       request.startIndex      = offset;
       request.advancedSearchDetails = buildSearchQuery(inputs);
 
-      //ICAt proxy object
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       int result = icat.searchByAdvancedPagination(&request, &response);
 
@@ -843,7 +850,8 @@ namespace Mantid
      */
     int64_t CICatHelper::getNumberOfSearchResults(const CatalogSearchParam& inputs)
     {
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       ns1__searchByAdvanced request;
       ns1__searchByAdvancedResponse response;
@@ -875,8 +883,8 @@ namespace Mantid
      */
     bool CICatHelper::isvalidSession()
     {
-
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       ns1__isSessionValid request;
       ns1__isSessionValidResponse response;
@@ -897,8 +905,11 @@ namespace Mantid
     {
       // Store the soap end-point in the session for use later.
       ICat::Session::Instance().setSoapEndPoint(url);
+      
       // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
+
       // Output the soap end-point in use for debugging purposes.
       g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << "\n";
 
@@ -931,8 +942,8 @@ namespace Mantid
 
     void CICatHelper::getdownloadURL(const long long& fileId,std::string& url)
     {
-
-      ICATPortBindingProxy icat = getICATProxy();
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
       ns1__downloadDatafile request;
 
@@ -963,9 +974,9 @@ namespace Mantid
 
     void CICatHelper::getlocationString(const long long& fileid,std::string& filelocation)
     {
-
-      ICATPortBindingProxy icat = getICATProxy();
-
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
+      
       ns1__getDatafile request;
 
       boost::shared_ptr<std::string >sessionId_sptr(new std::string);
@@ -988,18 +999,16 @@ namespace Mantid
     }
 
     /**
-     * Sets the soap-endpoint & SSL context for the proxy being returned.
-     * @return ICATPortBindingProxy :: The proxy with set endpoint & SSL context.
+     * Sets the soap-endpoint & SSL context for the given ICAT proxy.
      */
-    ICat3::ICATPortBindingProxy CICatHelper::getICATProxy()
+    void CICatHelper::setICATProxySettings(ICat3::ICATPortBindingProxy& icat)
     {
-      ICat3::ICATPortBindingProxy icat;
       // Set the soap-endpoint of the catalog we want to use.
       icat.soap_endpoint = ICat::Session::Instance().getSoapEndPoint().c_str();
       // Sets SSL authentication scheme
       setSSLContext(icat);
-      return icat;
     }
+
     /**
      * Defines the SSL authentication scheme.
      * @param icat :: ICATPortBindingProxy object.

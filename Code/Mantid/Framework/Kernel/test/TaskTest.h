@@ -43,10 +43,9 @@ public:
   void test_mutex()
   {
     MyTask t;
-    Mutex * mut = new Mutex();
+    boost::shared_ptr<Mutex> mut(new Mutex());
     t.setMutex(mut);
     TS_ASSERT_EQUALS( mut, t.getMutex() );
-    delete mut;
   }
 
 

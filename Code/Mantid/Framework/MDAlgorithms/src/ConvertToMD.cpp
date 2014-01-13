@@ -29,7 +29,7 @@ The examples below demonstrate the usages of the algorithm in most common situat
 
 Load(Filename='MAR11001.nxspe',OutputWorkspace='MAR11001')
 SofQW3(InputWorkspace='MAR11001',OutputWorkspace='MAR11001Qe2',QAxisBinning='0,0.1,7',EMode='Direct')
-AddSampleLog(Workspace='MAR11001Qe2',LogName='T',LogText='100',LogType='Number Series')
+AddSampleLog(Workspace='MAR11001Qe2',LogName='T',LogText='100.0',LogType='Number Series')
 
 ConvertToMD(InputWorkspace='MAR11001Qe2',OutputWorkspace='MD3',QDimensions='CopyToMD',OtherDimensions='T',\
 MinValues='-10,0,0',MaxValues='10,6,500',SplitInto='50,50,5')
@@ -50,7 +50,7 @@ Load(Filename=WS_Name,OutputWorkspace=WS_Name)
 # this workspace has been  obtained from an inelastic experiment with input energy Ei = 3. 
 # Usually this energy is stored in workspace
 # but if it is not, we have to provide it for inelastic conversion to work.
-AddSampleLog(Workspace=WS_Name,LogName='Ei',LogText='3',LogType='Number')
+AddSampleLog(Workspace=WS_Name,LogName='Ei',LogText='3.0',LogType='Number')
 #
 # set up target ws name and remove target workspace with the same name which can occasionally exist.
 RezWS = 'WS_4D'
@@ -100,7 +100,7 @@ WS_Name='MAR11001.nxspe'
 Load(Filename=WS_Name,OutputWorkspace=WS_Name)
 # this workspace has been  obtained from an inelastic experiment with input energy 
 # nxspe file has input energy stored in it so no need to add energy artificially
-#AddSampleLog(Workspace=WS_Name,LogName='Ei',LogText='3',LogType='Number')
+#AddSampleLog(Workspace=WS_Name,LogName='Ei',LogText='3.0',LogType='Number')
 
 # set up target ws name and remove target workspace with the same name which can occasionally exist.
 RezWS = 'WS_3D'
@@ -111,7 +111,7 @@ except ValueError:
 i=0
 # let's assume this is the temperature range obtained in experiments and 
 # each data file is obtained for particular temperature. 
-T = [1,1.5,2,2.5,3,3.5,4.,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10]
+T = [1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0,8.5,9.0,9.5,10.0]
 for i in range(0,len(T),1):
     # EMULATE LOAD OF DIFFERENT results obtained for different temperatures. ------>
     SourceWS = 'SourcePart'+str(i)

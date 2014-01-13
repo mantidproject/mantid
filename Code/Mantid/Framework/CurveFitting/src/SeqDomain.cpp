@@ -101,7 +101,7 @@ void SeqDomain::leastSquaresVal(const CostFuncLeastSquares& leastSquares)
 //------------------------------------------------------------------------------------------------
 /**
  * Calculate the value of a least squares cost function
- * @param leastSquares :: The least squares cost func to calculate the value for
+ * @param rwp :: The RWP cost func to calculate the value for
  */
 void SeqDomain::rwpVal(const CostFuncRwp& rwp)
 {
