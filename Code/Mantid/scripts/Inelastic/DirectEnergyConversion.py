@@ -1206,8 +1206,16 @@ class DirectEnergyConversion(object):
             # simple case of setting simple value
             if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requesed explicitly
                 value = getattr(self,par_name)
+
+
             setattr(self,par_name,value)
             properties_changed.append(par_name)
+
+        # some properties have collective meaning
+        if self.use_hard_mask_only and self.hard_mask_file is None:
+          if self.run_diagnostics:
+              self.run_diagnostics=False;
+              properties_changed.append('run_diagnostics');
 
         return properties_changed
 

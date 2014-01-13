@@ -256,7 +256,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     masking = None;
     masks_done=False
     if not Reducer.run_diagnostics:
-       header="Diagnostics skipped "
+       header="Diagnostics including hard masking is skipped "
        masks_done = True;	
     if Reducer.save_and_reuse_masks :
         raise NotImplementedError("Save and reuse masks option is not yet implemented")
