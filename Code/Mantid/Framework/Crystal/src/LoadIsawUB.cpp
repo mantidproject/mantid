@@ -20,6 +20,7 @@ is the beam direction and z is vertically upward. (IPNS convention)
 #include <iosfwd>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Crystal/UnitCell.h>
+#include "MantidAPI/IMDEventWorkspace.h"
 
 using namespace Mantid::Kernel::Strings;
 using Mantid::Kernel::DblMatrix;
@@ -88,8 +89,18 @@ namespace Crystal
   {
     // In and Out workspace.
     Workspace_sptr ws1 = getProperty("InputWorkspace");
-    ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
-   if (!ws) throw
+
+    ExperimentInfo_sptr ws;
+    IMDEventWorkspace_sptr MDWS=boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
+    if (MDWS != NULL)
+    {
+        ws = MDWS->getExperimentInfo(0);
+    }
+    else
+    {
+        ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+    }
+    if (!ws) throw
         std::invalid_argument("Must specify either a MatrixWorkspace or a PeaksWorkspace or a MDEventWorkspace.");
 
     std::string Filename = getProperty("Filename");
@@ -150,6 +161,15 @@ namespace Crystal
     // Save it into the workspace
     ws->mutableSample().setOrientedLattice(latt);
 
+    //Save it to every experiment info in MD workspaces
+    if ((MDWS != NULL) && (MDWS->getNumExperimentInfo()>1))
+    {
+        for(u_int16_t i=1;i<MDWS->getNumExperimentInfo();i++)
+        {
+           ws = MDWS->getExperimentInfo(i);
+           ws->mutableSample().setOrientedLattice(latt);
+        }
+    }
 
     this->setProperty("InputWorkspace", ws1);
 
