@@ -739,12 +739,14 @@ class DirectEnergyConversion(object):
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
+        #
         calibration = None
         if self.relocate_dets:
             if self.__det_cal_file_ws:
                 calibration = self.__det_cal_file_ws
             else:
                 calibration = self.det_cal_file
+        #}
         result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True)
         
         if new_ws_name != None :
