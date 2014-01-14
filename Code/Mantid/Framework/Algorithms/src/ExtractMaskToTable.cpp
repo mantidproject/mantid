@@ -1,9 +1,20 @@
 /*WIKI* 
-The masking from the InputWorkspace property is extracted by creating a new MatrixWorkspace with a single X bin where:
-* 0 = masked;
-* 1 = unmasked.
 
-The spectra containing 0 are also marked as masked and the instrument link is preserved so that the instrument view functions correctly.
+==== InputWorskpace ====
+It can be either a MaskWorkspace, containing the masking information, or a Data workspace (EventWorkspace or Workspace2D), having
+detectors masked.
+
+==== Optional MaskTableWorkspace ====
+If the optional input 'MaskTableWorkspace' is given, it must be a table workspace having the
+same format as output TableWorkspace such that it contains 3 columns, XMin, XMax and DetectorIDsList.
+
+The contents in this mask table workspace will be copied to output workspace.
+
+If a detector is masked in this input 'MaskTableWorkspace', and it is also masked in input MaskWorkspace or data workspace,
+the setup (Xmin and Xmax) in MaskTableWorkspace has higher priority, i.e., in the output mask table workspace,
+the masked detector will be recorded in the row copied from input MaskTableWrokspace.
+
+
 *WIKI*/
 
 #include "MantidAlgorithms/ExtractMaskToTable.h"
@@ -56,11 +67,11 @@ namespace Algorithms
     */
   void ExtractMaskToTable::init()
   {
-    auto inwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input);
-    declareProperty(inwsprop, "A workspace whose masking is to be extracted");
+    auto inwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input);
+    declareProperty(inwsprop, "A workspace whose masking is to be extracted or a MaskWorkspace. ");
 
     auto intblprop = new WorkspaceProperty<TableWorkspace>("MaskTableWorkspace", "", Direction::Input, PropertyMode::Optional);
-    declareProperty(intblprop, "A workspace containing the masked spectra as zeroes and ones. ");
+    declareProperty(intblprop, "A mask table workspace containing 3 columns: XMin, XMax and DetectorIDsList. ");
 
     auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output);
     declareProperty(outwsprop, "A comma separated list or array containing a list of masked detector ID's ");
@@ -108,7 +119,7 @@ namespace Algorithms
     vector<detid_t> prevmaskeddetids;
     if (m_inputTableWS)
     {
-      g_log.notice("[To implement] Parse input table workspace.");
+      g_log.notice("Parse input masking table workspace.");
       parseMaskTable(m_inputTableWS, prevmaskeddetids);
     }
     else
@@ -143,12 +154,37 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Parse input TableWorkspace to get a list of detectors IDs of which detector are already masked
     * @param masktablews :: TableWorkspace containing masking information
-    * @param maskeddetectorids :: List for holding masked detector IDs
+    * @param maskeddetectorids :: (output) vector of detector IDs that are masked
     */
   void ExtractMaskToTable::parseMaskTable(DataObjects::TableWorkspace_sptr masktablews, std::vector<detid_t>& maskeddetectorids)
   {
     // Clear input
-    maskeddetectorids.clear();;
+    maskeddetectorids.clear();
+
+    // Check format of mask table workspace
+    if (masktablews->columnCount() != 3)
+    {
+      g_log.error("Mask table workspace must have more than 3 columns.  First 3 must be Xmin, Xmax and Spectrum List.");
+      return;
+    }
+    else
+    {
+      vector<string> colnames = masktablews->getColumnNames();
+      vector<string> chkcolumans(3);
+      chkcolumans[0] = "XMin";
+      chkcolumans[1] = "XMax";
+      chkcolumans[2] = "DetectorIDsList";
+      for (int i = 0; i < 3; ++i)
+      {
+        if (colnames[i] != chkcolumans[i])
+        {
+          g_log.error() << "Mask table workspace " << masktablews->name() << "'s " << i << "-th column name is "
+                        << colnames[i] << ", while it should be " << chkcolumans[i] << ". MaskWorkspace is invalid"
+                        << " and thus not used.\n";
+          return;
+        }
+      }
+    }
 
     // Parse each row
     size_t numrows = masktablews->rowCount();
@@ -319,7 +355,8 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Add a list of spectra (detector IDs) to the output table workspace
+  /** Add a list of spectra (detector IDs) to the output table workspace.
+    * If a detector is masked in input MaskTableWorkspace, then it will not be added to a new row
     * @param outws :: table workspace to write
     * @param maskeddetids :: vector of detector IDs of which detectors masked
     * @param xmin :: minumim x
