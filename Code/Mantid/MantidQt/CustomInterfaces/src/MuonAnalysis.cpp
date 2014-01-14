@@ -3213,7 +3213,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
   }
   else if(newTab == m_uiForm.ResultsTable)
   {
-    m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
+    m_resultTableTab->populateTables();
   }
 
   m_currentTab = newTab;

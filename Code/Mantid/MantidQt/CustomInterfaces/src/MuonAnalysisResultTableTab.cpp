@@ -196,60 +196,50 @@ void MuonAnalysisResultTableTab::applyUserSettings()
 }
 
 /**
-* Populates the tables with all the correct log values and fitting results. It takes the
-* given workspace list and checks to see if a fit has been done to the data set and if so
-* adds it to a new workspace list.
-*
-* @param wsList :: A list containing all the data set workspaces that have been loaded
-*                   by muon analysis.
-*/
-void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
+ * Returns a list of all the fitted workspace base names.
+ * @return List of names
+ */
+QVector<QString> MuonAnalysisResultTableTab::getFittedWorkspaces()
+{
+  QVector<QString> fittedWorkspaces;
+
+  std::set<std::string> allWorkspaces = AnalysisDataService::Instance().getObjectNames();
+
+  for(auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++)
+  {
+    size_t pos = (*it).find("_Workspace"); 
+
+    if ( pos == std::string::npos )
+      continue;
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it);
+
+    if( ! ws )
+      continue;
+
+    std::string wsName = *it;
+    wsName.erase(pos);
+
+    if ( ! AnalysisDataService::Instance().doesExist(wsName + "_Parameters") )
+      continue;
+
+    fittedWorkspaces << QString::fromStdString(wsName);
+  }
+
+  return fittedWorkspaces;
+}
+
+/**
+ * Populates the tables with all the correct log values and fitting results.
+ */
+void MuonAnalysisResultTableTab::populateTables()
 {
   storeUserSettings();
   
   // Clear the previous table values
   m_logValues.clear();
-  QVector<QString> fittedWsList;
 
-  // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
-  for (int i(0); i<wsList.size(); ++i)
-  {
-    if((Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_Parameters"))&&(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString()))) 
-      fittedWsList.append(wsList[i]);
-  }
-
-  // Add all the fittings made by seq. fit dialog
-  std::map<std::string, Workspace_sptr> items = 
-    Mantid::API::AnalysisDataService::Instance().topLevelItems();
-
-  for ( auto it = items.begin(); it != items.end(); ++it )
-  {
-    if ( ! boost::starts_with(it->first, "MuonSeqFit_") )
-      continue;
-
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(it->second);
-
-    if ( ! group )
-      continue;
-
-    for ( size_t i = 0; i < group->size(); ++i )
-    {
-      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(i) );
-
-      if ( ! ws )
-        continue;
-
-      std::string name = ws->name();
-      size_t pos = name.find("_Workspace"); 
-
-      if ( pos == std::string::npos)
-        continue;
-
-      name.erase(pos);
-
-      fittedWsList << QString::fromStdString(name);
-    }
-  }
+  QVector<QString> fittedWsList = getFittedWorkspaces();
 
   if(fittedWsList.size() > 0)
   { 
@@ -340,7 +330,8 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
     QMap<QString, QVariant> allLogs;
 
     // Get log information
-    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString()));
+    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(
+      AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_Workspace"));
     if (!ws)
     {
       throw std::runtime_error("Wrong type of Workspace");
