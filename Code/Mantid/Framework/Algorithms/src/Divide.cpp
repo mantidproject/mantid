@@ -50,12 +50,12 @@ namespace Mantid
     void Divide::init()
     {
       BinaryOperation::init();
-      declareProperty("WarnOnZeroDivide",false, "Algorithm usually warns if division by 0 occurs. Set this value to true if one does not want this message appearing ");
+      declareProperty("NotWarnOnZeroDivide",false, "Algorithm usually warns if division by 0 occurs. Set this value to true if one does not want this message appearing ");
     }
 
     void Divide::exec()
     {
-       m_warnOnZeroDivide = getProperty("WarnOnZeroDivide");
+       m_warnOnZeroDivide = !getProperty("NotWarnOnZeroDivide");
        BinaryOperation::exec();
     }
 
@@ -89,7 +89,7 @@ namespace Mantid
     {
       (void) lhsX; //Avoid compiler warning
 
-      if (rhsY == 0 && (!m_warnOnZeroDivide))
+      if (rhsY == 0 && (m_warnOnZeroDivide))
         g_log.warning() << "Division by zero: the RHS is a single-valued vector with value zero."
                         << "\n";
 

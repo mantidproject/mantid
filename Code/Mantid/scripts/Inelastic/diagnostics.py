@@ -269,11 +269,11 @@ def normalise_background(background_int, white_int, second_white_int=None):
     """
     if second_white_int is None:
         # quetly divide background integral by white beam integral not reporting about possible 0 in wb integral (they will be removed by diag anyway)
-        background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=white_int,WarnOnZeroDivide='1');
+        background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=white_int,NotWarnOnZeroDivide='1');
     else:
         hmean = 2.0*white_int*second_white_int/(white_int+second_white_int)
         #background_int /= hmean
-        background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=hmean,WarnOnZeroDivide='1');
+        background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=hmean,NotWarnOnZeroDivide='1');
         DeleteWorkspace(hmean)
 
 #------------------------------------------------------------------------------
