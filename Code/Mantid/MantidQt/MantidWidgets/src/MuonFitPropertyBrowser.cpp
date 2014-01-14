@@ -346,5 +346,20 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws)const
     return false;
 }
 
+void MuonFitPropertyBrowser::finishHandle(const IAlgorithm* alg)
+{
+  // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
+  auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    static_cast<std::string>( alg->getProperty("InputWorkspace") ) );
+
+  auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    outputName() + "_Workspace");
+
+  if (inWs && outWs)
+    outWs->copyExperimentInfoFrom(inWs.get());
+
+  FitPropertyBrowser::finishHandle(alg);
+}
+
 } // MantidQt
 } // API
