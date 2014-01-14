@@ -51,6 +51,8 @@ namespace MantidWidgets
       this, SLOT( updateInputEnabled(DialogState) ) );
     connect( this, SIGNAL( stateChanged(DialogState) ),
       this, SLOT( updateControlEnabled(DialogState) ) );
+    connect( this, SIGNAL( stateChanged(DialogState) ),
+      this, SLOT( updateCursor(DialogState) ) );
   }
 
   /**
@@ -249,6 +251,27 @@ namespace MantidWidgets
   {
     m_ui.controlButton->setEnabled( newState != Preparing );
     
+  }
+
+  /**
+   * Update cursor depending on the new state of the dialog.
+   * Waiting cursor is displayed while preparing so that user does now that something is happening.
+   * @param newState :: New state of the dialog
+   */
+  void MuonSequentialFitDialog::updateCursor(DialogState newState)
+  {
+    switch(newState)
+    {
+      case Preparing:
+        setCursor(Qt::WaitCursor);
+        break;
+      case Running:
+        setCursor(Qt::BusyCursor);
+        break;
+      default:
+        unsetCursor();
+        break;
+    }
   }
 
   /**

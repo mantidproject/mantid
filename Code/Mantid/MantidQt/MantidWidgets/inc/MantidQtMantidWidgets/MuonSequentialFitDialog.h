@@ -119,6 +119,9 @@ namespace MantidWidgets
     /// Update control button enabled status depending on the new state. 
     void updateControlEnabled(DialogState newState); 
 
+    /// Update cursor depending on the new state of the dialog.
+    void updateCursor(DialogState newState); 
+
     /// Start fitting process
     void startFit();
 
