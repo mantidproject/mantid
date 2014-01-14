@@ -40,6 +40,7 @@ namespace MantidQt
 
       // Add the automatically generated buttons (help, run, and cancel) to the ui.
       m_uiForm.buttonGrid->addLayout(createDefaultButtonLayout());
+      m_uiForm.instructions->setText(getOptionalMessage());
 
       // This allows the user NOT to select a workspace if there are any loaded into Mantid.
       m_uiForm.inputWorkspaceCb->insertItem("", 0);

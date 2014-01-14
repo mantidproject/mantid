@@ -32,6 +32,7 @@ namespace Mantid
     void CatalogPublish::initDocs()
     {
       this->setWikiSummary("Allows the user to publish data to the catalog.");
+      this->setOptionalMessage("Publish datafiles to the information catalog.");
     }
 
     /// Init method to declare algorithm properties
