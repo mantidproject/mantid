@@ -57,23 +57,17 @@ namespace Mantid
         throw std::runtime_error("Please select a workspace or a file to publish. Not both.");
       }
 
-      // The name of the file, which is used to obtain the dataset ID in getUploadURL below.
-      std::string dataFileName = getPropertyValue("InvestigationNumber");
-
       // Create a catalog as getUploadURL is called twice if workspace is selected.
       auto catalog = CatalogAlgorithmHelper().createCatalog();
 
       // The user want to upload a file.
       if (!filePath.empty())
       {
-        // If the user has not specified then an investigation number to use then obtain it from the filename.
-        if (dataFileName.empty()) dataFileName = extractFileName(filePath);
         // If the user has not set the name to save the file as, then use the filename of the file being uploaded.
         if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", Poco::Path(filePath).getFileName());
       }
       else // The user wants to upload a workspace.
       {
-        if (dataFileName.empty()) dataFileName = extractFileName(workspace->name());
         if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", workspace->name());
         // Save workspace to a .nxs file in the user's default directory.
         saveWorkspaceToNexus(workspace);
@@ -88,10 +82,9 @@ namespace Mantid
       // Verify that the file can be opened correctly.
       if (fileStream.rdstate() & std::ios::failbit) throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
       // Publish the contents of the file to the server.
-
-      publish(fileStream,catalog->getUploadURL(dataFileName, getPropertyValue("NameInCatalog")));
+      publish(fileStream,catalog->getUploadURL(getPropertyValue("InvestigationNumber"), getPropertyValue("NameInCatalog")));
       // If a workspace was published, then we want to also publish the history of a workspace.
-      if (!ws.empty()) publishWorkspaceHistory(catalog, workspace, dataFileName);
+      if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
     }
 
     /**
@@ -156,19 +149,6 @@ namespace Mantid
     }
 
     /**
-     * Extract the name of the file from a given path.
-     * @param filePath :: Path of data file to use.
-     * @returns The filename of the given path.
-     */
-    const std::string CatalogPublish::extractFileName(const std::string &filePath)
-    {
-      // Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
-      std::string dataFileName = Poco::Path(Poco::Path(filePath).getFileName()).getBaseName();
-      // Extracts the specific file name (e.g. CSP74683) from the file path.
-      return dataFileName.substr(0, dataFileName.find_first_of('_'));
-    }
-
-    /**
      * Saves the workspace (given the property) as a nexus file to the user's default directory.
      * This is then used to publish the workspace (as a file) for ease of use later.
      * @param workspace :: The workspace to save to a file.
@@ -188,9 +168,8 @@ namespace Mantid
      * Publish the history of a given workspace.
      * @param catalog   :: The catalog to use to publish the file.
      * @param workspace :: The workspace to obtain the history from.
-     * @param datafileName :: The name of the file that is used to obtain the dataset ID.
      */
-    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace, std::string &datafileName)
+    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace)
     {
       std::stringstream ss;
       // Obtain the workspace history as a string.
@@ -198,7 +177,7 @@ namespace Mantid
       // Use the name the use wants to save the file to the server as and append .py
       std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
       // Publish the workspace history to the server.
-      publish(ss, catalog->getUploadURL(datafileName, fileName));
+      publish(ss, catalog->getUploadURL(getPropertyValue("InvestigationNumber"), fileName));
     }
 
     /**

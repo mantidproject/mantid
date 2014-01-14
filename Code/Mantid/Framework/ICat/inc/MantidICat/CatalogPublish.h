@@ -60,12 +60,10 @@ namespace Mantid
         bool checkGroups() { return false; }
         /// True if the extension of the file is a datafile.
         bool isDataFile(const std::string & filePath);
-        /// Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
-        const std::string extractFileName(const std::string &filePath);
         /// Saves the workspace as a nexus file to the user's default directory.
         void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
         /// Publish the history of a given workspace.
-        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace, std::string &datafileName);
+        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace);
         /// Generate the history of a given workspace.
         const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
     };
