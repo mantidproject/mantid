@@ -788,6 +788,13 @@ class DirectEnergyConversion(object):
         if hasattr(self, 'nexus_in_event_mode') and self.nexus_in_event_mode:
             event_mode = True;
 
+        if self.relocate_dets:
+            if self.__det_cal_file_ws:
+                calibration = self.__det_cal_file_ws
+            else:
+                calibration = self.det_cal_file
+        #}
+
         sum = True
         result_ws = common.load_runs(runs, sum)
         if new_ws_name != None :
