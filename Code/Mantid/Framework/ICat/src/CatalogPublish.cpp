@@ -20,6 +20,7 @@
 #include <Poco/URI.h>
 
 #include <fstream>
+#include <boost/regex.hpp>
 
 namespace Mantid
 {
@@ -49,7 +50,15 @@ namespace Mantid
       // Used for error checking.
       std::string ws       = getPropertyValue("InputWorkspace");
       std::string filePath = getPropertyValue("FileName");
+      std::string nameInCatalog = getPropertyValue("NameInCatalog");
       Mantid::API::Workspace_sptr workspace = getProperty("InputWorkspace");
+
+      // Prevent invalid/malicious file names being saved to the catalog.
+      boost::regex re("^[a-zA-Z0-9_.]*$");
+      if (!boost::regex_match(nameInCatalog.begin(), nameInCatalog.end(), re))
+      {
+        throw std::runtime_error("The filename can only contain characters, numbers, underscores and periods");
+      }
 
       // Error checking to ensure a workspace OR a file is selected. Never both.
       if ((ws.empty() && filePath.empty()) || (!ws.empty() && !filePath.empty()))
@@ -63,12 +72,16 @@ namespace Mantid
       // The user want to upload a file.
       if (!filePath.empty())
       {
+        std::string fileName = Poco::Path(filePath).getFileName();
         // If the user has not set the name to save the file as, then use the filename of the file being uploaded.
-        if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", Poco::Path(filePath).getFileName());
+        if (nameInCatalog.empty()) setProperty("NameInCatalog", fileName);
+        g_log.notice("NameInCatalog has not been set. Using filename instead: " + fileName + ".");
       }
       else // The user wants to upload a workspace.
       {
-        if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", workspace->name());
+        if (nameInCatalog.empty()) setProperty("NameInCatalog", workspace->name());
+        g_log.notice("NameInCatalog has not been set. Using workspace name instead: " + workspace->name() + ".");
+
         // Save workspace to a .nxs file in the user's default directory.
         saveWorkspaceToNexus(workspace);
         // Overwrite the filePath string to the location of the file (from which the workspace was saved to).
