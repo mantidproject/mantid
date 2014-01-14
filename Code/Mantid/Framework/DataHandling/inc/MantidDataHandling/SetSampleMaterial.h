@@ -52,7 +52,6 @@ public:
   virtual int version() const;
   /// Algorithm's category for identification
   virtual const std::string category() const;
-  /// @inheritdocs
   virtual std::map<std::string, std::string> validateInputs();
 
 private:

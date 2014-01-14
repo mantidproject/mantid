@@ -143,6 +143,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Parse input TableWorkspace to get a list of detectors IDs of which detector are already masked
     * @param masktablews :: TableWorkspace containing masking information
+    * @param maskeddetectorids :: List for holding masked detector IDs
     */
   void ExtractMaskToTable::parseMaskTable(DataObjects::TableWorkspace_sptr masktablews, std::vector<detid_t>& maskeddetectorids)
   {
@@ -323,6 +324,7 @@ namespace Algorithms
     * @param maskeddetids :: vector of detector IDs of which detectors masked
     * @param xmin :: minumim x
     * @param xmax :: maximum x
+    * @param prevmaskedids :: vector of previous masked detector IDs
     */
   void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws, vector<detid_t> maskeddetids,
                                                double xmin, double xmax, vector<detid_t> prevmaskedids)

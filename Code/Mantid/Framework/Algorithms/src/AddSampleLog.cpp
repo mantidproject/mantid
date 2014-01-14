@@ -1,7 +1,9 @@
 /*WIKI* 
 Workspaces contain information in logs. Often these detail what happened to the sample during the experiment. This algorithm allows one named log to be entered. 
 
-The log can be either a String, a Number, or a Number Series. If you select Number Series, the current time will be used as the time of the log entry, and the number in the text used as the (only) value.
+The log can be either a String, a Number, or a Number Series. If you select Number Series, the workspace start time will be used as the time of the log entry, and the number in the text used as the (only) value.
+
+If the LogText contains a numeric value, the created log will be of integer type if an integer is passed and floating point (double) otherwise. This applies to both the Number & Number Series options.
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -66,31 +68,55 @@ void AddSampleLog::exec()
 
   // Remove any existing log
   if (theRun.hasProperty(propName))
+  {
     theRun.removeLogData(propName);
+  }
 
   if (propType == "String")
   {
     theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
+    return;
   }
-  else if (propType == "Number")
+
+  bool valueIsInt(false);
+  int intVal;
+  double dblVal;
+  if ( Strings::convert(propValue, intVal) )
   {
-    double val;
-    if (!Strings::convert(propValue, val))
-      throw std::invalid_argument("Error interpreting string '" + propValue + "' as a number.");
-    theRun.addLogData(new PropertyWithValue<double>(propName, val));
+    valueIsInt = true;
+  }
+  else if ( !Strings::convert(propValue, dblVal) )
+  {
+    throw std::invalid_argument("Error interpreting string '" + propValue + "' as a number.");
+  }
+
+  if (propType == "Number")
+  {
+    if (valueIsInt) theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
+    else theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
   }
   else if (propType == "Number Series")
   {
-    double val;
-    if (!Strings::convert(propValue, val))
-      throw std::invalid_argument("Error interpreting string '" + propValue + "' as a number.");
-    Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
-    TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>(propName);
-    tsp->addValue(now, val);
-    theRun.addLogData(tsp);
-  }
+    Kernel::DateAndTime startTime;
+    try {
+      startTime = theRun.startTime();
+    } catch (std::runtime_error&) {
+      // Swallow the error - startTime will just be 0
+    }
 
-  setProperty("Workspace", wSpace);
+    if (valueIsInt)
+    {
+      auto tsp = new TimeSeriesProperty<int>(propName);
+      tsp->addValue(startTime, intVal);
+      theRun.addLogData(tsp);
+    }
+    else
+    {
+      auto tsp = new TimeSeriesProperty<double>(propName);
+      tsp->addValue(startTime, dblVal);
+      theRun.addLogData(tsp);
+    }
+  }
 }
 
 } // namespace Algorithms

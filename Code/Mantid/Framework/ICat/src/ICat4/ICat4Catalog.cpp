@@ -28,11 +28,14 @@ namespace Mantid
      */
     void ICat4Catalog::login(const std::string& username, const std::string& password, const std::string& url)
     {
-      UNUSED_ARG(url)
+      // Store the soap end-point in the session for use later.
+      ICat::Session::Instance().setSoapEndPoint(url);
+      // Securely set, including soap-endpoint.
       ICat4::ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
 
-      // Define ssl authentication scheme
-      setSSLContext(icat);
+      // Output the soap end-point in use for debugging purposes.
+      g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << "\n";
 
       // Used to authenticate the user.
       ns1__login login;
@@ -87,7 +90,7 @@ namespace Mantid
     void ICat4Catalog::logout()
     {
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__logout request;
       ns1__logoutResponse response;
@@ -258,7 +261,7 @@ namespace Mantid
       g_log.debug() << "ICat4Catalog::search -> Query is: { " << query << " }" << std::endl;
 
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -286,7 +289,7 @@ namespace Mantid
     int64_t ICat4Catalog::getNumberOfSearchResults(const CatalogSearchParam& inputs)
     {
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -329,7 +332,7 @@ namespace Mantid
     void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr& outputws)
     {
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -435,7 +438,7 @@ namespace Mantid
     void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -504,7 +507,7 @@ namespace Mantid
     void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -582,7 +585,7 @@ namespace Mantid
     void ICat4Catalog::listInstruments(std::vector<std::string>& instruments)
     {
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -623,7 +626,7 @@ namespace Mantid
     void ICat4Catalog::listInvestigationTypes(std::vector<std::string>& invstTypes)
     {
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__search request;
       ns1__searchResponse response;
@@ -665,7 +668,7 @@ namespace Mantid
     void ICat4Catalog::getFileLocation(const long long & fileID, std::string & fileLocation)
     {
       ICat4::ICATPortBindingProxy icat;
-      setSSLContext(icat);
+      setICATProxySettings(icat);
 
       ns1__get request;
       ns1__getResponse response;
@@ -817,5 +820,15 @@ namespace Mantid
       return (dateTime.toFormattedString(format));
     }
 
+    /**
+     * Sets the soap-endpoint & SSL context for the given ICAT proxy.
+     */
+    void ICat4Catalog::setICATProxySettings(ICat4::ICATPortBindingProxy& icat)
+    {
+      // Set the soap-endpoint of the catalog we want to use.
+      icat.soap_endpoint = ICat::Session::Instance().getSoapEndPoint().c_str();
+      // Sets SSL authentication scheme
+      setSSLContext(icat);
+    }
   }
 }

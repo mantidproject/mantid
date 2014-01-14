@@ -78,7 +78,7 @@ private:
 	int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
 	void loadTimeDetails(NeXus::NXEntry& entry);
 	NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
-	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);
+	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, int vanaCalculatedDetectorElasticPeakPosition = -1);
 
 	void runLoadInstrument();
 
@@ -86,10 +86,13 @@ private:
 	static double calculateError(double in) {
 		return sqrt(in);
 	}
+	int validateVanadium(const std::string &);
 
 	API::MatrixWorkspace_sptr m_localWorkspace;
 
-	std::string m_filename; ///< The file to load
+//	NeXus::NXRoot m_dataRoot;
+//	NeXus::NXRoot m_vanaRoot;
+
 	std::string m_instrumentName; ///< Name of the instrument
 	std::string m_instrumentPath; ///< Name of the instrument path
 

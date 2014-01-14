@@ -1,9 +1,12 @@
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Logger.h"
 #include <time.h>
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
 #include <boost/date_time/posix_time/posix_time_config.hpp>
+#include <ostream>
+#include <ctime>
 
 namespace Mantid
 {
@@ -968,19 +971,10 @@ bool DateAndTime::stringIsISO8601(const std::string & str)
   return Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FORMAT, str, dt, tz_diff);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+std::ostream& operator<< (std::ostream& stream, const DateAndTime & t)
+{
+  stream << t.toSimpleString(); return stream;
+}
 
 TimeInterval::TimeInterval(const DateAndTime& from, const DateAndTime& to)
 :m_begin(from)
@@ -1021,6 +1015,11 @@ std::string TimeInterval::end_str()const
   return boost::posix_time::to_simple_string(this->m_end.to_ptime());
 }
 
+std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t)
+{
+  s << t.begin().toSimpleString() << " - " << t.end().toSimpleString();
+  return s;
+}
 
 } // namespace Kernel
 

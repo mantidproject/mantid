@@ -32,21 +32,7 @@ namespace API
    */
   ScopedWorkspace::~ScopedWorkspace()
   {
-    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
-
-    // When destructed, remove workspace from the ADS if was added and still exists
-    if ( ads.doesExist(m_name) )
-    {
-      if ( ads.retrieveWS<WorkspaceGroup>(m_name) )
-      {
-        // If is a group, need to remove all the members as well
-        ads.deepRemoveGroup(m_name);
-      }
-      else
-      {
-        ads.remove(m_name);
-      }
-    }
+    remove();
   }
 
   /**
@@ -73,6 +59,28 @@ namespace API
     
     return Workspace_sptr();
   }
+
+  /**
+   * Removes the workspace entry from the ADS.
+   */
+  void ScopedWorkspace::remove()
+  {
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
+    // When destructed, remove workspace from the ADS if was added and still exists
+    if ( ads.doesExist(m_name) )
+    {
+      if ( ads.retrieveWS<WorkspaceGroup>(m_name) )
+      {
+        // If is a group, need to remove all the members as well
+        ads.deepRemoveGroup(m_name);
+      }
+      else
+      {
+        ads.remove(m_name);
+      }
+    }
+  }
  
   /**
    * Make ADS entry to point to the given workspace.
@@ -83,6 +91,9 @@ namespace API
 
     if ( ! newWS->name().empty() && ads.doesExist( newWS->name() ) )
       throw std::invalid_argument( "Workspace is already in the ADS under the name " + newWS->name() );
+
+    // Remove previous workspace entry
+    remove();
 
     ads.add(m_name, newWS); 
   }

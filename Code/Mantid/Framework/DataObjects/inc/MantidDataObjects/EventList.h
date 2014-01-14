@@ -14,7 +14,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include <cstddef>
-#include <iostream>
+#include <iosfwd>
 #include <set>
 #include <vector>
 #include "MantidKernel/MultiThreaded.h"
@@ -281,6 +281,9 @@ public:
 
   void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection, bool docorrection) const;
 
+  /// Split events by pulse time
+  void splitByPulseTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs) const;
+
   void multiply(const double value, const double error = 0.0);
   EventList& operator*=(const double value);
 
@@ -375,6 +378,10 @@ private:
   template< class T >
   void splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, typename std::vector<T> & events,
       double tofcorrection, bool docorrection) const;
+  /// Split events by pulse time
+  template< class T >
+  void splitByPulseTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
+                              typename std::vector<T> & events) const;
   template< class T>
   static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
   template<class T>

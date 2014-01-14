@@ -378,6 +378,15 @@ public:
     // TODO: add more asserts
   }
 
+  void test_getFunctionNames()
+  {
+    const auto& names = FunctionFactory::Instance().getFunctionNames<IFunction1D>();
+    TS_ASSERT( !names.empty() );
+    TS_ASSERT( std::find(names.begin(), names.end(), "FunctionFactoryTest_FunctA") != names.end() );
+    // Call it again to indirectly test caching
+    TS_ASSERT_EQUALS( names, FunctionFactory::Instance().getFunctionNames<IFunction1D>());
+  }
+
 };
 
 #endif /*FUNCTIONFACTORYTEST_H_*/

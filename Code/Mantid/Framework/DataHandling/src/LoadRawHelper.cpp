@@ -455,7 +455,7 @@ namespace Mantid
      */
     bool LoadRawHelper::isAscii(FILE* file) const
     {  
-      return LoadAscii::isAscii(file);
+      return Kernel::FileDescriptor::isAscii(file);
     }
 
 

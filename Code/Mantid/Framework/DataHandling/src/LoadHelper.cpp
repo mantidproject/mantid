@@ -20,7 +20,7 @@ LoadHelper::~LoadHelper() {
 
 /**
  * Finds the path for the instrument name in the nexus file
- * Usually of the form: entry0/<NXinstrument class>/name
+ * Usually of the form: entry0/\<NXinstrument class\>/name
  */
 std::string LoadHelper::findInstrumentNexusPath(
 		const NeXus::NXEntry &firstEntry) {
@@ -81,6 +81,7 @@ double LoadHelper::calculateEnergy(double wavelength) {
 /**
  * Calculate TOF from distance
  *  @param distance :: distance in meters
+ *  @param wavelength :: wavelength to calculate TOF from
  *  @return tof in seconds
  */
 double LoadHelper::calculateTOF(double distance,double wavelength) {

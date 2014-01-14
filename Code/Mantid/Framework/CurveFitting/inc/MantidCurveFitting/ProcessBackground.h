@@ -101,7 +101,7 @@ private:
     DataObjects::Workspace2D_sptr autoBackgroundSelection(DataObjects::Workspace2D_sptr bkgdWS);
 
     /// Create a background function from input properties
-    BackgroundFunction_sptr createBackgroundFunction();
+    BackgroundFunction_sptr createBackgroundFunction(const std::string backgroundtype);
 
     /// Filter non-background data points out and create a background workspace
     DataObjects::Workspace2D_sptr filterForBackground(BackgroundFunction_sptr bkgdfunction);
@@ -113,6 +113,10 @@ private:
 
     double m_lowerBound;
     double m_upperBound;
+
+    std::string m_bkgdType;
+
+    bool m_doFitBackground;
 
     // double mTolerance;
 
@@ -127,6 +131,8 @@ private:
 
     /// Add a certain region from a reference workspace
     void addRegion();
+
+    void fitBackgroundFunction(std::string bkgdfunctiontype);
     
   };
 

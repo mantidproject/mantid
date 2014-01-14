@@ -127,6 +127,9 @@ namespace Crystal
     histoTypes.push_back("");
     declareProperty("SortBy", histoTypes[2],boost::make_shared<StringListValidator>(histoTypes),
       "Sort the histograms by bank, run number or both (default).");
+    declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive,
+      "The minimum I/sig(I) ratio");
+    declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -136,13 +139,14 @@ namespace Crystal
   {
 
     std::string filename = getPropertyValue("Filename");
-    PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
-
+    ws = getProperty("InputWorkspace");
     double scaleFactor = getProperty("ScalePeaks"); 
     double dMin = getProperty("MinDSpacing");
     double wlMin = getProperty("MinWavelength");
     double wlMax = getProperty("MaxWavelength");
     std::string type = getProperty("SortBy");
+    double minIsigI = getProperty("MinIsigI");
+    int widthBorder = getProperty("WidthBorder");
 
     // Sequence and run number
     int seqNum = 1;
@@ -294,9 +298,14 @@ namespace Crystal
       Peak & p = peaks[wi];
       if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) || 
         boost::math::isnan(p.getSigmaIntensity())) continue;
+      if (minIsigI != EMPTY_DBL() && p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())) continue;
       int run = p.getRunNumber();
       int bank = 0;
       std::string bankName = p.getBankName();
+      int nCols, nRows;
+      sizeBanks(bankName, nCols, nRows);
+      if (widthBorder != EMPTY_INT() && (p.getCol() < widthBorder || p.getRow() < widthBorder || p.getCol() > (nCols - widthBorder) ||
+    		  p.getRow() > (nRows -widthBorder))) continue;
       // Take out the "bank" part of the bank name and convert to an int
       bankName.erase(remove_if(bankName.begin(), bankName.end(), not1(std::ptr_fun (::isdigit))), bankName.end());
       Strings::convert(bankName, bank);
@@ -516,7 +525,30 @@ namespace Crystal
 
       return spect;
   }
+  void SaveHKL::sizeBanks(std::string bankName, int& nCols, int& nRows)
+  {
+         if (bankName.compare("None") == 0) return;
+         boost::shared_ptr<const IComponent> parent = ws->getInstrument()->getComponentByName(bankName);
+         if (parent->type().compare("RectangularDetector") == 0)
+         {
+			boost::shared_ptr<const RectangularDetector> RDet = boost::dynamic_pointer_cast<
+								const RectangularDetector>(parent);
 
+			nCols = RDet->xpixels();
+			nRows = RDet->ypixels();
+         }
+         else
+         {
+			std::vector<Geometry::IComponent_const_sptr> children;
+			boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+			asmb->getChildren(children, false);
+			boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+			std::vector<Geometry::IComponent_const_sptr> grandchildren;
+			asmb2->getChildren(grandchildren,false);
+			nRows = static_cast<int>(grandchildren.size());
+			nCols = static_cast<int>(children.size());
+         }
+  }
 
 } // namespace Mantid
 } // namespace Crystal

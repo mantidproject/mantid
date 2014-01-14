@@ -132,6 +132,12 @@ namespace Mantid
       /// Builds search query based on user input and stores query in related ICAT class.
       ICat3::ns1__advancedSearchDetails* buildSearchQuery(const CatalogSearchParam& inputs);
 
+      // Defines the SSL authentication scheme.
+      void setSSLContext(ICat3::ICATPortBindingProxy& icat);
+
+      // Sets the soap-endpoint & SSL context for the given ICAT proxy.
+      void setICATProxySettings(ICat3::ICATPortBindingProxy& icat);
+
       /** This is a template method to save data to table workspace
        * @param input :: pointer to input value
        * @param t :: table row reference

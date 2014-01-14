@@ -54,7 +54,8 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Crystal"; }
   /// Call TOFLattice as a Child Algorithm to get statistics of the peaks
-  double optLattice(std::string inname, std::string cell_type, std::vector<double> & params);
+  double optLatticeSum(std::string inname, std::string cell_type, std::vector<double> & params);
+  void optLattice(std::string inname, std::vector<double> & params, double *out);
 
 private:
   /// Sets documentation strings for this algorithm
@@ -64,7 +65,12 @@ private:
   void exec();
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
-  
+  /// Function to find peaks near detector edge
+  bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName, int col, int row, int Edge);
+  Kernel::DblMatrix aMatrix( std::vector<double> lattice );
+  void calculateErrors(size_t npeaks, std::string inname, std::string cell_type,
+          std::vector<double> & Params,
+          std::vector<double> & sigabc, double chisq);
 };
 
 } // namespace Algorithm

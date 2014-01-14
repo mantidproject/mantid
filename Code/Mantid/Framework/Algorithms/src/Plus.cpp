@@ -1,8 +1,10 @@
 /*WIKI* 
 {{BinaryOperation|verb=added|prep=to|symbol=<math>+</math>}} 
 
-For [[EventWorkspace]]s, the Event lists at each workspace index are concatenated to create the output event list at the same workspace index. Note that in some cases, these event lists might be from different detectors; this is not checked against and the event lists will be concatenated anyway. This may or may not be your desired behavior. If you wish to merge different EventWorkspaces while matching their detectors together, use the [[MergeRuns]] algorithm.
+===EventWorkspace note===
+For [[EventWorkspace]]s, the event lists at each workspace index are concatenated to create the output event list at the same workspace index. Note that in some (rare<sup>*</sup>) cases, these event lists might be from different detectors; this is not checked against and the event lists will be concatenated anyway. This may or may not be your desired behavior. If you wish to merge different EventWorkspaces while matching their detectors together, use the [[MergeRuns]] algorithm.
 
+<sup>*</sup> This could happen, for example, if the workspace operands have not both been processed in an identical fashion and the detectors have somehow been grouped differently.
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''

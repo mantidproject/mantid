@@ -55,6 +55,9 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
+// Name of the QSettings group to store the InstrumentWindw settings
+const char* InstrumentWindowSettingsGroup = "Mantid/InstrumentWindow";
+
 /**
  * Constructor.
  */
@@ -797,30 +800,26 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   //Replace current workspace
   if (wsName == m_workspaceName.toStdString())
   {
-    bool resetGeometry = true;
-    bool autoscaling = true;
-    double scaleMin = 0.0;
-    double scaleMax = 0.0;
     if (m_instrumentActor)
     {
       // try to detect if the instrument changes with the workspace
       auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
-      resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
+      bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
 
       // if instrument doesn't change keep the scaling
       if ( !resetGeometry )
       {
-        autoscaling = m_instrumentActor->autoscaling();
-        scaleMin = m_instrumentActor->minValue();
-        scaleMax = m_instrumentActor->maxValue();
+        m_instrumentActor->updateColors();
       }
-
-      delete m_instrumentActor;
-      m_instrumentActor = NULL;
+      else
+      {
+        delete m_instrumentActor;
+        m_instrumentActor = NULL;
+        init( resetGeometry, true, 0.0, 0.0, false );
+        updateInstrumentDetectors();
+      }
     }
 
-    init( resetGeometry, autoscaling, scaleMin, scaleMax, false );
-    updateInstrumentDetectors();
   }
 }
 
@@ -1343,4 +1342,21 @@ void InstrumentWindow::createTabs(QSettings& settings)
 
     m_tabs << m_renderTab << pickTab << maskTab << treeTab;
 
+}
+
+/**
+  * Return a name for a group in QSettings to store InstrumentWindow configuration.
+  */
+QString InstrumentWindow::getSettingsGroupName() const
+{
+  return QString::fromAscii( InstrumentWindowSettingsGroup );
+}
+
+/**
+  * Construct a name for a group in QSettings to store instrument-specific configuration.
+  */
+QString InstrumentWindow::getInstrumentSettingsGroupName() const
+{
+  return QString::fromAscii( InstrumentWindowSettingsGroup ) + "/" +
+      QString::fromStdString( getInstrumentActor()->getInstrument()->getName() );
 }

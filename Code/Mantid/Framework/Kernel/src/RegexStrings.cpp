@@ -9,6 +9,7 @@
 #include <functional>
 
 #include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid
 {

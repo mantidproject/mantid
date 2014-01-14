@@ -9297,6 +9297,17 @@ void ApplicationWindow::windowsMenuAboutToShow()
   reloadCustomActions();
 }
 
+namespace // anonymous
+{
+  /**
+   * Helper function used with Qt's qSort to make sure interfaces are in alphabetical order.
+   */
+  bool interfaceNameComparator(const QPair<QString, QString> & lhs, const QPair<QString, QString> & rhs)
+  {
+    return lhs.first.toLower() < rhs.first.toLower();
+  }
+} // anonymous namespace
+
 void ApplicationWindow::interfaceMenuAboutToShow()
 {
   interfaceMenu->clear();
@@ -9320,6 +9331,10 @@ void ApplicationWindow::interfaceMenuAboutToShow()
     interfaceMenu->insertItem(tr(category), categoryMenu);
     categoryMenus[category] = categoryMenu;
   }
+
+  // Show the interfaces in alphabetical order in their respective submenus.
+  qSort(m_interfaceNameDataPairs.begin(), m_interfaceNameDataPairs.end(), 
+    interfaceNameComparator);
 
   // Turn the name/data pairs into QActions with which we populate the menus.
   foreach(const auto interfaceNameDataPair, m_interfaceNameDataPairs)
@@ -16338,6 +16353,7 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
     code += in.readLine() + "\n";
   }
   Script *runner = scriptingEnv()->newScript(filename, this, Script::NonInteractive);
+  connect(runner, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(onScriptExecuteError(const QString &, const QString &, int)));
   runner->redirectStdOut(false);
   scriptingEnv()->redirectStdOut(false);
   if(execMode == Script::Asynchronous)
@@ -16356,6 +16372,24 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
     runner->execute(code);
   }
   delete runner;
+}
+
+/**
+ * This is the slot for handing script execution errors. It is only
+ * attached by ::executeScriptFile which is only done in the '-xq'
+ * command line option.
+ *
+ * @param message Normally the stacktrace of the error.
+ * @param scriptName The name of the file.
+ * @param lineNumber The line number in the script that caused the error.
+ */
+void ApplicationWindow::onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber)
+{
+  g_log.fatal() << "Fatal error on line " << lineNumber << " of \"" << scriptName.toStdString()
+            << "\" encountered:\n"
+            << message.toStdString();
+  this->setExitCode(1);
+  this->exitWithPresetCode();
 }
 
 /**

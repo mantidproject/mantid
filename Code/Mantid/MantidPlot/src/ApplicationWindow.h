@@ -238,6 +238,8 @@ public slots:
   ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
+  /// Slot to connect the script execution errors to
+  void onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on success/failure.
   bool runPythonScript(const QString & code, bool async = false, bool quiet=false, bool redirect=true);
   

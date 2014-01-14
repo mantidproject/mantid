@@ -9,7 +9,7 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Algorithms::ReflectometryReductionOne;
+using namespace Mantid::Algorithms;
 
 class ReflectometryReductionOneTest: public CxxTest::TestSuite
 {
@@ -35,10 +35,12 @@ public:
 
     // Define one spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
-    detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
     // Define another spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep2));
-    detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep2));
+    std::stringstream buffer;
+    buffer << workspaceIndexToKeep1 << "," << workspaceIndexToKeep2;
+    const std::string detectorIndexRangesStr = buffer.str();
+
     // Define a wavelength range for the detector workspace
     const double wavelengthMin = 1.0;
     const double wavelengthMax = 15;
@@ -49,8 +51,8 @@ public:
     ReflectometryReductionOne alg;
 
     // Run the conversion.
-    ReflectometryReductionOne::DetectorMonitorWorkspacePair inLam = alg.toLam(toConvert,
-        detectorIndexRange, monitorIndex, boost::tuple<double, double>(wavelengthMin, wavelengthMax),
+    ReflectometryWorkflowBase::DetectorMonitorWorkspacePair inLam = alg.toLam(toConvert,
+        detectorIndexRangesStr, monitorIndex, boost::tuple<double, double>(wavelengthMin, wavelengthMax),
         boost::tuple<double, double>(backgroundWavelengthMin, backgroundWavelengthMax), wavelengthStep);
 
     // Unpack the results
@@ -90,31 +92,6 @@ public:
     AnalysisDataService::Instance().remove(toConvert->getName());
   }
 
-  void testIvsQ()
-  {
-    auto loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", "INTER13460_IvsLam.nxs");
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-
-    MatrixWorkspace_sptr toConvert = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("demo");
-
-    ReflectometryReductionOne alg;
-
-    auto instrument = toConvert->getInstrument();
-    auto detector = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>( instrument->getComponentByName("point-detector") );
-    auto sample = instrument->getComponentByName("some-surface-holder");
-
-    boost::optional<double> theta = 0.7;
-
-    MatrixWorkspace_const_sptr inQ = alg.toIvsQ(toConvert, true /*correct position*/,
-        true /*is point detector*/, theta, sample, detector);
-
-    TS_ASSERT_EQUALS("MomentumTransfer", inQ->getAxis(0)->unit()->unitID());
-
-    AnalysisDataService::Instance().remove(toConvert->getName());
-  }
 
 };
 

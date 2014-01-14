@@ -4,8 +4,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Logger.h"
-#include <iostream>
-#include <vector>
 
 namespace Mantid
 {
