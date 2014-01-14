@@ -44,7 +44,7 @@ namespace MantidQt
       // This allows the user NOT to select a workspace if there are any loaded into Mantid.
       m_uiForm.inputWorkspaceCb->insertItem("", 0);
 
-      // Display "investigationNumberCb" with the investigations that he user can publish to.
+      // Populate "investigationNumberCb" with the investigation IDs that the user can publish to.
       populateUserInvestigations();
 
       // Open a browsing dialog when the browse button is pressed.

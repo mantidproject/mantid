@@ -2085,7 +2085,7 @@ bool MantidUI::isValidCatalogLogin()
 }
 
 /**
- * Creates a publishing dialog GUI.
+ * Creates a publishing dialog GUI and runs the publishing algorithm when "Run" is pressed.
  */
 void MantidUI::catalogPublishDialog()
 {
