@@ -243,20 +243,8 @@ void MuonAnalysisResultTableTab::populateTables()
 
   if(fittedWsList.size() > 0)
   { 
-    // Make sure all params match.
-    QVector<QString> sameFittedWsList(fittedWsList);
-
-    // Clear the previous tables.
-    const int fittingRowCount(m_uiForm.fittingResultsTable->rowCount());
-    for (int i=0; i < fittingRowCount; ++i)
-	    m_uiForm.fittingResultsTable->removeRow(0);
-    const int logRowCount(m_uiForm.valueTable->rowCount());
-    for (int i=0; i < logRowCount; ++i)
-      m_uiForm.valueTable->removeRow(0);
-
     // Add number of rows  for the amount of fittings.
-    for(int i=0; i < sameFittedWsList.size(); ++i)
-      m_uiForm.fittingResultsTable->insertRow(m_uiForm.fittingResultsTable->rowCount() );
+    m_uiForm.fittingResultsTable->setRowCount(fittedWsList.size());
 
     // Add check boxes for the include column on fitting table, and make text uneditable.
     for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
@@ -268,8 +256,8 @@ void MuonAnalysisResultTableTab::populateTables()
     }
 
     // Populate the individual log values and fittings into their respective tables.
-    populateFittings(sameFittedWsList);
-    populateLogsAndValues(sameFittedWsList);    
+    populateFittings(fittedWsList);
+    populateLogsAndValues(fittedWsList);    
     
     // Add check boxes for the include column on log table, and make text uneditable.
     for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
@@ -433,8 +421,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
   }
   
   // Add number of rows to the table based on number of logs to display.
-  for (int i=0; i < logsToDisplay.size(); ++i)
-    m_uiForm.valueTable->insertRow(m_uiForm.valueTable->rowCount() );
+  m_uiForm.valueTable->setRowCount(logsToDisplay.size());
 
   // If there isn't enough rows in the table to populate all logs then display error message
   if(logsToDisplay.size() > m_uiForm.valueTable->rowCount())
