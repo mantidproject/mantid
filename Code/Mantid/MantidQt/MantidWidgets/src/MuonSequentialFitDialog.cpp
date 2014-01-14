@@ -385,6 +385,10 @@ namespace MantidWidgets
       ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
       ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
 
+      // Copy log values
+      auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
+      fitWs->copyExperimentInfoFrom(ws.get());
+
       // Add information about the fit to the diagnosis table
       addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"), functionToFit); 
 
