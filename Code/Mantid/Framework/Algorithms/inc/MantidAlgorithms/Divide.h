@@ -82,7 +82,7 @@ namespace Mantid
 
       std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 
-      bool m_beQuet;
+      bool m_warnOnZeroDivide;
 
     };
 
