@@ -361,7 +361,6 @@ def get_defaults(run_ws, pol_corr = False):
     defaults['MonitorBackgroundMax'] =float( instrument.getNumberParameter('MonitorBackgroundMax')[0] ) 
     defaults['MonitorIntegralMin'] =  float( instrument.getNumberParameter('MonitorIntegralMin')[0] )
     defaults['MonitorIntegralMax'] = float( instrument.getNumberParameter('MonitorIntegralMax')[0] )
-    defaults['MonitorsToCorrect'] = int( instrument.getNumberParameter('MonitorsToCorrect')[0] )
     defaults['PointDetectorStart'] =  int( instrument.getNumberParameter('PointDetectorStart')[0] )
     defaults['PointDetectorStop'] =  int( instrument.getNumberParameter('PointDetectorStop')[0] )
     defaults['MultiDetectorStart'] = int( instrument.getNumberParameter('MultiDetectorStart')[0] )
