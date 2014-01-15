@@ -299,9 +299,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Check parameters in workspace
-    MatrixWorkspace_sptr ws;
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    // Check parameters in workspace T
+    // The workspace is a workspace group with one member corresponding to the one bank in the IRF file
+    WorkspaceGroup_sptr gws;
+    gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
+    Workspace_sptr wsi = gws->getItem(0) ;
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
     Mantid::Geometry::ParameterMap& paramMap = ws->instrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getInstrument();
 
@@ -507,7 +510,7 @@ public:
 
 
   //----------------------------------------------------------------------------------------------
-  /** Generate a GEM workspace
+  /** Generate a GEM workspace group with one member
     */
   void load_GEM()
   {
@@ -519,9 +522,11 @@ public:
     wsName = "LoadFullprofResolutionWorkspace";
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
+    gws->addWorkspace( ws2D );
 
     //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, gws));
 
     // Path to test input file 
     loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");

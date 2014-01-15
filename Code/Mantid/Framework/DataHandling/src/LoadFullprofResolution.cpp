@@ -1,6 +1,7 @@
 /*WIKI* 
 
-Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instrument of a matrix workspace.
+Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instrument of a group of matrix workspaces with one workspace per bank of the .irf file.
+Either or both of the Tableworkspace(s) and matrix workspace must be set.
 
 *WIKI*/
 #include "MantidDataHandling/LoadFullprofResolution.h"
@@ -63,8 +64,8 @@ namespace DataHandling
     */
   void LoadFullprofResolution::initDocs()
   {
-    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s).");
-    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s).");
+    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) or the instruments in a group of matrix workspaces");
+    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) or the instruments in a group of matrix workspaces.");
 
     return;
   }
@@ -88,10 +89,9 @@ namespace DataHandling
     declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load. "
                     "Default is all banks contained in input .irf file.");
 
-    // declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
-
-    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut, PropertyMode::Optional),
-        "Optional: A matrix workspace with the instrument to which we add the parameters from the Fullprof .irf file.");
+    // Workspace to put parameters into. It must be a workspace group with one workpace per bank from the IRF file
+    declareProperty(new WorkspaceProperty<WorkspaceGroup>("Workspace","",Direction::InOut, PropertyMode::Optional),
+        "A workspace group with the instrument to which we add the parameters from the Fullprof .irf file with one workspace for each bank of the .irf file");
 
     return;
   }
@@ -104,7 +104,7 @@ namespace DataHandling
     // Get input
     string datafile = getProperty("Filename");
     vector<int> outputbankids = getProperty("Banks");
-    MatrixWorkspace_sptr workspace = getProperty("Workspace");
+    WorkspaceGroup_sptr wsg = getProperty("Workspace");
 
     // Import data
     vector<string> lines;
@@ -195,8 +195,10 @@ namespace DataHandling
 
 
     // If workspace, put parameters there
-    if(workspace)
-    {
+    if(wsg)
+    {   
+      Workspace_sptr wsi = wsg->getItem(0);
+      auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
       putParametersIntoWorkspace( outTabWs, workspace );
     } 
     else if( getPropertyValue("OutputTableWorkspace") == "")
