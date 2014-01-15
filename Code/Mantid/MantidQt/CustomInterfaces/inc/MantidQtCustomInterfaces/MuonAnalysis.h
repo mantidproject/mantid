@@ -326,11 +326,11 @@ private:
   Algorithm_sptr createLoadAlgorithm();
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
-  void plotSpectrum(const QString& wsName, const int wsIndex, bool logScale = false);
+  void plotSpectrum(const QString& wsName, bool logScale = false);
 
   /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
   /// something is not specified
-  QMap<QString, QString> getPlotStyleParams(const QString& wsName, const int wsIndex);
+  QMap<QString, QString> getPlotStyleParams(const QString& wsName);
 
   /// get period labels
   QStringList getPeriodLabels() const;

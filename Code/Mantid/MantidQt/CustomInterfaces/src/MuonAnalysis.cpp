@@ -388,7 +388,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
       hideAllPlotWindows();
 
     // Plot the workspace
-    plotSpectrum( wsNameQ, 0, (plotType == Logorithm) );
+    plotSpectrum( wsNameQ, (plotType == Logorithm) );
 
     setCurrentDataName( wsNameQ );
   }
@@ -2170,13 +2170,12 @@ QStringList MuonAnalysis::getPeriodLabels() const
 /**
  * plots specific WS spectrum (used by plotPair and plotGroup)
  * @param wsName   :: Workspace name
- * @param wsIndex  :: Workspace index
  * @param logScale :: Whether to plot using logarithmic scale
  */
-void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, bool logScale)
+void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
 {
     // Get plotting params
-    const QMap<QString, QString>& params = getPlotStyleParams(wsName, wsIndex);
+    const QMap<QString, QString>& params = getPlotStyleParams(wsName);
 
     QString pyS;
 
@@ -2185,17 +2184,17 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, bool l
 
     // If doesn't exist - plot it
     pyS += "if w == None:\n"
-           "  w = plotSpectrum('%1', %2, %3, %4)\n"
+           "  w = plotSpectrum('%1', 0, %2, %3)\n"
            "  w.setObjectName('%1')\n";
 
     // If plot does exist already, it should've just been updated automatically, so we just
     // need to make sure it is visible
     pyS += "else:\n"
-          "  plotSpectrum('%1', %2, %3, %4, window = w, clearWindow = True)\n"
+          "  plotSpectrum('%1', 0, %2, %3, window = w, clearWindow = True)\n"
           "  w.show()\n"
           "  w.setFocus()\n";
 
-    pyS = pyS.arg(wsName).arg(wsIndex).arg(params["ShowErrors"]).arg(params["ConnectType"]);
+    pyS = pyS.arg(wsName).arg(params["ShowErrors"]).arg(params["ConnectType"]);
   
     // Update titles
     pyS += "l = w.activeLayer()\n"
@@ -2223,14 +2222,12 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, bool l
 }
 
 /**
- * Get current plot style parameters. wsName and wsIndex are used to get default values if 
- * something is not specified.
+ * Get current plot style parameters. wsName is used to get default values. 
  * @param wsName Workspace plot of which we want to style
- * @param wsIndex Workspace index of the plot data
  * @return Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
            of possible keys
  */
-QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, const int wsIndex)
+QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName)
 {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
@@ -2247,7 +2244,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, c
     {
       Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
       MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-      const Mantid::MantidVec& dataY = matrix_workspace->readY(wsIndex);
+      const Mantid::MantidVec& dataY = matrix_workspace->readY(0);
 
       if(min.isEmpty())
         params["YAxisMin"] = QString::number(*min_element(dataY.begin(), dataY.end()));
@@ -2295,7 +2292,7 @@ void MuonAnalysis::selectMultiPeak(const QString& wsName)
   disableAllTools();
 
   if( ! plotExists(wsName) )
-    plotSpectrum(wsName, 0);
+    plotSpectrum(wsName);
 
   QString code;
 
@@ -3351,15 +3348,8 @@ void MuonAnalysis::updateCurrentPlotStyle()
 {
   if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE)
   {
-    // Get selected group index
-    int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
-
-    // Check if pair is selected
-    if(index >= numGroups())
-      index = 0;
-
     // Replot using new style params
-    plotSpectrum(m_currentDataName, index);
+    plotSpectrum(m_currentDataName);
   }
 }
 
