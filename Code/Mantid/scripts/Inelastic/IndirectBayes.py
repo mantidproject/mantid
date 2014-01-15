@@ -439,13 +439,13 @@ def C2Fw(prog,sname):
 	vAxisNames = []
 	x, y, e = [], [], []
 
-	names = ['Amplitude', 'Height', 'FWHM']
+	names = ['Amplitude', 'FWHM']
 	n_params = len(names)
 	nhist = 0
 
 	for nl in range(1,4):
 
-		nhist += nl*n_params
+		nhist += nl*n_params+1
 		
 		#read ASCII file output from Fortran code
 		file_name = sname + '.ql' +str(nl)
@@ -455,8 +455,8 @@ def C2Fw(prog,sname):
 		nspec = int(var[0])
 		first = 7
 
-		amplitude_data, height_data, width_data = [], [], []
-		amplitude_error, height_error, width_error  = [], [], []
+		amplitude_data, width_data = [], []
+		amplitude_error, width_error  = [], []
 		
 		for m in range(nspec):
 			first,Q,i0,fw,it = LorBlock(asc,first,nl)
@@ -465,16 +465,20 @@ def C2Fw(prog,sname):
 			#collect amplitude, height and width data
 			width_data += fw[:nl]
 			amplitude_data += it[:nl]
-			height_data += [i0[0] for i in range(nl)]
+			height = i0[0]
 				
 			#collect amplitude, height and width error data
 			width_error += fw[nl:nl+nl]
 			amplitude_error += it[nl:nl+nl]
-			height_error += [i0[1] for i in range(nl)]
+			height_e = i0[1]
 
-		y += amplitude_data + height_data + width_data
-		e += amplitude_error + height_error + width_error
+		height_data = [height for i in range(len(width_data)/nl)]
+		height_error = [height_e for i in range(len(width_data)/nl)]
 
+		y += height_data + amplitude_data + width_data
+		e += height_error + amplitude_error + width_error
+
+		vAxisNames.append('f'+str(nl)+'.f0.'+'Height')
 		for j in range(1, nl+1):
 			for name in names:
 				vAxisNames.append('f'+str(nl)+'.f'+str(j)+'.'+name)
