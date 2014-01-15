@@ -62,7 +62,7 @@ class DensityOfStates(PythonAlgorithm):
 
 			if self.specType == 'DOS' or self.specType == 'IR Active':
 
-				if len(irIntens) == 0:
+				if irIntens.size == 0:
 					raise ValueError("Could not load any IR intensities from file.")
 
 				self.computeDos(freqs, irIntens, weights)
@@ -73,7 +73,7 @@ class DensityOfStates(PythonAlgorithm):
 
 			elif self.specType == 'Raman Active':
 
-				if len(ramanIntens) == 0:
+				if ramanIntens.size == 0:
 					raise ValueError("Could not load any Raman intensities from file.")
 
 				self.computeRaman(freqs, ramanIntens, weights)
@@ -341,9 +341,9 @@ class DensityOfStates(PythonAlgorithm):
 								if data_item:
 									data_list.append(float(data_item))
 
-						freqs.append(block_freqs)
-						ir_intensities.append(block_ir)
-						raman_intensities.append(block_raman)
+						freqs.append(np.asarray(block_freqs))
+						ir_intensities.append(np.asarray(block_ir))
+						raman_intensities.append(np.asarray(block_raman))
 
 						prog_reporter.report("Reading intensities.")
 
@@ -439,8 +439,9 @@ class DensityOfStates(PythonAlgorithm):
 							#remove non-active intensities from data
 							intensities = []
 							for value, active in zip(intensity_data[::2], intensity_data[1::2]):
-								if active == 'N':	value = 0.0
-								intensities.append(value)
+								if self.specType == 'IR Active':
+									if active == 'N':	value = 0.0
+									intensities.append(value)
 
 							#append data to block lists
 							data_lists = (block_freqs, block_ir, block_raman)
@@ -450,9 +451,9 @@ class DensityOfStates(PythonAlgorithm):
 
 							line = f_handle.readline()
 
-						freqs.append(block_freqs)
-						ir_intensities.append(block_ir)
-						raman_intensities.append(block_raman)
+						freqs.append(np.array(block_freqs))
+						ir_intensities.append(np.array(block_ir))
+						raman_intensities.append(np.array(block_raman))
 
 						prog_reporter.report("Reading intensities.")
 
