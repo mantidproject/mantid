@@ -6,12 +6,18 @@
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include <fstream>
 #include <Poco/File.h>
 
 using Mantid::DataHandling::LoadFullprofResolution;
 
 using namespace Mantid;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -41,7 +47,7 @@ public:
 
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "1");
-    alg.setProperty("OutputWorkspace", "TestBank1Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank1Table");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -51,7 +57,7 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 28);
+    TS_ASSERT_EQUALS(outws->rowCount(), getExpectedNumberOfRows() );
 
     // 3. Verify name and value
     map<string, double> parammap;
@@ -87,7 +93,7 @@ public:
 
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "3");
-    alg.setProperty("OutputWorkspace", "TestBank3Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank3Table");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -97,7 +103,7 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 28);
+    TS_ASSERT_EQUALS(outws->rowCount(), getExpectedNumberOfRows());
 
     // 3. Verify name and value
     map<string, double> parammap;
@@ -132,7 +138,7 @@ public:
 
     // Set up
     alg.setProperty("Filename", filename);
-    alg.setProperty("OutputWorkspace", "TestBank4Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank4Table");
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -145,7 +151,7 @@ public:
 
     // Check table workspace size
     TS_ASSERT_EQUALS(outws->columnCount(), 3);
-    TS_ASSERT_EQUALS(outws->rowCount(), 28);
+    TS_ASSERT_EQUALS(outws->rowCount(), getExpectedNumberOfRows());
 
     // Verify value (including bank number)
     map<string, double> parammap1;
@@ -186,7 +192,7 @@ public:
 
     // Set up
     alg.setProperty("Filename", filename);
-    alg.setProperty("OutputWorkspace", "TestBank5Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank5Table");
     alg.setPropertyValue("Banks", "2-4");
 
     // Execute
@@ -200,7 +206,7 @@ public:
 
     // Check table workspace size
     TS_ASSERT_EQUALS(outws->columnCount(), 4);
-    TS_ASSERT_EQUALS(outws->rowCount(), 28);
+    TS_ASSERT_EQUALS(outws->rowCount(), getExpectedNumberOfRows());
 
     // Verify value
     map<string, double> parammap1;
@@ -233,7 +239,7 @@ public:
 
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "1");
-    alg.setProperty("OutputWorkspace", "TestAGSTable");
+    alg.setProperty("OutputTableWorkspace", "TestAGSTable");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -268,6 +274,168 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test that when the workspace property is used
+  **  that parameters are correctly loaded into this workspace
+  *   The GEM instrument is used
+  */
+  void test_workspace()
+  {
+    // Generate file
+    string filename("TestWorskpace.irf");
+    generate1BankIrfFile(filename);
+
+    // Load workspace wsName
+    load_GEM();
+
+    // Set up algorithm to load into the workspace
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Banks", "1");
+    alg.setProperty("Workspace", wsName);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check parameters in workspace
+    MatrixWorkspace_sptr ws;
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    Mantid::Geometry::ParameterMap& paramMap = ws->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr = ws->getInstrument();
+
+
+    Mantid::Geometry::Parameter_sptr alpha0Param = paramMap.get(&(*instr), "Alpha0", "fitting");
+    TS_ASSERT(alpha0Param);
+    if(alpha0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = alpha0Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.000008, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr beta0Param = paramMap.get(&(*instr), "Beta0", "fitting");
+    TS_ASSERT(beta0Param);
+    if(beta0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta0Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 6.251096, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr alpha1Param = paramMap.get(&(*instr), "Alpha1", "fitting");
+    TS_ASSERT(alpha1Param);
+    if(alpha1Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = alpha1Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.0, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr beta1Param = paramMap.get(&(*instr), "Kappa", "fitting");
+    TS_ASSERT(beta1Param);
+    if(beta0Param) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta1Param->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 0.0, 0.0000001);
+    }
+
+
+    boost::shared_ptr<const Mantid::Geometry::IComponent> bank = instr->getComponentByName("bank1");
+    Mantid::Geometry::Parameter_sptr sigmaSqParam = paramMap.get(&(*bank), "SigmaSquared", "fitting");
+    TS_ASSERT(sigmaSqParam);
+    if(sigmaSqParam) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = sigmaSqParam->value<Mantid::Geometry::FitParameter>();
+      double formulaValueCantreAt0 = fitParam.getValue( 0.0 );    // Value for centre=0.0
+      TS_ASSERT_DELTA( formulaValueCantreAt0, 0.355, 0.0000001);
+      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );  // Value for centre=10.0
+      TS_ASSERT_DELTA( formulaValueCantreAt10, 0.399, 0.0000001);
+    }
+
+    Mantid::Geometry::Parameter_sptr gammaParam = paramMap.get(&(*bank), "Gamma", "fitting");
+    TS_ASSERT(gammaParam);
+    if(gammaParam) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = gammaParam->value<Mantid::Geometry::FitParameter>();
+      double formulaValueCantreAt0 = fitParam.getValue( 0.0 );    // Value for centre=0.0
+      TS_ASSERT_DELTA( formulaValueCantreAt0, 0.0, 0.0000001);
+      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );  // Value for centre=10.0
+      TS_ASSERT_DELTA( formulaValueCantreAt10, 0.0, 0.0000001);
+    }
+
+    // Clean
+    Poco::File("TestWorskpace.irf").remove();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that algorithm does not run, 
+  *   if neither the OutputTableWorkspace nor Workspace
+  **  property is set.
+  */
+  void test_no_output()
+  {
+    // Generate file
+    string filename("TestNoOutput.irf");
+    generate1BankIrfFile(filename);
+
+    // Set up algorithm without specifying OutputTableWorkspace or Workspace
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Banks", "1");
+
+    // Execute and check that execution failed
+    alg.execute();
+    TS_ASSERT(!alg.isExecuted());
+
+    // Clean
+    Poco::File("TestNoOutput.irf").remove();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that the number from the NPROF is read correctly 
+  **  and has correct name in table.
+  */
+  void test_nprof()
+  {
+    // Generate file
+    string filename("TestNPROF.irf");
+    generate3BankIrfFile(filename);
+
+    // Init LoadFullprofResolution
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    // Set up
+    alg.setProperty("Filename", filename);
+    alg.setProperty("OutputTableWorkspace", "TestNPROFTable");
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve output
+    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    AnalysisDataService::Instance().retrieve("TestNPROFTable"));
+    TS_ASSERT(outws);
+
+    // Verify NPROF exists and has a value of 10 for first two banks
+    map<string, double> parammap1;
+    parseTableWorkspace(outws, parammap1);  // 1st bank
+    map<string, double> parammap2;
+    parseTableWorkspace2(outws, parammap2); // 2nd bank
+    TS_ASSERT_EQUALS(parammap1.count("NPROF"),1);
+    TS_ASSERT_DELTA(parammap1["NPROF"], 10.0, 0.0001);
+    TS_ASSERT_EQUALS(parammap2.count("NPROF"),1);
+    TS_ASSERT_DELTA(parammap2["NPROF"], 10.0, 0.0001);
+
+    // Clean
+    AnalysisDataService::Instance().remove("TestNPROFTable");
+    Poco::File("TestNPROF.irf").remove();
+    
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test Exception
     */
   void test_WrongInputBankCase()
@@ -282,7 +450,7 @@ public:
 
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "2");
-    alg.setProperty("OutputWorkspace", "TestBank3Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank3Table");
 
     alg.execute();
 
@@ -335,6 +503,33 @@ public:
     }
 
     return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate a GEM workspace
+    */
+  void load_GEM()
+  {
+    LoadInstrument loaderGEM;
+
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadFullprofResolutionWorkspace";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Path to test input file 
+    loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
+    //inputFile = loaderIDF2.getPropertyValue("Filename");
+    loaderGEM.setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
+    TS_ASSERT( loaderGEM.isExecuted() );
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -522,6 +717,16 @@ public:
 
     return;
   }
+
+  /* Return the number of rows the table must have
+  */
+  int getExpectedNumberOfRows()
+  {
+    return 29;  // Change this value if you add or remove any rows from the OutputTableWorkspace
+  }
+
+  private:
+  std::string wsName;  // For Workspace property
 
 };
 

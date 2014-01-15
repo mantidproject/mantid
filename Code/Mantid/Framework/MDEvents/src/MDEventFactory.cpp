@@ -338,7 +338,7 @@ namespace Mantid
         public:
             LOOP()
             {
-                LOOP::EXEC();
+                EXEC();
             }
             static inline void EXEC()
             {

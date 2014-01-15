@@ -45,6 +45,8 @@ namespace Mantid
       static bool isAscii(const std::string & filename, const size_t nbytes=256);
       /// Returns true if the stream is considered ascii
       static bool isAscii(std::istream & data, const size_t nbytes=256);
+      /// Returns true if the file is considered ascii
+      static bool isAscii(FILE* file, const size_t nbytes=256);
 
     public:
       /// Constructor accepting a filename

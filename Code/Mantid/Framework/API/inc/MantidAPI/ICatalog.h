@@ -50,7 +50,9 @@ public:
   /// logout from catalog
   virtual void logout()=0;
   ///Search investigations
-  virtual void search(const ICat::CatalogSearchParam&,ITableWorkspace_sptr &)=0;
+  virtual void search(const ICat::CatalogSearchParam&,ITableWorkspace_sptr&, const int &offset,const int &limit)=0;
+  /// Obtain the number of results returned by the search method.
+  virtual int64_t getNumberOfSearchResults(const ICat::CatalogSearchParam&)=0;
   /// search logged in users data
   virtual void myData(ITableWorkspace_sptr &)=0;
   /// get datasets.
@@ -65,6 +67,8 @@ public:
   virtual void getFileLocation(const long long&,std::string& )=0;
   /// get URLs of the files
   virtual void getDownloadURL(const long long& fileid,std::string&)=0;
+  /// get URL of where to PUT (publish) files.
+  virtual const std::string getUploadURL(const std::string &fileName, const std::string &dataFileName)=0;
   /// keep alive
   virtual void keepAlive()=0;
   ///keep alive in minutes

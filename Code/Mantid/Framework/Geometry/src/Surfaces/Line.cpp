@@ -8,6 +8,7 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Tolerance.h"
+#include <iostream>
 
 namespace Mantid
 {

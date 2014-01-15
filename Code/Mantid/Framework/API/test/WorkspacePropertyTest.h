@@ -257,6 +257,34 @@ public:
 
   }
 
+  void test_storing_workspace_name_assing()
+  {
+      Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1);
+      AnalysisDataService::Instance().add("space1", ws1);
+      WorkspaceProperty<Workspace> p1("workspace1","",Direction::Input);
+      p1 = ws1;
+      TS_ASSERT_EQUALS( p1.value(), "space1" );
+      AnalysisDataService::Instance().clear();
+  }
+
+  void test_storing_workspace_name_setDataItem()
+  {
+      Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1);
+      AnalysisDataService::Instance().add("space1", ws1);
+      WorkspaceProperty<Workspace> p1("workspace1","",Direction::Input);
+      p1.setDataItem( ws1 );
+      TS_ASSERT_EQUALS( p1.value(), "space1" );
+      AnalysisDataService::Instance().clear();
+  }
+
+  void test_not_storing_workspace_name()
+  {
+      Workspace_sptr ws1 = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1);
+      WorkspaceProperty<Workspace> p1("workspace1","",Direction::Input);
+      p1 = ws1;
+      TS_ASSERT_EQUALS( p1.value(), "" );
+  }
+
 private:
   WorkspaceProperty<Workspace> *wsp1;
   WorkspaceProperty<Workspace> *wsp2;

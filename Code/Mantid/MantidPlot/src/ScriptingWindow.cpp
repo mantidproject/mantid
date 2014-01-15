@@ -9,6 +9,7 @@
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "ApplicationWindow.h"
 
 // MantidQt
@@ -27,6 +28,8 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QTextStream>
+#include <QList>
+#include <QUrl>
 
 //-------------------------------------------
 // Public member functions
@@ -38,10 +41,11 @@
  * @param flags :: Window flags passed to the base class
  */
 ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint, QWidget *parent, Qt::WindowFlags flags) :
-  QMainWindow(parent, flags), m_acceptClose(false)
+  QMainWindow(parent, flags), m_acceptClose(false),g_log(Mantid::Kernel::Logger::get("ScriptingWindow"))
 {
   Q_UNUSED(capturePrint);
   setObjectName("MantidScriptWindow");
+  setAcceptDrops(true);
 
   // Sub-widgets
   m_manager = new MultiTabScriptInterpreter(env, this);
@@ -156,6 +160,7 @@ void ScriptingWindow::showEvent(QShowEvent *event)
  */
 void ScriptingWindow::open(const QString & filename, bool newtab)
 {
+  std::string file = filename.toStdString();
   m_manager->open(newtab, filename);
 }
 
@@ -581,4 +586,75 @@ void ScriptingWindow::customEvent(QEvent *event)
     ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent*>(event);
     setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() + " Window");
   }
+}
+
+
+/**
+ * Accept a drag move event and selects whether to accept the action
+ * @param de :: The drag move event
+ */
+void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData();  
+  if (mimeData->hasUrls())
+  {
+    if (extractPyFiles(mimeData->urls()).size() > 0)
+    {
+      de->accept();
+    }
+  }
+}
+ 
+/**
+ * Accept a drag enter event and selects whether to accept the action
+ * @param de :: The drag enter event
+ */
+void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData();  
+  if (mimeData->hasUrls())
+  {
+    if (extractPyFiles(mimeData->urls()).size() > 0)
+    {
+      de->acceptProposedAction();
+    }
+  }
+}
+ 
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void ScriptingWindow::dropEvent(QDropEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData();  
+  if (mimeData->hasUrls()) 
+  {
+    QStringList filenames = extractPyFiles(mimeData->urls());
+    de->acceptProposedAction();
+
+    for (int i = 0; i < filenames.size(); ++i) 
+    {
+      m_manager->openInNewTab(filenames[i]);
+    }
+  }
+}
+
+QStringList ScriptingWindow::extractPyFiles(const QList<QUrl>& urlList) const
+{
+  QStringList filenames;
+  for (int i = 0; i < urlList.size(); ++i) 
+  {
+    QString fName = urlList[i].toLocalFile();
+    if (fName.size()>0)
+    {
+      QFileInfo fi(fName);
+      
+      if (fi.suffix().upper()=="PY")
+      {
+        filenames.append(fName);
+      }
+    }
+  }
+  return filenames;
 }

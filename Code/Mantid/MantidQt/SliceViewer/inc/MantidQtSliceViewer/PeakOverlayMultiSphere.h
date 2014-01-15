@@ -82,6 +82,13 @@ namespace SliceViewer
     virtual bool positionOnly() const;
     /// Get the radius of the peak objects.
     virtual double getRadius() const;
+    /// Determine if the background radius is shown.
+    virtual bool isBackgroundShown() const;
+    /// Get the current background colour
+    virtual QColor getBackgroundColour() const;
+    /// Get the current foreground colour
+    virtual QColor getForegroundColour() const;
+
   private:
 
     //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
@@ -102,6 +109,8 @@ namespace SliceViewer
     QColor m_backColour;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
+    /// Show the background radius.
+    bool m_showBackground;
   };
 
 

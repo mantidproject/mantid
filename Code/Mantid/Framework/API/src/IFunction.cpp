@@ -167,7 +167,7 @@ std::string IFunction::asString()const
   {
     std::string attName = attr[i];
     std::string attValue = this->getAttribute(attr[i]).value();
-    if (!attValue.empty())
+    if (!attValue.empty() && attValue != "\"\"" )
     {
       ostr<<','<<attName<<'='<<attValue;
     }
@@ -415,6 +415,9 @@ std::string IFunction::Attribute::asQuotedString()const
     throw std::runtime_error("Trying to access a "+type()+" attribute "
       "as string");
   }
+
+  if ( attr.empty() ) return "\"\"";
+
   std::string quoted(attr);
   if( *(attr.begin()) != '\"' ) quoted = "\"" + attr;
   if( *(quoted.end() - 1) != '\"' ) quoted += "\"";
@@ -1090,6 +1093,29 @@ size_t IFunction::nAttributes() const
 bool IFunction::hasAttribute(const std::string& name)const
 {
     return m_attrs.find(name) != m_attrs.end();
+}
+
+/**
+  * Overload for const char* values.
+  * @param attName :: Attribute name
+  * @param value :: New attribute value to set
+  */
+void IFunction::setAttributeValue(const std::string &attName, const char *value)
+{
+    std::string str(value);
+    setAttributeValue( attName, str );
+}
+
+/**
+  * Set string attribute by value. Make sure that quoted style doesn't change.
+  * @param attName :: Attribute name
+  * @param value :: New attribute value to set
+  */
+void IFunction::setAttributeValue(const std::string &attName, const std::string &value)
+{
+    Attribute att = getAttribute(attName);
+    att.setString(value);
+    setAttribute( attName, att );
 }
 
 /// Returns a list of attribute names

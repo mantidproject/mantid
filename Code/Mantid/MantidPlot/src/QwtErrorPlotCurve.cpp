@@ -90,9 +90,9 @@ void QwtErrorPlotCurve::drawErrorBars(QPainter *painter, const QwtScaleMap &xMap
   double d_xOffset = 0.0;
   double d_yOffset = 0.0;
   if (d_master_curve->type() == Graph::VerticalBars)
-    d_xOffset = ((QwtBarCurve *) d_master_curve)->dataOffset();
+    d_xOffset = (static_cast<QwtBarCurve *>(d_master_curve))->dataOffset();
   else if (d_master_curve->type() == Graph::HorizontalBars)
-    d_yOffset = ((QwtBarCurve *) d_master_curve)->dataOffset();
+    d_yOffset = (static_cast<QwtBarCurve *>(d_master_curve))->dataOffset();
 
   int skipPoints = d_master_curve->skipSymbolsCount();
 
@@ -272,7 +272,7 @@ void QwtErrorPlotCurve::loadData()
   int r = abs(d_end_row - d_start_row) + 1;
   QVector<double> X(r), Y(r), err(r);
   int data_size = 0;
-  QLocale locale = ((Plot *) plot())->locale();
+  QLocale locale = (static_cast<Plot *>(plot()))->locale();
   for (int i = d_start_row; i <= d_end_row; i++)
   {
     QString xval = mt->text(i, xcol);

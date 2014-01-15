@@ -69,11 +69,10 @@ void InvertMDDim::recurseDim(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr
 {
 	boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(currentDim);
 	if(currentDim == rank - 1) {
-		unsigned int inIDX, outIDX;
 		for(int i = 0; i < static_cast<int>(dimi->getNBins()); i++){
 			idx[currentDim] = i;
-			inIDX = calcIndex(inWS,idx);
-			outIDX = calcInvertedIndex(outWS,idx);
+			unsigned int inIDX = calcIndex(inWS,idx);
+			unsigned int outIDX = calcInvertedIndex(outWS,idx);
 			outWS->setSignalAt(outIDX,inWS->signalAt(inIDX));
 			outWS->setErrorSquaredAt(outIDX,inWS->errorSquaredAt(inIDX));
 		}

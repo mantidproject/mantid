@@ -331,17 +331,22 @@ namespace Algorithms
     // Loop over the spectra - there will be one per monitor
     for ( std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms(); ++spec )
     {
-      // Create a column for this monitor
-      const std::string monitorName = monitorWorkspace->getDetector(spec)->getName();
-      auto monitorCounts = outputWorkspace->addColumn("int",monitorName);
-      const IEventList & eventList = monitorWorkspace->getEventList(spec);
-      // Accumulate things in a local vector before transferring to the table workspace
-      std::vector<int> Y(xLength);
-      filterEventList(eventList, minVal, maxVal, log, Y);
-      // Transfer the results to the table
-      for ( int i = 0; i < xLength; ++i )
-      {
-        monitorCounts->cell<int>(i) = Y[i];
+      try {
+        // Create a column for this monitor
+        const std::string monitorName = monitorWorkspace->getDetector(spec)->getName();
+        auto monitorCounts = outputWorkspace->addColumn("int",monitorName);
+        const IEventList & eventList = monitorWorkspace->getEventList(spec);
+        // Accumulate things in a local vector before transferring to the table workspace
+        std::vector<int> Y(xLength);
+        filterEventList(eventList, minVal, maxVal, log, Y);
+        // Transfer the results to the table
+        for ( int i = 0; i < xLength; ++i )
+        {
+          monitorCounts->cell<int>(i) = Y[i];
+        }
+      } catch (Exception::NotFoundError&) {
+        // ADARA-generated nexus files have sometimes been seen to contain 'phantom' monitors that aren't in the IDF.
+        // This handles that by ignoring those spectra.
       }
     }
   }

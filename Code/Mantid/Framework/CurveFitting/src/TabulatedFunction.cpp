@@ -22,22 +22,34 @@ using namespace API;
 
 DECLARE_FUNCTION(TabulatedFunction)
 
+const int TabulatedFunction::defaultIndexValue = 0;
+
 /// Constructor
 TabulatedFunction::TabulatedFunction():
-m_xStart(0),m_xEnd(0)
+    m_setupFinished(false)
 {
   declareParameter("Scaling",1.0,"A scaling factor");
+  declareAttribute("FileName", Attribute("", true));
+  declareAttribute("Workspace", Attribute(""));
+  declareAttribute("WorkspaceIndex", Attribute(defaultIndexValue));
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
 void TabulatedFunction::eval(double scaling, double* out, const double* xValues, const size_t nData)const
 {
-  if (nData == 0 || size() == 0) return;
+  if (nData == 0) return;
 
-  if (m_xStart >= xValues[nData-1] || m_xEnd <= xValues[0]) return;
+  setupData();
+
+  if (size() == 0) return;
+
+  const double xStart = m_xData.front();
+  const double xEnd = m_xData.back();
+
+  if (xStart >= xValues[nData-1] || xEnd <= xValues[0]) return;
 
   size_t i = 0;
-  while(i < nData - 1 && xValues[i] < m_xStart)
+  while(i < nData - 1 && xValues[i] < xStart)
   {
     out[i] = 0;
     i++;
@@ -108,23 +120,11 @@ void TabulatedFunction::functionDeriv1D(API::Jacobian* out, const double* xValue
 
 
 /// Clear all data
-void TabulatedFunction::clear()
+void TabulatedFunction::clear() const
 {
-  m_fileName.clear();
-  m_wsName.clear();
   m_xData.clear();
   m_yData.clear();
-  m_xStart = 0;
-  m_xEnd = 0;
-}
-
-/// Returns a list of attribute names
-std::vector<std::string> TabulatedFunction::getAttributeNames()const
-{
-  std::vector<std::string> res(2);
-  res[0] = "FileName";
-  res[1] = "Workspace";
-  return res;
+  m_setupFinished = false;
 }
 
 /** Set a value to attribute attName
@@ -133,137 +133,58 @@ std::vector<std::string> TabulatedFunction::getAttributeNames()const
  */
 void TabulatedFunction::setAttribute(const std::string& attName,const IFunction::Attribute& value)
 {
-  std::string aName( attName );
-  std::transform(aName.begin(),aName.end(),aName.begin(),toupper);
-  if (aName == "FILENAME")
+  if (attName == "FileName")
   {
     std::string fileName = value.asUnquotedString();
     FileValidator fval;
     std::string error = fval.isValid(fileName);
     if (error == "")
     {
-      m_fileName = fileName;
-      m_wsName.clear();
+        storeAttributeValue(attName, Attribute(fileName,true));
+        storeAttributeValue("Workspace", Attribute(""));
     }
     else
     {
-      return; // allow initialization with invalid attribute (for editing)
+        // file not found
+        throw Kernel::Exception::FileError( error, fileName );
     }
-    load(m_fileName);
+    load(fileName);
   }
-  else if (aName == "WORKSPACE") 
+  else if (attName == "Workspace")
   {
+    storeAttributeValue( attName, value );
+    storeAttributeValue( "FileName", Attribute("",true));
     loadWorkspace( value.asString() );
   }
   else
   {
     IFunction::setAttribute(attName,value);
+    m_setupFinished = false;
   }
-}
-
-/// Return a value of attribute attName
-IFunction::Attribute TabulatedFunction::getAttribute(const std::string& attName)const
-{
-  std::string aName( attName );
-  std::transform(aName.begin(),aName.end(),aName.begin(),toupper);
-  if ( aName == "FILENAME" )
-  {
-    return Attribute( m_fileName, true );
-  }
-  else if ( aName == "WORKSPACE" )
-  {
-    return Attribute( m_wsName );
-  }
-  return IFunction::getAttribute( attName );
-}
-
-/**
- * Check if attribute attName exists
- * @param attName :: A name to check.
- */
-bool TabulatedFunction::hasAttribute(const std::string& attName)const
-{
-  std::string aName( attName );
-  std::transform(aName.begin(),aName.end(),aName.begin(),toupper);
-  return aName == "FILENAME" || aName == "WORKSPACE";
-}
-
-/**
- * Decide whether to load the file as an ASCII file or as a Nexus file.
- * @param fname :: The file name
- */
-void TabulatedFunction::load(const std::string& fname)
-{
-  m_xData.clear();
-  m_yData.clear();
-
-  size_t format = fname.find(".nxs");
-  if ( format != std::string::npos )
-  {
-    loadNexus(fname);
-  }
-  else
-  {
-    loadAscii(fname);
-  }
-
-}
-
-/**
- * Load input file as an Ascii file.
- * @param fname :: The file name
- */
-void TabulatedFunction::loadAscii(const std::string& fname)
-{
-  std::ifstream fil(fname.c_str());
-  std::string str;
-
-  while(getline(fil,str))
-  {
-    str += ' ';
-    std::istringstream istr(str);
-    double x,y;
-    istr >> x >> y;
-    if (!istr.good())
-    {
-      break;
-    }
-    m_xData.push_back(x);
-    m_yData.push_back(y);
-  }
-
-  if (m_xData.size() < 2)
-  {
-    m_xData.clear();
-    m_yData.clear();
-    throw std::runtime_error("TabulatedFunction: too few data points");
-  }
-  m_xStart = m_xData.front();
-  m_xEnd   = m_xData.back();
 }
 
 /**
  * Load input file as a Nexus file.
  * @param fname :: The file name
  */
-void TabulatedFunction::loadNexus(const std::string& fname)
+void TabulatedFunction::load(const std::string& fname)
 {
-  IAlgorithm_sptr loadNxs = Mantid::API::AlgorithmFactory::Instance().create("LoadNexus", -1);
-  loadNxs->initialize();
-  loadNxs->setChild(true);
-  loadNxs->setLogging(false);
+  IAlgorithm_sptr loadAlg = Mantid::API::AlgorithmFactory::Instance().create("Load", -1);
+  loadAlg->initialize();
+  loadAlg->setChild(true);
+  loadAlg->setLogging(false);
   try
   {
-    loadNxs->setPropertyValue("Filename", fname);
-    loadNxs->setPropertyValue("OutputWorkspace", "_TabulatedFunction_fit_data_");
-    loadNxs->execute();
+    loadAlg->setPropertyValue("Filename", fname);
+    loadAlg->setPropertyValue("OutputWorkspace", "_TabulatedFunction_fit_data_");
+    loadAlg->execute();
   }
   catch ( std::runtime_error & )
   {
     throw std::runtime_error("Unable to load Nexus file for TabulatedFunction function.");
   }
   
-  Workspace_sptr ws = loadNxs->getProperty("OutputWorkspace");
+  Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr resData = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
   loadWorkspace( resData );
   
@@ -273,43 +194,63 @@ void TabulatedFunction::loadNexus(const std::string& fname)
  * Load the points from a MatrixWorkspace
  * @param wsName :: The workspace to load from
  */
-void TabulatedFunction::loadWorkspace(const std::string& wsName)
+void TabulatedFunction::loadWorkspace(const std::string& wsName) const
 {
-  try
-  {
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>( wsName );
     loadWorkspace( ws );
-    m_wsName = wsName;
-    m_fileName.clear();
-  }
-  catch( ... )
-  {
-    g_log.error() << "Workspace " << wsName << " not found \n";
-    clear();
-  }
 }
 
 /**
  * Load the points from a MatrixWorkspace
  * @param ws :: The workspace to load from
  */
-void TabulatedFunction::loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws)
+void TabulatedFunction::loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) const
 {
-  const bool hist = ws->isHistogramData();
-  const size_t nbins = ws->blocksize();
-
-  for ( size_t i = 0; i < nbins; i++ )
-  {
-    double x = 0.0;
-    m_yData.push_back(ws->readY(0)[i]);
-    if ( hist ) x = ( ws->readX(0)[i] + ws->readX(0)[i+1] ) / 2;
-    else x = ws->readX(0)[i];
-    m_xData.push_back( x );
-  }
-  m_xStart = m_xData.front();
-  m_xEnd   = m_xData.back();
+  m_workspace = ws;
+  m_setupFinished = false;
 }
 
+/**
+  * Fill in the x and y value containers (m_xData and m_yData)
+  */
+void TabulatedFunction::setupData() const
+{
+    if ( m_setupFinished )
+    {
+        g_log.debug() << "Re-setting isn't required.";
+        return;
+    }
+
+    if ( !m_workspace )
+    {
+        std::string wsName = getAttribute("Workspace").asString();
+        if ( wsName.empty() ) throw std::invalid_argument("Data not set for function " + this->name());
+        else
+            loadWorkspace( wsName );
+    }
+
+    size_t index = static_cast<size_t>(getAttribute("WorkspaceIndex").asInt());
+
+    g_log.debug() << "Setting up " << m_workspace->name() << " index " << index << std::endl;
+
+    const bool hist = m_workspace->isHistogramData();
+    const size_t nbins = m_workspace->blocksize();
+    m_xData.resize(nbins);
+    m_yData.resize(nbins);
+
+    for ( size_t i = 0; i < nbins; i++ )
+    {
+      double x = 0.0;
+      m_yData[i] = m_workspace->readY(index)[i];
+      auto &xvec = m_workspace->readX(index);
+      if ( hist ) x = ( xvec[i] + xvec[i+1] ) / 2;
+      else x = xvec[i];
+      m_xData[i] = x;
+    }
+
+    m_workspace.reset();
+    m_setupFinished = true;
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

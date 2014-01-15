@@ -338,8 +338,7 @@ void LoadNexusMonitors::exec()
   file.openData("name");
   instrumentName = file.getStrData();
   g_log.debug() << "Instrument name read from NeXus file is " << instrumentName << std::endl;
-  if (instrumentName.compare("POWGEN3") == 0) // hack for powgen b/c of bad long name
-          instrumentName = "POWGEN";
+
   // Now let's close the file as we don't need it anymore to load the instrument.
   file.closeData();
   file.closeGroup(); // Close the NXentry

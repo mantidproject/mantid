@@ -30,8 +30,7 @@
 #define IMAGEMARKER_H
 
 #include <qwt_plot.h>
-#include "PlotEnrichement.h"
-
+#include <qwt_plot_marker.h>
 #include <QPixmap>
 
 /**\brief Draw images on a QwtPlot.
@@ -61,7 +60,7 @@
  *
  * \sa Legend, ArrowMarker
  */
-class ImageMarker: public PlotEnrichement
+class ImageMarker : public QwtPlotMarker
 {
 public:
 	//! Construct an image marker from a file name.
@@ -107,18 +106,13 @@ public:
 private:
 	//! Does the actual drawing; see QwtPlotItem::draw.
 	void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &r) const;
-    //! The position in paint coordiantes.
-	QPoint d_pos;
-	//! The pixmap to be drawn.
-	QPixmap d_pic;
-	//! The size (in paint coordinates) to which #d_pic will be scaled in draw().
-	QSize d_size;
-	//! The file from which the image was loaded.
-	QString d_file_name;
-	//! The right side position in scale coordinates.
-	double d_x_right;
-    //! The bottom side position in scale coordinates.
-    double d_y_bottom;
+    
+	QPoint d_pos;         //!< The position in paint coordinates.
+	QPixmap d_pic;        //!< The pixmap to be drawn.
+	QSize d_size;         //!< The size (in paint coordinates) to which #d_pic will be scaled in draw().
+	QString d_file_name;  //!< The file from which the image was loaded.
+	double d_x_right;     //!< The right side position in scale coordinates.
+  double d_y_bottom;    //!< The bottom side position in scale coordinates.
 };
 
 #endif

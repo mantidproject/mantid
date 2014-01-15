@@ -58,12 +58,15 @@ namespace DataHandling
     /// Load file to a vector of strings
     void loadFile(std::string filename, std::vector<std::string>& lines);
 
+    /// Get the NPROF number
+    int getProfNumber(const std::vector<std::string>& lines);
+
     /// Scan imported file for bank information
     void scanBanks(const std::vector<std::string>& lines, std::vector<int>& banks,
                    std::map<int, int> &bankstartindexmap, std::map<int, int> &bankendindexmap);
 
     /// Parse .irf file to a map
-    void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, int bankid, int startlineindex, int endlineindex);
+    void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, int bankid, int startlineindex, int endlineindex, int nProf);
     
     void parseBankLine(std::string line, double& cwl, int& bankid);
 
@@ -81,6 +84,30 @@ namespace DataHandling
 
     /// Generate bank information workspace
     DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
+
+    /// Put parameters into a metrix workspace
+    void putParametersIntoWorkspace( const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws);
+
+     /// Add an ALFBE parameter 
+    void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
+
+    /// Add set of Sigma parameters 
+    void addSigmaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of Gamma parameters 
+    void addGammaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Get value for XML eq attribute for parameter
+    std::string getXMLEqValue( const API::Column_const_sptr, const std::string& name );
+
+    // Translate a parameter name from as it appears in the table workspace to its name in the XML file
+    std::string getXMLParameterName( const std::string& name );
+
+    /// Get row numbers of the parameters in the table workspace
+    void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);
+
+    /// Place to store the row numbers
+    std::map<std::string, size_t> m_rowNumbers;
 
   };
 

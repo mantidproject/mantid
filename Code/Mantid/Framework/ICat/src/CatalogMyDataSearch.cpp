@@ -35,18 +35,8 @@ namespace Mantid
     void CatalogMyDataSearch::exec()
     {
       // Create and use the catalog the user has specified in Facilities.xml
-      ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
-
-      API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      try
-      {
-        catalog->myData(outputws);
-      }
-      catch(std::runtime_error&)
-      {
-        setProperty("IsValid",false);
-        throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
-      }
+      auto outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      CatalogAlgorithmHelper().createCatalog()->myData(outputws);
       setProperty("OutputWorkspace",outputws);
     }
   }

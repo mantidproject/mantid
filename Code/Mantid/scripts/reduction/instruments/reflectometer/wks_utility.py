@@ -1997,10 +1997,18 @@ def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
     sz = final_data_y_axis.shape
     nbrTof = sz[0]
     
+    notYetRemoved = True;
+    
     for t in range(nbrTof):
             
         _data = final_data_y_axis[t]
         _error = final_data_y_error_axis[t]
+
+        if _data > 0 and notYetRemoved:
+            notYetRemoved = False
+            final_data_y_axis[t] = 0
+            final_data_y_error_axis[t] = 1
+            continue
             
         # if error is > value, remove point
         if abs(_error) >= abs(_data):

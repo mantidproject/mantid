@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <MantidKernel/Timer.h>
 #include <MantidKernel/System.h>
+#include <boost/make_shared.hpp>
 #include <iostream>
 #include <iomanip>
 
@@ -22,7 +23,7 @@ public:
   class TaskWithMutex : public Task
   {
   public:
-    TaskWithMutex(Mutex * mutex, double cost)
+    TaskWithMutex(boost::shared_ptr<Mutex> mutex, double cost)
     {
       m_mutex = mutex;
       m_cost = cost;
@@ -30,7 +31,9 @@ public:
 
     /// Count # of times destructed in the destructor
     ~TaskWithMutex()
-    {ThreadSchedulerMutexesTest_timesDeleted++;}
+    {
+      ThreadSchedulerMutexesTest_timesDeleted++;
+    }
 
     void run()
     {
@@ -42,8 +45,8 @@ public:
   void test_push()
   {
     ThreadSchedulerMutexes sc;
-    Mutex * mut1 = new Mutex();
-    Mutex * mut2 = new Mutex();
+    auto mut1 = boost::make_shared<Mutex>();
+    auto mut2 = boost::make_shared<Mutex>();
     TaskWithMutex * task1 = new TaskWithMutex(mut1, 10.0);
     TaskWithMutex * task2 = new TaskWithMutex(mut2,  9.0);
 
@@ -56,16 +59,16 @@ public:
   void test_queue()
   {
     ThreadSchedulerMutexes sc;
-    Mutex * mut1 = new Mutex();
-    Mutex * mut2 = new Mutex();
-    Mutex * mut3 = new Mutex();
+    auto mut1 = boost::make_shared<Mutex>();
+    auto mut2 = boost::make_shared<Mutex>();
+    auto mut3 = boost::make_shared<Mutex>();
     TaskWithMutex * task1 = new TaskWithMutex(mut1, 10.0);
     TaskWithMutex * task2 = new TaskWithMutex(mut1,  9.0);
     TaskWithMutex * task3 = new TaskWithMutex(mut1,  8.0);
     TaskWithMutex * task4 = new TaskWithMutex(mut2,  7.0);
     TaskWithMutex * task5 = new TaskWithMutex(mut2,  6.0);
     TaskWithMutex * task6 = new TaskWithMutex(mut3,  5.0);
-    TaskWithMutex * task7 = new TaskWithMutex(NULL,  4.0);
+    TaskWithMutex * task7 = new TaskWithMutex(boost::shared_ptr<Mutex>(),  4.0);
     sc.push(task1);
     sc.push(task2);
     sc.push(task3);
@@ -115,7 +118,6 @@ public:
     TS_ASSERT_EQUALS( task, task5 );
     TS_ASSERT_EQUALS( sc.size(), 0 );
     // (for this task, the thread pool would have to wait till the mutex is released)
-
   }
 
   void test_clear()
@@ -123,7 +125,7 @@ public:
     ThreadSchedulerMutexes sc;
     for (size_t i=0; i<10; i++)
     {
-      TaskWithMutex * task = new TaskWithMutex(new Mutex(), 10.0);
+      TaskWithMutex * task = new TaskWithMutex(boost::make_shared<Mutex>(), 10.0);
       sc.push(task);
     }
     TS_ASSERT_EQUALS(sc.size(), 10);
@@ -138,7 +140,7 @@ public:
   {
     ThreadSchedulerMutexes sc;
     Timer tim0;
-    Mutex * mut1 = new Mutex();
+    auto mut1 = boost::make_shared<Mutex>();
     size_t num = 500;
     for (size_t i=0; i < num; i++)
     {
@@ -150,7 +152,7 @@ public:
     Timer tim1;
     for (size_t i=0; i < num; i++)
     {
-      sc.pop(0);
+      delete sc.pop(0);
     }
     //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), 0);
@@ -163,7 +165,7 @@ public:
     size_t num = 500;
     for (size_t i=0; i < num; i++)
     {
-      sc.push(new TaskWithMutex(new Mutex(), 10.0));
+      sc.push(new TaskWithMutex(boost::make_shared<Mutex>(), 10.0));
     }
     //std::cout << tim0.elapsed() << " secs to push." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), num);
@@ -171,7 +173,7 @@ public:
     Timer tim1;
     for (size_t i=0; i < num; i++)
     {
-      sc.pop(0);
+      delete sc.pop(0);
     }
     //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
     TS_ASSERT_EQUALS( sc.size(), 0);

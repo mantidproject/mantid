@@ -181,39 +181,8 @@ namespace Mantid
       //   g_log.error("Unable to successfully run LoadMuonNexus Child Algorithm");
       //  }
       if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus2 Child Algorithm");
-      // Get pointer to the workspace created
-      //  m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
-      //  setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
-      Workspace_sptr localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
-      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-      //
-      // copy pointers to any new output workspaces created by alg LoadMuonNexus to alg LoadNexus
-      // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
-      // until name not found
-      //
 
-      int period=0;
-      bool noError=true;
-      while(noError)
-      {
-        std::stringstream suffix;
-        //period++;
-        suffix << (period+1);
-        std::string opWS = outputWorkspace + "_"+suffix.str();
-        std::string WSName = m_workspace + "_" + suffix.str();
-        try
-        {
-          Workspace_sptr localWorkspace = loadMuonNexus->getProperty(opWS);
-          declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
-          setProperty<Workspace_sptr>(opWS, localWorkspace);
-          period++;
-        }
-        catch (Exception::NotFoundError&)
-        {
-          noError=false;
-        }
-      }
-
+      setOutputWorkspace(loadMuonNexus);
     }
 
     void LoadNexus::runLoadNexusProcessed()
@@ -224,9 +193,9 @@ namespace Mantid
       // Set the workspace property
       loadNexusPro->setPropertyValue("OutputWorkspace",m_workspace);
 
-	  loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
-	  loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
-	  loadNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
+      loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
+      loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
+      loadNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
 
 	
       /* !!! The spectrum min/max/list properties are currently missing from LoadNexus
@@ -252,35 +221,8 @@ namespace Mantid
       // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       loadNexusPro->execute();
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadNexusProcessed Child Algorithm");
-      // Get pointer to the workspace created
-      Workspace_sptr localworkspace=loadNexusPro->getProperty("OutputWorkspace");
-      setProperty<Workspace_sptr>("OutputWorkspace",localworkspace); 
-      //
-      // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
-      // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
-      // until name not found.
-      // At moment do not expect LoadNexusProcessed to return multiperiod data.
-      //
-      int period=0;
-      bool noError=true;
-      while(noError)
-      {
-        std::stringstream suffix;
-        suffix << (period+1);
-        std::string opWS = "OutputWorkspace_"+ suffix.str();
-        std::string WSName = m_workspace + "_" + suffix.str();
-        try
-        {
-          Workspace_sptr localWorkspace = loadNexusPro->getProperty(opWS); 
-          declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
-          setProperty<Workspace_sptr>(opWS, localWorkspace);
-          period++;
-        }
-        catch (Exception::NotFoundError&)
-        {
-          noError=false;
-        }
-      }
+
+      setOutputWorkspace(loadNexusPro);
     }
 
     void LoadNexus::runLoadIsisNexus()
@@ -307,34 +249,8 @@ namespace Mantid
       loadNexusPro->execute();
 
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadISISNexus Child Algorithm");
-      // Get pointer to the workspace created
-      Workspace_sptr localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
-      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-      //
-      // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
-      // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
-      // until name not found.
-      //
-      int period=0;
-      bool noError=true;
-      while(noError)
-      {
-        std::stringstream suffix;
-        suffix << (period+1);
-        std::string opWS = outputWorkspace + "_"+suffix.str();
-        std::string WSName = m_workspace + "_" + suffix.str();
-        try
-        {
-          Workspace_sptr localWorkspace = loadNexusPro->getProperty(opWS); 
-          declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
-          setProperty<Workspace_sptr>(opWS,localWorkspace);
-          period++;
-        }
-        catch (Exception::NotFoundError&)
-        {
-          noError=false;
-        }
-      }
+
+      setOutputWorkspace(loadNexusPro);
     }
 
     void LoadNexus::runLoadTOFRawNexus()
@@ -367,28 +283,32 @@ namespace Mantid
         g_log.error("Unable to successfully run LoadTOFRawNexus Child Algorithm");
       }
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadTOFRawNexus Child Algorithm");
-      // Get pointer to the workspace created
-      Workspace_sptr localWorkspace = loadNexusPro->getProperty(outputWorkspace); 
-      setProperty(outputWorkspace,localWorkspace);
-      //
-      // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
-      // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
-      // until name not found.
-      //
 
-      WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(localWorkspace);
-      if (wsGroup)
+      setOutputWorkspace(loadNexusPro);
+    }
+
+    /**
+    * Set the output workspace(s) if the load's return workspace has type API::Workspace
+    * @param loader :: Shared pointer to load algorithm
+    */
+    void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr & loader)
+    {
+      // Go through each OutputWorkspace property and check whether we need to make a counterpart here
+      const std::vector<Property*> & loaderProps = loader->getProperties();
+      const size_t count = loader->propertyCount();
+      for( size_t i = 0; i < count; ++i )
       {
-        const std::vector<std::string> wsNames = wsGroup->getNames();
-        for(size_t i=0;i<wsNames.size();i++)
+        Property *prop = loaderProps[i];
+        if( dynamic_cast<IWorkspaceProperty*>(prop) && prop->direction() == Direction::Output )
         {
-          std::stringstream suffix;
-          suffix << '_' << (i+1);
-          std::string opWS = outputWorkspace + suffix.str();
-          std::string WSName = m_workspace + suffix.str();
-          Workspace_sptr localWorkspace = loadNexusPro->getProperty(opWS); 
-          declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
-          setProperty(opWS,localWorkspace);
+          const std::string & name = prop->name();
+          if( !this->existsProperty(name) )
+          {
+            declareProperty(new WorkspaceProperty<Workspace>(name, loader->getPropertyValue(name),
+              Direction::Output));
+          }
+          Workspace_sptr wkspace = loader->getProperty(name);
+          setProperty(name, wkspace);
         }
       }
     }

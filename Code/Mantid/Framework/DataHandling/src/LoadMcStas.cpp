@@ -4,7 +4,7 @@ Reads a McStas Nexus file into a Mantid WorkspaceGroup with a user-supplied name
 
 
 LoadMcStas replaces LoadMcStasEventNexus.
-LoadMcStas can be used for reading McStas 2.1 histogram and evnet data. 
+LoadMcStas can be used for reading McStas 2.1 histogram and event data. 
 LoadMcStasNexus can be used for reading McStas 2.0 histogram data. 
 
 
@@ -211,15 +211,14 @@ namespace DataHandling
    
 	/**
 	 * Return the confidence with with this algorithm can load the file
-	 * @param descriptor A descriptor for the file
-	 * @param descriptor A descriptor for the file
+   * @param eventEntries map of the file entries that have events
+   * @param outputGroup pointer to the workspace group
 	 * @param nxFile Reads data from inside first first top entry
 	 */
 	void LoadMcStas::readEventData(const std::map<std::string, std::string>& eventEntries, WorkspaceGroup_sptr& outputGroup, ::NeXus::File& nxFile)
 	{
 		std::string filename = getPropertyValue("Filename");
 		auto entries = nxFile.getEntries();
-		auto itend = entries.end();
 
 		// will assume that each top level entry contain one mcstas
 		// generated IDF and any event data entries within this top level
@@ -390,7 +389,9 @@ namespace DataHandling
   
 	/**
 	 * Return the confidence with with this algorithm can load the file
-	 * @param descriptor A descriptor for the file
+   * @param histogramEntries map of the file entries that have histogram
+   * @param outputGroup pointer to the workspace group
+   * @param nxFile Reads data from inside first first top entry
 	 * @returns An integer specifying the confidence level. 0 indicates it will not be used
 	 */
 	void LoadMcStas::readHistogramData(const std::map<std::string, std::string>& histogramEntries, WorkspaceGroup_sptr& outputGroup, ::NeXus::File& nxFile)

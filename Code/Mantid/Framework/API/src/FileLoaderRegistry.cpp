@@ -23,7 +23,7 @@ namespace Mantid
       {
         void apply(Kernel::FileDescriptor & descriptor) { descriptor.resetStreamToStart(); }
       };
-      ///endcond
+      /// @endcond
 
       /**
        * @param filename A string giving a filename
@@ -79,7 +79,7 @@ namespace Mantid
     /**
      * If the name does not exist then it does nothing
      * @param name Name of the algorithm to remove from the search list
-     * @aparam version An optional version to remove. -1 indicates remove all (Default=-1)
+     * @param version An optional version to remove. -1 indicates remove all (Default=-1)
      */
     void FileLoaderRegistryImpl::unsubscribe(const std::string &name, const int version)
     {

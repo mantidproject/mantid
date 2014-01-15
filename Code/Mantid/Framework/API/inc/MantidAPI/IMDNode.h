@@ -177,6 +177,7 @@ public:
      * @param length :: length of cylinder below which to integrate
      * @param signal [out] :: set to the integrated signal
      * @param errorSquared [out] :: set to the integrated squared error.
+     * @param signal_fit [out] :: array of values for the fit.
       */
     virtual void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const = 0;
 
@@ -209,6 +210,8 @@ public:
     virtual coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const=0;
     virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)=0;
 
+    // to avoid casting (which need also the number of dimensions) method say if Node is a box. if not, it is gridbox
+    virtual bool isBox()const=0;
   // ----------------------------- Helper Methods --------------------------------------------------------
   //-----------------------------------------------------------------------------------------------
   /** Helper method for sorting MDBoxBasees by file position.

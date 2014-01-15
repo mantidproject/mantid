@@ -8,7 +8,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include "MantidMDEvents/MDBox.h"

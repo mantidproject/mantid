@@ -1,8 +1,6 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
-	src/ApplyGroupingFromMuonNexus.cpp
 	src/CompressEvents.cpp
-	src/ConvertFullprofToXML.cpp
 	src/CreateChopperModel.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
@@ -19,6 +17,7 @@ set ( SRC_FILES
 	src/ISISRunLogs.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
+	src/LoadAscii2.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -59,6 +58,7 @@ set ( SRC_FILES
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
+	src/LoadPDCharacterizations.cpp
 	src/LoadPDFgetNFile.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
@@ -99,6 +99,7 @@ set ( SRC_FILES
 	src/SNSDataArchive.cpp
 	src/SNSDataArchiveICAT2.cpp
 	src/SaveAscii.cpp
+	src/SaveAscii2.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
@@ -129,9 +130,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
-	inc/MantidDataHandling/ApplyGroupingFromMuonNexus.h
 	inc/MantidDataHandling/CompressEvents.h
-	inc/MantidDataHandling/ConvertFullprofToXML.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
@@ -148,6 +147,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
+	inc/MantidDataHandling/LoadAscii2.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -188,6 +188,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
+	inc/MantidDataHandling/LoadPDCharacterizations.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
@@ -223,6 +224,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SNSDataArchiveICAT2.h
 	inc/MantidDataHandling/SaveAscii.h
+	inc/MantidDataHandling/SaveAscii2.h
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
@@ -258,9 +260,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
-	ApplyGroupingFromMuonNexusTest.h
 	CompressEventsTest.h
-	ConvertFullprofToXMLTest.h
 	CreateChopperModelTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
@@ -275,6 +275,7 @@ set ( TEST_FILES
 	GroupDetectorsTest.h
 	ISISDataArchiveTest.h
 	InstrumentRayTracerTest.h
+	LoadAscii2Test.h
 	LoadAsciiTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
@@ -288,6 +289,7 @@ set ( TEST_FILES
 	LoadEventPreNexusTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSSTest.h
+	LoadIDFFromNexusTest.h
 	LoadILLSANSTest.h
 	LoadILLTest.h
 	LoadISISNexusTest.h
@@ -298,8 +300,8 @@ set ( TEST_FILES
 	LoadLogTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
-	LoadMcStasTest.h
 	LoadMcStasNexusTest.h
+	LoadMcStasTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
@@ -308,6 +310,7 @@ set ( TEST_FILES
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
 	LoadNexusTest.h
+	LoadPDCharacterizationsTest.h
 	LoadPDFgetNFileTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
@@ -342,6 +345,7 @@ set ( TEST_FILES
 	RotateInstrumentComponentTest.h
 	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
+	SaveAscii2Test.h
 	SaveAsciiTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h

@@ -57,7 +57,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("BackgroundParameterWorkspace", "", Direction.InOut),
                 "Name of table workspace containing background parameters.")
 	self.declareProperty("ProcessBackground", False, "Option to process background from input data file.")
-        backgroundtypes = ["Polynomial", "Chebyshev"]
+        backgroundtypes = ["Polynomial", "Chebyshev", "FullprofPolynomial"]
 	self.declareProperty("BackgroundType", "Polynomial", StringListValidator(backgroundtypes), "Type of background.")
         arrvalidator = FloatArrayBoundedValidator()
         arrvalidator.setLower(0.)

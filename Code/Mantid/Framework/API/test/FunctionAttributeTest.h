@@ -22,6 +22,7 @@ public:
       declareAttribute("IAttr", Attribute(0));
       declareAttribute("BAttr", Attribute(false));
       declareAttribute("SAttr", Attribute(""));
+      declareAttribute("SQAttr", Attribute("",true));
       declareAttribute("VAttr", Attribute(std::vector<double>()));
       std::vector<double> v(3);
       v[0] = 1;
@@ -152,6 +153,30 @@ public:
 
     }
 
+    void test_quoted_string_attribute()
+    {
+      IFT_Funct f;
+      IFunction::Attribute att = f.getAttribute("SQAttr");
+
+      TS_ASSERT_EQUALS( att.asString(), "\"\"" );
+      TS_ASSERT_EQUALS( att.type(), "std::string" );
+
+      att.setString( "text" );
+      TS_ASSERT_EQUALS( att.asString(), "\"text\"" );
+
+      att.fromString("25");
+      TS_ASSERT_EQUALS( att.asString(), "\"25\"" );
+
+      f.setAttribute("SQAttr", IFunction::Attribute("Hello",true));
+      TS_ASSERT_EQUALS( f.getAttribute("SQAttr").asString(), "\"Hello\"" );
+
+      f.setAttributeValue("SQAttr", "World");
+      TS_ASSERT_EQUALS( f.getAttribute("SQAttr").asString(), "\"World\"" );
+
+      TS_ASSERT( f.getAttribute("SQAttr").value() == "\"World\"" );
+
+    }
+
     void test_vector_attribute()
     {
       IFT_Funct f;
@@ -231,19 +256,26 @@ public:
     void test_factory_creation()
     {
         auto f = Mantid::API::FunctionFactory::Instance().createInitialized(
-                    "name=IFT_Funct,DAttr=12.0,IAttr=777,BAttr=true, SAttr= \"Hello world!\",VAttr=(4,5,6)");
+                    "name=IFT_Funct,DAttr=12.0,IAttr=777,BAttr=true, SAttr= \"Hello world!\", SQAttr= \"Hello world!\",VAttr=(4,5,6)");
         TS_ASSERT( f );
         TS_ASSERT_EQUALS( f->getAttribute("DAttr").asDouble(), 12.0 );
         TS_ASSERT_EQUALS( f->getAttribute("IAttr").asInt(), 777 );
         TS_ASSERT_EQUALS( f->getAttribute("BAttr").asBool(), true );
         TS_ASSERT_EQUALS( f->getAttribute("SAttr").asString(), "Hello world!" );
+        TS_ASSERT_EQUALS( f->getAttribute("SQAttr").asString(), "\"Hello world!\"" );
         std::vector<double> v = f->getAttribute("VAttr").asVector();
         TS_ASSERT_EQUALS( v.size(), 3 );
         TS_ASSERT_EQUALS( v[0], 4 );
         TS_ASSERT_EQUALS( v[1], 5 );
         TS_ASSERT_EQUALS( v[2], 6 );
 
-        TS_ASSERT_EQUALS( f->asString(), "name=IFT_Funct,BAttr=true,DAttr=12,IAttr=777,SAttr=Hello world!,VAttr=(4,5,6),VAttr1=(1,2,3)" );
+        TS_ASSERT_EQUALS( f->asString(), "name=IFT_Funct,BAttr=true,DAttr=12,IAttr=777,SAttr=Hello world!,SQAttr=\"Hello world!\",VAttr=(4,5,6),VAttr1=(1,2,3)" );
+    }
+
+    void test_empty_string_attributes_do_not_show_by_asString()
+    {
+        IFT_Funct f;
+        TS_ASSERT_EQUALS( f.asString(), "name=IFT_Funct,BAttr=false,DAttr=0,IAttr=0,VAttr=(),VAttr1=(1,2,3)" );
     }
 
 };

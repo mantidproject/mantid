@@ -15,6 +15,17 @@
 
 using namespace Mantid::Geometry;
 
+/** Constructor
+* @param s The surface of the panel
+*/
+FlatBankInfo::FlatBankInfo(PanelsSurface *s):
+  id(0),
+  rotation(),
+  startDetectorIndex(0),endDetectorIndex(0),
+  polygon(),surface(s)
+{
+}
+
 /**
   * Translate the bank by a vector.
   * @param shift :: Translation vector.
@@ -31,6 +42,8 @@ void FlatBankInfo::translate(const QPointF &shift)
         udet.v += dv;
     }
 }
+
+
 
 Mantid::Kernel::Logger &PanelsSurface::g_log = Mantid::Kernel::Logger::get("PanelsSurface");
 
@@ -265,7 +278,7 @@ void PanelsSurface::addFlatBank(ComponentID bankId, const Mantid::Kernel::V3D &n
   * Add a flat bank from an assembly of detectors.
   * @param bankId :: Component ID of the bank.
   * @param normal :: Normal vector to the bank's plane.
-  * @param objCompAssemblies :: List of component IDs. Each component must cast to Detector.
+  * @param detectors :: List of component IDs. Each component must cast to Detector.
   */
 void PanelsSurface::addFlatBankOfDetectors(ComponentID bankId, const Mantid::Kernel::V3D &normal, QList<ComponentID> detectors)
 {
@@ -341,7 +354,7 @@ void PanelsSurface::addObjCompAssemblies(ComponentID bankId)
     {
         return;
     }
-    int ndetectors = 0;
+
     QList<ComponentID> objCompAssemblies;
     // normal to the plane, undefined at first
     Mantid::Kernel::V3D normal(0,0,0);
@@ -401,7 +414,6 @@ void PanelsSurface::addObjCompAssemblies(ComponentID bankId)
                 return;
             }
         }
-        ndetectors += objCompAssembly->nelements();
         objCompAssemblies << objCompAssembly->getComponentID();
     }
     if ( !objCompAssemblies.isEmpty() )

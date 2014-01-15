@@ -1163,12 +1163,11 @@ Matrix<T>::factor()
   if (nx!=ny || nx<1)
     throw std::runtime_error("Matrix::factor Matrix is not NxN");
 
-  double Pmax;
   double deter=1.0;
   for(int i=0;i<static_cast<int>(nx)-1;i++)       //loop over each row
     {
       int jmax=i;
-      Pmax=fabs(V[i][i]);
+      double Pmax=fabs(V[i][i]);
       for(int j=i+1;j<static_cast<int>(nx);j++)     // find max in Row i
         {
           if (fabs(V[i][j])>Pmax)
@@ -1256,7 +1255,6 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
     @param rowperm :: row permuations [nx values]
   */
 {
-  int imax(0),j,k;
   double sum,dum,big,temp;
 
   if (nx!=ny || nx<2)
@@ -1269,7 +1267,7 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
   for(int i=0;i<static_cast<int>(nx);i++)
     {
       big=0.0;
-      for(j=0;j<static_cast<int>(nx);j++)
+      for(int j=0;j<static_cast<int>(nx);j++)
       if ((temp=fabs(V[i][j])) > big) 
           big=temp;
 
@@ -1281,21 +1279,21 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
       vv[i]=1.0/big;
     }
 
-  for (j=0;j<static_cast<int>(nx);j++)
+  for (int j=0;j<static_cast<int>(nx);j++)
     {
       for(int i=0;i<j;i++)
         {
           sum=V[i][j];
-          for(k=0;k<i;k++)
+          for(int k=0;k<i;k++)
             sum-= V[i][k] * V[k][j];
           V[i][j]=static_cast<T>(sum);
         }
       big=0.0;
-      imax=j;
+      int imax=j;
       for (int i=j;i<static_cast<int>(nx);i++)
         {
           sum=V[i][j];
-          for (k=0;k<j;k++)
+          for (int k=0;k<j;k++)
             sum -= V[i][k] * V[k][j];
           V[i][j]=static_cast<T>(sum);
           if ( (dum=vv[i] * fabs(sum)) >=big)
@@ -1307,7 +1305,7 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
 
       if (j!=imax)
         {
-          for(k=0;k<static_cast<int>(nx);k++)
+          for(int k=0;k<static_cast<int>(nx);k++)
             {                     //Interchange rows
               dum=V[imax][k];
               V[imax][k]=V[j][k];
@@ -1457,7 +1455,6 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
     @return :: 1  on success 0 on failure
   */
 {
-  double theta,tresh,tanAngle,cosAngle,sinAngle;
   if(nx!=ny || nx<1)
     {
       std::cerr<<"Matrix not square"<<std::endl;
@@ -1490,10 +1487,9 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
     }
 
   int iteration=0;
-  double sm; 
   for(int i=0;i<100;i++)        //max 50 iterations
     {
-      sm=0.0;           // sum of off-diagonal terms
+      double sm=0.0;           // sum of off-diagonal terms
       for(size_t ip=0;ip<nx-1;ip++)
         for(size_t iq=ip+1;iq<nx;iq++)
           sm+=fabs(A.V[ip][iq]);
@@ -1508,7 +1504,7 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
         }
 
       // Threshold large for first 5 sweeps
-      tresh= (i<6) ? 0.2*sm/static_cast<int>(nx*nx) : 0.0;
+      double tresh= (i<6) ? 0.2*sm/static_cast<int>(nx*nx) : 0.0;
 
       for(int ip=0;ip<static_cast<int>(nx)-1;ip++)
         {
@@ -1523,12 +1519,13 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
 
               else if (fabs(A.V[ip][iq])>tresh)
                 {
+                  double tanAngle,cosAngle,sinAngle;
                   double h=Diag[iq]-Diag[ip];
                   if (static_cast<float>((fabs(h)+g)) == static_cast<float>(fabs(h)))
                     tanAngle=A.V[ip][iq]/h;      // tanAngle=1/(2theta)
                   else
                     {
-                      theta=0.5*h/A.V[ip][iq];
+                      double theta=0.5*h/A.V[ip][iq];
                       tanAngle=1.0/(fabs(theta)+sqrt(1.0+theta*theta));
                       if (theta<0.0)
                         tanAngle = -tanAngle;
@@ -1620,14 +1617,13 @@ std::vector<T> Matrix<T>::toRotation()
   if (this->nx != this->ny) throw(std::invalid_argument("matrix is not square"));
   if (fabs(this->determinant()) <1e-10) throw(std::invalid_argument("Determinant is too small"));
   // step 1: orthogonalize the matrix
-  double spself,spother;
   for (size_t i=0; i<this->ny;++i)
   {
-    spself=0.;
+    double spself=0.;
     for (size_t j=0; j<this->nx;++j) spself+=(V[j][i]*V[j][i]);
     for (size_t k=i+1; k<this->ny;++k) 
     {
-      spother=0;
+      double spother=0;
       for (size_t j=0; j<this->nx;++j) spother+=(V[j][i]*V[j][k]);
       for (size_t j=0; j<this->nx;++j) V[j][k]-=static_cast<T>(V[j][i]*spother/spself);
     }

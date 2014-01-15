@@ -249,7 +249,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on peak calcualtion with non-trivial background
    */
-  void Ptest_CalculationModeFull()
+  void test_CalculationModeFull()
   {
     // 1. Create input workspace
     API::MatrixWorkspace_sptr dataws;
@@ -326,18 +326,18 @@ public:
     * Due to the strongly correlated peak parameters, only 1 parameter
     * has its value shifted from true value for unit test purpose
    */
-  void Ptest_fit1Parameter()
+  void test_fit1Parameter()
   {
     std::string testplan("zero");
 
-    // 1. Create input workspace
+    // Create input workspace
     API::MatrixWorkspace_sptr dataws;
     DataObjects::TableWorkspace_sptr parameterws;
     DataObjects::TableWorkspace_sptr hklws;
 
-    // a) Data.  Option 1
+    // Data.  Option 1
     dataws = createInputDataWorkspace(1);
-    // b) Parameter
+    // Profile parameter
     std::map<std::string, double> parammodifymap;
     if (testplan.compare("zero") == 0)
     {
@@ -377,12 +377,12 @@ public:
     AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
     AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
 
-    // 2. Initialize LeBaiFit
+    // Initialize LeBaiFit
     LeBailFit lbfit;
     TS_ASSERT_THROWS_NOTHING(lbfit.initialize());
     TS_ASSERT(lbfit.isInitialized());
 
-    // 3. Set properties
+    // Set properties
     lbfit.setPropertyValue("InputWorkspace", "Data");
     lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
     lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
@@ -392,6 +392,8 @@ public:
     lbfit.setProperty("OutputWorkspace", "FitResultWS");
     lbfit.setProperty("OutputPeaksWorkspace", "PeakInfoWS");
     lbfit.setProperty("PeakRadius", 8);
+    lbfit.setPropertyValue("BackgroundType", "Polynomial");
+    lbfit.setPropertyValue("BackgroundParameters", "0.01, 0.0, 0.0, 0.0");
 
     lbfit.setProperty("NumberMinimizeSteps", 1000);
 

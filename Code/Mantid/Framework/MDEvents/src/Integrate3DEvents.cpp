@@ -194,15 +194,13 @@ int Integrate3DEvents::numInEllipsoid( std::vector<V3D>    const & events,
                                        std::vector<V3D>    const & directions,
                                        std::vector<double> const & sizes )
 {
-  int    count = 0;
-  double comp;
-  double sum;
+  int count = 0;
   for ( size_t i = 0; i < events.size(); i++ )
   {
-    sum = 0;
+    double sum = 0;
     for ( size_t k = 0; k < 3; k++ )
     {
-      comp = events[i].scalar_prod( directions[k] ) / sizes[k];
+      double comp = events[i].scalar_prod( directions[k] ) / sizes[k];
       sum += comp * comp;
     }
     if ( sum <= 1 )
@@ -312,24 +310,23 @@ double Integrate3DEvents::stdDev( std::vector<V3D> const & events,
 {
   double sum    = 0;
   double sum_sq = 0;
+  double stdev = 0;
   int    count  = 0;
-  double dot_prod;
 
   for ( size_t i = 0; i < events.size(); i++ )
   {
     if ( events[i].norm() <= radius )
     {
-      dot_prod = events[i].scalar_prod( direction );
+      double dot_prod = events[i].scalar_prod( direction );
       sum += dot_prod;
       sum_sq += dot_prod * dot_prod;
       count++;
     }
   }
-  double ave   = 0;
-  double stdev = 0;
+
   if ( count > 1 )
   {
-    ave   = sum / count;
+    double ave   = sum / count;
     stdev = sqrt( (sum_sq/count - ave*ave) * (double)count/(count-1.0) );
   }
 

@@ -104,7 +104,7 @@ namespace Mantid
     	  return Zscore;
       }
       std::vector<double> Zscore;
-      double tmp;
+
       Statistics stats = getStatistics(data, sorted);
       if(stats.standard_deviation == 0.)
       {
@@ -114,7 +114,7 @@ namespace Mantid
       typename vector<TYPE>::const_iterator it = data.begin();
       for (; it != data.end(); ++it)
       {
-    	tmp = static_cast<double> (*it);
+    	  double tmp = static_cast<double> (*it);
         Zscore.push_back(fabs((tmp - stats.mean) / stats.standard_deviation));
       }
       return Zscore;
@@ -181,11 +181,10 @@ namespace Mantid
       stats.minimum = stats.mean;
       stats.maximum = stats.mean;
       double stddev = 0.;
-      double temp;
       typename vector<TYPE>::const_iterator it = data.begin();
       for (; it != data.end(); ++it)
       {
-        temp = static_cast<double> (*it);
+        double temp = static_cast<double> (*it);
         stddev += ((temp - stats.mean) * (temp - stats.mean));
         if (temp > stats.maximum)
           stats.maximum = temp;
@@ -280,6 +279,7 @@ namespace Mantid
       rfactor.Rp = (sumrpnom/sumrpdenom);
       rfactor.Rwp = std::sqrt(sumnom/sumdenom);
 
+      // cppcheck-suppress duplicateExpression
       if (rfactor.Rwp != rfactor.Rwp)
         std::cout << "Rwp is NaN.  Denominator = " << sumnom << "; Nominator = " << sumdenom << ". \n";
 

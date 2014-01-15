@@ -344,13 +344,12 @@ namespace Kernel
       }
 
       //delete the NullChannel
-      if (m_nullStream)
-      {
-        delete(m_nullStream);
-        m_nullStream=0;
-      }
+      delete(m_nullStream);
+      m_nullStream=0;
+
       // Finally delete the mutex
       delete mutexLoggerList;
+      mutexLoggerList = 0;
     }
     catch (std::exception& e)
     {
@@ -451,8 +450,8 @@ namespace Kernel
 
    /**
    * Log a given message at a given priority
-   * @param message :: The message to log
    * @param priority :: The priority level
+   * @return :: the stream
    */
   std::ostream& Logger::getLogStream(Logger::Priority priority)
   {

@@ -355,6 +355,9 @@ void SequentialFitDialog::accept()
     alg->setPropertyValue("FitType","Individual");
   }
 
+  bool passWSIndexToFunction = ui.ckbPassWS->isChecked();
+  alg->setProperty("PassWSIndexToFunction", passWSIndexToFunction);
+
   alg->executeAsync();
   QDialog::accept();
 }

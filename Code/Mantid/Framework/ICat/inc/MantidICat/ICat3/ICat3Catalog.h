@@ -4,6 +4,7 @@
 #include "MantidAPI/ICatalog.h"
 #include "MantidICat/CatalogSearchParam.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
+#include "MantidICat/ICat3/ICat3Helper.h"
 
 namespace Mantid
 {
@@ -45,7 +46,10 @@ namespace Mantid
       /// logout from isis catalog
       virtual void logout();
       /// search isis data
-      virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr);
+      virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr,
+          const int &offset, const int &limit);
+      /// Obtain the number of results returned by the search method.
+      virtual int64_t getNumberOfSearchResults(const CatalogSearchParam& inputs);
       /// logged in user's investigations search
       virtual void myData(Mantid::API::ITableWorkspace_sptr& mydataws_sptr);
       /// get datasets
@@ -60,10 +64,16 @@ namespace Mantid
       virtual void getFileLocation(const long long&fileid,std::string& filelocation);
       /// get urls
       virtual void getDownloadURL(const long long& fileid,std::string & fileLocation);
+      /// get URL of where to PUT (publish) files.
+      virtual const std::string getUploadURL(const std::string &dataFileName, const std::string &createFileName);
       /// keep alive
       virtual void keepAlive();
       /// keep alive in minutes
       virtual int keepAliveinminutes();
+
+    private:
+      /// The helper class that accesses ICAT functionality.
+      CICatHelper* m_helper;
     };
 
   }

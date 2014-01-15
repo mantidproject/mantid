@@ -30,7 +30,7 @@ namespace
    */
   PyObject * getFunctionNames(FunctionFactoryImpl & self)
   {
-    std::vector<std::string> names = self.getFunctionNames<Mantid::API::IFunction>();
+    const std::vector<std::string>& names = self.getFunctionNames<Mantid::API::IFunction>();
 
     PyObject *registered = PyList_New(0);
     for (auto name = names.begin(); name != names.end(); ++name)

@@ -407,8 +407,6 @@ namespace SliceViewer
     QPointF dragAmount = current - this->m_dragStart;
     dragAmount = snap(dragAmount);
     double width = 0;
-    double angle = 0;
-    double length = 0;
 
     // Adjust the current mouse position if needed.
     if ((m_snapLength > 0) || shiftPressed || m_angleSnapMode)
@@ -421,7 +419,7 @@ namespace SliceViewer
         currentDiff = current - m_pointA;
 
       // Limit angles to 45 degree increments with shift pressed
-      angle = atan2(currentDiff.y(), currentDiff.x());
+      double angle = atan2(currentDiff.y(), currentDiff.x());
       // Round angle to closest 45 degrees, if in angle snap mode
       if (shiftPressed || m_angleSnapMode)
       {
@@ -431,7 +429,7 @@ namespace SliceViewer
       }
 
       // Round length to m_snapLength, if specified
-      length = sqrt(currentDiff.x()*currentDiff.x() + currentDiff.y()*currentDiff.y());
+      double length = sqrt(currentDiff.x()*currentDiff.x() + currentDiff.y()*currentDiff.y());
       if (m_snapLength > 0)
         length = Utils::rounddbl(length / m_snapLength) * m_snapLength;
 

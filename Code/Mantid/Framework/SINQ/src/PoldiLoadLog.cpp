@@ -126,7 +126,7 @@ void PoldiLoadLog::exec()
 	std::map<std::string,std::string>::const_iterator it;
 	File fin(filename);
 
-	for(it = dictionary.begin(); it != dictionary.end(); it++){
+	for(it = dictionary.begin(); it != dictionary.end(); ++it){
 
 //		g_log.error() << "_Poldi -   dico       " <<  it->first  << " " << it->second << std::endl;
 

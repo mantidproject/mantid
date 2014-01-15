@@ -604,6 +604,7 @@ public:
   /// All groups are the same size
   void test_processGroups_allSameSize()
   {
+      Mantid::API::AnalysisDataService::Instance().clear();
     WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
         "B", "B_1,B_2,B_3",   "C", "C_1,C_2,C_3");
 

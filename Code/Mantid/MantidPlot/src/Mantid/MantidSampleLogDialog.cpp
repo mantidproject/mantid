@@ -34,18 +34,18 @@ using namespace Mantid::Kernel;
 // Public methods
 //----------------------------------
 /**
- * Construct an object of this type
- * @param wsname :: The name of the workspace object from which to retrieve the log files
- * @param mui :: The MantidUI area
- * @param flags :: Window flags that are passed the the QDialog constructor
- * @param experimentInfoIndex :: optional index in the array of
- *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
- */
+* Construct an object of this type
+* @param wsname :: The name of the workspace object from which to retrieve the log files
+* @param mui :: The MantidUI area
+* @param flags :: Window flags that are passed the the QDialog constructor
+* @param experimentInfoIndex :: optional index in the array of
+*        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
+*/
 MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags, size_t experimentInfoIndex)  :
   QDialog(mui->appWindow(), flags), m_wsname(wsname), m_experimentInfoIndex(experimentInfoIndex), m_mantidUI(mui)
 {
   setWindowTitle(tr("MantidPlot - " + wsname + " sample logs"));
-  
+
   m_tree = new QTreeWidget;
   QStringList titles;
   titles << "Name" << "Type" << "Value" << "Units";
@@ -118,7 +118,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
       numSelectorLayout->addWidget(m_spinNumber);
       //Double-click imports a log file
       connect(m_spinNumber, SIGNAL(valueChanged(int)),
-          this, SLOT(selectExpInfoNumber(int)));
+        this, SLOT(selectExpInfoNumber(int)));
       hbox->addLayout(numSelectorLayout);
     }
   }
@@ -128,7 +128,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   hbox->addWidget(groupBox);
   hbox->addWidget(statsBox);
   hbox->addStretch(1);
-     
+
 
 
   //--- Main layout With 2 sides -----
@@ -141,7 +141,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   init();
 
   resize(750,400);
-  
+
   connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedLogs()));
   connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
   //want a custom context menu
@@ -162,8 +162,8 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
 // Private methods
 //----------------------------------
 /**
- * Plot the selected log entries (TimeSeriesProperty or PropertyWithValue)
- */
+* Plot the selected log entries (TimeSeriesProperty or PropertyWithValue)
+*/
 void MantidSampleLogDialog::importSelectedLogs()
 {
   QList<QTreeWidgetItem *> items = m_tree->selectedItems();
@@ -177,8 +177,8 @@ void MantidSampleLogDialog::importSelectedLogs()
 
 
 /**
- * Show Log Statistics when a line is selected
- */
+* Show Log Statistics when a line is selected
+*/
 void MantidSampleLogDialog::showLogStatistics()
 {
   QList<QTreeWidgetItem *> items = m_tree->selectedItems();
@@ -210,47 +210,47 @@ void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
   int key = item->data(1, Qt::UserRole).toInt();
   switch (key)
   {
-    case numeric :
-    case string :
-    case stringTSeries :
-    case numericArray :
+  case numeric :
+  case string :
+  case stringTSeries :
+  case numericArray :
+    return;
+    break;
+
+  case numTSeries :
+    // Calculate the stats
+    // Get the workspace
+    if (!m_ei) return;
+
+    // Now the log
+    Mantid::Kernel::TimeSeriesPropertyStatistics stats;
+    Mantid::Kernel::Property * logData = m_ei->run().getLogData(item->text(0).toStdString());
+    // Get the stas if its a series of int or double; fail otherwise
+    Mantid::Kernel::TimeSeriesProperty<double> * tspd = dynamic_cast<TimeSeriesProperty<double> *>(logData);
+    Mantid::Kernel::TimeSeriesProperty<int> * tspi = dynamic_cast<TimeSeriesProperty<int> *>(logData);
+    double timeAvg = 0.;
+    if (tspd)
+    {
+      stats = tspd->getStatistics();
+      timeAvg = tspd->timeAverageValue();
+    }
+    else if (tspi)
+    {
+      stats = tspi->getStatistics();
+      timeAvg = tspi->timeAverageValue();
+    }
+    else
       return;
-      break;
 
-    case numTSeries :
-      // Calculate the stats
-      // Get the workspace
-      if (!m_ei) return;
-
-      // Now the log
-      Mantid::Kernel::TimeSeriesPropertyStatistics stats;
-      Mantid::Kernel::Property * logData = m_ei->run().getLogData(item->text(0).toStdString());
-      // Get the stas if its a series of int or double; fail otherwise
-      Mantid::Kernel::TimeSeriesProperty<double> * tspd = dynamic_cast<TimeSeriesProperty<double> *>(logData);
-      Mantid::Kernel::TimeSeriesProperty<int> * tspi = dynamic_cast<TimeSeriesProperty<int> *>(logData);
-      double timeAvg = 0.;
-      if (tspd)
-      {
-        stats = tspd->getStatistics();
-        timeAvg = tspd->timeAverageValue();
-      }
-      else if (tspi)
-      {
-        stats = tspi->getStatistics();
-        timeAvg = tspi->timeAverageValue();
-      }
-      else
-        return;
-
-      // --- Show the stats ---
-      statValues[0]->setText( QString::number( stats.minimum ));
-      statValues[1]->setText( QString::number( stats.maximum ));
-      statValues[2]->setText( QString::number( stats.mean ));
-      statValues[3]->setText( QString::number( timeAvg ));
-      statValues[4]->setText( QString::number( stats.median ));
-      statValues[5]->setText( QString::number( stats.standard_deviation ));
-      return;
-      break;
+    // --- Show the stats ---
+    statValues[0]->setText( QString::number( stats.minimum ));
+    statValues[1]->setText( QString::number( stats.maximum ));
+    statValues[2]->setText( QString::number( stats.mean ));
+    statValues[3]->setText( QString::number( timeAvg ));
+    statValues[4]->setText( QString::number( stats.median ));
+    statValues[5]->setText( QString::number( stats.standard_deviation ));
+    return;
+    break;
   }
   throw std::invalid_argument("Error importing log entry, wrong data type");
 }
@@ -268,38 +268,37 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
   int filter = 0;
   int key = item->data(1, Qt::UserRole).toInt();
   Mantid::Kernel::Property * logData = NULL;
+  QString caption = QString::fromStdString(m_wsname) + QString::fromStdString("-") + item->text(0);
   switch (key)
   {
-    case numeric :
-    case string :
-      m_mantidUI->importString(item->text(0),
-        item->data(0, Qt::UserRole).toString()); //Pretty much just print out the string
-      break;
-    case numTSeries :
-      if (filterStatus->isChecked()) filter = 1;
-      if (filterPeriod->isChecked()) filter = 2;
-      if (filterStatusPeriod->isChecked()) filter = 3;
-      m_mantidUI->importNumSeriesLog(QString::fromStdString(m_wsname), item->text(0), filter);
-      break;
-    case stringTSeries :
-      m_mantidUI->importStrSeriesLog(item->text(0),
-                                     item->data(0, Qt::UserRole).toString());
-      break;
-    case numericArray :
-	  logData=m_ei->getLog(item->text(0).toStdString());
-	  if (!logData) return;
-	  m_mantidUI->importString(item->text(0),QString::fromStdString(logData->value()), QString::fromStdString(",") );
-      break;
-    default :
-      throw std::invalid_argument("Error importing log entry, wrong data type");
+  case numeric :
+  case string :
+    m_mantidUI->importString(item->text(0), item->data(0, Qt::UserRole).toString(), QString(""), QString::fromStdString(m_wsname)); //Pretty much just print out the string
+    break;
+  case numTSeries :
+    if (filterStatus->isChecked()) filter = 1;
+    if (filterPeriod->isChecked()) filter = 2;
+    if (filterStatusPeriod->isChecked()) filter = 3;
+    m_mantidUI->importNumSeriesLog(QString::fromStdString(m_wsname), item->text(0), filter);
+    break;
+  case stringTSeries :
+    m_mantidUI->importStrSeriesLog(item->text(0), item->data(0, Qt::UserRole).toString(), QString::fromStdString(m_wsname));
+    break;
+  case numericArray :
+    logData=m_ei->getLog(item->text(0).toStdString());
+    if (!logData) return;
+    m_mantidUI->importString(item->text(0),QString::fromStdString(logData->value()), QString::fromStdString(","), QString::fromStdString(m_wsname));
+    break;
+  default :
+    throw std::invalid_argument("Error importing log entry, wrong data type");
   }
 }
 
 
 //------------------------------------------------------------------------------------------------
 /**
- * Popup a custom context menu
- */
+* Popup a custom context menu
+*/
 void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 {
   if( !m_tree->itemAt(pos) ) 
@@ -309,11 +308,11 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
   }
 
   QMenu *menu = new QMenu(m_tree);
-  
+
   QAction *action = new QAction("Import", m_tree);
   connect(action, SIGNAL(triggered()), this, SLOT(importSelectedLogs()));
   menu->addAction(action);
-  
+
   menu->popup(QCursor::pos());
 
 }
@@ -322,8 +321,8 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 
 //------------------------------------------------------------------------------------------------
 /**
- * Initialize everything ub tge tree.
- */
+* Initialize everything ub tge tree.
+*/
 void MantidSampleLogDialog::init()
 {
   m_tree->clear();
@@ -356,7 +355,7 @@ void MantidSampleLogDialog::init()
   auto pEnd = logData.end();
   int max_length(0);
   for(auto pItr = logData.begin();
-       pItr != pEnd; ++pItr )
+    pItr != pEnd; ++pItr )
   {
     //name() contains the full path, so strip to file name
     QString filename = QFileInfo((**pItr).name().c_str()).fileName();
@@ -431,7 +430,7 @@ void MantidSampleLogDialog::init()
 
     }
     else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(*pItr) ||
-             dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(*pItr))
+      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(*pItr))
     {
       treeItem->setText(1, "numeric");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(numeric)); //Save the "role" as numeric.
@@ -440,8 +439,8 @@ void MantidSampleLogDialog::init()
     }
     else if( dynamic_cast<Mantid::Kernel::ArrayProperty<int> *>(*pItr) ||
       dynamic_cast<Mantid::Kernel::ArrayProperty<double> *>(*pItr) ||
-	  dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(*pItr) ||
-	  dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>> *>(*pItr))
+      dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(*pItr) ||
+      dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>> *>(*pItr))
     {
       treeItem->setText(1, "numeric array");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(numericArray)); //Save the "role" as numeric array.
@@ -454,7 +453,7 @@ void MantidSampleLogDialog::init()
     //Add tree item
     m_tree->addTopLevelItem(treeItem);
   }
-  
+
   //Resize the columns
   m_tree->header()->resizeSection(0, max_length*10);
   m_tree->header()->resizeSection(1, 100);

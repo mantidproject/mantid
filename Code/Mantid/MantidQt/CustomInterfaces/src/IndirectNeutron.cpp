@@ -163,7 +163,7 @@ namespace MantidQt
 				    }
 				  }
 				}
-				catch(std::runtime_error e)
+				catch(std::runtime_error& e)
 				{
 					emit showMessageBox(e.what());
 				}
@@ -188,7 +188,6 @@ namespace MantidQt
 			MatrixWorkspace_sptr idfWs;
 
     	// Find the file path of the insturment file
-			std::string inst = instrument.toStdString();
     	std::string idfPath = ExperimentInfo::getInstrumentFilename(instrument.toStdString());
     	if(idfPath.empty())
     	{
@@ -209,7 +208,7 @@ namespace MantidQt
 
 	      idfWs = loadEmptyInst->getProperty("OutputWorkspace");
     	}
-    	catch(std::runtime_error ex)
+    	catch(std::runtime_error& ex)
     	{
     		throw std::runtime_error("Could not load instrument file for instrument" + instrument.toStdString()
     					+ "\n " + ex.what());
@@ -238,7 +237,7 @@ namespace MantidQt
 		 * Set the instrument selected in the combobox based on
 		 * the file name of the run is possible.
 		 *
-		 * Assumes that names have the form <instrument>_<run-number>.<ext>
+     * Assumes that names have the form \<instrument\>_\<run-number\>.\<ext\>
 		 */
     void IndirectNeutron::handleFilesFound()
     {

@@ -924,15 +924,14 @@ bool MatrixModel::calculate(int startRow, int endRow, int startCol, int endCol)
 	double dy = d_matrix->dy();
 	double x_start = d_matrix->xStart();
 	double y_start = d_matrix->yStart();
-	double r = 0.0, c = 0.0;
 	for(int row = startRow; row <= endRow; row++){
-	    r = row + 1.0;
+	  double r = row + 1.0;
 		script->setDouble(r, "i");
 		script->setDouble(r, "row");
 		script->setDouble(y_start + row*dy, "y");
 		int aux = row*d_cols + startCol;
 		for(int col = startCol; col <= endCol; col++){
-		    c = col + 1.0;
+		  double c = col + 1.0;
 			script->setDouble(c, "j");
 			script->setDouble(c, "col");
 			script->setDouble(x_start + col*dx, "x");

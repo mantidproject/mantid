@@ -95,6 +95,7 @@ set ( SRC_FILES
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
+	src/ScopedWorkspace.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
@@ -241,6 +242,7 @@ set ( INC_FILES
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
+	inc/MantidAPI/ScopedWorkspace.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
@@ -288,25 +290,25 @@ set ( TEST_FILES
 	FilePropertyTest.h
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
-  FunctionAttributeTest.h
-  FunctionDomainTest.h
-  FunctionFactoryTest.h
+	FunctionAttributeTest.h
+	FunctionDomainTest.h
+	FunctionFactoryTest.h
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
 	IEventListTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
-	IkedaCarpenterModeratorTest.h
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
+	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
 	LiveListenerFactoryTest.h
-        LogManagerTest.h
+	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	MemoryManagerTest.h
@@ -324,6 +326,7 @@ set ( TEST_FILES
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleTest.h
+	ScopedWorkspaceTest.h
 	SpectraAxisTest.h
 	SpectrumDetectorMappingTest.h
 	TextAxisTest.h

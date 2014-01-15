@@ -35,11 +35,10 @@ namespace Mantid
     /// exec methods
     void CatalogGetDataSets::exec()
     {
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
-      API::ITableWorkspace_sptr ws_sptr = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       int64_t investigationId = getProperty("InvestigationId");
-      catalog->getDataSets(investigationId,ws_sptr);
-      setProperty("OutputWorkspace",ws_sptr);
+      CatalogAlgorithmHelper().createCatalog()->getDataSets(investigationId,workspace);
+      setProperty("OutputWorkspace",workspace);
     }
 
   }

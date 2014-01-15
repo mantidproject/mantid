@@ -158,7 +158,7 @@ static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_
   */
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-	int i, n, nrhs_2, func_called = 0, errcode = 0;
+	int i, nrhs_2, func_called = 0, errcode = 0;
 	static int first_call = 0;
 	static int call_depth = 0;
 	char error_buffer[256];
@@ -203,7 +203,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	if (!compare_nocase(funcname + (i - 9), "_varargin"))
 	{
 		funcname[i-9] = '\0';	/* remove the trailing "_varargin" from the name */
-		n = 0;
+		int n = 0;
 		for(i=0; i<nrhs; i++)
 		{
 			unrollCell(prhs[i], new_prhs, n);
@@ -386,15 +386,16 @@ int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
    */
 int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-	mwSize dims[2] = { 1, 1 };
-    char algName[128];
 	try
 	{
-	    mxGetString(prhs[0], algName, sizeof(algName));
-	    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm(algName);
-	    plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
-	    uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
-	    data[0] = (uint64_t)alg;
+    char algName[128];
+    mwSize dims[2] = { 1, 1 };
+
+	  mxGetString(prhs[0], algName, sizeof(algName));
+	  IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm(algName);
+	  plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
+	  uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
+	  data[0] = (uint64_t)alg;
 		return 0;
 	}
 	catch(std::exception& e)
@@ -414,16 +415,17 @@ int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
    */
 int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-	char buffer[256];
 	try
 	{
-	    uint64_t* data = (uint64_t*)mxGetData(prhs[0]);
-	    IAlgorithm* alg = (IAlgorithm*)data[0];
-      mxGetString(prhs[1], buffer, sizeof(buffer));
-      alg->setProperties(buffer);
-	    alg->execute();
-	    plhs[0] = mxCreateString("");
-	    return 0;
+    char buffer[256];
+	
+	  uint64_t* data = (uint64_t*)mxGetData(prhs[0]);
+	  IAlgorithm* alg = (IAlgorithm*)data[0];
+    mxGetString(prhs[1], buffer, sizeof(buffer));
+    alg->setProperties(buffer);
+	  alg->execute();
+	  plhs[0] = mxCreateString("");
+	  return 0;
 	}
 	catch(std::exception& e)
 	{
@@ -443,11 +445,12 @@ int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
   */
 int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-	char buffer[256];
-	mxArray* marray;
-	std::string property_name;
 	try
 	{
+	    mxArray* marray;	
+      char buffer[256];
+	    std::string property_name;
+
 	    uint64_t* data = (uint64_t*)mxGetData(prhs[0]);
 	    IAlgorithm* alg = (IAlgorithm*)data[0];
 	    int i=1;

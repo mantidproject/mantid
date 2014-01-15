@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <stdexcept>
 
 namespace MantidQt
@@ -9,7 +10,7 @@ namespace MantidQt
     Constructor
     */
     CompositePeaksPresenter::CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget, PeaksPresenter_sptr defaultPresenter) : m_zoomablePlottingWidget(zoomablePlottingWidget),  
-      m_default(defaultPresenter)
+      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1)
     {
       if(m_zoomablePlottingWidget == NULL)
       {
@@ -117,6 +118,7 @@ namespace MantidQt
       if(result_it == m_subjects.end())
       {
         m_subjects.push_back(presenter);
+        presenter->registerOwningPresenter(this);
       }
     }
 
@@ -196,7 +198,7 @@ namespace MantidQt
       m_palette.setForegroundColour(pos, colour);
 
       // Apply the foreground colour
-      (*iterator)->setForegroundColour(colour);
+      (*iterator)->setForegroundColor(colour);
     }
 
     /**
@@ -213,7 +215,7 @@ namespace MantidQt
       m_palette.setBackgroundColour(pos, colour);
 
       // Apply the background colour
-      (*iterator)->setBackgroundColour(colour);
+      (*iterator)->setBackgroundColor(colour);
     }
 
     /**
@@ -337,6 +339,8 @@ namespace MantidQt
       subjectPresenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
       // We want to zoom out now, because any currently selected peak will be wrong.
       m_zoomablePlottingWidget->resetView();
+      m_zoomedPeakIndex = -1;
+      m_zoomedPresenter.reset();
     }
 
     /**
@@ -372,6 +376,10 @@ namespace MantidQt
       }
     }
 
+    /**
+     * Get the peak size on the projection plane
+     * @return size
+     */
     double CompositePeaksPresenter::getPeakSizeOnProjection() const
     {
       if (useDefault())
@@ -391,6 +399,10 @@ namespace MantidQt
       return result;
     }
 
+    /**
+     * Get peak size into the projection
+     * @return size
+     */
     double CompositePeaksPresenter::getPeakSizeIntoProjection() const
     {
       if (useDefault())
@@ -408,6 +420,181 @@ namespace MantidQt
         }
       }
       return result;
+    }
+
+    /**
+     * Determine if the background is to be shown for a particular workspace.
+     * @param ws
+     * @return
+     */
+    bool CompositePeaksPresenter::getShowBackground(
+        boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
+    {
+      if (useDefault())
+      {
+        throw std::runtime_error(
+            "Get show background cannot be fetched until nested presenters are added.");
+      }
+      SubjectContainer::const_iterator iterator = getPresenterIteratorFromWorkspace(ws);
+      return (*iterator)->getShowBackground();
+    }
+
+    namespace
+    {
+      // Helper comparitor type.
+      class MatchWorkspaceName: public std::unary_function<SetPeaksWorkspaces::value_type, bool>
+      {
+      private:
+        const QString m_wsName;
+      public:
+        MatchWorkspaceName(const QString& name) :
+            m_wsName(name)
+        {
+        }
+        bool operator()(SetPeaksWorkspaces::value_type ws)
+        {
+          const std::string wsName = ws->name();
+          const std::string toMatch = m_wsName.toStdString();
+          const bool result = (wsName == toMatch);
+          return result;
+        }
+      };
+    }
+
+    /**
+     * Get the peaks presenter correspoinding to a peaks workspace name.
+     * @param name
+     * @return Peaks presenter.
+     */
+    PeaksPresenter* CompositePeaksPresenter::getPeaksPresenter(const QString& name)
+    {
+      MatchWorkspaceName comparitor(name);
+      SubjectContainer::iterator presenterFound = m_subjects.end();
+      for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
+          ++presenterIterator)
+      {
+        auto wsOfSubject = (*presenterIterator)->presentedWorkspaces();
+        SetPeaksWorkspaces::iterator iteratorFound = std::find_if(wsOfSubject.begin(), wsOfSubject.end(), comparitor);
+        if (iteratorFound != wsOfSubject.end())
+        {
+          presenterFound = presenterIterator;
+          break;
+        }
+      }
+      if(presenterFound == m_subjects.end())
+      {
+        throw std::invalid_argument("Cannot find peaks workspace called :" + name.toStdString());
+      }
+      return (*presenterFound).get();
+    }
+
+    /**
+     * Register an owning presenter for this object.
+     * @param owner
+     */
+    void CompositePeaksPresenter::registerOwningPresenter(UpdateableOnDemand* owner)
+    {
+      m_owner = owner;
+    }
+
+    /**
+     * Perform steps associated with an update. Driven by nested presenters.
+     */
+    void CompositePeaksPresenter::performUpdate()
+    {
+      for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
+          ++presenterIterator)
+      {
+        auto presenter = (*presenterIterator);
+        const int pos = static_cast<int>(std::distance(m_subjects.begin(), presenterIterator));
+        m_palette.setBackgroundColour(pos, presenter->getBackgroundColor());
+        m_palette.setForegroundColour(pos, presenter->getForegroundColor());
+
+        if (m_owner)
+        {
+          m_owner->performUpdate();
+        }
+      }
+    }
+
+    namespace
+    {
+      // Private helper class
+      class MatchPointer: public std::unary_function<bool, PeaksPresenter_sptr>
+      {
+      private:
+        PeaksPresenter* m_toFind;
+      public:
+        MatchPointer(PeaksPresenter* toFind) :
+            m_toFind(toFind)
+        {
+        }
+        bool operator()(PeaksPresenter_sptr candidate)
+        {
+          return candidate.get() == m_toFind;
+        }
+      };
+    }
+
+    /**
+     * Zoom to a peak
+     * @param presenter: Holds the peaks workspace.
+     * @param peakIndex: The peak index.
+     */
+    void CompositePeaksPresenter::zoomToPeak(PeaksPresenter* const presenter, const int peakIndex)
+    {
+
+      MatchPointer comparitor(presenter);
+      m_zoomedPeakIndex = peakIndex;
+      SubjectContainer::iterator it = std::find_if(m_subjects.begin(), m_subjects.end(), comparitor);
+      if( it == m_subjects.end())
+      {
+        throw std::invalid_argument("Cannot file subject presenter at CompositePeaksPresenter::zoomToPeak");
+      }
+      const PeakBoundingBox& box = presenter->getBoundingBox(peakIndex);
+      m_zoomablePlottingWidget->zoomToRectangle(box);
+      m_zoomedPresenter = *it;
+      m_zoomedPeakIndex = peakIndex;
+      m_owner->performUpdate();
+    }
+
+    /**
+     * Determine if the presenter is hidden.
+     * @param peaksWS to use to find the right presenter.
+     * @return True if hidden.
+     */
+    bool CompositePeaksPresenter::getIsHidden(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const
+    {
+      auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+      auto subjectPresenter = *iterator;
+      return subjectPresenter->isHidden();
+    }
+
+    /**
+     * Reset the zoom.
+     * Forget any optional zoom extents.
+     */
+    void CompositePeaksPresenter::resetZoom()
+    {
+      m_zoomedPeakIndex = -1;
+      m_zoomedPresenter.reset();
+      m_owner->performUpdate(); // This tells any 'listening GUIs' to sort themselves out.
+    }
+
+    /**
+     * @return an optional zoomed peak presenter.
+     */
+    boost::optional<PeaksPresenter_sptr> CompositePeaksPresenter::getZoomedPeakPresenter() const
+    {
+      return m_zoomedPresenter;
+    }
+
+    /**
+     * @return a zoomed peak index.
+     */
+    int CompositePeaksPresenter::getZoomedPeakIndex() const
+    {
+      return m_zoomedPeakIndex;
     }
 
   }

@@ -99,11 +99,19 @@ void UserFunctionDialog::loadFunctions()
  */
 void UserFunctionDialog::updateCategories()
 {
+  // store the name of the current item
+  QString currentCategory = getCurrentCategory();
   m_uiForm.lstCategory->clear();
-  QSet<QString> cats = names();
+  QSet<QString> cats = categoryNames();
   foreach(QString cat ,cats)
   {
     m_uiForm.lstCategory->addItem(cat);
+  }
+  // try to restore current item selection
+  auto items = m_uiForm.lstCategory->findItems( currentCategory, Qt::MatchExactly );
+  if ( !items.isEmpty() )
+  {
+      m_uiForm.lstCategory->setCurrentItem( items[0] );
   }
 }
 
@@ -113,7 +121,7 @@ void UserFunctionDialog::updateCategories()
  */
 void UserFunctionDialog::selectCategory(const QString& cat)
 {
-  QSet<QString> funs = names(cat);
+  QSet<QString> funs = functionNames(cat);
   m_uiForm.lstFunction->clear();
   foreach(QString fun ,funs)
   {
@@ -286,36 +294,53 @@ void UserFunctionDialog::updateFunction()
 }
 
 /**
- * Returns function names: If the input cat parameter is empty the returned set
- * contains funtion categories, otherwise it returns function names in category cat.
- * @param cat :: The category for which functions will be returned.
- * @return A set of funtion names.
+ * Returns a list of category names
  */
-QSet<QString> UserFunctionDialog::names(const QString& cat)const
+QSet<QString> UserFunctionDialog::categoryNames() const
 {
-  QSet<QString> out;
-  if (cat.isEmpty())
-  {
+    QSet<QString> out;
     QMap<QString,QString>::const_iterator it = m_funs.begin();
     for(; it != m_funs.end(); ++it)
     {
       QStringList cn = it.key().split('.');
       out.insert(cn[0]);
     }
-  }
-  else
+    return out;
+}
+
+/**
+ * Returns function names in category cat.
+ * @param cat :: The category for which functions will be returned.
+ * @return A set of funtion names.
+ */
+QSet<QString> UserFunctionDialog::functionNames(const QString& cat)const
+{
+  QSet<QString> out;
+  QMap<QString,QString>::const_iterator it = m_funs.begin();
+  for(; it != m_funs.end(); ++it)
   {
-    QMap<QString,QString>::const_iterator it = m_funs.begin();
-    for(; it != m_funs.end(); ++it)
-    {
       QStringList cn = it.key().split('.');
       if (cn[0] == cat)
       {
         out.insert(cn[1]);
       }
-    }
   }
   return out;
+}
+
+/**
+  * Get the name of currently selected category. If no category is selected returns
+  * empty string.
+  */
+QString UserFunctionDialog::getCurrentCategory() const
+{
+    QString cur_category;
+    QListWidgetItem *currentCategoryItem = m_uiForm.lstCategory->currentItem();
+    if ( currentCategoryItem )
+    {
+        cur_category = m_uiForm.lstCategory->currentItem()->text();
+    }
+    return cur_category;
 }
 
 /**
@@ -323,7 +348,9 @@ QSet<QString> UserFunctionDialog::names(const QString& cat)const
  */
 void UserFunctionDialog::saveFunction()
 {
-  QString cur_category = m_uiForm.lstCategory->currentItem()->text();
+  // select one of user-defined categories
+  QString cur_category = getCurrentCategory();
+
   if (cur_category == "Base" || cur_category == "Built-in")
   {
     cur_category = "";
@@ -345,7 +372,7 @@ void UserFunctionDialog::saveFunction()
     QList<QListWidgetItem*> items = m_uiForm.lstCategory->findItems(cat,Qt::MatchExactly);
     if ( !items.isEmpty() )
     {// check if a function with this name already exists
-      const QSet<QString> functions = names(cat);
+      const QSet<QString> functions = functionNames(cat);
       QSet<QString>::const_iterator found = functions.find(fun);
       if (found != functions.end() &&
         QMessageBox::question(this,"Mantid","A function with name "+fun+" already exists in category "+cat+".\n"
@@ -406,6 +433,7 @@ void UserFunctionDialog::removeCurrentFunction()
     }
   }
   selectCategory(cat);
+  saveToFile();
 }
 
 QStringList UserFunctionDialog::categories()const

@@ -324,14 +324,14 @@ double gauss_multi_peak_d (const gsl_vector * x, void *params) {
         a[i] = sqrt(M_2_PI)*gsl_vector_get(x, 3*i)/wi;
         w2[i] = wi*wi;
     }
-    double t;
+
     for (i = 0; i < n; i++) {
         double res = 0;
         for (j = 0; j < peaks; j++) {
             double diff=X[i]-xc[j];
             res+= a[j]*exp(-2*diff*diff/w2[j]);
         }
-        t = (res+offset-Y[i])/sigma[i];
+        double t = (res+offset-Y[i])/sigma[i];
         val += t*t;
     }
     delete[] a;
@@ -417,26 +417,25 @@ double lorentz_multi_peak_d (const gsl_vector * x, void *params) {
     double *xc = new double[peaks];
     double *w = new double[peaks];
     double offset = gsl_vector_get (x, p-1);
-    size_t i,j;
-    double val=0,t;
-    for (i = 0; i < peaks; i++) {
+    double val=0;
+    for (size_t i = 0; i < peaks; i++) {
         a[i] = gsl_vector_get(x, 3*i);
         xc[i] = gsl_vector_get(x, 3*i+1);
         w[i] = gsl_vector_get(x, 3*i+2);
     }
-    for (i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         double res = 0;
-        for (j = 0; j < peaks; j++) {
+        for (size_t j = 0; j < peaks; j++) {
             double diff = X[i]-xc[j];
             res += a[j]*w[j]/(4*diff*diff+w[j]*w[j]);
         }
-        t = (M_2_PI*res + offset - Y[i])/sigma[i];
+        double t = (M_2_PI*res + offset - Y[i])/sigma[i];
         val += t*t;
     }
     delete[] a;
     delete[] xc;
     delete[] w;
-    return GSL_SUCCESS;
+    return val;
 }
 int lorentz_multi_peak_df (const gsl_vector * x, void *params, gsl_matrix * J) {
     size_t n = ((struct FitData *)params)->n;
@@ -498,6 +497,7 @@ int user_f(const gsl_vector * x, void *params, gsl_vector * f) {
         }
         parser.SetExpr(function);
         for (int j = 0; j < (int)n; j++) {
+            // cppcheck-suppress unreadVariable
             xvar=X[j];
             gsl_vector_set (f, j, (parser.Eval() - Y[j])/sigma[j]);
         }
@@ -529,6 +529,7 @@ double user_d(const gsl_vector * x, void *params) {
         }
         parser.SetExpr(function);
         for (int j = 0; j < (int)n; j++) {
+            // cppcheck-suppress unreadVariable
             xvar=X[j];
             double t=(parser.Eval() - Y[j])/sigma[j];
             val+=t*t;
@@ -559,6 +560,7 @@ int user_df(const gsl_vector *x, void *params, gsl_matrix *J) {
         }
         parser.SetExpr(function);
         for (int i = 0; i<(int)n; i++) {
+            // cppcheck-suppress unreadVariable
             xvar = X[i];
             for (int j=0; j<(int)p; j++)
                 gsl_matrix_set (J, i, j, 1/sigma[i]*parser.Diff(&param[j], param[j]));

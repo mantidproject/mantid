@@ -57,6 +57,45 @@ namespace MantidQt
     }
 
     /**
+     * Get whether file or workspace input is currently being shown.
+     *
+     * Returns 0 for file view and 1 for workspace view
+     *
+     * @return :: index of the visible view 
+     */
+    int DataSelector::getCurrentView() const
+    {
+      return m_uiForm.stackedDataSelect->currentIndex();
+    }
+
+    /**
+     * Check if the data selector is in a valid state
+     *
+     * Checks using the relvant widgets isValid method depending
+     * on what view is currently being shown
+     *
+     * @return :: If the data selector is valid
+     */
+    bool DataSelector::isValid() const
+    {
+      bool isValid = false;
+
+      switch(getCurrentView())
+      {
+        case 0:
+          // file view is visible
+          isValid = m_uiForm.rfFileInput->isValid();
+          break;
+        case 1:
+          // workspace view is visible
+          isValid = m_uiForm.wsWorkspaceInput->isValid();
+          break;
+      }
+
+      return isValid;
+    }
+
+    /**
      * Attempt to load a file if the widget is set to attempt auto-loading
      *
      * Function creates an instance of the load algorithm and attaches it to a

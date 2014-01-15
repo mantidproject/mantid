@@ -1,27 +1,23 @@
 set ( SRC_FILES
 	src/AlgorithmSelectorWidget.cpp
+	src/CatalogHelper.cpp
+	src/CatalogSearch.cpp
 	src/CheckboxHeader.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
-	src/FindReplaceDialog.cpp
 	src/FindDialog.cpp
+	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/FunctionBrowser.cpp
-	src/ICatAdvancedSearch.cpp
-	src/ICatInvestigation.cpp
-	src/ICatMyDataSearch.cpp
-	src/ICatSearch.cpp
-	src/ICatSearch2.cpp
-	src/ICatHelper.cpp
-	src/ICatUtils.cpp
 	src/InstrumentSelector.cpp
-	src/MessageDisplay.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
+	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
 	src/MuonFitPropertyBrowser.cpp
+	src/MuonSequentialFitDialog.cpp
+	src/ProcessingAlgoWidget.cpp
 	src/PropertyHandler.cpp
-    src/ProcessingAlgoWidget.cpp
 	src/RangeSelector.cpp
 	src/RenameParDialog.cpp
 	src/SafeQwtPlot.cpp
@@ -35,32 +31,22 @@ set ( SRC_FILES
 	src/pythonCalc.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES 
-    src/ICatAdvancedSearch.cpp
-    src/ICatSearch.cpp
-)
-
 # Header files with Q_OBJECT that qmake will "moc"
 set ( MOC_FILES 
-	inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
-	inc/MantidQtMantidWidgets/CheckboxHeader.h
-	inc/MantidQtMantidWidgets/DataSelector.h
+	  inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
+	  inc/MantidQtMantidWidgets/CheckboxHeader.h
+	  inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
-    inc/MantidQtMantidWidgets/ICatAdvancedSearch.h
-    inc/MantidQtMantidWidgets/ICatInvestigation.h
-    inc/MantidQtMantidWidgets/ICatMyDataSearch.h
-    inc/MantidQtMantidWidgets/ICatSearch.h
-    inc/MantidQtMantidWidgets/ICatSearch2.h
-    inc/MantidQtMantidWidgets/ICatHelper.h
-    inc/MantidQtMantidWidgets/ICatUtils.h
+    inc/MantidQtMantidWidgets/CatalogSearch.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
+    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
@@ -68,7 +54,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/pythonCalc.h
     inc/MantidQtMantidWidgets/RangeSelector.h
     inc/MantidQtMantidWidgets/RenameParDialog.h
-	inc/MantidQtMantidWidgets/SafeQwtPlot.h
+	  inc/MantidQtMantidWidgets/SafeQwtPlot.h
     inc/MantidQtMantidWidgets/SaveWorkspaces.h
     inc/MantidQtMantidWidgets/ScriptEditor.h
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
@@ -81,20 +67,18 @@ set ( MOC_FILES
 # Add the include files are NOT already in MOC_FILES
 set ( INC_FILES
     ${MOC_FILES}
+    inc/MantidQtMantidWidgets/CatalogHelper.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
 
 # QtDesigner UI files to process
 set ( UI_FILES 
-	inc/MantidQtMantidWidgets/DataSelector.ui
-    inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
-    inc/MantidQtMantidWidgets/ICatInvestigation.ui
-    inc/MantidQtMantidWidgets/ICatMyDataSearch.ui
-    inc/MantidQtMantidWidgets/ICatSearch.ui
-    inc/MantidQtMantidWidgets/ICatSearch2.ui
-    inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
+	  inc/MantidQtMantidWidgets/DataSelector.ui
+    inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
+    inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
+    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui

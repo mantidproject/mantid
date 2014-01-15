@@ -40,7 +40,7 @@ namespace MDEvents
   {
   public:
   
-    MDGridBox(boost::shared_ptr<Mantid::API::BoxController> &bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
+    MDGridBox(boost::shared_ptr<API::BoxController> &bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
     MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box);
@@ -83,6 +83,8 @@ namespace MDEvents
    size_t getNumDims() const;
    size_t getNumMDBoxes() const;
    size_t getNumChildren() const;
+  /// to avoid casting (which need also the number of dimensions) method say if Node is a box. if not, it is gridbox
+    virtual bool isBox()const{return false;}
 
    
     size_t getChildIndexFromID(size_t childId) const;

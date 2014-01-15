@@ -8,7 +8,6 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include <string>
-#include <iostream>
 #include <sstream>
 #include <typeinfo>
 #include <vector>

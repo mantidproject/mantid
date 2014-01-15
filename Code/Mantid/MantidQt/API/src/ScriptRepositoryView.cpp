@@ -4,6 +4,7 @@
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include <QMessageBox>
 #include <QTime>
 #include <QCoreApplication>

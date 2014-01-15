@@ -441,11 +441,10 @@ void PoldiAutoCorrelation5::exec()
 					int iicmin = static_cast<int>(int(cmin)%nb_time_elmt);                     // modulo for the equivalent int
 					int iicmax = static_cast<int>(int(cmax)%nb_time_elmt);
 
-					double I(0.0), delta_q(0.0);
 					if(iicmax>iicmin){
 						for(int k = iicmin; k<iicmax; k++){
-							delta_q = min(k+1,icmax) - max(k,icmin);                   // range hight limit - range low limit
-							I = nhe3(static_cast<int>(wire),k);
+							double delta_q = min(k+1,icmax) - max(k,icmin);                   // range hight limit - range low limit
+							double I = nhe3(static_cast<int>(wire),k);
 							cmess[slit] += I*delta_q/float(max(1.,I));
 							csigm[slit] +=   delta_q/float(max(1.,I));
 						}
@@ -527,10 +526,8 @@ void PoldiAutoCorrelation5::exec()
 	}
 
 	g_log.debug() << "_Poldi -        dint                  " <<  dint[5] << " " << dint [100]  << std::endl;
-	vector<double> qi; qi.resize(n_d_space);
 	vector<double> qj; qj.resize(n_d_space);
 	for(size_t i=0; i<n_d_space; i++){
-		qi[i] = 2.*M_PI/(dspace1+float(i)*dspace2);
 		qj[n_d_space-1-i] = 2.*M_PI/(dspace1+float(i)*dspace2);
 	}
 

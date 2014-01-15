@@ -30,6 +30,7 @@
 #Make the reduction module available
 from ISISCommandInterface import *
 from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
 sanslog = Logger.get("SANS")
 import copy
@@ -127,6 +128,11 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     ins_name = ReductionSingleton().instrument.name()
     # is used for SaveCanSAS1D go give the detectors names
     detnames = ', '.join(ReductionSingleton().instrument.listDetectors())
+
+    # LARMOR has just one detector, but, it defines two because ISISInstrument is defined as two banks! #8395
+    if ins_name == 'LARMOR': 
+        detnames = ReductionSingleton().instrument.cur_detector().name()
+
     scale_shift = {'scale':1.0000, 'shift':0.0000}
     #first copy the user settings in case running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
@@ -212,8 +218,15 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
         if file:
+            save_names = []
+            for n in names:
+                w = mtd[n]
+                if isinstance(w,WorkspaceGroup):
+                    save_names.extend(w.getNames())
+                else:
+                    save_names.append(n)
             for algor in saveAlgs.keys():
-                for workspace_name in names:
+                for workspace_name in save_names:
                     #add the file extension, important when saving different types of file so they don't over-write each other
                     ext = saveAlgs[algor]
                     if not ext.startswith('.'):
@@ -289,9 +302,13 @@ def read_run(runs, run_role, format):
             return
 
     run_file, period = parse_run(run_file, format)
-    run_ws = eval(COMMAND[run_role] + 'run_file, period=period)[0]')
+    run_ws = eval(COMMAND[run_role] + 'run_file, period=period)')    
     if not run_ws:
         raise SkipReduction('Cannot load ' + run_role + ' run "' + run_file + '"')
+
+    #AssignCan and AssignSample will change signature for: ws_name = AssignCan 
+    if isinstance(run_ws, tuple):
+        return run_ws[0]
     return run_ws
 
 def read_trans_runs(runs, sample_or_can, format):

@@ -18,6 +18,7 @@
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
 #include <deque>
+#include <iostream>
 #include <stack>
 
 namespace Mantid
@@ -882,12 +883,12 @@ namespace Mantid
       // angles. This could be optimised further e.g. by
       // using a light weight version of the interceptSurface method - this does more work
       // than is necessary in this application.
-      // Accuracy is of the order of 1% for objects with an accurate boundng box, though
+      // Accuracy is of the order of 1% for objects with an accurate bounding box, though
       // less in the case of high aspect ratios.
       //
       // resBB controls accuracy and cost - linear accuracy improvement with increasing res,
       // but quadratic increase in run time. If no bounding box found, resNoBB used instead.
-      const int resNoBB = 200, resBB = 100, resPhiMin = 10;
+      const int resNoBB = 200, resPhiMin = 10;
       int res = resNoBB, itheta, jphi, resPhi;
       double theta, phi, sum, dphi, dtheta;
       if (this->isValid(observer) && !this->isOnSide(observer))
@@ -907,6 +908,7 @@ namespace Mantid
         useBB = usePt = true;
         thetaMax = boundingBox.angularWidth(observer);
         ptInObject = boundingBox.centrePoint();
+        const int resBB = 100;
         res = resBB;
       }
       // Try and find a point in the object if useful bounding box not found
@@ -1020,7 +1022,7 @@ namespace Mantid
       const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
       const double denom = modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
       if (denom != 0.0)
-        return 2.0 * atan(scalTripProd / denom);
+        return 2.0 * atan2(scalTripProd, denom);
       else
         return 0.0; // not certain this is correct
     }

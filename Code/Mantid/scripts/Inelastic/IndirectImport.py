@@ -77,8 +77,8 @@ def import_f2py(lib_base_name):
     modules, which hopefully makes the other Indirect scripts a lot less messy.
     
     @param lib_base_name :: is the prefix of the library name.  For example, 
-    the CEfit_lnx64.so and CEfit_win32.pyd libraries share the same base name 
-    of "CEfit".
+    the QLres_lnx64.so and QLres_win32.pyd libraries share the same base name 
+    of "QLres".
     
     @returns the imported module.
     '''

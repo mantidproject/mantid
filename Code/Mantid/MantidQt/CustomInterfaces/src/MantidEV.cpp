@@ -1060,7 +1060,7 @@ void MantidEV::integratePeaks_slot()
    bool sphere_integrate    = m_uiForm.SphereIntegration_rbtn->isChecked();
    bool fit_integrate       = m_uiForm.TwoDFitIntegration_rbtn->isChecked();
    bool ellipsoid_integrate = m_uiForm.EllipsoidIntegration_rbtn->isChecked();
-   bool use_cylinder_integration = true; //m_uiForm.use_cylinder_integration_ckbx->isChecked();
+   bool use_cylinder_integration = m_uiForm.Cylinder_ckbx->isChecked();
 
    if ( sphere_integrate || use_cylinder_integration)
    {
@@ -1080,8 +1080,6 @@ void MantidEV::integratePeaks_slot()
        return;
 
      bool integrate_edge = m_uiForm.IntegrateEdge_ckbx->isChecked();
-
-     bool use_cylinder_integration = m_uiForm.Cylinder_ckbx->isChecked();
 
      if ( !getPositiveDouble(m_uiForm.CylinderLength_ledt, cylinder_length))
             return;
@@ -2037,7 +2035,7 @@ void MantidEV::loadSettings( const std::string & filename )
                                                   // Load Tab 1, Select Data 
   restore( state, "SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt );
   restore( state, "MDworkspace_ledt", m_uiForm.MDworkspace_ledt );
-  m_uiForm.loadDataGroupBox->setChecked( state->value("LoadEventFile_rbtn", false).toBool() );
+  m_uiForm.loadDataGroupBox->setChecked( state->value("LoadEventFile_rbtn", true).toBool() );
   restore( state, "EventFileName_ledt", m_uiForm.EventFileName_ledt );
   restore( state, "MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt );
   restore( state, "LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx );
@@ -2045,7 +2043,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "CalFileName_ledt", m_uiForm.CalFileName_ledt );
   restore( state, "CalFileName2_ledt", m_uiForm.CalFileName2_ledt );
   setEnabledLoadCalFiles_slot();
-  m_uiForm.convertToMDGroupBox->setChecked( state->value("ConvertToMD_rbtn", false).toBool() );
+  m_uiForm.convertToMDGroupBox->setChecked( state->value("ConvertToMD_rbtn", true).toBool() );
                                                   // Load Tab 2, Find Peaks
   restore( state, "PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt );
   restore( state, "FindPeaks_rbtn", m_uiForm.FindPeaks_rbtn );

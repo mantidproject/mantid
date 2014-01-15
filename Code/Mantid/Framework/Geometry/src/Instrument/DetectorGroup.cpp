@@ -144,12 +144,11 @@ namespace Mantid
     double DetectorGroup::getSignedTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis, const Kernel::V3D& instrumentUp) const
     {
       double result = 0.0;
-      double angle = 0.0;
       DetCollection::const_iterator it;
       for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
       {
         const V3D sampleDetVec = it->second->getPos() - observer;
-        angle = sampleDetVec.angle(axis);
+        double angle = sampleDetVec.angle(axis);
 
         V3D cross = axis.cross_prod(sampleDetVec);
         V3D normToSurface = axis.cross_prod(instrumentUp);

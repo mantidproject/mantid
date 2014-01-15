@@ -295,6 +295,8 @@ namespace VATES
     // Add points and scalars
     visualDataSet->SetPoints(points);
     visualDataSet->GetCellData()->SetScalars(signal);
+
+    delete [] ids;
   }
 
   /**

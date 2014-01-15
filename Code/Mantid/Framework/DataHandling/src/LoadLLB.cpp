@@ -223,9 +223,6 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 
 int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
 
-	std::vector<int> listOfFoundEPP;
-
-	
 	std::vector<int> cumulatedSumOfSpectras(m_numberOfChannels, 0);
 	for (size_t i = 0; i < m_numberOfTubes; i++) 
 	{

@@ -27,7 +27,8 @@ namespace MantidQt
       ~UserFunctionDialog();
       QStringList categories()const;
       QString getFormula()const{return m_uiForm.teUserFunction->toPlainText();}
-    public slots:
+
+    private slots:
       void selectCategory(const QString& cat);
       void selectFunction(const QString& fun);
       void addExpression();
@@ -36,20 +37,23 @@ namespace MantidQt
       void updateCategories();
       void updateFunction();
       void helpClicked();
-    protected:
-      /// User interface elements
-      Ui::UserFunctionDialog m_uiForm;
+
+    private:
+      bool eventFilter(QObject *obj, QEvent *ev);
 
       void loadFunctions();
       void checkParameters(QString& expr);
-      QSet<QString> names(const QString& key = "")const;
-      bool eventFilter(QObject *obj, QEvent *ev);
+      QSet<QString> categoryNames()const;
+      QSet<QString> functionNames(const QString& cat)const;
+      QString getCurrentCategory()const;
       QString getFunction(const QString& cat,const QString& fun)const;
       QString getComment(const QString& cat,const QString& fun)const;
       void setFunction(const QString& cat,const QString& fun,const QString& expr,const QString& comment = "");
       bool isBuiltin(const QString& cat)const;
       void saveToFile();
-    private:
+
+      /// User interface elements
+      Ui::UserFunctionDialog m_uiForm;
 
       /// Container for prerecorded functions: key = category.name, value = formula
       /// Records with key = category.name.comment contain comments to corresponding functions

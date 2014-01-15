@@ -4,6 +4,7 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/Path.h>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -11,7 +12,6 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <iosfwd>
 #include <iostream>
 #include <list>
 #include <sstream>
@@ -330,6 +330,19 @@ namespace Mantid
         return Line;
       }
 
+      /**
+       * Peek at a line without extracting it from the stream
+       */
+      std::string peekLine(std::istream & fh)
+      {
+        std::string str;
+        std::streampos pos = fh.tellg();
+        getline(fh, str);
+        fh.seekg(pos);
+
+        return strip(str);
+      }
+
       //------------------------------------------------------------------------------------------------
       /**
        *  Determines if a string is only spaces
@@ -383,13 +396,21 @@ namespace Mantid
        */
       std::string strip(const std::string& A)
       {
-        std::string::size_type posA=A.find_first_not_of(" ");
-        std::string::size_type posB=A.find_last_not_of(" ");
-        if (posA==std::string::npos)
-          return "";
-        return A.substr(posA,1+posB-posA);
+        std::string result(A);
+        boost::trim(result);
+        return result;
       }
 
+      /**
+      * Return true if the line is to be skipped (starts with #).
+      * @param line :: The line to be checked
+      * @return True if the line should be skipped
+      */
+      bool skipLine(const std::string & line)
+      {
+        // Empty or comment
+        return ( line.empty() || boost::starts_with(line, "#") );
+      }
 
       //------------------------------------------------------------------------------------------------
       /**
@@ -707,7 +728,7 @@ namespace Mantid
        * @return a string
        */
       template<typename T>
-      std::string toString(const T value)
+      std::string toString(const T &value)
       {
         std::ostringstream mess;
         mess << value;
@@ -1153,15 +1174,15 @@ namespace Mantid
       template MANTID_KERNEL_DLL int convert(const char*,int&);
       template MANTID_KERNEL_DLL int convert(const char*,std::size_t&);
 
-      template MANTID_KERNEL_DLL std::string toString(const double value);
-      template MANTID_KERNEL_DLL std::string toString(const float value);
-      template MANTID_KERNEL_DLL std::string toString(const int value);
-      template MANTID_KERNEL_DLL std::string toString(const uint16_t value);
-      template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches uint64_t on Linux 64 & Win 64
+      template MANTID_KERNEL_DLL std::string toString(const double &value);
+      template MANTID_KERNEL_DLL std::string toString(const float &value);
+      template MANTID_KERNEL_DLL std::string toString(const int &value);
+      template MANTID_KERNEL_DLL std::string toString(const uint16_t &value);
+      template MANTID_KERNEL_DLL std::string toString(const size_t &value); // Matches uint64_t on Linux 64 & Win 64
 #if defined(__APPLE__) || ( defined(_WIN32) && !defined(_WIN64)) || (defined(__GNUC__) && !defined(__LP64__)) // Mac or 32-bit compiler
-      template MANTID_KERNEL_DLL std::string toString(const uint64_t value);
+      template MANTID_KERNEL_DLL std::string toString(const uint64_t &value);
 #endif
-      template MANTID_KERNEL_DLL std::string toString(const std::string value);
+      template MANTID_KERNEL_DLL std::string toString(const std::string &value);
 
       template MANTID_KERNEL_DLL std::string toString(const std::vector<int> &value);
 

@@ -50,7 +50,7 @@ UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector & other)
 }
 
 /** Assignment operator */
-const UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector & other)
+UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector & other)
 {
   u = other.u;
   v = other.v;
@@ -729,9 +729,8 @@ void UnwrappedSurface::calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos
 //------------------------------------------------------------------------------
 /** Calculate the size of the detector in U/V
  *
- * @param udet
- * @param X
- * @param Y
+ * @param udet :: UwrappedDetector struct to calculate the size for. udet's size fields 
+ * are updated by this method.
  */
 void UnwrappedSurface::calcSize(UnwrappedDetector& udet)
 {

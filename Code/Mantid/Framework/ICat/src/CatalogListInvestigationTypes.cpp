@@ -35,18 +35,8 @@ namespace Mantid
     /// exec method
     void CatalogListInvestigationTypes::exec()
     {
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
-
       std::vector<std::string> investTypes;
-      try
-      {
-        catalog->listInvestigationTypes(investTypes);
-      }
-      catch(std::runtime_error&)
-      {
-        setProperty("IsValid",false);
-        throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
-      }
+      CatalogAlgorithmHelper().createCatalog()->listInvestigationTypes(investTypes);
       setProperty("InvestigationTypes",investTypes);
     }
 

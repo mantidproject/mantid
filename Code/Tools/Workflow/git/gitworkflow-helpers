@@ -59,13 +59,13 @@ check_branch_exists() {
 # and empty string is returned
 find_branch_on_remote() {
     if [ ! $# -eq 1 ]; then
-	echo "find_branch_on_remote requires a hint"
-	exit 1
+        echo "find_branch_on_remote requires a hint"
+        exit 1
     fi
     remote_branches=$(git branch -r --no-color | grep -E "${1}" | grep origin)
     nbranches=$(echo "${remote_branches}" | wc -l) # the quotes are necessary to make it keep the separate lines!
     if [ $nbranches -eq 1 ]; then
-	echo ${remote_branches}
+        echo ${remote_branches}
     fi
 }
 
@@ -86,8 +86,8 @@ git_halt_on_error() {
     echo "git $@"
     git "$@"
     if [ $? -gt 0 ]; then
-	echo "An error occurred, cannot continue"
-	exit 1
+        echo "An error occurred, cannot continue"
+        exit 1
     fi
 }
 
@@ -114,14 +114,14 @@ check_git_repo() {
 # Checks if the first branch has been fully merged into the second
 branch_is_merged() {
     if [ ! $# -eq 2 ]; then
-	exit 1
+        exit 1
     fi
     merge_base_sha1=$(git merge-base $1 $2)
     branch_sha1=$(git rev-parse $1)
     if [ ! "${merge_base_sha1}" = ${branch_sha1} ]; then
-	return 0
+        return 0
     else
-	return 1
+        return 1
     fi
 }
 
@@ -129,9 +129,9 @@ branch_is_merged() {
 merge_in_progress() {
     git_dir="$(git rev-parse --show-toplevel)/.git"
     if [ -f ${git_dir}/MERGE_HEAD ]; then
-	retval=1
+        retval=1
     else
-	retval=0
+        retval=0
     fi
     return $retval
 }
@@ -140,9 +140,9 @@ merge_in_progress() {
 rebase_in_progress() {
     git_dir="$(git rev-parse --show-toplevel)/.git"
     if [ -d "${git_dir}"/rebase-merge -o -d "${git_dir}"/rebase-apply ]; then
-	retval=1
+        retval=1
     else
-	retval=0
+        retval=0
     fi
     return $retval
 }
@@ -150,8 +150,8 @@ rebase_in_progress() {
 # Publish given branch
 publish_branch() {
     if [ ! $# -eq 1 ]; then
-	echo "publish_branch requires a single local branchname argument"
-	exit 1
+        echo "publish_branch requires a single local branchname argument"
+        exit 1
     fi
     
     git_halt_on_error push origin $1
@@ -163,8 +163,8 @@ publish_branch() {
 # git rebase --preserve-merges origin/<branchname>
 update_branch_from_remote() {
     if [ ! $# -eq 1 ]; then
-	echo "update_branch_from_remote requires a single local branchname argument"
-	exit 1
+        echo "update_branch_from_remote requires a single local branchname argument"
+        exit 1
     fi
 
     git_halt_on_error fetch -p
@@ -174,8 +174,8 @@ update_branch_from_remote() {
 # Delete branch on remote
 delete_remote_branch() {
     if [ ! $# -eq 1 ]; then
-	echo "delete_remote_branch requires a single local branchname argument"
-	exit 1
+        echo "delete_remote_branch requires a single local branchname argument"
+        exit 1
     fi
     # Delete branch on the remote
     git_halt_on_error push origin :$1
@@ -184,20 +184,20 @@ delete_remote_branch() {
 # Delete branch locally
 delete_local_branch() {
     if [ ! $# -eq 1 ]; then
-	echo "delete_local_branch requires a single local branchname argument"
-	exit 1
+        echo "delete_local_branch requires a single local branchname argument"
+        exit 1
     fi
     # Delete local branch if there
     local_branch_exists $1
     if [ $? -eq 1 ]; then
-	git_halt_on_error branch -D $1
+        git_halt_on_error branch -D $1
     fi
 }
 
 # Construct address for compare view on github given the branch name
 github_compare_url() {
     if [ ! $# -eq 1 ]; then
-	echo "github_compare_address requires a single argument giving the branch name"
+        echo "github_compare_address requires a single argument giving the branch name"
     fi
     # Any forward slashes must be replaced with semicolons
     changes_branch_gh=$(echo $1 | sed -e "s@/@;@g")
@@ -211,7 +211,7 @@ github_compare_url() {
 # Get the author name
 get_author_name() {
     if [ ! $# -eq 1 ]; then
-	echo "get_contact_info requires a single argument giving the branch name"
+        echo "get_contact_info requires a single argument giving the branch name"
     fi
     git log -1 $1 --format="format:%an"
 }
@@ -219,7 +219,7 @@ get_author_name() {
 # Get the author name
 get_author_email() {
     if [ ! $# -eq 1 ]; then
-	echo "get_contact_info requires a single argument giving the branch name"
+        echo "get_contact_info requires a single argument giving the branch name"
     fi
     git log -1 $1 --format="format:%ae"
 }
@@ -227,7 +227,7 @@ get_author_email() {
 # Removes a key and section if it is empty
 remove_config_value() {
     if [ ! $# -eq 1 ]; then
-	echo "remove_config_value requires the key as an arguments"
+        echo "remove_config_value requires the key as an arguments"
     fi
     # Clear saved config
     git config --unset $1
@@ -235,6 +235,6 @@ remove_config_value() {
     section_name=$(echo $1 | cut -d'.' -f 1,2)
     remaining_keys=$(git config --list | grep ${section_name})
     if [ -z "${remaining_keys}" ]; then
-	git config --remove-section ${section_name} 2> /dev/null
+        git config --remove-section ${section_name} 2> /dev/null
     fi
 }

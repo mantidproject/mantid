@@ -108,8 +108,6 @@ void SliceMDHisto::cutData(Mantid::API::IMDHistoWorkspace_sptr inWS,
 		  std::vector<int> start, std::vector<int> end, unsigned int dim)
 {
 	int length;
-	signal_t val;
-	size_t idx;
 
 	boost::shared_ptr<const IMDDimension> inDim = inWS->getDimension(dim);
 	boost::shared_ptr<const IMDDimension> outDim = outWS->getDimension(dim);
@@ -118,9 +116,9 @@ void SliceMDHisto::cutData(Mantid::API::IMDHistoWorkspace_sptr inWS,
 		MDHistoWorkspace_sptr outWSS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
 		for(int i = 0; i < length; i++){
 			sourceDim[dim] = inDim->getX(start[dim]+i);
-			val = inWS->getSignalAtCoord(sourceDim, static_cast<Mantid::API::MDNormalization>(0));
+			signal_t val = inWS->getSignalAtCoord(sourceDim, static_cast<Mantid::API::MDNormalization>(0));
 			targetDim[dim] = outDim->getX(i);
-			idx = outWSS->getLinearIndexAtCoord(targetDim);
+			size_t idx = outWSS->getLinearIndexAtCoord(targetDim);
 			outWS->setSignalAt(idx,val);
 			outWS->setErrorSquaredAt(idx,val);
 		}

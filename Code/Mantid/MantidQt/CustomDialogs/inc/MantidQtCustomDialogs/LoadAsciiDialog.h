@@ -70,7 +70,9 @@ private:
   /* GUI components */
   QLineEdit *m_lineFilename;
   QLineEdit *m_lineOutputWorkspace;
-  QComboBox  *m_separatorBox;
+  QLineEdit *m_lineCommentIndicator;
+  QLineEdit *m_lineCustomSeparator;
+  QComboBox *m_separatorBox;
 
 };
 

@@ -124,7 +124,7 @@ namespace Mantid
     }
     
     /** Write the data to the SPE file
-    *  @param outFile :: the file object to write to
+    *  @param outSPEFile :: the file object to write to
     *  @param inputWS :: the workspace to be saved
     */
     void SaveSPE::writeSPEFile(FILE * outSPEFile, const API::MatrixWorkspace_const_sptr &inputWS)
@@ -132,7 +132,7 @@ namespace Mantid
       const size_t nHist = inputWS->getNumberHistograms();
       m_nBins = inputWS->blocksize();
       // Number of Workspaces and Number of Energy Bins
-      FPRINTF_WITH_EXCEPTION(outSPEFile,"%8u%8u\n",static_cast<int>(nHist), static_cast<int>(m_nBins));
+      FPRINTF_WITH_EXCEPTION(outSPEFile,"%8u%8u\n",static_cast<unsigned int>(nHist), static_cast<unsigned int>(m_nBins));
       // Write the angle grid (dummy if no 'vertical' axis)
       size_t phiPoints(0);
       if ( inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric() )

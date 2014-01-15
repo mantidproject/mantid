@@ -409,12 +409,11 @@ void SpectrumDisplay::SetHGraph( double y )
   QVector<double> xData;
   QVector<double> yData;
 
-  double x_val;
   xData.push_back( x_min );                              // start at x_min
   yData.push_back( data[ row * n_cols ] );
   for ( size_t col = 0; col < n_cols; col++ )
   {
-    x_val = data_array->XOfColumn( col );
+    double x_val = data_array->XOfColumn( col );
     xData.push_back( x_val );                           // mark data at col
     yData.push_back( data[ row * n_cols + col ] );      // centers
   }
@@ -456,12 +455,12 @@ void SpectrumDisplay::SetVGraph( double x )
   QVector<double> v_xData;
   QVector<double> v_yData;
 
-  double y_val;
+
   v_yData.push_back( y_min );                     // start at y_min
   v_xData.push_back( data[col] );
-  for ( size_t row = 0; row < n_rows; row++ )     // mark data at row centers
+  for ( size_t row = 0; row < n_rows; row++ )     // mark data at row centres
   {
-    y_val = data_array->YOfRow( row );
+    double y_val = data_array->YOfRow( row );
     v_yData.push_back( y_val );
     v_xData.push_back( data[ row * n_cols + col ] );
   }

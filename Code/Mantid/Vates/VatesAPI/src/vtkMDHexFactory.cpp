@@ -173,6 +173,9 @@ namespace Mantid
         }
       } // for each box.
 
+      delete[] signalArray;
+      delete[] useBox;
+
       //Shrink to fit
       signals->Squeeze();
       visualDataSet->Squeeze();

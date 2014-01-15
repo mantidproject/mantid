@@ -117,7 +117,7 @@ namespace Kernel
   int BinFinder::bin(double x)
   {
     int index;
-    double min, max;
+    double min;
 
     //Too small?
     if (x < boundaries[0])
@@ -128,7 +128,7 @@ namespace Kernel
     for (i=0; i < numRegions; i++)
     {
       min = boundaries[i];
-      max = boundaries[i+1];
+      double max = boundaries[i+1];
       if ( (x >= min) && (x < max) )
         break;
     }

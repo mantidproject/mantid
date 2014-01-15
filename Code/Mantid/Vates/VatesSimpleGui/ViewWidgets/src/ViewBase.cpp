@@ -429,14 +429,6 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z)
 }
 
 /**
- * This function will handle axis scale updates. Most views will not do this,
- * so the default is to do nothing.
- */
-void ViewBase::setAxisScales()
-{
-}
-
-/**
  * This function is used to set the current state of the view between a
  * parallel projection and the normal projection.
  * @param state whether or not to use parallel projection

@@ -66,7 +66,7 @@ void QwtBarCurve::draw(QPainter *painter,
     painter->setPen(QwtPlotCurve::pen());
     painter->setBrush(QwtPlotCurve::brush());
 
-    int dx, dy, ref;
+    int ref;
 	double bar_width = 0;
 
     if (bar_style == Vertical)
@@ -76,7 +76,7 @@ void QwtBarCurve::draw(QPainter *painter,
 
 	if (bar_style == Vertical)
 	{
-		dx = abs(xMap.transform(x(from+1))-xMap.transform(x(from)));
+		int dx = abs(xMap.transform(x(from+1))-xMap.transform(x(from)));
 		for (int i=from+2; i<to; i++)
 		{
 			int min = abs(xMap.transform(x(i+1))-xMap.transform(x(i)));
@@ -87,7 +87,7 @@ void QwtBarCurve::draw(QPainter *painter,
 	}
 	else
 	{
-		dy = abs(yMap.transform(y(from+1))-yMap.transform(y(from)));
+		int dy = abs(yMap.transform(y(from+1))-yMap.transform(y(from)));
 		for (int i=from+2; i<to; i++)
 		{
 			int min = abs(yMap.transform(y(i+1))-yMap.transform(y(i)));

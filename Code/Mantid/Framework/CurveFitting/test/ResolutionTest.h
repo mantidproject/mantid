@@ -85,6 +85,20 @@ public:
 
 };
 
+class ResolutionTest_Jacobian: public Jacobian
+{
+public:
+    void set(size_t, size_t, double)
+    {
+        throw std::runtime_error("Set method shouldn't be called.");
+    }
+
+    double get(size_t, size_t)
+    {
+        throw std::runtime_error("Get method shouldn't be called.");
+    }
+};
+
 DECLARE_FUNCTION(ResolutionTest_Gauss);
 
 class ResolutionTest : public CxxTest::TestSuite
@@ -200,6 +214,8 @@ void tearDown()
     fit.setPropertyValue("WorkspaceIndex","0");
     fit.execute();
 
+    AnalysisDataService::Instance().clear();
+
   }
  
   void testForCategories()
@@ -208,6 +224,18 @@ void tearDown()
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "General" );
+  }
+
+  void test_derivatives_not_calculated()
+  {
+      auto ws = WorkspaceFactory::Instance().create("Workspace2D",1,10,10);
+      AnalysisDataService::Instance().add("ResolutionTest_WS",ws);
+      Resolution res;
+      res.setAttributeValue("Workspace","ResolutionTest_WS");
+      std::vector<double> x(10);
+      ResolutionTest_Jacobian jacobian;
+      TS_ASSERT_THROWS_NOTHING( res.functionDeriv1D(&jacobian, x.data(), 10) );
+      AnalysisDataService::Instance().clear();
   }
 
 private:

@@ -7,6 +7,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/ConventionalCell.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 
 namespace Mantid
@@ -217,13 +218,13 @@ namespace Geometry
     V3D a_dir;
     V3D b_dir;
     V3D c_dir;
-    IndexingUtils::GetABC( UB, a_dir, b_dir, c_dir );
+    OrientedLattice::GetABC( UB, a_dir, b_dir, c_dir );
 
     std::vector<V3D> edges;
     edges.push_back( a_dir );
     edges.push_back( b_dir );
     edges.push_back( c_dir );
-    std::sort( edges.begin(), edges.end(), IndexingUtils::CompareMagnitude );
+    std::sort( edges.begin(), edges.end(), V3D::CompareMagnitude );
 
     V3D a = edges[0];
     V3D b = edges[1];
@@ -234,7 +235,7 @@ namespace Geometry
     {
       c = c * (-1);
     } 
-    IndexingUtils::GetUB( UB, a, b, c );
+    OrientedLattice::GetUB( UB, a, b, c );
   }
 
 
@@ -253,7 +254,7 @@ namespace Geometry
     V3D a;
     V3D b;
     V3D c;
-    IndexingUtils::GetABC( UB, a, b, c );
+    OrientedLattice::GetABC( UB, a, b, c );
 
     double a_b_diff = fabs( a.norm() - b.norm() ) /
                       std::min( a.norm(), b.norm() );
@@ -268,11 +269,11 @@ namespace Geometry
                           // equal sides first.
     if ( a_c_diff <= a_b_diff && a_c_diff <= b_c_diff )
     {
-      IndexingUtils::GetUB( UB, c, a, b );
+      OrientedLattice::GetUB( UB, c, a, b );
     }
     else if ( b_c_diff <= a_b_diff && b_c_diff <= a_c_diff )
     {
-      IndexingUtils::GetUB( UB, b, c, a );
+      OrientedLattice::GetUB( UB, b, c, a );
     }
   
   }
@@ -292,7 +293,7 @@ namespace Geometry
     V3D a;
     V3D b;
     V3D c;
-    IndexingUtils::GetABC( UB, a, b, c );
+    OrientedLattice::GetABC( UB, a, b, c );
 
     double alpha = b.angle( c ) * 180.0/M_PI;
     double beta  = c.angle( a ) * 180.0/M_PI;
@@ -300,22 +301,22 @@ namespace Geometry
                                                 // degree angle last
     if ( fabs(alpha-90) > 20 )
     {
-      IndexingUtils::GetUB( UB, b, c, a );
+      OrientedLattice::GetUB( UB, b, c, a );
     }
     else if ( fabs(beta-90) > 20 )
     {
-      IndexingUtils::GetUB( UB, c, a, b );
+      OrientedLattice::GetUB( UB, c, a, b );
     }
                                                 // if the non 90 degree angle
                                                 // is about 60 degrees, make
                                                 // it about 120 degrees.
-    IndexingUtils::GetABC( UB, a, b, c );
+    OrientedLattice::GetABC( UB, a, b, c );
     double gamma = a.angle( b ) * 180.0/M_PI;
     if ( fabs( gamma - 60 ) < 10 )
     {
       a = a * ( -1 );                           // reflect a and c to change
       c = c * ( -1 );                           // alpha and gamma to their
-      IndexingUtils::GetUB( UB, a, b, c );      // supplementary angle
+      OrientedLattice::GetUB( UB, a, b, c );      // supplementary angle
     }
   }
 

@@ -379,7 +379,7 @@ bool Graph::isColorBarEnabled(int axis) const
 *  @param axis the aixs to check e.g. yright ...
 *  @return true if there is a log scale on that axis
 */
-bool Graph::isLog(const QwtPlot::Axis axis) const
+bool Graph::isLog(const QwtPlot::Axis& axis) const
 {
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
   return ( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 );
@@ -3152,7 +3152,12 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
     // Select only those column names which we can draw and search for any X columns specified
     for (int i = 0; i < names.count(); i++)
     {
-      int d = w->colPlotDesignation(w->colIndex(names[i]));
+      int c = w->colIndex(names[i]);
+      if (c < 0)
+      {
+        continue;
+      }
+      int d = w->colPlotDesignation(c);
 
       if (d == Table::Y || d == Table::xErr || d == Table::yErr || d == Table::Label)
       {

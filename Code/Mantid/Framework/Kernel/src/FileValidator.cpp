@@ -25,18 +25,17 @@ namespace Kernel
 // Initialize the logger
 Logger& FileValidator::g_log = Logger::get("FileValidator");
 
-/// Default constructor.
-FileValidator::FileValidator() : TypedValidator<std::string>(), m_extensions(), m_fullTest(true)
-{}
-
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
  *  @param testFileExists :: Flag indicating whether to test for existence of file (default: yes)
+ *  @param testCanWrite :: Flag to check if file writing permissible.
  */
-FileValidator::FileValidator(const std::vector<std::string>& extensions, bool testFileExists) :
+FileValidator::FileValidator(const std::vector<std::string>& extensions, bool testFileExists,
+                             bool testCanWrite) :
   TypedValidator<std::string>(),
   m_extensions(extensions.begin(),extensions.end()),
-  m_fullTest(testFileExists)
+  m_testExist(testFileExists),
+  m_testCanWrite(testCanWrite)
 {
   for_each(m_extensions.begin(), m_extensions.end(), lowercase());
 }
@@ -88,10 +87,74 @@ std::string FileValidator::checkValidity(const std::string &value) const
     }
   }
 
-  //If the file is required to exist check it is there
-  if ( m_fullTest && ( value.empty() || !Poco::File(value).exists() ) )
+  // create a variable for the absolute path to be used in error messages
+  std::string abspath(value);
+  if (!value.empty())
   {
-    return "File \"" + Poco::Path(value).getFileName() + "\" not found";
+    Poco::Path path(value);
+    if (path.isAbsolute())
+      abspath = path.toString();
+  }
+
+  //If the file is required to exist check it is there
+  if ( m_testExist && ( value.empty() || !Poco::File(value).exists() ) )
+  {
+    return "File \"" + abspath + "\" not found";
+  }
+
+  //If the file is required to be writable...
+  if (m_testCanWrite)
+  {
+    if (value.empty())
+      return "Cannot write to empty filename";
+
+    Poco::File file(value);
+    // the check for writable is different for whether or not a version exists
+    // this is taken from ConfigService near line 443
+    if (file.exists())
+    {
+      try
+      {
+        if (!file.canWrite())
+          return "File \"" + abspath + "\" cannot be written";
+      }
+      catch (std::exception &e)
+      {
+        g_log.information() << "Encountered exception while checking for writable: " << e.what();
+      }
+    }
+    else // if the file doesn't exist try to temporarily create one
+    {
+      try
+      {
+        Poco::Path direc(value);
+        if (direc.isAbsolute())
+        {
+          // look for an existing parent
+          while (!Poco::File(direc).exists())
+          {
+            direc = direc.parent();
+          }
+
+          // see if the directory exists
+          Poco::File direcFile(direc);
+          if (direcFile.exists() && direcFile.isDirectory())
+          {
+            if (direcFile.canWrite())
+              return "";
+            else
+              return "Cannot write to directory \"" + direc.toString() + "\"";
+          }
+        }
+
+        g_log.debug() << "Do not have enough information to validate \""
+                      << abspath << "\"\n";
+      }
+      catch (std::exception &e)
+      {
+        g_log.information() << "Encountered exception while checking for writable: " << e.what();
+      }
+    }
   }
 
   //Otherwise we are okay, file extensions are just a suggestion so no validation on them is necessary

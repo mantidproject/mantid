@@ -118,7 +118,7 @@ SmoothCurveDialog::SmoothCurveDialog(int method, QWidget* parent, Qt::WFlags fl 
 
 void SmoothCurveDialog::smooth()
 {
-    SmoothFilter *sf = new SmoothFilter((ApplicationWindow *)this->parent(), graph,
+    SmoothFilter *sf = new SmoothFilter(static_cast<ApplicationWindow *>(this->parent()), graph,
                                         boxName->currentText(), smooth_method);
     if (smooth_method == SmoothFilter::SavitzkyGolay)
     {

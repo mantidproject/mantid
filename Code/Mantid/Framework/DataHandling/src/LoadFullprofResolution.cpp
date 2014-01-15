@@ -1,6 +1,6 @@
 /*WIKI* 
 
-Load Fullprof resolution (.irf) file to TableWorkspace(s)
+Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instrument of a matrix workspace.
 
 *WIKI*/
 #include "MantidDataHandling/LoadFullprofResolution.h"
@@ -8,6 +8,14 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s)
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidAPI/InstrumentDataService.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidDataHandling/LoadParameterFile.h"
+
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/AutoPtr.h>
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
@@ -22,6 +30,12 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace std;
+using namespace Poco::XML;
+
+using Geometry::Instrument;
+using Geometry::Instrument_sptr;
+using Geometry::Instrument_const_sptr;
+using Mantid::Geometry::InstrumentDefinitionParser;
 
 namespace Mantid
 {
@@ -66,8 +80,8 @@ namespace DataHandling
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "Path to an Fullprof .irf file to load.");
 
-    // Output workspace
-    auto wsprop = new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace", "", Direction::Output);
+    // Output table workspace
+    auto wsprop = new WorkspaceProperty<API::ITableWorkspace>("OutputTableWorkspace", "", Direction::Output, PropertyMode::Optional);
     declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
     // Bank to import
@@ -75,6 +89,9 @@ namespace DataHandling
                     "Default is all banks contained in input .irf file.");
 
     // declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
+
+    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut, PropertyMode::Optional),
+        "Optional: A matrix workspace with the instrument to which we add the parameters from the Fullprof .irf file.");
 
     return;
   }
@@ -87,10 +104,14 @@ namespace DataHandling
     // Get input
     string datafile = getProperty("Filename");
     vector<int> outputbankids = getProperty("Banks");
+    MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
     // Import data
     vector<string> lines;
     loadFile(datafile, lines);
+
+    // Get Prof number
+    int nProf = getProfNumber(lines);
 
     // Examine bank information
     vector<int> vec_bankinirf;
@@ -159,15 +180,30 @@ namespace DataHandling
       int bankid = vec_bankids[i];
       g_log.debug() << "Parse bank " << bankid << " of total " << vec_bankids.size() << ".\n";
       map<string, double> parammap;
-      parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid]);
+      parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid], nProf);
       bankparammap.insert(make_pair(bankid, parammap));
     }
 
     // Generate output table workspace
-    API::ITableWorkspace_sptr outws = genTableWorkspace(bankparammap);
+    API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
 
-    // 6. Output
-    setProperty("OutputWorkspace", outws);
+    if( getPropertyValue("OutputTableWorkspace") != "")
+    {
+      // Output the output table workspace
+      setProperty("OutputTableWorkspace", outTabWs);
+    }
+
+
+    // If workspace, put parameters there
+    if(workspace)
+    {
+      putParametersIntoWorkspace( outTabWs, workspace );
+    } 
+    else if( getPropertyValue("OutputTableWorkspace") == "")
+    {
+      // We don't know where to output
+      throw std::runtime_error("Either the OutputTableWorkspace or Workspace property must be set.");
+    }
 
     return;
   }
@@ -216,11 +252,31 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Get the NPROF number
+    * @param lines :: vector of string of all non-empty lines in input file;
+    */
+  int LoadFullprofResolution::getProfNumber( const vector<string>& lines)
+  {
+    // Assume the NPROF number is on the second line
+    if (lines[1].find("NPROF") != string::npos)
+    {
+       // Split line to get the NPROF number
+      size_t nStart = lines[1].find("NPROF");
+      size_t nNumber = lines[1].find("=", nStart) + 1;
+      size_t nEnd = lines[1].find(" ",nStart); // Assume the NRPOF number is followed by space
+      if(nNumber == string::npos + 1 || nEnd == string::npos ) return (-1);
+      return( boost::lexical_cast<int> (lines[1].substr(nNumber,nEnd-nNumber)) );
+    }
+
+    return(0);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Scan lines for bank IDs
     * @param lines :: vector of string of all non-empty lines in input file;
     * @param banks :: [output] vector of integers for existing banks in .irf file;
     * @param bankstartindexmap :: [output] map to indicate the first line of each bank in vector lines.
-    * @param bankendindexmap :: [output] map to indicate the last lie of each bank in vector lines
+    * @param bankendindexmap :: [output] map to indicate the last line of each bank in vector lines
     */
   void LoadFullprofResolution::scanBanks(const vector<string>& lines, vector<int>& banks,
                                          map<int, int>& bankstartindexmap, map<int, int>& bankendindexmap)
@@ -281,9 +337,10 @@ namespace DataHandling
     * @param bankid :: [input] ID of the bank to get parsed
     * @param startlineindex :: [input] index of the first line of the bank in vector of lines
     * @param endlineindex :: [input] index of the last line of the bank in vector of lines
+    * @param profNumber :: [input] index of the profile number
     */
   void LoadFullprofResolution::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines,
-                                                      int bankid, int startlineindex, int endlineindex)
+                                                      int bankid, int startlineindex, int endlineindex, int profNumber)
   {
     string bankline = lines[startlineindex];
     double cwl;
@@ -305,6 +362,7 @@ namespace DataHandling
         << ") found in the specified region from input. ";
       throw runtime_error(errss.str());
     }
+    parammap["NPROF"] = profNumber;
     parammap["CWL"] = cwl;
 
     double tempdb;
@@ -315,6 +373,10 @@ namespace DataHandling
       // Skip information line
       if (line[0] == '!')
         continue;
+
+      // skip NPROF line, which is processed by getProfNumber
+      if ( line.find("NPROF") != string::npos )
+         continue;
 
       // Parse
       g_log.debug() << "Parse Line " << i << "\t\t" << line << "\n";
@@ -704,6 +766,183 @@ namespace DataHandling
 
     return tablews;
   }
+
+  void LoadFullprofResolution::putParametersIntoWorkspace( const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws)
+  {  
+
+    // Get instrument name from matrix workspace
+    std::string instrumentName = ws->getInstrument()->getName();
+
+    // Convert table workspace into DOM XML document
+    //   Set up writer to Paremeter file
+    DOMWriter writer;
+    writer.setNewLine("\n");
+    writer.setOptions(XMLWriter::PRETTY_PRINT);
+
+    //   Get current time
+    Kernel::DateAndTime date = Kernel::DateAndTime::getCurrentTime();
+    std::string ISOdate = date.toISO8601String();
+    std::string ISOdateShort = ISOdate.substr(0,19); // Remove fraction of seconds
+
+    //   Create document
+    AutoPtr<Document> mDoc = new Document();
+    AutoPtr<Element> rootElem = mDoc->createElement("parameter-file");
+    rootElem->setAttribute("date", ISOdateShort);
+    mDoc->appendChild(rootElem);
+
+    //   Add instrument
+    getTableRowNumbers( tws, m_rowNumbers);
+    AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
+    instrumentElem->setAttribute("name",instrumentName);
+    rootElem->appendChild(instrumentElem);
+    API::Column_const_sptr column1 = tws->getColumn( 1 );
+    addALFBEParameter( column1, mDoc, instrumentElem, "Alph0");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Beta0");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Alph1");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Beta1");
+
+    //   Add banks
+    if(tws->columnCount() < 2){
+      throw std::runtime_error("No banks found");
+    }
+    size_t num_banks = tws->columnCount()-1;
+
+    for( size_t i=0; i<num_banks; ++i)
+    {
+      API::Column_const_sptr column = tws->getColumn( i+1 );
+      const double bankNumber = column->cell<double>(0);
+      std::ostringstream bankName;
+      bankName << "bank" << bankNumber;
+      AutoPtr<Element> bankElem = mDoc->createElement("component-link");
+      bankElem->setAttribute("name",bankName.str());
+      addSigmaParameters( column, mDoc, bankElem );
+      addGammaParameters( column, mDoc, bankElem );
+      rootElem->appendChild(bankElem);
+    }
+
+    // Convert DOM XML document into string
+    std::ostringstream outFile;
+    writer.writeNode(outFile, mDoc);  
+    std::string parameterXMLString = outFile.str();
+
+    //std::ofstream outfileDebug("C:/Temp/test2_fullprof.xml");
+    //outfileDebug << parameterXMLString;
+    //outfileDebug.close();
+
+
+    // Load the string into the workspace
+    LoadParameterFile::execManually(true, "", parameterXMLString, ws);
+
+  }
+
+  /* Add an ALFBE parameter to the XML document according to the table workspace
+  *
+  *  paramName is the name of the parameter as it appears in the table workspace
+  */
+  void LoadFullprofResolution::addALFBEParameter(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
+  {
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", getXMLParameterName(paramName));
+    parameterElem->setAttribute("type","fitting");
+
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+    formulaElem->setAttribute("eq",getXMLEqValue(column, paramName));
+    if(paramName != "Beta1") formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
+
+    AutoPtr<Element> fixedElem = mDoc->createElement("fixed");
+    parameterElem->appendChild(fixedElem);
+
+    parent->appendChild(parameterElem);
+  }
+
+    /* Add a set of SIGMA paraters to the XML document according to the table workspace
+   * for the bank at the given column of the table workspace
+   */
+  void LoadFullprofResolution::addSigmaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+     AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+     parameterElem->setAttribute("name", "IkedaCarpenterPV:SigmaSquared");
+     parameterElem->setAttribute("type","fitting");
+
+     AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+     std::string eqValue = getXMLEqValue(column, "Sig1")+"*centre^2+"+getXMLEqValue(column, "Sig0");
+     formulaElem->setAttribute("eq", eqValue);
+     formulaElem->setAttribute("unit","dSpacing");
+     formulaElem->setAttribute("result-unit","TOF^2");
+     parameterElem->appendChild(formulaElem);
+
+     parent->appendChild(parameterElem);
+  }
+
+   /* Add a set of GAMMA paraters to the XML document according to the table workspace
+   * for the bank at the given column of the table workspace
+   */
+  void LoadFullprofResolution::addGammaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+     AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+     parameterElem->setAttribute("name", "IkedaCarpenterPV:Gamma");
+     parameterElem->setAttribute("type","fitting");
+
+     AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+     std::string eqValue = getXMLEqValue(column, "Gam1" )+"*centre";
+     formulaElem->setAttribute("eq", eqValue);
+     formulaElem->setAttribute("unit","dSpacing");
+     formulaElem->setAttribute("result-unit","TOF");
+     parameterElem->appendChild(formulaElem);
+
+     parent->appendChild(parameterElem);
+  }
+
+
+
+  /*
+  *  Get the XML name of a parameter given its Table Workspace name
+  */
+  std::string LoadFullprofResolution::getXMLParameterName( const std::string& name )
+  {
+    // Only used for ALFBE parameters
+    std::string prefix = "IkedaCarpenterPV:";
+    if(name == "Alph0") return prefix+"Alpha0";
+    if(name == "Beta0") return prefix+"Beta0";
+    if(name == "Alph1") return prefix+"Alpha1";
+    if(name == "Beta1") return prefix+"Kappa";
+    return "?"+name;
+  }
+
+  /*
+  * Get the value string to put in the XML eq attribute of the formula element of the paramenter element
+  * given the name of the parameter in the table workspace.
+  */
+  std::string LoadFullprofResolution::getXMLEqValue( const API::Column_const_sptr column, const std::string& name )
+  {
+    size_t paramNumber = m_rowNumbers[name];
+    //API::Column_const_sptr column = tablews->getColumn( columnIndex );
+    double eqValue = column->cell<double>(paramNumber);
+    if(name.substr(0,3) == "Sig") eqValue = eqValue*eqValue; // Square the sigma values
+    return boost::lexical_cast<std::string>(eqValue);
+  }
+
+  /* This function fills in a list of the row numbers starting 0 of the parameters
+     in the table workspace, so one can find the position in a column of
+     the value of the given parameter.
+  */
+  void LoadFullprofResolution::getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap)
+  {
+    parammap.clear();
+
+    size_t numrows = tablews->rowCount();
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      TableRow row = tablews->getRow(i);
+      std::string name;
+      row >> name;
+      parammap.insert(std::make_pair(name, i));
+    }
+
+    return;
+  }
+
 
 } // namespace DataHandling
 } // namespace Mantid

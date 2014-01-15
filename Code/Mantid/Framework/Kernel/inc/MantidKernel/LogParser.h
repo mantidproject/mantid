@@ -55,9 +55,9 @@ namespace Mantid
     {
     public:
       /// Returns the name of the log created that defines the status during a run
-      static const std::string & statusLogName();
+      static const std::string statusLogName();
       /// Returns the name of the log that contains all of the periods
-      static const std::string & periodsLogName();
+      static const std::string periodsLogName();
       /// Creates a TimeSeriesProperty of either double or string type depending on the log data
       /// Returns a pointer to the created property
       static Kernel::Property* createLogProperty(const std::string& logFName, const std::string& name);
