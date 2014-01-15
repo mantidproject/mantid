@@ -1,3 +1,10 @@
+/*WIKI*
+
+This algorithm allows a user (who is logged into the information catalog) to publish
+datafiles or workspaces to investigations of which they are an investigator.
+
+*WIKI*/
+
 #include "MantidICat/CatalogPublish.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
@@ -31,7 +38,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogPublish::initDocs()
     {
-      this->setWikiSummary("Allows the user to publish data to the catalog.");
+      this->setWikiSummary("Allows the user to publish datafiles or workspaces to the information catalog."
+          "Workspaces uploaded are converted to and saved as nexus files.");
       this->setOptionalMessage("Publish datafiles to the information catalog.");
     }
 
@@ -40,9 +48,9 @@ namespace Mantid
     {
       declareProperty(new Mantid::API::FileProperty("FileName", "", Mantid::API::FileProperty::OptionalLoad), "The file to publish.");
       declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
-            "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"An input workspace to publish.");
+            "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"The workspace to publish.");
       declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default.");
-      declareProperty("InvestigationNumber","","The investigation number to save the file to. Extracted from filename or workspace name, but can be overridden.");
+      declareProperty("InvestigationNumber","","The investigation number where the published file will be saved to.");
     }
 
     /// Execute the algorithm
