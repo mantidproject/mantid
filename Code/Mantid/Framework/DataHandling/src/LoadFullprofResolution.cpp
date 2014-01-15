@@ -90,7 +90,7 @@ namespace DataHandling
 
     // declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
 
-    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<WorkspaceGroup>("Workspace","",Direction::InOut, PropertyMode::Optional),
         "Optional: A matrix workspace with the instrument to which we add the parameters from the Fullprof .irf file.");
 
     return;
@@ -104,7 +104,7 @@ namespace DataHandling
     // Get input
     string datafile = getProperty("Filename");
     vector<int> outputbankids = getProperty("Banks");
-    MatrixWorkspace_sptr workspace = getProperty("Workspace");
+    WorkspaceGroup_sptr wsg = getProperty("Workspace");
 
     // Import data
     vector<string> lines;
@@ -195,8 +195,10 @@ namespace DataHandling
 
 
     // If workspace, put parameters there
-    if(workspace)
-    {
+    if(wsg)
+    {   
+      Workspace_sptr wsi = wsg->getItem(0);
+      auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
       putParametersIntoWorkspace( outTabWs, workspace );
     } 
     else if( getPropertyValue("OutputTableWorkspace") == "")
