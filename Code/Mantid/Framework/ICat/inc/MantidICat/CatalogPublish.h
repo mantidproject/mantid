@@ -45,7 +45,7 @@ namespace Mantid
         /// Algorithm's version for identification.
         virtual int version() const { return 1; }
         /// Algorithm's category for identification.
-        virtual const std::string category() const { return "DataHandling\\CatalogPublish"; }
+        virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
       private:
         /// Sets documentation strings for this algorithm
