@@ -308,7 +308,7 @@ public:
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
-    TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("WorkspaceIndexMin", "0"));
+    TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("WorkspaceIndexMin", "-1"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "2"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
