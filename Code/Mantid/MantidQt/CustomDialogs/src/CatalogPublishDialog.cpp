@@ -38,10 +38,6 @@ namespace MantidQt
       // Allows the combo box to show workspaces when they are loaded into Mantid.
       m_uiForm.inputWorkspaceCb->setValidatingAlgorithm(m_algName);
 
-      // Add the automatically generated buttons (help, run, and cancel) to the ui.
-      m_uiForm.buttonGrid->addLayout(createDefaultButtonLayout());
-      m_uiForm.instructions->setText(getOptionalMessage());
-
       // This allows the user NOT to select a workspace if there are any loaded into Mantid.
       m_uiForm.inputWorkspaceCb->insertItem("", 0);
 
@@ -50,6 +46,23 @@ namespace MantidQt
 
       // Open a browsing dialog when the browse button is pressed.
       connect(m_uiForm.browseBtn,SIGNAL(clicked()),this,SLOT(onBrowse()));
+
+      // Assign the buttons with the inherited methods.
+      connect(m_uiForm.runBtn,SIGNAL(clicked()),this,SLOT(accept()));
+      connect(m_uiForm.cancelBtn,SIGNAL(clicked()),this,SLOT(reject()));
+      connect(m_uiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
+
+      // The user is not an investigator on any investigations and cannot publish.
+      if (m_uiForm.investigationNumberCb->count() == 0)
+      {
+        // Update the message to inform the user why they cannot publish datafiles.
+        setOptionalMessage("You cannot publish datafiles as you are not an investigator on any investigations.");
+        // Disable the input fields and run button to prevent user from running algorithm.
+        m_uiForm.scrollArea->setDisabled(true);
+        m_uiForm.runBtn->setDisabled(true);
+      }
+      // Get optional message here as we may set it if user has no investigations to publish to.
+      m_uiForm.instructions->setText(getOptionalMessage());
     }
 
     /**
