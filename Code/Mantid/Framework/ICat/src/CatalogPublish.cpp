@@ -153,6 +153,10 @@ namespace Mantid
         // (Note: The IDS does not currently return any meta-data related to the errors caused.)
         if (HTTPStatus.find("20") == std::string::npos)
         {
+          // As an error occurred we must cancel the algorithm.
+          // We cannot throw an exception here otherwise it is caught below as Poco::Exception catches runtimes,
+          // and then the I/O error is thrown as it is generated above first.
+          this->cancel();
           g_log.error("An error has occurred on the ICAT IDS server.\n"
                       "A file with that name already exists or you do not have permissions to publish to that investigation.");
         }
@@ -161,6 +165,8 @@ namespace Mantid
       {
         throw std::runtime_error(error.displayText());
       }
+      // This is bad, but is needed to catch a POCO I/O error.
+      // For more info see comments (of I/O error) in CatalogDownloadDataFiles.cpp
       catch(Poco::Exception&) {}
     }
 
