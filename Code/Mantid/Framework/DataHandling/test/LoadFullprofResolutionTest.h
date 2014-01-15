@@ -299,7 +299,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Check parameters in workspace
+    // Check parameters in workspace T
+    // The workspace is a workspace group with one member corresponding to the one bank in the IRF file
     WorkspaceGroup_sptr gws;
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     Workspace_sptr wsi = gws->getItem(0) ;
