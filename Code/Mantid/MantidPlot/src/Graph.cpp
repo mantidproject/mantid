@@ -3159,20 +3159,32 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       }
       int d = w->colPlotDesignation(c);
 
-      if (d == Table::Y || d == Table::xErr || d == Table::yErr || d == Table::Label)
+      switch(d)
       {
-        drawableNames << names[i];
+        case Table::Y:
+          // Y columns should be drawn first, so we are keeping them at the beginning of the list
+          drawableNames.prepend(names[i]);
+          break;
 
-        // Count error columns
-        if(d == Table::xErr || d == Table::yErr)
+        case Table::xErr: case Table::yErr:
           noOfErrorCols++;
-      } else if(d == Table::X)
-      {
-        // If multiple X columns are specified, it's an error, as we don't know which one to use
-        if(!xColNameGiven.isEmpty())
-          return false;
+          // Fall through, as we want errors to be at the end of the list in the same way as labels
+          // are. So _no break_ here on purpose.
 
-        xColNameGiven = names[i];
+        case Table::Label:
+          // Keep error/label columns at the end of the list
+          drawableNames.append(names[i]);
+          break;
+
+        case Table::X:
+          if(!xColNameGiven.isEmpty())
+            // If multiple X columns are specified, it's an error, as we don't know which one to use
+            return false;
+          xColNameGiven = names[i];
+          break;
+
+        default:
+          break;
       }
     }
 
