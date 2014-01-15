@@ -409,9 +409,6 @@ private:
   /// time zero returned in ms
   double timeZero();
 
-  /// Get the new plot name
-  QString getNewPlotName(const QString & firstPart);
-
   /// title of run
   std::string m_title;
 

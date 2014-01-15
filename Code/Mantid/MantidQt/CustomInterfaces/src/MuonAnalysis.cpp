@@ -2342,36 +2342,6 @@ void MuonAnalysis::showAllPlotWindows()
 }
 
 /**
- * Get a name for a new plot. If overwrite is disabled, will return a unique name given the first
- * part, otherwise will always return "firstPart; #1"
- * @param firstPart :: First part of the name, i.e . instrument + run number + group/pair name.
- * @return The name which can be used to create workspace/plot.
- */
-QString MuonAnalysis::getNewPlotName(const QString & firstPart)
-{
-  const QString prefix(firstPart + "; #");
-
-  QString name;
-
-  if ( ! isOverwriteEnabled() )
-  { // Find the name which doesn't exist
-    int num = 1;
-
-    do 
-    { 
-      name = prefix + QString::number(num++);
-    }
-    while ( AnalysisDataService::Instance().doesExist(name.toStdString()) );
-  }
-  else
-  { // If overwrite enabled, just use the first one
-    name = prefix + "1";
-  }
-
-  return name;
-}
-
-/**
  * Is Grouping set.
  *
  * @return true if set
