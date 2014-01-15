@@ -79,7 +79,10 @@ namespace Algorithms
     // Implement abstract Algorithm methods
     void exec();
 
-    void processInputTime(Kernel::DateAndTime runstarttime);
+    /// Process properties
+    void processInOutWorkspaces();
+
+    void processInputTime();
     void setFilterByTimeOnly();
     void setFilterByLogValue(std::string logname);
 
@@ -96,19 +99,34 @@ namespace Algorithms
     void makeMultipleFiltersByValues(Kernel::TimeSplitterType& split, std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
         bool centre, bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime);
 
-    void processIntegerValueFilter(Kernel::TimeSplitterType &splitters, int minvalue, int maxvalue,
+    void processIntegerValueFilter(int minvalue, int maxvalue,
                                    bool filterIncrease, bool filterDecrease, Kernel::DateAndTime runend);
 
     size_t searchValue(std::vector<double> sorteddata, double value);
 
+    /// Add a splitter
+    void addSplitter(Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime, int wsindex, std::string info);
+
+    /// Add a splitter
+    void make_splitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance);
+
+
+    /// Generate a matrix workspace containing splitters
+    void generateSplittersInMatrixWorkspace();
+
     DataObjects::EventWorkspace_const_sptr m_dataWS;
+
+    /// SplitterWorkspace
     API::ISplittersWorkspace_sptr m_splitWS;
+    /// Matrix workspace containing splitters
+    API::MatrixWorkspace_sptr m_filterWS;
+
     API::ITableWorkspace_sptr m_filterInfoWS;
 
-    Kernel::DateAndTime mStartTime;
-    Kernel::DateAndTime mStopTime;
+    Kernel::DateAndTime m_startTime;
+    Kernel::DateAndTime m_stopTime;
 
-    double m_timeUnitConvertFactor;
+    double m_timeUnitConvertFactorToNS;
 
     Kernel::TimeSeriesProperty<double>* m_dblLog;
     Kernel::TimeSeriesProperty<int>* m_intLog;
@@ -116,10 +134,19 @@ namespace Algorithms
     bool m_logAtCentre;
     double m_logTimeTolerance;
 
+    /// Flag to output matrix workspace for fast log
+    bool m_forFastLog;
+
+    /// SplitterType
+    Kernel::TimeSplitterType m_splitters;
+    /// Vector as date and time
+    std::vector<Kernel::DateAndTime> m_vecSplitterTime;
+    std::vector<int> m_vecSplitterGroup;
+
   };
 
   /** Generate a new time splitter and add to a list of splitters
-    */
+
   void make_splitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance,
                      Kernel::TimeSplitterType& splitters)
   {
@@ -128,6 +155,7 @@ namespace Algorithms
 
     return;
   }
+  */
 
 } // namespace Algorithms
 } // namespace Mantid
