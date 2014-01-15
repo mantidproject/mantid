@@ -88,6 +88,28 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Set fit range
+   * */
+  void FitOneSinglePeak::setFitWindow(double leftwindow, double rightwindow, double leftpeak,
+                                      double rightpeak)
+  {
+
+
+    m_minFitX = leftwindow;
+    m_maxFitX = rightwindow;
+    m_minPeakX = leftpeak;
+    m_maxPeakX = rightpeak;
+
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
+
+    i_minFitX = getVectorIndex(vecX, m_minFitX);
+    i_maxFitX = getVectorIndex(vecX, m_maxFitX);
+    i_minPeakX = getVectorIndex(vecX, m_minPeakX);
+    i_maxPeakX = getVectorIndex(vecX, m_maxPeakX);
+
+    return;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Set peaks
@@ -233,28 +255,140 @@ namespace Algorithms
     return false;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate a new temporary workspace for removed background peak
+    */
+  API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS()
+  {
+    size_t size = i_maxFitX-i_minFitX+1;
+    MatrixWorkspace_sptr purePeakWS = WorkspaceFactory::Instance().create("Workspace2D",
+                                                                          1, size, size);
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
+    const MantidVec& vecY = m_dataWS->readY(m_wsIndex);
+    const MantidVec& vecE = m_dataWS->readE(m_wsIndex);
 
+    MantidVec& dataX = purePeakWS->dataX(0);
+    MantidVec& dataY = purePeakWS->dataY(0);
+    MantidVec& dataE = purePeakWS->dataE(0);
+
+    dataX.assign(vecX.begin() + i_minFitX, vecX.begin() + i_maxFitX+1);
+    dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX+1);
+    dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX+1);
+
+    return purePeakWS;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Estimate the peak height from a set of data containing pure peaks
+    */
+  double FitOneSinglePeak::estimatePeakHeight(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_sptr dataws,
+                                            size_t wsindex, size_t ixmin, size_t ixmax)
+  {
+    // Get current peak height: from current peak centre (previously setup)
+    // FIXME - This might be costly.
+    double peakcentre = peakfunc->centre();
+    vector<double> svvec(1, peakcentre);
+    FunctionDomain1DVector svdomain(svvec);
+    FunctionValues svvalues(svdomain);
+    peakfunc->function(svdomain, svvalues);
+    double curpeakheight = svvalues[0];
+
+    g_log.debug() << "Estimate-Peak-Height: Current peak height = " << curpeakheight << "\n";
+
+    // Get maximum peak value among
+    const MantidVec& vecX = dataws->readX(wsindex);
+
+    const MantidVec& vecY = dataws->readY(wsindex);
+    double ymax = vecY[ixmin+1];
+    size_t iymax = ixmin+1;
+    for (size_t i = ixmin+2; i < ixmax; ++i)
+    {
+      double tempy = vecY[i];
+      if (tempy > ymax)
+      {
+        ymax = tempy;
+        iymax = i;
+      }
+    }
+    g_log.debug() << "Estimate-Peak-Height: Maximum Y value between " << vecX[ixmin] << " and "
+                  << vecX[ixmax] << " is "
+                  << ymax << " at X = " << vecX[iymax] << ".\n";
+
+    // Compute peak height (not the maximum peak intensity)
+    double estheight = ymax/curpeakheight*peakfunc->height();
+
+    return estheight;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Make a pure peak WS in the fit window region from m_background_function
+    * Migrated from 'makePurePeakWS'
+    */
+  void FitOneSinglePeak::removeBackground(MatrixWorkspace_sptr purePeakWS)
+  {
+    // Calculate background
+    const MantidVec& vecX = purePeakWS->readX(0);
+    FunctionDomain1DVector domain(vecX);
+    FunctionValues bkgdvalues(domain);
+    m_bkgdFunc->function(domain, bkgdvalues);
+
+    // Calculate pure background and put weight on peak if using Rwp
+    MantidVec& vecY = purePeakWS->dataY(0);
+    MantidVec& vecE = purePeakWS->dataE(0);
+    for (size_t i = 0; i < vecY.size(); ++i)
+    {
+      double y = vecY[i];
+      y -= bkgdvalues[i];
+      if (y < 0.)
+        y = 0.;
+      vecY[i] = y;
+      vecE[i] = 1.0;
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fit peak function (only. so must be pure peak).
+    * In this function, the fit result will be examined if fit is 'successful' in order to rule out
+    * some fit with unphysical result.
+    * @return :: chi-square/Rwp
+    */
+  double FitOneSinglePeak::fitPeakFunction(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_sptr dataws,
+                                           size_t wsindex, double startx, double endx)
+  {
+    // Check validity and debug output
+    if (!peakfunc)
+      throw std::runtime_error("fitPeakFunction's input peakfunc has not been initialized.");
+    else
+      g_log.debug() << "Function (to fit): " << peakfunc->asString() << "  From "
+                    << startx << "  to " << endx << ".\n";
+
+    double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, false);
+    g_log.debug() << "Peak parameter goodness-Fit = " << goodness << "\n";
+
+    return goodness;
+  }
+
+
+  //----------------------------------------------------------------------- ----------------------
   /** Fit peak with high background
+    * Procedure:
+    * 1. Fit background
+    * 2. Create a new workspace with limited region
     */
   bool FitOneSinglePeak::highBkgdFit(size_t numsteps)
   {
     // Fit background
     m_bkgdFunc = fitBackground(m_bkgdFunc);
 
-    // print background function and original input workspace
+    // Generate partial workspace within given fit window
+    MatrixWorkspace_sptr purePeakWS = genFitWindowWS();
 
-    // Backup original data due to pure peak data to be made
-    // TODO
-    MatrixWorkspace_sptr purePeakWS = genPurePeakWS();
-
-    // Make pure peak
-    // TODO
-    makePurePeakWS(purePeakWS);
-
-    // print this pure workspace out;
+    // Remove background to make a pure peak
+    removeBackground(purePeakWS);
 
     // Estimate the peak height
-    // TODO
     double est_peakheight = estimatePeakHeight(m_peakFunc, purePeakWS, 0, 0, purePeakWS->readX(0).size()-1);
     m_peakFunc->setHeight(est_peakheight);
 
@@ -279,7 +413,6 @@ namespace Algorithms
                     << vec_FWHM[i] << "\n";
 
       // Fit
-      // TODO
       double rwp = fitPeakFunction(m_peakFunc, purePeakWS, 0, m_minFitX, m_maxFitX);
 
       // Store result
@@ -754,10 +887,10 @@ namespace Algorithms
       g_log.warning() << "Maximum peak range is out side of the upper boundary of fit window. ";
     }
 
-    i_minFitX = getVectorIndex(vecX, m_minFitX);
-    i_maxFitX = getVectorIndex(vecX, m_maxFitX);
-    i_minPeakX = getVectorIndex(vecX, m_minPeakX);
-    i_maxPeakX = getVectorIndex(vecX, m_maxPeakX);
+    // i_minFitX = getVectorIndex(vecX, m_minFitX);
+    // i_maxFitX = getVectorIndex(vecX, m_maxFitX);
+    // i_minPeakX = getVectorIndex(vecX, m_minPeakX);
+    // i_maxPeakX = getVectorIndex(vecX, m_maxPeakX);
 
     m_fitBkgdFirst = getProperty("FitBackgroundFirst");
 
@@ -1181,24 +1314,7 @@ namespace Algorithms
     */
   void FitPeak::makePurePeakWS(MatrixWorkspace_sptr purePeakWS)
   {
-    // Calculate background
-    const MantidVec& vecX = purePeakWS->readX(0);
-    FunctionDomain1DVector domain(vecX);
-    FunctionValues bkgdvalues(domain);
-    m_bkgdFunc->function(domain, bkgdvalues);
-
-    // Calculate pure background and put weight on peak if using Rwp
-    MantidVec& vecY = purePeakWS->dataY(0);
-    MantidVec& vecE = purePeakWS->dataE(0);
-    for (size_t i = 0; i < vecY.size(); ++i)
-    {
-      double y = vecY[i];
-      y -= bkgdvalues[i];
-      if (y < 0.)
-        y = 0.;
-      vecY[i] = y;
-      vecE[i] = 1.0;
-    }
+    throw runtime_error("Removed!");
 
     return;
   }
@@ -1370,6 +1486,7 @@ namespace Algorithms
   double FitPeak::fitPeakFunction(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_sptr dataws,
                                  size_t wsindex, double startx, double endx)
   {
+    throw runtime_error("GHOST FUNCTION.");
     // Check validity and debug output
     if (!peakfunc)
       throw std::runtime_error("fitPeakFunction's input peakfunc has not been initialized.");
@@ -1431,6 +1548,7 @@ namespace Algorithms
   double FitPeak::estimatePeakHeight(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_sptr dataws,
                                      size_t wsindex, size_t ixmin, size_t ixmax)
   {
+    throw runtime_error("No use here. ");
     // Get current peak height: from current peak centre (previously setup)
     double peakcentre = peakfunc->centre();
     vector<double> svvec(1, peakcentre);

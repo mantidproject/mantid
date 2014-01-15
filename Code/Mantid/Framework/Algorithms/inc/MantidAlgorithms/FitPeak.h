@@ -40,7 +40,11 @@ namespace Algorithms
     void setWorskpace(API::MatrixWorkspace_const_sptr dataws, size_t wsindex);
 
     /// Set fit window
-    void setFitWindow(double xmin, double xmax);
+    // void setFitWindow(double xmin, double xmax);
+
+    /// Set fit range
+    void setFitWindow(double leftwindow, double rightwindow, double leftpeak,
+                      double rightpeak);
 
     /// Set peak range
     void setPeakRange(double xpeakleft, double xpeakright);
@@ -60,7 +64,19 @@ namespace Algorithms
     /// Get background
     API::IBackgroundFunction_sptr getBackgroundFunction();
 
+    /// Estimate the peak height from a set of data containing pure peaks
+    double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
+                              size_t wsindex, size_t ixmin, size_t ixmax);
 
+    /// Fit peak function (flexible)
+    double fitPeakFunction(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
+                        size_t wsindex, double startx, double endx);
+
+    /// Generate a partial workspace at fit window
+    API::MatrixWorkspace_sptr genFitWindowWS();
+
+    /// remove background
+    void removeBackground(API::MatrixWorkspace_sptr purePeakWS);
 
     void setPeakParameterValues();
 
@@ -136,6 +152,11 @@ namespace Algorithms
     std::string m_minimizer;
     ///
     std::string m_costFunction;
+
+    ///
+    size_t i_minFitX;
+    ///
+    size_t i_maxFitX;
 
     /// Log
     // Kernel::Logger& g_log;
