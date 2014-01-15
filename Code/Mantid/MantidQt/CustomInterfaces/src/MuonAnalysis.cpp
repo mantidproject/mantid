@@ -2210,11 +2210,14 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, bool l
 
     // Set scaling
     if( params["YAxisAuto"] == "True" )
+    {
       pyS += "l.setAutoScale()\n";
+    }
     else
+    {
       pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
-
-    pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
+      pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
+    }
 
     runPythonCode( pyS );
 }
