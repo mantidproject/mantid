@@ -35,7 +35,7 @@ public:
   {
   }
 
-  void testExec()
+  void xtestExec()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -94,7 +94,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void testExec_DX()
+  void xtestExec_DX()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave = boost::dynamic_pointer_cast<
       Mantid::DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
@@ -170,7 +170,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void testExec_no_header()
+  void xtestExec_no_header()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -211,7 +211,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_CustomSeparator_override()
+  void xtest_CustomSeparator_override()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -248,7 +248,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_SpectrumList()
+  void xtest_SpectrumList()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -266,7 +266,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_workspace()
+  void xtest_fail_invalid_workspace()
   {
     SaveAscii2 save;
     save.setRethrows(true);
@@ -281,7 +281,7 @@ public:
     TS_ASSERT( !Poco::File(filename).exists() );
   }
 
-  void test_fail_invalid_IndexMax()
+  void xtest_fail_invalid_IndexMax()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -300,7 +300,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_IndexMin()
+  void xtest_fail_invalid_IndexMin()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -319,7 +319,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_IndexMin_Max_Overlap()
+  void xtest_fail_invalid_IndexMin_Max_Overlap()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -338,7 +338,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_SpectrumList()
+  void xtest_fail_invalid_SpectrumList()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -357,7 +357,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_SpectrumList_exceeds()
+  void xtest_fail_SpectrumList_exceeds()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -375,7 +375,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Precision()
+  void xtest_fail_invalid_Precision()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -394,7 +394,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_CommentIndicator_number()
+  void xtest_fail_invalid_CommentIndicator_number()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -412,7 +412,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_CommentIndicator_e()
+  void xtest_fail_invalid_CommentIndicator_e()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -430,7 +430,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_CommentIndicator_hyphen()
+  void xtest_fail_invalid_CommentIndicator_hyphen()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -448,7 +448,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_CommentIndicator_plus()
+  void xtest_fail_invalid_CommentIndicator_plus()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -466,7 +466,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator_e()
+  void xtest_fail_invalid_Separator_e()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -485,7 +485,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator_number()
+  void xtest_fail_invalid_Separator_number()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -504,7 +504,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator_plus()
+  void xtest_fail_invalid_Separator_plus()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -523,7 +523,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator_hyphen()
+  void xtest_fail_invalid_Separator_hyphen()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -542,7 +542,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_invalid_Separator()
+  void xtest_fail_invalid_Separator()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -561,7 +561,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void test_fail_clash_CustomSeparator_CustomComment()
+  void xtest_fail_clash_CustomSeparator_CustomComment()
   {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
