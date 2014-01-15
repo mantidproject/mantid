@@ -345,7 +345,7 @@ set ( TEST_FILES
 	RotateInstrumentComponentTest.h
 	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
-	SaveAscii2Test.h
+	#SaveAscii2Test.h
 	SaveAsciiTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
