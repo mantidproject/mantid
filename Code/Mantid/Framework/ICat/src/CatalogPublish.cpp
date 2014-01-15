@@ -83,13 +83,19 @@ namespace Mantid
       {
         std::string fileName = Poco::Path(filePath).getFileName();
         // If the user has not set the name to save the file as, then use the filename of the file being uploaded.
-        if (nameInCatalog.empty()) setProperty("NameInCatalog", fileName);
-        g_log.notice("NameInCatalog has not been set. Using filename instead: " + fileName + ".");
+        if (nameInCatalog.empty())
+        {
+          setProperty("NameInCatalog", fileName);
+          g_log.notice("NameInCatalog has not been set. Using filename instead: " + fileName + ".");
+        }
       }
       else // The user wants to upload a workspace.
       {
-        if (nameInCatalog.empty()) setProperty("NameInCatalog", workspace->name());
-        g_log.notice("NameInCatalog has not been set. Using workspace name instead: " + workspace->name() + ".");
+        if (nameInCatalog.empty())
+        {
+          setProperty("NameInCatalog", workspace->name());
+          g_log.notice("NameInCatalog has not been set. Using workspace name instead: " + workspace->name() + ".");
+        }
 
         // Save workspace to a .nxs file in the user's default directory.
         saveWorkspaceToNexus(workspace);
