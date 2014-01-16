@@ -199,7 +199,7 @@ namespace Algorithms
 
 #endif
 
-    // 3. Get Log
+    // Get Log
     std::string logname = this->getProperty("LogName");
     if (logname.empty())
     {
@@ -561,6 +561,15 @@ namespace Algorithms
         // Generate filters for a series of log value
         processMultipleValueFilters(minvalue, maxvalue, filterIncrease, filterDecrease);
       }
+
+      // Add splitters
+      /// FIXME/TODO : consider of refactor!
+      size_t numsplits = m_splitters.size();
+      for (size_t i = 0; i < numsplits; ++i)
+      {
+        SplittingInterval split = m_splitters[i];
+        m_splitWS->addSplitter(split);
+      }
     }
     else
     {
@@ -592,7 +601,6 @@ namespace Algorithms
       }
 
       // Split along log
-      TimeSplitterType splitters;
       DateAndTime runendtime = m_dataWS->run().endTime();
 
       if (m_forFastLog)
@@ -734,47 +742,89 @@ namespace Algorithms
     } // ENDWHILE
 
     // Debug print
-    stringstream splitss;
-    splitss << "Index map size = " << indexwsindexmap.size() << "\n";
+    stringstream dbsplitss;
+    dbsplitss << "Index map size = " << indexwsindexmap.size() << "\n";
     for (map<size_t, int>::iterator mit = indexwsindexmap.begin();
          mit != indexwsindexmap.end(); ++mit)
     {
-      splitss << "Index " << mit->first << ":  WS-group = " << mit->second
+      dbsplitss << "Index " << mit->first << ":  WS-group = " << mit->second
               << ". Log value range: " << logvalueranges[mit->first*2] << ", "
               << logvalueranges[mit->first*2+1] << ".\n";
     }
-    g_log.information(splitss.str());
+    g_log.information(dbsplitss.str());
 
+    // Check split interval obtained wehther is with valid size
     if (logvalueranges.size() < 2)
     {
-      g_log.warning() << "There is no log value interval existing." << std::endl;
+      g_log.warning("There is no log value interval existing.");
       return;
     }
 
-    double upperboundinterval0 = logvalueranges[1];
-    double lowerboundlastinterval = logvalueranges[logvalueranges.size()-2];
-    double minlogvalue = m_dblLog->minValue();
-    double maxlogvalue = m_dblLog->maxValue();
-    if (minlogvalue > upperboundinterval0 || maxlogvalue < lowerboundlastinterval)
+
     {
-      g_log.warning() << "User specifies log interval from " << minvalue-valuetolerance
-                      << " to " << maxvalue-valuetolerance << " with interval size = " << valueinterval
-                      << "; Log " << m_dblLog->name() << " has range " << minlogvalue << " to " << maxlogvalue
-                      << ".  Therefore some workgroup index may not have any splitter." << std::endl;
+      // Warning information
+      double upperboundinterval0 = logvalueranges[1];
+      double lowerboundlastinterval = logvalueranges[logvalueranges.size()-2];
+      double minlogvalue = m_dblLog->minValue();
+      double maxlogvalue = m_dblLog->maxValue();
+      if (minlogvalue > upperboundinterval0 || maxlogvalue < lowerboundlastinterval)
+      {
+        g_log.warning() << "User specifies log interval from " << minvalue-valuetolerance
+                        << " to " << maxvalue-valuetolerance << " with interval size = " << valueinterval
+                        << "; Log " << m_dblLog->name() << " has range " << minlogvalue << " to " << maxlogvalue
+                        << ".  Therefore some workgroup index may not have any splitter." << std::endl;
+      }
     }
 
-    // 3. Call
+    // Generate event filters by log value
     Kernel::TimeSplitterType splitters;
     std::string logboundary = this->getProperty("LogBoundary");
     transform(logboundary.begin(), logboundary.end(), logboundary.begin(), ::tolower);
 
-    makeMultipleFiltersByValues(splitters, indexwsindexmap, logvalueranges,
+    makeMultipleFiltersByValues(indexwsindexmap, logvalueranges,
                                 logboundary.compare("centre") == 0,
                                 filterincrease, filterdecrease, m_startTime, m_stopTime);
 
-    // 4. Put to SplittersWorkspace
-    for (size_t i = 0; i < splitters.size(); i ++)
-      m_splitWS->addSplitter(splitters[i]);
+    // Put to SplittersWorkspace
+    if (m_forFastLog)
+    {
+      // Splitters in matrix workspace
+#if 0
+      g_log.notice() << "Number of vector splitter: " << m_vecSplitterTime.size()
+                     << ", " << m_vecSplitterGroup.size() << "\n";
+      for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
+      {
+        g_log.notice() << m_vecSplitterTime[i] << ", " << m_vecSplitterGroup[i] << "\n";
+      }
+      g_log.notice() << m_vecSplitterTime.back() << "\n";
+#endif
+
+#if 0
+      size_t sizex = m_vecSplitterTime.size();
+      size_t sizey = m_vecSplitterGroup.size();
+      if (sizex - sizey != 1)
+        throw runtime_error("Logic error.");
+
+      m_filterWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+          (API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
+
+      MantidVec& dataX = m_filterWS->dataX(0);
+      for (size_t i = 0; i < sizex; ++i)
+        dataX[i] = static_cast<double>(m_vecSplitterTime[i].totalNanoseconds());
+
+      MantidVec& dataY = m_filterWS->dataY(0);
+      for (size_t i = 0; i < sizey; ++i)
+        dataY[i] = static_cast<double>(m_vecSplitterGroup[i]);
+#else
+      generateSplittersInMatrixWorkspace();
+#endif
+    }
+    else
+    {
+      // Normal SplitterWorkspace
+      for (size_t i = 0; i < splitters.size(); i ++)
+        m_splitWS->addSplitter(splitters[i]);
+    }
 
     return;
   }
@@ -923,7 +973,7 @@ namespace Algorithms
    * @param startTime :: Start time.
    * @param stopTime :: Stop time.
    */
-  void GenerateEventsFilter::makeMultipleFiltersByValues(TimeSplitterType& split, map<size_t, int> indexwsindexmap,
+  void GenerateEventsFilter::makeMultipleFiltersByValues(map<size_t, int> indexwsindexmap,
                                                          vector<double> logvalueranges,
                                                          bool centre, bool filterIncrease, bool filterDecrease,
                                                          DateAndTime startTime, DateAndTime stopTime)
@@ -1144,6 +1194,9 @@ namespace Algorithms
       // d) Create Splitter
       if (createsplitter)
       {
+        make_splitter(start, stop, lastindex, tol);
+
+#if 0
         if (centre)
         {
           split.push_back( SplittingInterval(start-tol, stop-tol, lastindex) );
@@ -1152,10 +1205,12 @@ namespace Algorithms
         {
           split.push_back( SplittingInterval(start, stop, lastindex) );
         }
+
         g_log.debug() << "DBx250 Add Splitter " << split.size()-1 << ":  " << start.totalNanoseconds() << ", "
                       << stop.totalNanoseconds() << ", Delta T = "
                       << static_cast<double>(stop.totalNanoseconds()-start.totalNanoseconds())*1.0E-9
                       << "(s), Workgroup = " << lastindex << std::endl;
+#endif
 
         // reset
         start = ZeroTime;
@@ -1427,15 +1482,42 @@ namespace Algorithms
   {
     if (m_forFastLog)
     {
-      throw runtime_error("Implement ASAP F210");
+      // For MatrixWorkspace splitter
+      // Start of splitter
+      if (m_vecSplitterTime.size() == 0)
+      {
+        // First splitter
+        m_vecSplitterTime.push_back(starttime);
+      }
+      else if (m_vecSplitterTime.back() < starttime)
+      {
+        // Splitter to insert has a gap to previous splitter
+        m_vecSplitterTime.push_back(starttime);
+        m_vecSplitterGroup.push_back(-1);
+
+      }
+      else if (m_vecSplitterTime.back() == starttime)
+      {
+        // Splitter to insert is just behind previous one (no gap): nothing
+      }
+      else
+      {
+        // Impossible situation
+        throw runtime_error("Logic error. Trying to insert a splitter, whose start time is earlier than last splitter.");
+      }
+      // Stop of splitter
+      m_vecSplitterTime.push_back(stoptime);
+      // Group
+      m_vecSplitterGroup.push_back(wsindex);
     }
     else
     {
+      // For regular Splitter
       Kernel::SplittingInterval spiv(starttime, stoptime, wsindex);
       m_splitWS->addSplitter(spiv);
     }
 
-    // c)
+    // Information
     API::TableRow row = m_filterInfoWS->appendRow();
     row << wsindex << info;
 
@@ -1454,7 +1536,37 @@ namespace Algorithms
 
     if (m_forFastLog)
     {
-      throw runtime_error("Implement ASAP F503.");
+      DateAndTime starttime = start-tolerance;
+      DateAndTime stoptime = stop-tolerance;
+
+      // Start time of splitter
+      if (m_vecSplitterTime.size() == 0)
+      {
+        // First value
+        m_vecSplitterTime.push_back(starttime);
+      }
+      else if (m_vecSplitterTime.back() < starttime)
+      {
+        // Stop time of previous splitter is earlier than start time of this splitter (gap)
+        m_vecSplitterTime.push_back(starttime);
+        m_vecSplitterGroup.push_back(-1);
+      }
+      else if (m_vecSplitterTime.back() > starttime)
+      {
+        // Impossible situation
+        throw runtime_error("Impossible situation.");
+      }
+      else
+      {
+        // Stop time of previous splitter is the start time of this splitter. Nothing need to do
+        ;
+      }
+
+      // Stop time of splitter
+      m_vecSplitterTime.push_back(stoptime);
+
+      // Group index
+      m_vecSplitterGroup.push_back(group);
     }
     else
     {
@@ -1472,7 +1584,31 @@ namespace Algorithms
     */
   void GenerateEventsFilter::generateSplittersInMatrixWorkspace()
   {
-    throw runtime_error("Implement ASAP F212");
+    g_log.information() << "Size of splitter vector: " << m_vecSplitterTime.size() << ", "
+                        << m_vecSplitterGroup.size() << "\n";
+
+    size_t sizex = m_vecSplitterTime.size();
+    size_t sizey = m_vecSplitterGroup.size();
+
+    if (sizex - sizey != 1)
+    {
+      throw runtime_error("Logic error on splitter vectors' size. ");
+    }
+
+    m_filterWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
+    MantidVec& dataX = m_filterWS->dataX(0);
+    for (size_t i = 0; i < sizex; ++i)
+    {
+      dataX[i] = static_cast<double>(m_vecSplitterTime[i].totalNanoseconds());
+    }
+
+    MantidVec& dataY = m_filterWS->dataY(0);
+    for (size_t i = 0; i < sizey; ++i)
+    {
+      dataY[i] = static_cast<double>(m_vecSplitterGroup[i]);
+    }
+
+    return;
   }
 
 } // namespace Mantid

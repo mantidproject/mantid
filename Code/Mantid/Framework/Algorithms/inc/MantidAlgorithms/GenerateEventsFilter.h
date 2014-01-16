@@ -96,8 +96,9 @@ namespace Algorithms
         bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
         int wsindex);
 
-    void makeMultipleFiltersByValues(Kernel::TimeSplitterType& split, std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
-        bool centre, bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime);
+    void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges, bool centre,
+                                     bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime,
+                                     Kernel::DateAndTime stopTime);
 
     void processIntegerValueFilter(int minvalue, int maxvalue,
                                    bool filterIncrease, bool filterDecrease, Kernel::DateAndTime runend);
