@@ -294,7 +294,7 @@ namespace Mantid
         std::transform(ctfoil.begin(), ctfoil.end(), foilSpectrum.begin(), ctfoil.begin(),
                        std::minus<double>());
       }
-      bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)->getSpectrumNo()));
+      bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)->getSpectrumNo()) != 0 );
       // This is quicker than the if within the loop
       if(reversed)
       {
