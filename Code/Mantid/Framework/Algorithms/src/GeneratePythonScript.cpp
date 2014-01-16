@@ -67,7 +67,7 @@ void GeneratePythonScript::init()
 
   declareProperty(new API::FileProperty("Filename","", API::FileProperty::OptionalSave, exts),
   "The name of the file into which the workspace history will be generated.");
-  declareProperty("ScriptText", "", "Saves the history of the workspace to a variable.",Direction::Output);
+  declareProperty("ScriptText", "", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
