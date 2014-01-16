@@ -3,6 +3,8 @@
 This algorithm allows a user (who is logged into the information catalog) to publish
 datafiles or workspaces to investigations of which they are an investigator.
 
+'''Parameters Note:''' A file or workspace can be published, but not both at the same time.
+
 *WIKI*/
 
 #include "MantidICat/CatalogPublish.h"
@@ -49,7 +51,8 @@ namespace Mantid
       declareProperty(new Mantid::API::FileProperty("FileName", "", Mantid::API::FileProperty::OptionalLoad), "The file to publish.");
       declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
             "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"The workspace to publish.");
-      declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default.");
+      declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default. "
+          "This can only contain alphanumerics, underscores or periods");
       declareProperty("InvestigationNumber","","The investigation number where the published file will be saved to.");
     }
 
