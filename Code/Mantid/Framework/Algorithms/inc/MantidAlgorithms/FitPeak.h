@@ -27,24 +27,17 @@ namespace Algorithms
     /// Desctructor
     virtual ~FitOneSinglePeak();
 
+    /// Set workspaces
+    void setWorskpace(API::MatrixWorkspace_const_sptr dataws, size_t wsindex);
+
     /// Set fitting method
     void setFittingMethod(std::string minimizer, std::string costfunction);
 
     /// Set functions
     void setFunctions(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc);
 
-    /// Create functions from sctrach
-    void createFunctions(std::string peaktype, std::string bkgdtype);
-
-    /// Set workspaces
-    void setWorskpace(API::MatrixWorkspace_const_sptr dataws, size_t wsindex);
-
-    /// Set fit window
-    // void setFitWindow(double xmin, double xmax);
-
     /// Set fit range
-    void setFitWindow(double leftwindow, double rightwindow, double leftpeak,
-                      double rightpeak);
+    void setFitWindow(double leftwindow, double rightwindow);
 
     /// Set peak range
     void setPeakRange(double xpeakleft, double xpeakright);
@@ -53,10 +46,10 @@ namespace Algorithms
     void setupGuessedFWHM(int width);
 
     /// Fit peak and background together
-    bool simpleFit(size_t numsteps);
+    bool simpleFit();
 
     /// Fit peak first considering high background
-    bool highBkgdFit(size_t numsteps);
+    bool highBkgdFit();
 
     /// Get peak
     API::IPeakFunction_sptr getPeakFunction();
@@ -85,23 +78,32 @@ namespace Algorithms
 
   private:
 
-    ///
+    /// Name
     virtual const std::string name() const;
-
-    ///
+    /// Version
     virtual int version() const;
-
-    ///
+    /// Init
     void init();
-
-    ///
+    /// Exec
     void exec();
+
+    /// Check whether it is ready to fit
+    bool isReadyToFit();
+
+    /// Check a peak function whether it is valid comparing to user specified criteria
+    double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
+
 
     void setupGuessedFWHM(std::vector<double>& vec_FWHM);
 
-    ///
+    /// Fit function in single domain
     double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
                          double xmin, double xmax, bool calmode);
+
+    /// Fit peak and background composite function
+    double fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
+                                API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
+                                double startx, double endx);
 
     ///
     void processNStoreFitResult(double, bool);
@@ -128,6 +130,19 @@ namespace Algorithms
     double m_minFitX;
     /// Upper boundary of fitting range
     double m_maxFitX;
+    /// index of m_minFitX
+    size_t i_minFitX;
+    /// index of m_maxFitX
+    size_t i_maxFitX;
+
+    /// peak left boundary (client-defined)
+    double m_minPeakX;
+    /// peak right boundary (client-defined)
+    double m_maxPeakX;
+    /// index of m_minPeakX
+    size_t i_minPeakX;
+    /// index of m_maxPeakX
+    size_t i_maxPeakX;
 
     ///
     double m_userGuessedFWHM;
@@ -153,10 +168,9 @@ namespace Algorithms
     ///
     std::string m_costFunction;
 
-    ///
-    size_t i_minFitX;
-    ///
-    size_t i_maxFitX;
+    /// Goodness of fit
+    double m_finalFitGoodness;
+
 
     /// Log
     // Kernel::Logger& g_log;
