@@ -378,115 +378,134 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 
 	EndTime(program)
 
+def yield_floats(block):
+	#yield a list of floats from a list of lines of text
+	#encapsulates the iteration over a block of lines
+	for line in block:
+		yield ExtractFloat(line)
 
-def LorBlock(a,first,nl):                                 #read Ascii block of Integers
-	line1 = a[first]
-	first += 1
-	val = ExtractFloat(a[first])               #Q,AMAX,HWHM,BSCL,GSCL
-	Q = val[0]
-	AMAX = val[1]
-	HWHM = val[2]
-	BSCL = val[3]
-	GSCL = val[4]
-	first += 1
-	val = ExtractFloat(a[first])               #A0,A1,A2,A4
-	int0 = [AMAX*val[0]]
-	bgd1 = BSCL*val[1]
-	bgd2 = BSCL*val[2]
-	zero = GSCL*val[3]
-	first += 1
-	val = ExtractFloat(a[first])                #AI,FWHM first peak
-	fw = [2.*HWHM*val[1]]
-	int = [AMAX*val[0]]
-	if nl >= 2:
-		first += 1
-		val = ExtractFloat(a[first])            #AI,FWHM second peak
-		fw.append(2.*HWHM*val[1])
-		int.append(AMAX*val[0])
-	if nl == 3:
-		first += 1
-		val = ExtractFloat(a[first])            #AI,FWHM third peak
-		fw.append(2.*HWHM*val[1])
-		int.append(AMAX*val[0])
-	first += 1
-	val = ExtractFloat(a[first])                 #SIG0
-	int0.append(val[0])
-	first += 1
-	val = ExtractFloat(a[first])                  #SIGIK
-	int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
-	first += 1
-	val = ExtractFloat(a[first])                  #SIGFK
-	fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
-	if nl >= 2:                                      # second peak
-		first += 1
-		val = ExtractFloat(a[first])                  #SIGIK
-		int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
-		first += 1
-		val = ExtractFloat(a[first])                  #SIGFK
-		fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
-	if nl == 3:                                       # third peak
-		first += 1
-		val = ExtractFloat(a[first])                  #SIGIK
-		int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
-		first += 1
-		val = ExtractFloat(a[first])                  #SIGFK
-		fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
-	first += 1
-	return first,Q,int0,fw,int                                      #values as list
+def read_ql_file(file_name, nl):
+	#offet to ignore header
+	header_offset = 8
+	block_size = 4+nl*3
+
+	asc = readASCIIFile(file_name)
+	#extract number of blocks from the file header 
+	num_blocks = int(ExtractFloat(asc[3])[0])
+
+	q_data = [] 
+	amp_data, FWHM_data, height_data = [], [], []
+	amp_error, FWHM_error, height_error = [], [], []
+
+	#iterate over each block of fit parameters in the file
+	for block_num in xrange(num_blocks):
+		lower_index = header_offset+(block_size*block_num)
+		upper_index = lower_index+block_size 
+		
+		#create iterator for each line in the block
+		line_pointer = yield_floats(asc[lower_index:upper_index])
+
+		#Q,AMAX,HWHM,BSCL,GSCL
+		line = line_pointer.next()
+		Q, AMAX, HWHM, BSCL, GSCL = line
+		q_data.append(Q)
+
+		#A0,A1,A2,A4
+		line = line_pointer.next()
+		block_height = AMAX*line[0]
+
+		#parse peak data from block
+		block_FWHM = []
+		block_amplitude = []
+		for i in range(nl):		
+			#Amplitude,FWHM for each peak
+			line = line_pointer.next()
+			amp = AMAX*line[0]
+			FWHM = 2.*HWHM*line[1]
+			block_amplitude.append(amp)
+			block_FWHM.append(FWHM)
+		
+		#next parse error data from block
+		#SIG0
+		line = line_pointer.next()
+		block_height_e = line[0]
+		
+		block_FWHM_e = []
+		block_amplitude_e = []
+		for i in range(nl):
+			#Amplitude error,FWHM error for each peak
+			#SIGIK
+			line = line_pointer.next()
+			amp = AMAX*math.sqrt(math.fabs(line[0])+1.0e-20)
+			block_amplitude_e.append(amp)
+			
+			#SIGFK
+			line = line_pointer.next()
+			FWHM = 2.0*HWHM*math.sqrt(math.fabs(line[0])+1.0e-20)
+			block_FWHM_e.append(FWHM)
+	
+		amp_data.append(block_amplitude)
+		FWHM_data.append(block_FWHM)
+		height_data.append(block_height)
+
+		amp_error.append(block_amplitude_e)
+		FWHM_error.append(block_FWHM_e)
+		height_error.append(block_height_e)
+
+	return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 
 def C2Fw(prog,sname):
 	output_workspace = sname+'_Workspace'
-	vAxisNames = []
+	n_hist = 0
+
+	axis_names = []
 	x, y, e = [], [], []
-
-	names = ['Amplitude', 'FWHM']
-	n_params = len(names)
-	nhist = 0
-
 	for nl in range(1,4):
-
-		nhist += nl*n_params+1
+		n_hist += nl*2+1
 		
-		#read ASCII file output from Fortran code
-		file_name = sname + '.ql' +str(nl)
-		asc = readASCIIFile(file_name)
-
-		var = asc[3].split()
-		nspec = int(var[0])
-		first = 7
-
 		amplitude_data, width_data = [], []
 		amplitude_error, width_error  = [], []
 		
-		for m in range(nspec):
-			first,Q,i0,fw,it = LorBlock(asc,first,nl)
-			x.append(Q)
+		#read data from file output by fortran code
+		file_name = sname + '.ql' +str(nl)
+		x_data, peak_data, peak_error = read_ql_file(file_name, nl)
+		amplitude_data, width_data, height_data = peak_data
+		amplitude_error, width_error, height_error = peak_error
 
-			#collect amplitude, height and width data
-			width_data += fw[:nl]
-			amplitude_data += it[:nl]
-			height = i0[0]
-				
-			#collect amplitude, height and width error data
-			width_error += fw[nl:nl+nl]
-			amplitude_error += it[nl:nl+nl]
-			height_e = i0[1]
+		#transpose y and e data into workspace rows
+		amplitude_data, width_data = np.asarray(amplitude_data).T, np.asarray(width_data).T
+		amplitude_error, width_error = np.asarray(amplitude_error).T, np.asarray(width_error).T
+		
+		x_data = np.asarray(x_data)
 
-		height_data = [height for i in range(len(width_data)/nl)]
-		height_error = [height_e for i in range(len(width_data)/nl)]
+		#interlace amplitudes and widths of the peaks
+		y.append(np.asarray(height_data))
+		for amp, width in zip(amplitude_data, width_data):
+			y.append(amp)
+			y.append(width)
 
-		y += height_data + amplitude_data + width_data
-		e += height_error + amplitude_error + width_error
+		#iterlace amplitude and width errors of the peaks
+		e.append(np.asarray(height_error))
+		for amp, width in zip(amplitude_error, width_error):
+			e.append(amp)
+			e.append(width)
 
-		vAxisNames.append('f'+str(nl)+'.f0.'+'Height')
-		for j in range(1, nl+1):
-			for name in names:
-				vAxisNames.append('f'+str(nl)+'.f'+str(j)+'.'+name)
+		#create x data and axis names for each function
+		axis_names.append('f'+str(nl-1)+'.f0.'+'Height')
+		x.append(x_data)
+		for j in range(1,nl+1):
+				axis_names.append('f'+str(nl-1)+'.f'+str(j)+'.Amplitude')				
+				x.append(x_data)
 
-	#repeat x data for each of the histograms 
-	x = x * (nhist/3)
-	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=nhist,
-		UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=vAxisNames)
+				axis_names.append('f'+str(nl-1)+'.f'+str(j)+'.FWHM')
+				x.append(x_data)
+
+	x = np.asarray(x).flatten()
+	y = np.asarray(y).flatten()
+	e = np.asarray(e).flatten()
+
+	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=n_hist,
+		UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
 	return output_workspace
 
