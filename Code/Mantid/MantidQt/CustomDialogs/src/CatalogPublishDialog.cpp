@@ -41,9 +41,6 @@ namespace MantidQt
       // This allows the user NOT to select a workspace if there are any loaded into Mantid.
       m_uiForm.inputWorkspaceCb->insertItem("", 0);
 
-      // Populate "investigationNumberCb" with the investigation IDs that the user can publish to.
-      populateUserInvestigations();
-
       // Open a browsing dialog when the browse button is pressed.
       connect(m_uiForm.browseBtn,SIGNAL(clicked()),this,SLOT(onBrowse()));
 
@@ -52,15 +49,9 @@ namespace MantidQt
       connect(m_uiForm.cancelBtn,SIGNAL(clicked()),this,SLOT(reject()));
       connect(m_uiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
 
-      // The user is not an investigator on any investigations and cannot publish.
-      if (m_uiForm.investigationNumberCb->count() == 0)
-      {
-        // Update the message to inform the user why they cannot publish datafiles.
-        setOptionalMessage("You cannot publish datafiles as you are not an investigator on any investigations.");
-        // Disable the input fields and run button to prevent user from running algorithm.
-        m_uiForm.scrollArea->setDisabled(true);
-        m_uiForm.runBtn->setDisabled(true);
-      }
+      // Populate "investigationNumberCb" with the investigation IDs that the user can publish to.
+      populateUserInvestigations();
+
       // Get optional message here as we may set it if user has no investigations to publish to.
       m_uiForm.instructions->setText(getOptionalMessage());
     }
@@ -74,6 +65,17 @@ namespace MantidQt
       std::string catalogName = Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo().catalogName();
       auto catalog = Mantid::API::CatalogFactory::Instance().create(catalogName);
       catalog->myData(workspace);
+
+      // The user is not an investigator on any investigations and cannot publish
+      // or they are not logged into the catalog then update the related message..
+      if (workspace->rowCount() == 0)
+      {
+        setOptionalMessage("You cannot publish datafiles as you are not an investigator on any investigations or are not logged into the catalog.");
+        // Disable the input fields and run button to prevent user from running algorithm.
+        m_uiForm.scrollArea->setDisabled(true);
+        m_uiForm.runBtn->setDisabled(true);
+        return;
+      }
 
       // Populate the form with investigations that the user can publish to.
       for (size_t row = 0; row < workspace->rowCount(); row++)

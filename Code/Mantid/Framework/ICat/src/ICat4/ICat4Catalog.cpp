@@ -338,6 +338,8 @@ namespace Mantid
       ns1__searchResponse response;
 
       std::string sessionID = Session::Instance().getSessionId();
+      // Prevents any calls to myData from hanging due to sending a request to icat without a session ID.
+      if (sessionID.empty()) return;
       request.sessionId     = &sessionID;
 
       std::string query = "Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
