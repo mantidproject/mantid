@@ -13366,6 +13366,10 @@ void ApplicationWindow::createActions()
   actionCatalogSearch->setToolTip(tr("Search data in archives."));
   connect(actionCatalogSearch, SIGNAL(activated()), this, SLOT(CatalogSearch()));
 
+  actionCatalogPublish = new QAction("Publish",this);
+  actionCatalogPublish->setToolTip(tr("Publish data to the archives."));
+  connect(actionCatalogPublish, SIGNAL(activated()), this, SLOT(CatalogPublish()));
+
   actionCatalogLogout = new QAction("Logout",this);
   actionCatalogLogout->setToolTip(tr("Catalog Logout"));
   connect(actionCatalogLogout, SIGNAL(activated()), this, SLOT(CatalogLogout()));
@@ -17381,6 +17385,7 @@ void ApplicationWindow::CatalogLogin()
   if (mantidUI->isValidCatalogLogin())
   {
     icat->addAction(actionCatalogSearch);
+    icat->addAction(actionCatalogPublish);
     icat->addAction(actionCatalogLogout);
   }
 }
@@ -17400,11 +17405,17 @@ void ApplicationWindow::CatalogSearch()
   }
 }
 
+void ApplicationWindow::CatalogPublish()
+{
+  mantidUI->catalogPublishDialog();
+}
+
 void ApplicationWindow::CatalogLogout()
 {
   auto logout = mantidUI->createAlgorithm("CatalogLogout");
   mantidUI->executeAlgorithmAsync(logout);
   icat->removeAction(actionCatalogSearch);
+  icat->removeAction(actionCatalogPublish);
   icat->removeAction(actionCatalogLogout);
 }
 
