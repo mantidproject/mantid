@@ -342,8 +342,7 @@ public:
     }
 
 
-    boost::shared_ptr<const Mantid::Geometry::IComponent> bank = instr->getComponentByName("bank1");
-    Mantid::Geometry::Parameter_sptr sigmaSqParam = paramMap.get(&(*bank), "SigmaSquared", "fitting");
+    Mantid::Geometry::Parameter_sptr sigmaSqParam = paramMap.get(&(*instr), "SigmaSquared", "fitting");
     TS_ASSERT(sigmaSqParam);
     if(sigmaSqParam) 
     {
@@ -354,7 +353,7 @@ public:
       TS_ASSERT_DELTA( formulaValueCantreAt10, 0.399, 0.0000001);
     }
 
-    Mantid::Geometry::Parameter_sptr gammaParam = paramMap.get(&(*bank), "Gamma", "fitting");
+    Mantid::Geometry::Parameter_sptr gammaParam = paramMap.get(&(*instr), "Gamma", "fitting");
     TS_ASSERT(gammaParam);
     if(gammaParam) 
     {
