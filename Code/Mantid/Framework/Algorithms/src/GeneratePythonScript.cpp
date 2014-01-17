@@ -13,7 +13,6 @@ Retrieves the algorithm history of the workspace provided and saves it to a vari
   wsHistory = GeneratePythonScript("MUSR00022725")
 
   # Output the contents of the hist variable.
-  # (E.g. the history of the workspace. This will also be stored
   print wsHistory
 
   ######################################################################
