@@ -195,12 +195,24 @@ namespace DataHandling
 
 
     // If workspace, put parameters there
-    if(wsg)
-    {   
-      Workspace_sptr wsi = wsg->getItem(0);
-      auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-      putParametersIntoWorkspace( outTabWs, workspace );
-    } 
+    if(wsg) {
+      // First check that number of workspaces in group matches number of banks
+      if( wsg->size() != vec_bankids.size() )
+      {
+        std::ostringstream mess;
+        mess << "Number of banks ("<< vec_bankids.size() << ") does not match number of workspaces (" << wsg->size() << ") in group. Parameters not put into workspaces.";
+        g_log.error( mess.str() );
+      }
+      else // Numbers match, so put parameters into workspaces.
+      {   
+        for (size_t i=0; i < wsg->size(); ++i)
+        {
+          Workspace_sptr wsi = wsg->getItem(i);
+          auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+          putParametersIntoWorkspace( i+1, outTabWs, workspace );
+        }
+      } 
+    }
     else if( getPropertyValue("OutputTableWorkspace") == "")
     {
       // We don't know where to output
@@ -769,13 +781,16 @@ namespace DataHandling
     return tablews;
   }
 
-  void LoadFullprofResolution::putParametersIntoWorkspace( const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws)
+  void LoadFullprofResolution::putParametersIntoWorkspace( size_t wsNumber, const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws)
   {  
 
     // Get instrument name from matrix workspace
     std::string instrumentName = ws->getInstrument()->getName();
 
-    // Convert table workspace into DOM XML document
+    // Get column from table workspace
+    API::Column_const_sptr column = tws->getColumn( wsNumber );
+
+    // Convert table workspace column into DOM XML document
     //   Set up writer to Paremeter file
     DOMWriter writer;
     writer.setNewLine("\n");
@@ -797,30 +812,13 @@ namespace DataHandling
     AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name",instrumentName);
     rootElem->appendChild(instrumentElem);
-    API::Column_const_sptr column1 = tws->getColumn( 1 );
-    addALFBEParameter( column1, mDoc, instrumentElem, "Alph0");
-    addALFBEParameter( column1, mDoc, instrumentElem, "Beta0");
-    addALFBEParameter( column1, mDoc, instrumentElem, "Alph1");
-    addALFBEParameter( column1, mDoc, instrumentElem, "Beta1");
+    addALFBEParameter( column, mDoc, instrumentElem, "Alph0");
+    addALFBEParameter( column, mDoc, instrumentElem, "Beta0");
+    addALFBEParameter( column, mDoc, instrumentElem, "Alph1");
+    addALFBEParameter( column, mDoc, instrumentElem, "Beta1");
+    addSigmaParameters( column, mDoc, instrumentElem );
+    addGammaParameters( column, mDoc, instrumentElem );
 
-    //   Add banks
-    if(tws->columnCount() < 2){
-      throw std::runtime_error("No banks found");
-    }
-    size_t num_banks = tws->columnCount()-1;
-
-    for( size_t i=0; i<num_banks; ++i)
-    {
-      API::Column_const_sptr column = tws->getColumn( i+1 );
-      const double bankNumber = column->cell<double>(0);
-      std::ostringstream bankName;
-      bankName << "bank" << bankNumber;
-      AutoPtr<Element> bankElem = mDoc->createElement("component-link");
-      bankElem->setAttribute("name",bankName.str());
-      addSigmaParameters( column, mDoc, bankElem );
-      addGammaParameters( column, mDoc, bankElem );
-      rootElem->appendChild(bankElem);
-    }
 
     // Convert DOM XML document into string
     std::ostringstream outFile;

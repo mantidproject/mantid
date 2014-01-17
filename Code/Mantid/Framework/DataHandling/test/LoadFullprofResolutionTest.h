@@ -225,7 +225,6 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test import of ALFBE, GAMMA and SIGMA parameters
   *   and check they are given their expected names.
-  *   ConvertFullprofToXML relies on features tested here.
   */
   void test_ags_parameters()
   {
@@ -284,8 +283,8 @@ public:
     string filename("TestWorskpace.irf");
     generate1BankIrfFile(filename);
 
-    // Load workspace wsName
-    load_GEM();
+    // Load workspace group wsName with one workspace
+    load_GEM(1);
 
     // Set up algorithm to load into the workspace
     LoadFullprofResolution alg;
@@ -299,7 +298,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Check parameters in workspace T
+    // Check parameters in workspace 
     // The workspace is a workspace group with one member corresponding to the one bank in the IRF file
     WorkspaceGroup_sptr gws;
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
@@ -342,8 +341,7 @@ public:
     }
 
 
-    boost::shared_ptr<const Mantid::Geometry::IComponent> bank = instr->getComponentByName("bank1");
-    Mantid::Geometry::Parameter_sptr sigmaSqParam = paramMap.get(&(*bank), "SigmaSquared", "fitting");
+    Mantid::Geometry::Parameter_sptr sigmaSqParam = paramMap.get(&(*instr), "SigmaSquared", "fitting");
     TS_ASSERT(sigmaSqParam);
     if(sigmaSqParam) 
     {
@@ -354,7 +352,7 @@ public:
       TS_ASSERT_DELTA( formulaValueCantreAt10, 0.399, 0.0000001);
     }
 
-    Mantid::Geometry::Parameter_sptr gammaParam = paramMap.get(&(*bank), "Gamma", "fitting");
+    Mantid::Geometry::Parameter_sptr gammaParam = paramMap.get(&(*instr), "Gamma", "fitting");
     TS_ASSERT(gammaParam);
     if(gammaParam) 
     {
@@ -367,6 +365,80 @@ public:
 
     // Clean
     Poco::File("TestWorskpace.irf").remove();
+  }
+
+ //----------------------------------------------------------------------------------------------
+  /** Test that when the workspace property is used with multiple workspaces
+  **  that parameters are correctly loaded into this workspaces, according to the fullprof banks.
+  *   The GEM instrument is used
+  */
+  void test_multiworkspace()
+  {
+    // Generate file
+    string filename("TestMultiWorskpace.irf");
+    generate3BankIrfFile(filename);
+
+    // Load workspace group wsName with 3 workspaces
+    load_GEM(3);
+
+    // Set up algorithm to load into the workspace
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Banks", "2-4");
+    alg.setProperty("Workspace", wsName);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check parameters in workspace 
+    // The workspace is a workspace group with three members corresponding to the three banks in the IRF file
+    WorkspaceGroup_sptr gws;
+    gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
+    // 1st Workspace - bank 2
+    Workspace_sptr wsi = gws->getItem(0) ;
+    auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    Mantid::Geometry::ParameterMap& paramMap1 = ws1->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr1 = ws1->getInstrument();
+    // 2nd Workspace - bank 3
+    wsi = gws->getItem(1) ;
+    auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    Mantid::Geometry::ParameterMap& paramMap2 = ws2->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr2 = ws2->getInstrument();
+    // 3rd Workspace - bank 4
+    wsi = gws->getItem(2) ;
+    auto ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    Mantid::Geometry::ParameterMap& paramMap3 = ws3->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr3 = ws3->getInstrument();
+
+
+    // Check Beta0 parameter in each workspace
+    Mantid::Geometry::Parameter_sptr beta0Param1 = paramMap1.get(&(*instr1), "Beta0", "fitting");
+    TS_ASSERT(beta0Param1);
+    if(beta0Param1) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta0Param1->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 6.251096, 0.0000001);
+    }
+    Mantid::Geometry::Parameter_sptr beta0Param2 = paramMap2.get(&(*instr2), "Beta0", "fitting");
+    TS_ASSERT(beta0Param2);
+    if(beta0Param2) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta0Param2->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 7.251096, 0.0000001);
+    }
+    Mantid::Geometry::Parameter_sptr beta0Param3 = paramMap3.get(&(*instr3), "Beta0", "fitting");
+    TS_ASSERT(beta0Param3);
+    if(beta0Param3) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta0Param3->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 3.012, 0.0000001);
+    }
+
+    // Clean
+    Poco::File("TestMultiWorskpace.irf").remove();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -510,20 +582,30 @@ public:
 
 
   //----------------------------------------------------------------------------------------------
-  /** Generate a GEM workspace group with one member
+  /** Generate a GEM workspace group with specified number of workspaces.
     */
-  void load_GEM()
+  void load_GEM( size_t numberOfWorkspaces)
   {
     LoadInstrument loaderGEM;
 
     TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize());
 
     //create a workspace with some sample data
-    wsName = "LoadFullprofResolutionWorkspace";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
     WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
-    gws->addWorkspace( ws2D );
+    if(numberOfWorkspaces == 1) 
+    {
+      wsName = "LoadFullprofResolutionWorkspace";
+    } 
+    else
+    {
+      wsName = "LoadFullprofResolutionMultiWorkspace";
+    }
+    for (size_t i=0; i < numberOfWorkspaces; ++i)
+    {
+      Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+      gws->addWorkspace( ws2D );
+    }
 
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, gws));
@@ -689,7 +771,7 @@ public:
       ofile << "!           Gam-2       Gam-1       Gam-0                                      \n";
       ofile << "GAMMA       0.000       0.000       0.000                                      \n";
       ofile << "!         alph0       beta0       alph1       beta1                            \n";
-      ofile << "ALFBE    0.000008    6.251096    0.000000    0.000000                          \n";
+      ofile << "ALFBE    0.000008    7.251096    0.000000    0.000000                          \n";
       ofile << "!         alph0t      beta0t      alph1t      beta1t                           \n";
       ofile << "ALFBT   0.010156   85.918922    0.000000    0.000000                           \n";
       ofile << "END                                                                            \n";
