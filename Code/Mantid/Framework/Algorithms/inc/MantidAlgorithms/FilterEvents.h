@@ -61,17 +61,30 @@ namespace Algorithms
     // Implement abstract Algorithm methods
     void exec();
 
+    /// Process user input properties
+    void processProperties();
+
     void processSplittersWorkspace();
 
-    void createOutputWorkspaces(std::string outputwsnamebase);
+    ///
+    void processMatrixSplitterWorkspace();
+
+    void createOutputWorkspaces();
 
     void importDetectorTOFCalibration();
 
     void filterEventsBySplitters(double progressamount);
 
+    ///
+    void filterEventsByVectorSplitters(double progressamount);
+
     DataObjects::EventWorkspace_sptr m_eventWS;
-    DataObjects::SplittersWorkspace_sptr mSplittersWorkspace;
+    DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
+    API::MatrixWorkspace_const_sptr m_matrixSplitterWS;
     DataObjects::TableWorkspace_sptr m_detCorrectWorkspace;
+
+    /// Flag to use matrix splitters or table splitters
+    bool m_useTableSplitters;
 
     std::set<int> m_workGroupIndexes;
     Kernel::TimeSplitterType m_splitters;
@@ -83,7 +96,7 @@ namespace Algorithms
 
     bool mFilterByPulseTime;
 
-    DataObjects::TableWorkspace_sptr mInformationWS;
+    DataObjects::TableWorkspace_sptr m_informationWS;
     bool mWithInfo;
 
     double mProgress;
@@ -98,6 +111,17 @@ namespace Algorithms
     bool m_doTOFCorrection;
     /// Flag to generate TOF correction
     bool m_genTOFCorrection;
+
+    /// Base of output workspace's name
+    std::string m_outputWSNameBase;
+
+    ///
+    bool m_toGroupWS;
+
+    ///
+    std::vector<int64_t> m_vecSplitterTime;
+    ///
+    std::vector<int> m_vecSplitterGroup;
 
 
   };

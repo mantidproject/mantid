@@ -83,17 +83,17 @@ namespace Algorithms
   void FilterEvents::init()
   {
     declareProperty(
-          new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input),
+          new API::WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
           "An input event workspace" );
 
     declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
                     "The base name to use for the output workspace" );
 
-    declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<TableWorkspace>("InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
         "Optional output for the information of each splitter workspace index.");
 
     declareProperty(
-        new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("SplitterWorkspace", "", Direction::Input),
+        new API::WorkspaceProperty<API::Workspace>("SplitterWorkspace", "", Direction::Input),
         "An input SpilltersWorskpace for filtering");
 
     auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "", Direction::Input, PropertyMode::Optional);
@@ -121,6 +121,68 @@ namespace Algorithms
   void FilterEvents::exec()
   {
     // Process algorithm properties
+    processProperties();
+
+    // Parse splitters
+    mProgress = 0.0;
+    progress(mProgress, "Processing SplittersWorkspace.");
+    if (m_useTableSplitters)
+      processSplittersWorkspace();
+    else
+      processMatrixSplitterWorkspace();
+
+    // Create output workspaces
+    mProgress = 0.1;
+    progress(mProgress, "Create Output Workspaces.");
+    createOutputWorkspaces();
+
+    // Optionall import corrections
+    mProgress = 0.20;
+    progress(mProgress, "Importing TOF corrections. ");
+    if (m_doTOFCorrection)
+      importDetectorTOFCalibration();
+
+    // Filter Events
+    mProgress = 0.30;
+    progress(mProgress, "Filter Events.");
+    double progressamount;
+    if (m_toGroupWS)
+      progressamount = 0.6;
+    else
+      progressamount = 0.7;
+    if (m_useTableSplitters)
+      filterEventsBySplitters(progressamount);
+    else
+      filterEventsByVectorSplitters(progressamount);
+
+    // Optional to group detector
+    if (m_toGroupWS)
+    {
+      mProgress = 0.9;
+      progress(mProgress, "Group workspaces");
+
+      std::string groupname = m_outputWSNameBase;
+      API::IAlgorithm_sptr groupws = createChildAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
+      // groupws->initialize();
+      groupws->setAlwaysStoreInADS(true);
+      groupws->setProperty("InputWorkspaces", m_wsNames);
+      groupws->setProperty("OutputWorkspace", groupname);
+      groupws->execute();
+      if (!groupws->isExecuted())
+      {
+        g_log.error() << "Grouping all output workspaces fails." << std::endl;
+      }
+    }
+
+    mProgress = 1.0;
+    progress(mProgress, "Completed");
+
+    return;
+  }
+
+
+  void FilterEvents::processProperties()
+  {
     m_eventWS = this->getProperty("InputWorkspace");
     if (!m_eventWS)
     {
@@ -130,14 +192,34 @@ namespace Algorithms
       throw std::invalid_argument(errss.str());
     }
 
-    mSplittersWorkspace = this->getProperty("SplitterWorkspace");
-    mInformationWS = this->getProperty("InformationWorkspace");
+    // Process splitting workspace (table or data)
+    API::Workspace_sptr tempws = this->getProperty("SplitterWorkspace");
 
-    std::string outputwsnamebase = this->getProperty("OutputWorkspaceBaseName");
+    m_splittersWorkspace = boost::dynamic_pointer_cast<SplittersWorkspace>(tempws);
+    if (m_splittersWorkspace)
+    {
+      m_useTableSplitters = true;
+    }
+    else
+    {
+      m_matrixSplitterWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tempws);
+      if (m_matrixSplitterWS)
+      {
+        m_useTableSplitters = false;
+      }
+      else
+      {
+        throw runtime_error("Invalid type of input workspace, neither SplittersWorkspace nor MatrixWorkspace.");
+      }
+    }
+
+    m_informationWS = this->getProperty("InformationWorkspace");
+
+    m_outputWSNameBase = this->getPropertyValue("OutputWorkspaceBaseName");
     m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
 
-    bool togroupws = this->getProperty("GroupWorkspaces");
+    m_toGroupWS = this->getProperty("GroupWorkspaces");
 
     // Do correction or not?
     m_doTOFCorrection = true;
@@ -159,60 +241,10 @@ namespace Algorithms
     }
 
     // Informatin workspace is specified?
-    if (!mInformationWS)
-      mWithInfo = false;    
-    else    
-      mWithInfo = true;
-
-    // Parse splitters
-    mProgress = 0.0;
-    progress(mProgress, "Processing SplittersWorkspace.");
-    processSplittersWorkspace();
-
-    // Create output workspaces
-    mProgress = 0.1;
-    progress(mProgress, "Create Output Workspaces.");
-    createOutputWorkspaces(outputwsnamebase);
-
-    // Optionall import corrections
-    mProgress = 0.20;
-    progress(mProgress, "Importing TOF corrections. ");
-    if (m_doTOFCorrection)
-      importDetectorTOFCalibration();
-
-    // Filter Events
-    mProgress = 0.30;
-    progress(mProgress, "Filter Events.");
-    double progressamount;
-    if (togroupws)
-      progressamount = 0.6;
+    if (!m_informationWS)
+      mWithInfo = false;
     else
-      progressamount = 0.7;
-    filterEventsBySplitters(progressamount);
-
-    // Optional to group detector
-    if (togroupws)
-    {
-      mProgress = 0.9;
-      progress(mProgress, "Group workspaces");
-
-      std::string groupname = outputwsnamebase;
-      API::IAlgorithm_sptr groupws = createChildAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
-      // groupws->initialize();
-      groupws->setAlwaysStoreInADS(true);
-      groupws->setProperty("InputWorkspaces", m_wsNames);
-      groupws->setProperty("OutputWorkspace", groupname);
-      groupws->execute();
-      if (!groupws->isExecuted())
-      {
-        g_log.error() << "Grouping all output workspaces fails." << std::endl;
-      }
-    }
-
-    mProgress = 1.0;
-    progress(mProgress, "Completed");
-
-    return;
+      mWithInfo = true;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -222,14 +254,14 @@ namespace Algorithms
   void FilterEvents::processSplittersWorkspace()
   {
     // 1. Init data structure
-    size_t numsplitters = mSplittersWorkspace->getNumberSplitters();
+    size_t numsplitters = m_splittersWorkspace->getNumberSplitters();
     m_splitters.reserve(numsplitters);
 
     // 2. Insert all splitters
     bool inorder = true;
     for (size_t i = 0; i < numsplitters; i ++)
     {
-      m_splitters.push_back(mSplittersWorkspace->getSplitter(i));
+      m_splitters.push_back(m_splittersWorkspace->getSplitter(i));
       m_workGroupIndexes.insert(m_splitters.back().index());
 
       if (inorder && i > 0 && m_splitters[i] < m_splitters[i-1])
@@ -250,10 +282,10 @@ namespace Algorithms
     // 5. Add information
     if (mWithInfo)
     {
-      if (m_workGroupIndexes.size() > mInformationWS->rowCount()+1)
+      if (m_workGroupIndexes.size() > m_informationWS->rowCount()+1)
       {
         g_log.warning() << "Input Splitters Workspace has different entries (" << m_workGroupIndexes.size() -1
-                        << ") than input information workspaces (" << mInformationWS->rowCount() << "). "
+                        << ") than input information workspaces (" << m_informationWS->rowCount() << "). "
                         << "  Information may not be accurate. " << std::endl;
       }
     }
@@ -261,18 +293,49 @@ namespace Algorithms
     return;
   }
 
+
+  void FilterEvents::processMatrixSplitterWorkspace()
+  {
+    // Check input workspace validity
+    const MantidVec& vecX = m_matrixSplitterWS->readX(0);
+    const MantidVec& vecY = m_matrixSplitterWS->readY(0);
+    size_t sizex = vecX.size();
+    size_t sizey = vecY.size();
+    if (sizex - sizey != 1)
+      throw runtime_error("Size must be N and N-1.");
+
+    // Assign vectors for time comparison
+    m_vecSplitterTime.assign(vecX.size(), 0);
+    m_vecSplitterGroup.assign(vecY.size(), -1);
+
+    // Transform vector
+    for (size_t i = 0; i < sizex; ++i)
+    {
+      m_vecSplitterTime[i] = static_cast<int64_t>(vecX[i]);
+    }
+    for (size_t i = 0; i < sizey; ++i)
+    {
+      m_vecSplitterGroup[i] = static_cast<int>(vecY[i]);
+      m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
+    }
+
+    return;
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Create a list of EventWorkspace for output
    */
-  void FilterEvents::createOutputWorkspaces(std::string outputwsnamebase)
+  void FilterEvents::createOutputWorkspaces()
   {
+
     // Convert information workspace to map
     std::map<int, std::string> infomap;
     if (mWithInfo)
     {
-      for (size_t ir = 0; ir < mInformationWS->rowCount(); ++ ir)
+      for (size_t ir = 0; ir < m_informationWS->rowCount(); ++ ir)
       {
-        API::TableRow row = mInformationWS->getRow(ir);
+        API::TableRow row = m_informationWS->getRow(ir);
         int& indexws = row.Int(0);
         std::string& info = row.String(1);
         infomap.insert(std::make_pair(indexws, info));
@@ -310,11 +373,11 @@ namespace Algorithms
       std::stringstream wsname;
       if (wsgroup >= 0)
       {
-        wsname << outputwsnamebase << "_" << (wsgroup+delta_wsindex);
+        wsname << m_outputWSNameBase << "_" << (wsgroup+delta_wsindex);
       }
       else
       {
-        wsname << outputwsnamebase << "_unfiltered";
+        wsname << m_outputWSNameBase << "_unfiltered";
         if (from1)
           add2output = false;
       }
@@ -586,6 +649,111 @@ namespace Algorithms
       progress(0.1+progressamount+outwsindex/numws*0.2, "Splitting logs");
       outwsindex += 1.;
     }
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Split events by splitters represented by vector
+    */
+  void FilterEvents::filterEventsByVectorSplitters(double progressamount)
+  {
+    size_t numberOfSpectra = m_eventWS->getNumberHistograms();
+    // FIXME : consider to use vector to index workspace and event list
+    std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
+
+    // Loop over the histograms (detector spectra) to do split from 1 event list to N event list
+    g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
+
+    // FIXME Make it parallel
+    // PARALLEL_FOR_NO_WSP_CHECK()
+    for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
+    {
+      // FIXME Make it parallel
+      // PARALLEL_START_INTERUPT_REGION
+
+      // Get the output event lists (should be empty) to be a map
+      map<int, DataObjects::EventList* > outputs;
+      for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+      {
+        int index = wsiter->first;
+        DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
+        outputs.insert(std::make_pair(index, output_el));
+      }
+
+      // Get a holder on input workspace's event list of this spectrum
+      const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
+
+      // Perform the filtering (using the splitting function and just one output)
+      if (mFilterByPulseTime)
+      {
+        throw runtime_error("It is not a good practice to split fast event by pulse time. ");
+        // input_el.splitByPulseTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs);
+      }
+      else if (m_doTOFCorrection)
+      {
+        input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
+                                               m_detTofOffsets[iws], m_doTOFCorrection);
+      }
+      else
+      {
+        input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs, 1.0, m_doTOFCorrection);
+      }
+
+      mProgress = 0.3+(progressamount-0.2)*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
+      progress(mProgress, "Filtering events");
+
+      // FIXME - Turn on parallel
+      // PARALLEL_END_INTERUPT_REGION
+    } // END FOR i = 0
+    // PARALLEL_CHECK_INTERUPT_REGION
+    // FIXME - Turn on parallel
+
+
+    // Finish (1) adding events and splitting the sample logs in each target workspace.
+    progress(0.1+progressamount, "Splitting logs");
+
+    std::vector<std::string> lognames;
+    this->getTimeSeriesLogNames(lognames);
+    g_log.debug() << "[FilterEvents D1214]:  Number of TimeSeries Logs = " << lognames.size()
+                  << " to " << m_outputWS.size() << " outptu workspaces. \n";
+
+    double numws = static_cast<double>(m_outputWS.size());
+    double outwsindex = 0.;
+    for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++wsiter)
+    {
+      int wsindex = wsiter->first;
+      DataObjects::EventWorkspace_sptr opws = wsiter->second;
+
+      // Generate a list of splitters for current output workspace
+      Kernel::TimeSplitterType splitters;
+      generateSplitters(wsindex, splitters);
+
+      g_log.debug() << "[FilterEvents D1215]: Output orkspace Index " << wsindex
+                    << ": Name = " << opws->name() << "; Number of splitters = " << splitters.size() << ".\n";
+
+      // Skip output workspace has ZERO splitters
+      if (splitters.size() == 0)
+      {
+        g_log.warning() << "[FilterEvents] Workspace " << opws->name() << " Indexed @ " << wsindex <<
+                           " won't have logs splitted due to zero splitter size. " << ".\n";
+        continue;
+      }
+
+      // Split log
+      size_t numlogs = lognames.size();
+      for (size_t ilog = 0; ilog < numlogs; ++ilog)
+      {
+        this->splitLog(opws, lognames[ilog], splitters);
+      }
+      opws->mutableRun().integrateProtonCharge();
+
+      progress(0.1+progressamount+outwsindex/numws*0.2, "Splitting logs");
+      outwsindex += 1.;
+    }
+
+    return;
 
     return;
   }
