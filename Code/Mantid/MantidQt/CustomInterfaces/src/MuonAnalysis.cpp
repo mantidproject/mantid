@@ -164,8 +164,6 @@ void MuonAnalysis::initLayout()
 
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
   m_optionTab->initLayout();
-  // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
-  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SLOT(showAllPlotWindows()));
 
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
   m_fitDataTab->init();
@@ -390,11 +388,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
       hideAllPlotWindows();
 
     // Plot the workspace
-    plotSpectrum( wsNameQ, 0, (plotType == Logorithm) );
-
-    // Change the plot style of the graph so that it matches what is selected on
-    // the plot options tab.
-    setPlotStyle( wsNameQ, getPlotStyleParams(wsNameQ, 0) );
+    plotSpectrum( wsNameQ, (plotType == Logorithm) );
 
     setCurrentDataName( wsNameQ );
   }
@@ -2175,84 +2169,65 @@ QStringList MuonAnalysis::getPeriodLabels() const
 
 /**
  * plots specific WS spectrum (used by plotPair and plotGroup)
- * @param wsName workspace name
- * @param wsIndex workspace index
+ * @param wsName   :: Workspace name
+ * @param logScale :: Whether to plot using logarithmic scale
  */
-void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale)
+void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
 {
-    // Close the previous plot window ( if exists )
-    closePlotWindow(wsName);
+    // Get plotting params
+    const QMap<QString, QString>& params = getPlotStyleParams(wsName);
 
-    // create first part of plotting Python string
-    QString gNum = QString::number(wsIndex);
     QString pyS;
 
-    // Plot error bars by default. If not needed they will get hidden when plot style if applied.
-    pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ",True)\n";
+    // Try to find existing graph window
+    pyS = "w = graph('%1-1')\n";
 
-    // Add the objectName for the peakPickerTool to find
-    pyS += "gs.setObjectName(\"" + wsName + "\")\n"
-           "l = gs.activeLayer()\n"
-           "l.setCurveTitle(0, \"" + wsName + "\")\n"
-           "l.setTitle(\"" + m_title.c_str() + "\")\n";
+    // If doesn't exist - plot it
+    pyS += "if w == None:\n"
+           "  w = plotSpectrum('%1', 0, %2, %3)\n"
+           "  w.setObjectName('%1')\n";
 
-    if ( ylogscale )
+    // If plot does exist already, it should've just been updated automatically, so we just
+    // need to make sure it is visible
+    pyS += "else:\n"
+          "  plotSpectrum('%1', 0, %2, %3, window = w, clearWindow = True)\n"
+          "  w.show()\n"
+          "  w.setFocus()\n";
+
+    pyS = pyS.arg(wsName).arg(params["ShowErrors"]).arg(params["ConnectType"]);
+  
+    // Update titles
+    pyS += "l = w.activeLayer()\n"
+           "l.setCurveTitle(0, '%1')\n"
+           "l.setTitle('%2')\n";
+
+    pyS = pyS.arg(wsName).arg(m_title.c_str());
+
+    // Set logarithmic scale if required
+    if ( logScale )
       pyS += "l.logYlinX()\n";
 
-    // plot the spectrum
+    // Set scaling
+    if( params["YAxisAuto"] == "True" )
+    {
+      pyS += "l.setAutoScale()\n";
+    }
+    else
+    {
+      pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
+      pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
+    }
+
     runPythonCode( pyS );
 }
 
 /**
- * Set various style parameters for the plot of the given ws
- * @param wsName Workspace which plot to style
- * @param params Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
-                 of possible keys
- */
-void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QString>& params)
-{
-  QString code;
-
-  // Get the active layer of the graph
-  code += "l = graph('"+ wsName + "-1').activeLayer()\n";
-
-  // Set whether to show symbols
-  QString symbolStyle = (params["ConnectType"] == "0") ? QString("PlotSymbol.NoSymbol") : QString("PlotSymbol.Ellipse");
-  code += "l.setCurveSymbol(0, PlotSymbol(" + symbolStyle +", QBrush(), QPen(), QSize(5,5)))\n";
-
-  // Set whether to show line
-  QString penStyle = (params["ConnectType"] == "1") ? QString("Qt.NoPen") : QString("Qt.SolidLine");
-  code += "pen = QPen(Qt.black)\n"
-          "pen.setStyle(" + penStyle +")\n"
-          "l.setCurvePen(0, pen)\n";
-
-  // Set error settings
-  QString showErrors = (params["ShowErrors"] == "True") ? QString("True") : QString("False");
-  code += "errorSettings = l.errorBarSettings(0, 0)\n"
-          "errorSettings.drawMinusSide(" + showErrors + ")\n"
-          "errorSettings.drawPlusSide(" + showErrors + ")\n";
-
-  // If autoscaling disabled - set manual Y axis values
-  if(params["YAxisAuto"] == "False")
-    code += "l.setAxisScale(Layer.Left," + params["YAxisMin"] + "," + params["YAxisMax"] + ")\n";
-  else
-    code += "l.setAutoScale()\n";
-
-  // Replot
-  code += "l.replot()\n";
-
-  runPythonCode(code);
-}
-
-/**
- * Get current plot style parameters. wsName and wsIndex are used to get default values if 
- * something is not specified.
+ * Get current plot style parameters. wsName is used to get default values. 
  * @param wsName Workspace plot of which we want to style
- * @param wsIndex Workspace index of the plot data
  * @return Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
            of possible keys
  */
-QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, const int wsIndex)
+QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName)
 {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
@@ -2269,7 +2244,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, c
     {
       Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
       MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-      const Mantid::MantidVec& dataY = matrix_workspace->readY(wsIndex);
+      const Mantid::MantidVec& dataY = matrix_workspace->readY(0);
 
       if(min.isEmpty())
         params["YAxisMin"] = QString::number(*min_element(dataY.begin(), dataY.end()));
@@ -2280,22 +2255,6 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, c
   }
 
   return params;
-}
-
-/**
- * Closes the window with the plot of the given ws.
- * @param wsName Name of the workspace which plot window to close
- */
-void MuonAnalysis::closePlotWindow(const QString& wsName)
-{
-  QString code;
-
-  code += "g = graph('"+ wsName + "-1')\n"
-          "if g != None:\n"
-          "  g.confirmClose(False)\n"
-          "  g.close()\n";
-
-  runPythonCode(code);
 }
 
 /**
@@ -2331,6 +2290,9 @@ bool MuonAnalysis::plotExists(const QString& wsName)
 void MuonAnalysis::selectMultiPeak(const QString& wsName)
 {
   disableAllTools();
+
+  if( ! plotExists(wsName) )
+    plotSpectrum(wsName);
 
   QString code;
 
@@ -2377,41 +2339,6 @@ void MuonAnalysis::showAllPlotWindows()
           "    w.show()\n";
 
   runPythonCode(code);
-}
-
-/**
- * Show a plot for a given workspace. Closes previous plot if exists.
- * @param wsName The name of workspace to be plotted. Should exist in ADS.
- */
-void MuonAnalysis::showPlot(const QString& wsName)
-{
-  // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
-  //       only one groups)
-
-  // If empty -> no workspaces available to choose (e.g. all were deleted)
-  if(wsName.isEmpty())
-  {
-    setCurrentDataName(NOT_AVAILABLE);
-  }
-  // Just in case, check if exists. Shouldn't happen normally.
-  // TODO: can happen if currently connected ws gets deleted. Observe deletion event and do 
-  //       something in that case
-  else if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-  {
-    g_log.warning("Can't show workspace which doesn't exist.");
-  }
-  else
-  {
-    setCurrentDataName(wsName);
-
-    if(!plotExists(wsName))
-    {
-      plotSpectrum(m_currentDataName, 0, false);
-      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
-    }
-
-    selectMultiPeak(m_currentDataName);
-  }
 }
 
 /**
@@ -3195,7 +3122,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
     // Disconnect to avoid problems when filling list of workspaces in fit prop. browser
     disconnect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                              this, SLOT(showPlot(const QString&)));
+                              this, SLOT(selectMultiPeak(const QString&)));
   }
 
   if(newTab == m_uiForm.DataAnalysis) // Entering DA tab
@@ -3205,11 +3132,11 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
     // Show connected plot and attach PP tool to it (if has been assigned)
     if(m_currentDataName != NOT_AVAILABLE)
-      showPlot(m_currentDataName);
+      selectMultiPeak(m_currentDataName);
     
     // In future, when workspace gets changed, show its plot and attach PP tool to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                           this, SLOT(showPlot(const QString&)), Qt::QueuedConnection);
+                           this, SLOT(selectMultiPeak(const QString&)), Qt::QueuedConnection);
   }
   else if(newTab == m_uiForm.ResultsTable)
   {
@@ -3391,21 +3318,8 @@ void MuonAnalysis::updateCurrentPlotStyle()
 {
   if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE)
   {
-    if(plotExists(m_currentDataName))
-    {
-      // TODO: This index magic wouldn't be needed if we'd store only a single group in a workspace.
-
-      // Get selected group index
-      int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
-
-      // Check if pair is selected
-      if(index >= numGroups())
-        index = 0;
-
-      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, index));
-    }
-    else
-      runFrontPlotButton();
+    // Replot using new style params
+    plotSpectrum(m_currentDataName);
   }
 }
 
