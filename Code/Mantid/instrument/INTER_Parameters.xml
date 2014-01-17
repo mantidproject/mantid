@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "INTER" valid-from = "2014-01-13T00:00:00">
+<parameter-file instrument = "INTER" valid-from = "2012-01-31T00:00:00">
 <component-link name = "INTER">
   <parameter name="MonitorIntegralMin">
     <value val="4.0"/>
