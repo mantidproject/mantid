@@ -23,9 +23,10 @@ namespace MantidWidgets
 
     setState(Stopped);
 
-    // Set initial runs text 
-    Workspace_const_sptr fitWS = m_fitPropBrowser->getWorkspace();
-    m_ui.runs->setText( QString::fromStdString( getRunTitle(fitWS) ) + "-" );
+    // Set initial run to be run number of the workspace selected in fit browser when starting
+    // seq. fit dialog 
+    auto fitWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( m_fitPropBrowser->getWorkspace() );
+    m_ui.runs->setText( QString::number( fitWS->getRunNumber() ) + "-" );
 
     // TODO: find a better initial one, e.g. previously used
     m_ui.labelInput->setText("Label");
