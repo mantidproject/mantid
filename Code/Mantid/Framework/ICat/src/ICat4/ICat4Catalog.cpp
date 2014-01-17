@@ -546,6 +546,7 @@ namespace Mantid
       outputws->addColumn("str","Location");
       outputws->addColumn("str","Create Time");
       outputws->addColumn("long64","Id");
+      outputws->addColumn("long64","File size(bytes)");
       outputws->addColumn("str","File size");
 
       std::vector<xsd__anyType*>::const_iterator iter;
@@ -565,6 +566,8 @@ namespace Mantid
             savetoTableWorkspace(&createDate, table);
 
             savetoTableWorkspace(datafile->id, table);
+            savetoTableWorkspace(datafile->fileSize, table);
+
             std::string fileSize = bytesToString(*datafile->fileSize);
             savetoTableWorkspace(&fileSize, table);
           }
