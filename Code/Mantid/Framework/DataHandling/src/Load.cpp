@@ -413,7 +413,6 @@ namespace Mantid
       setOutputWorkspace(m_loader);
     }
 
-
     void Load::loadMultipleFiles()
     {
       // allFilenames contains "rows" of filenames. If the row has more than 1 file in it
@@ -433,6 +432,8 @@ namespace Mantid
       std::vector<API::Workspace_sptr> loadedWsList;
       loadedWsList.reserve(allFilenames.size());
 
+      Workspace_sptr tempWs;
+
       // Cycle through the filenames and wsNames.
       for(; filenames != allFilenames.end(); ++filenames, ++wsName)
       {
@@ -442,8 +443,8 @@ namespace Mantid
         ++filename;
         for(; filename != filenames->end(); ++filename)
         {
-          Workspace_sptr secondWS = loadFileToWs(*filename,  "__@loadsum_temp@");
-          sumWS = plusWs(sumWS, secondWS);
+          tempWs = loadFileToWs(*filename,  "__@loadsum_temp@");
+          sumWS = plusWs(sumWS, tempWs);
         }
 
         API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
@@ -468,6 +469,7 @@ namespace Mantid
       if(loadedWsList.size() == 1)
       {
         setProperty("OutputWorkspace", loadedWsList[0]);
+        AnalysisDataService::Instance().rename(loadedWsList[0]->getName(), outputWsName);
       }
       // Else we have multiple loaded workspaces - group them and set the group as output.
       else
@@ -499,6 +501,16 @@ namespace Mantid
           declareProperty(new WorkspaceProperty<Workspace>(outWsPropName, *childWsName, Direction::Output));
           setProperty(outWsPropName, childWs);
         }
+      }
+
+      // Clean up.
+      if( tempWs )
+      {
+        Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
+        alg->initialize();
+        alg->setChild(true);
+        alg->setProperty("Workspace", tempWs);
+        alg->execute();
       }
     }
 
