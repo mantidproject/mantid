@@ -21,6 +21,7 @@ set ( SRC_FILES
 	src/LatticeErrors.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
+	src/LoadIsawSpectrum.cpp
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
@@ -78,6 +79,7 @@ set ( INC_FILES
 	inc/MantidCrystal/LatticeErrors.h
 	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
+	inc/MantidCrystal/LoadIsawSpectrum.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
