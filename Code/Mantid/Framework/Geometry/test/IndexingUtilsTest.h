@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <MantidKernel/V3D.h>
 #include <MantidKernel/Matrix.h>
-
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <MantidGeometry/Crystal/IndexingUtils.h>
 
 using namespace Mantid::Geometry;
@@ -19,7 +19,6 @@ class IndexingUtilsTest : public CxxTest::TestSuite
 {
 public:
 
-#define PI 3.141592653589793238
 
   static std::vector<V3D> getNatroliteQs()
   {
@@ -75,19 +74,6 @@ public:
   }
 
 
-  static Matrix<double> getSiliconUB()
-  {
-    Matrix<double> UB(3,3,false);
-    V3D row_0( -0.147196, -0.141218,  0.304286 );
-    V3D row_1(  0.106642,  0.120341,  0.090518 );
-    V3D row_2( -0.261273,  0.258426, -0.006190 );
-    UB.setRow( 0, row_0 );
-    UB.setRow( 1, row_1 );
-    UB.setRow( 2, row_2 );
-    return UB;
-  }
-
-
   static void ShowLatticeParameters( Matrix<double> UB )
   {
     Matrix<double> UB_inv(3,3,false);
@@ -96,9 +82,9 @@ public:
     V3D a_dir( UB_inv[0][0], UB_inv[0][1], UB_inv[0][2] );
     V3D b_dir( UB_inv[1][0], UB_inv[1][1], UB_inv[1][2] );
     V3D c_dir( UB_inv[2][0], UB_inv[2][1], UB_inv[2][2] );
-    double alpha = b_dir.angle( c_dir ) * 180 / PI;
-    double beta  = c_dir.angle( a_dir ) * 180 / PI;
-    double gamma = a_dir.angle( b_dir ) * 180 / PI;
+    double alpha = b_dir.angle( c_dir ) * 180 / M_PI;
+    double beta  = c_dir.angle( a_dir ) * 180 / M_PI;
+    double gamma = a_dir.angle( b_dir ) * 180 / M_PI;
     std::cout << "-------------------------------------------" << std::endl;
     std::cout << "a = " << a_dir << "   " << a_dir.norm() << std::endl;
     std::cout << "b = " << b_dir << "   " << b_dir.norm() << std::endl;
@@ -556,15 +542,15 @@ public:
     V3D a_dir(  1, 2, 3 );
     V3D b_dir( -3, 2, 1 );
 
-    double gamma    = a_dir.angle( b_dir ) * 180.0 / PI;
+    double gamma    = a_dir.angle( b_dir ) * 180.0 / M_PI;
     double alpha    = 123;
     double beta     = 74;
     double c_length = 10;
     V3D result = IndexingUtils::Make_c_dir( a_dir, b_dir, c_length,
                                             alpha, beta, gamma );
 
-    double alpha_calc = result.angle( b_dir ) * 180 / PI;
-    double beta_calc  = result.angle( a_dir ) * 180 / PI;
+    double alpha_calc = result.angle( b_dir ) * 180 / M_PI;
+    double beta_calc  = result.angle( a_dir ) * 180 / M_PI;
 
     TS_ASSERT_DELTA( result.norm(), c_length, 1e-5 );
     TS_ASSERT_DELTA( alpha_calc, alpha, 1e-5 );
@@ -959,7 +945,7 @@ public:
 
     Matrix<double> UB(3,3,false);
    
-    IndexingUtils::GetUB( UB, a_dir, b_dir, c_dir );
+    OrientedLattice::GetUB( UB, a_dir, b_dir, c_dir );
 
     for ( size_t row = 0; row < 3; row++ )
     {
@@ -980,7 +966,7 @@ public:
     V3D b;
     V3D c;
 
-    IndexingUtils::GetABC( UB, a, b, c );
+    OrientedLattice::GetABC( UB, a, b, c );
 
     a = a - a_dir;
     b = b - b_dir;
@@ -1008,86 +994,6 @@ public:
       TS_ASSERT_DELTA( lat_par[i], correct_value[i], 1e-3 );
   }
 
-
-  void test_HasNiggleAngles()
-  {
-    V3D  a(1,0,0);
-    V3D  b(0,1,0);
-    V3D  c(0,0,1);
-
-    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a, b, c, 0.001 ), true);
-
-    V3D  b1( 0.1, 1, 0 ); 
-    V3D  c1(-0.1, 0, 1 ); 
-
-    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a, b1, c1, 0.001), false);
-
-    V3D  a2( 1,   0.1, 0.1 );
-    V3D  b2( 0.1, 1,   0.1 );
-    V3D  c2( 0.1, 0.1, 1   );
-
-    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a2, b2, c2, 0.001), true);
-
-    V3D  a3(  1,   -0.1, -0.1 );
-    V3D  b3( -0.1,  1,   -0.1 );
-    V3D  c3( -0.1, -0.1,  1   );
-
-    TS_ASSERT_EQUALS( IndexingUtils::HasNiggliAngles(a3, b3, c3, 0.001), true);
-  }
-
-
-  void test_MakeNiggliUB()
-  {
-    double answer[3][3] = { { -0.147196, -0.141218,  0.304286 },
-                            {  0.106642,  0.120341,  0.090518 },
-                            { -0.261273,  0.258426, -0.006190 } };
-
-    Matrix<double> newUB(3,3,false);
-    Matrix<double> UB = getSiliconUB();
-    UB = UB * 1.0;
-
-    TS_ASSERT( IndexingUtils::MakeNiggliUB( UB, newUB ) );
-
-    for ( size_t row = 0; row < 3; row++ )
-      for ( size_t col = 0; col < 3; col++ )
-        TS_ASSERT_DELTA( newUB[row][col], answer[row][col], 1e-5 );  
-  }
-
-
-  void test_MakeNiggliUB2()
-  {
-    // Make a fake UB matrix with:
-    // gamma > 90 deg
-    // alpha < 90 deg
-    Matrix<double> UB(3,3, true);
-    V3D a(10,0,0);
-    V3D b(-5,5,0);
-    V3D c(0,5,5);
-    IndexingUtils::GetUB(UB, a,b,c);
-
-    Matrix<double> newUB(3,3,false);
-
-    TS_ASSERT( IndexingUtils::MakeNiggliUB( UB, newUB ) );
-
-    // Extract the a,b,c vectors
-    V3D a_dir;
-    V3D b_dir;
-    V3D c_dir;
-    IndexingUtils::GetABC(newUB, a_dir,b_dir,c_dir);
-    double alpha = b_dir.angle( c_dir ) * 180.0/PI;
-    double beta  = c_dir.angle( a_dir ) * 180.0/PI;
-    double gamma = a_dir.angle( b_dir ) * 180.0/PI;
-    // All vectors have two components of length 5.0
-    double norm = sqrt(50.0);
-    TS_ASSERT_DELTA( a_dir.norm(), norm, 1e-3 );
-    TS_ASSERT_DELTA( b_dir.norm(), norm, 1e-3 );
-    TS_ASSERT_DELTA( c_dir.norm(), norm, 1e-3 );
-    // Angles are 60 degrees
-    TS_ASSERT_DELTA( alpha, 60, 1e-1 );
-    TS_ASSERT_DELTA( beta, 60, 1e-1 );
-    TS_ASSERT_DELTA( gamma, 60, 1e-1 );
-
-  }
 };
 
 #endif  /* MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_ */

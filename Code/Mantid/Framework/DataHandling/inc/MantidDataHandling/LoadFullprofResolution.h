@@ -85,6 +85,30 @@ namespace DataHandling
     /// Generate bank information workspace
     DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
 
+    /// Put parameters into a metrix workspace
+    void putParametersIntoWorkspace( size_t wsNumber, const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws);
+
+     /// Add an ALFBE parameter 
+    void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
+
+    /// Add set of Sigma parameters 
+    void addSigmaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of Gamma parameters 
+    void addGammaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Get value for XML eq attribute for parameter
+    std::string getXMLEqValue( const API::Column_const_sptr, const std::string& name );
+
+    // Translate a parameter name from as it appears in the table workspace to its name in the XML file
+    std::string getXMLParameterName( const std::string& name );
+
+    /// Get row numbers of the parameters in the table workspace
+    void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);
+
+    /// Place to store the row numbers
+    std::map<std::string, size_t> m_rowNumbers;
+
   };
 
 

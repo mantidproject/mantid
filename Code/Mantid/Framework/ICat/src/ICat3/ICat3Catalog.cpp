@@ -97,6 +97,19 @@ namespace Mantid
       m_helper->getdownloadURL(fileid,url);
     }
 
+    /**
+     * Get the URL where the datafiles will be uploaded to.
+     * @param investigationID :: The investigation used to obtain the related dataset ID.
+     * @param createFileName  :: The name to give to the file being saved.
+     * @return URL to PUT datafiles to.
+     */
+    const std::string ICat3Catalog::getUploadURL(const std::string &investigationID, const std::string &createFileName)
+    {
+      UNUSED_ARG(investigationID);
+      UNUSED_ARG(createFileName);
+      throw std::runtime_error("ICat3Catalog does not support publishing.");
+    }
+
     /**This method method does the search for investigations
      *@param inputs :: reference to a class conatains search inputs
      *@param ws_sptr :: -shared pointer to search results workspace

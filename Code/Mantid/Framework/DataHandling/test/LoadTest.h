@@ -13,23 +13,13 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
-namespace
-{
-  void removeGroupFromADS(WorkspaceGroup_sptr group)
-  {
-    const std::vector<std::string> wsNames = group->getNames();
-    std::vector<std::string>::const_iterator it = wsNames.begin();
-    AnalysisDataService::Instance().remove(group->name());
-    for(; it != wsNames.end(); ++it)
-    {
-      AnalysisDataService::Instance().remove(*it);
-    }
-  }
-}
-
 class LoadTest : public CxxTest::TestSuite
 {
 public:
+  void tearDown()
+  {
+    AnalysisDataService::Instance().clear();
+  }
 
   void testViaProxy()
   {
@@ -129,7 +119,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testRawWithOneSpectrum()
@@ -152,7 +141,6 @@ public:
 
     // Check it only has 1 spectrum
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
-    AnalysisDataService::Instance().remove(outputName);
   }
 
   void testRaw1()
@@ -164,7 +152,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testRawGroup()
@@ -178,9 +165,6 @@ public:
     TS_ASSERT(wsg);
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_1");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
-    AnalysisDataService::Instance().remove("LoadTest_Output_1");
-    AnalysisDataService::Instance().remove("LoadTest_Output_2");
 
   }
   
@@ -193,7 +177,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void _ARGUS_NXS()
@@ -217,9 +200,6 @@ public:
     TS_ASSERT(wsg);
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_1");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
-    AnalysisDataService::Instance().remove("LoadTest_Output_1");
-    AnalysisDataService::Instance().remove("LoadTest_Output_2");
   }
    void testISISNexus()
   {
@@ -230,7 +210,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testUnknownExt()
@@ -249,7 +228,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
   
   void testAscii()
@@ -261,7 +239,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testSpice2D()
@@ -273,7 +250,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
   void testSNSSpec()
   {
@@ -284,7 +260,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testGSS()
@@ -311,7 +286,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void test_EventPreNeXus_WithNoExecute()
@@ -341,7 +315,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testArgusFileLoadingWithIncorrectZeroPadding()
@@ -353,7 +326,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testMDWorkspace()
@@ -365,7 +337,6 @@ public:
     loader.setPropertyValue("OutputWorkspace",outputWS);
     TS_ASSERT( loader.execute() );
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(outputWS) );
-    AnalysisDataService::Instance().remove(outputWS);
   }
 
   void testList()
@@ -396,8 +367,6 @@ public:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015189"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015190"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("MUSR00015191"));
-
-    removeGroupFromADS(output);
   }
 
   void testPlus()
@@ -410,7 +379,6 @@ public:
 
     MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(output);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testPlusGroupWorkspaces()
@@ -426,7 +394,6 @@ public:
     MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_1");
     TS_ASSERT(ws1);
     MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_2");
-    removeGroupFromADS(output);
   }
 
   void testRange()
@@ -455,7 +422,6 @@ public:
     TS_ASSERT(ws7);
     MatrixWorkspace_sptr ws8 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015192_2");
     TS_ASSERT(ws8);
-    removeGroupFromADS(output);
   }
 
   void testSteppedRange()
@@ -476,7 +442,6 @@ public:
     TS_ASSERT(ws3);
     MatrixWorkspace_sptr ws4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_2");
     TS_ASSERT(ws4);
-    removeGroupFromADS(output);
   }
 
   void testAddedRange()
@@ -499,8 +464,6 @@ public:
     TS_ASSERT(ws2);
     TS_ASSERT_DELTA(ws2->readY(0)[5], 2.0, 1e-12);
     TS_ASSERT_DELTA(ws2->readY(8)[0], 6.0, 1e-12);
-
-    removeGroupFromADS(output);
   }
 
   void testAddedSteppedRange()
@@ -518,7 +481,6 @@ public:
     TS_ASSERT(ws1);
     MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015191_2");
     TS_ASSERT(ws2);
-    removeGroupFromADS(output);
   }
 
   void testMultiFilesExtraProperties()
@@ -544,8 +506,6 @@ public:
 
     // Make sure that it contains the requested number of spectra as per SpectrumMin and SpectrumMax
     TS_ASSERT_EQUALS(childWs->getNumberHistograms(), 91);
-
-    removeGroupFromADS(wsg);
   }
 
   void testCommaSeparatedListOfDifferentIntruments()
@@ -559,8 +519,6 @@ public:
     WorkspaceGroup_sptr wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(wsg);
     TS_ASSERT_EQUALS(wsg->getNames().size(), 3);
-
-    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void test_outputWsNameSameAsOneOfTheSinglePeriodFileNames()
@@ -571,13 +529,24 @@ public:
     loader.setPropertyValue("OutputWorkspace","LOQ48127");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
-    std::set<std::string> adsContents = AnalysisDataService::Instance().getObjectNames();
-
     WorkspaceGroup_sptr wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LOQ48127");
     TS_ASSERT(wsg);
     TS_ASSERT_EQUALS(wsg->getNames().size(), 3);
+  }
 
-    AnalysisDataService::Instance().remove("LOQ48127");
+  void test_cleanupAfterMultifileLoading()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "MUSR15189-15192:2.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    TS_ASSERT_EQUALS(3, AnalysisDataService::Instance().size());
+
+    const auto wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
+    TS_ASSERT(wsg);
+    TS_ASSERT_EQUALS(wsg->getNames().size(), 2);
   }
 };
 

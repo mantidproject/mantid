@@ -352,6 +352,7 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, c
 /** 
  * Uses linear algorithm to do the fitting.
  * 
+ * @param WS The workspace to fit
  * @param spectrum The spectrum index to fit, using the workspace numbering of the spectra
  * @param startX An X value in the first bin to be included in the fit
  * @param endX An X value in the last bin to be included in the fit

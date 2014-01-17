@@ -316,6 +316,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
  * @param entry_name :: NXentry name
  * @param bankName :: NXdata bank name
  * @param WS :: workspace to modify
+ * @param id_to_wi :: det ID to workspace index mapping
  */
 void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::string & entry_name,
     const std::string &bankName, API::MatrixWorkspace_sptr WS, const detid2index_map& id_to_wi)

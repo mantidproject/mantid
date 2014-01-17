@@ -1,6 +1,5 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
-#include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidAPI/FunctionFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -35,13 +34,13 @@
 
 #include <QSettings>
 #include <QMessageBox>
+#include <QAction>
 
 
 namespace MantidQt
 {
 namespace MantidWidgets
 {
-
 
 /**
  * Constructor
@@ -311,6 +310,13 @@ void MuonFitPropertyBrowser::fit()
   }
 }
 
+/**
+ * Show sequential fit dialog.
+ */
+void MuonFitPropertyBrowser::sequentialFit()
+{
+  emit sequentialFitRequested();
+}
 
 /**
  * Connect to the AnalysisDataServis when shown
@@ -322,17 +328,6 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent* e)
   populateWorkspaceNames();
 }
 
-
-/** 
-* Enable/disable the Fit button.
-*/
-void MuonFitPropertyBrowser::setFitEnabled(bool yes)
-{
-  m_fitActionFit->setEnabled(yes);
-  m_fitActionSeqFit->setEnabled(false);
-}
-
-
 /** Check if the workspace can be used in the fit. The accepted types are
   * MatrixWorkspaces same size and that it isn't the generated raw file.
   * @param ws :: The workspace
@@ -340,7 +335,12 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes)
 bool MuonFitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
 {
   QString workspaceName(QString::fromStdString(ws->name() ) );
+
   if ( (workspaceName.contains("_Raw") ) || (workspaceName.contains("MuonAnalysis") ) )
+    return false;
+
+  // Exclude fitting results
+  if ( workspaceName.endsWith("_Workspace") )
     return false;
 
   if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0)
@@ -348,7 +348,6 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)con
   else
     return false;
 }
-
 
 } // MantidQt
 } // API

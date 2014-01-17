@@ -209,6 +209,7 @@ class AvrgDetector
   double m_AzimutSum;
   double m_PolarSum;
   double m_FlightPathSum;
+  double m_AzimBase,m_PolarBase;
   // if azimuthal and polar sizes expressed in angular or linear units
   bool m_useSphericalSizes;
   double m_AzimMin,m_PolarMin,m_AzimMax,m_PolarMax;
@@ -216,16 +217,18 @@ class AvrgDetector
   size_t m_nComponents;
 public:
   AvrgDetector():m_AzimutSum(0),m_PolarSum(0),m_FlightPathSum(0),
+                 m_AzimBase(0),m_PolarBase(0),
                  m_useSphericalSizes(false),
                  m_AzimMin(FLT_MAX),m_PolarMin(FLT_MAX),m_AzimMax(-FLT_MAX),m_PolarMax(-FLT_MAX),
                  m_nComponents(0)
-  {}
+  { }
   void addDetInfo(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &Observer);
   void returnAvrgDetPar(DetParameters &det);
 
   void setUseSpherical(bool shouldWe=true)
   {m_useSphericalSizes = shouldWe;}
 
+  static double nearAngle(const double &baseAngle,const double &anAngle);
 };
 
 

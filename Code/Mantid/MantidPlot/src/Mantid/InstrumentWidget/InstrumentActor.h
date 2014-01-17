@@ -84,7 +84,7 @@ public:
   /// Change the colormap scale type.
   void changeScaleType(int);
   /// Get the file name of the current color map.
-  QString getCurrentColorMap()const{return m_currentColorMap;}
+  QString getCurrentColorMap()const{return m_currentColorMapFilename;}
   /// Toggle colormap scale autoscaling.
   void setAutoscaling(bool);
   /// Get colormap scale autoscaling status.
@@ -103,7 +103,7 @@ public:
   /// Set both the minimum and the maximum data values on the color map scale.
   void setMinMaxRange(double vmin, double vmax);
   /// Get the smallest positive data value in the data. Used by the log20 scale.
-  double minPositiveValue()const{return m_WkspDataPositiveMin;}
+  double minPositiveValue()const{return m_DataPositiveMinValue;}
   /// Get the lower bound of the integration range.
   double minBinValue()const{return m_BinMinValue;}
   /// Get the upper bound of the integration range.
@@ -135,7 +135,7 @@ public:
   void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax) const;
 
   /// Update the detector colors to match the integrated counts within the current integration range.
-  void update();
+  void updateColors();
   /// Invalidate the OpenGL display lists to force full re-drawing of the instrument and creation of new lists.
   void invalidateDisplayLists()const{m_scene.invalidateDisplayList();}
   /// Toggle display of the guide and other non-detector instrument components
@@ -161,11 +161,15 @@ public:
   bool hasMaskWorkspace() const;
 signals:
   void colorMapChanged();
-protected:
 
+private:
+
+  void setUpWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace, double scaleMin, double scaleMax);
   void resetColors();
   void loadSettings();
   void saveSettings();
+  void setDataMinMaxRange(double vmin, double vmax);
+  void setDataIntegrationRange(const double& xmin,const double& xmax);
 
   size_t push_back_detid(Mantid::detid_t)const;
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const;
@@ -176,19 +180,21 @@ protected:
   mutable boost::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
   /// The colormap
   MantidColorMap m_colorMap;
+  QString m_currentColorMapFilename;
   /// integrated spectra
   std::vector<double> m_specIntegrs;
   /// The workspace data and bin range limits
-  double m_WkspDataMin, m_WkspDataMax,m_WkspDataPositiveMin; ///< min and max over whole workspace
-  double m_WkspBinMin, m_WkspBinMax;                         ///< min and max over whole workspace
+  double m_WkspBinMinValue, m_WkspBinMaxValue;                         ///< x-values min and max over whole workspace
   /// The user requested data and bin ranges
-  double m_DataMinValue, m_DataMaxValue;                     ///< min and max for current bin (x integration) range
-  double m_DataMinScaleValue, m_DataMaxScaleValue;           /// min and max of the color map scale
-  double m_BinMinValue, m_BinMaxValue;
+  double m_DataMinValue, m_DataMaxValue, m_DataPositiveMinValue;    ///< y-values min and max for current bin (x integration) range
+  double m_DataMinScaleValue, m_DataMaxScaleValue;           ///< min and max of the color map scale
+  double m_BinMinValue, m_BinMaxValue;                       ///< x integration range
   /// Flag to rescale the colormap axis automatically when the data or integration range change
   bool m_autoscaling;
   /// Flag to show the guide and other components. Loaded and saved in settings.
   bool m_showGuides;
+  /// Color map scale type: linear or log
+  GraphOptions::ScaleType m_scaleType;
 
   /// The workspace's detector ID to workspace index map
   Mantid::detid2index_map m_detid2index_map;
@@ -201,7 +207,6 @@ protected:
 
   /// Colors in order of workspace indexes
   mutable std::vector<GLColor> m_colors;
-  QString m_currentColorMap;
   /// Colour of a masked detector
   GLColor m_maskedColor;
   /// Colour of a "failed" detector

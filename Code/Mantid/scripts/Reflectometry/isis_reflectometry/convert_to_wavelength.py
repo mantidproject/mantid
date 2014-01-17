@@ -17,9 +17,20 @@ class ConvertToWavelength(object):
         return sum(workspaces)
     
     @classmethod
+    def to_single_workspace(cls, candidate):
+        ws = ConvertToWavelength.to_workspace(candidate)
+        input = None
+        if isinstance(ws, mantid.api.WorkspaceGroup):
+            input = ws[0]
+        else:
+            input = ws
+        output = msi.CloneWorkspace(OutputWorkspace="_singleWorkspace",InputWorkspace=input)
+        return output
+    
+    @classmethod
     def to_workspace(cls, candidate):
         workspace = None
-        if isinstance(candidate, mantid.api.MatrixWorkspace):
+        if isinstance(candidate, mantid.api.Workspace):
             workspace = candidate
         elif isinstance(candidate, str):
             if  mantid.api.AnalysisDataService.doesExist(candidate):

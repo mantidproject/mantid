@@ -5,12 +5,16 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-#include "MantidQtAPI/UserSubWindow.h"
 
-#include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+
+#include "MantidGeometry/Instrument.h"
+
+#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtMantidWidgets/pythonCalc.h"
+#include "MantidQtMantidWidgets/MWDiag.h"
 
 #include <map>
 
@@ -28,6 +32,7 @@ namespace Muon
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 /** 
 This is the main class for the MuonAnalysis interface
@@ -170,12 +175,6 @@ private slots:
   /// Whether Overwrite option is enabled on the Settings tab.
   bool isOverwriteEnabled();
 
-  /// Show a plot for a given workspace. Closes previous plot if exists.
-  void showPlot(const QString& wsName);
-
-  /// Closes the window with the plot of the given ws
-  void closePlotWindow(const QString& wsName);
-
   /// Checks if the plot for the workspace does exist.
   bool plotExists(const QString& wsName);
 
@@ -209,6 +208,8 @@ private slots:
   /// Saves the value of the widget which called the slot
   void saveWidgetValue();
 
+  /// Opens a sequential fit dialog
+  void openSequentialFitDialog();
 
 private:
  
@@ -271,9 +272,6 @@ private:
   /// Selects a workspace from the group according to what is selected on the interface for the period
   MatrixWorkspace_sptr getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group);
 
-  /// Apply whatever grouping is specified in GUI tables to workspace
-  bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
-
   /// Update front 
   void updateFront();
 
@@ -285,9 +283,6 @@ private:
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
-
-  /// Return a vector of IDs for row number from string of type 1-3, 5, 10-15
-  std::vector<int> spectrumIDs(const std::string& str) const;
 
   void changeCurrentRun(std::string& workspaceGroupName);
 
@@ -321,18 +316,21 @@ private:
   /// Return number of groups defined (not including pairs)
   int numGroups();
 
-  // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
-  //       (as we are doing with pairs)
+  /// Returns custom dead time table file name as set on the interface
+  std::string deadTimeFilename();
+
+  /// Loads dead time table (group of tables) from the file.
+  Workspace_sptr loadDeadTimes(const std::string& filename);
+
+  /// Creates and algorithm with all the properties set according to widget values on the interface
+  Algorithm_sptr createLoadAlgorithm();
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
-  void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
-
-  /// Set various style parameters for the plot of the given ws
-  void setPlotStyle(const QString& wsName, const QMap<QString, QString>& params);
+  void plotSpectrum(const QString& wsName, bool logScale = false);
 
   /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
   /// something is not specified
-  QMap<QString, QString> getPlotStyleParams(const QString& wsName, const int wsIndex);
+  QMap<QString, QString> getPlotStyleParams(const QString& wsName);
 
   /// get period labels
   QStringList getPeriodLabels() const;
@@ -349,8 +347,11 @@ private:
   /// The last directory that was viewed
   QString m_last_dir;
 
-  /// name of workspace
+  /// Name of the loaded workspace
   std::string m_workspace_name;
+
+  /// Name of the loaded AND grouped workspace
+  std::string m_grouped_name;
 
   /// name of the loaded data
   QString m_currentDataName;
@@ -408,15 +409,6 @@ private:
   /// time zero returned in ms
   double timeZero();
 
-  /// set grouping in table from information from nexus raw file
-  void setGroupingFromNexus(const QString& nexusFile); 
-
-  ///
-  void setDummyGrouping(const int numDetectors);
-
-  ///
-  void setGroupingFromIDF(const std::string& mainFieldDirection, MatrixWorkspace_sptr matrix_workspace);
-
   /// title of run
   std::string m_title;
 
@@ -464,6 +456,21 @@ private:
 
   /// Saves the value of the widget which called the slot
   void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
+
+  // Groups loaded workspace (m_workspace_name)
+  void groupLoadedWorkspace(ITableWorkspace_sptr detGroupingTable = ITableWorkspace_sptr());
+
+  /// Parses grouping information from the UI table.
+  ITableWorkspace_sptr parseGrouping();  
+
+  /// Updated UI table using the grouping information provided.
+  void setGrouping(ITableWorkspace_sptr detGroupingTable);
+
+  /// Updates UI grouping table - creates dummy grouping 
+  void setDummyGrouping(Instrument_const_sptr instrument);
+
+  /// Updates UI grouping table using default grouping of the instrument
+  void setGroupingFromIDF(Instrument_const_sptr instrument, const std::string& mainFieldDirection);
 
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;

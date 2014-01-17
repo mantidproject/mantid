@@ -542,7 +542,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
   //----------------------------------------------------------------------------------------------
   /** Set up some constant by default
     * Output--> m_configuration
-    * @param chopperfrequency :: chopper frequency of the profile for.
+    * @param profmap :: map of parameters
     */
   void SaveGSASInstrumentFile::initConstants(const map<unsigned int, map<string, double> >& profmap)
   {

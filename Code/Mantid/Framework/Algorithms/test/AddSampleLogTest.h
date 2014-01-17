@@ -42,6 +42,9 @@ public:
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     ExecuteAlgorithm(ws, "My Name", "Number", "1.234", 1.234);
     ExecuteAlgorithm(ws, "My Name", "Number", "2.456", 2.456);
+
+    ExecuteAlgorithm(ws, "My Name", "Number", "-987654321", -987654321);
+    ExecuteAlgorithm(ws, "My Name", "Number", "963", 963);
   }
 
   void test_BadNumber()
@@ -59,12 +62,18 @@ public:
   void test_NumberSeries()
   {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),DateAndTime("2013-12-18T13:42:00"));
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234);
     ExecuteAlgorithm(ws, "My Name", "Number Series", "2.456", 2.456);
+
+    ExecuteAlgorithm(ws, "My Name", "Number Series", "-1", -1);
+    ExecuteAlgorithm(ws, "Another Name", "Number Series", "0", 0);
+    ExecuteAlgorithm(ws, "Another Name", "Number Series", "123456789", 123456789);
   }
 
+  template<typename T>
   void ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string LogName, std::string LogType, std::string LogText,
-      double expectedValue, bool fails=false)
+      T expectedValue, bool fails=false)
   {
     //add the workspace to the ADS
     AnalysisDataService::Instance().addOrReplace("AddSampleLogTest_Temporary", testWS);
@@ -103,14 +112,15 @@ public:
     }
     else if (LogType == "Number")
     {
-      PropertyWithValue<double> *testProp = dynamic_cast<PropertyWithValue<double>*>(prop);
+      auto testProp = dynamic_cast<PropertyWithValue<T>*>(prop);
       TS_ASSERT(testProp);
       TS_ASSERT_DELTA((*testProp)(), expectedValue, 1e-5);
     }
     else if (LogType == "Number Series")
     {
-      TimeSeriesProperty<double> *testProp = dynamic_cast<TimeSeriesProperty<double>*>(prop);
+      auto testProp = dynamic_cast<TimeSeriesProperty<T>*>(prop);
       TS_ASSERT(testProp);
+      TS_ASSERT_EQUALS(testProp->firstTime(),DateAndTime("2013-12-18T13:40:00"));
       TS_ASSERT_DELTA(testProp->firstValue(), expectedValue, 1e-5);
     }
     

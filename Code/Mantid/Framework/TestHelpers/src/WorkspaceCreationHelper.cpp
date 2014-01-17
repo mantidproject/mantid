@@ -312,14 +312,17 @@ namespace WorkspaceCreationHelper
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors, bool startYNegative)
+  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
+                                                       bool startYNegative, bool isHistogram)
   {
     if( includeMonitors && nhist < 2 )
     {
       throw std::invalid_argument("Attemping to 2 include monitors for a workspace with fewer than 2 histograms");
     }
 
-    Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins); // A 1:1 spectra is created by default
+    Workspace2D_sptr space;
+    if(isHistogram) space = Create2DWorkspaceBinned(nhist, nbins); // A 1:1 spectra is created by default
+    else space = Create2DWorkspace123(nhist,nbins, false);
     space->setTitle("Test histogram"); // actually adds a property call run_title to the logs
     space->getAxis(0)->setUnit("TOF");
     space->setYUnit("Counts");

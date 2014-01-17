@@ -318,7 +318,7 @@ namespace Crystal
     {
       // ---------------- Determine which HKL to look for -------------------------------------
       // Inverse d-spacing that is the limit to look for.
-      double dstar = 1.0/minD;
+      double Qmax = 2.*M_PI/minD;
       V3D hklMin(0,0,0);
       V3D hklMax(0,0,0);
       for (double qx=-1; qx < 2; qx += 2)
@@ -327,7 +327,7 @@ namespace Crystal
           {
             // Build a q-vector for this corner of a cube
             V3D Q(qx,qy,qz);
-            Q *= dstar;
+            Q *= Qmax;
             V3D hkl = crystal.hklFromQ(Q);
             // Find the limits of each hkl
             for (size_t i=0; i<3; i++)

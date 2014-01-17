@@ -60,12 +60,12 @@ namespace Mantid
       declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
 		      "The filename of the output Ascii file.");
 
-      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
-      mustBePositive->setLower(1);
-      declareProperty("WorkspaceIndexMin", 1, mustBePositive,"The starting workspace index.");
-      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive,"The ending workspace index.");
+      auto mustBeNonNegative = boost::make_shared<BoundedValidator<int> >();
+      mustBeNonNegative->setLower(0);
+      declareProperty("WorkspaceIndexMin", 0, mustBeNonNegative,"The starting workspace index.");
+      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeNonNegative,"The ending workspace index.");
       declareProperty(new ArrayProperty<int>("SpectrumList"),"List of workspace indices to save.");
-      declareProperty("Precision", EMPTY_INT(), mustBePositive,"Precision of output double values.");
+      declareProperty("Precision", EMPTY_INT(), mustBeNonNegative,"Precision of output double values.");
       declareProperty("WriteXError", false, "If true, the error on X will be written as the fourth column.");
 
       declareProperty("CommentIndicator", "", "Character(s) to put in front of comment lines.");

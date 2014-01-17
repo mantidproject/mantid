@@ -1048,7 +1048,7 @@ void InstrumentWindowMaskTab::storeMask()
         catch(...){}
       }
       // update detector colours
-      m_instrWindow->getInstrumentActor()->update();
+      m_instrWindow->getInstrumentActor()->updateColors();
       m_instrWindow->updateInstrumentDetectors();
     }
   }

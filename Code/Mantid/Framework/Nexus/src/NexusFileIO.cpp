@@ -150,6 +150,7 @@ using namespace DataObjects;
        The URLs are not correct as they do not exist presently, but follow the format for other
        Nexus specs.
        @param title :: title field.
+       @param wsName :: workspace name.
   */
   int NexusFileIO::writeNexusProcessedHeader( const std::string& title, const std::string& wsName) const
   {

@@ -22,7 +22,7 @@ is the beam direction and z is vertically upward. (IPNS convention)
 #include <exception>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Crystal/UnitCell.h>
-
+#include "MantidAPI/IMDEventWorkspace.h"
 
 using Mantid::Kernel::DblMatrix;
 using Mantid::Geometry::UnitCell;
@@ -134,7 +134,16 @@ namespace Crystal
    try
       {
         Workspace_sptr ws1 = getProperty("InputWorkspace");
-        ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+        ExperimentInfo_sptr ws;
+        IMDEventWorkspace_sptr MDWS=boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
+        if (MDWS != NULL)
+        {
+            ws = MDWS->getExperimentInfo(0);
+        }
+        else
+        {
+            ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+        }
 
         if (!ws)
           throw std::invalid_argument(

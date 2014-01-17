@@ -102,10 +102,6 @@ signals:
   /// Emitted when plot style parameters has changed.
   void plotStyleChanged();
 
-  /// Tell Muon interface to show the muon graphs
-  void notHidingGraphs();
-
-
 private:
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
