@@ -397,7 +397,6 @@ public:
     // The workspace is a workspace group with three members corresponding to the three banks in the IRF file
     WorkspaceGroup_sptr gws;
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
-    size_t size = gws->getNumberOfEntries();
     // 1st Workspace - bank 2
     Workspace_sptr wsi = gws->getItem(0) ;
     auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
