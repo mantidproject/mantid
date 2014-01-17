@@ -40,9 +40,9 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogPublish::initDocs()
     {
-      this->setWikiSummary("Allows the user to publish datafiles or workspaces to the information catalog."
-          "Workspaces uploaded are converted to and saved as nexus files.");
-      this->setOptionalMessage("Publish datafiles to the information catalog.");
+      this->setWikiSummary("Allows the user to publish datafiles or workspaces to the information catalog. "
+          "Workspaces are converted to nexus files (store in the default save directory), and then uploaded from there.");
+      this->setOptionalMessage("Allows the user to publish datafiles or workspaces to the information catalog.");
     }
 
     /// Init method to declare algorithm properties
@@ -52,7 +52,7 @@ namespace Mantid
       declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
             "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"The workspace to publish.");
       declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default. "
-          "This can only contain alphanumerics, underscores or periods");
+          "This can only contain alphanumerics, underscores or periods.");
       declareProperty("InvestigationNumber","","The investigation number where the published file will be saved to.");
     }
 
