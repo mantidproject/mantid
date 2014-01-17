@@ -491,13 +491,13 @@ def C2Fw(prog,sname):
 			e.append(width)
 
 		#create x data and axis names for each function
-		axis_names.append('f'+str(nl-1)+'.f0.'+'Height')
+		axis_names.append('f'+str(nl)+'.f0.'+'Height')
 		x.append(x_data)
 		for j in range(1,nl+1):
-				axis_names.append('f'+str(nl-1)+'.f'+str(j)+'.Amplitude')				
+				axis_names.append('f'+str(nl)+'.f'+str(j)+'.Amplitude')				
 				x.append(x_data)
 
-				axis_names.append('f'+str(nl-1)+'.f'+str(j)+'.FWHM')
+				axis_names.append('f'+str(nl)+'.f'+str(j)+'.FWHM')
 				x.append(x_data)
 
 	x = np.asarray(x).flatten()
@@ -603,10 +603,10 @@ def QLPlotQL(inputWS,Plot,res_plot,Loop):
 		nhist = mtd[ws_name].getNumberHistograms()
 
 		if (Plot == 'Amplitude' or Plot == 'All'):
-			plotSpectra(ws_name, 'Amplitude', indicies=range(0,nhist,3))
+			plotSpectra(ws_name, 'Amplitude', indicies=[1,4,6])
 		
 		if (Plot == 'FWHM' or Plot == 'All'):
-			plotSpectra(ws_name, 'Full width half maximum (meV)', indicies=range(2,nhist,3))
+			plotSpectra(ws_name, 'Full width half maximum (meV)', indicies=[2,5,7])
 
 		if (Plot == 'Prob' or Plot == 'All'):
 			pWS = inputWS+'_Prob'
