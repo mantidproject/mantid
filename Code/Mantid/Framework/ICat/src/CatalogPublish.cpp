@@ -30,6 +30,8 @@ datafiles or workspaces to investigations of which they are an investigator.
 
 #include <fstream>
 #include <boost/regex.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 namespace Mantid
 {
@@ -148,20 +150,25 @@ namespace Mantid
         
         // Close the request by requesting a response.
         Poco::Net::HTTPResponse response;
-        session.receiveResponse(response);
-
+        // Store the response for use IF an error occurs (e.g. 404).
+        std::istream& responseStream = session.receiveResponse(response);
+        // Obtain the status returned by the server to verify if it was a success.
         std::string HTTPStatus = boost::lexical_cast<std::string>(response.getStatus());
 
         // Throw an error if publishing was not successful.
         // (Note: The IDS does not currently return any meta-data related to the errors caused.)
         if (HTTPStatus.find("20") == std::string::npos)
         {
+          std::string jsonResponseData;
+          // Copy the input stream to a string.
+          Poco::StreamCopier::copyToString(responseStream, jsonResponseData);
+
           // As an error occurred we must cancel the algorithm.
           // We cannot throw an exception here otherwise it is caught below as Poco::Exception catches runtimes,
           // and then the I/O error is thrown as it is generated above first.
           this->cancel();
-          g_log.error("An error has occurred on the ICAT IDS server.\n"
-                      "A file with that name already exists or you do not have permissions to publish to that investigation.");
+          // Output an appropriate error message from the JSON object returned by the IDS.
+          g_log.error(getIDSError(jsonResponseData));
         }
       }
       catch(Poco::Net::SSLException& error)
@@ -232,5 +239,21 @@ namespace Mantid
       return wsHistory->getPropertyValue("ScriptText");
     }
 
+
+    /**
+     * Obtain the error message returned by the IDS.
+     * @param jsonResponseData :: The contents of the JSON object returned from the IDS.
+     * @returns An appropriate error message for the user.
+     */
+    const std::string CatalogPublish::getIDSError(const std::string& jsonResponseData)
+    {
+      std::istringstream is(jsonResponseData);
+      // Stores the contents of `jsonResponseData` as a json property tree.
+      boost::property_tree::ptree json;
+      // Convert the stream to a JSON tree.
+      boost::property_tree::read_json(is, json);
+      // Return the message returned by the server.
+      return json.get<std::string>("code") + ": " + json.get<std::string>("message");
+    }
   }
 }
