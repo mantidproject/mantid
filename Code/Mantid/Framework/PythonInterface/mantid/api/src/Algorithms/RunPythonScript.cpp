@@ -124,6 +124,9 @@ namespace Mantid
       using namespace API;
       using namespace boost::python;
 
+      // Execution
+      Environment::GlobalInterpreterLock gil;
+
       auto locals = doExecuteScript(script);
       return extractOutputWorkspace(locals);
     }
@@ -136,8 +139,6 @@ namespace Mantid
      */
     boost::python::dict RunPythonScript::doExecuteScript(const std::string & script) const
     {
-      // Execution
-      Environment::GlobalInterpreterLock gil;
       // Retrieve the main module.
       auto main = boost::python::import("__main__");
       // Retrieve the main module's namespace
