@@ -3352,9 +3352,6 @@ void MuonAnalysis::hideEvent(QHideEvent *e)
   if(m_currentTab == m_uiForm.DataAnalysis)
     emit setFitPropertyBrowser(NULL);
 
-  // Delete the peak picker tool because it is no longer needed.
-  disableAllTools();
-
   e->accept();
 }
 
