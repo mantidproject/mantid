@@ -452,7 +452,8 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 		outWorkspace->setYUnitLabel("Counts");
 
 		// Fully copy the instrument
-		outWorkspace->setInstrument( boost::shared_ptr<Geometry::Instrument>(refWorkspace->getInstrument()->clone()));
+		auto sourceBaseInstrument = boost::shared_ptr<Geometry::Instrument>(refWorkspace->getInstrument()->baseInstrument()->clone());
+		outWorkspace->setInstrument( sourceBaseInstrument );
 		// OR copy base instrument => ParameterMap is empty!
 		// outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument());
 
@@ -492,9 +493,11 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 
 
 			// Debug:
+			/*
 			outInstrument->printTree(g_log.debug());
 			boost::shared_ptr<Geometry::ParameterMap> thisParameterMap = thisInstrument->getParameterMap();
 			g_log.debug() << outParameterMap->asString() << std::endl;
+			*/
 
 		}
 		return outWorkspace;

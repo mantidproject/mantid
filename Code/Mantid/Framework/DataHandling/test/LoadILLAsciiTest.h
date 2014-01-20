@@ -32,11 +32,12 @@ public:
 	void test_exec() {
 
 		LoadILLAscii alg;
+		alg.setRethrows(true);
 		TS_ASSERT_THROWS_NOTHING(alg.initialize())
 		TS_ASSERT(alg.isInitialized())
 		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", m_testFile));
 		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "outputWSName"));
-		TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+		alg.execute();
 		TS_ASSERT(alg.isExecuted( ));
 
 //    // Retrieve the workspace from data service. TODO: Change to your desired type
