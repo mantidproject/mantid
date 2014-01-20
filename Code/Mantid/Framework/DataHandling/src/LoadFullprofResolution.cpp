@@ -801,7 +801,7 @@ namespace DataHandling
     * @param workspaces :: [input] list of corresponding workspaces or empty vector for default
     * @param workspaceOfBank :: [output] map to indicate the workspace that a bank's parameters will be put in
     */
-  void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, int>& workspaceOfBank )
+  void LoadFullprofResolution::createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, int>& workspaceOfBank )
   {
     if(workspaces.size() == 0)
     {
