@@ -3374,10 +3374,9 @@ void MuonAnalysis::showEvent(QShowEvent *e)
  */
 void MuonAnalysis::setToolbarsHidden(bool hidden)
 {
-  if (hidden == true)
-    runPythonCode("setToolbarsVisible(False)");
-  else
-    runPythonCode("setToolbarsVisible(True)");
+  QString isVisibleStr = hidden ? "False" : "True";
+
+  runPythonCode( QString("setToolbarsVisible(%1)").arg(isVisibleStr) );
 }
 
 
