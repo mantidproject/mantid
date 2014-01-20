@@ -31,7 +31,8 @@ public:
   static ExtractMaskToTableTest *createSuite() { return new ExtractMaskToTableTest(); }
   static void destroySuite( ExtractMaskToTableTest *suite ) { delete suite; }
 
-  /** Test a method
+  //----------------------------------------------------------------------------------------------
+  /** Test method 'subtractVector'
     */
   void test_method()
   {
@@ -40,7 +41,7 @@ public:
     vector<int> vecA;
     vector<int> vecB;
 
-    // All B's items are in A
+    // Case: A constains B
     for (size_t i = 0; i < 20; ++i)
     {
       vecA.push_back(static_cast<int>(i)+5);
@@ -52,13 +53,10 @@ public:
     }
 
     vector<int> vecC = alg.subtractVector(vecA, vecB);
-    for (size_t i = 0;i < vecC.size(); ++i)
-      cout << "Item " << i << "\t = \t" << vecC[i] << ".\n";
-    cout << "\n";
 
     TS_ASSERT_EQUALS(vecC.size(), vecA.size()-vecB.size());
 
-    // Not all B's item are in A
+    // Case: A does not contain B; but the intersection between A and B is not empty
     vecA.clear();
     vecB.clear();
 
@@ -70,13 +68,9 @@ public:
 
     vecC = alg.subtractVector(vecA, vecB);
 
-    for (size_t i = 0;i < vecC.size(); ++i)
-      cout << "Item " << i << "\t = \t" << vecC[i] << ".\n";
-    cout << "\n";
-
     TS_ASSERT_EQUALS(vecC.size(), 7);
 
-    // B has a large range than A
+    // Case: B has a larger range than A
     vecA.clear();
     vecB.clear();
 
@@ -91,14 +85,13 @@ public:
     vecB.push_back(30);
 
     vecC = alg.subtractVector(vecA, vecB);
-    for (size_t i = 0;i < vecC.size(); ++i)
-      cout << "Item " << i << "\t = \t" << vecC[i] << ".\n";
-    cout << "\n";
+
     TS_ASSERT_EQUALS(vecC.size(), 5);
 
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Test initialization of the algorithm
     */
   void test_Init()
@@ -108,6 +101,7 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Test for writing a new line to a new table workspace
     */
   void test_writeToNewTable()
@@ -130,27 +124,13 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("TestWorkspace1", inputws);
 
-    /*
-    for (size_t i = 0; i < inputws->getNumberHistograms(); ++i)
-    {
-      IDetector_const_sptr det = inputws->getDetector(i);
-      cout << "WorkspaceIndex = " << i << "  X Size = " << inputws->readX(i).size()
-           << "; Detector ID = " << det->getID() << ".\n";
-    }
-    Instrument_const_sptr instrument = inputws->getInstrument();
-    vector<detid_t> detids = instrument->getDetectorIDs();
-    cout << "Number of detectors = " << detids.size() << ".\n";
-    for (size_t i = 0; i < detids.size(); ++i)
-      cout << "Detector " << i << ":  ID = " << detids[i] << ".\n";
-     */
-
     // Call algorithms
     ExtractMaskToTable alg;
     alg.initialize();
 
     // Set up properties
-    alg.setProperty("InputWorkspace", "TestWorkspace1");
-    alg.setProperty("OutputWorkspace", "MaskTable1");
+    alg.setPropertyValue("InputWorkspace", "TestWorkspace1");
+    alg.setPropertyValue("OutputWorkspace", "MaskTable1");
     alg.setProperty("XMin", 1234.0);
     alg.setProperty("XMax", 12345.6);
 
@@ -173,7 +153,6 @@ public:
     string specstr;
     therow >> xxmin >> xxmax >> specstr;
 
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
     string expectedspec(" 1,  6-8,  11,  21,  31,  41");
     TS_ASSERT_EQUALS(specstr, expectedspec);
     TS_ASSERT_DELTA(xxmin, 1234.0, 0.0001);
@@ -186,6 +165,7 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Test for appending a new line to an existing table workspace
     */
   void test_appendToExistingTable()
@@ -250,7 +230,7 @@ public:
 
     TableRow therow = outws->getRow(2);
     therow >> xxmin >> xxmax >> specstr;
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
+
     string expectedspec(" 1,  6-8,  11,  21,  31,  41");
     TS_ASSERT_EQUALS(specstr, expectedspec);
     TS_ASSERT_DELTA(xxmin, 1234.0, 0.0001);
@@ -258,7 +238,7 @@ public:
 
     TableRow therow1 = outws->getRow(1);
     therow1 >> xxmin >> xxmax >> specstr;
-    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
+
     string expectedspec2("43");
     TS_ASSERT_DELTA(xxmin, 2345.1, 0.0001);
     TS_ASSERT_DELTA(xxmax, 78910.5, 0.0001);

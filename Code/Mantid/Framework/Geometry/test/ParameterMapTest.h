@@ -311,6 +311,29 @@ public:
     TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority",false, fetchedValue->value<bool>());
   }
 
+  void test_copy_from_old_pmap_to_new_pmap_with_new_component(){
+
+	  IComponent_sptr oldComp = m_testInstrument->getChild(0);
+	  IComponent_sptr newComp = m_testInstrument->getChild(1);
+
+	  ParameterMap oldPMap;
+	  oldPMap.addBool(oldComp.get(), "A", false);
+	  oldPMap.addDouble(oldComp.get(), "B", 1.2);
+
+	  ParameterMap newPMap;
+
+	  TS_ASSERT_DIFFERS(oldPMap,newPMap);
+
+	  newPMap.copyFromParameterMap(oldComp.get(),newComp.get(), &oldPMap);
+
+	  TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "A", ParameterMap::pBool()), true);
+	  TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "B", ParameterMap::pDouble()), true);
+
+	  Parameter_sptr a = newPMap.get(newComp.get(), "A");
+	  TS_ASSERT_EQUALS( a->value<bool>(), false);
+
+  }
+
 private:
   Instrument_sptr m_testInstrument;
 };

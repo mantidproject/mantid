@@ -13,8 +13,10 @@ set ( SRC_FILES
 	src/BoundaryConstraint.cpp
 	src/CalculateGammaBackground.cpp
 	src/Chebyshev.cpp
+	src/ComptonPeakProfile.cpp
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
+	src/ConvertToYSpace.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
@@ -55,6 +57,7 @@ set ( SRC_FILES
 	src/MultiDomainCreator.cpp
 	src/MuonFInteraction.cpp
 	src/NeutronBk2BkExpConvPVoigt.cpp
+	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
@@ -109,8 +112,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
+	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
+	inc/MantidCurveFitting/ConvertToYSpace.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
@@ -156,6 +161,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/MultiDomainCreator.h
 	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/NeutronBk2BkExpConvPVoigt.h
+	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
@@ -207,8 +213,10 @@ set ( TEST_FILES
 	CalculateGammaBackgroundTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
+	ComptonPeakProfileTest.h
 	ComptonProfileTest.h
 	ComptonScatteringCountRateTest.h
+	ConvertToYSpaceTest.h
 	ConvolutionTest.h
 	CubicSplineTest.h
 	DampingMinimizerTest.h
@@ -245,6 +253,7 @@ set ( TEST_FILES
 	MultiDomainFunctionTest.h
 	MuonFInteractionTest.h
 	NeutronBk2BkExpConvPVoigtTest.h
+	NormaliseByPeakAreaTest.h
 	PRConjugateGradientTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h

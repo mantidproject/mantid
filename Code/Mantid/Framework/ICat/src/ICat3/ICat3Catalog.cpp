@@ -99,13 +99,13 @@ namespace Mantid
 
     /**
      * Get the URL where the datafiles will be uploaded to.
-     * @param dataFileName   :: The name of the datafile to use.
-     * @param createFileName :: The name to give to the file being saved.
+     * @param investigationID :: The investigation used to obtain the related dataset ID.
+     * @param createFileName  :: The name to give to the file being saved.
      * @return URL to PUT datafiles to.
      */
-    const std::string ICat3Catalog::getUploadURL(const std::string &dataFileName, const std::string &createFileName)
+    const std::string ICat3Catalog::getUploadURL(const std::string &investigationID, const std::string &createFileName)
     {
-      UNUSED_ARG(dataFileName);
+      UNUSED_ARG(investigationID);
       UNUSED_ARG(createFileName);
       throw std::runtime_error("ICat3Catalog does not support publishing.");
     }

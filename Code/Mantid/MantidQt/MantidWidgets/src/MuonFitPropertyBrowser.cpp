@@ -337,7 +337,12 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent* e)
 bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws)const
 {
   QString workspaceName(QString::fromStdString(ws->name() ) );
+
   if ( (workspaceName.contains("_Raw") ) || (workspaceName.contains("MuonAnalysis") ) )
+    return false;
+
+  // Exclude fitting results
+  if ( workspaceName.endsWith("_Workspace") )
     return false;
 
   if (dynamic_cast<MatrixWorkspace*>(ws.get()) != 0)
