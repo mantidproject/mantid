@@ -93,6 +93,10 @@ namespace DataHandling
     declareProperty(new WorkspaceProperty<WorkspaceGroup>("Workspace","",Direction::InOut, PropertyMode::Optional),
         "A workspace group with the instrument to which we add the parameters from the Fullprof .irf file with one workspace for each bank of the .irf file");
 
+   // Workspaces for each bank
+    declareProperty(new ArrayProperty<int>("WorkspacesForBanks"), "For each bank, the ID of the corresponding workspace in same order as banks are specified. "
+                    "Default is all workspaces in numerical order.");
+
     return;
   }
 
@@ -105,6 +109,7 @@ namespace DataHandling
     string datafile = getProperty("Filename");
     vector<int> outputbankids = getProperty("Banks");
     WorkspaceGroup_sptr wsg = getProperty("Workspace");
+    vector<int> outputwsids = getProperty("WorkspacesForBanks");
 
     // Import data
     vector<string> lines;
@@ -122,6 +127,9 @@ namespace DataHandling
     for (size_t i = 0; i < vec_bankinirf.size(); ++i)
       g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
 
+    // Bank-workspace correspondence
+    map < int, int > workspaceOfBank;
+
     vector<int> vec_bankids; // bank IDs to output to table workspace
 
     if (vec_bankinirf.empty())
@@ -131,16 +139,22 @@ namespace DataHandling
     else if (outputbankids.size() == 0)
     {
       vec_bankids = vec_bankinirf;
+      // If workspaces, set up Bank-Workpace correspondence
+      if(wsg) createBankToWorkspaceMap ( vec_bankids, outputwsids, workspaceOfBank);
     }
     else
     {
+      // If workspaces, set up Bank-Workpace correspondece, before banks are sorted.
+      if(wsg) createBankToWorkspaceMap ( outputbankids, outputwsids, workspaceOfBank);
+
+      // Deal with banks
       sort(outputbankids.begin(), outputbankids.end());
       for (size_t i = 0; i < outputbankids.size(); ++i)
       {
         int outputbankid = outputbankids[i];
         if (outputbankid < 0)
         {
-          g_log.warning() << "Input bank ID (" << outputbankid << ") is negative.  It is not allowed and ignored. " << ".\n";
+          g_log.warning() << "Input bank ID (" << outputbankid << ") is negative.  It is not allowed and is  ignored. " << ".\n";
         }
         else
         {
@@ -207,9 +221,9 @@ namespace DataHandling
       {   
         for (size_t i=0; i < wsg->size(); ++i)
         {
-          Workspace_sptr wsi = wsg->getItem(i);
+          Workspace_sptr wsi = wsg->getItem(i);  //i
           auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-          putParametersIntoWorkspace( i+1, outTabWs, workspace );
+          putParametersIntoWorkspace( i+1, outTabWs, workspace );  //i+1
         }
       } 
     }
@@ -781,6 +795,36 @@ namespace DataHandling
     return tablews;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** create a map of the workspaces corresponding to each bank
+    * @param banks :: [input] list of bank IDs; must not be empty. must not have duplicate entries. 
+    * @param workspaces :: [input] list of corresponding workspaces or empty vector for default
+    * @param workspaceOfBank :: [output] map to indicate the workspace that a bank's parameters will be put in
+    */
+  void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, int>& workspaceOfBank )
+  {
+    if(workspaces.size() == 0)
+    {
+      for(size_t i=0; i<banks.size(); i++)
+      {
+        workspaceOfBank.insert(std::pair<int,int>(banks[i],i+1));
+      }
+    }
+    else
+    {
+      for(size_t i=0; i<banks.size(); i++)
+      {
+        workspaceOfBank.insert(std::pair<int,int>(banks[i],workspaces[i]));
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Put the parameters into one workspace
+    * @param wsNumber :: [input] the membership number of the workspace in its group
+    * @param tws :: [input] the output table workspace 
+    * @param workspaceOfBank :: [input/output] the group workspace parameters are to be put in
+    */
   void LoadFullprofResolution::putParametersIntoWorkspace( size_t wsNumber, const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws)
   {  
 
