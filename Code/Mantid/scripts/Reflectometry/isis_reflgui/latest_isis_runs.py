@@ -15,6 +15,7 @@ class LatestISISRuns(object):
     __instrument = None
     __mountpoint = None
     __most_recent_cycle = None
+    __number_of_cycles = None
     __cycleMap = None
     
     def __init__(self, instrument):
@@ -37,6 +38,7 @@ class LatestISISRuns(object):
     def setLatestCycle(self):
         tree = xml.parse(self.main_path)
         dom = tree.getroot()
+        self.__number_of_cycles = len(dom)
         element = dom[-1]
         journal_file = element.attrib.get('name')
         journal_path = os.path.join(self.base_path, journal_file)
@@ -51,6 +53,8 @@ class LatestISISRuns(object):
         return self.__most_recent_cycle
     def getInstrument(self):
         return self.__instrument
+    def getNumCycles(self):
+        return self.__number_of_cycles
     def __findCycleId(self, path):
         tree = xml.parse(path)    
         root = tree.getroot()
@@ -71,23 +75,25 @@ class LatestISISRuns(object):
         linecache = []
         if eID:
             f = open(self.text_path, 'r')
+            expected_eID_length = -8
             eLength = -1*(len(eID)+1)
-            if eLength > -8:
-                eLength = -8
+            if eLength > expected_eID_length:
+                eLength = expected_eID_length
             for line in f:
                 ###start line correcting block
                 #this is here for the purpose of correcting a badly formatted summary file
                 #this concatenates lines broken by EOL characters where they shouldn't be
                 #as there were some in the INTER summary file when I wrote this
-                if len(line) < 89:
+                expected_line_length = 89
+                if len(line) < expected_line_length:
                     linecache.append(line)
                     cachecount = 0
                     for entry in linecache:
                         cachecount = cachecount + len(entry)
-                    if cachecount == 89:
+                    if cachecount == expected_line_length:
                         line = ''.join(linecache)
                         linecache = []
-                    elif cachecount > 89:
+                    elif cachecount > expected_line_length:
                         linecache = []
                     else:
                         continue
@@ -96,6 +102,7 @@ class LatestISISRuns(object):
                 ###end line correcting block
                 lineID = line[eLength:].strip()
                 if str(eID) == str(lineID):
+                    #grab and concatenate the run number and investigation name.
                     item = line[3:8] + ": " + line[28:52].strip()
                     runnames.append(item)
         return runnames
@@ -128,7 +135,7 @@ class LatestISISRuns(object):
             depth = depth + 1
             if depth >= maxDepth:
                 break
-        print "Search for RB number " + str(eID) + " complete."
+        print "Search for RB number " + str(eID) + " complete. Search yielded " + str(len(runnames)) + " results"
         return runnames
     def getJournalRuns(self, eID, maxDepth = 1):
         if maxDepth < 1:

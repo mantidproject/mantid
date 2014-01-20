@@ -132,8 +132,10 @@ class ReflGui(refl_window.Ui_windowRefl):
             selectedInstrument = config['default.instrument'].strip().upper()
             if not self.__instrumentRuns:
                 self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
+                self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
             elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
                 self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
+                self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
             if self.textRB.text():
                 runs = []
                 self.statusMain.clearMessage()
