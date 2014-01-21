@@ -346,66 +346,33 @@ void MuonAnalysisResultTableTab::populateTables()
 {
   storeUserSettings();
   
-  // Clear the previous table values
-  m_logValues.clear();
-
   QStringList fittedWsList = getFittedWorkspaces();
 
-  if(fittedWsList.size() > 0)
-  { 
-    // Add number of rows  for the amount of fittings.
-    m_uiForm.fittingResultsTable->setRowCount(fittedWsList.size());
+  // Clear the previous table values
+  m_logValues.clear();
+  m_uiForm.fittingResultsTable->setRowCount(0);
+  m_uiForm.valueTable->setRowCount(0);
 
-    // Add check boxes for the include column on fitting table, and make text uneditable.
-    for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
-    {
-      m_uiForm.fittingResultsTable->setCellWidget(i,1, new QCheckBox);
-      QTableWidgetItem * textItem = m_uiForm.fittingResultsTable->item(i, 0);
-      if(textItem)
-        textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
-    }
+  // Populate the individual log values and fittings into their respective tables.
+  populateFittings(fittedWsList);
+  populateLogsAndValues(fittedWsList);    
 
-    // Populate the individual log values and fittings into their respective tables.
-    populateFittings(fittedWsList);
-    populateLogsAndValues(fittedWsList);    
-    
-    // Add check boxes for the include column on log table, and make text uneditable.
-    for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
-    {
-      m_uiForm.valueTable->setCellWidget(i,1, new QCheckBox);
-      QTableWidgetItem * textItem = m_uiForm.valueTable->item(i, 0);
-      if(textItem)
-        textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
-    }
+  // Make sure all fittings are selected by default.
+  selectAllFittings(true);
 
-    QTableWidgetItem* temp = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(0,0));
-    // If there is no item in the first row then there must be no log files found between the two data sets.
-    if (temp == NULL)
-    {
-      QMessageBox::information(this, "Mantid - Muon Analysis", "There were no common log files found.");
-    }
-    else
-    {
-      // Make sure all fittings are selected by default.
-      selectAllFittings(true);
-    }
-
-    // If we have Run Number log value, we want to select it by default.
-    auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
-    if(!found.empty())
-    {
-      int r = found[0]->row();
-
-      if(QCheckBox* cb = dynamic_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(r, 1)))
-        cb->setCheckState(Qt::Checked); 
-    }
-
-    applyUserSettings();
-  }
-  else
+  // If we have Run Number log value, we want to select it by default.
+  auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
+  if ( ! found.empty() )
   {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "A fitting must be made on the Data Analysis tab before producing a Results Table.");
+    int r = found[0]->row();
+
+    if( auto cb = dynamic_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(r, 1)) )
+    {
+      cb->setCheckState(Qt::Checked); 
+    }
   }
+
+  applyUserSettings();
 }
 
 
@@ -552,6 +519,17 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
 
   // Save the number of logs displayed so don't have to search through all cells.
   m_numLogsdisplayed = logsToDisplay.size();
+
+  // Add check boxes for the include column on log table, and make text uneditable.
+  for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
+  {
+    m_uiForm.valueTable->setCellWidget(i,1, new QCheckBox);
+    
+    if( auto textItem = m_uiForm.valueTable->item(i, 0) )
+    {
+      textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
+    }
+  }
 }
 
 
@@ -563,46 +541,53 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
 */
 void MuonAnalysisResultTableTab::populateFittings(const QStringList& fittedWsList)
 {
-  if(fittedWsList.size() > m_uiForm.fittingResultsTable->rowCount())
+  // Add number of rows  for the amount of fittings.
+  m_uiForm.fittingResultsTable->setRowCount(fittedWsList.size());
+
+  // Add check boxes for the include column on fitting table, and make text uneditable.
+  for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
   {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "There is not enough room in the table to populate all fitting parameter results");
-  }
-  else
-  {
-    // Get colors, 0=Black, 1=Red, 2=Green, 3=Blue, 4=Orange, 5=Purple. (If there are more than this then use black as default.)
-    QMap<int, int> colors = getWorkspaceColors(fittedWsList);
-    for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++)
+    m_uiForm.fittingResultsTable->setCellWidget(i,1, new QCheckBox);
+    
+    if( auto textItem = m_uiForm.fittingResultsTable->item(i, 0) )
     {
-      // Fill values and delete previous old ones.
-      if (row < fittedWsList.size())
-      {
-        QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
-        int color(colors.find(row).data());
-        switch (color)
-        {
-          case(1):
-            item->setTextColor("red");
-            break;
-          case(2):
-            item->setTextColor("green");
-            break;
-          case(3):
-            item->setTextColor("blue");
-            break;
-          case(4):
-            item->setTextColor("orange");
-            break;
-          case(5):
-            item->setTextColor("purple");
-            break;
-          default:
-            item->setTextColor("black");
-        }
-        m_uiForm.fittingResultsTable->setItem(row, 0, item);
-      }
-      else
-        m_uiForm.fittingResultsTable->setItem(row,0, NULL);
+      textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
     }
+  }
+
+  // Get colors, 0=Black, 1=Red, 2=Green, 3=Blue, 4=Orange, 5=Purple. (If there are more than this then use black as default.)
+  QMap<int, int> colors = getWorkspaceColors(fittedWsList);
+  for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++)
+  {
+    // Fill values and delete previous old ones.
+    if (row < fittedWsList.size())
+    {
+      QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
+      int color(colors.find(row).data());
+      switch (color)
+      {
+        case(1):
+        item->setTextColor("red");
+        break;
+        case(2):
+        item->setTextColor("green");
+        break;
+        case(3):
+        item->setTextColor("blue");
+        break;
+        case(4):
+        item->setTextColor("orange");
+        break;
+        case(5):
+        item->setTextColor("purple");
+        break;
+        default:
+        item->setTextColor("black");
+      }
+      m_uiForm.fittingResultsTable->setItem(row, 0, item);
+    }
+    else
+      m_uiForm.fittingResultsTable->setItem(row,0, NULL);
   }
 }
 
