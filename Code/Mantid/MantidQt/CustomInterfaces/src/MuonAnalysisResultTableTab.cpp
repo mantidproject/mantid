@@ -264,31 +264,35 @@ QStringList MuonAnalysisResultTableTab::getSequentialFitLabels()
  */
 QStringList MuonAnalysisResultTableTab::getSequentialFitWorkspaces(const QString& label)
 {
+  const AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
   std::string groupName = MuonSequentialFitDialog::SEQUENTIAL_PREFIX + label.toStdString();
 
-  if ( auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName) )
+  WorkspaceGroup_sptr group;
+
+  // Might have been accidentally deleted by user
+  if ( ! ads.doesExist(groupName) || ! ( group = ads.retrieveWS<WorkspaceGroup>(groupName) ) )
   {
-    QStringList workspaces;
-
-    std::vector<std::string> wsNames = group->getNames(); 
-
-    for (auto it = wsNames.begin(); it != wsNames.end(); it++)
-    {
-      if( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
-        continue;
-
-      std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
-
-      workspaces << QString::fromStdString(baseName);
-    }
-
-    return workspaces;
-  }
-  else
-  {
-    // TODO: log message
+    QMessageBox::critical(this, "Group not found", 
+      "Group with fitting results of the specified label was not found.");
     return QStringList();
   }
+
+  std::vector<std::string> wsNames = group->getNames(); 
+
+  QStringList workspaces;
+
+  for (auto it = wsNames.begin(); it != wsNames.end(); it++)
+  {
+    if( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
+      continue;
+
+    std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
+
+    workspaces << QString::fromStdString(baseName);
+  }
+
+  return workspaces;
 }
 
 /**
