@@ -389,9 +389,6 @@ namespace MantidWidgets
       const std::string runTitle = getRunTitle(ws);
       const std::string wsBaseName = labelGroupName + "_" + runTitle; 
 
-      ads.add(wsBaseName, ws);
-      ads.addToGroup(labelGroupName, wsBaseName);
-
       IFunction_sptr functionToFit;
 
       if ( useInitFitFunction )
@@ -436,6 +433,10 @@ namespace MantidWidgets
       ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
       ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
       ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
+
+      // Copy log values
+      auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
+      fitWs->copyExperimentInfoFrom(ws.get());
 
       // Add information about the fit to the diagnosis table
       addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"), functionToFit); 
