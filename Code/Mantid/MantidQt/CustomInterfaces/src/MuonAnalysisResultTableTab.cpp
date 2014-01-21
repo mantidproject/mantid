@@ -346,33 +346,37 @@ void MuonAnalysisResultTableTab::populateTables()
 {
   storeUserSettings();
   
-  QStringList fittedWsList = getFittedWorkspaces();
-
   // Clear the previous table values
   m_logValues.clear();
   m_uiForm.fittingResultsTable->setRowCount(0);
   m_uiForm.valueTable->setRowCount(0);
 
-  // Populate the individual log values and fittings into their respective tables.
-  populateFittings(fittedWsList);
-  populateLogsAndValues(fittedWsList);    
+  QStringList fittedWsList = getFittedWorkspaces();
 
-  // Make sure all fittings are selected by default.
-  selectAllFittings(true);
-
-  // If we have Run Number log value, we want to select it by default.
-  auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
-  if ( ! found.empty() )
+  if ( ! fittedWsList.isEmpty() )
   {
-    int r = found[0]->row();
+    // Populate the individual log values and fittings into their respective tables.
+    populateFittings(fittedWsList);
+    populateLogsAndValues(fittedWsList);    
 
-    if( auto cb = dynamic_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(r, 1)) )
+    // Make sure all fittings are selected by default.
+    selectAllFittings(true);
+
+    // If we have Run Number log value, we want to select it by default.
+    auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
+    if ( ! found.empty() )
     {
-      cb->setCheckState(Qt::Checked); 
+      int r = found[0]->row();
+
+      if( auto cb = dynamic_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(r, 1)) )
+      {
+        cb->setCheckState(Qt::Checked); 
+      }
     }
+
+    applyUserSettings();
   }
 
-  applyUserSettings();
 }
 
 
