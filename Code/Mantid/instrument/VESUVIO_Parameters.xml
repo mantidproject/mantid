@@ -112,12 +112,6 @@
     <value val="4908"/>
   </parameter>
 
-</component-link> 
-<!-- End VESUVIO link -->
-
-<!-- ======================= Energy widths ================================= -->
-
-<component-link name = "forward">
   <!-- Lorentzian HWHM of the analyser energy (efixed) (meV) -->
   <parameter name="hwhm_lorentz">
     <value val="24"/>
@@ -129,7 +123,11 @@
   <parameter name="sigma_gauss">
     <value val="73"/>
   </parameter>
-</component-link>
+
+</component-link> 
+<!-- End VESUVIO link -->
+
+<!-- ======================= Energy widths for foils ================================= -->
 
 <component-link name = "foil-pos0">
   <!-- Lorentzian HWHM of the foil energy (meV) -->

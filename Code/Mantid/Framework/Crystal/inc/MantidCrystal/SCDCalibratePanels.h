@@ -281,7 +281,7 @@ namespace Crystal
      * @param ws        The workspace with the predicted qx,qy, and qz values for each
      *                   peak
      *
-     * @param nGroups   The number of Groups-Sets of panels
+     * @param NGroups   The number of Groups-Sets of panels
      * @param names     The names of the variables that have been fit
      *
      * @param params    The values of the variables that have been fit
@@ -297,7 +297,7 @@ namespace Crystal
      * @param nData      The number of xVals and out values
      */
     void  CreateFxnGetValues(DataObjects::Workspace2D_sptr const ws,
-                         int const nGroups, std::vector<std::string> const names,
+                         int const NGroups, std::vector<std::string> const names,
                          std::vector<double> const params,
                          std::string const BankNameString, double *out,
                          const double *xVals,const size_t nData) const;

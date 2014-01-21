@@ -139,10 +139,12 @@ public:
    * @param event_time_of_flight :: array with event TOFS
    * @param numEvents :: how many events in the arrays
    * @param startAt :: index of the first event from event_index
-   * @param event_index_ptr :: ptr to a vector of event index (length of # of pulses)
+   * @param event_index :: vector of event index (length of # of pulses)
    * @param thisBankPulseTimes :: ptr to the pulse times for this particular bank.
    * @param have_weight :: flag for handling simulated files
    * @param event_weight :: array with weights for events
+   * @param min_event_id ;: minimum detector ID to load
+   * @param max_event_id :: maximum detector ID to load
    * @return
    */
   ProcessBankData(LoadEventNexus * alg, std::string entry_name,
@@ -452,7 +454,7 @@ public:
    */
   LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& entry_name, const std::string & entry_type,
                        const std::size_t numEvents, const bool oldNeXusFileNames,
-                       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
+                       Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
   : Task(),
     alg(alg), entry_name(entry_name), entry_type(entry_type),
     pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
@@ -1425,11 +1427,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
       // get the number of events
       std::size_t num = numEvents(file, hasTotalCounts, oldNeXusFileNames);
-      if (num == 0)
-      {
-        file.closeGroup();
-        continue;
-      }
       bankNames.push_back( entry_name );
       bankNumEvents.push_back(num);
       total_events += num;
@@ -1606,7 +1603,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  Mutex * diskIOMutex = new Mutex();
+  auto diskIOMutex = boost::make_shared<Mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
@@ -1680,7 +1677,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
   // Start and end all threads
   pool.joinAll();
-  delete diskIOMutex;
+  diskIOMutex.reset();
   delete prog2;
 
 
@@ -2616,7 +2613,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
  * 
  * @note: It does essentially the same thing of the method: LoadISISNexus2::loadSampleData
  * 
- * @param nexusfilename : path for the nexus file
+ * @param file : handle to the nexus file
  * @param WS : pointer to the workspace
  */
 void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS){

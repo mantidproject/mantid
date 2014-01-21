@@ -10,7 +10,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
-#include <iostream>
 #include <map>
 #include <vector>
 #include <sstream>

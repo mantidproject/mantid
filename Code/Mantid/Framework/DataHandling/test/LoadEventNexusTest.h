@@ -332,6 +332,24 @@ public:
     doTestSingleBank(false, false, "bankDoesNotExist", true);
   }
 
+  void test_SingleBank_with_no_events()
+  {
+    LoadEventNexus load;
+    TS_ASSERT_THROWS_NOTHING( load.initialize() );
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("Filename", "HYSA_12509.nxs.h5") );
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("BankName", "bank10") );
+    const std::string outws("AnEmptyWS");
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("OutputWorkspace", outws) );
+    if ( !load.execute() )
+    {
+      TS_FAIL("LoadEventNexus shouldn't fail to load an empty bank");
+      return;
+    }
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
+    TS_ASSERT_EQUALS( ws->getNumberEvents(), 0 );
+  }
+
   void test_instrument_inside_nexus_file()
   {
     LoadEventNexus load;
@@ -350,6 +368,28 @@ public:
     TS_ASSERT_EQUALS( inst->baseInstrument()->numMonitors(), 3 );
     auto params = inst->getParameterMap();
     TS_ASSERT_EQUALS( params->size(), 49);
+    TS_ASSERT_EQUALS( params->getString(inst.get(), "deltaE-mode"), "direct");
+  }
+
+  void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file()
+  {
+    LoadEventNexus load;
+    TS_ASSERT_THROWS_NOTHING( load.initialize() );
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("Filename", "CNCS_7860_event.nxs") );
+    load.setProperty<bool>("LoadLogs", false); // Time-saver
+    const std::string outws("InstNotInNexus");
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("OutputWorkspace", outws) );
+    TS_ASSERT( load.execute() );
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
+    auto inst = ws->getInstrument();
+    TS_ASSERT( !inst->getFilename().empty()); // This is how we know we didn't get it from inside the nexus file
+    TS_ASSERT_EQUALS( inst->getName(), "CNCS" );
+    TS_ASSERT_EQUALS( inst->getNumberDetectors(), 51203 );
+    TS_ASSERT_EQUALS( inst->baseInstrument()->numMonitors(), 3 );
+
+    // check that CNCS_Parameters.xml has been loaded
+    auto params = inst->getParameterMap();
     TS_ASSERT_EQUALS( params->getString(inst.get(), "deltaE-mode"), "direct");
   }
 

@@ -237,7 +237,7 @@ namespace MantidQt
 		 * Set the instrument selected in the combobox based on
 		 * the file name of the run is possible.
 		 *
-		 * Assumes that names have the form <instrument>_<run-number>.<ext>
+     * Assumes that names have the form \<instrument\>_\<run-number\>.\<ext\>
 		 */
     void IndirectNeutron::handleFilesFound()
     {

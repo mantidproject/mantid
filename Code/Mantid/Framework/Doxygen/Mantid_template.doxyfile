@@ -127,8 +127,8 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/MantidWidgets/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/SliceViewer/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/SliceViewer/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/ImageViewer/inc \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/ImageViewer/src \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/SpectrumViewer/inc \
+        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/SpectrumViewer/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/RefDetectorViewer/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../MantidQt/RefDetectorViewer/src \
 	@CMAKE_CURRENT_SOURCE_DIR@/../../Vates/ParaviewPlugins \

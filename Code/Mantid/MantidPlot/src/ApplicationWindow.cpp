@@ -9297,6 +9297,17 @@ void ApplicationWindow::windowsMenuAboutToShow()
   reloadCustomActions();
 }
 
+namespace // anonymous
+{
+  /**
+   * Helper function used with Qt's qSort to make sure interfaces are in alphabetical order.
+   */
+  bool interfaceNameComparator(const QPair<QString, QString> & lhs, const QPair<QString, QString> & rhs)
+  {
+    return lhs.first.toLower() < rhs.first.toLower();
+  }
+} // anonymous namespace
+
 void ApplicationWindow::interfaceMenuAboutToShow()
 {
   interfaceMenu->clear();
@@ -9320,6 +9331,10 @@ void ApplicationWindow::interfaceMenuAboutToShow()
     interfaceMenu->insertItem(tr(category), categoryMenu);
     categoryMenus[category] = categoryMenu;
   }
+
+  // Show the interfaces in alphabetical order in their respective submenus.
+  qSort(m_interfaceNameDataPairs.begin(), m_interfaceNameDataPairs.end(), 
+    interfaceNameComparator);
 
   // Turn the name/data pairs into QActions with which we populate the menus.
   foreach(const auto interfaceNameDataPair, m_interfaceNameDataPairs)
@@ -13351,6 +13366,10 @@ void ApplicationWindow::createActions()
   actionCatalogSearch->setToolTip(tr("Search data in archives."));
   connect(actionCatalogSearch, SIGNAL(activated()), this, SLOT(CatalogSearch()));
 
+  actionCatalogPublish = new QAction("Publish",this);
+  actionCatalogPublish->setToolTip(tr("Publish data to the archives."));
+  connect(actionCatalogPublish, SIGNAL(activated()), this, SLOT(CatalogPublish()));
+
   actionCatalogLogout = new QAction("Logout",this);
   actionCatalogLogout->setToolTip(tr("Catalog Logout"));
   connect(actionCatalogLogout, SIGNAL(activated()), this, SLOT(CatalogLogout()));
@@ -16338,6 +16357,7 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
     code += in.readLine() + "\n";
   }
   Script *runner = scriptingEnv()->newScript(filename, this, Script::NonInteractive);
+  connect(runner, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(onScriptExecuteError(const QString &, const QString &, int)));
   runner->redirectStdOut(false);
   scriptingEnv()->redirectStdOut(false);
   if(execMode == Script::Asynchronous)
@@ -16356,6 +16376,24 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
     runner->execute(code);
   }
   delete runner;
+}
+
+/**
+ * This is the slot for handing script execution errors. It is only
+ * attached by ::executeScriptFile which is only done in the '-xq'
+ * command line option.
+ *
+ * @param message Normally the stacktrace of the error.
+ * @param scriptName The name of the file.
+ * @param lineNumber The line number in the script that caused the error.
+ */
+void ApplicationWindow::onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber)
+{
+  g_log.fatal() << "Fatal error on line " << lineNumber << " of \"" << scriptName.toStdString()
+            << "\" encountered:\n"
+            << message.toStdString();
+  this->setExitCode(1);
+  this->exitWithPresetCode();
 }
 
 /**
@@ -17347,6 +17385,7 @@ void ApplicationWindow::CatalogLogin()
   if (mantidUI->isValidCatalogLogin())
   {
     icat->addAction(actionCatalogSearch);
+    icat->addAction(actionCatalogPublish);
     icat->addAction(actionCatalogLogout);
   }
 }
@@ -17366,11 +17405,17 @@ void ApplicationWindow::CatalogSearch()
   }
 }
 
+void ApplicationWindow::CatalogPublish()
+{
+  mantidUI->catalogPublishDialog();
+}
+
 void ApplicationWindow::CatalogLogout()
 {
   auto logout = mantidUI->createAlgorithm("CatalogLogout");
   mantidUI->executeAlgorithmAsync(logout);
   icat->removeAction(actionCatalogSearch);
+  icat->removeAction(actionCatalogPublish);
   icat->removeAction(actionCatalogLogout);
 }
 
@@ -17530,23 +17575,43 @@ QPoint ApplicationWindow::desktopTopLeft() const
   */
 QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 {
-  const int dlt = 40; // shift in x and y
-  const QPoint first(-1,-1);
-  static QPoint lastPoint(first);
+  const int yDelta = 40; 
+  const QPoint noPoint(-1,-1);
 
-  if (lastPoint == first)
-  {
+  static QPoint lastPoint(noPoint);
+
+  if ( lastPoint == noPoint || m_floatingWindows.isEmpty() )
+  { // If no other windows added - start from top-left corner
     lastPoint = desktopTopLeft();
-    return lastPoint;
   }
-
-  lastPoint += QPoint(dlt,dlt);
-
-  QWidget* desktop = QApplication::desktop()->screen();
-  if (lastPoint.x() + sz.width() > desktop->width() ||
-      lastPoint.y() + sz.height() > desktop->height())
+  else
   {
-    lastPoint = QPoint(0,0);
+    // Get window which was added last
+    FloatingWindow* lastWindow = m_floatingWindows.last();
+
+    if ( lastWindow->isVisible() )
+    { // If it is still visibile - can't use it's location, so need to find a new one
+
+      QPoint diff = lastWindow->pos() - lastPoint;
+
+      if ( abs(diff.x()) < 20 && abs(diff.y()) < 20 )
+      { // If window was moved far enough from it's previous location - can use it 
+
+        // Get a screen space which we can use
+        const QRect screen = QApplication::desktop()->availableGeometry(this);
+
+        // How mush we need to move in X so that cascading direction is diagonal according to
+        // screen size
+        int xDelta = static_cast<int>( yDelta * ( 1.0 * screen.width() / screen.height() ) );
+
+        lastPoint += QPoint(xDelta, yDelta);
+
+        const QRect newPlace = QRect(lastPoint, sz);
+        if ( newPlace.bottom() > screen.height() || newPlace.right() > screen.width() )
+          // If new window doesn't fit to the screen - start anew
+          lastPoint = desktopTopLeft();
+      }
+    }
   }
 
   return lastPoint;

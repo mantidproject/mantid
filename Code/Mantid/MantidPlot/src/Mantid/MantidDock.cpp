@@ -408,7 +408,7 @@ void MantidDockWidget::setTreeUpdating(const bool state)
 /**
  * Clears the tree and re-populates it with the given top level items
  * @param topLevelItems The map of names to workspaces
- * @param expandedItems Names of items who should expanded after being populated
+ * @param expanded Names of items who should expanded after being populated
  */
 void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems,
                                         const QStringList & expanded)

@@ -3,12 +3,17 @@
 
 #include "MantidAPI/Algorithm.h"
 
-#include "MantidCurveFitting/ComptonProfile.h"
+#include <boost/unordered_map.hpp>
 
 namespace Mantid
 {
   namespace CurveFitting
   {
+    //---------------------------------------------------------------------------
+    // Forward declarations
+    //---------------------------------------------------------------------------
+    struct DetectorParams;
+    struct ResolutionParams;
 
     /**
 
@@ -57,11 +62,11 @@ namespace Mantid
       };
 
       /// Calculate & correct the given index of the input workspace
-      void applyCorrection(const size_t wsIndex);
+      void applyCorrection(const size_t inputIndex,const size_t outputIndex);
       /// Compute the expected spectrum from a given detector
-      void calculateSpectrumFromDetector(const size_t wsIndex);
+      void calculateSpectrumFromDetector(const size_t inputIndex, const size_t outputIndex);
       /// Compute the expected background from the foils
-      void calculateBackgroundFromFoils(const size_t wsIndex);
+      void calculateBackgroundFromFoils(const size_t inputIndex, const size_t outputIndex);
       /// Compute expected background from single foil for spectrum at wsIndex
       void calculateBackgroundSingleFoil(std::vector<double> & ctfoil,const size_t wsIndex,
                                          const FoilInfo & foilInfo, const Kernel::V3D & detPos,
@@ -79,11 +84,11 @@ namespace Mantid
       /// Compute the theta range for a given foil
       std::pair<double,double> calculateThetaRange(const Geometry::IComponent_const_sptr & foilComp,
                                                    const double radius, const unsigned int horizDir) const;
-      /// Retrieve parameter for given component
-      double getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const;
 
       /// Input TOF data
       API::MatrixWorkspace_const_sptr m_inputWS;
+      /// Sorted indices to correct
+      boost::unordered_map<size_t,size_t> m_indices;
       /// Function that defines the mass profile
       std::string m_profileFunction;
       /// The number of peaks in spectrum

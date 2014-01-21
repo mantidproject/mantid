@@ -18,6 +18,7 @@
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Tolerance.h"
 #include <deque>
+#include <iostream>
 #include <stack>
 
 namespace Mantid
@@ -1021,7 +1022,7 @@ namespace Mantid
       const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
       const double denom = modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
       if (denom != 0.0)
-        return 2.0 * atan(scalTripProd / denom);
+        return 2.0 * atan2(scalTripProd, denom);
       else
         return 0.0; // not certain this is correct
     }

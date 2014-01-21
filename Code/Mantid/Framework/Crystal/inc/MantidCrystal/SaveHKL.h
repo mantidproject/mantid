@@ -3,6 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid
 {
@@ -59,7 +60,8 @@ namespace Crystal
     double radius; // in cm
     double power_th;
     double spectrumCalc(double TOF, int iSpec,std::vector<std::vector<double> > time, std::vector<std::vector<double> > spectra, size_t id);
-
+    DataObjects::PeaksWorkspace_sptr ws;
+    void sizeBanks(std::string bankName, int& nCols, int& nRows);
   };
 
 

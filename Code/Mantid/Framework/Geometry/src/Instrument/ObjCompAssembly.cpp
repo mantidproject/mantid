@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <stdexcept> 
 #include <ostream>
+#include <iostream>
 
 namespace Mantid
 {

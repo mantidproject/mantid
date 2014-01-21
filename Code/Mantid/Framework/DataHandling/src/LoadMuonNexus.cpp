@@ -91,6 +91,9 @@ namespace Mantid
       
       declareProperty(new WorkspaceProperty<Workspace>("DeadTimeTable", "", Direction::Output, PropertyMode::Optional), 
         "Table or a group of tables containing detector dead times");
+
+      declareProperty(new WorkspaceProperty<Workspace>("DetectorGroupingTable", "", Direction::Output, PropertyMode::Optional),
+        "Table or a group of tables with information about the detector grouping stored in the file (if any)");
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set
@@ -166,8 +169,9 @@ namespace Mantid
      * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    int LoadMuonNexus::confidence(Kernel::NexusDescriptor &) const
+    int LoadMuonNexus::confidence(Kernel::NexusDescriptor &descriptor) const
     {
+      UNUSED_ARG(descriptor);
       return 0; // Not to be used but LoadMuonNexus2, which inherits from this will
     }
 

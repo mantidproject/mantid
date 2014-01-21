@@ -55,7 +55,6 @@ namespace Algorithms
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Sample;Utility\\Workspaces;DataHandling";}
-    /// @inheritdocs
     virtual std::map<std::string, std::string> validateInputs();
   private:
     /// Sets documentation strings for this algorithm

@@ -44,7 +44,7 @@ public:
   ///               markers. Selected peaks can be deleted by pressing the Delete key.
   enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube, Draw};
   enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, EditShape};
-  enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,NUMBER_OF_UNITS};
+  enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,OUT_OF_PLANE_ANGLE,NUMBER_OF_UNITS};
 
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);
@@ -98,10 +98,10 @@ private:
     std::vector<double>&x,
     std::vector<double>&y,
     std::vector<double>* err = NULL);
-    TubeXUnits getTubeXUnits(const QString& name) const;
     QString getTubeXUnitsName(TubeXUnits unit) const;
   QString getNonDetectorInfo();
   QColor getShapeBorderColor() const;
+  static double getOutOfPlaneAngle(const Mantid::Kernel::V3D& pos, const Mantid::Kernel::V3D& origin, const Mantid::Kernel::V3D& normal);
 
   /* Pick tab controls */
   OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
@@ -126,7 +126,7 @@ private:
   QAction *m_linearY;
   QActionGroup *m_yScale;
   QActionGroup* m_unitsGroup;
-  QAction *m_detidUnits,*m_lengthUnits,*m_phiUnits;
+  QAction *m_detidUnits,*m_lengthUnits,*m_phiUnits,*m_outOfPlaneAngleUnits;
   QSignalMapper *m_unitsMapper;
 
   // Instrument display context menu actions

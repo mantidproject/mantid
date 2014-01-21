@@ -9,6 +9,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <QLineEdit>
 #include <QFileDialog>
@@ -27,8 +28,10 @@ namespace CustomInterfaces
 {
 namespace Muon
 {
-  using namespace MantidQt::API;
   using namespace Mantid::Kernel;
+  using namespace Mantid::API;
+
+  using namespace MantidQt::API;
   using namespace MantidQt::MantidWidgets;
 
   const std::string MuonAnalysisResultTableTab::RUN_NO_LOG = "run_number";
@@ -193,43 +196,55 @@ void MuonAnalysisResultTableTab::applyUserSettings()
 }
 
 /**
-* Populates the tables with all the correct log values and fitting results. It takes the
-* given workspace list and checks to see if a fit has been done to the data set and if so
-* adds it to a new workspace list.
-*
-* @param wsList :: A list containing all the data set workspaces that have been loaded
-*                   by muon analysis.
-*/
-void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
+ * Returns a list of all the fitted workspace base names.
+ * @return List of names
+ */
+QVector<QString> MuonAnalysisResultTableTab::getFittedWorkspaces()
+{
+  QVector<QString> fittedWorkspaces;
+
+  std::set<std::string> allWorkspaces = AnalysisDataService::Instance().getObjectNames();
+
+  for(auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++)
+  {
+    size_t pos = (*it).find("_Workspace"); 
+
+    if ( pos == std::string::npos )
+      continue;
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it);
+
+    if( ! ws )
+      continue;
+
+    std::string wsName = *it;
+    wsName.erase(pos);
+
+    if ( ! AnalysisDataService::Instance().doesExist(wsName + "_Parameters") )
+      continue;
+
+    fittedWorkspaces << QString::fromStdString(wsName);
+  }
+
+  return fittedWorkspaces;
+}
+
+/**
+ * Populates the tables with all the correct log values and fitting results.
+ */
+void MuonAnalysisResultTableTab::populateTables()
 {
   storeUserSettings();
   
   // Clear the previous table values
   m_logValues.clear();
-  QVector<QString> fittedWsList;
-  // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
-  for (int i(0); i<wsList.size(); ++i)
-  {
-    if((Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_Parameters"))&&(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString()))) 
-      fittedWsList.append(wsList[i]);
-  }
+
+  QVector<QString> fittedWsList = getFittedWorkspaces();
 
   if(fittedWsList.size() > 0)
   { 
-    // Make sure all params match.
-    QVector<QString> sameFittedWsList(fittedWsList);
-
-    // Clear the previous tables.
-    const int fittingRowCount(m_uiForm.fittingResultsTable->rowCount());
-    for (int i=0; i < fittingRowCount; ++i)
-	    m_uiForm.fittingResultsTable->removeRow(0);
-    const int logRowCount(m_uiForm.valueTable->rowCount());
-    for (int i=0; i < logRowCount; ++i)
-      m_uiForm.valueTable->removeRow(0);
-
     // Add number of rows  for the amount of fittings.
-    for(int i=0; i < sameFittedWsList.size(); ++i)
-      m_uiForm.fittingResultsTable->insertRow(m_uiForm.fittingResultsTable->rowCount() );
+    m_uiForm.fittingResultsTable->setRowCount(fittedWsList.size());
 
     // Add check boxes for the include column on fitting table, and make text uneditable.
     for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
@@ -241,8 +256,8 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
     }
 
     // Populate the individual log values and fittings into their respective tables.
-    populateFittings(sameFittedWsList);
-    populateLogsAndValues(sameFittedWsList);    
+    populateFittings(fittedWsList);
+    populateLogsAndValues(fittedWsList);    
     
     // Add check boxes for the include column on log table, and make text uneditable.
     for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
@@ -303,7 +318,8 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
     QMap<QString, QVariant> allLogs;
 
     // Get log information
-    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString()));
+    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(
+      AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_Workspace"));
     if (!ws)
     {
       throw std::runtime_error("Wrong type of Workspace");
@@ -405,8 +421,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
   }
   
   // Add number of rows to the table based on number of logs to display.
-  for (int i=0; i < logsToDisplay.size(); ++i)
-    m_uiForm.valueTable->insertRow(m_uiForm.valueTable->rowCount() );
+  m_uiForm.valueTable->setRowCount(logsToDisplay.size());
 
   // If there isn't enough rows in the table to populate all logs then display error message
   if(logsToDisplay.size() > m_uiForm.valueTable->rowCount())

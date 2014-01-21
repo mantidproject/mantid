@@ -5,7 +5,7 @@
 #include <time.h>
 #endif
 #include <cstddef>
-#include <iostream>
+#include <iosfwd>
 #include <vector>
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidKernel/cow_ptr.h"

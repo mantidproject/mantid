@@ -67,9 +67,9 @@ namespace CurveFitting
     void cacheBackground(const API::IFunction1D_sptr & profile,
                          const size_t paramsOffset);
     /// Set up the constraint matrices
-    void createConstraintMatrices(const MantidVec & xValues);
+    void createConstraintMatrices(const std::vector<double> & xValues);
     /// Set up positivity constraint matrix
-    void createPositivityCM(const MantidVec & xValues);
+    void createPositivityCM(const std::vector<double> & xValues);
     /// Set up equality constraint matrix
     void createEqualityCM(const size_t nmasses);
     

@@ -541,6 +541,7 @@ namespace Mantid
     /**
      * Count the number of columns in the first line of the text file
      * @param logFileStream :: stream to the file
+     * @param logFileName :: name for the log file
      */
     int LoadLog::countNumberColumns(std::ifstream& logFileStream, const std::string& logFileName)
     {

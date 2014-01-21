@@ -71,9 +71,9 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt=ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = { -0.0500,  0.04000,  0.0019,
-                            -0.0053,  -0.0071, 0.1290,
-                             0.0615, 0.0319, 0.0127 }; 
+    double correct_UB[] = { -0.0477,  0.0413,  -0.0005,
+                            -0.0055,  -0.0090, 0.1250,
+                             0.0610, 0.0314, 0.0110 };
                             
     std::vector<double> UB_calculated = latt.getUB().getVector();
 

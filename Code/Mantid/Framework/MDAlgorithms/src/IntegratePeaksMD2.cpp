@@ -593,6 +593,8 @@ namespace MDAlgorithms
 				}
 			}
       	  }
+          checkOverlap (i, peakWS, CoordinatesToUse,
+        		  2.0 * std::max(PeakRadiusVector[i],BackgroundOuterRadiusVector[i]));
 		  // Save it back in the peak object.
 		  if (signal != 0. || replaceIntensity)
 		  {
@@ -638,7 +640,7 @@ namespace MDAlgorithms
 
   /** Calculate if this Q is on a detector
    *
-   * @param QLabFrame. The Peak center.
+   * @param QLabFrame: The Peak center.
    * @param r: Peak radius.
    */
   bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
@@ -676,7 +678,36 @@ namespace MDAlgorithms
     }
     return in;
   }
-
+  void IntegratePeaksMD2::checkOverlap(int i,
+		  Mantid::DataObjects::PeaksWorkspace_sptr peakWS, int CoordinatesToUse, double radius)
+  {
+      // Get a direct ref to that peak.
+      IPeak & p1 = peakWS->getPeak(i);
+      V3D pos1;
+      if (CoordinatesToUse == 1) //"Q (lab frame)"
+        pos1 = p1.getQLabFrame();
+      else if (CoordinatesToUse == 2) //"Q (sample frame)"
+        pos1 = p1.getQSampleFrame();
+      else if (CoordinatesToUse == 3) //"HKL"
+        pos1 = p1.getHKL();
+	    for (int j=i+1; j < peakWS->getNumberPeaks(); ++j)
+	    {
+			  // Get a direct ref to rest of peaks peak.
+			  IPeak & p2 = peakWS->getPeak(j);
+			  V3D pos2;
+			  if (CoordinatesToUse == 1) //"Q (lab frame)"
+				pos2 = p2.getQLabFrame();
+			  else if (CoordinatesToUse == 2) //"Q (sample frame)"
+				pos2 = p2.getQSampleFrame();
+			  else if (CoordinatesToUse == 3) //"HKL"
+				pos2 = p2.getHKL();
+			  if (pos1.distance(pos2) < radius)
+			  {
+				  g_log.warning() << " Warning:  Peak integration spheres for peaks "
+						  << i << " and " << j <<" overlap.  Distance between peaks is "<< pos1.distance(pos2)<<std::endl;
+			  }
+	    }
+  }
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */

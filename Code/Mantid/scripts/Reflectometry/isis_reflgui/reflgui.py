@@ -18,7 +18,7 @@ from PyQt4.QtGui import QFont
 from mantid.simpleapi import *  # New API
 
 # import qti as qti
-from isis_reflectometry.quick import *
+from isis_reflectometry.quick import quick
 from isis_reflectometry.combineMulti import *
 from mantid.api import WorkspaceGroup
 from settings import *
