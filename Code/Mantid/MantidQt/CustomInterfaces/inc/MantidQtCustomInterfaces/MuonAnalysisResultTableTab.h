@@ -71,17 +71,17 @@ private slots:
 private:
   void storeUserSettings();
   void applyUserSettings();
-  void populateLogsAndValues(const QVector<QString>& fittedWsList);
-  void populateFittings(const QVector<QString>& fittedWsList);
+  void populateLogsAndValues(const QStringList& fittedWsList);
+  void populateFittings(const QStringList& fittedWsList);
 
   /// Returns a list of all the fitted workspace base names
-  QVector<QString> getFittedWorkspaces();
+  QStringList getFittedWorkspaces();
 
-  bool haveSameParameters(const QVector<QString>& wsList);
-  QVector<QString> getSelectedWs();
-  QVector<QString> getSelectedLogs();
+  bool haveSameParameters(const QStringList& wsList);
+  QStringList getSelectedWs();
+  QStringList getSelectedLogs();
   std::string getFileName();
-  QMap<int,int> getWorkspaceColors(const QVector<QString>& wsList);
+  QMap<int,int> getWorkspaceColors(const QStringList& wsList);
   
   Ui::MuonAnalysis& m_uiForm;
   int m_numLogsdisplayed;

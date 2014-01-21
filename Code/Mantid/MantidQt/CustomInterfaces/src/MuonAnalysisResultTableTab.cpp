@@ -199,9 +199,9 @@ void MuonAnalysisResultTableTab::applyUserSettings()
  * Returns a list of all the fitted workspace base names.
  * @return List of names
  */
-QVector<QString> MuonAnalysisResultTableTab::getFittedWorkspaces()
+QStringList MuonAnalysisResultTableTab::getFittedWorkspaces()
 {
-  QVector<QString> fittedWorkspaces;
+  QStringList fittedWorkspaces;
 
   std::set<std::string> allWorkspaces = AnalysisDataService::Instance().getObjectNames();
 
@@ -239,7 +239,7 @@ void MuonAnalysisResultTableTab::populateTables()
   // Clear the previous table values
   m_logValues.clear();
 
-  QVector<QString> fittedWsList = getFittedWorkspaces();
+  QStringList fittedWsList = getFittedWorkspaces();
 
   if(fittedWsList.size() > 0)
   { 
@@ -305,10 +305,10 @@ void MuonAnalysisResultTableTab::populateTables()
 * @param fittedWsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
-void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& fittedWsList)
+void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fittedWsList)
 {
   // Clear the logs if not empty and then repopulate.
-  QVector<QString> logsToDisplay;
+  QStringList logsToDisplay;
   
   // Add run number explicitly as it is the only non-timeseries log value we are using 
   logsToDisplay.push_back(RUN_NO_TITLE.c_str());
@@ -417,7 +417,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 
   for(int i=0; i<toRemove.size(); ++i)
   {
-    logsToDisplay.remove(toRemove[i]-i);
+    logsToDisplay.removeAt(toRemove[i]-i);
   }
   
   // Add number of rows to the table based on number of logs to display.
@@ -451,7 +451,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 * @param fittedWsList :: a workspace list containing ONLY the workspaces that have parameter
 *                        tables associated with it.
 */
-void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fittedWsList)
+void MuonAnalysisResultTableTab::populateFittings(const QStringList& fittedWsList)
 {
   if(fittedWsList.size() > m_uiForm.fittingResultsTable->rowCount())
   {
@@ -503,7 +503,7 @@ void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fitted
 * @param wsList :: List of all workspaces with fitted parameters.
 * @return colors :: List of colors (as numbers) with the key being position in wsList.
 */
-QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QVector<QString>& wsList)
+QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList& wsList)
 {
   QMap<int,int> colors; //position, color
   int posCount(0);
@@ -572,8 +572,8 @@ void MuonAnalysisResultTableTab::createTable()
   }
 
   // Get the user selection
-  QVector<QString> wsSelected = getSelectedWs();
-  QVector<QString> logsSelected = getSelectedLogs();
+  QStringList wsSelected = getSelectedWs();
+  QStringList logsSelected = getSelectedLogs();
 
   if ((wsSelected.size() == 0) || logsSelected.size() == 0)
   {
@@ -615,7 +615,7 @@ void MuonAnalysisResultTableTab::createTable()
 
     // Get param information
     QMap<QString, QMap<QString, double> > wsParamsList;
-    QVector<QString> paramsToDisplay;
+    QStringList paramsToDisplay;
     for(int i=0; i<wsSelected.size(); ++i)
     {
       QMap<QString, double> paramsList;
@@ -713,7 +713,7 @@ void MuonAnalysisResultTableTab::createTable()
 * @param wsList :: A list of workspaces with fitted parameters.
 * @return bool :: Whether or not the wsList given share the same fitting parameters.
 */
-bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsList)
+bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList& wsList)
 {
   std::vector<std::string> firstParams;
 
@@ -756,9 +756,9 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsLi
 *
 * @return wsSelected :: A vector of QString's containing the workspace that are selected.
 */
-QVector<QString> MuonAnalysisResultTableTab::getSelectedWs()
+QStringList MuonAnalysisResultTableTab::getSelectedWs()
 {
-  QVector<QString> wsSelected;
+  QStringList wsSelected;
   for (int i = 0; i < m_logValues.size(); i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(i,1));
@@ -777,9 +777,9 @@ QVector<QString> MuonAnalysisResultTableTab::getSelectedWs()
 *
 * @return logsSelected :: A vector of QString's containing the logs that are selected.
 */
-QVector<QString> MuonAnalysisResultTableTab::getSelectedLogs()
+QStringList MuonAnalysisResultTableTab::getSelectedLogs()
 {
-  QVector<QString> logsSelected;
+  QStringList logsSelected;
   for (int i = 0; i < m_numLogsdisplayed; i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,1));
