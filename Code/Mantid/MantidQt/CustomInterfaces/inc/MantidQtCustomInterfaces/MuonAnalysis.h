@@ -75,6 +75,10 @@ public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
 
+signals:
+  /// Request to hide/show Mantid toolbars
+  void setToolbarsHidden(bool isHidden); 
+
 private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
@@ -128,7 +132,7 @@ private slots:
   void userSelectInstrument(const QString& prefix);
 
   /// Hide/show MantidPlot toolbars
-  void setToolbarsHidden(bool hidden);
+  void doSetToolbarsHidden(bool hidden);
 
   /// Run the plot button on the home tab.
   void runFrontPlotButton();
