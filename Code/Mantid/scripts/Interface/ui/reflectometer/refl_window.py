@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Wed Jan 08 16:11:40 2014
+# Created: Tue Jan 21 14:34:54 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -21,8 +21,8 @@ class Ui_windowRefl(object):
         windowRefl.setAcceptDrops(True)
         self.widgetMainRow = QtGui.QWidget(windowRefl)
         self.widgetMainRow.setObjectName(_fromUtf8("widgetMainRow"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.widgetMainRow)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.layoutBase = QtGui.QVBoxLayout(self.widgetMainRow)
+        self.layoutBase.setObjectName(_fromUtf8("layoutBase"))
         self.layoutTopRow = QtGui.QHBoxLayout()
         self.layoutTopRow.setObjectName(_fromUtf8("layoutTopRow"))
         self.labelInstrument = QtGui.QLabel(self.widgetMainRow)
@@ -65,7 +65,7 @@ class Ui_windowRefl(object):
         self.comboPolarCorrect.addItem(_fromUtf8(""))
         self.comboPolarCorrect.addItem(_fromUtf8(""))
         self.layoutTopRow.addWidget(self.comboPolarCorrect)
-        self.verticalLayout.addLayout(self.layoutTopRow)
+        self.layoutBase.addLayout(self.layoutTopRow)
         self.layoutMidRow = QtGui.QHBoxLayout()
         self.layoutMidRow.setSpacing(12)
         self.layoutMidRow.setObjectName(_fromUtf8("layoutMidRow"))
@@ -102,7 +102,7 @@ class Ui_windowRefl(object):
         self.buttonAuto = QtGui.QPushButton(self.widgetMainRow)
         self.buttonAuto.setObjectName(_fromUtf8("buttonAuto"))
         self.layoutMidRow.addWidget(self.buttonAuto)
-        self.verticalLayout.addLayout(self.layoutMidRow)
+        self.layoutBase.addLayout(self.layoutMidRow)
         self.layoutBottomRow = QtGui.QHBoxLayout()
         self.layoutBottomRow.setObjectName(_fromUtf8("layoutBottomRow"))
         self.listMain = QtGui.QListWidget(self.widgetMainRow)
@@ -193,7 +193,7 @@ class Ui_windowRefl(object):
         self.layoutTableButton.addWidget(self.buttonClear)
         self.layoutTableColumn.addLayout(self.layoutTableButton)
         self.layoutBottomRow.addLayout(self.layoutTableColumn)
-        self.verticalLayout.addLayout(self.layoutBottomRow)
+        self.layoutBase.addLayout(self.layoutBottomRow)
         windowRefl.setCentralWidget(self.widgetMainRow)
         self.menuBar = QtGui.QMenuBar(windowRefl)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 1000, 21))
