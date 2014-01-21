@@ -55,6 +55,9 @@ namespace MantidWidgets
       Stopped
     };
 
+    // Prefix added to the names of the sequential fit result workspaces and groups
+    static const std::string SEQUENTIAL_PREFIX;
+
   signals:
     void stateChanged(DialogState newState);
 
