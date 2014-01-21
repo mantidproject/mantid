@@ -6,6 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/TableRow.h"
 
+#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include <boost/shared_ptr.hpp>
@@ -34,8 +35,10 @@ namespace Muon
   using namespace MantidQt::API;
   using namespace MantidQt::MantidWidgets;
 
-  const std::string MuonAnalysisResultTableTab::RUN_NO_LOG = "run_number";
-  const std::string MuonAnalysisResultTableTab::RUN_NO_TITLE = "Run Number";
+  const std::string MuonAnalysisResultTableTab::RUN_NO_LOG("run_number");
+  const std::string MuonAnalysisResultTableTab::RUN_NO_TITLE("Run Number");
+  const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
+
 /**
 * Constructor
 */
@@ -54,6 +57,16 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
 
   // Connect the create table button
   connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this, SLOT(createTable()));
+
+  // Enable label combox-box only when sequential fit type selected
+  connect(m_uiForm.sequentialFit, SIGNAL( toggled(bool) ), 
+    m_uiForm.fitLabelCombo, SLOT( setEnabled(bool) ));
+
+  // Re-populate tables when fit type or seq. fit label is changed
+  connect(m_uiForm.fitType, SIGNAL( buttonClicked(QAbstractButton*) ),
+    this, SLOT( populateTables() ));
+  connect(m_uiForm.fitLabelCombo, SIGNAL( activated(int) ),
+    this, SLOT( populateTables() ));
 }
 
 
@@ -196,41 +209,134 @@ void MuonAnalysisResultTableTab::applyUserSettings()
 }
 
 /**
- * Returns a list of all the fitted workspace base names.
- * @return List of names
+ * Returns a list of workspaces which should be displayed in the table, depending on what user has
+ * chosen to view.
+ * @return List of workspace base names
  */
 QStringList MuonAnalysisResultTableTab::getFittedWorkspaces()
 {
-  QStringList fittedWorkspaces;
+  if ( m_uiForm.fitType->checkedButton() == m_uiForm.individualFit )
+  {
+    return getIndividualFitWorkspaces();
+  }
+  else if ( m_uiForm.fitType->checkedButton() == m_uiForm.sequentialFit )
+  {
+    QString selectedLabel = m_uiForm.fitLabelCombo->currentText();
+
+    return getSequentialFitWorkspaces(selectedLabel);
+  }
+  else
+  {
+    throw std::runtime_error("Uknown fit type option");
+  }
+}
+
+/**
+ * Returns a list of labels user has made sequential fits for.
+ * @return List of labels
+ */
+QStringList MuonAnalysisResultTableTab::getSequentialFitLabels()
+{
+  QStringList labels;
+
+  std::map<std::string, Workspace_sptr> items = AnalysisDataService::Instance().topLevelItems();
+
+  for ( auto it = items.begin(); it != items.end(); ++it )
+  {
+    if ( it->second->id() != "WorkspaceGroup" )
+      continue;
+
+    if ( it->first.find(MuonSequentialFitDialog::SEQUENTIAL_PREFIX) != 0)
+      continue;
+
+    std::string label = it->first.substr(MuonSequentialFitDialog::SEQUENTIAL_PREFIX.size());
+
+    labels << QString::fromStdString(label);
+  }
+
+  return labels;
+}
+
+/**
+ * Returns a list of sequentially fitted workspaces names.
+ * @param label :: Label to return sequential fits for
+ * @return List of workspace base names
+ */
+QStringList MuonAnalysisResultTableTab::getSequentialFitWorkspaces(const QString& label)
+{
+  std::string groupName = MuonSequentialFitDialog::SEQUENTIAL_PREFIX + label.toStdString();
+
+  if ( auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName) )
+  {
+    QStringList workspaces;
+
+    std::vector<std::string> wsNames = group->getNames(); 
+
+    for (auto it = wsNames.begin(); it != wsNames.end(); it++)
+    {
+      if( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
+        continue;
+
+      std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
+
+      workspaces << QString::fromStdString(baseName);
+    }
+
+    return workspaces;
+  }
+  else
+  {
+    // TODO: log message
+    return QStringList();
+  }
+}
+
+/**
+ * Returns a list individually fitted workspaces names.
+ * @return List of workspace base names
+ */
+QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
+{
+  QStringList workspaces;
 
   std::set<std::string> allWorkspaces = AnalysisDataService::Instance().getObjectNames();
 
   for(auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++)
   {
-    size_t pos = (*it).find("_Workspace"); 
-
-    if ( pos == std::string::npos )
+    if ( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
       continue;
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it);
-
-    if( ! ws )
+    // Ignore sequential fit results
+    if ( boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
       continue;
 
-    std::string wsName = *it;
-    wsName.erase(pos);
+    std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
 
-    if ( ! AnalysisDataService::Instance().doesExist(wsName + "_Parameters") )
-      continue;
-
-    fittedWorkspaces << QString::fromStdString(wsName);
+    workspaces << QString::fromStdString(baseName);
   }
 
-  return fittedWorkspaces;
+  return workspaces;
 }
 
 /**
- * Populates the tables with all the correct log values and fitting results.
+ * Refresh the label list and re-populate the tables.
+ */
+void MuonAnalysisResultTableTab::refresh()
+{
+  m_uiForm.individualFit->setChecked(true);
+
+  QStringList labels = getSequentialFitLabels();
+
+  m_uiForm.fitLabelCombo->clear();
+  m_uiForm.fitLabelCombo->addItems(labels);
+
+  m_uiForm.sequentialFit->setEnabled( m_uiForm.fitLabelCombo->count() != 0 );
+
+  populateTables();
+}
+
+/**
+ * Clear and populate both tables.
  */
 void MuonAnalysisResultTableTab::populateTables()
 {

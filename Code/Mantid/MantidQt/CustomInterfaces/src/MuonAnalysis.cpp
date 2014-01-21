@@ -3140,7 +3140,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
   }
   else if(newTab == m_uiForm.ResultsTable)
   {
-    m_resultTableTab->populateTables();
+    m_resultTableTab->refresh();
   }
 
   m_currentTab = newTab;

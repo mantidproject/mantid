@@ -53,7 +53,8 @@ class MuonAnalysisResultTableTab : public QWidget
 public:
   MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm);
 
-  void populateTables();
+  // Refresh the label list and re-populate the tables
+  void refresh();
 
   static const std::string RUN_NO_LOG; // Name of the run_number log
   static const std::string RUN_NO_TITLE; // Table title for the run_number
@@ -68,14 +69,29 @@ private slots:
   void selectAllFittings(bool);
   void createTable();
 
+  /// Clear and populate both tables
+  void populateTables();
+
 private:
+  /// Postfix used by Fit fot result workspaces
+  static const std::string WORKSPACE_POSTFIX;
+
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList& fittedWsList);
   void populateFittings(const QStringList& fittedWsList);
 
-  /// Returns a list of all the fitted workspace base names
+  /// Returns a list of workspaces which should be displayed in the table
   QStringList getFittedWorkspaces();
+
+  /// Returns a list individually fitted workspaces names
+  QStringList getIndividualFitWorkspaces();
+
+  /// Returns a list of sequentially fitted workspaces names
+  QStringList getSequentialFitWorkspaces(const QString& label);
+
+  /// Returns a list of labels user has made sequential fits for
+  QStringList getSequentialFitLabels();
 
   bool haveSameParameters(const QStringList& wsList);
   QStringList getSelectedWs();
