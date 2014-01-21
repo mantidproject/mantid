@@ -62,6 +62,7 @@ class LatestISISRuns(object):
             for elem in run:
                 if elem.tag.split('}')[-1] == 'isis_cycle':
                     return elem.text
+        return None
     def __checkPath(self, path):
         if not os.path.exists(path):
             raise RuntimeError("The path %s does not exist" % path)
@@ -117,24 +118,27 @@ class LatestISISRuns(object):
             journal_file = cycle.attrib.get('name')
             journal_path = os.path.join(self.base_path, journal_file)
             cycle_id = self.__findCycleId(journal_path)
-            cycle = 'cycle_'+ cycle_id
-            cycle_dir_path = os.path.join(self.instr_path, 'data', cycle)
-            # side effect.
-            self.__addSettingDirToManagedUserDirs(cycle_dir_path)
-            cycletree = xml.parse(journal_path)
-            root = cycletree.getroot()
-            for run in root:
-                runno = None
-                title = None
-                if (run[4].text == eID):
-                    runno = run[6].text.strip()
-                    title = run[0].text.strip()
-                    if title and runno:
-                        journalentry = runno + ": " + title
-                        runnames.append(journalentry)
-            depth = depth + 1
-            if depth >= maxDepth:
-                break
+            if cycle_id:
+                cycle = 'cycle_'+ cycle_id
+                cycle_dir_path = os.path.join(self.instr_path, 'data', cycle)
+                # side effect.
+                self.__addSettingDirToManagedUserDirs(cycle_dir_path)
+                cycletree = xml.parse(journal_path)
+                root = cycletree.getroot()
+                for run in root:
+                    runno = None
+                    title = None
+                    if (run[4].text == eID):
+                        runno = run[6].text.strip()
+                        title = run[0].text.strip()
+                        if title and runno:
+                            journalentry = runno + ": " + title
+                            runnames.append(journalentry)
+                depth = depth + 1
+                if depth >= maxDepth:
+                    break
+            else:
+                print "Error reading journal: " + journal_path + " - could not identify associated cycle. Skipping journal."
         print "Search for RB number " + str(eID) + " complete. Search yielded " + str(len(runnames)) + " results"
         return runnames
     def getJournalRuns(self, eID, maxDepth = 1):
