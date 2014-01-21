@@ -28,7 +28,6 @@ class ReflGui(refl_window.Ui_windowRefl):
     def __del__(self):
         if self.windowRefl.modFlag:
             self.save(true)
-
     def on_buttonAuto_clicked(self):
         self.autoFill()
     def on_buttonTransfer_clicked(self):
@@ -51,7 +50,7 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_actionReload_from_Disk_triggered(self):
         self.reloadTable()
     def on_actionSave_triggered(self):
-        save()
+        self.save()
     def on_actionSave_As_triggered(self):
         self.saveAs()
     def on_actionSave_Workspaces_triggered(self):
