@@ -219,11 +219,13 @@ namespace DataHandling
       }
       else // Numbers match, so put parameters into workspaces.
       {   
-        for (size_t i=0; i < wsg->size(); ++i)
+        for (size_t i=0; i < vec_bankids.size(); ++i)
         {
-          Workspace_sptr wsi = wsg->getItem(i);  //i
+          int bankId = vec_bankids[i];
+          int wsId = workspaceOfBank[bankId];
+          Workspace_sptr wsi = wsg->getItem(wsId-1);  
           auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-          putParametersIntoWorkspace( i+1, outTabWs, workspace );  //i+1
+          putParametersIntoWorkspace( i+1, outTabWs, workspace );  
         }
       } 
     }
