@@ -71,10 +71,8 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
         for inst in self.instrumentList:
             self.comboInstrument.addItem(inst)
-        self.statusMain.clearMessage()
-        self.statusMain.showMessage("Ready")
-        #self.labelStatus = QtGui.QLabel("Ready")
-        #self.statusMain.addWidget(self.labelStatus)
+        self.labelStatus = QtGui.QLabel("Ready")
+        self.statusMain.addWidget(self.labelStatus)
         self.initTable()
         self.populateList()
         self.windowRefl = windowRefl
@@ -138,7 +136,6 @@ class ReflGui(refl_window.Ui_windowRefl):
                 self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
             if self.textRB.text():
                 runs = []
-                self.statusMain.clearMessage()
                 self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
                 try:
                     runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
@@ -147,7 +144,6 @@ class ReflGui(refl_window.Ui_windowRefl):
                     QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
                     runs = []
                 self.statusMain.clearMessage()
-                self.statusMain.showMessage("Ready")
                 for run in runs:
                     self.listMain.addItem(run)
         except Exception as ex:
