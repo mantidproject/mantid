@@ -1741,10 +1741,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         infoStr += ss.str();
       }
       else // Show appropriate error message.
-        infoStr += "Error - Not set in data file.";
+        infoStr += "Not set";
     }
     else // Show appropriate error message.
-      infoStr += "Error - Not found in data file.";
+      infoStr += "Not found";
 
     // Include all the run information.
     m_uiForm.infoBrowser->setText(infoStr.c_str());
