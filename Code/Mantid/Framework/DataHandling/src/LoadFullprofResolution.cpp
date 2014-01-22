@@ -128,7 +128,7 @@ namespace DataHandling
       g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
 
     // Bank-workspace correspondence
-    map < int, int > workspaceOfBank;
+    map < int, size_t > workspaceOfBank;
 
     vector<int> vec_bankids; // bank IDs to output to table workspace
 
@@ -222,7 +222,7 @@ namespace DataHandling
         for (size_t i=0; i < vec_bankids.size(); ++i)
         {
           int bankId = vec_bankids[i];
-          int wsId = workspaceOfBank[bankId];
+          size_t wsId = workspaceOfBank[bankId];
           Workspace_sptr wsi = wsg->getItem(wsId-1);  
           auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
           putParametersIntoWorkspace( i+1, outTabWs, workspace );  
@@ -800,23 +800,23 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** create a map of the workspaces corresponding to each bank
     * @param banks :: [input] list of bank IDs; must not be empty. must not have duplicate entries. 
-    * @param workspaces :: [input] list of corresponding workspaces or empty vector for default
+    * @param workspaces :: [input] list of corresponding workspaces or empty vector for default  MAY NEED TO BE size_t <int, size_t>
     * @param workspaceOfBank :: [output] map to indicate the workspace that a bank's parameters will be put in
     */
-  void LoadFullprofResolution::createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, int>& workspaceOfBank )
+  void LoadFullprofResolution::createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& workspaceOfBank )
   {
     if(workspaces.size() == 0)
     {
       for(size_t i=0; i<banks.size(); i++)
       {
-        workspaceOfBank.insert(std::pair<int,int>(banks[i],i+1));
+        workspaceOfBank.insert(std::pair<int,size_t>(banks[i],i+1));
       }
     }
     else
     {
       for(size_t i=0; i<banks.size(); i++)
       {
-        workspaceOfBank.insert(std::pair<int,int>(banks[i],workspaces[i]));
+        workspaceOfBank.insert(std::pair<int,size_t>(banks[i],workspaces[i]));
       }
     }
   }
