@@ -669,7 +669,17 @@ public:
   {
     if ( run.hasProperty(property) )
     {
-      T propertyValue = run.getPropertyValueAsType<T>(property);
+      T propertyValue;
+
+      try
+      {
+        propertyValue = run.getPropertyValueAsType<T>(property);
+      }
+      catch(...)
+      {
+        TS_FAIL("Unexpected property type: " + property);
+        return;
+      }
 
       TSM_ASSERT_EQUALS("Property value mismatch: " + property, propertyValue, expectedValue);
     }
