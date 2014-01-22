@@ -19,8 +19,6 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	if Verbose:
 		logger.notice('Cropping from Q= ' + str(qmin) +' to '+ str(qmax))
 
-	CropWorkspace(InputWorkspace=spectumWs, OutputWorkspace=spectumWs,XMin=qmin, XMax=qmax)
-
 	#give the user some extra infromation if required
 	if Verbose:
 		inGR = mtd[samWS].getRun()
@@ -73,7 +71,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 
 	#run fit function
 	fitWS = samWS[:-10] +'_'+ jumpFunc +'fit'
-	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fitWS)
+	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fitWS, StartX=qmin, EndX=qmax)
 
 	#process output options
 	if Save:
