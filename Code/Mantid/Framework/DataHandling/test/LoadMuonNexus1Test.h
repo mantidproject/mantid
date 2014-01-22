@@ -660,8 +660,8 @@ public:
     checkProperty(run, "nspectra", 32);
     checkProperty(run, "goodfrm", 417485);
 
-    checkProperty(run, "temperature", 200.0);
-    checkProperty(run, "magnetic_field", 5.0);
+    checkProperty(run, "sample_temp", 200.0);
+    checkProperty(run, "sample_magn_field", 5.0);
   }
   
   template<typename T>
