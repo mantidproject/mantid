@@ -659,6 +659,9 @@ public:
     checkProperty(run, "dur_secs", std::string("8697"));
     checkProperty(run, "nspectra", 32);
     checkProperty(run, "goodfrm", 417485);
+
+    checkProperty(run, "temperature", 200.0);
+    checkProperty(run, "magnetic_field", 5.0);
   }
   
   template<typename T>
