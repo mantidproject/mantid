@@ -1748,6 +1748,30 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       infoStr << "Not found";
     }
 
+    // Add sample temperature
+    infoStr << "\nSample Temperature: ";
+    if ( runDetails.hasProperty("sample_temp") )
+    {
+      auto temp = runDetails.getPropertyValueAsType<double>("sample_temp");
+      infoStr << temp;
+    }
+    else
+    {
+      infoStr << "Not found";
+    }
+
+    // Add sample magnetic field
+    infoStr << "\nSample Magnetic Field: ";
+    if ( runDetails.hasProperty("sample_magn_field") )
+    {
+      auto temp = runDetails.getPropertyValueAsType<double>("sample_magn_field");
+      infoStr << temp;
+    }
+    else
+    {
+      infoStr << "Not found";
+    }
+
     // Include all the run information.
     m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
 
