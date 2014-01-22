@@ -234,7 +234,6 @@ namespace Mantid
       auto wsHistory = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
       wsHistory->initialize();
       wsHistory->setProperty("InputWorkspace", workspace->name());
-      wsHistory->setProperty("FileName", Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + workspace->name() + ".py");
       wsHistory->execute();
       return wsHistory->getPropertyValue("ScriptText");
     }
