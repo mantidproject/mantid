@@ -1113,6 +1113,7 @@ namespace MantidQt
       // For all the files downloaded (or in archive) we want to load them.
       for (unsigned i = 0; i < filePaths.size(); i++)
       {
+        if (filePaths.at(i).empty()) return;
         // Set the filename (path) of the algorithm to load from.
         loadAlgorithm->setPropertyValue("Filename", filePaths.at(i));
         // Sets the output workspace to be the name of the file.
