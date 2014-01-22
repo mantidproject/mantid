@@ -1730,24 +1730,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     {
       // Filter the temperatures by the start and end times for the run.
       runDetails.getProperty("Temp_Sample")->filterByTime(start, end);
-      QString allRuns = QString::fromStdString(runDetails.getProperty("Temp_Sample")->value() );
-      QStringList runTemp = allRuns.split("\n");
-      int tempCount(0);
-      double total(0.0);
 
-      // Go through each temperature entry, remove the date and time, and total the temperatures.
-      for (int i=0; i<runTemp.size(); ++i)
-      {
-        if (runTemp[i].contains("  ") )
-        {
-          QStringList dateTimeTemperature = runTemp[i].split("  ");
-          total += dateTimeTemperature[dateTimeTemperature.size() - 1].toDouble();
-          ++tempCount;
-        }
-      }
+      // Get average of the values
+      double average = runDetails.getPropertyAsSingleValue("Temp_Sample");
 
-      // Find the average and display it.
-      double average(total/tempCount);
       if (average != 0.0)
       {
         std::ostringstream ss;
