@@ -178,11 +178,27 @@ namespace Mantid
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
         session.sendRequest(request);
 
-        Poco::Net::HTTPResponse res;
-        std::istream& rs = session.receiveResponse(res);
+        // Close the request by requesting a response.
+        Poco::Net::HTTPResponse response;
+        // Store the response for use IF an error occurs (e.g. 404).
+        std::istream& responseStream = session.receiveResponse(response);
 
-        //save file to local disk
-        retVal_FullPath = saveFiletoDisk(rs,fileName);
+        // Obtain the status returned by the server to verify if it was a success.
+        std::string HTTPStatus = boost::lexical_cast<std::string>(response.getStatus());
+        // The error message returned by the IDS (if one exists).
+        std::string IDSError = CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
+        // Cancel the algorithm and display the message if it exists.
+        if(!IDSError.empty())
+        {
+          // As an error occurred we must cancel the algorithm to prevent success message.
+          this->cancel();
+          // Output an appropriate error message from the JSON object returned by the IDS.
+          g_log.error(IDSError);
+          return "";
+        }
+
+        // Save the file to local disk if no errors occurred on the IDS.
+        retVal_FullPath = saveFiletoDisk(responseStream,fileName);
 
         clock_t end=clock();
         float diff = float(end - start)/CLOCKS_PER_SEC;
