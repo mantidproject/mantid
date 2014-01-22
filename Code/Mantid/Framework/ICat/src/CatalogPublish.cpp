@@ -30,8 +30,6 @@ datafiles or workspaces to investigations of which they are an investigator.
 
 #include <fstream>
 #include <boost/regex.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 namespace Mantid
 {
@@ -144,7 +142,6 @@ namespace Mantid
         // Sets the encoding type of the request. This enables us to stream data to the server.
         request.setChunkedTransferEncoding(true);
         std::ostream& os = session.sendRequest(request);
-
         // Copy data from the input stream to the server (request) output stream.
         Poco::StreamCopier::copyStream(fileContents, os);
         
@@ -152,23 +149,20 @@ namespace Mantid
         Poco::Net::HTTPResponse response;
         // Store the response for use IF an error occurs (e.g. 404).
         std::istream& responseStream = session.receiveResponse(response);
+
         // Obtain the status returned by the server to verify if it was a success.
         std::string HTTPStatus = boost::lexical_cast<std::string>(response.getStatus());
-
-        // Throw an error if publishing was not successful.
-        // (Note: The IDS does not currently return any meta-data related to the errors caused.)
-        if (HTTPStatus.find("20") == std::string::npos)
+        // The error message returned by the IDS (if one exists).
+        std::string IDSError = CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
+        // Cancel the algorithm and display the message if it exists.
+        if(!IDSError.empty())
         {
-          std::string jsonResponseData;
-          // Copy the input stream to a string.
-          Poco::StreamCopier::copyToString(responseStream, jsonResponseData);
-
           // As an error occurred we must cancel the algorithm.
           // We cannot throw an exception here otherwise it is caught below as Poco::Exception catches runtimes,
           // and then the I/O error is thrown as it is generated above first.
           this->cancel();
           // Output an appropriate error message from the JSON object returned by the IDS.
-          g_log.error(getIDSError(jsonResponseData));
+          g_log.error(IDSError);
         }
       }
       catch(Poco::Net::SSLException& error)
@@ -239,21 +233,5 @@ namespace Mantid
       return wsHistory->getPropertyValue("ScriptText");
     }
 
-
-    /**
-     * Obtain the error message returned by the IDS.
-     * @param jsonResponseData :: The contents of the JSON object returned from the IDS.
-     * @returns An appropriate error message for the user.
-     */
-    const std::string CatalogPublish::getIDSError(const std::string& jsonResponseData)
-    {
-      std::istringstream is(jsonResponseData);
-      // Stores the contents of `jsonResponseData` as a json property tree.
-      boost::property_tree::ptree json;
-      // Convert the stream to a JSON tree.
-      boost::property_tree::read_json(is, json);
-      // Return the message returned by the server.
-      return json.get<std::string>("code") + ": " + json.get<std::string>("message");
-    }
   }
 }
