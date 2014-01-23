@@ -1985,9 +1985,7 @@ void MuonAnalysis::updateFront()
   // get current index
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
-  m_uiForm.frontPlotFuncs->blockSignals(true);
   m_uiForm.frontPlotFuncs->clear();
-  m_uiForm.frontPlotFuncs->blockSignals(false);
 
   int numG = numGroups();
   if (numG)
