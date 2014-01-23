@@ -461,7 +461,7 @@ def C2Fw(prog,sname):
 	axis_names = []
 	x, y, e = [], [], []
 	for nl in range(1,4):
-		n_hist += nl*2+1
+		n_hist += nl*3+1
 		
 		amplitude_data, width_data = [], []
 		amplitude_error, width_error  = [], []
@@ -475,7 +475,8 @@ def C2Fw(prog,sname):
 		#transpose y and e data into workspace rows
 		amplitude_data, width_data = np.asarray(amplitude_data).T, np.asarray(width_data).T
 		amplitude_error, width_error = np.asarray(amplitude_error).T, np.asarray(width_error).T
-		
+		height_data, height_error = np.asarray(height_data), np.asarray(height_error)
+
 		x_data = np.asarray(x_data)
 
 		#interlace amplitudes and widths of the peaks
@@ -483,12 +484,14 @@ def C2Fw(prog,sname):
 		for amp, width in zip(amplitude_data, width_data):
 			y.append(amp)
 			y.append(width)
+			y.append(height_data / (height_data+amp))
 
 		#iterlace amplitude and width errors of the peaks
 		e.append(np.asarray(height_error))
 		for amp, width in zip(amplitude_error, width_error):
 			e.append(amp)
 			e.append(width)
+			e.append(height_error / (height_error+amp))
 
 		#create x data and axis names for each function
 		axis_names.append('f'+str(nl)+'.f0.'+'Height')
@@ -498,6 +501,9 @@ def C2Fw(prog,sname):
 				x.append(x_data)
 
 				axis_names.append('f'+str(nl)+'.f'+str(j)+'.FWHM')
+				x.append(x_data)
+
+				axis_names.append('f'+str(nl)+'.f'+str(j)+'.EISF')
 				x.append(x_data)
 
 	x = np.asarray(x).flatten()
