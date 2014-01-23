@@ -85,6 +85,9 @@ namespace DataHandling
     /// Generate bank information workspace
     DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
 
+    /// Create Bank to Workspace Correspondence
+    void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
+
     /// Put parameters into a metrix workspace
     void putParametersIntoWorkspace( size_t wsNumber, const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws);
 

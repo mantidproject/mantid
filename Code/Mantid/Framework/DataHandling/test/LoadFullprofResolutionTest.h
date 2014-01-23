@@ -437,6 +437,49 @@ public:
       TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 3.012, 0.0000001);
     }
 
+    // --- Test WorkspacesForBanks property ---
+    // we do it here to avoid recreating the workspace group again, which takes time
+    LoadFullprofResolution alg2;
+    alg2.initialize();
+
+    alg2.setProperty("Filename", filename);
+    alg2.setPropertyValue("Banks", "4,2");
+    alg2.setProperty("Workspace", wsName);
+    alg2.setProperty("WorkspacesForBanks","1,3");
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg2.execute());
+    TS_ASSERT(alg2.isExecuted());
+
+    // Check parameters in workspaces of group 
+    // 1st Workspace - bank 4
+    wsi = gws->getItem(0) ;
+    auto ws01 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    Mantid::Geometry::ParameterMap& paramMap01 = ws01->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr01 = ws01->getInstrument();
+    // 3rd Workspace - bank 2
+    wsi = gws->getItem(2) ;
+    auto ws03 = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+    Mantid::Geometry::ParameterMap& paramMap03 = ws03->instrumentParameters();
+    boost::shared_ptr<const Mantid::Geometry::Instrument> instr03 = ws03->getInstrument();
+
+    // Check Beta0 parameter in each workspace
+    Mantid::Geometry::Parameter_sptr beta0Param01 = paramMap01.get(&(*instr01), "Beta0", "fitting");
+    TS_ASSERT(beta0Param01);
+    if(beta0Param01) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta0Param01->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 3.012, 0.0000001);
+    }
+    Mantid::Geometry::Parameter_sptr beta0Param03 = paramMap03.get(&(*instr03), "Beta0", "fitting");
+    TS_ASSERT(beta0Param03);
+    if(beta0Param03) 
+    {
+      const Mantid::Geometry::FitParameter& fitParam = beta0Param03->value<Mantid::Geometry::FitParameter>();
+      TS_ASSERT_DELTA( boost::lexical_cast<double>(fitParam.getFormula()), 6.251096, 0.0000001);
+    }
+
+
     // Clean
     Poco::File("TestMultiWorskpace.irf").remove();
   }
