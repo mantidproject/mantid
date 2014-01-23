@@ -212,7 +212,7 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontPlotButton, SIGNAL(clicked()), this, SLOT(runFrontPlotButton()));
 
   // front group/ group pair combobox
-  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this,
+  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(activated(int)), this,
     SLOT(runFrontGroupGroupPairComboBox(int)));
 
   connect(m_uiForm.hideToolbars, SIGNAL( toggled(bool) ), this, SIGNAL( setToolbarsHidden(bool) ));
@@ -250,7 +250,7 @@ void MuonAnalysis::initLayout()
   // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
-  connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
+  connect(m_uiForm.deadTimeType, SIGNAL(activated(int)), this, SLOT(changeDeadTimeType(int) ) );
   connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
 
   m_currentTab = m_uiForm.tabWidget->currentWidget();
@@ -3157,17 +3157,17 @@ void MuonAnalysis::connectAutoUpdate()
   // Home tab Auto Updates
   connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(firstPeriodSelectionChanged()));
-  connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(secondPeriodSelectionChanged()));
-  connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(changeHomeFunction()));
+  connect(m_uiForm.homePeriodBox1, SIGNAL(activated(int)), this, SLOT(firstPeriodSelectionChanged()));
+  connect(m_uiForm.homePeriodBoxMath, SIGNAL(activated(int)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.homePeriodBox2, SIGNAL(activated(int)), this, SLOT(secondPeriodSelectionChanged()));
+  connect(m_uiForm.frontPlotFuncs, SIGNAL(activated(int)), this, SLOT(changeHomeFunction()));
   connect(m_uiForm.frontAlphaNumber, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
 
   // Grouping tab Auto Updates
   // Group Table
-  connect(m_uiForm.groupTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdateGroup()));
+  connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdateGroup()));
   // Pair Table (Guess Alpha button attached in another function)
-  connect(m_uiForm.pairTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdatePair()));
+  connect(m_uiForm.pairTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePair()));
 
   // Settings tab Auto Updates
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
