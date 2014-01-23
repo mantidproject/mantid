@@ -210,8 +210,8 @@ namespace DataHandling
 
     // If workspace, put parameters there
     if(wsg) {
-      // First check that number of workspaces in group matches number of banks
-      if( wsg->size() != vec_bankids.size() )
+      // First check that number of workspaces in group matches number of banks, if no WorkspacesForBanks is specified.
+      if( (outputwsids.size() == 0) && (wsg->size() != vec_bankids.size()) )
       {
         std::ostringstream mess;
         mess << "Number of banks ("<< vec_bankids.size() << ") does not match number of workspaces (" << wsg->size() << ") in group. Parameters not put into workspaces.";
