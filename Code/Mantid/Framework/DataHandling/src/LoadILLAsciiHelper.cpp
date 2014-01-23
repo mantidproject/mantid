@@ -160,7 +160,7 @@ namespace DataHandling {
  * @param filepath :: The filepath for the raw file.
  */
 ILLParser::ILLParser(const std::string &filepath) {
-	fin.open(filepath);
+	fin.open(filepath.c_str());
 }
 
 ILLParser::~ILLParser() {
