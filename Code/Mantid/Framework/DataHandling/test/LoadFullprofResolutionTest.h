@@ -41,7 +41,7 @@ public:
 
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "1");
-    alg.setProperty("OutputWorkspace", "TestBank1Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank1Table");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -87,7 +87,7 @@ public:
 
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "3");
-    alg.setProperty("OutputWorkspace", "TestBank3Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank3Table");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -132,7 +132,7 @@ public:
 
     // Set up
     alg.setProperty("Filename", filename);
-    alg.setProperty("OutputWorkspace", "TestBank4Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank4Table");
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -186,7 +186,7 @@ public:
 
     // Set up
     alg.setProperty("Filename", filename);
-    alg.setProperty("OutputWorkspace", "TestBank5Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank5Table");
     alg.setPropertyValue("Banks", "2-4");
 
     // Execute
@@ -233,7 +233,7 @@ public:
 
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "1");
-    alg.setProperty("OutputWorkspace", "TestAGSTable");
+    alg.setProperty("OutputTableWorkspace", "TestAGSTable");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -282,7 +282,7 @@ public:
 
     alg.setProperty("Filename", filename);
     alg.setPropertyValue("Banks", "2");
-    alg.setProperty("OutputWorkspace", "TestBank3Table");
+    alg.setProperty("OutputTableWorkspace", "TestBank3Table");
 
     alg.execute();
 

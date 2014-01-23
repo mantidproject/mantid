@@ -108,7 +108,7 @@ namespace Mantid
       template<typename T> int convert(const char* A,T& out);
 
       /// Convert a number to a string
-      template<typename T> std::string toString(const T value);
+      template<typename T> std::string toString(const T &value);
 
       /// Convert a vector to a string
       template<typename T> std::string toString(const std::vector<T> &value);

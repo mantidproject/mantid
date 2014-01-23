@@ -148,7 +148,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         """
         # 1. Import
         irfwsname = irffilename.split("/")[-1]
-        irfws = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace=irfwsname)
+        irfws = api.LoadFullprofResolution(Filename=irffilename, OutputTableWorkspace=irfwsname)
 
         # 2. Create an empty workspace
         tablews = WorkspaceFactory.createTable()

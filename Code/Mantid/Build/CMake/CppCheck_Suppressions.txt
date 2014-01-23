@@ -1,0 +1,11 @@
+// suppress memleak and exceptNew errors in the file src/file1.cpp
+//memleak:src/file1.cpp
+//exceptNew:src/file1.cpp
+
+// suppress in all files - BE CAREFULL not to leave trailing spaces after the rule id. or empty lines
+// This finds false positives where private member variable names reused by inheriting classes
+duplInheritedMember
+// For a library this is not a problem per se
+unusedFunction
+// cppcheck has problems handling the number of pre-processor definitions used in the DLL_EXPORTs
+class_X_Y

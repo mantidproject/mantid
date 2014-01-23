@@ -100,7 +100,7 @@ QwtText ScaleDraw::label(double value) const
 	switch (d_type){
 		case Numeric:
 		{
-            QLocale locale = ((Graph *)d_plot->parent())->multiLayer()->locale();
+            QLocale locale = (static_cast<Graph *>(d_plot->parent()))->multiLayer()->locale();
 			if (d_numeric_format == Superscripts){
 				QString txt = locale.toString(transformValue(value), 'e', d_prec);
 				QStringList list = txt.split("e", QString::SkipEmptyParts);

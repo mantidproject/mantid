@@ -483,7 +483,6 @@ double MantidMatrix::dataE(int row, int col) const
 {
   if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
   double res = m_workspace->readE(row + m_startRow)[col];
-  if (res == 0.) res = 1.;//  quick fix of the fitting problem
   return res;
 
 }

@@ -179,8 +179,6 @@ namespace Mantid
             MantidVec::iterator iter;
             for (iter = outputWs->dataX(0).begin(); iter != outputWs->dataX(0).end(); ++iter)
             {
-              // cppcheck cannot see that this is used by reference by muparser
-              // cppcheck-suppress unreadVariable
               axisValue = *iter;
               double result = p.Eval();
               *iter = result;

@@ -155,7 +155,7 @@ void* DllOpen::OpenDllImpl(const std::string& filePath)
     //          LocalSize(lpDisplayBuf) / sizeof(TCHAR),
     //          TEXT("failed with error %d: %s"), 
     //          dw, lpMsgBuf); 
-    _snprintf((char*)lpDisplayBuf, n, "failed with error %d: %s", dw, lpMsgBuf);
+    _snprintf((char*)lpDisplayBuf, n, "failed with error %lu: %s", dw, lpMsgBuf);
     log.error()<<"Could not open library " << filePath << ": " << (LPCTSTR)lpDisplayBuf << std::endl;
 
     LocalFree(lpMsgBuf);

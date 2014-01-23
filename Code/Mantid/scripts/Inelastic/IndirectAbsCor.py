@@ -237,13 +237,12 @@ def calcThicknessAtSec(xSection, thickness, sec):
 
     return thickSec1, thickSec2
 
-def calcFlatAbsCan(ass, canXSection, thick, sec):
+def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, sec):
+    nlam = len(canXSection)
+
     assc = np.ones(nlam)
     acsc = np.ones(nlam)
     acc = np.ones(nlam)
-
-    #thickness of the can
-    canThickness1, canThickness2 = thick
 
     sec1, sec2 = sec
 
@@ -341,6 +340,6 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
         if useCan:
             #calculate can cross section
             canXSection = (canScatt + canAbs * waves /1.8) * canDensity
-            assc, acsc, acc = calcFlatAbsCan(ass, canXSection, [canThickness1, canThickness2], [sec1, sec2])
+            assc, acsc, acc = calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, [sec1, sec2])
 
     return ass, assc, acsc, acc
