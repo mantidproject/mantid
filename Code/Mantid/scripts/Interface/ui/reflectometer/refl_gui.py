@@ -29,11 +29,8 @@ class ReflGui(refl_window.Ui_windowRefl):
     def __del__(self):
         if self.windowRefl.modFlag:
             self.save(true)
-
     def on_buttonAuto_clicked(self):
         self.autoFill()
-    def on_comboCycle_activated(self, cycle):
-        self.populateList(selected_cycle=cycle)
     def on_buttonTransfer_clicked(self):
         self.transfer()
     def on_checkTickAll_stateChanged(self,state):
@@ -45,15 +42,16 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_buttonProcess_clicked(self):
         self.process()
     def on_comboInstrument_activated(self, instrument):
-        config['default.instrument'] = str(instrument)
-        print "Instrument is now: ", str(instrument)
+        config['default.instrument'] = self.instrumentList[instrument]
+        print "Instrument is now: ", config['default.instrument']
+        self.textRB.clear()
         self.populateList()
     def on_actionOpen_Table_triggered(self):
         self.loadTable()
     def on_actionReload_from_Disk_triggered(self):
         self.reloadTable()
     def on_actionSave_triggered(self):
-        save()
+        self.save()
     def on_actionSave_As_triggered(self):
         self.saveAs()
     def on_actionSave_Workspaces_triggered(self):
@@ -70,18 +68,21 @@ class ReflGui(refl_window.Ui_windowRefl):
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
         self.loading = False
+        self.instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
+        for inst in self.instrumentList:
+            self.comboInstrument.addItem(inst)
+        self.labelStatus = QtGui.QLabel("Ready")
+        self.statusMain.addWidget(self.labelStatus)
         self.initTable()
         self.populateList()
         self.windowRefl = windowRefl
         self.connectSlots()
-        #self.windowRefl.modFlag = True
     def initTable(self):
         self.currentTable = None
         self.tableMain.resizeColumnsToContents()
-        instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
-        currentInstrument = config['default.instrument']
-        if currentInstrument in instrumentList:
-            self.comboInstrument.setCurrentIndex(instrumentList.index(config['default.instrument'].upper()))
+        currentInstrument = config['default.instrument'].upper()
+        if currentInstrument in self.instrumentList:
+            self.comboInstrument.setCurrentIndex(self.instrumentList.index(currentInstrument))
         else:
             self.comboInstrument.setCurrentIndex(0)
             config['default.instrument'] = 'INTER'
@@ -106,9 +107,9 @@ class ReflGui(refl_window.Ui_windowRefl):
     def connectSlots(self):
         self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
-        self.comboCycle.activated.connect(self.on_comboCycle_activated)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
-        self.textRB.editingFinished.connect(self.on_textRB_editingFinished)
+        self.textRB.returnPressed.connect(self.on_textRB_editingFinished)
+        self.buttonSearch.clicked.connect(self.on_textRB_editingFinished)
         self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
         self.buttonProcess.clicked.connect(self.on_buttonProcess_clicked)
         self.buttonTransfer.clicked.connect(self.on_buttonTransfer_clicked)
@@ -120,7 +121,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionClose_Refl_Gui.triggered.connect(self.windowRefl.close)
         self.actionMantid_Help.triggered.connect(self.on_actionMantid_Help_triggered)
         self.tableMain.cellChanged.connect(self.on_tableMain_modified)
-    def populateList(self, selected_cycle=None):
+    def populateList(self):
         # Clear existing
         self.listMain.clear()
         # Fill with ADS workspaces
@@ -129,32 +130,25 @@ class ReflGui(refl_window.Ui_windowRefl):
             selectedInstrument = config['default.instrument'].strip().upper()
             if not self.__instrumentRuns:
                 self.__instrumentRuns =  LatestISISRuns(instrument=selectedInstrument)
+                self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
             elif not self.__instrumentRuns.getInstrument() == selectedInstrument:
                 self.__instrumentRuns =  LatestISISRuns(selectedInstrument)
-            self.populateListCycle(selected_cycle)
+                self.spinDepth.setMaximum(self.__instrumentRuns.getNumCycles())
+            if self.textRB.text():
+                runs = []
+                self.statusMain.showMessage("Searching Journals for RB number: " + self.textRB.text())
+                try:
+                    runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
+                except:
+                    print "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives."
+                    QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
+                    runs = []
+                self.statusMain.clearMessage()
+                for run in runs:
+                    self.listMain.addItem(run)
         except Exception as ex:
-            self.comboCycle.setVisible(False)
             logger.notice("Could not list archive runs")
             logger.notice(str(ex))
-
-    #Functionality which will hopefully be moved into a new file
-    def populateListCycle(self, selected_cycle=None):
-        runs = self.__instrumentRuns.getJournalRuns(cycle=selected_cycle)
-        for run in runs:
-            self.listMain.addItem(run)
-        # Get possible cycles for this instrument.
-        cycles = self.__instrumentRuns.getCycles()
-        # Setup the list of possible cycles. And choose the latest as the default
-        if not selected_cycle:
-            cycle_count = 0
-            self.comboCycle.clear()
-            for cycle in cycles:
-                self.comboCycle.addItem(cycle)
-                if cycle == self.__instrumentRuns.getLatestCycle():
-                    self.comboCycle.setCurrentIndex(cycle_count)
-                cycle_count+=1
-        # Ensure that the cycle widget is shown.
-        self.comboCycle.setVisible(True)
     def populateListADSWorkspaces(self):
         names = mtd.getObjectNames()
         for ws in names:
@@ -188,9 +182,13 @@ class ReflGui(refl_window.Ui_windowRefl):
             if mtd.doesExist(first_contents):
                 runnumber = groupGet(mtd[first_contents], "samp", "run_number")
             else:
-                temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
-                runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
-                DeleteWorkspace(temp)
+                try:
+                    temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
+                    runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
+                    DeleteWorkspace(temp)
+                except:
+                    print "Unable to load file. Please check your managed user directories."
+                    QtGui.QMessageBox.critical(self.tableMain, 'Error Loading File',"Unable to load file. Please check your managed user directories.")
             item = QtGui.QTableWidgetItem()
             item.setText(runnumber)
             self.tableMain.setItem(row, col, item)
@@ -399,7 +397,7 @@ class ReflGui(refl_window.Ui_windowRefl):
             if self.currentTable:
                 filename = self.currentTable
             else:
-                saveDialog = QtGui.QFileDialog(self.layoutMainRow.parent(), "Save Table")
+                saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
                 saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
                 saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
                 saveDialog.setDefaultSuffix("tbl")
@@ -410,7 +408,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     return False
         return self.saveTable(filename)
     def saveAs(self):
-        saveDialog = QtGui.QFileDialog(self.layoutMainRow.parent(), "Save Table")
+        saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
         saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
         saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
         saveDialog.setDefaultSuffix("tbl")
@@ -420,7 +418,7 @@ class ReflGui(refl_window.Ui_windowRefl):
             self.saveTable(filename)
     def loadTable(self):
         self.loading = True
-        loadDialog = QtGui.QFileDialog(self.layoutMainRow.parent(), "Open Table")
+        loadDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Open Table")
         loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
         loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
         if loadDialog.exec_():
