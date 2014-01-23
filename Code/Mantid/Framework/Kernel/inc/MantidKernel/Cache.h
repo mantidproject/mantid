@@ -8,8 +8,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <iostream>
-
 namespace Mantid
 {
   namespace Kernel

@@ -189,6 +189,7 @@ public:
     const double Q = 0.7;
     const int N = 4;
     Mantid::CurveFitting::DiffRotDiscreteCircle func;
+    func.init();
     func.setParameter( "f1.Intensity", I );
     func.setParameter( "f1.Radius" , R );
     func.setParameter( "f1.Decay", tao );
@@ -221,6 +222,7 @@ public:
 
     // This should set parameters of the inelastic part
     Mantid::CurveFitting::DiffRotDiscreteCircle func;
+    func.init();
     func.setParameter( "Intensity", I );
     func.setParameter( "Radius", R );
     func.setParameter( "Decay", tao );
@@ -338,7 +340,8 @@ private:
    */
   Mantid::DataObjects::Workspace2D_sptr generateN3Workspace( const double & I, const double & R, const double & tao, const double & Q )
   {
-    const double rate = 4.136 / tao; // conversion from picosec to mili-eV, or from nanosec to micro-eV
+    const double hbar = 0.658211626; // plank constant in meV*THz (or ueV*PHz)
+    const double rate = hbar / tao; // conversion from picosec to mili-eV, or from nanosec to micro-eV
 
     // calculate prefix A1. Better be verbose for clarity
     const double x = Q * R * sqrt( 3.0 );

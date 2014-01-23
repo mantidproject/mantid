@@ -74,7 +74,7 @@ namespace Mantid
     /// Add a workspace to the group and register in the analysis data service
     void registerWorkspace(API::WorkspaceGroup_sptr gws, const std::string wsName, DataObjects::Workspace2D_sptr ws, const std::string &description);
     /// Read info about one HDF5 dataset, log if error
-    void dataSetInfo( const hid_t& h5file, const std::string setName, hsize_t* dims);
+    herr_t dataSetInfo( const hid_t& h5file, const std::string setName, hsize_t* dims) const;
     /// Read dataset data to a buffer ot type double
     void dataSetDouble( const hid_t& h5file, const std::string setName, double *buf );
     /// Load qvectors dataset, calculate modulus of vectors

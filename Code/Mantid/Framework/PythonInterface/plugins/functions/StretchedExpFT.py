@@ -43,7 +43,7 @@ class StretchedExpFT(IFunction1D):
     def __init__(self):
         '''declare some constants'''
         super(StretchedExpFT, self).__init__()
-        self._meV2ps = 4.136
+        self._h = 4.135665616 #meV*Thz
         self._parmset = set(['height','tau','beta']) #valid syntaxfor python >= 2.6
         self._parm2index = {'height':0,'tau':1,'beta':2} #order in which they were defined
 
@@ -86,8 +86,8 @@ class StretchedExpFT(IFunction1D):
             1/(M*dt) = xvals[1]-xvals[0]
             N/(M*dt) = max(abs(xvals))
         Thus:
-            dt = 1/[M*(xvals[1]-xvals[0])]  # M=2*N+1
             N = max(abs(xvals)) / (xvals[1]-xvals[0])
+            dt = 1/[M*(xvals[1]-xvals[0])]  # M=2*N+1
 
         Its Fourier transform is real by definition, thus we return the real part
         of the Fast Fourier Transform (FFT). The FFT step is meant to produce
@@ -107,12 +107,15 @@ class StretchedExpFT(IFunction1D):
         if optparms:
             if self._parmset.issubset( set(optparms.keys()) ):
                 for name in self._parmset: p[name] = optparms[name]
-        de = xvals[1]-xvals[0] # meV (or ueV) , energy step
-        # make sure M > len(xvals) so that we can use interp1d later
-        N = 1+ int( max(np.abs(xvals)) / de )
-        M = 2*N+1
-        dt = self._meV2ps / (M*de) # ps ( or ns), time step
-        sampled_times = dt * np.arange(-N, N+1)
+
+        de = (xvals[1]-xvals[0]) / 2 # increase the long-time range, increase the low-frequency resolution
+        emax = max( abs(xvals) )
+        Nmax = 16000 # increase short-times resolution, increase the resolution of the structure factor tail
+        while ( emax / de ) < Nmax:
+            emax = 2 * emax
+        N = int( emax / de )
+        dt = ( float(N) / ( 2 * N + 1 ) ) * (self._h / emax)  # extent to negative times and t==0
+        sampled_times = dt * np.arange(-N, N+1) # len( sampled_times ) < 64000
         exponent = -(np.abs(sampled_times)/p['tau'])**p['beta']
         freqs = de * np.arange(-N, N+1)
         fourier = p['height']*np.abs( scipy.fftpack.fft( np.exp(exponent) ).real )

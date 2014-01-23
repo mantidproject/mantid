@@ -195,6 +195,12 @@ namespace MantidQt
 					cbItemName = title.substr(0, substrIndex);
 					spectraList[cbItemName] = static_cast<int>(i);
 					m_uiForm.cbWidth->addItem(QString(cbItemName.c_str()));
+					
+					//display widths f1.f1, f2.f1 and f2.f2
+					if (m_uiForm.cbWidth->count() == 3)
+					{
+						return;
+					}
 				}
 			}
 		}

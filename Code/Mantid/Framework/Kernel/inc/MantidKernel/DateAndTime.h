@@ -2,11 +2,8 @@
 #define DATE_AND_TIME_H
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <ctime>
-#include <ostream>
+#include <iosfwd>
 
 namespace Mantid
 {
@@ -16,6 +13,8 @@ namespace Kernel
 /// Durations and time intervals
 typedef boost::posix_time::time_duration time_duration;
 
+// forward declaration
+class Logger;
 
 //=============================================================================================
 /** Class for holding the date and time in Mantid.
@@ -57,10 +56,7 @@ public:
   std::string toISO8601String() const;
 
   /// Stream output operator
-  friend std::ostream& operator<< (std::ostream& stream, const DateAndTime & t)
-  {
-    stream << t.toSimpleString(); return stream;
-  }
+  friend MANTID_KERNEL_DLL std::ostream& operator<< (std::ostream& stream, const DateAndTime & t);
 
   void setToMaximum();
   void setToMinimum();
@@ -199,11 +195,7 @@ public:
     std::string end_str()const;
 
     /** Stream output operator  */
-    friend std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t)
-    {
-      s << t.begin().toSimpleString() << " - " << t.end().toSimpleString();
-      return s;
-    }
+    friend MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& s,const Mantid::Kernel::TimeInterval& t);
 
 private:
     /// begin

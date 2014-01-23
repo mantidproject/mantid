@@ -278,7 +278,7 @@ void PanelsSurface::addFlatBank(ComponentID bankId, const Mantid::Kernel::V3D &n
   * Add a flat bank from an assembly of detectors.
   * @param bankId :: Component ID of the bank.
   * @param normal :: Normal vector to the bank's plane.
-  * @param objCompAssemblies :: List of component IDs. Each component must cast to Detector.
+  * @param detectors :: List of component IDs. Each component must cast to Detector.
   */
 void PanelsSurface::addFlatBankOfDetectors(ComponentID bankId, const Mantid::Kernel::V3D &normal, QList<ComponentID> detectors)
 {

@@ -16,6 +16,7 @@ class QCheckBox;
 class QAction;
 class QActionGroup;
 class QMenu;
+class QLineEdit;
 
 /**
   * Implements the Render tab in InstrumentWindow.
@@ -66,6 +67,7 @@ private slots:
   void scaleTypeChanged(int);
   void glOptionChanged(bool);
   void showMenuToolTip(QAction*);
+  void setUCorrection();
 
 private:
   void showEvent (QShowEvent *);
@@ -73,6 +75,7 @@ private:
   QFrame * setupAxisFrame();
   void setPrecisionMenuItemChecked(int n);
   void enable3DSurface( bool on );
+  QPointF getUCorrection() const;
 
   QPushButton *m_surfaceTypeButton;
   QPushButton *mSaveImage;
@@ -100,6 +103,7 @@ private:
   QAction *m_wireframe;
   QAction *m_lighting;
   QAction *m_GLView; ///< toggle between OpenGL and simple view
+  QAction *m_UCorrection;
   QActionGroup *m_precisionActionGroup;
   QList<QAction*> m_precisionActions;
 

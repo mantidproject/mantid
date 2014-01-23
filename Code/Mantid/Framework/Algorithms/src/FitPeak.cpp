@@ -107,8 +107,7 @@ namespace Algorithms
     mustBeNonNegative->setLower(0);
     declareProperty("WorkspaceIndex", 0, mustBeNonNegative, "Workspace index ");
 
-    std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-    vector<string> peakFullNames = addFunctionParameterNames(peakNames);
+    static vector<string> peakFullNames = addFunctionParameterNames(FunctionFactory::Instance().getFunctionNames<IPeakFunction>());
     declareProperty("PeakFunctionType", "", boost::make_shared<StringListValidator>(peakFullNames),
                     "Peak function type. ");
 
