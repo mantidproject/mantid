@@ -134,37 +134,46 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties
 
 ##############################################################################
 
-def confitParsToWS(Table, Data, specMin=0, specMax=-1):
+def confitParsToWS(table_name, Data, specMin=0, specMax=-1):
     
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
 
-    ws = mtd[Table]
+    ws = mtd[table_name]
 
-    xAxisVals = createQaxis(Data)
+    x = createQaxis(Data)
     dataX, dataY, dataE = [], [], []
 
     #find all relevant column names
-    names = ['FWHM', 'Amplitude', 'Height']
-    colNames = [name for name in ws.getColumnNames() for substr in names if substr in name]
-
-    nSpec = len(colNames)
+    name_stems = ['Amplitude', 'FWHM', 'Height']
+    column_names = [name for suffix in name_stems for name in ws.getColumnNames() if suffix in name]
+    v_axis_names = column_names[::2]
 
     #extract columns from table
-    columns = [ws.column(name) for name in colNames]
-    columns = zip(columns[::2], columns[1::2])
+    columns = np.asarray([ws.column(name) for name in column_names])
 
-    #build data arrays for workspace
-    nSpec = len(columns)
-    for y, error in columns:
-        dataX += xAxisVals
-        dataY += y
-        dataE += error
+    #Calculate EISF if we found height data
+    num_spectra = len(columns) / 2
+    if(num_spectra == 3):
+        amplitude, amplitude_error = columns[:2]
+        height, height_error = columns[4:6]
 
-    outputName = Table + "_Workspace"
-    dataX = trimData(nSpec, dataX, specMin, specMax)
-    CreateWorkspace(OutputWorkspace=outputName, DataX=dataX, DataY=dataY, DataE=dataE, NSpec=nSpec,
-        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=colNames[::2])
+        EISF = height / (height+amplitude)
+        EISF_error = height_error / (height_error+amplitude_error)
+
+        columns = np.vstack((columns, EISF, EISF_error))
+        v_axis_names.append('f1.f1.f1.EISF')
+        num_spectra+=1
+
+    #create workspace spectum arrays
+    dataX = np.tile(x, num_spectra)
+    dataY = np.hstack(columns[::2])
+    dataE = np.hstack(columns[1::2])
+
+    outputName = table_name + "_Workspace"
+    dataX = trimData(num_spectra, dataX, specMin, specMax)
+    CreateWorkspace(OutputWorkspace=outputName, DataX=dataX, DataY=dataY, DataE=dataE, NSpec=num_spectra,
+        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=v_axis_names)
     
     return outputName
 
