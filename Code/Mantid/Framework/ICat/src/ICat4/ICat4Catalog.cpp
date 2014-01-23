@@ -899,12 +899,8 @@ namespace Mantid
     void ICat4Catalog::setICATProxySettings(ICat4::ICATPortBindingProxy& icat)
     {
       // The soapEndPoint is only set when the user logs into the catalog.
-      // Instead, Inform the user that they need to log into the catalog as no soapEndPoint is set.
-      if (ICat::Session::Instance().getSoapEndPoint().empty())
-      {
-        g_log.error("Session ID cannot be null or empty. Please log into the catalog.");
-        return;
-      }
+      // If it's not set the correct error is returned (invalid sessionID) from the ICAT server.
+      if (ICat::Session::Instance().getSoapEndPoint().empty()) return;
       // Set the soap-endpoint of the catalog we want to use.
       icat.soap_endpoint = ICat::Session::Instance().getSoapEndPoint().c_str();
       // Sets SSL authentication scheme
