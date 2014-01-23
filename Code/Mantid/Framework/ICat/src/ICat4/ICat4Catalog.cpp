@@ -901,7 +901,10 @@ namespace Mantid
       // The soapEndPoint is only set when the user logs into the catalog.
       // Instead, Inform the user that they need to log into the catalog as no soapEndPoint is set.
       if (ICat::Session::Instance().getSoapEndPoint().empty())
-        throw std::runtime_error("Session ID cannot be null or empty. Please log into the catalog.");
+      {
+        g_log.error("Session ID cannot be null or empty. Please log into the catalog.");
+        return;
+      }
       // Set the soap-endpoint of the catalog we want to use.
       icat.soap_endpoint = ICat::Session::Instance().getSoapEndPoint().c_str();
       // Sets SSL authentication scheme
