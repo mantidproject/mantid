@@ -300,6 +300,8 @@ void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
 {
   if ( index >= 0 )
     updateFront();
+
+  homeTabUpdatePlot();
 }
 
 /**
