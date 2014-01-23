@@ -1,12 +1,13 @@
 """*WIKI* 
 
-TODO
+Calculates the Density of States from either a .phonon or .castep file.
 
 *WIKI*"""
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
+import scipy.constants
 import numpy as np
 import re
 import os.path
@@ -20,15 +21,15 @@ class DensityOfStates(PythonAlgorithm):
 				extensions = ["phonon", "castep"]),
 				doc='Filename of the file.')
 			
-			self.declareProperty(name='FitFunction',defaultValue='Gaussian', 
+			self.declareProperty(name='Function',defaultValue='Gaussian', 
 				validator=StringListValidator(['Gaussian', 'Lorentzian']), 
 				doc="Type of function to fit to peaks.")
 
 			self.declareProperty(name='Width', defaultValue=10.0, 
 				doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 			
-			self.declareProperty(name='SpectrumType',defaultValue='IR', 
-				validator=StringListValidator(['DOS', 'IR Active', 'Raman Active']), 
+			self.declareProperty(name='SpectrumType',defaultValue='DOS', 
+				validator=StringListValidator(['DOS', 'IR_Active', 'Raman_Active']), 
 				doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 			
 			self.declareProperty(name='Scale', defaultValue=1.0, 
@@ -60,27 +61,30 @@ class DensityOfStates(PythonAlgorithm):
 			fname = self.getPropertyValue('File')
 			freqs, irIntens, ramanIntens, weights = self.readDataFromFile(fname)
 
-			if self.specType == 'DOS' or self.specType == 'IR Active':
-
-				if irIntens.size == 0:
-					raise ValueError("Could not load any IR intensities from file.")
-
-				self.computeDos(freqs, irIntens, weights)
+			if self.specType == 'DOS':
+				self.computeDos(freqs, np.ones(freqs.shape), weights)
 
 				#set y units on output workspace
-				unity = mtd[self.wsName].getAxis(1).setUnit("Label")
-				unity.setLabel("IR Intensity", '(D/A)^2/amu')
+				mtd[self.wsName].setYUnit('(D/A)^2/amu')
+				mtd[self.wsName].setYUnitLabel('Intensity')
 
-			elif self.specType == 'Raman Active':
+			elif self.specType == 'IR_Active':
+				if irIntens.size == 0:
+					raise ValueError("Could not load any IR intensities from file.")
+				
+				self.computeDos(freqs, irIntens, weights)
+				#set y units on output workspace
+				mtd[self.wsName].setYUnit('(D/A)^2/amu')
+				mtd[self.wsName].setYUnitLabel('Intensity')
 
+			elif self.specType == 'Raman_Active':
 				if ramanIntens.size == 0:
 					raise ValueError("Could not load any Raman intensities from file.")
 
 				self.computeRaman(freqs, ramanIntens, weights)
-
 				#set y units on output workspace
-				unity = mtd[self.wsName].getAxis(1).setUnit("Label")
-				unity.setLabel("Raman Intensity", 'A^4')
+				mtd[self.wsName].setYUnit('A^4')
+				mtd[self.wsName].setYUnitLabel('Intensity')
 
 			self.setProperty("OutputWorkspace", self.wsName)
 
@@ -91,26 +95,10 @@ class DensityOfStates(PythonAlgorithm):
 			self.temperature = self.getProperty('Temperature').value
 			self.binWidth = self.getProperty('BinWidth').value
 			self.specType = self.getPropertyValue('SpectrumType')
-			self.peakFunc = self.getPropertyValue('FitFunction')
+			self.peakFunc = self.getPropertyValue('Function')
 			self.wsName = self.getPropertyValue('OutputWorkspace')
 			self.width = self.getProperty('Width').value
 			self.scale = self.getProperty('Scale').value
-
-
-		def findContent(self, regex, content):
-			"""
-			Search a string to file the groups in the regex
-
-			@param regex - the regex pattern to search for
-			@param content - the string to search in
-			@retrun the matched groups in the string
-			"""
-			match = re.search(regex, content, re.DOTALL)
-
-			if match:
-				return match.groups()
-			else:
-				raise Exception('Error parsing file. Failed to find content.')
 
 		def fitPeaks(self, hist, peaks):
 			"""
@@ -157,18 +145,18 @@ class DensityOfStates(PythonAlgorithm):
 			#flatten arrays
 			freqs = np.hstack(freqs)
 			intensities = np.hstack(intensities)
-			
-			if ( self.base > 1.0e20 ):
-				self.base = freqs[0]
 
-			if ( len(freqs) > len(intensities) ):
+			if ( freqs.size > intensities.size ):
 				#if we have less intensities than frequencies fill the difference with ones.
-				diff = len(freqs)-len(intensities)
+				diff = freqs.size-intensities.size
 				intensities = np.concatenate((intensities, np.ones(diff)))
+			
+			if ( freqs.size != weights.size ):
+				raise ValueError("Number of data points must match!")
 
-				#ignore values below fzerotol
-				fzeroMask = np.where(freqs < self.fzerotol)
-				intensities[fzeroMask] = 0
+			#ignore values below fzerotol
+			fzeroMask = np.where(np.absolute(freqs) < self.fzerotol)
+			intensities[fzeroMask] = 0.0
 				
 			#sort data to follow natural ordering
 			permutation = freqs.argsort()
@@ -176,18 +164,15 @@ class DensityOfStates(PythonAlgorithm):
 			intensities = intensities[permutation]
 			weights = weights[permutation]
 				
-			if ( len(freqs) != len(weights) ):
-				raise ValueError("Number of data points must match!")
-
 			#weight intensities
 			intensities = intensities * weights
 			
 			#create histogram x data
-			xmin, xmax = self.base, freqs[-1]+self.binWidth
+			xmin, xmax = freqs[0], freqs[-1]+self.binWidth
 			bins = np.arange(xmin, xmax, self.binWidth)
 
 			#sum values in each bin
-			hist = np.zeros(len(bins))
+			hist = np.zeros(bins.size)
 			for index, (lower, upper) in enumerate(zip(bins, bins[1:])):
 				binMask = np.where((freqs >= lower) & (freqs < upper))
 				hist[index] = intensities[binMask].sum()
@@ -196,7 +181,7 @@ class DensityOfStates(PythonAlgorithm):
 			peaks = hist.nonzero()[0]
 			dos = self.fitPeaks(hist, peaks)
 
-			dataX = np.arange(xmin, xmin+(len(dos)/self.binWidth), self.binWidth)
+			dataX = np.arange(xmin, xmin+(dos.size/self.binWidth), self.binWidth)
 			CreateWorkspace(DataX=dataX, DataY=dos, OutputWorkspace=self.wsName)
 			unitx = mtd[self.wsName].getAxis(0).setUnit("Label")
 			unitx.setLabel("Energy Shift", 'cm^-1')
@@ -212,16 +197,16 @@ class DensityOfStates(PythonAlgorithm):
 			@param intensities - raman intensities read from file
 			@param weights - weights for each frequency block
 			'''
-			#speed of light in m/s
-			c = 299792458
+			#speed of light in vaccum in m/s
+			c = scipy.constants.c
 			#wavelength of the laser
-			laserWavelength = 514.5e-9
+			laser_wavelength = 514.5e-9
 			#planck's constant
-			planck = 6.6260755e-34
+			planck = scipy.constants.h
 			# cm(-1) => K conversion 
-			cm1k = 1.438769
+			cm1_to_K = scipy.constants.codata.value('inverse meter-kelvin relationship')*100
 
-			factor = (math.pow((2*math.pi / laserWavelength), 4) * planck) / (8 * math.pi**2 * 45) * 1e12
+			factor = (math.pow((2*math.pi / laser_wavelength), 4) * planck) / (8 * math.pi**2 * 45) * 1e12
 
 			crossSections = np.zeros(len(freqs[0]))
 
@@ -230,7 +215,7 @@ class DensityOfStates(PythonAlgorithm):
 			frequencyXSections = freqs[0][xSecMask]
 			intensityXSections = intensities[0][xSecMask]
 			
-			boseOcc = 1.0 / ( np.exp(cm1k * frequencyXSections / self.temperature) -1)
+			boseOcc = 1.0 / ( np.exp(cm1_to_K * frequencyXSections / self.temperature) -1)
 			crossSections[xSecMask] = factor / frequencyXSections * (1 + boseOcc) * intensityXSections
 			
 			self.computeDos(freqs, crossSections, weights)
@@ -247,15 +232,17 @@ class DensityOfStates(PythonAlgorithm):
 			self.fileType = ext
 
 			if ext == '.phonon':
-				freqs, irIntens, ramanIntens, weights = self.parsePhononFile(fname)
+				file_data = self.parsePhononFile(fname)
 
 			elif ext == '.castep':
-				freqs, irIntens, ramanIntens, weights = self.parseCastepFile(fname)
+				file_data = self.parseCastepFile(fname)
 
-			if ( len(freqs) == 0 ):
+			freqs, irIntens, ramanIntens, weights = file_data
+
+			if ( freqs.size == 0 ):
 				raise ValueError("Failed to load any frequencies from file.")
 
-			if ( len(ramanIntens) == 0 and len(irIntens) == 0 ):
+			if ( ramanIntens.size == 0 and ramanIntens.size == 0 ):
 				raise ValueError("Failed to load any intensities from file.")
 
 			return freqs, irIntens, ramanIntens, weights
@@ -270,7 +257,7 @@ class DensityOfStates(PythonAlgorithm):
 			"""
 			#found header block at start of frequencies
 			q1, q2, q3, weight = map(float, header_match.groups())
-			if block_count > 1 and sum([q1,q2,q3]) == 0 and self.specType != 'DOS':
+			if block_count > 1 and sum([q1,q2,q3]) == 0:
 				weight = 0.0
 			return weight
 						
@@ -336,10 +323,10 @@ class DensityOfStates(PythonAlgorithm):
 							line = f_handle.readline()
 							line_data = line.strip().split()[1:]
 
-							data_lists = (block_freqs, block_ir, block_raman)
-							for data_list, data_item in zip(data_lists, line_data):
-								if data_item:
-									data_list.append(float(data_item))
+							blocks = (block_freqs, block_ir, block_raman)
+							for block, item in zip(blocks, line_data):
+								if item != 0:
+									block.append(float(item))
 
 						freqs.append(np.asarray(block_freqs))
 						ir_intensities.append(np.asarray(block_ir))
@@ -439,15 +426,16 @@ class DensityOfStates(PythonAlgorithm):
 							#remove non-active intensities from data
 							intensities = []
 							for value, active in zip(intensity_data[::2], intensity_data[1::2]):
-								if self.specType == 'IR Active':
-									if active == 'N':	value = 0.0
-									intensities.append(value)
+								if self.specType == 'IR_Active' or self.specType == 'Raman_Active':
+									if active == 'N' and value != 0: 
+										value = 0.0
+								intensities.append(value)
 
 							#append data to block lists
-							data_lists = (block_freqs, block_ir, block_raman)
-							for data_list, data_item in zip(data_lists, [freq] + intensities):
-								if data_item:
-									data_list.append(float(data_item))
+							blocks = (block_freqs, block_ir, block_raman)
+							for block, item in zip(blocks, [freq] + intensities):
+								if item != None:
+									block.append(float(item))
 
 							line = f_handle.readline()
 
