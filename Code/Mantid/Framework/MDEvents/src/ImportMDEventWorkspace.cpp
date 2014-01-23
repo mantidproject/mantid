@@ -362,7 +362,6 @@ namespace MDEvents
     // Calculate the actual number of columns in the MDEvent data.
     int posDiffMDEvent = static_cast<int>(std::distance(m_posMDEventStart, m_file_data.end()));
     const size_t columnsForFullEvents = m_nDimensions + 4; // signal, error, run_no, detector_no
-    const size_t columnsForLeanEvents = m_nDimensions + 2; // signal, error
     m_IsFullMDEvents = (nActualColumns == columnsForFullEvents);
 
     m_nMDEvents = posDiffMDEvent / nActualColumns;
