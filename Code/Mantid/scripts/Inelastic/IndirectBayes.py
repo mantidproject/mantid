@@ -398,6 +398,7 @@ def read_ql_file(file_name, nl):
 	amp_error, FWHM_error, height_error = [], [], []
 
 	#iterate over each block of fit parameters in the file
+	#each block corresponds to a single column in the final workspace
 	for block_num in xrange(num_blocks):
 		lower_index = header_offset+(block_size*block_num)
 		upper_index = lower_index+block_size 
@@ -444,10 +445,12 @@ def read_ql_file(file_name, nl):
 			FWHM = 2.0*HWHM*math.sqrt(math.fabs(line[0])+1.0e-20)
 			block_FWHM_e.append(FWHM)
 	
+		#append data from block
 		amp_data.append(block_amplitude)
 		FWHM_data.append(block_FWHM)
 		height_data.append(block_height)
 
+		#append error values from block
 		amp_error.append(block_amplitude_e)
 		FWHM_error.append(block_FWHM_e)
 		height_error.append(block_height_e)
@@ -456,12 +459,13 @@ def read_ql_file(file_name, nl):
 
 def C2Fw(prog,sname):
 	output_workspace = sname+'_Workspace'
-	n_hist = 0
+	num_spectra = 0
 
 	axis_names = []
 	x, y, e = [], [], []
 	for nl in range(1,4):
-		n_hist += nl*3+1
+		num_params = nl*3+1 
+		num_spectra += num_params
 		
 		amplitude_data, width_data = [], []
 		amplitude_error, width_error  = [], []
@@ -469,15 +473,16 @@ def C2Fw(prog,sname):
 		#read data from file output by fortran code
 		file_name = sname + '.ql' +str(nl)
 		x_data, peak_data, peak_error = read_ql_file(file_name, nl)
+		x_data = np.asarray(x_data)
+		
 		amplitude_data, width_data, height_data = peak_data
 		amplitude_error, width_error, height_error = peak_error
 
 		#transpose y and e data into workspace rows
 		amplitude_data, width_data = np.asarray(amplitude_data).T, np.asarray(width_data).T
 		amplitude_error, width_error = np.asarray(amplitude_error).T, np.asarray(width_error).T
-		height_data, height_error = np.asarray(height_data), np.asarray(height_error)
 
-		x_data = np.asarray(x_data)
+		height_data, height_error = np.asarray(height_data), np.asarray(height_error)
 
 		#interlace amplitudes and widths of the peaks
 		y.append(np.asarray(height_data))
@@ -499,10 +504,8 @@ def C2Fw(prog,sname):
 		for j in range(1,nl+1):
 				axis_names.append('f'+str(nl)+'.f'+str(j)+'.Amplitude')				
 				x.append(x_data)
-
 				axis_names.append('f'+str(nl)+'.f'+str(j)+'.FWHM')
 				x.append(x_data)
-
 				axis_names.append('f'+str(nl)+'.f'+str(j)+'.EISF')
 				x.append(x_data)
 
@@ -510,7 +513,7 @@ def C2Fw(prog,sname):
 	y = np.asarray(y).flatten()
 	e = np.asarray(e).flatten()
 
-	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=n_hist,
+	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
 		UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
 	return output_workspace
