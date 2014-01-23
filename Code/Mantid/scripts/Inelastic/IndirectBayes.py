@@ -346,11 +346,11 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 			Nspec=3, UnitX='MomentumTransfer')
 		outWS = C2Fw(samWS[:-4],fname)
 		if (Plot != 'None'):
-			QLPlotQL(fname,Plot,res_plot,Loop)
+			QLPlot(fname,Plot,res_plot,Loop)
 	if program == 'QSe':
 		outWS = C2Se(fname)
 		if (Plot != 'None'):
-			QLPlotQSe(fname,Plot,res_plot,Loop)
+			QLPlot(fname,Plot,res_plot,Loop)
 
 	#Add some sample logs to the output workspace
 	AddSampleLog(Workspace=outWS, LogName="Fit Program", LogType="String", LogText=prog)
@@ -606,37 +606,17 @@ def C2Se(sname):
 		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 	return outWS
 
-def QLPlotQL(inputWS,Plot,res_plot,Loop):
+def QLPlot(inputWS,Plot,res_plot,Loop):
 	if Loop:
 		ws_name = inputWS + '_Workspace'
-		nhist = mtd[ws_name].getNumberHistograms()
-
-		if (Plot == 'Amplitude' or Plot == 'All'):
-			plotSpectra(ws_name, 'Amplitude', indicies=[1,4,6])
-		
-		if (Plot == 'FWHM' or Plot == 'All'):
-			plotSpectra(ws_name, 'Full width half maximum (meV)', indicies=[2,5,7])
+		num_spectra = mtd[ws_name].getNumberHistograms()
 
 		if (Plot == 'Prob' or Plot == 'All'):
 			pWS = inputWS+'_Prob'
 			p_plot=mp.plotSpectrum(pWS,[1,2],False)
-
-	if (Plot == 'Fit' or Plot == 'All'):
-		fWS = inputWS+'_Result_0'
-		f_plot=mp.plotSpectrum(fWS,res_plot,False)
-
-def QLPlotQSe(inputWS,Plot,res_plot,Loop):
-	ws_name = inputWS+'_Workspace'
-
-	if Loop:
-		if (Plot == 'Amplitude' or Plot == 'All'):
-			plotSpectra(ws_name, 'Amplitude', indicies=[0])
-		
-		if (Plot == 'FWHM' or Plot == 'All'):
-			plotSpectra(ws_name, 'Full width half maximum (meV)', indicies=[1])
-		
-		if (Plot == 'Beta' or Plot == 'All'):
-			plotSpectra(ws_name, 'Beta', indicies=[2])
+		else:
+			spectra_indicies = [i for i in range(num_spectra) if Plot in mtd[ws_name].getAxis(1).label(i)]
+			plotSpectra(ws_name, Plot, indicies=spectra_indicies)
 
 	if (Plot == 'Fit' or Plot == 'All'):
 		fWS = inputWS+'_Result_0'
