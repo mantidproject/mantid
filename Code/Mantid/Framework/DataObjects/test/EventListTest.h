@@ -1453,39 +1453,46 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  void test_splitByTime()
+  /** Test method to split events by full time (pulse + tof) withtout correction on TOF
+    */
+  void test_splitByFullTime()
   {
-    this->fake_uniform_time_data();
+    // Create 1000 random events close to SNS's frequency
+    fake_uniform_time_sns_data();
 
-    std::vector< EventList * > outputs;
-    for (size_t i=0; i<10; i++)
-      outputs.push_back( new EventList() );
+    // Output will be 10 event lists
+    std::map<int, EventList * > outputs;
+    for (size_t i = 0; i < 10; i++)
+      outputs.insert(std::make_pair(i, new EventList()));
+    outputs.insert(std::make_pair(-1, new EventList()));
 
+    // Generate time splitters
     TimeSplitterType split;
-    //Start only at 100
-    for (int i=1; i<10; i++)
+
+    // Start only at 100
+    for (int i = 1; i < 10; i++)
     {
-      //Reject the odd hundreds pulse times (100-199, 300-399, etc).
+      // Reject the odd hundreds pulse times (100-199, 300-399, etc).
       if ((i%2) == 0)
-        split.push_back( SplittingInterval(i*100, (i+1)*100, i) );
+        split.push_back( SplittingInterval(i*1000000, (i+1)*1000000, i) );
       else
-        split.push_back( SplittingInterval(i*100, (i+1)*100, -1) );
+        split.push_back( SplittingInterval(i*1000000, (i+1)*1000000, -1) );
     }
 
-    //Do the splitting
-    el.splitByTime(split, outputs);
+    // Do the splitting
+    el.splitByFullTime(split, outputs, 1.0, false);
 
     //No events in the first ouput 0-99
     TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
 
-    for (size_t i=1; i<10; i++)
+    for (int i=1; i<10; i++)
     {
       EventList * myOut = outputs[i];
-      //std::cout << i << " " << myOut->getNumberEvents() << "\n";
+      std::cout << i << " " << myOut->getNumberEvents() << "\n";
       if ((i%2) == 0)
       {
         //Even
-        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 100);
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 1);
       }
       else
       {
@@ -1493,6 +1500,77 @@ public:
         TS_ASSERT_EQUALS( myOut->getNumberEvents(), 0);
       }
     }
+
+    return;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Test method to split events by full time (pulse + tof) withtout correction on TOF
+    * and with vector splitter
+    */
+  void test_splitByFullTimeVectorSplitter()
+  {
+    // Create 1000 random events close to SNS's frequency
+    fake_uniform_time_sns_data();
+
+    el.sortPulseTimeTOF();
+    for (size_t i = 0; i < el.getNumberEvents(); ++i)
+    {
+      std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
+                << ", " << el.getEvent(i).pulseTime().totalNanoseconds() + static_cast<int64_t>(el.getEvent(i).tof()*1000.0) << "\n";
+    }
+
+    // Output will be 10 event lists
+    std::map<int, EventList * > outputs;
+    for (size_t i = 0; i < 10; i++)
+      outputs.insert(std::make_pair(i, new EventList()));
+    outputs.insert(std::make_pair(-1, new EventList()));
+
+    // Generate time splitters
+    std::vector<int64_t> vec_splitTimes;
+    std::vector<int> vec_splitGroup;
+
+    // Start only at 100
+    for (int i = 1; i <= 10; i++)
+    {
+      vec_splitTimes.push_back(i*1000000);
+    }
+    vec_splitGroup.assign(vec_splitTimes.size(), -1);
+    vec_splitGroup[1] = 2;
+    vec_splitGroup[3] = 4;
+    vec_splitGroup[5] = 6;
+    vec_splitGroup[7] = 8;
+
+    for (size_t i = 0; i < vec_splitTimes.size()-1; ++i)
+    {
+      std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i+1] << ", "
+                << vec_splitGroup[i] << "\n";
+    }
+
+    // Do the splitting
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, 1.0, false);
+
+
+    //No events in the first ouput 0-99
+    TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
+
+    for (int i=1; i<10; i++)
+    {
+      EventList * myOut = outputs[i];
+      std::cout << i << " " << myOut->getNumberEvents() << "\n";
+      if ((i%2) == 0)
+      {
+        //Even
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 1);
+      }
+      else
+      {
+        //Odd
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 0);
+      }
+    }
+
+    return;
   }
 
 
@@ -1937,6 +2015,24 @@ public:
     {
       //All pulse times from 0 to 999 in seconds
       el += TofEvent( rand()%1000, time); //Kernel::DateAndTime(time*1.0, 0.0) );
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fake uniform time data more close to SNS case
+    */
+  void fake_uniform_time_sns_data()
+  {
+    //Clear the list
+    el = EventList();
+
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (int time = 0; time < 1000; time++)
+    {
+      //All pulse times from 0 to 999 in seconds
+      DateAndTime pulsetime(static_cast<int64_t>(time*1000000));
+      el += TofEvent( rand()%1000, pulsetime ); //Kernel::DateAndTime(time*1.0, 0.0) );
     }
   }
 

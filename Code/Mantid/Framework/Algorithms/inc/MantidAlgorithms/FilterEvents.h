@@ -123,7 +123,8 @@ namespace Algorithms
     ///
     std::vector<int> m_vecSplitterGroup;
 
-
+    /// Flag to split sample logs
+    bool m_splitSampleLogs;
   };
 
 

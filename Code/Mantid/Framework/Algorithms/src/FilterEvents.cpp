@@ -86,31 +86,37 @@ namespace Algorithms
           new API::WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
           "An input event workspace" );
 
+    declareProperty(
+          new API::WorkspaceProperty<API::Workspace>("SplitterWorkspace", "", Direction::Input),
+          "An input SpilltersWorskpace for filtering");
+
     declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
                     "The base name to use for the output workspace" );
 
-    declareProperty(new WorkspaceProperty<TableWorkspace>("InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
-        "Optional output for the information of each splitter workspace index.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("InformationWorkspace", "", Direction::Input,
+                                                          PropertyMode::Optional),
+                    "Optional output for the information of each splitter workspace index.");
 
-    declareProperty(
-        new API::WorkspaceProperty<API::Workspace>("SplitterWorkspace", "", Direction::Input),
-        "An input SpilltersWorskpace for filtering");
-
-    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "", Direction::Input, PropertyMode::Optional);
+    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "", Direction::Input,
+                                                             PropertyMode::Optional);
     declareProperty(tablewsprop, "Name of table workspace containing the log time correction factor for each detector. ");
 
-    this->declareProperty("FilterByPulseTime", false,
-        "Filter the event by its pulse time only for slow sample environment log.  This option can make execution of algorithm faster.  But it lowers precision.");
+    declareProperty("FilterByPulseTime", false,
+                    "Filter the event by its pulse time only for slow sample environment log.  This option can make execution of algorithm faster.  But it lowers precision.");
 
-    this->declareProperty("GroupWorkspaces", false,
-        "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
+    declareProperty("GroupWorkspaces", false,
+                    "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
 
     declareProperty("OutputWorkspaceIndexedFrom1", false, "If selected, the minimum output workspace is indexed from 1 and continuous. ");
 
-    declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
-
     declareProperty("GenerateTOFCorrection", false, "If this option is true and user does not specify DetectorTOFCorrectionWorkspacel, "
                     "then the correction will be generated automatically by the instrument geometry. ");
+
+    declareProperty("SplitSampleLogs", true, "If selected, all sample logs will be splitted by the  "
+                    "event splitters.  It is not recommended for fast event log splitters. ");
+
+    declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
+
 
     return;
   }
@@ -245,6 +251,8 @@ namespace Algorithms
       mWithInfo = false;
     else
       mWithInfo = true;
+
+    m_splitSampleLogs = getProperty("SplitSampleLogs");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -294,6 +302,9 @@ namespace Algorithms
   }
 
 
+  //----------------------------------------------------------------------------------------------
+  /**
+    */
   void FilterEvents::processMatrixSplitterWorkspace()
   {
     // Check input workspace validity
@@ -321,7 +332,6 @@ namespace Algorithms
 
     return;
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Create a list of EventWorkspace for output
@@ -608,8 +618,15 @@ namespace Algorithms
     // FIXME - Turn on parallel
 
 
-    // Finish (1) adding events and splitting the sample logs in each target workspace.
+    // Split the sample logs in each target workspace.
     progress(0.1+progressamount, "Splitting logs");
+
+    if (!m_splitSampleLogs)
+    {
+      // Skip if choice is no
+      g_log.notice("Sample logs are not split by user's choice.");
+      return;
+    }
 
     std::vector<std::string> lognames;
     this->getTimeSeriesLogNames(lognames);
@@ -714,6 +731,7 @@ namespace Algorithms
     // Finish (1) adding events and splitting the sample logs in each target workspace.
     progress(0.1+progressamount, "Splitting logs");
 
+#if 0
     std::vector<std::string> lognames;
     this->getTimeSeriesLogNames(lognames);
     g_log.debug() << "[FilterEvents D1214]:  Number of TimeSeries Logs = " << lognames.size()
@@ -752,8 +770,9 @@ namespace Algorithms
       progress(0.1+progressamount+outwsindex/numws*0.2, "Splitting logs");
       outwsindex += 1.;
     }
-
-    return;
+#else
+    g_log.notice("Splitters in format of Matrixworkspace are not recommended to split sample logs. ");
+#endif
 
     return;
   }
@@ -781,7 +800,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Split a log by splitters
    */
-  void FilterEvents::splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters)
+  void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname, TimeSplitterType& splitters)
   {
     Kernel::TimeSeriesProperty<double>* prop =
         dynamic_cast<Kernel::TimeSeriesProperty<double>* >(eventws->mutableRun().getProperty(logname));

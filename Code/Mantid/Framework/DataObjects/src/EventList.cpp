@@ -3930,9 +3930,16 @@ namespace DataObjects
 
       // Search in vector
       int index = static_cast<int>(lower_bound(vectimes.begin(), vectimes.end(), evabstimens) - vectimes.begin());
-      if (index == 0)
-        throw runtime_error("Impossible to have this situation/event is too early ");
-      int group = vecgroups[index-1];
+      int group;
+      if (index == 0 || index == static_cast<int>(vectimes.size()-1))
+      {
+        // Event is before first splitter.  Put to -1
+        group = -1;
+      }
+      else
+      {
+        group = vecgroups[index-1];
+      }
 
       // Copy event to the proper group
       EventList* myOutput = outputs[group];
