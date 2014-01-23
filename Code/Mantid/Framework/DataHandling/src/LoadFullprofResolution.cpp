@@ -292,9 +292,10 @@ namespace DataHandling
     {
        // Split line to get the NPROF number
       size_t nStart = lines[1].find("NPROF");
-      size_t nNumber = lines[1].find("=", nStart) + 1;
+      size_t nEq = lines[1].find("=", nStart);
       size_t nEnd = lines[1].find(" ",nStart); // Assume the NRPOF number is followed by space
-      if(nNumber == string::npos + 1 || nEnd == string::npos ) return (-1);
+      if(nEq == string::npos || nEnd == string::npos ) return (-1);
+      size_t nNumber = nEq + 1;
       return( boost::lexical_cast<int> (lines[1].substr(nNumber,nEnd-nNumber)) );
     }
 
