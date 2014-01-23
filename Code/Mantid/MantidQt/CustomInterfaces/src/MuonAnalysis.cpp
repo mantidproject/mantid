@@ -1899,7 +1899,7 @@ std::string MuonAnalysis::getRangedName()
   }
 
   if (firstFile.contains('.') )
-    firstFile.chop(firstFile.size()-firstFile.find('.') );
+    firstFile.chop(firstFile.size()-firstFile.indexOf('.') );
 
   return (firstFile.toStdString() + '-' + lastRun.toStdString());
 }
@@ -2562,7 +2562,7 @@ double MuonAnalysis::timeZero()
   {
     timeZero = boost::lexical_cast<double>(boxText.toStdString());
   }
-  catch(boost::bad_lexical_cast)
+  catch(boost::bad_lexical_cast&)
   {
     QMessageBox::warning(this, "MantidPlot - Muon Analysis", "Unable to interpret time zero as number, setting to 0.0");
     m_uiForm.timeZeroFront->setText("0.0");
@@ -2805,7 +2805,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   prevPlotBinning.beginGroup(group + "BinningOptions");
   int rebinFixed = prevPlotBinning.value("rebinFixed", 1).toInt();
   m_uiForm.optionStepSizeText->setText(QString::number(rebinFixed));
-  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toCString());
+  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toString());
 
   int rebinComboBoxIndex = prevPlotBinning.value("rebinComboBoxIndex", 0).toInt();
   m_uiForm.rebinComboBox->setCurrentIndex(rebinComboBoxIndex);
@@ -2953,7 +2953,7 @@ void MuonAnalysis::setAppendingRun(int inc)
   // File path should be the same for both.
   separateMuonFile(filePath, currentFiles[fileNumber], run, runSize);
 
-  int fileExtensionSize(currentFiles[fileNumber].size()-currentFiles[fileNumber].find('.') );
+  int fileExtensionSize(currentFiles[fileNumber].size()-currentFiles[fileNumber].indexOf('.') );
   QString fileExtension = currentFiles[fileNumber].right(fileExtensionSize);
   currentFiles[fileNumber].chop(fileExtensionSize);
 
@@ -3010,7 +3010,7 @@ void MuonAnalysis::changeRun(int amountToChange)
     
   separateMuonFile(filePath, currentFile, run, runSize);
 
-  int fileExtensionSize(currentFile.size()-currentFile.find('.') );
+  int fileExtensionSize(currentFile.size()-currentFile.indexOf('.') );
   QString fileExtension(currentFile.right(fileExtensionSize) );
   currentFile.chop(fileExtensionSize);
 
