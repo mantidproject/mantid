@@ -134,7 +134,7 @@ void LoadILLAscii::exec() {
 
 	Progress progress(this, 0, 1, spectraList.size());
 	for (iSpectra = spectraList.begin(), iSpectraHeader = spectraHeaderList.begin();
-			iSpectra < spectraList.end()-23 && iSpectraHeader < spectraHeaderList.end()-23;
+			iSpectra < spectraList.end() && iSpectraHeader < spectraHeaderList.end();
 			++iSpectra, ++iSpectraHeader) {
 
 		g_log.debug() << "Reading Spectrum: " << std::distance(spectraList.begin(), iSpectra) << std::endl;
@@ -145,6 +145,7 @@ void LoadILLAscii::exec() {
 
 		thisWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 		thisWorkspace->setYUnitLabel("Counts");
+		// only reads instrument
 		loadIDF(thisWorkspace);
 
 		double currentPositionAngle = illAsciiParser.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
@@ -161,6 +162,7 @@ void LoadILLAscii::exec() {
 		std::stringstream outWorkspaceNameStream;
 		outWorkspaceNameStream << "test" << std::distance(spectraList.begin(), iSpectra);
 		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(), thisWorkspace);
+		// End here
 
 		progress.report();
 	}
@@ -451,55 +453,55 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 		outWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 		outWorkspace->setYUnitLabel("Counts");
 
-		// Fully copy the instrument
-		auto sourceBaseInstrument = boost::shared_ptr<Geometry::Instrument>(refWorkspace->getInstrument()->baseInstrument()->clone());
-		outWorkspace->setInstrument( sourceBaseInstrument );
-		// OR copy base instrument => ParameterMap is empty!
-		// outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument());
-
-		// outInstrument: The instrument that will be modified
-		Geometry::Instrument_const_sptr outInstrument = outWorkspace->getInstrument();
-
-		std::size_t numberOfDetectorsPerScan = outInstrument->getNumberDetectors(true);
-		g_log.debug() << "***** NumberOfDetectorsPerScan: " << numberOfDetectorsPerScan << std::endl;
-
-		//DEBUG: print outParameterMap
-		boost::shared_ptr<Geometry::ParameterMap> outParameterMap = outInstrument->getParameterMap();
-		// g_log.debug() << outParameterMap->asString() << std::endl;
-		//DEBUG: print intrument tree
-		//outInstrument->printTree(g_log.debug());
-
-
-		auto it = workspaceList.begin();
-		for (++it; it < workspaceList.end(); ++it) { // jumps the first
-			std::size_t pos = std::distance(workspaceList.begin(),it);
-			API::MatrixWorkspace_sptr thisWorkspace = *it;
-
-			g_log.debug() << "Merging the workspace: " << pos << std::endl;
-
-			// current position
-			Geometry::Instrument_const_sptr thisInstrument = thisWorkspace->getInstrument();
-
-
-			long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
-
-			// FUN STARTS HERE!
-			//addCompAssemblyToReferenceInstrument( const_cast < Geometry::Instrument* >( thisInstrument.get()),"bank_uniq");
-			addCompAssemblyToReferenceInstrument(const_cast < Geometry::Instrument* >(outInstrument.get()),
-					const_cast < Geometry::Instrument* >(thisInstrument.get()),"bank_uniq");
-
-
-
-
-
-			// Debug:
-			/*
-			outInstrument->printTree(g_log.debug());
-			boost::shared_ptr<Geometry::ParameterMap> thisParameterMap = thisInstrument->getParameterMap();
-			g_log.debug() << outParameterMap->asString() << std::endl;
-			*/
-
-		}
+//		// Fully copy the instrument
+//		auto sourceBaseInstrument = boost::shared_ptr<Geometry::Instrument>(refWorkspace->getInstrument()->baseInstrument()->clone());
+//		outWorkspace->setInstrument( sourceBaseInstrument );
+//		// OR copy base instrument => ParameterMap is empty!
+//		// outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument());
+//
+//		// outInstrument: The instrument that will be modified
+//		Geometry::Instrument_const_sptr outInstrument = outWorkspace->getInstrument();
+//
+//		std::size_t numberOfDetectorsPerScan = outInstrument->getNumberDetectors(true);
+//		g_log.debug() << "***** NumberOfDetectorsPerScan: " << numberOfDetectorsPerScan << std::endl;
+//
+//		//DEBUG: print outParameterMap
+//		boost::shared_ptr<Geometry::ParameterMap> outParameterMap = outInstrument->getParameterMap();
+//		// g_log.debug() << outParameterMap->asString() << std::endl;
+//		//DEBUG: print intrument tree
+//		//outInstrument->printTree(g_log.debug());
+//
+//
+//		auto it = workspaceList.begin();
+//		for (++it; it < workspaceList.end(); ++it) { // jumps the first
+//			std::size_t pos = std::distance(workspaceList.begin(),it);
+//			API::MatrixWorkspace_sptr thisWorkspace = *it;
+//
+//			g_log.debug() << "Merging the workspace: " << pos << std::endl;
+//
+//			// current position
+//			Geometry::Instrument_const_sptr thisInstrument = thisWorkspace->getInstrument();
+//
+//
+//			long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
+//
+//			// FUN STARTS HERE!
+//			//addCompAssemblyToReferenceInstrument( const_cast < Geometry::Instrument* >( thisInstrument.get()),"bank_uniq");
+//			addCompAssemblyToReferenceInstrument(const_cast < Geometry::Instrument* >(outInstrument.get()),
+//					const_cast < Geometry::Instrument* >(thisInstrument.get()),"bank_uniq");
+//
+//
+//
+//
+//
+//			// Debug:
+//			/*
+//			outInstrument->printTree(g_log.debug());
+//			boost::shared_ptr<Geometry::ParameterMap> thisParameterMap = thisInstrument->getParameterMap();
+//			g_log.debug() << outParameterMap->asString() << std::endl;
+//			*/
+//
+//		}
 		return outWorkspace;
 	}
 	else{
