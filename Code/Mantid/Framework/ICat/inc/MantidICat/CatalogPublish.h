@@ -66,6 +66,8 @@ namespace Mantid
         void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace);
         /// Generate the history of a given workspace.
         const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
+        /// Obtain the error message returned by the IDS.
+        const std::string getIDSError(const std::string& jsonResponseData);
     };
   }
 }

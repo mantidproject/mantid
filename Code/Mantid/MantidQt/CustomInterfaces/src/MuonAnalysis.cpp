@@ -114,7 +114,7 @@ void MuonAnalysis::initLocalPython()
 
   // Hide the toolbars, if user wants to
   if(m_uiForm.hideToolbars->isChecked())
-    setToolbarsHidden(true);
+    emit setToolbarsHidden(true);
 }
 
 /// Set up the dialog layout
@@ -215,7 +215,7 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this,
     SLOT(runFrontGroupGroupPairComboBox(int)));
 
-  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(setToolbarsHidden(bool)));
+  connect(m_uiForm.hideToolbars, SIGNAL( toggled(bool) ), this, SIGNAL( setToolbarsHidden(bool) ));
 
   // connect "?" (Help) Button
   connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
@@ -254,6 +254,9 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );  
 
   m_currentTab = m_uiForm.tabWidget->currentWidget();
+
+  connect(this, SIGNAL( setToolbarsHidden(bool) ), this, SLOT( doSetToolbarsHidden(bool) ), 
+    Qt::QueuedConnection ); // We dont' neet this to happen instantly, prefer safer way
 }
 
 /**
@@ -3107,7 +3110,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
-    setToolbarsHidden(true);
+    emit setToolbarsHidden(true);
 
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
@@ -3140,7 +3143,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
   }
   else if(newTab == m_uiForm.ResultsTable)
   {
-    m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
+    m_resultTableTab->populateTables();
   }
 
   m_currentTab = newTab;
@@ -3342,45 +3345,37 @@ bool MuonAnalysis::isOverwriteEnabled()
 /**
  * Executed when interface gets hidden or closed
  */
-void MuonAnalysis::hideEvent(QHideEvent *e)
+void MuonAnalysis::hideEvent(QHideEvent *)
 {
-  // Show the toolbars
+  // Show toolbars if were chosen to be hidden by user
   if (m_uiForm.hideToolbars->isChecked())
-    setToolbarsHidden(false);
-
+    emit setToolbarsHidden(false);
+  
   // If closed while on DA tab, reassign fit property browser to default one
   if(m_currentTab == m_uiForm.DataAnalysis)
     emit setFitPropertyBrowser(NULL);
-
-  // Delete the peak picker tool because it is no longer needed.
-  disableAllTools();
-
-  e->accept();
 }
 
 
 /**
  * Executed when interface gets shown
  */
-void MuonAnalysis::showEvent(QShowEvent *e)
+void MuonAnalysis::showEvent(QShowEvent *)
 {
-  // Hide the toolbars
+  // Hide toolbars if requested by user
   if (m_uiForm.hideToolbars->isChecked() )
-    setToolbarsHidden(true);
-
-  e->accept();
+    emit setToolbarsHidden(true);
 }
 
 /**
  * Hide/show MantidPlot toolbars.
  * @param hidden If true, toolbars will be hidden, if false - shown
  */
-void MuonAnalysis::setToolbarsHidden(bool hidden)
+void MuonAnalysis::doSetToolbarsHidden(bool hidden)
 {
-  if (hidden == true)
-    runPythonCode("setToolbarsVisible(False)");
-  else
-    runPythonCode("setToolbarsVisible(True)");
+  QString isVisibleStr = hidden ? "False" : "True";
+
+  runPythonCode( QString("setToolbarsVisible(%1)").arg(isVisibleStr) );
 }
 
 
