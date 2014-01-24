@@ -75,6 +75,10 @@ public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
 
+signals:
+  /// Request to hide/show Mantid toolbars
+  void setToolbarsHidden(bool isHidden); 
+
 private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
@@ -128,7 +132,7 @@ private slots:
   void userSelectInstrument(const QString& prefix);
 
   /// Hide/show MantidPlot toolbars
-  void setToolbarsHidden(bool hidden);
+  void doSetToolbarsHidden(bool hidden);
 
   /// Run the plot button on the home tab.
   void runFrontPlotButton();
@@ -174,12 +178,6 @@ private slots:
 
   /// Whether Overwrite option is enabled on the Settings tab.
   bool isOverwriteEnabled();
-
-  /// Show a plot for a given workspace. Closes previous plot if exists.
-  void showPlot(const QString& wsName);
-
-  /// Closes the window with the plot of the given ws
-  void closePlotWindow(const QString& wsName);
 
   /// Checks if the plot for the workspace does exist.
   bool plotExists(const QString& wsName);
@@ -331,18 +329,12 @@ private:
   /// Creates and algorithm with all the properties set according to widget values on the interface
   Algorithm_sptr createLoadAlgorithm();
 
-  // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
-  //       (as we are doing with pairs)
-
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
-  void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
-
-  /// Set various style parameters for the plot of the given ws
-  void setPlotStyle(const QString& wsName, const QMap<QString, QString>& params);
+  void plotSpectrum(const QString& wsName, bool logScale = false);
 
   /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
   /// something is not specified
-  QMap<QString, QString> getPlotStyleParams(const QString& wsName, const int wsIndex);
+  QMap<QString, QString> getPlotStyleParams(const QString& wsName);
 
   /// get period labels
   QStringList getPeriodLabels() const;

@@ -52,7 +52,8 @@ class MuonAnalysisResultTableTab : public QWidget
  Q_OBJECT
 public:
   MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm);
-  void populateTables(const QStringList& wsList);
+
+  void populateTables();
 
   static const std::string RUN_NO_LOG; // Name of the run_number log
   static const std::string RUN_NO_TITLE; // Table title for the run_number
@@ -72,6 +73,9 @@ private:
   void applyUserSettings();
   void populateLogsAndValues(const QVector<QString>& fittedWsList);
   void populateFittings(const QVector<QString>& fittedWsList);
+
+  /// Returns a list of all the fitted workspace base names
+  QVector<QString> getFittedWorkspaces();
 
   bool haveSameParameters(const QVector<QString>& wsList);
   QVector<QString> getSelectedWs();

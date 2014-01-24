@@ -16,13 +16,20 @@
   <property name="windowTitle">
    <string>ISIS Reflectometry</string>
   </property>
-  <widget class="QWidget" name="layoutMainRow">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+  <widget class="QWidget" name="widgetMainRow">
+   <layout class="QVBoxLayout" name="layoutBase">
     <item>
      <layout class="QHBoxLayout" name="layoutTopRow">
-      <property name="spacing">
-       <number>12</number>
-      </property>
+      <item>
+       <widget class="QLabel" name="labelInstrument">
+        <property name="text">
+         <string>Instrument:</string>
+        </property>
+        <property name="buddy">
+         <cstring>comboInstrument</cstring>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QComboBox" name="comboInstrument">
         <property name="sizePolicy">
@@ -37,70 +44,49 @@
           <bold>true</bold>
          </font>
         </property>
-        <item>
-         <property name="text">
-          <string>Inter</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>SURF</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>CRISP</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>PolRef</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboCycle"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelRB">
-        <property name="text">
-         <string>RB:</string>
+       <spacer name="spacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="textRB">
-        <property name="maximumSize">
+        <property name="sizeHint" stdset="0">
          <size>
-          <width>55</width>
-          <height>16777215</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
-        <property name="cursorPosition">
-         <number>0</number>
-        </property>
-       </widget>
+       </spacer>
       </item>
       <item>
        <widget class="QLabel" name="labelRuns">
         <property name="text">
          <string>Transmission run(s):</string>
         </property>
+        <property name="buddy">
+         <cstring>textRuns</cstring>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="textRuns">
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>120</width>
           <height>16777215</height>
          </size>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="spacer_1">
+       <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -115,7 +101,10 @@
       <item>
        <widget class="QLabel" name="labelPolarCorrect">
         <property name="text">
-         <string>Polarisation corrections</string>
+         <string>Polarisation corrections:</string>
+        </property>
+        <property name="buddy">
+         <cstring>comboPolarCorrect</cstring>
         </property>
        </widget>
       </item>
@@ -142,15 +131,76 @@
           <string>2-PA</string>
          </property>
         </item>
-        <item>
-         <property name="text">
-          <string>3-Other</string>
-         </property>
-        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="layoutMidRow">
+      <property name="spacing">
+       <number>12</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="labelRB">
+        <property name="text">
+         <string>RB Search:</string>
+        </property>
+        <property name="buddy">
+         <cstring>textRB</cstring>
+        </property>
        </widget>
       </item>
       <item>
-       <spacer name="spacer_2">
+       <widget class="QLineEdit" name="textRB">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>70</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly</set>
+        </property>
+        <property name="cursorPosition">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelDepth">
+        <property name="text">
+         <string>Search Depth (Cycles):</string>
+        </property>
+        <property name="buddy">
+         <cstring>spinDepth</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinDepth">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>99</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonSearch">
+        <property name="text">
+         <string>Search</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -209,7 +259,7 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>150</width>
+          <width>200</width>
           <height>16777215</height>
          </size>
         </property>
@@ -489,6 +539,8 @@
      </layout>
     </item>
    </layout>
+   <zorder></zorder>
+   <zorder></zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -519,6 +571,7 @@
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
   </widget>
+  <widget class="QStatusBar" name="statusMain"/>
   <action name="actionSave_As">
    <property name="text">
     <string>Save As...</string>
@@ -576,6 +629,21 @@
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>comboInstrument</tabstop>
+  <tabstop>textRuns</tabstop>
+  <tabstop>comboPolarCorrect</tabstop>
+  <tabstop>textRB</tabstop>
+  <tabstop>spinDepth</tabstop>
+  <tabstop>buttonSearch</tabstop>
+  <tabstop>checkTickAll</tabstop>
+  <tabstop>buttonAuto</tabstop>
+  <tabstop>listMain</tabstop>
+  <tabstop>buttonTransfer</tabstop>
+  <tabstop>tableMain</tabstop>
+  <tabstop>buttonProcess</tabstop>
+  <tabstop>buttonClear</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

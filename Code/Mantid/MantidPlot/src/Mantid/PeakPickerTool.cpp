@@ -88,6 +88,10 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
           this,SLOT(removePlot(MantidQt::MantidWidgets::PropertyHandler*)));
   connect(m_fitPropertyBrowser,SIGNAL(removeFitCurves()),this,SLOT(removeFitCurves()));
 
+  // When fit browser destroyed, disable oneself in the parent graph 
+  connect(m_fitPropertyBrowser, SIGNAL( destroyed() ), graph, SLOT( disableTools() ), 
+    Qt::QueuedConnection);
+
   //Show the fitPropertyBrowser if it isn't already.
   if (showFitPropertyBrowser) m_fitPropertyBrowser->show();
   connect(this,SIGNAL(isOn(bool)),m_fitPropertyBrowser,SLOT(setPeakToolOn(bool)));

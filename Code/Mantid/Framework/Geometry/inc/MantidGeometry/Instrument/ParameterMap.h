@@ -274,6 +274,8 @@ namespace Geometry
     void saveNexus(::NeXus::File * file, const std::string & group) const;
 //    void loadNexus(::NeXus::File * file, const std::string & group, Instrument_const_sptr instr);
 
+    /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new newComp->id
+    void copyFromParameterMap(const IComponent* oldComp,const IComponent* newComp, const ParameterMap *oldPMap);
 
   private:
     ///Assignment operator

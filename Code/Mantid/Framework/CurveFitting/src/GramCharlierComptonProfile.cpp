@@ -9,6 +9,8 @@
 #include <gsl/gsl_sf_gamma.h> // for factorial
 #include <gsl/gsl_spline.h>
 
+#include <sstream>
+
 namespace Mantid
 {
   namespace CurveFitting

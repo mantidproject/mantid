@@ -2217,8 +2217,20 @@ void Table::setHeader(QStringList header)
 
 int Table::colIndex(const QString& name)
 {
-  int pos = name.lastIndexOf("_");
-  QString label = name.right(name.length()-pos-1);
+  QString label;
+
+  if ( name.startsWith(objectName()) )
+  {
+    // If fully-qualified column name specified - remove name of the table from it before searching.
+    // E.g. Table-1_A0 should become just A0. -1 for the unserscore after the table name.
+    label = name.right( name.length() - objectName().length() - 1);
+  }
+  else
+  {
+    // If doesn't begin with a table name, try to look for a full name specified.
+    label = name;
+  }
+
   return col_label.findIndex(label);
 }
 
