@@ -212,8 +212,14 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontPlotButton, SIGNAL(clicked()), this, SLOT(runFrontPlotButton()));
 
   // front group/ group pair combobox
-  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this,
-    SLOT(runFrontGroupGroupPairComboBox(int)));
+  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL( currentIndexChanged(int) ), this, SLOT( updateFront() ));
+
+  // Synchronize plot function selector on the Home tab with the one under the Group Table
+  connect(m_uiForm.frontPlotFuncs, SIGNAL( activated(int) ),m_uiForm.groupTablePlotChoice, SLOT( setCurrentIndex(int) ) );
+  connect(m_uiForm.groupTablePlotChoice, SIGNAL( activated(int) ), this, SLOT( syncGroupTablePlotTypeWithHome() ) );
+
+  connect(m_uiForm.homePeriodBox1, SIGNAL( currentIndexChanged(int) ), this, SLOT( checkForEqualPeriods() ));
+  connect(m_uiForm.homePeriodBox2, SIGNAL( currentIndexChanged(int) ), this, SLOT( checkForEqualPeriods() ));
 
   connect(m_uiForm.hideToolbars, SIGNAL( toggled(bool) ), this, SIGNAL( setToolbarsHidden(bool) ));
 
@@ -250,8 +256,8 @@ void MuonAnalysis::initLayout()
   // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
-  connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );  
+  connect(m_uiForm.deadTimeType, SIGNAL(activated(int)), this, SLOT(changeDeadTimeType(int) ) );
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
 
   m_currentTab = m_uiForm.tabWidget->currentWidget();
 
@@ -292,16 +298,6 @@ void MuonAnalysis::setCurrentDataName(const QString& name)
   m_uiForm.connectedDataSettings->setText("Connected: " + m_currentDataName);
 }
 
-
-/**
-* Front group/ group pair combobox (slot)
-*/
-void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
-{
-  if ( index >= 0 )
-    updateFront();
-}
-
 /**
 * Front plot button (slot)
 */
@@ -330,7 +326,7 @@ void MuonAnalysis::plotSelectedItem()
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
   if (index < 0)
-    throw std::runtime_error("Item not selected");
+    return; // Nothing to plot
 
   if (index >= numGroups())
   {
@@ -827,7 +823,6 @@ void MuonAnalysis::runLoadGroupButton()
 
   clearTablesAndCombo();
   fillGroupingTable(loadedGrouping, m_uiForm);
-  updateFront();
 
   m_updating = false;
 
@@ -1069,7 +1064,6 @@ void MuonAnalysis::pairTableClicked(int row)
   if ( pNum >= 0 )
   {
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(pNum+numGroups());
-    updateFront();
   }
 }
 
@@ -1105,7 +1099,6 @@ void MuonAnalysis::groupTableClicked(int row)
   if ( gNum >= 0 )
   {
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(gNum);
-    updateFront();
     m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
   }
 }
@@ -1899,7 +1892,7 @@ std::string MuonAnalysis::getRangedName()
   }
 
   if (firstFile.contains('.') )
-    firstFile.chop(firstFile.size()-firstFile.find('.') );
+    firstFile.chop(firstFile.size()-firstFile.indexOf('.') );
 
   return (firstFile.toStdString() + '-' + lastRun.toStdString());
 }
@@ -1950,7 +1943,7 @@ void MuonAnalysis::guessAlphaClicked()
   m_updating = false;
 
   // See if auto-update is on and if so update the plot
-  groupTabUpdatePair();
+  groupTabUpdatePlot();
 }
 
 /**
@@ -1983,12 +1976,11 @@ void MuonAnalysis::updateFront()
   // get current index
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
-  m_uiForm.frontPlotFuncs->blockSignals(true);
   m_uiForm.frontPlotFuncs->clear();
-  m_uiForm.frontPlotFuncs->blockSignals(false);
 
   int numG = numGroups();
-  if (numG)
+
+  if (index >= 0 && numG)
   {
     if (index >= numG && numG >= 2)
     {
@@ -2040,8 +2032,6 @@ void MuonAnalysis::updateFrontAndCombo()
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
   else
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(currentI);
-
-  updateFront();
 }
 
 /**
@@ -2562,7 +2552,7 @@ double MuonAnalysis::timeZero()
   {
     timeZero = boost::lexical_cast<double>(boxText.toStdString());
   }
-  catch(boost::bad_lexical_cast)
+  catch(boost::bad_lexical_cast&)
   {
     QMessageBox::warning(this, "MantidPlot - Muon Analysis", "Unable to interpret time zero as number, setting to 0.0");
     m_uiForm.timeZeroFront->setText("0.0");
@@ -2805,7 +2795,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   prevPlotBinning.beginGroup(group + "BinningOptions");
   int rebinFixed = prevPlotBinning.value("rebinFixed", 1).toInt();
   m_uiForm.optionStepSizeText->setText(QString::number(rebinFixed));
-  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toCString());
+  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toString());
 
   int rebinComboBoxIndex = prevPlotBinning.value("rebinComboBoxIndex", 0).toInt();
   m_uiForm.rebinComboBox->setCurrentIndex(rebinComboBoxIndex);
@@ -2953,7 +2943,7 @@ void MuonAnalysis::setAppendingRun(int inc)
   // File path should be the same for both.
   separateMuonFile(filePath, currentFiles[fileNumber], run, runSize);
 
-  int fileExtensionSize(currentFiles[fileNumber].size()-currentFiles[fileNumber].find('.') );
+  int fileExtensionSize(currentFiles[fileNumber].size()-currentFiles[fileNumber].indexOf('.') );
   QString fileExtension = currentFiles[fileNumber].right(fileExtensionSize);
   currentFiles[fileNumber].chop(fileExtensionSize);
 
@@ -3010,7 +3000,7 @@ void MuonAnalysis::changeRun(int amountToChange)
     
   separateMuonFile(filePath, currentFile, run, runSize);
 
-  int fileExtensionSize(currentFile.size()-currentFile.find('.') );
+  int fileExtensionSize(currentFile.size()-currentFile.indexOf('.') );
   QString fileExtension(currentFile.right(fileExtensionSize) );
   currentFile.chop(fileExtensionSize);
 
@@ -3155,19 +3145,21 @@ void MuonAnalysis::changeTab(int newTabNumber)
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
+  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+
+  connect(m_uiForm.frontPlotFuncs, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.frontAlphaNumber, SIGNAL( returnPressed() ), this, SLOT( homeTabUpdatePlot() ));
+
   connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(firstPeriodSelectionChanged()));
-  connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(secondPeriodSelectionChanged()));
-  connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(changeHomeFunction()));
-  connect(m_uiForm.frontAlphaNumber, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
+
+  connect(m_uiForm.homePeriodBox1, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.homePeriodBoxMath, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.homePeriodBox2, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
 
   // Grouping tab Auto Updates
-  // Group Table
-  connect(m_uiForm.groupTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdateGroup()));
-  // Pair Table (Guess Alpha button attached in another function)
-  connect(m_uiForm.pairTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdatePair()));
+  connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
+  connect(m_uiForm.pairTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
 
   // Settings tab Auto Updates
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
@@ -3250,35 +3242,16 @@ void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue
   settings.endGroup();
 }
 
-void MuonAnalysis::changeHomeFunction()
-{
-  if (m_currentTab == m_uiForm.Home)
-  {
-    m_uiForm.groupTablePlotChoice->setCurrentIndex(m_uiForm.frontPlotFuncs->currentIndex());
-    homeTabUpdatePlot();
-  }
-}
-
-void MuonAnalysis::firstPeriodSelectionChanged()
+/**
+ * Checks whether two specified periods are equal and, if they are, sets second one to None.
+ */
+void MuonAnalysis::checkForEqualPeriods()
 {
   if ( m_uiForm.homePeriodBox2->currentText() == m_uiForm.homePeriodBox1->currentText() )
   {
     m_uiForm.homePeriodBox2->setCurrentIndex(0);
   }
-  else
-    homeTabUpdatePlot();
 }
-
-void MuonAnalysis::secondPeriodSelectionChanged()
-{
-  if ( m_uiForm.homePeriodBox2->currentText() == m_uiForm.homePeriodBox1->currentText() )
-  {
-    m_uiForm.homePeriodBox2->setCurrentIndex(0);
-  }
-  else
-    homeTabUpdatePlot();
-}
-
 
 void MuonAnalysis::homeTabUpdatePlot()
 {
@@ -3286,32 +3259,33 @@ void MuonAnalysis::homeTabUpdatePlot()
       runFrontPlotButton();
 }
 
-void MuonAnalysis::groupTabUpdateGroup()
+void MuonAnalysis::groupTabUpdatePlot()
 {
-  if (m_currentTab == m_uiForm.GroupingOptions)
-  {
-    if (m_uiForm.frontPlotFuncs->count() <= 1)
-    {
-      m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
-      updateFront();
-    }
-    m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
-
-    if (isAutoUpdateEnabled() && m_loaded == true)
-      runGroupTablePlotButton();
-  }
-}
-
-void MuonAnalysis::groupTabUpdatePair()
-{
-  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions && m_loaded == true)
-    runPairTablePlotButton();
+  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions && m_loaded)
+      runFrontPlotButton();
 }
 
 void MuonAnalysis::settingsTabUpdatePlot()
 {
   if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.Settings && m_loaded == true)
     runFrontPlotButton();
+}
+
+/**
+ * Sets plot type combo box on the Home tab to the same value as the one under Group Table.
+ */
+void MuonAnalysis::syncGroupTablePlotTypeWithHome()
+{
+  int plotTypeIndex = m_uiForm.groupTablePlotChoice->currentIndex();
+
+  if ( m_uiForm.frontPlotFuncs->count() <= plotTypeIndex )
+  {
+    // This is not the best solution, but I don't have anything brighter at the moment and it
+    // was working like that for some time without anybody complaining.
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
+  }
+
+  m_uiForm.frontPlotFuncs->setCurrentIndex(plotTypeIndex);
 }
 
 /**
