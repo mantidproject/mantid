@@ -142,16 +142,14 @@ class DensityOfStates(PythonAlgorithm):
 			@param intensities - intensities read from file
 			@param weights - weights for each frequency block
 			"""
-			#flatten arrays
-			freqs = np.hstack(freqs)
-			intensities = np.hstack(intensities)
 
+			print freqs.size, intensities.size
 			if ( freqs.size > intensities.size ):
 				#if we have less intensities than frequencies fill the difference with ones.
 				diff = freqs.size-intensities.size
 				intensities = np.concatenate((intensities, np.ones(diff)))
 			
-			if ( freqs.size != weights.size ):
+			if ( freqs.size != weights.size or freqs.size != intensities.size ):
 				raise ValueError("Number of data points must match!")
 
 			#ignore values below fzerotol
@@ -169,6 +167,7 @@ class DensityOfStates(PythonAlgorithm):
 			
 			#create histogram x data
 			xmin, xmax = freqs[0], freqs[-1]+self.binWidth
+			print xmin, xmax, self.binWidth
 			bins = np.arange(xmin, xmax, self.binWidth)
 
 			#sum values in each bin
@@ -197,6 +196,11 @@ class DensityOfStates(PythonAlgorithm):
 			@param intensities - raman intensities read from file
 			@param weights - weights for each frequency block
 			'''
+			#we only want to use the first set
+			freqs = freqs[:self.num_branches]
+			intensities = intensities[:self.num_branches]
+			weights = weights[:self.num_branches]
+
 			#speed of light in vaccum in m/s
 			c = scipy.constants.c
 			#wavelength of the laser
@@ -205,15 +209,13 @@ class DensityOfStates(PythonAlgorithm):
 			planck = scipy.constants.h
 			# cm(-1) => K conversion 
 			cm1_to_K = scipy.constants.codata.value('inverse meter-kelvin relationship')*100
-
 			factor = (math.pow((2*math.pi / laser_wavelength), 4) * planck) / (8 * math.pi**2 * 45) * 1e12
-
-			crossSections = np.zeros(len(freqs[0]))
+			crossSections = np.zeros(len(freqs))
 
 			#use only the first set of frequencies and ignore small values
-			xSecMask = np.where( freqs[0] > self.fzerotol )
-			frequencyXSections = freqs[0][xSecMask]
-			intensityXSections = intensities[0][xSecMask]
+			xSecMask = np.where( freqs > self.fzerotol )
+			frequencyXSections = freqs[xSecMask]
+			intensityXSections = intensities[xSecMask]
 			
 			boseOcc = 1.0 / ( np.exp(cm1_to_K * frequencyXSections / self.temperature) -1)
 			crossSections[xSecMask] = factor / frequencyXSections * (1 + boseOcc) * intensityXSections
@@ -283,6 +285,13 @@ class DensityOfStates(PythonAlgorithm):
 				if 'END header' in line: 
 					return num_ions, num_branches
 
+		def parsePhononFreqBlock(self, f_handle):
+				for _ in xrange( self.num_branches):
+					line = f_handle.readline()
+					line_data = line.strip().split()[1:]
+					line_data = map(float, line_data)
+					yield line_data
+
 		def parsePhononFile(self, fname):
 			'''
 			Read frequencies from a <>.phonon file
@@ -297,47 +306,36 @@ class DensityOfStates(PythonAlgorithm):
 			headerRegex = re.compile(headerRegexStr)
 
 			eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
+			block_count = 0
 
 			freqs, ir_intensities, raman_intensities, weights = [], [], [], []
+			data_lists = (freqs, ir_intensities, raman_intensities)
 			with open(fname, 'r') as f_handle:
-				num_ions, num_branches = self.parsePhononFileHeader(f_handle)
-				block_count = 0
-				prog_reporter = Progress(self,start=0.0,end=1.0, nreports=1)
+				self.num_ions, self.num_branches = self.parsePhononFileHeader(f_handle)
 
 				while True:
 					line = f_handle.readline()
 					#check we've reached the end of file
 					if not line: break
 
+					#check if we've found a block of frequencies
 					header_match = headerRegex.match(line)
 					if header_match:
-						#found header block at start of frequencies
-						block_count+=1
+						block_count += 1
+
 						weight = self.parseBlockHeader(header_match, block_count)
 						weights.append(weight)
-						prog_reporter.setNumSteps(block_count+1)
 						
 						#parse block of frequencies
-						block_freqs, block_ir, block_raman = [], [], []
-						for _ in xrange(num_branches):
-							line = f_handle.readline()
-							line_data = line.strip().split()[1:]
 
-							blocks = (block_freqs, block_ir, block_raman)
-							for block, item in zip(blocks, line_data):
-								if item != 0:
-									block.append(float(item))
-
-						freqs.append(np.asarray(block_freqs))
-						ir_intensities.append(np.asarray(block_ir))
-						raman_intensities.append(np.asarray(block_raman))
-
-						prog_reporter.report("Reading intensities.")
+						for line_data in self.parsePhononFreqBlock(f_handle):
+							for data_list, item in zip(data_lists, line_data):
+								data_list.append(item)
 
 					#skip over eigenvectors
 					vector_match = eigenvectors_regex.match(line)
 					if vector_match:
-						for _ in xrange(num_ions*num_branches):
+						for _ in xrange(self.num_ions*self.num_branches):
 							line = f_handle.readline()
 							if not line:
 								raise IOError("Could not parse file. Invalid file format.")
@@ -345,7 +343,7 @@ class DensityOfStates(PythonAlgorithm):
 			freqs = np.asarray(freqs) 
 			ir_intensities = np.asarray(ir_intensities)
 			raman_intensities = np.asarray(raman_intensities)
-			warray = np.repeat(weights, len(freqs[0]))
+			warray = np.repeat(weights, self.num_branches)
 
 			return freqs, ir_intensities, raman_intensities, warray
 
@@ -373,6 +371,25 @@ class DensityOfStates(PythonAlgorithm):
 					num_branches = num_species*num_ions 
 					return num_ions, num_branches
 
+		def parseCastepFreqBlock(self, f_handle, line):
+			for _ in xrange(self.num_branches):
+				line_data = line.strip().split()[1:-1]
+				freq = line_data[1]
+				intensity_data = line_data[3:]
+
+				#remove non-active intensities from data
+				intensities = []
+				for value, active in zip(intensity_data[::2], intensity_data[1::2]):
+					if self.specType == 'IR_Active' or self.specType == 'Raman_Active':
+						if active == 'N' and value != 0: 
+							value = 0.0
+					intensities.append(value)
+
+				line_data = [freq] + intensities
+				line_data = map(float, line_data)
+				yield line_data
+				line = f_handle.readline()
+
 		def parseCastepFile(self, fname):
 			'''
 			Read frequencies from a <>.castep file
@@ -390,24 +407,23 @@ class DensityOfStates(PythonAlgorithm):
 			dataRegexStr = r" +\+ +\d+ +(%(s)s)(?: +\w)? *(%(s)s)? *([YN])? *(%(s)s)? *([YN])? *\+"% {'s': self.fnumber}
 			dataRegex = re.compile(dataRegexStr)
 
+			block_count = 0
 			freqs, ir_intensities, raman_intensities, weights = [], [], [], []
+			data_lists = (freqs, ir_intensities, raman_intensities)
 			with open(fname, 'r') as f_handle:
-				num_ions, num_branches = self.parseCastepFileHeader(f_handle)
-				block_count = 0
-				prog_reporter = Progress(self,start=0.0,end=1.0, nreports=1)
+				self.num_ions, self.num_branches = self.parseCastepFileHeader(f_handle)
 
 				while True:
 					line = f_handle.readline()
 					#check we've reached the end of file
 					if not line: break
 
+					#check if we've found a block of frequencies
 					header_match = headerRegex.match(line)
 					if header_match:
-						#found header block at start of frequencies
-						block_count+=1
+						block_count += 1
 						weight = self.parseBlockHeader(header_match, block_count)
 						weights.append(weight)
-						prog_reporter.setNumSteps(block_count+1)
 						
 						#move file pointer forward to start of intensity data
 						while True:
@@ -417,38 +433,14 @@ class DensityOfStates(PythonAlgorithm):
 							if dataRegex.match(line): break
 
 						#parse block of frequencies
-						block_freqs, block_ir, block_raman = [], [], []
-						for _ in xrange(num_branches):
-							line_data = line.strip().split()[1:-1]
-							freq = line_data[1]
-							intensity_data = line_data[3:]
-
-							#remove non-active intensities from data
-							intensities = []
-							for value, active in zip(intensity_data[::2], intensity_data[1::2]):
-								if self.specType == 'IR_Active' or self.specType == 'Raman_Active':
-									if active == 'N' and value != 0: 
-										value = 0.0
-								intensities.append(value)
-
-							#append data to block lists
-							blocks = (block_freqs, block_ir, block_raman)
-							for block, item in zip(blocks, [freq] + intensities):
-								if item != None:
-									block.append(float(item))
-
-							line = f_handle.readline()
-
-						freqs.append(np.array(block_freqs))
-						ir_intensities.append(np.array(block_ir))
-						raman_intensities.append(np.array(block_raman))
-
-						prog_reporter.report("Reading intensities.")
+						for line_data in self.parseCastepFreqBlock(f_handle, line):
+							for data_list, item in zip(data_lists, line_data):
+								data_list.append(item)
 
 			freqs = np.asarray(freqs) 
 			ir_intensities = np.asarray(ir_intensities)
 			raman_intensities = np.asarray(raman_intensities)
-			warray = np.repeat(weights, len(freqs[0]))
+			warray = np.repeat(weights, self.num_branches)
 
 			return freqs, ir_intensities, raman_intensities, warray
 
