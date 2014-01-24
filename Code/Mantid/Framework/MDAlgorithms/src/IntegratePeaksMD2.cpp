@@ -598,7 +598,8 @@ namespace MDAlgorithms
 				// Get background counts
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					double background = paramsValue[numcols-2] * x[j] * x[j] + paramsValue[numcols-3] * x[j] + paramsValue[numcols-4];
+					//paramsValue[numcols-2] is chisq
+					double background = paramsValue[numcols-3] * x[j] * x[j] + paramsValue[numcols-4] * x[j] + paramsValue[numcols-5];
 					if (j < peakMin || j > peakMax)
 						background_total = background_total + background;
 				}
