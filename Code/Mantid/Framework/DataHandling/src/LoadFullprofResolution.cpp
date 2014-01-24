@@ -218,14 +218,17 @@ namespace DataHandling
         g_log.error( mess.str() );
       }
       else // Numbers match, so put parameters into workspaces.
-      {   
+      { 
+        getTableRowNumbers( outTabWs, m_rowNumbers);
         for (size_t i=0; i < vec_bankids.size(); ++i)
         {
           int bankId = vec_bankids[i];
           size_t wsId = workspaceOfBank[bankId];
-          Workspace_sptr wsi = wsg->getItem(wsId-1);  
+          Workspace_sptr wsi = wsg->getItem(wsId-1); 
           auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
-          putParametersIntoWorkspace( i+1, outTabWs, workspace );  
+              // Get column from table workspace
+          API::Column_const_sptr OutTabColumn = outTabWs->getColumn( i+1 );
+          putParametersIntoWorkspace( OutTabColumn, workspace, nProf );  
         }
       } 
     }
@@ -824,18 +827,15 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /** Put the parameters into one workspace
-    * @param wsNumber :: [input] the membership number of the workspace in its group
-    * @param tws :: [input] the output table workspace 
+    * @param column :: [input] column of the output table workspace 
     * @param workspaceOfBank :: [input/output] the group workspace parameters are to be put in
+    * @param nprof :: the PROF Number, which is used to determine fitting function for the parameters.
     */
-  void LoadFullprofResolution::putParametersIntoWorkspace( size_t wsNumber, const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws)
+  void LoadFullprofResolution::putParametersIntoWorkspace( API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nprof)
   {  
 
     // Get instrument name from matrix workspace
     std::string instrumentName = ws->getInstrument()->getName();
-
-    // Get column from table workspace
-    API::Column_const_sptr column = tws->getColumn( wsNumber );
 
     // Convert table workspace column into DOM XML document
     //   Set up writer to Paremeter file
@@ -855,7 +855,6 @@ namespace DataHandling
     mDoc->appendChild(rootElem);
 
     //   Add instrument
-    getTableRowNumbers( tws, m_rowNumbers);
     AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name",instrumentName);
     rootElem->appendChild(instrumentElem);

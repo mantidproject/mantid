@@ -59,7 +59,7 @@ namespace DataHandling
     void loadFile(std::string filename, std::vector<std::string>& lines);
 
     /// Get the NPROF number
-    int getProfNumber(const std::vector<std::string>& lines);
+    int getProfNumber( const std::vector<std::string>& lines );
 
     /// Scan imported file for bank information
     void scanBanks(const std::vector<std::string>& lines, std::vector<int>& banks,
@@ -89,7 +89,7 @@ namespace DataHandling
     void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
 
     /// Put parameters into a metrix workspace
-    void putParametersIntoWorkspace( size_t wsNumber, const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws);
+    void putParametersIntoWorkspace( const API::Column_const_sptr, API::MatrixWorkspace_sptr ws, int profNumber);
 
      /// Add an ALFBE parameter 
     void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
