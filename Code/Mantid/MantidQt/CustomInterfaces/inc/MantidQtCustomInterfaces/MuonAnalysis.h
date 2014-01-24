@@ -83,11 +83,8 @@ private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
 
-  /// When second period selection combobox changed
-  void firstPeriodSelectionChanged();
-
-  /// When second period selection combobox changed
-  void secondPeriodSelectionChanged();
+  /// Checks whether two specified periods are equal and, if they are, sets second one to None
+  void checkForEqualPeriods();
 
   /// Input file changed in MWRunFiles widget
   void inputFileChanged_MWRunFiles();
@@ -140,9 +137,6 @@ private slots:
   /// Creates a plot of selected group/pair.
   void plotSelectedItem();
 
-  /// 
-  void runFrontGroupGroupPairComboBox(int index);
-
   /// Link to the wiki for the home tab
   void muonAnalysisHelpClicked();
 
@@ -158,17 +152,17 @@ private slots:
   /// When the tab has changed.
   void changeTab(int);
 
-  /// Update the plot based on changes on the front page.
+  /// Update the plot based on changes on the front tab
   void homeTabUpdatePlot();
 
-  /// Update the group plot based on changes on the group page.
-  void groupTabUpdateGroup();
-
-  /// Update the pair plot based on changes on the group page.
-  void groupTabUpdatePair();
-
-  /// Update the pair plot based on changes on the group page.
+  /// Update the plot based on changes on the settings tab
   void settingsTabUpdatePlot();
+
+  /// Update the plot based on changes on the grouping options tab
+  void groupTabUpdatePlot();
+
+  /// Sets plot type combo box on the Home tab to the same value as the one under Group Table
+  void syncGroupTablePlotTypeWithHome();
 
   /// Updates the style of the current plot according to actual parameters on settings tab.
   void updateCurrentPlotStyle();
@@ -194,9 +188,6 @@ private slots:
   /// Shows all the plot windows (MultiLayer ones)
   void showAllPlotWindows();
 
-  /// Called when the plot function has been changed on the home page.
-  void changeHomeFunction();
-
   /// Change what type of deadtime to use and the options available for the user's choice.
   void changeDeadTimeType(int);
 
@@ -214,6 +205,9 @@ private slots:
 
   /// Opens a sequential fit dialog
   void openSequentialFitDialog();
+
+  /// Update front
+  void updateFront();
 
 private:
  
@@ -275,9 +269,6 @@ private:
 
   /// Selects a workspace from the group according to what is selected on the interface for the period
   MatrixWorkspace_sptr getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group);
-
-  /// Update front 
-  void updateFront();
 
   /// Update front anc pair combo box
   void updateFrontAndCombo();
