@@ -607,20 +607,21 @@ def C2Se(sname):
 	return outWS
 
 def QLPlot(inputWS,Plot,res_plot,Loop):
-	if Loop:
-		ws_name = inputWS + '_Workspace'
-		num_spectra = mtd[ws_name].getNumberHistograms()
+	if Plot:
+		if Loop:
+			ws_name = inputWS + '_Workspace'
+			num_spectra = mtd[ws_name].getNumberHistograms()
 
-		if (Plot == 'Prob' or Plot == 'All'):
-			pWS = inputWS+'_Prob'
-			p_plot=mp.plotSpectrum(pWS,[1,2],False)
-		else:
-			spectra_indicies = [i for i in range(num_spectra) if Plot in mtd[ws_name].getAxis(1).label(i)]
-			plotSpectra(ws_name, Plot, indicies=spectra_indicies)
+			if (Plot == 'Prob' or Plot == 'All'):
+				pWS = inputWS+'_Prob'
+				p_plot=mp.plotSpectrum(pWS,[1,2],False)
+			else:
+				spectra_indicies = [i for i in range(num_spectra) if Plot in mtd[ws_name].getAxis(1).label(i)]
+				plotSpectra(ws_name, Plot, indicies=spectra_indicies)
 
-	if (Plot == 'Fit' or Plot == 'All'):
-		fWS = inputWS+'_Result_0'
-		f_plot=mp.plotSpectrum(fWS,res_plot,False)
+		if (Plot == 'Fit' or Plot == 'All'):
+			fWS = inputWS+'_Result_0'
+			f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
 def plotSpectra(ws, axis_title, indicies=[]):
 	if len(indicies) > 0:
