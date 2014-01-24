@@ -326,7 +326,7 @@ void MuonAnalysis::plotSelectedItem()
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
   if (index < 0)
-    throw std::runtime_error("Item not selected");
+    return; // Nothing to plot
 
   if (index >= numGroups())
   {
