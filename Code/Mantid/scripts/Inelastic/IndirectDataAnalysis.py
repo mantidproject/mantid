@@ -158,9 +158,12 @@ def confitParsToWS(table_name, Data, specMin=0, specMax=-1):
         amplitude, amplitude_error = columns[:2]
         height, height_error = columns[4:6]
 
-        EISF = height / (height+amplitude)
-        EISF_error = height_error / (height_error+amplitude_error)
+        total = height+amplitude
+        EISF = height / total
 
+        total_error = height_error**2 + amplitude_error**2
+        EISF_error = EISF * np.sqrt((height_error**2/height**2) + (total_error/total**2))
+        
         columns = np.vstack((columns, EISF, EISF_error))
         v_axis_names.append('f1.f1.f1.EISF')
         num_spectra+=1

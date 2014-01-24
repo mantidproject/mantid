@@ -481,22 +481,27 @@ def C2Fw(prog,sname):
 		#transpose y and e data into workspace rows
 		amplitude_data, width_data = np.asarray(amplitude_data).T, np.asarray(width_data).T
 		amplitude_error, width_error = np.asarray(amplitude_error).T, np.asarray(width_error).T
-
 		height_data, height_error = np.asarray(height_data), np.asarray(height_error)
+
+		#calculate EISF and EISF error
+		total = height_data+amplitude_data
+		EISF_data = height_data / total
+		total_error = height_error**2 + amplitude_error**2
+		EISF_error = EISF_data * np.sqrt((height_error**2/height_data**2) + (total_error/total**2))
 
 		#interlace amplitudes and widths of the peaks
 		y.append(np.asarray(height_data))
-		for amp, width in zip(amplitude_data, width_data):
+		for amp, width, EISF in zip(amplitude_data, width_data, EISF_data):
 			y.append(amp)
 			y.append(width)
-			y.append(height_data / (height_data+amp))
+			y.append(EISF)
 
 		#iterlace amplitude and width errors of the peaks
 		e.append(np.asarray(height_error))
-		for amp, width in zip(amplitude_error, width_error):
+		for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
 			e.append(amp)
 			e.append(width)
-			e.append(height_error / (height_error+amp))
+			e.append(EISF)
 
 		#create x data and axis names for each function
 		axis_names.append('f'+str(nl)+'.f0.'+'Height')
