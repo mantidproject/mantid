@@ -829,9 +829,9 @@ namespace DataHandling
   /** Put the parameters into one workspace
     * @param column :: [input] column of the output table workspace 
     * @param workspaceOfBank :: [input/output] the group workspace parameters are to be put in
-    * @param nprof :: the PROF Number, which is used to determine fitting function for the parameters.
+    * @param nProf :: the PROF Number, which is used to determine fitting function for the parameters.
     */
-  void LoadFullprofResolution::putParametersIntoWorkspace( API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nprof)
+  void LoadFullprofResolution::putParametersIntoWorkspace( API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nProf)
   {  
 
     // Get instrument name from matrix workspace
@@ -858,12 +858,21 @@ namespace DataHandling
     AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name",instrumentName);
     rootElem->appendChild(instrumentElem);
-    addALFBEParameter( column, mDoc, instrumentElem, "Alph0");
-    addALFBEParameter( column, mDoc, instrumentElem, "Beta0");
-    addALFBEParameter( column, mDoc, instrumentElem, "Alph1");
-    addALFBEParameter( column, mDoc, instrumentElem, "Beta1");
-    addSigmaParameters( column, mDoc, instrumentElem );
-    addGammaParameters( column, mDoc, instrumentElem );
+    if (nProf == 9)  // put parameters into BackToBackExponential function
+    {
+      addBBX_S_Parameters( column, mDoc, instrumentElem );
+      addBBX_A_Parameters( column, mDoc, instrumentElem );
+      addBBX_B_Parameters( column, mDoc, instrumentElem );
+    }
+    else // Assume IkedaCarpenter PV
+    {
+      addALFBEParameter( column, mDoc, instrumentElem, "Alph0");
+      addALFBEParameter( column, mDoc, instrumentElem, "Beta0");
+      addALFBEParameter( column, mDoc, instrumentElem, "Alph1");
+      addALFBEParameter( column, mDoc, instrumentElem, "Beta1");
+      addSigmaParameters( column, mDoc, instrumentElem );
+      addGammaParameters( column, mDoc, instrumentElem );
+    }
 
 
     // Convert DOM XML document into string
@@ -871,9 +880,10 @@ namespace DataHandling
     writer.writeNode(outFile, mDoc);  
     std::string parameterXMLString = outFile.str();
 
-    //std::ofstream outfileDebug("C:/Temp/test2_fullprof.xml");
-    //outfileDebug << parameterXMLString;
-    //outfileDebug.close();
+    // Useful code for testing upgrades commented out for production use
+    std::ofstream outfileDebug("C:/Temp/test3_fullprof.xml");
+    outfileDebug << parameterXMLString;
+    outfileDebug.close();
 
 
     // Load the string into the workspace
@@ -881,7 +891,7 @@ namespace DataHandling
 
   }
 
-  /* Add an ALFBE parameter to the XML document according to the table workspace
+  /* Add an Ikeda Carpenter PV ALFBE parameter to the XML document according to the table workspace
   *
   *  paramName is the name of the parameter as it appears in the table workspace
   */
@@ -902,7 +912,7 @@ namespace DataHandling
     parent->appendChild(parameterElem);
   }
 
-    /* Add a set of SIGMA paraters to the XML document according to the table workspace
+   /* Add a set of Ikeda Carpenter PV SIGMA parameters to the XML document according to the table workspace
    * for the bank at the given column of the table workspace
    */
   void LoadFullprofResolution::addSigmaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
@@ -912,7 +922,7 @@ namespace DataHandling
      parameterElem->setAttribute("type","fitting");
 
      AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-     std::string eqValue = getXMLEqValue(column, "Sig1")+"*centre^2+"+getXMLEqValue(column, "Sig0");
+     std::string eqValue = getXMLSquaredEqValue(column, "Sig1")+"*centre^2+"+getXMLSquaredEqValue(column, "Sig0");
      formulaElem->setAttribute("eq", eqValue);
      formulaElem->setAttribute("unit","dSpacing");
      formulaElem->setAttribute("result-unit","TOF^2");
@@ -921,7 +931,7 @@ namespace DataHandling
      parent->appendChild(parameterElem);
   }
 
-   /* Add a set of GAMMA paraters to the XML document according to the table workspace
+   /* Add a set of Ikeda Carpenter PV GAMMA parameters to the XML document according to the table workspace
    * for the bank at the given column of the table workspace
    */
   void LoadFullprofResolution::addGammaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
@@ -938,6 +948,69 @@ namespace DataHandling
      parameterElem->appendChild(formulaElem);
 
      parent->appendChild(parameterElem);
+  }
+
+  /* Add a set of BackToBackExponential S parameters to the XML document according to the table workspace
+  * for the bank at the given column of the table workspace
+  */
+  void LoadFullprofResolution::addBBX_S_Parameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", "BackToBackExponential:S");
+    parameterElem->setAttribute("type","fitting");
+
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+    std::string eqValue = "sqrt("+getXMLEqValue(column, "Sig2" )+"*centre^4 + "+getXMLEqValue(column, "Sig1" )+"*centre^2 + "+getXMLEqValue(column, "Sig0" )+")";
+    formulaElem->setAttribute("eq", eqValue);
+    formulaElem->setAttribute("unit","dSpacing");
+    formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
+
+    parent->appendChild(parameterElem);
+  }
+
+  /* Add a set of BackToBackExponential A parameters to the XML document according to the table workspace
+  * for the bank at the given column of the table workspace
+  */
+  void LoadFullprofResolution::addBBX_A_Parameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", "BackToBackExponential:A");
+    parameterElem->setAttribute("type","fitting");
+
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+    std::string eqValue = "("+getXMLEqValue(column, "Alph1" )+"/centre) + "+getXMLEqValue(column,"Alph0");
+    formulaElem->setAttribute("eq", eqValue);
+    formulaElem->setAttribute("unit","dSpacing");
+    formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
+
+    AutoPtr<Element> fixedElem = mDoc->createElement("fixed");
+    parameterElem->appendChild(fixedElem);
+
+    parent->appendChild(parameterElem);
+  }
+
+  /* Add a set of BackToBackExponential B parameters to the XML document according to the table workspace
+  * for the bank at the given column of the table workspace
+  */
+  void LoadFullprofResolution::addBBX_B_Parameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", "BackToBackExponential:B");
+    parameterElem->setAttribute("type","fitting");
+
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+    std::string eqValue = "("+getXMLEqValue(column, "Beta1" )+"/centre^4) + "+getXMLEqValue(column,"Beta0");
+    formulaElem->setAttribute("eq", eqValue);
+    formulaElem->setAttribute("unit","dSpacing");
+    formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
+
+    AutoPtr<Element> fixedElem = mDoc->createElement("fixed");
+    parameterElem->appendChild(fixedElem);
+
+    parent->appendChild(parameterElem);
   }
 
 
@@ -965,8 +1038,19 @@ namespace DataHandling
     size_t paramNumber = m_rowNumbers[name];
     //API::Column_const_sptr column = tablews->getColumn( columnIndex );
     double eqValue = column->cell<double>(paramNumber);
-    if(name.substr(0,3) == "Sig") eqValue = eqValue*eqValue; // Square the sigma values
     return boost::lexical_cast<std::string>(eqValue);
+  }
+
+  /*
+  * Get the value string to put in the XML eq attribute of the formula element of the SQUARED paramenter element
+  * given the name of the parameter in the table workspace.
+  */
+  std::string LoadFullprofResolution::getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name )
+  {
+    size_t paramNumber = m_rowNumbers[name];
+    //API::Column_const_sptr column = tablews->getColumn( columnIndex );
+    double eqValue = column->cell<double>(paramNumber);
+    return boost::lexical_cast<std::string>(eqValue*eqValue);
   }
 
   /* This function fills in a list of the row numbers starting 0 of the parameters

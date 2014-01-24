@@ -88,20 +88,32 @@ namespace DataHandling
     /// Create Bank to Workspace Correspondence
     void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
 
-    /// Put parameters into a metrix workspace
+    /// Put parameters into a matrix workspace
     void putParametersIntoWorkspace( const API::Column_const_sptr, API::MatrixWorkspace_sptr ws, int profNumber);
 
-     /// Add an ALFBE parameter 
+     /// Add an Ikeda-Carpenter PV ALFBE parameter 
     void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
 
-    /// Add set of Sigma parameters 
+    /// Add set of Ikeda-Carpenter PV Sigma parameters 
     void addSigmaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
 
-    /// Add set of Gamma parameters 
+    /// Add set of Ikeda-Carpenter PV Gamma parameters 
     void addGammaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of BackToBackExponential S parameters 
+    void addBBX_S_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of BackToBackExponential A parameters 
+    void addBBX_A_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of BackToBackExponential B parameters 
+    void addBBX_B_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
 
     /// Get value for XML eq attribute for parameter
     std::string getXMLEqValue( const API::Column_const_sptr, const std::string& name );
+
+    /// Get value for XML eq attribute for squared parameter
+    std::string getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name );
 
     // Translate a parameter name from as it appears in the table workspace to its name in the XML file
     std::string getXMLParameterName( const std::string& name );
