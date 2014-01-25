@@ -146,12 +146,19 @@ void LoadILLAscii::exec() {
 		thisWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 		thisWorkspace->setYUnitLabel("Counts");
 		// only reads instrument
-		loadIDF(thisWorkspace);
-
+		// loadIDF(thisWorkspace);
 		double currentPositionAngle = illAsciiParser.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
-		moveDetector(thisWorkspace, currentPositionAngle);
+		// moveDetector(thisWorkspace, currentPositionAngle);
 
-		//
+		API::Run & runDetails = thisWorkspace->mutableRun();
+//		runDetails.addProperty("rotangle", currentPositionAngle);
+
+		Mantid::Kernel::TimeSeriesProperty<double> *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+		std::string time("2007-11-30T16:17:00");
+		p->addValue(time, currentPositionAngle);
+		runDetails.addLogData(p);
+
+				//
 		loadsDataIntoTheWS(thisWorkspace, thisSpectrum);
 		loadIDF(thisWorkspace); // assigns data to the instrument
 

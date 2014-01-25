@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
-<instrument name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-11-26 14:18:50">
+<instrument name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" 
+last-modified="2013-11-28 14:18:50">
   <!-- Author: ricardo.leal@ill.fr -->
   <defaults>
     <length unit="meter" />
@@ -32,7 +33,28 @@
   <!-- Detector Banks -->
   <type name="detectors">
     <component type="bank_uniq">
-      <location />
+    <location>
+      <parameter name="r-position">
+        <value val="0"/>
+      </parameter>
+      <parameter name="t-position">
+        <logfile id="rotangle"  eq="0.0+value"/>
+        <!--  <value val="90"/> -->
+      </parameter>
+      <parameter name="p-position">
+        <value val="0"/>
+      </parameter>
+      <parameter name="rotx">
+        <value val="0"/>
+      </parameter>
+      <parameter name="roty">
+        <logfile id="rotangle"  eq="0.0+value"/>
+        <!--   <value val="90"/> -->
+      </parameter>
+      <parameter name="rotz">
+        <value val="0"/>
+      </parameter>
+    </location>
     </component>
   </type>
   <!-- Definition of the unique existent bank (made of tubes) -->
