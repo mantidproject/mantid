@@ -145,14 +145,10 @@ void LoadILLAscii::exec() {
 
 		thisWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 		thisWorkspace->setYUnitLabel("Counts");
-		// only reads instrument
-		// loadIDF(thisWorkspace);
+
+		// TODO make this a function. get real time from file
 		double currentPositionAngle = illAsciiParser.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
-		// moveDetector(thisWorkspace, currentPositionAngle);
-
 		API::Run & runDetails = thisWorkspace->mutableRun();
-//		runDetails.addProperty("rotangle", currentPositionAngle);
-
 		Mantid::Kernel::TimeSeriesProperty<double> *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
 		std::string time("2007-11-30T16:17:00");
 		p->addValue(time, currentPositionAngle);
@@ -247,64 +243,6 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
 	}
 
 	loadIDF(thisWorkspace); // assigns data to the instrument
-
-}
-
-/**
- *
- * @param angle :: the theta angle read from the data file
- */
-void LoadILLAscii::moveDetector(API::MatrixWorkspace_sptr &ws, double angle) {
-
-	// todo: put this as a constant somewhere?
-	const std::string componentName("bank_uniq");
-
-	try {
-		// current position
-		Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-
-		Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
-		Geometry::ICompAssembly_const_sptr componentAssembly =
-				boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
-
-		if (componentAssembly) {
-			// Get a vector of children (recursively)
-			std::vector<Geometry::IComponent_const_sptr> children;
-			componentAssembly->getChildren(children, false);
-
-			for (unsigned int i = 0; i < children.size(); ++i) {
-				std::string tubeName = children.at(i)->getName();
-
-				Geometry::IComponent_const_sptr tube = instrument->getComponentByName(tubeName);
-
-				// position - set all detector distance to constant l2
-				double r, theta, phi, refTheta, newTheta;
-				V3D oldPos = tube->getPos();
-				oldPos.getSpherical(r, theta, phi);
-
-				if (i == 0) {
-					// the theta for the first tube is the reference
-					refTheta = theta;
-				}
-
-				newTheta = theta - refTheta + angle;
-
-				V3D newPos;
-				newPos.spherical(r, newTheta, phi);
-
-				//g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " << newTheta << "\n";
-				Geometry::ParameterMap& pmap = ws->instrumentParameters();
-				Geometry::ComponentHelper::moveComponent(*tube, pmap, newPos, Geometry::ComponentHelper::Absolute);
-
-			}
-		}
-	} catch (Mantid::Kernel::Exception::NotFoundError&) {
-		throw std::runtime_error(
-				"Error when trying to move the detector : NotFoundError");
-	} catch (std::runtime_error &) {
-		throw std::runtime_error(
-				"Error when trying to move the detector : runtime_error");
-	}
 
 }
 

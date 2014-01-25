@@ -57,7 +57,6 @@ private:
 	void loadExperimentDetails(ILLParser &p);
 	void loadIDF(API::MatrixWorkspace_sptr &workspace);
 	void loadsDataIntoTheWS(API::MatrixWorkspace_sptr &, const std::vector<int> &);
-	void moveDetector(API::MatrixWorkspace_sptr &, double angle);
 	API::MatrixWorkspace_sptr mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> &);
 	void addCompAssemblyToReferenceInstrument(Geometry::CompAssembly *refInstrument,
 			Geometry::CompAssembly *instrumentFrom, const std::string &componentName);

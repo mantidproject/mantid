@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadILLAscii.h"
+#include "MantidDataHandling/LoadILLAsciiHelper.h"
 
 using Mantid::DataHandling::LoadILLAscii;
 using namespace Mantid::API;
@@ -37,7 +38,7 @@ public:
 		TS_ASSERT(alg.isInitialized())
 		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", m_testFile));
 		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "outputWSName"));
-		alg.execute();
+		TS_ASSERT_THROWS_NOTHING( alg.execute() );
 		TS_ASSERT(alg.isExecuted( ));
 
 //    // Retrieve the workspace from data service. TODO: Change to your desired type
@@ -50,6 +51,21 @@ public:
 //
 //    // Remove workspace from the data service.
 //    AnalysisDataService::Instance().remove(outWSName);
+	}
+
+	void test_LoadILLHelper() {
+
+		using Mantid::DataHandling::ILLParser;
+
+		// Parses ascii file and fills the data scructures
+		ILLParser illAsciiParser(m_testFile);
+		illAsciiParser.parse();
+
+
+		// get local references to the parsed file
+		// const std::vector<std::vector<int> > &spectraList = illAsciiParser.getSpectraList();
+		// const std::vector<std::map<std::string, std::string> > &spectraHeaderList = illAsciiParser.getSpectraHeaderList();
+
 	}
 
 private:
