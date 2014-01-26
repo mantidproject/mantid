@@ -23,51 +23,8 @@
 	MultiDetectorStart=[1]
 	I0MonitorIndex=1
  -->
-   <parameter name="MonitorIntegralMin">
-    <value val="4.0"/> 
-  </parameter>
-  
-  <parameter name="MonitorIntegralMax">
-    <value val="10.0"/> 
-  </parameter>
- 
-  <parameter name="MonitorBackgroundMin">
-    <value val="15.0"/> 
-  </parameter>
-  
-  <parameter name="MonitorBackgroundMax">
-    <value val="17.0"/> 
-  </parameter>
    
 <!-- here we need to add the other monitors -->
-  <parameter name="MonitorsToCorrect">
-    <value val="2"/>
-  </parameter>
-
-  <parameter name="PointDetectorStart">
-    <value val="3"/>
-  </parameter>
-
-  <parameter name="PointDetectorStop">
-    <value val="4"/>
-  </parameter>
-  
-  <parameter name="MultiDetectorStart">
-    <value val="6"/>
-  </parameter>
-  
-  <parameter name="I0MonitorIndex">
-    <value val="2"/>
-  </parameter>
-  
-  <parameter name="LambdaMin">
-    <value val="1.0"/>
-  </parameter>
-
-  <parameter name="LambdaMax">
-    <value val="17.0"/>
-  </parameter>
-
    <!-- parameters for efficiency correction -->
    <parameter name="correction" type="string">
     <value val="polynomial"/>
@@ -180,8 +137,6 @@
     
     <algebra val="base : top" />
   </type>  
-
-
 
   <component type="point-detector" idlist="point-detector">
   
