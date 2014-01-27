@@ -75,7 +75,6 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 
 // Static constants
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");
-
 //----------------------
 // Public member functions
 //----------------------
@@ -1422,12 +1421,14 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     // Whether the instrument in the file is different from the one used
     bool instrumentChanged = false;
 
-    std::string mainFieldDirection("");
-    double timeZero(0.0);
-    double firstGoodData(0.0);
+    std::string mainFieldDirection;
+    double timeZero;
+    double firstGoodData;
 
-    ScopedWorkspace loadedDeadTimes;
-    ScopedWorkspace loadedDetGrouping;
+    std::vector<Workspace_sptr> loadedWorkspaces;
+
+    Workspace_sptr loadedDeadTimes;
+    Workspace_sptr loadedDetGrouping;
 
     for (int i=0; i<files.size(); ++i)
     {
@@ -1460,59 +1461,58 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
           break;
         }
       }
+
       if ( !foundInst )
         throw std::runtime_error("Muon file " + filename.toStdString() + " not recognised.");
 
       // Setup Load Nexus Algorithm
-      Mantid::API::IAlgorithm_sptr loadMuonAlg = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
+      IAlgorithm_sptr loadMuonAlg = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
       loadMuonAlg->initialize();
-      loadMuonAlg->setLogging(false);
+      loadMuonAlg->setChild(true);
       loadMuonAlg->setPropertyValue("Filename", filename.toStdString() );
-      loadMuonAlg->setProperty("AutoGroup", false);
+
+      // Set up ws names. They are not actually used as the algorithm is set up as a child,
+      // but they are needed to pass validation.
+      loadMuonAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
 
       if ( i == 0 )
       {
-        // Get dead times/grouping from first file only
-        loadMuonAlg->setPropertyValue( "DeadTimeTable", loadedDeadTimes.name() );
-        loadMuonAlg->setPropertyValue( "DetectorGroupingTable", loadedDetGrouping.name() );
-
-        loadMuonAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
-      }
-      else
-      {
-        QString tempRangeNum;
-        tempRangeNum.setNum(i);
-        loadMuonAlg->setPropertyValue("OutputWorkspace", m_workspace_name + tempRangeNum.toStdString() );
+        // These are only needed for the first file
+        loadMuonAlg->setPropertyValue("DeadTimeTable", "__NotUsed");
+        loadMuonAlg->setPropertyValue("DetectorGroupingTable", "__NotUsed");
       }
 
-      if (loadMuonAlg->execute() )
+      loadMuonAlg->execute();
+
+      loadedWorkspaces.push_back( loadMuonAlg->getProperty("OutputWorkspace") );
+
+      if ( i == 0 )
       {
-        
+        // Load some additional information from the first file in the list
+
+        loadedDeadTimes = loadMuonAlg->getProperty("DeadTimeTable");
+        loadedDetGrouping = loadMuonAlg->getProperty("DetectorGroupingTable");
+
         timeZero = loadMuonAlg->getProperty("TimeZero");
         firstGoodData = loadMuonAlg->getProperty("FirstGoodData");
-
-
-        if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS")
-        {
-          // ARGUS doesn't support dead time correction, so leave deadTimes empty.
-
-          // Some of the ARGUS data files contain wrong information about the instrument main field
-          // direction. It is alway longitudinal.
-          mainFieldDirection = "longitudinal";
-        }
-        else
-        {
-          mainFieldDirection = loadMuonAlg->getPropertyValue("MainFieldDirection");
-        }
+        mainFieldDirection = loadMuonAlg->getPropertyValue("MainFieldDirection");
       }
-      else
-      {
-        throw std::runtime_error("Problem when executing LoadMuonNexus algorithm.");
-      }
+
     }
 
-    if (m_previousFilenames.size() > 1)
-      plusRangeWorkspaces();
+    Workspace_sptr loadedWorkspace;
+
+    if ( loadedWorkspaces.size() == 1 )
+      loadedWorkspace = loadedWorkspaces[0];
+    //else
+      // TODO: sum workspaces here
+
+    if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS")
+    {
+      // Some of the ARGUS data files contain wrong information about the instrument main field
+      // direction. It is alway longitudinal.
+      mainFieldDirection = "longitudinal";
+    }
 
     if (m_uiForm.deadTimeType->currentIndex() != 0)
     {
@@ -1522,28 +1522,31 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS") 
             throw std::runtime_error("Dead times are currently not implemented in ARGUS files.");
 
-        ScopedWorkspace deadTimes;
+        // Dead time table which will be used
+        Workspace_sptr deadTimes;
 
         if (m_uiForm.deadTimeType->currentIndex() == 1) // From Run Data
         {
           if( ! loadedDeadTimes )
             throw std::runtime_error("Data file doesn't appear to contain dead time values");
 
-          Workspace_sptr ws = loadedDeadTimes.retrieve();
-          loadedDeadTimes.remove();
-
-          deadTimes.set(ws);
+          deadTimes = loadedDeadTimes;
         }
         else if (m_uiForm.deadTimeType->currentIndex() == 2) // From Specified File
         {
-          Workspace_sptr ws = loadDeadTimes( deadTimeFilename() );
-          deadTimes.set(ws);
+          deadTimes = loadDeadTimes( deadTimeFilename() );
         }
 
-        IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
-        applyCorrAlg->setPropertyValue("InputWorkspace", m_workspace_name); 
-        applyCorrAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
-        applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimes.name());
+        // Add workspaces to ADS so that they can be processed correctly in case they are groups
+        ScopedWorkspace loadedWsEntry(loadedWorkspace);
+        ScopedWorkspace deadTimesEntry(deadTimes);
+
+        IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
+        applyCorrAlg->initialize();
+        applyCorrAlg->setChild(true);
+        applyCorrAlg->setPropertyValue("InputWorkspace", loadedWsEntry.name());
+        applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimesEntry.name());
+        applyCorrAlg->setPropertyValue("OutputWorkspace", loadedWsEntry.name());
         applyCorrAlg->execute();
       }
       catch(std::exception& e)
@@ -1562,9 +1565,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     MatrixWorkspace_sptr matrix_workspace;
     int numPeriods;
 
-    Workspace_sptr loadedWS = AnalysisDataService::Instance().retrieve(m_workspace_name);
-
-    if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS) )
+    if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWorkspace) )
     {
       numPeriods = static_cast<int>( group->size() );
       matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
@@ -1572,14 +1573,16 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     else 
     {
       numPeriods = 1;
-      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS);
+      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWorkspace);
     }
+
+    Workspace_sptr grouping;
 
     if ( isGroupingSet() )
     {
       // If grouping set already - it means it wasn't reset and we can use it
       g_log.information("Using custom grouping");
-      groupLoadedWorkspace();
+      grouping = parseGrouping();
     }
     else
     {
@@ -1588,37 +1591,38 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       if ( isGroupingSet() )
       {
         g_log.information("Using grouping loaded from IDF");
-        groupLoadedWorkspace();
+        grouping = parseGrouping();
       }
       else if ( loadedDetGrouping )
       {
         g_log.information("Using grouping loaded from Nexus file");
 
-        Workspace_sptr groupingWS = loadedDetGrouping.retrieve();
-        loadedDetGrouping.remove(); // Don't need it in the ADS any more
-
         ITableWorkspace_sptr groupingTable;
 
-        if ( auto table = boost::dynamic_pointer_cast<ITableWorkspace>(groupingWS) )
-        {
-          groupingTable = table;
-        }
-        else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(groupingWS) )
+        if ( !( groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(loadedDetGrouping) ) )
         {
           g_log.information("Multi-period grouping loaded from the Nexus file. Using the first one.");
+          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedDetGrouping);
           groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>( group->getItem(0) );
         }
 
         setGrouping(groupingTable);
-        groupLoadedWorkspace(groupingTable);
+        grouping = groupingTable;
       }
       else 
       {
         g_log.information("Using dummy grouping");
         setDummyGrouping( matrix_workspace->getInstrument() );
-        groupLoadedWorkspace();
+        grouping = parseGrouping();
       }
     }
+
+    Workspace_sptr groupedWorkspace = groupWorkspace(loadedWorkspace, grouping);
+
+    // At this point we are sure that all the possible problems with the loaded workspace has been
+    // checked, so we can safely overwrite previous data.
+    AnalysisDataService::Instance().addOrReplace(m_workspace_name, loadedWorkspace);
+    AnalysisDataService::Instance().addOrReplace(m_grouped_name, groupedWorkspace);
 
     // Make the options available
     m_optionTab->nowDataAvailable();
@@ -1794,6 +1798,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
 /**
 * Uses the algorithm plus to add all the workspaces from a range.
+* TODO: change to sumWorkspaces(list of workspaces) -> workspace
 */
 void MuonAnalysis::plusRangeWorkspaces()
 {
@@ -1816,6 +1821,7 @@ void MuonAnalysis::plusRangeWorkspaces()
 
 /**
 * Delete ranged workspaces.
+* TODO: remove, not needed anymore
 */
 void MuonAnalysis::deleteRangedWorkspaces()
 {
@@ -3455,39 +3461,53 @@ void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
 }
 
 /**
- * Groups loaded workspace (m_workspace_name). Grouped workspace is stored under m_grouped_name.
- * @param detGroupingTable :: Grouping information to use. If null - info from table widget is used
+ * Groups detectors in the workspace
+ * @param ws :: Workspace to group
+ * @param grouping :: Grouping table to use
+ * @return Grouped workspace
  */
-void MuonAnalysis::groupLoadedWorkspace(ITableWorkspace_sptr detGroupingTable)
+Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping)
 {
-  if ( ! detGroupingTable )
-  {
-    auto groupingFromUI = parseGrouping();
+  ScopedWorkspace wsEntry(ws);
+  ScopedWorkspace groupingEntry(grouping);
 
-    if ( ! groupingFromUI )
-      throw std::invalid_argument("Unable to parse grouping information from the table, or it is empty.");
-
-    detGroupingTable = groupingFromUI;
-  }
-
-  // Make sure grouping table is in the ADS
-  ScopedWorkspace table(detGroupingTable);
+  ScopedWorkspace outputEntry;
 
   try
   {
-    IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors"); 
+    IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
     groupAlg->initialize();
-    groupAlg->setLogging(false); // Don't want to clutter the log
     groupAlg->setRethrows(true);
-    groupAlg->setPropertyValue("InputWorkspace", m_workspace_name);
-    groupAlg->setPropertyValue("OutputWorkspace", m_grouped_name);
-    groupAlg->setPropertyValue("DetectorGroupingTable", table.name());
+    groupAlg->setLogging(false);
+    groupAlg->setPropertyValue("InputWorkspace", wsEntry.name());
+    groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
+    groupAlg->setPropertyValue("DetectorGroupingTable", groupingEntry.name());
     groupAlg->execute();
   }
   catch(std::exception& e)
   {
     throw std::runtime_error( "Unable to group loaded workspace:\n\n" + std::string(e.what()) );
   }
+
+  return outputEntry.retrieve();
+}
+
+/**
+ * Groups loaded workspace using information from Grouping Options tab.
+ * I.e. m_workspace_name is grouped with result placed to m_grouped_name
+ */
+void MuonAnalysis::groupLoadedWorkspace()
+{
+  ITableWorkspace_sptr grouping = parseGrouping();
+
+  if ( ! grouping )
+    throw std::invalid_argument("Unable to parse grouping information from the table, or it is empty.");
+
+  Workspace_sptr loadedWorkspace = AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
+
+  Workspace_sptr groupedWorkspace = groupWorkspace(loadedWorkspace, grouping);
+
+  AnalysisDataService::Instance().addOrReplace(m_grouped_name, groupedWorkspace);
 }
 
 /**

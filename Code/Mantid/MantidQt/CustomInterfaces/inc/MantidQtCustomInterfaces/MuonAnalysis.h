@@ -452,8 +452,11 @@ private:
   /// Saves the value of the widget which called the slot
   void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
 
-  // Groups loaded workspace (m_workspace_name)
-  void groupLoadedWorkspace(ITableWorkspace_sptr detGroupingTable = ITableWorkspace_sptr());
+  /// Groups the workspace
+  Workspace_sptr groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping);
+
+  /// Groups loaded workspace using information from Grouping Options tab
+  void groupLoadedWorkspace();
 
   /// Parses grouping information from the UI table.
   ITableWorkspace_sptr parseGrouping();  
