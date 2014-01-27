@@ -15,10 +15,19 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/System.h"
 
+////#include "MantidMDEvents/ImportMDEventWorkspace.h"
+//#include "MantidKernel/System.h"
+//#include "MantidAPI/FileProperty.h"
+//#include "MantidMDEvents/MDEventFactory.h"
+//#include "MantidMDEvents/MDEventInserter.h"
+//#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <iterator>     // std::distance
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -386,8 +395,69 @@ void LoadILLAscii::addCompAssemblyToReferenceInstrument(Geometry::CompAssembly *
 MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 		std::vector<API::MatrixWorkspace_sptr> &workspaceList) {
 
+	//	// Create a target output workspace.
+//    IMDEventWorkspace_sptr outWs = MDEvents::MDEventFactory::CreateMDWorkspace(2, "MDEvent");
+//
+//    outWs->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension("x", "X", "m", 0, 5, 2)));
+//    outWs->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension("y", "Y", "m", 0, 5, 2)));
+//    outWs->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension("z", "Z", "m", 0, 5, 2)));
+
+
+	std::ofstream myfile;
+	myfile.open ("/tmp/d2b_ascii.txt");
+	myfile << "DIMENSIONS" <<std::endl;
+	myfile << "x X m 100" <<std::endl;
+	myfile << "y Y m 100" <<std::endl;
+	myfile << "y Z m 100" <<std::endl;
+	myfile << "# Signal, Error, DetectorId, RunId, coord1, coord2, ... to end of coords" <<std::endl;
+	myfile << "MDEVENTS" <<std::endl;
+
 	if (workspaceList.size() > 0) {
-		// 1st workspace will be the reference
+
+		for (auto it = workspaceList.begin(); it < workspaceList.end(); ++it) { // jumps the first
+			std::size_t pos = std::distance(workspaceList.begin(),it);
+			API::MatrixWorkspace_sptr thisWorkspace = *it;
+
+			g_log.debug() << "Writing workspace to a file." << pos << std::endl;
+
+			std::size_t nHist = thisWorkspace->getNumberHistograms();
+			for (std::size_t i=0; i < nHist; ++i){
+				Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
+				const MantidVec& signal = thisWorkspace->readY(i);
+				const MantidVec& error = thisWorkspace->readE(i);
+				myfile << signal[0] << " ";
+				myfile << error[0] << " ";
+				myfile << det->getID() << " ";
+				myfile << pos << " ";
+				Kernel::V3D detPos = det->getPos();
+				myfile << detPos.X() << " ";
+				myfile << detPos.Y() << " ";
+				myfile << detPos.Z() << " ";
+				myfile << std::endl;
+			}
+
+			// current position
+
+
+			//long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
+		}
+
+
+
+
+		myfile.close();
+
+
+
+
+
+
+
+
+
+
+
+//		// 1st workspace will be the reference
 		API::MatrixWorkspace_sptr &refWorkspace = workspaceList[0];
 
 		size_t numberOfHistograms = refWorkspace->getNumberHistograms() * workspaceList.size();
