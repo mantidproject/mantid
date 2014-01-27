@@ -3,7 +3,14 @@
 Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instrument of a group of matrix workspaces with one workspace per bank of the .irf file.
 Either or both of the Tableworkspace(s) and matrix workspace must be set.
 
+Where a Workspace is specified the support for translating Fullprof resolution parameters into the workspace for subsequent
+fitting is limitted to Fullprof:
+
+* NPROF=13, Ikeda-Carpender pseudo-Voigt translated into [[IkedaCarpenterPV]] according to [[CreateIkedaCarpenterParameters]] 
+* NPROF=9, back-to-back-exponential pseudo-Voigt translated into [[BackToBackExponential]] according to [[CreateBackToBackParameters]]
+
 *WIKI*/
+
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -86,7 +93,9 @@ namespace DataHandling
     declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
     // Bank to import
-    declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load. "
+    declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load, "
+                    "where ID=1 refers to the first bank (block of number in the .irf file), "
+                    "ID=2 refers to the second bank (block of number in the .irf file) and so on. "
                     "Default is all banks contained in input .irf file.");
 
     // Workspace to put parameters into. It must be a workspace group with one workpace per bank from the IRF file
@@ -94,8 +103,12 @@ namespace DataHandling
         "A workspace group with the instrument to which we add the parameters from the Fullprof .irf file with one workspace for each bank of the .irf file");
 
    // Workspaces for each bank
-    declareProperty(new ArrayProperty<int>("WorkspacesForBanks"), "For each bank, the ID of the corresponding workspace in same order as banks are specified. "
-                    "Default is all workspaces in numerical order.");
+    declareProperty(new ArrayProperty<int>("WorkspacesForBanks"), "For each Fullprof bank,"
+                    " the ID of the corresponding workspace in same order as the Fullprof banks are specified. "
+                    "ID=1 refers to the first workspace in the workspace group, "
+                    "ID=2 refers to the second workspace and so on. "
+                    "Default is all workspaces in numerical order."
+                    "If default banks are specified, they too are taken to be in numerical order" );
 
     return;
   }
