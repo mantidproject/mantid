@@ -219,6 +219,20 @@ void MuonAnalysisOptionTab::runTimeComboBox(int index)
       m_uiForm.timeAxisStartAtInput->setText(m_customTimeValue);
   }
 
+  if(index == 0)
+  {
+    // Synchronize First Good Data box on Home tab with the one on this tab, if Start at First Good
+    // Data is enabled.
+    connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
+      m_uiForm.timeAxisStartAtInput, SLOT(setText(const QString&)));
+  }
+  else
+  {
+    // Disable synchronization otherwise
+    disconnect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
+      m_uiForm.timeAxisStartAtInput, SLOT(setText(const QString&)));
+  }
+
   // save this new choice
   QSettings group;
   group.beginGroup(m_settingsGroup + "plotStyleOptions");

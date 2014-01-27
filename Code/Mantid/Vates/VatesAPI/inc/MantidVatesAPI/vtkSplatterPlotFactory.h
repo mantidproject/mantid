@@ -73,6 +73,9 @@ public:
   /// Set percentage of boxes from which points will be plotted
   virtual void SetPercentToUse(double percentToUse);
 
+  /// Set the time value.
+  void setTime(double timeStep);
+
 private:
 
   template<typename MDE, size_t nd>
@@ -117,7 +120,8 @@ private:
   /// Variable to hold sorted list, so sort doesn't have to be repeated
   mutable std::vector< Mantid::API::IMDNode * > m_sortedBoxes;
 
-
+  /// Time value.
+  double m_time;
 };
 
 }

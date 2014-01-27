@@ -45,6 +45,8 @@ public:
   virtual void fit(const std::vector<double>& X,const std::vector<double>& Y) = 0;
 };
 
+typedef boost::shared_ptr<IBackgroundFunction> IBackgroundFunction_sptr;
+
 } // namespace API
 } // namespace Mantid
 

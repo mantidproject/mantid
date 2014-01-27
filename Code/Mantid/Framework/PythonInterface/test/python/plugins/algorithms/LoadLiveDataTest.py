@@ -12,6 +12,8 @@ class LoadLiveDataTest(unittest.TestCase):
     
     def setUp(self):
         FrameworkManager.clearData()
+        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"IDFs_for_UNIT_TESTING/UnitTestFacilities.xml"))
+        ConfigService.setFacility("TEST")
         pass
     
     

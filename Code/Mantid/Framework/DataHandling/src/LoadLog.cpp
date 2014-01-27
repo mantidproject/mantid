@@ -105,6 +105,7 @@ namespace Mantid
         "This must be one fewer than the number of columns in the file. "
         "Optional: leave blank for no units in any log.");
 
+      declareProperty("NumberOfColumns", Mantid::EMPTY_INT(), "Number of columns in the file. If not set Mantid will attempt to guess.");
     }
 
     /**
@@ -147,24 +148,24 @@ namespace Mantid
         throw std::invalid_argument("More than one log name provided. Invalid ISIS log file.");
       }
 
-      try
+      int colNum =  static_cast<int>(getProperty("NumberOfColumns"));
+
+      if(colNum == Mantid::EMPTY_INT())
       {
-        loadThreeColumnLogFile(logFileStream, m_filename, localWorkspace->mutableRun());
-        return;
-      }
-      catch(std::exception&)
-      {
+        colNum = countNumberColumns(logFileStream, m_filename);
       }
 
-      try
+      switch(colNum)
       {
-        // Since we passed the stream to "loadThreeColumnLogFile" above, we need to reset position to start.
-        logFileStream.seekg(0);
-        loadTwoColumnLogFile(logFileStream, extractLogName(names), localWorkspace->mutableRun());
-      }
-      catch(std::exception&)
-      {
-        throw std::invalid_argument("The log file provided is invalid as it has more than three columns.");
+        case 2:
+          loadTwoColumnLogFile(logFileStream, extractLogName(names), localWorkspace->mutableRun());
+          break;
+        case 3:
+          loadThreeColumnLogFile(logFileStream, m_filename, localWorkspace->mutableRun());
+          break;
+        default:
+          throw std::invalid_argument("The log file provided is invalid as it has less than 2 or more than three columns.");
+          break;
       }
     }
 
@@ -273,7 +274,7 @@ namespace Mantid
 
         if ( LoadLog::string != l_kind && LoadLog::number != l_kind)
         {
-          throw std::invalid_argument("ISIS log file contains unrecognised third column entries: " + logFileName);
+          continue; //no value defined, just skip this entry
         }
 
         // column two in .log file is called block column
@@ -535,6 +536,58 @@ namespace Mantid
       }
       // Nothing failed = it is that format.
       return true;
+    }
+
+    /**
+     * Count the number of columns in the first line of the text file
+     * @param logFileStream :: stream to the file
+     */
+    int LoadLog::countNumberColumns(std::ifstream& logFileStream, const std::string& logFileName)
+    {
+      if (!logFileStream)
+      {
+        throw std::invalid_argument("Unable to open file " + m_filename);
+      }
+
+      std::string str;
+      kind l_kind(LoadLog::empty);
+
+      //extract first line of file
+      Mantid::Kernel::extractToEOL(logFileStream,str);
+
+      if ( !isDateTimeString(str) )
+      {
+        throw std::invalid_argument("File" + logFileName + " is not a standard ISIS log file. Expected to be a file starting with DateTime String format.");
+      }
+
+      std::stringstream line(str);
+      std::string timecolumn;
+      line >> timecolumn;
+
+      std::string blockcolumn;
+      line >> blockcolumn;
+      l_kind = classify(blockcolumn);
+
+      if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
+      {
+        throw std::invalid_argument("ISIS log file contains unrecognised second column entries:" + logFileName);
+      }
+
+      std::string valuecolumn;
+      line >> valuecolumn;
+      l_kind = classify(valuecolumn);
+
+      //reset file back to the beginning
+      logFileStream.seekg(0);
+
+      if ( LoadLog::string != l_kind && LoadLog::number != l_kind)
+      {
+        return 2; //looks like a two column file
+      }
+      else
+      {
+        return 3; //looks like a three column file
+      }
     }
 
   } // namespace DataHandling

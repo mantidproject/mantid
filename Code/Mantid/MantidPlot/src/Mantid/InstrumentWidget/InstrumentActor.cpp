@@ -2,6 +2,9 @@
 #include "CompAssemblyActor.h"
 #include "ObjComponentActor.h"
 #include "SampleActor.h"
+#include "ComponentActor.h"
+#include "ObjCompAssemblyActor.h"
+#include "RectangularDetectorActor.h"
 #include "GLActorVisitor.h"
 
 #include "MantidKernel/Exception.h"
@@ -129,7 +132,7 @@ m_sampleActor(NULL)
   m_scene.addActor(new CompAssemblyActor(*this,instrument->getComponentID()));
 
   FindComponentVisitor findVisitor(instrument->getSample()->getComponentID());
-  accept(findVisitor);
+  accept(findVisitor,GLActor::Finish);
   const ObjComponentActor* samplePosActor = dynamic_cast<const ObjComponentActor*>(findVisitor.getActor());
 
   m_sampleActor = new SampleActor(*this,shared_workspace->sample(),samplePosActor);
@@ -155,9 +158,10 @@ InstrumentActor::~InstrumentActor()
  * @param visitor
  * @return
  */
-bool InstrumentActor::accept(GLActorVisitor& visitor)
+bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
 {
-  bool ok = m_scene.accept(visitor);
+  bool ok = m_scene.accept(visitor, rule);
+  visitor.visit(this);
   SetVisibilityVisitor* vv = dynamic_cast<SetVisibilityVisitor*>(&visitor);
   if (vv && m_sampleActor)
   {
@@ -165,6 +169,25 @@ bool InstrumentActor::accept(GLActorVisitor& visitor)
   }
   invalidateDisplayLists();
   return ok;
+}
+
+bool InstrumentActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule rule) const
+{
+    bool ok = m_scene.accept(visitor, rule);
+    visitor.visit(this);
+    return ok;
+}
+
+void InstrumentActor::setChildVisibility(bool on)
+{
+    m_scene.setChildVisibility(on);
+    auto guidesVisitor = SetVisibleNonDetectorVisitor(m_showGuides);
+    m_scene.accept( guidesVisitor );
+}
+
+bool InstrumentActor::hasChildVisible() const
+{
+    return m_scene.hasChildVisible();
 }
 
 /** Returns the workspace relating to this instrument view.
@@ -971,18 +994,74 @@ void InstrumentActor::getBinMinMaxIndex( size_t wi, size_t& imin, size_t& imax )
   }
 }
 
+//-------------------------------------------------------------------------//
 bool SetVisibleComponentVisitor::visit(GLActor* actor)
 {
-  ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);
-  if (comp)
-  {
-    bool on = comp->getComponent()->getComponentID() == m_id;
-    actor->setVisibility(on);
-    return on;
-  }
-  return false;
+    actor->setVisibility(false);
+    return false;
 }
 
+bool SetVisibleComponentVisitor::visit(GLActorCollection *actor)
+{
+    bool visible = actor->hasChildVisible();
+    actor->setVisibility(visible);
+    return visible;
+}
+
+bool SetVisibleComponentVisitor::visit(ComponentActor *actor)
+{
+    bool on = actor->getComponent()->getComponentID() == m_id;
+    actor->setVisibility(on);
+    return on;
+}
+
+bool SetVisibleComponentVisitor::visit(CompAssemblyActor *actor)
+{
+    bool visible = false;
+    if ( actor->getComponent()->getComponentID() == m_id )
+    {
+        visible = true;
+        actor->setChildVisibility(true);
+    }
+    else
+    {
+        visible = actor->hasChildVisible();
+        actor->setVisibility(visible);
+    }
+    return visible;
+}
+
+bool SetVisibleComponentVisitor::visit(ObjCompAssemblyActor *actor)
+{
+    bool on = actor->getComponent()->getComponentID() == m_id;
+    actor->setVisibility(on);
+    return on;
+}
+
+bool SetVisibleComponentVisitor::visit(InstrumentActor *actor)
+{
+    bool visible = false;
+    if ( actor->getInstrument()->getComponentID() == m_id )
+    {
+        visible = true;
+        actor->setChildVisibility(true);
+    }
+    else
+    {
+        visible = actor->hasChildVisible();
+        actor->setVisibility(visible);
+    }
+    return visible;
+}
+
+bool SetVisibleComponentVisitor::visit(RectangularDetectorActor *actor)
+{
+    bool on = actor->getComponent()->getComponentID() == m_id || actor->isChildDetector(m_id);
+    actor->setVisibility(on);
+    return on;
+}
+
+//-------------------------------------------------------------------------//
 /**
  * Visits an actor and if it is a "non-detector" sets its visibility.
  *
@@ -999,6 +1078,7 @@ bool SetVisibleNonDetectorVisitor::visit(GLActor* actor)
   return false;
 }
 
+//-------------------------------------------------------------------------//
 bool FindComponentVisitor::visit(GLActor* actor)
 {
   ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);

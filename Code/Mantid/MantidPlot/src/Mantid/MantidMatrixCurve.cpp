@@ -33,6 +33,10 @@ MantidMatrixCurve::MantidMatrixCurve(const QString&,const QString& wsName,Graph*
   m_wsName(wsName),
   m_index(index)
 {
+  if(!g)
+  {
+    throw std::invalid_argument("MantidMatrixCurve::MantidMatrixCurve - NULL graph pointer not allowed");
+  }
   init(g,distr,style);
 }
 
@@ -131,12 +135,7 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   {
     setStyle(QwtPlotCurve::Lines);
   }
-
-
-  if (g)
-  {
-    g->insertCurve(this,lineWidth);
-  }
+  g->insertCurve(this,lineWidth);
 
   // Initialise error bar colour to match curve colour
   m_errorSettings->m_color = pen().color();

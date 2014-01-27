@@ -104,9 +104,13 @@ void LoadSPE::exec()
   }
 
   // The first two numbers are the number of histograms and the number of bins
-  int nhist=0, nbins=0;
-  int retval = fscanf(speFile,"%8u%8u\n",&nhist,&nbins);
+  size_t nhist=0, nbins=0;
+  unsigned int nhistTemp=0, nbinsTemp=0;
+  int retval = fscanf(speFile,"%8u%8u\n",&nhistTemp,&nbinsTemp);
   if ( retval != 2 ) reportFormatError("Header line");
+  //Cast from temp values to size_t values
+  nhist = static_cast<size_t>(nhistTemp);
+  nbins = static_cast<size_t>(nbinsTemp);
 
   // Next line should be comment line: "### Phi Grid" or "### Q Grid"
   char comment[100];
@@ -126,7 +130,7 @@ void LoadSPE::exec()
   }
 
   // Read in phi grid
-  for (int i = 0; i <= nhist; ++i)
+  for (size_t i = 0; i <= nhist; ++i)
   {
     double phi;
     retval = fscanf(speFile,"%10le",&phi);
@@ -150,7 +154,7 @@ void LoadSPE::exec()
   MantidVec& X = XValues.access();
   X.resize(nbins+1);
 
-  for (int i = 0; i <= nbins; ++i)
+  for (size_t i = 0; i <= nbins; ++i)
   {
     retval = fscanf(speFile,"%10le",&X[i]);
     if ( retval != 1 ) 
@@ -173,7 +177,7 @@ void LoadSPE::exec()
 
   // Now read in the data spectrum-by-spectrum
   Progress progress(this,0,1,nhist);
-  for (int j = 0; j < nhist; ++j)
+  for (size_t j = 0; j < nhist; ++j)
   {
     // Set the common X vector
     workspace->setX(j,XValues);
@@ -195,7 +199,7 @@ void LoadSPE::exec()
  *  @param workspace :: The output workspace
  *  @param index ::     The index of the current spectrum
  */
-void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, int index)
+void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, size_t index)
 {
   // First, there should be a comment line
   char comment[100];

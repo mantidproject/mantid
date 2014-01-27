@@ -43,6 +43,9 @@ class QWheelEvent;
 
   * Performs projection of an instrument onto a plane. Draws the resulting image on the screen.
   * Supports selection and zooming.
+  *
+  * Iherited classes must implement the pure virtual methods and set m_viewRect - the bounding
+  * rectangle in surface coordinates.
   */
 
 class ProjectionSurface: public QObject

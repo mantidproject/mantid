@@ -8,7 +8,9 @@
 #include <numeric>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 #include <sstream>
+#include <cfloat>
 
 namespace Mantid
 {
@@ -102,7 +104,7 @@ namespace Mantid
     	  return Zscore;
       }
       std::vector<double> Zscore;
-      double tmp;
+
       Statistics stats = getStatistics(data, sorted);
       if(stats.standard_deviation == 0.)
       {
@@ -112,7 +114,7 @@ namespace Mantid
       typename vector<TYPE>::const_iterator it = data.begin();
       for (; it != data.end(); ++it)
       {
-    	tmp = static_cast<double> (*it);
+    	  double tmp = static_cast<double> (*it);
         Zscore.push_back(fabs((tmp - stats.mean) / stats.standard_deviation));
       }
       return Zscore;
@@ -179,11 +181,10 @@ namespace Mantid
       stats.minimum = stats.mean;
       stats.maximum = stats.mean;
       double stddev = 0.;
-      double temp;
       typename vector<TYPE>::const_iterator it = data.begin();
       for (; it != data.end(); ++it)
       {
-        temp = static_cast<double> (*it);
+        double temp = static_cast<double> (*it);
         stddev += ((temp - stats.mean) * (temp - stats.mean));
         if (temp > stats.maximum)
           stats.maximum = temp;
@@ -253,16 +254,34 @@ namespace Mantid
         double weight = 1.0/(sigma*sigma);
         double diff = obs_i - cal_i;
 
-        sumrpnom += fabs(diff);
-        sumrpdenom += fabs(obs_i);
+        if (weight == weight && weight <= DBL_MAX)
+        {
+          // If weight is not NaN.
+          sumrpnom += fabs(diff);
+          sumrpdenom += fabs(obs_i);
 
-        sumnom += weight*diff*diff;
-        sumdenom += weight*obs_i*obs_i;
+          double tempnom = weight*diff*diff;
+          double tempden = weight*obs_i*obs_i;
+
+          sumnom += tempnom;
+          sumdenom += tempden;
+
+          if (tempnom != tempnom || tempden != tempden)
+          {
+            std::cout << "***** Error! ****** Data indexed " << i << " is NaN. "
+                      << "i = " << i << ": cal = " << calI[i] << ", obs = " << obs_i
+                      << ", weight = " << weight << ". \n";
+          }
+        }
       }
 
       Rfactor rfactor(0., 0.);
       rfactor.Rp = (sumrpnom/sumrpdenom);
       rfactor.Rwp = std::sqrt(sumnom/sumdenom);
+
+      // cppcheck-suppress duplicateExpression
+      if (rfactor.Rwp != rfactor.Rwp)
+        std::cout << "Rwp is NaN.  Denominator = " << sumnom << "; Nominator = " << sumdenom << ". \n";
 
       return rfactor;
     }

@@ -27,10 +27,9 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   * @param elem :: The Poco::XML::Element to read the data from
   * @throw std::runtime_error if name or file extensions are not defined
   */
-FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
-  m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(), m_extensions(),
-  m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener(),
-  m_computeResources()
+FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
+  m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(),
+  m_extensions(), m_archiveSearch(), m_instruments(), m_liveListener(), m_computeResources()
 {
   if (m_name.empty())
   {
@@ -42,9 +41,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillZeroPadding(elem);
   fillDelimiter(elem);
   fillExtensions(elem);
-  fillSoapEndPoint(elem);
   fillArchiveNames(elem);
-  fillCatalogName(elem);
   fillLiveListener(elem);
   fillComputeResources(elem);
   fillInstruments(elem); // Make sure this is last as it picks up some defaults that are set above
@@ -94,27 +91,6 @@ void FacilityInfo::addExtension(const std::string& ext)
   if (it == m_extensions.end()) m_extensions.push_back(ext);
 }
 
-/// Called from constructor to fill ICAT soap end point
-void FacilityInfo::fillSoapEndPoint(const Poco::XML::Element* elem)
-{
-  Poco::XML::NodeList* pNL_soapEndPoint = elem->getElementsByTagName("soapEndPoint");
-
-  if (pNL_soapEndPoint->length() > 1)
-  {
-    pNL_soapEndPoint->release();
-    g_log.error("Facility must have only one soapEndPoint tag");
-    throw std::runtime_error("Facility must have only one csoapEndPoint tag");
-  }
-  else if (pNL_soapEndPoint->length() == 1)
-  {
-    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_soapEndPoint->item(0));
-    if(!elem->getAttribute("url").empty())
-    {
-      m_soapEndPoint= elem->getAttribute("url");
-    }
-  }
-  pNL_soapEndPoint->release();
-}
 
 /// Called from constructor to fill archive interface names
 void FacilityInfo::fillArchiveNames(const Poco::XML::Element* elem)
@@ -140,27 +116,6 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element* elem)
     pNL_interfaces->release();
   }
   pNL_archives->release();
-}
-
-/// Called from constructor to fill catalog name
-void FacilityInfo::fillCatalogName(const Poco::XML::Element* elem)
-{
-  Poco::XML::NodeList* pNL_catalogs = elem->getElementsByTagName("catalog");
-
-  if (pNL_catalogs->length() > 1)
-  {
-    g_log.error("Facility must have only one catalog tag");
-    throw std::runtime_error("Facility must have only one catalog tag");
-  }
-  else if (pNL_catalogs->length() == 1)
-  {
-    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_catalogs->item(0));
-    if(!elem->getAttribute("name").empty())
-    {
-      m_catalogName= elem->getAttribute("name");
-    }
-  }
-  pNL_catalogs->release();
 }
 
 /// Called from constructor to fill instrument list

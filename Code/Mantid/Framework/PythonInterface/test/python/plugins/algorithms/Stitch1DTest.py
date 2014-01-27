@@ -47,6 +47,32 @@ class Stitch1DTest(unittest.TestCase):
             self.assertTrue(False, "Should have thrown with StartOverlap < x max")
         except RuntimeError:
             pass
+        
+    def test_lhsworkspace_must_be_histogram(self):
+        x = numpy.arange(-1, 1, 0.2)
+        e = numpy.arange(-1, 1, 0.2)
+        lhs_ws =  CreateWorkspace(UnitX="1/q", DataX=x, DataY=[0,0,0,3,3,3,3,3,3,3], NSpec=1, DataE=e)
+        self.assertTrue(not lhs_ws.isHistogramData(), "Input LHS WS SHOULD NOT be histogram for this test")
+        self.assertTrue(self.a.isHistogramData(), "Input RHS WS should SHOULD be histogram for this test")
+        try:
+            stitched = Stitch1D(LHSWorkspace=lhs_ws, RHSWorkspace=self.a, StartOverlap=self.x[-1], EndOverlap=self.x[0], Params='0.2')
+        except ValueError:
+            pass
+        finally:
+            DeleteWorkspace(lhs_ws)
+    
+    def test_rhsworkspace_must_be_histogram(self):
+        x = numpy.arange(-1, 1, 0.2)
+        e = numpy.arange(-1, 1, 0.2)
+        rhs_ws =  CreateWorkspace(UnitX="1/q", DataX=x, DataY=[0,0,0,3,3,3,3,3,3,3], NSpec=1, DataE=e)
+        self.assertTrue(self.a.isHistogramData(), "Input LHS WS SHOULD be histogram for this test")
+        self.assertTrue(not rhs_ws.isHistogramData(), "Input RHS WS should SHOULD NOT be histogram for this test")
+        try:
+            stitched = Stitch1D(LHSWorkspace=self.a, RHSWorkspace=rhs_ws, StartOverlap=self.x[-1], EndOverlap=self.x[0], Params='0.2')
+        except ValueError:
+            pass
+        finally:
+            DeleteWorkspace(rhs_ws)
           
     def test_stitching_scale_right(self):
         stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2')    

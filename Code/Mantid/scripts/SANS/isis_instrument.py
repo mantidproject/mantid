@@ -975,6 +975,58 @@ class SANS2D(ISISInstrument):
         
         return [-pos.getX(), -pos.getY()]
 
+class LARMOR(ISISInstrument):
+    _NAME = 'LARMOR'
+    WAV_RANGE_MIN = 2.2
+    WAV_RANGE_MAX = 10.0
+    def __init__(self):
+        super(LARMOR,self).__init__('LARMOR_Definition.xml')
+        self.monitor_names = dict()
+
+        for i in range(1,6):
+            self.monitor_names[i] = 'monitor'+str(i)
+            
+    def set_up_for_run(self, base_runno):
+        """
+            Needs to run whenever a sample is loaded
+        """
+        first = self.DETECTORS['low-angle']
+        second = self.DETECTORS['high-angle']
+
+        first.set_orien('Horizontal')
+        first.set_first_spec_num(10)
+        second.set_orien('Horizontal')
+        second.place_after(first)
+
+    def move_components(self, ws, xbeam, ybeam):
+        super(LARMOR,self).move_components(ws)
+        
+        detBanch = self.getDetector('rear')
+
+        xshift = -xbeam
+        yshift = -ybeam
+        #zshift = ( detBanch.z_corr)/1000.
+        #zshift -= self.REAR_DET_DEFAULT_SD_M
+        zshift = 0
+        sanslog.notice("Setup move " + str(xshift*1000) + " " + str(yshift*1000) + " " + str(zshift*1000))
+        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift, 
+                                Y=yshift, Z=zshift)
+        # beam centre, translation
+        return [0.0, 0.0], [-xbeam, -ybeam]
+
+    def load_transmission_inst(self, workspace):
+        """
+            Not required for SANS2D
+        """
+        pass
+
+    def cur_detector_position(self, ws_name):
+        """Return the position of the center of the detector bank"""
+        ws = mtd[ws_name]
+        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        
+        return [-pos.getX(), -pos.getY()]
+
 
 
 if __name__ == '__main__':

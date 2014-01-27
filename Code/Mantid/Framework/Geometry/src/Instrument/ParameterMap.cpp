@@ -148,10 +148,29 @@ namespace Mantid
       // Quick size check
       if(this->size() != rhs.size()) return false;
       
+      // The map is unordered and the key is only valid at runtime. The
+      // asString method turns the ComponentIDs to full-qualified name identifiers
+      // so we will use the same approach to compare them
+
       pmap_cit thisEnd = this->m_map.end();
+      pmap_cit rhsEnd = rhs.m_map.end();
       for(pmap_cit thisIt = this->m_map.begin(); thisIt != thisEnd; ++thisIt)
       {
-        if(!rhs.contains(thisIt->first, *(thisIt->second))) return false;
+        const IComponent * comp = static_cast<IComponent*>(thisIt->first);
+        const std::string fullName = comp->getFullName();
+        const auto & param = thisIt->second;
+        bool match(false);
+        for(pmap_cit rhsIt = rhs.m_map.begin(); rhsIt != rhsEnd; ++rhsIt)
+        {
+          const IComponent * rhsComp = static_cast<IComponent*>(rhsIt->first);
+          const std::string rhsFullName = rhsComp->getFullName();
+          if(fullName == rhsFullName && (*param) == (*rhsIt->second))
+          {
+            match = true;
+            break;
+          }
+        }
+        if(!match) return false;
       }
       return true;
     }

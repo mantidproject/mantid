@@ -13,7 +13,6 @@
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
-#include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -338,40 +337,6 @@ public:
   {
     std::string outputFile;
     do_testExec_EventWorkspaces("SaveNexusProcessed_EventTo2D", TOF, outputFile, false, clearfiles, true /* DONT preserve events */, true /* Compress */);
-  }
-
-  void xtestExec_LoadedEventWorkspace()  /** Disabled because it takes >3 seconds */
-  {
-
-    //----- Now we re-load with precounting and compare memory use ----
-    Mantid::DataHandling::LoadSNSEventNexus ld2;
-    std::string outws_name = "SaveNexusProcessed_Loaded";
-    ld2.initialize();
-    ld2.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld2.setPropertyValue("OutputWorkspace",outws_name);
-    ld2.setPropertyValue("Precount", "1");
-    ld2.execute();
-    TS_ASSERT( ld2.isExecuted() );
-
-    SaveNexusProcessed alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspace", outws_name);
-    outputFile = "SaveNexusProcessed_Loaded.nxs";
-    dataName = "spectra";
-    title = "A simple workspace saved in Processed Nexus format";
-    alg.setPropertyValue("Filename", outputFile);
-    outputFile = alg.getPropertyValue("Filename");
-    alg.setPropertyValue("Title", title);
-
-    // Clear the existing file, if any
-    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
-    alg.execute();
-    TS_ASSERT( alg.isExecuted() );
-
-    TS_ASSERT( Poco::File(outputFile).exists() );
-
-    if (clearfiles)
-      if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
   }
 
   void testExecSaveLabel()

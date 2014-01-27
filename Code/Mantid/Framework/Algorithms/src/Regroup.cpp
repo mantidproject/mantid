@@ -7,7 +7,7 @@ The difference between Rebin and Regroup is that in the former the data in the o
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Regroup("InWS","OutWS","x1,dx1,x2")
+ outputW = Regroup("inputW","x1,dx1,x2")
 
 *WIKI_USAGE*/
 //----------------------------------------------------------------------

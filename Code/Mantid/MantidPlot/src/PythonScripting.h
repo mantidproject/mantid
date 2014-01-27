@@ -97,10 +97,6 @@ public:
   /// Return the sys dictionary for this environment
   PyObject *sysDict() { return m_sys; }
 
-public slots:
-  /// Refresh Python algorithms state
-  virtual void refreshAlgorithms(bool force = false);
-
 private:
   /// Constructor
   PythonScripting(ApplicationWindow *parent);
@@ -120,8 +116,6 @@ private:
   PyObject *m_math;
   /// The dictionary of the sys module
   PyObject *m_sys;
-  /// Refresh protection
-  int refresh_allowed;
   /// Pointer to the main threads state
   PyThreadState *m_mainThreadState;
 };

@@ -29,7 +29,7 @@ endif()
 find_program(CPPCHECK_EXECUTABLE NAMES cppcheck)
 
 if(MSVC)
-  set(CPPCHECK_TEMPLATE_ARG --template vs)
+  set(CPPCHECK_TEMPLATE_ARG --template "{file}({line}): warning : ({severity}-{id}) {message}")
   set(CPPCHECK_FAIL_REGULAR_EXPRESSION "[(]error[)]")
   set(CPPCHECK_WARN_REGULAR_EXPRESSION "[(]style[)]")
 elseif(CMAKE_COMPILER_IS_GNUCXX)
@@ -61,7 +61,7 @@ if(CPPCHECK_EXECUTABLE)
 endif()
 
 mark_as_advanced(CPPCHECK_EXECUTABLE)
-set ( CPPCHECK_ARGS --enable=all --inline-suppr CACHE STRING "Arguments for running cppcheck" )
+set ( CPPCHECK_ARGS --enable=all --inline-suppr CACHE STRING "Arguments for running cppcheck" --suppressions ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/CppCheck_Suppressions.txt )
 set ( CPPCHECK_NUM_THREADS 0 CACHE STRING "Number of threads to use when running cppcheck" )
 set ( CPPCHECK_GENERATE_XML OFF CACHE BOOL "Generate xml output files from cppcheck" )
 

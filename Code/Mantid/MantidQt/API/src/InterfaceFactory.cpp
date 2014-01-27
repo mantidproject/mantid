@@ -43,6 +43,21 @@ UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & na
   return window;   
 }
 
+/**
+ * Return the set of categories that the interface with the given name belongs to.
+ *
+ * @param name :: The name of the interface.
+ * @returns the set of category names if an interface with the given name has been registered,
+ *          else an empty set.
+ */
+QSet<QString> UserSubWindowFactoryImpl::getInterfaceCategories(const QString & interfaceName) const
+{
+  if( !m_categoryLookup.contains(interfaceName) )
+    return QSet<QString>();
+
+  return m_categoryLookup[interfaceName];
+}
+
 //----------------------------------------
 // Public member functions
 //----------------------------------------

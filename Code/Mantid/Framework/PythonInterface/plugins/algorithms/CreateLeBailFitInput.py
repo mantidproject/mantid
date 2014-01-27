@@ -49,10 +49,10 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        instruments=["POWGEN", "NOMAD", "VULCAN"]
         self.setWikiSummary("""Create various input Workspaces required by algorithm LeBailFit.""")
         
-        self.declareProperty("Instrument", "POWGEN", StringListValidator(instruments), "Powder diffractometer's name")
+        #instruments=["POWGEN", "NOMAD", "VULCAN"]
+        #self.declareProperty("Instrument", "POWGEN", StringListValidator(instruments), "Powder diffractometer's name")
 
         self.declareProperty(FileProperty("ReflectionsFile","", FileAction.OptionalLoad, ['.hkl']),
                 "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.")
@@ -92,7 +92,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         self.setProperty("BraggPeakParameterWorkspace", hklWS)
 
         # 2. Get Other Properties
-        instrument = self.getPropertyValue("Instrument")
+        # instrument = self.getPropertyValue("Instrument")
         reflectionfilename = self.getPropertyValue("ReflectionsFile")
 
         # 3. Import reflections list
@@ -148,7 +148,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         """
         # 1. Import
         irfwsname = irffilename.split("/")[-1]
-        irfws = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace=irfwsname)
+        irfws = api.LoadFullprofResolution(Filename=irffilename, OutputTableWorkspace=irfwsname)
 
         # 2. Create an empty workspace
         tablews = WorkspaceFactory.createTable()

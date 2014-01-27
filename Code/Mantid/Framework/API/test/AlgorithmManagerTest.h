@@ -99,7 +99,7 @@ public:
   static AlgorithmManagerTest *createSuite() { return new AlgorithmManagerTest(); }
   static void destroySuite( AlgorithmManagerTest *suite ) { delete suite; }
 
-  AlgorithmManagerTest() 
+  AlgorithmManagerTest()
   {
     // A test fails unless algorithms.retained is big enough
     Mantid::Kernel::ConfigService::Instance().setString("algorithms.retained","5");
@@ -293,6 +293,25 @@ public:
     {
       AlgorithmManager::Instance().create("AlgTest");
     }
+  }
+
+  void testRemovingByIdRemovesCorrectObject()
+  {
+    auto & mgr = AlgorithmManager::Instance();
+    mgr.setMaxAlgorithms(10);
+    const size_t initialManagerSize = mgr.size();
+    // 2 different ids for same named algorithm
+    auto alg1 = mgr.create("AlgTest");
+    auto alg2 = mgr.create("AlgTest");
+    TS_ASSERT_EQUALS(initialManagerSize + 2, mgr.size());
+
+    TS_ASSERT_THROWS_NOTHING(mgr.removeById(alg1->getAlgorithmID()));
+    TS_ASSERT_EQUALS(initialManagerSize + 1, mgr.size());
+    // the right one?
+    auto foundAlg = mgr.getAlgorithm(alg2->getAlgorithmID());
+    TS_ASSERT(foundAlg);
+
+    mgr.setMaxAlgorithms(5);
   }
 
   void test_newestInstanceOf()

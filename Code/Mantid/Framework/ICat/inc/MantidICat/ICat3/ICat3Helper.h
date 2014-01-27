@@ -53,10 +53,10 @@ namespace Mantid
       int doSearch(ICat3::ICATPortBindingProxy& icat,boost::shared_ptr<ICat3::ns1__searchByAdvanced>& request,ICat3::ns1__searchByAdvancedResponse& response);
 
       /// calls getInvestigationIncludes api's
-      int getDataFiles(long long invId,ICat3::ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
+      int getDataFiles(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
 
       /// this method calls Icat api getInvestigationIncludes and returns datasets for the given investigation id.
-      int doDataSetsSearch(long long invId,ICat3::ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
+      int doDataSetsSearch(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
 
       /// This method lists the isntruments
       void  listInstruments(std::vector<std::string>& instruments);

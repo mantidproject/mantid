@@ -50,10 +50,12 @@ class GLActorCollection: public GLActor
 public:
   GLActorCollection(); ///< Default Constructor
   virtual ~GLActorCollection(); ///< Destructor
-  void setVisibility(bool);
+  void setChildVisibility(bool);
+  bool hasChildVisible() const;
   void draw(bool picking = false)const;
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
-  bool accept(GLActorVisitor& visitor);
+  bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll) const;
 
   void addActor(GLActor*);
   void removeActor(GLActor*);

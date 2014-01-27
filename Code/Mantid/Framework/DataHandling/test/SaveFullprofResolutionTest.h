@@ -7,6 +7,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
+#include <Poco/File.h>
+
 #include <fstream>
 #include <iostream>
 
@@ -34,81 +36,280 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void Passsed_test_SaveFile()
+  //----------------------------------------------------------------------------------------------
+  /** Test save profile 10
+    */
+  void test_write1BankProfl10()
   {
-    // 1. Create input workspace
-    string filename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentTable.dat");
-    map<std::string, double> parameters, newvalueparameters;
-    map<string, vector<double> > parametermcs;
-    importInstrumentTxtFile(filename, parameters, parametermcs);
-    TableWorkspace_sptr itablews = createInstrumentParameterWorkspace(parameters, newvalueparameters, parametermcs);
+    // Create input workspace
+    std::string prof10tablewsname("Bank1InstrumentParameterTable");
+    createProfile10TableWS(prof10tablewsname);
 
-    AnalysisDataService::Instance().addOrReplace("Bank1InstrumentParameterTable", itablews);
-
-    // 2. Init the algorithm
+    // Init the algorithm
     Mantid::DataHandling::SaveFullprofResolution alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    // 3. Set up
+    // Set up properties
     alg.setProperty("InputWorkspace", "Bank1InstrumentParameterTable");
-    alg.setProperty("OutputFile", "bank1.irf");
+    alg.setProperty("OutputFilename", "bank1.irf");
     alg.setProperty("Bank", 1);
 
-    // 4. Execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_EQUALS(1, 212);
+    // Check file
+    bool outputfileexist = Poco::File("bank1.irf").exists();
+    TS_ASSERT(outputfileexist);
 
+    if (!outputfileexist)
+    {
+      return;
+    }
+
+    // Check file lines
+    int numlines = getFileLines("bank1.irf");
+    TS_ASSERT_EQUALS(numlines, 22);
+
+    // Clean
+    Poco::File("bank1.irf").remove();
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test writing out a single bank in a multiple bank table workspace
+    */
+  void test_write1BankInMultiBankTableProf9()
+  {
+    // Generate test table workspace
+    string parwsname("HRPD2BankParameterTableWS");
+    create2BankProf9Table(parwsname);
+
+    // Create and set up algorithm to test
+    Mantid::DataHandling::SaveFullprofResolution alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setProperty("InputWorkspace", parwsname);
+    alg.setProperty("OutputFilename", "bank2.irf");
+    alg.setProperty("Bank", 2);
+    alg.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+
+    // Execute
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Locate file
+    Poco::File irffile("bank2.irf");
+    TS_ASSERT(irffile.exists());
+    if (!irffile.exists())
+    {
+      Poco::File(parwsname).remove();
+      return;
+    }
+
+    // Count number of lines
+    int numlines = getFileLines("bank2.irf");
+    TS_ASSERT_EQUALS(numlines, 18);
+
+    // Clean
+    Poco::File("bank2.irf").remove();
+
+    return;
   }
 
 
-
-  //----------------  Helpers To Create Input Workspaces --------------------------
-
-  /** Create instrument geometry parameter/LeBail parameter workspaces
-   */
-  DataObjects::TableWorkspace_sptr createInstrumentParameterWorkspace(std::map<std::string, double> parameters,
-                                                                      std::map<std::string, double> newvalueparameters,
-                                                                      map<string, vector<double> > mcparameters)
+  //----------------------------------------------------------------------------------------------
+  /** Test writing out a single bank in a multiple bank table workspace
+    */
+  void test_appendBankInMultiBankTableProf9()
   {
-    UNUSED_ARG(mcparameters);
+    // Generate test table workspace
+    string parwsname("HRPD2BankParameterTableWS");
+    create2BankProf9Table(parwsname);
 
-    // 1. Combine 2 inputs
-    std::map<std::string, double>::iterator nvit;
-    std::stringstream infoss;
-    infoss << "Modifying parameters: " << std::endl;
-    for (nvit = newvalueparameters.begin(); nvit != newvalueparameters.end(); ++nvit)
+    // Write out the first bank
+    Mantid::DataHandling::SaveFullprofResolution alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setProperty("InputWorkspace", parwsname);
+    alg.setProperty("OutputFilename", "bankall.irf");
+    alg.setProperty("Bank", 1);
+    alg.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+
+    // Execute
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Append the second bank
+    Mantid::DataHandling::SaveFullprofResolution alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+
+    alg2.setProperty("InputWorkspace", parwsname);
+    alg2.setProperty("OutputFilename", "bankall.irf");
+    alg2.setProperty("Bank", 2);
+    alg2.setProperty("ProfileFunction", "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
+    alg2.setProperty("Append", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg2.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Locate file
+    Poco::File irffile("bankall.irf");
+    TS_ASSERT(irffile.exists());
+    if (!irffile.exists())
     {
-      std::map<std::string, double>::iterator fdit;
-      fdit = parameters.find(nvit->first);
-      if (fdit != parameters.end())
+      Poco::File(parwsname).remove();
+      return;
+    }
+
+    // Count number of lines
+    int numlines = getFileLines("bankall.irf");
+    TS_ASSERT_EQUALS(numlines, 34);
+
+    // Clean
+    irffile.remove();
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Find out number of lines in a text file
+    */
+  int getFileLines(std::string filename)
+  {
+    ifstream infile;
+    infile.open(filename.c_str());
+
+    int numlines = 0;
+    if (infile.is_open())
+    {
+      string line;
+      while(getline(infile, line))
       {
-        fdit->second = nvit->second;
-        infoss << "Name: " << std::setw(15) << fdit->first << ", Value: " << fdit->second << std::endl;
+        if (line.size() > 0)
+          ++ numlines;
       }
     }
-    std::cout << infoss.str();
+    else
+    {
+      numlines = -1;
+    }
 
-    // 2. Crate table workspace
-    DataObjects::TableWorkspace* tablews = new DataObjects::TableWorkspace();
-    DataObjects::TableWorkspace_sptr geomws = DataObjects::TableWorkspace_sptr(tablews);
+    return numlines;
+  }
 
-    tablews->addColumn("str", "Name");
-    tablews->addColumn("double", "Value");
-    tablews->addColumn("str", "FitOrTie");
-    tablews->addColumn("double", "Chi2");
-    tablews->addColumn("double", "Min");
-    tablews->addColumn("double", "Max");
-    tablews->addColumn("double", "StepSize");
+  //----------------------------------------------------------------------------------------------
+  /** Write out a TableWorkspace contain 2 banks' parameters
+    * ISIS HRPD Data
+    */
+  void create2BankProf9Table(string workspacename)
+  {
+    TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
+    partablews->addColumn("str", "Name");
+    partablews->addColumn("double", "Value_1");
+    partablews->addColumn("double", "Value_2");
 
-    // 2. Add peak parameters' name and values
+    TableRow row0 = partablews->appendRow();
+    row0 << "BANK" << 1. << 2.;
+    TableRow row1 = partablews->appendRow();
+    row1 << "Alph0" 	<< 	0.		<< 0.         ;
+    TableRow row2 = partablews->appendRow();
+    row2 << "Alph1" 	<< 	0.081722	<< 0.109024;
+    TableRow row3 = partablews->appendRow();
+    row3 << "Beta0" 	<< 	0.023271	<< 0.018108;
+    TableRow row4 = partablews->appendRow();
+    row4 << "Beta1" 	<< 	0.006292	<< 0.015182;
+    TableRow row5 = partablews->appendRow();
+    row5 << "CWL" 	<< 	-1.		<< -1.     ;
+    TableRow row6 = partablews->appendRow();
+    row6 << "Dtt1" 	<< 	48303.1		<< 34837.1 ;
+    TableRow row7 = partablews->appendRow();
+    row7 << "Dtt2" 	<< 	-4.093		<< -0.232  ;
+    TableRow row8 = partablews->appendRow();
+    row8 << "Gam0" 	<< 	6.611		<< 0.      ;
+    TableRow row9 = partablews->appendRow();
+    row9 << "Gam1" 	<< 	0.		<< 5.886   ;
+    TableRow row10 = partablews->appendRow();
+    row10 << "Gam2" 	<< 	0.		<< 0.      ;
+    TableRow row11 = partablews->appendRow();
+    row11 << "Sig0" 	<< 	0.		<< 0.      ;
+    TableRow row12 = partablews->appendRow();
+    row12 << "Sig1" 	<< 	10.6313		<< 61.5518 ;
+    TableRow row13 = partablews->appendRow();
+    row13 << "Sig2" 	<< 	0.		<< 12.1755 ;
+    TableRow row14 = partablews->appendRow();
+    row14 << "Zero" 	<< 	-4.734		<< 2.461   ;
+    TableRow row15 = partablews->appendRow();
+    row15 << "step" 	<< 	1.		<< 7.85    ;
+    TableRow row16 = partablews->appendRow();
+    row16 << "tof-max" << 	105100.		<< 111500. ;
+    TableRow row17 = partablews->appendRow();
+    row17 << "tof-min" << 	14364.		<< 12680.  ;
+    TableRow row18 = partablews->appendRow();
+    row18 << "twotheta" << 	168.33		<< 89.58   ;
+
+    AnalysisDataService::Instance().addOrReplace(workspacename, partablews);
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Create instrument geometry parameter/LeBail parameter workspaces of profil 10
+    * Source data is from POWGEN's bank 1 calibrated
+   */
+  void createProfile10TableWS(std::string wsname)
+  {
+    // Create a map of string/double for parameters of profile 10
+    std::map<std::string, double> parammap;
+    parammap.insert(make_pair("BANK",    1	    ));
+    parammap.insert(make_pair("Alph0" ,  1.88187));
+    parammap.insert(make_pair("Alph0t",  64.4102));
+    parammap.insert(make_pair("Alph1",   0.     ));
+    parammap.insert(make_pair("Alph1t",  0.     ));
+    parammap.insert(make_pair("Beta0" ,  6.2511 ));
+    parammap.insert(make_pair("Beta0t",  85.9189));
+    parammap.insert(make_pair("Beta1",   0.     ));
+    parammap.insert(make_pair("Beta1t",  0.     ));
+    parammap.insert(make_pair("CWL",     0.533  ));
+    parammap.insert(make_pair("Dtt1",    22584.5));
+    parammap.insert(make_pair("Dtt1t",   22604.9));
+    parammap.insert(make_pair("Dtt2",    0      ));
+    parammap.insert(make_pair("Dtt2t",  0.3     ));
+    parammap.insert(make_pair("Gam0" ,   0      ));
+    parammap.insert(make_pair("Gam1",    5.744  ));
+    parammap.insert(make_pair("Gam2",    0      ));
+    parammap.insert(make_pair("Sig0" ,   0      ));
+    parammap.insert(make_pair("Sig1",    3.16228));
+    parammap.insert(make_pair("Sig2",    16.7331));
+    parammap.insert(make_pair("Tcross",  0.356  ));
+    parammap.insert(make_pair("Width",   1.0521 ));
+    parammap.insert(make_pair("Zero",    0      ));
+    parammap.insert(make_pair("Zerot",   11.3175));
+    parammap.insert(make_pair("step",    4.0002 ));
+    parammap.insert(make_pair("tof-max", 51000  ));
+    parammap.insert(make_pair("tof-min", 5000.23));
+    parammap.insert(make_pair("twotheta", 90.0  ));
+
+    // Crate table workspace
+    DataObjects::TableWorkspace_sptr geomws = boost::make_shared<TableWorkspace>();
+
+    geomws->addColumn("str", "Name");
+    geomws->addColumn("double", "Value");
+    geomws->addColumn("str", "FitOrTie");
+    geomws->addColumn("double", "Chi2");
+    geomws->addColumn("double", "Min");
+    geomws->addColumn("double", "Max");
+    geomws->addColumn("double", "StepSize");
+
+    // Add peak parameters' name and values
     map<string, double>::iterator mit;
     string fitortie("f");
     double minvalue = 0.0;
     double maxvalue = 0.0;
     double stepsize = 0.0;
-    for (mit = parameters.begin(); mit != parameters.end(); ++mit)
+    for (mit = parammap.begin(); mit != parammap.end(); ++mit)
     {
       string parname = mit->first;
       double parvalue = mit->second;
@@ -117,64 +318,7 @@ public:
       newrow << parname << parvalue << fitortie << 1.234 << minvalue << maxvalue << stepsize;
     }
 
-    return geomws;
-  }
-
-  /** Import text file containing the instrument parameters
-    * Format: name, value, min, max, step-size
-    * Input:  a text based file
-    * Output: a map for (parameter name, parameter value)
-    */
-  void importInstrumentTxtFile(std::string filename, std::map<std::string, double>& parameters,
-                               std::map<string, vector<double> >& parametermcs)
-  {
-    // 1. Open file
-    std::ifstream ins;
-    ins.open(filename.c_str());
-    if (!ins.is_open())
-    {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
-      throw std::invalid_argument("Cannot open Reflection-Text-File.");
-    }
-    else
-    {
-      std::cout << "Importing instrument parameter file " << filename << std::endl;
-    }
-
-    // 2. Parse
-    parameters.clear();
-    parametermcs.clear();
-
-    char line[256];
-    while(ins.getline(line, 256))
-    {
-      if (line[0] != '#')
-      {
-        std::string parname;
-        double parvalue, parmin, parmax, parstepsize;
-
-        std::stringstream ss;
-        ss.str(line);
-        ss >> parname >> parvalue;
-        parameters.insert(std::make_pair(parname, parvalue));
-
-        try
-        {
-          ss >> parmin >> parmax >> parstepsize;
-          vector<double> mcpars;
-          mcpars.push_back(parmin);
-          mcpars.push_back(parmax);
-          mcpars.push_back(parstepsize);
-          parametermcs.insert(make_pair(parname, mcpars));
-        }
-        catch (runtime_error err)
-        {
-          ;
-        }
-      }
-    }
-
-    ins.close();
+    AnalysisDataService::Instance().addOrReplace(wsname, geomws);
 
     return;
   }

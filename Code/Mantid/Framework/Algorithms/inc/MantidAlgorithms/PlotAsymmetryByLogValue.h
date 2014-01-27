@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -18,6 +19,8 @@ namespace Mantid
 
   namespace Algorithms
   {
+    using namespace API;
+    using namespace DataObjects;
     /**Takes a muon workspace as input and sums all the spectra into two spectra which represent
 	  the two detector groupings. The resultant spectra are used to calculate (F-aB) / (F+aB) the results of which
 	  are stored in the output workspace.
@@ -59,7 +62,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      PlotAsymmetryByLogValue() : API::Algorithm() {};
+      PlotAsymmetryByLogValue() : Algorithm() {};
       /// Destructor
       virtual ~PlotAsymmetryByLogValue() {};
       /// Algorithm's name for identification overriding a virtual method
@@ -77,15 +80,36 @@ namespace Mantid
       void exec();
 
       /// Calculate the integral asymmetry for a workspace (single period)
-      void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double& Y, double& E);
+      void calcIntAsymmetry(MatrixWorkspace_sptr ws, double& Y, double& E);
 
       /// Calculate the integral asymmetry for a workspace (red & green)
-      void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
-          API::MatrixWorkspace_sptr ws_geen,double& Y, double& E);
+      void calcIntAsymmetry(MatrixWorkspace_sptr ws_red, MatrixWorkspace_sptr ws_geen,double& Y, double& E);
       /// Group detectors
-      void groupDetectors(API::MatrixWorkspace_sptr& ws,const std::vector<int>& spectraList);
+      void groupDetectors(MatrixWorkspace_sptr& ws,const std::vector<int>& spectraList);
       /// Get log value
-      double getLogValue(API::MatrixWorkspace& ws,const std::string& logName);
+      double getLogValue(MatrixWorkspace& ws,const std::string& logName);
+
+      /// Create a Dead Time Table using given list of dead times
+      Workspace_sptr deadTimesToTable(const std::vector<double>& deadTimes, size_t numDetectors = 0);
+
+      /// Creates Dead Time Table using all the data between begin and end
+      ITableWorkspace_sptr createDeadTimeTable( std::vector<double>::const_iterator begin, 
+        std::vector<double>::const_iterator end);
+
+      /// Runs an appropriate applyDeadTimeCorrection function depending on the type of workspaces
+      Workspace_sptr applyDeadTimeCorrection(Workspace_sptr deadTimeWs, Workspace_sptr ws);
+
+      /// Applies DTC to a group of workspaces using a single table
+      WorkspaceGroup_sptr applyDeadTimeCorrection(ITableWorkspace_sptr deadTimeTable, 
+        WorkspaceGroup_sptr wsGroup);
+
+      /// Applies DTC to a group of workspace using a group of tables
+      WorkspaceGroup_sptr applyDeadTimeCorrection(WorkspaceGroup_sptr deadTimeGroup, 
+        WorkspaceGroup_sptr wsGroup);
+
+      /// Runs ApplyDeadTimeCorr to apply DTC to a workspace using a table
+      Workspace2D_sptr applyDeadTimeCorrection(ITableWorkspace_sptr deadTimeTable, 
+        Workspace2D_sptr ws);
 
       /// Stores property "Int"
       bool m_int;

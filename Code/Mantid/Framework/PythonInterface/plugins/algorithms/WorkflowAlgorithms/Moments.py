@@ -1,3 +1,8 @@
+"""*WIKI* 
+
+Calculates the <math>n^{th}</math> moment <math>M_n</math> of <math>S(Q,w)</math> where <math>M_n</math> is the integral of <math>w^n*S(Q,w)</math> over all w for <math>n=0</math> to 4.
+
+*WIKI*"""
 # Algorithm to start Bayes programs
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory
@@ -11,6 +16,9 @@ class Moments(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
+		self.setOptionalMessage("Calculates the nth moment of S(q,w)")
+		self.setWikiSummary("Calculates the nth moment of S(q,w)")
+
 		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File or Workspace')
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')

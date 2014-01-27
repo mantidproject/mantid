@@ -24,6 +24,8 @@ public:
   void updateView(bool picking = true);
   /// Update the detector information (count values) and redraw
   void updateDetectors();
+  /// Save the image into a file
+  void saveToFile(const QString & filename);
 protected:
   void paintEvent(QPaintEvent*);
   void resizeEvent(QResizeEvent*);

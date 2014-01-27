@@ -79,8 +79,10 @@ namespace Mantid
         void saveDataFiles(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Saves "DataSets" information to the output workspace.
         void saveDataSets(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
+        // Convert a file size to human readable file format.
+        std::string bytesToString(int64_t &fileSize);
         // Helper method that formats a given timestamp.
-        std::string formatDateTime(time_t timestamp);
+        std::string formatDateTime(const time_t &timestamp, const std::string &format);
         // Reference to the logger class.
         Kernel::Logger& g_log;
 

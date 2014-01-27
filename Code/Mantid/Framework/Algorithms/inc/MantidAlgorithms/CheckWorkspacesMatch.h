@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -38,10 +40,7 @@ namespace Algorithms
     <LI> Result - Contains 'success' if the workspaces match, the reason for the failure otherwise </LI>
     </UL>
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 01/12/2009
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2009-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -92,11 +91,11 @@ private:
   /// Execution code
   void exec();
   
-  // property indicate that relative error tolerance in data is set up rather then absolute error. 
-  bool m_ErrorIsRelative;
   void doComparison();
-  // Compare two MD workspaces
+  void doPeaksComparison(API::IPeaksWorkspace_sptr tws1, API::IPeaksWorkspace_sptr tws2);
+  void doTableComparison(API::ITableWorkspace_const_sptr tws1, API::ITableWorkspace_const_sptr tws2);
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);
+  bool checkEventLists(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2);
   bool checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkAxes(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkSpectraMap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);

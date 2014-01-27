@@ -8,8 +8,11 @@ namespace Mantid
 {
   namespace ICat
   {
+    /**
+      This class is used in Catalog Search service to set/get all the inputs to search for.
 
-    /** This class is used in ICat Search service to set all the inputs for search.
+      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
       This file is part of Mantid.
 
       Mantid is free software; you can redistribute it and/or modify
@@ -25,10 +28,9 @@ namespace Mantid
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-      File change history is stored at: <https://github.com/mantidproject/mantid>.
+      File change history is stored at: <https://github.com/mantidproject/mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
-
-     */
+    */
     class CatalogSearchParam
     {
     public:
@@ -36,140 +38,57 @@ namespace Mantid
       CatalogSearchParam();
       /// Destructor
       ~CatalogSearchParam();
-      /**This method  sets start date
-       *@param startRun :: start run number
-       */
+
+      /// Set the start run to search for.
       void setRunStart(const double& startRun);
-      /**This method  sets end date
-       *@param endRun :: end run number
-       */
+      /// Set the end run to search for.
       void setRunEnd(const double& endRun);
-      /**This method  sets isntrument name
-       *@param instrName :: name of the instrument
-       */
+      /// Set the instrument to search for.
       void setInstrument(const std::string& instrName);
-      /**This method  sets the start date
-       *@param startDate :: start date for search
-       */
+      /// Set the start date to search for.
       void setStartDate(const time_t& startDate);
-      /** This method  sets the end date
-       * @param endDate :: end date for search
-       */
+      /// Set the end date to search for.
       void setEndDate(const time_t& endDate);
-      /**This method  sets the CaseSensitive
-       *@param bCase :: flag to do case sensitive  search
-       */
-      void setCaseSensitive(bool bCase);
-
-      /**This method  sets the keywords
-       *@param keywords :: the key words used for searching investigations
-       */
+      /// Set the keywords to search for.
       void setKeywords(const std::string& keywords);
-
-      /**This method  sets investigationName used for searching
-       *@param instName ::  investigation name
-       */
-      void  setInvestigationName(const std::string& instName);
-
-      /**This method  sets investigationAbstract used for searching
-       *@param invstabstract :: investigation abstract
-       */
-      void setInvestigationAbstract(const std::string& invstabstract);
-
-      /**This method  sets sample used for searching
-       *@param sampleName :: name of the sample
-       */
+      /// Set the investigation name to search for.
+      void setInvestigationName(const std::string& instName);
+      /// Set the datafile name to search for.
+      void setDatafileName(const std::string& datafileName);
+      /// Set the sample name to search for.
       void setSampleName(const std::string& sampleName);
-
-      /**This method  sets Investigator surname
-       *@param investigatorName :: surname of the investigator
-       */
-      void  setInvestigatorSurName(const std::string& investigatorName);
-
-      /** This method  sets Rb Number
-       *@param RbNumber :: Rb number used for search
-       */
-      void setRbNumber(const std::string& RbNumber);
-
-      /**This method  sets Investigation Type
-       *@param invstType :: investigation type used for search
-       */
+      /// Set the investigators name to search for.
+      void setInvestigatorSurName(const std::string& investigatorName);
+      /// Set the investigation type to search for.
       void setInvestigationType(const std::string& invstType);
+      /// Set the "my data only" flag to search only user's data if true.
+      void setMyData(bool flag);
 
-      /**This method  sets datafileName
-       *@param datafileName :: data file name used for search
-       */
-      void setDatafileName(const std::string& datafileName );
-
-      /**This method  returns the start run number
-       *@returns  run start number
-       */
-      const double& getRunStart()const  ;
-      /**This method  returns the end run number
-       *@returns  run end number
-       */
+      /// Get the start run from user input.
+      const double& getRunStart() const;
+      /// Get the end run.
       const double& getRunEnd() const;
-      /**This method  returns the instrument name
-       *@returns  instrument name
-       */
+      /// Get the instrument name.
       const std::string& getInstrument() const;
-      /**This method  returns the start date
-       *@returns  start date
-       */
+      /// Get the investigation start date.
       const time_t& getStartDate() const;
-
-      /**This method  returns the end date
-       *@returns end date for investigations serch
-       */
+      /// Get the investigation end date.
       const time_t& getEndDate() const;
-      /**This method  returns case sensitive flag
-       *@returns  case sensitive flag
-       */
-      bool getCaseSensitive() const;
-
-      /**This method  returns keywords used for searching
-       *@returns keywords
-       */
+      /// Get the keywords to search investigations for.
       const std::string& getKeywords() const;
-
-      /**This method  returns investigationName used for searching
-       *@returns investigation name
-       */
+      /// Get the name of the investigation to search for.
       const std::string& getInvestigationName() const;
-
-      /**This method  returns investigationAbstract used for searching
-       *@returns investigation abstract
-       */
-      const std::string& getInvestigationAbstract() const;
-
-      /**This method  returns sample used for searching
-       *@returns samplename
-       */
-      const std::string& getSampleName() const;
-
-      /**This method  returns Investigator surname
-       *@returns surname of the investigator
-       */
-      const std::string& getInvestigatorSurName() const;
-
-      /**This method  returns Rb Number
-       *@returns Rb number
-       */
-      const std::string& getRbNumber() const;
-
-      /**This method  returns Investigation Type
-       *@returns Rb number
-       */
-      const std::string& getInvestigationType() const;
-
-      /**This method  returns datafileName
-       *@returns m_datafileName
-       */
+      /// Get the datafile name.
       const std::string& getDatafileName() const;
-
-      /**This method returns the time_t value for a Date which is in "DD/MM/YYYY" format
-       *@param sDate :: input date string
-       */
+      /// Get the sample name.
+      const std::string& getSampleName() const;
+      /// Get the investigators name.
+      const std::string& getInvestigatorSurName() const;
+      /// Get the investigation type.
+      const std::string& getInvestigationType() const;
+      /// Get the "my data only" flag.
+      bool getMyData() const;
+      /// Saves the start/end date times to time_t value.
       time_t getTimevalue(const std::string& sDate);
 
     private:
@@ -181,31 +100,23 @@ namespace Mantid
       std::string m_instrName;
       /// search keywords
       std::string m_keywords;
-      /// case sensitive
-      bool m_caseSensitive;
       /// start date
       time_t m_startDate;
       /// end date
       time_t m_endDate;
       /// investigation anme
       std::string m_investigationName;
-      /// investigation abstract
-      std::string m_investigationAbstract;
+      /// Datafile name
+      std::string m_datafileName;
       /// sample name
       std::string m_sampleName;
       /// investigator surname
       std::string m_investigatorSurname;
-      /// rb number
-      std::string m_RbNumber;
       /// investigation type
       std::string m_investigationType;
-      /// data file name
-      std::string m_datafileName;
-
+      /// My data checkbox
+      bool m_myData;
     };
-
   }
-
 }
-
 #endif

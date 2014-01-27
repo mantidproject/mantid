@@ -18,18 +18,25 @@ namespace API
   IDomainCreator::IDomainCreator( Kernel::IPropertyManager* manager,
     const std::vector<std::string>& workspacePropertyNames,
     DomainType domainType):
-  m_manager( manager ),
-  m_workspacePropertyNames( workspacePropertyNames ),
-    m_domainType( domainType ), m_outputCompositeMembers( false ), m_ignoreInvalidData( false )
+    m_manager( manager ),
+    m_workspacePropertyNames( workspacePropertyNames ),
+    m_domainType( domainType ),
+    m_outputCompositeMembers( false ),
+    m_convolutionCompositeMembers( false ),
+    m_ignoreInvalidData( false )
   {}
 
   /**
    * @param value If true then each composite is unrolled and its output is appended to
    * the default output, otherwise just the composite is used
+   * @param conv If true and the fitting function is Convolution and its model (function with
+   * index 1) is composite then output the components of the model convolved with the
+   * resolution (function index 0).
    */
-  void IDomainCreator::separateCompositeMembersInOutput(const bool value)
+  void IDomainCreator::separateCompositeMembersInOutput(const bool value, const bool conv)
   {
     m_outputCompositeMembers = value;
+    m_convolutionCompositeMembers = conv;
   }
 
   /**

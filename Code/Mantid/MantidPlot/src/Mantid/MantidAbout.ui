@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>380</width>
-    <height>477</height>
+    <height>536</height>
    </rect>
   </property>
   <property name="font">
@@ -93,7 +93,7 @@
         <item row="4" column="0">
          <widget class="QLabel" name="mantidlabel">
           <property name="text">
-           <string>Homepage</string>
+           <string>Homepage:</string>
           </property>
          </widget>
         </item>
@@ -115,6 +115,20 @@
          <widget class="QLabel" name="revision_value">
           <property name="text">
            <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLabel" name="mantiddoi">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="doi_label">
+          <property name="text">
+           <string>Citation:</string>
           </property>
          </widget>
         </item>
@@ -140,7 +154,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="builitusing_label">
           <property name="text">
-           <string>Extended from</string>
+           <string>Extended from:</string>
           </property>
          </widget>
         </item>

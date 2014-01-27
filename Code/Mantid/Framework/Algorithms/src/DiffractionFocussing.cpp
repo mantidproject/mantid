@@ -24,7 +24,7 @@ The main difference vs. using a Workspace2D is that the event lists from all the
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
-    DiffractionFocussing("InWS","OutWS","filename")
+    OutWS = DiffractionFocussing("InWS","filename")
 '''C++'''
     IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("DiffractionFocussing");
     alg->setPropertyValue("InputWorkspace", "InWS"); 

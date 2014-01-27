@@ -36,9 +36,9 @@ namespace MantidQt
     class DLLExport PeakOverlayMultiSphereFactory : public PeakOverlayViewFactoryBase
     {
     private:
-      double m_peakRadius;
-      double m_backgroundInnerRadius;
-      double m_backgroundOuterRadius;
+      std::vector<double> m_peakRadius;
+      std::vector<double> m_backgroundInnerRadius;
+      std::vector<double> m_backgroundOuterRadius;
       Mantid::API::IPeaksWorkspace_sptr m_peaksWS;
       int m_FOM;
     public:

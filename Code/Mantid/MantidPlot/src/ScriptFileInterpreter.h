@@ -28,7 +28,7 @@ class ScriptFileInterpreter : public QWidget
 
 public:
   /// Construct the object
-  ScriptFileInterpreter(QWidget *parent = NULL);
+  ScriptFileInterpreter(QWidget *parent = NULL, const QString & settingsGroup = "");
   /// Destroy the object
   ~ScriptFileInterpreter();
   /// Make sure we are in a safe state to delete the widget
@@ -38,6 +38,8 @@ public:
 
   /// Return the filename of the script in the editor
   virtual QString filename() const;
+  ///
+  inline ScriptEditor *editor() const { return m_editor; }
   /// Has the script text been modified
   virtual bool isScriptModified() const;
   /// Is the script running
@@ -75,10 +77,6 @@ public slots:
   /// Execute the current selection
   virtual void executeSelection(const Script::ExecutionMode mode = Script::Asynchronous);
 
-  /// Zoom in on script
-  virtual void zoomInOnScript();
-  /// Zoom out on script
-  virtual void zoomOutOnScript();
   /// Toggles the progress reports on/off
   virtual void toggleProgressReporting(bool state);
   /// Toggles the code folding on/off

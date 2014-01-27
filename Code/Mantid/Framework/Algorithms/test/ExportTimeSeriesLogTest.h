@@ -25,7 +25,6 @@
 #include <iomanip>
 #include <fstream>
 #include <Poco/File.h>
-#include "MantidAlgorithms/FilterEventsHighFrequency.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

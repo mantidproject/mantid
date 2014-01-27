@@ -648,7 +648,7 @@ namespace Mantid
           goniometerMatrix[9 * i + 5] = gm[2][1];
           goniometerMatrix[9 * i + 6] = gm[0][2];
           goniometerMatrix[9 * i + 7] = gm[1][2];
-          goniometerMatrix[9 * i + 8] = gm[1][2];
+          goniometerMatrix[9 * i + 8] = gm[2][2];
         }
         // etc.
       }

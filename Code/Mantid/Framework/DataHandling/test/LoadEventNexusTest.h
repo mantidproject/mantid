@@ -16,7 +16,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadLogsFromSNSNexus.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <Poco/File.h>
@@ -331,6 +330,27 @@ public:
   void test_SingleBank_ThatDoesntExist()
   {
     doTestSingleBank(false, false, "bankDoesNotExist", true);
+  }
+
+  void test_instrument_inside_nexus_file()
+  {
+    LoadEventNexus load;
+    TS_ASSERT_THROWS_NOTHING( load.initialize() );
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("Filename", "HYSA_12509.nxs.h5") );
+    const std::string outws("InstInNexus");
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("OutputWorkspace", outws) );
+    TS_ASSERT( load.execute() );
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
+    auto inst = ws->getInstrument();
+    TS_ASSERT( inst->getFilename().empty() ); // This is how we know we got it from inside the nexus file
+    TS_ASSERT_EQUALS( inst->getName(), "HYSPECA" );
+    TS_ASSERT_EQUALS( inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000") );
+    TS_ASSERT_EQUALS( inst->getNumberDetectors(), 20483 );
+    TS_ASSERT_EQUALS( inst->baseInstrument()->numMonitors(), 3 );
+    auto params = inst->getParameterMap();
+    TS_ASSERT_EQUALS( params->size(), 49);
+    TS_ASSERT_EQUALS( params->getString(inst.get(), "deltaE-mode"), "direct");
   }
 
   /** Test with a particular ARCS file that has 2 preprocessors,

@@ -352,7 +352,7 @@ void JSONValue::prettyPrint( ostream &ostr, unsigned indentLevel) const
           }
           it->prettyPrint( ostr, indentLevel+1);
           ostr << endl;
-          it++;
+          ++it;
         }
 
         for (unsigned i = 0; i < indentLevel+1; i++)
@@ -762,7 +762,7 @@ void prettyPrint( const JSONObject &obj, std::ostream &ostr, unsigned indentLeve
       // will be printed with their key, value and braces all on one line.)
       ostr << endl;
     }
-    it++;
+    ++it;
   }
   ostr.flush();
 }

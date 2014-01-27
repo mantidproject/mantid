@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/CatalogAlgorithmHelper.cpp
 	src/CatalogDownloadDataFiles.cpp
 	src/CatalogGetDataFiles.cpp
 	src/CatalogGetDataSets.cpp
@@ -21,6 +22,7 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( INC_FILES
+	inc/MantidICat/CatalogAlgorithmHelper.h
 	inc/MantidICat/CatalogDownloadDataFiles.h
 	inc/MantidICat/CatalogGetDataFiles.h
 	inc/MantidICat/CatalogGetDataSets.h
@@ -45,6 +47,7 @@ set ( INC_FILES
 	inc/MantidICat/ICat4/GSoapGenerated/ICat4H.h
 	inc/MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h
 	inc/MantidICat/ICat4/GSoapGenerated/ICat4Stub.h
+	inc/MantidICat/ICat4/ICat4Catalog.h
 )
 
 set ( TEST_FILES

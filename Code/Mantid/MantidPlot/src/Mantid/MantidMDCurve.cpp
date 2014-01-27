@@ -24,6 +24,10 @@ MantidMDCurve::MantidMDCurve(const QString& wsName,Graph* g,bool err,bool distr,
   :MantidCurve(wsName, err),
   m_wsName(wsName)
 {
+  if(!g)
+  {
+    throw std::invalid_argument("MantidMDCurve::MantidMDCurve() - NULL graph pointer not allowed");
+  }
   init(g,distr,style);
 }
 
@@ -77,10 +81,7 @@ void MantidMDCurve::init(Graph* g, bool distr, Graph::CurveType style)
   {
     setStyle(QwtPlotCurve::Lines);
   }
-  if (g)
-  {
-    g->insertCurve(this,lineWidth);
-  }
+  g->insertCurve(this,lineWidth);
   connect(g,SIGNAL(axisScaleChanged(int,bool)),this,SLOT(axisScaleChanged(int,bool)));
   observePostDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );

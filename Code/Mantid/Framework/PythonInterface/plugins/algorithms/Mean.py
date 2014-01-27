@@ -8,7 +8,7 @@ from mantid.kernel import *
 class Mean(PythonAlgorithm):
 
     def category(self):
-        return "Algebraic"
+        return "Arithmetic"
 
     def name(self):
         return "Mean"

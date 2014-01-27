@@ -145,13 +145,14 @@ namespace Mantid
       calculateSampleContribution();
       calculateDetectorContribution();
       calculateTimeBinContribution();
+      size_t randUsed = m_randIndex;
 
       m_curRandNums = NULL;
       m_randIndex = 0;
       m_curObs = NULL;
       m_curQOmega = NULL;
 
-      return length();
+      return randUsed;
     }
 
     //-----------------------------------------------------------------------

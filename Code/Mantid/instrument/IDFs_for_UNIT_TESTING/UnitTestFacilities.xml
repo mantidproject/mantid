@@ -17,6 +17,16 @@
     <livedata listener="ISISHistoDataListener" address="127.0.0.1:6789" />
   </instrument>
 
+  <instrument name="TestDataListener">
+    <technique>Test Listener</technique>
+    <livedata listener="TestDataListener" address="127.0.0.1:0" />
+  </instrument>
+
+  <instrument name="FakeEventDataListener">
+    <technique>Test Listener</technique>
+    <livedata listener="FakeEventDataListener" address="127.0.0.1:0" />
+  </instrument>
+
 </facility>
 
 </facilities>

@@ -934,7 +934,7 @@ QImage Spectrogram::renderImage(
           imax = rect.height()-1;
         }
       }
-      std::fill(image2matrix_yMap.begin()+imin,image2matrix_yMap.begin()+imax+1,row);
+      std::fill(image2matrix_yMap.begin()+imin,image2matrix_yMap.begin()+imax+1,static_cast<int>(row));
 
     }
 

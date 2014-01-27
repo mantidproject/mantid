@@ -1126,6 +1126,12 @@ public:
 
   MDIWindowList windowsList() /PyName=windows/;
 
+  // Required for setting the IPython console
+  QDockWidget _getInterpreterDock();
+%MethodCode
+  sipRes = sipCpp->m_interpreterDock;
+%End
+
   // folders
   Folder *activeFolder();
 %MethodCode
@@ -1593,8 +1599,17 @@ sipClass=sipFindClass(sipCpp->className());
 
 public:
   // Plotting methods
-  MultiLayer* plotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotBin(const QString&,const QList<int>&,bool = false,Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* plotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, 
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* window = NULL, bool clearWindow = false);
+
+  MultiLayer* plotBin(const QString&,const QList<int>&,bool = false,Graph::CurveType style = Graph::Unspecified,
+    MultiLayer* window = NULL, bool clearWindow = false);
+
+  MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis, 
+    const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* window = NULL,
+    bool clearWindow = false);
+
+
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
 

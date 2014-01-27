@@ -49,9 +49,11 @@ namespace LiveData
         instruments.push_back( it->name() );
       }
     }
-    // TEMPORARY: Add all the listeners by hand while this is all under development
+#ifndef NDEBUG
+    // Debug builds only: Add all the listeners by hand for development testing purposes
     std::vector<std::string> listeners = Mantid::API::LiveListenerFactory::Instance().getKeys();
     instruments.insert( instruments.end(), listeners.begin(), listeners.end() );
+#endif
     declareProperty(new PropertyWithValue<std::string>("Instrument","", boost::make_shared<StringListValidator>(instruments)),
         "Name of the instrument to monitor.");
 

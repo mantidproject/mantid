@@ -97,7 +97,9 @@ public:
      dataStore.remove(wsName2);
   }
 
-  void testDifferent_BaseInstrument_Throws()
+	// #8186: it was decided to relax the previous requirement that it does not copy the instrument
+	// parameter for different instruments
+  void testDifferent_BaseInstrument_Warns()
   {
     // Create input workspace with parameterised instrument and put into data store
      MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
@@ -113,10 +115,10 @@ public:
      TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1 ));
      TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", wsName2 ));
 
-     // Execute Algorithm, should throw invalid argument exception
+     // Execute Algorithm, should warn but proceed
      copyInstParam.setRethrows(true);
-     TS_ASSERT_THROWS(copyInstParam.execute(), std::invalid_argument);
-     TS_ASSERT( !copyInstParam.isExecuted() );
+     TS_ASSERT(copyInstParam.execute());
+     TS_ASSERT( copyInstParam.isExecuted() );
 
      dataStore.remove(wsName1);
      dataStore.remove(wsName2);

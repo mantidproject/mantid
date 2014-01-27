@@ -83,7 +83,7 @@ public:
     bool contains(double x, double y) const;
     bool contains(const RectF& rect);
 
-    void findTransform(QTransform& trans, const QRectF& rect);
+    void findTransform(QTransform& trans, const QRectF& rect) const;
 
     QRectF toQRectF() const;
 
@@ -116,8 +116,8 @@ inline RectF::RectF(const QPointF &point0, const QPointF &point1)
 
 inline RectF::RectF(const QRectF &rect)
 {
-    m_x0 = rect.x();
-    m_y0 = rect.y();
+    m_x0 = rect.left();
+    m_y0 = rect.top();
     m_x1 = rect.right();
     m_y1 = rect.bottom();
 }

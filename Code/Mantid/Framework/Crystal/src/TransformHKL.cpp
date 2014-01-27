@@ -97,7 +97,7 @@ namespace Crystal
     identity_matrix[8] = 1;
     auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
     this->declareProperty(
-          new ArrayProperty<double>("HKL_Transform",identity_matrix,threeBythree),
+          new ArrayProperty<double>("HKLTransform",identity_matrix,threeBythree),
           "Specify 3x3 HKL transform matrix as a comma separated list of 9 numbers");
 
     this->declareProperty(
@@ -132,7 +132,7 @@ namespace Crystal
              "ERROR: The stored UB is not a valid orientation matrix");
     }
 
-    std::vector<double> tran_vec = getProperty("HKL_Transform");
+    std::vector<double> tran_vec = getProperty("HKLTransform");
     DblMatrix hkl_tran( tran_vec );
 
     std::ostringstream str_stream;

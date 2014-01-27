@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QCheckBox>
+#include <QSignalMapper>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -27,8 +28,8 @@ namespace CustomDialogs
 }
 }
 
-// Just to save writing this everywhere 
 using namespace MantidQt::CustomDialogs;
+using namespace MantidQt::API; 
 
 //---------------------------------------
 // Public member functions
@@ -38,6 +39,9 @@ using namespace MantidQt::CustomDialogs;
  */
 PlotAsymmetryByLogValueDialog::PlotAsymmetryByLogValueDialog(QWidget *parent) : AlgorithmDialog(parent)
 {
+  browseButtonMapper = new QSignalMapper();
+
+  connect(browseButtonMapper, SIGNAL(mapped(const QString&)), this, SLOT(openFileDialog(const QString&)));
 }
 
 /**
@@ -45,6 +49,7 @@ PlotAsymmetryByLogValueDialog::PlotAsymmetryByLogValueDialog(QWidget *parent) : 
   */
 PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog()
 {	
+  delete browseButtonMapper;
 }
 
 //---------------------------------------
@@ -56,92 +61,71 @@ PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog()
 void PlotAsymmetryByLogValueDialog::initLayout()
 {
   m_uiForm.setupUi(this);
+
+  // Tie all the properties
   tie(m_uiForm.firstRunBox, "FirstRun", m_uiForm.FirstRunLayout);
   tie(m_uiForm.lastRunBox, "LastRun", m_uiForm.LastRunLayout);
-  tie( m_uiForm.outWSBox, "OutputWorkspace", m_uiForm.OutputWSLayout);
-  connect( m_uiForm.browseFirstButton, SIGNAL(clicked()), this, SLOT(browseFirstClicked()) );
-  connect( m_uiForm.browseLastButton, SIGNAL(clicked()), this, SLOT(browseLastClicked()) );
+  tie(m_uiForm.logBox, "LogValue");
+  tie(m_uiForm.outWSBox, "OutputWorkspace", m_uiForm.OutputWSLayout);
+  tie(m_uiForm.typeBox, "Type");
+  tie(m_uiForm.redBox, "Red");
+  tie(m_uiForm.greenBox, "Green");
+  tie(m_uiForm.forwardBox, "ForwardSpectra");
+  tie(m_uiForm.backwardBox, "BackwardSpectra");
+  tie(m_uiForm.timeMinBox, "TimeMin");
+  tie(m_uiForm.timeMaxBox, "TimeMax");
+  tie(m_uiForm.dtcType, "DeadTimeCorrType");
+  tie(m_uiForm.dtcFile, "DeadTimeCorrFile");
+
+  // Set-up browse button mapping
+  browseButtonMapper->setMapping(m_uiForm.browseFirstButton, "FirstRun");
+  browseButtonMapper->setMapping(m_uiForm.browseLastButton,  "LastRun");
+  browseButtonMapper->setMapping(m_uiForm.dtcFileBrowseButton, "DeadTimeCorrFile");
+
+  // Connect Browse buttons to the mapper
+  connect(m_uiForm.browseFirstButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
+  connect(m_uiForm.browseLastButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
+  connect(m_uiForm.dtcFileBrowseButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
+
   connect( m_uiForm.firstRunBox, SIGNAL(textChanged(const QString&)), this, SLOT(fillLogBox(const QString&)) );
   connect( m_uiForm.btnOK,SIGNAL(clicked()),this,SLOT(accept()));
   connect( m_uiForm.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
   connect( m_uiForm.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
 
-  fillLineEdit("FirstRun", m_uiForm.firstRunBox);
-  fillLineEdit("LastRun", m_uiForm.lastRunBox);
-  m_uiForm.logBox->setEditable(true);
-  fillLineEdit("OutputWorkspace", m_uiForm.outWSBox);
-  fillAndSetComboBox("Type",m_uiForm.typeBox);
-  fillLineEdit("Red", m_uiForm.redBox);
-  fillLineEdit("Green", m_uiForm.greenBox);
-  fillLineEdit("ForwardSpectra", m_uiForm.forwardBox);
-  fillLineEdit("BackwardSpectra", m_uiForm.backwardBox);
-  fillLineEdit("TimeMin", m_uiForm.timeMinBox);
-  fillLineEdit("TimeMax", m_uiForm.timeMaxBox);
-  
-  QString asdfdasasdf = m_uiForm.firstRunBox->text();
-   
+  connect( m_uiForm.dtcType, SIGNAL(currentIndexChanged(int)), this, SLOT(showHideDeadTimeFileWidget(int)));
+
+  // Fill ComboBoxes with allowed values
+  fillAndSetComboBox("Type", m_uiForm.typeBox);
+  fillAndSetComboBox("DeadTimeCorrType", m_uiForm.dtcType);
+
+  // Fill log values from the file
   if ( !m_uiForm.firstRunBox->text().isEmpty() )
     fillLogBox(m_uiForm.firstRunBox->text());
+
+  // So user can enter a custom value
+  m_uiForm.logBox->setEditable(true);
 }
 
 /**
- * Retrieve the input from the dialog
+ * Opens a file dialog. Updates the QLineEdit provided when the dialog is closed.
  */
-void PlotAsymmetryByLogValueDialog::parseInput()
+void PlotAsymmetryByLogValueDialog::openFileDialog(const QString& filePropName)
 {
-  storePropertyValue("FirstRun", m_uiForm.firstRunBox->text());
-  storePropertyValue("LastRun", m_uiForm.lastRunBox->text());
-  storePropertyValue("LogValue", m_uiForm.logBox->currentText());
-  storePropertyValue("OutputWorkspace", m_uiForm.outWSBox->text());
-  storePropertyValue("Type", m_uiForm.typeBox->currentText());
-  storePropertyValue("Red", m_uiForm.redBox->text());
-  storePropertyValue("Green", m_uiForm.greenBox->text());
-  storePropertyValue("ForwardSpectra", m_uiForm.forwardBox->text());
-  storePropertyValue("BackwardSpectra", m_uiForm.backwardBox->text());
-  storePropertyValue("TimeMin", m_uiForm.timeMinBox->text());
-  storePropertyValue("TimeMax", m_uiForm.timeMaxBox->text()); 
-}
+  QString selectedPath = AlgorithmDialog::openFileDialog(filePropName);
 
-/**
-  * A slot for the browse button "clicked" signal
-  */
-void PlotAsymmetryByLogValueDialog::browseFirstClicked()
-{
-  if( !m_uiForm.firstRunBox->text().isEmpty() )
+  if(!selectedPath.isEmpty())
   {
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(m_uiForm.firstRunBox->text()).absoluteDir().path());
+    // Save used directory for the next time
+    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(selectedPath).absoluteDir().path());
+
+    // Get the widget for the file property
+    QLineEdit* lineEdit = dynamic_cast<QLineEdit*>(m_tied_properties[filePropName]);
+
+    if(!lineEdit)
+      throw std::runtime_error("Widget of the file property was not found");
+
+    lineEdit->setText(selectedPath.trimmed());
   }
-
-  QString filepath = this->openFileDialog("FirstRun");
-  if( !filepath.isEmpty() )
-  {
-    m_uiForm.firstRunBox->clear();
-    m_uiForm.firstRunBox->setText(filepath.trimmed());
-  }
-
-//  //Add a suggestion for workspace name
-//  if( m_wsBox->isEnabled() && !filepath.isEmpty() ) m_wsBox->setText(QFileInfo(filepath).baseName());
-}
-
-/**
-  * A slot for the browse button "clicked" signal
-  */
-void PlotAsymmetryByLogValueDialog::browseLastClicked()
-{
-  if( !m_uiForm.firstRunBox->text().isEmpty() )
-  {
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(m_uiForm.firstRunBox->text()).absoluteDir().path());
-  }
-
-  QString filepath = this->openFileDialog("LastRun");
-  if( !filepath.isEmpty() )
-  {
-    m_uiForm.lastRunBox->clear();
-    m_uiForm.lastRunBox->setText(filepath.trimmed());
-  }
-
-//  //Add a suggestion for workspace name
-//  if( m_wsBox->isEnabled() && !filepath.isEmpty() ) m_wsBox->setText(QFileInfo(filepath).baseName());
 }
 
 /**
@@ -221,4 +205,14 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
   catch(std::exception& )
   {
   }
+}
+
+/**
+ * Show or hide Dead Time file widget depending on which Dead Time type is selected.
+ * @param deadTimeTypeIndex Selected Dead Time Correction type index
+ */
+void PlotAsymmetryByLogValueDialog::showHideDeadTimeFileWidget(int deadTimeTypeIndex)
+{
+  // Show only if "Using specified file" selected
+  m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 1);
 }

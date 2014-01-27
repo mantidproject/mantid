@@ -94,6 +94,19 @@ static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
+static const string  EVENT_EXTS[] = {"_neutron_event.dat",
+                                     "_neutron0_event.dat",
+                                     "_neutron1_event.dat",
+                                     "_neutron2_event.dat",
+                                     "_neutron3_event.dat",
+                                     "_live_neutron_event.dat"};
+static const string  PULSE_EXTS[] = {"_pulseid.dat",
+                                     "_pulseid0.dat",
+                                     "_pulseid1.dat",
+                                     "_pulseid2.dat",
+                                     "_pulseid3.dat",
+                                     "_live_pulseid.dat"};
+static const int NUM_EXT = 6;
 
 //-----------------------------------------------------------------------------
 //Statistic Functions
@@ -113,26 +126,21 @@ static string getRunnumber(const string &filename) {
 
 static string generatePulseidName(string eventfile)
 {
-  size_t start;
-  string ending;
+  // initialize vector of endings and put live at the beginning
+  vector<string> eventExts(EVENT_EXTS, EVENT_EXTS+NUM_EXT);
+  std::reverse(eventExts.begin(), eventExts.end());
+  vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS+NUM_EXT);
+  std::reverse(pulseExts.begin(), pulseExts.end());
 
-  // normal ending
-  ending = "neutron_event.dat";
-  start = eventfile.find(ending);
-  if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid.dat");
+  // look for the correct ending
+  for (std::size_t i = 0; i < eventExts.size(); ++i)
+  {
+    size_t start = eventfile.find(eventExts[i]);
+    if (start != string::npos)
+      return eventfile.replace(start, eventExts[i].size(), pulseExts[i]);
+  }
 
-  // split up event files - yes this is copy and pasted code
-  ending = "neutron0_event.dat";
-  start = eventfile.find(ending);
-  if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid0.dat");
-
-  ending = "neutron1_event.dat";
-  start = eventfile.find(ending);
-  if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid1.dat");
-
+  // give up and return nothing
   return "";
 }
 
@@ -243,20 +251,10 @@ void LoadEventPreNexus2::initDocs()
 void LoadEventPreNexus2::init()
 {
   // which files to use
-  vector<string> eventExts;
-  eventExts.push_back("_neutron_event.dat");
-  eventExts.push_back("_neutron0_event.dat");
-  eventExts.push_back("_neutron1_event.dat");
-  eventExts.push_back("_neutron2_event.dat");
-  eventExts.push_back("_neutron3_event.dat");
+  vector<string> eventExts(EVENT_EXTS, EVENT_EXTS+NUM_EXT);
   declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, eventExts),
       "The name of the neutron event file to read, including its full or relative path. In most cases, the file typically ends in neutron_event.dat (N.B. case sensitive if running on Linux).");
-  vector<string> pulseExts;
-  pulseExts.push_back("_pulseid.dat");
-  pulseExts.push_back("_pulseid0.dat");
-  pulseExts.push_back("_pulseid1.dat");
-  pulseExts.push_back("_pulseid2.dat");
-  pulseExts.push_back("_pulseid3.dat");
+  vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS+NUM_EXT);
   declareProperty(new FileProperty(PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
       "File containing the accelerator pulse information; the filename will be found automatically if not specified.");
   declareProperty(new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
@@ -486,11 +484,25 @@ void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle, size_t mindex){
  */
 void LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace)
 {
-  // determine the instrument parameter file
+  // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
-  size_t pos = instrument.rfind("_"); // get rid of 'event.dat'
-  pos = instrument.rfind("_", pos-1); // get rid of 'neutron'
-  pos = instrument.rfind("_", pos-1); // get rid of the run number
+
+  // initialize vector of endings and put live at the beginning
+  vector<string> eventExts(EVENT_EXTS, EVENT_EXTS+NUM_EXT);
+  std::reverse(eventExts.begin(), eventExts.end());
+
+  for (size_t i = 0; i < eventExts.size(); ++i)
+  {
+    size_t pos = instrument.find(eventExts[i]);
+    if (pos != string::npos)
+    {
+      instrument = instrument.substr(0, pos);
+      break;
+    }
+  }
+
+  // determine the instrument parameter file
+  size_t pos = instrument.rfind("_"); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
   // do the actual work

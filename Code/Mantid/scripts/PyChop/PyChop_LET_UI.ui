@@ -39,9 +39,6 @@
     <property name="text">
      <string extracomment="5"/>
     </property>
-    <property name="placeholderText">
-     <string extracomment="5"/>
-    </property>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">

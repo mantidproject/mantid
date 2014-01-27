@@ -231,15 +231,14 @@ void SaveCanSAS1D2::createSASTransElement(std::string& sasTrans, const std::stri
   const MantidVec& ydata = m_ws->readY(0);
   const MantidVec& edata = m_ws->readE(0);
   const bool isHistogram = m_ws->isHistogramData();
-  double lambda, trans_value, trans_err; 
   for (size_t j = 0; j < m_ws->blocksize(); ++j)
   {
     // x data is the Lambda in xml. If histogramdata take the mean
-    lambda = isHistogram ? (xdata[j] + xdata[j+1])/2: xdata[j];
+    double lambda = isHistogram ? (xdata[j] + xdata[j+1])/2: xdata[j];
     // y data is the T in xml.
-    trans_value = ydata[j]; 
+    double trans_value = ydata[j]; 
     // e data is the Tdev in xml. 
-    trans_err = edata[j]; 
+    double trans_err = edata[j]; 
 
     trans << "\n\t\t\t<Tdata><Lambda unit=\""<<lambda_unit
           <<"\">"; 

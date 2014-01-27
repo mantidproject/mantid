@@ -66,7 +66,7 @@ void QueryAllRemoteJobs::exec()
   JSONObject resp;
   try {
   initFromStream( resp, respStream);
-  } catch (JSONParseException &ex) {
+  } catch (JSONParseException &) {
     // Nobody else knows what a JSONParseException is, so rethrow as a runtime_error
     throw( std::runtime_error( "Error parsing data returned from the server.  This probably indicates a server-side error of some kind."));
   }
@@ -126,7 +126,7 @@ void QueryAllRemoteJobs::exec()
         completionDates.push_back( "");
       }
 
-      it++;
+      ++it;
     }
 
     setProperty( "JobId", jobIds);

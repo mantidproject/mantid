@@ -51,6 +51,18 @@ class AnalysisDataServiceTest(unittest.TestCase):
         AnalysisDataService.addOrReplace(name, ws)
         self.assertRaises(RuntimeError, AnalysisDataService.add, name, ws)
         AnalysisDataService.remove(name)
+
+    def test_addOrReplace_replaces_workspace_with_existing_name(self):
+        data = [1.0,2.0,3.0]
+        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        name = "testws"
+        ws = alg.getProperty("OutputWorkspace").value
+        AnalysisDataService.add(name, ws)
+        len_before = len(AnalysisDataService)
+        AnalysisDataService.addOrReplace(name, ws)
+        len_after = len(AnalysisDataService)
+        self.assertEquals(len_after, len_before)
+        AnalysisDataService.remove(name)
     
     def do_check_for_matrix_workspace_type(self, workspace):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))

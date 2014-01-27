@@ -18,6 +18,7 @@
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadAscii.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Poco/File.h>
@@ -670,14 +671,37 @@ namespace Mantid
       std::list<std::string>::const_iterator logPath;
       for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath)
       {
+        //check for log files we should just ignore
+        std::string ignoreSuffix = "ICPstatus.txt";
+        if(boost::algorithm::ends_with(*logPath, ignoreSuffix))
+        {
+          g_log.information("Skipping log file: " + *logPath);
+          continue;
+        }
+
+        ignoreSuffix = "ICPdebug.txt";
+        if(boost::algorithm::ends_with(*logPath, ignoreSuffix))
+        {
+          g_log.information("Skipping log file: " + *logPath);
+          continue;
+        }
+
         // Create a new object for each log file.
         IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
+
         // Pass through the same input filename
         loadLog->setPropertyValue("Filename", *logPath);
         // Set the workspace property to be the same one filled above
         loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
         // Pass the name of the log file explicitly to LoadLog.
         loadLog->setPropertyValue("Names", extractLogName(*logPath));
+
+        //Force loading two column file if it's an ISIS ICPevent log
+        if(boost::algorithm::ends_with(*logPath, "ICPevent.txt"))
+        {
+          loadLog->setPropertyValue("NumberOfColumns", "2");
+        }
+
         // Enable progress reporting by Child Algorithm - if progress range has duration
         if ( progStart < progEnd )
         {

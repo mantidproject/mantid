@@ -14,7 +14,7 @@ Note: this algorithm does not perform any grouping; the grouping must be done vi
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
-    AsymmetryCalc("EmuData","OutWS","1.0","0,1,2,3,4","16,17,18,19,20")
+    OutWS = AsymmetryCalc("EmuData","1.0","0,1,2,3,4","16,17,18,19,20")
 
 '''C++'''
     IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("AsymmetryCalc");
@@ -110,6 +110,11 @@ void AsymmetryCalc::exec()
     specIDs[1] = backward;
     std::vector<size_t> indices;
     tmpWS->getIndicesFromSpectra( specIDs, indices );
+
+    // If some spectra were not found, can't continue
+    if(specIDs.size() != indices.size())
+      throw std::invalid_argument("Some of the spectra specified do not exist in a workspace");
+
     forward = static_cast<int>( indices[0] );
     backward = static_cast<int>( indices[1] );
   }
@@ -129,7 +134,15 @@ void AsymmetryCalc::exec()
     double denominator = (tmpWS->dataY(forward)[j] + alpha * tmpWS->dataY(backward)[j]);
 
     // cal F-aB / F+aB
-    outputWS->dataY(0)[j] = denominator ? numerator / denominator : 0.;
+    if(denominator) 
+    {
+        outputWS->dataY(0)[j] = numerator / denominator;
+    } 
+    else
+    {
+        outputWS->dataY(0)[j] = 0.;
+    }
+
 
     // Work out the error (as in 1st attachment of ticket #4188)
     double error = 1.0;

@@ -3,7 +3,6 @@
 import platform, sys
 from IndirectImport import *
 if is_supported_f2py_platform():
-    fltabs = import_f2py("fltabs")
     cylabs = import_f2py("cylabs")
 else:
     unsupported_message()
@@ -120,13 +119,13 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     acscWS = name + '_acsc'
     accWS = name + '_acc'
     fname = name +'_Abs'
-    wrk = workdir + run_name
+    wrk = os.path.join(workdir, run_name)
     wrk.ljust(120,' ')
     for n in range(0,ndet):
         if geom == 'flt':
             angles = [avar, det[n]]
-            kill, A1, A2, A3, A4 = fltabs.fltabs(ncan, size, density, sigs,
-                siga, angles, waves, n, wrk, 0)
+            (A1,A2,A3,A4) = FlatAbs(ncan, size, density, sigs, siga, angles, waves)	
+            kill = 0
         if geom == 'cyl':
             astep = avar
             if (astep) < 1e-5:
@@ -203,3 +202,144 @@ def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
     if ( plotOpt == 'Angle' or plotOpt == 'Both' ):
         graph = mp.plotTimeBin(workspaces, 0)
         graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
+
+
+# FlatAbs - calculate flat plate absorption factors
+# 
+# For more information See:
+#   - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf  
+#   - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)  
+#
+#  Input parameters :
+#  sigs - list of scattering  cross-sections
+#  siga - list of absorption cross-sections
+#  density - list of density
+#  ncan - = 0 no can, >1 with can
+#  thick - list of thicknesses: sample thickness, can thickness1, can thickness2
+#  angles - list of angles
+#  waves - list of wavelengths
+
+def Fact(xSection,thickness,sec1,sec2):
+    S = xSection*thickness*(sec1-sec2)
+    F = 1.0
+    if (S == 0.):
+        F = thickness
+    else:
+        S = (1-math.exp(-S))/S
+        F = thickness*S
+    return F
+
+def calcThicknessAtSec(xSection, thickness, sec):
+    sec1, sec2 = sec
+
+    thickSec1 = xSection * thickness * sec1
+    thickSec2 = xSection * thickness * sec2
+
+    return thickSec1, thickSec2
+
+def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, sec):
+    nlam = len(canXSection)
+
+    assc = np.ones(nlam)
+    acsc = np.ones(nlam)
+    acc = np.ones(nlam)
+
+    sec1, sec2 = sec
+
+    #vector version of fact
+    vecFact = np.vectorize(Fact)
+    f1 = vecFact(canXSection,canThickness1,sec1,sec2)
+    f2 = vecFact(canXSection,canThickness2,sec1,sec2)
+
+    canThick1Sec1, canThick1Sec2 = calcThicknessAtSec(canXSection, canThickness1, sec)
+    canThick2Sec1, canThick2Sec2 = calcThicknessAtSec(canXSection, canThickness2, sec)
+
+    if (sec2 < 0.):
+        val = np.exp(-(canThick1Sec1-canThick1Sec2))
+        assc = ass * val
+
+        acc1 = f1
+        acc2 = f2 * val
+
+        acsc1 = acc1
+        acsc2 = acc2 * np.exp(-(sampleSec1-sampleSec2))
+    else:
+        val = np.exp(-(canThick1Sec1+canThick2Sec2))
+        assc = ass * val
+
+        acc1 = f1 * np.exp(-(canThick1Sec2+canThick2Sec2))
+        acc2 = f2 * val
+
+        acsc1 = acc1 * np.exp(-sampleSec2)
+        acsc2 = acc2 * np.exp(-sampleSec1)
+
+    canThickness = canThickness1+canThickness2
+
+    if(canThickness > 0.):
+        acc = (acc1+acc2)/canThickness
+        acsc = (acsc1+acsc2)/canThickness
+
+    return assc, acsc, acc
+
+def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
+    
+    PICONV = math.pi/180.
+
+    #can angle and detector angle
+    tcan1, theta1 = angles
+    canAngle = tcan1*PICONV
+    theta = theta1*PICONV
+
+    # tsec is the angle the scattered beam makes with the normal to the sample surface.
+    tsec = theta1-tcan1
+
+    nlam = len(waves)
+
+    ass = np.ones(nlam)
+    assc = np.ones(nlam)
+    acsc = np.ones(nlam)
+    acc = np.ones(nlam)
+
+    # case where tsec is close to 90 degrees. CALCULATION IS UNRELIABLE
+    if (abs(abs(tsec)-90.0) < 1.0):
+        #default to 1 for everything
+        return ass, assc, acsc, acc
+    else:
+        #sample & can scattering x-section
+        sampleScatt, canScatt = sigs[:2]
+        #sample & can absorption x-section                           
+        sampleAbs, canAbs = siga[:2]
+        #sample & can density                           
+        sampleDensity, canDensity = density[:2]
+        #thickness of the sample and can
+        samThickness, canThickness1, canThickness2 = thick
+        
+        tsec = tsec*PICONV
+
+        sec1 = 1./math.cos(canAngle)
+        sec2 = 1./math.cos(tsec)
+
+        #list of wavelengths
+        waves = np.array(waves)
+
+        #sample cross section
+        sampleXSection = (sampleScatt + sampleAbs * waves /1.8) * sampleDensity
+
+        #vector version of fact
+        vecFact = np.vectorize(Fact)
+        fs = vecFact(sampleXSection, samThickness, sec1, sec2)
+
+        sampleSec1, sampleSec2 = calcThicknessAtSec(sampleXSection, samThickness, [sec1, sec2])
+
+        if (sec2 < 0.):
+            ass = fs / samThickness
+        else:
+            ass= np.exp(-sampleSec2) * fs / samThickness
+
+        useCan = (ncan > 1)
+        if useCan:
+            #calculate can cross section
+            canXSection = (canScatt + canAbs * waves /1.8) * canDensity
+            assc, acsc, acc = calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, [sec1, sec2])
+
+    return ass, assc, acsc, acc

@@ -40,7 +40,6 @@ public:
 private:
     void initLayout();
     void populateMenuTree();
-    void getCustomInterfaceList();
     QList<QTreeWidgetItem*> getCurrentSelection();
     QTreeWidgetItem* getCurrentMenuSelection();
 private slots:

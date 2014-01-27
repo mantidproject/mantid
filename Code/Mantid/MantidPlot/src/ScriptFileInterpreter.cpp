@@ -16,9 +16,9 @@
  * Construct a widget
  * @param parent :: The parent widget
  */
-ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent)
+ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent, const QString & settingsGroup)
   : QWidget(parent), m_splitter(new QSplitter(Qt::Vertical,this)),
-    m_editor(new ScriptEditor(this, NULL)),
+    m_editor(new ScriptEditor(this, NULL,settingsGroup)),
     m_messages(new ScriptOutputDisplay), m_status(new QStatusBar),
     m_runner()
 {
@@ -249,17 +249,6 @@ void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
   }
 }
 
-/// Zoom in on script
-void ScriptFileInterpreter::zoomInOnScript()
-{
-  m_editor->zoomIn();
-}
-/// Zoom out on script
-void ScriptFileInterpreter::zoomOutOnScript()
-{
-  m_editor->zoomOut();
-}
-
 /// Toggles the progress reports on/off
 void ScriptFileInterpreter::toggleProgressReporting(bool state)
 {
@@ -316,6 +305,7 @@ void ScriptFileInterpreter::setupEditor(const ScriptingEnv & environ, const QStr
     readFileIntoEditor(identifier);
   }
   m_editor->setLexer(environ.createCodeLexer());
+  m_editor->setSettingsGroup("ScriptWindow");
   m_editor->padMargin();
   m_editor->setAutoMarginResize();
   m_editor->enableAutoCompletion();

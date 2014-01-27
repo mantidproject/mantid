@@ -52,6 +52,8 @@ public:
   virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
   //virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
   virtual void setColors();
+  bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
 private:
   void setDetectorColor(unsigned char* data, size_t i,GLColor c); ///< set colour to a detector
   void generateTexture(unsigned char* data, unsigned int& id);

@@ -162,8 +162,7 @@ namespace CurveFitting
     m_yspace.resize(nData);
     for(size_t i = 0; i < nData; ++i)
     {
-      const double tof = (isHistogram) ? 0.5*(xValues[i] + xValues[i+1]) : xValues[i];
-      const double tseconds = tof*1e-6;
+      const double tseconds = (isHistogram) ? 0.5*(xValues[i] + xValues[i+1]) : xValues[i];
       const double v0 = m_l1/(tseconds - m_t0 - (m_l2/v1));
       const double ei = massToMeV*v0*v0;
       m_e0[i] = ei;
@@ -173,7 +172,6 @@ namespace CurveFitting
       m_modQ[i] = q;
       m_yspace[i] = 0.2393*(m_mass/q)*(w - (mevToK*q*q/m_mass));
     }
-
   }
 
   /*

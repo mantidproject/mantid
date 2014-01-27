@@ -198,7 +198,12 @@ double MantidQwtIMDWorkspaceData::x(size_t i) const
 */
 double MantidQwtIMDWorkspaceData::y(size_t i) const
 {
-  return m_Y[i];
+  Mantid::signal_t tmp = m_Y[i];
+  if (m_logScale && tmp <= 0.)
+  {
+    tmp = m_minPositive;
+  }
+  return tmp;
 }
 
 /// Returns the x position of the error bar for the i-th data point (bin)
@@ -210,13 +215,59 @@ double MantidQwtIMDWorkspaceData::ex(size_t i) const
 /// Returns the error of the i-th data point
 double MantidQwtIMDWorkspaceData::e(size_t i) const
 {
-  return m_E[i];
+  if (m_logScale)
+    {
+      if (m_Y[i] <= 0.0)
+        return 0;
+      else
+        return m_E[i];
+    }
+    else
+      return m_E[i];
 }
 
 /// Number of error bars to plot
 size_t MantidQwtIMDWorkspaceData::esize() const
 {
   return m_E.size();
+}
+
+/**
+ * Depending upon whether the log options have been set.
+ * @return the lowest y value.
+ */
+double MantidQwtIMDWorkspaceData::getYMin() const
+{
+  auto it = std::min_element(m_Y.begin(), m_Y.end());
+  double temp = 0;
+  if(it != m_Y.end())
+  {
+    temp = *it;
+  }
+  if (m_logScale && temp <= 0.)
+  {
+    temp = m_minPositive;
+  }
+  return temp;
+}
+
+/**
+ * Depending upon whether the log options have been set.
+ * @return the highest y value.
+ */
+double MantidQwtIMDWorkspaceData::getYMax() const
+{
+  auto it = std::max_element(m_Y.begin(), m_Y.end());
+  double temp = 0;
+  if(it != m_Y.end())
+  {
+    temp = *it;
+  }
+  if (m_logScale && temp <= 0.)
+  {
+    temp = m_minPositive;
+  }
+  return temp;
 }
 
 void MantidQwtIMDWorkspaceData::setLogScale(bool on)

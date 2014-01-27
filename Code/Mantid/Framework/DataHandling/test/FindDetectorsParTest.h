@@ -97,8 +97,8 @@ public:
         pattern[2] = "1,2,3,";  // dist
         pattern[0] = "2,3,4,";    // azimutal
         pattern[1] = "-3,-4,-5,"; //polar
-        pattern[3] = "75.9638,68.1986,63.4349,"; // atan(4,5,6)/dist;    // az_width
-        pattern[4] = "78.6901,71.5651,66.8014,"; // atan(5,6,7)/dist;    // pol_width
+        pattern[3] = "78.6901,71.5651,66.8014,"; // atan(5,6,7)/dist;    // pol_width
+        pattern[4] = "75.9638,68.1986,63.4349,"; // atan(4,5,6)/dist;    // az_width
         for(int i=0;i<5;i++){
             std::stringstream buf;
             for(int j=0;j<3;j++){
@@ -147,11 +147,11 @@ public:
     Mantid::DataObjects::TableWorkspace_sptr spResult =
         AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("DET_PAR2");
 
-       TSM_ASSERT_DELTA("polar wrong ",      37.0858,  spResult->cell<double>(0,0),1.e-3);
-       TSM_ASSERT_DELTA("azimut wrong",       0,       spResult->cell<double>(0,1),1.e-3);
-       TSM_ASSERT_DELTA("flight path wrong ",7.52685,  spResult->cell<double>(0,2),1.e-3);
-       TSM_ASSERT_DELTA("polar width wrong ",23.2429,  spResult->cell<double>(0,3),1.e-3); // despite looking strange, this may have cence as detectors overlap; wander what MAPS will be 
-       TSM_ASSERT_DELTA("azim width wrong ", 875.7862, spResult->cell<double>(0,4),1.e-3);
+       TSM_ASSERT_DELTA("polar wrong ",      37.0451,  spResult->cell<double>(0,0),1.e-3);
+       TSM_ASSERT_DELTA("azimut wrong: some average angle -> 0 for many detectors", 8.1818, spResult->cell<double>(0,1),1.e-3);
+       TSM_ASSERT_DELTA("flight path wrong ",7.5248,  spResult->cell<double>(0,2),1.e-3);
+       TSM_ASSERT_DELTA("polar width wrong ",20.0598,  spResult->cell<double>(0,3),1.e-3);
+       TSM_ASSERT_DELTA("azim width wrong ring of ~365deg", 354.6336, spResult->cell<double>(0,4),1.e-3);
 
        AnalysisDataService::Instance().remove("DET_PAR2");
 
@@ -499,8 +499,8 @@ private:
      std::string azim_pattern("0,0,0,");
      std::string pol_pattern("170.565,169.565,168.565,");
      std::string sfp_pattern("1,1,1,");
+     std::string polw_pattern("0.804071,0.804258,0.804442,");
      std::string azw_pattern("5.72472,5.72472,5.72472,");
-     std::string polw_pattern("0.792313,0.789995,0.787437,");
  
 
      std::auto_ptr<std::stringstream> bufs[5];
@@ -513,8 +513,9 @@ private:
      TSM_ASSERT_EQUALS("azimut wrong",pol_pattern,bufs[0]->str());
      TSM_ASSERT_EQUALS("polar wrong ",azim_pattern,bufs[1]->str());
      TSM_ASSERT_EQUALS("flight path wrong ",sfp_pattern,bufs[2]->str());
-     TSM_ASSERT_EQUALS("azim width wrong ",polw_pattern,bufs[3]->str());
-     TSM_ASSERT_EQUALS("polar width wrong ",azw_pattern,bufs[4]->str());
+     TSM_ASSERT_EQUALS("polar width wrong ",polw_pattern,bufs[3]->str());
+     TSM_ASSERT_EQUALS("azimuthal width wrong ",azw_pattern,bufs[4]->str());
+
   }
 };
 #endif

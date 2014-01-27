@@ -49,5 +49,11 @@ MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidDialog(parent)
   QLabel* url = m_uiForm.mantidurl;
   url->setText(mantidurl);
   url->setOpenExternalLinks(true);
+
+  QString mantidDOI = QString::fromStdString("<p><a href = " +\
+                      Mantid::Kernel::MantidVersion::doi() + ">" +\
+                      Mantid::Kernel::MantidVersion::doi() + "</a></p>");
+  m_uiForm.mantiddoi->setText(mantidDOI);
+  m_uiForm.mantiddoi->setOpenExternalLinks(true);
 }
 

@@ -24,6 +24,7 @@ namespace IDA
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "Elwin";}
     void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
+    void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
 
   private slots:
     void plotInput();

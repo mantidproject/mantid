@@ -6,7 +6,7 @@ The Minus algorithm will subtract the data values and calculate the correspondin
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Minus("w1","w2","output")
+ output = Minus("w1","w2")
  w3 = w1 - w2
  w2 -= w1  # Perform "in-place"
 

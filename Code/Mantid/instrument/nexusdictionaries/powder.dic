@@ -1,0 +1,6 @@
+data=/entry1/data1/counts
+x-axis=/entry1/data1/two_theta
+x-axis-name=two_theta
+title=/entry1/title
+sample=/entry1/sample/sample_name
+wavelength=/entry1/DMC/Monochromator/lambda

@@ -329,7 +329,9 @@ public:
     PropertyWithValue< std::vector<int> > * pv = new PropertyWithValue< std::vector<int> >("some_array", v);
     PropertyWithValue< std::vector<int> > * pv2 = new PropertyWithValue< std::vector<int> >("some_array", v);
     (*pv) += pv2;
-    TS_ASSERT_EQUALS(pv->value(), "1,2,3,1,2,3")
+    TS_ASSERT_EQUALS(pv->value(), "1,2,3,1,2,3");
+    delete pv;
+    delete pv2;
   }
 
   void testPlusEqualOperatorOnYourself()
@@ -340,7 +342,8 @@ public:
     v.push_back(3);
     PropertyWithValue< std::vector<int> > * pv = new PropertyWithValue< std::vector<int> >("some_array", v);
     (*pv) += pv;
-    TS_ASSERT_EQUALS(pv->value(), "1,2,3,1,2,3")
+    TS_ASSERT_EQUALS(pv->value(), "1,2,3,1,2,3");
+    delete pv;
   }
 
   void testOperatorNothing()
@@ -575,6 +578,8 @@ public:
     PropertyWithValue<double> * pd = dynamic_cast< PropertyWithValue<double> * >(p1);
     d = *pd;
     TS_ASSERT_EQUALS( d, 35.0 );
+    delete p1;
+    delete p2;
 
     p1 = new PropertyWithValue<int>("Prop1", 34);
     p2 = new PropertyWithValue<int>("Prop1", 62);
@@ -582,6 +587,8 @@ public:
     PropertyWithValue<int> * pi = dynamic_cast< PropertyWithValue<int> * >(p1);
     i = *pi;
     TS_ASSERT_EQUALS( i, 96 );
+    delete p1;
+    delete p2;
 
     // --- Vectors are appennded together ----
     std::vector<int> v1, v2;
@@ -593,7 +600,8 @@ public:
     PropertyWithValue< std::vector<int> > * pvi = dynamic_cast< PropertyWithValue< std::vector<int> > * >(p1);
     std::vector<int> v3 = *pvi;
     TS_ASSERT_EQUALS( v3.size(), 6 );
-
+    delete p1;
+    delete p2;
   }
   
 private:

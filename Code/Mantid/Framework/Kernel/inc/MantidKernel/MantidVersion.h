@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 
+#include <string>
+
 namespace Mantid
 {
 namespace Kernel
@@ -39,6 +41,7 @@ public:
   static const char* revision();    ///< The abbreviated SHA-1 of the last commit
   static const char* revisionFull();    ///< The full SHA-1 of the last commit
   static const char* releaseDate(); ///< The date of the last commit
+  static std::string doi();         ///< The DOI for this release of Mantid.
 
 private:
   MantidVersion(); ///< Private, unimplemented constructor. Not a class that can be instantiated.

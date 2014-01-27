@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"

@@ -9,6 +9,7 @@
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidAPI/IPeak.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
@@ -43,8 +44,8 @@ namespace
     MOCK_METHOD0(changeShownDim, bool());
     MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string&));
     MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
-    MOCK_METHOD1(setForegroundColour, void(const QColor));
-    MOCK_METHOD1(setBackgroundColour, void(const QColor));
+    MOCK_METHOD1(setForegroundColor, void(const QColor));
+    MOCK_METHOD1(setBackgroundColor, void(const QColor));
     MOCK_CONST_METHOD0(getTransformName, std::string());
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
     MOCK_METHOD1(setShown, void(const bool));
@@ -54,6 +55,10 @@ namespace
     MOCK_METHOD1(setPeakSizeIntoProjection, void(const double));
     MOCK_CONST_METHOD0(getPeakSizeOnProjection, double());
     MOCK_CONST_METHOD0(getPeakSizeIntoProjection, double());
+    MOCK_METHOD1(registerOwningPresenter, void(UpdateableOnDemand*));
+    MOCK_CONST_METHOD0(getShowBackground, bool());
+    MOCK_METHOD1(zoomToPeak, void(const int));
+    MOCK_CONST_METHOD0(isHidden, bool());
     virtual ~MockPeaksPresenter(){}
   };
 
@@ -119,6 +124,9 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_CONST_METHOD0(getOccupancyIntoView, double());
     MOCK_CONST_METHOD0(positionOnly, bool());
     MOCK_CONST_METHOD0(getRadius, double());
+    MOCK_CONST_METHOD0(isBackgroundShown, bool());
+    MOCK_CONST_METHOD0(getForegroundColour, QColor());
+    MOCK_CONST_METHOD0(getBackgroundColour, QColor());
     ~MockPeakOverlayView(){}
   };
 

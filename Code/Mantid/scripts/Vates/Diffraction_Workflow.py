@@ -76,9 +76,8 @@ HKL = ConvertToDiffractionMDWorkspace(InputWorkspace=ws,
 # Part 4. Displaying 
 
 # Bin to a regular grid
-Binned = BinMD(InputWorkspace=HKL,AlignedDim0='H, -15, 5, 150',AlignedDim1='K, -0, 10, 50',
-      AlignedDim2='L, 0, 12,  150')
+Binned = BinMD(InputWorkspace=HKL,AlignedDim0='[H,0,0], -15, 5, 150',AlignedDim1='[0,K,0], -0, 10, 50',AlignedDim2='[0,0,L], 0, 12,  150')
       
 # Show in slice Viewer		
-sv = plotSlice(Binned, xydim=('H','L'), slicepoint=[0, +9, 0], colorscalelog=True)
+sv = plotSlice(Binned, xydim=('[H,0,0]','[0,0,L]'), slicepoint=[0, +9, 0], colorscalelog=True)
 sv.setColorMapBackground(0,0,0)

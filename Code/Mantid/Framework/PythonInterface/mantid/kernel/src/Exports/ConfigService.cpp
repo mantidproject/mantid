@@ -64,7 +64,9 @@ void export_ConfigService()
          (arg("facilityName")), return_value_policy<reference_existing_object>(),
          "Returns the named facility. Raises an RuntimeError if it does not exist")
 
-    .def("setFacility", &ConfigServiceImpl::setString, (arg("facilityName")), "Sets the current facility to the given name")
+    .def("setFacility", &ConfigServiceImpl::setFacility, "Sets the current facility to the given name")
+
+    .def("updateFacilities", &ConfigServiceImpl::updateFacilities, "Loads facility information from a provided file")
 
     .def("getInstrument", &ConfigServiceImpl::getInstrument,
           getInstrument_Overload("Returns the named instrument. If name = \"\" then the default.instrument is returned",

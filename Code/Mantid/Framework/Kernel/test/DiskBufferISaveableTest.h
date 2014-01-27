@@ -385,6 +385,11 @@ public:
       std::cout<<"Finished DiskBuffer inserting/deleting performance test, 1 thread in "<< clock.elapsed()<<" sec\n";
       TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(),BIG_NUM+DATA_SIZE);
 
+      // cleanup memory
+      for(long i=0;i<DATA_SIZE;i++)
+      {
+          delete objToAdd[i];
+      }
   }
 
   void test_addAndRemoveMultithread()
@@ -424,6 +429,11 @@ public:
       std::cout<<"Finished DiskBuffer inserting/deleting performance test, multithread in "<< clock.elapsed()<<" sec\n";
       TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(),BIG_NUM+DATA_SIZE);
 
+      // cleanup memory
+      for(long i=0;i<DATA_SIZE;i++)
+      {
+          delete objToAdd[i];
+      }
   }
 
 

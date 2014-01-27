@@ -21,6 +21,9 @@ public:
   int version() const  { return 1;}                        ///< Algorithm's version for identification
   const std::string category() const { return "ProxyCat";}           ///< Algorithm's category for identification
   const std::string alias() const { return "Dog";}            ///< Algorithm's alias
+  const std::string workspaceMethodName() const { return "toyalgorithm"; }
+  const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
+  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
 
   void init()
   { 
@@ -192,6 +195,23 @@ public:
         TS_ASSERT( obs.progress );
         TS_ASSERT( obs.finish );
     }
+
+    void test_WorkspaceMethodFunctionsReturnProxiedContent()
+    {
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ToyAlgorithmProxy");
+
+      TS_ASSERT_EQUALS("toyalgorithm", alg->workspaceMethodName());
+      
+      auto types = alg->workspaceMethodOn();
+      TS_ASSERT_EQUALS(2, types.size());
+      if(types.size() == 2)
+      {
+        TS_ASSERT_EQUALS("MatrixWorkspace", types[0]);
+        TS_ASSERT_EQUALS("ITableWorkspace", types[1]);
+      }
+      TS_ASSERT_EQUALS("InputWorkspace", alg->workspaceMethodInputProperty());
+    }
+
 };
 
 #endif /*ALGORITHMPROXYTEST_H_*/

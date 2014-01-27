@@ -23,7 +23,8 @@ using namespace Mantid::VATES;
 /**
 Constructor
 */
-DimensionWidget::DimensionWidget()
+DimensionWidget::DimensionWidget() :
+  m_pDimensionPresenter(NULL), m_initialBinDisplay(BinDisplay::Simple)
 {
   m_binStackedWidget = new QStackedWidget;
   BinInputWidget* simple = new SimpleBinInputWidget;

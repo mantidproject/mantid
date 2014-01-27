@@ -25,7 +25,7 @@ public:
 
   MDHistoWorkspace_sptr createInputWorkspace(signal_t signal, signal_t errorSQ=0, const int nBins=1)
   {
-    MDHistoDimension_sptr dim = boost::make_shared<MDHistoDimension>("X", "X", "", 0, 10, nBins);
+    MDHistoDimension_sptr dim = boost::make_shared<MDHistoDimension>("X", "X", "", static_cast<coord_t>(0), static_cast<coord_t>(10), static_cast<size_t>(nBins));
     MDHistoWorkspace_sptr histo = boost::make_shared<MDHistoWorkspace>(dim);
     signal_t* signals = histo->getSignalArray();
     signal_t* errorsSQ = histo->getErrorSquaredArray();

@@ -527,9 +527,9 @@ namespace WorkspaceCreationHelper
     retVal->initialize(numPixels,1,1);
 
     //Make fake events
-    size_t workspaceIndex = 0;
     if (eventPattern) // 0 == no events
     {
+      size_t workspaceIndex = 0;
       for (int pix= start_at_pixelID+0; pix < start_at_pixelID+numPixels; pix++)
       {
         EventList & el = retVal->getEventList(workspaceIndex);

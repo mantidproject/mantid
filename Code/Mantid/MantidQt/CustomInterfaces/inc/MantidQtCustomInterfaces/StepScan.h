@@ -22,6 +22,8 @@ class StepScan : public API::UserSubWindow
 public:
   /// The name of the interface as registered into the factory
   static std::string name() { return "Step Scan Analysis"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "General"; }
 
   StepScan(QWidget *parent = 0);
   ~StepScan();

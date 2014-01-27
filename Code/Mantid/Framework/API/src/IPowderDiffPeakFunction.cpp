@@ -329,8 +329,6 @@ namespace API
    */
   std::complex<double> E1(std::complex<double> z)
   {
-    const double el = 0.5772156649015328;
-
     std::complex<double> exp_e1;
 
     double rz = real(z);
@@ -363,8 +361,8 @@ namespace API
         }
       } // ENDFOR k
 
-      // cout << "[DB] el = " << el << ", exp_e1 = " << exp_e1 << endl;
 
+      const double el = 0.5772156649015328;
       exp_e1 = -el - log(z) + (z*exp_e1);
     }
     else
@@ -386,7 +384,6 @@ namespace API
       }
     }
 
-    // cout << "[DB] Final exp_e1 = " << exp_e1 << "\n";
 
     return exp_e1;
   }

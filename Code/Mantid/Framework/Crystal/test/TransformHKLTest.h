@@ -88,7 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Tolerance","0.1") );
 
                                            // specify a matrix that will swap H and K and negate L
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("HKL_Transform","0,1,0,1,0,0,0,0,-1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("HKLTransform","0,1,0,1,0,0,0,0,-1") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 

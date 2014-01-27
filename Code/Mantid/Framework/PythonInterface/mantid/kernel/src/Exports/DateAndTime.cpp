@@ -6,6 +6,15 @@ using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::time_duration;
 using namespace boost::python;
 
+/** Circumvent a bug in IPython 1.1, which chokes on nanosecond precision datetimes.
+ *  Adding a space to the string returned by the C++ method avoids it being given
+ *  the special treatment that leads to the problem.
+ */
+std::string ISO8601StringPlusSpace(DateAndTime & self)
+{
+  return self.toISO8601String()+" ";
+}
+
 void export_DateAndTime()
 {
   class_<DateAndTime>("DateAndTime", no_init)
@@ -17,7 +26,7 @@ void export_DateAndTime()
     .def("total_nanoseconds", &DateAndTime::totalNanoseconds)
     .def("totalNanoseconds", &DateAndTime::totalNanoseconds)
     .def("setToMinimum", &DateAndTime::setToMinimum)
-    .def("__str__", &Mantid::Kernel::DateAndTime::toISO8601String)
+    .def("__str__", &ISO8601StringPlusSpace)
     // cppcheck-suppress duplicateExpression
     .def(self == self)
     // cppcheck-suppress duplicateExpression

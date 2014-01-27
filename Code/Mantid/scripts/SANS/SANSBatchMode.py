@@ -34,6 +34,7 @@ from mantid.kernel import Logger
 sanslog = Logger.get("SANS")
 import copy
 import sys
+import re
 
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
@@ -126,6 +127,11 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     ins_name = ReductionSingleton().instrument.name()
     # is used for SaveCanSAS1D go give the detectors names
     detnames = ', '.join(ReductionSingleton().instrument.listDetectors())
+
+    # LARMOR has just one detector, but, it defines two because ISISInstrument is defined as two banks! #8395
+    if ins_name == 'LARMOR': 
+        detnames = ReductionSingleton().instrument.cur_detector().name()
+
     scale_shift = {'scale':1.0000, 'shift':0.0000}
     #first copy the user settings in case running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
@@ -257,7 +263,7 @@ def parse_run(run_num, ext):
     """
     if not run_num:
         return '', -1
-    parts = run_num.upper().split('P')
+    parts = re.split('[pP]', run_num)
     if len(parts) > 2:
         raise RuntimeError('Problem reading run number "'+run_num+'"')
     run_spec = parts[0]+ext

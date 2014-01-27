@@ -3,6 +3,7 @@
      <assistant>
          <title>Mantid Help</title>
          <startPage>qthelp://org.mantidproject/doc/html/index.html</startPage>
+         <homePage>qthelp://org.mantidproject/doc/html/index.html</homePage>
          <applicationIcon>src/images/MantidPlot_Icon_32offset.png</applicationIcon>
          <enableFilterFunctionality>true</enableFilterFunctionality>
          <enableDocumentationManager>true</enableDocumentationManager>

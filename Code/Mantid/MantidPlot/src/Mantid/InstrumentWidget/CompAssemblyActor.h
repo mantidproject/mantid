@@ -58,8 +58,10 @@ public:
   virtual ~CompAssemblyActor();					
   virtual std::string type()const {return "CompAssemblyActor";} ///< Type of the GL object
   virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  void setVisibility(bool);
-  bool accept(GLActorVisitor& visitor);
+  void setChildVisibility(bool);
+  bool hasChildVisible() const;
+  bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
   virtual void setColors();
 
 protected:

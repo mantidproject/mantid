@@ -765,6 +765,23 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
       }
     }
 
+    if ( !str.compare("column_15") )
+    {
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      nxDouble.load();
+      Kernel::Matrix<double> gm(3, 3, false);
+      int k = 0;
+      for (int r = 0; r < numberPeaks; r++) {
+    	for (int j = 0; j < 9; j++)
+		{
+    		double val = nxDouble[k];
+    		k++;
+    		gm[j%3][j/3] = val;
+		}
+        peakWS->getPeak(r).setGoniometerMatrix( gm );
+      }
+    }
+
   }
 
   return boost::static_pointer_cast<API::Workspace>(peakWS);

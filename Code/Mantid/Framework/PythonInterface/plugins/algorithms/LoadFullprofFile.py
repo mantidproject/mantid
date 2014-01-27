@@ -440,5 +440,4 @@ class LoadFullprofFile(PythonAlgorithm):
         return (tablews, dataws)
 
 # Register algorithm with Mantid
-#registerAlgorithm(LoadFullprofFile)
 AlgorithmFactory.subscribe(LoadFullprofFile)

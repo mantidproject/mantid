@@ -118,11 +118,22 @@ public:
     std::string realName = TYPE::name();
     Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
     saveAliasNames<TYPE>(realName);
+    
+    // Make a record of each interface's categories.
+    const QStringList categories = TYPE::categoryInfo().split(";", QString::SkipEmptyParts);
+    QSet<QString> result;
+    foreach(const QString category, categories)
+    {
+      result.insert(category.trimmed());
+    }
+    m_categoryLookup[QString::fromStdString(realName)] = result;
   }
 
 public:
   // Override createUnwrapped to search through the alias list
   UserSubWindow * createUnwrapped(const std::string & name) const;
+
+  QSet<QString> getInterfaceCategories(const QString & interfaceName) const;
   
 protected:
   // Unhide the inherited create method
@@ -151,6 +162,8 @@ private:
   QHash<QString, std::string> m_aliasLookup;
   /// An index of multiply defined aliases
   QHash<QString, QList<std::string> > m_badAliases; 
+  /// A map of interfaces to their categories.
+  QHash<QString, QSet<QString>> m_categoryLookup;
   Mantid::Kernel::Logger & g_log;
 };
 

@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument last-modified="2012-09-14 09:03:45.617018" valid-to="2012-07-31 23:59:59" name="NOMAD" valid-from="2012-07-01 00:00:01">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ last-modified="2012-09-14 09:03:45.617018" valid-to="2012-07-31 23:59:59" name="NOMAD" valid-from="2012-07-01 00:00:01">
   <!-- Created by Peter Peterson and Vickie Lynch-->
   <!--DEFAULTS-->
   <defaults>
@@ -27,15 +28,11 @@
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location name="monitor1">
-        <parameter name="z">
-          <logfile id="-0.879475"/>
-        </parameter>
+      <location z="-0.879475" name="monitor1">
+        <neutronic z="-0.879475"/>
       </location>
-      <location name="monitor2">
-        <parameter name="z">
-          <logfile id="5.748782"/>
-        </parameter>
+      <location z="5.748782" name="monitor2">
+        <neutronic z="5.748782"/>
       </location>
     </component>
   </type>

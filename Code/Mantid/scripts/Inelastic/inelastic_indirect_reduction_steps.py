@@ -538,9 +538,10 @@ class HandleMonitor(ReductionStep):
     def _monitor_efficiency(self, monitor):
         inst = mtd[monitor].getInstrument()
         try:
-            area = inst.getNumberParameter('Workflow.Monitor1-Area')[0]
-            thickness = inst.getNumberParameter('Workflow.Monitor1-Thickness')[0]
-            attenuation= inst.getNumberParameter('Workflow.Monitor1-Attenuation')[0]
+            montiorStr = 'Workflow.Monitor1'
+            area = inst.getNumberParameter(montiorStr+'-Area')[0]
+            thickness = inst.getNumberParameter(montiorStr+'-Thickness')[0]
+            attenuation= inst.getNumberParameter(montiorStr+'-Attenuation')[0]
         except IndexError:
             raise ValueError('Unable to retrieve monitor thickness, area and '
                 'attenuation from Instrument Parameter file.')
@@ -557,7 +558,7 @@ class HandleMonitor(ReductionStep):
         """
         try:
             factor = mtd[monitor].getInstrument().getNumberParameter(
-                'Workflow.MonitorScalingFactor')[0]
+                'Workflow.Monitor1-ScalingFactor')[0]
         except IndexError:
             print "Monitor is not being scaled."
         else:

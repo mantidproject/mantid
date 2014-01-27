@@ -3,12 +3,14 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-LinePlotOptions::LinePlotOptions(QWidget *parent)
+LinePlotOptions::LinePlotOptions(QWidget *parent, bool logScaleOption)
     : QWidget(parent),
       m_plotAxis(MantidQwtIMDWorkspaceData::PlotAuto),
       m_normalize(Mantid::API::VolumeNormalization)
 {
 	ui.setupUi(this);
+
+	ui.widgetLogOptions->setVisible(logScaleOption);
 
 	addPlotRadioButton("Auto", "Automatically choose between plotting X or Y depending on the angle of the line");
   addPlotRadioButton("Distance", "Use the distance from the start of the line as the X axis of the plot");
@@ -19,6 +21,8 @@ LinePlotOptions::LinePlotOptions(QWidget *parent)
   QObject::connect(ui.radNoNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
   QObject::connect(ui.radNumEventsNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
   QObject::connect(ui.radVolumeNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
+  QObject::connect(ui.ckLog10, SIGNAL(toggled(bool)), this, SLOT(onYScalingChanged()));
+
 }
 
 LinePlotOptions::~LinePlotOptions()
@@ -172,5 +176,22 @@ void LinePlotOptions::radNormalization_changed()
     m_normalize = Mantid::API::NoNormalization;
   // Send out a signal
   emit changedNormalization();
+}
+
+/**
+ * Handler for changes to the Y-axis log scale.
+ */
+void LinePlotOptions::onYScalingChanged()
+{
+  emit changedYLogScaling();
+}
+
+/**
+ * Getter for the currently set option of the isLogScaled control.
+ * @return
+ */
+bool LinePlotOptions::isLogScaledY() const
+{
+  return ui.ckLog10->isChecked();
 }
 

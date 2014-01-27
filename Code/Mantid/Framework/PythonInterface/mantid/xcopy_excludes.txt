@@ -1,0 +1,2 @@
+libzmq.pyd
+libzmq_d.pyd

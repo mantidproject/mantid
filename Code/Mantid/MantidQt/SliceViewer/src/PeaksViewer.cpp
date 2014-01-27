@@ -43,6 +43,7 @@ namespace MantidQt
     void PeaksViewer::setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter) 
     {
       m_presenter = presenter;
+      m_presenter->registerView(this);
       
       // Configure the entire control using the managed workspaces.
       auto workspaces = m_presenter->presentedWorkspaces();
@@ -168,6 +169,50 @@ namespace MantidQt
     {
       m_presenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
     }
+
+    /**
+     * Perform an update based on the proxy composite. Re-fetch data.
+     */
+    void PeaksViewer::performUpdate()
+    {
+      auto allWS = m_presenter->presentedWorkspaces();
+      for(auto it = allWS.begin(); it != allWS.end(); ++it)
+      {
+        auto ws = *it;
+        QColor backgroundColor = m_presenter->getBackgroundColour(ws);
+        QColor foregroundColor = m_presenter->getForegroundColour(ws);
+        bool showBackground = m_presenter->getShowBackground(ws);
+        bool isHidden = m_presenter->getIsHidden(ws);
+        auto optionalZoomedPresenter = m_presenter->getZoomedPeakPresenter();
+        int optionalZoomedIndex = m_presenter->getZoomedPeakIndex();
+
+        // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
+        QList<PeaksWorkspaceWidget*> children = qFindChildren<PeaksWorkspaceWidget*>(this);
+        Mantid::API::IPeaksWorkspace_sptr targetPeaksWorkspace;
+        for(int i = 0; i < children.size(); ++i)
+        {
+          PeaksWorkspaceWidget* candidateWidget = children.at(i);
+          Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace = candidateWidget->getPeaksWorkspace();
+          if(candidateWorkspace == ws)
+          {
+            // We have the right widget to update.
+            candidateWidget->setBackgroundColor(backgroundColor);
+            candidateWidget->setForegroundColor(foregroundColor);
+            candidateWidget->setShowBackground(showBackground);
+            candidateWidget->setHidden(isHidden);
+            if( optionalZoomedPresenter.is_initialized() )
+            {
+              // Is the zoomed peaks workspace the current workspace.
+              if (optionalZoomedPresenter.get().get() == m_presenter->getPeaksPresenter(ws->name().c_str()))
+              {
+                candidateWidget->setSelectedPeak(optionalZoomedIndex);
+              }
+            }
+          }
+        }
+      }
+    }
+
 
     /**
      * Slot called when the user wants to see the dialog for selecting

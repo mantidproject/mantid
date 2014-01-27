@@ -30,7 +30,7 @@ If the input workspace contains data points, rather than histograms, then Rebin 
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Rebin("InWS2","OutWS","x1,dx1,x2")
+ outputW = Rebin("inputW","x1,dx1,x2")
 
 *WIKI_USAGE*/
 //----------------------------------------------------------------------

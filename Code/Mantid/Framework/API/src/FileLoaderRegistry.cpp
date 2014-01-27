@@ -49,6 +49,7 @@ namespace Mantid
           const int version = it->second;
           logger.debug() << "Checking " << name << " version " << version << std::endl;
 
+          // Use static cast for speed. Checks have been done at registration to check the types
           auto alg = boost::static_pointer_cast<FileLoaderType>(factory.create(name, version)); // highest version
           try
           {
@@ -74,6 +75,20 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     // Public members
     //----------------------------------------------------------------------------------------------
+
+    /**
+     * If the name does not exist then it does nothing
+     * @param name Name of the algorithm to remove from the search list
+     * @aparam version An optional version to remove. -1 indicates remove all (Default=-1)
+     */
+    void FileLoaderRegistryImpl::unsubscribe(const std::string &name, const int version)
+    {
+      auto iend = m_names.end();
+      for(auto it = m_names.begin(); it != iend; ++it)
+      {
+        removeAlgorithm(name, version, *it);
+      }
+    }
 
     /**
      * Queries each registered algorithm and asks it how confident it is that it can
@@ -160,6 +175,33 @@ namespace Mantid
     FileLoaderRegistryImpl::~FileLoaderRegistryImpl()
     {
     }
+
+    /**
+     * @param name A string containing the algorithm name
+     * @param version The version to remove. -1 indicates all instances
+     * @param typedLoaders A map of names to version numbers 
+     **/
+    void FileLoaderRegistryImpl::removeAlgorithm(const std::string & name, const int version, 
+                                                 std::multimap<std::string,int> & typedLoaders)
+    {
+      if(version == -1) // remove all
+      {
+        typedLoaders.erase(name);
+      }
+      else // find the right version
+      {
+        auto range = typedLoaders.equal_range(name);
+        for(auto ritr = range.first; ritr != range.second; ++ritr)
+        {
+          if(ritr->second == version)
+          {
+            typedLoaders.erase(ritr);
+            break;
+          }
+        }
+      }
+    }
+
 
   } // namespace API
 } // namespace Mantid

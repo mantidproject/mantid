@@ -80,7 +80,6 @@ endif()
 # Also makes sure our commit hooks are linked in the right place.
 ###########################################################################
 
-set ( MtdVersion_WC_LAST_CHANGED_REV 0 )
 set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 set ( MtdVersion_WC_LAST_CHANGED_DATETIME 0 )
 set ( NOT_GIT_REPO "Not" )
@@ -94,14 +93,12 @@ if ( GIT_FOUND )
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
   if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
-
     # Remove the tag name part
     string ( REGEX MATCH "[-](.*)" MtdVersion_WC_LAST_CHANGED_REV ${GIT_DESCRIBE} )
     # Extract the SHA1 part (with a 'g' prefix which stands for 'git')
     # N.B. The variable comes back from 'git describe' with a line feed on the end, so we need to lose that
     string ( REGEX MATCH "(g.*)[^\n]" MtdVersion_WC_LAST_CHANGED_SHA ${MtdVersion_WC_LAST_CHANGED_REV} )
-    # Get the number part (number of commits since tag)
-    string ( REGEX MATCH "[0-9]+" MtdVersion_WC_LAST_CHANGED_REV ${MtdVersion_WC_LAST_CHANGED_REV} )
+
     # Get the date of the last commit
     execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE 
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -190,26 +187,27 @@ else()
   message ( STATUS "Git not found - using dummy revision number and date" )
 endif()
 
-mark_as_advanced( MtdVersion_WC_LAST_CHANGED_REV MtdVersion_WC_LAST_CHANGED_DATE
-                  MtdVersion_WC_LAST_CHANGED_DATETIME )
+mark_as_advanced( MtdVersion_WC_LAST_CHANGED_DATE MtdVersion_WC_LAST_CHANGED_DATETIME )
+
+
+if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
+  ###########################################################################
+  # Create the file containing the patch version number for use by cpack
+  # The patch number make have been overridden by VersionNumber so create
+  # the file used by cpack here
+  ###########################################################################
+  configure_file ( ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake.in
+                   ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake )
+  include ( PatchVersionNumber )
+endif()
 
 ###########################################################################
 # Include the file that contains the version number
 # This must come after the git describe business above because it can be
 # used to override the patch version number (MtdVersion_WC_LAST_CHANGED_REV)
 ###########################################################################
-
 include ( VersionNumber )
 
-if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
-  ###########################################################################
-  # Create the file containing the patch version number for use by cpack
-  # The patch number make have been overridden by VerisonNumber so create
-  # the file used by cpack here
-  ###########################################################################
-  configure_file ( ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake.in
-                   ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake )
-endif()
 
 ###########################################################################
 # Look for OpenMP and set compiler flags if found

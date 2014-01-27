@@ -171,17 +171,25 @@ public:
   void subscribe(const std::string& className, AbstractFactory* pAbstractFactory,
                  SubscribeAction replace=ErrorIfExists)
   {
-    if(className.empty()) throw std::invalid_argument("Cannot register empty class name");
+    if(className.empty())
+    {
+      if (pAbstractFactory)
+        delete pAbstractFactory;
+      throw std::invalid_argument("Cannot register empty class name");
+    }
 
     typename FactoryMap::iterator it = _map.find(className);
     if (it == _map.end() || replace == OverwriteCurrent)
     {
+      if (it != _map.end() && it->second)
+        delete it->second;
       _map[className] = pAbstractFactory;
       sendUpdateNotificationIfEnabled();
     }
     else
     {
-      delete pAbstractFactory;
+      if (pAbstractFactory)
+        delete pAbstractFactory;
       throw std::runtime_error(className + " is already registered.\n");
     }
   }

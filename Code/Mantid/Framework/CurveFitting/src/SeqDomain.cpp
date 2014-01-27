@@ -98,6 +98,29 @@ void SeqDomain::leastSquaresVal(const CostFuncLeastSquares& leastSquares)
   }
 }
 
+//------------------------------------------------------------------------------------------------
+/**
+ * Calculate the value of a least squares cost function
+ * @param leastSquares :: The least squares cost func to calculate the value for
+ */
+void SeqDomain::rwpVal(const CostFuncRwp& rwp)
+{
+  API::FunctionDomain_sptr domain;
+  API::IFunctionValues_sptr values;
+  const size_t n = getNDomains();
+  for(size_t i = 0; i < n; ++i)
+  {
+    values.reset();
+    getDomainAndValues( i, domain, values );
+    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
+    if (!simpleValues)
+    {
+      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+    }
+    rwp.addVal( domain, simpleValues );
+  }
+}
+
 /**
  * Calculate the value, first and second derivatives of a least squares cost function
  * @param leastSquares :: The least squares cost func to calculate the value for
@@ -120,6 +143,31 @@ void SeqDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSqu
       throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
     }
     leastSquares.addValDerivHessian(leastSquares.getFittingFunction(),domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+  }
+}
+
+/**
+ * Calculate the value, first and second derivatives of a RWP cost function
+ * @param rwp :: The rwp cost func to calculate the value for
+ * @param evalFunction :: Flag to evaluate the value of the cost function
+ * @param evalDeriv :: Flag to evaluate the first derivatives
+ * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
+ */
+void SeqDomain::rwpValDerivHessian(const CostFuncRwp& rwp, bool evalFunction, bool evalDeriv, bool evalHessian)
+{
+  API::FunctionDomain_sptr domain;
+  API::IFunctionValues_sptr values;
+  const size_t n = getNDomains();
+  for(size_t i = 0; i < n; ++i)
+  {
+    values.reset();
+    getDomainAndValues( i, domain, values );
+    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(values);
+    if (!simpleValues)
+    {
+      throw std::runtime_error("Rwp: unsupported IFunctionValues.");
+    }
+    rwp.addValDerivHessian(rwp.getFittingFunction(),domain,simpleValues,evalFunction,evalDeriv,evalHessian);
   }
 }
 

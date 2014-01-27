@@ -1,0 +1,16 @@
+{
+   <StdoutChannelTest_ConsoleChannel>
+   Memcheck:Leak
+   ...
+   fun:_ZN17StdoutChannelTest14testLogMessageEv
+   fun:_ZN54TestDescription_suite_StdoutChannelTest_testLogMessage7runTestEv
+   ...
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:_ZN15DataServiceTest17test_threadSafetyEv
+   fun:_ZN55TestDescription_suite_DataServiceTest_test_threadSafety7runTestEv
+   ...
+}

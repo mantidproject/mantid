@@ -9,12 +9,13 @@ except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
 import mantidplotpy.proxies as proxies
-from mantidplotpy.proxies import threadsafe_call, new_proxy
+from mantidplotpy.proxies import threadsafe_call, new_proxy, getWorkspaceNames
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 import os
 import time
+import mantid.api
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
@@ -186,7 +187,7 @@ def plot(source, *args, **kwargs):
         return plotSpectrum(source, *args, **kwargs)
         
 #-----------------------------------------------------------------------------
-def plotSpectrum(source, indices, error_bars = False, type = -1):
+def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Open a 1D Plot of a spectrum in a workspace.
     
     This plots one or more spectra, with X as the bin boundaries,
@@ -196,18 +197,66 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         source: workspace or name of a workspace
         indices: workspace index, or tuple or list of workspace indices to plot
         error_bars: bool, set to True to add error bars.
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
+    Returns:
+        A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
-    workspace_names = __getWorkspaceNames(source)
+    workspace_names = getWorkspaceNames(source)
     index_list = __getWorkspaceIndices(indices)
     if len(workspace_names) == 0:
         raise ValueError("No workspace names given to plot")
     if len(index_list) == 0:
         raise ValueError("No indices given to plot")
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type))
+
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
+
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type, window, clearWindow))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
+
+# IPython couldn't correctly display complex enum value in doc pop-up, so we extract integer value
+# of enum manually.
+DEFAULT_MD_NORMALIZATION = int(mantid.api.MDNormalization.VolumeNormalization)
+
+def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error_bars = False, window = None,
+  clearWindow = False):
+    """Open a 1D plot of a MDWorkspace.
+    
+    Args:
+        source: Workspace(s) to plot
+        plot_axis: Index of the plot axis (defaults to auto-select)
+        normalization: Type of normalization required (defaults to volume)
+        error_bars: Flag for error bar plotting.
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
+    Returns:
+        A handle to the matrix containing the image data.
+    """
+    workspace_names = getWorkspaceNames(source)
+    if len(workspace_names) == 0:
+        raise ValueError("No workspace names given to plotMD")
+    for name in workspace_names:
+        if not mantid.api.mtd.doesExist(name):
+            raise ValueError("%s does not exist in the workspace list" % name)
+        if not isinstance(mantid.api.mtd[name], mantid.api.IMDWorkspace):
+            raise ValueError("%s is not an IMDWorkspace" % name)
+        non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
+        if not len(non_integrated_dims) == 1:
+            raise ValueError("%s must have a single non-integrated dimension in order to be rendered via plotMD" % name)
+
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
+
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization,
+      error_bars, window, clearWindow))
+
+    return graph
 
 def fitBrowser():
     """
@@ -217,7 +266,7 @@ def fitBrowser():
     return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
 
 #-----------------------------------------------------------------------------
-def plotBin(source, indices, error_bars = False, graph_type = 0):
+def plotBin(source, indices, error_bars = False, graph_type = 0, window = None, clearWindow = False):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
     
     This puts the spectrum number as the X variable, and the
@@ -230,25 +279,31 @@ def plotBin(source, indices, error_bars = False, graph_type = 0):
         source: workspace or name of a workspace
         indices: bin number(s) to plot
         error_bars: bool, set to True to add error bars.
-
+        window: window used for plotting. If None a new one will be created
+        clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
-        A handle to the created Graph widget.
+        A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
-    def _callPlotBin(workspace, indexes, errors, graph_type):
+    def _callPlotBin(workspace, indexes, errors, graph_type, window, clearWindow):
         if isinstance(workspace, str):
             wkspname = workspace
         else:
             wkspname = workspace.getName()
         if type(indexes) == int:
             indexes = [indexes]
-        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors,graph_type)
+
+        # Unwrap the window object, if any specified
+        if window != None:
+          window = window._getHeldObject()
+
+        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors, graph_type, window, clearWindow)
 
     if isinstance(source, list) or isinstance(source, tuple):
         if len(source) > 1:
             raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
         else:
             source = source[0]
-    return _callPlotBin(source, indices, error_bars, graph_type)
+    return _callPlotBin(source, indices, error_bars, graph_type, window, clearWindow)
 
 #-----------------------------------------------------------------------------
 def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
@@ -536,7 +591,7 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
         Use SliceViewerWindow.getSlicer() to get access to the functions of the
         SliceViewer, e.g. setting the view and slice point.
     """ 
-    workspace_names = __getWorkspaceNames(source)
+    workspace_names = getWorkspaceNames(source)
     try:
         import mantidqtpython
     except:
@@ -576,7 +631,7 @@ def getSliceViewer(source, label=""):
         a handle to the SliceViewerWindow object that was created before. 
     """
     import mantidqtpython
-    workspace_names = __getWorkspaceNames(source)
+    workspace_names = getWorkspaceNames(source)
     if len(workspace_names) != 1:
         raise Exception("Please specify only one workspace.")
     else:
@@ -628,48 +683,6 @@ Layer.Top = _qti.GraphOptions.Top
 #-----------------------------------------------------------------------------
 #--------------------------- "Private" functions -----------------------------
 #-----------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------
-def __getWorkspaceNames(source):
-    """Takes a "source", which could be a WorkspaceGroup, or a list
-    of workspaces, or a list of names, and converts
-    it to a list of workspace names.
-    
-    Args:
-        source :: input list or workspace group
-        
-    Returns:
-        list of workspace names 
-    """
-    ws_names = []
-    if isinstance(source, list) or isinstance(source,tuple):
-        for w in source:
-            names = __getWorkspaceNames(w)
-            ws_names += names
-    elif hasattr(source, 'getName'):
-        if hasattr(source, '_getHeldObject'):
-            wspace = source._getHeldObject()
-        else:
-            wspace = source
-        if wspace == None:
-            return []
-        if hasattr(wspace, 'getNames'):
-            grp_names = wspace.getNames()
-            for n in grp_names:
-                if n != wspace.getName():
-                    ws_names.append(n)
-        else:
-            ws_names.append(wspace.getName())
-    elif isinstance(source,str):
-        w = _get_analysis_data_service()[source]
-        if w != None:
-            names = __getWorkspaceNames(w)
-            for n in names:
-                ws_names.append(n)
-    else:
-        raise TypeError('Incorrect type passed as workspace argument "' + str(source) + '"')
-    return ws_names
     
 #-----------------------------------------------------------------------------
 def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,

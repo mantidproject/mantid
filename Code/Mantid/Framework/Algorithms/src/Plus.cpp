@@ -6,7 +6,7 @@ For [[EventWorkspace]]s, the Event lists at each workspace index are concatenate
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Plus("w1","w2","output")
+ output = Plus("w1","w2")
  w3 = w1 + w2
  w1 += w2  # Perform "in-place"
 

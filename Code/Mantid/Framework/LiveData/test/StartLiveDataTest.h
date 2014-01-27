@@ -12,6 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/FacilityHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::LiveData;
@@ -21,12 +22,17 @@ using namespace Mantid::Kernel;
 
 class StartLiveDataTest : public CxxTest::TestSuite
 {
+private:
+  FacilityHelper::ScopedFacilities loadTESTFacility;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static StartLiveDataTest *createSuite() { return new StartLiveDataTest(); }
   static void destroySuite( StartLiveDataTest *suite ) { delete suite; }
 
+  StartLiveDataTest() : loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST")
+  {}
 
   void test_Init()
   {

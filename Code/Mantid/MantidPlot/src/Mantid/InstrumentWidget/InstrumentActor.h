@@ -10,7 +10,6 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include <boost/weak_ptr.hpp>
-#include <QObject>
 #include <vector>
 #include <map>
 
@@ -43,7 +42,7 @@ namespace Mantid
    operation for selective rendering of the instrument
 
 */
-class InstrumentActor: public QObject, public GLActor
+class InstrumentActor: public GLActor
 {
   Q_OBJECT
 public:
@@ -58,7 +57,13 @@ public:
   /// Return the bounding box in 3D
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
   /// Run visitors callback on each component
-  bool accept(GLActorVisitor& visitor);
+  bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  /// Run visitors callback on each component (const version)
+  bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll) const;
+  /// Toggle the visibility of the child actors (if exist).
+  virtual void setChildVisibility(bool);
+  /// Check if any child is visible
+  virtual bool hasChildVisible() const;
   /// Get the underlying instrument
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
@@ -222,6 +227,12 @@ class SetVisibleComponentVisitor: public SetVisibilityVisitor
 public:
   SetVisibleComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id){}
   bool visit(GLActor*);
+  bool visit(GLActorCollection*);
+  bool visit(ComponentActor* actor);
+  bool visit(CompAssemblyActor* actor);
+  bool visit(ObjCompAssemblyActor* actor);
+  bool visit(InstrumentActor* actor);
+  bool visit(RectangularDetectorActor* actor);
   Mantid::Geometry::ComponentID getID()const{return m_id;}
 private:
   Mantid::Geometry::ComponentID m_id;
@@ -238,6 +249,7 @@ public:
   /// @param on :: If true then all non-detectors will be made visible or invisible if false.
   SetVisibleNonDetectorVisitor(bool on):m_on(on){}
   bool visit(GLActor*);
+  SAME_VISITS
 private:
   bool m_on;
 };
@@ -250,6 +262,7 @@ class FindComponentVisitor: public GLActorVisitor
 public:
   FindComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id),m_actor(NULL){}
   bool visit(GLActor*);
+  SAME_VISITS
   ComponentActor* getActor()const{return m_actor;}
 private:
   Mantid::Geometry::ComponentID m_id;

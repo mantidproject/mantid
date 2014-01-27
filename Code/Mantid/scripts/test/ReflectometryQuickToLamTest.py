@@ -2,7 +2,7 @@ import unittest
 import numpy
 from mantid.simpleapi import *
 from mantid.api import *
-from isis_reflgui import quick
+from isis_reflectometry import quick
 
 class ReflectometryQuickToLamTest(unittest.TestCase):
     

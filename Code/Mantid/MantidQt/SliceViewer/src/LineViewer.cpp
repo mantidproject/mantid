@@ -9,6 +9,8 @@
 #include <QIntValidator>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
+#include <qwt_scale_engine.h>
+#include <qwt_scale_div.h>
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
@@ -26,7 +28,6 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-
 
 LineViewer::LineViewer(QWidget *parent)
  : QWidget(parent),
@@ -49,15 +50,16 @@ LineViewer::LineViewer(QWidget *parent)
   m_plotLayout->addWidget(m_plot, 1);
 
   // Make the 2 curves
-  m_previewCurve = new QwtPlotCurve("Preview");
-  m_fullCurve = new QwtPlotCurve("Integrated");
+  m_previewCurve = new QwtPlotCurve("Preview Plot");
+  m_fullCurve = new QwtPlotCurve("Full Plot");
   m_previewCurve->attach(m_plot);
   m_fullCurve->attach(m_plot);
   m_previewCurve->setVisible(false);
   m_fullCurve->setVisible(false);
 
   // The plotOptions
-  m_lineOptions = new LinePlotOptions(this);
+  bool showLogOptions = true;
+  m_lineOptions = new LinePlotOptions(this, showLogOptions);
   m_plotLayout->addWidget(m_lineOptions, 0);
 
   // To run BinMD in the background
@@ -78,6 +80,7 @@ LineViewer::LineViewer(QWidget *parent)
 
   QObject::connect(m_lineOptions, SIGNAL(changedPlotAxis()), this, SLOT(refreshPlot()));
   QObject::connect(m_lineOptions, SIGNAL(changedNormalization()), this, SLOT(refreshPlot()));
+  QObject::connect(m_lineOptions, SIGNAL(changedYLogScaling()), this, SLOT(onToggleLogYAxis()));
 }
 
 LineViewer::~LineViewer()
@@ -937,18 +940,62 @@ int LineViewer::getPlotAxis() const
   return m_lineOptions->getPlotAxis();
 }
 
-
 // ==============================================================================================
 // ================================== Rendering =================================================
 // ==============================================================================================
 
+
+/**
+ * Helper method to get the positive min value.
+ * @param curveDat : CurveData to look through the data of.
+ * @param to : Start value
+ * @return : Positive min value.
+ */
+double getPositiveMin(const MantidQwtWorkspaceData& curveData, const double from)
+{
+  double yPositiveMin = from;
+  size_t n = curveData.size();
+  for (size_t i = 0; i < n; ++i)
+  {
+    double y = curveData.y(i);
+    if (y > 0 && y < yPositiveMin)
+    {
+      yPositiveMin = y;
+    }
+  }
+  return yPositiveMin;
+}
+
+/**
+ * Set up the appropriate scale engine.
+ * Uses the isLogScaled method to work out which scale engine to make.
+ * @param curveData : Curve Data to read.
+ */
+void LineViewer::setupScaleEngine(MantidQwtWorkspaceData& curveData)
+{
+  QwtScaleEngine* engine = NULL;
+  auto from = curveData.getYMin();
+  auto to = curveData.getYMax();
+
+  if (m_lineOptions->isLogScaledY())
+  {
+    engine = new QwtLog10ScaleEngine();
+    curveData.saveLowestPositiveValue(from);
+  }
+  else
+  {
+    engine = new QwtLinearScaleEngine();
+  }
+  m_plot->setAxisScaleEngine(QwtPlot::yLeft, engine);
+  m_plot->setAxisScale(QwtPlot::yLeft, from, to);
+}
 
 //-----------------------------------------------------------------------------
 /** Calculate and show the preview (non-integrated) line,
  * using the current parameters. */
 void LineViewer::showPreview()
 {
-  MantidQwtIMDWorkspaceData curveData(m_ws, false,
+  MantidQwtIMDWorkspaceData curveData(m_ws, isLogScaledY(),
       m_start, m_end, m_lineOptions->getNormalization());
   curveData.setPreviewMode(true);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
@@ -960,6 +1007,9 @@ void LineViewer::showPreview()
     m_fullCurve->detach();
     m_previewCurve->attach(m_plot);
   }
+
+  setupScaleEngine(curveData);
+
   m_previewCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Preview Plot");
@@ -974,11 +1024,20 @@ Gets the dimension index corresponding to the lineviewers preview plot x axis.
 */
 int LineViewer::getXAxisDimensionIndex() const
 {
-  MantidQwtIMDWorkspaceData curveData(m_ws, false,
+  MantidQwtIMDWorkspaceData curveData(m_ws, isLogScaledY(),
       m_start, m_end, m_lineOptions->getNormalization());
   curveData.setPreviewMode(true);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   return curveData.currentPlotXAxis();
+}
+
+/**
+ * Getter for the log scaled status.
+ * @return True if and only if the y-axis is log scaled.
+ */
+bool LineViewer::isLogScaledY() const
+{
+  return m_lineOptions->isLogScaledY();
 }
 
 //-----------------------------------------------------------------------------
@@ -988,11 +1047,12 @@ int LineViewer::getXAxisDimensionIndex() const
 void LineViewer::showFull()
 {
   if (!m_sliceWS) return;
-  MatrixWorkspace_const_sptr sliceMatrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(m_sliceWS);
+  MatrixWorkspace_sptr sliceMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
   if (sliceMatrix)
   {
-    MantidQwtMatrixWorkspaceData curveData(sliceMatrix, 0, false /*not logScale*/);
+    MantidQwtMatrixWorkspaceData curveData(sliceMatrix, 0, isLogScaledY());
     m_fullCurve->setData(curveData);
+    setupScaleEngine(curveData);
     Unit_const_sptr unit = sliceMatrix->getAxis(0)->unit();
     std::string title = unit->caption() + " (" + unit->label() + ")";
     m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString(title));;
@@ -1001,11 +1061,12 @@ void LineViewer::showFull()
   }
   else
   {
-    MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
+    MantidQwtIMDWorkspaceData curveData(m_sliceWS, isLogScaledY(),
         VMD(), VMD(), m_lineOptions->getNormalization());
     curveData.setPreviewMode(false);
     curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
     m_fullCurve->setData(curveData);
+    setupScaleEngine(curveData);
     m_plot->setAxisTitle( QwtPlot::xBottom, QString::fromStdString( curveData.getXAxisLabel() ));;
     m_plot->setAxisTitle( QwtPlot::yLeft, QString::fromStdString( curveData.getYAxisLabel() ));;
   }
@@ -1016,6 +1077,7 @@ void LineViewer::showFull()
     m_previewCurve->detach();
     m_fullCurve->attach(m_plot);
   }
+
   m_fullCurve->setVisible(true);
   m_plot->replot();
   m_plot->setTitle("Integrated Line Plot");
@@ -1034,6 +1096,14 @@ void LineViewer::refreshPlot()
     showFull();
 }
 
+
+/**
+ * Handler for the log10 toggle axis event.
+ */
+void LineViewer::onToggleLogYAxis()
+{
+  refreshPlot();
+}
 
 } // namespace
 }

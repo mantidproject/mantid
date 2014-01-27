@@ -45,6 +45,7 @@ There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlo
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -109,9 +110,10 @@ namespace Mantid
     */
     void PlotAsymmetryByLogValue::init()
     {
-      std::string ext(".nxs");
-      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext), "The name of the first workspace in the series.");
-      declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext), "The name of the last workspace in the series.");
+      std::string nexusExt(".nxs");
+
+      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, nexusExt), "The name of the first workspace in the series.");
+      declareProperty(new FileProperty("LastRun","", FileProperty::Load, nexusExt), "The name of the last workspace in the series.");
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The name of the output workspace containing the resulting asymmetries.");
       declareProperty("LogValue","",boost::make_shared<MandatoryValidator<std::string>>(), "The name of the log values which will be used as the x-axis in the output workspace.");
       declareProperty("Red", 1, "The period number for the 'red' data.");
@@ -129,6 +131,18 @@ namespace Mantid
          "The list of spectra for the forward group. If not specified the following happens. The data will be grouped according to grouping information in the data, if available. The forward will use the first of these groups.");
        declareProperty(new ArrayProperty<int> ("BackwardSpectra"),
          "The list of spectra for the backward group. If not specified the following happens. The data will be grouped according to grouping information in the data, if available. The backward will use the second of these groups.");
+    
+      std::vector<std::string> deadTimeCorrTypes;
+      deadTimeCorrTypes.push_back("None");
+      deadTimeCorrTypes.push_back("FromRunData");
+      deadTimeCorrTypes.push_back("FromSpecifiedFile");
+
+      declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0], 
+        boost::make_shared<StringListValidator>(deadTimeCorrTypes), 
+        "Type of Dead Time Correction to apply.");
+
+      declareProperty(new FileProperty("DeadTimeCorrFile", "", FileProperty::OptionalLoad, nexusExt), 
+        "Custom file with Dead Times. Will be used only if appropriate DeadTimeCorrType is set.");
     }
 
     /** 
@@ -140,8 +154,6 @@ namespace Mantid
       m_backward_list = getProperty("BackwardSpectra");
       m_autogroup = ( m_forward_list.size() == 0 && m_backward_list.size() == 0);
 
-      //double alpha = getProperty("Alpha");
-
       std::string logName = getProperty("LogValue");
 
       int red = getProperty("Red");
@@ -149,6 +161,29 @@ namespace Mantid
 
       std::string stype = getProperty("Type");
       m_int = stype == "Integral";
+
+      std::string dtcType = getProperty("DeadTimeCorrType");
+
+      Workspace_sptr deadTimeWs; // Workspace with Dead Time Table[s]
+
+      // If use wants to use Dead Times from his own file, load them
+      if(dtcType == "FromSpecifiedFile")
+      {
+        const std::string dtcFile = getProperty("DeadTimeCorrFile");
+
+        try
+        {
+          IAlgorithm_sptr loadDeadTimes = createChildAlgorithm("LoadNexusProcessed");
+          loadDeadTimes->setPropertyValue("Filename", dtcFile);
+          loadDeadTimes->execute();
+
+          deadTimeWs = loadDeadTimes->getProperty("OutputWorkspace");
+        }
+        catch(...)
+        {
+          throw std::runtime_error("Unable to load Dead Time Table from the file. Please use correct file or set Deat Time Correction to None");
+        }
+      }
 
       std::string firstFN = getProperty("FirstRun");
       std::string lastFN = getProperty("LastRun");
@@ -208,60 +243,104 @@ namespace Mantid
 
         // Load a muon nexus file with auto_group set to true
         IAlgorithm_sptr loadNexus = createChildAlgorithm("LoadMuonNexus");
+        loadNexus->initialize();
         loadNexus->setPropertyValue("Filename", fn.str());
-        loadNexus->setPropertyValue("OutputWorkspace","tmp"+fnn.str());
-        if (m_autogroup)
-          loadNexus->setPropertyValue("AutoGroup","1");
         loadNexus->execute();
 
-        std::string wsProp = "OutputWorkspace";
+        Workspace_sptr loadedWs = loadNexus->getProperty("OutputWorkspace");
 
-        DataObjects::Workspace2D_sptr ws_red;
-        DataObjects::Workspace2D_sptr ws_green;
-
-        // Run through the periods of the loaded file and do calculations on the selected ones
-        Workspace_sptr tmp = loadNexus->getProperty(wsProp);
-        WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(tmp);
-        if (!wsGroup)
+        // Get Dead Times from run data file if necessary
+        if(dtcType == "FromRunData")
         {
-          ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
+          std::vector<double> deadTimes = loadNexus->getProperty("DeadTimes");
+
+          if(WorkspaceGroup_sptr loadedGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs))
+          {
+            // Assume all the WS in a group will have the same number of detectors
+            Workspace2D_sptr firstMember = 
+              boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(0));
+
+            size_t numDetectors = firstMember->getNumberHistograms();
+
+            deadTimeWs = deadTimesToTable(deadTimes, numDetectors);
+          }
+          else
+            deadTimeWs = deadTimesToTable(deadTimes);
+        }
+
+        // Apply Dead Time Correction if necessary
+        if(dtcType != "None")
+        {
+          try
+          {
+            loadedWs = applyDeadTimeCorrection(deadTimeWs, loadedWs);
+          }
+          catch(...)
+          {
+            throw std::runtime_error("Unable to apply Dead Time correction. Please change the Dead Time Table used or set Deat Time Correction to None");
+          }
+        }
+
+        if(m_autogroup)
+        {
+          IAlgorithm_sptr applyGrouping = createChildAlgorithm("ApplyGroupingFromMuonNexus");
+          applyGrouping->initialize();
+          applyGrouping->setProperty("InputWorkspace", loadedWs);
+          applyGrouping->setPropertyValue("Filename", fn.str());
+
+          try
+          {
+            applyGrouping->execute();
+          }
+          catch(...)
+          {
+            throw std::runtime_error("Unable to auto-group the workspace. Please specify grouping manually");
+          }
+
+          loadedWs = applyGrouping->getProperty("OutputWorkspace");
+        }
+
+        WorkspaceGroup_sptr loadedGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+
+        if (!loadedGroup)
+        {
+          Workspace2D_sptr loadedWs2D = boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
+
           double Y,E; 
-          calcIntAsymmetry(ws_red,Y,E);
+          calcIntAsymmetry(loadedWs2D, Y, E);
           outWS->dataY(0)[i-is] = Y;
-          outWS->dataX(0)[i-is] = getLogValue( *ws_red, logName );
+          outWS->dataX(0)[i-is] = getLogValue(*loadedWs2D, logName);
           outWS->dataE(0)[i-is] = E;
         }
         else
         {
+          DataObjects::Workspace2D_sptr ws_red;
+          DataObjects::Workspace2D_sptr ws_green;
 
-          for( int period = 1; period <= wsGroup->getNumberOfEntries(); ++period )
+          // Run through the periods of the loaded file and do calculations on the selected ones
+          for(int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++)
           {
-            std::stringstream suffix;
-            suffix << period;
-            wsProp = "OutputWorkspace_" + suffix.str();// form the property name for higher periods
+            Workspace2D_sptr memberWs = 
+              boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
+
+            int period = mi + 1;
+
             // Do only one period
             if (green == EMPTY_INT() && period == red)
             {
-              Workspace_sptr tmpff = loadNexus->getProperty(wsProp);
-              ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpff);
+              ws_red = memberWs;
               double Y,E; 
               calcIntAsymmetry(ws_red,Y,E);
               outWS->dataY(0)[i-is] = Y;
-              outWS->dataX(0)[i-is] = getLogValue( *ws_red, logName );
+              outWS->dataX(0)[i-is] = getLogValue(*ws_red, logName);
               outWS->dataE(0)[i-is] = E;
             }
             else // red & green
             {
               if (period == red)
-              {
-                Workspace_sptr temp = loadNexus->getProperty(wsProp);
-                ws_red = boost::dynamic_pointer_cast<Workspace2D>(temp);
-              }
+                ws_red = memberWs;
               if (period == green)
-              {
-                Workspace_sptr temp = loadNexus->getProperty(wsProp);
-                ws_green = boost::dynamic_pointer_cast<Workspace2D>(temp);
-              }
+                ws_green = memberWs;
             }
 
           }
@@ -542,6 +621,196 @@ namespace Mantid
         }
 
         throw std::invalid_argument("Log "+logName+" cannot be converted to a double type.");
+    }
+
+    /**
+     * Runs an appropriate applyDeadTimeCorrection function depending on the type of workspaces.
+     *
+     * @param deadTimeTable :: 
+     */ 
+    Workspace_sptr PlotAsymmetryByLogValue::applyDeadTimeCorrection(Workspace_sptr deadTimeWs, 
+      Workspace_sptr ws)
+    {
+      WorkspaceGroup_sptr deadTimeGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimeWs);
+      ITableWorkspace_sptr deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(deadTimeWs);
+
+      if(!deadTimeGroup && !deadTimeTable)
+        throw std::invalid_argument("Unsupported type of Dead Time Table");
+
+      WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+      if(wsGroup)
+      {
+        if(deadTimeGroup)
+          return applyDeadTimeCorrection(deadTimeGroup, wsGroup);
+        else
+          return applyDeadTimeCorrection(deadTimeTable, wsGroup);
+      }
+      else if(ws2D)
+      {
+        if(deadTimeTable)
+          return applyDeadTimeCorrection(deadTimeTable, ws2D);
+        else
+          throw std::invalid_argument("Can't apply group of tables to a single workspace");
+      }
+      else
+      {
+        throw std::invalid_argument("Unsupported type of the input workspace");
+      }
+    }
+
+    /**
+     * Applies a Dead Time Correction to a group of workspace using a single table.
+     *
+     * @param deadTimeTable :: Dead Time Table to be applied
+     * @param       wsGroup :: Group of workspaces to apply correction to
+     *
+     * @return Group of workspaces with DTC applied
+     */
+    WorkspaceGroup_sptr PlotAsymmetryByLogValue::applyDeadTimeCorrection(
+      ITableWorkspace_sptr deadTimeTable, WorkspaceGroup_sptr wsGroup)
+    {
+      WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+
+      for(size_t i = 0; i < wsGroup->size(); i++)
+      {
+        Workspace2D_sptr member = boost::dynamic_pointer_cast<Workspace2D>(wsGroup->getItem(i));
+
+        if(!member)
+          throw std::invalid_argument("Group contains unsupported type of workspace");
+        
+        Workspace2D_sptr outputWs = applyDeadTimeCorrection(deadTimeTable, member);
+
+        outputGroup->addWorkspace(outputWs);
+      }
+
+      return outputGroup;
+    }
+
+    /**
+     * Applies Dead Time Correction to a group workspaces using a group of tables. Each table
+     * is applied to the corresponding ws from the group.
+     *
+     * @param deadTimeGroup :: Group of Dead Time Tables to be applied
+     * @param       wsGroup :: Group of workspaces to apply correction to
+     *
+     * @return Group of workspaces with DTC applied
+     */
+    WorkspaceGroup_sptr PlotAsymmetryByLogValue::applyDeadTimeCorrection(
+      WorkspaceGroup_sptr deadTimeGroup, WorkspaceGroup_sptr wsGroup)
+    {
+      if(deadTimeGroup->size() != wsGroup->size())
+        throw std::invalid_argument("Dead Time Table group size is not equal to ws group sizes");
+
+      WorkspaceGroup_sptr outputGroup = boost::make_shared<WorkspaceGroup>();
+
+      for(size_t i = 0; i < wsGroup->size(); i++)
+      {
+        Workspace2D_sptr wsMember = boost::dynamic_pointer_cast<Workspace2D>(wsGroup->getItem(i));
+
+        if(!wsMember)
+          throw std::invalid_argument("Group contains unsupported type of workspace");
+
+        ITableWorkspace_sptr deadTimeMember = 
+          boost::dynamic_pointer_cast<ITableWorkspace>(deadTimeGroup->getItem(i));
+
+        if(!deadTimeMember)
+          throw std::invalid_argument("Dead Time Table group contains workspace which is not a table");
+          
+        Workspace2D_sptr outputWs = applyDeadTimeCorrection(deadTimeMember, wsMember);
+
+        outputGroup->addWorkspace(outputWs);
+      }
+
+      return outputGroup;
+    }
+
+    /**
+     * Runs ApplyDeadTimeCorr algorithm to apply Dead Time Correction to a ws using a given table.
+     *
+     * @param deadTimeTable :: Dead Time Table to be applied
+     * @param            ws :: Workspace to apply correction to
+     *
+     * @return Workspace with DTC applied
+     */
+    Workspace2D_sptr PlotAsymmetryByLogValue::applyDeadTimeCorrection(
+      ITableWorkspace_sptr deadTimeTable, Workspace2D_sptr ws)
+    {
+      IAlgorithm_sptr applyDtc = createChildAlgorithm("ApplyDeadTimeCorr");
+
+      applyDtc->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
+      applyDtc->setProperty<ITableWorkspace_sptr>("DeadTimeTable", deadTimeTable);
+      applyDtc->execute();
+
+      MatrixWorkspace_sptr output = applyDtc->getProperty("OutputWorkspace");
+
+      return boost::dynamic_pointer_cast<Workspace2D>(output);
+    }
+
+    /**
+     * Create a Dead Time Table using given list of dead times. 
+     *
+     * deadTimes could contain information for multiple Dead Time Tables, in which case 
+     * WorkspaceGroup is returned with information for numDetectors in every workspace.
+     * 
+     * @param    deadTimes :: List of dead times, on for every spectra
+     * @param numDetectors :: How many detectors. If 0 then numDetectors = deadTimes.size()
+     * @return Dead Time Table (ITableWorkspace) or a group of such tables (WorkspaceGroup)
+     */
+    Workspace_sptr PlotAsymmetryByLogValue::deadTimesToTable(const std::vector<double>& deadTimes, 
+      size_t numDetectors)
+    {
+      if(numDetectors == 0 || numDetectors == deadTimes.size())
+      {
+        // Use the whole vector to create a table
+
+        return createDeadTimeTable(deadTimes.begin(), deadTimes.end());
+      }
+      else
+      {
+        // Use parts of vector for multiple workspaces
+
+        if(deadTimes.size() % numDetectors != 0)
+          throw std::invalid_argument("Invalid number of Dead Times. Should me multiple of numDetectors");
+
+        WorkspaceGroup_sptr deadTimeGroup = boost::make_shared<WorkspaceGroup>();
+
+        for(auto it = deadTimes.begin(); it != deadTimes.end(); it += numDetectors)
+        {
+          ITableWorkspace_sptr deadTimeTable = createDeadTimeTable(it, it + numDetectors);
+
+          deadTimeGroup->addWorkspace(deadTimeTable);
+        }
+
+        return deadTimeGroup;
+      }
+    }
+
+    /**
+     * Creates Dead Time Table using all the data between begin and end.
+     *
+     * @param begin :: Iterator to the first element of the data to use
+     * @param   end :: Iterator to the last element of the data to use
+     * @return Dead Time Table create using the data
+     */
+    ITableWorkspace_sptr PlotAsymmetryByLogValue::createDeadTimeTable(
+      std::vector<double>::const_iterator begin, std::vector<double>::const_iterator end)
+    {
+      ITableWorkspace_sptr deadTimeTable = WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+      deadTimeTable->addColumn("int","spectrum");
+      deadTimeTable->addColumn("double","dead-time");
+
+      int s = 1; // Current spectrum
+
+      for(auto it = begin; it != end; it++)
+      {
+        TableRow row = deadTimeTable->appendRow();
+        row << s++ << *it;
+      }
+
+      return deadTimeTable;
     }
 
   } // namespace Algorithm

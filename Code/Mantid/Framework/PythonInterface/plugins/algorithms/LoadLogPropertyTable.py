@@ -20,7 +20,7 @@ import datetime
 import numbers
 import bisect
 import numpy
-from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
+from mantid.api import * # PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import * # StringArrayProperty
 from mantid.simpleapi import * # needed for Load
 

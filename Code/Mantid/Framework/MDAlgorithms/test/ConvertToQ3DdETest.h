@@ -86,8 +86,7 @@ void testExecFailsOnNewWorkspaceNoMaxLimits(){
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
 
-    pAlg->execute();
-    TSM_ASSERT("Should fail as no max limits were specified ",!pAlg->isExecuted());
+    TSM_ASSERT_THROWS("Should fail as no max limits were specified ",pAlg->execute(), std::runtime_error);
 
 }
 void testExecFailsLimits_MinGeMax(){
@@ -106,8 +105,7 @@ void testExecFailsLimits_MinGeMax(){
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("MaxValues", " 50., 50.,-50,-2"));
 
-    pAlg->execute();
-    TSM_ASSERT("Should fail as wrong max limits were specified ",!pAlg->isExecuted());
+    TSM_ASSERT_THROWS("Should fail as wrong max limits were specified ",pAlg->execute(), std::runtime_error);
 
 }
 void testExecFine(){

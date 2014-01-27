@@ -50,7 +50,7 @@ def getConvFitOption(ftype, bgd, Verbose):
 
 ##############################################################################
 
-def createConvFitFun(options, par, file):
+def createConvFitFun(options, par, file, ties):
     bgd_fun = 'name=LinearBackground,A0='
     if options[0] == 'FixF':
         bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A0='+str(par[0])+',A1=0.0)'
@@ -66,8 +66,11 @@ def createConvFitFun(options, par, file):
     if  options[2] >= 1:
         lor_fun = 'name=Lorentzian,Amplitude='+str(par[ip])+',PeakCentre='+str(par[ip+1])+',HWHM='+str(par[ip+2])
     if options[2] == 2:
+        funcIndex = 1 if options[1] else 0
         lor_2 = 'name=Lorentzian,Amplitude='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',HWHM='+str(par[ip+5])
-        lor_fun = lor_fun +';'+ lor_2 +';ties=(f0.PeakCentre=f1.PeakCentre)'
+        lor_fun = lor_fun +';'+ lor_2 +';'
+        if ties:
+            lor_fun += 'ties=(f'+str(funcIndex)+'.PeakCentre=f'+str(funcIndex+1)+'.PeakCentre)'
     if options[1]:
         delta_fun = 'name=DeltaFunction,Height='+str(par[2])
         lor_fun = delta_fun +';' + lor_fun
@@ -76,7 +79,7 @@ def createConvFitFun(options, par, file):
 
 ##############################################################################
 
-def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
+def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose):
     options = getConvFitOption(ftype, bgd[:-2], Verbose)   
     params = mtd[outNm+'_Parameters']
     A0 = params.column(1)     #bgd A0 value
@@ -94,8 +97,8 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
         H2 = params.column(ip+6)        #height2 value
         C2 = params.column(ip+8)      #centre2 value
         W2 = params.column(ip+10)      #width2 value
-    nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(nHist):
+
+    for i in range(0,(specMax-specMin)+1):
         paras = [A0[i], A1[i]]
         if options[1]:
             paras.append(D1[i])
@@ -107,12 +110,12 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
             paras.append(H2[i])
             paras.append(C2[i])
             paras.append(W2[i])
-        func = createConvFitFun(options, paras, resFile)
+        func = createConvFitFun(options, paras, resFile, ties)
         if Verbose:
             logger.notice('Fit func : '+func)      
         fitWS = outNm + '_Result_'
         fout = fitWS + str(i)
-        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i+specMin,Output=fout,MaxIterations=0)
         unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
@@ -184,7 +187,7 @@ def confitPlotSeq(inputWS, Plot):
 
 ##############################################################################
 
-def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, specMax, Verbose):
+def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, specMax, ties, Verbose):
     StartTime('ConvFit')
     workdir = config['defaultsave.directory']
     elements = func.split('"')
@@ -213,7 +216,7 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
     AddSampleLog(Workspace=wsname, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
 
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
-    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose)
+    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose)
     if Save:
         o_path = os.path.join(workdir, wsname+'.nxs')                    # path name for nxs file
         if Verbose:
@@ -266,6 +269,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     workdir = config['defaultsave.directory']
     CheckXrange(eRange,'Energy')
     tempWS = '__temp'
+    Range2 = ( len(eRange) == 4 )
     if Verbose:
         range1 = str(eRange[0])+' to '+str(eRange[1])
         if ( len(eRange) == 4 ): 
@@ -344,83 +348,174 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
             datTx = np.append(datTx,Txa)
             datTy = np.append(datTy,iqa)
             datTe = np.append(datTe,eqa)
-    DeleteWorkspace(tempWS)
+
     DeleteWorkspace('__eq1')
     DeleteWorkspace('__eq2')
+    DeleteWorkspace('__elf')
+
     if (nr == 1):
         ename = first[:-1]
     else:
         ename = first+'to_'+last
-    elfWS = ename+'_elf'    # interchange Q & T
-    CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
-        Nspec=nQ, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=q1)
-    unitx = mtd[elfWS].getAxis(0).setUnit("Label")
-    unitx.setLabel(unit[0], unit[1])
-    DeleteWorkspace('__elf')
+
+    #check if temp was increasing or decreasing
+    if(datTx[0] > datTx[-1]):
+        # if so reverse data to follow natural ordering
+    	datTx = datTx[::-1]
+        datTy = datTy[::-1]
+        datTe = datTe[::-1]
+
+    elfWS = ename+'_elf'
     e1WS = ename+'_eq1'
-    CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
-        Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
+    e2WS = ename+'_eq2'
+    #elt only created if we normalise
+    eltWS = None
+
+    wsnames = [elfWS, e1WS, e2WS]
+    
+    #x,y,e data for the elf, e1 and e2 workspaces
+    data = [[datTx, datTy, datTe], 
+            [datX1, datY1, datE1], 
+            [datX2, datY2, datE2]]
+    
+    #x and vertical units for the elf, e1 and e2 workspaces
+    xunits = ['Energy', 'MomentumTransfer', 'QSquared']
+    vunits = ['MomentumTransfer', 'Energy', 'Energy']
+
+    #vertical axis values for the elf, e1 and e2 workspaces
+    vvalues = [q1, Taxis, Taxis]
+    
+    #number of spectra in each workspace
+    nspecs =  [nQ, nr, nr]
+
+    #x-axis units label
+    label = unit[0]+' / '+unit[1]
+
+    wsInfo = zip(wsnames,data, xunits, vunits, vvalues, nspecs)
+
+    #Create output workspaces and add sample logs
+    for wsname, wsdata, xunit, vunit, vvalue, nspec in wsInfo:
+        x, y, e = wsdata
+
+        CreateWorkspace(OutputWorkspace=wsname, DataX=x, DataY=y, DataE=e,
+            Nspec=nspec, UnitX=xunit, VerticalAxisUnit=vunit, VerticalAxisValues=vvalue)
+
+        #add sample logs to new workspace
+        CopyLogs(InputWorkspace=tempWS, OutputWorkspace=wsname)
+        addElwinLogs(wsname, label, eRange, Range2)
+
+    # remove the temp workspace now we've copied the logs
+    DeleteWorkspace(tempWS)
+
+    if unit[0] == 'Temperature':
+
+        AddSampleLog(Workspace=e1WS, LogName="temp_normalise", 
+            LogType="String", LogText=str(Normalise))
+
+        #create workspace normalized to the lowest temperature
+        if Normalise:
+            eltWS = ename+'_elt'
+            
+            #create elt workspace
+            mtd[elfWS].clone(OutputWorkspace=eltWS)
+            elwinNormalizeToLowestTemp(eltWS)
+
+            #set labels and meta data
+            unitx = mtd[eltWS].getAxis(0).setUnit("Label")
+            unitx.setLabel(unit[0], unit[1])
+            addElwinLogs(eltWS, label, eRange, Range2)
+
+            #append workspace name to output files list
+            wsnames.append(eltWS)
+
+    #set labels on workspace axes
     unity = mtd[e1WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
-    label = unit[0]+' / '+unit[1]
-    AddSampleLog(Workspace=e1WS, LogName="Vaxis", LogType="String", LogText=label)
-    e2WS = ename+'_eq2'
-    CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
-        Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
+    
     unity = mtd[e2WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
-    AddSampleLog(Workspace=e2WS, LogName="Vaxis", LogType="String", LogText=label)
-    if unit[0] == 'Temperature':
-        nT = len(Tvalue)
-        if Tvalue[0] < Tvalue[nT-1]:
-            lo = 0
-            hi = nT-1
-        else:
-            lo = nT-1
-            hi = 0
-        text = 'Temperature range : '+str(Tvalue[lo])+' to '+str(Tvalue[hi])
-        if Normalise:
-            yval = mtd[e1WS].readY(lo)
-            normFactor = 1.0/yval[0]
-            Scale(InputWorkspace=e1WS, OutputWorkspace=e1WS, Factor=normFactor, Operation='Multiply')
-            if Verbose:
-                logger.notice(text)
-                logger.notice('Normalised eq1 by scale factor : '+str(normFactor))
+    
+    unitx = mtd[elfWS].getAxis(0).setUnit("Label")
+    unitx.setLabel(unit[0], unit[1])
 
     if Save:
-        e1_path = os.path.join(workdir, e1WS+'.nxs')					# path name for nxs file
-        e2_path = os.path.join(workdir, e2WS+'.nxs')					# path name for nxs file
-        elf_path = os.path.join(workdir, elfWS+'.nxs')					# path name for nxs file
-        if Verbose:
-            logger.notice('Creating file : '+e1_path)
-            logger.notice('Creating file : '+e2_path)
-            logger.notice('Creating file : '+elf_path)
-        SaveNexusProcessed(InputWorkspace=e1WS, Filename=e1_path)
-        SaveNexusProcessed(InputWorkspace=e2WS, Filename=e2_path)
-        SaveNexusProcessed(InputWorkspace=elfWS, Filename=elf_path)
+        elwinSaveWorkspaces(wsnames, workdir, Verbose)
+
     if Plot:
-        elwinPlot(e1WS,e2WS,elfWS)
+        elwinPlot(label,e1WS,e2WS,elfWS,eltWS)
+
     EndTime('Elwin')
     return e1WS,e2WS
 
-def elwinPlot(eq1,eq2,elf):
-    nhist = mtd[eq1].getNumberHistograms()                      # no. of hist/groups in sam
-    nBins = mtd[eq1].blocksize()
-    lastXeq1 = mtd[eq1].readX(0)[nBins-1]
-    graph1 = mp.plotSpectrum(eq1, range(0,nhist))
-    layer1 = graph1.activeLayer()
-    layer1.setScale(mp.Layer.Bottom, 0.0, lastXeq1)
-    layer1.setAxisTitle(mp.Layer.Left,'Elastic Intensity')
-    nBins = mtd[eq2].blocksize()
-    lastXeq2 = mtd[eq2].readX(0)[nBins-1]
-    graph2 = mp.plotSpectrum(eq2, range(0,nhist))
-    layer2 = graph2.activeLayer()
-    layer2.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
-    layer2.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
-    ntemp = mtd[elf].getNumberHistograms()                      # no. of hist/groups in sam
-    graph3 = mp.plotSpectrum(elf, range(0,ntemp))
-    layer3 = graph3.activeLayer()
-    layer3.setAxisTitle(mp.Layer.Bottom, 'Temperature(K)')
+#normalize workspace to the lowest temperature
+def elwinNormalizeToLowestTemp(eltWS):
+    nhist = mtd[eltWS].getNumberHistograms()
+    
+    #normalize each spectrum in the workspace
+    for n in range(0,nhist):
+        y = mtd[eltWS].readY(n)
+        scale = 1.0/y[0]
+        yscaled = scale * y
+        mtd[eltWS].setY(n, yscaled)
+
+# Write each of the created workspaces to file
+def elwinSaveWorkspaces(flist, dir, Verbose):
+    for fname in flist:
+        fpath = os.path.join(dir, fname+'.nxs')
+
+        if Verbose:
+            logger.notice('Creating file : '+ fpath)
+
+        SaveNexusProcessed(InputWorkspace=fname, Filename=fpath)
+
+# Add sample log to each of the workspaces created by Elwin
+def addElwinLogs(ws, label, eRange, Range2):
+
+    AddSampleLog(Workspace=ws, LogName="vert_axis", LogType="String", LogText=label)
+    AddSampleLog(Workspace=ws, LogName="range1_start", LogType="Number", LogText=str(eRange[0]))
+    AddSampleLog(Workspace=ws, LogName="range1_end", LogType="Number", LogText=str(eRange[1]))
+    AddSampleLog(Workspace=ws, LogName="two_ranges", LogType="String", LogText=str(Range2))
+
+    if Range2:
+        AddSampleLog(Workspace=ws, LogName="range2_start", LogType="Number", LogText=str(eRange[2]))
+        AddSampleLog(Workspace=ws, LogName="range2_end", LogType="Number", LogText=str(eRange[3]))
+
+#Plot each of the workspace output by elwin
+def elwinPlot(label,eq1,eq2,elf,elt):
+    plotElwinWorkspace(eq1, yAxisTitle='Elastic Intensity', setScale=True)
+    plotElwinWorkspace(eq2, yAxisTitle='log(Elastic Intensity)', setScale=True)
+    plotElwinWorkspace(elf, xAxisTitle=label)
+
+    if elt is not None:
+        plotElwinWorkspace(elt, xAxisTitle=label)
+
+#Plot a workspace generated by Elwin
+def plotElwinWorkspace(ws, xAxisTitle=None, yAxisTitle=None, setScale=False):
+    ws = mtd[ws]
+    nBins = ws.blocksize()
+    lastX = ws.readX(0)[nBins-1]
+
+    nhist = ws.getNumberHistograms()
+
+    try:
+        graph = mp.plotSpectrum(ws, range(0,nhist))
+    except RuntimeError, e:
+        #User clicked cancel on plot so don't do anything
+        return None
+    
+    layer = graph.activeLayer()
+
+    #set the x scale of the layer
+    if setScale:
+        layer.setScale(mp.Layer.Bottom, 0.0, lastX)
+    
+    #set the title on the x-axis
+    if xAxisTitle:
+        layer.setAxisTitle(mp.Layer.Bottom, xAxisTitle)
+
+    #set the title on the y-axis
+    if yAxisTitle:
+        layer.setAxisTitle(mp.Layer.Left, yAxisTitle)
 
 ##############################################################################
 # Fury
@@ -834,6 +929,14 @@ def msdfitParsToWS(Table, xData):
     dataY1 = map(lambda x : -x, yA1) 
     eA1 = ws.column(4)
     wsname = Table
+
+    #check if temp was increasing or decreasing
+    if(dataX[0] > dataX[-1]):
+        # if so reverse data to follow natural ordering
+        dataX = dataX[::-1]
+        dataY1 = dataY1[::-1]
+        eA1 = eA1[::-1]
+
     CreateWorkspace(OutputWorkspace=wsname+'_a0', DataX=dataX, DataY=yA0, DataE=eA0,
         Nspec=1, UnitX='')
     CreateWorkspace(OutputWorkspace=wsname+'_a1', DataX=dataX, DataY=dataY1, DataE=eA1,
@@ -871,8 +974,8 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
     ws_run = ws.getRun()
     vertAxisValues = ws.getAxis(1).extractValues()
     x_list = vertAxisValues
-    if 'Vaxis' in ws_run:
-        xlabel = ws_run.getLogData('Vaxis').value
+    if 'vert_axis' in ws_run:
+        xlabel = ws_run.getLogData('vert_axis').value
     for nr in range(0, nHist):
         nsam,ntc = CheckHistZero(root)
         lnWS = '__lnI_'+str(nr)
@@ -927,6 +1030,12 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
         DeleteWorkspace(inWS)
         DeleteWorkspace('__data')
     GroupWorkspaces(InputWorkspaces=gro,OutputWorkspace=calcWS)
+
+    #add sample logs to output workspace
+    CopyLogs(InputWorkspace=root, OutputWorkspace=msdWS)
+    AddSampleLog(Workspace=msdWS, LogName="start_x", LogType="Number", LogText=str(startX))
+    AddSampleLog(Workspace=msdWS, LogName="end_x", LogType="Number", LogText=str(endX))
+    
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
         msdfitPlotFits(calcWS, 0)
@@ -982,14 +1091,16 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     sam_name = getWSprefix(inputWS)
     ConvertUnits(InputWorkspace=inputWS, OutputWorkspace=inputWS, Target='Wavelength',
         EMode='Indirect', EFixed=efixed)
+
+    nameStem = corr[:-4]
     if canWS != '':
         (instr, can_run) = getInstrRun(canWS)
-        corrections = [corr+'_1', corr+'_2', corr+'_3', corr+'_4']
+        corrections = [nameStem+'_ass', nameStem+'_assc', nameStem+'_acsc', nameStem+'_acc']
         CorrectedWS = sam_name +'Correct_'+ can_run
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='Wavelength',
             EMode='Indirect', EFixed=efixed)
     else:
-        corrections = [corr+'_1']
+        corrections = [nameStem+'_ass']
         CorrectedWS = sam_name +'Corrected'
     nHist = mtd[inputWS].getNumberHistograms()
     # Check that number of histograms in each corrections workspace matches
@@ -1043,10 +1154,10 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     DeleteWorkspace('Fit_NormalisedCovarianceMatrix')
     DeleteWorkspace('Fit_Parameters')
     DeleteWorkspace('Fit_Workspace')
-    DeleteWorkspace('corrections')
+    DeleteWorkspace(corr)
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
+def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
         PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
@@ -1069,14 +1180,11 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
             if container != '':
                 text += ' with ' + container
             logger.notice(text)
-        file = sam_name + geom +'_Abs.nxs'
-        abs_path = os.path.join(workdir, file)					# path name for nxs file
-        if Verbose:
-            logger.notice('Correction file :'+abs_path)
-        LoadNexus(Filename=abs_path, OutputWorkspace='corrections')
-        cor_result = applyCorrections(sample, container, 'corrections', Verbose)
+            
+        cor_result = applyCorrections(sample, container, corrections, Verbose)
         rws = mtd[cor_result+'_red']
         outNm= cor_result + '_Result_'
+
         if Save:
             cred_path = os.path.join(workdir,cor_result+'_red.nxs')
             SaveNexusProcessed(InputWorkspace=cor_result+'_red',Filename=cred_path)

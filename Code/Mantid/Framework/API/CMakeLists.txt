@@ -297,6 +297,7 @@ set ( TEST_FILES
 	IEventListTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	IkedaCarpenterModeratorTest.h
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h

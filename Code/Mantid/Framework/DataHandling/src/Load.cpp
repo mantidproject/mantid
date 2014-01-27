@@ -248,8 +248,18 @@ namespace Mantid
       }
       winningLoader->initialize();
       setUpLoader(winningLoader,0,1);
+
+      findFilenameProperty(winningLoader);
+
+      setPropertyValue("LoaderName", winningLoader->name());
+      setProperty("LoaderVersion", winningLoader->version());
+      return winningLoader;
+    }
+
+    void Load::findFilenameProperty(const API::IAlgorithm_sptr & loader)
+    {
       // Use the first file property as the main Filename
-      const auto & props = winningLoader->getProperties();
+      const auto & props = loader->getProperties();
       for(auto it = props.begin(); it != props.end(); ++it)
       {
         if(auto *fp = dynamic_cast<API::FileProperty*>(*it))
@@ -262,11 +272,8 @@ namespace Mantid
       {
         setPropertyValue("LoaderName", "");
         setProperty("LoaderVersion", -1);
-        throw std::runtime_error("Cannot find FileProperty on " + winningLoader->name() + " algorithm.");
+        throw std::runtime_error("Cannot find FileProperty on " + loader->name() + " algorithm.");
       }
-      setPropertyValue("LoaderName", winningLoader->name());
-      setProperty("LoaderVersion", winningLoader->version());
-      return winningLoader;
     }
 
     /**
@@ -379,6 +386,7 @@ namespace Mantid
       else
       {
         m_loader = createLoader(0,1);
+        findFilenameProperty(m_loader);
       }
       g_log.information() << "Using " << loaderName << " version " << m_loader->version() << ".\n";
       ///get the list properties for the concrete loader load algorithm

@@ -73,6 +73,9 @@ public:
   virtual const std::string category() const { return "Transforms\\Units";}
 
 private:
+  const std::string workspaceMethodName() const { return "convertUnits"; }
+  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
+
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods

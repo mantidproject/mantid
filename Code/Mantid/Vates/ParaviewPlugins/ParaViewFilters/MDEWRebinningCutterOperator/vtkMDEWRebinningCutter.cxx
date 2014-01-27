@@ -198,7 +198,8 @@ m_presenter(new NullRebinningPresenter()),
   m_timestep(0),
   m_thresholdMax(1e9),
   m_thresholdMin(0),
-  m_thresholdMethodIndex(0)
+  m_thresholdMethodIndex(0),
+  m_bOutputHistogramWS(true)
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);

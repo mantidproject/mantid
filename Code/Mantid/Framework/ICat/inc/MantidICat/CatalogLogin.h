@@ -54,7 +54,6 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      void throwCatalogError() const;
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// Overwrites Algorithm method.

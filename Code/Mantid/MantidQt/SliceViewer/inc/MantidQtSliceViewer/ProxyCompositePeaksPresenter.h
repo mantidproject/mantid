@@ -4,7 +4,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
+#include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include <boost/shared_ptr.hpp>
+#include <QObject>
 
 namespace MantidQt
 {
@@ -14,13 +16,14 @@ namespace MantidQt
     ProxyCompositePeaksPresenter
 
     Proxy wrapper of the CompositePeaksPresenter. Allows the CompositePeaksPresenter to 
-    be used in suituations where diluted power, via a restricted API is required.
+    be used in situations where diluted power, via a restricted API is required.
     ----------------------------------------------------------*/
-    class DLLExport ProxyCompositePeaksPresenter 
+    class DLLExport ProxyCompositePeaksPresenter : public QObject, public UpdateableOnDemand
     {
     public:
 
       ProxyCompositePeaksPresenter(boost::shared_ptr<CompositePeaksPresenter> compositePresenter);
+      ProxyCompositePeaksPresenter();
       ~ProxyCompositePeaksPresenter();
       size_t size() const;
       void update();
@@ -32,6 +35,8 @@ namespace MantidQt
       QColor getForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
       /// Get the background colour corresponding to the workspace
       QColor getBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+      /// Determine wheter the background is shown or not.
+      bool getShowBackground(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
       /// Get references to all presented workspaces.
       SetPeaksWorkspaces presentedWorkspaces() const;
       /// Gets the transform name.
@@ -46,10 +51,23 @@ namespace MantidQt
       void zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex);
       /// sort the peaks workspace.
       void sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending);
-
+      /// Get the named peaks presenter
+      PeaksPresenter* getPeaksPresenter(const QString& name);
+      /// Is the workspace hidden.
+      bool getIsHidden(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const;
+      /// Perform a requested update.
+      void performUpdate();
+      /// Register an updateable view
+      void registerView(UpdateableOnDemand* view);
+      /// Get optional zoomed peak presenter.
+      boost::optional<PeaksPresenter_sptr> getZoomedPeakPresenter() const;
+      /// Get optional zoomed peak index.
+      int getZoomedPeakIndex() const;
     private:
       /// Wrapped composite to delegate to.
       boost::shared_ptr<CompositePeaksPresenter> m_compositePresenter;
+      /// Register an assoicated view.
+      UpdateableOnDemand* m_updateableView;
     };
   }
 }

@@ -7,7 +7,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadSNSEventNexus.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

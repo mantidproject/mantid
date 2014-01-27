@@ -13,7 +13,9 @@ sanslog = sans_reduction_steps.sanslog
 
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace
-import SANSUtility
+from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
+                         isEventWorkspace, fromEvent2Histogram, 
+                         getFilePathFromWorkspace, getWorkspaceReference)
 import isis_instrument
 import os
 import math
@@ -83,8 +85,6 @@ class LoadRun(object):
                             OutputWorkspace=workspace,
                             **extra_options)
 
-            alg = outWs.getHistory().lastAlgorithm()
-            self._data_file = alg.getPropertyValue("Filename")
             LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
 
             workspace = self._leaveSinglePeriod(workspace, period)
@@ -94,8 +94,6 @@ class LoadRun(object):
             outWs = LoadNexus(Filename=self._data_file, 
                               OutputWorkspace=workspace,
                               **extra_options)
-            alg = outWs.getHistory().lastAlgorithm()            
-            self._data_file = alg.getPropertyValue("Filename")
 
         SANS2D_log_file = mtd[workspace]
        
@@ -159,9 +157,9 @@ class LoadRun(object):
         ws_pointer = self._data_file
 
         try:
-            _file_path = ws_pointer.getHistory().getAlgorithm(0).getPropertyValue("Filename")
+            _file_path = getFilePathFromWorkspace(ws_pointer)
         except:
-            raise RuntimeError("Failed to retrieve information to reloade this workspace " + str(self._data_file))
+            raise RuntimeError("Failed to retrieve information to reload this workspace " + str(self._data_file))
         self._data_file = _file_path
         if self._reload:
             # give to _assignHelper the responsibility of loading this data.
@@ -181,6 +179,9 @@ class LoadRun(object):
         if 'Algorithm: Move' in hist_str or 'Algorithm: Rotate' in hist_str:
             raise RuntimeError('Moving components needs to be made compatible with not reloading the sample')
         
+        if isEventWorkspace(ws_pointer):
+            ws_pointer = fromEvent2Histogram(ws_pointer)
+
         return True, self._extract_log_info(ws_pointer, reducer.instrument)
         
 
@@ -208,7 +209,7 @@ class LoadRun(object):
         spectrum_limits = dict()
         if self._is_trans:
             if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
-                dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
+                dimension = GetInstrumentDetails(reducer.instrument)[0]
                 spec_min = dimension*dimension*2
                 spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
 
@@ -296,7 +297,8 @@ class LoadRun(object):
         return numPeriods
 
     def _getHistory(self, wk_name):
-
+        ws = getWorkspaceReference(wk_name)
+        
         if isinstance(wk_name, Workspace):
             ws_h = wk_name.getHistory()
         else:
@@ -834,15 +836,15 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         if detector.isAlias('rear'):
             self.spec_list = self._ConvertToSpecList(self.spec_mask_r, detector)
             #Time mask
-            SANSUtility.MaskByBinRange(workspace,self.time_mask_r)
-            SANSUtility.MaskByBinRange(workspace,self.time_mask)
+            MaskByBinRange (workspace,self.time_mask_r)
+            MaskByBinRange(workspace,self.time_mask)
 
         if detector.isAlias('front'):
             #front specific masking
             self.spec_list = self._ConvertToSpecList(self.spec_mask_f, detector)
             #Time mask
-            SANSUtility.MaskByBinRange(workspace,self.time_mask_f)
-            SANSUtility.MaskByBinRange(workspace,self.time_mask)
+            MaskByBinRange(workspace,self.time_mask_f)
+            MaskByBinRange(workspace,self.time_mask)
 
         #reset the xml, as execute can be run more than once
         self._xml = []
@@ -1227,7 +1229,18 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         # apply the propertis to self.fit_settings
         for prop in self.fit_props:
             self.fit_settings[select+prop] = sel_settings[prop]
+        
+        # When both is given, it is necessary to clean the specific settings for the individual selectors
+        if select == 'both::':            
+            for selector_ in ['sample::','can::']:
+                for prop_ in self.fit_props:
+                    prop_name = selector_+prop_
+                    if self.fit_settings.has_key(prop_name):
+                        del self.fit_settings[prop_name]
 
+    def isSeparate(self):
+        """ Returns true if the can or sample was given and false if just both was used"""
+        return self.fit_settings.has_key('sample::fit_method') or self.fit_settings.has_key('can::fit_method')
 
     def setup_wksp(self, inputWS, inst, wavbining, pre_monitor, post_monitor):
         """
@@ -1431,9 +1444,14 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def lambdaMax(self, selector):
         return self._get_fit_property(selector.lower(), 'lambda_max')
     def fitMethod(self, selector):
+        """It will return LINEAR, LOGARITHM, POLYNOMIALx for x in 2,3,4,5"""
         resp = self._get_fit_property(selector.lower(), 'fit_method')
         if 'POLYNOMIAL' == resp:
             resp += str(self._get_fit_property(selector.lower(), 'order'))
+        if resp  in ['LIN','STRAIGHT'] :
+            resp = 'LINEAR'
+        if resp in ['YLOG','LOG']:
+            resp = 'LOGARITHMIC'
         return resp
 
 class AbsoluteUnitsISIS(ReductionStep):
@@ -1851,7 +1869,7 @@ class UserFile(ReductionStep):
                 else:
                     raise 1
                 reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
-                                                              fit_method=fit_type, override=False, 
+                                                              fit_method=fit_type, override=True, 
                                                               selector=selector)
             except:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)

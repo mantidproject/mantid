@@ -209,6 +209,22 @@ inline bool isNaN(T val)
   volatile T buf=val;
   return (val!=buf);
 }
+
+const std::string ConvertToMD::name() const
+{
+  return "ConvertToMD";
+}
+
+int ConvertToMD::version() const
+{
+  return 1;
+}
+
+const std::string ConvertToMD::category() const
+{
+  return "MDAlgorithms";
+}
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -350,6 +366,48 @@ ConvertToMD::init()
 "property is necessary if one wants to generate multiple file based workspaces in order to merge them later.");
     setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
  
+}
+
+std::map<std::string, std::string> ConvertToMD::validateInputs()
+{
+  std::map<std::string, std::string> result;
+
+  std::vector<double> minVals = this->getProperty("MinValues");
+  std::vector<double> maxVals = this->getProperty("MaxValues");
+
+  if (minVals.size() != maxVals.size())
+  {
+    std::stringstream msg;
+    msg << "Rank of MinValues != MaxValues (" << minVals.size() << "!=" << maxVals.size() << ")";
+    result["MinValues"] = msg.str();
+    result["MaxValues"] = msg.str();
+  }
+  else
+  {
+    std::stringstream msg;
+
+    size_t rank = minVals.size();
+    for (size_t i = 0; i < rank; ++i)
+    {
+      if (minVals[i] >= maxVals[i])
+      {
+        if (msg.str().empty())
+          msg << "max not bigger than min ";
+        else
+          msg << ", ";
+        msg << "at index=" << (i+1) << " ("
+            << minVals[i] << ">=" << maxVals[i] << ")";
+      }
+    }
+
+    if (!msg.str().empty())
+    {
+      result["MinValues"] = msg.str();
+      result["MaxValues"] = msg.str();
+    }
+  }
+
+  return result;
 }
 
  //----------------------------------------------------------------------------------------------

@@ -55,16 +55,16 @@ namespace Mantid
     {
     public:
       /// Returns the name of the log created that defines the status during a run
-      static const std::string & statusLogName();
+      static const std::string statusLogName();
       /// Returns the name of the log that contains all of the periods
-      static const std::string & periodsLogName();
+      static const std::string periodsLogName();
       /// Creates a TimeSeriesProperty of either double or string type depending on the log data
       /// Returns a pointer to the created property
       static Kernel::Property* createLogProperty(const std::string& logFName, const std::string& name);
+      /// Check if the icp log commands are in the new style
+      static bool isICPEventLogNewStyle( const std::multimap<Kernel::DateAndTime, std::string> &logm );
 
     public:
-      /// Create given the icpevent file name
-      LogParser(const std::string& eventFName);
       /// Create given the icpevent log property
       LogParser(const Kernel::Property* log);
       /// Destructor
@@ -87,6 +87,16 @@ namespace Mantid
 
     private:
 
+      /// Parse the icp event log with old style commands
+      void parseOldStyleCommands( const std::multimap<Kernel::DateAndTime, std::string> &logm,
+                                  Kernel::TimeSeriesProperty<int>* periods,
+                                  Kernel::TimeSeriesProperty<bool>* status );
+
+      /// Parse the icp event log with new style commands
+      void parseNewStyleCommands( const std::multimap<Kernel::DateAndTime, std::string> &logm,
+                                  Kernel::TimeSeriesProperty<int>* periods,
+                                  Kernel::TimeSeriesProperty<bool>* status );
+
       /// Available commands.
       enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};
 
@@ -105,8 +115,8 @@ namespace Mantid
       /// static reference to the logger class
       static Kernel::Logger& g_log;
 
-      /// Creates a map of all available commands.
-      CommandMap createCommandMap() const;
+      /// Creates a map of all available old-style commands.
+      CommandMap createCommandMap(bool newStyle) const;
 
       /// Try to parse period data.
       void tryParsePeriod(const std::string& com, const DateAndTime& time, std::istringstream& idata, Kernel::TimeSeriesProperty<int>* const periods);

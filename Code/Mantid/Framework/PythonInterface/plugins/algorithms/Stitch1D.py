@@ -2,6 +2,7 @@
 
 Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputing a stitched Matrix Workspace. This algorithm is a wrapper over [[Stitch1DMD]].
 
+The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
 *WIKI*"""
 from mantid.simpleapi import *
 
@@ -18,15 +19,18 @@ class Stitch1D(PythonAlgorithm):
 	    return "Stitch1D"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("LHSWorkspace", "", Direction.Input), "Input workspace")
-        self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input), "Input workspace")
+        
+        histogram_validator = HistogramValidator()
+        
+        self.declareProperty(MatrixWorkspaceProperty("LHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
+        self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")
         
         overlap_validator = FloatMandatoryValidator() 
-
+        
         self.declareProperty(name="StartOverlap", defaultValue=-1.0, validator=overlap_validator, doc="Overlap in Q.")
         self.declareProperty(name="EndOverlap", defaultValue=-1.0, validator=overlap_validator, doc="End overlap in Q.")
-        self.declareProperty(name="Params", defaultValue="0.1", doc="Rebinning Parameters. See Rebin for format.")
+        self.declareProperty(FloatArrayProperty(name="Params", values=[0.1]), doc="Rebinning Parameters. See Rebin for format.")
         self.declareProperty(name="ScaleRHSWorkspace", defaultValue=True, doc="Scaling either with respect to workspace 1 or workspace 2.")
         self.declareProperty(name="UseManualScaleFactor", defaultValue=False, doc="True to use a provided value for the scale factor.")
         self.declareProperty(name="ManualScaleFactor", defaultValue=1.0, doc="Provided value for the scale factor.")
@@ -38,9 +42,10 @@ class Stitch1D(PythonAlgorithm):
         return count > 0
             
     def PyExec(self):
+        rangeTolerance = 1e-9
         # Just forward the other properties on.
-        startOverlap = self.getProperty('StartOverlap').value
-        endOverlap = self.getProperty('EndOverlap').value
+        startOverlap = self.getProperty('StartOverlap').value - rangeTolerance
+        endOverlap = self.getProperty('EndOverlap').value + rangeTolerance
         scaleRHSWorkspace = self.getProperty('ScaleRHSWorkspace').value
         useManualScaleFactor = self.getProperty('UseManualScaleFactor').value
         manualScaleFactor = self.getProperty('ManualScaleFactor').value

@@ -71,17 +71,6 @@ class ThreadSafeLogStream;
     // Our logger's priority types are the same as POCO's Message's types.
     typedef Poco::Message::Priority Priority;
 
-//    /// An enumeration of the priority levels of a log message.
-//    enum Priority
-//    {
-//      PRIO_FATAL = 1,           ///< A fatal error. The application will most likely terminate. This is the highest priority.
-//      PRIO_ERROR = 3,       ///< An error. An operation did not complete successfully, but the application as a whole is not affected.
-//      PRIO_WARNING = 4,     ///< A warning. An operation completed with an unexpected result.
-//      PRIO_NOTICE = 5,      ///< An informational message, usually denoting the successful completion of an Algorithm, These are the headlines of what we should be reporting to the user.
-//      PRIO_INFORMATION = 6, ///< An informational message, usually denoting the successful completion of an operation.
-//      PRIO_DEBUG = 7        ///< A debugging message.This is the lowest priority.
-//    };
-
     /// Sets the Loggername to a new value.
     void setName(std::string newName);
     /// Logs at Fatal level     
@@ -115,7 +104,13 @@ class ThreadSafeLogStream;
 
     /// Sets the Logger's log level.
     void setLevel(int level);
-                
+           
+    /// Sets the Logger's log offset level.
+    void setLevelOffset(int level);     
+
+    /// Gets the Logger's log offset level.
+    int getLevelOffset();
+
     /// Returns the Logger's log level.
     int getLevel() const;
                 
@@ -162,12 +157,20 @@ class ThreadSafeLogStream;
     /// Return a log stream set with the given priority
     void log(const std::string message, Logger::Priority priority);
 
+    /// gets the correct log stream for a priority
+    std::ostream& getLogStream(Logger::Priority priority);
+
+    /// Return a log stream set with the given priority
+    Priority applyLevelOffset(Priority proposedLevel);
+
     /// Internal handle to third party logging objects
     Poco::Logger* m_log;
     /// A Log stream to allow streaming operations.  This pointer is owned by this class, initialized in the constructor and deleted in the destructor
     ThreadSafeLogStream* m_logStream;
     /// Name of this logging object
     std::string m_name;
+    /// The offset of the logger
+    int m_levelOffset;
     /// The state of this logger, disabled loggers send no messages
     bool m_enabled;
     /// Typdef for a container of logger pointers

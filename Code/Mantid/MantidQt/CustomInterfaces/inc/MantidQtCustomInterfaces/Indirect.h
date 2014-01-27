@@ -9,6 +9,7 @@
 #include <qwt_plot_curve.h>
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 //----------------------------------------------------
 // Forward declarations
@@ -122,6 +123,7 @@ namespace MantidQt
       void calMinChanged(double);
       void calMaxChanged(double);
       void calUpdateRS(QtProperty*, double);
+      void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
 
       void sOfQwClicked(); ///< S(Q,w) tab run button clicked
       void sOfQwRebinE(bool state);

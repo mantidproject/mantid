@@ -118,8 +118,7 @@ namespace Crystal
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
     declareProperty("CoordinatesToUse", "Q (lab frame)", boost::make_shared<StringListValidator>(propOptions),
-      "Which coordinates of the peak center do you wish to use to integrate the peak? This should match the InputWorkspace's dimensions."
-       );
+    		"Deprecated:  algorithm uses the InputWorkspace's coordinates.");
 
     declareProperty("RadiusStart", 0.0, "Radius at which to start integrating." );
     declareProperty("RadiusEnd", 1.0, "Radius at which to stop integrating." );

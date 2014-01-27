@@ -93,25 +93,21 @@ DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
 
   double x_step = (xmax - xmin) / (double)n_cols;
   double y_step = (ymax - ymin) / (double)n_rows;
-  double mid_y,
-         mid_x;
   double d_x_index,
          d_y_index;
-  size_t source_row,
-         source_col;
   size_t index = 0;                               // get data for middle of
   for ( size_t row = 0; row < n_rows; row++ )     // each destination position
   {
-    mid_y = ymin + ((double)row + 0.5) * y_step;
+    double mid_y = ymin + ((double)row + 0.5) * y_step;
     SVUtils::Interpolate( total_ymin, total_ymax, mid_y,
                                  0.0, (double)total_rows, d_y_index );
-    source_row = (size_t)d_y_index;
+    size_t source_row = (size_t)d_y_index;
     for ( size_t col = 0; col < n_cols; col++ )
     {
-      mid_x = xmin + ((double)col + 0.5) * x_step;
+      double mid_x = xmin + ((double)col + 0.5) * x_step;
       SVUtils::Interpolate( total_xmin, total_xmax, mid_x,
                                    0.0, (double)total_cols, d_x_index );
-      source_col = (size_t)d_x_index;             
+      size_t source_col = (size_t)d_x_index;             
       new_data[index] = data[source_row * total_cols + source_col];
       index++;
     } 

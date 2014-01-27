@@ -8,6 +8,7 @@
 #include <iomanip>
 #include "MantidLiveData/LiveDataAlgorithm.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -25,8 +26,8 @@ class LiveDataAlgorithmImpl : public LiveDataAlgorithm
   // Make all the members public so I can test them.
   friend class LiveDataAlgorithmTest;
 public:
-  virtual const std::string name() const { return "LiveDataAlgorithmImpl";};
-  virtual int version() const { return 1;};
+  virtual const std::string name() const { return "LiveDataAlgorithmImpl";}
+  virtual int version() const { return 1;}
   virtual const std::string category() const { return "Testing";}
   void init()
   { this->initProps(); }
@@ -66,6 +67,8 @@ public:
   
   void test_validateInputs()
   {
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+
     LiveDataAlgorithmImpl alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -87,7 +90,7 @@ public:
     alg.setPropertyValue("AccumulationWorkspace", "out_ws");
     TSM_ASSERT("AccumulationWorkspace == OutputWorkspace",  !alg.validateInputs()["AccumulationWorkspace"].empty() );
 
-    alg.setPropertyValue("Instrument", "ISISHistoDataListener");
+    alg.setPropertyValue("Instrument", "TESTHISTOLISTENER");
     alg.setPropertyValue("AccumulationMethod","Add");
     TSM_ASSERT("Shouldn't add histograms", !alg.validateInputs()["AccumulationMethod"].empty() );
   }

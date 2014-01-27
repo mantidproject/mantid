@@ -46,6 +46,7 @@ public:
     Mutex * mut = new Mutex();
     t.setMutex(mut);
     TS_ASSERT_EQUALS( mut, t.getMutex() );
+    delete mut;
   }
 
 

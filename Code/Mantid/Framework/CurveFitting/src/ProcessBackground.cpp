@@ -63,8 +63,10 @@ DECLARE_ALGORITHM(ProcessBackground)
 
   void ProcessBackground::initDocs()
   {
-      this->setWikiSummary("ProcessBackground provides some tools to process powder diffraction pattern's background in order to help Le Bail Fit.");
-      this->setOptionalMessage("ProcessBackground provides some tools to process powder diffraction pattern's background in order to help Le Bail Fit.");
+      this->setWikiSummary("ProcessBackground provides some tools to process powder diffraction pattern's "
+                           "background in order to help Le Bail Fit.");
+      this->setOptionalMessage("ProcessBackground provides some tools to process powder diffraction pattern's "
+                               "background in order to help Le Bail Fit.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -108,7 +110,8 @@ DECLARE_ALGORITHM(ProcessBackground)
     bkgdtype.push_back("Polynomial");
     bkgdtype.push_back("Chebyshev");
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
-    declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Type of the background. Options include Polynomial and Chebyshev.");
+    declareProperty("BackgroundType", "Polynomial", bkgdvalidator,
+                    "Type of the background. Options include Polynomial and Chebyshev.");
     setPropertySettings("BackgroundType",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
@@ -160,6 +163,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     // Background tolerance
     declareProperty("NoiseTolerance", 1.0, "Tolerance of noise range. ");
     setPropertySettings("NoiseTolerance",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
+
+    // Background tolerance
+    declareProperty("NegativeNoiseTolerance", EMPTY_DBL(), "Tolerance of noise range for negative number. ");
+    setPropertySettings("NegativeNoiseTolerance",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Optional output workspace
@@ -310,11 +318,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     size_t numrows = peaktablews->rowCount();
     vec_peakcentre.resize(numrows, 0.);
     vec_peakfwhm.resize(numrows, 0.);
-    double centre, fwhm;
+
     for (size_t i = 0; i < numrows; ++i)
     {
-      centre = peaktablews->cell<double>(i, index_centre);
-      fwhm = peaktablews->cell<double>(i, index_fwhm);
+      double centre = peaktablews->cell<double>(i, index_centre);
+      double fwhm = peaktablews->cell<double>(i, index_fwhm);
       vec_peakcentre[i] = centre;
       vec_peakfwhm[i] = fwhm;
     }
@@ -773,7 +781,12 @@ DECLARE_ALGORITHM(ProcessBackground)
     */
   Workspace2D_sptr ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction)
   {
-    double noisetolerance = getProperty("NoiseTolerance");
+    double posnoisetolerance = getProperty("NoiseTolerance");
+    double negnoisetolerance = getProperty("NegativeNoiseTolerance");
+    if (isEmpty(negnoisetolerance))
+    {
+      negnoisetolerance = posnoisetolerance;
+    }
 
     // Calcualte theoretical values
     const std::vector<double> x = m_dataWS->readX(m_wsIndex);
@@ -802,8 +815,8 @@ DECLARE_ALGORITHM(ProcessBackground)
       {
         outws->dataY(0)[i] = values[i];
         outws->dataY(1)[i] = m_dataWS->readY(m_wsIndex)[i] - values[i];
-        outws->dataY(2)[i] = noisetolerance;
-        outws->dataY(3)[i] = -noisetolerance;
+        outws->dataY(2)[i] = posnoisetolerance;
+        outws->dataY(3)[i] = -negnoisetolerance;
       }
       setProperty("UserBackgroundWorkspace", outws);
     }
@@ -814,7 +827,7 @@ DECLARE_ALGORITHM(ProcessBackground)
     {
       double y = m_dataWS->readY(m_wsIndex)[i];
       double theoryy = values[i];
-      if (y >= (theoryy-noisetolerance) && y <= (theoryy+noisetolerance) )
+      if (y-theoryy < posnoisetolerance && y-theoryy > -negnoisetolerance)
       {
         // Selected
         double x = domain[i];
@@ -960,11 +973,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     size_t numrows = peaktablews->rowCount();
     vec_peakcentre.resize(numrows, 0.);
     vec_peakfwhm.resize(numrows, 0.);
-    double centre, fwhm;
+
     for (size_t i = 0; i < numrows; ++i)
     {
-      centre = peaktablews->cell<double>(i, index_centre);
-      fwhm = peaktablews->cell<double>(i, index_fwhm);
+      double centre = peaktablews->cell<double>(i, index_centre);
+      double fwhm = peaktablews->cell<double>(i, index_fwhm);
       vec_peakcentre[i] = centre;
       vec_peakfwhm[i] = fwhm;
     }

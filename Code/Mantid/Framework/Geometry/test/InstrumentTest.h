@@ -251,6 +251,12 @@ public:
     TS_ASSERT_EQUALS(instrument.getNumberDetectors(true), ndets-1); // skipMonitors
   }
 
+  void testNumMonitors()
+  {
+    TS_ASSERT_EQUALS( instrument.numMonitors(), 1 );
+    TS_ASSERT_EQUALS( Instrument().numMonitors(), 0 );
+  }
+
   void testDetector()
   {
     TS_ASSERT_THROWS( instrument.getDetector(0), Exception::NotFoundError );

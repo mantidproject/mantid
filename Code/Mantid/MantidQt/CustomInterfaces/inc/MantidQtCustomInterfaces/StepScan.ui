@@ -248,7 +248,9 @@
            <enum>QComboBox::AdjustToContents</enum>
           </property>
           <property name="WorkspaceTypes">
-           <stringlist/>
+           <stringlist>
+            <string>MaskWorkspace</string>
+           </stringlist>
           </property>
           <property name="ShowHidden" stdset="0">
            <bool>false</bool>

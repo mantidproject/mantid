@@ -5,7 +5,7 @@ The algorithm rebins data by adding together ''n_bunch'' successive bins.
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Rebunch("InWS, "OutWS", "3")
+ outputW = Rebunch("inputW, "3")
 *WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes

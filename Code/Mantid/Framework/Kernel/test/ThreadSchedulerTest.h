@@ -101,6 +101,10 @@ public:
 
     // And ThreadScheduler does not delete popped tasks in this way
     TS_ASSERT_EQUALS(ThreadSchedulerTest_numDestructed, 0);
+    for (size_t i=0; i<4; i++)
+    {
+      delete tasks[i];
+    }
   }
 
   void test_ThreadSchedulerFIFO()
@@ -109,6 +113,7 @@ public:
     double costs[4] = {0,1,2,3};
     size_t poppedIndices[4] = {0,1,2,3};
     do_test(sc, costs, poppedIndices);
+    delete sc;
   }
 
   void test_ThreadSchedulerLIFO()
@@ -117,6 +122,7 @@ public:
     double costs[4] = {0,1,2,3};
     size_t poppedIndices[4] = {3,2,1,0};
     do_test(sc, costs, poppedIndices);
+    delete sc;
   }
 
   void test_ThreadSchedulerLargestCost()
@@ -125,6 +131,7 @@ public:
     double costs[4] = {1,5,2,-3};
     size_t poppedIndices[4] = {1,2,0,3};
     do_test(sc, costs, poppedIndices);
+    delete sc;
   }
 
 

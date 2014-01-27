@@ -67,6 +67,15 @@ namespace DataHandling
     
     void parseBankLine(std::string line, double& cwl, int& bankid);
 
+    /// Search token for profile number
+    int searchProfile();
+
+    /// Parse 1 bank of lines of profile 9
+    void parseProfile9();
+
+    /// Parse 1 bank of lines of profile 10
+    void parseProfile10();
+
     /// Generate output workspace
     DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<int, std::map<std::string, double> > bankparammap);
 

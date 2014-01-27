@@ -91,6 +91,7 @@ private:
   QAction *m_sphericalX;
   QAction *m_sphericalY;
   QAction *m_sphericalZ;
+  QAction *m_sideBySide;
 
   QAction *m_colorMap;
   QAction *m_backgroundColor;

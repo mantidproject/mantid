@@ -173,12 +173,12 @@ namespace Geometry
     else if (pDoc != NULL)
     {
       std::string lastModified = pRootElem->getAttribute("last-modified");
-      if (lastModified.length() == 0)
+      if (lastModified.empty())
       {
         g_log.warning() << "The IDF that you are using doesn't contain a 'last-modified' field. ";
         g_log.warning() << "You may not get the correct definition file loaded." << std::endl ;
       }
-      return m_xmlFile->getFileNameOnly() + lastModified;
+      return m_instName + lastModified;
     }
     else
     {
@@ -2390,9 +2390,6 @@ namespace Geometry
     bool alongPhi = false; 
 
     double x=0.0, y=0.0, z=0.0;
-    double x_end=0.0;
-    double y_end=0.0;
-    double z_end=0.0;
     bool alongX = false;
     bool alongY = false;
     bool alongZ = false;
@@ -2501,7 +2498,7 @@ namespace Geometry
       {
         if (  pElem->hasAttribute("y-end") || pElem->hasAttribute("z-end") )
           throwTooManyEndAttributeInLocations("x-end", "y-end or z-end");
-        x_end = atof((pElem->getAttribute("x-end")).c_str());
+        double x_end = atof((pElem->getAttribute("x-end")).c_str());
         alongX = true;
         step = (x_end - x) / static_cast<double>(n_elements-1);
         nAlong++;
@@ -2511,7 +2508,7 @@ namespace Geometry
       {
         if (  pElem->hasAttribute("x-end") || pElem->hasAttribute("z-end") )
           throwTooManyEndAttributeInLocations("y-end", "x-end or z-end");
-        y_end = atof((pElem->getAttribute("y-end")).c_str());
+        double y_end = atof((pElem->getAttribute("y-end")).c_str());
         alongY = true;
         step = (y_end - y) / static_cast<double>(n_elements-1);
         nAlong++;
@@ -2521,7 +2518,7 @@ namespace Geometry
       {
         if (  pElem->hasAttribute("x-end") || pElem->hasAttribute("y-end") )
           throwTooManyEndAttributeInLocations("z-end", "x-end or y-end");
-        z_end = atof((pElem->getAttribute("z-end")).c_str());
+        double z_end = atof((pElem->getAttribute("z-end")).c_str());
         alongZ = true;
         step = (z_end - z) / static_cast<double>(n_elements-1);
         nAlong++;
@@ -2530,7 +2527,6 @@ namespace Geometry
 
     // also check if 'rot' is the one to step through
     double rot=0.0;
-    double rot_end = 0.0;
     bool along_rot = false;    
     if ( pElem->hasAttribute("rot") ) 
     {
@@ -2538,7 +2534,7 @@ namespace Geometry
 
       if ( pElem->hasAttribute("rot-end") ) 
       {
-        rot_end = atof((pElem->getAttribute("rot-end")).c_str());
+        double rot_end = atof((pElem->getAttribute("rot-end")).c_str());
         along_rot = true;
         step = (rot_end - rot) / static_cast<double>(n_elements-1);
         nAlong++;

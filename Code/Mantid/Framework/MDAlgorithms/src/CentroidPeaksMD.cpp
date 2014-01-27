@@ -67,8 +67,7 @@ namespace MDAlgorithms
     propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
     declareProperty("CoordinatesToUse", "HKL",boost::make_shared<StringListValidator>(propOptions),
-      "Which coordinates of the peak center do you wish to use to find the center? This should match the InputWorkspace's dimensions."
-       );
+    	"Deprecated:  algorithm uses the InputWorkspace's coordinates.");
 
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
         "Fixed radius around each peak position in which to calculate the centroid.");
@@ -99,10 +98,15 @@ namespace MDAlgorithms
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
 
-    /// Value of the CoordinatesToUse property.
-    std::string CoordinatesToUse = getPropertyValue("CoordinatesToUse");
+    std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
+    int CoordinatesToUse =  ws->getSpecialCoordinateSystem();
+    if (CoordinatesToUse == 1 && CoordinatesToUseStr != "Q (lab frame)")
+      g_log.warning() << "Warning: used Q (lab frame) coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
+    else if (CoordinatesToUse == 2 && CoordinatesToUseStr != "Q (sample frame)")
+      g_log.warning() << "Warning: used Q (sample frame) coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
+    else if (CoordinatesToUse == 3 && CoordinatesToUseStr != "HKL")
+      g_log.warning() << "Warning: used HKL coordinates for MD workspace, not CoordinatesToUse from input " << std::endl;
 
-    // TODO: Confirm that the coordinates requested match those in the MDEventWorkspace
 
     /// Radius to use around peaks
     double PeakRadius = getProperty("PeakRadius");
@@ -117,11 +121,11 @@ namespace MDAlgorithms
 
       // Get the peak center as a position in the dimensions of the workspace
       V3D pos;
-      if (CoordinatesToUse == "Q (lab frame)")
+      if (CoordinatesToUse == 1) //"Q (lab frame)"
         pos = p.getQLabFrame();
-      else if (CoordinatesToUse == "Q (sample frame)")
+      else if (CoordinatesToUse == 2) //"Q (sample frame)"
         pos = p.getQSampleFrame();
-      else if (CoordinatesToUse == "HKL")
+      else if (CoordinatesToUse == 3) //"HKL"
         pos = p.getHKL();
 
       // Build the sphere transformation
@@ -152,17 +156,17 @@ namespace MDAlgorithms
         V3D vecCentroid(centroid[0], centroid[1], centroid[2]);
 
         // Save it back in the peak object, in the dimension specified.
-        if (CoordinatesToUse == "Q (lab frame)")
+        if (CoordinatesToUse == 1) //"Q (lab frame)"
         {
           p.setQLabFrame( vecCentroid, detectorDistance);
           p.findDetector();
         }
-        else if (CoordinatesToUse == "Q (sample frame)")
+        else if (CoordinatesToUse == 2) //"Q (sample frame)"
         {
           p.setQSampleFrame( vecCentroid, detectorDistance);
           p.findDetector();
         }
-        else if (CoordinatesToUse == "HKL")
+        else if (CoordinatesToUse == 3) //"HKL"
         {
           p.setHKL( vecCentroid );
         }

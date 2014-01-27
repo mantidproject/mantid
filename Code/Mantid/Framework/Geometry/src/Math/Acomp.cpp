@@ -623,10 +623,10 @@ namespace Mantid
       @param BX :: binary component
       */
     {
-      int flag,S,V;
+      int S,V;
       for(int i=0;i<static_cast<int>(BX.Size());i++)
       {
-        flag=BX[i];
+        int flag=BX[i];
         if (flag)
         {
           split(flag,S,V);
@@ -1393,7 +1393,7 @@ namespace Mantid
       if (retJoin!=1)          // single unit is alway ok 
         retJoin=1-Intersect;         
 
-      int aimTruth,S,V;
+      int S,V;
       std::map<int,int>::const_iterator bv;
       std::vector<int>::const_iterator uc;
       // e.g. a'b   1 1  (retJoin ==1)
@@ -1403,7 +1403,7 @@ namespace Mantid
         bv=Base.find(V);
         if (bv==Base.end())
           throw std::runtime_error("Base unit not found");
-        aimTruth= (S<0) ? 1-retJoin : retJoin;
+        int aimTruth= (S<0) ? 1-retJoin : retJoin;
 
         if (bv->second == aimTruth)          // any true then return true
           return retJoin;
@@ -1445,8 +1445,7 @@ namespace Mantid
       std::vector<Acomp> V;
       // Only have First level components to consider
       std::vector<Acomp>::const_iterator cc;
-      int cell;
-
+      
       std::vector<Acomp> Flist,Glist;
       if (!getDNFpart(Flist) || !G.getDNFpart(Glist))
         return std::pair<Acomp,Acomp>(Acomp(),Acomp());
@@ -1458,6 +1457,7 @@ namespace Mantid
         V.push_back(Acomp(0));      //intersection Unit
         Acomp& Uitem= U.back();
         Acomp& Vitem= V.back();
+        int cell;
         while( (cell = cc->itemN(itemCnt)) )
         {
           if (Gmap.find(cell)!=Gmap.end())
@@ -1793,13 +1793,7 @@ namespace Mantid
       {
         if (!Intersect && (vc!=Comp.begin() || !Units.empty()))
           cx<<'+';
-        //      if ( join && (*vc)->type() )
-        if ( !vc->Intersect )
-          cx<<'('<<vc->display()<<')';
-        else
-          cx<<'('<<vc->display()<<')';
-        //	cx<<vc->display();
-
+        cx<<'('<<vc->display()<<')';
       }
       return cx.str();
     }

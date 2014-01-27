@@ -30,6 +30,14 @@ namespace Mantid
   {
     class Surface;
     class Object;
+
+    struct CuboidCorners
+    {
+      Kernel::V3D lfb;
+      Kernel::V3D lft;
+      Kernel::V3D lbb;
+      Kernel::V3D rfb;
+    };
     
     /**
 
@@ -79,14 +87,18 @@ namespace Mantid
       std::string parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseSegmentedCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
+      
+      CuboidCorners parseCuboid(Poco::XML::Element* pElem);
       std::string parseCuboid(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseHexahedron(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
+      std::string parseTaperedGuide(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseTorus(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
       std::string parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       Poco::XML::Element* getShapeElement(Poco::XML::Element* pElem, const std::string& name);
+      Poco::XML::Element* getOptionalShapeElement(Poco::XML::Element* pElem, const std::string& name);
       double getDoubleAttribute(Poco::XML::Element* pElem, const std::string& name);
       Kernel::V3D parsePosition(Poco::XML::Element* pElem);     
       void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Object>);

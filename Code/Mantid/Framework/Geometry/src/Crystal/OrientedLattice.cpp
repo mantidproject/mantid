@@ -10,7 +10,7 @@ namespace Geometry
   /** Default constructor
   @param Umatrix :: orientation matrix U. By default this will be identity matrix
   */
-  OrientedLattice::OrientedLattice(DblMatrix Umatrix):UnitCell()
+  OrientedLattice::OrientedLattice(const DblMatrix & Umatrix) : UnitCell()
   {
     if (Umatrix.isRotation()==true)
     { 
@@ -23,7 +23,7 @@ namespace Geometry
   /** Copy constructor
   @param other :: The OrientedLattice from which to copy information
   */    
-  OrientedLattice::OrientedLattice(const OrientedLattice& other):UnitCell(other),U(other.U),UB(other.UB)
+  OrientedLattice::OrientedLattice(const OrientedLattice& other) : UnitCell(other),U(other.U),UB(other.UB)
   {
   }
 
@@ -33,7 +33,8 @@ namespace Geometry
   @param _c :: lattice parameter \f$ c \f$ with \f$\alpha = \beta = \gamma = 90^\circ \f$
   @param Umatrix :: orientation matrix U
   */
-  OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,DblMatrix Umatrix):UnitCell(_a,_b,_c)
+  OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,
+                                   const DblMatrix &Umatrix) : UnitCell(_a,_b,_c)
   {
     if (Umatrix.isRotation()==true)
     { 
@@ -53,7 +54,10 @@ namespace Geometry
   @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
   @param Umatrix :: orientation matrix U
   */
-  OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,DblMatrix Umatrix, const int angleunit):UnitCell(_a,_b,_c,_alpha,_beta,_gamma,angleunit)
+  OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,const double _alpha,
+                                   const double _beta,const double _gamma, const DblMatrix &Umatrix,
+                                   const int angleunit)
+  :UnitCell(_a,_b,_c,_alpha,_beta,_gamma,angleunit)
   {
     if (Umatrix.isRotation()==true)
     { 
@@ -67,7 +71,8 @@ namespace Geometry
   @param uc :: UnitCell
   @param Umatrix :: orientation matrix U. By default this will be identity matrix
   */
-  OrientedLattice::OrientedLattice(UnitCell uc,DblMatrix Umatrix):UnitCell(uc),U(Umatrix)
+  OrientedLattice::OrientedLattice(const UnitCell & uc, const DblMatrix & Umatrix)
+    : UnitCell(uc),U(Umatrix)
   {
     if (Umatrix.isRotation()==true)
     { 

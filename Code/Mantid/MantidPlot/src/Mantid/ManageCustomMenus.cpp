@@ -10,7 +10,7 @@
 * @param parent :: pointer to the main MantidPlot ApplicationWindow object
 */
 ManageCustomMenus::ManageCustomMenus(QWidget *parent) : QDialog(parent),
-m_scriptsTree(0), m_customInterfacesTree(0), m_menusTree(0)
+m_scriptsTree(0), m_menusTree(0)
 {
 	m_uiForm.setupUi(this);
     m_appWindow = static_cast<ApplicationWindow*>(parent);
@@ -22,11 +22,9 @@ m_scriptsTree(0), m_customInterfacesTree(0), m_menusTree(0)
 void ManageCustomMenus::initLayout()
 {
     m_scriptsTree = m_uiForm.twScripts;
-    m_customInterfacesTree = m_uiForm.twCustomInterfaces;
     m_menusTree = m_uiForm.twMenus;
 
     m_scriptsTree->setHeaderLabel("Python Scripts");
-    m_customInterfacesTree->setHeaderLabel("Custom Interfaces");
     m_menusTree->setHeaderLabel("Custom Menus");
 
     // create qt connections
@@ -38,7 +36,6 @@ void ManageCustomMenus::initLayout()
     connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
     connect(m_uiForm.pbConfirm, SIGNAL(clicked()), this, SLOT(close()));
     // Perform subsequent setups
-    getCustomInterfaceList();
     populateMenuTree();
 }
 /**
@@ -71,23 +68,7 @@ void ManageCustomMenus::populateMenuTree()
         m_menusTree->addTopLevelItem(menu);    
     }
 }
-/**
-* Gets the list of Custom Interfaces that have been registered with Mantid.
-*/
-void ManageCustomMenus::getCustomInterfaceList()
-{
-    MantidQt::API::InterfaceManager interfaceManager;
-    QStringList user_windows = interfaceManager.getUserSubWindowKeys();
-    QStringListIterator itr(user_windows);
-    while( itr.hasNext() )
-    {
-        QString name = itr.next();
-        QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(name));
-        item->setData(0, Qt::UserRole, name);
-        item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable );
-        m_customInterfacesTree->addTopLevelItem(item);
-    }
-}
+
 /**
 * Returns a list of pointers to the selected items in the Scripts and Custom Interfaces trees.
 * @return list of selected items
@@ -95,7 +76,7 @@ void ManageCustomMenus::getCustomInterfaceList()
 QList<QTreeWidgetItem*> ManageCustomMenus::getCurrentSelection()
 {
     QList<QTreeWidgetItem*> result;
-    result = m_scriptsTree->selectedItems() + m_customInterfacesTree->selectedItems();
+    result = m_scriptsTree->selectedItems();
     return result;
 }
 /**
