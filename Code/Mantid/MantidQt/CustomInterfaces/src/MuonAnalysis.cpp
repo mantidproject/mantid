@@ -1648,14 +1648,17 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     setTimeZeroState();
     setFirstGoodDataState();
 
-    std::string infoStr("");
+    std::ostringstream infoStr;
+
+    // Set display style for floating point values
+    infoStr << std::fixed << std::setprecision(12);
     
     // Populate run information with the run number
     QString run(getGroupName());
     if (m_previousFilenames.size() > 1)
-      infoStr += "Runs: ";
+      infoStr << "Runs: ";
     else
-      infoStr += "Run: ";
+      infoStr << "Run: ";
 
     // Remove instrument and leading zeros
     int zeroCount(0);
@@ -1671,39 +1674,39 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     }
 
     // Add to run information.
-    infoStr += run.toStdString();
+    infoStr << run.toStdString();
 
     // Populate run information text field
     m_title = matrix_workspace->getTitle();
-    infoStr += "\nTitle: ";
-    infoStr += m_title;
+    infoStr << "\nTitle: ";
+    infoStr << m_title;
     
     // Add the comment to run information
-    infoStr += "\nComment: ";
-    infoStr += matrix_workspace->getComment();
+    infoStr << "\nComment: ";
+    infoStr << matrix_workspace->getComment();
     
     const Run& runDetails = matrix_workspace->run();
 
     Mantid::Kernel::DateAndTime start, end;
 
     // Add the start time for the run
-    infoStr += "\nStart: ";
+    infoStr << "\nStart: ";
     if ( runDetails.hasProperty("run_start") )
     {
       start = runDetails.getProperty("run_start")->value();
-      infoStr += start.toSimpleString();
+      infoStr << start.toSimpleString();
     }
 
     // Add the end time for the run
-    infoStr += "\nEnd: ";
+    infoStr << "\nEnd: ";
     if ( runDetails.hasProperty("run_end") )
     {
       end = runDetails.getProperty("run_end")->value();
-      infoStr += end.toSimpleString();
+      infoStr << end.toSimpleString();
     }
 
     // Add counts to run information
-    infoStr += "\nCounts: ";
+    infoStr << "\nCounts: ";
     double counts(0.0);
     for (size_t i=0; i<matrix_workspace->getNumberHistograms(); ++i)
     {
@@ -1712,49 +1715,58 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         counts += matrix_workspace->dataY(i)[j];
       }
     }
-    std::ostringstream ss;
-    ss << std::fixed << std::setprecision(12) << counts/1000000;
-    infoStr += ss.str();
-    infoStr += " MEv";
+    infoStr << counts/1000000 << " MEv";
 
     // Add average temperature.
-    infoStr += "\nAverage Temperature: ";
+    infoStr << "\nAverage Temperature: ";
     if ( runDetails.hasProperty("Temp_Sample") )
     {
       // Filter the temperatures by the start and end times for the run.
       runDetails.getProperty("Temp_Sample")->filterByTime(start, end);
-      QString allRuns = QString::fromStdString(runDetails.getProperty("Temp_Sample")->value() );
-      QStringList runTemp = allRuns.split("\n");
-      int tempCount(0);
-      double total(0.0);
 
-      // Go through each temperature entry, remove the date and time, and total the temperatures.
-      for (int i=0; i<runTemp.size(); ++i)
-      {
-        if (runTemp[i].contains("  ") )
-        {
-          QStringList dateTimeTemperature = runTemp[i].split("  ");
-          total += dateTimeTemperature[dateTimeTemperature.size() - 1].toDouble();
-          ++tempCount;
-        }
-      }
+      // Get average of the values
+      double average = runDetails.getPropertyAsSingleValue("Temp_Sample");
 
-      // Find the average and display it.
-      double average(total/tempCount);
       if (average != 0.0)
       {
-        std::ostringstream ss;
-        ss << std::fixed << std::setprecision(12) << average;
-        infoStr += ss.str();
+        infoStr << average;
       }
-      else // Show appropriate error message.
-        infoStr += "Error - Not set in data file.";
+      else
+      {
+        infoStr << "Not set";
+      }
     }
-    else // Show appropriate error message.
-      infoStr += "Error - Not found in data file.";
+    else
+    {
+      infoStr << "Not found";
+    }
+
+    // Add sample temperature
+    infoStr << "\nSample Temperature: ";
+    if ( runDetails.hasProperty("sample_temp") )
+    {
+      auto temp = runDetails.getPropertyValueAsType<double>("sample_temp");
+      infoStr << temp;
+    }
+    else
+    {
+      infoStr << "Not found";
+    }
+
+    // Add sample magnetic field
+    infoStr << "\nSample Magnetic Field: ";
+    if ( runDetails.hasProperty("sample_magn_field") )
+    {
+      auto temp = runDetails.getPropertyValueAsType<double>("sample_magn_field");
+      infoStr << temp;
+    }
+    else
+    {
+      infoStr << "Not found";
+    }
 
     // Include all the run information.
-    m_uiForm.infoBrowser->setText(infoStr.c_str());
+    m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
 
     // If instrument or number of periods has changed -> update period widgets
     if(instrumentChanged || numPeriods != m_uiForm.homePeriodBox1->count())

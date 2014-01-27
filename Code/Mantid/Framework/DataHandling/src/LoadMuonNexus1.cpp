@@ -741,6 +741,20 @@ namespace Mantid
         runDetails.addProperty("goodfrm", dum);
       }
 
+      // Get sample parameters
+      NXEntry runSample = root.openEntry("run/sample");
+
+      if ( runSample.containsDataSet("temperature") )
+      {
+        float temperature = runSample.getFloat("temperature");
+        runDetails.addProperty("sample_temp", static_cast<double>(temperature));
+      }
+
+      if ( runSample.containsDataSet("magnetic_field") )
+      {
+        float magn_field = runSample.getFloat("magnetic_field");
+        runDetails.addProperty("sample_magn_field", static_cast<double>(magn_field));
+      }
     }
 
     /// Run LoadInstrumentFromNexus as a Child Algorithm (only if loading from instrument definition file fails)
