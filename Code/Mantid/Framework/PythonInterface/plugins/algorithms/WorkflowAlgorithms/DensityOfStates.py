@@ -1,8 +1,9 @@
 """*WIKI* 
 
-Calculates the Density of States from either a .phonon or .castep file.
+Calculates the Density of States from either a .phonon or .castep file using either Raman or IR intensities. 
 
 *WIKI*"""
+
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
