@@ -1,4 +1,4 @@
-from isis_reflgui.settings import *
+from settings import *
 import xml.etree.ElementTree as xml
 
 '''
