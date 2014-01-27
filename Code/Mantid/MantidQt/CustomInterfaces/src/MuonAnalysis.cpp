@@ -3473,20 +3473,33 @@ void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
  */
 Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping)
 {
-  ScopedWorkspace wsEntry(ws);
-  ScopedWorkspace groupingEntry(grouping);
-
   ScopedWorkspace outputEntry;
 
   try
   {
+    ScopedWorkspace wsEntry, groupingEntry;
+
+    std::string wsName = ws->name();
+    if ( wsName.empty() )
+    {
+      wsEntry.set(ws);
+      wsName = wsEntry.name();
+    }
+
+    std::string groupingName = grouping->name();
+    if ( groupingName.empty() )
+    {
+      groupingEntry.set(grouping);
+      groupingName = groupingEntry.name();
+    }
+
     IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
     groupAlg->initialize();
     groupAlg->setRethrows(true);
     groupAlg->setLogging(false);
-    groupAlg->setPropertyValue("InputWorkspace", wsEntry.name());
+    groupAlg->setPropertyValue("InputWorkspace", wsName);
+    groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
-    groupAlg->setPropertyValue("DetectorGroupingTable", groupingEntry.name());
     groupAlg->execute();
   }
   catch(std::exception& e)
