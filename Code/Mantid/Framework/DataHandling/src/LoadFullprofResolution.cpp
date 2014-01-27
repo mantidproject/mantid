@@ -973,7 +973,7 @@ namespace DataHandling
     parameterElem->setAttribute("type","fitting");
 
     AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-    std::string eqValue = "sqrt("+getXMLEqValue(column, "Sig2" )+"*centre^4 + "+getXMLEqValue(column, "Sig1" )+"*centre^2 + "+getXMLEqValue(column, "Sig0" )+")";
+    std::string eqValue = "sqrt("+getXMLSquaredEqValue(column, "Sig2" )+"*centre^4 + "+getXMLSquaredEqValue(column, "Sig1" )+"*centre^2 + "+getXMLSquaredEqValue(column, "Sig0" )+")";
     formulaElem->setAttribute("eq", eqValue);
     formulaElem->setAttribute("unit","dSpacing");
     formulaElem->setAttribute("result-unit","TOF");
