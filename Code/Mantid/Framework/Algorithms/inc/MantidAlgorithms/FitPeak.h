@@ -28,7 +28,7 @@ namespace Algorithms
     virtual ~FitOneSinglePeak();
 
     /// Set workspaces
-    void setWorskpace(API::MatrixWorkspace_const_sptr dataws, size_t wsindex);
+    void setWorskpace(API::MatrixWorkspace_sptr dataws, size_t wsindex);
 
     /// Set fitting method
     void setFittingMethod(std::string minimizer, std::string costfunction);
@@ -43,7 +43,9 @@ namespace Algorithms
     void setPeakRange(double xpeakleft, double xpeakright);
 
     /// Set peak width to guess
-    void setupGuessedFWHM(int width);
+    void setupGuessedFWHM(double width, int minfwhm, int maxfwhm, int stepsize, bool fitwithsteppedfwhm);
+
+    void setFitPeakCriteria(bool usepeakpostol, double peakpostol);
 
     /// Fit peak and background together
     bool simpleFit();
@@ -79,9 +81,16 @@ namespace Algorithms
   private:
 
     /// Name
-    virtual const std::string name() const;
+    virtual const std::string name() const
+    {
+      return "FitOneSinglePeak";
+    }
+
     /// Version
-    virtual int version() const;
+    virtual int version() const
+    {
+      return 1;
+    }
     /// Init
     void init();
     /// Exec
@@ -94,19 +103,23 @@ namespace Algorithms
     double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
 
 
-    void setupGuessedFWHM(std::vector<double>& vec_FWHM);
+    void setupGuessedFWHM(std::vector<double>& vec_FWHM, bool fitwithsteppedfwhm);
 
     /// Fit function in single domain
-    double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
+    double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex,
                          double xmin, double xmax, bool calmode);
 
     /// Fit peak and background composite function
     double fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
-                                API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
+                                API::MatrixWorkspace_sptr dataws, size_t wsindex,
                                 double startx, double endx);
 
+    double fitFunctionMD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws,
+                         size_t wsindex, std::vector<double> vec_xmin, std::vector<double> vec_xmax);
+
+
     ///
-    void processNStoreFitResult(double, bool);
+    void processNStoreFitResult(double rwp, bool storebkgd);
 
     void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
               std::map<std::string, double>& paramerrormap);
@@ -122,7 +135,7 @@ namespace Algorithms
     API::IBackgroundFunction_sptr m_bkgdFunc;
 
     /// Input data workspace
-    API::MatrixWorkspace_const_sptr m_dataWS;
+    API::MatrixWorkspace_sptr m_dataWS;
     /// Input worskpace index
     size_t m_wsIndex;
 
@@ -145,13 +158,13 @@ namespace Algorithms
     size_t i_maxPeakX;
 
     ///
-    double m_userGuessedFWHM;
+    // double m_userGuessedFWHM;
     ///
-    double m_minGuessedPeakWidth;
+    // double m_minGuessedPeakWidth;
     ///
-    double m_maxGuessedPeakWidth;
+    // double m_maxGuessedPeakWidth;
     ///
-    double m_fwhmFitStep;
+    // double m_fwhmFitStep;
 
     /// Best peak parameters
     std::map<std::string, double> m_bestPeakFunc;
@@ -171,6 +184,21 @@ namespace Algorithms
     /// Goodness of fit
     double m_finalFitGoodness;
 
+    std::vector<double> m_vecFWHM;
+
+    // bool m_fitWithStepPeakWidth;
+
+    bool m_usePeakPositionTolerance;
+
+    double m_peakPositionTolerance;
+
+    double m_userPeakCentre;
+
+    double m_bestRwp;
+
+    /// Fitting result
+    std::map<std::string, double> m_fitErrorPeakFunc;
+    std::map<std::string, double> m_fitErrorBkgdFunc;
 
     /// Log
     // Kernel::Logger& g_log;
