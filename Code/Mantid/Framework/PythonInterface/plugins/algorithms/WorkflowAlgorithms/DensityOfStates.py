@@ -180,7 +180,7 @@ class DensityOfStates(PythonAlgorithm):
 			peaks = hist.nonzero()[0]
 			dos = self._draw_peaks(hist, peaks)
 
-			data_x = np.arange(xmin, xmin+(dos.size/self._bin_width), self._bin_width)
+			data_x = np.arange(xmin, xmin+dos.size)
 			CreateWorkspace(DataX=data_x, DataY=dos, OutputWorkspace=self._ws_name)
 			unitx = mtd[self._ws_name].getAxis(0).setUnit("Label")
 			unitx.setLabel("Energy Shift", 'cm^-1')
