@@ -1541,13 +1541,18 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         ScopedWorkspace loadedWsEntry(loadedWorkspace);
         ScopedWorkspace deadTimesEntry(deadTimes);
 
+        ScopedWorkspace correctedWsEntry;
+
         IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
         applyCorrAlg->initialize();
-        applyCorrAlg->setChild(true);
+        applyCorrAlg->setRethrows(true);
+        applyCorrAlg->setLogging(false);
         applyCorrAlg->setPropertyValue("InputWorkspace", loadedWsEntry.name());
         applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimesEntry.name());
-        applyCorrAlg->setPropertyValue("OutputWorkspace", loadedWsEntry.name());
+        applyCorrAlg->setPropertyValue("OutputWorkspace", correctedWsEntry.name());
         applyCorrAlg->execute();
+
+        loadedWorkspace = correctedWsEntry.retrieve();
       }
       catch(std::exception& e)
       {
