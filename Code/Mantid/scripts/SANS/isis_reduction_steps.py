@@ -2128,8 +2128,8 @@ class UserFile(ReductionStep):
                 reducer.inst.set_TOFs(None, None, int(parts[0]))
                 return ''
 
-            # assume a line of the form BACK/M1/TIME 
-            parts = arguments.split('/TIME')
+            # assume a line of the form BACK/M1/TIMES 
+            parts = arguments.split('/TIMES')
             if len(parts) == 2:
                 times = parts[1].split()
             else:
