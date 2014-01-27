@@ -1503,9 +1503,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     Workspace_sptr loadedWorkspace;
 
     if ( loadedWorkspaces.size() == 1 )
-      loadedWorkspace = loadedWorkspaces[0];
-    //else
-      // TODO: sum workspaces here
+      loadedWorkspace = loadedWorkspaces.front();
+    else
+      loadedWorkspace = sumWorkspaces(loadedWorkspaces);
 
     if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS")
     {
@@ -1793,26 +1793,31 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
 }
 
-
 /**
-* Uses the algorithm plus to add all the workspaces from a range.
-* TODO: change to sumWorkspaces(list of workspaces) -> workspace
-*/
-void MuonAnalysis::plusRangeWorkspaces()
+ * Sums a given list of workspaces
+ * @param workspaces :: List of workspaces
+ * @return Result workspace
+ */
+Workspace_sptr MuonAnalysis::sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
 {
-  // Start at 1 because 0 is MuonAnalysis without a number
-  for (int i=1; i<m_previousFilenames.size(); ++i)
-  {
-    QString tempNum;
-    tempNum.setNum(i);
+  if (workspaces.size() < 1)
+    throw std::invalid_argument("Couldn't sum an empty list of workspaces");
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Plus");
-    alg->setPropertyValue("LHSWorkspace", m_workspace_name);
-    alg->setPropertyValue("RHSWorkspace", m_workspace_name + tempNum.toStdString());
-    alg->setPropertyValue("OutputWorkspace", m_workspace_name);
+  ScopedWorkspace accumulatorEntry(workspaces.front());
+
+  for ( auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it )
+  {
+    ScopedWorkspace wsEntry(*it);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
+    alg->setPropertyValue("LHSWorkspace", accumulatorEntry.name());
+    alg->setPropertyValue("RHSWorkspace", wsEntry.name());
+    alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
     if (!alg->execute())
       throw std::runtime_error("Error in adding range together.");
   }
+
+  return accumulatorEntry.retrieve();
 }
 
 /**

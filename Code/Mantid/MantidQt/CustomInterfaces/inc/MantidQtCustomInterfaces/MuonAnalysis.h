@@ -287,8 +287,8 @@ private:
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
-  /// Adds the workspaces in a range.
-  void plusRangeWorkspaces();
+  /// Sums a given list of workspaces
+  Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces);
 
   /// Get group workspace name
   QString getGroupName();
