@@ -881,9 +881,9 @@ namespace DataHandling
     std::string parameterXMLString = outFile.str();
 
     // Useful code for testing upgrades commented out for production use
-    //std::ofstream outfileDebug("C:/Temp/test3_fullprof.xml");
+    //std::ofstream outfileDebug("C:/Temp/test4_fullprof.xml");
     //outfileDebug << parameterXMLString;
-   // outfileDebug.close();
+    //outfileDebug.close();
 
 
     // Load the string into the workspace

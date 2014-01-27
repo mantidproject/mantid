@@ -541,10 +541,10 @@ public:
     {
       const Mantid::Geometry::FitParameter& fitParam = A_Param->value<Mantid::Geometry::FitParameter>();
       // Check for two values of centre
-      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );    // Value for centre=10.0
-    //  TS_ASSERT_DELTA( formulaValueCantreAt10, 0.355, 0.0000001);
-      double formulaValueCantreAt20 = fitParam.getValue( 20.0 );  // Value for centre=20.0
-   //   TS_ASSERT_DELTA( formulaValueCantreAt20, 0.399, 0.0000001);
+      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );   // Value for centre=10.0
+      TS_ASSERT_DELTA( formulaValueCantreAt10, 0.0097, 0.0001);
+      double formulaValueCantreAt20 = fitParam.getValue( 20.0 );   // Value for centre=20.0
+      TS_ASSERT_DELTA( formulaValueCantreAt20, 0.0049, 0.0001);
     }
 
     Mantid::Geometry::Parameter_sptr B_Param = paramMap.get(&(*instr), "B", "fitting");
@@ -553,10 +553,10 @@ public:
     {
       const Mantid::Geometry::FitParameter& fitParam = B_Param->value<Mantid::Geometry::FitParameter>();
       // Check for two values of centre
-      double formulaValueCantreAt10 = fitParam.getValue( 10.0 );    // Value for centre=10.0
-     // TS_ASSERT_DELTA( formulaValueCantreAt10, 0.355, 0.0000001);
-      double formulaValueCantreAt20 = fitParam.getValue( 20.0 );  // Value for centre=20.0
-     // TS_ASSERT_DELTA( formulaValueCantreAt20, 0.399, 0.0000001);
+      double formulaValueCantreAt1 = fitParam.getValue( 1.0 );   // Value for centre=1.0
+      TS_ASSERT_DELTA( formulaValueCantreAt1, 0.0310, 0.0001);
+      double formulaValueCantreAt2 = fitParam.getValue( 2.0 );   // Value for centre=2.0
+      TS_ASSERT_DELTA( formulaValueCantreAt2, 0.0251, 0.0001);
     }
 
     // Clean
