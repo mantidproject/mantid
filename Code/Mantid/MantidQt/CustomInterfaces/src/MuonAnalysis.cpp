@@ -1799,8 +1799,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   catch(std::exception& e)
   {
     QMessageBox::warning(this,"Mantid - MuonAnalysis", e.what());
+    m_updating = false;
+    m_uiForm.tabWidget->setTabEnabled(3, true);
   }
-
 }
 
 /**
