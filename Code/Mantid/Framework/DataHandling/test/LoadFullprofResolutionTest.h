@@ -706,7 +706,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a GEM workspace group with specified number of workspaces.
     */
-  void load_GEM( size_t numberOfWorkspaces, std::string wsName)
+  void load_GEM( size_t numberOfWorkspaces, std::string workspaceName)
   {
     LoadInstrument loaderGEM;
 
@@ -723,15 +723,15 @@ public:
     }
 
     //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, gws));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(workspaceName, gws));
 
     // Path to test input file 
     loaderGEM.setPropertyValue("Filename", "GEM_Definition.xml");
     //inputFile = loaderIDF2.getPropertyValue("Filename");
-    loaderGEM.setPropertyValue("Workspace", wsName);
+    loaderGEM.setPropertyValue("Workspace", workspaceName);
     TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
     TS_ASSERT( loaderGEM.isExecuted() );
-
+    wsName = workspaceName;
   }
 
   //----------------------------------------------------------------------------------------------
