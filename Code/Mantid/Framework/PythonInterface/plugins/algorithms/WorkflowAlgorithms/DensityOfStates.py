@@ -247,8 +247,6 @@ class DensityOfStates(PythonAlgorithm):
 
 			if ( frequencies.size == 0 ):
 				raise ValueError("Failed to load any frequencies from file.")
-			if ( raman_intensities.size == 0 and ir_intensities.size == 0 ):
-				raise ValueError("Failed to load any intensities from file.")
 
 			return frequencies, ir_intensities, raman_intensities, weights
 
