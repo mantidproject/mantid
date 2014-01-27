@@ -1626,8 +1626,13 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
     // At this point we are sure that all the possible problems with the loaded workspace has been
     // checked, so we can safely overwrite previous data.
-    AnalysisDataService::Instance().addOrReplace(m_workspace_name, loadedWorkspace);
-    AnalysisDataService::Instance().addOrReplace(m_grouped_name, groupedWorkspace);
+
+    // This is done explicitly because addOrReplace is not replacing groups properly.
+    deleteWorkspaceIfExists(m_workspace_name);
+    deleteWorkspaceIfExists(m_grouped_name);
+
+    AnalysisDataService::Instance().add(m_workspace_name, loadedWorkspace);
+    AnalysisDataService::Instance().add(m_grouped_name, groupedWorkspace);
 
     // Make the options available
     m_optionTab->nowDataAvailable();
@@ -1823,6 +1828,20 @@ Workspace_sptr MuonAnalysis::sumWorkspaces(const std::vector<Workspace_sptr>& wo
   }
 
   return accumulatorEntry.retrieve();
+}
+
+/**
+ * Deletes a workspace _or_ a workspace group with the given name, if one exists
+ * @param wsName :: Name of the workspace to delete
+ */
+void MuonAnalysis::deleteWorkspaceIfExists(const std::string &wsName)
+{
+  if ( AnalysisDataService::Instance().doesExist(wsName) )
+  {
+    IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+    deleteAlg->setPropertyValue("Workspace", wsName);
+    deleteAlg->execute();
+  }
 }
 
 /**
