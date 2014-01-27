@@ -1,4 +1,4 @@
-from settings import *
+from isis_reflectometry.settings import *
 import xml.etree.ElementTree as xml
 
 '''
