@@ -290,9 +290,6 @@ private:
   /// Adds the workspaces in a range.
   void plusRangeWorkspaces();
 
-  /// Delete ranged workspaces.
-  void deleteRangedWorkspaces();
-
   /// Get group workspace name
   QString getGroupName();
 

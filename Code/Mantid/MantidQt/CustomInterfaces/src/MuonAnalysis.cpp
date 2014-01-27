@@ -1788,8 +1788,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   }
   catch(std::exception& e)
   {
-    deleteRangedWorkspaces();
-
     QMessageBox::warning(this,"Mantid - MuonAnalysis", e.what());
   }
 
@@ -1814,28 +1812,6 @@ void MuonAnalysis::plusRangeWorkspaces()
     alg->setPropertyValue("OutputWorkspace", m_workspace_name);
     if (!alg->execute())
       throw std::runtime_error("Error in adding range together.");
-  }
-  deleteRangedWorkspaces();
-}
-
-
-/**
-* Delete ranged workspaces.
-* TODO: remove, not needed anymore
-*/
-void MuonAnalysis::deleteRangedWorkspaces()
-{
-  // Start at 1 because 0 is MuonAnalysis without a number
-  for (int i=1; i<m_previousFilenames.size(); ++i)
-  {
-    QString tempNum;
-    tempNum.setNum(i);
-    if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + tempNum.toStdString() ) )
-      Mantid::API::AnalysisDataService::Instance().remove(m_workspace_name + tempNum.toStdString() );
-    if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + tempNum.toStdString() + "_1") )
-      Mantid::API::AnalysisDataService::Instance().remove(m_workspace_name + tempNum.toStdString() + "_1");
-    if (Mantid::API::AnalysisDataService::Instance().doesExist(m_workspace_name + tempNum.toStdString() + "_2") )
-      Mantid::API::AnalysisDataService::Instance().remove(m_workspace_name + tempNum.toStdString() + "_2");
   }
 }
 
