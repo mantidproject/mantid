@@ -36,7 +36,7 @@ namespace CurveFitting
    */
   SplineSmoothing::SplineSmoothing()
     : M_START_SMOOTH_POINTS(10),
-      m_cspline(boost::make_shared<CubicSpline>())
+      m_cspline(boost::make_shared<BSpline>())
   {
   }
     
@@ -102,7 +102,7 @@ namespace CurveFitting
     //number of input histograms.
     int histNo = static_cast<int>(inputWorkspaceBinned->getNumberHistograms());
 
-    //convert binned data to point data is necessary
+    //convert binned data to point data
     MatrixWorkspace_sptr inputWorkspacePt = convertBinnedData(inputWorkspaceBinned);
 
     //output workspaces for points and derivs
@@ -112,17 +112,15 @@ namespace CurveFitting
     Progress pgress(this, 0.0, 1.0, histNo);
     for(int i = 0; i < histNo; ++i)
     {
-      m_cspline = boost::make_shared<CubicSpline>();
+      m_cspline = boost::make_shared<BSpline>();
 
       //choose some smoothing points from input workspace
-      std::set<int> xPoints;
-      selectSmoothingPoints(xPoints,inputWorkspacePt, i);
-      performAdditionalFitting(inputWorkspacePt, i);
+      selectSmoothingPoints(inputWorkspacePt, i);
+      //performAdditionalFitting(inputWorkspacePt, i);
 
       //compare the data set against our spline
       outputWorkspace->setX(i, inputWorkspaceBinned->readX(i));
       calculateSmoothing(inputWorkspacePt, outputWorkspace, i);
-
 
       //calculate the derivatives, if required
       if(order > 0)
@@ -270,19 +268,6 @@ namespace CurveFitting
       m_cspline->derivative1D(yValues, xValues, nData, order);
   }
 
-  /** Sets the points defining the spline
-   *
-   * @param index :: The index of the attribute/parameter to set
-   * @param xpoint :: The value of the x attribute
-   * @param ypoint :: The value of the y parameter
-   */
-  void SplineSmoothing::setSmoothingPoint(const int index, const double xpoint, const double ypoint) const
-  {
-    //set the x and y values defining a point on the spline
-     m_cspline->setXAttribute(index, xpoint);
-     m_cspline->setParameter(index, ypoint);
-  }
-
   /** Checks if the difference of each data point between the smoothing points falls within
    * the error tolerance.
    *
@@ -302,7 +287,7 @@ namespace CurveFitting
     {
       //check if the difference between points is greater than our error tolerance
       double ydiff = fabs(ys[i] - ysmooth[i]);
-      if(ydiff > error)
+      if(ydiff > error && (end-start) > 1)
       {
         return false;
       }
@@ -321,15 +306,24 @@ namespace CurveFitting
       const double* xs, const double* ys) const
   {
     //resize the number of attributes
-    int size = static_cast<int>(points.size());
-    m_cspline->setAttributeValue("n", size);
-
+    int num_points = static_cast<int>(points.size());
+    std::vector<double> breakPoints(num_points);
+    m_cspline->setAttributeValue("Uniform",false);
+    m_cspline->setAttributeValue("Order", num_points);
+    
     //set each of the x and y points to redefine the spline
-    std::set<int>::const_iterator iter;
-    int i(0);
-    for(iter = points.begin(); iter != points.end(); ++iter)
+    std::set<int>::const_iterator pts;
+    for(pts = points.begin(); pts != points.end(); ++pts)
     {
-      setSmoothingPoint(i, xs[*iter], ys[*iter]);
+      breakPoints.push_back(xs[*pts]);
+      std::cout << xs[*pts] << std::endl;
+    }
+    m_cspline->setAttributeValue("BreakPoints", breakPoints); 
+    
+    int i = 0;
+    for (pts = points.begin(); pts != points.end(); ++pts)
+    {
+      m_cspline->setParameter(i, ys[*pts]);
       ++i;
     }
   }
@@ -337,13 +331,12 @@ namespace CurveFitting
   /** Defines the points used to make the spline by iteratively creating more smoothing points
    * until all smoothing points fall within a certain error tolerance
    *
-   * @param smoothPts :: The set of indices of the x/y points defining the spline
    * @param inputWorkspace :: The input workspace containing noisy data
    * @param row :: The row of spectra to use
    */
-  void SplineSmoothing::selectSmoothingPoints(std::set<int>& smoothPts,
-      MatrixWorkspace_const_sptr inputWorkspace, size_t row) const
+  void SplineSmoothing::selectSmoothingPoints(MatrixWorkspace_sptr inputWorkspace, size_t row)
   {
+      std::set<int> smoothPts;
       const auto & xs = inputWorkspace->readX(row);
       const auto & ys = inputWorkspace->readY(row);
 
@@ -360,16 +353,24 @@ namespace CurveFitting
       }
       smoothPts.insert(xSize-1); //add largest element to end of spline.
 
-      addSmoothingPoints(smoothPts, xs.data(), ys.data());
-
       bool resmooth(true);
       while(resmooth)
       {
+        addSmoothingPoints(smoothPts, xs.data(), ys.data());
+        
+        //if we're using all points then we can't do anything more.
+        if (smoothPts.size() >= xs.size()) break;
         resmooth = false;
 
         //calculate the spline and retrieve smoothed points
         boost::shared_array<double> ysmooth(new double[xSize]);
         m_cspline->function1D(ysmooth.get(),xs.data(),xSize);
+
+        std::vector<double> v = m_cspline->getAttribute("BreakPoints").asVector();
+        for (std::vector<double>::iterator iter = v.begin(); iter < v.end(); ++iter)
+        {
+          std::cout << *iter << std::endl;
+        }
 
         //iterate over smoothing points
         std::set<int>::const_iterator iter = smoothPts.begin();
@@ -391,13 +392,6 @@ namespace CurveFitting
           }
 
           start = end;
-          accurate = true;
-        }
-
-        //add new smoothing points if necessary
-        if(resmooth)
-        {
-          addSmoothingPoints(smoothPts, xs.data(), ys.data());
         }
       }
   }

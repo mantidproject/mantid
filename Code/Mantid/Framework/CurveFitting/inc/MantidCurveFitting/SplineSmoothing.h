@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCurveFitting/CubicSpline.h"
+#include "MantidCurveFitting/BSpline.h"
 
 namespace Mantid
 {
@@ -53,7 +53,7 @@ namespace CurveFitting
     const int M_START_SMOOTH_POINTS;
 
     /// CubicSpline member used to perform smoothing
-    boost::shared_ptr<CubicSpline> m_cspline;
+    boost::shared_ptr<BSpline> m_cspline;
 
     //Overriden methods
     virtual void initDocs();
@@ -70,8 +70,7 @@ namespace CurveFitting
     void setSmoothingPoint(const int index, const double xpoint, const double ypoint) const;
 
     /// choose points to define a spline and smooth the data
-    void selectSmoothingPoints(std::set<int>& xPoints,
-        API::MatrixWorkspace_const_sptr inputWorkspace, size_t row) const;
+    void selectSmoothingPoints(API::MatrixWorkspace_sptr inputWorkspace, size_t row);
 
     /// calculate the spline based on the smoothing points chosen
     void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
