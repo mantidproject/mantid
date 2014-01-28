@@ -24,7 +24,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	#give the user some extra infromation is required
 	if Verbose:
 		inGR = mtd[samWS].getRun()
-		log = inGR.getLogData('Fit Program')
+		log = inGR.getLogData('fit_program')
 		
 		if log:
 			val = log.value
