@@ -34,7 +34,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void Ptest_Init()
+  void test_Init()
   {
     // Generate input workspace
     MatrixWorkspace_sptr dataws = gen_4866P5Data();
@@ -293,7 +293,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on fit a peak with 1 step
     */
-  void Ptest_FitPeakOneStep()
+  void test_FitPeakOneStep()
   {
     // Generate input workspace
     MatrixWorkspace_sptr dataws = gen_PG3DiamondData();
@@ -344,7 +344,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on fit a peak with 1 step
     */
-  void Ptest_FitPeakOneStepFullPeakName()
+  void test_FitPeakOneStepFullPeakName()
   {
     // Generate input workspace
     MatrixWorkspace_sptr dataws = gen_PG3DiamondData();

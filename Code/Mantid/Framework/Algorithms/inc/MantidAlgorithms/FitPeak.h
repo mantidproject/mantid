@@ -59,10 +59,6 @@ namespace Algorithms
     /// Get background
     API::IBackgroundFunction_sptr getBackgroundFunction();
 
-    /// Estimate the peak height from a set of data containing pure peaks
-    double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
-                              size_t wsindex, size_t ixmin, size_t ixmax);
-
     /// Fit peak function (flexible)
     double fitPeakFunction(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
                         size_t wsindex, double startx, double endx);
@@ -85,7 +81,6 @@ namespace Algorithms
     {
       return "FitOneSinglePeak";
     }
-
     /// Version
     virtual int version() const
     {
@@ -97,13 +92,14 @@ namespace Algorithms
     void exec();
 
     /// Check whether it is ready to fit
-    bool isReadyToFit();
+    bool hasSetupToFitPeak(std::string &errmsg);
+
+    /// Estimate the peak height from a set of data containing pure peaks
+    double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
+                              size_t wsindex, size_t ixmin, size_t ixmax);
 
     /// Check a peak function whether it is valid comparing to user specified criteria
     double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
-
-
-    void setupGuessedFWHM(std::vector<double>& vec_FWHM, bool fitwithsteppedfwhm);
 
     /// Fit function in single domain
     double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex,
@@ -114,11 +110,11 @@ namespace Algorithms
                                 API::MatrixWorkspace_sptr dataws, size_t wsindex,
                                 double startx, double endx);
 
+    /// Fit function in multiple-domain
     double fitFunctionMD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws,
                          size_t wsindex, std::vector<double> vec_xmin, std::vector<double> vec_xmax);
 
-
-    ///
+    /// Process and store fit result
     void processNStoreFitResult(double rwp, bool storebkgd);
 
     void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
@@ -128,6 +124,16 @@ namespace Algorithms
 
     API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
 
+    /// Flag to show whether fitting parameters are set
+    bool m_fitMethodSet;
+    /// Flag whether the peak range is set
+    bool m_peakRangeSet;
+    /// Flag whether the peak width is set
+    bool m_peakWidthSet;
+    /// Peak widnow is set up
+    bool m_peakWindowSet;
+    /// Flag to apply peak position tolerance
+    bool m_usePeakPositionTolerance;
 
     /// Peak function
     API::IPeakFunction_sptr m_peakFunc;
@@ -157,15 +163,6 @@ namespace Algorithms
     /// index of m_maxPeakX
     size_t i_maxPeakX;
 
-    ///
-    // double m_userGuessedFWHM;
-    ///
-    // double m_minGuessedPeakWidth;
-    ///
-    // double m_maxGuessedPeakWidth;
-    ///
-    // double m_fwhmFitStep;
-
     /// Best peak parameters
     std::map<std::string, double> m_bestPeakFunc;
     /// Best background parameters
@@ -176,9 +173,14 @@ namespace Algorithms
     /// Backed up background function parameters
     std::map<std::string, double> m_bkupBkgdFunc;
 
+    /// Fitting result
+    std::map<std::string, double> m_fitErrorPeakFunc;
     ///
+    std::map<std::string, double> m_fitErrorBkgdFunc;
+
+    /// Minimzer
     std::string m_minimizer;
-    ///
+    /// Cost function
     std::string m_costFunction;
 
     /// Goodness of fit
@@ -186,22 +188,17 @@ namespace Algorithms
 
     std::vector<double> m_vecFWHM;
 
-    // bool m_fitWithStepPeakWidth;
-
-    bool m_usePeakPositionTolerance;
-
+    /// Peak position tolerance
     double m_peakPositionTolerance;
 
+    /// Peak centre provided by user
     double m_userPeakCentre;
 
+    ///
     double m_bestRwp;
 
-    /// Fitting result
-    std::map<std::string, double> m_fitErrorPeakFunc;
-    std::map<std::string, double> m_fitErrorBkgdFunc;
-
-    /// Log
-    // Kernel::Logger& g_log;
+    /// Final goodness value (Rwp/Chi-square)
+    double m_finalGoodnessValue;
 
   };
 
@@ -254,12 +251,6 @@ namespace Algorithms
     /// Check the input properties and functions
     void prescreenInputData();
 
-    /// Fit peak in a simple one-step approach
-    void fitPeakOneStep();
-
-    /// Fit peak in a robust manner.  Multiple fit will be
-    void fitPeakMultipleStep();
-
     /// Set up the output workspaces
     void setupOutput();
 
@@ -308,11 +299,6 @@ namespace Algorithms
 
     /// Create functions
     void createFunctions();
-
-#if 0
-    /// Get an index of a value in a sorted vector.  The index should be the item with value nearest to X
-    size_t getVectorIndex(const MantidVec& vecx, double x);
-#endif
 
     /// Check the fitted peak value to see whether it is valud
     double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
