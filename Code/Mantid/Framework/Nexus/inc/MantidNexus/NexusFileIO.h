@@ -375,13 +375,26 @@ namespace Mantid
           maxSize = size;
       }
 
+      // Set-up dimensions
       int dims[2];
       dims[0] = static_cast<int>(rowCount);
       dims[1] = static_cast<int>(maxSize);
 
-      int fakeData[rowCount * maxSize];
+      // Create data array
+      int data[rowCount * maxSize];
+      for ( size_t i = 0; i < rowCount; ++i )
+      {
+        std::vector<T> values = column->template cell< std::vector<T> >(i);
 
-      NXwritedata(columnName.c_str(), NX_INT32, 2, dims, (void *)(&fakeData), false);
+        // So that all the arrays are of the size maxSize
+        values.resize(maxSize);
+
+        // Copy values to the data array
+        for ( size_t j = 0; j < maxSize; ++j )
+          data[i*maxSize + j] = values[j];
+      }
+
+      NXwritedata(columnName.c_str(), NX_INT32, 2, dims, (void *)(&data), false);
     }
 
   } // namespace NeXus

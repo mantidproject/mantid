@@ -436,7 +436,16 @@ public:
       TS_ASSERT_EQUALS( columnInfo.dims[0], 3);
       TS_ASSERT_EQUALS( columnInfo.dims[1], 4);
 
-      // TODO: check data
+      std::vector<int> data;
+
+      savedNexus.getData<int>(data);
+
+      TS_ASSERT_EQUALS( data.size(), 12 );
+      TS_ASSERT_EQUALS( data[0], 1 );
+      TS_ASSERT_EQUALS( data[3], 0 );
+      TS_ASSERT_EQUALS( data[5], 3 );
+      TS_ASSERT_EQUALS( data[8], 4 );
+      TS_ASSERT_EQUALS( data[11], 7 );
     }
     catch(std::exception& e)
     {
