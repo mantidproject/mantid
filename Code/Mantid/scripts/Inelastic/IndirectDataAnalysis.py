@@ -945,7 +945,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
         logger.notice('Option: '+option)  
         logger.notice('Function: '+function)  
     nHist = mtd[inputWS].getNumberHistograms()
-    outNm = inputWS[:-3] + 'fury_mult'
+    outNm = getWSprefix(inputWS) + 'fury_1Smult_s0_to_' + str(nHist-1)
     f1 = createFuryMultFun(True, function)
     func= 'composite=MultiDomainFunction,NumDeriv=1;'
     ties='ties=('
@@ -963,17 +963,18 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
     CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
     Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=0,Output=outNm,**kwargs)
     outWS = furyfitMultParsToWS(outNm, inputWS)
+    result_workspace = outNm + '_Result'
     getFuryMultResult(inputWS, outNm, function, Verbose)
 
     params = [startx, endx, ftype]
     furyAddSampleLogs(inputWS, outWS, params, True)
-    furyAddSampleLogs(inputWS, outNm+'_result', params, True)
+    furyAddSampleLogs(inputWS, result_workspace, params, True)
 
     if Save:
         opath = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-        rpath = os.path.join(workdir, outNm+'_result.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=outNm+'_result', Filename=rpath)
+        rpath = os.path.join(workdir, result_workspace+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=result_workspace, Filename=rpath)
         if Verbose:
             logger.notice('Output file : '+opath)  
             logger.notice('Output file : '+rpath)  
