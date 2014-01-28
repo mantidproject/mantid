@@ -1,11 +1,6 @@
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
-import xml.etree.ElementTree as xml
-from isis_reflectometry.quick import *
-from isis_reflectometry.procedures import *
-from isis_reflectometry.combineMulti import *
-from isis_reflgui.settings import *
+import numpy as n
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
