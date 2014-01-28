@@ -181,6 +181,7 @@ namespace Mantid
       template<class T>
       std::string logValueType()const{return "unknown";}
 
+      /// Writes given vector column to the currently open Nexus file
       template<typename T, int NexusType>
       void writeNexusVectorColumn(const std::string& columnName,
         const boost::shared_ptr< const DataObjects::VectorColumn<T> >& column) const;
@@ -359,6 +360,11 @@ namespace Mantid
       status=NXclosegroup(fileID);
     }
 
+    /**
+     * Writes given vector column to the currently open Nexus file. Uses NXwritedata.
+     * @param columnName :: Name of NXdata group to write to
+     * @param column     :: Column to write
+     */
     template<typename Type, int NexusType>
     void NexusFileIO::writeNexusVectorColumn(const std::string& columnName,
       const boost::shared_ptr<const DataObjects::VectorColumn<Type> >& column) const
