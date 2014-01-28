@@ -322,7 +322,7 @@ class DensityOfStates(PythonAlgorithm):
 
 			frequencies, ir_intensities, raman_intensities, weights = [], [], [], []
 			data_lists = (frequencies, ir_intensities, raman_intensities)
-			with open(file_name, 'r') as f_handle:
+			with open(file_name, 'rU') as f_handle:
 				self._parse_phonon_file_header(f_handle)
 
 				while True:
@@ -452,7 +452,7 @@ class DensityOfStates(PythonAlgorithm):
 			block_count = 0
 			frequencies, ir_intensities, raman_intensities, weights = [], [], [], []
 			data_lists = (frequencies, ir_intensities, raman_intensities)
-			with open(file_name, 'r') as f_handle:
+			with open(file_name, 'rU') as f_handle:
 				self._parse_castep_file_header(f_handle)
 
 				while True:
