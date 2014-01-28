@@ -45,17 +45,10 @@ void SetupILLD33Reduction::init()
   // Load options
   std::string load_grp = "Load Options";
 
-  declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
-  declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
-
   declareProperty("SolidAngleCorrection", true, "If true, the solide angle correction will be applied to the data");
   declareProperty("DetectorTubes", false, "If true, the solid angle correction for tube detectors will be applied");
 
   // -- Define group --
-
-  setPropertyGroup("SampleDetectorDistance", load_grp);
-  setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
-
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
 
@@ -71,9 +64,6 @@ void SetupILLD33Reduction::init()
       boost::make_shared<StringListValidator>(centerOptions),
       "Method for determining the data beam center");
 
-  //declareProperty("FindBeamCenter", false, "If True, the beam center will be calculated");
-  declareProperty("UseConfigBeam", false, "If True, the beam center will be taken from the config file");
-
   //    Option 1: Set beam center by hand
   declareProperty("BeamCenterX", EMPTY_DBL(), "Position of the beam center, in pixel");
   declareProperty("BeamCenterY", EMPTY_DBL(), "Position of the beam center, in pixel");
@@ -88,10 +78,8 @@ void SetupILLD33Reduction::init()
   setPropertySettings("BeamCenterFile",
             new VisibleWhenProperty("BeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
 
-  //declareProperty("Tolerance", EMPTY_DBL(), "Tolerance on the center of mass position between each iteration [m]. Default: 0.00125");
   auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
-  //declareProperty("UseDirectBeamMethod", true, "If true, the direct beam method will be used");
   declareProperty("BeamRadius", EMPTY_DBL(),
       "Radius of the beam area used the exclude the beam when calculating "
       "the center of mass of the scattering pattern [pixels]. Default=3.0");
@@ -100,12 +88,9 @@ void SetupILLD33Reduction::init()
 
   // -- Define group --
   setPropertyGroup("BeamCenterMethod", center_grp);
-  setPropertyGroup("UseConfigBeam", center_grp);
   setPropertyGroup("BeamCenterX", center_grp);
   setPropertyGroup("BeamCenterY", center_grp);
   setPropertyGroup("BeamCenterFile", center_grp);
-  //setPropertyGroup("Tolerance", center_grp);
-  //setPropertyGroup("UseDirectBeamMethod", center_grp);
   setPropertyGroup("BeamRadius", center_grp);
 
 
@@ -115,23 +100,13 @@ void SetupILLD33Reduction::init()
   incidentBeamNormOptions.push_back("None");
   // The data will be normalised to the monitor counts
   incidentBeamNormOptions.push_back("Monitor");
-  // The data will be normalised to the total charge and divided by the beam profile
-  incidentBeamNormOptions.push_back("BeamProfileAndCharge");
   // The data will be normalised to the total charge only (no beam profile)
   incidentBeamNormOptions.push_back("Charge");
-  this->declareProperty("Normalisation", "BeamProfileAndCharge",
+  this->declareProperty("Normalisation", "None",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
 
-  declareProperty("LoadMonitors", false, "If true, the monitor workspace will be loaded");
-  //declareProperty("NormaliseToBeam", true, "If true, the data will be normalised to the total charge and divided by the beam profile");
-  //declareProperty("NormaliseToMonitor", false, "If true, the data will be normalised to the monitor, otherwise the total charge will be used");
-  declareProperty(new API::FileProperty("MonitorReferenceFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
-      "The name of the beam monitor reference file used for normalisation");
-
   setPropertyGroup("Normalisation", norm_grp);
-  setPropertyGroup("LoadMonitors", norm_grp);
-  setPropertyGroup("MonitorReferenceFile", norm_grp);
 
   // Dark current
   declareProperty(new API::FileProperty("DarkCurrentFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
@@ -227,10 +202,6 @@ void SetupILLD33Reduction::init()
       "Empty data file for transmission calculation");
   setPropertySettings("TransmissionEmptyDataFile",
             new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty("FitFramesTogether", false,
-      "If true, the two frames will be fit together");
-  setPropertySettings("FitFramesTogether",
-            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
   declareProperty("TransmissionBeamCenterMethod", "None",
@@ -277,7 +248,6 @@ void SetupILLD33Reduction::init()
   setPropertyGroup("TransmissionBeamRadius", trans_grp);
   setPropertyGroup("TransmissionSampleDataFile", trans_grp);
   setPropertyGroup("TransmissionEmptyDataFile", trans_grp);
-  setPropertyGroup("FitFramesTogether", trans_grp);
   setPropertyGroup("TransmissionBeamCenterMethod", trans_grp);
   setPropertyGroup("TransmissionBeamCenterX", trans_grp);
   setPropertyGroup("TransmissionBeamCenterY", trans_grp);
@@ -319,10 +289,6 @@ void SetupILLD33Reduction::init()
       API::FileProperty::OptionalLoad, ".xml"),
       "Empty data file for transmission calculation");
   setPropertySettings("BckTransmissionEmptyDataFile",
-            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
-  declareProperty("BckFitFramesTogether", false,
-      "If true, the two frames will be fit together");
-  setPropertySettings("BckFitFramesTogether",
             new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
@@ -438,14 +404,8 @@ void SetupILLD33Reduction::init()
                   "Number of I(q) bins when binning is not specified");
   declareProperty("IQLogBinning", false,
                   "I(q) log binning when binning is not specified");
-  declareProperty("IQIndependentBinning", true,
-                  "If true and frame skipping is used, each frame will have its own binning");
-  declareProperty("IQScaleResults", true,
-                  "If true and frame skipping is used, frame 1 will be scaled to frame 2");
   declareProperty("ComputeResolution", false,
                   "If true the Q resolution will be computed");
-  declareProperty("SampleApertureDiameter", 10.0,
-                  "Sample aperture diameter [mm]");
 
   declareProperty("Do2DReduction", true);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
@@ -455,10 +415,7 @@ void SetupILLD33Reduction::init()
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
   setPropertyGroup("IQNumberOfBins", iq1d_grp);
   setPropertyGroup("IQLogBinning", iq1d_grp);
-  setPropertyGroup("IQIndependentBinning", iq1d_grp);
-  setPropertyGroup("IQScaleResults", iq1d_grp);
   setPropertyGroup("ComputeResolution", iq1d_grp);
-  setPropertyGroup("SampleApertureDiameter", iq1d_grp);
   setPropertyGroup("Do2DReduction", iq1d_grp);
   setPropertyGroup("IQ2DNumberOfBins", iq1d_grp);
 
@@ -494,31 +451,13 @@ void SetupILLD33Reduction::exec()
 
   // Store normalization algorithm
   const std::string normalization = getProperty("Normalisation");
-//  bool loadMonitors = getProperty("LoadMonitors");
-  const std::string monitorRefFile = getPropertyValue("MonitorReferenceFile");
 
   if (!boost::contains(normalization, "None")) {
 	  // If we normalize to monitor, force the loading of monitor data
 	  IAlgorithm_sptr normAlg = createChildAlgorithm("EQSANSNormalise");
-
-	  if (boost::contains(normalization, "BeamProfileAndCharge"))
-	  {
-		normAlg->setProperty("NormaliseToBeam", true);
-		normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
-	  }
-	  else if (boost::contains(normalization, "Charge"))
+	  if (boost::contains(normalization, "Charge"))
 	  {
 		normAlg->setProperty("NormaliseToBeam", false);
-	  }
-	  else if (boost::contains(normalization, "Monitor"))
-	  {
-//		loadMonitors = true;
-		if (monitorRefFile.size()==0)
-		{
-		  g_log.error() << "ERROR: normalize-to-monitor was turned ON but no reference data was selected" << std::endl;
-		}
-		normAlg->setProperty("NormaliseToMonitor", true);
-		normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
 	  }
 	  normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 	  AlgorithmProperty *algProp = new AlgorithmProperty("NormaliseAlgorithm");
@@ -677,10 +616,7 @@ void SetupILLD33Reduction::exec()
   {
     const std::string nBins = getPropertyValue("IQNumberOfBins");
     const bool logBinning = getProperty("IQLogBinning");
-    //const double sampleApert = getProperty("SampleApertureDiameter");
     const bool computeResolution = getProperty("ComputeResolution");
-    //const bool indepBinning = getProperty("IQIndependentBinning");
-    //const bool scaleResults = getProperty("IQScaleResults");
 
     IAlgorithm_sptr iqAlg = createChildAlgorithm("SANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("NumberOfBins", nBins);
@@ -808,14 +744,12 @@ void SetupILLD33Reduction::setupTransmission(boost::shared_ptr<PropertyManager> 
     const std::string sampleFilename = getPropertyValue("TransmissionSampleDataFile");
     const std::string emptyFilename = getPropertyValue("TransmissionEmptyDataFile");
     const double beamRadius = getProperty("TransmissionBeamRadius");
-    const bool fitFramesTogether = getProperty("FitFramesTogether");
     const double beamX = getProperty("TransmissionBeamCenterX");
     const double beamY = getProperty("TransmissionBeamCenterY");
     const std::string centerMethod = getPropertyValue("TransmissionBeamCenterMethod");
 
     IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
-    transAlg->setProperty("FitFramesTogether", fitFramesTogether);
-    transAlg->setProperty("SampleDataFilename", sampleFilename);
+     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
@@ -894,10 +828,8 @@ void SetupILLD33Reduction::setupBackground(boost::shared_ptr<PropertyManager> re
     const double beamY = getProperty("BckTransmissionBeamCenterY");
     const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
     const bool useSampleDC = getProperty("TransmissionUseSampleDC");
-    const bool fitFramesTogether = getProperty("BckFitFramesTogether");
 
     IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
-    transAlg->setProperty("FitFramesTogether", fitFramesTogether);
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
