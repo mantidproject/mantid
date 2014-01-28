@@ -237,13 +237,6 @@ namespace Mantid
         throw std::invalid_argument(
             "A SecondTransmissionRun is only valid if a FirstTransmissionRun is provided.");
       }  
-      else if (firstTransmissionInWavelength)
-      {
-          this->g_log.warning(
-              "The first transmission run is in wavelength so is assumed to be correctly stitched in wavelength. "
-                  "The second transmission run and associated inputs will be ignored."
-                  "Run CreateTransmissionWorkspace to create a transmission workspace from TOF runs.");
-      }
       else
       {
         if (isPropertyDefault("Params"))
