@@ -44,16 +44,6 @@ void SetupILLD33Reduction::init()
 {
   // Load options
   std::string load_grp = "Load Options";
-  declareProperty("UseConfigTOFCuts", false, "If true, the edges of the TOF distribution will be cut according to the configuration file");
-  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be loaded into the workspace at load-time");
-  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be loaded into the workspace at load-time");
-  declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when rebinning the data before performing the reduction");
-  declareProperty("UseConfigMask", false, "If true, the masking information found in the configuration file will be used");
-  declareProperty("UseConfig", true, "If true, the best configuration file found will be used");
-  declareProperty("CorrectForFlightPath", false, "If true, the TOF will be modified for the true flight path from the sample to the detector pixel");
-
-  declareProperty("SkipTOFCorrection", false, "IF true, the EQSANS TOF correction will be skipped");
-  declareProperty("PreserveEvents", true, "If true, the output workspace will be an event workspace");
 
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
@@ -62,17 +52,6 @@ void SetupILLD33Reduction::init()
   declareProperty("DetectorTubes", false, "If true, the solid angle correction for tube detectors will be applied");
 
   // -- Define group --
-  setPropertyGroup("UseConfigTOFCuts", load_grp);
-  setPropertyGroup("LowTOFCut", load_grp);
-  setPropertyGroup("HighTOFCut", load_grp);
-
-  setPropertyGroup("WavelengthStep", load_grp);
-  setPropertyGroup("UseConfigMask", load_grp);
-  setPropertyGroup("UseConfig", load_grp);
-  setPropertyGroup("CorrectForFlightPath", load_grp);
-
-  setPropertyGroup("SkipTOFCorrection", load_grp);
-  setPropertyGroup("PreserveEvents", load_grp);
 
   setPropertyGroup("SampleDetectorDistance", load_grp);
   setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
@@ -517,71 +496,42 @@ void SetupILLD33Reduction::exec()
   const std::string normalization = getProperty("Normalisation");
   bool loadMonitors = getProperty("LoadMonitors");
   const std::string monitorRefFile = getPropertyValue("MonitorReferenceFile");
-  // If we normalize to monitor, force the loading of monitor data
-  IAlgorithm_sptr normAlg = createChildAlgorithm("EQSANSNormalise");
 
-  if (boost::contains(normalization, "BeamProfileAndCharge"))
-  {
-    normAlg->setProperty("NormaliseToBeam", true);
-    normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
+  if (!boost::contains(normalization, "None")) {
+	  // If we normalize to monitor, force the loading of monitor data
+	  IAlgorithm_sptr normAlg = createChildAlgorithm("EQSANSNormalise");
+
+	  if (boost::contains(normalization, "BeamProfileAndCharge"))
+	  {
+		normAlg->setProperty("NormaliseToBeam", true);
+		normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
+	  }
+	  else if (boost::contains(normalization, "Charge"))
+	  {
+		normAlg->setProperty("NormaliseToBeam", false);
+	  }
+	  else if (boost::contains(normalization, "Monitor"))
+	  {
+		loadMonitors = true;
+		if (monitorRefFile.size()==0)
+		{
+		  g_log.error() << "ERROR: normalize-to-monitor was turned ON but no reference data was selected" << std::endl;
+		}
+		normAlg->setProperty("NormaliseToMonitor", true);
+		normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
+	  }
+	  normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+	  AlgorithmProperty *algProp = new AlgorithmProperty("NormaliseAlgorithm");
+	  algProp->setValue(normAlg->toString());
+	  reductionManager->declareProperty(algProp);
   }
-  else if (boost::contains(normalization, "Charge"))
-  {
-    normAlg->setProperty("NormaliseToBeam", false);
-  }
-  else if (boost::contains(normalization, "Monitor"))
-  {
-    loadMonitors = true;
-    if (monitorRefFile.size()==0)
-    {
-      g_log.error() << "ERROR: normalize-to-monitor was turned ON but no reference data was selected" << std::endl;
-    }
-    normAlg->setProperty("NormaliseToMonitor", true);
-    normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
-  }
-  normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-  AlgorithmProperty *algProp = new AlgorithmProperty("NormaliseAlgorithm");
-  algProp->setValue(normAlg->toString());
-  reductionManager->declareProperty(algProp);
 
   // Load algorithm
   //IAlgorithm_sptr loadAlg = createChildAlgorithm("EQSANSLoad");
   // TODO : It looks like properties need cleanup
   IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadILLSANS");
-//  const bool useConfigBeam = getProperty("UseConfigBeam");
-//  loadAlg->setProperty("UseConfigBeam", useConfigBeam);
-//  const bool useConfigTOFCuts = getProperty("UseConfigTOFCuts");
-//  loadAlg->setProperty("UseConfigTOFCuts", useConfigTOFCuts);
-//  if (!useConfigTOFCuts)
-//  {
-//    const double lowTOFCut = getProperty("LowTOFCut");
-//    const double highTOFCut = getProperty("HighTOFCut");
-//    loadAlg->setProperty("LowTOFCut", lowTOFCut);
-//    loadAlg->setProperty("HighTOFCut", highTOFCut);
-//  }
-//
-//  const bool skipTOFCorrection = getProperty("SkipTOFCorrection");
-//  loadAlg->setProperty("SkipTOFCorrection", skipTOFCorrection);
-//
-//  const bool correctForFlightPath = getProperty("CorrectForFlightPath");
-//  loadAlg->setProperty("CorrectForFlightPath", correctForFlightPath);
-//
-//  const bool preserveEvents = getProperty("PreserveEvents");
-//  loadAlg->setProperty("PreserveEvents", preserveEvents);
-//  loadAlg->setProperty("LoadMonitors", loadMonitors);
-//
-//  const double sdd = getProperty("SampleDetectorDistance");
-//  loadAlg->setProperty("SampleDetectorDistance", sdd);
-//  const double sddOffset = getProperty("SampleDetectorDistanceOffset");
-//  loadAlg->setProperty("SampleDetectorDistanceOffset", sddOffset);
-//  const double wlStep = getProperty("WavelengthStep");
-//  loadAlg->setProperty("WavelengthStep", wlStep);
-//
-//  const bool useConfig = getProperty("UseConfig");
-//  loadAlg->setProperty("UseConfig", useConfig);
-//  const bool useConfigMask = getProperty("UseConfigMask");
-//  loadAlg->setProperty("UseConfigMask", useConfigMask);
-  algProp = new AlgorithmProperty("LoadAlgorithm");
+
+  AlgorithmProperty *algProp = new AlgorithmProperty("LoadAlgorithm");
   algProp->setValue(loadAlg->toString());
   reductionManager->declareProperty(algProp);
 
@@ -732,13 +682,10 @@ void SetupILLD33Reduction::exec()
     const bool indepBinning = getProperty("IQIndependentBinning");
     const bool scaleResults = getProperty("IQScaleResults");
 
-    IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSAzimuthalAverage1D");
+    IAlgorithm_sptr iqAlg = createChildAlgorithm("SANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("NumberOfBins", nBins);
     iqAlg->setProperty("LogBinning", logBinning);
-    iqAlg->setProperty("ScaleResults", scaleResults);
     iqAlg->setProperty("ComputeResolution", computeResolution);
-    iqAlg->setProperty("IndependentBinning", indepBinning);
-    iqAlg->setProperty("SampleApertureDiameter", sampleApert);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
     algProp = new AlgorithmProperty("IQAlgorithm");
