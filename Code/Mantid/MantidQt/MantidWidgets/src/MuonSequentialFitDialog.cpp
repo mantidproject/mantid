@@ -12,6 +12,9 @@ namespace MantidWidgets
   using namespace Mantid::API;
 
   Logger& MuonSequentialFitDialog::g_log(Logger::get("MuonSequentialFitDialog"));
+
+  const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
+
   /** 
    * Constructor
    */
@@ -309,7 +312,7 @@ namespace MantidWidgets
     QStringList runFilenames = m_ui.runs->getFilenames();
 
     const std::string label = m_ui.labelInput->text().toStdString();
-    const std::string labelGroupName = "MuonSeqFit_" + label;
+    const std::string labelGroupName = SEQUENTIAL_PREFIX + label;
 
     AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
 
