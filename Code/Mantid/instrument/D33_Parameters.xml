@@ -2,8 +2,15 @@
 <parameter-file instrument = "D33" valid-from = "20th May 2010">
     
     <component-link name="D33">
-
 		
+		<parameter name="number-of-x-pixels">
+		  <value val="256"/>
+		</parameter>
+
+		<parameter name="number-of-y-pixels">
+		  <value val="128"/>
+		</parameter>
+
 		<parameter name="x-pixel-size">
 		  <value val="5.5"/>
 		</parameter>
