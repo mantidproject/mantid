@@ -137,8 +137,8 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         log_binning = self.getProperty("LogBinning").value
         nbins = self.getProperty("NumberOfBins").value
         if workspace.getRun().hasProperty("qmin") and workspace.getRun().hasProperty("qmax"):
-            qmin = workspace.getRun().getProperty("qmin")
-            qmax = workspace.getRun().getProperty("qmax")
+            qmin = workspace.getRun().getProperty("qmin").value
+            qmax = workspace.getRun().getProperty("qmax").value
         else:
             sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
             nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
