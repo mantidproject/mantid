@@ -73,7 +73,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 			logger.notice('Fit file is ' + fit_path)
 
 	if Plot:
-		JumpPlot(fitWS+'_Workspace')
+		JumpPlot(fit_workspace)
 
 	EndTime('Jump fit : '+jumpFunc+' ; ')
 
