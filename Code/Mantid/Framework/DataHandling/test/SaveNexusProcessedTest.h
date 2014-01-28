@@ -7,6 +7,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -18,6 +20,8 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <nexus/NeXusFile.hpp>
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>
@@ -389,7 +393,55 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
+  void testSaveTableVectorColumn()
+  {
+    std::string outputFileName = "SaveNexusProcessedTest_testSaveTableVectorColumn.nxs";
 
+    // Create a table which we will save
+    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+    table->addColumn("vector_int", "VectorColumn");
+
+    // Add some rows of different sizes
+    TableRow row1 = table->appendRow(); row1 << Strings::parseRange("1");
+    TableRow row2 = table->appendRow(); row2 << Strings::parseRange("2,3");
+    TableRow row3 = table->appendRow(); row3 << Strings::parseRange("4,5,6");
+
+    ScopedWorkspace inputWsEntry(table);
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", inputWsEntry.name());
+    alg.setPropertyValue("Filename", outputFileName);
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    if ( ! alg.isExecuted() )
+      return; // Nothing to check
+
+    // Get full output file path
+    outputFileName = alg.getPropertyValue("Filename");
+
+    try
+    {
+      NeXus::File savedNexus(outputFileName);
+
+      savedNexus.openGroup("mantid_workspace_1", "NXentry");
+      savedNexus.openGroup("table_workspace", "NXdata");
+      savedNexus.openData("column_1");
+
+      NeXus::Info columnInfo = savedNexus.getInfo();
+      // TODO: check columnInfo
+
+      // TODO: check data
+    }
+    catch(std::exception& e)
+    {
+      TS_FAIL( e.what() );
+    }
+
+    Poco::File(outputFileName).remove();
+  }
 
 private:
   std::string outputFile;
