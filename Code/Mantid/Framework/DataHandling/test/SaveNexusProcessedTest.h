@@ -404,7 +404,7 @@ public:
     // Add some rows of different sizes
     TableRow row1 = table->appendRow(); row1 << Strings::parseRange("1");
     TableRow row2 = table->appendRow(); row2 << Strings::parseRange("2,3");
-    TableRow row3 = table->appendRow(); row3 << Strings::parseRange("4,5,6");
+    TableRow row3 = table->appendRow(); row3 << Strings::parseRange("4,5,6,7");
 
     ScopedWorkspace inputWsEntry(table);
 
@@ -430,8 +430,11 @@ public:
       savedNexus.openGroup("table_workspace", "NXdata");
       savedNexus.openData("column_1");
 
+      // Check that the dimensions are right
       NeXus::Info columnInfo = savedNexus.getInfo();
-      // TODO: check columnInfo
+      TS_ASSERT_EQUALS( columnInfo.dims.size(), 2 );
+      TS_ASSERT_EQUALS( columnInfo.dims[0], 3);
+      TS_ASSERT_EQUALS( columnInfo.dims[1], 4);
 
       // TODO: check data
     }

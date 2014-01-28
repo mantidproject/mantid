@@ -363,10 +363,25 @@ namespace Mantid
     void NexusFileIO::writeNexusVectorColumn(const std::string& columnName,
       const boost::shared_ptr<const DataObjects::VectorColumn<T> >& column) const
     {
-      UNUSED_ARG(column);
-      int dims[1]; dims[0] = 3;
-      int fake_data[3]; fake_data[0] = 1; fake_data[1] = 2; fake_data[2] = 3;
-      NXwritedata(columnName.c_str(), NX_INT32, 1, dims, (void *)(&fake_data), false);
+      size_t rowCount = column->size();
+
+      // Search for the longest array amongst the cells
+      size_t maxSize(0);
+      for ( size_t i = 0; i < rowCount; ++i )
+      {
+        size_t size = column->template cell< std::vector<T> >(i).size();
+
+        if ( size > maxSize )
+          maxSize = size;
+      }
+
+      int dims[2];
+      dims[0] = static_cast<int>(rowCount);
+      dims[1] = static_cast<int>(maxSize);
+
+      int fakeData[rowCount * maxSize];
+
+      NXwritedata(columnName.c_str(), NX_INT32, 2, dims, (void *)(&fakeData), false);
     }
 
   } // namespace NeXus
