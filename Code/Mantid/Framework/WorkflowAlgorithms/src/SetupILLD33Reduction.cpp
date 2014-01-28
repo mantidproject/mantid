@@ -1,5 +1,5 @@
 /*WIKI* 
-Create a PropertyManager object setting the reduction options for EQSANS.
+Create a PropertyManager object setting the reduction options for ILL D33 SANS TOF instrument.
 The property manager object is then added to the PropertyManagerDataService.
 
 See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
@@ -494,7 +494,7 @@ void SetupILLD33Reduction::exec()
 
   // Store normalization algorithm
   const std::string normalization = getProperty("Normalisation");
-  bool loadMonitors = getProperty("LoadMonitors");
+//  bool loadMonitors = getProperty("LoadMonitors");
   const std::string monitorRefFile = getPropertyValue("MonitorReferenceFile");
 
   if (!boost::contains(normalization, "None")) {
@@ -512,7 +512,7 @@ void SetupILLD33Reduction::exec()
 	  }
 	  else if (boost::contains(normalization, "Monitor"))
 	  {
-		loadMonitors = true;
+//		loadMonitors = true;
 		if (monitorRefFile.size()==0)
 		{
 		  g_log.error() << "ERROR: normalize-to-monitor was turned ON but no reference data was selected" << std::endl;
@@ -677,10 +677,10 @@ void SetupILLD33Reduction::exec()
   {
     const std::string nBins = getPropertyValue("IQNumberOfBins");
     const bool logBinning = getProperty("IQLogBinning");
-    const double sampleApert = getProperty("SampleApertureDiameter");
+    //const double sampleApert = getProperty("SampleApertureDiameter");
     const bool computeResolution = getProperty("ComputeResolution");
-    const bool indepBinning = getProperty("IQIndependentBinning");
-    const bool scaleResults = getProperty("IQScaleResults");
+    //const bool indepBinning = getProperty("IQIndependentBinning");
+    //const bool scaleResults = getProperty("IQScaleResults");
 
     IAlgorithm_sptr iqAlg = createChildAlgorithm("SANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("NumberOfBins", nBins);
