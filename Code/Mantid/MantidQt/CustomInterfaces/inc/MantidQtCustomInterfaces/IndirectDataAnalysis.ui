@@ -23,7 +23,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabElwin">
       <attribute name="title">
@@ -618,7 +618,7 @@
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QCheckBox" name="furfit_ckConstrainBeta">
+              <widget class="QCheckBox" name="furyfit_ckConstrainBeta">
                <property name="enabled">
                 <bool>false</bool>
                </property>
