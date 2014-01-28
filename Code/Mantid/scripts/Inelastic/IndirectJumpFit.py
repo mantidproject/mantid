@@ -55,13 +55,19 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 		return
 
 	#run fit function
-	fitWS = samWS[:-10] +'_'+ jumpFunc +'fit'
-	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fitWS)
+	fit_workspace_base = samWS[:-10] +'_'+ jumpFunc +'fit'
+	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fit_workspace_base)
+	fit_workspace = fit_workspace_base + '_Workspace'
+	
+	CopyLogs(InputWorkspace=samWS, OutputWorkspace=fit_workspace)
+	AddSampleLog(Workspace=fit_workspace, LogName="jump_function", LogType="String", LogText=jumpFunc)
+	AddSampleLog(Workspace=fit_workspace, LogName="q_min", LogType="Number", LogText=str(qmin))
+	AddSampleLog(Workspace=fit_workspace, LogName="q_max", LogType="Number", LogText=str(qmax))
 
 	#process output options
 	if Save:
-		fit_path = os.path.join(workdir,fitWS+'_Workspace.nxs')
-		SaveNexusProcessed(InputWorkspace=fitWS+'_Workspace', Filename=fit_path)
+		fit_path = os.path.join(workdir,fit_workspace+'.nxs')
+		SaveNexusProcessed(InputWorkspace=fit_workspace, Filename=fit_path)
 		
 		if Verbose:
 			logger.notice('Fit file is ' + fit_path)
