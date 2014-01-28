@@ -455,6 +455,9 @@ private:
   /// Groups the workspace
   Workspace_sptr groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping);
 
+  /// Groups the workspace
+  Workspace_sptr groupWorkspace(const std::string& wsName, const std::string& groupingName);
+
   /// Groups loaded workspace using information from Grouping Options tab
   void groupLoadedWorkspace();
 

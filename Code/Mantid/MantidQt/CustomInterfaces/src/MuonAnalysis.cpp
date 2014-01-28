@@ -3474,26 +3474,24 @@ void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
  */
 Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping)
 {
+   ScopedWorkspace wsEntry(ws);
+   ScopedWorkspace groupingEntry(grouping);
+
+   return groupWorkspace(wsEntry.name(), groupingEntry.name());
+}
+
+/**
+ * Groups detectors in the workspace
+ * @param ws :: ADS name of the workspace to group
+ * @param grouping :: ADS name of the grouping table to use
+ * @return Grouped workspace
+ */
+Workspace_sptr MuonAnalysis::groupWorkspace(const std::string& wsName, const std::string& groupingName)
+{
   ScopedWorkspace outputEntry;
 
   try
   {
-    ScopedWorkspace wsEntry, groupingEntry;
-
-    std::string wsName = ws->name();
-    if ( wsName.empty() )
-    {
-      wsEntry.set(ws);
-      wsName = wsEntry.name();
-    }
-
-    std::string groupingName = grouping->name();
-    if ( groupingName.empty() )
-    {
-      groupingEntry.set(grouping);
-      groupingName = groupingEntry.name();
-    }
-
     IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
     groupAlg->initialize();
     groupAlg->setRethrows(true);
@@ -3505,7 +3503,7 @@ Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr gr
   }
   catch(std::exception& e)
   {
-    throw std::runtime_error( "Unable to group loaded workspace:\n\n" + std::string(e.what()) );
+    throw std::runtime_error( "Unable to group workspace:\n\n" + std::string(e.what()) );
   }
 
   return outputEntry.retrieve();
@@ -3522,11 +3520,12 @@ void MuonAnalysis::groupLoadedWorkspace()
   if ( ! grouping )
     throw std::invalid_argument("Unable to parse grouping information from the table, or it is empty.");
 
-  Workspace_sptr loadedWorkspace = AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
+  ScopedWorkspace groupingEntry(grouping);
 
-  Workspace_sptr groupedWorkspace = groupWorkspace(loadedWorkspace, grouping);
+  Workspace_sptr groupedWorkspace = groupWorkspace(m_workspace_name, groupingEntry.name());
 
-  AnalysisDataService::Instance().addOrReplace(m_grouped_name, groupedWorkspace);
+  deleteWorkspaceIfExists(m_grouped_name);
+  AnalysisDataService::Instance().add(m_grouped_name, groupedWorkspace);
 }
 
 /**
