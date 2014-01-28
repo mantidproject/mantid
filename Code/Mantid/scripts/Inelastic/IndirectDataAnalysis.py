@@ -818,12 +818,13 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     return mtd[fitWS]
 
 #Copy logs from sample and add some addtional ones
-def furyAddSampleLogs(inputWs, ws, params):
+def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False):
     startx, endx, fitType = params
     CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
     AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
     AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
     AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
+    AddSampleLog(Workspace=ws, LogName="intensities_constrained", LogType="String", LogText=str(intensities_constrained))
 
 def furyfitMultParsToWS(Table, Data):
 #   Q = createQaxis(Data)
@@ -963,6 +964,11 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
     Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=0,Output=outNm,**kwargs)
     outWS = furyfitMultParsToWS(outNm, inputWS)
     getFuryMultResult(inputWS, outNm, function, Verbose)
+
+    params = [startx, endx, ftype]
+    furyAddSampleLogs(inputWS, outWS, params, True)
+    furyAddSampleLogs(inputWS, outNm+'_result', params, True)
+
     if Save:
         opath = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
