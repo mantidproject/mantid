@@ -181,7 +181,7 @@ namespace Mantid
       template<class T>
       std::string logValueType()const{return "unknown";}
 
-      template<typename T>
+      template<typename T, int NexusType>
       void writeNexusVectorColumn(const std::string& columnName,
         const boost::shared_ptr< const DataObjects::VectorColumn<T> >& column) const;
     };
@@ -359,9 +359,9 @@ namespace Mantid
       status=NXclosegroup(fileID);
     }
 
-    template<typename T>
+    template<typename Type, int NexusType>
     void NexusFileIO::writeNexusVectorColumn(const std::string& columnName,
-      const boost::shared_ptr<const DataObjects::VectorColumn<T> >& column) const
+      const boost::shared_ptr<const DataObjects::VectorColumn<Type> >& column) const
     {
       size_t rowCount = column->size();
 
@@ -369,7 +369,7 @@ namespace Mantid
       size_t maxSize(0);
       for ( size_t i = 0; i < rowCount; ++i )
       {
-        size_t size = column->template cell< std::vector<T> >(i).size();
+        size_t size = column->template cell< std::vector<Type> >(i).size();
 
         if ( size > maxSize )
           maxSize = size;
@@ -381,10 +381,10 @@ namespace Mantid
       dims[1] = static_cast<int>(maxSize);
 
       // Create data array
-      int data[rowCount * maxSize];
+      Type data[rowCount * maxSize];
       for ( size_t i = 0; i < rowCount; ++i )
       {
-        std::vector<T> values = column->template cell< std::vector<T> >(i);
+        auto values = column->template cell< std::vector<Type> >(i);
 
         // So that all the arrays are of the size maxSize
         values.resize(maxSize);
@@ -394,7 +394,7 @@ namespace Mantid
           data[i*maxSize + j] = values[j];
       }
 
-      NXwritedata(columnName.c_str(), NX_INT32, 2, dims, (void *)(&data), false);
+      NXwritedata(columnName.c_str(), NexusType, 2, dims, (void *)(&data), false);
     }
 
   } // namespace NeXus

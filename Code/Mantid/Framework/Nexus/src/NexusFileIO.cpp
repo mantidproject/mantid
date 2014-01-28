@@ -484,7 +484,7 @@ using namespace DataObjects;
       Column_const_sptr col = itableworkspace->getColumn(i);
 
       std::string str = "column_" + boost::lexical_cast<std::string>(i+1);
-  
+
       if ( col->isType<double>() )  
       {  
         double * toNexus = new double[nRows];
@@ -555,11 +555,14 @@ using namespace DataObjects;
 
         NXclosedata(fileID);
       }
-      else if ( col->isType< std::vector<int> >() )
-      {
-        auto vecCol = boost::dynamic_pointer_cast< const VectorColumn<int> >(col);
-        writeNexusVectorColumn(str, vecCol);
+      #define IF_VECTOR_COLUMN(Type, NexusType) \
+      else if ( col->isType< std::vector<Type> >() ) \
+      { \
+        auto vecCol = boost::dynamic_pointer_cast< const VectorColumn<Type> >(col); \
+        writeNexusVectorColumn<Type, NexusType>(str, vecCol); \
       }
+      IF_VECTOR_COLUMN(int,NX_INT32)
+      IF_VECTOR_COLUMN(double,NX_FLOAT64)
 
       // write out title 
       NXopendata(fileID, str.c_str());
@@ -570,6 +573,7 @@ using namespace DataObjects;
     status=NXclosegroup(fileID);
     return((status==NX_ERROR)?3:0);
   }
+
 
   //-------------------------------------------------------------------------------------
   /** Write out a combined chunk of event data

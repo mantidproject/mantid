@@ -399,12 +399,18 @@ public:
 
     // Create a table which we will save
     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
-    table->addColumn("vector_int", "VectorColumn");
+    table->addColumn("vector_int", "IntVectorColumn");
+    table->addColumn("vector_double", "DoubleVectorColumn");
+
+    std::vector<double> d1, d2, d3;
+    d1.push_back(0.5);
+    d2.push_back(1.0); d2.push_back(2.5);
+    d3.push_back(4.0);
 
     // Add some rows of different sizes
-    TableRow row1 = table->appendRow(); row1 << Strings::parseRange("1");
-    TableRow row2 = table->appendRow(); row2 << Strings::parseRange("2,3");
-    TableRow row3 = table->appendRow(); row3 << Strings::parseRange("4,5,6,7");
+    TableRow row1 = table->appendRow(); row1 << Strings::parseRange("1")<< d1;
+    TableRow row2 = table->appendRow(); row2 << Strings::parseRange("2,3") << d2;
+    TableRow row3 = table->appendRow(); row3 << Strings::parseRange("4,5,6,7") << d3;
 
     ScopedWorkspace inputWsEntry(table);
 
@@ -428,24 +434,44 @@ public:
 
       savedNexus.openGroup("mantid_workspace_1", "NXentry");
       savedNexus.openGroup("table_workspace", "NXdata");
+
+      // -- Checking int column -----
+
       savedNexus.openData("column_1");
 
-      // Check that the dimensions are right
-      NeXus::Info columnInfo = savedNexus.getInfo();
-      TS_ASSERT_EQUALS( columnInfo.dims.size(), 2 );
-      TS_ASSERT_EQUALS( columnInfo.dims[0], 3);
-      TS_ASSERT_EQUALS( columnInfo.dims[1], 4);
+      NeXus::Info columnInfo1 = savedNexus.getInfo();
+      TS_ASSERT_EQUALS( columnInfo1.dims.size(), 2 );
+      TS_ASSERT_EQUALS( columnInfo1.dims[0], 3 );
+      TS_ASSERT_EQUALS( columnInfo1.dims[1], 4 );
+      TS_ASSERT_EQUALS( columnInfo1.type, NX_INT32 );
 
-      std::vector<int> data;
+      std::vector<int> data1;
+      savedNexus.getData<int>(data1);
 
-      savedNexus.getData<int>(data);
+      TS_ASSERT_EQUALS( data1.size(), 12 );
+      TS_ASSERT_EQUALS( data1[0], 1 );
+      TS_ASSERT_EQUALS( data1[3], 0 );
+      TS_ASSERT_EQUALS( data1[5], 3 );
+      TS_ASSERT_EQUALS( data1[8], 4 );
+      TS_ASSERT_EQUALS( data1[11], 7 );
 
-      TS_ASSERT_EQUALS( data.size(), 12 );
-      TS_ASSERT_EQUALS( data[0], 1 );
-      TS_ASSERT_EQUALS( data[3], 0 );
-      TS_ASSERT_EQUALS( data[5], 3 );
-      TS_ASSERT_EQUALS( data[8], 4 );
-      TS_ASSERT_EQUALS( data[11], 7 );
+      // -- Checking double column -----
+
+      savedNexus.openData("column_2");
+
+      NeXus::Info columnInfo2 = savedNexus.getInfo();
+      TS_ASSERT_EQUALS( columnInfo2.dims.size(), 2 );
+      TS_ASSERT_EQUALS( columnInfo2.dims[0], 3 );
+      TS_ASSERT_EQUALS( columnInfo2.dims[1], 2 );
+      TS_ASSERT_EQUALS( columnInfo2.type, NX_FLOAT64 );
+
+      std::vector<double> data2;
+      savedNexus.getData<double>(data2);
+
+      TS_ASSERT_EQUALS( data2.size(), 6 );
+      TS_ASSERT_EQUALS( data2[0], 0.5 );
+      TS_ASSERT_EQUALS( data2[3], 2.5 );
+      TS_ASSERT_EQUALS( data2[5], 0.0 );
     }
     catch(std::exception& e)
     {
