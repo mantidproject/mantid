@@ -356,8 +356,14 @@ namespace IDA
 
     m_ffTree->addProperty(m_ffProp["StartX"]);
     m_ffTree->addProperty(m_ffProp["EndX"]);
-
     m_ffTree->addProperty(m_ffProp["LinearBackground"]);
+    
+    //option should only be available with a single stretched exponential
+    uiForm().furyfit_ckConstrainBeta->setEnabled((index == 2));
+    if (!uiForm().furyfit_ckConstrainBeta->isEnabled())
+    {
+      uiForm().furyfit_ckConstrainBeta->setChecked(false);
+    }
 
     switch ( index )
     {
@@ -527,9 +533,10 @@ namespace IDA
       }
     }
 
+    bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
     std::string function = std::string(func->asString());
   
-    QString pyInput = "from IndirectDataAnalysis import furyfitSeq\n"
+    QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
       "input = '" + m_ffInputWSName + "'\n"
       "func = r'" + QString::fromStdString(function) + "'\n"
       "ftype = '" + fitTypeString() + "'\n"
@@ -544,7 +551,14 @@ namespace IDA
     if ( uiForm().furyfit_ckSaveSeq->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
-    pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot, verbose)\n";
+    if (!constrainBeta)
+    {
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot, verbose)\n";
+    }
+    else
+    {
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, save, plot, verbose)\n";
+    }
   
     QString pyOutput = runPythonCode(pyInput);
   }
