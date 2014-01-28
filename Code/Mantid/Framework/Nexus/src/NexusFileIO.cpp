@@ -24,6 +24,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
+#include "MantidDataObjects/VectorColumn.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AlgorithmHistory.h"
@@ -480,7 +481,7 @@ using namespace DataObjects;
 
     for (size_t i = 0; i < itableworkspace->columnCount(); i++)
     {
-      boost::shared_ptr<const API::Column> col = itableworkspace->getColumn(i);
+      Column_const_sptr col = itableworkspace->getColumn(i);
 
       std::string str = "column_" + boost::lexical_cast<std::string>(i+1);
   
@@ -554,6 +555,11 @@ using namespace DataObjects;
 
         NXclosedata(fileID);
       }
+      else if ( col->isType< std::vector<int> >() )
+      {
+        auto vecCol = boost::dynamic_pointer_cast< const VectorColumn<int> >(col);
+        writeNexusVectorColumn(str, vecCol);
+      }
 
       // write out title 
       NXopendata(fileID, str.c_str());
@@ -564,9 +570,6 @@ using namespace DataObjects;
     status=NXclosegroup(fileID);
     return((status==NX_ERROR)?3:0);
   }
-
-
-
 
   //-------------------------------------------------------------------------------------
   /** Write out a combined chunk of event data

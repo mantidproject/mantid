@@ -5,6 +5,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/VectorColumn.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/date_time/c_local_time_adjustor.hpp>
@@ -180,6 +181,9 @@ namespace Mantid
       template<class T>
       std::string logValueType()const{return "unknown";}
 
+      template<typename T>
+      void writeNexusVectorColumn(const std::string& columnName,
+        const boost::shared_ptr< const DataObjects::VectorColumn<T> >& column) const;
     };
     
     /**
@@ -355,6 +359,15 @@ namespace Mantid
       status=NXclosegroup(fileID);
     }
 
+    template<typename T>
+    void NexusFileIO::writeNexusVectorColumn(const std::string& columnName,
+      const boost::shared_ptr<const DataObjects::VectorColumn<T> >& column) const
+    {
+      UNUSED_ARG(column);
+      int dims[1]; dims[0] = 3;
+      int fake_data[3]; fake_data[0] = 1; fake_data[1] = 2; fake_data[2] = 3;
+      NXwritedata(columnName.c_str(), NX_INT32, 1, dims, (void *)(&fake_data), false);
+    }
 
   } // namespace NeXus
 } // namespace Mantid
