@@ -115,6 +115,7 @@ void LoadILLSANS::exec() {
 	// Move detectors
 	moveDetectors(detPos);
 
+	setFinalProperties();
 	// Set the output workspace property
 	setProperty("OutputWorkspace", m_localWorkspace);
 
@@ -506,6 +507,71 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
 		m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
 	}
 
+	// Put the detector distances:
+//	std::string detectorPath(instrumentNamePath + "/detector");
+//	// Just for Sample - RearDetector
+//	double sampleDetectorDistance = m_loader.getDoubleFromNexusPath(entry,detectorPath + "/det2_calc");
+//	runDetails.addProperty("sample_detector_distance", sampleDetectorDistance);
+
+
+
+}
+
+
+/**
+ * @param lambda : wavelength in Amstrongs
+ * @param twoTheta : twoTheta in degreess
+ */
+double LoadILLSANS::calculateQ(const double lambda, const double twoTheta) const
+{
+	return (4 * 3.1415936 * std::sin(twoTheta*(3.1415936/180)/2)) / (lambda);
+
+}
+
+std::pair<double, double> LoadILLSANS::calculateQMaxQMin(){
+	double min=0, max=0;
+	g_log.debug("Calculating Qmin Qmax...");
+	std::size_t nHist = m_localWorkspace->getNumberHistograms();
+	for (std::size_t i=0; i < nHist; ++i){
+		const MantidVec& lambdaBinning = m_localWorkspace->readX(i);
+		Geometry::IDetector_const_sptr det = m_localWorkspace->getDetector(i);
+		Kernel::V3D detPos = det->getPos();
+		double r, theta, phi;
+		detPos.getSpherical(r, theta, phi);
+		double v1 = calculateQ(*(lambdaBinning.begin()),theta);
+		double v2 = calculateQ(*(lambdaBinning.end()-1),theta);
+		//std::cout << "i=" << i << " theta="<<theta << " lambda_i=" << *(lambdaBinning.begin()) << " lambda_f=" << *(lambdaBinning.end()-1) << " v1=" << v1 << " v2=" << v2 << std::endl;
+		if ( i == 0) {
+			min = v1;
+			max = v1;
+		}
+		if (v1 < min){
+			min = v1;
+		}
+		if (v2 < min){
+			min = v2;
+		}
+		if (v1 > max){
+			max = v1;
+		}
+		if (v2 > max){
+			max = v2;
+		}
+
+	}
+
+	g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max <<"]"<< std::endl;
+
+	return std::pair<double, double>(min,max);
+}
+
+void LoadILLSANS::setFinalProperties(){
+	API::Run & runDetails = m_localWorkspace->mutableRun();
+	runDetails.addProperty("is_frame_skipping", 0);
+
+	std::pair<double, double> minmax = LoadILLSANS::calculateQMaxQMin();
+	runDetails.addProperty("qmin", minmax.first);
+	runDetails.addProperty("qmax", minmax.second);
 }
 
 

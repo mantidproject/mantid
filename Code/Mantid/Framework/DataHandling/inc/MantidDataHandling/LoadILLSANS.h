@@ -92,6 +92,9 @@ private:
 	API::MatrixWorkspace_sptr m_localWorkspace;
 	std::vector<double> m_defaultBinning;
 
+	double calculateQ(const double lambda, const double twoTheta) const;
+	std::pair<double, double> calculateQMaxQMin();
+	void setFinalProperties();
 };
 
 } // namespace DataHandling
