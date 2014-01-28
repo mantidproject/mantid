@@ -40,7 +40,7 @@ calibration/geometry/ code. -->
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location z="-4.45" name="monitor1"/>
+      <location z="-2.488" name="monitor1"/>
     </component>
   </type>
   
