@@ -343,8 +343,6 @@ class ReflGui(refl_window.Ui_windowRefl):
                         w1 = getWorkspace(wksp[0])
                         w2 = getWorkspace(wksp[len(wksp) - 1])
                         begoverlap = w2.readX(0)[0]
-                        # Qmin = w1.readX(0)[0]
-                        # Qmax = max(w2.readX(0))
                         # get Qmax
                         if (self.tableMain.item(row, i * 5 + 4).text() == ''):
                             overlapHigh = 0.3 * max(w1.readX(0))
@@ -365,11 +363,6 @@ class ReflGui(refl_window.Ui_windowRefl):
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
-        #names = mtd.getObjectNames()
-        #if self.zeroCheck(runno):
-        #    StartLiveData(Instrument=config['default.instrument'],UpdateEvery='0',Outputworkspace='_LiveOut')
-        #    runno = '_LiveOut'
-        #[wlam, wq, th] = quick(runno, trans=transrun, theta=angle)
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             if not self.accMethod:
