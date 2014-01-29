@@ -42,10 +42,15 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_buttonProcess_clicked(self):
         self.process()
     def on_comboInstrument_activated(self, instrument):
-        config['default.instrument'] = self.instrumentList[instrument]
+        config['default.instrument'] = self.instrument_list[instrument]
         print "Instrument is now: ", config['default.instrument']
         self.textRB.clear()
         self.populateList()
+        self.current_instrument = self.instrument_list[instrument]
+        self.comboPolarCorrect.setEnabled(self.current_instrument  in self.polarisation_instruments) # Enable as appropriate
+        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None
+            
+            
     def on_actionOpen_Table_triggered(self):
         self.loadTable()
     def on_actionReload_from_Disk_triggered(self):
@@ -63,29 +68,57 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_tableMain_modified(self):
         if not self.loading:
             self.windowRefl.modFlag = True
-
+            
+    '''
+    Event handler for polarisation correction selection.
+    '''
+    def on_comboPolarCorr_activated(self):
+        if self.current_instrument in self.polarisation_instruments:
+            chosen_method = self.comboPolarCorrect.currentText()
+            self.current_polarisation_method = self.polarisation_options[chosen_method]
+        else:
+            logger.notice("Polarisation correction is not supported on " + self.current_instrument)
+        
     #Further UI setup
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
         self.loading = False
-        self.instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
-        for inst in self.instrumentList:
-            self.comboInstrument.addItem(inst)
+        
+        '''
+        Setup instrument options with defaults assigned.
+        '''
+        self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
+        self.polarisation_instruments = ['CRISP', 'POLREF'] 
+        self.comboInstrument.addItems(self.instrument_list)
+        current_instrument = config['default.instrument'].upper()
+        if current_instrument in self.instrument_list:
+            self.comboInstrument.setCurrentIndex(self.instrument_list.index(current_instrument))
+        else:
+            self.comboInstrument.setCurrentIndex(0)
+            config['default.instrument'] = 'INTER'
+        self.current_instrument = config['default.instrument']
+        
+        '''
+        Setup polarisation options with default assigned
+        '''
+        self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
+        self.comboPolarCorrect.clear()
+        self.comboPolarCorrect.addItems(self.polarisation_options.keys())
+        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None'))
+        self.current_polarisation_method = self.polarisation_options['None']
+        self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments)
+        
         self.labelStatus = QtGui.QLabel("Ready")
         self.statusMain.addWidget(self.labelStatus)
         self.initTable()
         self.populateList()
         self.windowRefl = windowRefl
         self.connectSlots()
+        
     def initTable(self):
-        self.currentTable = None
+        self.current_table = None
         self.tableMain.resizeColumnsToContents()
-        currentInstrument = config['default.instrument'].upper()
-        if currentInstrument in self.instrumentList:
-            self.comboInstrument.setCurrentIndex(self.instrumentList.index(currentInstrument))
-        else:
-            self.comboInstrument.setCurrentIndex(0)
-            config['default.instrument'] = 'INTER'
+        
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
                 if (column == 17):
@@ -108,6 +141,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
+        self.comboPolarCorrect.activated.connect(self.on_comboPolarCorr_activated)
         self.textRB.returnPressed.connect(self.on_textRB_editingFinished)
         self.buttonSearch.clicked.connect(self.on_textRB_editingFinished)
         self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
@@ -180,7 +214,10 @@ class ReflGui(refl_window.Ui_windowRefl):
             first_contents = contents.split(':')[0]
             runnumber = None
             if mtd.doesExist(first_contents):
-                runnumber = groupGet(mtd[first_contents], "samp", "run_number")
+                if isinstance(mtd[first_contents], WorkspaceGroup):
+                    runnumber = first_contents # No single run number for a group of workspaces.
+                else:
+                    runnumber = groupGet(mtd[first_contents], "samp", "run_number")
             else:
                 try:
                     temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
@@ -240,11 +277,14 @@ class ReflGui(refl_window.Ui_windowRefl):
                     # Determine resolution
                     # if (runno[0] != ''):
                     if (self.tableMain.item(row, 15).text() == ''):
-                        dqq = calcRes(runno[0])
-                        item = QtGui.QTableWidgetItem()
-                        item.setText(str(dqq))
-                        self.tableMain.setItem(row, 15, item)
-                        print "Calculated resolution: ", dqq
+                        try:
+                            dqq = calcRes(runno[0])
+                            item = QtGui.QTableWidgetItem()
+                            item.setText(str(dqq))
+                            self.tableMain.setItem(row, 15, item)
+                            print "Calculated resolution: ", dqq
+                        except IndexError:
+                            pass
                     else:
                         dqq = float(self.tableMain.item(row, 15).text())
                     # Populate runlist
@@ -339,12 +379,17 @@ class ReflGui(refl_window.Ui_windowRefl):
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         names = mtd.getObjectNames()
-        [wlam, wq, th] = quick(runno, trans=transrun, theta=angle)
+        [wlam, wq, th] = quick(runno, trans=transrun, theta=angle, polcorr=self.current_polarisation_method)
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-
+        
+        if mtd.doesExist(runno):
+            inws = mtd[runno]
+            if isinstance(inws, WorkspaceGroup):
+                 runno = groupGet(inws[0], "samp", "run_number")
+                 
         ws_name = str(runno) + '_IvsQ'
         inst = groupGet(ws_name, 'inst')
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
@@ -361,7 +406,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     rowtext.append(self.tableMain.item(row, column).text())
                 if (len(rowtext) > 0):
                     writer.writerow(rowtext)
-            self.currentTable = filename
+            self.current_table = filename
             print "Saved file to " + filename
             self.windowRefl.modFlag = False
         except:
@@ -382,8 +427,8 @@ class ReflGui(refl_window.Ui_windowRefl):
             msgBox.exec_()
             import datetime
             failtime = datetime.datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
-            if self.currentTable:
-                filename = self.currentTable.rsplit('.',1)[0] + "_recovered_" + failtime + ".tbl"
+            if self.current_table:
+                filename = self.current_table.rsplit('.',1)[0] + "_recovered_" + failtime + ".tbl"
             else:
                 mantidDefault = config['defaultsave.directory']
                 if os.path.exists(mantidDefault):
@@ -394,8 +439,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                     filename = os.path.join(tempDir,"mantid_reflectometry_recovered_" + failtime + ".tbl")
         else:
             #this is a save-on-quit or file->save
-            if self.currentTable:
-                filename = self.currentTable
+            if self.current_table:
+                filename = self.current_table
             else:
                 saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
                 saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
@@ -424,7 +469,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         if loadDialog.exec_():
             try:
                 filename = loadDialog.selectedFiles()[0]
-                self.currentTable = filename
+                self.current_table = filename
                 reader = csv.reader(open(filename, "rb"))
                 row = 0
                 for line in reader:
@@ -440,7 +485,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.windowRefl.modFlag = False
     def reloadTable(self):
         self.loading = True
-        filename = self.currentTable
+        filename = self.current_table
         if filename:
             try:
                 reader = csv.reader(open(filename, "rb"))
@@ -475,9 +520,15 @@ class ReflGui(refl_window.Ui_windowRefl):
 def calcRes(run):
     runno = '_' + str(run) + 'temp'
     if type(run) == type(int()):
-        Load(Filename=run, OutputWorkspace=runno)
+        runno =Load(Filename=run, OutputWorkspace=runno)
+    elif mtd.doesExist(run): 
+        ws = mtd[run]
+        if isinstance(ws, WorkspaceGroup):
+            run_number = groupGet(ws[0], "samp", "run_number")
+            print runno
+            runno =Load(Filename=str(run_number))
     else:
-        Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+        runno = Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
     # Get slits and detector angle theta from NeXuS
     theta = groupGet(runno, 'samp', 'THETA')
     inst = groupGet(runno, 'inst')
@@ -497,6 +548,7 @@ def calcRes(run):
     print "dq/q=", resolution
     DeleteWorkspace(runno)
     return resolution
+
 def groupGet(wksp, whattoget, field=''):
     '''
     returns information about instrument or sample details for a given workspace wksp,
