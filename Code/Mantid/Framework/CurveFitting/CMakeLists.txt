@@ -17,6 +17,7 @@ set ( SRC_FILES
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
 	src/ConvertToYSpace.cpp
+	src/ConvolveWorkspaces.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
@@ -117,6 +118,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/ConvertToYSpace.h
 	inc/MantidCurveFitting/Convolution.h
+	inc/MantidCurveFitting/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/CostFuncRwp.h
