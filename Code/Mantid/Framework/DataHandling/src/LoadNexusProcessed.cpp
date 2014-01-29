@@ -574,10 +574,14 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
           }
         }
       }
-      else if ( info.type == NX_INT32 ) // A vector_int column
-      {
-        loadVectorColumn<int>(nx_tw, str, workspace, "vector_int");
+      #define IF_VECTOR_COLUMN(Type, ColumnTypeName, NexusType) \
+      else if ( info.type == NexusType ) \
+      { \
+        loadVectorColumn<Type>(nx_tw, str, workspace, #ColumnTypeName); \
       }
+      IF_VECTOR_COLUMN(int, vector_int, NX_INT32)
+      IF_VECTOR_COLUMN(double, vector_double, NX_FLOAT64)
+
     }
 
     columnNumber++;
