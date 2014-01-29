@@ -89,14 +89,20 @@ class ReflGui(refl_window.Ui_windowRefl):
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
                 
-                if (column == 0):
+                if (column == 0) or (column == 5) or (column == 10):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
-                    item.setToolTip('')
+                    item.setToolTip('Runs can be semicolon delimited to coadd them')
+                    self.tableMain.setItem(row, column, item)
+                elif (column == 1) or (column == 6) or (column == 11):
+                    item = QtGui.QTableWidgetItem()
+                    item.setText('')
+                    item.setToolTip('Angles are in degrees')
                     self.tableMain.setItem(row, column, item)
                 elif (column == 17):
                     check = QtGui.QCheckBox()
                     check.setCheckState(False)
+                    check..setToolTip('If checked, the runs in this row will be stitched together')
                     item = QtGui.QWidget()
                     layout = QtGui.QHBoxLayout(item)
                     layout.addWidget(check)
