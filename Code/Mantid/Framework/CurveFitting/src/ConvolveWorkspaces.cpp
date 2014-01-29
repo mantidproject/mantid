@@ -95,24 +95,23 @@ void ConvolveWorkspaces::exec()
     Convolution conv;
 
     boost::shared_ptr<Convolution_Spline> res( new Convolution_Spline );
-    res->setMatrixWorkspace(ws1,l,x[0],x[x.size()]);
-    //res->setParameter("l",static_cast<double>(l));
+    size_t N = Yout.size();
+    res->setMatrixWorkspace(ws1,l,x[0],x[N]);
 
     conv.addFunction(res);
 
     boost::shared_ptr<Convolution_Spline> fun( new Convolution_Spline );
-    fun->setMatrixWorkspace(ws2,l,x[0],x[x.size()]);
-    //res->setParameter("l",static_cast<double>(l));
+    fun->setMatrixWorkspace(ws2,l,x[0],x[N]);
 
     conv.addFunction(fun);
 
-    FunctionDomain1DView xView(&x[0],x.size());
+    FunctionDomain1DView xView(&x[0],N);
     FunctionValues out(xView);
     conv.function(xView,out);
 
-    for(size_t i=0;i<x.size();i++)
+    for(size_t i=0;i<N;i++)
     {
-      Yout[i] = out.getCalculated(i);
+      Yout[i] = out.getCalculated(i) * static_cast<double>(N);
 
     }
     PARALLEL_END_INTERUPT_REGION
