@@ -173,15 +173,21 @@ class ReflGui(refl_window.Ui_windowRefl):
         for cell in self.tableMain.selectedItems():
             sum = sum + self.tableMain.row(cell)
         if (howMany):
-            if (sum / howMany == self.tableMain.row(self.tableMain.selectedItems()[0])):
+            selectedrow = self.tableMain.row(self.tableMain.selectedItems()[0])
+            if (sum / howMany == selectedrow):
+                startrow = selectedrow + 1
+                filled = 0
                 for cell in self.tableMain.selectedItems():
-                    row = self.tableMain.row(cell) + 1
+                    row = startrow
                     txt = cell.text()
                     while (self.tableMain.item(row, 0).text() != ''):
                         item = QtGui.QTableWidgetItem()
                         item.setText(txt)
                         self.tableMain.setItem(row, self.tableMain.column(cell), item)
                         row = row + 1
+                        filled = filled + 1
+                if not filled:
+                    QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
             else:
                 QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
         else:
