@@ -74,6 +74,9 @@ private:
 			const std::string &);
 	void initWorkSpace(NeXus::NXEntry&, const std::string&);
 	void createEmptyWorkspace(int, int);
+
+	size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0);
+
 	size_t loadDataIntoWorkspaceFromHorizontalTubes(NeXus::NXInt &, const std::vector<double> &,
 			size_t);
 	size_t loadDataIntoWorkspaceFromVerticalTubes(NeXus::NXInt &, const std::vector<double> &,
