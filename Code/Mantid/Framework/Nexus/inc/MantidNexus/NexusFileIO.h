@@ -184,8 +184,8 @@ namespace Mantid
       std::string logValueType()const{return "unknown";}
 
       /// Writes given vector column to the currently open Nexus file
-      template<typename T>
-      void writeNexusVectorColumn(const boost::shared_ptr< const DataObjects::VectorColumn<T> >& column,
+      template<typename Type>
+      void writeNexusVectorColumn(const boost::shared_ptr< const DataObjects::VectorColumn<Type> >& column,
                                   const std::string& columnName, int nexusType,
                                   const std::string& typeName) const;
     };
