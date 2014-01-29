@@ -56,6 +56,16 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.saveAs()
     def on_actionSave_Workspaces_triggered(self):
         self.saveWorkspaces()
+    def on_actionAutofill_triggered(self):
+        self.autoFill()
+    def on_actionProcess_triggered(self):
+        self.process()
+    def on_actionTransfer_triggered(self):
+        self.transfer()
+    def on_actionClear_Table_triggered(self):
+        self.initTable()
+    def on_actionSearch_RB_triggered(self):
+        self.populateList()
     def actionClose_Refl_Gui_triggered(self):
         self.showHelp()
     def on_actionMantid_Help_triggered(self):
@@ -88,7 +98,13 @@ class ReflGui(refl_window.Ui_windowRefl):
             config['default.instrument'] = 'INTER'
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                if (column == 17):
+                
+                if (column == 0):
+                    item = QtGui.QTableWidgetItem()
+                    item.setText('')
+                    item.setToolTip('')
+                    self.tableMain.setItem(row, column, item)
+                elif (column == 17):
                     check = QtGui.QCheckBox()
                     check.setCheckState(False)
                     item = QtGui.QWidget()
@@ -170,6 +186,10 @@ class ReflGui(refl_window.Ui_windowRefl):
                         item.setText(txt)
                         self.tableMain.setItem(row, self.tableMain.column(cell), item)
                         row = row + 1
+            else:
+                QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
+        else:
+            QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
     def transfer(self):
         col = 0
         row = 0
