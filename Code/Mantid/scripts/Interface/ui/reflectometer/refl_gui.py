@@ -56,16 +56,6 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.saveAs()
     def on_actionSave_Workspaces_triggered(self):
         self.saveWorkspaces()
-    def on_actionAutofill_triggered(self):
-        self.autoFill()
-    def on_actionProcess_triggered(self):
-        self.process()
-    def on_actionTransfer_triggered(self):
-        self.transfer()
-    def on_actionClear_Table_triggered(self):
-        self.initTable()
-    def on_actionSearch_RB_triggered(self):
-        self.populateList()
     def actionClose_Refl_Gui_triggered(self):
         self.showHelp()
     def on_actionMantid_Help_triggered(self):
@@ -121,10 +111,10 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
     def connectSlots(self):
-        self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
         self.textRB.returnPressed.connect(self.on_textRB_editingFinished)
+        self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.buttonSearch.clicked.connect(self.on_textRB_editingFinished)
         self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
         self.buttonProcess.clicked.connect(self.on_buttonProcess_clicked)
@@ -136,7 +126,13 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionSave_Workspaces.triggered.connect(self.on_actionSave_Workspaces_triggered)
         self.actionClose_Refl_Gui.triggered.connect(self.windowRefl.close)
         self.actionMantid_Help.triggered.connect(self.on_actionMantid_Help_triggered)
+        self.actionAutofill.triggered.connect(self.on_buttonAuto_clicked)
+        self.actionSearch_RB.triggered.connect(self.on_textRB_editingFinished)
+        self.actionClear_Table.triggered.connect(self.on_buttonClear_clicked)
+        self.actionProcess.triggered.connect(self.on_buttonProcess_clicked)
+        self.actionTransfer.triggered.connect(self.on_buttonTransfer_clicked)
         self.tableMain.cellChanged.connect(self.on_tableMain_modified)
+        
     def populateList(self):
         # Clear existing
         self.listMain.clear()
