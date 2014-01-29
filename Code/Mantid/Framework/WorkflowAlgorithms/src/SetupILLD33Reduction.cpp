@@ -745,7 +745,7 @@ void SetupILLD33Reduction::setupTransmission(boost::shared_ptr<PropertyManager> 
     const double beamY = getProperty("TransmissionBeamCenterY");
     const std::string centerMethod = getPropertyValue("TransmissionBeamCenterMethod");
 
-    IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSDirectBeamTransmission");
      transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
@@ -826,7 +826,7 @@ void SetupILLD33Reduction::setupBackground(boost::shared_ptr<PropertyManager> re
     const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
     const bool useSampleDC = getProperty("TransmissionUseSampleDC");
 
-    IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSDirectBeamTransmission");
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
