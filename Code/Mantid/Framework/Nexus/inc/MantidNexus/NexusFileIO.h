@@ -9,6 +9,8 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/date_time/c_local_time_adjustor.hpp>
+#include <boost/scoped_array.hpp>
+
 #include <limits.h>
 #include <nexus/NeXusFile.hpp>
 
@@ -391,7 +393,8 @@ namespace Mantid
       dims[1] = static_cast<int>(maxSize);
 
       // Create data array
-      Type data[rowCount * maxSize];
+      boost::scoped_array<Type> data(new Type[rowCount * maxSize]);
+
       for ( size_t i = 0; i < rowCount; ++i )
       {
         auto values = column->template cell< std::vector<Type> >(i);
@@ -405,7 +408,7 @@ namespace Mantid
       }
 
       // Write data
-      NXwritedata(columnName.c_str(), nexusType, 2, dims, reinterpret_cast<void*>(&data), false);
+      NXwritedata(columnName.c_str(), nexusType, 2, dims, reinterpret_cast<void*>(data.get()), false);
 
       std::string units = "Not known";
       std::string interpret_as = "A vector of " + typeName;
