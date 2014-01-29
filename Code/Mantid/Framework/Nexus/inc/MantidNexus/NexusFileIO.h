@@ -410,13 +410,27 @@ namespace Mantid
       // Write data
       NXwritedata(columnName.c_str(), nexusType, 2, dims, reinterpret_cast<void*>(data.get()), false);
 
+      NXopendata(fileID, columnName.c_str());
+
+      // Add sizes of rows as attributes. We can't use padding zeroes to determine that because the
+      // vector stored might end with zeroes as well.
+      for ( size_t i = 0; i < rowCount; ++i )
+      {
+        auto size = static_cast<int>( column->template cell< std::vector<Type> >(i).size() );
+
+        std::ostringstream rowSizeAttrName;
+        rowSizeAttrName << "row_size_" << i;
+
+        NXputattr(fileID, rowSizeAttrName.str().c_str(), &size, 1, NX_INT32);
+      }
+
       std::string units = "Not known";
       std::string interpret_as = "A vector of " + typeName;
 
-      // Write attributes
-      NXopendata(fileID, columnName.c_str());
+      // Write general attributes
       NXputattr(fileID, "units",  units.c_str(), static_cast<int>(units.size()), NX_CHAR);
       NXputattr(fileID, "interpret_as",  interpret_as.c_str(), static_cast<int>(interpret_as.size()), NX_CHAR);
+
       NXclosedata(fileID);
     }
 
