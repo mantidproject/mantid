@@ -44,6 +44,9 @@
           <bold>true</bold>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Sets the instrument to use.</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -83,6 +86,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Transmission run number to be automatically entered into the 'trans' column when transferring runs.</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -116,6 +122,9 @@
           <bold>true</bold>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Sets the polarisation corrections to be done when processing.</string>
+        </property>
         <item>
          <property name="text">
           <string>None</string>
@@ -132,6 +141,19 @@
          </property>
         </item>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -164,6 +186,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>The term to search the archives for</string>
+        </property>
         <property name="inputMethodHints">
          <set>Qt::ImhDigitsOnly</set>
         </property>
@@ -184,11 +209,17 @@
       </item>
       <item>
        <widget class="QSpinBox" name="spinDepth">
+        <property name="toolTip">
+         <string>The depth in cycles of the serach to to on the archives. A depth of '1' seraches only the most recent cycle.</string>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>
         <property name="maximum">
          <number>99</number>
+        </property>
+        <property name="value">
+         <number>5</number>
         </property>
        </widget>
       </item>
@@ -214,6 +245,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkTickAll">
+        <property name="toolTip">
+         <string>Toggles selection of the 'Stitch?' column.</string>
+        </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
@@ -557,9 +591,11 @@
     </property>
     <addaction name="actionOpen_Table"/>
     <addaction name="actionReload_from_Disk"/>
+    <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionSave_Workspaces"/>
+    <addaction name="separator"/>
     <addaction name="actionClose_Refl_Gui"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -568,7 +604,20 @@
     </property>
     <addaction name="actionMantid_Help"/>
    </widget>
+   <widget class="QMenu" name="menuFunction">
+    <property name="title">
+     <string>Function</string>
+    </property>
+    <addaction name="actionTransfer"/>
+    <addaction name="actionAutofill"/>
+    <addaction name="separator"/>
+    <addaction name="actionProcess"/>
+    <addaction name="actionClear_Table"/>
+    <addaction name="separator"/>
+    <addaction name="actionSearch_RB"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuFunction"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusMain"/>
@@ -626,6 +675,46 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F4</string>
+   </property>
+  </action>
+  <action name="actionAutofill">
+   <property name="text">
+    <string>Autofill</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+A</string>
+   </property>
+  </action>
+  <action name="actionProcess">
+   <property name="text">
+    <string>Process</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
+  </action>
+  <action name="actionTransfer">
+   <property name="text">
+    <string>Transfer</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+T</string>
+   </property>
+  </action>
+  <action name="actionClear_Table">
+   <property name="text">
+    <string>Clear Table</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+C</string>
+   </property>
+  </action>
+  <action name="actionSearch_RB">
+   <property name="text">
+    <string>Search RB</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+R</string>
    </property>
   </action>
  </widget>

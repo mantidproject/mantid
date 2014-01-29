@@ -144,4 +144,4 @@ class LatestISISRuns(object):
     def getJournalRuns(self, eID, maxDepth = 1):
         if maxDepth < 1:
             maxDepth = 1
-        return self.getxmlway(eID, maxDepth)
+        return self.getxmlway(eID.strip(), maxDepth)
