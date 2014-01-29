@@ -1,6 +1,7 @@
 import mantid.simpleapi as msi
 import mantid.api
 from mantid.kernel import logger
+import re
 
 class ConvertToWavelength(object):
     
@@ -33,8 +34,8 @@ class ConvertToWavelength(object):
         if isinstance(candidate, mantid.api.Workspace):
             workspace = candidate
         elif isinstance(candidate, str):
-            if  mantid.api.AnalysisDataService.doesExist(candidate):
-                workspace = mantid.api.AnalysisDataService.retrieve(candidate)
+            if  mantid.api.AnalysisDataService.doesExist(candidate.strip()):
+                workspace = mantid.api.AnalysisDataService.retrieve(candidate.strip())
             else:
                  workspace = msi.Load(Filename=candidate)
         else:
@@ -58,7 +59,10 @@ class ConvertToWavelength(object):
         """
         source_list = None
         if not isinstance(source, list):
-            source_list = [source]
+            if isinstance(source, str):
+                source_list = re.split(',|:', source)
+            else:
+                source_list = [source]
         else:
             source_list = source
         self.__to_workspace_list(source_list)    
