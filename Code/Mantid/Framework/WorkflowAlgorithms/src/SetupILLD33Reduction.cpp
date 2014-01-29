@@ -101,7 +101,7 @@ void SetupILLD33Reduction::init()
   // The data will be normalised to the monitor counts
   incidentBeamNormOptions.push_back("Monitor");
   // The data will be normalised to the total charge only (no beam profile)
-  incidentBeamNormOptions.push_back("Charge");
+  incidentBeamNormOptions.push_back("Timer");
   this->declareProperty("Normalisation", "None",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
@@ -454,12 +454,9 @@ void SetupILLD33Reduction::exec()
 
   if (!boost::contains(normalization, "None")) {
 	  // If we normalize to monitor, force the loading of monitor data
-	  IAlgorithm_sptr normAlg = createChildAlgorithm("EQSANSNormalise");
-	  if (boost::contains(normalization, "Charge"))
-	  {
-		normAlg->setProperty("NormaliseToBeam", false);
-	  }
-	  normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+	  IAlgorithm_sptr normAlg = createChildAlgorithm("HFIRSANSNormalise");
+	  normAlg->setProperty("NormalisationType", normalization);
+	  //normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 	  AlgorithmProperty *algProp = new AlgorithmProperty("NormaliseAlgorithm");
 	  algProp->setValue(normAlg->toString());
 	  reductionManager->declareProperty(algProp);

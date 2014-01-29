@@ -487,6 +487,9 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
 	end_time = m_loader.dateTimeInIsoFormat(end_time);
 	runDetails.addProperty("run_end", end_time);
 
+    double duration = entry.getFloat("duration");
+    runDetails.addProperty("timer", duration);
+
 	double wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
 	g_log.debug()<< "Wavelength found in the nexus file: " << wavelength << std::endl;
 
