@@ -61,8 +61,10 @@ namespace Mantid
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(1);
-      declareProperty("WorkspaceIndexMin", 1, mustBePositive,"The starting workspace index.");
-      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive,"The ending workspace index.");
+      auto mustBeZeroGreater = boost::make_shared<BoundedValidator<int> >();
+      mustBeZeroGreater->setLower(0);
+      declareProperty("WorkspaceIndexMin", EMPTY_INT(), mustBeZeroGreater,"The starting workspace index.");
+      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBeZeroGreater,"The ending workspace index.");
       declareProperty(new ArrayProperty<int>("SpectrumList"),"List of workspace indices to save.");
       declareProperty("Precision", EMPTY_INT(), mustBePositive,"Precision of output double values.");
       declareProperty("ScientificFormat", false, "If true, the values will be written to the file in scientific notation.");
@@ -153,7 +155,7 @@ namespace Mantid
       // Add spectra interval into the index list
       if (spec_max != EMPTY_INT() && spec_min != EMPTY_INT())
       {
-        if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min <= 0 || spec_max <= 0 || spec_min > spec_max)
+        if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min < 0 || spec_max < 0 || spec_min > spec_max)
         {
           throw std::invalid_argument("Inconsistent spectra interval");
         }

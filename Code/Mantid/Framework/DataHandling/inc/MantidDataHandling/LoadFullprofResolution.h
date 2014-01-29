@@ -85,8 +85,11 @@ namespace DataHandling
     /// Generate bank information workspace
     DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
 
+    /// Create Bank to Workspace Correspondence
+    void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
+
     /// Put parameters into a metrix workspace
-    void putParametersIntoWorkspace( const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws);
+    void putParametersIntoWorkspace( size_t wsNumber, const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws);
 
      /// Add an ALFBE parameter 
     void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "INTER" valid-from = "2012-01-31T00:00:00">
+<component-link name = "INTER">
+  <parameter name="MonitorIntegralMin">
+    <value val="4.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+    <value val="10.0"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMin">
+    <value val="15.0"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMax">
+    <value val="17.0"/>
+  </parameter>
+
+  <parameter name="PointDetectorStart">
+    <value val="3"/>
+  </parameter>
+
+  <parameter name="PointDetectorStop">
+    <value val="4"/>
+  </parameter>
+
+  <parameter name="MultiDetectorStart">
+    <value val="6"/>
+  </parameter>
+
+  <parameter name="I0MonitorIndex">
+    <value val="2"/>
+  </parameter>
+
+  <parameter name="LambdaMin">
+    <value val="1.0"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="17.0"/>
+  </parameter>
+</component-link>
+</parameter-file>

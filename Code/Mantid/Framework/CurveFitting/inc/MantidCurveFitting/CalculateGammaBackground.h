@@ -3,14 +3,17 @@
 
 #include "MantidAPI/Algorithm.h"
 
-#include "MantidCurveFitting/ComptonProfile.h"
-
 #include <boost/unordered_map.hpp>
 
 namespace Mantid
 {
   namespace CurveFitting
   {
+    //---------------------------------------------------------------------------
+    // Forward declarations
+    //---------------------------------------------------------------------------
+    struct DetectorParams;
+    struct ResolutionParams;
 
     /**
 

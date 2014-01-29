@@ -878,8 +878,16 @@ namespace IDA
     // Add/remove some properties to display only relevant options
     if ( prop == m_cfProp["UseDeltaFunc"] )
     {
-      if ( checked ) { m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]); }
-      else { m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]); }
+      if ( checked ) 
+      { 
+        m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]);
+        uiForm().confit_cbPlotOutput->addItem("Height");
+      }
+      else 
+      { 
+        m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]);
+        uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
+      }
     }
   }
 

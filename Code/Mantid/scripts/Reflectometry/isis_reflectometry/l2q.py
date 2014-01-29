@@ -7,7 +7,7 @@ def l2q(ws,whichDet,theta, sample_component_name):
     '''    
     call signature::call signature::
 
-    q=l2q(ws, whichDet, theta)
+    q=l2q(ws, whichDet, theta, sample_component_name)
       
     Convert from lambda to qz.
     
@@ -52,6 +52,7 @@ def l2q(ws,whichDet,theta, sample_component_name):
     coord_args[ reference_frame.pointingUpAxis() ] = up_offset
     coord_args[ reference_frame.pointingHorizontalAxis() ] = across_offset 
     
+    logger.information('Correcting detector location')
     MoveInstrumentComponent(ws, ComponentName=whichDet, RelativePosition=False, **coord_args )
             
     # Now convert to momentum transfer

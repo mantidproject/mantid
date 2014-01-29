@@ -17,7 +17,7 @@ public:
   static void destroySuite( CalculateGammaBackgroundTest *suite ) { delete suite; }
 
   //------------------------------------ Success cases ---------------------------------------
-  void xtest_Input_With_Spectrum_Number_Inside_Forward_Scatter_Range_Gives_Expected_Correction()
+  void test_Input_With_Spectrum_Number_Inside_Forward_Scatter_Range_Gives_Expected_Correction()
   {
     using namespace Mantid::API;
     auto inputWS = createTestWorkspaceWithFoilChanger(); //specNo=1
@@ -148,7 +148,7 @@ public:
 
   //------------------------------------ Error cases ---------------------------------------
 
-  void xtest_Empty_Function_Property_Throws_Error()
+  void test_Empty_Function_Property_Throws_Error()
   {
     auto alg = createAlgorithm();
     alg->setRethrows(true);
@@ -158,7 +158,7 @@ public:
     TS_ASSERT(!alg->isExecuted());
   }
 
-  void xtest_Function_Property_With_Single_Non_ComptonProfile_Throws_Error()
+  void test_Function_Property_With_Single_Non_ComptonProfile_Throws_Error()
   {
     auto alg = createAlgorithm();
     alg->setRethrows(true);
@@ -169,7 +169,7 @@ public:
     TS_ASSERT(!alg->isExecuted());
   }
 
-  void xtest_Function_Property_With_Composite_Non_ComptonProfile_Throws_Error()
+  void test_Function_Property_With_Composite_Non_ComptonProfile_Throws_Error()
   {
     auto alg = createAlgorithm();
     alg->setRethrows(true);
@@ -210,19 +210,19 @@ private:
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithFoilChanger()
   {
     double x0(50.0),x1(300.0),dx(0.5);
-    return ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx, true,true);
+    return ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx, true,true);
   }
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspaceWithNoFoilChanger()
   {
     double x0(165.0),x1(166.0),dx(0.5);
-    return ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx,false);
+    return ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx,false);
   }
 
   Mantid::API::MatrixWorkspace_sptr createTwoSpectrumWorkspaceWithFoilChanger()
   {
     double x0(50.0),x1(300.0),dx(0.5);
-    auto singleSpectrum = ComptonProfileTestHelpers::createSingleSpectrumWorkspace(x0,x1,dx, true,true);
+    auto singleSpectrum = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx, true,true);
     const size_t nhist = 2;
     auto twoSpectrum = Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
     // Copy data

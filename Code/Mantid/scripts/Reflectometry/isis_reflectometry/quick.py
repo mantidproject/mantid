@@ -111,8 +111,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     Version of quick where all parameters are explicitly provided.
     '''
     sample_ws = ConvertToWavelength.to_single_workspace(run)
-    to_lam = ConvertToWavelength(run)
     nHist =  sample_ws.getNumberHistograms()
+    to_lam = ConvertToWavelength(run)
     
     if pointdet:
         detector_index_ranges = (point_detector_start, point_detector_stop)
@@ -147,7 +147,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             ReflectedBeam = ReflectedBeam / DirectBeam
         polCorr(pol_corr, IvsLam, crho, calpha, cAp, cPp)
         if (theta and correct_positions):
-            IvsQ = l2q(ReflectedBeam, 'linear-detector', theta)
+            IvsQ = l2q(ReflectedBeam, detector_component_name, theta, sample_component_name)
         else:
             IvsQ = ConvertUnits(InputWorkspace=ReflectedBeam, Target="MomentumTransfer")
         
@@ -227,7 +227,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     
     if debug != 0:
         cleanup()
-        
+    DeleteWorkspace(sample_ws)
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
@@ -361,7 +361,6 @@ def get_defaults(run_ws, pol_corr = False):
     defaults['MonitorBackgroundMax'] =float( instrument.getNumberParameter('MonitorBackgroundMax')[0] ) 
     defaults['MonitorIntegralMin'] =  float( instrument.getNumberParameter('MonitorIntegralMin')[0] )
     defaults['MonitorIntegralMax'] = float( instrument.getNumberParameter('MonitorIntegralMax')[0] )
-    defaults['MonitorsToCorrect'] = int( instrument.getNumberParameter('MonitorsToCorrect')[0] )
     defaults['PointDetectorStart'] =  int( instrument.getNumberParameter('PointDetectorStart')[0] )
     defaults['PointDetectorStop'] =  int( instrument.getNumberParameter('PointDetectorStop')[0] )
     defaults['MultiDetectorStart'] = int( instrument.getNumberParameter('MultiDetectorStart')[0] )
