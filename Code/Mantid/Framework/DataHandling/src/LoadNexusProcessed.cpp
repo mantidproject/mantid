@@ -574,7 +574,40 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
           }
         }
       }
-      // TODO: vector column ifs here
+      else if ( info.type == NX_INT32 ) // A vector_int column
+      {
+        NXDataSetTyped<int> data = nx_tw.openNXDataSet<int>(str.c_str());
+        std::string columnTitle = data.attributes("name");
+        if ( ! columnTitle.empty() )
+        {
+          workspace->addColumn("vector_int", columnTitle);
+
+          const size_t rowCount = info.dims[0];
+          const size_t blockSize = info.dims[1];
+
+          workspace->setRowCount(rowCount);
+
+          data.load();
+
+          for ( size_t i = 0; i < rowCount; ++i )
+          {
+            auto& cell = workspace->cell< std::vector<int> >(i, workspace->columnCount() - 1);
+
+            int* from = data() + blockSize * i;
+
+            cell.assign(from, from + blockSize);
+
+            std::ostringstream rowSizeAttrName; rowSizeAttrName << "row_size_" << i;
+
+            // This is ugly, but I can only get attribute as a string using the API
+            std::istringstream rowSizeStr( data.attributes(rowSizeAttrName.str()) );
+
+            int rowSize; rowSizeStr >> rowSize;
+
+            cell.resize(rowSize);
+          }
+        }
+      }
     }
 
     columnNumber++;
