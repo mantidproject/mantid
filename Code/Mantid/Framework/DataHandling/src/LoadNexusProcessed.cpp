@@ -508,67 +508,74 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
       break;
     }
 
-    if ( info.type == NX_FLOAT64 )
+    if ( info.rank == 1 )
     {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-      std::string columnTitle = nxDouble.attributes("name");
-      if (!columnTitle.empty())
+      if ( info.type == NX_FLOAT64 )
       {
-        workspace->addColumn("double", columnTitle);
-        nxDouble.load();
-        int length = nxDouble.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
-        }
-        for (int i = 0; i < length; i++)
-          workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
-      }
-    }
-	else if ( info.type == NX_INT32 )
-    {
-      NXInt nxInt = nx_tw.openNXInt(str.c_str());
-      std::string columnTitle = nxInt.attributes("name");
-      if (!columnTitle.empty())
-      {
-        workspace->addColumn("int", columnTitle);
-        nxInt.load();
-        int length = nxInt.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
-        }
-        for (int i = 0; i < length; i++)
-          workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
-      }
-    }
-    else if ( info.type == NX_CHAR )
-    {
-      NXChar data = nx_tw.openNXChar(str.c_str());
-      std::string columnTitle = data.attributes("name");
-      if (!columnTitle.empty())
-      {
-        workspace->addColumn("str", columnTitle);
-        int nRows = info.dims[0];
-        if ( !hasNumberOfRowBeenSet )
+        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+        std::string columnTitle = nxDouble.attributes("name");
+        if (!columnTitle.empty())
         {
-          workspace->setRowCount(nRows);
-          hasNumberOfRowBeenSet = true;
+          workspace->addColumn("double", columnTitle);
+          nxDouble.load();
+          int length = nxDouble.dim0();
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(length);
+            hasNumberOfRowBeenSet = true;
+          }
+          for (int i = 0; i < length; i++)
+            workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
         }
+      }
+      else if ( info.type == NX_INT32 )
+      {
+        NXInt nxInt = nx_tw.openNXInt(str.c_str());
+        std::string columnTitle = nxInt.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("int", columnTitle);
+          nxInt.load();
+          int length = nxInt.dim0();
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(length);
+            hasNumberOfRowBeenSet = true;
+          }
+          for (int i = 0; i < length; i++)
+            workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
+        }
+      }
+    }
+    else if ( info.rank == 2 )
+    {
+      if ( info.type == NX_CHAR )
+      {
+        NXChar data = nx_tw.openNXChar(str.c_str());
+        std::string columnTitle = data.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("str", columnTitle);
+          int nRows = info.dims[0];
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(nRows);
+            hasNumberOfRowBeenSet = true;
+          }
 
-        const int maxStr = info.dims[1];
-        data.load();
-        for (int iR = 0; iR < nRows; ++iR)
-        {
-          auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
-          auto startPoint = data() + maxStr*iR;
-          cellContents.assign(startPoint,startPoint+maxStr);
-          boost::trim_right(cellContents);
+          const int maxStr = info.dims[1];
+          data.load();
+          for (int iR = 0; iR < nRows; ++iR)
+          {
+            auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
+            auto startPoint = data() + maxStr*iR;
+            cellContents.assign(startPoint,startPoint+maxStr);
+            boost::trim_right(cellContents);
+          }
         }
       }
-    } 
+      // TODO: vector column ifs here
+    }
 
     columnNumber++;
   
