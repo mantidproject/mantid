@@ -1155,7 +1155,12 @@
                </item>
                <item>
                 <property name="text">
-                 <string>Intensity</string>
+                 <string>All</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Amplitude</string>
                 </property>
                </item>
                <item>
