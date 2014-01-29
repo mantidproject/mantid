@@ -92,7 +92,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 if (column == 0) or (column == 5) or (column == 10):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
-                    item.setToolTip('Runs can be comma delimited to coadd them')
+                    item.setToolTip('Runs can be colon delimited to coadd them')
                     self.tableMain.setItem(row, column, item)
                 elif (column == 1) or (column == 6) or (column == 11):
                     item = QtGui.QTableWidgetItem()
@@ -102,7 +102,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 elif (column == 17):
                     check = QtGui.QCheckBox()
                     check.setCheckState(False)
-                    check..setToolTip('If checked, the runs in this row will be stitched together')
+                    check.setToolTip('If checked, the runs in this row will be stitched together')
                     item = QtGui.QWidget()
                     layout = QtGui.QHBoxLayout(item)
                     layout.addWidget(check)
