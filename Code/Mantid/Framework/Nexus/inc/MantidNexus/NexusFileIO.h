@@ -182,9 +182,10 @@ namespace Mantid
       std::string logValueType()const{return "unknown";}
 
       /// Writes given vector column to the currently open Nexus file
-      template<typename T, int NexusType>
-      void writeNexusVectorColumn(const std::string& columnName,
-        const boost::shared_ptr< const DataObjects::VectorColumn<T> >& column) const;
+      template<typename T>
+      void writeNexusVectorColumn(const boost::shared_ptr< const DataObjects::VectorColumn<T> >& column,
+                                  const std::string& columnName, int nexusType,
+                                  const std::string& typeName) const;
     };
     
     /**
@@ -361,13 +362,16 @@ namespace Mantid
     }
 
     /**
-     * Writes given vector column to the currently open Nexus file. Uses NXwritedata.
-     * @param columnName :: Name of NXdata group to write to
+     * Writes given vector column to the currently open Nexus file.
+     * @param columnName :: Name of NXdata to write to
+     * @param nexusType  :: Nexus type to use to store data
+     * @param typeName   :: Name of the type to use for "interpret_as" attribute
      * @param column     :: Column to write
      */
-    template<typename Type, int NexusType>
-    void NexusFileIO::writeNexusVectorColumn(const std::string& columnName,
-      const boost::shared_ptr<const DataObjects::VectorColumn<Type> >& column) const
+    template<typename Type>
+    void NexusFileIO::writeNexusVectorColumn(const boost::shared_ptr<const DataObjects::VectorColumn<Type> >& column,
+                                             const std::string& columnName, int nexusType,
+                                             const std::string& typeName) const
     {
       size_t rowCount = column->size();
 
@@ -400,7 +404,17 @@ namespace Mantid
           data[i*maxSize + j] = values[j];
       }
 
-      NXwritedata(columnName.c_str(), NexusType, 2, dims, (void *)(&data), false);
+      // Write data
+      NXwritedata(columnName.c_str(), nexusType, 2, dims, reinterpret_cast<void*>(&data), false);
+
+      std::string units = "Not known";
+      std::string interpret_as = "A vector of " + typeName;
+
+      // Write attributes
+      NXopendata(fileID, columnName.c_str());
+      NXputattr(fileID, "units",  units.c_str(), static_cast<int>(units.size()), NX_CHAR);
+      NXputattr(fileID, "interpret_as",  interpret_as.c_str(), static_cast<int>(interpret_as.size()), NX_CHAR);
+      NXclosedata(fileID);
     }
 
   } // namespace NeXus

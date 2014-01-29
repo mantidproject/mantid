@@ -559,7 +559,7 @@ using namespace DataObjects;
       else if ( col->isType< std::vector<Type> >() ) \
       { \
         auto vecCol = boost::dynamic_pointer_cast< const VectorColumn<Type> >(col); \
-        writeNexusVectorColumn<Type, NexusType>(str, vecCol); \
+        writeNexusVectorColumn<Type>(vecCol, str, NexusType, #Type); \
       }
       IF_VECTOR_COLUMN(int,NX_INT32)
       IF_VECTOR_COLUMN(double,NX_FLOAT64)

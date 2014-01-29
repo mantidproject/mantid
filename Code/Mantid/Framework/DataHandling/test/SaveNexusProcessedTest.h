@@ -455,6 +455,19 @@ public:
       TS_ASSERT_EQUALS( data1[8], 4 );
       TS_ASSERT_EQUALS( data1[11], 7 );
 
+      std::vector<NeXus::AttrInfo> attrInfos1 = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS( attrInfos1.size(), 3 );
+
+      if ( attrInfos1.size() == 3 )
+      {
+        TS_ASSERT_EQUALS( attrInfos1[0].name, "units");
+        TS_ASSERT_EQUALS( attrInfos1[1].name, "interpret_as");
+        TS_ASSERT_EQUALS( attrInfos1[2].name, "name");
+
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[1]), "A vector of int" );
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos1[2]), "IntVectorColumn" );
+      }
+
       // -- Checking double column -----
 
       savedNexus.openData("column_2");
@@ -472,6 +485,19 @@ public:
       TS_ASSERT_EQUALS( data2[0], 0.5 );
       TS_ASSERT_EQUALS( data2[3], 2.5 );
       TS_ASSERT_EQUALS( data2[5], 0.0 );
+
+      std::vector<NeXus::AttrInfo> attrInfos2 = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS( attrInfos2.size(), 3 );
+
+      if ( attrInfos2.size() == 3 )
+      {
+        TS_ASSERT_EQUALS( attrInfos2[0].name, "units");
+        TS_ASSERT_EQUALS( attrInfos2[1].name, "interpret_as");
+        TS_ASSERT_EQUALS( attrInfos2[2].name, "name");
+
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[1]), "A vector of double" );
+        TS_ASSERT_EQUALS( savedNexus.getStrAttr(attrInfos2[2]), "DoubleVectorColumn" );
+      }
     }
     catch(std::exception& e)
     {
