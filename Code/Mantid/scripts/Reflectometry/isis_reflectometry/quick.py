@@ -39,8 +39,8 @@ class ExponentialCorrectionStrategy(CorrectionStrategy):
         
     def apply(self, to_correct):
         logger.information("Exponential Correction")
-        corrected = ExponentialCorrection(InputWorkspace=to_correct,C0=self.__c0, C1= self.__c1, Operation='Divide')
-        return corrected
+        _corrected = ExponentialCorrection(InputWorkspace=to_correct,C0=self.__c0, C1= self.__c1, Operation='Divide')
+        return _corrected
     
 class PolynomialCorrectionStrategy(CorrectionStrategy):
     def __init__(self, poly_string):
@@ -48,14 +48,14 @@ class PolynomialCorrectionStrategy(CorrectionStrategy):
     
     def apply(self, to_correct):
         logger.information("Polynomial Correction")
-        corrected = PolynomialCorrection(InputWorkspace=to_correct, Coefficients=self.__poly_string, Operation='Divide')
-        return corrected
+        _corrected = PolynomialCorrection(InputWorkspace=to_correct, Coefficients=self.__poly_string, Operation='Divide')
+        return _corrected
        
 class NullCorrectionStrategy(CorrectionStrategy):
     def apply(self, to_correct):
         logger.information("Null Correction")
-        out = to_correct.clone()
-        return out
+        _out = to_correct.clone()
+        return _out
         
 
 def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', 
