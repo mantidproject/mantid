@@ -11,8 +11,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
 
 // function checks if conversion within limits works reversibly
-void convert_unit_twice(const Unit &aUnit,std::vector<double> &samples,std::vector<double> &results)
+std::string convert_units_check_range(const Unit &aUnit,std::vector<double> &samples,std::vector<double> &results, double epsilon1=0)
 {
+  std::string error_mess("");
 
   samples.resize(4);
   results.resize(4);
@@ -32,6 +33,65 @@ void convert_unit_twice(const Unit &aUnit,std::vector<double> &samples,std::vect
   results[3]= aUnit.singleFromTOF(results[1]); // unit 2
 
 
+  auto range = aUnit.conversionRange();
+  double tof1=aUnit.singleToTOF(range[0]);
+  double tof2=aUnit.singleToTOF(range[1]);
+  bool t_increases(true);
+  if (tof1>tof2)
+    t_increases=false;
+
+  if (tof1==tof2)
+  {
+    error_mess = "conversion: "+aUnit.unitID()+ " Time range is  zero (tof_left==tof_rignt)";
+    return error_mess;
+  }
+  if (tof1<tof_min || tof2 < tof_min)
+  {
+      error_mess = "conversion: "+aUnit.unitID()+ " min time range is smaller then minimal conversion time";
+      return error_mess;
+  }
+  if (tof1>tof_max*(1+epsilon1) || tof2 > tof_max*(1+epsilon1))
+  {
+      error_mess = "conversion: "+aUnit.unitID()+ "max time range is bigger then maximal conversion time";
+      return error_mess;
+  }
+
+
+  const size_t nSteps(100);
+
+  double step = (range[1]-range[0])/nSteps;
+  if (step == std::numeric_limits<double>::infinity())
+  {
+    step =(DBL_MAX/nSteps)*2;
+  }
+ 
+  double t1 = aUnit.singleToTOF(range[0]);
+  for(size_t i=1;i<=nSteps;i++)
+  {
+    double unitVal=range[0]+i*step;
+    double tofVal = aUnit.singleToTOF(unitVal);
+    if (t_increases)
+    {
+      if (tofVal*(1+epsilon1)< t1)
+      {
+        error_mess="conversion: "+aUnit.unitID()+" subsequent tof decreases for increasing function at step: "+boost::lexical_cast<std::string>(i);
+        return error_mess;
+      }
+    }
+    else
+    {
+      if (tofVal>t1*(1+epsilon1))
+      {
+        error_mess="conversion: "+aUnit.unitID()+" subsequent tof increases for decreasing function at step: "+boost::lexical_cast<std::string>(i);
+        return error_mess;
+      }
+
+      t1=tofVal;
+    }
+
+  }
+
+  return error_mess;
 }
 
 class UnitTest : public CxxTest::TestSuite
@@ -53,6 +113,9 @@ public:
     void init() {}
     virtual double singleToTOF(const double ) const { return 0; }
     virtual double singleFromTOF(const double ) const { return 0; }
+    virtual double conversionTOFMax()const{return std::numeric_limits<double>::quiet_NaN();}
+    virtual double conversionTOFMin()const{return std::numeric_limits<double>::quiet_NaN();}
+
     virtual Unit * clone() const { return new UnitTester();}
   };
 
@@ -193,7 +256,9 @@ public:
   void testTOFrange()
   {    
     std::vector<double> sample,rezult;
-    convert_unit_twice(tof,sample,rezult);
+    std::string err_mess=convert_units_check_range(tof,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
     for(size_t i=0;i<sample.size();i++)
     {
       TS_ASSERT_DELTA(sample[i],rezult[i],FLT_EPSILON);
@@ -273,12 +338,15 @@ public:
   void testWavelengthrange()
   {    
     std::vector<double> sample,rezult;
-    convert_unit_twice(lambda,sample,rezult);
+    std::string err_mess=convert_units_check_range(lambda,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
     for(size_t i=0;i<sample.size();i++)
     {
       TSM_ASSERT_DELTA(" Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],FLT_EPSILON);
     }
   }
+
 
   //----------------------------------------------------------------------
   // Energy tests
@@ -344,6 +412,25 @@ public:
     lambda.fromTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x2[0], result, 1.0e-15 )
   }
+  void testEnergyRange()
+  {    
+    std::vector<double> sample,rezult;
+    std::string err_mess=convert_units_check_range(energy,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("Energy limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("Energy limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }
+        
+    }
+  }
+
 
   //----------------------------------------------------------------------
   // Energy_inWavenumber tests
@@ -476,6 +563,27 @@ public:
     q2.fromTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-12 )
   }
+  void testdSpacingRange()
+  {    
+    std::vector<double> sample,rezult;
+
+    std::string err_mess=convert_units_check_range(d,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("d-spacing limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("d-spacing limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }
+        
+    }
+  }
+
 
   //----------------------------------------------------------------------
   // Momentum Transfer tests
@@ -543,6 +651,27 @@ public:
     d.fromTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-12 )
   }
+  void testMomentumTransferRange()
+  {    
+    std::vector<double> sample,rezult;
+
+    std::string err_mess=convert_units_check_range(q,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }
+        
+    }
+  }
+
 
   //----------------------------------------------------------------------
   // Momentum Squared tests
@@ -610,6 +739,28 @@ public:
     d.fromTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
   }
+  void testQ2Range()
+  {    
+    std::vector<double> sample,rezult;
+
+    q2.initialize(1.1,1.1,99.0,0,99.0,0);
+    std::string err_mess=convert_units_check_range(q2,sample,rezult,-DBL_EPSILON);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }
+        
+    }
+  }
+
 
   //----------------------------------------------------------------------
   // Energy transfer tests
@@ -670,6 +821,36 @@ public:
     // emode = 0
     TS_ASSERT_THROWS( dE.fromTOF(x,y,1.5,2.5,0.0,0,4.0,0.0), std::invalid_argument )
   }
+  void testDERange()
+  {    
+    std::vector<double> sample,rezult;
+    //Direct
+    dE.initialize(2001.0,1.0, 1.5, 1, 10., 0.0);
+
+    std::string err_mess=convert_units_check_range(dE,sample,rezult,DBL_EPSILON);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    TSM_ASSERT_DELTA("Direct energy transfer limits Failed for conversion t_min: ",sample[0],rezult[0],10*FLT_EPSILON);
+    TSM_ASSERT_DELTA("Direct energy transfer limits Failed for conversion t_max: ",sample[1]/rezult[1],1.,0.05);
+    TSM_ASSERT_DELTA("Direct energy transfer limits Failed for conversion e_min: ",sample[2],rezult[2],10*FLT_EPSILON);
+    TSM_ASSERT_DELTA("Direct energy transfer limits Failed for conversion e_max: ",sample[3],rezult[3],10*FLT_EPSILON);
+   
+    //Indirect
+    dE.initialize(2001.0,1.0, 1.5, 2, 10., 0.0);
+
+    err_mess=convert_units_check_range(dE,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion t_min: ",sample[0],rezult[0],10*FLT_EPSILON);
+    TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion t_max: ",sample[1]/rezult[1],1.,0.05);
+    TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion e_min: ",sample[2],rezult[2],10*FLT_EPSILON);
+    TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion e_max: ",sample[3],rezult[3],10*FLT_EPSILON);
+
+  
+  }
+
+
+
 
   //----------------------------------------------------------------------
   // Energy transfer tests
@@ -702,12 +883,12 @@ public:
     std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( dEk.toTOF(x,y,1.5,2.5,0.0,1,4.0,0.0) )
-    TS_ASSERT_DELTA( x[0], 11246.74, 0.01 )
+    TS_ASSERT_DELTA( x[0], 4622.5452, 0.01 )
     TS_ASSERT( yy == y )
 
     x[0] = 1.1;
     TS_ASSERT_THROWS_NOTHING( dEk.toTOF(x,y,1.5,2.5,0.0,2,4.0,0.0) )
-    TS_ASSERT_DELTA( x[0], 7170.555, 0.001 )
+    TS_ASSERT_DELTA( x[0], 4544.0378, 0.001 )
     TS_ASSERT( yy == y )
 
     // emode = 0
@@ -730,6 +911,34 @@ public:
     // emode = 0
     TS_ASSERT_THROWS( dEk.fromTOF(x,y,1.5,2.5,0.0,0,4.0,0.0), std::invalid_argument )
   }
+  void testDE_kRange()
+  {    
+    std::vector<double> sample,rezult;
+    //Direct
+    dEk.initialize(2001.0,1.0, 1.5, 1, 10., 0.0);
+
+    std::string err_mess=convert_units_check_range(dEk,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    TSM_ASSERT_DELTA("Direct energy transfer limits Failed for conversion t_min: ",sample[0],rezult[0],10*FLT_EPSILON);
+    TSM_ASSERT_DELTA("Direct energy transfer limits Failed for conversion t_max: ",sample[1]/rezult[1],1.,0.05);
+    TSM_ASSERT_DELTA("Direct energy transfer limits Failed for conversion e_min: ",sample[2],rezult[2],10*FLT_EPSILON);
+    TSM_ASSERT_DELTA("Direct energy transfer limits Failed for conversion e_max: ",sample[3],rezult[3],10*FLT_EPSILON);
+   
+    //Indirect
+    dEk.initialize(2001.0,1.0, 1.5, 2, 10., 0.0);
+
+    err_mess=convert_units_check_range(dEk,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion t_min: ",sample[0],rezult[0],10*FLT_EPSILON);
+    TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion t_max: ",sample[1]/rezult[1],1.,0.05);
+    TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion e_min: ",sample[2],rezult[2],10*FLT_EPSILON);
+    TSM_ASSERT_DELTA("Indirect energy transfer limits Failed for conversion e_max: ",sample[3],rezult[3],10*FLT_EPSILON);
+
+  
+  }
+
   //----------------------------------------------------------------------
   // Momentum tests
   //----------------------------------------------------------------------
@@ -803,6 +1012,62 @@ public:
     TS_ASSERT_DELTA(0,power-power1,0.0001);
     TS_ASSERT_DELTA(0,factor-factor1,0.0001);
   }
+  void testK_iRange()
+  {    
+    std::vector<double> sample,rezult;
+    k_i.initialize(1.1,1.1,99.0,0,99.0,99);
+
+    std::string err_mess=convert_units_check_range(k_i,sample,rezult,DBL_EPSILON);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("Elastic Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("Elastic Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }        
+    }
+
+    k_i.initialize(10000,11,99.0,2,99.0,99);
+
+    err_mess=convert_units_check_range(k_i,sample,rezult,DBL_EPSILON);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("Indirect Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("Indirect Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }        
+    }
+
+    k_i.initialize(1,1.1,99.0,1,99.0,99);
+
+    err_mess=convert_units_check_range(k_i,sample,rezult,DBL_EPSILON);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("Direct Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("Direct Momentum transfer limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }        
+    }
+
+  }
+
 
 
    //----------------------------------------------------------------------
@@ -866,6 +1131,27 @@ public:
     double factor, power;
     TS_ASSERT( !delta.quickConversion(energy,factor,power) )
     TS_ASSERT( !delta.quickConversion(energyk,factor,power) )
+  }
+  void testSpinEchoRange()
+  {    
+    std::vector<double> sample,rezult;
+    delta.initialize(10,1.1,99.0,0,99.0,99);
+
+    std::string err_mess=convert_units_check_range(delta,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("Spin Echo limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("Spin Echo limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }        
+    } 
+
   }
 
   
@@ -931,6 +1217,28 @@ public:
     TS_ASSERT( !tau.quickConversion(energy,factor,power) )
     TS_ASSERT( !tau.quickConversion(energyk,factor,power) )
   }
+  void testSpinEchoTimeRange()
+  {    
+    std::vector<double> sample,rezult;
+    tau.initialize(100,11,1.0,0,1.0,1);
+
+    std::string err_mess=convert_units_check_range(tau,sample,rezult);
+    TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
+
+    for(size_t i=0;i<sample.size();i++)
+    {
+      if (std::fabs(sample[i])<10*FLT_EPSILON)
+      {
+        TSM_ASSERT_DELTA("Spin Echo limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),sample[i],rezult[i],10*FLT_EPSILON);
+      }
+      else
+      {
+        TSM_ASSERT_DELTA("Spin Echo limits Failed for conversion N: "+boost::lexical_cast<std::string>(i),rezult[i]/sample[i],1.,10*FLT_EPSILON);
+      }        
+    } 
+
+  }
+
 
 private:
   Units::Label label;

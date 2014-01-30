@@ -161,6 +161,15 @@ double Unit::convertSingleFromTOF(const double xvalue, const double& l1, const d
   return this->singleFromTOF(xvalue);
 }
 
+std::vector<double> Unit::conversionRange()const
+{
+  double u1=this->singleFromTOF(this->conversionTOFMin());
+  double u2=this->singleFromTOF(this->conversionTOFMax());
+  std::vector<double> range(2);
+  range[0] = std::min(u1,u2);
+  range[1] = std::max(u1,u2);
+  return range;
+}
 
 namespace Units
 {
@@ -355,11 +364,11 @@ double Wavelength::singleFromTOF(const double tof) const
   x *= factorFrom;
   return x;
 }
-std::vector<double> Wavelength::conversionRange()const
-{
-    double tmp[]={-DBL_MAX,DBL_MAX};
-    return std::vector<double>(tmp,tmp+2);
-}
+//std::vector<double> Wavelength::conversionRange()const
+//{
+//    double tmp[]={-DBL_MAX,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
 ///@return  Minimal time of flight, which can be reversively converted into wavelength
 double Wavelength::conversionTOFMin()const
 {
@@ -431,16 +440,22 @@ double Energy::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
 }
-///@return  Minimal time of flight which can be reasonably converted into energy
+///@return  Minimal time of flight which can be reversibly converted into energy
 double Energy::conversionTOFMin()const
 {
-  return factorTo/sqrt(std::numeric_limits<double>::max());
+  return factorTo/sqrt(DBL_MAX);
 }
-std::vector<double> Energy::conversionRange()const
+double Energy::conversionTOFMax()const
 {
-    double tmp[]={0,DBL_MAX};
-    return std::vector<double>(tmp,tmp+2);
+  return sqrt(DBL_MAX);
 }
+
+///@return range of energies which can be monotonicly converted into TOF
+//std::vector<double> Energy::conversionRange()const
+//{
+//    double tmp[]={0,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
 
 
 double Energy::singleFromTOF(const double tof) const
@@ -498,16 +513,22 @@ double Energy_inWavenumber::singleToTOF(const double x) const
   if (temp <= DBL_MIN) temp = DBL_MIN; // Protect against divide by zero and define conversion range
   return factorTo / sqrt(temp);
 }
-///@return  Minimal time which can be reasonably converted into energy in wavenumner units
+///@return  Minimal time which can be reversibly converted into energy in wavenumner units
 double Energy_inWavenumber::conversionTOFMin()const
 {
   return factorTo / sqrt(std::numeric_limits<double>::max());
 }
-std::vector<double> Energy_inWavenumber::conversionRange()const
+double Energy_inWavenumber::conversionTOFMax()const
 {
-    double tmp[]={0,DBL_MAX};
-    return std::vector<double>(tmp,tmp+2);
+  return factorTo / sqrt(std::numeric_limits<double>::max());
 }
+
+/////@return range of energies in wavenumber units, which can be monotonically converted into TOF
+//std::vector<double> Energy_inWavenumber::conversionRange()const
+//{
+//    double tmp[]={0,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
 
 
 double Energy_inWavenumber::singleFromTOF(const double tof) const
@@ -557,22 +578,25 @@ double dSpacing::singleToTOF(const double x) const
 {
   return x*factorTo;
 }
-
-double dSpacing::conversionTOFMin()const
-{
-  return 0;
-}
-std::vector<double> dSpacing::conversionRange()const
-{
-    double tmp[]={-DBL_MAX,DBL_MAX};
-    return std::vector<double>(tmp,tmp+2);
-}
-
-
 double dSpacing::singleFromTOF(const double tof) const
 {
   return tof/factorFrom;
 }
+double dSpacing::conversionTOFMin()const
+{
+  return 0;
+}
+double dSpacing::conversionTOFMax()const
+{
+  return DBL_MAX/factorTo;
+}
+//std::vector<double> dSpacing::conversionRange()const
+//{
+//    double tmp[]={-DBL_MAX,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
+
+
 
 Unit * dSpacing::clone() const
 {
@@ -619,24 +643,33 @@ double MomentumTransfer::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / temp;
 }
-double MomentumTransfer::conversionTOFMin()const
-{
-  return 0;
-}
-std::vector<double> MomentumTransfer::conversionRange()const
-{
-    double tmp[]={0,DBL_MAX};
-    return std::vector<double>(tmp,tmp+2);
-}
-
-
-
+//
 double MomentumTransfer::singleFromTOF(const double tof) const
 {
   double temp = tof;
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorFrom / temp;
 }
+
+
+double MomentumTransfer::conversionTOFMin()const
+{
+  return factorFrom/DBL_MAX;
+}
+double MomentumTransfer::conversionTOFMax()const
+{
+  return DBL_MAX;
+}
+
+
+//std::vector<double> MomentumTransfer::conversionRange()const
+//{
+//    double tmp[]={factorFrom/DBL_MAX,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
+
+
+
 
 Unit * MomentumTransfer::clone() const
 {
@@ -682,25 +715,37 @@ double QSquared::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
 }
-
-
-double QSquared::conversionTOFMin()const
-{
-  return 0;
-}
-std::vector<double> QSquared::conversionRange()const
-{
-    double tmp[]={DBL_MIN,DBL_MAX};
-    return std::vector<double>(tmp,tmp+2);
-}
-
-
 double QSquared::singleFromTOF(const double tof) const
 {
   double temp = tof;
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorFrom / (temp*temp);
 }
+
+double QSquared::conversionTOFMin()const
+{
+  if (factorTo > 0)
+    return factorTo/sqrt(DBL_MAX);
+  else
+    return -sqrt(DBL_MAX);
+
+
+}
+double QSquared::conversionTOFMax()const
+{
+    if (factorTo > 0)
+      return  sqrt(DBL_MAX);
+    else
+      return factorTo/sqrt(DBL_MAX);
+}
+
+//std::vector<double> QSquared::conversionRange()const
+//{
+//    double tmp[]={0,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
+
+
 
 Unit * QSquared::clone() const
 {
@@ -761,9 +806,9 @@ double DeltaE::singleToTOF(const double x) const
 {
   if (emode == 1)
   {
-    const double e2 = (efixed - x) / unitScaling;
+    const double e2 = efixed - x/unitScaling;
     if (e2<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
-      return DBL_MAX;
+      return  DeltaE::conversionTOFMax();
     else
     {
       // this_t = t2;
@@ -773,9 +818,9 @@ double DeltaE::singleToTOF(const double x) const
   }
   else if (emode == 2)
   {
-    const double e1 = (efixed + x) / unitScaling;
+    const double e1 = efixed + x/unitScaling;
     if (e1<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
-      return -DBL_MAX;
+      return DeltaE::conversionTOFMax();
     else
     {
       // this_t = t1;
@@ -785,7 +830,7 @@ double DeltaE::singleToTOF(const double x) const
   }
   else
   {
-    return DBL_MAX;
+    return DeltaE::conversionTOFMax();
   }
 }
 
@@ -821,29 +866,20 @@ double DeltaE::singleFromTOF(const double tof) const
 
 double DeltaE::conversionTOFMin()const
 {
-  double range(DBL_MAX); // impossible for elastic
+  double time(DBL_MAX); // impossible for elastic, this units do not work for elastic
   if (emode == 1 || emode == 2)
-    range = t_otherFrom;
-  return range;
+    time = t_otherFrom*(1+DBL_EPSILON);
+  return time;
 }
-
-std::vector<double> DeltaE::conversionRange()const
+double DeltaE::conversionTOFMax()const
 {
-    double tmp[]={DBL_MAX,DBL_MAX};
-    std::vector<double> range(tmp,tmp+2);
-    if(emode==1)
-    {
-      range[0]=-DBL_MAX;
-      range[1]=efixed;
-    }
-    else if (emode == 2)
-    {
-      range[0]=-efixed;
-      range[1]= DBL_MAX;
-    }
-
-    return range;
+  // 0.1 here to provide at least two significant units to conversion range as this conversion range comes from 1-epsilon
+  if (efixed>1)
+    return t_otherFrom+sqrt(factorFrom/efixed)/sqrt(DBL_MIN);
+  else
+    return t_otherFrom+sqrt(factorFrom)/sqrt(DBL_MIN);
 }
+
 
 
 Unit * DeltaE::clone() const
@@ -886,24 +922,30 @@ double DeltaE_inWavenumber::conversionTOFMin()const
   return DeltaE::conversionTOFMin();
 }
 
-std::vector<double> DeltaE_inWavenumber::conversionRange()const
+double DeltaE_inWavenumber::conversionTOFMax()const
 {
-
-    double tmp[]={DBL_MAX,DBL_MAX};
-    std::vector<double> range(tmp,tmp+2);
-    if(emode==1)
-    {
-      range[0]=-DBL_MAX;
-      range[1]=efixed*unitScaling;
-    }
-    else if (emode == 2)
-    {
-      range[0]=-efixed*unitScaling;
-      range[1]= DBL_MAX;
-    }
-
-    return range;
+  return DeltaE::conversionTOFMax();
 }
+
+
+//std::vector<double> DeltaE_inWavenumber::conversionRange()const
+//{
+//
+//    double tmp[]={DBL_MAX,DBL_MAX};
+//    std::vector<double> range(tmp,tmp+2);
+//    if(emode==1)
+//    {
+//      range[0]=-DBL_MAX;
+//      range[1]=efixed*unitScaling;
+//    }
+//    else if (emode == 2)
+//    {
+//      range[0]=-efixed*unitScaling;
+//      range[1]= DBL_MAX;
+//    }
+//
+//    return range;
+//}
 
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
@@ -1002,17 +1044,26 @@ double Momentum::singleToTOF(const double ki) const
 }
 double Momentum::conversionTOFMin()const
 {
-  double range(DBL_MAX);
-  range=0;
+  double range = DBL_MIN*factorFrom;
   if (emode == 1 || emode == 2)
-    range = sfpTo;
+    range = sfpFrom*(1+DBL_EPSILON*factorFrom);
   return range;
 }
-std::vector<double> Momentum::conversionRange()const
+double Momentum::conversionTOFMax()const
 {
-    double tmp[]={DBL_MIN,DBL_MAX};
-    return std::vector<double>(tmp,tmp+2);
+  double range =DBL_MAX/factorTo; 
+  if (emode == 1 || emode == 2)
+  {
+    range = 1+DBL_MAX/factorTo+sfpFrom;
+  }
+  return range;
 }
+
+//std::vector<double> Momentum::conversionRange()const
+//{
+//    double tmp[]={DBL_MIN,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
 
 double Momentum::singleFromTOF(const double tof) const
 {
@@ -1064,14 +1115,26 @@ double SpinEchoLength::singleToTOF(const double x) const
 
 double SpinEchoLength::conversionTOFMin()const
 {
-  return 0;
+  double wl = Wavelength::conversionTOFMin();
+  return efixed*wl*wl;
+}
+double SpinEchoLength::conversionTOFMax()const
+{
+  double sel = sqrt(DBL_MAX);
+  if( efixed>1)
+  {
+    sel/=efixed;
+  }
+
+  return sel;
 }
 
-std::vector<double> SpinEchoLength::conversionRange()const
-{
-    double tmp[]={DBL_MIN,DBL_MAX};
-    return std::vector<double>(tmp,tmp+2);
-}
+
+//std::vector<double> SpinEchoLength::conversionRange()const
+//{
+//    double tmp[]={DBL_MIN,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
 
 double SpinEchoLength::singleFromTOF(const double tof) const
 {
@@ -1119,6 +1182,20 @@ double SpinEchoTime::conversionTOFMin()const
 {
   return 0;
 }
+double SpinEchoTime::conversionTOFMax()const
+{
+  double tm = std::pow(DBL_MAX,1./3.);
+  if (efixed > 1)
+    tm /=efixed;
+  return tm;
+}
+
+//std::vector<double> SpinEchoTime::conversionRange()const
+//{
+//    double tmp[]={DBL_MIN,DBL_MAX};
+//    return std::vector<double>(tmp,tmp+2);
+//}
+
 
 double SpinEchoTime::singleFromTOF(const double tof) const
 {
@@ -1162,6 +1239,16 @@ double Time::singleFromTOF(const double tof) const
     throw std::runtime_error("Time is not allwed to be converted from TOF. ");
     return 0.0;
 }
+
+double Time::conversionTOFMax()const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+};
+double Time::conversionTOFMin()const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+};
+
 
 Unit * Time::clone() const
 {
