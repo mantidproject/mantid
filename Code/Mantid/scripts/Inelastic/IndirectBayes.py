@@ -5,7 +5,6 @@
 #
 from IndirectImport import *
 if is_supported_f2py_platform():
-    Er      = import_f2py("erange")
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
@@ -33,24 +32,40 @@ def readASCIIFile(file_name):
 
 	return asc
 
-def CalcErange(inWS,ns,er,nbin):
-	rscl = 1.0
-	array_len = 4096                           # length of array in Fortran
-	N,X,Y,E = GetXYE(inWS,ns,array_len)        # get data
-	nout,bnorm,Xdat=Er.erange(N,X,Y,E,er,nbin,rscl)    # calculate energy range
-	if nout[0] == 0:
-		error = 'Erange - calculated points is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if nout[1] == 0:
-		error = 'Erange - calculated Imin is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if nout[2] == 0:
-		error = 'Erange - calculated Imax is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	return nout,bnorm,Xdat,X,Y,E
+def CalcErange(inWS,ns,erange,binWidth):
+	#length of array in Fortran
+	array_len = 4096
+	
+	binWidth = int(binWidth)
+	bnorm = 1.0/binWidth
+
+	#get data from input workspace
+	N,X,Y,E = GetXYE(inWS,ns,array_len)
+	Xdata = mtd[inWS].readX(0)
+
+	#get all x values within the energy range
+	rangeMask = (Xdata >= erange[0]) & (Xdata <= erange[1])
+	Xin = Xdata[rangeMask]
+
+	#get indicies of the bounds of our energy range
+	minIndex = np.where(Xdata==Xin[0])[0][0]+1
+	maxIndex = np.where(Xdata==Xin[-1])[0][0]
+
+	#reshape array into sublists of bins
+	Xin = Xin.reshape(len(Xin)/binWidth, binWidth)
+
+	#sum and normalise values in bins
+	Xout = [sum(bin)*bnorm for bin in Xin]
+
+	#count number of bins
+	nbins = len(Xout)
+	
+	nout = [nbins, minIndex, maxIndex]
+
+ 	#pad array for use in Fortran code
+	Xout = PadArray(Xout,array_len)
+
+	return nout,bnorm,Xout,X,Y,E
 
 def GetXYE(inWS,n,array_len):
 	Xin = mtd[inWS].readX(n)
@@ -823,7 +838,9 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	theta,Q = GetThetaQ(vname)
 	efix = getEfixed(vname)
 	nres,ntr = CheckHistZero(rname)
+	print "begining erange calc"
 	nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
+	print "end of erange calc"
 	Ndat = nout[0]
 	Imin = nout[1]
 	Imax = nout[2]
