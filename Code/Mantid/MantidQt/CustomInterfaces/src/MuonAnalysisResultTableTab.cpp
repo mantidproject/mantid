@@ -494,19 +494,24 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
   }
 
   allLogs = allLogs.subtract(toRemove);
+
+  // Sort logs
+  QList<QString> allLogsSorted(allLogs.toList());
+  qSort(allLogsSorted.begin(), allLogsSorted.end(), MuonAnalysisResultTableTab::logNameLessThan);
   
   // Add number of rows to the table based on number of logs to display.
-  m_uiForm.valueTable->setRowCount(allLogs.size());
+  m_uiForm.valueTable->setRowCount(allLogsSorted.size());
 
   // Populate table with all log values available without repeating any.
-  for ( auto it = allLogs.constBegin(); it != allLogs.constEnd(); ++it )
+  for ( auto it = allLogsSorted.constBegin(); it != allLogsSorted.constEnd(); ++it )
   {
-    int row = static_cast<int>( std::distance(allLogs.constBegin(), it) );
+    int row = static_cast<int>( std::distance(allLogsSorted.constBegin(), it) );
     m_uiForm.valueTable->setItem(row, 0, new QTableWidgetItem(*it));
   }
 
-  // Save the number of logs displayed so don't have to search through all cells.
-  m_numLogsdisplayed = allLogs.size();
+  // Save the number of logs displayed
+  // XXX: this is redundant, as number of logs == number of rows
+  m_numLogsdisplayed = m_uiForm.valueTable->rowCount();
 
   // Add check boxes for the include column on log table, and make text uneditable.
   for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
@@ -520,6 +525,34 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
   }
 }
 
+/**
+ * LessThan function used to sort log names. Puts non-timeseries logs first and the timeseries ones
+ * sorted by named ignoring the case.
+ * @param logName1
+ * @param logName2
+ * @return True if logName1 is less than logName2, false otherwise
+ */
+bool MuonAnalysisResultTableTab::logNameLessThan(const QString& logName1, const QString& logName2)
+{
+  int index1 = NON_TIMESERIES_LOGS.indexOf(logName1);
+  int index2 = NON_TIMESERIES_LOGS.indexOf(logName2);
+
+  if ( index1 == -1 && index2 == -1 )
+  {
+    // If both are timeseries logs - compare lexicographically ignoring the case
+    return logName1.toLower() < logName2.toLower();
+  }
+  else if ( index1 != -1 && index2 != -1 )
+  {
+    // If both timeseries - keep the order of non-timeseries logs list
+    return index1 < index2;
+  }
+  else
+  {
+    // If one is timeseries and another is not - the one which is not is always less
+    return index1 != -1;
+  }
+}
 
 /**
 * Populates the items (fitted workspaces) into their table.

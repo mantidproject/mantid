@@ -76,6 +76,9 @@ private:
   /// Names of the non-timeseries logs we should display
   static const QStringList NON_TIMESERIES_LOGS;
 
+  /// LessThan function used to sort log names
+  static bool logNameLessThan(const QString& logName1, const QString& logName2);
+
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList& fittedWsList);
