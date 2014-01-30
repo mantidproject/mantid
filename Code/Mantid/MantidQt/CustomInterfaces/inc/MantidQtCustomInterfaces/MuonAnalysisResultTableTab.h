@@ -73,6 +73,9 @@ private:
   /// Postfix used by Fit fot result workspaces
   static const std::string WORKSPACE_POSTFIX;
 
+  /// Names of the non-timeseries logs we should display
+  static const QStringList NON_TIMESERIES_LOGS;
+
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList& fittedWsList);
@@ -108,8 +111,6 @@ private:
 
   QList<QString> m_unselectedFittings;
 
-  /// Names of the non-timeseries logs we should display
-  QStringList m_nonTimeseriesLogs;
 };
 
 }

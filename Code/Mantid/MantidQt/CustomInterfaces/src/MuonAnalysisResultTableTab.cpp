@@ -37,6 +37,9 @@ namespace Muon
 
   const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
 
+  const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS = \
+      QStringList() << "run_number" << "sample_temp" << "sample_magn_field";
+
 /**
 * Constructor
 */
@@ -65,11 +68,6 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
     this, SLOT( populateTables() ));
   connect(m_uiForm.fitLabelCombo, SIGNAL( activated(int) ),
     this, SLOT( populateTables() ));
-
-  // Populate list of non-timeseries properties
-  m_nonTimeseriesLogs.push_back("run_number");
-  m_nonTimeseriesLogs.push_back("sample_temp");
-  m_nonTimeseriesLogs.push_back("sample_magn_field");
 }
 
 
@@ -450,7 +448,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
         QString logName = QString::fromStdString( (**pItr).name() );
 
         // Check if we should display it
-        if ( m_nonTimeseriesLogs.contains(logName) )
+        if ( NON_TIMESERIES_LOGS.contains(logName) )
         {
           QVariant value;
 
