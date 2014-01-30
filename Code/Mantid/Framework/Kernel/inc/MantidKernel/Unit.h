@@ -12,6 +12,7 @@
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
 #include <limits>
+#include <cfloat>
 
 namespace Mantid
 {
@@ -518,8 +519,8 @@ class Degrees : public Mantid::Kernel::Unit
   const std::string label() const { return "degrees"; }
   virtual double singleToTOF(const double x) const { return x;}
   virtual double singleFromTOF(const double tof) const { return tof; }
-  double conversionTOFMax()const;
-  double conversionTOFMin()const;
+  double conversionTOFMax()const{return DBL_MAX;}
+  double conversionTOFMin()const{return -DBL_MAX;}
   virtual void init() {}
 
   virtual Unit * clone() const { return new Degrees(*this); }

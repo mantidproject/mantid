@@ -6,7 +6,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
-#include <cfloat>
+
 
 namespace Mantid
 {
@@ -200,22 +200,6 @@ Unit * Empty::clone() const
 {
   return new Empty(*this);
 }
-
-/* =============================================================================
- * LABEL DEGREES
- * =============================================================================
- */
-
-double Degrees::conversionTOFMax()const
-{
-  return DBL_MAX;
-}
-
-double Degrees::conversionTOFMin()const
-{
-  return -DBL_MAX;
-}
-
 
 
 /* =============================================================================
