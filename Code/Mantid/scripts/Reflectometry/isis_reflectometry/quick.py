@@ -212,7 +212,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
                 try:
                     IvsQ = l2q(IvsLam, detector_component_name, theta, sample_component_name)
                 except AttributeError:
-                    logger.warning("detector_component_name " + detector_component_name + "is unknown")
+                    logger.warning("detector_component_name " + detector_component_name + " is unknown")
                     IvsQ = ConvertUnits(InputWorkspace=IvsLam,OutputWorkspace="IvsQ",Target="MomentumTransfer") 
             else:
                 IvsQ = ConvertUnits(InputWorkspace=IvsLam,OutputWorkspace="IvsQ",Target="MomentumTransfer")       
@@ -371,7 +371,7 @@ def get_defaults(run_ws, polcorr = False):
     defaults['PointDetectorStop'] =  int( instrument.getNumberParameter('PointDetectorStop')[0] )
     defaults['MultiDetectorStart'] = int( instrument.getNumberParameter('MultiDetectorStart')[0] )
     defaults['I0MonitorIndex'] = int( instrument.getNumberParameter('I0MonitorIndex')[0] ) 
-    if polcorr:
+    if polcorr and (polcorr != PolarisationCorrection.NONE):
         
         def str_to_float_list(str):
             str_list = str.split(',')
@@ -382,8 +382,6 @@ def get_defaults(run_ws, polcorr = False):
         defaults['calpha']  = str_to_float_list(instrument.getStringParameter('calpha')[0])
         defaults['cAp']  = str_to_float_list(instrument.getStringParameter('cAp')[0])
         defaults['cPp']  = str_to_float_list(instrument.getStringParameter('cPp')[0])
-    
-    
     
     
     correction = NullCorrectionStrategy()

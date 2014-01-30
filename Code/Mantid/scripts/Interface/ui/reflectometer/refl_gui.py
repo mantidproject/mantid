@@ -284,16 +284,20 @@ class ReflGui(refl_window.Ui_windowRefl):
                             self.tableMain.setItem(row, 15, item)
                             print "Calculated resolution: ", dqq
                         except IndexError:
+                            logger.warning("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
                             pass
                     else:
                         dqq = float(self.tableMain.item(row, 15).text())
                     # Populate runlist
+                    first_wq = None
                     for i in range(len(runno)):
-                        [theta, qmin, qmax] = self.dorun(runno[i], row, i)
+                        theta, qmin, qmax, wlam, wq = self.dorun(runno[i], row, i)
+                        if not first_wq:
+                            first_wq = wq # Cache the first Q workspace
                         theta = round(theta, 3)
                         qmin = round(qmin, 3)
                         qmax = round(qmax, 3)
-                        wksp.append(runno[i] + '_IvsQ')
+                        wksp.append(wq.name())
                         if (self.tableMain.item(row, i * 5 + 1).text() == ''):
                             item = QtGui.QTableWidgetItem()
                             item.setText(str(theta))
@@ -318,7 +322,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                                 l2 = subs.split(':')
                                 for l3 in l2:
                                     runlist.append(l3)
-                            wksp[i] = runlist[0] + '_IvsQ'
+                            wksp[i] = first_wq.name()
+                                
                         ws_name_binned = wksp[i] + '_binned'
                         ws = getWorkspace(wksp[i])
                         w1 = getWorkspace(wksp[0])
@@ -379,24 +384,19 @@ class ReflGui(refl_window.Ui_windowRefl):
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         names = mtd.getObjectNames()
-        [wlam, wq, th] = quick(runno, trans=transrun, theta=angle, polcorr=self.current_polarisation_method)
+        wlam, wq, th = quick(runno, trans=transrun, theta=angle, polcorr=self.current_polarisation_method)
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-        
-        if mtd.doesExist(runno):
-            inws = mtd[runno]
-            if isinstance(inws, WorkspaceGroup):
-                 runno = groupGet(inws[0], "samp", "run_number")
                  
-        ws_name = str(runno) + '_IvsQ'
-        inst = groupGet(ws_name, 'inst')
+        inst = groupGet(wq, 'inst')
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
         lmax = inst.getNumberParameter('LambdaMax')[0] - 2
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
-        return th, qmin, qmax
+        return th, qmin, qmax, wlam, wq
+    
     def saveTable(self, filename):
         try:
             writer = csv.writer(open(filename, "wb"))
@@ -557,12 +557,12 @@ def groupGet(wksp, whattoget, field=''):
     if (whattoget == 'inst'):
         if isinstance(wksp, str):
             if isinstance(mtd[wksp], WorkspaceGroup):
-                return mtd[wksp + '_1'].getInstrument()
+                return mtd[wksp][0].getInstrument()
             else:
                 return mtd[wksp].getInstrument()
         elif isinstance(wksp, Workspace):
             if isinstance(wksp, WorkspaceGroup):
-                return mtd[wksp + '_1'].getInstrument()
+                return wksp[0].getInstrument()
             else:
                 return wksp.getInstrument()
         else:
@@ -571,7 +571,7 @@ def groupGet(wksp, whattoget, field=''):
         if isinstance(wksp, str):
             if isinstance(mtd[wksp], WorkspaceGroup):
                 try:
-                    log = mtd[wksp + '_1'].getRun().getLogData(field).value
+                    log = mtd[wksp][0].getRun().getLogData(field).value
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
@@ -592,7 +592,7 @@ def groupGet(wksp, whattoget, field=''):
         elif isinstance(wksp, Workspace):
             if isinstance(wksp, WorkspaceGroup):
                 try:
-                    log = mtd[wksp + '_1'].getRun().getLogData(field).value
+                    log = mtd[wksp][0].getRun().getLogData(field).value
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
@@ -616,12 +616,12 @@ def groupGet(wksp, whattoget, field=''):
     elif (whattoget == 'wksp'):
         if isinstance(wksp, str):
             if isinstance(mtd[wksp], WorkspaceGroup):
-                return mtd[wksp + '_1'].getNumberHistograms()
+                return mtd[wksp][0].getNumberHistograms()
             else:
                 return mtd[wksp].getNumberHistograms()
         elif isinstance(wksp, Workspace):
             if isinstance(wksp, WorkspaceGroup):
-                return mtd[wksp + '_1'].getNumberHistograms()
+                return mtd[wksp][0].getNumberHistograms()
             else:
                 return wksp.getNumberHistograms()
         else:
@@ -631,7 +631,7 @@ def getWorkspace(wksp):
         return wksp
     elif isinstance(wksp, str):
         if isinstance(mtd[wksp], WorkspaceGroup):
-            wout = mtd[wksp + '_1']
+            wout = mtd[wksp][0]
         else:
             wout = mtd[wksp]
         return wout
