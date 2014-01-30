@@ -204,6 +204,17 @@ class ReflGui(refl_window.Ui_windowRefl):
                         item.setText(txt)
                         self.tableMain.setItem(row, self.tableMain.column(cell), item)
                         row = row + 1
+    
+    '''
+    Create a display name from a workspace.
+    '''
+    def create_workspace_display_name(self, candidate):
+        if isinstance(mtd[candidate], WorkspaceGroup):
+            todisplay = candidate # No single run number for a group of workspaces.
+        else:
+            todisplay = groupGet(mtd[first_contents], "samp", "run_number")
+        return todisplay
+
     def transfer(self):
         col = 0
         row = 0
@@ -214,10 +225,7 @@ class ReflGui(refl_window.Ui_windowRefl):
             first_contents = contents.split(':')[0]
             runnumber = None
             if mtd.doesExist(first_contents):
-                if isinstance(mtd[first_contents], WorkspaceGroup):
-                    runnumber = first_contents # No single run number for a group of workspaces.
-                else:
-                    runnumber = groupGet(mtd[first_contents], "samp", "run_number")
+                runnumber = self.create_workspace_display_name(first_contents)
             else:
                 try:
                     temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
@@ -516,19 +524,28 @@ class ReflGui(refl_window.Ui_windowRefl):
     def showHelp(self):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
-
-def calcRes(run):
-    runno = '_' + str(run) + 'temp'
+        
+'''
+Get a representative workspace from the input workspace.
+'''        
+def get_representative_workspace(run):
     if type(run) == type(int()):
-        runno =Load(Filename=run, OutputWorkspace=runno)
+        _runno =Load(Filename=run, OutputWorkspace=runno)
     elif mtd.doesExist(run): 
         ws = mtd[run]
         if isinstance(ws, WorkspaceGroup):
             run_number = groupGet(ws[0], "samp", "run_number")
-            print runno
-            runno =Load(Filename=str(run_number))
+            _runno =Load(Filename=str(run_number))
     else:
-        runno = Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+        _runno = Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+    return _runno
+
+'''
+Calculate the resolution from the slits.
+'''
+def calcRes(run):
+    
+    runno = get_representative_workspace(run)
     # Get slits and detector angle theta from NeXuS
     theta = groupGet(runno, 'samp', 'THETA')
     inst = groupGet(runno, 'inst')
