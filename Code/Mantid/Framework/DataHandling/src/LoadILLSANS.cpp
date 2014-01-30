@@ -10,8 +10,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <numeric> //for std::iota
-#include <algorithm>
 #include <limits>
 
 namespace Mantid {
@@ -265,8 +263,11 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry
 			data.load();
 			g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0() << "x"<< data.dim1() << "x"<< data.dim2() << std::endl;
 
-			std::vector<double> positionsBinning(data.dim2() + 1);
-			std::iota(positionsBinning.begin(), positionsBinning.end(), 0);
+			const size_t vectorSize = data.dim2() + 1;
+			std::vector<double> positionsBinning;
+			positionsBinning.reserve(vectorSize);
+			for( size_t i = 0; i <= vectorSize; i++ )
+				positionsBinning.push_back( static_cast<double>(i) );
 
 			// Assign X
 			m_localWorkspace->dataX(firstIndex).assign(positionsBinning.begin(),positionsBinning.end());
