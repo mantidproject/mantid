@@ -364,11 +364,6 @@ double Wavelength::singleFromTOF(const double tof) const
   x *= factorFrom;
   return x;
 }
-//std::vector<double> Wavelength::conversionRange()const
-//{
-//    double tmp[]={-DBL_MAX,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
 ///@return  Minimal time of flight, which can be reversively converted into wavelength
 double Wavelength::conversionTOFMin()const
 {
@@ -450,13 +445,6 @@ double Energy::conversionTOFMax()const
   return sqrt(DBL_MAX);
 }
 
-///@return range of energies which can be monotonicly converted into TOF
-//std::vector<double> Energy::conversionRange()const
-//{
-//    double tmp[]={0,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
-
 
 double Energy::singleFromTOF(const double tof) const
 {
@@ -523,13 +511,6 @@ double Energy_inWavenumber::conversionTOFMax()const
   return factorTo / sqrt(std::numeric_limits<double>::max());
 }
 
-/////@return range of energies in wavenumber units, which can be monotonically converted into TOF
-//std::vector<double> Energy_inWavenumber::conversionRange()const
-//{
-//    double tmp[]={0,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
-
 
 double Energy_inWavenumber::singleFromTOF(const double tof) const
 {
@@ -590,11 +571,6 @@ double dSpacing::conversionTOFMax()const
 {
   return DBL_MAX/factorTo;
 }
-//std::vector<double> dSpacing::conversionRange()const
-//{
-//    double tmp[]={-DBL_MAX,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
 
 
 
@@ -662,11 +638,6 @@ double MomentumTransfer::conversionTOFMax()const
 }
 
 
-//std::vector<double> MomentumTransfer::conversionRange()const
-//{
-//    double tmp[]={factorFrom/DBL_MAX,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
 
 
 
@@ -738,13 +709,6 @@ double QSquared::conversionTOFMax()const
     else
       return factorTo/sqrt(DBL_MAX);
 }
-
-//std::vector<double> QSquared::conversionRange()const
-//{
-//    double tmp[]={0,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
-
 
 
 Unit * QSquared::clone() const
@@ -928,25 +892,6 @@ double DeltaE_inWavenumber::conversionTOFMax()const
 }
 
 
-//std::vector<double> DeltaE_inWavenumber::conversionRange()const
-//{
-//
-//    double tmp[]={DBL_MAX,DBL_MAX};
-//    std::vector<double> range(tmp,tmp+2);
-//    if(emode==1)
-//    {
-//      range[0]=-DBL_MAX;
-//      range[1]=efixed*unitScaling;
-//    }
-//    else if (emode == 2)
-//    {
-//      range[0]=-efixed*unitScaling;
-//      range[1]= DBL_MAX;
-//    }
-//
-//    return range;
-//}
-
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
  * =====================================================================================================
@@ -1059,11 +1004,6 @@ double Momentum::conversionTOFMax()const
   return range;
 }
 
-//std::vector<double> Momentum::conversionRange()const
-//{
-//    double tmp[]={DBL_MIN,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
 
 double Momentum::singleFromTOF(const double tof) const
 {
@@ -1130,12 +1070,6 @@ double SpinEchoLength::conversionTOFMax()const
 }
 
 
-//std::vector<double> SpinEchoLength::conversionRange()const
-//{
-//    double tmp[]={DBL_MIN,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
-
 double SpinEchoLength::singleFromTOF(const double tof) const
 {
   double wavelength = Wavelength::singleFromTOF(tof);
@@ -1190,11 +1124,6 @@ double SpinEchoTime::conversionTOFMax()const
   return tm;
 }
 
-//std::vector<double> SpinEchoTime::conversionRange()const
-//{
-//    double tmp[]={DBL_MIN,DBL_MAX};
-//    return std::vector<double>(tmp,tmp+2);
-//}
 
 
 double SpinEchoTime::singleFromTOF(const double tof) const
