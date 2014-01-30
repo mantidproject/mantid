@@ -221,12 +221,27 @@ namespace IDA
 
   QString FuryFit::validate()
   {
+    using Mantid::API::AnalysisDataService;
     UserInputValidator uiv;
 
     switch( uiForm().furyfit_cbInputType->currentIndex() )
     {
     case 0:
-      uiv.checkMWRunFilesIsValid("Input", uiForm().furyfit_inputFile); break;
+      uiv.checkMWRunFilesIsValid("Input", uiForm().furyfit_inputFile); 
+
+      //file should already be loaded by this point, but attempt to recover if not.
+      if(!AnalysisDataService::Instance().doesExist(m_ffInputWSName.toStdString()))
+      {
+        //attempt to reload the nexus file.
+        QString filename = uiForm().furyfit_inputFile->getFirstFilename();
+        QFileInfo fi(filename);
+        QString wsname = fi.baseName();
+
+        m_ffInputWS = runLoadNexus(filename, wsname);
+        m_ffInputWSName = wsname;
+      }
+
+      break;
     case 1:
       uiv.checkWorkspaceSelectorIsNotEmpty("Input", uiForm().furyfit_wsIqt); break;
     }
@@ -502,7 +517,13 @@ namespace IDA
 
   void FuryFit::sequential()
   {
-    plotInput();
+    const QString error = validate();
+    if( ! error.isEmpty() )
+    {
+      showInformationBox(error);
+      return;
+    }
+    
     if ( m_ffInputWS == NULL )
     {
       return;

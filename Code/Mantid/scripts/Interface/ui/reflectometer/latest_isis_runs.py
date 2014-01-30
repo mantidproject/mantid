@@ -1,4 +1,4 @@
-from isis_reflgui.settings import *
+from isis_reflectometry.settings import *
 import xml.etree.ElementTree as xml
 
 '''
@@ -144,4 +144,4 @@ class LatestISISRuns(object):
     def getJournalRuns(self, eID, maxDepth = 1):
         if maxDepth < 1:
             maxDepth = 1
-        return self.getxmlway(eID, maxDepth)
+        return self.getxmlway(eID.strip(), maxDepth)

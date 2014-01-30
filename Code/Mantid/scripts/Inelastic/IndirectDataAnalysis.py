@@ -135,56 +135,65 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties
 
 ##############################################################################
 
-def confitParsToWS(Table, Data, specMin=0, specMax=-1):
+def confitParsToWS(table_name, Data, specMin=0, specMax=-1):
+    
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
-    dataX = createQaxis(Data)
-    xAxisVals = []
-    xAxisTrimmed = []
-    dataY = []
-    dataE = []
-    names = ''
-    ws = mtd[Table]
-    cName =  ws.getColumnNames()
-    nSpec = ( ws.columnCount() - 1 ) / 2
-    for spec in range(0,nSpec):
-        yCol = (spec*2)+1
-        yAxis = cName[(spec*2)+1]
-        if re.search('FWHM$', yAxis) or re.search('Amplitude$', yAxis):
-            xAxisVals += dataX
-            if (len(names) > 0):
-                names += ","
-            names += yAxis
-            eCol = (spec*2)+2
-            eAxis = cName[(spec*2)+2]
-            for row in range(0, ws.rowCount()):
-                dataY.append(ws.cell(row,yCol))
-                dataE.append(ws.cell(row,eCol))
-        else:
-            nSpec -= 1
-    outNm = Table + "_Workspace"
-    xAxisTrimmed = trimData(nSpec, xAxisVals, specMin, specMax)
-    CreateWorkspace(OutputWorkspace=outNm, DataX=xAxisTrimmed, DataY=dataY, DataE=dataE, 
-        Nspec=nSpec, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-        VerticalAxisValues=names)
-    return outNm
+
+    ws = mtd[table_name]
+
+    x = createQaxis(Data)
+    dataX, dataY, dataE = [], [], []
+
+    #find all relevant column names
+    name_stems = ['Amplitude', 'FWHM', 'Height']
+    column_names = [name for suffix in name_stems for name in ws.getColumnNames() if suffix in name]
+    v_axis_names = column_names[::2]
+
+    #extract columns from table
+    columns = np.asarray([ws.column(name) for name in column_names])
+
+    #Calculate EISF if we found height data
+    num_spectra = len(columns) / 2
+    if(num_spectra == 3):
+        amplitude, amplitude_error = columns[:2]
+        height, height_error = columns[4:6]
+
+        total = height+amplitude
+        EISF = height / total
+
+        total_error = height_error**2 + amplitude_error**2
+        EISF_error = EISF * np.sqrt((height_error**2/height**2) + (total_error/total**2))
+        
+        columns = np.vstack((columns, EISF, EISF_error))
+        v_axis_names.append('f1.f1.f1.EISF')
+        num_spectra+=1
+
+    #create workspace spectum arrays
+    dataX = np.tile(x, num_spectra)
+    dataY = np.hstack(columns[::2])
+    dataE = np.hstack(columns[1::2])
+
+    outputName = table_name + "_Workspace"
+    dataX = trimData(num_spectra, dataX, specMin, specMax)
+    CreateWorkspace(OutputWorkspace=outputName, DataX=dataX, DataY=dataY, DataE=dataE, NSpec=num_spectra,
+        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=v_axis_names)
+    
+    return outputName
 
 ##############################################################################
 
 def confitPlotSeq(inputWS, Plot):
-    nhist = mtd[inputWS].getNumberHistograms()
+    ws = mtd[inputWS]
+    nhist = ws.getNumberHistograms()
+    
     if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nhist), True)
-        return    
-    plotSpecs = []
-    if ( Plot == 'Intensity' ):
-        res = 'Amplitude$'
-    elif ( Plot == 'FWHM' ):
-        res = 'FWHM$'
-    for i in range(0,nhist):
-        title = mtd[inputWS].getAxis(1).label(i)
-        if re.search(res, title):
-            plotSpecs.append(i)
+        #plot all spectra
+        plotSpecs = range(0, nhist)
+    else:
+        #Plot all spectra matching the plot option
+        plotSpecs = [i for i in range(0,nhist) if Plot in ws.getAxis(1).label(i)]
+    
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
 ##############################################################################
