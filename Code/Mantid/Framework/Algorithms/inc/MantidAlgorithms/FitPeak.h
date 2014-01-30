@@ -53,26 +53,26 @@ namespace Algorithms
     /// Fit peak first considering high background
     bool highBkgdFit();
 
+    /// Get fitting error
+    void getFitError(std::map<std::string, double>& peakerrormap, std::map<std::string, double>& bkgderrormap);
+
+    /// Get cost function value from fitting
+    double getFitCostFunctionValue();
+
     /// Get peak
-    API::IPeakFunction_sptr getPeakFunction();
+    // API::IPeakFunction_sptr getPeakFunction();
 
     /// Get background
-    API::IBackgroundFunction_sptr getBackgroundFunction();
-
-    /// Fit peak function (flexible)
-    double fitPeakFunction(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
-                        size_t wsindex, double startx, double endx);
+    // API::IBackgroundFunction_sptr getBackgroundFunction();
 
     /// Generate a partial workspace at fit window
     API::MatrixWorkspace_sptr genFitWindowWS();
 
-    /// remove background
-    void removeBackground(API::MatrixWorkspace_sptr purePeakWS);
 
-    void setPeakParameterValues();
 
-    void setBackgroundParameterValues();
+    // void setPeakParameterValues();
 
+    // void setBackgroundParameterValues();
 
   private:
 
@@ -101,6 +101,10 @@ namespace Algorithms
     /// Check a peak function whether it is valid comparing to user specified criteria
     double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
 
+    /// Fit peak function (flexible)
+    double fitPeakFunction(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
+                        size_t wsindex, double startx, double endx);
+
     /// Fit function in single domain
     double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex,
                          double xmin, double xmax, bool calmode);
@@ -113,14 +117,18 @@ namespace Algorithms
     /// Fit function in multiple-domain
     double fitFunctionMD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws,
                          size_t wsindex, std::vector<double> vec_xmin, std::vector<double> vec_xmax);
+    /// remove background
+    void removeBackground(API::MatrixWorkspace_sptr purePeakWS);
 
     /// Process and store fit result
     void processNStoreFitResult(double rwp, bool storebkgd);
 
-    void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
-              std::map<std::string, double>& paramerrormap);
+    void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap);
 
     void pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func);
+
+    /// Store function fitting error
+    void storeFunctionError(const API::IFunction_const_sptr &func, std::map<std::string, double>& paramerrormap);
 
     API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
 
@@ -173,9 +181,9 @@ namespace Algorithms
     /// Backed up background function parameters
     std::map<std::string, double> m_bkupBkgdFunc;
 
-    /// Fitting result
+    /// Fit error of peak function
     std::map<std::string, double> m_fitErrorPeakFunc;
-    ///
+    /// Fit error of background function
     std::map<std::string, double> m_fitErrorBkgdFunc;
 
     /// Minimzer
@@ -252,7 +260,7 @@ namespace Algorithms
     void prescreenInputData();
 
     /// Set up the output workspaces
-    void setupOutput();
+    void setupOutput(const std::map<std::string, double>& m_fitErrorPeakFunc, const std::map<std::string, double>& m_fitErrorBkgdFunc);
 
     /// Fit a single peak function with pure peak workspace
     double fitPeakFunction(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
@@ -399,8 +407,8 @@ namespace Algorithms
     std::string m_costFunction;
 
     /// Fitting result
-    std::map<std::string, double> m_fitErrorPeakFunc;
-    std::map<std::string, double> m_fitErrorBkgdFunc;
+    // std::map<std::string, double> m_fitErrorPeakFunc;
+    // std::map<std::string, double> m_fitErrorBkgdFunc;
 
   };
 
