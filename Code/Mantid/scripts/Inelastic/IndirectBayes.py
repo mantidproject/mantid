@@ -643,12 +643,6 @@ def QLPlot(inputWS,Plot,res_plot,Loop):
 			fWS = inputWS+'_Result_0'
 			f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
-def plotSpectra(ws, axis_title, indicies=[]):
-	if len(indicies) > 0:
-		plot = mp.plotSpectrum(ws, indicies, True)
-		layer = plot.activeLayer()
-		layer.setAxisTitle(mp.Layer.Left, axis_title)
-
 # Quest programs
 def CheckBetSig(nbs):
 	Nsig = int(nbs[1])
