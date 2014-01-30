@@ -1224,7 +1224,7 @@ public:
     std::vector<double> sample,rezult;
     tau.initialize(100,11,1.0,0,1.0,1);
 
-    std::string err_mess=convert_units_check_range(tau,sample,rezult);
+    std::string err_mess=convert_units_check_range(tau,sample,rezult,DBL_EPSILON);
     TSM_ASSERT(" ERROR:"+err_mess,err_mess.size()==0);
 
     for(size_t i=0;i<sample.size();i++)
