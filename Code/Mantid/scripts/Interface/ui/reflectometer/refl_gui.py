@@ -89,9 +89,21 @@ class ReflGui(refl_window.Ui_windowRefl):
             config['default.instrument'] = 'INTER'
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                if (column == 17):
+                
+                if (column == 0) or (column == 5) or (column == 10):
+                    item = QtGui.QTableWidgetItem()
+                    item.setText('')
+                    item.setToolTip('Runs can be colon delimited to coadd them')
+                    self.tableMain.setItem(row, column, item)
+                elif (column == 1) or (column == 6) or (column == 11):
+                    item = QtGui.QTableWidgetItem()
+                    item.setText('')
+                    item.setToolTip('Angles are in degrees')
+                    self.tableMain.setItem(row, column, item)
+                elif (column == 17):
                     check = QtGui.QCheckBox()
                     check.setCheckState(False)
+                    check.setToolTip('If checked, the runs in this row will be stitched together')
                     item = QtGui.QWidget()
                     layout = QtGui.QHBoxLayout(item)
                     layout.addWidget(check)
@@ -106,10 +118,10 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
     def connectSlots(self):
-        self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
         self.textRB.returnPressed.connect(self.on_textRB_editingFinished)
+        self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.buttonSearch.clicked.connect(self.on_textRB_editingFinished)
         self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
         self.buttonProcess.clicked.connect(self.on_buttonProcess_clicked)
@@ -121,7 +133,13 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionSave_Workspaces.triggered.connect(self.on_actionSave_Workspaces_triggered)
         self.actionClose_Refl_Gui.triggered.connect(self.windowRefl.close)
         self.actionMantid_Help.triggered.connect(self.on_actionMantid_Help_triggered)
+        self.actionAutofill.triggered.connect(self.on_buttonAuto_clicked)
+        self.actionSearch_RB.triggered.connect(self.on_textRB_editingFinished)
+        self.actionClear_Table.triggered.connect(self.on_buttonClear_clicked)
+        self.actionProcess.triggered.connect(self.on_buttonProcess_clicked)
+        self.actionTransfer.triggered.connect(self.on_buttonTransfer_clicked)
         self.tableMain.cellChanged.connect(self.on_tableMain_modified)
+        
     def populateList(self):
         # Clear existing
         self.listMain.clear()
@@ -162,15 +180,25 @@ class ReflGui(refl_window.Ui_windowRefl):
         for cell in self.tableMain.selectedItems():
             sum = sum + self.tableMain.row(cell)
         if (howMany):
-            if (sum / howMany == self.tableMain.row(self.tableMain.selectedItems()[0])):
+            selectedrow = self.tableMain.row(self.tableMain.selectedItems()[0])
+            if (sum / howMany == selectedrow):
+                startrow = selectedrow + 1
+                filled = 0
                 for cell in self.tableMain.selectedItems():
-                    row = self.tableMain.row(cell) + 1
+                    row = startrow
                     txt = cell.text()
                     while (self.tableMain.item(row, 0).text() != ''):
                         item = QtGui.QTableWidgetItem()
                         item.setText(txt)
                         self.tableMain.setItem(row, self.tableMain.column(cell), item)
                         row = row + 1
+                        filled = filled + 1
+                if not filled:
+                    QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
+            else:
+                QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
+        else:
+            QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
     def transfer(self):
         col = 0
         row = 0
