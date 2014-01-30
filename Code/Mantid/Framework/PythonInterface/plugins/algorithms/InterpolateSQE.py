@@ -57,7 +57,7 @@ class InterpolateSQE(PythonAlgorithm):
     # Check congruence of workspaces
     workspaces = self.getProperty('Workspaces')
     fvalues = self.getProperty('ParameterValues')
-    for workspace in workspaces[1:]+[]:
+    for workspace in workspaces[1:]:
       if not self.areWorkspacesCompatible(mtd[workspaces[0]],mtd[workspace]):
         logger.error('Workspace {0} incompatible with {1}'.format(workspace, workspaces[0]))
         return
