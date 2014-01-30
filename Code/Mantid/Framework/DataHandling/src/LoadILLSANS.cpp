@@ -277,6 +277,14 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry
 			MantidVec& E = m_localWorkspace->dataE(firstIndex);
 			std::transform(data(), data() + data.dim2(), E.begin(),LoadHelper::calculateStandardError);
 
+			// Add average monitor counts to a property:
+			double averageMonitorCounts = std::accumulate(data(), data() + data.dim2(), 0) / data.dim2();
+			// make sure the monitor has values!
+			if (averageMonitorCounts > 0) {
+				API::Run & runDetails = m_localWorkspace->mutableRun();
+				runDetails.addProperty("monitor", averageMonitorCounts,true);
+			}
+
 			firstIndex++;
 		}
 	}
