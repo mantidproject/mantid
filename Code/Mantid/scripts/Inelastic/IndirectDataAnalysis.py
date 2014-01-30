@@ -50,67 +50,97 @@ def getConvFitOption(ftype, bgd, Verbose):
 
 ##############################################################################
 
-def createConvFitFun(options, par, file, ties):
-    bgd_fun = 'name=LinearBackground,A0='
-    if options[0] == 'FixF':
-        bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A0='+str(par[0])+',A1=0.0)'
-    if options[0] == 'FitF':
-        bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A1=0.0)'
-    if options[0] == 'FitL':
-        bgd_fun = bgd_fun +str(par[0])+',A1='+str(par[1])
-    if options[1]:
-        ip = 3
+def createConvFitFun(options, par, file_name, temperature, ties):
+    background_fix = options[0]
+    use_delta_func = options[1]
+    num_peaks = options[2]
+    a0 = par[0]
+    
+    bgd_fun = 'name=LinearBackground,'
+    #append background parameters
+    if background_fix == 'FixF':
+        bgd_fun += 'A0=%f,A1=0,ties=(A0=%f,A1=0.0);' % (a0, a0)
+    elif background_fix == 'FitF':
+        bgd_fun += 'A0=%f,A1=0,ties=(A1=0.0);' % a0
+    elif background_fix == 'FitL':
+        a1 = par[1]
+        bgd_fun += 'A0%f,A1=%f;' % (a0, a1)
+    
+    if use_delta_func: 
+        offset = 3
     else:
-        ip = 2
-    pk_1 = '(composite=Convolution;name=Resolution, FileName="'+file+'"'
-    if  options[2] >= 1:
-        lor_fun = 'name=Lorentzian,Amplitude='+str(par[ip])+',PeakCentre='+str(par[ip+1])+',FWHM='+str(par[ip+2])
-    if options[2] == 2:
-        funcIndex = 1 if options[1] else 0
-        lor_2 = 'name=Lorentzian,Amplitude='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',FWHM='+str(par[ip+5])
-        lor_fun = lor_fun +';'+ lor_2 +';'
+        offset = 2
+
+    #create peak model
+    res_func = 'name=Resolution, FileName=\"%s\";' % file_name
+    
+    #add a delta function if required
+    delta_func = ''
+    if use_delta_func:
+        delta_height = par[2]
+        delta_func = 'name=DeltaFunction,Height=%f;' % delta_height
+    
+    #create product of lorentzian and temperature factor
+    lor_func = '(composite=ProductFunction;'
+    if temperature != None:
+        lor_func += 'name=UserFunction, Formula=((x*11.606)/temp) / (1 - exp(-((x*11.606)/temp))), temp=%f;' % temperature
+    lor_func += 'name=Lorentzian,Amplitude=%f,PeakCentre=%f,FWHM=%f;' % (par[offset], par[offset+1], par[offset+2])   
+    lor_func += ');'
+
+    #add another peak if we require two lorentzians
+    if num_peaks == 2:
+        #create product of lorentzian and temperature factor
+        lor_func += '(composite=ProductFunction;'
+        if temperature != None:
+            lor_func += 'name=UserFunction, Formula=((x*11.606)/temp) / (1 - exp(-((x*11.606)/temp))), temp=%f;' % temperature
+        lor_func += 'name=Lorentzian,Amplitude=%f,PeakCentre=%f,FWHM=%f;' % (par[offset+3], par[offset+4], par[offset+5])
+        lor_func += ');'
+        
         if ties:
-            lor_fun += 'ties=(f'+str(funcIndex)+'.PeakCentre=f'+str(funcIndex+1)+'.PeakCentre)'
-    if options[1]:
-        delta_fun = 'name=DeltaFunction,Height='+str(par[2])
-        lor_fun = delta_fun +';' + lor_fun
-    func = bgd_fun +';'+ pk_1 +';('+ lor_fun +'))'
+            funcIndex = 1 if use_delta_func else 0
+            lor_fun += 'ties=(f%d.PeakCentre=f%d.PeakCentre)' % (funcIndex, funcIndex+1)
+    
+    model ='(composite=Convolution;' + res_func + delta_func + lor_func + ');'
+    func = bgd_fun + model 
+
     return func
 
 ##############################################################################
 
-def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose):
+def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose, temperature):
     options = getConvFitOption(ftype, bgd[:-2], Verbose)   
-    params = mtd[outNm+'_Parameters']
-    A0 = params.column(1)     #bgd A0 value
-    A1 = params.column(3)     #bgd A1 value
-    if options[1]:
-        ip = 7
-        D1 = params.column(5)      #delta value
-    else:
-        ip = 5
-    if options[2] >= 1:
-        H1 = params.column(ip)        #height1 value
-        C1 = params.column(ip+2)      #centre1 value
-        W1 = params.column(ip+4)      #width1 value
-    if options[2] == 2:
-        H2 = params.column(ip+6)        #height2 value
-        C2 = params.column(ip+8)      #centre2 value
-        W2 = params.column(ip+10)      #width2 value
+    params_table = mtd[outNm+'_Parameters']
+    parameter_names = ['A0', 'A1', 'Height']
+
+    def search_for_params(suffix): 
+        """
+        function to search through column names for any name containg suffix.
+        """
+        return [params_table.column(name) for name in params_table.getColumnNames() if name[-len(suffix):] == suffix]
+
+    #collect top level parameters from table
+    global_params = {}
+    for parameter in parameter_names:
+       global_params[parameter] = search_for_params(parameter)
+
+    heights = search_for_params('Amplitude')
+    widths = search_for_params('FWHM')
+    peak_centres = search_for_params('PeakCentre')
 
     for i in range(0,(specMax-specMin)+1):
-        paras = [A0[i], A1[i]]
-        if options[1]:
-            paras.append(D1[i])
-        if options[2] >= 1:
-            paras.append(H1[i])
-            paras.append(C1[i])
-            paras.append(W1[i])
-        if options[2] == 2:
-            paras.append(H2[i])
-            paras.append(C2[i])
-            paras.append(W2[i])
-        func = createConvFitFun(options, paras, resFile, ties)
+        fit_params = [global_params['A0'][0][i], global_params['A1'][0][i]]
+        
+        #append delta height if present
+        if len(global_params['Height']) > 0 :
+            fit_params.append(global_params['Height'][0][i])
+
+        #append amplitude, peak centre and FWHM
+        for height, centre, width in zip(heights, peak_centres, widths):
+            fit_params.append(height[i])
+            fit_params.append(centre[i])
+            fit_params.append(width[i])
+
+        func = createConvFitFun(options, fit_params, resFile, temperature, ties)
         if Verbose:
             logger.notice('Fit func : '+func)      
         fitWS = outNm + '_Result_'
@@ -197,7 +227,7 @@ def confitPlotSeq(inputWS, Plot):
 
 ##############################################################################
 
-def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, specMax, ties, Verbose):
+def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, specMax, ties, temperature=None, Verbose=False):
     StartTime('ConvFit')
     workdir = config['defaultsave.directory']
     elements = func.split('"')
@@ -213,7 +243,8 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
     run_name = instr + run
     outNm = getWSprefix(inputWS) + 'conv_' + ftype + bgd + str(specMin) + "_to_" + str(specMax)
     if Verbose:
-        logger.notice(func)  
+        logger.notice(func)
+
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startX, EndX=endX, FitType='Sequential')
     wsname = confitParsToWS(outNm, inputWS, specMin, specMax)
@@ -226,7 +257,7 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
     AddSampleLog(Workspace=wsname, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
 
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
-    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose)
+    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose, temperature)
     if Save:
         o_path = os.path.join(workdir, wsname+'.nxs')                    # path name for nxs file
         if Verbose:
