@@ -7,8 +7,10 @@ import csv
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
+from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 from latest_isis_runs import *
+
 from mantid.api import Workspace, WorkspaceGroup
 
 try:
