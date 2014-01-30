@@ -406,9 +406,6 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
       throw std::runtime_error("Wrong type of Workspace");
     }
 
-    const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
-    std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
-
     // Try to get a run number for the workspace
     if (ws->run().hasProperty(RUN_NO_LOG))
     {
@@ -419,19 +416,18 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
 
-    for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
-          pItr != pEnd; ++pItr )
+    const std::vector<Property*> & logData = ws->run().getLogData();
+    std::vector<Property*>::const_iterator pEnd = logData.end();
+
+    for( std::vector<Property*>::const_iterator pItr = logData.begin(); pItr != pEnd; ++pItr )
     {  
-
-      QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
-      // Just get the num.series log values
-      Mantid::Kernel::TimeSeriesProperty<double> *tspd = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr);
-
-      if( tspd )//If it is then it must be num.series
+      // Check if is a timeseries log
+      if( TimeSeriesProperty<double> *tspd = dynamic_cast<TimeSeriesProperty<double>*>(*pItr) )
       {
-        bool logFound(false);
+        QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
+
         double value(0.0);
-        double count(0.0);
+        int count(0);
 
         Mantid::Kernel::DateAndTime logTime;
 
@@ -447,14 +443,15 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
             // add it to a total and increment the count (will be used to make average entry value during a run)
             value += tspd->nthValue(k);
             count++;
-            logFound = true;
           }
         }
 
-        if (logFound == true)
+        if ( count != 0 )
         {
           //Find average
-          wsLogValues[logFile] = value/count;
+          wsLogValues[logFile] = value / count;
+        }
+      }
 
           // Add to the list of known logs
           allLogs.insert(logFile);
