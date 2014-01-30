@@ -11,6 +11,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
+#include <limits>
 
 namespace Mantid
 {
