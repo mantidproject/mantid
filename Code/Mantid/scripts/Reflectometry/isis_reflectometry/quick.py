@@ -110,8 +110,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     '''
     Version of quick where all parameters are explicitly provided.
     '''
-    sample_ws = ConvertToWavelength.to_single_workspace(run)
-    nHist =  sample_ws.getNumberHistograms()
+    _sample_ws = ConvertToWavelength.to_single_workspace(run)
+    nHist =  _sample_ws.getNumberHistograms()
     to_lam = ConvertToWavelength(run)
     
     if pointdet:
@@ -122,7 +122,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     
     _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
 
-    inst = sample_ws.getInstrument()
+    inst = _sample_ws.getInstrument()
     # Some beamline constants from IDF
    
     print i0_monitor_index
@@ -131,7 +131,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     if (run=='0'):
         RunNumber = '0'
     else:
-        RunNumber = groupGet(sample_ws.getName(),'samp','run_number') 
+        RunNumber = groupGet(_sample_ws.getName(),'samp','run_number') 
     
     if not pointdet:
         # Proccess Multi-Detector; assume MD goes to the end:
@@ -225,9 +225,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         
     # delete all temporary workspaces unless in debug mode (debug=1)
     
-    if debug != 0:
+    if not debug:
         cleanup()
-    DeleteWorkspace(sample_ws)
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
@@ -344,6 +343,7 @@ def cleanup():
     names = mtd.getObjectNames()
     for name in names:
         if re.search("^_", name):
+            print "deleting " + name
             DeleteWorkspace(name)
     
 def get_defaults(run_ws, pol_corr = False):

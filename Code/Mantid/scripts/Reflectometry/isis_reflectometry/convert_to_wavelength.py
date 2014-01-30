@@ -29,17 +29,17 @@ class ConvertToWavelength(object):
     
     @classmethod
     def to_workspace(cls, candidate):
-        workspace = None
+        _workspace = None
         if isinstance(candidate, mantid.api.Workspace):
-            workspace = candidate
+            _workspace = candidate
         elif isinstance(candidate, str):
             if  mantid.api.AnalysisDataService.doesExist(candidate):
-                workspace = mantid.api.AnalysisDataService.retrieve(candidate)
+                _workspace = mantid.api.AnalysisDataService.retrieve(candidate)
             else:
-                 workspace = msi.Load(Filename=candidate)
+                 _workspace = msi.Load(Filename=candidate)
         else:
              raise ValueError("Unknown source item %s" % candidate)
-        return workspace
+        return _workspace
 
     def __to_workspace_list(self, source_list):
         temp=[]
@@ -75,7 +75,7 @@ class ConvertToWavelength(object):
         returns a new copy of the workspace with spectra cropped out.
         """
         
-        in_rng = msi.CloneWorkspace(ws)
+        _in_rng = msi.CloneWorkspace(ws)
         if not isinstance(rng, tuple):
             raise ValueError("Elements must be tuples.")
         
@@ -84,12 +84,12 @@ class ConvertToWavelength(object):
         
         if is_actual_range(rng):
             start, stop = rng[0], rng[1]
-            in_rng = msi.CropWorkspace(InputWorkspace=in_rng, StartWorkspaceIndex=start,EndWorkspaceIndex=stop)
+            _in_rng = msi.CropWorkspace(InputWorkspace=_in_rng, StartWorkspaceIndex=start,EndWorkspaceIndex=stop)
         else:
             for subrng in rng:
-                in_rng = ConvertToWavelength.crop_range(ws, subrng)
+                _in_rng = ConvertToWavelength.crop_range(ws, subrng)
   
-        return in_rng
+        return _in_rng
         
     def convert(self, wavelength_min, wavelength_max, detector_workspace_indexes, monitor_workspace_index, correct_monitor=False, bg_min=None, bg_max=None):
         """
@@ -107,7 +107,7 @@ class ConvertToWavelength(object):
         bg_max: x max background in wavelength
         
         Returns:
-        monitor_ws: A workspace of monitors
+        _monitor_ws: A workspace of monitors
         """
         # Sanity check inputs.
         if(wavelength_min >= wavelength_max):
@@ -125,18 +125,18 @@ class ConvertToWavelength(object):
         logger.debug("Monitor detector index %s" % str(monitor_workspace_index))
             
         # Crop out the monitor workspace
-        monitor_ws = msi.CropWorkspace(InputWorkspace=sum_wavelength, StartWorkspaceIndex=monitor_workspace_index,EndWorkspaceIndex=monitor_workspace_index)
+        _monitor_ws = msi.CropWorkspace(InputWorkspace=sum_wavelength, StartWorkspaceIndex=monitor_workspace_index,EndWorkspaceIndex=monitor_workspace_index)
         # Crop out the detector workspace then chop out the x-ranges of interest.
-        detector_ws =  ConvertToWavelength.crop_range(sum_wavelength, detector_workspace_indexes)
+        _detector_ws =  ConvertToWavelength.crop_range(sum_wavelength, detector_workspace_indexes)
         
-        detector_ws =  msi.CropWorkspace(InputWorkspace=detector_ws, XMin=wavelength_min, XMax=wavelength_max)
+        _detector_ws =  msi.CropWorkspace(InputWorkspace=_detector_ws, XMin=wavelength_min, XMax=wavelength_max)
 
         # Apply a flat background
         if correct_monitor and all((bg_min, bg_max)):
-            monitor_ws = msi.CalculateFlatBackground(InputWorkspace=monitor_ws,WorkspaceIndexList=0,StartX=bg_min, EndX=bg_max)
+            _monitor_ws = msi.CalculateFlatBackground(InputWorkspace=_monitor_ws,WorkspaceIndexList=0,StartX=bg_min, EndX=bg_max)
         
         msi.DeleteWorkspace(Workspace=sum_wavelength.getName())
-        return (monitor_ws, detector_ws)
+        return (_monitor_ws, _detector_ws)
         
         
    
