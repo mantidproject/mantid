@@ -25,7 +25,7 @@ using namespace Mantid::API;
 
 /// Constructor
 StepScan::StepScan(QWidget *parent)
-  : UserSubWindow(parent), m_dataReloadNeeded(false),
+  : UserSubWindow(parent),
     m_instrument(ConfigService::Instance().getInstrument().name()),
     m_algRunner(new API::AlgorithmRunner(this)),
     m_addObserver(*this, &StepScan::handleAddEvent),
@@ -169,7 +169,7 @@ void StepScan::loadFile(bool async)
   const QString filename = m_uiForm.mWRunFiles->getFirstFilename();
   // This handles the fact that mwRunFiles emits the filesFound signal more than
   // we want (on some platforms). TODO: Consider dealing with this up in mwRunFiles.
-  if ( filename != m_inputFilename || m_dataReloadNeeded )
+  if ( filename != m_inputFilename )
   {
     m_inputFilename = filename;
 
@@ -200,7 +200,6 @@ void StepScan::loadFileComplete(bool error)
   disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(loadFileComplete(bool)));
   if ( ! error )
   {
-    m_dataReloadNeeded = false;
     setupOptionControls();
   }
   else
@@ -355,10 +354,6 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
     break;
   }
 
-  // If any of the filtering options were set, next time round we'll need to reload the data
-  // as they cause the workspace to be changed
-  if ( !maskWS.isEmpty() || !xminStr.isEmpty() || !xmaxStr.isEmpty() ) m_dataReloadNeeded = true;
-
   return stepScan;
 }
 
@@ -399,9 +394,11 @@ void StepScan::runStepScanAlg()
   else  // Offline data
   {
     // Check just in case the user has deleted the loaded workspace
-    if ( ! AnalysisDataService::Instance().doesExist(m_inputWSName) ) m_dataReloadNeeded = true;
-    // Reload also needed if the workspace isn't fresh, as well as if the line above triggers
-    if ( m_dataReloadNeeded ) loadFile(false);
+    if ( ! AnalysisDataService::Instance().doesExist(m_inputWSName) )
+    {
+      m_inputFilename.clear();
+      loadFile(false);
+    }
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
     algSuccessful = stepScan->execute();
   }
