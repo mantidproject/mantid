@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 
+#include <QDoubleValidator>
 #include <QFileInfo>
 #include <QMenu>
 
@@ -89,6 +90,8 @@ namespace IDA
 
     m_cfProp["Lorentzian1"] = createLorentzian("Lorentzian 1");
     m_cfProp["Lorentzian2"] = createLorentzian("Lorentzian 2");
+
+    uiForm().confit_leTempCorrection->setValidator(new QDoubleValidator(this));
 
     // Connections
     connect(m_cfRangeS, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
@@ -423,12 +426,39 @@ namespace IDA
       else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
       subIndex++;
     }
-  
+
+    // ------------------------------------------------------------
+    // --- Composite / Convolution / Model / Temperature Factor ---
+    // ------------------------------------------------------------
+
+    //create temperature correction function to multiply with the lorentzians
+    Mantid::API::IFunction_sptr tempFunc;
+    QString temperature = uiForm().confit_leTempCorrection->text();
+    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
+    
+    if(useTempCorrection)
+    {
+      //create user function for the exponential correction
+      // (x*temp) / 1-exp(-(x*temp))
+      tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+      //11.606 is the conversion factor from meV to K
+      std::string formula = "((x*11.606)/temp) / (1 - exp(-((x*11.606)/temp)))";
+      Mantid::API::IFunction::Attribute att(formula);
+      tempFunc->setAttribute("Formula", att);
+      tempFunc->setParameter("temp", temperature.toDouble());
+    }
+
     // -----------------------------------------------------
     // --- Composite / Convolution / Model / Lorentzians ---
     // -----------------------------------------------------
     std::string prefix1;
     std::string prefix2;
+
+    //create product function for temp * lorentzian
+    //if temperature not included then product is lorentzian * 1
+    auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
+    index = conv->addFunction(product);
+
     switch ( uiForm().confit_cbFitType->currentIndex() )
     {
     case 0: // No Lorentzians
@@ -436,37 +466,57 @@ namespace IDA
       break;
 
     case 1: // 1 Lorentzian
+     
+      if(tempFunc)
+      {
+        product->addFunction(tempFunc);
+      }
 
       func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = conv->addFunction(func);
+      index = product->addFunction(func);
 
       // If it's the first "sub" function of model, then it wont be nested inside Convolution ...
       if( subIndex == 0 ) { prefix1 = createParName(index); }
       // ... else it's part of a composite function inside Convolution.
       else { prefix1 = createParName(index, subIndex); }
 
-      populateFunction(func, conv, m_cfProp["Lorentzian1"], prefix1, false);
+      populateFunction(func, product, m_cfProp["Lorentzian1"], prefix1, false);
       subIndex++;
       break;
 
     case 2: // 2 Lorentzians
 
+      //Lorentzian #1
+      if(tempFunc)
+      {
+        product->addFunction(tempFunc);
+      }
+
       func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = conv->addFunction(func);
+      index = product->addFunction(func);
 
       // If it's the first "sub" function of model, then it wont be nested inside Convolution ...
       if( subIndex == 0 ) { prefix1 = createParName(index); }
       // ... else it's part of a composite function inside Convolution.
       else { prefix1 = createParName(index, subIndex); }
 
-      populateFunction(func, conv, m_cfProp["Lorentzian1"], prefix1, false);
+      populateFunction(func, product, m_cfProp["Lorentzian1"], prefix1, false);
       subIndex++;
 
+      //Lorentzian #2
+      product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
+      index = conv->addFunction(product);
+    
+      if(tempFunc)
+      {
+        product->addFunction(tempFunc);
+      }
+
       func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = conv->addFunction(func);
+      index = product->addFunction(func);
 
       prefix2 = createParName(index, subIndex); // (Part of a composite.)
-      populateFunction(func, conv, m_cfProp["Lorentzian2"], prefix2, false);
+      populateFunction(func, product, m_cfProp["Lorentzian2"], prefix2, false);
 
       // Now prefix1 should be changed to reflect the fact that it is now part of a composite function inside Convolution.
       prefix1 = createParName(index, subIndex-1);
@@ -476,13 +526,12 @@ namespace IDA
       {
         QString tieL = QString::fromStdString(prefix1 + "PeakCentre");
         QString tieR = QString::fromStdString(prefix2 + "PeakCentre");
-        conv->tie(tieL.toStdString(), tieR.toStdString());
+        product->tie(tieL.toStdString(), tieR.toStdString());
       }
       break;
     }
 
     comp->addFunction(conv);
-
     comp->applyTies();
 
     return comp;
@@ -803,6 +852,7 @@ namespace IDA
     QString stX = m_cfProp["StartX"]->valueText();
     QString enX = m_cfProp["EndX"]->valueText();
 
+
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
       "input = '" + m_cfInputWSName + "'\n"
@@ -819,11 +869,22 @@ namespace IDA
 
     if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
+
+    QString temperature = uiForm().confit_leTempCorrection->text();
+    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
+    if ( useTempCorrection ) 
+    {
+      pyInput += "temp=" + temperature + "\n";
+    }
+    else
+    {
+      pyInput += "temp=None\n";
+    }
   
     pyInput +=    
       "bg = '" + bg + "'\n"
       "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax, ties, Verbose=verbose)\n";
+      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax, ties, Verbose=verbose, temperature=temp)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }
