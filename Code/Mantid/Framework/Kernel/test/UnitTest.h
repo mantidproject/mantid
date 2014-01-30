@@ -6,6 +6,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/lexical_cast.hpp>
+#include <cfloat>
+#include <limits>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
