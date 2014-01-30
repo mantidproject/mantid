@@ -286,11 +286,9 @@ public:
   virtual void init();
   virtual Unit * clone() const;
  ///@return -DBL_MAX as ToF convetanble to TOF for in any time range
-  virtual double conversionTOFMin()const
-  {return -DBL_MAX; }
+  virtual double conversionTOFMin()const;
  ///@return DBL_MAX as ToF convetanble to TOF for in any time range
-  virtual double conversionTOFMax()const
-  {return DBL_MAX; }
+  virtual double conversionTOFMax()const;
 
 
   /// Constructor
@@ -519,8 +517,8 @@ class Degrees : public Mantid::Kernel::Unit
   const std::string label() const { return "degrees"; }
   virtual double singleToTOF(const double x) const { return x;}
   virtual double singleFromTOF(const double tof) const { return tof; }
-  double conversionTOFMax()const{return DBL_MAX;};
-  double conversionTOFMin()const{return -DBL_MAX;};
+  double conversionTOFMax()const;
+  double conversionTOFMin()const;
   virtual void init() {}
 
   virtual Unit * clone() const { return new Degrees(*this); }

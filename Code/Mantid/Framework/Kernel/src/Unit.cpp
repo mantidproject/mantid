@@ -201,6 +201,22 @@ Unit * Empty::clone() const
   return new Empty(*this);
 }
 
+/* =============================================================================
+ * LABEL DEGREES
+ * =============================================================================
+ */
+
+double Degrees::conversionTOFMax()const
+{
+  return DBL_MAX;
+}
+
+double Degrees::conversionTOFMin()const
+{
+  return -DBL_MAX;
+}
+
+
 
 /* =============================================================================
  * LABEL
@@ -261,6 +277,15 @@ double TOF::singleFromTOF(const double tof) const
 Unit * TOF::clone() const
 {
   return new TOF(*this);
+}
+double TOF::conversionTOFMin()const
+{
+  return -DBL_MAX; 
+}
+ ///@return DBL_MAX as ToF convetanble to TOF for in any time range
+double TOF::conversionTOFMax()const
+{
+  return DBL_MAX; 
 }
 
 
