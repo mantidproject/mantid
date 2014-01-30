@@ -67,6 +67,11 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
     this, SLOT( populateTables() ));
   connect(m_uiForm.fitLabelCombo, SIGNAL( activated(int) ),
     this, SLOT( populateTables() ));
+
+  // Populate list of non-timeseries properties
+  m_nonTimeseriesLogs.push_back("run_number");
+  m_nonTimeseriesLogs.push_back("sample_temp");
+  m_nonTimeseriesLogs.push_back("sample_magn_field");
 }
 
 
@@ -390,9 +395,6 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
 {
   // A set of all the logs we've met in the workspaces
   QSet<QString> allLogs;
-  
-  // Add run number explicitly as it is the only non-timeseries log value we are using 
-  allLogs.insert(RUN_NO_TITLE.c_str());
 
   for (int i=0; i<fittedWsList.size(); i++)
   { 
@@ -404,13 +406,6 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
     if (!ws)
     {
       throw std::runtime_error("Wrong type of Workspace");
-    }
-
-    // Try to get a run number for the workspace
-    if (ws->run().hasProperty(RUN_NO_LOG))
-    {
-      // Set run number as a string, as we don't want it to be formatted like double.
-      wsLogValues[RUN_NO_TITLE.c_str()] = QString(ws->run().getLogData(RUN_NO_LOG)->value().c_str());
     }
 
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
@@ -452,12 +447,35 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
           wsLogValues[logFile] = value / count;
         }
       }
+      else // Should be a non-timeseries one
+      {
+        QString logName = QString::fromStdString( (**pItr).name() );
 
-          // Add to the list of known logs
-          allLogs.insert(logFile);
+        // Check if we should display it
+        if ( m_nonTimeseriesLogs.contains(logName) )
+        {
+          QVariant value;
+
+          if ( auto stringProp = dynamic_cast<PropertyWithValue<std::string>*>(*pItr) )
+          {
+            value = QString::fromStdString( (*stringProp)() );
+          }
+          else if ( auto doubleProp = dynamic_cast<PropertyWithValue<double>*>(*pItr) )
+          {
+            value = (*doubleProp)();
+          }
+          else
+          {
+            throw std::runtime_error("Unsupported non-timeseries log type");
+          }
+
+          wsLogValues[logName] = value;
         }
       }
     }
+
+    // Append log names found in the workspace to the list of all known log names
+    allLogs += wsLogValues.keys().toSet();
 
     // Add all data collected from one workspace to another map. Will be used when creating table.
     m_logValues[fittedWsList[i]] = wsLogValues;

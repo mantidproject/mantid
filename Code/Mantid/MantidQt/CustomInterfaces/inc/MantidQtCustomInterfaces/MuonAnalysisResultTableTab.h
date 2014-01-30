@@ -110,6 +110,9 @@ private:
   QMap<QString, Qt::CheckState> m_savedLogsState;
 
   QList<QString> m_unselectedFittings;
+
+  /// Names of the non-timeseries logs we should display
+  QStringList m_nonTimeseriesLogs;
 };
 
 }
