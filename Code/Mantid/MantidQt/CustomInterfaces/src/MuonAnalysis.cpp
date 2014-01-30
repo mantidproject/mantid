@@ -1544,6 +1544,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         }
 
         IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+        applyCorrAlg->setRethrows(true);
+        applyCorrAlg->setLogging(false);
         applyCorrAlg->setPropertyValue("InputWorkspace", m_workspace_name); 
         applyCorrAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
         applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimes.name());
@@ -1804,6 +1806,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     QMessageBox::warning(this,"Mantid - MuonAnalysis", e.what());
   }
 
+  m_updating = false;
+  m_uiForm.tabWidget->setTabEnabled(3, true);
 }
 
 
