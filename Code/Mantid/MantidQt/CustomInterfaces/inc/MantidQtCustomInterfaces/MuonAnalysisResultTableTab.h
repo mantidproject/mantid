@@ -56,9 +56,6 @@ public:
   // Refresh the label list and re-populate the tables
   void refresh();
 
-  static const std::string RUN_NO_LOG; // Name of the run_number log
-  static const std::string RUN_NO_TITLE; // Table title for the run_number
-
 signals:
   /// Emitted to run some (usually simple) Python code
   void runPythonCode(const QString& code, bool async);

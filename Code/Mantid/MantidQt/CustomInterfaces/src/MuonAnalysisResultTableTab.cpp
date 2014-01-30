@@ -35,8 +35,6 @@ namespace Muon
   using namespace MantidQt::API;
   using namespace MantidQt::MantidWidgets;
 
-  const std::string MuonAnalysisResultTableTab::RUN_NO_LOG("run_number");
-  const std::string MuonAnalysisResultTableTab::RUN_NO_TITLE("Run Number");
   const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
 
 /**
@@ -368,7 +366,7 @@ void MuonAnalysisResultTableTab::populateTables()
     selectAllFittings(true);
 
     // If we have Run Number log value, we want to select it by default.
-    auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
+    auto found = m_uiForm.valueTable->findItems("run_number", Qt::MatchFixedString);
     if ( ! found.empty() )
     {
       int r = found[0]->row();
