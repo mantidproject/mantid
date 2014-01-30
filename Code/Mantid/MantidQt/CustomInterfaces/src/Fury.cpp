@@ -66,10 +66,11 @@ namespace IDA
     QString pyInput =
       "from IndirectDataAnalysis import fury\n";
 
-    //in case the user removed the workspace somehow
+    //in case the user removed the workspace somehow, attempt to reload workspace
     if(!Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
-      pyInput += wsName + " = LoadNexus('"+wsName+".nxs')\n";
+      QString fileName = uiForm().furyfit_inputFile->getFirstFilename();
+      pyInput += wsName + " = LoadNexus('"+fileName+".nxs')\n";
     }
 
     pyInput += "samples = [r'" + wsName + "']\n"
