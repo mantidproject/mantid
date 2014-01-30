@@ -23,9 +23,9 @@ Details:
  
 *WIKI*"""
 
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, CloneWorkspace
 from mantid.simpleapi import CloneWorkspace, mtd
-from mantid.kernel import StringMandatoryValidator, Direction
+from mantid.kernel import FloatArrayProperty, FloatArrayLengthValidator, StringArrayProperty, arrvalidator, Direction, FloatBoundedValidator, logger
 
 
 class InterpolateSQE(PythonAlgorithm):
@@ -34,12 +34,19 @@ class InterpolateSQE(PythonAlgorithm):
     return "Arithmetic"
 
   def name(self):
-    return "InterpolateSQE"
+    return 'InterpolateSQE'
 
   def PyInit(self):
-    mustHaveWorkspaceNames = StringMandatoryValidator()
-    self.declareProperty("Workspaces", "", validator=mustHaveWorkspaceNames, direction=Direction.Input, doc="Input workspaces. Comma separated workspace names")
-    self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output interpolated workspace")
+    arrvalidator = StringArrayMandatoryValidator()
+    self.declareProperty(StringArrayProperty('Workspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of input workspaces')
+    # check the number of input workspaces is same as number of input parameters
+    arrvalidator2 = FloatArrayLengthValidator(len(self.getProperty('Workspaces')))
+    self.declareProperty(FloatArrayProperty('ParameterValues', values=[], validator=arrvalidator2, direction=Direction.Input), doc='list of input parameter values')
+    # check requested parameter falls within the list of parameters
+    parmvalidator=FloatBoundedValidator()
+    parmvalidator.setBounds( min(self.getProperty('ParameterValues')), max(self.getProperty('ParameterValues')) )
+    self.declareProperty('Parameter', 0.0, validator=parmvalidator, direction=Direction.Input, doc="Parameter to interpolate the structure factor")
+    self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.InputOutput), doc='Workspace to be overwritten with interpolated structure factor')
 
   def areWorkspacesCompatible(self, a, b):
     sizeA = a.blocksize() * a.getNumberHistograms() 
@@ -47,20 +54,30 @@ class InterpolateSQE(PythonAlgorithm):
     return sizeA == sizeB
 
   def PyExec(self):
-    import dsfinterp
-    workspaces = self.getProperty("Workspaces").value.split(',')
-    out_ws = CloneWorkspace(InputWorkspace=mtd[workspaces[0]], OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
-    for index in range(1, len(workspaces)):
-      name = workspaces[index].strip()
-      ws = mtd[name]
-      if not self.areWorkspacesCompatible(out_ws, ws):
-        raise RuntimeError("Input Workspaces are not the same shape.")
-      out_ws += ws
-    out_ws /= len(workspaces)
-    self.setProperty("OutputWorkspace", out_ws)
-        
-
-
+    # Check congruence of workspaces
+    workspaces = self.getProperty('Workspaces')
+    fvalues = self.getProperty('ParameterValues')
+    for workspace in workspaces[1:]+[]:
+      if not self.areWorkspacesCompatible(mtd[workspaces[0]],mtd[workspace]):
+        logger.error('Workspace {0} incompatible with {1}'.format(workspace, workspaces[0]))
+        return
+    # Load the workspaces into a group of dynamic structure factors
+    from dsfinterp import Dsf, DsfGroup, ChannelGroup
+    dsfgroup = DsfGroup()
+    for idsf in range(len(workspaces)):
+      dsf = Dsf()
+      dsf.Load( mtd[workspaces[idsf]] )
+      dsf.setFvalue( fvalues[idsf] )
+      dsfgroup.InsertDsf(dsf)
+    # Create the intepolator
+    channelgroup = ChannelGroup()
+    channelgroup.InitFromDsfGroup(dsfgroup)
+    channelgroup.InitializeInterpolator()
+    # Invoke the interpolator and save to outputworkspace
+    dsf = channelgroup( self.getProperty('Parameter') )
+    outws = CloneWorkspace( mtd[workspaces[0]] )
+    dsf.Save(outws) # overwrite dataY and dataE
+    self.setProperty("OutputWorkspace", outws)
 #############################################################################################
 
 try:
