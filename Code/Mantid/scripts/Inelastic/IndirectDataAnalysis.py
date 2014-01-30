@@ -870,7 +870,7 @@ def furyfitMultParsToWS(Table, Data):
     dataE = np.append(dataE,np.array(Terr))
     dataY = np.append(dataY,np.array(Bval))
     dataE = np.append(dataE,np.array(Berr))
-    names = 'A0,Intensity,Tau,Beta'
+    names = 'f0.A0,f1.Intensity,f1.Tau,f1.Beta'
     suffix = 'Workspace'
     wsname = Table + '_' + suffix
     CreateWorkspace(OutputWorkspace=wsname, DataX=Qa, DataY=dataY, DataE=dataE, 
