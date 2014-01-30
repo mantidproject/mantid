@@ -153,8 +153,6 @@ def load_monitors(self, property_manager):
     # Ensuring that the binning is uniform
     spec0 = empty_ws.dataX(0)
     spec_last = empty_ws.dataX(empty_ws.getNumberHistograms()-1)
-    diff = sum(spec0)-sum(spec_last)
-    Logger.get("TransmissionUtils").error(str(diff))
     if abs(sum(spec0)-sum(spec_last))>0.000001:
         alg = _execute("ExtractSingleSpectrum",
                        {"InputWorkspace": empty_ws,
