@@ -18,7 +18,13 @@ class ConvertToWavelength(object):
         return sum(workspaces)
     
     @classmethod
+    def get_first_of_coadd_ws(cls, candidate):
+        return re.split(',|:', candidate)[0]
+
+    @classmethod
     def to_single_workspace(cls, candidate):
+        if isinstance(candidate, str):
+            ConvertToWavelength.get_first_of_coadd_ws(candidate)
         ws = ConvertToWavelength.to_workspace(candidate)
         input = None
         if isinstance(ws, mantid.api.WorkspaceGroup):
@@ -31,6 +37,8 @@ class ConvertToWavelength(object):
     @classmethod
     def to_workspace(cls, candidate):
         workspace = None
+        if isinstance(candidate, str):
+            candidate = ConvertToWavelength.get_first_of_coadd_ws(candidate)
         if isinstance(candidate, mantid.api.Workspace):
             workspace = candidate
         elif isinstance(candidate, str):
