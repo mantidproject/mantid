@@ -59,6 +59,7 @@ public:
 
 			TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 65536+2);
 			TS_ASSERT_EQUALS(output2D->blocksize(), 100);
+			TS_ASSERT_DIFFERS(output2D->run().getPropertyValueAsType<double>("monitor"),0.0);
 			AnalysisDataService::Instance().clear();
 		}
 
@@ -81,6 +82,7 @@ public:
 
 			TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 65536+2);
 			TS_ASSERT_EQUALS(output2D->blocksize(), 1);
+			TS_ASSERT_DIFFERS(output2D->run().getPropertyValueAsType<double>("monitor"),0.0);
 			AnalysisDataService::Instance().clear();
 		}
 
