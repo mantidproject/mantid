@@ -209,14 +209,13 @@ def confitPlotSeq(inputWS, Plot):
     ws = mtd[inputWS]
     nhist = ws.getNumberHistograms()
     
-    if ( Plot == 'All' ):
-        #plot all spectra
-        plotSpecs = range(0, nhist)
-    else:
-        #Plot all spectra matching the plot option
-        plotSpecs = [i for i in range(0,nhist) if Plot in ws.getAxis(1).label(i)]
-    
-    mp.plotSpectrum(inputWS, plotSpecs, True)
+    if ( Plot == 'Amplitude' or Plot == 'All' ):
+        plotSpecs = [i for i in range(0,nhist) if 'Amplitude' in ws.getAxis(1).label(i)]
+        plotSpectra(inputWS, 'Amplitude', indicies=plotSpecs)
+
+    if ( Plot == 'FWHM' or Plot == 'All' ):
+        plotSpecs = [i for i in range(0,nhist) if 'FWHM' in ws.getAxis(1).label(i)]
+        plotSpectra(inputWS, 'FWHM', indicies=plotSpecs)
 
 ##############################################################################
 
