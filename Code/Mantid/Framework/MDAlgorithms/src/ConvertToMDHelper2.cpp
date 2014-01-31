@@ -23,8 +23,9 @@ spectra of the transformed workspace to identify |Q|_min, |Q|_max and dE_min and
 #include "MantidAPI/IMDNode.h"
 #include "MantidMDEvents/MDWSTransform.h"
 #include "MantidMDEvents/ConvToMDSelector.h"
-
-
+#include "MantidMDEvents/UnitsConversionHelper.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <cfloat>
 
@@ -89,7 +90,7 @@ namespace MDAlgorithms
     if(!m_HelperWSWrapper) m_HelperWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
 
    // -------- get Input workspace
-   Mantid::API::MatrixWorkspace_const_sptr InWS2D = getProperty("InputWorkspace");
+   Mantid::API::MatrixWorkspace_sptr InWS2D = getProperty("InputWorkspace");
    
    
   // Collect and Analyze the requests to the job, specified by the input parameters:
@@ -117,14 +118,12 @@ namespace MDAlgorithms
    // total number of dimensions
    size_t nDim =nMatrixDim+otherDimNames.size();
 
-  // build simplified workspace with min-max histogram values from input workspace and the same instument as the initial ws. 
-    buildMinMaxWorkspaceWithMinInstrument(InWS2D,otherDimNames,true);
     std::vector<double> MinValues,MaxValues;
     MinValues.resize(nDim,-FLT_MAX/10);
     MaxValues.resize(nDim,FLT_MAX/10);
     // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less max
     targWSDescr.setMinMax(MinValues,MaxValues);   
-    targWSDescr.buildFromMatrixWS(m_MinMaxWS2D,QModReq,dEModReq,otherDimNames);
+    targWSDescr.buildFromMatrixWS(InWS2D,QModReq,dEModReq,otherDimNames);
   // add rinindex to the target workspace description for further usage as the identifier for the events, which come from this run. 
     targWSDescr.addProperty("RUN_INDEX",uint16_t(0),true);  
 
@@ -142,7 +141,7 @@ namespace MDAlgorithms
      //this->setBoxController(bc, m_MinMaxWS2D->getInstrument());
      //----> this all converts as follows:
      // let it be all in one box
-     bc->setSplitThreshold(m_MinMaxWS2D->getNumberHistograms()*2);
+     bc->setSplitThreshold(InWS2D->getNumberHistograms()*3+1);
      bc->setMaxDepth( 2 ); // just in case
 
     // Build MDGridBox
@@ -175,7 +174,10 @@ namespace MDAlgorithms
     targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);           
 
     //TODO: in a future it can be a choice -- use source workspace or the workspace with spherical instrument. Current settings 
-    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_MinMaxWS2D,dEModReq,false,std::string(getProperty("PreprocDetectorsWS")));
+    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(InWS2D,dEModReq,false,std::string(getProperty("PreprocDetectorsWS")));
+
+   // build simplified workspace with min-max histogram values from input workspace and the same instument as the initial ws.true parameter 
+    buildMinMaxWorkspaceWithMinInstrument(targWSDescr,pQtransf,iEmode,true);
 
  
     //DO THE JOB:
@@ -186,7 +188,7 @@ namespace MDAlgorithms
      // initate conversion and estimate amout of job to do
      size_t n_steps = m_Convertor->initialize(targWSDescr,m_HelperWSWrapper,false);
     // progress reporter
-     auto progress = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,0.1,n_steps)); 
+     auto progress = std::auto_ptr<API::Progress>(new API::Progress(this,0.0,1.,n_steps)); 
 
      m_Convertor->runConversion(progress.get());
   
@@ -320,64 +322,76 @@ namespace MDAlgorithms
     return theInstument;
 }
 
-  /**Build min-max instrument with 2 detectors*/
-   void ConvertToMDHelper2::buildMinMaxWorkspaceWithMinInstrument(Mantid::API::MatrixWorkspace_const_sptr &InWS2D,bool useWorkspace)
+  /**Build min-max workspace with the same detectors as inpitial workspace and specta which have only min-max values */
+   void ConvertToMDHelper2::buildMinMaxWorkspaceWithMinInstrument(MDEvents::MDWSDescription &InOutWSDescription,
+                                                                  MDEvents::MDTransfInterface const *const pQtransf,Kernel::DeltaEMode::Type iEMode,bool useWorkspace)
    {
 
      // Create workspace with min-max values
     double xMin,xMax;
-    InWS2D->getXMinMax(xMin,xMax);
+    InOutWSDescription.getInWS()->getXMinMax(xMin,xMax);
 
     // we expect it also to copy all log files correspondent to ,const std::vector<std::string> &oterDimNames
-    m_MinMaxWS2D=boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(InWS2D));
+    m_MinMaxWS2D=boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(InOutWSDescription.getInWS()));
 
     if(!m_MinMaxWS2D)
-    {
       throw(std::runtime_error(" Can not get Workspace 2D from the matrix workspace"));
-    }
 
-    //size_t nHist = 2+4; // -- for spherical instrument number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
-    size_t nHist = InWS2D->getNumberHistograms(); // number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
-    size_t nBins = 2; // number of bins in min-max workspace
+    // This option depends on useWorkspace and is currently disabled.
+    //size_t nHist = 2+4; // for spherical instrument number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
+    size_t nHist = InOutWSDescription.getInWS()->getNumberHistograms(); // number of histograms (detectors) in the min-max workspace -- more precise workspace would have the same number of detectors as the input one
+    size_t nBins(3); // number of bins in min-max workspace
 
-    if (xMin<0 && xMax>0)nBins=3;
 
     MantidVecPtr X,Y,ERR;
+    // source workspace units
+    std::string wsUnitID    = InOutWSDescription.getInWS()->getAxis(0)->unit()->unitID();
+
+
+
+    std::vector<double> range;
+    bool range_expanded=findConversionRange(InOutWSDescription,wsUnitID,xMin,xMax,range);
+    if(range_expanded)
+    {
+      nBins = 3;
+      m_MinMaxWS2D->initialize(nHist,nBins,nBins);
     X.access().resize(nBins);
     Y.access().resize(nBins,1);
     ERR.access().resize(nBins,1);
 
     X.access()[0]=xMin;
-    if (xMin<0 && xMax>0)
-    {
-       X.access()[1]=0;
        X.access()[2]=xMax;
+      for (size_t i=0; i< nHist; i++)
+      {
+        X.access()[1]=range[i];
+        m_MinMaxWS2D->setX(i,X);
+        m_MinMaxWS2D->setData(i,Y,ERR);
+    }
+
     }
     else
-      X.access()[1]=xMax;
-
-
+    {
+      nBins=2;
     m_MinMaxWS2D->initialize(nHist,nBins,nBins);
-    //m_MinMaxWS2D->initialize(nHist,nBins+1,nBins);
+      X.access().resize(nBins);
+      Y.access().resize(nBins,1);
+      ERR.access().resize(nBins,1);
+      X.access()[0]=range[0];
+      X.access()[1]=range[1];
+
     for (size_t i=0; i< nHist; i++)
     {
       m_MinMaxWS2D->setX(i,X);
       m_MinMaxWS2D->setData(i,Y,ERR);
     }
 
-    //m_MinMaxWS2D->getAxis(0)->setUnit(InWS2D->getAxis(0)->unit()->unitID());
-    //auto yAxis = InWS2D->getAxis(1);
-    //if (!yAxis)
-    //  m_MinMaxWS2D->setYUnit("Counts");
-    //else
-    //  m_MinMaxWS2D->setYUnit(yAxis->unit()->unitID());
+    }
 
 
+
+
+   
     if (!useWorkspace) 
-      //m_MinMaxWS2D->mutableRun() = InWS2D->cloneExperimentInfo();
-      //m_MinMaxWS2D->setInstrument(InWS2D->getInstrument());
-      //m_MinMaxWS2D->mutableRun().setGoniometer(InWS2D->run().getGoniometer());
-      //else
     {
       // create spherical instrument has range of problems at the moment as detectors should be placed in RUB matrix egenvectors directions
       // this is for the future
@@ -388,7 +402,74 @@ namespace MDAlgorithms
 
 
     // add workspace to analysis data servise for it to be availible for subalgorithms
-    API::AnalysisDataService::Instance().addOrReplace("_"+InWS2D->getName()+"_MinMaxServiceWS",m_MinMaxWS2D);
+    API::AnalysisDataService::Instance().addOrReplace("_"+InOutWSDescription.getInWS()->getName()+"_MinMaxServiceWS",m_MinMaxWS2D);
+    // add this to ws description replacing initial workspace as conversion would work with this workspace pointer;
+    InOutWSDescription.setWS(m_MinMaxWS2D);
+   }
+
+   /***/
+   bool ConvertToMDHelper2::findConversionRange(const MDEvents::MDWSDescription &InWSDescription,const std::string & wsUnitID,
+                              const std::string & targetUnitID,const double &xMin,const double &xMax,std::vector<double> &range)const
+   {
+
+     MDEvents::UnitsConversionHelper unitsConverter;
+     int Emode = static_cast<int>(InWSDescription.getEMode());
+     long nHist =(long)InWSDescription.getInWS()->getNumberHistograms();
+
+     bool convertTOF(false);
+     if(wsUnitID!="TOF")convertTOF=true;
+
+     bool rangeChanged(false);
+     range.resize(nHist,DBL_MAX);
+     unitsConverter.initialize("TOF",wsUnitID,InWSDescription.m_PreprDetTable,Emode);
+
+     //PRAGMA_OMP(parallel for reduction(||:rangeChanged))
+     for(long i=0;i<nHist;i++)
+     {
+         unitsConverter.updateConversion(i);
+         double minTOFValue = unitsConverter.getTargetUnitPtr()->conversionTOFMin();
+         if(convertTOF)
+         {
+           // different unit conversion occurs in the range from minTOFValue to max_time
+           double ConvX1=unitsConverter.convertUnits(minTOFValue);
+           double ConvX2=unitsConverter.convertUnits(DBL_MAX);
+
+           if(ConvX1>xMin && ConvX1<xMax)
+           {
+             range[i]=ConvX1;
+             rangeChanged=true;
+           }
+           if(ConvX2>xMin && ConvX2<xMax)
+           {
+             // we never expect it to happen and this can not happen for the units in use when this code was written. But if it does happen, let's warn the user as it mean rethinking the code
+             if (rangeChanged)
+             {
+               g_log.warning()<<" conversion limits for both workspace ranges have changed. This is unexpected situation\n";
+               g_log.warning()<<" Workspce limits: xMin: "<<xMin<<" xMax: "<<xMax<<"\n";
+               g_log.warning()<<" Unit conversion limits limits: r1 "<<ConvX1<<" r2: "<<ConvX2<<"\n";
+               range[i]=(ConvX2>range[i])?ConvX2:range[i];
+               g_log.warning()<<" using conversion limi: "<<range[i]<<"\n";
+             }
+             else
+             {
+               range[i]=ConvX2;
+               rangeChanged=true;
+             }
+           }
+
+         }
+         else
+         {
+            if(minTOFValue>xMin && minTOFValue<xMax)
+            {
+              range[i]=minTOFValue;
+              rangeChanged=true;
+            }
+         }
+     }
+
+
+     return rangeChanged;
    }
 
 } // namespace MDAlgorithms

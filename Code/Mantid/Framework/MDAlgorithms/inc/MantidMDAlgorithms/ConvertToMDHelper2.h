@@ -45,7 +45,11 @@ namespace MDAlgorithms
     static Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPosisions(const double &L1,const std::vector<double>& L2, const std::vector<double>& polar, const std::vector<double>& azim);
   protected: // for testing 
     
-    void buildMinMaxWorkspaceWithMinInstrument(Mantid::API::MatrixWorkspace_const_sptr &InWS2D,bool useWorkspace);
+    void buildMinMaxWorkspaceWithMinInstrument(MDEvents::MDWSDescription &InOutWSDescription,
+                                               MDEvents::MDTransfInterface const *const qTransf,Kernel::DeltaEMode::Type dEMode,bool useWorkspace);
+
+     bool findConversionRange(const MDEvents::MDWSDescription &InWSDescription,const std::string & wsUnitID,const std::string & targetUnitID,
+                              const double &xMin,const double &xMax,std::vector<double> &range)const;
   private:
     virtual void initDocs();
     void exec();

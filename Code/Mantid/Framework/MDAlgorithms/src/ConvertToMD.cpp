@@ -315,10 +315,15 @@ void ConvertToMD::exec()
     //e) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
     std::string convertTo_                 = getProperty("QConversionScales");
 
+    // get the min and max values for the dimensions from the input porperties
+    std::vector<double> dimMin = getProperty("MinValues");
+    std::vector<double> dimMax = getProperty("MaxValues");
+
+
     // Build the target ws description as function of the input & output ws and the parameters, supplied to the algorithm 
     MDEvents::MDWSDescription targWSDescr;
     // get workspace parameters and build target workspace descritpion, report if there is need to build new target MD workspace
-    bool createNewTargetWs = buildTargetWSDescription(spws,QModReq,dEModReq,otherDimNames,QFrame,convertTo_,targWSDescr);
+    bool createNewTargetWs = buildTargetWSDescription(spws,QModReq,dEModReq,otherDimNames,dimMin,dimMax,QFrame,convertTo_,targWSDescr);
 
      // create and initate new workspace or set up existing workspace as a target. 
     if(createNewTargetWs)  // create new
@@ -411,19 +416,39 @@ ConvertToMD::ConvertToMD()
 * @param QModReq -- mode to convert momentum
 * @param dEModReq -- mode to convert energy 
 * @param otherDimNames -- the vector of additional dimensions names (if any)
+* @param dimMin     -- the vector of minimal values for all dimensions of the workspace; on input it is copied from the algorithm parameters, on outputput 
+                       it is defined from MD worksace of matrix workspace depending on how well inpupt parameters are defined 
+* @param dimMax     -- the vector of maximal values for all dimensions of the workspace; is set up similarly to dimMin
 * @param QFrame      -- in Q3D case this describes target coordinate system and is ignored in any othre caste
 * @param convertTo_  -- The parameter describing Q-scaling transformtations
 * @param targWSDescr -- the resulting class used to interpret all parameters together and used to describe selected transformation. 
 */ 
 bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &QModReq,const std::string &dEModReq,const std::vector<std::string> &otherDimNames,
+                                           std::vector<double> &dimMin, std::vector<double> &dimMax,
                                            const std::string &QFrame,const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr)
 {
   // ------- Is there need to creeate new ouptutworpaced?  
     bool createNewTargetWs =doWeNeedNewTargetWorkspace(spws);
  
-   // set the min and max values for the dimensions from the input porperties
-    std::vector<double> dimMin = getProperty("MinValues");
-    std::vector<double> dimMax = getProperty("MaxValues");
+    if (createNewTargetWs )
+    {
+      // find min-max dimensions values -- either take them from input parameters or identify the defaults if input parameters are not defined
+      this->findMinMax(m_InWS2D,QModReq,dEModReq,QFrame,convertTo_,otherDimNames,dimMin,dimMax);
+    }
+    else // get min/max from existing MD workspace ignoring input min/max values
+    {
+       size_t NDims = spws->getNumDims();
+       dimMin.resize(NDims);
+       dimMax.resize(NDims);
+      for(size_t i=0;i<NDims;i++)
+      {
+        const Geometry::IMDDimension *pDim = spws->getDimension(i).get();
+        dimMin[i]  = pDim->getMinimum();
+        dimMax[i]  = pDim->getMaximum();
+      }
+
+    }
+
     // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less max
     targWSDescr.setMinMax(dimMin,dimMax);   
     targWSDescr.buildFromMatrixWS(m_InWS2D,QModReq,dEModReq,otherDimNames);
@@ -529,6 +554,25 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
 }
 
 
+/** Method takes min-max values from algorithm parameters if they are present or calculates default min-max values if these values 
+    were not supplied to the method or the supplied value is incorrect.
+ *
+ *@param inWS    -- the shared pointer to the source workspace
+ *@param QMode   -- the string which defines algorithms Q-conversion mode
+ *@param dEMode  -- the string describes the algorithms energy conversion mode
+ *@param QFrame  -- 
+ *@param ConvertTo--
+ *@param otherDim -- the vector of other dimension names (if any)
+ *  Input-output values: 
+ *@param minVal  -- the vector with min values for the algorithm
+ *@param maxVal  -- the vector with max values for the algorithm
+ *
+ *
+*/
+void ConvertToMD::findMinMax(const Mantid::API::MatrixWorkspace_sptr &inWS,const std::string &QMode, const std::string &dEMode,
+                             const std::string &QFrame,const std::string &ConvertTo,const std::vector<std::string> &otherDim,
+                             std::vector<double> &minVal,std::vector<double> &maxVal)
+{
 
    // get raw pointer to Q-transformation (do not delete this pointer, it hold by MDTransfFatctory!)
    MDTransfInterface* pQtransf =  MDTransfFactory::Instance().create(QMode).get();
@@ -561,8 +605,6 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
     Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("ConvertToMDHelper");
     if(!childAlg)throw(std::runtime_error("Can not create child ChildAlgorithm to found min/max values"));
 
-    m_InWS2D = getProperty("InputWorkspace");
-    
     childAlg->setPropertyValue("InputWorkspace", inWS->getName());
     childAlg->setPropertyValue("QDimensions",QMode);
     childAlg->setPropertyValue("dEAnalysisMode",dEMode);
