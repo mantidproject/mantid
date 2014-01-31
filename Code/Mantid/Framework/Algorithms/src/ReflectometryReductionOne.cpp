@@ -124,9 +124,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void ReflectometryReductionOne::initDocs()
     {
-      this->setWikiSummary(
-          "Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.");
-      this->setOptionalMessage(this->getWikiSummary());
+      this->setOptionalMessage("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.");
+      this->setWikiSummary("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections. See [[Reflectometry_Guide]]");
     }
 
     //----------------------------------------------------------------------------------------------

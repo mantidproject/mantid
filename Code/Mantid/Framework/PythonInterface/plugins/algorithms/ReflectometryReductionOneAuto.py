@@ -22,7 +22,10 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         return "ReflectometryReductionOneAuto"
     
     def PyInit(self):
-        
+    
+        self.setOptionalMessage("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.")
+        self.setWikiSummary("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections. See [[Reflectometry_Guide]]")
+   
         input_validator = WorkspaceUnitValidator("TOF")
         self.declareProperty(MatrixWorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input, optional=PropertyMode.Mandatory), "Input run in TOF")
         
