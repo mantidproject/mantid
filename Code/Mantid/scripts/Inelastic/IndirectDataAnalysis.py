@@ -850,12 +850,13 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     return mtd[fitWS]
 
 #Copy logs from sample and add some addtional ones
-def furyAddSampleLogs(inputWs, ws, params):
+def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False):
     startx, endx, fitType = params
     CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
     AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
     AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
     AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
+    AddSampleLog(Workspace=ws, LogName="intensities_constrained", LogType="String", LogText=str(intensities_constrained))
 
 def furyfitMultParsToWS(Table, Data):
 #   Q = createQaxis(Data)
@@ -901,7 +902,7 @@ def furyfitMultParsToWS(Table, Data):
     dataE = np.append(dataE,np.array(Terr))
     dataY = np.append(dataY,np.array(Bval))
     dataE = np.append(dataE,np.array(Berr))
-    names = 'A0,Intensity,Tau,Beta'
+    names = 'f0.A0,f1.Intensity,f1.Tau,f1.Beta'
     suffix = 'Workspace'
     wsname = Table + '_' + suffix
     CreateWorkspace(OutputWorkspace=wsname, DataX=Qa, DataY=dataY, DataE=dataE, 
@@ -976,7 +977,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
         logger.notice('Option: '+option)  
         logger.notice('Function: '+function)  
     nHist = mtd[inputWS].getNumberHistograms()
-    outNm = inputWS[:-3] + 'fury_mult'
+    outNm = getWSprefix(inputWS) + 'fury_1Smult_s0_to_' + str(nHist-1)
     f1 = createFuryMultFun(True, function)
     func= 'composite=MultiDomainFunction,NumDeriv=1;'
     ties='ties=('
@@ -994,12 +995,18 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
     CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
     Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=0,Output=outNm,**kwargs)
     outWS = furyfitMultParsToWS(outNm, inputWS)
+    result_workspace = outNm + '_Result'
     getFuryMultResult(inputWS, outNm, function, Verbose)
+
+    params = [startx, endx, ftype]
+    furyAddSampleLogs(inputWS, outWS, params, True)
+    furyAddSampleLogs(inputWS, result_workspace, params, True)
+
     if Save:
         opath = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-        rpath = os.path.join(workdir, outNm+'_result.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=outNm+'_result', Filename=rpath)
+        rpath = os.path.join(workdir, result_workspace+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=result_workspace, Filename=rpath)
         if Verbose:
             logger.notice('Output file : '+opath)  
             logger.notice('Output file : '+rpath)  
