@@ -47,10 +47,10 @@ namespace Mantid
      *@param investigationId :: unique identifier of the investigation
      *@param datasetsws_sptr :: shared pointer to datasets
      */
-    void ICat3Catalog::getDataSets(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr)
+    void ICat3Catalog::getDataSets(const std::string& investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr)
     {
       //search datasets for a given investigation id using ICat api.
-      m_helper->doDataSetsSearch(investigationId,
+      m_helper->doDataSetsSearch(boost::lexical_cast<int64_t>(investigationId),
           ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATASET_USCOREPARAMETERS_USCOREONLY,datasetsws_sptr);
     }
 
@@ -58,9 +58,10 @@ namespace Mantid
      *@param investigationId :: unique identifier of the investigation
      *@param datafilesws_sptr :: shared pointer to datasets
      */
-    void ICat3Catalog::getDataFiles(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
+    void ICat3Catalog::getDataFiles(const std::string& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
     {
-      m_helper->getDataFiles(investigationId,ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
+      m_helper->getDataFiles(boost::lexical_cast<int64_t>(investigationId),
+          ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
     }
 
     /**This method returns the list of instruments
