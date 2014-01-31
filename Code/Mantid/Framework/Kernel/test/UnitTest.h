@@ -70,7 +70,7 @@ std::string convert_units_check_range(const Unit &aUnit,std::vector<double> &sam
   double t1 = aUnit.singleToTOF(range[0]);
   for(size_t i=1;i<=nSteps;i++)
   {
-    double unitVal=range[0]+i*step;
+    double unitVal=range[0]+double(i)*step;
     double tofVal = aUnit.singleToTOF(unitVal);
     if (t_increases)
     {
