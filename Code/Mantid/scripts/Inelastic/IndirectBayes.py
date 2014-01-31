@@ -592,19 +592,19 @@ def C2Se(sname):
 	dataY = np.append(dataY,np.array(Yi))
 	dataE = np.append(dataE,np.array(Ei))
 	nhist = 1
-	Vaxis.append('Amplitude')
+	Vaxis.append('f1.Amplitude')
 
 	dataX = np.append(dataX, np.array(Xout))
 	dataY = np.append(dataY, np.array(Yf))
 	dataE = np.append(dataE, np.array(Ef))
 	nhist += 1
-	Vaxis.append('FWHM')
+	Vaxis.append('f1.FWHM')
 
 	dataX = np.append(dataX,np.array(Xout))
 	dataY = np.append(dataY,np.array(Yb))
 	dataE = np.append(dataE,np.array(Eb))
 	nhist += 1
-	Vaxis.append('Beta')
+	Vaxis.append('f1.Beta')
 
 	logger.notice('Vaxis=' + str(Vaxis))
 	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
