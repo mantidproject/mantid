@@ -1,8 +1,12 @@
 """*WIKI* 
 
 This algorithm reads in an old SNS reduction ROI file and converts it into 
-a Mantid mask workspace. It can optionally save that mask to a Mantid 
-mask file.
+a Mantid mask workspace. It will save that mask to a Mantid mask file.
+
+The file format of the ROI file looks like:
+bank1_0_0
+bank1_0_1
+...
 
 *WIKI*"""
 
@@ -73,7 +77,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         for line in roi_file:
             if line.startswith("#"):
                 continue
-            id_list.append(self.__get_id(line))
+            id_list.append(self._get_id(line))
         roi_file.close()
         
         # Make XML DOM for "mask"
@@ -109,7 +113,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         output_file = os.path.join(self._outputDir, self._filePrefix)
         msapi.SaveMask(mask_ws, OutputFile=output_file+".xml")
     
-    def __get_id(self, idx):
+    def _get_id(self, idx):
         """
         Convert the old bankN_x_y pixel ID into a Mantid index.
         """
