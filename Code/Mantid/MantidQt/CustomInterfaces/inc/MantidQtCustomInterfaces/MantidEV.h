@@ -90,6 +90,30 @@ class RunFindPeaks : public QRunnable
     double           min_intensity;
 };
 
+/// Local class to run PredictPeaks in a Non-Qt thread.
+class RunPredictPeaks : public QRunnable
+{
+  public:
+
+  /// Constructor just saves the info needed by the run() method
+  RunPredictPeaks(       MantidEVWorker * worker,
+                const std::string    & peaks_ws_name,
+                      double           min_pred_wl,
+                      double           max_pred_wl,
+                      double           min_pred_dspacing,
+                      double           max_pred_dspacing );
+
+  /// Calls worker->predictPeaks from a separate thread
+  void run();
+
+  private:
+    MantidEVWorker * worker;
+    std::string      peaks_ws_name;
+    double           min_pred_wl;
+    double           max_pred_wl;
+    double           min_pred_dspacing;
+    double           max_pred_dspacing;
+};
 
 /// Local class to run IntegratePeaksMD in a Non-Qt thread.
 class RunSphereIntegrate : public QRunnable
@@ -238,6 +262,9 @@ private slots:
   /// Slot for the find peaks tab's Apply button 
   void findPeaks_slot();
 
+  /// Slot for the predict peaks tab's Apply button
+  void predictPeaks_slot();
+
   /// Slot for choosing a peaks file name
   void getLoadPeaksFileName_slot();
 
@@ -300,6 +327,9 @@ private slots:
 
   /// Slot to enable/disable the find peaks controls
   void setEnabledFindPeaksParams_slot( bool on );
+
+  /// Slot to enable/disable the predict peaks controls
+  void setEnabledPredictPeaksParams_slot( bool on );
 
   /// Slot to enable/disable the Load Peaks File controls
   void setEnabledLoadPeaksParams_slot( bool on );

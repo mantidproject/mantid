@@ -288,6 +288,51 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
    return false;
 }
 
+/**
+ *  Predict peaks and overwrite
+ *  specified peaks workspace.
+ *
+ *  @param md_ws_name     Name of the MD workspace to use
+ *  @param peaks_ws_name  Name of the peaks workspace to create
+ *
+ *  @param min_pred_wl        Minimum wavelength
+ *  @param max_pred_wl        Maximum wavelength
+*  @param min_pred_dspacing   Minimum d-space
+*  @param max_pred_dspacing   Maximum d-space
+ *
+ *  @return true if PredictPeaks completed successfully.
+ */
+bool MantidEVWorker::predictPeaks( const std::string & peaks_ws_name,
+                                         double        min_pred_wl,
+                                         double        max_pred_wl,
+                                         double        min_pred_dspacing,
+                                         double        max_pred_dspacing )
+{
+  try
+  {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PredictPeaksMD");
+    alg->setProperty("InputWorkspace",peaks_ws_name);
+    alg->setProperty("WavelengthMin", min_pred_wl);
+    alg->setProperty("WavelengthMax", max_pred_wl);
+    alg->setProperty("MinDSpacing",min_pred_dspacing);
+    alg->setProperty("MinDSpacing",max_pred_dspacing);
+    alg->setProperty("OutputWorkspace", peaks_ws_name );
+
+    if ( alg->execute() )
+      return true;
+  }
+  catch( std::exception &e)
+  {
+    g_log.error()<<"Error:" << e.what() <<std::endl;
+    return false;
+  }
+  catch(...)
+  {
+    g_log.error()<<"Error: Could Not predictPeaks" <<std::endl;
+    return false;
+  }
+   return false;
+}
 
 /**
  *  Load the specified peaks workspace from the specified peaks file.

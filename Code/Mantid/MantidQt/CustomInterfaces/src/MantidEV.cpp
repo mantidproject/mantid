@@ -79,6 +79,32 @@ void RunFindPeaks::run()
                      max_abc, num_to_find, min_intensity );
 }
 
+/**
+ * Class to call predictPeaks in a separate thread.
+ */
+RunPredictPeaks::RunPredictPeaks(        MantidEVWorker * worker,
+                            const std::string     & peaks_ws_name,
+                                  double            min_pred_wl,
+                                  double            max_pred_wl,
+                                  double            min_pred_dspacing,
+                                  double            max_pred_dspacing )
+{
+  this->worker        = worker;
+  this->peaks_ws_name = peaks_ws_name;
+  this->min_pred_wl       = min_pred_wl;
+  this->max_pred_wl       = max_pred_wl;
+  this->min_pred_dspacing = min_pred_dspacing;
+  this->max_pred_dspacing = max_pred_dspacing;
+}
+
+
+/**
+ *  Class to call predictPeaks in a separate thread.
+ */
+void RunPredictPeaks::run()
+{
+  worker->predictPeaks( peaks_ws_name, min_pred_wl, max_pred_wl, min_pred_dspacing, max_pred_dspacing );
+}
 
 /**
  *  Class to call sphereIntegrate in a separate thread.
@@ -311,6 +337,9 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
 
+   QObject::connect( m_uiForm.PredictPeaks_rbtn, SIGNAL(toggled(bool)),
+                     this, SLOT( setEnabledPredictPeaksParams_slot(bool) ) );
+
    QObject::connect( m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadPeaksParams_slot(bool) ) );
 
@@ -409,7 +438,13 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.UseExistingPeaksWorkspace_rbtn->setChecked(false);
    m_uiForm.LoadIsawPeaks_rbtn->setChecked(false);
    m_uiForm.SelectPeaksFile_ledt->setText("");
+   m_uiForm.PredictPeaks_rbtn->setChecked(true);
+   m_uiForm.min_pred_wl_ledt->setText("0.4");
+   m_uiForm.max_pred_wl_ledt->setText("3.5");
+   m_uiForm.min_pred_dspacing_ledt->setText("0.4");
+   m_uiForm.max_pred_dspacing_ledt->setText("8.5");
    setEnabledFindPeaksParams_slot(true);
+   setEnabledPredictPeaksParams_slot(false);
    setEnabledLoadPeaksParams_slot(false);
    last_peaks_file.clear();
                                                     // Find UB tab
@@ -733,6 +768,57 @@ void MantidEV::findPeaks_slot()
      {
        errorMessage("Could not load requested peaks file");
      }
+   }
+}
+/**
+ *  Slot called when the Apply button is pressed on the Find Peaks tab.
+ */
+void MantidEV::predictPeaks_slot()
+{
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+   if ( peaks_ws_name.length() == 0 )
+   {
+     errorMessage("Specify a peaks workspace name on the Predict Peaks tab.");
+     return;
+   }
+
+   if ( m_thread_pool->activeThreadCount() >= 1 )
+   {
+     errorMessage("Previous operation still running, please wait until it is finished");
+     return;
+   }
+
+   bool predict_new_peaks     = m_uiForm.PredictPeaks_rbtn->isChecked();
+
+   if ( predict_new_peaks )
+   {
+	 double min_pred_wl       =          0.4;
+	 double max_pred_wl       =          3.5;
+	 double min_pred_dspacing =          0.4;
+	 double max_pred_dspacing =          8.5;
+
+     if ( !getPositiveDouble( m_uiForm.min_pred_wl_ledt, min_pred_wl ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.max_pred_wl_ledt, max_pred_wl ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.min_pred_dspacing_ledt, min_pred_dspacing ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.max_pred_dspacing_ledt, max_pred_dspacing ) )
+       return;
+
+     RunPredictPeaks* runner = new RunPredictPeaks( worker,
+                                         peaks_ws_name,
+                                         min_pred_wl,
+                                         max_pred_wl,
+                                         min_pred_dspacing,
+                                         max_pred_dspacing );
+
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start predictPeaks thread...previous operation not complete" );
    }
 }
 
@@ -1516,6 +1602,23 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
   m_uiForm.MinIntensity_ledt->setEnabled( on );
 }
 
+/**
+ * Set the enabled state of the load find peaks components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
+void MantidEV::setEnabledPredictPeaksParams_slot( bool on )
+{
+  m_uiForm.min_pred_wl_lbl->setEnabled( on );
+  m_uiForm.min_pred_wl_ledt->setEnabled( on );
+  m_uiForm.max_pred_wl_lbl->setEnabled( on );
+  m_uiForm.max_pred_wl_ledt->setEnabled( on );
+  m_uiForm.min_pred_dspacing_lbl->setEnabled( on );
+  m_uiForm.min_pred_dspacing_ledt->setEnabled( on );
+  m_uiForm.max_pred_dspacing_lbl->setEnabled( on );
+  m_uiForm.max_pred_dspacing_ledt->setEnabled( on );
+}
 
 /**
  * Set the enabled state of the load peaks file components to the
@@ -1948,6 +2051,11 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked());
   state->setValue("LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn->isChecked());
   state->setValue("SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt->text());
+  state->setValue("PredictPeaks_rbtn", m_uiForm.PredictPeaks_rbtn->isChecked());
+  state->setValue("min_pred_wl_ledt", m_uiForm.min_pred_wl_ledt->text());
+  state->setValue("max_pred_wl_ledt", m_uiForm.max_pred_wl_ledt->text());
+  state->setValue("min_pred_dspacing_ledt", m_uiForm.min_pred_dspacing_ledt->text());
+  state->setValue("max_pred_dspacing_ledt", m_uiForm.max_pred_dspacing_ledt->text());
 
                                                 // Save Tab 3, Find UB 
   state->setValue("FindUBUsingFFT_rbtn", m_uiForm.FindUBUsingFFT_rbtn->isChecked());
@@ -2053,6 +2161,11 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn );
   restore( state, "LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn );
   restore( state, "SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt );
+  restore( state, "PredictPeaks_rbtn", m_uiForm.FindPeaks_rbtn );
+  restore( state, "min_pred_wl_ledt", m_uiForm.min_pred_wl_ledt );
+  restore( state, "max_pred_wl_ledt", m_uiForm.max_pred_wl_ledt );
+  restore( state, "min_pred_dspacing_ledt", m_uiForm.min_pred_dspacing_ledt );
+  restore( state, "max_pred_dspacing_ledt", m_uiForm.max_pred_dspacing_ledt );
 
                                                   // Load Tab 3, Find UB 
   restore( state, "FindUBUsingFFT_rbtn", m_uiForm.FindUBUsingFFT_rbtn );
