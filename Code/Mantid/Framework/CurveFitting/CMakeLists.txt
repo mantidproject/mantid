@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/SplineBackground.cpp
 	src/SplineInterpolation.cpp
 	src/SplineSmoothing.cpp
+	src/SplineWorkspace.cpp
 	src/StaticKuboToyabe.cpp
 	src/StaticKuboToyabeTimesExpDecay.cpp
 	src/StaticKuboToyabeTimesGausDecay.cpp
@@ -183,6 +184,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SplineBackground.h
 	inc/MantidCurveFitting/SplineInterpolation.h
 	inc/MantidCurveFitting/SplineSmoothing.h
+	inc/MantidCurveFitting/SplineWorkspace.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/StaticKuboToyabeTimesExpDecay.h
 	inc/MantidCurveFitting/StaticKuboToyabeTimesGausDecay.h

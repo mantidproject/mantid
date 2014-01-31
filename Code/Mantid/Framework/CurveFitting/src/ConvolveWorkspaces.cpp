@@ -9,6 +9,7 @@ Convolution of two workspaces
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ConvolveWorkspaces.h"
 #include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/SplineWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <sstream>
 #include <gsl/gsl_errno.h>
@@ -26,8 +27,8 @@ DECLARE_ALGORITHM(ConvolveWorkspaces)
 /// Sets documentation strings for this algorithm
 void ConvolveWorkspaces::initDocs()
 {
-  this->setWikiSummary("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process. ");
-  this->setOptionalMessage("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.");
+  this->setWikiSummary("Convolution of two workspaces. ");
+  this->setOptionalMessage("Convolution of two workspaces.");
 }
 
 /// Constructor
@@ -51,7 +52,7 @@ void ConvolveWorkspaces::init()
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace1","",Direction::Input), "The name of the first input workspace.");
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace2","",Direction::Input), "The name of the second input workspace.");
 
-  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output), "The name of the second input workspace.");
+  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output), "The name of the output workspace.");
 
 
 
@@ -87,13 +88,13 @@ void ConvolveWorkspaces::exec()
     MantidVec& Yout = outputWS->dataY(l);
     Convolution conv;
 
-    boost::shared_ptr<Convolution_Spline> res( new Convolution_Spline );
+    boost::shared_ptr<SplineWorkspace> res( new SplineWorkspace );
     size_t N = Yout.size();
     res->setMatrixWorkspace(ws1,l,x[0],x[N]);
 
     conv.addFunction(res);
 
-    boost::shared_ptr<Convolution_Spline> fun( new Convolution_Spline );
+    boost::shared_ptr<SplineWorkspace> fun( new SplineWorkspace );
     fun->setMatrixWorkspace(ws2,l,x[0],x[N]);
 
     conv.addFunction(fun);
