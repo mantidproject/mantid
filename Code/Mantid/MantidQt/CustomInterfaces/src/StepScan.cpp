@@ -196,6 +196,8 @@ void StepScan::loadFile(bool async)
       return;
     }
 
+    m_uiForm.statusText->setText("<i><font color='darkblue'>Loading data...</font></i>");
+
     if ( async )
     {
       connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(loadFileComplete(bool)));
@@ -211,6 +213,7 @@ void StepScan::loadFile(bool async)
 
 void StepScan::loadFileComplete(bool error)
 {
+  m_uiForm.statusText->clear();
   disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(loadFileComplete(bool)));
 
   if ( m_inputWSName == "__multifiles" && !error ) error = mergeRuns();
@@ -225,29 +228,50 @@ void StepScan::loadFileComplete(bool error)
   }
 }
 
-// Small class to handle disabling mouse clicks and showing the busy cursor in an RAII manner.
-// Used in the runStepScanAlg below to ensure these things are unset when the method is exited.
-class DisableGUI_RAII
-{
-public:
-  DisableGUI_RAII(StepScan * gui) : the_gui(gui)
+namespace {
+  class ScopedStatusText
   {
-    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
-  }
+  public:
+    ScopedStatusText(QLabel * label, QString labelText) : status_label(label)
+    {
+      status_label->setText("<i><font color='darkblue'>" + labelText + "</font></i>");
+    }
 
-  ~DisableGUI_RAII()
+    ~ScopedStatusText()
+    {
+      status_label->clear();
+    }
+
+  private:
+    QLabel * const status_label;
+  };
+
+
+  // Small class to handle disabling mouse clicks and showing the busy cursor in an RAII manner.
+  // Used in the runStepScanAlg below to ensure these things are unset when the method is exited.
+  class DisableGUI_RAII
   {
-    QApplication::restoreOverrideCursor();
-    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents, false );
-  }
+  public:
+    DisableGUI_RAII(StepScan * gui) : the_gui(gui)
+    {
+      QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+      the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
+    }
 
-private:
-  StepScan * const the_gui;
-};
+    ~DisableGUI_RAII()
+    {
+      QApplication::restoreOverrideCursor();
+      the_gui->setAttribute( Qt::WA_TransparentForMouseEvents, false );
+    }
+
+  private:
+    StepScan * const the_gui;
+  };
+}
 
 bool StepScan::mergeRuns()
 {
+  ScopedStatusText _merging(this->m_uiForm.statusText,"Merging runs...");
   // This can be slow and will lock the GUI, but will probably be so rarely used that it's
   // not worth making it asynchronous
   // Block mouse clicks while the algorithm runs. Also set the busy cursor.
@@ -459,6 +483,7 @@ void StepScan::runStepScanAlg()
       loadFile(false);
     }
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
+    ScopedStatusText _merging(this->m_uiForm.statusText,"Analyzing scan...");
     algSuccessful = stepScan->execute();
   }
 
