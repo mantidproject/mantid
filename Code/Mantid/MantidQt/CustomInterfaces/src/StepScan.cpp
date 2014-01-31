@@ -291,7 +291,12 @@ bool StepScan::mergeRuns()
     addScanIndex->setProperty("LogName","scan_index");
     addScanIndex->setProperty("LogType","Number Series");
     addScanIndex->setProperty("LogText",Strings::toString(i+1));
-    if ( ! addScanIndex->execute() ) return true;
+    auto result = addScanIndex->executeAsync();
+    while ( !result.available() )
+    {
+      QApplication::processEvents();
+    }
+    if ( ! addScanIndex->isExecuted() ) return true;
 
     // Add a scan_index = 0 to the end time for each workspace
     try
@@ -306,7 +311,12 @@ bool StepScan::mergeRuns()
   merge->setPropertyValue("InputWorkspaces",m_inputWSName);
   const std::string summedWSName = "__summed_multifiles";
   merge->setPropertyValue("OutputWorkspace",summedWSName);
-  if ( ! merge->execute() ) return true;
+  auto result = merge->executeAsync();
+  while ( !result.available() )
+  {
+    QApplication::processEvents();
+  }
+  if ( ! merge->isExecuted() ) return true;
   m_inputWSName = summedWSName;
 
   return false;
@@ -484,7 +494,12 @@ void StepScan::runStepScanAlg()
     }
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
     ScopedStatusText _merging(this->m_uiForm.statusText,"Analyzing scan...");
-    algSuccessful = stepScan->execute();
+    auto result = stepScan->executeAsync();
+    while ( !result.available() )
+    {
+      QApplication::processEvents();
+    }
+    algSuccessful = stepScan->isExecuted();
   }
 
   if ( !algSuccessful )
