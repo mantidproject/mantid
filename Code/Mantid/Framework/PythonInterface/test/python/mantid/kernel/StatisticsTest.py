@@ -34,6 +34,20 @@ class StatisticsTest(unittest.TestCase):
         self.assertEquals(18.3, stats.maximum)
         self.assertEquals(17.2, stats.median)
         
+
+    def test_getZScores(self):
+        """Data taken from C++ test"""
+        values = [12,13,9,18,7,9,14,16,10,12,7,13,14,19,10,16,12,16,19,11]
+        arr = numpy.array(values,dtype=numpy.float64)
+        
+        zscore = Stats.getZscore(arr)
+        self.assertAlmostEqual(1.63977, zscore[4], places = 4)
+        self.assertAlmostEqual(0.32235, zscore[6], places = 4)
+
+        modZ = Stats.getModifiedZscore(arr)
+        self.assertAlmostEqual(1.23658, modZ[4], places = 4)
+        self.assertAlmostEqual(0.33725, modZ[6], places = 4)
+
     def test_getMoments(self):
         mean = 5.
         sigma = 4.

@@ -61,6 +61,57 @@ namespace
   // Define an overload to handle the default argument
   BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1, 2);
 
+  //============================ Z score ============================================
+  // Function pointer to real implementation of Zscore functions
+  typedef std::vector<double> (*ZScoreFunction)(const std::vector<double>& data, const bool sorted);
+
+  /**
+   * The implementation for getMomentsAboutOrigin & getMomentsAboutOriginMean for using
+   * numpy arrays are identical. This encapsulates that behaviour an additional parameter for
+   * specifying the actual function called along.
+   * @param momentsFunc A function pointer to the required moments function
+   * @param data Numpy array of data
+   * @param sorted True if the input data is already sorted
+   */
+  std::vector<double> getZScoreNumpyImpl(ZScoreFunction zscoreFunc, const numeric::array& data,
+      const bool sorted)
+  {
+    using Converters::NDArrayToVector;
+
+    auto *dataPtr = data.ptr();
+    if(PyArray_ISFLOAT(dataPtr))
+    {
+      return zscoreFunc(NDArrayToVector<double>(data)(), sorted);
+    }
+    else
+    {
+      throw UnknownDataType();
+    }
+  }
+
+  /**
+   * Proxy for @see Mantid::Kernel::getZscore so that it can accept numpy arrays,
+   */
+  std::vector<double> getZscoreNumpy(const numeric::array & data, const bool sorted = false)
+  {
+    using Mantid::Kernel::getZscore;
+    return getZScoreNumpyImpl(&getZscore, data, sorted);
+  }
+  // Define an overload to handle the default argument
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getZscoreOverloads, getZscoreNumpy, 1, 2);
+
+  /**
+   * Proxy for @see Mantid::Kernel::getModifiedZscore so that it can accept numpy arrays,
+   */
+  std::vector<double> getModifiedZscoreNumpy(const numeric::array & data, const bool sorted = false)
+  {
+    using Mantid::Kernel::getModifiedZscore;
+    return getZScoreNumpyImpl(&getModifiedZscore, data, sorted);
+  }
+  // Define an overload to handle the default argument
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads, getModifiedZscoreNumpy, 1, 2);
+
+
   //============================ getMoments ============================================
 
   // Function pointer to real implementation of getMoments
@@ -138,25 +189,35 @@ void export_Statistics()
  // define a new "Statistics" scope so that everything is called as Statistics.getXXX
   // this affects everything defined within the lifetime of the scope object
   scope stats = class_<Stats>("Stats",no_init)
-      .def("getStatistics", &getStatisticsNumpy,
-           getStatisticsOverloads(args("data", "sorted"),
-                                  "Determine the statistics for an array of data")
+    .def("getStatistics", &getStatisticsNumpy,
+         getStatisticsOverloads(args("data", "sorted"),
+                                "Determine the statistics for an array of data")
                                  )
-     .staticmethod("getStatistics")
+    .staticmethod("getStatistics")
 
-     .def("getMomentsAboutOrigin", &getMomentsAboutOriginNumpy,
-          getMomentsAboutOriginOverloads(args("indep", "depend", "maxMoment"),
-                                         "Calculate the first n-moments (inclusive) about the origin"
-                                        )[ReturnNumpyArray()])
-     .staticmethod("getMomentsAboutOrigin")
+    .def("getZscore", &getZscoreNumpy,
+         getZscoreOverloads(args("data", "sorted"),
+                                 "Determine the Z score for an array of data")
+                                )
+    .staticmethod("getZscore")
 
-     .def("getMomentsAboutMean", &getMomentsAboutMeanNumpy,
-          getMomentsAboutMeanOverloads(args("indep", "depend", "maxMoment"),
-                                         "Calculate the first n-moments (inclusive) about the mean"
-                                        )[ReturnNumpyArray()])
-     .staticmethod("getMomentsAboutMean")
+    .def("getModifiedZscore", &getModifiedZscoreNumpy,
+        getModifiedZscoreOverloads(args("data", "sorted"),
+                                "Determine the modified Z score for an array of data")
+                               )
+    .staticmethod("getModifiedZscore")
 
+    .def("getMomentsAboutOrigin", &getMomentsAboutOriginNumpy,
+         getMomentsAboutOriginOverloads(args("indep", "depend", "maxMoment"),
+                                        "Calculate the first n-moments (inclusive) about the origin"
+                                       )[ReturnNumpyArray()])
+    .staticmethod("getMomentsAboutOrigin")
 
+    .def("getMomentsAboutMean", &getMomentsAboutMeanNumpy,
+         getMomentsAboutMeanOverloads(args("indep", "depend", "maxMoment"),
+                                        "Calculate the first n-moments (inclusive) about the mean"
+                                       )[ReturnNumpyArray()])
+    .staticmethod("getMomentsAboutMean")
   ;
 
   //------------------------------ Statistics values -----------------------------------------------------
