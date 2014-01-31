@@ -346,10 +346,11 @@ namespace MDAlgorithms
     MantidVecPtr X,Y,ERR;
     // source workspace units
     std::string wsUnitID    = InOutWSDescription.getInWS()->getAxis(0)->unit()->unitID();
-
+    std::string targUnitID    = InOutWSDescription.getInWS()->getAxis(0)->unit()->unitID();
 
 
     std::vector<double> range;
+   
     bool range_expanded=findConversionRange(InOutWSDescription,wsUnitID,xMin,xMax,range);
     if(range_expanded)
     {
@@ -387,9 +388,6 @@ namespace MDAlgorithms
 
     }
 
-
-
-
    
     if (!useWorkspace) 
     {
@@ -409,7 +407,7 @@ namespace MDAlgorithms
 
    /***/
    bool ConvertToMDHelper2::findConversionRange(const MDEvents::MDWSDescription &InWSDescription,const std::string & wsUnitID,
-                              const std::string & targetUnitID,const double &xMin,const double &xMax,std::vector<double> &range)const
+                             const double &xMin,const double &xMax,std::vector<double> &range)const
    {
 
      MDEvents::UnitsConversionHelper unitsConverter;
@@ -427,7 +425,7 @@ namespace MDAlgorithms
      for(long i=0;i<nHist;i++)
      {
          unitsConverter.updateConversion(i);
-         double minTOFValue = unitsConverter.getTargetUnitPtr()->conversionTOFMin();
+         double minTOFValue = unitsConverter.getMinTOF();
          if(convertTOF)
          {
            // different unit conversion occurs in the range from minTOFValue to max_time

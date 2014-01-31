@@ -77,6 +77,8 @@ public:
     void initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode);
     void updateConversion(size_t i);
     double convertUnits(double val);   
+    // get minimal TOF convertable into target unit
+    double getMinTOF()const{return m_TargetUnit->conversionTOFMin();}
     // copy constructor
     UnitsConversionHelper(const UnitsConversionHelper &another);
 protected: // for testing

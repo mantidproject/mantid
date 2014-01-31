@@ -48,7 +48,7 @@ namespace MDAlgorithms
     void buildMinMaxWorkspaceWithMinInstrument(MDEvents::MDWSDescription &InOutWSDescription,
                                                MDEvents::MDTransfInterface const *const qTransf,Kernel::DeltaEMode::Type dEMode,bool useWorkspace);
 
-     bool findConversionRange(const MDEvents::MDWSDescription &InWSDescription,const std::string & wsUnitID,const std::string & targetUnitID,
+     bool findConversionRange(const MDEvents::MDWSDescription &InWSDescription,const std::string & wsUnitID,
                               const double &xMin,const double &xMax,std::vector<double> &range)const;
   private:
     virtual void initDocs();
