@@ -528,11 +528,11 @@ public:
       const Mantid::Geometry::FitParameter& fitParam = S_Param->value<Mantid::Geometry::FitParameter>();
       // Check for three values of centre
       double formulaValueCantreAt0 = fitParam.getValue( 0.0 );    // Value for centre=0.0
-      TS_ASSERT_DELTA( formulaValueCantreAt0, 0.2659, 0.0001);
+      TS_ASSERT_DELTA( formulaValueCantreAt0, 0.0707, 0.0001);
       double formulaValueCantreAt10 = fitParam.getValue( 10.0 );  // Value for centre=10.0
-      TS_ASSERT_DELTA( formulaValueCantreAt10, 419.1416, 0.0001);
+      TS_ASSERT_DELTA( formulaValueCantreAt10, 1805.0819, 0.0001);
       double formulaValueCantreAt20 = fitParam.getValue( 20.0 );  // Value for centre=20.0
-      TS_ASSERT_DELTA( formulaValueCantreAt20, 1654.1655, 0.0001);
+      TS_ASSERT_DELTA( formulaValueCantreAt20, 6891.6009, 0.0001);
     }
 
     Mantid::Geometry::Parameter_sptr A_Param = paramMap.get(&(*instr), "A", "fitting");
