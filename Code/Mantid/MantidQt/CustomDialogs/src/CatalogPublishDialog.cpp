@@ -34,6 +34,7 @@ namespace MantidQt
       tie(m_uiForm.inputWorkspaceCb,"InputWorkspace");
       tie(m_uiForm.nameInCatalogTxt,"NameInCatalog");
       tie(m_uiForm.investigationNumberCb,"InvestigationNumber");
+      tie(m_uiForm.descriptionInput,"DataFileDescription");
 
       // Allows the combo box to show workspaces when they are loaded into Mantid.
       m_uiForm.inputWorkspaceCb->setValidatingAlgorithm(m_algName);

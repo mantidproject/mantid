@@ -56,6 +56,7 @@ namespace Mantid
       declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default. "
           "This can only contain alphanumerics, underscores or periods.");
       declareProperty("InvestigationNumber","","The investigation number where the published file will be saved to.");
+      declareProperty("DataFileDescription","","A short description of the datafile you are publishing to the catalog.");
     }
 
     /// Execute the algorithm
@@ -115,7 +116,8 @@ namespace Mantid
       // Verify that the file can be opened correctly.
       if (fileStream.rdstate() & std::ios::failbit) throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
       // Publish the contents of the file to the server.
-      publish(fileStream,catalog->getUploadURL(getPropertyValue("InvestigationNumber"), getPropertyValue("NameInCatalog")));
+      publish(fileStream,catalog->getUploadURL(
+          getPropertyValue("InvestigationNumber"), getPropertyValue("NameInCatalog"), getPropertyValue("DataFileDescription")));
       // If a workspace was published, then we want to also publish the history of a workspace.
       if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
     }
@@ -221,7 +223,7 @@ namespace Mantid
       // Use the name the use wants to save the file to the server as and append .py
       std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
       // Publish the workspace history to the server.
-      publish(ss, catalog->getUploadURL(getPropertyValue("InvestigationNumber"), fileName));
+      publish(ss, catalog->getUploadURL(getPropertyValue("InvestigationNumber"), fileName, getPropertyValue("DataFileDescription")));
     }
 
     /**
