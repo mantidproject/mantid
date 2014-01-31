@@ -22,11 +22,14 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	#give the user some extra infromation if required
 	if Verbose:
 		inGR = mtd[samWS].getRun()
-		log = inGR.getLogData('Fit Program')
-		
-		if log:
-			val = log.value
-			logger.notice('Fit program was : '+val)
+		try:
+			log = inGR.getLogData('fit_program')
+			if log:
+				val = log.value
+				logger.notice('Fit program was : '+val)
+		except RuntimeError:
+			#if we couldn't find the fit program, just pass
+			pass
 
 		logger.notice('Parameters in ' + samWS)
 
@@ -70,19 +73,25 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 		return
 
 	#run fit function
-	fitWS = samWS[:-10] +'_'+ jumpFunc +'fit'
-	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fitWS, StartX=qmin, EndX=qmax)
+	fit_workspace_base = samWS[:-10] +'_'+ jumpFunc +'fit'
+	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fit_workspace_base, StartX=qmin, EndX=qmax)
+	fit_workspace = fit_workspace_base + '_Workspace'
+	
+	CopyLogs(InputWorkspace=samWS, OutputWorkspace=fit_workspace)
+	AddSampleLog(Workspace=fit_workspace, LogName="jump_function", LogType="String", LogText=jumpFunc)
+	AddSampleLog(Workspace=fit_workspace, LogName="q_min", LogType="Number", LogText=str(qmin))
+	AddSampleLog(Workspace=fit_workspace, LogName="q_max", LogType="Number", LogText=str(qmax))
 
 	#process output options
 	if Save:
-		fit_path = os.path.join(workdir,fitWS+'_Workspace.nxs')
-		SaveNexusProcessed(InputWorkspace=fitWS+'_Workspace', Filename=fit_path)
+		fit_path = os.path.join(workdir,fit_workspace+'.nxs')
+		SaveNexusProcessed(InputWorkspace=fit_workspace, Filename=fit_path)
 		
 		if Verbose:
 			logger.notice('Fit file is ' + fit_path)
 
 	if Plot:
-		JumpPlot(fitWS+'_Workspace')
+		JumpPlot(fit_workspace)
 
 	EndTime('Jump fit : '+jumpFunc+' ; ')
 
