@@ -150,7 +150,7 @@ private slots:
   void checkAppendingNextRun();
 
   /// When the tab has changed.
-  void changeTab(int);
+  void changeTab(int newTabIndex);
 
   /// Update the plot based on changes on the front tab
   void homeTabUpdatePlot();

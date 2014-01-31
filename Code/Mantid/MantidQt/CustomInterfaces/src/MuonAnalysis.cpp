@@ -2054,8 +2054,8 @@ void MuonAnalysis::updateFrontAndCombo()
 }
 
 /**
- * Updates widgets related to period algebra
- * @param newNumPeriods Number of periods available
+ * Updates widgets related to period algebra.
+ * @param numPeriods Number of periods available
  */
 void MuonAnalysis::updatePeriodWidgets(int numPeriods)
 {
@@ -3111,11 +3111,11 @@ void MuonAnalysis::getFullCode(int originalSize, QString & run)
 /**
  * Is called every time when tab gets changed
  *
- * @param tabNumber The index value of the current tab
+ * @param newTabIndex :: The index of the tab we switch to
  */
-void MuonAnalysis::changeTab(int newTabNumber)
+void MuonAnalysis::changeTab(int newTabIndex)
 {
-  QWidget* newTab = m_uiForm.tabWidget->widget(newTabNumber);
+  QWidget* newTab = m_uiForm.tabWidget->widget(newTabIndex);
 
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
