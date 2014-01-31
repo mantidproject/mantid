@@ -304,10 +304,17 @@
       <archiveSearch plugin="SNSDataSearchICAT2" />
    </archive>
 
-   <computeResource name="Fermi">
-      <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
-   </computeResource>
-
+  <catalog name="ICat4Catalog">
+    <soapendpoint url="https://icat.sns.gov:8181/ICATService/ICAT"></soapendpoint>
+    <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
+    <filelocation>
+      <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
+      <windows replacement=""></windows>
+      <linux replacement="/archive"></linux>
+      <mac replacement="/archive"></mac>
+    </filelocation>
+  </catalog>
+  
    <instrument name="DAS"> 
       <technique>technique</technique>
    </instrument> 
