@@ -1,4 +1,9 @@
-# Algorithm to start Bayes programs
+'''
+*WIKI*
+This is a variation of the stretched exponential option of [[IndirectBayes:Quasi|Quasi]]. For each spectrum a fit is performed for a grid of &beta; and &sigma; values. 
+The distribution of goodness of fit values is plotted.
+*WIKI*
+'''
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *

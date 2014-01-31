@@ -1,4 +1,11 @@
-# Algorithm to start Bayes programs
+'''
+*WIKI*
+This algorithm creates a group 'normalisation' file by taking a resolution file and fitting it to all the groups in the resolution (vanadium) data file which has the same grouping as the sample data of interest. 
+The routine varies the width of the resolution file to give a 'stretch factor' and the area provides an intensity normalisation factor. 
+The fitted parameters are in the group workspace with suffix _ResNorm with additional suffices of Intensity & Stretch. 
+The fitted data are in the workspace ending in _ResNorm_Fit.
+*WIKI*
+'''
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
