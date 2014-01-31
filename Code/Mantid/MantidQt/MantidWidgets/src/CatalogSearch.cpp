@@ -819,7 +819,7 @@ namespace MantidQt
       updateDataFileLabels(item);
 
       // Perform the "search" and obtain the related data files for the selected investigation.
-      m_icatHelper->executeGetDataFiles(investigationId->text().toLongLong());
+      m_icatHelper->executeGetDataFiles(investigationId->text().toStdString());
 
       // Populate the dataFile table from the "dataFileResults" workspace.
       populateDataFileTable();
