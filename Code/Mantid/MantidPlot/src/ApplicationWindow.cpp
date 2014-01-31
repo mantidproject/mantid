@@ -2956,6 +2956,9 @@ void ApplicationWindow::setPreferences(Graph* g)
           g->setAxisTitle(i, tr(" "));
       }
     }
+
+
+
     //set the scale type i.e. log or linear
     g->setScale(QwtPlot::yLeft, d_axes_scales[0]);
     g->setScale(QwtPlot::yRight, d_axes_scales[1]);
@@ -2980,6 +2983,7 @@ void ApplicationWindow::setPreferences(Graph* g)
     for (int i = 0; i < QwtPlot::axisCnt; i++)
       g->setAxisTitleDistance(i, d_graph_axes_labels_dist);
     //    need to call the plot functions for log/linear, errorbars and distribution stuff
+
   }
 
   g->setSynchronizedScaleDivisions(d_synchronize_graph_scales);
@@ -5131,9 +5135,10 @@ void ApplicationWindow::readSettings()
    
   // Transform from the old setting for plot defaults, will only happen once.
   if ( !settings.contains("/UpdateForPlotImprovements1") )
-  {
-    settings.beginGroup("/General");
+  {    
     settings.writeEntry("/UpdateForPlotImprovements1","true");
+    settings.beginGroup("/General");
+
     settings.writeEntry("/Antialiasing","true");
 
     //enable right and top axes without labels
@@ -14190,6 +14195,7 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
   MultiLayer* g = multilayerPlot(generateUniqueName(tr("Graph")));
   Graph* plot = g->activeGraph();
   setPreferences(plot);
+  setSpectrogramTickStyle(plot);  
 
   plot->plotSpectrogram(m, type);
 
@@ -14197,6 +14203,17 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
 
   QApplication::restoreOverrideCursor();
   return g;
+}
+
+void ApplicationWindow::setSpectrogramTickStyle(Graph* g)
+{
+  //always use the out tick style for colour bar axes
+  QList<int> ticksList;
+  ticksList<<majTicksStyle<<Graph::Ticks::Out<<majTicksStyle<<majTicksStyle;
+  g->setMajorTicksType(ticksList);
+  ticksList.clear();
+  ticksList<<minTicksStyle<<Graph::Ticks::Out<<minTicksStyle<<minTicksStyle;
+  g->setMinorTicksType(ticksList);
 }
 
 ApplicationWindow* ApplicationWindow::importOPJ(const QString& filename, bool factorySettings, bool newProject)

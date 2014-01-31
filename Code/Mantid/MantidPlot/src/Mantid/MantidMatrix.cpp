@@ -692,6 +692,8 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, Graph::CurveType type,bool project,const ProjectData* const prjData)
 {
   app->setPreferences(plot);
+  app->setSpectrogramTickStyle(plot);
+
   plot->setTitle(tr("Workspace ") + name());
   const Mantid::API::Axis* ax;
   ax = m_workspace->getAxis(0);
