@@ -225,8 +225,34 @@ void StepScan::loadFileComplete(bool error)
   }
 }
 
+// Small class to handle disabling mouse clicks and showing the busy cursor in an RAII manner.
+// Used in the runStepScanAlg below to ensure these things are unset when the method is exited.
+class DisableGUI_RAII
+{
+public:
+  DisableGUI_RAII(StepScan * gui) : the_gui(gui)
+  {
+    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
+  }
+
+  ~DisableGUI_RAII()
+  {
+    QApplication::restoreOverrideCursor();
+    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents, false );
+  }
+
+private:
+  StepScan * const the_gui;
+};
+
 bool StepScan::mergeRuns()
 {
+  // This can be slow and will lock the GUI, but will probably be so rarely used that it's
+  // not worth making it asynchronous
+  // Block mouse clicks while the algorithm runs. Also set the busy cursor.
+  DisableGUI_RAII _blockclicks(this);
+
   // Get hold of the group workspace and go through the entries adding an incrementing scan_index variable
   WorkspaceGroup_const_sptr wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_inputWSName);
   if ( !wsGroup ) return true; // Shouldn't be possible, but be defensive
@@ -402,27 +428,6 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
 
   return stepScan;
 }
-
-// Small class to handle disabling mouse clicks and showing the busy cursor in an RAII manner.
-// Used in the runStepScanAlg below to ensure these things are unset when the method is exited.
-class DisableGUI_RAII
-{
-public:
-  DisableGUI_RAII(StepScan * gui) : the_gui(gui)
-  {
-    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents );
-  }
-
-  ~DisableGUI_RAII()
-  {
-    QApplication::restoreOverrideCursor();
-    the_gui->setAttribute( Qt::WA_TransparentForMouseEvents, false );
-  }
-
-private:
-  StepScan * const the_gui;
-};
 
 void StepScan::runStepScanAlg()
 {
