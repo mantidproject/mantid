@@ -618,8 +618,9 @@ def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
 			num_spectra = mtd[ws_name].getNumberHistograms()
 
 			if (plot_type == 'Prob' or plot_type == 'All'):
-				pWS = ws_stem+'_Prob'
-				mp.plotSpectrum(pWS,[1,2],False)
+				prob_ws = ws_stem+'_Prob'
+				if prob_ws in mtd.getObjectNames():
+					mp.plotSpectrum(prob_ws,[1,2],False)
 		
 			if (plot_type == 'Amplitude' or plot_type == 'All'):
 				spectra_indicies = [i for i in range(num_spectra) if 'Amplitude' in mtd[ws_name].getAxis(1).label(i)]
@@ -628,6 +629,10 @@ def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
 			if (plot_type == 'FWHM' or plot_type == 'All'):
 				spectra_indicies = [i for i in range(num_spectra) if 'FWHM' in mtd[ws_name].getAxis(1).label(i)]
 				plotSpectra(ws_name, 'FWHM', indicies=spectra_indicies[:3])
+
+			if (plot_type == 'Beta' or plot_type == 'All'):
+				spectra_indicies = [i for i in range(num_spectra) if 'Beta' in mtd[ws_name].getAxis(1).label(i)]
+				plotSpectra(ws_name, 'Beta', indicies=spectra_indicies[:3])
 
 		if (plot_type == 'Fit' or plot_type == 'All'):
 			fWS = ws_stem+'_Result_0'
