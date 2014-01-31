@@ -166,21 +166,35 @@ void StepScan::startLiveListenerComplete(bool error)
 
 void StepScan::loadFile(bool async)
 {
-  const QString filename = m_uiForm.mWRunFiles->getFirstFilename();
+  const QString filename = m_uiForm.mWRunFiles->getUserInput().asString();
   // This handles the fact that mwRunFiles emits the filesFound signal more than
   // we want (on some platforms). TODO: Consider dealing with this up in mwRunFiles.
-  if ( filename != m_inputFilename )
+  if ( filename != m_inputFilename && m_uiForm.mWRunFiles->isValid() )
   {
     m_inputFilename = filename;
 
     // Remove any previously-loaded workspaces
     cleanupWorkspaces();
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadEventNexus");
-    alg->setPropertyValue("Filename", filename.toStdString());
-    m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
-    alg->setPropertyValue("OutputWorkspace", m_inputWSName);
-    alg->setProperty("LoadMonitors", true);
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
+    try {
+      alg->setPropertyValue("Filename", filename.toStdString());
+      if ( m_uiForm.mWRunFiles->getFilenames().size() == 1 )
+      {
+        m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
+      }
+      else
+      {
+        m_inputWSName = "__multifiles";
+      }
+      alg->setPropertyValue("OutputWorkspace", m_inputWSName);
+      alg->setProperty("LoadMonitors", true);
+    }
+    catch (std::exception&) // Have to catch at this level as different exception types can happen
+    {
+      QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
+      return;
+    }
 
     if ( async )
     {
@@ -198,6 +212,9 @@ void StepScan::loadFile(bool async)
 void StepScan::loadFileComplete(bool error)
 {
   disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(loadFileComplete(bool)));
+
+  if ( m_inputWSName == "__multifiles" && !error ) error = mergeRuns();
+
   if ( ! error )
   {
     setupOptionControls();
@@ -206,6 +223,35 @@ void StepScan::loadFileComplete(bool error)
   {
     QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
   }
+}
+
+bool StepScan::mergeRuns()
+{
+  // Get hold of the group workspace and go through the entries adding an incrementing scan_index variable
+  WorkspaceGroup_const_sptr wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_inputWSName);
+  if ( !wsGroup ) return true; // Shouldn't be possible, but be defensive
+
+  for ( size_t i = 0; i < wsGroup->size(); ++i )
+  {
+    // Add a scan_index variable to each workspace, counting from 1
+    MatrixWorkspace_sptr ws = boost::static_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    if ( !ws ) return true; // Again, shouldn't be possible (unless there's a group within a group?)
+    IAlgorithm_sptr addScanIndex = AlgorithmManager::Instance().create("AddSampleLog");
+    addScanIndex->setPropertyValue("Workspace",ws->name());
+    addScanIndex->setProperty("LogName","scan_index");
+    addScanIndex->setProperty("LogType","Number Series");
+    addScanIndex->setProperty("LogText",Strings::toString(i+1));
+    if ( ! addScanIndex->execute() ) return true;
+  }
+
+  IAlgorithm_sptr merge = AlgorithmManager::Instance().create("MergeRuns");
+  merge->setPropertyValue("InputWorkspaces",m_inputWSName);
+  const std::string summedWSName = "__summed_multifiles";
+  merge->setPropertyValue("OutputWorkspace",summedWSName);
+  if ( ! merge->execute() ) return true;
+  m_inputWSName = summedWSName;
+
+  return false;
 }
 
 void StepScan::setupOptionControls()

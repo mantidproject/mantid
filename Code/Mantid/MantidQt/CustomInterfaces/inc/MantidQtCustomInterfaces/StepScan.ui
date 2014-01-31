@@ -21,6 +21,9 @@
        <property name="label" stdset="0">
         <string>Data source</string>
        </property>
+       <property name="multipleFiles" stdset="0">
+        <bool>true</bool>
+       </property>
        <property name="optional" stdset="0">
         <bool>true</bool>
        </property>

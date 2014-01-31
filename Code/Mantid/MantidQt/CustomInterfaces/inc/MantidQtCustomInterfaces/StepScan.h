@@ -53,6 +53,7 @@ private slots:
 private:
   void initLayout();
   void startLiveListener();
+  bool mergeRuns();
   void setupOptionControls();
   void clearNormalizationCombobox();
   Mantid::API::IAlgorithm_sptr setupStepScanAlg();
