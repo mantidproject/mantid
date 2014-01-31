@@ -21,7 +21,6 @@ EXTENSIONS = [".dat", ".txt"]
 INSTRUMENTS = ["ARCS", "BASIS", "CNCS", "SEQUOIA"]
 TYPE1 = (8, 128)
 TYPE2 = (64, 64)
-SEQUOIA_OFFSET = 38
 
 class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
     """
@@ -123,13 +122,9 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         else:
             det_size = TYPE1
             
-        offset = 1
-        if self._instName == "SEQUOIA":
-            offset = SEQUOIA_OFFSET
-            
         parts = idx.split('_')
         bankid = int(parts[0].split('bank')[-1])
-        return int(parts[2]) + det_size[1] * (int(parts[1]) + det_size[0] * (bankid-offset))
+        return int(parts[2]) + det_size[1] * (int(parts[1]) + det_size[0] * (bankid-1))
         
 # Register algorithm with Mantid.
 api.AlgorithmFactory.subscribe(ConvertSnsRoiFileToMask)
