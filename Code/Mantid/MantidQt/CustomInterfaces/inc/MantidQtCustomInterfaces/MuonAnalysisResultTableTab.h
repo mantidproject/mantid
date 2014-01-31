@@ -56,9 +56,6 @@ public:
   // Refresh the label list and re-populate the tables
   void refresh();
 
-  static const std::string RUN_NO_LOG; // Name of the run_number log
-  static const std::string RUN_NO_TITLE; // Table title for the run_number
-
 signals:
   /// Emitted to run some (usually simple) Python code
   void runPythonCode(const QString& code, bool async);
@@ -75,6 +72,12 @@ private slots:
 private:
   /// Postfix used by Fit fot result workspaces
   static const std::string WORKSPACE_POSTFIX;
+
+  /// Names of the non-timeseries logs we should display
+  static const QStringList NON_TIMESERIES_LOGS;
+
+  /// LessThan function used to sort log names
+  static bool logNameLessThan(const QString& logName1, const QString& logName2);
 
   void storeUserSettings();
   void applyUserSettings();
@@ -110,6 +113,7 @@ private:
   QMap<QString, Qt::CheckState> m_savedLogsState;
 
   QList<QString> m_unselectedFittings;
+
 };
 
 }

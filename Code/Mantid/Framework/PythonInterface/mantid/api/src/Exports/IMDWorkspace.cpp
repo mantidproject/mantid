@@ -22,8 +22,8 @@ void export_IMDWorkspace()
 
   // EventWorkspace class
   class_< IMDWorkspace, bases<Workspace, MDGeometry>, boost::noncopyable >("IMDWorkspace", no_init)
-    .def("getNPoints", &IMDWorkspace::getNPoints, "Returns the total number of points within the workspace")
-    .def("getNEvents", &IMDWorkspace::getNEvents, "Returns the total number of events, contributed to the workspace")
+    .def("getNPoints", &IMDWorkspace::getNPoints, args("self"), "Returns the total number of points within the workspace")
+    .def("getNEvents", &IMDWorkspace::getNEvents, args("self"), "Returns the total number of events, contributed to the workspace")
     ;
 
   REGISTER_SINGLEVALUE_HANDLER(IMDWorkspace_sptr);

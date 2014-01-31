@@ -600,7 +600,6 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
       {
         g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
         g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
-        g->setAntialiasing(false);
         g->setAutoScale();
       }
     }
@@ -2989,7 +2988,6 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
   }
   g->setXAxisTitle(tr(s.c_str()));
   g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-  g->setAntialiasing(false);
   g->setAutoScale();
 }
 
@@ -3011,7 +3009,6 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   }
   g->setXAxisTitle(tr(xtitle.c_str()));
   g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-  g->setAntialiasing(false);
 }
 
 /**
@@ -3189,7 +3186,6 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     }
     g->setYAxisTitle(tr(yTitle.c_str()));
 
-    g->setAntialiasing(false);
     g->setAutoScale();
     /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
      * data points. However, this has the side-effect suggested by its name: all the axes become

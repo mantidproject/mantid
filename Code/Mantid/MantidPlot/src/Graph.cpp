@@ -139,7 +139,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   ignoreResize = false;
   drawAxesBackbone = true;
   autoScaleFonts = false;
-  d_antialiasing = false;
+  d_antialiasing = true;
   d_scale_on_print = true;
   d_print_cropmarks = false;
   d_synchronize_scales = false;
@@ -2053,8 +2053,6 @@ void Graph::setCanvasFrame(int width, const QColor& color)
 
 void Graph::drawAxesBackbones(bool yes)
 {
-  if (drawAxesBackbone == yes)
-    return;
 
   drawAxesBackbone = yes;
 
@@ -2064,7 +2062,14 @@ void Graph::drawAxesBackbones(bool yes)
     if (scale)
     {
       ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw (i));
-      sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, yes);
+      if (isColorBarEnabled(i)) //always draw the backbone for a colour bar axis
+      {
+        sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, true);
+      }
+      else
+      {
+        sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, yes);
+      }
       scale->repaint();
     }
   }

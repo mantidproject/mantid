@@ -7,8 +7,10 @@ import csv
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
+from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 from latest_isis_runs import *
+
 from mantid.api import Workspace, WorkspaceGroup
 
 try:
@@ -116,14 +118,29 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.connectSlots()
         
     def initTable(self):
-        self.current_table = None
+
+        self.currentTable = None
+        self.accMethod = None
+
         self.tableMain.resizeColumnsToContents()
         
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                if (column == 17):
+                
+                if (column == 0) or (column == 5) or (column == 10):
+                    item = QtGui.QTableWidgetItem()
+                    item.setText('')
+                    item.setToolTip('Runs can be colon delimited to coadd them')
+                    self.tableMain.setItem(row, column, item)
+                elif (column == 1) or (column == 6) or (column == 11):
+                    item = QtGui.QTableWidgetItem()
+                    item.setText('')
+                    item.setToolTip('Angles are in degrees')
+                    self.tableMain.setItem(row, column, item)
+                elif (column == 17):
                     check = QtGui.QCheckBox()
                     check.setCheckState(False)
+                    check.setToolTip('If checked, the runs in this row will be stitched together')
                     item = QtGui.QWidget()
                     layout = QtGui.QHBoxLayout(item)
                     layout.addWidget(check)
@@ -138,11 +155,11 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
     def connectSlots(self):
-        self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
         self.comboPolarCorrect.activated.connect(self.on_comboPolarCorr_activated)
         self.textRB.returnPressed.connect(self.on_textRB_editingFinished)
+        self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.buttonSearch.clicked.connect(self.on_textRB_editingFinished)
         self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
         self.buttonProcess.clicked.connect(self.on_buttonProcess_clicked)
@@ -154,7 +171,13 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionSave_Workspaces.triggered.connect(self.on_actionSave_Workspaces_triggered)
         self.actionClose_Refl_Gui.triggered.connect(self.windowRefl.close)
         self.actionMantid_Help.triggered.connect(self.on_actionMantid_Help_triggered)
+        self.actionAutofill.triggered.connect(self.on_buttonAuto_clicked)
+        self.actionSearch_RB.triggered.connect(self.on_textRB_editingFinished)
+        self.actionClear_Table.triggered.connect(self.on_buttonClear_clicked)
+        self.actionProcess.triggered.connect(self.on_buttonProcess_clicked)
+        self.actionTransfer.triggered.connect(self.on_buttonTransfer_clicked)
         self.tableMain.cellChanged.connect(self.on_tableMain_modified)
+        
     def populateList(self):
         # Clear existing
         self.listMain.clear()
@@ -195,16 +218,27 @@ class ReflGui(refl_window.Ui_windowRefl):
         for cell in self.tableMain.selectedItems():
             sum = sum + self.tableMain.row(cell)
         if (howMany):
-            if (sum / howMany == self.tableMain.row(self.tableMain.selectedItems()[0])):
+            selectedrow = self.tableMain.row(self.tableMain.selectedItems()[0])
+            if (sum / howMany == selectedrow):
+                startrow = selectedrow + 1
+                filled = 0
                 for cell in self.tableMain.selectedItems():
-                    row = self.tableMain.row(cell) + 1
+                    row = startrow
                     txt = cell.text()
                     while (self.tableMain.item(row, 0).text() != ''):
                         item = QtGui.QTableWidgetItem()
                         item.setText(txt)
                         self.tableMain.setItem(row, self.tableMain.column(cell), item)
                         row = row + 1
-    
+
+                        filled = filled + 1
+                if not filled:
+                    QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
+            else:
+                QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
+        else:
+            QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
+
     '''
     Create a display name from a workspace.
     '''
@@ -214,6 +248,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         else:
             todisplay = groupGet(mtd[first_contents], "samp", "run_number")
         return todisplay
+
 
     def transfer(self):
         col = 0
@@ -247,6 +282,22 @@ class ReflGui(refl_window.Ui_windowRefl):
     def unTickAll(self,state):
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, 17).children()[1].setCheckState(state)
+    def getAccMethod(self):
+        msgBox = QtGui.QMessageBox()
+        msgBox.setText("The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?")
+        msgBox.setIcon(QtGui.QMessageBox.Question)
+        AddButton = msgBox.addButton("Add", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
+        ReplaceButton = msgBox.addButton("Replace", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
+        AppendButton = msgBox.addButton("Append", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
+        msgBox.setDefaultButton(AddButton)
+        msgBox.setEscapeButton(AddButton)
+        reply = msgBox.exec_()
+        if msgBox.clickedButton() == AppendButton:
+            return "Append"
+        elif msgBox.clickedButton() == ReplaceButton:
+            return "Replace"
+        else:
+            return "Add"
     def process(self):
 #--------- If "Process" button pressed, convert raw files to IvsLam and IvsQ and combine if checkbox ticked -------------
         willProcess = True
@@ -264,6 +315,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         if willProcess:
             for row in rowIndexes:  # range(self.tableMain.rowCount()):
                 runno = []
+                loadedRuns = []
                 wksp = []
                 wkspBinned = []
                 overlapLow = []
@@ -283,8 +335,18 @@ class ReflGui(refl_window.Ui_windowRefl):
                             overlapHigh.append(float(ovHigh))
                     print len(runno), "runs: ", runno
                     # Determine resolution
-                    # if (runno[0] != ''):
                     if (self.tableMain.item(row, 15).text() == ''):
+
+                        loadedRun = None
+                        if load_live_runs.is_live_run(runno[0]):
+                            if not self.accMethod:
+                            #reply = QtGui.QMessageBox.question(self.tableMain, 'Accumulation Method?',"The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                                self.accMethod = self.getAccMethod()
+                            loadedRun = load_live_runs.get_live_data(config['default.instrument'], Accumulation = self.accMethod)
+                        else:
+                            Load(Filename=run, outputWorkspace="run")
+                            loadedRun = mtd["run"]
+                            
                         try:
                             dqq = calcRes(runno[0])
                             item = QtGui.QTableWidgetItem()
@@ -293,7 +355,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                             print "Calculated resolution: ", dqq
                         except IndexError:
                             logger.warning("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
-                            pass
+                              
                     else:
                         dqq = float(self.tableMain.item(row, 15).text())
                     # Populate runlist
@@ -370,8 +432,6 @@ class ReflGui(refl_window.Ui_windowRefl):
                         w1 = getWorkspace(wksp[0])
                         w2 = getWorkspace(wksp[len(wksp) - 1])
                         begoverlap = w2.readX(0)[0]
-                        # Qmin = w1.readX(0)[0]
-                        # Qmax = max(w2.readX(0))
                         # get Qmax
                         if (self.tableMain.item(row, i * 5 + 4).text() == ''):
                             overlapHigh = 0.3 * max(w1.readX(0))
@@ -387,17 +447,23 @@ class ReflGui(refl_window.Ui_windowRefl):
                             gcomb.activeLayer().setTitle(titl)
                             gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
                             gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+        self.accMethod = None
     def dorun(self, runno, row, which):
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
-        names = mtd.getObjectNames()
-        wlam, wq, th = quick(runno, trans=transrun, theta=angle, polcorr=self.current_polarisation_method)
+        loadedRun = runno
+        if load_live_runs.is_live_run(runno):
+            if not self.accMethod:
+                self.accMethod = self.getAccMethod()
+            loadedRun = load_live_runs.get_live_data(InstrumentName = config['default.instrument'], Accumulation = self.accMethod)
+        wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
+
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-                 
+      
         inst = groupGet(wq, 'inst')
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
         lmax = inst.getNumberParameter('LambdaMax')[0] - 2
@@ -524,6 +590,7 @@ class ReflGui(refl_window.Ui_windowRefl):
     def showHelp(self):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
+
         
 '''
 Get a representative workspace from the input workspace.
@@ -563,7 +630,8 @@ def calcRes(run):
     #1500.0 is the S1-S2 distance in mm for SURF!!!
     resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
     print "dq/q=", resolution
-    DeleteWorkspace(runno)
+    if not type(run) == type(Workspace):
+        DeleteWorkspace(runno)
     return resolution
 
 def groupGet(wksp, whattoget, field=''):
