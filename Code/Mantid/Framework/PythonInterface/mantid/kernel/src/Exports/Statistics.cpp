@@ -32,11 +32,13 @@ namespace
   class UnknownDataType : public std::invalid_argument
   {
   public:
-    UnknownDataType(const std::string & methodName)
-      : std::invalid_argument(methodName + "(): Unknown datatype. Currently only arrays of "
+    UnknownDataType()
+      : std::invalid_argument("Unknown datatype. Currently only arrays of "
                               "Python floats are supported ")
     {}
   };
+
+  //============================ getStatistics ============================================
 
   /**
    * Proxy for @see Mantid::Kernel::getStatistics so that it can accept numpy arrays,
@@ -53,20 +55,30 @@ namespace
     }
     else
     {
-      throw UnknownDataType("getStatistics");
+      throw UnknownDataType();
     }
   }
   // Define an overload to handle the default argument
   BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1, 2);
 
+  //============================ getMoments ============================================
+
+  // Function pointer to real implementation of getMoments
+  typedef std::vector<double> (*MomentsFunction)(const std::vector<double>& indep,
+                                                 const std::vector<double>& depend, const int);
 
   /**
-   * Proxy for @see Mantid::Kernel::getMomentsAboutOrigin so that it can accept numpy arrays
+   * The implementation for getMomentsAboutOrigin & getMomentsAboutOriginMean for using
+   * numpy arrays are identical. This encapsulates that behaviour an additional parameter for
+   * specifying the actual function called along.
+   * @param momentsFunc A function pointer to the required moments function
+   * @param indep Numpy array of independent variables
+   * @param depend Numpy array of dependent variables
+   * @param maxMoment Maximum number of moments to return
    */
-  std::vector<double> getMomentsAboutOriginNumpy(const numeric::array& indep, numeric::array& depend,
-                                                 const int maxMoment = 3)
+  std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc,const numeric::array& indep,
+                                          const numeric::array& depend, const int maxMoment)
   {
-    using Mantid::Kernel::getMomentsAboutOrigin;
     using Converters::NDArrayToVector;
 
     auto *indepPtr = indep.ptr();
@@ -74,18 +86,28 @@ namespace
     // Both input arrays must have the same typed data
     if(PyArray_TYPE((PyArrayObject*)indepPtr) != PyArray_TYPE((PyArrayObject*)dependPtr))
     {
-      throw std::invalid_argument("getMomentsAboutOrigin() : Datatypes of input arrays must match.");
+      throw std::invalid_argument("Datatypes of input arrays must match.");
     }
 
     if(PyArray_ISFLOAT(indepPtr) && PyArray_ISFLOAT(dependPtr))
     {
-      return getMomentsAboutOrigin(NDArrayToVector<double>(indep)(),
-                                   NDArrayToVector<double>(depend)(), maxMoment);
+      return momentsFunc(NDArrayToVector<double>(indep)(),
+                         NDArrayToVector<double>(depend)(), maxMoment);
     }
     else
     {
-      throw UnknownDataType("getMomentsAboutOrigin");
+      throw UnknownDataType();
     }
+  }
+
+  /**
+   * Proxy for @see Mantid::Kernel::getMomentsAboutOrigin so that it can accept numpy arrays
+   */
+  std::vector<double> getMomentsAboutOriginNumpy(const numeric::array& indep, const numeric::array& depend,
+                                                 const int maxMoment = 3)
+  {
+    using Mantid::Kernel::getMomentsAboutOrigin;
+    return getMomentsNumpyImpl(&getMomentsAboutOrigin, indep, depend, maxMoment);
   }
 
   // Define an overload to handle the default argument
@@ -98,32 +120,15 @@ namespace
                                                const int maxMoment = 3)
   {
     using Mantid::Kernel::getMomentsAboutMean;
-    using Converters::NDArrayToVector;
-
-    auto *indepPtr = indep.ptr();
-    auto *dependPtr = depend.ptr();
-    // Both input arrays must have the same typed data
-    if(PyArray_TYPE((PyArrayObject*)indepPtr) != PyArray_TYPE((PyArrayObject*)dependPtr))
-    {
-      throw std::invalid_argument("getMomentsAboutOrigin() : Datatypes of input arrays must match.");
-    }
-
-    if(PyArray_ISFLOAT(indepPtr) && PyArray_ISFLOAT(dependPtr))
-    {
-      return getMomentsAboutMean(NDArrayToVector<double>(indep)(),
-                                 NDArrayToVector<double>(depend)(), maxMoment);
-    }
-    else
-    {
-      throw UnknownDataType("getMomentsAboutMean");
-    }
+    return getMomentsNumpyImpl(&getMomentsAboutMean, indep, depend, maxMoment);
   }
 
   // Define an overload to handle the default argument
   BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads, getMomentsAboutMeanNumpy, 2, 3);
   ///@endcond
-
 }
+
+// -------------------------------------- Exports start here --------------------------------------
 
 void export_Statistics()
 {
