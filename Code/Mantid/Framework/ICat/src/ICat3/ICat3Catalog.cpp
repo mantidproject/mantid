@@ -103,10 +103,12 @@ namespace Mantid
      * @param createFileName  :: The name to give to the file being saved.
      * @return URL to PUT datafiles to.
      */
-    const std::string ICat3Catalog::getUploadURL(const std::string &investigationID, const std::string &createFileName)
+    const std::string ICat3Catalog::getUploadURL(
+        const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription)
     {
       UNUSED_ARG(investigationID);
       UNUSED_ARG(createFileName);
+      UNUSED_ARG(dataFileDescription);
       throw std::runtime_error("ICat3Catalog does not support publishing.");
     }
 

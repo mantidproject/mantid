@@ -738,7 +738,8 @@ namespace Mantid
      * @param createFileName  :: The name to give to the file being saved.
      * @return URL to PUT datafiles to.
      */
-    const std::string ICat4Catalog::getUploadURL(const std::string &investigationID, const std::string &createFileName)
+    const std::string ICat4Catalog::getUploadURL(
+        const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription)
     {
       // Obtain the URL from the Facilities.xml file.
       std::string url = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
@@ -749,9 +750,10 @@ namespace Mantid
       if (sessionID.empty()) throw std::runtime_error("You are not currently logged into the cataloging system.");
       std::string name      = "&name="      + createFileName;
       std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetId(investigationID));
+      std::string description = "&description=" + dataFileDescription;
 
       // Add pieces of URL together.
-      url += ("put?" + session + name + datasetId + "&datafileFormatId=1");
+      url += ("put?" + session + name + datasetId + description + "&datafileFormatId=1");
       g_log.debug() << "ICat4Catalog::getUploadURL url is: " << url << std::endl;
       return url;
     }
