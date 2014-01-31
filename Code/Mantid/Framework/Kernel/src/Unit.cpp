@@ -161,14 +161,12 @@ double Unit::convertSingleFromTOF(const double xvalue, const double& l1, const d
   return this->singleFromTOF(xvalue);
 }
 
-std::vector<double> Unit::conversionRange()const
+std::pair<double,double> Unit::conversionRange()const
 {
   double u1=this->singleFromTOF(this->conversionTOFMin());
   double u2=this->singleFromTOF(this->conversionTOFMax());
-  std::vector<double> range(2);
-  range[0] = std::min(u1,u2);
-  range[1] = std::max(u1,u2);
-  return range;
+  //
+  return std::pair<double,double>(std::min(u1,u2),std::max(u1,u2));
 }
 
 namespace Units

@@ -36,8 +36,8 @@ std::string convert_units_check_range(const Unit &aUnit,std::vector<double> &sam
 
 
   auto range = aUnit.conversionRange();
-  double tof1=aUnit.singleToTOF(range[0]);
-  double tof2=aUnit.singleToTOF(range[1]);
+  double tof1=aUnit.singleToTOF(range.first);
+  double tof2=aUnit.singleToTOF(range.second);
   bool t_increases(true);
   if (tof1>tof2)
     t_increases=false;
@@ -61,16 +61,16 @@ std::string convert_units_check_range(const Unit &aUnit,std::vector<double> &sam
 
   const size_t nSteps(100);
 
-  double step = (range[1]-range[0])/nSteps;
+  double step = (range.second-range.first)/nSteps;
   if (step == std::numeric_limits<double>::infinity())
   {
     step =(DBL_MAX/nSteps)*2;
   }
  
-  double t1 = aUnit.singleToTOF(range[0]);
+  double t1 = aUnit.singleToTOF(range.first);
   for(size_t i=1;i<=nSteps;i++)
   {
-    double unitVal=range[0]+double(i)*step;
+    double unitVal=range.first+double(i)*step;
     double tofVal = aUnit.singleToTOF(unitVal);
     if (t_increases)
     {

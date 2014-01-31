@@ -167,7 +167,7 @@ public:
   virtual double conversionTOFMax()const=0;
  
   /**The range where conversion to TOF from given units is monotonic and reversible*/
-  virtual std::vector<double> conversionRange()const;
+  virtual std::pair<double,double> conversionRange()const;
 
 protected:
   // Add a 'quick conversion' for a unit pair
