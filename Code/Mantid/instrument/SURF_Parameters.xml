@@ -40,5 +40,19 @@
   <parameter name="LambdaMax">
     <value val="9.0"/>
   </parameter>
+
+  <!-- parameters for efficiency correction -->
+  <parameter name="correction" type="string">
+    <value val="exponential"/>
+  </parameter>
+
+  <parameter name="C0">
+    <value val="36.5688"/>
+  </parameter>
+
+  <parameter name="C1">
+    <value val="0.188676"/>
+  </parameter>
+
 </component-link>
 </parameter-file>
