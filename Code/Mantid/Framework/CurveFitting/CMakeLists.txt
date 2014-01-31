@@ -17,8 +17,8 @@ set ( SRC_FILES
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
 	src/ConvertToYSpace.cpp
-	src/ConvolveWorkspaces.cpp
 	src/Convolution.cpp
+	src/ConvolveWorkspaces.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
 	src/CostFuncRwp.cpp
@@ -220,6 +220,7 @@ set ( TEST_FILES
 	ComptonScatteringCountRateTest.h
 	ConvertToYSpaceTest.h
 	ConvolutionTest.h
+	ConvolveWorkspacesTest.h
 	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h

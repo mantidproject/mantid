@@ -65,20 +65,13 @@ void ConvolveWorkspaces::exec()
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
   const size_t numBins = ws1->blocksize();
-  const bool histogram = ws1->isHistogramData();
   Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D",numHists,numBins,numBins-1));
 
   WorkspaceFactory::Instance().initializeFromParent(ws1, outputWS, true);
   // First check that the workspace are the same size
-  if ( numHists != ws2->getNumberHistograms() || numBins != ws2->blocksize() )
+  if ( numHists != ws2->getNumberHistograms()  )
   {
 	throw std::runtime_error("Size mismatch");
-  }
-  
-  // Check that both are either histograms or point-like data
-  if ( histogram != ws2->isHistogramData() )
-  {
-	throw std::runtime_error("Histogram/point-like mismatch");
   }
 
   prog = new Progress(this, 0.0, 1.0, numHists);
@@ -111,7 +104,7 @@ void ConvolveWorkspaces::exec()
 
     for(size_t i=0;i<N;i++)
     {
-      Yout[i] = out.getCalculated(i) * static_cast<double>(N);
+      Yout[i] = out.getCalculated(i);
 
     }
     PARALLEL_END_INTERUPT_REGION
