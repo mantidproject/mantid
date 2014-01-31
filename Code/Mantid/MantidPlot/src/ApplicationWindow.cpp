@@ -5164,7 +5164,18 @@ void ApplicationWindow::readSettings()
     settings.beginGroup("/Legend");
     settings.writeEntry("/Transparency", 255); 
     settings.endGroup(); // Legend
- 
+  }
+    // Transform from the old setting for plot defaults, will only happen once.
+  if ( !settings.contains("/UpdateForPlotImprovements2") )
+  {    
+    settings.writeEntry("/UpdateForPlotImprovements2","true");
+    settings.beginGroup("/General");
+
+    //turn axes backbones off as these rarely join at the corners
+    settings.writeEntry("/AxesBackbones","false");
+
+    settings.writeEntry("/CanvasFrameWidth","1");
+    settings.endGroup();
   }
   
   settings.beginGroup("/General");
@@ -14195,9 +14206,10 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
   MultiLayer* g = multilayerPlot(generateUniqueName(tr("Graph")));
   Graph* plot = g->activeGraph();
   setPreferences(plot);
-  setSpectrogramTickStyle(plot);  
 
   plot->plotSpectrogram(m, type);
+
+  setSpectrogramTickStyle(plot);  
 
   plot->setAutoScale();//Mantid
 
@@ -14214,6 +14226,8 @@ void ApplicationWindow::setSpectrogramTickStyle(Graph* g)
   ticksList.clear();
   ticksList<<minTicksStyle<<Graph::Ticks::Out<<minTicksStyle<<minTicksStyle;
   g->setMinorTicksType(ticksList);
+  //reset this as the colourbar should now be detectable
+  g->drawAxesBackbones(drawBackbones);
 }
 
 ApplicationWindow* ApplicationWindow::importOPJ(const QString& filename, bool factorySettings, bool newProject)
