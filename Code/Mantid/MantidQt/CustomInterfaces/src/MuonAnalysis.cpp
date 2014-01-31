@@ -256,8 +256,11 @@ void MuonAnalysis::initLayout()
   // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
-  connect(m_uiForm.deadTimeType, SIGNAL(activated(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
+  connect(m_uiForm.deadTimeType, SIGNAL( currentIndexChanged(int) ),
+          this, SLOT( onDeadTimeTypeChanged(int) ));
+
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL( fileFindingFinished() ),
+          this, SLOT( deadTimeFileSelected() ));
 
   m_currentTab = m_uiForm.tabWidget->currentWidget();
 
@@ -1541,6 +1544,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         }
 
         IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+        applyCorrAlg->setRethrows(true);
+        applyCorrAlg->setLogging(false);
         applyCorrAlg->setPropertyValue("InputWorkspace", m_workspace_name); 
         applyCorrAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
         applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimes.name());
@@ -1801,6 +1806,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     QMessageBox::warning(this,"Mantid - MuonAnalysis", e.what());
   }
 
+  m_updating = false;
+  m_uiForm.tabWidget->setTabEnabled(3, true);
 }
 
 
@@ -2839,7 +2846,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
 
-  changeDeadTimeType(deadTimeTypeIndex);
+  onDeadTimeTypeChanged(deadTimeTypeIndex);
 
   QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
   m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
@@ -3169,6 +3176,8 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.homePeriodBoxMath, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
   connect(m_uiForm.homePeriodBox2, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
 
+  connect(m_uiForm.deadTimeType, SIGNAL( activated(int) ), this, SLOT( deadTimeTypeAutoUpdate(int) ));
+
   // Grouping tab Auto Updates
   connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
   connect(m_uiForm.pairTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
@@ -3366,11 +3375,10 @@ void MuonAnalysis::doSetToolbarsHidden(bool hidden)
 
 
 /**
-* Change what type of deadtime to use and the options available for the user's choice.
-*
-* @param choice :: The current index of dead time type combo box.
-*/
-void MuonAnalysis::changeDeadTimeType(int choice)
+ * Called when dead time correction type is changed.
+ * @param choice :: New index of dead time correction type combo box
+ */
+void MuonAnalysis::onDeadTimeTypeChanged(int choice)
 {
   m_deadTimesChanged = true;
 
@@ -3378,7 +3386,6 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
     m_uiForm.dtcFileLabel->setVisible(false);
-    homeTabUpdatePlot();
   }
   else // choice must be from workspace
   {
@@ -3392,6 +3399,19 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   group.setValue("deadTimes", choice);
 }
 
+/**
+ * Auto-update the plot after user has changed dead time correction type.
+ * @param choice :: User selected index of the dead time correction combox box
+ */
+void MuonAnalysis::deadTimeTypeAutoUpdate(int choice)
+{
+  // We update the plot only if user switches to "None" or "From Data File" correction type, because
+  // in case of "From Disk" the file should be specified first.
+  if ( choice == 0 || choice == 1 )
+  {
+    homeTabUpdatePlot();
+  }
+}
 
 /**
 * If the user selects/changes the file to be used to apply the dead times then 

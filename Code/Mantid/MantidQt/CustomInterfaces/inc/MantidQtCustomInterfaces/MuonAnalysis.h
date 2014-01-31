@@ -188,8 +188,11 @@ private slots:
   /// Shows all the plot windows (MultiLayer ones)
   void showAllPlotWindows();
 
-  /// Change what type of deadtime to use and the options available for the user's choice.
-  void changeDeadTimeType(int);
+  /// Called when dead time correction type is changed.
+  void onDeadTimeTypeChanged(int choice);
+
+  /// Auto-update the plot after user has changed dead time correction type.
+  void deadTimeTypeAutoUpdate(int choice);
 
   /// Change to the dead time file, make sure graph is updated next time it is plotted.
   void deadTimeFileSelected();
