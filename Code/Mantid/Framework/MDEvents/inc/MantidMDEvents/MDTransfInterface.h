@@ -129,6 +129,13 @@ public:
     /** set up transformation from the class, which can provide all variables necessary for the conversion */
     virtual void initialize(const MDWSDescription &)=0;
 
+    /** method returns the set points where the transformation achieves extremums in any of its output directions 
+     * the extremums should be achieved within xMin-xMax range of input coordinates assuming that input values for the transformation
+     * within xMin-xMax ranges change monotonically. 
+     *
+    */
+    virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax)const = 0;
+
 //***************> the methods below are mainly involved in defining the target workspace properties. 
 //                 Thay also can be involwed in the preparation to calculations of MD coordinates 
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)

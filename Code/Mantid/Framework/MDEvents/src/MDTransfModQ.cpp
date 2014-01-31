@@ -25,6 +25,7 @@ namespace Mantid
         throw(std::invalid_argument(" MDTransfModQ::inputUnitID: this class supports only conversion in Elastic and Inelastic energy transfer modes"));
       }
     }
+
     /** method returns number of matrix dimensions calculated by this class
     *   as function of the energy analysis (conversion) mode  
        @param mode   -- energy conversion mode requested by the user for the transfromation
@@ -192,6 +193,13 @@ namespace Mantid
       return true;
 
     }
+
+    std::vector<double> MDTransfModQ::getExtremumPoints(const double xMin, const double xMax)const
+    {
+      std::vector<double> rez(2);
+      return rez;
+    }
+
 
     /** function initalizes all variables necessary for converting workspace variables into MD variables in ModQ (elastic/inelastic) cases  */
     void MDTransfModQ::initialize(const MDWSDescription &ConvParams)

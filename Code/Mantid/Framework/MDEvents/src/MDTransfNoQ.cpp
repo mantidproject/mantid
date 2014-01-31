@@ -77,6 +77,16 @@ namespace Mantid
 
     }
 
+    std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin, const double xMax)const
+    {
+      std::vector<double> rez(2);
+      rez[0]=xMin;
+      rez[1]=xMax;
+
+      return rez;
+    }
+
+
     /** return the number of dimensions, calculated by the transformation from the workspace.
     Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
     unsigned int MDTransfNoQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const
