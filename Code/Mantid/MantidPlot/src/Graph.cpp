@@ -2053,8 +2053,6 @@ void Graph::setCanvasFrame(int width, const QColor& color)
 
 void Graph::drawAxesBackbones(bool yes)
 {
-  if (drawAxesBackbone == yes)
-    return;
 
   drawAxesBackbone = yes;
 
@@ -2064,7 +2062,14 @@ void Graph::drawAxesBackbones(bool yes)
     if (scale)
     {
       ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw (i));
-      sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, yes);
+      if (isColorBarEnabled(i)) //always draw the backbone for a colour bar axis
+      {
+        sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, true);
+      }
+      else
+      {
+        sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, yes);
+      }
       scale->repaint();
     }
   }
