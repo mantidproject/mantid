@@ -65,16 +65,16 @@ class StatisticsTest(unittest.TestCase):
         self.assertEquals(4, aboutOrigin.shape[0])
         self.assertAlmostEqual(1., aboutOrigin[0], places=4)
         self.assertAlmostEqual(mean, aboutOrigin[1], places=4)
-        self.assertAlmostEqual(expVar, aboutOrigin[2],  delta=.001*expVar)
-        self.assertAlmostEqual(expSkew, aboutOrigin[3], delta=.001*expSkew)
+        self.assertTrue(math.fabs(expVar - aboutOrigin[2]) < 0.001*expVar)
+        self.assertTrue(math.fabs(expSkew - aboutOrigin[3]) < 0.001*expSkew)
 
         aboutMean = Stats.getMomentsAboutMean(indep, depend)
         self.assertTrue(isinstance(aboutOrigin, numpy.ndarray))
         self.assertEquals(4, aboutOrigin.shape[0])
         self.assertAlmostEqual(1., aboutMean[0], places=4)
         self.assertAlmostEqual(0., aboutMean[1], places=4)
-        self.assertAlmostEqual(sigma*sigma, aboutMean[2], delta=.001*expVar)
-        self.assertAlmostEqual(0., aboutMean[3], delta=.0001*expSkew)
+        self.assertTrue(math.fabs(sigma*sigma - aboutMean[2]) < 0.001*expVar)
+        self.assertTrue(math.fabs(0. - aboutMean[3]) < 0.0001*expSkew)
 
 # end class definition
 
