@@ -268,6 +268,14 @@ bool StepScan::mergeRuns()
     addScanIndex->setProperty("LogType","Number Series");
     addScanIndex->setProperty("LogText",Strings::toString(i+1));
     if ( ! addScanIndex->execute() ) return true;
+
+    // Add a scan_index = 0 to the end time for each workspace
+    try
+    {
+      ws->run().getTimeSeriesProperty<int>("scan_index")->addValue(ws->run().endTime(),0);
+    } catch (std::runtime_error&) {
+      /* Swallow the error if there's no run end time. It shouldn't happen for real data. */
+    }
   }
 
   IAlgorithm_sptr merge = AlgorithmManager::Instance().create("MergeRuns");
