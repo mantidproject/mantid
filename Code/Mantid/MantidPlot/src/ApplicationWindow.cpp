@@ -793,11 +793,11 @@ void ApplicationWindow::initGlobalConstants()
   d_show_table_comments = false;
 
   titleOn = true;
+  // 'Factory' default is to show top & right axes but without labels
   d_show_axes = QVector<bool> (QwtPlot::axisCnt, true);
-  // 'Factory' default is to not show top & right axes
-  d_show_axes[1] = false;
-  d_show_axes[3] = false;
   d_show_axes_labels = QVector<bool> (QwtPlot::axisCnt, true);
+  d_show_axes_labels[1] = false;
+  d_show_axes_labels[3] = false;
   canvasFrameWidth = 0;
   defaultPlotMargin = 0;
   drawBackbones = true;
@@ -809,7 +809,7 @@ void ApplicationWindow::initGlobalConstants()
   autoscale2DPlots = true;
   autoScaleFonts = true;
   autoResizeLayers = true;
-  antialiasing2DPlots = false; //Mantid
+  antialiasing2DPlots = true; 
   fixedAspectRatio2DPlots = false; //Mantid
   d_scale_plots_on_print = false;
   d_print_cropmarks = false;
@@ -819,15 +819,15 @@ void ApplicationWindow::initGlobalConstants()
   defaultCurveLineWidth = 1;
   defaultSymbolSize = 7;
 
-  majTicksStyle = static_cast<int>(ScaleDraw::Out);
-  minTicksStyle = static_cast<int>(ScaleDraw::Out);
+  majTicksStyle = static_cast<int>(ScaleDraw::In);
+  minTicksStyle = static_cast<int>(ScaleDraw::In);
   minTicksLength = 5;
   majTicksLength = 9;
 
   legendFrameStyle = static_cast<int>(LegendWidget::Line);
   legendTextColor = Qt::black;
   legendBackground = Qt::white;
-  legendBackground.setAlpha(0); // transparent by default;
+  legendBackground.setAlpha(255); // opaque by default;
 
   defaultArrowLineWidth = 1;
   defaultArrowColor = Qt::black;
@@ -2956,6 +2956,9 @@ void ApplicationWindow::setPreferences(Graph* g)
           g->setAxisTitle(i, tr(" "));
       }
     }
+
+
+
     //set the scale type i.e. log or linear
     g->setScale(QwtPlot::yLeft, d_axes_scales[0]);
     g->setScale(QwtPlot::yRight, d_axes_scales[1]);
@@ -2980,6 +2983,7 @@ void ApplicationWindow::setPreferences(Graph* g)
     for (int i = 0; i < QwtPlot::axisCnt; i++)
       g->setAxisTitleDistance(i, d_graph_axes_labels_dist);
     //    need to call the plot functions for log/linear, errorbars and distribution stuff
+
   }
 
   g->setSynchronizedScaleDivisions(d_synchronize_graph_scales);
@@ -5126,7 +5130,43 @@ void ApplicationWindow::readSettings()
   /* --------------- end group Tables ------------------------ */
 
   /* --------------- group 2D Plots ----------------------------- */
+  
   settings.beginGroup("/2DPlots");
+   
+  // Transform from the old setting for plot defaults, will only happen once.
+  if ( !settings.contains("/UpdateForPlotImprovements1") )
+  {    
+    settings.writeEntry("/UpdateForPlotImprovements1","true");
+    settings.beginGroup("/General");
+
+    settings.writeEntry("/Antialiasing","true");
+
+    //enable right and top axes without labels
+    settings.beginWriteArray("EnabledAxes");
+    int i=1;
+    settings.setArrayIndex(i);
+    settings.writeEntry("enabled", "true");
+    settings.writeEntry("labels", "false");
+    i=3;
+    settings.setArrayIndex(i);
+    settings.writeEntry("enabled", "true");
+    settings.writeEntry("labels", "false");
+    settings.endArray();
+    settings.endGroup();
+ 
+    //ticks should be in
+    settings.beginGroup("/Ticks");
+    settings.writeEntry("/MajTicksStyle", ScaleDraw::In);
+    settings.writeEntry("/MinTicksStyle", ScaleDraw::In);
+    settings.endGroup();
+
+    //legend to opaque
+    settings.beginGroup("/Legend");
+    settings.writeEntry("/Transparency", 255); 
+    settings.endGroup(); // Legend
+ 
+  }
+  
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
@@ -5140,6 +5180,7 @@ void ApplicationWindow::readSettings()
   autoscale2DPlots = settings.value("/Autoscale", true).toBool();
   autoScaleFonts = settings.value("/AutoScaleFonts", true).toBool();
   autoResizeLayers = settings.value("/AutoResizeLayers", true).toBool();
+
   antialiasing2DPlots = settings.value("/Antialiasing", false).toBool(); //Mantid
   fixedAspectRatio2DPlots = settings.value("/FixedAspectRatio2DPlots", false).toBool(); //Mantid
   d_scale_plots_on_print = settings.value("/ScaleLayersOnPrint", false).toBool();
@@ -5178,15 +5219,15 @@ void ApplicationWindow::readSettings()
   settings.endGroup(); // General
 
   settings.beginGroup("/Curves");
-  defaultCurveStyle = settings.value("/Style", Graph::Line).toInt();
+  defaultCurveStyle = settings.value("/Style", Graph::LineSymbols).toInt();
   defaultCurveLineWidth = settings.value("/LineWidth", 1).toDouble();
-  defaultSymbolSize = settings.value("/SymbolSize", 7).toInt();
+  defaultSymbolSize = settings.value("/SymbolSize", 3).toInt();
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();
   settings.endGroup(); // Curves
 
   settings.beginGroup("/Ticks");
-  majTicksStyle = settings.value("/MajTicksStyle", ScaleDraw::Out).toInt();
-  minTicksStyle = settings.value("/MinTicksStyle", ScaleDraw::Out).toInt();
+  majTicksStyle = settings.value("/MajTicksStyle", ScaleDraw::In).toInt();
+  minTicksStyle = settings.value("/MinTicksStyle", ScaleDraw::In).toInt();
   minTicksLength = settings.value("/MinTicksLength", 5).toInt();
   majTicksLength = settings.value("/MajTicksLength", 9).toInt();
   settings.endGroup(); // Ticks
@@ -14154,6 +14195,7 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
   MultiLayer* g = multilayerPlot(generateUniqueName(tr("Graph")));
   Graph* plot = g->activeGraph();
   setPreferences(plot);
+  setSpectrogramTickStyle(plot);  
 
   plot->plotSpectrogram(m, type);
 
@@ -14161,6 +14203,17 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
 
   QApplication::restoreOverrideCursor();
   return g;
+}
+
+void ApplicationWindow::setSpectrogramTickStyle(Graph* g)
+{
+  //always use the out tick style for colour bar axes
+  QList<int> ticksList;
+  ticksList<<majTicksStyle<<Graph::Ticks::Out<<majTicksStyle<<majTicksStyle;
+  g->setMajorTicksType(ticksList);
+  ticksList.clear();
+  ticksList<<minTicksStyle<<Graph::Ticks::Out<<minTicksStyle<<minTicksStyle;
+  g->setMinorTicksType(ticksList);
 }
 
 ApplicationWindow* ApplicationWindow::importOPJ(const QString& filename, bool factorySettings, bool newProject)
