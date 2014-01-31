@@ -62,11 +62,12 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         
         self.declareProperty(name="CorrectDetectorPositions", defaultValue=True, direction=Direction.Input, doc="Correct detector positions using ThetaIn (if given)")
         
+        self.declareProperty(name="StrictSpectrumChecking", defaultValue=True, direction=Direction.Input, doc="Strict checking between spectrum numbers in input workspaces and transmission workspaces.")
         
     def value_or_none(self, prop_name):
         property = self.getProperty(prop_name)
         if property.isDefault:
-            return None # TODO: check this
+            return None 
         else:
             return property.value
     
@@ -143,6 +144,8 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
         
         region_of_direct_beam = self.value_or_none("RegionOfDirectBeam")
         
+        strict_spectrum_checking = self.value_or_none('StrictSpectrumChecking')
+        
         '''
         Pass the arguments and execute the main algorithm.
         '''
@@ -169,7 +172,8 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
                                                                       DetectorComponentName=detector_component_name,
                                                                       SampleComponentName=sample_component_name, 
                                                                       ThetaIn=theta_in, 
-                                                                      CorrectDetectorPositions=correct_positions)
+                                                                      CorrectDetectorPositions=correct_positions,
+                                                                      StrictSpectrumChecking=strict_spectrum_checking)
                                     
         self.setProperty("OutputWorkspace", new_IvsQ1)
         self.setProperty("OutputWorkspaceWavelength", new_IvsLam1)
