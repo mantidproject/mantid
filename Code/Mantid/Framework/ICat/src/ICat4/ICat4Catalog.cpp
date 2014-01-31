@@ -437,7 +437,7 @@ namespace Mantid
      * @param investigationId :: unique identifier of the investigation
      * @param outputws        :: shared pointer to datasets
      */
-    void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
+    void ICat4Catalog::getDataSets(const std::string& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -448,7 +448,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + boost::lexical_cast<std::string>(investigationId) + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
       g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
@@ -506,7 +506,7 @@ namespace Mantid
      * @param investigationId  :: unique identifier of the investigation
      * @param outputws         :: shared pointer to datasets
      */
-    void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
+    void ICat4Catalog::getDataFiles(const std::string& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -517,7 +517,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + boost::lexical_cast<std::string>(investigationId) + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
       g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
