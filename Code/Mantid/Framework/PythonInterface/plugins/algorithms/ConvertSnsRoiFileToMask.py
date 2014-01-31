@@ -9,6 +9,7 @@ mask file.
 import mantid.simpleapi as msapi
 import mantid.api as api
 import mantid.kernel as kernel
+from mantid import config
 
 import os
 
@@ -36,6 +37,9 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         return "ConvertSnsRoiFileToMask"
         
     def PyInit(self):
+        """
+        Set the algorithm properties.
+        """
         self.declareProperty(api.FileProperty(name="SnsRoiFile",
                                               defaultValue="",
                                               action=api.FileAction.Load,
@@ -45,10 +49,23 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         self.declareProperty("Instrument", "", 
                              validator=allowedInstruments,
                              doc="One of the following instruments: "+" ".join(INSTRUMENTS))
+        self.declareProperty("OutputFilePrefix", "", 
+                             "Overrides the default filename for the output "\
+                             +"file (Optional). Default is <inst_name>_Mask.")
+        self.declareProperty(api.FileProperty(name="OutputDirectory",
+                                              defaultValue=config['defaultsave.directory'],
+                                              action=api.FileAction.Directory),
+                                              "Directory to save mask file."\
+                                              +" Default is current Mantid save directory.")
     
     def PyExec(self):
+        """
+        Execute the algorithm.
+        """
         self._roiFile = self.getProperty("SnsRoiFile").value
         self._instName = self.getProperty("Instrument").value
+        self._filePrefix = self.getProperty("OutputFilePrefix").value
+        self._outputDir = self.getProperty("OutputDirectory").value
         
         # Read in ROI file 
         roi_file = open(self._roiFile)
@@ -84,6 +101,13 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         
         # Clean up temporary file
         os.remove(temp_file)
+    
+        # Save mask to a file
+        if self._filePrefix == "":
+            self._filePrefix = self._instName + "_Mask"
+        
+        output_file = os.path.join(self._outputDir, self._filePrefix)
+        msapi.SaveMask(mask_ws, OutputFile=output_file+".xml")
     
     def __get_id(self, idx):
         """
