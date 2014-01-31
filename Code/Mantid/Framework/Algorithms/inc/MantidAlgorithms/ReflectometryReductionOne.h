@@ -82,7 +82,10 @@ namespace Mantid
           OptionalMatrixWorkspace_sptr secondTransmissionRun, const OptionalDouble& stitchingStartQ,
           const OptionalDouble& stitchingDeltaQ, const OptionalDouble& stitchingEndQ,
           const OptionalDouble& stitchingStartOverlapQ, const OptionalDouble& stitchingEndOverlapQ,
-          const double& wavelengthStep );
+          const double& wavelengthStep, const std::string& processingCommands);
+
+      /// Verify spectrum maps
+      void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, const bool severe = false);
 
     };
 
