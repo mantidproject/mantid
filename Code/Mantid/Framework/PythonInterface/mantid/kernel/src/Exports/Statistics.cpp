@@ -26,9 +26,7 @@ namespace
   class Stats {};
 
   // For all methods below we have to extract specific types from Python to C++.
-  // We choose to support only a subset of the C++ exported types mainly:
-  //   * C++ double --> Python float
-  //   * C++ long --> Python int
+  // We choose to support only Python float arrays (C++ double)
 
   /// Custom exception type for unknown data type
   class UnknownDataType : public std::invalid_argument
@@ -36,7 +34,7 @@ namespace
   public:
     UnknownDataType(const std::string & methodName)
       : std::invalid_argument(methodName + "(): Unknown datatype. Currently only arrays of "
-                              "Python ints or floats are supported ")
+                              "Python floats are supported ")
     {}
   };
 
@@ -52,10 +50,6 @@ namespace
     if(PyArray_ISFLOAT(dataPtr))
     {
       return getStatistics(NDArrayToVector<double>(data)(), sorted);
-    }
-    else if(PyArray_ISINTEGER(dataPtr))
-    {
-      return getStatistics(NDArrayToVector<long>(data)(), sorted);
     }
     else
     {
