@@ -508,73 +508,135 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
       break;
     }
 
-    if ( info.type == NX_FLOAT64 )
+    if ( info.rank == 1 )
     {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-      std::string columnTitle = nxDouble.attributes("name");
-      if (!columnTitle.empty())
+      if ( info.type == NX_FLOAT64 )
       {
-        workspace->addColumn("double", columnTitle);
-        nxDouble.load();
-        int length = nxDouble.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
-        }
-        for (int i = 0; i < length; i++)
-          workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
-      }
-    }
-	else if ( info.type == NX_INT32 )
-    {
-      NXInt nxInt = nx_tw.openNXInt(str.c_str());
-      std::string columnTitle = nxInt.attributes("name");
-      if (!columnTitle.empty())
-      {
-        workspace->addColumn("int", columnTitle);
-        nxInt.load();
-        int length = nxInt.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
-        }
-        for (int i = 0; i < length; i++)
-          workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
-      }
-    }
-    else if ( info.type == NX_CHAR )
-    {
-      NXChar data = nx_tw.openNXChar(str.c_str());
-      std::string columnTitle = data.attributes("name");
-      if (!columnTitle.empty())
-      {
-        workspace->addColumn("str", columnTitle);
-        int nRows = info.dims[0];
-        if ( !hasNumberOfRowBeenSet )
+        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+        std::string columnTitle = nxDouble.attributes("name");
+        if (!columnTitle.empty())
         {
-          workspace->setRowCount(nRows);
-          hasNumberOfRowBeenSet = true;
+          workspace->addColumn("double", columnTitle);
+          nxDouble.load();
+          int length = nxDouble.dim0();
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(length);
+            hasNumberOfRowBeenSet = true;
+          }
+          for (int i = 0; i < length; i++)
+            workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
         }
+      }
+      else if ( info.type == NX_INT32 )
+      {
+        NXInt nxInt = nx_tw.openNXInt(str.c_str());
+        std::string columnTitle = nxInt.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("int", columnTitle);
+          nxInt.load();
+          int length = nxInt.dim0();
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(length);
+            hasNumberOfRowBeenSet = true;
+          }
+          for (int i = 0; i < length; i++)
+            workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
+        }
+      }
+    }
+    else if ( info.rank == 2 )
+    {
+      if ( info.type == NX_CHAR )
+      {
+        NXChar data = nx_tw.openNXChar(str.c_str());
+        std::string columnTitle = data.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("str", columnTitle);
+          int nRows = info.dims[0];
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(nRows);
+            hasNumberOfRowBeenSet = true;
+          }
 
-        const int maxStr = info.dims[1];
-        data.load();
-        for (int iR = 0; iR < nRows; ++iR)
-        {
-          auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
-          auto startPoint = data() + maxStr*iR;
-          cellContents.assign(startPoint,startPoint+maxStr);
-          boost::trim_right(cellContents);
+          const int maxStr = info.dims[1];
+          data.load();
+          for (int iR = 0; iR < nRows; ++iR)
+          {
+            auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
+            auto startPoint = data() + maxStr*iR;
+            cellContents.assign(startPoint,startPoint+maxStr);
+            boost::trim_right(cellContents);
+          }
         }
       }
-    } 
+      #define IF_VECTOR_COLUMN(Type, ColumnTypeName, NexusType) \
+      else if ( info.type == NexusType ) \
+      { \
+        loadVectorColumn<Type>(nx_tw, str, workspace, #ColumnTypeName); \
+      }
+      IF_VECTOR_COLUMN(int, vector_int, NX_INT32)
+      IF_VECTOR_COLUMN(double, vector_double, NX_FLOAT64)
+
+    }
 
     columnNumber++;
   
   } while ( 1 );
 
   return boost::static_pointer_cast<API::Workspace>(workspace);
+}
+
+/**
+ * Loads a vector column to the TableWorkspace.
+ * @param tableData   :: Table data to load from
+ * @param dataSetName :: Name of the data set to use to get column data
+ * @param tableWs     :: Workspace to add column to
+ * @param columnType  :: Name of the column type to create
+ */
+template<typename Type>
+void LoadNexusProcessed::loadVectorColumn(const NXData& tableData,
+                                          const std::string& dataSetName,
+                                          const ITableWorkspace_sptr& tableWs,
+                                          const std::string& columnType)
+{
+  NXDataSetTyped<Type> data = tableData.openNXDataSet<Type>(dataSetName.c_str());
+  std::string columnTitle = data.attributes("name");
+  if ( ! columnTitle.empty() )
+  {
+    tableWs->addColumn(columnType, columnTitle);
+
+    NXInfo info = tableData.getDataSetInfo(dataSetName.c_str());
+    const size_t rowCount = info.dims[0];
+    const size_t blockSize = info.dims[1];
+
+    // This might've been done already, but doing it twice should't do any harm
+    tableWs->setRowCount(rowCount);
+
+    data.load();
+
+    for ( size_t i = 0; i < rowCount; ++i )
+    {
+      auto& cell = tableWs->cell< std::vector<Type> >(i, tableWs->columnCount() - 1);
+
+      Type* from = data() + blockSize * i;
+
+      cell.assign(from, from + blockSize);
+
+      std::ostringstream rowSizeAttrName; rowSizeAttrName << "row_size_" << i;
+
+      // This is ugly, but I can only get attribute as a string using the API
+      std::istringstream rowSizeStr( data.attributes(rowSizeAttrName.str()) );
+
+      int rowSize; rowSizeStr >> rowSize;
+
+      cell.resize(rowSize);
+    }
+  }
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -19,9 +19,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	if Verbose:
 		logger.notice('Cropping from Q= ' + str(qmin) +' to '+ str(qmax))
 
-	CropWorkspace(InputWorkspace=spectumWs, OutputWorkspace=spectumWs,XMin=qmin, XMax=qmax)
-
-	#give the user some extra infromation is required
+	#give the user some extra infromation if required
 	if Verbose:
 		inGR = mtd[samWS].getRun()
 		try:
@@ -36,30 +34,47 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 		logger.notice('Parameters in ' + samWS)
 
 	x = mtd[samWS].readX(0)
-	xmax = x[len(x)-1]
-
+	xmax = x[-1]
+	
 	#select fit function to use
 	if jumpFunc == 'CE':
-		# Chudley-Elliott: HWHM=A*(1-sin*(Q*K)/(Q*K))
-		# for Q->0 W=A*Q^2*K^2/6
+		# Chudley-Elliott: HWHM=(1-sin*(Q*L)/(Q*L))/Tau
+		# for Q->0 W=Q^2*L^2/(6*Tau)
 
-		aval = xmax
-		bval = 1.5
-		func = 'name=UserFunction, Formula=a*(1-(sin(x*b))/(x*b)), a='+str(aval)+', b='+str(bval)
+		tval = 1.0/xmax
+		lval = 1.5
+		func = 'name=ChudleyElliot, Tau='+str(tval)+', L='+str(lval)
+
 	elif jumpFunc == 'SS':
-		# Singwi-Sjolander: HWHM=A*(1-exp(-r*Q^2))
+		# Singwi-Sjolander: HWHM=(1-exp(-L*Q^2))/Tau
 		# for Q->0 W=A*Q^2*r
 
-		aval = xmax
-		bval = 0.24
-		func = 'name=UserFunction, Formula=a*(1-exp(-x*x*b)), a='+str(aval)+', b='+str(bval)
+		tval = 1.0/xmax
+		lval = 1.5
+		func = 'name=SingwiSjolander, Tau='+str(tval)+', L='+str(lval)
+
+	elif jumpFunc == 'Fick':
+		# Fick: HWHM=D*Q^2
+		
+		y = mtd[samWS].readY(0)
+		diff = (y[2]-y[0])/((x[2]-x[0])*(x[2]-x[0]))
+		func = 'name=FickDiffusion, D='+str(diff)
+
+	elif jumpFunc == 'Teixeira':
+		# Teixeira: HWHM=Q^2*L/((1+Q^2*L)*tau)
+		# for Q->0 W=
+
+		tval = 1.0/xmax
+		lval = 1.5
+		func = 'name=TeixeiraWater, Tau='+str(tval)+', L='+str(lval)
+		
 	else:
 		sys.exit("Error in Jump Fit: Invalid fit function supplied.")
 		return
 
 	#run fit function
 	fit_workspace_base = samWS[:-10] +'_'+ jumpFunc +'fit'
-	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fit_workspace_base)
+	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fit_workspace_base, StartX=qmin, EndX=qmax)
 	fit_workspace = fit_workspace_base + '_Workspace'
 	
 	CopyLogs(InputWorkspace=samWS, OutputWorkspace=fit_workspace)

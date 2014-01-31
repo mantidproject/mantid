@@ -135,44 +135,67 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties
 
 ##############################################################################
 
+def search_for_fit_params(suffix, table_ws):
+    """
+    Find all fit parameters in a table workspace with the given suffix.
+    """
+    return [table_ws.column(name) for name in table_ws.getColumnNames() if suffix in name], [name for name in table_ws.getColumnNames() if suffix in name]
+
 def confitParsToWS(table_name, Data, specMin=0, specMax=-1):
     
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
 
     ws = mtd[table_name]
-
     x = createQaxis(Data)
-    dataX, dataY, dataE = [], [], []
+    dataY, dataE = [], []
+    v_axis_names = []
 
-    #find all relevant column names
-    name_stems = ['Amplitude', 'FWHM', 'Height']
-    column_names = [name for suffix in name_stems for name in ws.getColumnNames() if suffix in name]
-    v_axis_names = column_names[::2]
+    #get data and error values for each of the parameters
+    height, height_names = search_for_fit_params('Height', ws)
+    amplitude, amplitude_names = search_for_fit_params('Amplitude', ws)
+    FWHM, FWHM_names = search_for_fit_params('FWHM', ws)
 
-    #extract columns from table
-    columns = np.asarray([ws.column(name) for name in column_names])
+    if len(amplitude) == 0 or len(FWHM) == 0:
+        raise RuntimeError("Could not find expected fitting parameters!")
 
-    #Calculate EISF if we found height data
-    num_spectra = len(columns) / 2
-    if(num_spectra == 3):
-        amplitude, amplitude_error = columns[:2]
-        height, height_error = columns[4:6]
+    if len(height) > 0:
+        #append height data first
+        dataY += height[0]
+        dataE += height[1]
+        v_axis_names.append(height_names[0])
 
-        total = height+amplitude
-        EISF = height / total
-
-        total_error = height_error**2 + amplitude_error**2
-        EISF_error = EISF * np.sqrt((height_error**2/height**2) + (total_error/total**2))
+    # append amplitude and width data & error
+    for i in xrange(0, len(amplitude), 2):
+        amp, amp_error = amplitude[i], amplitude[i+1]
+        width, width_error = FWHM[i], FWHM[i+1]
         
-        columns = np.vstack((columns, EISF, EISF_error))
-        v_axis_names.append('f1.f1.f1.EISF')
-        num_spectra+=1
+        dataY += amp 
+        dataY += width
 
-    #create workspace spectum arrays
+        dataE += amp_error
+        dataE += width_error
+
+        v_axis_names.append(amplitude_names[i])
+        v_axis_names.append(FWHM_names[i])
+
+        #if we have height data, then calculate the EISF
+        if len(height) > 0:
+            height_y, height_e = np.asarray(height) 
+            
+            total = height_y+amp
+            EISF = height_y/total
+
+            total_error = height_e**2 + np.asarray(amp_error)**2
+            EISF_error = EISF * np.sqrt((height_e**2/height_y**2) + (total_error/total**2))
+
+            dataY += EISF.tolist()
+            dataE += EISF_error.tolist()
+
+            v_axis_names.append('f1.f1.f%d.EISF' % (math.log(i+1,2)+1))
+
+    num_spectra = len(v_axis_names)
     dataX = np.tile(x, num_spectra)
-    dataY = np.hstack(columns[::2])
-    dataE = np.hstack(columns[1::2])
 
     outputName = table_name + "_Workspace"
     dataX = trimData(num_spectra, dataX, specMin, specMax)

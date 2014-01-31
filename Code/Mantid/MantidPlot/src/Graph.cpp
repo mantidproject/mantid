@@ -139,7 +139,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   ignoreResize = false;
   drawAxesBackbone = true;
   autoScaleFonts = false;
-  d_antialiasing = false;
+  d_antialiasing = true;
   d_scale_on_print = true;
   d_print_cropmarks = false;
   d_synchronize_scales = false;
