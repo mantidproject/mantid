@@ -1,7 +1,7 @@
 /*WIKI*
 
 
-Convolution of two workspaces
+Convolution of two workspaces using [[Convolution]] from CurveFitting.  Workspaces must have the same number of spectra.
 
 *WIKI*/
 //----------------------------------------------------------------------
