@@ -101,6 +101,7 @@ namespace Mantid
      * Get the URL where the datafiles will be uploaded to.
      * @param investigationID :: The investigation used to obtain the related dataset ID.
      * @param createFileName  :: The name to give to the file being saved.
+     * @param dataFileDescription :: The description of the data file being saved.
      * @return URL to PUT datafiles to.
      */
     const std::string ICat3Catalog::getUploadURL(
