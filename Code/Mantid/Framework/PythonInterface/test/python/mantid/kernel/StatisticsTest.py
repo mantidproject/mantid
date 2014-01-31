@@ -1,5 +1,6 @@
 import unittest
 from mantid.kernel import Stats
+import math
 import numpy
 
 DELTA_PLACES = 10
@@ -41,6 +42,42 @@ class StatisticsTest(unittest.TestCase):
         self.assertEquals(12.6, stats.minimum)
         self.assertEquals(18.3, stats.maximum)
         self.assertEquals(17.2, stats.median)
+        
+    def test_getMoments(self):
+        mean = 5.
+        sigma = 4.
+        deltaX = .2
+        numX = 200
+        # calculate to have same number of points left and right of function
+        offsetX = mean - (.5 * deltaX * float(numX))
+        # variance about origin
+        expVar = mean*mean+sigma*sigma;
+        # skew about origin
+        expSkew = mean*mean*mean+3.*mean*sigma*sigma;
+
+        # x-values to try out
+        indep = numpy.arange(numX, dtype=numpy.float64)
+        indep = indep*deltaX + offsetX
+
+        
+        # y-values
+        # test different type
+        depend = numpy.arange(numX, dtype=numpy.int32)
+        self.assertRaises(ValueError, Stats.getMomentsAboutOrigin, indep, depend)
+        
+        # now correct y values
+        weightedDiff = (indep-mean)/sigma
+        depend = numpy.exp(-0.5*weightedDiff*weightedDiff)/sigma/math.sqrt(2.*math.pi)
+
+        aboutOrigin = Stats.getMomentsAboutOrigin(indep, depend)
+        self.assertTrue(isinstance(aboutOrigin, numpy.ndarray))
+        
+        self.assertEquals(4, aboutOrigin.shape[0])
+        self.assertAlmostEqual(1., aboutOrigin[0], places=4)
+        self.assertAlmostEqual(mean, aboutOrigin[1], places=4)
+        self.assertAlmostEqual(expVar, aboutOrigin[2],  delta=.001*expVar)
+        self.assertAlmostEqual(expSkew, aboutOrigin[3], delta=.001*expSkew)
+
 
 if __name__ == '__main__':
     unittest.main()
