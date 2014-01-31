@@ -90,6 +90,37 @@ namespace
 
   // Define an overload to handle the default argument
   BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads, getMomentsAboutOriginNumpy, 2, 3);
+
+  /**
+   * Proxy for @see Mantid::Kernel::getMomentsAboutMean so that it can accept numpy arrays
+   */
+  std::vector<double> getMomentsAboutMeanNumpy(const numeric::array& indep, numeric::array& depend,
+                                               const int maxMoment = 3)
+  {
+    using Mantid::Kernel::getMomentsAboutMean;
+    using Converters::NDArrayToVector;
+
+    auto *indepPtr = indep.ptr();
+    auto *dependPtr = depend.ptr();
+    // Both input arrays must have the same typed data
+    if(PyArray_TYPE((PyArrayObject*)indepPtr) != PyArray_TYPE((PyArrayObject*)dependPtr))
+    {
+      throw std::invalid_argument("getMomentsAboutOrigin() : Datatypes of input arrays must match.");
+    }
+
+    if(PyArray_ISFLOAT(indepPtr) && PyArray_ISFLOAT(dependPtr))
+    {
+      return getMomentsAboutMean(NDArrayToVector<double>(indep)(),
+                                 NDArrayToVector<double>(depend)(), maxMoment);
+    }
+    else
+    {
+      throw UnknownDataType("getMomentsAboutMean");
+    }
+  }
+
+  // Define an overload to handle the default argument
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads, getMomentsAboutMeanNumpy, 2, 3);
   ///@endcond
 
 }
@@ -113,6 +144,13 @@ void export_Statistics()
                                          "Calculate the first n-moments (inclusive) about the origin"
                                         )[ReturnNumpyArray()])
      .staticmethod("getMomentsAboutOrigin")
+
+     .def("getMomentsAboutMean", &getMomentsAboutMeanNumpy,
+          getMomentsAboutMeanOverloads(args("indep", "depend", "maxMoment"),
+                                         "Calculate the first n-moments (inclusive) about the mean"
+                                        )[ReturnNumpyArray()])
+     .staticmethod("getMomentsAboutMean")
+
 
   ;
 
