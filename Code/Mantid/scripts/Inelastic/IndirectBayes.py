@@ -360,11 +360,11 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 			Nspec=3, UnitX='MomentumTransfer')
 		outWS = C2Fw(samWS[:-4],fname)
 		if (Plot != 'None'):
-			QLPlot(fname,Plot,res_plot,Loop)
+			QuasiPlot(fname,Plot,res_plot,Loop)
 	if program == 'QSe':
 		outWS = C2Se(fname)
 		if (Plot != 'None'):
-			QLPlot(fname,Plot,res_plot,Loop)
+			QuasiPlot(fname,Plot,res_plot,Loop)
 
 	#Add some sample logs to the output workspaces
 	CopyLogs(InputWorkspace=samWS, OutputWorkspace=outWS)
@@ -621,40 +621,50 @@ def C2Se(sname):
 	dataY = np.append(dataY,np.array(Yi))
 	dataE = np.append(dataE,np.array(Ei))
 	nhist = 1
-	Vaxis.append('Amplitude')
+	Vaxis.append('f1.Amplitude')
 
 	dataX = np.append(dataX, np.array(Xout))
 	dataY = np.append(dataY, np.array(Yf))
 	dataE = np.append(dataE, np.array(Ef))
 	nhist += 1
-	Vaxis.append('FWHM')
+	Vaxis.append('f1.FWHM')
 
 	dataX = np.append(dataX,np.array(Xout))
 	dataY = np.append(dataY,np.array(Yb))
 	dataE = np.append(dataE,np.array(Eb))
 	nhist += 1
-	Vaxis.append('Beta')
+	Vaxis.append('f1.Beta')
 
 	logger.notice('Vaxis=' + str(Vaxis))
 	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
 		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 	return outWS
 
-def QLPlot(inputWS,Plot,res_plot,Loop):
-	if Plot:
-		if Loop:
-			ws_name = inputWS + '_Workspace'
+def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
+	if plot_type:
+		if sequential:
+			ws_name = ws_stem + '_Workspace'
 			num_spectra = mtd[ws_name].getNumberHistograms()
 
-			if (Plot == 'Prob' or Plot == 'All'):
-				pWS = inputWS+'_Prob'
-				p_plot=mp.plotSpectrum(pWS,[1,2],False)
-			else:
-				spectra_indicies = [i for i in range(num_spectra) if Plot in mtd[ws_name].getAxis(1).label(i)]
-				plotSpectra(ws_name, Plot, indicies=spectra_indicies)
+			if (plot_type == 'Prob' or plot_type == 'All'):
+				prob_ws = ws_stem+'_Prob'
+				if prob_ws in mtd.getObjectNames():
+					mp.plotSpectrum(prob_ws,[1,2],False)
+		
+			if (plot_type == 'Amplitude' or plot_type == 'All'):
+				spectra_indicies = [i for i in range(num_spectra) if 'Amplitude' in mtd[ws_name].getAxis(1).label(i)]
+				plotSpectra(ws_name, 'Amplitude', indicies=spectra_indicies[:3])
+			
+			if (plot_type == 'FWHM' or plot_type == 'All'):
+				spectra_indicies = [i for i in range(num_spectra) if 'FWHM' in mtd[ws_name].getAxis(1).label(i)]
+				plotSpectra(ws_name, 'FWHM', indicies=spectra_indicies[:3])
 
-		if (Plot == 'Fit' or Plot == 'All'):
-			fWS = inputWS+'_Result_0'
+			if (plot_type == 'Beta' or plot_type == 'All'):
+				spectra_indicies = [i for i in range(num_spectra) if 'Beta' in mtd[ws_name].getAxis(1).label(i)]
+				plotSpectra(ws_name, 'Beta', indicies=spectra_indicies[:3])
+
+		if (plot_type == 'Fit' or plot_type == 'All'):
+			fWS = ws_stem+'_Result_0'
 			f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
 # Quest programs
