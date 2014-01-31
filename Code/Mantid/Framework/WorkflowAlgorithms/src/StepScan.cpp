@@ -67,11 +67,12 @@ namespace WorkflowAlgorithms
 
   void StepScan::exec()
   {
+    using DataObjects::EventWorkspace_sptr;
     // Get hold of the input workspace
-    DataObjects::EventWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+    EventWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
     // Get hold of the related monitors workspace, if it exists
     // TODO: How will this work for live data???
-    DataObjects::EventWorkspace_sptr monitorWorkspace = getMonitorWorkspace(inputWorkspace);
+    EventWorkspace_sptr monitorWorkspace = getMonitorWorkspace(inputWorkspace);
 
     // If any of the filtering properties have been set, clone the input workspace
     MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
@@ -98,7 +99,11 @@ namespace WorkflowAlgorithms
 
     // Run the SumEventsByLogValue algorithm with the log fixed to 'scan_index'
     IAlgorithm_sptr sumEvents = createChildAlgorithm("SumEventsByLogValue");
-    sumEvents->setProperty<DataObjects::EventWorkspace_sptr>("InputWorkspace", inputWorkspace);
+    sumEvents->setProperty<EventWorkspace_sptr>("InputWorkspace", inputWorkspace);
+    if ( monitorWorkspace )
+    {
+      sumEvents->setProperty<EventWorkspace_sptr>("MonitorWorkspace",monitorWorkspace);
+    }
     sumEvents->setProperty("LogName", "scan_index");
     sumEvents->executeAsChildAlg();
 
