@@ -21,7 +21,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** SplineWorkspace : TODO: DESCRIPTION
+  /** SplineWorkspace : function to interpolate workspace data
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
