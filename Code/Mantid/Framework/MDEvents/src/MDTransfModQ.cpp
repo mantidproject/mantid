@@ -9,9 +9,9 @@ namespace Mantid
     DECLARE_MD_TRANSFID(MDTransfModQ,|Q|);
 
     /**method calculates the units, the transformation expects the input ws to be in. If the input ws is in different units, 
-       the WS data will be converted into the requested units on the fly. 
-       @param dEmode -- energy conversion mode requested by the user for the transfromation
-       @param inWS   -- imput matrix workspace, the subject of transformation.
+    the WS data will be converted into the requested units on the fly. 
+    @param dEmode -- energy conversion mode requested by the user for the transfromation
+    @param inWS   -- imput matrix workspace, the subject of transformation.
     */
     const std::string MDTransfModQ::inputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
@@ -28,8 +28,8 @@ namespace Mantid
 
     /** method returns number of matrix dimensions calculated by this class
     *   as function of the energy analysis (conversion) mode  
-       @param mode   -- energy conversion mode requested by the user for the transfromation
-       @param inWS   -- imput matrix workspace, the subject of transformation.
+    @param mode   -- energy conversion mode requested by the user for the transfromation
+    @param inWS   -- imput matrix workspace, the subject of transformation.
     */
     unsigned int MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,API::MatrixWorkspace_const_sptr inWS)const
     {
@@ -58,14 +58,14 @@ namespace Mantid
     */
     bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & signal,double & ErrSq)const
     {
-        UNUSED_ARG(signal);
-        UNUSED_ARG(ErrSq);
-        if(m_Emode == Kernel::DeltaEMode::Elastic)
-        {
-            return calcMatrixCoordElastic(x,Coord);
-        }else{
-            return calcMatrixCoordInelastic(x,Coord);
-        }
+      UNUSED_ARG(signal);
+      UNUSED_ARG(ErrSq);
+      if(m_Emode == Kernel::DeltaEMode::Elastic)
+      {
+        return calcMatrixCoordElastic(x,Coord);
+      }else{
+        return calcMatrixCoordInelastic(x,Coord);
+      }
     }
 
     /** Method fills-in all additional properties requested by user and not defined by matrix workspace itselt. 
@@ -101,11 +101,11 @@ namespace Mantid
     }
 
     /**
-     * Method updates the value of pre-processed detector coordinates in Q-space, used by other functions
-     * @param Coord
-     * @param i -- index of the detector, which corresponds to the spectra to process.
-     * @return FALSE if spectra should be excluded (if masked)
-     */
+    * Method updates the value of pre-processed detector coordinates in Q-space, used by other functions
+    * @param Coord
+    * @param i -- index of the detector, which corresponds to the spectra to process.
+    * @return FALSE if spectra should be excluded (if masked)
+    */
     bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
       UNUSED_ARG(Coord); 
@@ -169,7 +169,7 @@ namespace Mantid
     * Namely, it calculates module of Momentum transfer
     * put it into specified (0) position in the Coord vector
     *
-    *@param     k0   module of input momentum
+    *@param    k0   module of input momentum
     *@param   &Coord  vector of MD coordinates with filled in momentum and energy transfer
 
     *@return   true if momentum is within the limits requested by the algorithm and false otherwise.
@@ -193,11 +193,50 @@ namespace Mantid
       return true;
 
     }
-
-    std::vector<double> MDTransfModQ::getExtremumPoints(const double xMin, const double xMax)const
+    /** method returns the vector of input coordinates values where the transformed coordinates reach its extremum values in Q or dE
+     * direction. 
+     *
+     * @param eMin -- minimal momentum or energy transfer for the transformation
+     * @param eMax -- maxumal momentum or energy transfer for the transformation
+     * @param det_num -- number of the instrument detector for the transformation
+     */
+    std::vector<double> MDTransfModQ::getExtremumPoints(const double eMin, const double eMax,size_t det_num)const
     {
       std::vector<double> rez(2);
+      switch(m_Emode)
+      {
+      case(Kernel::DeltaEMode::Elastic): 
+        {          
+          rez[0]=eMin;
+          rez[1]=eMax;
+        }
+
+      case(Kernel::DeltaEMode::Direct): 
+      case(Kernel::DeltaEMode::Indirect): 
+        {
+          double ei = m_Ei;
+          if(m_pEfixedArray)
+            ei = double(*(m_pEfixedArray+det_num));
+
+          double eps_extr = ei*m_CosThetaSq[det_num];
+          if (eps_extr>eMin && eps_extr<eMax)
+          {
+            rez.resize(3);
+            rez[0]=eMin;
+            rez[1]=eps_extr;
+            rez[2]=eMax;
+
+          }
+          else
+          {
+            rez[0]=eMin;
+            rez[1]=eMax;
+          }
+
+        }
+      }
       return rez;
+
     }
 
 
@@ -247,6 +286,12 @@ namespace Mantid
           }catch(...)
           {}
 
+          // define cos(theta)^2 array used to find modQ limits;
+          auto &SinSq =  ConvParams.m_PreprDetTable->getColVector<double>("SinSq"); 
+          size_t nDetectors = SinSq.size();
+          m_CosThetaSq.resize(nDetectors);
+          for(size_t i=0;i<nDetectors;i++)
+            m_CosThetaSq[i] = 1-SinSq[i];
         }
 
         // the wave vector of incident neutrons;
@@ -257,7 +302,7 @@ namespace Mantid
       }
       else
         if (m_Emode != Kernel::DeltaEMode::Elastic)throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
-      
+
       m_pDetMasks =  ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
     }
     /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s are related to the units, 
@@ -317,7 +362,7 @@ namespace Mantid
 
     /// constructor;
     MDTransfModQ::MDTransfModQ():
-    m_Det(NULL)//,m_NMatrixDim(-1)
+      m_Det(NULL)//,m_NMatrixDim(-1)
     {}    
 
   } // End MDAlgorighms namespace

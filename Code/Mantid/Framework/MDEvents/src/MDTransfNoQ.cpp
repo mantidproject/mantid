@@ -77,8 +77,10 @@ namespace Mantid
 
     }
 
-    std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin, const double xMax)const
+    std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin, const double xMax,size_t det_num)const
     {
+      UNUSED_ARG(det_num);
+
       std::vector<double> rez(2);
       rez[0]=xMin;
       rez[1]=xMax;

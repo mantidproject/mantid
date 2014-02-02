@@ -62,7 +62,7 @@ public:
     //
     void initialize(const MDWSDescription &ConvParams);
     /***/
-    virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax)const;
+    virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax,size_t det_num)const;
 
 
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
@@ -109,6 +109,8 @@ protected:
     float *m_pEfixedArray;
     // pointer to the array which contains detectors masks. TODO: It is here untill Mantid masks spectra by 0 instead of NaNs, when switched to NaN-s -- remove
     int   *m_pDetMasks;
+    // vector of precalculated cos^2(Theta) values for all detectors, used for identifying extremums
+    std::vector<double> m_CosThetaSq;
 private:
      /// how to transform workspace data in elastic case
     inline bool calcMatrixCoordElastic(const double &k0,std::vector<coord_t> &Coored)const;
