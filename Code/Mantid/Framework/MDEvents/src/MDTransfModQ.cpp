@@ -248,6 +248,7 @@ namespace Mantid
       // get transformation matrix (needed for CrystalAsPoder mode)
       m_RotMat = ConvParams.getTransfMatrix();
       m_pEfixedArray = NULL;
+      if(!ConvParams.m_PreprDetTable)throw(std::runtime_error("The detectors have not been preprocessed but they have to before running initialize"));
 
       // get pointer to the positions of the detectors
       std::vector<Kernel::V3D> const & DetDir = ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections"); 
