@@ -218,14 +218,14 @@ namespace Mantid
           if(m_pEfixedArray)
             ei = double(*(m_pEfixedArray+det_num));
 
-          double eps_extr = ei*m_CosThetaSq[det_num];
+          double ez = (m_Det+det_num)->Z();
+          double eps_extr = ei*(1-ez*ez);
           if (eps_extr>eMin && eps_extr<eMax)
           {
             rez.resize(3);
             rez[0]=eMin;
             rez[1]=eps_extr;
             rez[2]=eMax;
-
           }
           else
           {
@@ -286,12 +286,6 @@ namespace Mantid
           }catch(...)
           {}
 
-          // define cos(theta)^2 array used to find modQ limits;
-          auto &SinSq =  ConvParams.m_PreprDetTable->getColVector<double>("SinSq"); 
-          size_t nDetectors = SinSq.size();
-          m_CosThetaSq.resize(nDetectors);
-          for(size_t i=0;i<nDetectors;i++)
-            m_CosThetaSq[i] = 1-SinSq[i];
         }
 
         // the wave vector of incident neutrons;
