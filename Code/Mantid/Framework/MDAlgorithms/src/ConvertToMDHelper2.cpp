@@ -326,6 +326,9 @@ namespace Mantid
     void ConvertToMDHelper2::buildMinMaxWorkspaceWithMinInstrument(MDEvents::MDWSDescription &InOutWSDescription,
       MDEvents::MDTransfInterface const *const pQtransf,Kernel::DeltaEMode::Type iEMode,bool useWorkspace)
     {
+      // for the time being. -- TODO: Enable
+      UNUSED_ARG(iEMode);
+      UNUSED_ARG(pQtransf);
 
       // Create workspace with min-max values
       double xMin,xMax;
