@@ -37,7 +37,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_direct1D()
+  void xest_direct1D()
   {
 
     Mantid::API::FrameworkManager::Instance();
@@ -63,7 +63,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
 
-  void test_direct3D()
+  void xest_direct3D()
   {
 
     Mantid::API::FrameworkManager::Instance();
@@ -96,7 +96,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
   
-  void test_direct3DHKL()
+  void xest_direct3DHKL()
   {
 
     Mantid::API::FrameworkManager::Instance();
@@ -131,7 +131,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
 
-  void test_indirect1D()
+  void xest_indirect1D()
   {
     
     Mantid::API::FrameworkManager::Instance();
@@ -154,7 +154,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
 
-  void test_elastic1D()
+  void xest_elastic1D()
   {
 
     Mantid::API::FrameworkManager::Instance();
@@ -177,7 +177,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(WSName);
   }
 
-  void test_elastic1DandExtra()
+  void xest_elastic1DandExtra()
   {
 
     Mantid::API::FrameworkManager::Instance();
