@@ -1272,14 +1272,14 @@ namespace WorkspaceCreationHelper
     polar.resize(nDet);
     azim.resize(nDet);
 
-    double dPolar=(polEnd-polStart)/(nDet-1);
-    double dAzim =(azimEnd-azimEnd)/(nDet-1);
+    double dPolar=(polEnd-polStart)/static_cast<double>(nDet-1);
+    double dAzim =(azimEnd-azimEnd)/static_cast<double>(nDet-1);
     for( size_t i=0;i<nPolar;i++)
     {
       for( size_t j=0;j<nAzim;j++)
       {
-        polar[i*nPolar+j]=polStart+dPolar*i;
-        azim[i*nPolar+j] =azimStart+dAzim*j;
+        polar[i*nPolar+j]=polStart+dPolar*static_cast<double>(i);
+        azim[i*nPolar+j] =azimStart+dAzim*static_cast<double>(j);
       }
     }
   }

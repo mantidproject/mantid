@@ -232,7 +232,11 @@ namespace Mantid
             rez[0]=eMin;
             rez[1]=eMax;
           }
-
+          return rez;
+        }
+      default:
+        {
+          throw std::invalid_argument("Undefined or unsupported energy conversion mode ");
         }
       }
       return rez;
