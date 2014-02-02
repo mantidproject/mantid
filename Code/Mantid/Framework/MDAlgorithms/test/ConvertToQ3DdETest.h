@@ -87,7 +87,7 @@ Mantid::API::IAlgorithm * calcMinMaxValDefaults(const std::string &QMode,const s
 }
 
 
-void testExecRunsOnNewWorkspaceNoLimits()
+void xestExecRunsOnNewWorkspaceNoLimits()
 {
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
     // add workspace energy
@@ -127,7 +127,7 @@ void testExecRunsOnNewWorkspaceNoLimits()
     }
 }
 
-void testExecRunsOnNewWorkspaceNoLimits5D()
+void xestExecRunsOnNewWorkspaceNoLimits5D()
 {
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
     // add workspace energy
@@ -177,7 +177,7 @@ void testExecRunsOnNewWorkspaceNoLimits5D()
 }
 
 
-void testExecWorksAutoLimitsOnNewWorkspaceNoMinMaxLimits()
+void xestExecWorksAutoLimitsOnNewWorkspaceNoMinMaxLimits()
 {
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
  // add workspace energy
