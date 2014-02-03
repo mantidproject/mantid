@@ -76,9 +76,11 @@ public:
     void initialize(const MDWSDescription &targetWSDescr,const std::string &units_to);
     void initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode);
     void updateConversion(size_t i);
-    double convertUnits(double val);   
+    double convertUnits(double val)const;   
     // get minimal TOF convertable into target unit
     double getMinTOF()const{return m_TargetUnit->conversionTOFMin();}
+
+    std::vector<double> getConversionRanges(double x1,double x2)const;
     // copy constructor
     UnitsConversionHelper(const UnitsConversionHelper &another);
 protected: // for testing
