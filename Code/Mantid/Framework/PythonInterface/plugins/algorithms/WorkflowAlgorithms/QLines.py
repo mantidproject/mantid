@@ -5,7 +5,7 @@ The model that is being fitted is that of a &delta;-function (elastic component)
 normalised to unity so that the amplitudes represent their integrated areas.
 
 For a Lorentzian, the Fourier transform does the conversion: <math>1/(x^{2}+\delta^{2}) \Leftrightarrow exp[-2\pi(\delta k)]</math>. 
-If <math>x</math> is identified with energy <math>E</math> and <math>2\pi k</math> with <math>t/\hbar</math> where t is time then: <math>1/[E^{2}+(\hbar / \tau )^{2}] \Leftrightarrow exp[−t /\tau]</math> and <math>\sigma</math> is identified with <math> \hbar / \tau </math>. 
+If <math>x</math> is identified with energy <math>E</math> and <math>2\pi k</math> with <math>t/\hbar</math> where t is time then: <math>1/[E^{2}+(\hbar / \tau )^{2}] \Leftrightarrow exp[−t /\tau]</math> and <math>\sigma</math> is identified with <math> \hbar / \tau </math>.
 The program estimates the quasielastic components of each of the groups of spectra and 
 requires the resolution file and optionally the normalisation file created by ResNorm. 
 
