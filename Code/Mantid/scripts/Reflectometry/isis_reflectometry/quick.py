@@ -39,8 +39,8 @@ class ExponentialCorrectionStrategy(CorrectionStrategy):
         
     def apply(self, to_correct):
         logger.information("Exponential Correction")
-        corrected = ExponentialCorrection(InputWorkspace=to_correct,C0=self.__c0, C1= self.__c1, Operation='Divide')
-        return corrected
+        _corrected = ExponentialCorrection(InputWorkspace=to_correct,C0=self.__c0, C1= self.__c1, Operation='Divide')
+        return _corrected
     
 class PolynomialCorrectionStrategy(CorrectionStrategy):
     def __init__(self, poly_string):
@@ -48,14 +48,14 @@ class PolynomialCorrectionStrategy(CorrectionStrategy):
     
     def apply(self, to_correct):
         logger.information("Polynomial Correction")
-        corrected = PolynomialCorrection(InputWorkspace=to_correct, Coefficients=self.__poly_string, Operation='Divide')
-        return corrected
+        _corrected = PolynomialCorrection(InputWorkspace=to_correct, Coefficients=self.__poly_string, Operation='Divide')
+        return _corrected
        
 class NullCorrectionStrategy(CorrectionStrategy):
     def apply(self, to_correct):
         logger.information("Null Correction")
-        out = to_correct.clone()
-        return out
+        _out = to_correct.clone()
+        return _out
         
 
 def quick(run, theta=0, pointdet=True,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', 
@@ -110,8 +110,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     '''
     Version of quick where all parameters are explicitly provided.
     '''
-    sample_ws = ConvertToWavelength.to_single_workspace(run)
-    nHist =  sample_ws.getNumberHistograms()
+    _sample_ws = ConvertToWavelength.to_single_workspace(run)
+    nHist =  _sample_ws.getNumberHistograms()
     to_lam = ConvertToWavelength(run)
     
     if pointdet:
@@ -122,7 +122,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     
     _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
 
-    inst = sample_ws.getInstrument()
+    inst = _sample_ws.getInstrument()
     # Some beamline constants from IDF
    
     print i0_monitor_index
@@ -131,7 +131,7 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
     if (run=='0'):
         RunNumber = '0'
     else:
-        RunNumber = groupGet(sample_ws.getName(),'samp','run_number') 
+        RunNumber = groupGet(_sample_ws.getName(),'samp','run_number') 
     
     if not pointdet:
         # Proccess Multi-Detector; assume MD goes to the end:
@@ -225,9 +225,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         
     # delete all temporary workspaces unless in debug mode (debug=1)
     
-    if debug != 0:
+    if not debug:
         cleanup()
-    DeleteWorkspace(sample_ws)
     return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
@@ -344,6 +343,7 @@ def cleanup():
     names = mtd.getObjectNames()
     for name in names:
         if re.search("^_", name):
+            print "deleting " + name
             DeleteWorkspace(name)
     
 def get_defaults(run_ws, pol_corr = False):
@@ -361,7 +361,6 @@ def get_defaults(run_ws, pol_corr = False):
     defaults['MonitorBackgroundMax'] =float( instrument.getNumberParameter('MonitorBackgroundMax')[0] ) 
     defaults['MonitorIntegralMin'] =  float( instrument.getNumberParameter('MonitorIntegralMin')[0] )
     defaults['MonitorIntegralMax'] = float( instrument.getNumberParameter('MonitorIntegralMax')[0] )
-    defaults['MonitorsToCorrect'] = int( instrument.getNumberParameter('MonitorsToCorrect')[0] )
     defaults['PointDetectorStart'] =  int( instrument.getNumberParameter('PointDetectorStart')[0] )
     defaults['PointDetectorStop'] =  int( instrument.getNumberParameter('PointDetectorStop')[0] )
     defaults['MultiDetectorStart'] = int( instrument.getNumberParameter('MultiDetectorStart')[0] )

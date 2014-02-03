@@ -288,7 +288,7 @@ public:
         auto inst = ws1->getInstrument();
         TS_ASSERT( !inst->getFilename().empty()); // This is how we know we didn't get it from inside the nexus file
         TS_ASSERT_EQUALS( inst->getName(), "POLREF" );
-        TS_ASSERT_EQUALS( inst->getNumberDetectors(), 244 );
+        TS_ASSERT_EQUALS( inst->getNumberDetectors(), 885 );
 
         // check that POLREF_Parameters.xml has been loaded
         auto params = inst->getParameterMap();

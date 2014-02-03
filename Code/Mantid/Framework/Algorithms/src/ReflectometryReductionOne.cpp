@@ -75,30 +75,6 @@ namespace Mantid
         return result.str();
       }
 
-      /**
-       * Helper non-member function
-       * Get indexes in terms of an end-point host workspace.
-       *
-       * Throws if the spectrum id cannot be found.
-       * @param hostWS : The host end point workspace, which the return values will be generated with reference to.
-       * @param originWS : The origin workspace
-       * @param originIndexes : Indexes in terms of the origin workspace
-       * @return WorkspaceIndexes in terms of the host workspace
-       */
-      ReflectometryWorkflowBase::WorkspaceIndexList getIndexesInTermsOf(
-          MatrixWorkspace_const_sptr hostWS, MatrixWorkspace_sptr originWS,
-          const ReflectometryReductionOne::WorkspaceIndexList& originIndexes)
-      {
-        auto spectrumMap = hostWS->getSpectrumToWorkspaceIndexMap();
-        ReflectometryReductionOne::WorkspaceIndexList translatedIndexList;
-        for (size_t i = 0; i < originIndexes.size(); ++i)
-        {
-          const specid_t specNumber = originWS->getSpectrum(i)->getSpectrumNo();
-          translatedIndexList.push_back(static_cast<int>(spectrumMap[specNumber]));
-        }
-        return translatedIndexList;
-      }
-
       const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
       const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
       const std::string tofUnitId = "TOF";
@@ -148,9 +124,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void ReflectometryReductionOne::initDocs()
     {
-      this->setWikiSummary(
-          "Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.");
-      this->setOptionalMessage(this->getWikiSummary());
+      this->setOptionalMessage("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.");
+      this->setWikiSummary("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections. See [[Reflectometry_Guide]]");
     }
 
     //----------------------------------------------------------------------------------------------
@@ -213,6 +188,10 @@ namespace Mantid
           "Second, high wavelength transmission run. Optional. Causes the FirstTransmissionRun to be treated as the low wavelength transmission run.");
 
       this->initStitchingInputs();
+
+      declareProperty(
+        new PropertyWithValue<bool>("StrictSpectrumChecking", true, Direction::Input),
+        "Enforces spectrum number checking prior to normalisation");
 
       setPropertyGroup("FirstTransmissionRun", "Transmission");
       setPropertyGroup("SecondTransmissionRun", "Transmission");
@@ -499,7 +478,7 @@ namespace Mantid
         IvsLam = this->transmissonCorrection(IvsLam, wavelengthInterval,
             monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval, i0MonitorIndex,
             firstTransmissionRun.get(), secondTransmissionRun, stitchingStart, stitchingDelta,
-            stitchingEnd, stitchingStartOverlap, stitchingEndOverlap, wavelengthStep);
+            stitchingEnd, stitchingStartOverlap, stitchingEndOverlap, wavelengthStep, processingCommands);
       }
       else
       {
@@ -529,6 +508,7 @@ namespace Mantid
      * @param stitchingStartOverlap : Stitching start wavelength overlap (optional but dependent on secondTransmissionRun)
      * @param stitchingEndOverlap : Stitching end wavelength overlap (optional but dependent on secondTransmissionRun)
      * @param wavelengthStep : Step in angstroms for rebinning for workspaces converted into wavelength.
+     * @param numeratorProcessingCommands: Processing commands used on detector workspace.
      * @return Normalized run workspace by the transmission workspace, which have themselves been converted to Lam, normalized by monitors and possibly stitched together.
      */
     MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(MatrixWorkspace_sptr IvsLam,
@@ -537,16 +517,27 @@ namespace Mantid
         MatrixWorkspace_sptr firstTransmissionRun, OptionalMatrixWorkspace_sptr secondTransmissionRun,
         const OptionalDouble& stitchingStart, const OptionalDouble& stitchingDelta,
         const OptionalDouble& stitchingEnd, const OptionalDouble& stitchingStartOverlap,
-        const OptionalDouble& stitchingEndOverlap, const double& wavelengthStep)
+        const OptionalDouble& stitchingEndOverlap, const double& wavelengthStep, const std::string& numeratorProcessingCommands)
     {
       g_log.debug("Extracting first transmission run workspace indexes from spectra");
-      const std::string detectorIndexes = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
-          firstTransmissionRun);
 
+      const bool strictSpectrumChecking = getProperty("StrictSpectrumChecking");
+    
       MatrixWorkspace_sptr denominator = firstTransmissionRun;
       Unit_const_sptr xUnit = firstTransmissionRun->getAxis(0)->unit();
       if (xUnit->unitID() == tofUnitId)
       {
+        std::string spectrumProcessingCommands = numeratorProcessingCommands;
+        /*
+        If we have strict spectrum checking, the processing commands need to be made from the 
+        numerator workspace AND the transmission workspace based on matching spectrum numbers.
+        */
+        if(strictSpectrumChecking)
+        {
+          spectrumProcessingCommands = createWorkspaceIndexListFromDetectorWorkspace(IvsLam,
+          firstTransmissionRun);
+        }
+
         // Make the transmission run.
         auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
         alg->initialize();
@@ -560,7 +551,7 @@ namespace Mantid
           alg->setProperty("StartOverlap", stitchingStartOverlap.get());
           alg->setProperty("EndOverlap", stitchingEndOverlap.get());
         }
-        alg->setProperty("ProcessingInstructions", detectorIndexes);
+        alg->setProperty("ProcessingInstructions", spectrumProcessingCommands);
         alg->setProperty("I0MonitorIndex", i0MonitorIndex);
         alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
         alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
@@ -583,9 +574,34 @@ namespace Mantid
       rebinToWorkspaceAlg->execute();
       denominator = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
 
+      verifySpectrumMaps(IvsLam, denominator, strictSpectrumChecking);
+
       // Do normalization.
       MatrixWorkspace_sptr normalizedIvsLam = IvsLam / denominator;
       return normalizedIvsLam;
+    }
+
+    /**
+    @param ws1 : First workspace to compare
+    @param ws2 : Second workspace to compare against
+    @param severe: True to indicate that failure to verify should result in an exception. Otherwise a warning is generated.
+    */
+    void ReflectometryReductionOne::verifySpectrumMaps(MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2, const bool severe)
+    {
+      auto map1 = ws1->getSpectrumToWorkspaceIndexMap();
+      auto map2 = ws2->getSpectrumToWorkspaceIndexMap();
+      if (map1 != map2)
+      {
+        std::string message = "Spectrum maps between workspaces do NOT match up.";
+        if (severe)
+        {
+          throw std::invalid_argument(message);
+        }
+        else
+        {
+          this->g_log.warning(message);
+        }
+      }
     }
 
   } // namespace Algorithms

@@ -221,12 +221,27 @@ namespace IDA
 
   QString FuryFit::validate()
   {
+    using Mantid::API::AnalysisDataService;
     UserInputValidator uiv;
 
     switch( uiForm().furyfit_cbInputType->currentIndex() )
     {
     case 0:
-      uiv.checkMWRunFilesIsValid("Input", uiForm().furyfit_inputFile); break;
+      uiv.checkMWRunFilesIsValid("Input", uiForm().furyfit_inputFile); 
+
+      //file should already be loaded by this point, but attempt to recover if not.
+      if(!AnalysisDataService::Instance().doesExist(m_ffInputWSName.toStdString()))
+      {
+        //attempt to reload the nexus file.
+        QString filename = uiForm().furyfit_inputFile->getFirstFilename();
+        QFileInfo fi(filename);
+        QString wsname = fi.baseName();
+
+        m_ffInputWS = runLoadNexus(filename, wsname);
+        m_ffInputWSName = wsname;
+      }
+
+      break;
     case 1:
       uiv.checkWorkspaceSelectorIsNotEmpty("Input", uiForm().furyfit_wsIqt); break;
     }
@@ -356,8 +371,14 @@ namespace IDA
 
     m_ffTree->addProperty(m_ffProp["StartX"]);
     m_ffTree->addProperty(m_ffProp["EndX"]);
-
     m_ffTree->addProperty(m_ffProp["LinearBackground"]);
+    
+    //option should only be available with a single stretched exponential
+    uiForm().furyfit_ckConstrainBeta->setEnabled((index == 2));
+    if (!uiForm().furyfit_ckConstrainBeta->isEnabled())
+    {
+      uiForm().furyfit_ckConstrainBeta->setChecked(false);
+    }
 
     switch ( index )
     {
@@ -502,7 +523,13 @@ namespace IDA
 
   void FuryFit::sequential()
   {
-    plotInput();
+    const QString error = validate();
+    if( ! error.isEmpty() )
+    {
+      showInformationBox(error);
+      return;
+    }
+    
     if ( m_ffInputWS == NULL )
     {
       return;
@@ -527,9 +554,10 @@ namespace IDA
       }
     }
 
+    bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
     std::string function = std::string(func->asString());
   
-    QString pyInput = "from IndirectDataAnalysis import furyfitSeq\n"
+    QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
       "input = '" + m_ffInputWSName + "'\n"
       "func = r'" + QString::fromStdString(function) + "'\n"
       "ftype = '" + fitTypeString() + "'\n"
@@ -544,7 +572,14 @@ namespace IDA
     if ( uiForm().furyfit_ckSaveSeq->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
-    pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot, verbose)\n";
+    if (!constrainBeta)
+    {
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot, verbose)\n";
+    }
+    else
+    {
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, save, plot, verbose)\n";
+    }
   
     QString pyOutput = runPythonCode(pyInput);
   }

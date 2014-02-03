@@ -409,7 +409,7 @@ namespace DataHandling
 
       // grap title to use to e.g. create workspace name
       std::string nameAttrValueTITLE;
-      nxFile.getAttr("title", nameAttrValueTITLE);
+      nxFile.getAttr("filename", nameAttrValueTITLE);
 
 			if ( nxFile.hasAttr("ylabel") )
 			{
