@@ -53,6 +53,13 @@ namespace API
   {
   }
 
+  /** Return the range of the data containing in the spectra e.g. x[0]-x[last] for histogram or tof_min-tof_max for events */
+  std::pair<double,double> ISpectrum::getXDataRange()const
+  {
+    size_t nData = refX->size();
+    return std::pair<double,double>(refX->operator[](0),refX->operator[](nData-1));
+  }
+
   // =============================================================================================
   /// Sets the x data.
   /// @param X :: vector of X data
