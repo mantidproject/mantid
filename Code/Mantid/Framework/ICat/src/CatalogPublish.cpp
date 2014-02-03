@@ -151,7 +151,7 @@ namespace Mantid
         std::istream& responseStream = session.receiveResponse(response);
 
         // Obtain the status returned by the server to verify if it was a success.
-        std::string HTTPStatus = boost::lexical_cast<std::string>(response.getStatus());
+        Poco::Net::HTTPResponse::HTTPStatus HTTPStatus = response.getStatus();
         // The error message returned by the IDS (if one exists).
         std::string IDSError = CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
         // Cancel the algorithm and display the message if it exists.
