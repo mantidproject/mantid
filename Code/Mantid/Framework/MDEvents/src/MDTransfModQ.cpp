@@ -209,8 +209,8 @@ namespace Mantid
         {          
           rez[0]=eMin;
           rez[1]=eMax;
+          return rez;
         }
-
       case(Kernel::DeltaEMode::Direct): 
       case(Kernel::DeltaEMode::Indirect): 
         {
