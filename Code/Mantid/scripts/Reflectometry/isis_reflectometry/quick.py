@@ -344,13 +344,13 @@ def polCorr(polcorr, IvsLam, crho, calpha, cAp, cPp):
         print message
     return IvsLam
     
+
 def cleanup():
     names = mtd.getObjectNames()
     for name in names:
-        if re.search("^_", name):
+        if re.search("^_", name) and mtd.doesExist(name):
             print "deleting " + name
             DeleteWorkspace(name)
-    
     
 def get_defaults(run_ws, polcorr = False):
     '''
