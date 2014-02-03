@@ -34,6 +34,8 @@ def setup(instname=None,reload=False):
     if not (Reducer is None) :
         if  Reducer.instr_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :
+                # reinitialize idf parameters to defaults.
+                Reducer.init_idf_params(True);
                 return  # has been already defined
 
     Reducer = DRC.setup_reducer(instname)
@@ -511,8 +513,23 @@ def process_legacy_parameters(**kwargs) :
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
+        if key == 'hardmaskPlus': # legacy key defines other mask file here
+            params["hard_mask_file"] = value;
+            params["use_hard_mask_only"] = False;
         else:
             params[key]=value;    
+
+    # Check all possible ways to define hard mask file:
+    if not params['hard_mask_file'] is None:
+        if type(params['hard_mask_file']) == str and params['hard_mask_file']=="None":
+            params['hard_mask_file'] = None;
+        elif type(params['hard_mask_file']) == bool:
+           if  params['hard_mask_file']:
+               raise  TypeError("hard_mask_file has to be a file name or None. It can not be boolean True")
+           else:
+               params['hard_mask_file'] = None;
+        elif len(params['hard_mask_file']) == 0:
+             params['hard_mask_file'] = None;
 
         
     return params
