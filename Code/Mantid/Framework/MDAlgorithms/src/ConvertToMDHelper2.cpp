@@ -176,8 +176,11 @@ namespace Mantid
       //TODO: in a future it can be a choice -- use source workspace or the workspace with spherical instrument. Current settings 
       targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(InWS2D,dEModReq,false,std::string(getProperty("PreprocDetectorsWS")));
 
+
       // build simplified workspace with min-max histogram values from input workspace and the same instument as the initial ws.true parameter 
-      buildMinMaxWorkspaceWithMinInstrument(targWSDescr,pQtransf,iEmode,true);
+      MinValues.assign(nDim,FLT_MAX);
+      MaxValues.assign(nDim,-FLT_MAX);
+      findMinMaxValues(targWSDescr,pQtransf,iEmode,true,MinValues,MaxValues);
 
 
       //DO THE JOB:

@@ -37,7 +37,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void xest_direct1D()
+  void test_direct1D()
   {
 
     Mantid::API::FrameworkManager::Instance();
