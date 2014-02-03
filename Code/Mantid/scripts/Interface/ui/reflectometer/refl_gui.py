@@ -246,7 +246,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         if isinstance(mtd[candidate], WorkspaceGroup):
             todisplay = candidate # No single run number for a group of workspaces.
         else:
-            todisplay = groupGet(mtd[first_contents], "samp", "run_number")
+            todisplay = groupGet(mtd[candidate], "samp", "run_number")
         return todisplay
 
 
