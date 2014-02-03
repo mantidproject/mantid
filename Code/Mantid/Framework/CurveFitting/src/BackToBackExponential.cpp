@@ -7,8 +7,10 @@ This peakshape function represent the convolution of back-to-back exponentials a
 be used for the data analysis of time-of-flight neutron powder diffraction data, see Ref. 1.
 
 The parameters <math>A</math> and <math>B</math> represent the absolute value of the exponential rise and decay constants (modelling the neutron pulse coming from the moderator)
-and <math>S</math> represent the standard deviation of the gaussian. The parameter <math>X0</math> is the location of the peak; more specifically it represent
+and <math>S</math> represent the standard deviation of the gaussian. The parameter <math>X0</math> is the location of the peak; more specifically it represent 
 the point where the exponentially modelled neutron pulse goes from being exponentially rising to exponentially decaying. <math>I</math> is the integrated intensity.
+
+For information about how to convert Fullprof back-to-back exponential parameters into those used for this function see [[CreateBackToBackParameters]]. 
 
 References
 

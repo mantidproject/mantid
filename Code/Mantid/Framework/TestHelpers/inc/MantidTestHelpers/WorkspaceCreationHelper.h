@@ -162,7 +162,7 @@ namespace WorkspaceCreationHelper
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
   Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nHist, int nBins,
-                    bool includeMonitors = false, bool startYNegative = false);
+                    bool includeMonitors = false, bool startYNegative = false, bool isHistogram = true);
   
   /**
    * Create a test workspace with a Theta numeric axis instead of a spectrum axis

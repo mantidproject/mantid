@@ -600,7 +600,6 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
       {
         g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
         g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
-        g->setAntialiasing(false);
         g->setAutoScale();
       }
     }
@@ -2084,6 +2083,20 @@ bool MantidUI::isValidCatalogLogin()
   return false;
 }
 
+/**
+ * Creates a publishing dialog GUI and runs the publishing algorithm when "Run" is pressed.
+ */
+void MantidUI::catalogPublishDialog()
+{
+  auto catalogAlgorithm = this->createAlgorithm("CatalogPublish");
+  auto publishDialog    = this->createAlgorithmDialog(catalogAlgorithm);
+
+  if(publishDialog->exec() == QDialog::Accepted)
+  {
+    catalogAlgorithm->executeAsync();
+  }
+}
+
 /** This method is sueful for saving the currently loaded workspaces to project file on save.
 *  saves the names of all the workspaces loaded into mantid workspace tree
 *  into a string and calls save nexus on each workspace to save the data to a nexus file.
@@ -2975,7 +2988,6 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
   }
   g->setXAxisTitle(tr(s.c_str()));
   g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-  g->setAntialiasing(false);
   g->setAutoScale();
 }
 
@@ -2997,7 +3009,6 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   }
   g->setXAxisTitle(tr(xtitle.c_str()));
   g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-  g->setAntialiasing(false);
 }
 
 /**
@@ -3175,7 +3186,6 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     }
     g->setYAxisTitle(tr(yTitle.c_str()));
 
-    g->setAntialiasing(false);
     g->setAutoScale();
     /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
      * data points. However, this has the side-effect suggested by its name: all the axes become

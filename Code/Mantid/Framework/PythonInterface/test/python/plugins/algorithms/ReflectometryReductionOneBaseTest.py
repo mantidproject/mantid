@@ -206,21 +206,50 @@ class ReflectometryReductionOneBaseTest(object):
         DeleteWorkspace(trans_run1)
         DeleteWorkspace(trans_run2)
     
-    def test_spectrum_map_mismatch_throws(self):
+    def test_spectrum_map_mismatch_throws_when_strict(self):
         alg = self.construct_standard_algorithm()
         real_run = Load('INTER00013460.nxs')
-        trans_run1 = Load('INTER00013463.nxs')
-        trans_run2 = self.__tof
+        trans_run1_tof = Load('INTER00013463.nxs')
+        '''
+        Here we convert the transmission run to Lam. The workspace will NOT have the same spectra map as the input workspace,
+        and strict checking is turned on, so this will throw upon execution.
+        '''
+        trans_run1_lam = ConvertUnits(trans_run1_tof, Target='Wavelength')
+        trans_run1_lam = CropWorkspace(trans_run1_lam, EndWorkspaceIndex=1)
         
         alg.set_InputWorkspace(real_run)
-        alg.set_ProcessingInstructions("3,4")
-        alg.set_FirstTransmissionRun(trans_run1) 
-        alg.set_SecondTransmissionRun(trans_run2)
+        alg.set_ProcessingInstructions("3,4") # This will make spectrum numbers in input workspace different from denominator
+        alg.set_FirstTransmissionRun(trans_run1_lam) 
+        alg.set_StrictSpectrumChecking(True)
         
-        self.assertRaises(Exception, alg.execute)
+        self.assertRaises(Exception, alg.execute) # Should throw due to spectrum missmatch.
         
         DeleteWorkspace(real_run)
-        DeleteWorkspace(trans_run1)
+        DeleteWorkspace(trans_run1_tof)
+        DeleteWorkspace(trans_run1_lam)
+        
+    def test_spectrum_map_mismatch_doesnt_throw_when_not_strict(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('INTER00013460.nxs')
+        trans_run1_tof = Load('INTER00013463.nxs')
+        '''
+        Here we convert the transmission run to Lam. The workspace will NOT have the same spectra map as the input workspace,
+        and strict checking is turned off, so this will NOT throw upon execution.
+        '''
+        trans_run1_lam = ConvertUnits(trans_run1_tof, Target='Wavelength')
+        trans_run1_lam = CropWorkspace(trans_run1_lam, EndWorkspaceIndex=1)
+        
+        alg.set_InputWorkspace(real_run)
+        alg.set_ProcessingInstructions("3,4") # This will make spectrum numbers in input workspace different from denominator
+        alg.set_FirstTransmissionRun(trans_run1_lam) 
+        alg.set_StrictSpectrumChecking(False) # Will not crash-out on spectrum checking.
+        
+        alg.execute()# Should not throw
+        
+        DeleteWorkspace(real_run)
+        DeleteWorkspace(trans_run1_tof)
+        DeleteWorkspace(trans_run1_lam)
+        
         
     def test_calculate_theta(self):
         alg = self.construct_standard_algorithm()

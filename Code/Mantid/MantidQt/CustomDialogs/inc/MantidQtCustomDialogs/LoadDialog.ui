@@ -33,7 +33,7 @@
     <enum>QLayout::SetMinAndMaxSize</enum>
    </property>
    <item>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="instructions">
      <property name="palette">
       <palette>
        <active>
@@ -138,7 +138,7 @@
       <enum>QFrame::Sunken</enum>
      </property>
      <property name="text">
-      <string>Attempts to load a given file by finding the appropriate Load algorithm</string>
+      <string/>
      </property>
      <property name="alignment">
       <set>Qt::AlignJustify|Qt::AlignVCenter</set>

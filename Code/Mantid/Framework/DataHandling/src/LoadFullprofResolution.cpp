@@ -1,8 +1,16 @@
 /*WIKI* 
 
-Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instrument of a matrix workspace.
+Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instrument of a group of matrix workspaces with one workspace per bank of the .irf file.
+Either or both of the Tableworkspace(s) and matrix workspace must be set.
+
+Where a Workspace is specified the support for translating Fullprof resolution parameters into the workspace for subsequent
+fitting is limitted to Fullprof:
+
+* NPROF=13, Ikeda-Carpender pseudo-Voigt translated into [[IkedaCarpenterPV]] according to [[CreateIkedaCarpenterParameters]] 
+* NPROF=9, back-to-back-exponential pseudo-Voigt translated into [[BackToBackExponential]] according to [[CreateBackToBackParameters]]
 
 *WIKI*/
+
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -63,8 +71,8 @@ namespace DataHandling
     */
   void LoadFullprofResolution::initDocs()
   {
-    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s).");
-    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s).");
+    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) or the instruments in a group of matrix workspaces");
+    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) or the instruments in a group of matrix workspaces.");
 
     return;
   }
@@ -85,13 +93,22 @@ namespace DataHandling
     declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
     // Bank to import
-    declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load. "
+    declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load, "
+                    "where ID=1 refers to the first bank (block of number in the .irf file), "
+                    "ID=2 refers to the second bank (block of number in the .irf file) and so on. "
                     "Default is all banks contained in input .irf file.");
 
-    // declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
+    // Workspace to put parameters into. It must be a workspace group with one workpace per bank from the IRF file
+    declareProperty(new WorkspaceProperty<WorkspaceGroup>("Workspace","",Direction::InOut, PropertyMode::Optional),
+        "A workspace group with the instrument to which we add the parameters from the Fullprof .irf file with one workspace for each bank of the .irf file");
 
-    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut, PropertyMode::Optional),
-        "Optional: A matrix workspace with the instrument to which we add the parameters from the Fullprof .irf file.");
+   // Workspaces for each bank
+    declareProperty(new ArrayProperty<int>("WorkspacesForBanks"), "For each Fullprof bank,"
+                    " the ID of the corresponding workspace in same order as the Fullprof banks are specified. "
+                    "ID=1 refers to the first workspace in the workspace group, "
+                    "ID=2 refers to the second workspace and so on. "
+                    "Default is all workspaces in numerical order."
+                    "If default banks are specified, they too are taken to be in numerical order" );
 
     return;
   }
@@ -104,7 +121,8 @@ namespace DataHandling
     // Get input
     string datafile = getProperty("Filename");
     vector<int> outputbankids = getProperty("Banks");
-    MatrixWorkspace_sptr workspace = getProperty("Workspace");
+    WorkspaceGroup_sptr wsg = getProperty("Workspace");
+    vector<int> outputwsids = getProperty("WorkspacesForBanks");
 
     // Import data
     vector<string> lines;
@@ -122,6 +140,9 @@ namespace DataHandling
     for (size_t i = 0; i < vec_bankinirf.size(); ++i)
       g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
 
+    // Bank-workspace correspondence
+    map < int, size_t > workspaceOfBank;
+
     vector<int> vec_bankids; // bank IDs to output to table workspace
 
     if (vec_bankinirf.empty())
@@ -131,16 +152,22 @@ namespace DataHandling
     else if (outputbankids.size() == 0)
     {
       vec_bankids = vec_bankinirf;
+      // If workspaces, set up Bank-Workpace correspondence
+      if(wsg) createBankToWorkspaceMap ( vec_bankids, outputwsids, workspaceOfBank);
     }
     else
     {
+      // If workspaces, set up Bank-Workpace correspondece, before banks are sorted.
+      if(wsg) createBankToWorkspaceMap ( outputbankids, outputwsids, workspaceOfBank);
+
+      // Deal with banks
       sort(outputbankids.begin(), outputbankids.end());
       for (size_t i = 0; i < outputbankids.size(); ++i)
       {
         int outputbankid = outputbankids[i];
         if (outputbankid < 0)
         {
-          g_log.warning() << "Input bank ID (" << outputbankid << ") is negative.  It is not allowed and ignored. " << ".\n";
+          g_log.warning() << "Input bank ID (" << outputbankid << ") is negative.  It is not allowed and is  ignored. " << ".\n";
         }
         else
         {
@@ -195,10 +222,29 @@ namespace DataHandling
 
 
     // If workspace, put parameters there
-    if(workspace)
-    {
-      putParametersIntoWorkspace( outTabWs, workspace );
-    } 
+    if(wsg) {
+      // First check that number of workspaces in group matches number of banks, if no WorkspacesForBanks is specified.
+      if( (outputwsids.size() == 0) && (wsg->size() != vec_bankids.size()) )
+      {
+        std::ostringstream mess;
+        mess << "Number of banks ("<< vec_bankids.size() << ") does not match number of workspaces (" << wsg->size() << ") in group. Parameters not put into workspaces.";
+        g_log.error( mess.str() );
+      }
+      else // Numbers match, so put parameters into workspaces.
+      { 
+        getTableRowNumbers( outTabWs, m_rowNumbers);
+        for (size_t i=0; i < vec_bankids.size(); ++i)
+        {
+          int bankId = vec_bankids[i];
+          size_t wsId = workspaceOfBank[bankId];
+          Workspace_sptr wsi = wsg->getItem(wsId-1); 
+          auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+              // Get column from table workspace
+          API::Column_const_sptr OutTabColumn = outTabWs->getColumn( i+1 );
+          putParametersIntoWorkspace( OutTabColumn, workspace, nProf );  
+        }
+      } 
+    }
     else if( getPropertyValue("OutputTableWorkspace") == "")
     {
       // We don't know where to output
@@ -262,9 +308,10 @@ namespace DataHandling
     {
        // Split line to get the NPROF number
       size_t nStart = lines[1].find("NPROF");
-      size_t nNumber = lines[1].find("=", nStart) + 1;
+      size_t nEq = lines[1].find("=", nStart);
       size_t nEnd = lines[1].find(" ",nStart); // Assume the NRPOF number is followed by space
-      if(nNumber == string::npos + 1 || nEnd == string::npos ) return (-1);
+      if(nEq == string::npos || nEnd == string::npos ) return (-1);
+      size_t nNumber = nEq + 1;
       return( boost::lexical_cast<int> (lines[1].substr(nNumber,nEnd-nNumber)) );
     }
 
@@ -767,13 +814,43 @@ namespace DataHandling
     return tablews;
   }
 
-  void LoadFullprofResolution::putParametersIntoWorkspace( const API::ITableWorkspace_sptr &tws, API::MatrixWorkspace_sptr ws)
+  //----------------------------------------------------------------------------------------------
+  /** create a map of the workspaces corresponding to each bank
+    * @param banks :: [input] list of bank IDs; must not be empty. must not have duplicate entries. 
+    * @param workspaces :: [input] list of corresponding workspaces or empty vector for default  MAY NEED TO BE size_t <int, size_t>
+    * @param workspaceOfBank :: [output] map to indicate the workspace that a bank's parameters will be put in
+    */
+  void LoadFullprofResolution::createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& workspaceOfBank )
+  {
+    if(workspaces.size() == 0)
+    {
+      for(size_t i=0; i<banks.size(); i++)
+      {
+        workspaceOfBank.insert(std::pair<int,size_t>(banks[i],i+1));
+      }
+    }
+    else
+    {
+      for(size_t i=0; i<banks.size(); i++)
+      {
+        workspaceOfBank.insert(std::pair<int,size_t>(banks[i],workspaces[i]));
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Put the parameters into one workspace
+    * @param column :: [input] column of the output table workspace 
+    * @param workspaceOfBank :: [input/output] the group workspace parameters are to be put in
+    * @param nProf :: the PROF Number, which is used to determine fitting function for the parameters.
+    */
+  void LoadFullprofResolution::putParametersIntoWorkspace( API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nProf)
   {  
 
     // Get instrument name from matrix workspace
     std::string instrumentName = ws->getInstrument()->getName();
 
-    // Convert table workspace into DOM XML document
+    // Convert table workspace column into DOM XML document
     //   Set up writer to Paremeter file
     DOMWriter writer;
     writer.setNewLine("\n");
@@ -791,41 +868,33 @@ namespace DataHandling
     mDoc->appendChild(rootElem);
 
     //   Add instrument
-    getTableRowNumbers( tws, m_rowNumbers);
     AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name",instrumentName);
     rootElem->appendChild(instrumentElem);
-    API::Column_const_sptr column1 = tws->getColumn( 1 );
-    addALFBEParameter( column1, mDoc, instrumentElem, "Alph0");
-    addALFBEParameter( column1, mDoc, instrumentElem, "Beta0");
-    addALFBEParameter( column1, mDoc, instrumentElem, "Alph1");
-    addALFBEParameter( column1, mDoc, instrumentElem, "Beta1");
-
-    //   Add banks
-    if(tws->columnCount() < 2){
-      throw std::runtime_error("No banks found");
-    }
-    size_t num_banks = tws->columnCount()-1;
-
-    for( size_t i=0; i<num_banks; ++i)
+    if (nProf == 9)  // put parameters into BackToBackExponential function
     {
-      API::Column_const_sptr column = tws->getColumn( i+1 );
-      const double bankNumber = column->cell<double>(0);
-      std::ostringstream bankName;
-      bankName << "bank" << bankNumber;
-      AutoPtr<Element> bankElem = mDoc->createElement("component-link");
-      bankElem->setAttribute("name",bankName.str());
-      addSigmaParameters( column, mDoc, bankElem );
-      addGammaParameters( column, mDoc, bankElem );
-      rootElem->appendChild(bankElem);
+      addBBX_S_Parameters( column, mDoc, instrumentElem );
+      addBBX_A_Parameters( column, mDoc, instrumentElem );
+      addBBX_B_Parameters( column, mDoc, instrumentElem );
     }
+    else // Assume IkedaCarpenter PV
+    {
+      addALFBEParameter( column, mDoc, instrumentElem, "Alph0");
+      addALFBEParameter( column, mDoc, instrumentElem, "Beta0");
+      addALFBEParameter( column, mDoc, instrumentElem, "Alph1");
+      addALFBEParameter( column, mDoc, instrumentElem, "Beta1");
+      addSigmaParameters( column, mDoc, instrumentElem );
+      addGammaParameters( column, mDoc, instrumentElem );
+    }
+
 
     // Convert DOM XML document into string
     std::ostringstream outFile;
     writer.writeNode(outFile, mDoc);  
     std::string parameterXMLString = outFile.str();
 
-    //std::ofstream outfileDebug("C:/Temp/test2_fullprof.xml");
+    // Useful code for testing upgrades commented out for production use
+    //std::ofstream outfileDebug("C:/Temp/test4_fullprof.xml");
     //outfileDebug << parameterXMLString;
     //outfileDebug.close();
 
@@ -835,7 +904,7 @@ namespace DataHandling
 
   }
 
-  /* Add an ALFBE parameter to the XML document according to the table workspace
+  /* Add an Ikeda Carpenter PV ALFBE parameter to the XML document according to the table workspace
   *
   *  paramName is the name of the parameter as it appears in the table workspace
   */
@@ -856,7 +925,7 @@ namespace DataHandling
     parent->appendChild(parameterElem);
   }
 
-    /* Add a set of SIGMA paraters to the XML document according to the table workspace
+   /* Add a set of Ikeda Carpenter PV SIGMA parameters to the XML document according to the table workspace
    * for the bank at the given column of the table workspace
    */
   void LoadFullprofResolution::addSigmaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
@@ -866,7 +935,7 @@ namespace DataHandling
      parameterElem->setAttribute("type","fitting");
 
      AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-     std::string eqValue = getXMLEqValue(column, "Sig1")+"*centre^2+"+getXMLEqValue(column, "Sig0");
+     std::string eqValue = getXMLSquaredEqValue(column, "Sig1")+"*centre^2+"+getXMLSquaredEqValue(column, "Sig0");
      formulaElem->setAttribute("eq", eqValue);
      formulaElem->setAttribute("unit","dSpacing");
      formulaElem->setAttribute("result-unit","TOF^2");
@@ -875,7 +944,7 @@ namespace DataHandling
      parent->appendChild(parameterElem);
   }
 
-   /* Add a set of GAMMA paraters to the XML document according to the table workspace
+   /* Add a set of Ikeda Carpenter PV GAMMA parameters to the XML document according to the table workspace
    * for the bank at the given column of the table workspace
    */
   void LoadFullprofResolution::addGammaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
@@ -892,6 +961,69 @@ namespace DataHandling
      parameterElem->appendChild(formulaElem);
 
      parent->appendChild(parameterElem);
+  }
+
+  /* Add a set of BackToBackExponential S parameters to the XML document according to the table workspace
+  * for the bank at the given column of the table workspace
+  */
+  void LoadFullprofResolution::addBBX_S_Parameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", "BackToBackExponential:S");
+    parameterElem->setAttribute("type","fitting");
+
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+    std::string eqValue = "sqrt("+getXMLSquaredEqValue(column, "Sig2" )+"*centre^4 + "+getXMLSquaredEqValue(column, "Sig1" )+"*centre^2 + "+getXMLSquaredEqValue(column, "Sig0" )+")";
+    formulaElem->setAttribute("eq", eqValue);
+    formulaElem->setAttribute("unit","dSpacing");
+    formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
+
+    parent->appendChild(parameterElem);
+  }
+
+  /* Add a set of BackToBackExponential A parameters to the XML document according to the table workspace
+  * for the bank at the given column of the table workspace
+  */
+  void LoadFullprofResolution::addBBX_A_Parameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", "BackToBackExponential:A");
+    parameterElem->setAttribute("type","fitting");
+
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+    std::string eqValue = "("+getXMLEqValue(column, "Alph1" )+"/centre) + "+getXMLEqValue(column,"Alph0");
+    formulaElem->setAttribute("eq", eqValue);
+    formulaElem->setAttribute("unit","dSpacing");
+    formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
+
+    AutoPtr<Element> fixedElem = mDoc->createElement("fixed");
+    parameterElem->appendChild(fixedElem);
+
+    parent->appendChild(parameterElem);
+  }
+
+  /* Add a set of BackToBackExponential B parameters to the XML document according to the table workspace
+  * for the bank at the given column of the table workspace
+  */
+  void LoadFullprofResolution::addBBX_B_Parameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
+  {
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", "BackToBackExponential:B");
+    parameterElem->setAttribute("type","fitting");
+
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
+    std::string eqValue = "("+getXMLEqValue(column, "Beta1" )+"/centre^4) + "+getXMLEqValue(column,"Beta0");
+    formulaElem->setAttribute("eq", eqValue);
+    formulaElem->setAttribute("unit","dSpacing");
+    formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
+
+    AutoPtr<Element> fixedElem = mDoc->createElement("fixed");
+    parameterElem->appendChild(fixedElem);
+
+    parent->appendChild(parameterElem);
   }
 
 
@@ -919,8 +1051,19 @@ namespace DataHandling
     size_t paramNumber = m_rowNumbers[name];
     //API::Column_const_sptr column = tablews->getColumn( columnIndex );
     double eqValue = column->cell<double>(paramNumber);
-    if(name.substr(0,3) == "Sig") eqValue = eqValue*eqValue; // Square the sigma values
     return boost::lexical_cast<std::string>(eqValue);
+  }
+
+  /*
+  * Get the value string to put in the XML eq attribute of the formula element of the SQUARED paramenter element
+  * given the name of the parameter in the table workspace.
+  */
+  std::string LoadFullprofResolution::getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name )
+  {
+    size_t paramNumber = m_rowNumbers[name];
+    //API::Column_const_sptr column = tablews->getColumn( columnIndex );
+    double eqValue = column->cell<double>(paramNumber);
+    return boost::lexical_cast<std::string>(eqValue*eqValue);
   }
 
   /* This function fills in a list of the row numbers starting 0 of the parameters

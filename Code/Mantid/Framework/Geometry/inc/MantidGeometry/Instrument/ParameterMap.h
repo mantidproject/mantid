@@ -261,6 +261,8 @@ namespace Geometry
     bool getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const;
     /// Persist a representation of the Parameter map to the open Nexus file
     void saveNexus(::NeXus::File * file, const std::string & group) const;
+    /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new newComp->id
+    void copyFromParameterMap(const IComponent* oldComp,const IComponent* newComp, const ParameterMap *oldPMap);
 
   private:
     ///Assignment operator

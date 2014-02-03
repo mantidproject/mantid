@@ -1192,12 +1192,12 @@ class DirectEnergyConversion(object):
                     raise KeyError("Attempt to set unknown parameter: "+par_name)
             # whole composite key is modified by input parameters
             if par_name in self.composite_keys_set :
-               val = getattr(self,par_name) # get default value
+               default_value = getattr(self,par_name) # get default value
                if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requesed explicitly
-                   value = val
-               if type(val) != type(value):
-                   raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(val))+ " with wrong type value: "+str(type(value)))
-               if len(val) != len(value) :
+                   value = default_value
+               if type(default_value) != type(value):
+                   raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(default_value))+ " with wrong type value: "+str(type(value)))
+               if len(default_value) != len(value) :
                     raise KeyError("Attempt to change range property : "+par_name+" with default value: ["+",".join(str(vv) for vv in val)+
                                    "] to wrong length value: ["+",".join(str(vv) for vv in value)+"]\n")
                else:

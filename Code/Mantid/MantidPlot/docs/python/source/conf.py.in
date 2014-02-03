@@ -37,6 +37,16 @@ def setup(app):
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+#try: # bonus for doxygen links - TODO off for now
+#  import sphinxcontrib.doxylink
+#  extensions.append('sphinxcontrib.doxylink')
+#except ImportError:
+#  pass
+#try: # bonus for breathe - TODO off for now
+#  import breathe
+#  extensions.append('breathe')
+#except ImportError:
+#  pass
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -97,6 +107,16 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 modindex_common_prefix = []
 
+
+# -- Options for sphinxcontrib-doxylink output ---------------------------------
+doxylink = { 'mantidcpp' : ('@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/../Framework/Doxygen/Mantid.tag',
+	 	  'http://doxygen.mantidproject.org/') }
+
+# -- Options for breathe output ------------------------------------------------
+breathe_projects = { 
+		 "mantid" : "/home/pf9/builds/mantid-release/doxygen/xml/"
+		  }
+breathe_default_project = "mantid"
 
 # -- Options for HTML output ---------------------------------------------------
 

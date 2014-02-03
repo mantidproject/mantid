@@ -50,9 +50,13 @@ namespace MantidWidgets
 
     enum DialogState 
     {
+      Preparing,
       Running,
       Stopped
     };
+
+    // Prefix added to the names of the sequential fit result workspaces and groups
+    static const std::string SEQUENTIAL_PREFIX;
 
   signals:
     void stateChanged(DialogState newState);
@@ -109,20 +113,24 @@ namespace MantidWidgets
     /// Updates visibility/tooltip of label error asterisk
     void updateLabelError(const QString& label);
 
-    /// Enables/disables start button depending on wether we are allowed to start
-    void updateControlButtonState();
-
     /// Sets control button to be start/stop depending on new dialog state 
     void updateControlButtonType(DialogState newState);
 
     /// Update enabled state off all the input widgets depending on new dialog state
     void updateInputEnabled(DialogState newState); 
 
+    /// Update control button enabled status depending on the new state. 
+    void updateControlEnabled(DialogState newState); 
+
+    /// Update cursor depending on the new state of the dialog.
+    void updateCursor(DialogState newState); 
+
     /// Start fitting process
     void startFit();
 
     /// Stop fitting process
     void stopFit();
+
   };
 
 

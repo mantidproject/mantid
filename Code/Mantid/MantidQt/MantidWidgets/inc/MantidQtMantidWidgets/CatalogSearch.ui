@@ -292,7 +292,11 @@
            </widget>
           </item>
           <item row="4" column="1" alignment="Qt::AlignVCenter">
-           <widget class="QLineEdit" name="DataFileName"/>
+           <widget class="QLineEdit" name="DataFileName">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the datafile to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
            <widget class="QLabel" name="Instrument_err">
@@ -370,7 +374,11 @@
            </widget>
           </item>
           <item row="2" column="5" colspan="2">
-           <widget class="QLineEdit" name="Keywords"/>
+           <widget class="QLineEdit" name="Keywords">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The keyword that appears in the investigation description, title, or related sample.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="instrumentLbl">
@@ -415,7 +423,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="InvestigationName"/>
+           <widget class="QLineEdit" name="InvestigationName">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The title (name) of the investigation to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="5">
            <widget class="QLineEdit" name="EndDate">
@@ -440,7 +452,7 @@
           <item row="2" column="1">
            <widget class="QLineEdit" name="RunRange">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a start range, end range, or both seperated by a hyphen (-) or colon (:).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a run number, or a range of runs seperated by a hyphen (-) or colon (:).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="inputMethodHints">
              <set>Qt::ImhDigitsOnly</set>
@@ -607,6 +619,9 @@
           </item>
           <item row="5" column="0">
            <widget class="QCheckBox" name="advSearchCbox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to view additional search options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Advanced search</string>
             </property>
@@ -624,6 +639,9 @@
           </item>
           <item row="5" column="1">
            <widget class="QCheckBox" name="myDataCbox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to search through the investigations of which you are an investigator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>My data only</string>
             </property>
@@ -669,7 +687,11 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QLineEdit" name="InvestigatorSurname"/>
+           <widget class="QLineEdit" name="InvestigatorSurname">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name (forename, surname, or both) of the investigator of an investigation. This is case insensitive.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
           <item row="3" column="7">
            <widget class="QLabel" name="SampleName_err">
@@ -682,7 +704,11 @@
            </widget>
           </item>
           <item row="3" column="5" colspan="2">
-           <widget class="QLineEdit" name="SampleName"/>
+           <widget class="QLineEdit" name="SampleName">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the sample in an investigation to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

@@ -986,7 +986,7 @@ class CropDetBank(ReductionStep):
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
 
-class NormalizeToMonitor(sans_reduction_steps.Normalize):
+class NormalizeToMonitor(ReductionStep):
     """
         Before normalisation the monitor spectrum's background is removed 
         and for LOQ runs also the prompt peak. The input workspace is copied
@@ -995,11 +995,8 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
     NORMALISATION_SPEC_NUMBER = 1
     NORMALISATION_SPEC_INDEX = 0
     def __init__(self, spectrum_number=None):
-        if not spectrum_number is None:
-            index_num = spectrum_number
-        else:
-            index_num = None
-        super(NormalizeToMonitor, self).__init__(index_num)
+        super(NormalizeToMonitor, self).__init__()
+        self._normalization_spectrum = spectrum_number
 
         #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
@@ -1022,11 +1019,10 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
                        reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
         
         # Remove flat background
-        TOF_start, TOF_end = reducer.inst.get_TOFs(
-                                    self.NORMALISATION_SPEC_NUMBER)
+        TOF_start, TOF_end = reducer.inst.get_TOFs(normalization_spectrum)
+
         if TOF_start and TOF_end:
-            CalculateFlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end,
-                WorkspaceIndexList=self.NORMALISATION_SPEC_INDEX, Mode='Mean')
+            CalculateFlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end, Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
         if reducer.instrument.is_interpolating_norm():
@@ -2132,8 +2128,8 @@ class UserFile(ReductionStep):
                 reducer.inst.set_TOFs(None, None, int(parts[0]))
                 return ''
 
-            # assume a line of the form BACK/M1/TIME 
-            parts = arguments.split('/TIME')
+            # assume a line of the form BACK/M1/TIMES 
+            parts = arguments.split('/TIMES')
             if len(parts) == 2:
                 times = parts[1].split()
             else:

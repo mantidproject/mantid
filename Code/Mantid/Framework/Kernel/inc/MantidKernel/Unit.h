@@ -5,11 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Exception.h"
 #include <string>
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
+#include <limits>
+#include <cfloat>
 
 namespace Mantid
 {
@@ -156,6 +159,16 @@ public:
   bool isInitialized() const
   { return initialized; }
 
+  /// some units can be converted from TOF only in the range of TOF ;
+  /// This function returns minimal TOF value still reversively convertable into the unit. 
+  virtual double conversionTOFMin()const=0;
+
+  /// This function returns maximal TOF value still reversively convertable into the unit. 
+  virtual double conversionTOFMax()const=0;
+ 
+  /**The range where conversion to TOF from given units is monotonic and reversible*/
+  virtual std::pair<double,double> conversionRange()const;
+
 protected:
   // Add a 'quick conversion' for a unit pair
   void addConversion(std::string to, const double& factor, const double& power = 1.0) const;
@@ -216,6 +229,13 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+  ///@return NaN as emty unit can not be converted from TOF
+  virtual double conversionTOFMin()const
+  {return std::numeric_limits<double>::quiet_NaN();}
+
+  ///@return NaN as emty unit can not be converted from TOF
+  virtual double conversionTOFMax()const
+  {return std::numeric_limits<double>::quiet_NaN();}
 
   /// Constructor
   Empty() : Unit() {}
@@ -236,6 +256,14 @@ public:
   Label(const std::string& caption, const std::string& label);
   void setLabel(const std::string& cpt, const std::string& lbl = "");
   virtual Unit * clone() const;
+
+ ///@return NaN as Label can not be obtained from TOF in any reasonable manner
+  virtual double conversionTOFMin()const
+  {return std::numeric_limits<double>::quiet_NaN();}
+ ///@return NaN as Label can not be obtained from TOF in any reasonable manner
+  virtual double conversionTOFMax()const
+  {return std::numeric_limits<double>::quiet_NaN();}
+
 
   /// Destructor
   ~Label() {}
@@ -259,6 +287,11 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+ ///@return -DBL_MAX as ToF convetanble to TOF for in any time range
+  virtual double conversionTOFMin()const;
+ ///@return DBL_MAX as ToF convetanble to TOF for in any time range
+  virtual double conversionTOFMax()const;
+
 
   /// Constructor
   TOF() : Unit() {}
@@ -280,11 +313,14 @@ public:
   virtual void init();
   virtual Unit * clone() const;
 
+  virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMax()const;  
+
   /// Constructor
   Wavelength();
   /// Destructor
   ~Wavelength() {}
-
+  
 protected:
   double sfpTo; ///< Extra correction factor in to conversion
   double factorTo; ///< Constant factor for to conversion
@@ -306,6 +342,9 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+
+  virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMax()const;  
 
   /// Constructor
   Energy();
@@ -330,6 +369,8 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+  virtual double conversionTOFMin()const; 
+  virtual double conversionTOFMax()const;
 
   /// Constructor
   Energy_inWavenumber();
@@ -354,6 +395,8 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+  virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMax()const;  
 
   /// Constructor
   dSpacing();
@@ -378,7 +421,8 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
-
+  virtual double conversionTOFMin()const;
+  virtual double conversionTOFMax()const;
   /// Constructor
   MomentumTransfer();
   /// Destructor
@@ -402,6 +446,8 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+  virtual double conversionTOFMin()const; 
+  virtual double conversionTOFMax()const;
 
   /// Constructor
   QSquared();
@@ -427,6 +473,9 @@ public:
   virtual void init();
   virtual Unit * clone() const;
 
+  virtual double conversionTOFMin()const; 
+  virtual double conversionTOFMax()const;
+ 
   /// Constructor
   DeltaE();
   /// Destructor
@@ -451,7 +500,8 @@ public:
 
   virtual void init();
   virtual Unit * clone() const;
-
+  virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMax()const;  
   /// Constructor
   DeltaE_inWavenumber();
   /// Destructor
@@ -469,7 +519,10 @@ class Degrees : public Mantid::Kernel::Unit
   const std::string label() const { return "degrees"; }
   virtual double singleToTOF(const double x) const { return x;}
   virtual double singleFromTOF(const double tof) const { return tof; }
+  double conversionTOFMax()const{return DBL_MAX;}
+  double conversionTOFMin()const{return -DBL_MAX;}
   virtual void init() {}
+
   virtual Unit * clone() const { return new Degrees(*this); }
 };
 
@@ -496,6 +549,8 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+  virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMax()const;  
 
   /// Constructor
   Momentum();
@@ -523,6 +578,8 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
+  virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMax()const;
 
   /// Constructor
   SpinEchoLength();
@@ -544,7 +601,9 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
-
+  virtual double conversionTOFMin()const;  
+  virtual double conversionTOFMax()const;  
+  
   /// Constructor
   SpinEchoTime();
   /// Destructor
@@ -564,6 +623,8 @@ public:
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
+  virtual double conversionTOFMax()const;
+  virtual double conversionTOFMin()const;
   virtual void init();
   virtual Unit * clone() const;
 

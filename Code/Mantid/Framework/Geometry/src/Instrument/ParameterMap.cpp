@@ -778,6 +778,26 @@ namespace Mantid
       return m_boundingBoxMap.getCache(comp->getComponentID(),box);
     }
 
+    /**
+     * Copy pairs (oldComp->id,Parameter) to the m_map
+     * assigning the new newComp->id
+     * @param oldComp :: Old component
+     * @param newComp :: New component
+     * @param oldPMap :: Old map corresponding to the Old component
+     */
+    void ParameterMap::copyFromParameterMap(const IComponent* oldComp,
+                                            const IComponent* newComp, const ParameterMap *oldPMap) 
+    {
+
+    std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
+
+    for(auto it = oldParameterNames.begin(); it != oldParameterNames.end(); ++it)
+    {
+      Parameter_sptr thisParameter = oldPMap->get(oldComp,*it);
+      // Insert the fecthed parameter in the m_map
+      m_map.insert(std::make_pair(newComp->getComponentID(),thisParameter));
+    }
+    
     //--------------------------------------------------------------------------------------------
     /** Save the object to an open NeXus file.
      * @param file :: open NeXus file
@@ -795,7 +815,6 @@ namespace Mantid
       file->writeData("data", s);
       file->closeGroup();
     }
-
 
     //--------------------------------------------------------------------------
     // Private methods

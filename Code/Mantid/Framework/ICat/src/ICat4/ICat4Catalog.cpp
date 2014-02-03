@@ -338,6 +338,8 @@ namespace Mantid
       ns1__searchResponse response;
 
       std::string sessionID = Session::Instance().getSessionId();
+      // Prevents any calls to myData from hanging due to sending a request to icat without a session ID.
+      if (sessionID.empty()) return;
       request.sessionId     = &sessionID;
 
       std::string query = "Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
@@ -544,7 +546,9 @@ namespace Mantid
       outputws->addColumn("str","Location");
       outputws->addColumn("str","Create Time");
       outputws->addColumn("long64","Id");
+      outputws->addColumn("long64","File size(bytes)");
       outputws->addColumn("str","File size");
+      outputws->addColumn("str","Description");
 
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
@@ -563,8 +567,12 @@ namespace Mantid
             savetoTableWorkspace(&createDate, table);
 
             savetoTableWorkspace(datafile->id, table);
+            savetoTableWorkspace(datafile->fileSize, table);
+
             std::string fileSize = bytesToString(*datafile->fileSize);
             savetoTableWorkspace(&fileSize, table);
+
+            if (datafile->description) savetoTableWorkspace(datafile->description, table);
           }
           catch(std::runtime_error&)
           {
@@ -729,11 +737,13 @@ namespace Mantid
 
     /**
      * Get the URL where the datafiles will be uploaded to.
-     * @param dataFileName   :: The name of the datafile to use.
-     * @param createFileName :: The name to give to the file being saved.
+     * @param investigationID :: The investigation used to obtain the related dataset ID.
+     * @param createFileName  :: The name to give to the file being saved.
+     * @param dataFileDescription :: The description of the data file being saved.
      * @return URL to PUT datafiles to.
      */
-    const std::string ICat4Catalog::getUploadURL(const std::string &dataFileName, const std::string &createFileName)
+    const std::string ICat4Catalog::getUploadURL(
+        const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription)
     {
       // Obtain the URL from the Facilities.xml file.
       std::string url = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
@@ -743,21 +753,22 @@ namespace Mantid
       std::string session   = "sessionId="  + sessionID;
       if (sessionID.empty()) throw std::runtime_error("You are not currently logged into the cataloging system.");
       std::string name      = "&name="      + createFileName;
-      std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetIdFromFileName(dataFileName));
+      std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetId(investigationID));
+      std::string description = "&description=" + dataFileDescription;
 
       // Add pieces of URL together.
-      url += ("put?" + session + name + datasetId + "&datafileFormatId=1");
+      url += ("put?" + session + name + datasetId + description + "&datafileFormatId=1");
       g_log.debug() << "ICat4Catalog::getUploadURL url is: " << url << std::endl;
       return url;
     }
 
 
     /**
-     * Search the archive & obtain the dataset ID based on the filename.
-     * @param dataFileName :: Used to get datafile ID.
-     * @return ID of the dataset the datafile is located in.
+     * Search the archive & obtain the dataset ID for a specific investigation.
+     * @param investigationID :: Used to obtain the related dataset ID.
+     * @return Dataset ID of the provided investigation.
      */
-    int64_t ICat4Catalog::getDatasetIdFromFileName(const std::string &dataFileName)
+    int64_t ICat4Catalog::getDatasetId(const std::string &investigationID)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -768,12 +779,12 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Dataset <-> Datafile[name LIKE'%" + dataFileName + "%']";
+      std::string query = "Dataset <-> Investigation[id = '" + investigationID + "']";
       request.query     = &query;
 
       g_log.debug() << "ICat4Catalog::getDatasetIdFromFileName -> { " << query << " }" << std::endl;
       
-      int64_t datafileId = 0;
+      int64_t datasetID = 0;
       
       int result = icat.search(&request, &response);
 
@@ -782,18 +793,17 @@ namespace Mantid
         if (response.return_.size() <= 0)
         {
           throw std::runtime_error("The datafile you tried to publish has no related dataset."
-              " (Based on the filename or investigation number: " + dataFileName + ")\n"
-              "Please select a filename that contains the instrument name & investigation number. (E.G. EMU00035020)");
+              " (Based on investigation ID: " + investigationID + ")");
         }
         ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(response.return_.at(0));
-        if (dataset && dataset->id) datafileId = *(dataset->id);
+        if (dataset && dataset->id) datasetID = *(dataset->id);
       }
       else
       {
         throwErrorMessage(icat);
       }
 
-      return datafileId;
+      return datasetID;
     }
 
     /**
@@ -894,6 +904,9 @@ namespace Mantid
      */
     void ICat4Catalog::setICATProxySettings(ICat4::ICATPortBindingProxy& icat)
     {
+      // The soapEndPoint is only set when the user logs into the catalog.
+      // If it's not set the correct error is returned (invalid sessionID) from the ICAT server.
+      if (ICat::Session::Instance().getSoapEndPoint().empty()) return;
       // Set the soap-endpoint of the catalog we want to use.
       icat.soap_endpoint = ICat::Session::Instance().getSoapEndPoint().c_str();
       // Sets SSL authentication scheme

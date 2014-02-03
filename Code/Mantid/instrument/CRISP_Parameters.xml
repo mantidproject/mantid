@@ -4,6 +4,63 @@
   <parameter name="show-signed-theta" type="string">
     <value val="Always" />
   </parameter>
+  <parameter name="MonitorBackgroundMin">
+    <value val="14.0"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMax">
+    <value val="15.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMin">
+    <value val="4.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+   <value val="10.0"/>
+  </parameter>
+
+<!-- here we need to add the other monitors -->
+
+  <parameter name="PointDetectorStart">
+    <value val="3"/>
+  </parameter>
+
+  <parameter name="PointDetectorStop">
+    <value val="4"/>
+  </parameter>
+
+  <parameter name="MultiDetectorStart">
+    <value val="6"/>
+  </parameter>
+
+  <parameter name="I0MonitorIndex">
+    <value val="2"/>
+  </parameter>
+
+  <parameter name="LambdaMin">
+    <value val="1.0"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="15.0"/>
+  </parameter>
+  <!-- POLARISATION CORRECTIONS-->
+   <parameter name="crho" type="string">
+    <value val="1.006831,-0.011467,0.002244,-0.000095"/>
+   </parameter>
+
+   <parameter name="calpha" type="string">
+    <value val="1.017526,-0.017183,0.003136,-0.000140"/>
+   </parameter>
+
+   <parameter name="cAp" type="string">
+    <value val="0.917940,0.038265,-0.006645,0.000282"/>
+   </parameter>
+
+   <parameter name="cPp" type="string">
+    <value val="0.972762,0.001828,-0.000261,0.0"/>
+   </parameter>
 </component-link>
 <component-link name="pointdetector">
     <!-- Link to log file that stores the z position. This angle can be used to

@@ -32,10 +32,6 @@
 	<value val="7.9"/> 
   </parameter>
    
-  <parameter name="MonitorsToCorrect">
-    <value val="1"/>
-  </parameter>
-
   <parameter name="PointDetectorStart">
     <value val="2"/>
   </parameter>

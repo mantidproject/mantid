@@ -6,6 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/TableRow.h"
 
+#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include <boost/shared_ptr.hpp>
@@ -34,8 +35,11 @@ namespace Muon
   using namespace MantidQt::API;
   using namespace MantidQt::MantidWidgets;
 
-  const std::string MuonAnalysisResultTableTab::RUN_NO_LOG = "run_number";
-  const std::string MuonAnalysisResultTableTab::RUN_NO_TITLE = "Run Number";
+  const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
+
+  const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS = \
+      QStringList() << "run_number" << "sample_temp" << "sample_magn_field";
+
 /**
 * Constructor
 */
@@ -54,6 +58,16 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
 
   // Connect the create table button
   connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this, SLOT(createTable()));
+
+  // Enable label combox-box only when sequential fit type selected
+  connect(m_uiForm.sequentialFit, SIGNAL( toggled(bool) ), 
+    m_uiForm.fitLabelCombo, SLOT( setEnabled(bool) ));
+
+  // Re-populate tables when fit type or seq. fit label is changed
+  connect(m_uiForm.fitType, SIGNAL( buttonClicked(QAbstractButton*) ),
+    this, SLOT( populateTables() ));
+  connect(m_uiForm.fitLabelCombo, SIGNAL( activated(int) ),
+    this, SLOT( populateTables() ));
 }
 
 
@@ -196,128 +210,174 @@ void MuonAnalysisResultTableTab::applyUserSettings()
 }
 
 /**
-* Populates the tables with all the correct log values and fitting results. It takes the
-* given workspace list and checks to see if a fit has been done to the data set and if so
-* adds it to a new workspace list.
-*
-* @param wsList :: A list containing all the data set workspaces that have been loaded
-*                   by muon analysis.
-*/
-void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
+ * Returns a list of workspaces which should be displayed in the table, depending on what user has
+ * chosen to view.
+ * @return List of workspace base names
+ */
+QStringList MuonAnalysisResultTableTab::getFittedWorkspaces()
+{
+  if ( m_uiForm.fitType->checkedButton() == m_uiForm.individualFit )
+  {
+    return getIndividualFitWorkspaces();
+  }
+  else if ( m_uiForm.fitType->checkedButton() == m_uiForm.sequentialFit )
+  {
+    QString selectedLabel = m_uiForm.fitLabelCombo->currentText();
+
+    return getSequentialFitWorkspaces(selectedLabel);
+  }
+  else
+  {
+    throw std::runtime_error("Uknown fit type option");
+  }
+}
+
+/**
+ * Returns a list of labels user has made sequential fits for.
+ * @return List of labels
+ */
+QStringList MuonAnalysisResultTableTab::getSequentialFitLabels()
+{
+  QStringList labels;
+
+  std::map<std::string, Workspace_sptr> items = AnalysisDataService::Instance().topLevelItems();
+
+  for ( auto it = items.begin(); it != items.end(); ++it )
+  {
+    if ( it->second->id() != "WorkspaceGroup" )
+      continue;
+
+    if ( it->first.find(MuonSequentialFitDialog::SEQUENTIAL_PREFIX) != 0)
+      continue;
+
+    std::string label = it->first.substr(MuonSequentialFitDialog::SEQUENTIAL_PREFIX.size());
+
+    labels << QString::fromStdString(label);
+  }
+
+  return labels;
+}
+
+/**
+ * Returns a list of sequentially fitted workspaces names.
+ * @param label :: Label to return sequential fits for
+ * @return List of workspace base names
+ */
+QStringList MuonAnalysisResultTableTab::getSequentialFitWorkspaces(const QString& label)
+{
+  const AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+
+  std::string groupName = MuonSequentialFitDialog::SEQUENTIAL_PREFIX + label.toStdString();
+
+  WorkspaceGroup_sptr group;
+
+  // Might have been accidentally deleted by user
+  if ( ! ads.doesExist(groupName) || ! ( group = ads.retrieveWS<WorkspaceGroup>(groupName) ) )
+  {
+    QMessageBox::critical(this, "Group not found", 
+      "Group with fitting results of the specified label was not found.");
+    return QStringList();
+  }
+
+  std::vector<std::string> wsNames = group->getNames(); 
+
+  QStringList workspaces;
+
+  for (auto it = wsNames.begin(); it != wsNames.end(); it++)
+  {
+    if( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
+      continue;
+
+    std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
+
+    workspaces << QString::fromStdString(baseName);
+  }
+
+  return workspaces;
+}
+
+/**
+ * Returns a list individually fitted workspaces names.
+ * @return List of workspace base names
+ */
+QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
+{
+  QStringList workspaces;
+
+  std::set<std::string> allWorkspaces = AnalysisDataService::Instance().getObjectNames();
+
+  for(auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++)
+  {
+    if ( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
+      continue;
+
+    // Ignore sequential fit results
+    if ( boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
+      continue;
+
+    std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
+
+    workspaces << QString::fromStdString(baseName);
+  }
+
+  return workspaces;
+}
+
+/**
+ * Refresh the label list and re-populate the tables.
+ */
+void MuonAnalysisResultTableTab::refresh()
+{
+  m_uiForm.individualFit->setChecked(true);
+
+  QStringList labels = getSequentialFitLabels();
+
+  m_uiForm.fitLabelCombo->clear();
+  m_uiForm.fitLabelCombo->addItems(labels);
+
+  m_uiForm.sequentialFit->setEnabled( m_uiForm.fitLabelCombo->count() != 0 );
+
+  populateTables();
+}
+
+/**
+ * Clear and populate both tables.
+ */
+void MuonAnalysisResultTableTab::populateTables()
 {
   storeUserSettings();
   
   // Clear the previous table values
   m_logValues.clear();
-  QVector<QString> fittedWsList;
+  m_uiForm.fittingResultsTable->setRowCount(0);
+  m_uiForm.valueTable->setRowCount(0);
 
-  // Get all the workspaces from the fitPropertyBrowser and find out whether they have had fitting done to them.
-  for (int i(0); i<wsList.size(); ++i)
+  QStringList fittedWsList = getFittedWorkspaces();
+
+  if ( ! fittedWsList.isEmpty() )
   {
-    if((Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString() + "_Parameters"))&&(Mantid::API::AnalysisDataService::Instance().doesExist(wsList[i].toStdString()))) 
-      fittedWsList.append(wsList[i]);
-  }
-
-  // Add all the fittings made by seq. fit dialog
-  std::map<std::string, Workspace_sptr> items = 
-    Mantid::API::AnalysisDataService::Instance().topLevelItems();
-
-  for ( auto it = items.begin(); it != items.end(); ++it )
-  {
-    if ( ! boost::starts_with(it->first, "MuonSeqFit_") )
-      continue;
-
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(it->second);
-
-    if ( ! group )
-      continue;
-
-    for ( size_t i = 0; i < group->size(); ++i )
-    {
-      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(i) );
-
-      if ( ! ws )
-        continue;
-
-      std::string name = ws->name();
-      size_t pos = name.find("_Workspace"); 
-
-      if ( pos == std::string::npos)
-        continue;
-
-      name.erase(pos);
-
-      fittedWsList << QString::fromStdString(name);
-    }
-  }
-
-  if(fittedWsList.size() > 0)
-  { 
-    // Make sure all params match.
-    QVector<QString> sameFittedWsList(fittedWsList);
-
-    // Clear the previous tables.
-    const int fittingRowCount(m_uiForm.fittingResultsTable->rowCount());
-    for (int i=0; i < fittingRowCount; ++i)
-	    m_uiForm.fittingResultsTable->removeRow(0);
-    const int logRowCount(m_uiForm.valueTable->rowCount());
-    for (int i=0; i < logRowCount; ++i)
-      m_uiForm.valueTable->removeRow(0);
-
-    // Add number of rows  for the amount of fittings.
-    for(int i=0; i < sameFittedWsList.size(); ++i)
-      m_uiForm.fittingResultsTable->insertRow(m_uiForm.fittingResultsTable->rowCount() );
-
-    // Add check boxes for the include column on fitting table, and make text uneditable.
-    for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
-    {
-      m_uiForm.fittingResultsTable->setCellWidget(i,1, new QCheckBox);
-      QTableWidgetItem * textItem = m_uiForm.fittingResultsTable->item(i, 0);
-      if(textItem)
-        textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
-    }
-
     // Populate the individual log values and fittings into their respective tables.
-    populateFittings(sameFittedWsList);
-    populateLogsAndValues(sameFittedWsList);    
-    
-    // Add check boxes for the include column on log table, and make text uneditable.
-    for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
-    {
-      m_uiForm.valueTable->setCellWidget(i,1, new QCheckBox);
-      QTableWidgetItem * textItem = m_uiForm.valueTable->item(i, 0);
-      if(textItem)
-        textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
-    }
+    populateFittings(fittedWsList);
+    populateLogsAndValues(fittedWsList);    
 
-    QTableWidgetItem* temp = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(0,0));
-    // If there is no item in the first row then there must be no log files found between the two data sets.
-    if (temp == NULL)
-    {
-      QMessageBox::information(this, "Mantid - Muon Analysis", "There were no common log files found.");
-    }
-    else
-    {
-      // Make sure all fittings are selected by default.
-      selectAllFittings(true);
-    }
+    // Make sure all fittings are selected by default.
+    selectAllFittings(true);
 
     // If we have Run Number log value, we want to select it by default.
-    auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
-    if(!found.empty())
+    auto found = m_uiForm.valueTable->findItems("run_number", Qt::MatchFixedString);
+    if ( ! found.empty() )
     {
       int r = found[0]->row();
 
-      if(QCheckBox* cb = dynamic_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(r, 1)))
+      if( auto cb = dynamic_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(r, 1)) )
+      {
         cb->setCheckState(Qt::Checked); 
+      }
     }
 
     applyUserSettings();
   }
-  else
-  {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "A fitting must be made on the Data Analysis tab before producing a Results Table.");
-  }
+
 }
 
 
@@ -327,51 +387,38 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 * @param fittedWsList :: a workspace list containing ONLY the workspaces that have parameter
 *                   tables associated with it.
 */
-void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& fittedWsList)
+void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fittedWsList)
 {
-  // Clear the logs if not empty and then repopulate.
-  QVector<QString> logsToDisplay;
-  
-  // Add run number explicitly as it is the only non-timeseries log value we are using 
-  logsToDisplay.push_back(RUN_NO_TITLE.c_str());
+  // A set of all the logs we've met in the workspaces
+  QSet<QString> allLogs;
 
   for (int i=0; i<fittedWsList.size(); i++)
   { 
-    QMap<QString, QVariant> allLogs;
+    QMap<QString, QVariant> wsLogValues;
 
     // Get log information
-    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(Mantid::API::AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString()));
+    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(
+      AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_Workspace"));
     if (!ws)
     {
       throw std::runtime_error("Wrong type of Workspace");
     }
 
-    const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
-    std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
-
-    // Try to get a run number for the workspace
-    if (ws->run().hasProperty(RUN_NO_LOG))
-    {
-      // Set run number as a string, as we don't want it to be formatted like double.
-      allLogs[RUN_NO_TITLE.c_str()] = QString(ws->run().getLogData(RUN_NO_LOG)->value().c_str());
-    }
-
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
 
-    for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
-          pItr != pEnd; ++pItr )
+    const std::vector<Property*> & logData = ws->run().getLogData();
+    std::vector<Property*>::const_iterator pEnd = logData.end();
+
+    for( std::vector<Property*>::const_iterator pItr = logData.begin(); pItr != pEnd; ++pItr )
     {  
-
-      QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
-      // Just get the num.series log values
-      Mantid::Kernel::TimeSeriesProperty<double> *tspd = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr);
-
-      if( tspd )//If it is then it must be num.series
+      // Check if is a timeseries log
+      if( TimeSeriesProperty<double> *tspd = dynamic_cast<TimeSeriesProperty<double>*>(*pItr) )
       {
-        bool logFound(false);
+        QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
+
         double value(0.0);
-        double count(0.0);
+        int count(0);
 
         Mantid::Kernel::DateAndTime logTime;
 
@@ -387,85 +434,125 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
             // add it to a total and increment the count (will be used to make average entry value during a run)
             value += tspd->nthValue(k);
             count++;
-            logFound = true;
           }
         }
 
-        if (logFound == true)
+        if ( count != 0 )
         {
           //Find average
-          allLogs[logFile] = value/count;
-          if (i == 0)
-            logsToDisplay.push_back(logFile);
+          wsLogValues[logFile] = value / count;
+        }
+      }
+      else // Should be a non-timeseries one
+      {
+        QString logName = QString::fromStdString( (**pItr).name() );
+
+        // Check if we should display it
+        if ( NON_TIMESERIES_LOGS.contains(logName) )
+        {
+          QVariant value;
+
+          if ( auto stringProp = dynamic_cast<PropertyWithValue<std::string>*>(*pItr) )
+          {
+            value = QString::fromStdString( (*stringProp)() );
+          }
+          else if ( auto doubleProp = dynamic_cast<PropertyWithValue<double>*>(*pItr) )
+          {
+            value = (*doubleProp)();
+          }
           else
           {
-            bool reg(true);
-            for(int j=0; j<logsToDisplay.size(); ++j)
-            {
-              //if log file already registered then don't register it again.
-              if (logsToDisplay[j] == logFile)
-              {
-                reg = false;
-                break;
-              }
-            }
-            if (reg==true)
-              logsToDisplay.push_back(logFile);
+            throw std::runtime_error("Unsupported non-timeseries log type");
           }
+
+          wsLogValues[logName] = value;
         }
       }
     }
 
+    // Append log names found in the workspace to the list of all known log names
+    allLogs += wsLogValues.keys().toSet();
+
     // Add all data collected from one workspace to another map. Will be used when creating table.
-    m_logValues[fittedWsList[i]] = allLogs;
+    m_logValues[fittedWsList[i]] = wsLogValues;
 
   } // End loop over all workspace's log information and param information
 
   // Remove the logs that don't appear in all workspaces
-  QVector<int> toRemove;
-  for(int i=0; i<logsToDisplay.size(); ++i)
+  QSet<QString> toRemove;
+  for ( auto logIt = allLogs.constBegin(); logIt != allLogs.constEnd(); ++logIt )
   {
-    for (auto itr = m_logValues.begin(); itr != m_logValues.end(); itr++)
+    for ( auto wsIt = m_logValues.constBegin(); wsIt != m_logValues.constEnd(); ++wsIt )
     { 
-      auto wsLogValues = itr.value();
-      if (!wsLogValues.contains(logsToDisplay[i]))
+      auto wsLogValues = wsIt.value();
+      if ( ! wsLogValues.contains(*logIt) )
       {      
-        toRemove.push_back(i);
+        toRemove.insert(*logIt);
         break;
       }
     }      
   }
 
-  for(int i=0; i<toRemove.size(); ++i)
-  {
-    logsToDisplay.remove(toRemove[i]-i);
-  }
+  allLogs = allLogs.subtract(toRemove);
+
+  // Sort logs
+  QList<QString> allLogsSorted(allLogs.toList());
+  qSort(allLogsSorted.begin(), allLogsSorted.end(), MuonAnalysisResultTableTab::logNameLessThan);
   
   // Add number of rows to the table based on number of logs to display.
-  for (int i=0; i < logsToDisplay.size(); ++i)
-    m_uiForm.valueTable->insertRow(m_uiForm.valueTable->rowCount() );
+  m_uiForm.valueTable->setRowCount(allLogsSorted.size());
 
-  // If there isn't enough rows in the table to populate all logs then display error message
-  if(logsToDisplay.size() > m_uiForm.valueTable->rowCount())
+  // Populate table with all log values available without repeating any.
+  for ( auto it = allLogsSorted.constBegin(); it != allLogsSorted.constEnd(); ++it )
   {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "There is not enough room in the table to populate all fitting parameter results");
+    int row = static_cast<int>( std::distance(allLogsSorted.constBegin(), it) );
+    m_uiForm.valueTable->setItem(row, 0, new QTableWidgetItem(*it));
+  }
+
+  // Save the number of logs displayed
+  // XXX: this is redundant, as number of logs == number of rows
+  m_numLogsdisplayed = m_uiForm.valueTable->rowCount();
+
+  // Add check boxes for the include column on log table, and make text uneditable.
+  for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
+  {
+    m_uiForm.valueTable->setCellWidget(i,1, new QCheckBox);
+    
+    if( auto textItem = m_uiForm.valueTable->item(i, 0) )
+    {
+      textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
+    }
+  }
+}
+
+/**
+ * LessThan function used to sort log names. Puts non-timeseries logs first and the timeseries ones
+ * sorted by named ignoring the case.
+ * @param logName1
+ * @param logName2
+ * @return True if logName1 is less than logName2, false otherwise
+ */
+bool MuonAnalysisResultTableTab::logNameLessThan(const QString& logName1, const QString& logName2)
+{
+  int index1 = NON_TIMESERIES_LOGS.indexOf(logName1);
+  int index2 = NON_TIMESERIES_LOGS.indexOf(logName2);
+
+  if ( index1 == -1 && index2 == -1 )
+  {
+    // If both are timeseries logs - compare lexicographically ignoring the case
+    return logName1.toLower() < logName2.toLower();
+  }
+  else if ( index1 != -1 && index2 != -1 )
+  {
+    // If both timeseries - keep the order of non-timeseries logs list
+    return index1 < index2;
   }
   else
   {
-    // Populate table with all log values available without repeating any.
-    for (int row = 0; row < m_uiForm.valueTable->rowCount(); row++)
-    {
-      if (row < logsToDisplay.size())
-        m_uiForm.valueTable->setItem(row,0, new QTableWidgetItem(logsToDisplay[row]));
-      else
-        m_uiForm.valueTable->setItem(row,0, NULL);
-    }
+    // If one is timeseries and another is not - the one which is not is always less
+    return index1 != -1;
   }
-
-  // Save the number of logs displayed so don't have to search through all cells.
-  m_numLogsdisplayed = logsToDisplay.size();
 }
-
 
 /**
 * Populates the items (fitted workspaces) into their table.
@@ -473,48 +560,55 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QVector<QString>& f
 * @param fittedWsList :: a workspace list containing ONLY the workspaces that have parameter
 *                        tables associated with it.
 */
-void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fittedWsList)
+void MuonAnalysisResultTableTab::populateFittings(const QStringList& fittedWsList)
 {
-  if(fittedWsList.size() > m_uiForm.fittingResultsTable->rowCount())
+  // Add number of rows  for the amount of fittings.
+  m_uiForm.fittingResultsTable->setRowCount(fittedWsList.size());
+
+  // Add check boxes for the include column on fitting table, and make text uneditable.
+  for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
   {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "There is not enough room in the table to populate all fitting parameter results");
-  }
-  else
-  {
-    // Get colors, 0=Black, 1=Red, 2=Green, 3=Blue, 4=Orange, 5=Purple. (If there are more than this then use black as default.)
-    QMap<int, int> colors = getWorkspaceColors(fittedWsList);
-    for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++)
+    m_uiForm.fittingResultsTable->setCellWidget(i,1, new QCheckBox);
+    
+    if( auto textItem = m_uiForm.fittingResultsTable->item(i, 0) )
     {
-      // Fill values and delete previous old ones.
-      if (row < fittedWsList.size())
-      {
-        QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
-        int color(colors.find(row).data());
-        switch (color)
-        {
-          case(1):
-            item->setTextColor("red");
-            break;
-          case(2):
-            item->setTextColor("green");
-            break;
-          case(3):
-            item->setTextColor("blue");
-            break;
-          case(4):
-            item->setTextColor("orange");
-            break;
-          case(5):
-            item->setTextColor("purple");
-            break;
-          default:
-            item->setTextColor("black");
-        }
-        m_uiForm.fittingResultsTable->setItem(row, 0, item);
-      }
-      else
-        m_uiForm.fittingResultsTable->setItem(row,0, NULL);
+      textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
     }
+  }
+
+  // Get colors, 0=Black, 1=Red, 2=Green, 3=Blue, 4=Orange, 5=Purple. (If there are more than this then use black as default.)
+  QMap<int, int> colors = getWorkspaceColors(fittedWsList);
+  for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++)
+  {
+    // Fill values and delete previous old ones.
+    if (row < fittedWsList.size())
+    {
+      QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
+      int color(colors.find(row).data());
+      switch (color)
+      {
+        case(1):
+        item->setTextColor("red");
+        break;
+        case(2):
+        item->setTextColor("green");
+        break;
+        case(3):
+        item->setTextColor("blue");
+        break;
+        case(4):
+        item->setTextColor("orange");
+        break;
+        case(5):
+        item->setTextColor("purple");
+        break;
+        default:
+        item->setTextColor("black");
+      }
+      m_uiForm.fittingResultsTable->setItem(row, 0, item);
+    }
+    else
+      m_uiForm.fittingResultsTable->setItem(row,0, NULL);
   }
 }
 
@@ -525,7 +619,7 @@ void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fitted
 * @param wsList :: List of all workspaces with fitted parameters.
 * @return colors :: List of colors (as numbers) with the key being position in wsList.
 */
-QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QVector<QString>& wsList)
+QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList& wsList)
 {
   QMap<int,int> colors; //position, color
   int posCount(0);
@@ -594,8 +688,8 @@ void MuonAnalysisResultTableTab::createTable()
   }
 
   // Get the user selection
-  QVector<QString> wsSelected = getSelectedWs();
-  QVector<QString> logsSelected = getSelectedLogs();
+  QStringList wsSelected = getSelectedWs();
+  QStringList logsSelected = getSelectedLogs();
 
   if ((wsSelected.size() == 0) || logsSelected.size() == 0)
   {
@@ -637,7 +731,7 @@ void MuonAnalysisResultTableTab::createTable()
 
     // Get param information
     QMap<QString, QMap<QString, double> > wsParamsList;
-    QVector<QString> paramsToDisplay;
+    QStringList paramsToDisplay;
     for(int i=0; i<wsSelected.size(); ++i)
     {
       QMap<QString, double> paramsList;
@@ -735,7 +829,7 @@ void MuonAnalysisResultTableTab::createTable()
 * @param wsList :: A list of workspaces with fitted parameters.
 * @return bool :: Whether or not the wsList given share the same fitting parameters.
 */
-bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsList)
+bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList& wsList)
 {
   std::vector<std::string> firstParams;
 
@@ -778,9 +872,9 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsLi
 *
 * @return wsSelected :: A vector of QString's containing the workspace that are selected.
 */
-QVector<QString> MuonAnalysisResultTableTab::getSelectedWs()
+QStringList MuonAnalysisResultTableTab::getSelectedWs()
 {
-  QVector<QString> wsSelected;
+  QStringList wsSelected;
   for (int i = 0; i < m_logValues.size(); i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(i,1));
@@ -799,9 +893,9 @@ QVector<QString> MuonAnalysisResultTableTab::getSelectedWs()
 *
 * @return logsSelected :: A vector of QString's containing the logs that are selected.
 */
-QVector<QString> MuonAnalysisResultTableTab::getSelectedLogs()
+QStringList MuonAnalysisResultTableTab::getSelectedLogs()
 {
-  QVector<QString> logsSelected;
+  QStringList logsSelected;
   for (int i = 0; i < m_numLogsdisplayed; i++)
   {
     QCheckBox* includeCell = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(i,1));

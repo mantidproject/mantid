@@ -8,7 +8,8 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h" 
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h" 
-//
+
+#include "MantidAPI/ScopedWorkspace.h"
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>
@@ -620,6 +621,74 @@ public:
     AnalysisDataService::Instance().deepRemoveGroup(outWSName);
     AnalysisDataService::Instance().deepRemoveGroup(detectorGroupingWSName);
   }
+
+  void test_loadRunInformation()
+  {
+    ScopedWorkspace outWsEntry;
+
+    LoadMuonNexus1 alg;
+
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006473.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWsEntry.name()) );
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    Workspace_sptr outWs = outWsEntry.retrieve();
+    TS_ASSERT(outWs);
+
+    if (!outWs)
+      return;
+
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWs);
+    TS_ASSERT(ws);
+
+    if (!ws)
+      return;
+
+    const Run& run = ws->run();
+
+    // Check expected properties
+    checkProperty(run, "run_number", std::string("6473"));
+    checkProperty(run, "run_title", std::string("Cr2.7Co0.3Si T=200.0 F=5.0"));
+    checkProperty(run, "run_start", std::string("2006-11-21T07:04:30"));
+    checkProperty(run, "run_end", std::string("2006-11-21T09:29:28"));
+    checkProperty(run, "dur_secs", std::string("8697"));
+    checkProperty(run, "nspectra", 32);
+    checkProperty(run, "goodfrm", 417485);
+
+    checkProperty(run, "sample_temp", 200.0);
+    checkProperty(run, "sample_magn_field", 5.0);
+  }
+  
+  template<typename T>
+  void checkProperty(const Run& run, const std::string& property, const T& expectedValue)
+  {
+    if ( run.hasProperty(property) )
+    {
+      T propertyValue;
+
+      try
+      {
+        propertyValue = run.getPropertyValueAsType<T>(property);
+      }
+      catch(...)
+      {
+        TS_FAIL("Unexpected property type: " + property);
+        return;
+      }
+
+      TSM_ASSERT_EQUALS("Property value mismatch: " + property, propertyValue, expectedValue);
+    }
+    else
+    {
+      TS_FAIL("No property: " + property);
+    }
+  }
+
 private:
   LoadMuonNexus1 nxLoad,nxload2,nxload3;
   std::string outputSpace;

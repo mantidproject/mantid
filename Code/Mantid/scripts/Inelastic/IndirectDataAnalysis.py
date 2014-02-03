@@ -120,10 +120,11 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties
         unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
-        AddSampleLog(Workspace=fout, LogName="Fit Program", LogType="String", LogText='ConvFit')
-        AddSampleLog(Workspace=fout, LogName='Background', LogType='String', LogText=str(options[0]))
-        AddSampleLog(Workspace=fout, LogName='Delta', LogType='String', LogText=str(options[1]))
-        AddSampleLog(Workspace=fout, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
+        CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fout)
+        AddSampleLog(Workspace=fout, LogName="fit_program", LogType="String", LogText='ConvFit')
+        AddSampleLog(Workspace=fout, LogName='background', LogType='String', LogText=str(options[0]))
+        AddSampleLog(Workspace=fout, LogName='delta_function', LogType='String', LogText=str(options[1]))
+        AddSampleLog(Workspace=fout, LogName='lorentzians', LogType='String', LogText=str(options[2]))
         DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
         DeleteWorkspace(fitWS+str(i)+'_Parameters')
         if i == 0:
@@ -134,57 +135,88 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties
 
 ##############################################################################
 
-def confitParsToWS(Table, Data, specMin=0, specMax=-1):
+def search_for_fit_params(suffix, table_ws):
+    """
+    Find all fit parameters in a table workspace with the given suffix.
+    """
+    return [table_ws.column(name) for name in table_ws.getColumnNames() if suffix in name], [name for name in table_ws.getColumnNames() if suffix in name]
+
+def confitParsToWS(table_name, Data, specMin=0, specMax=-1):
+    
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
-    dataX = createQaxis(Data)
-    xAxisVals = []
-    xAxisTrimmed = []
-    dataY = []
-    dataE = []
-    names = ''
-    ws = mtd[Table]
-    cName =  ws.getColumnNames()
-    nSpec = ( ws.columnCount() - 1 ) / 2
-    for spec in range(0,nSpec):
-        yCol = (spec*2)+1
-        yAxis = cName[(spec*2)+1]
-        if re.search('FWHM$', yAxis) or re.search('Amplitude$', yAxis):
-            xAxisVals += dataX
-            if (len(names) > 0):
-                names += ","
-            names += yAxis
-            eCol = (spec*2)+2
-            eAxis = cName[(spec*2)+2]
-            for row in range(0, ws.rowCount()):
-                dataY.append(ws.cell(row,yCol))
-                dataE.append(ws.cell(row,eCol))
-        else:
-            nSpec -= 1
-    outNm = Table + "_Workspace"
-    xAxisTrimmed = trimData(nSpec, xAxisVals, specMin, specMax)
-    CreateWorkspace(OutputWorkspace=outNm, DataX=xAxisTrimmed, DataY=dataY, DataE=dataE, 
-        Nspec=nSpec, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-        VerticalAxisValues=names)
-    return outNm
+
+    ws = mtd[table_name]
+    x = createQaxis(Data)
+    dataY, dataE = [], []
+    v_axis_names = []
+
+    #get data and error values for each of the parameters
+    height, height_names = search_for_fit_params('Height', ws)
+    amplitude, amplitude_names = search_for_fit_params('Amplitude', ws)
+    FWHM, FWHM_names = search_for_fit_params('FWHM', ws)
+
+    if len(amplitude) == 0 or len(FWHM) == 0:
+        raise RuntimeError("Could not find expected fitting parameters!")
+
+    if len(height) > 0:
+        #append height data first
+        dataY += height[0]
+        dataE += height[1]
+        v_axis_names.append(height_names[0])
+
+    # append amplitude and width data & error
+    for i in xrange(0, len(amplitude), 2):
+        amp, amp_error = amplitude[i], amplitude[i+1]
+        width, width_error = FWHM[i], FWHM[i+1]
+        
+        dataY += amp 
+        dataY += width
+
+        dataE += amp_error
+        dataE += width_error
+
+        v_axis_names.append(amplitude_names[i])
+        v_axis_names.append(FWHM_names[i])
+
+        #if we have height data, then calculate the EISF
+        if len(height) > 0:
+            height_y, height_e = np.asarray(height) 
+            
+            total = height_y+amp
+            EISF = height_y/total
+
+            total_error = height_e**2 + np.asarray(amp_error)**2
+            EISF_error = EISF * np.sqrt((height_e**2/height_y**2) + (total_error/total**2))
+
+            dataY += EISF.tolist()
+            dataE += EISF_error.tolist()
+
+            v_axis_names.append('f1.f1.f%d.EISF' % (math.log(i+1,2)+1))
+
+    num_spectra = len(v_axis_names)
+    dataX = np.tile(x, num_spectra)
+
+    outputName = table_name + "_Workspace"
+    dataX = trimData(num_spectra, dataX, specMin, specMax)
+    CreateWorkspace(OutputWorkspace=outputName, DataX=dataX, DataY=dataY, DataE=dataE, NSpec=num_spectra,
+        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=v_axis_names)
+    
+    return outputName
 
 ##############################################################################
 
 def confitPlotSeq(inputWS, Plot):
-    nhist = mtd[inputWS].getNumberHistograms()
-    if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nhist), True)
-        return    
-    plotSpecs = []
-    if ( Plot == 'Intensity' ):
-        res = 'Amplitude$'
-    elif ( Plot == 'FWHM' ):
-        res = 'FWHM$'
-    for i in range(0,nhist):
-        title = mtd[inputWS].getAxis(1).label(i)
-        if re.search(res, title):
-            plotSpecs.append(i)
-    mp.plotSpectrum(inputWS, plotSpecs, True)
+    ws = mtd[inputWS]
+    nhist = ws.getNumberHistograms()
+    
+    if ( Plot == 'Amplitude' or Plot == 'All' ):
+        plotSpecs = [i for i in range(0,nhist) if 'Amplitude' in ws.getAxis(1).label(i)]
+        plotSpectra(inputWS, 'Amplitude', indicies=plotSpecs)
+
+    if ( Plot == 'FWHM' or Plot == 'All' ):
+        plotSpecs = [i for i in range(0,nhist) if 'FWHM' in ws.getAxis(1).label(i)]
+        plotSpectra(inputWS, 'FWHM', indicies=plotSpecs)
 
 ##############################################################################
 
@@ -211,10 +243,11 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
 
     # Add some information about convfit to the output workspace
     options = getConvFitOption(ftype, bgd[:-2], Verbose)
-    AddSampleLog(Workspace=wsname, LogName="Fit Program", LogType="String", LogText='ConvFit')
-    AddSampleLog(Workspace=wsname, LogName='Background', LogType='String', LogText=str(options[0]))
-    AddSampleLog(Workspace=wsname, LogName='Delta', LogType='String', LogText=str(options[1]))
-    AddSampleLog(Workspace=wsname, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
+    CopyLogs(InputWorkspace=inputWS, OutputWorkspace=wsname)
+    AddSampleLog(Workspace=wsname, LogName="fit_program", LogType="String", LogText='ConvFit')
+    AddSampleLog(Workspace=wsname, LogName='background', LogType='String', LogText=str(options[0]))
+    AddSampleLog(Workspace=wsname, LogName='delta_function', LogType='String', LogText=str(options[1]))
+    AddSampleLog(Workspace=wsname, LogName='lorentzians', LogType='String', LogText=str(options[2]))
 
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
     getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose)
@@ -818,12 +851,13 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     return mtd[fitWS]
 
 #Copy logs from sample and add some addtional ones
-def furyAddSampleLogs(inputWs, ws, params):
+def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False):
     startx, endx, fitType = params
     CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
     AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
     AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
     AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
+    AddSampleLog(Workspace=ws, LogName="intensities_constrained", LogType="String", LogText=str(intensities_constrained))
 
 def furyfitMultParsToWS(Table, Data):
 #   Q = createQaxis(Data)
@@ -869,7 +903,7 @@ def furyfitMultParsToWS(Table, Data):
     dataE = np.append(dataE,np.array(Terr))
     dataY = np.append(dataY,np.array(Bval))
     dataE = np.append(dataE,np.array(Berr))
-    names = 'A0,Intensity,Tau,Beta'
+    names = 'f0.A0,f1.Intensity,f1.Tau,f1.Beta'
     suffix = 'Workspace'
     wsname = Table + '_' + suffix
     CreateWorkspace(OutputWorkspace=wsname, DataX=Qa, DataY=dataY, DataE=dataE, 
@@ -944,7 +978,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
         logger.notice('Option: '+option)  
         logger.notice('Function: '+function)  
     nHist = mtd[inputWS].getNumberHistograms()
-    outNm = inputWS[:-3] + 'fury_mult'
+    outNm = getWSprefix(inputWS) + 'fury_1Smult_s0_to_' + str(nHist-1)
     f1 = createFuryMultFun(True, function)
     func= 'composite=MultiDomainFunction,NumDeriv=1;'
     ties='ties=('
@@ -962,12 +996,18 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
     CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
     Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=0,Output=outNm,**kwargs)
     outWS = furyfitMultParsToWS(outNm, inputWS)
+    result_workspace = outNm + '_Result'
     getFuryMultResult(inputWS, outNm, function, Verbose)
+
+    params = [startx, endx, ftype]
+    furyAddSampleLogs(inputWS, outWS, params, True)
+    furyAddSampleLogs(inputWS, result_workspace, params, True)
+
     if Save:
         opath = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-        rpath = os.path.join(workdir, outNm+'_result.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=outNm+'_result', Filename=rpath)
+        rpath = os.path.join(workdir, result_workspace+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=result_workspace, Filename=rpath)
         if Verbose:
             logger.notice('Output file : '+opath)  
             logger.notice('Output file : '+rpath)  

@@ -1,5 +1,6 @@
 from mantid.simpleapi import *
 from mantid import config, logger
+from IndirectImport import import_mantidplot
 import sys, platform, os.path, math, datetime, re
     
 def StartTime(prog):
@@ -280,3 +281,14 @@ def CheckElimits(erange,Xin):
         error = 'Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )'			
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
+
+def plotSpectra(ws, axis_title, indicies=[]):
+    mp = import_mantidplot()
+    if len(indicies) > 0:
+        try:
+            plot = mp.plotSpectrum(ws, indicies, True)
+            layer = plot.activeLayer()
+            layer.setAxisTitle(mp.Layer.Left, axis_title)
+        except RuntimeError, e:
+            #User clicked cancel on plot so don't do anything
+            return

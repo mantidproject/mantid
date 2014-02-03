@@ -394,10 +394,6 @@ void MuonAnalysisOptionTab::hideGraphsChanged(bool state)
   QSettings group;
   group.beginGroup(m_settingsGroup + "SettingOptions");
   group.setValue("hiddenGraphs", state);
-  if (state)
-    emit settingsTabUpdatePlot();
-  else
-    emit notHidingGraphs();
 }
 
 

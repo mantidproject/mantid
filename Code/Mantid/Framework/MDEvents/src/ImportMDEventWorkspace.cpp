@@ -98,6 +98,8 @@ The equivalent with run numbers and detector ids specified is:
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <iostream>
 #include <fstream>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -239,6 +241,7 @@ namespace MDEvents
     }
   }
 
+
   /**
   Iterate through the file data looking for the specified flag and returning TRUE if found.
   @param flag : The flag to look for.
@@ -320,19 +323,28 @@ namespace MDEvents
       throw(e);
     }
 
-    // Extract data from the file, excluding comment lines.
-    std::string line;
-    while (std::getline(file, line))
-    {
-      if(std::string::npos == line.find_first_of(CommentLineStartFlag()))
+      // Extract data from the file, excluding comment lines.
+      std::string line;
+      std::string lastLine;
+      size_t nActualColumns = 0;
+      while (std::getline(file, line))
       {
-        std::stringstream buffer(line);
-        std::copy
-          ( std::istream_iterator <std::string> ( buffer ),
-          std::istream_iterator <std::string> (),
-          std::back_inserter( m_file_data ) );
+        boost::algorithm::trim(line);
+        if (std::string::npos == line.find_first_of(CommentLineStartFlag()))
+        {
+          std::stringstream buffer(line);
+          std::copy(std::istream_iterator<std::string>(buffer), std::istream_iterator<std::string>(),
+              std::back_inserter(m_file_data));
+
+          if (lastLine == MDEventBlockFlag())
+          {
+            std::vector<std::string> strVec;
+            boost::algorithm::split(strVec, line, boost::is_any_of("\t "),boost::token_compress_on);
+            nActualColumns = strVec.size();
+          }
+        }
+        lastLine = line;
       }
-    }
 
     file.close();
 
@@ -350,17 +362,8 @@ namespace MDEvents
     // Calculate the actual number of columns in the MDEvent data.
     int posDiffMDEvent = static_cast<int>(std::distance(m_posMDEventStart, m_file_data.end()));
     const size_t columnsForFullEvents = m_nDimensions + 4; // signal, error, run_no, detector_no
-    const size_t columnsForLeanEvents = m_nDimensions + 2; // signal, error
-    size_t nActualColumns = 0;
-    if((posDiffMDEvent - 1) % columnsForFullEvents != 0) 
-    {
-      nActualColumns = columnsForLeanEvents;
-    }
-    else
-    {
-      nActualColumns = columnsForFullEvents;
-    }
     m_IsFullMDEvents = (nActualColumns == columnsForFullEvents);
+
     m_nMDEvents = posDiffMDEvent / nActualColumns;
 
     // Get the min and max extents in each dimension.

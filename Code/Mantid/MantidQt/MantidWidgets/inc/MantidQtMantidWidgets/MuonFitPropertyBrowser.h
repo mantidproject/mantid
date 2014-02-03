@@ -42,7 +42,8 @@ public:
   virtual void init();
   /// Set the input workspace name
   virtual void setWorkspaceName(const QString& wsName);
-
+  /// Called when the fit is finished
+  virtual void finishHandle(const Mantid::API::IAlgorithm* alg);
 
 public slots:
   /// Perform the fit algorithm
@@ -60,7 +61,6 @@ protected:
 
 private slots:
   virtual void doubleChanged(QtProperty* prop);
-
 
 private:  
   /// Get the registered function names

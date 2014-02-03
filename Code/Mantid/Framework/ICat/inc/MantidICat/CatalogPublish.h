@@ -33,7 +33,7 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class CatalogPublish : public API::Algorithm
+    class DLLExport CatalogPublish : public API::Algorithm
     {
       public:
         /// constructor
@@ -45,7 +45,7 @@ namespace Mantid
         /// Algorithm's version for identification.
         virtual int version() const { return 1; }
         /// Algorithm's category for identification.
-        virtual const std::string category() const { return "DataHandling\\CatalogPublish"; }
+        virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
       private:
         /// Sets documentation strings for this algorithm
@@ -60,14 +60,14 @@ namespace Mantid
         bool checkGroups() { return false; }
         /// True if the extension of the file is a datafile.
         bool isDataFile(const std::string & filePath);
-        /// Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
-        const std::string extractFileName(const std::string &filePath);
         /// Saves the workspace as a nexus file to the user's default directory.
         void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
         /// Publish the history of a given workspace.
-        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace, std::string &datafileName);
+        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace);
         /// Generate the history of a given workspace.
         const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
+        /// Obtain the error message returned by the IDS.
+        const std::string getIDSError(const std::string& jsonResponseData);
     };
   }
 }

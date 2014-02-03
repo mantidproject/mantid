@@ -1,3 +1,12 @@
+/*WIKI*
+
+This algorithm allows a user (who is logged into the information catalog) to publish
+datafiles or workspaces to investigations of which they are an investigator.
+
+'''Parameters Note:''' A file or workspace can be published, but not both at the same time.
+
+*WIKI*/
+
 #include "MantidICat/CatalogPublish.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
@@ -20,6 +29,9 @@
 #include <Poco/URI.h>
 
 #include <fstream>
+#include <boost/regex.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 namespace Mantid
 {
@@ -30,7 +42,9 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogPublish::initDocs()
     {
-      this->setWikiSummary("Allows the user to publish data to the catalog.");
+      this->setWikiSummary("Allows the user to publish datafiles or workspaces to the information catalog. "
+          "Workspaces are converted to nexus files (store in the default save directory), and then uploaded from there.");
+      this->setOptionalMessage("Allows the user to publish datafiles or workspaces to the information catalog.");
     }
 
     /// Init method to declare algorithm properties
@@ -38,9 +52,11 @@ namespace Mantid
     {
       declareProperty(new Mantid::API::FileProperty("FileName", "", Mantid::API::FileProperty::OptionalLoad), "The file to publish.");
       declareProperty(new Mantid::API::WorkspaceProperty<Mantid::API::Workspace>(
-            "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"An input workspace to publish.");
-      declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default.");
-      declareProperty("InvestigationNumber","","The investigation number to save the file to. Extracted from filename or workspace name, but can be overridden.");
+            "InputWorkspace","", Mantid::Kernel::Direction::Input,Mantid::API::PropertyMode::Optional),"The workspace to publish.");
+      declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default. "
+          "This can only contain alphanumerics, underscores or periods.");
+      declareProperty("InvestigationNumber","","The investigation number where the published file will be saved to.");
+      declareProperty("DataFileDescription","","A short description of the datafile you are publishing to the catalog.");
     }
 
     /// Execute the algorithm
@@ -49,7 +65,15 @@ namespace Mantid
       // Used for error checking.
       std::string ws       = getPropertyValue("InputWorkspace");
       std::string filePath = getPropertyValue("FileName");
+      std::string nameInCatalog = getPropertyValue("NameInCatalog");
       Mantid::API::Workspace_sptr workspace = getProperty("InputWorkspace");
+
+      // Prevent invalid/malicious file names being saved to the catalog.
+      boost::regex re("^[a-zA-Z0-9_.]*$");
+      if (!boost::regex_match(nameInCatalog.begin(), nameInCatalog.end(), re))
+      {
+        throw std::runtime_error("The filename can only contain characters, numbers, underscores and periods");
+      }
 
       // Error checking to ensure a workspace OR a file is selected. Never both.
       if ((ws.empty() && filePath.empty()) || (!ws.empty() && !filePath.empty()))
@@ -57,24 +81,28 @@ namespace Mantid
         throw std::runtime_error("Please select a workspace or a file to publish. Not both.");
       }
 
-      // The name of the file, which is used to obtain the dataset ID in getUploadURL below.
-      std::string dataFileName = getPropertyValue("InvestigationNumber");
-
       // Create a catalog as getUploadURL is called twice if workspace is selected.
       auto catalog = CatalogAlgorithmHelper().createCatalog();
 
       // The user want to upload a file.
       if (!filePath.empty())
       {
-        // If the user has not specified then an investigation number to use then obtain it from the filename.
-        if (dataFileName.empty()) dataFileName = extractFileName(filePath);
+        std::string fileName = Poco::Path(filePath).getFileName();
         // If the user has not set the name to save the file as, then use the filename of the file being uploaded.
-        if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", Poco::Path(filePath).getFileName());
+        if (nameInCatalog.empty())
+        {
+          setProperty("NameInCatalog", fileName);
+          g_log.notice("NameInCatalog has not been set. Using filename instead: " + fileName + ".");
+        }
       }
       else // The user wants to upload a workspace.
       {
-        if (dataFileName.empty()) dataFileName = extractFileName(workspace->name());
-        if (getPropertyValue("NameInCatalog").empty()) setProperty("NameInCatalog", workspace->name());
+        if (nameInCatalog.empty())
+        {
+          setProperty("NameInCatalog", workspace->name());
+          g_log.notice("NameInCatalog has not been set. Using workspace name instead: " + workspace->name() + ".");
+        }
+
         // Save workspace to a .nxs file in the user's default directory.
         saveWorkspaceToNexus(workspace);
         // Overwrite the filePath string to the location of the file (from which the workspace was saved to).
@@ -88,10 +116,10 @@ namespace Mantid
       // Verify that the file can be opened correctly.
       if (fileStream.rdstate() & std::ios::failbit) throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
       // Publish the contents of the file to the server.
-
-      publish(fileStream,catalog->getUploadURL(dataFileName, getPropertyValue("NameInCatalog")));
+      publish(fileStream,catalog->getUploadURL(
+          getPropertyValue("InvestigationNumber"), getPropertyValue("NameInCatalog"), getPropertyValue("DataFileDescription")));
       // If a workspace was published, then we want to also publish the history of a workspace.
-      if (!ws.empty()) publishWorkspaceHistory(catalog, workspace, dataFileName);
+      if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
     }
 
     /**
@@ -124,22 +152,33 @@ namespace Mantid
         
         // Close the request by requesting a response.
         Poco::Net::HTTPResponse response;
-        session.receiveResponse(response);
-
+        // Store the response for use IF an error occurs (e.g. 404).
+        std::istream& responseStream = session.receiveResponse(response);
+        // Obtain the status returned by the server to verify if it was a success.
         std::string HTTPStatus = boost::lexical_cast<std::string>(response.getStatus());
 
         // Throw an error if publishing was not successful.
         // (Note: The IDS does not currently return any meta-data related to the errors caused.)
         if (HTTPStatus.find("20") == std::string::npos)
         {
-          g_log.error("An error has occurred on the ICAT IDS server.\n"
-                      "A file with that name already exists or you do not have permissions to publish to that investigation.");
+          std::string jsonResponseData;
+          // Copy the input stream to a string.
+          Poco::StreamCopier::copyToString(responseStream, jsonResponseData);
+
+          // As an error occurred we must cancel the algorithm.
+          // We cannot throw an exception here otherwise it is caught below as Poco::Exception catches runtimes,
+          // and then the I/O error is thrown as it is generated above first.
+          this->cancel();
+          // Output an appropriate error message from the JSON object returned by the IDS.
+          g_log.error(getIDSError(jsonResponseData));
         }
       }
       catch(Poco::Net::SSLException& error)
       {
         throw std::runtime_error(error.displayText());
       }
+      // This is bad, but is needed to catch a POCO I/O error.
+      // For more info see comments (of I/O error) in CatalogDownloadDataFiles.cpp
       catch(Poco::Exception&) {}
     }
 
@@ -153,19 +192,6 @@ namespace Mantid
       std::string extension = Poco::Path(filePath).getExtension();
       std::transform(extension.begin(),extension.end(),extension.begin(),tolower);
       return extension.compare("raw") == 0 || extension.compare("nxs") == 0;
-    }
-
-    /**
-     * Extract the name of the file from a given path.
-     * @param filePath :: Path of data file to use.
-     * @returns The filename of the given path.
-     */
-    const std::string CatalogPublish::extractFileName(const std::string &filePath)
-    {
-      // Extracts the file name (e.g. CSP74683_ICPevent) from the file path.
-      std::string dataFileName = Poco::Path(Poco::Path(filePath).getFileName()).getBaseName();
-      // Extracts the specific file name (e.g. CSP74683) from the file path.
-      return dataFileName.substr(0, dataFileName.find_first_of('_'));
     }
 
     /**
@@ -188,9 +214,8 @@ namespace Mantid
      * Publish the history of a given workspace.
      * @param catalog   :: The catalog to use to publish the file.
      * @param workspace :: The workspace to obtain the history from.
-     * @param datafileName :: The name of the file that is used to obtain the dataset ID.
      */
-    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace, std::string &datafileName)
+    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace)
     {
       std::stringstream ss;
       // Obtain the workspace history as a string.
@@ -198,7 +223,7 @@ namespace Mantid
       // Use the name the use wants to save the file to the server as and append .py
       std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
       // Publish the workspace history to the server.
-      publish(ss, catalog->getUploadURL(datafileName, fileName));
+      publish(ss, catalog->getUploadURL(getPropertyValue("InvestigationNumber"), fileName, getPropertyValue("DataFileDescription")));
     }
 
     /**
@@ -211,10 +236,25 @@ namespace Mantid
       auto wsHistory = Mantid::API::AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
       wsHistory->initialize();
       wsHistory->setProperty("InputWorkspace", workspace->name());
-      wsHistory->setProperty("FileName", Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") + workspace->name() + ".py");
       wsHistory->execute();
       return wsHistory->getPropertyValue("ScriptText");
     }
 
+
+    /**
+     * Obtain the error message returned by the IDS.
+     * @param jsonResponseData :: The contents of the JSON object returned from the IDS.
+     * @returns An appropriate error message for the user.
+     */
+    const std::string CatalogPublish::getIDSError(const std::string& jsonResponseData)
+    {
+      std::istringstream is(jsonResponseData);
+      // Stores the contents of `jsonResponseData` as a json property tree.
+      boost::property_tree::ptree json;
+      // Convert the stream to a JSON tree.
+      boost::property_tree::read_json(is, json);
+      // Return the message returned by the server.
+      return json.get<std::string>("code") + ": " + json.get<std::string>("message");
+    }
   }
 }

@@ -867,6 +867,10 @@ namespace MantidQt
       // Create the custom header with checkbox ability.
       m_customHeader = new CheckboxHeader(Qt::Horizontal, dataFileTable);
 
+      // There is no simple way to override default QTableWidget sort.
+      // Instead, connecting header to obtain column clicked, and sorting by
+      connect(m_customHeader,SIGNAL(sectionClicked(int)),this,SLOT(sortByFileSize(int)));
+
       // Set it prior to adding labels in populateTable.
       dataFileTable->setHorizontalHeader(m_customHeader);
 
@@ -883,6 +887,7 @@ namespace MantidQt
       // Hide these columns as they're not useful for the user, but are used by the algorithms.
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Id"), true);
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Location"), true);
+      dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "File size(bytes)"), true);
 
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
@@ -1174,6 +1179,30 @@ namespace MantidQt
         table->item(indexes.at(i).row(), 0)->setCheckState(Qt::Checked);
       }
       enableDownloadButtons();
+    }
+
+
+    /**
+     * When the user clicks "File size" column sort the table by "File size(bytes)".
+     * @param column :: The column that was clicked by the user.
+     */
+    void CatalogSearch::sortByFileSize(int column)
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+      int byteColumn  = headerIndexByName(table, "File size(bytes)");
+
+      if (column == headerIndexByName(table, "File size"))
+      {
+        // Convert cell value to int within the datamodel.
+        // This allows us to sort by the specific column.
+        for(int row = 0 ; row < table->rowCount(); row++)
+        {
+          QTableWidgetItem *item = new QTableWidgetItem;
+          item->setData(Qt::EditRole, table->item(row, byteColumn)->text().toInt());
+          table->setItem(row, byteColumn, item);
+        }
+        table->sortByColumn(byteColumn);
+      }
     }
 
   } // namespace MantidWidgets

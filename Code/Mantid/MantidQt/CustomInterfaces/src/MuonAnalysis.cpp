@@ -114,7 +114,7 @@ void MuonAnalysis::initLocalPython()
 
   // Hide the toolbars, if user wants to
   if(m_uiForm.hideToolbars->isChecked())
-    setToolbarsHidden(true);
+    emit setToolbarsHidden(true);
 }
 
 /// Set up the dialog layout
@@ -164,8 +164,6 @@ void MuonAnalysis::initLayout()
 
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
   m_optionTab->initLayout();
-  // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
-  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SLOT(showAllPlotWindows()));
 
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
   m_fitDataTab->init();
@@ -214,10 +212,16 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontPlotButton, SIGNAL(clicked()), this, SLOT(runFrontPlotButton()));
 
   // front group/ group pair combobox
-  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this,
-    SLOT(runFrontGroupGroupPairComboBox(int)));
+  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL( currentIndexChanged(int) ), this, SLOT( updateFront() ));
 
-  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(setToolbarsHidden(bool)));
+  // Synchronize plot function selector on the Home tab with the one under the Group Table
+  connect(m_uiForm.frontPlotFuncs, SIGNAL( activated(int) ),m_uiForm.groupTablePlotChoice, SLOT( setCurrentIndex(int) ) );
+  connect(m_uiForm.groupTablePlotChoice, SIGNAL( activated(int) ), this, SLOT( syncGroupTablePlotTypeWithHome() ) );
+
+  connect(m_uiForm.homePeriodBox1, SIGNAL( currentIndexChanged(int) ), this, SLOT( checkForEqualPeriods() ));
+  connect(m_uiForm.homePeriodBox2, SIGNAL( currentIndexChanged(int) ), this, SLOT( checkForEqualPeriods() ));
+
+  connect(m_uiForm.hideToolbars, SIGNAL( toggled(bool) ), this, SIGNAL( setToolbarsHidden(bool) ));
 
   // connect "?" (Help) Button
   connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
@@ -252,10 +256,16 @@ void MuonAnalysis::initLayout()
   // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
-  connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );  
+  connect(m_uiForm.deadTimeType, SIGNAL( currentIndexChanged(int) ),
+          this, SLOT( onDeadTimeTypeChanged(int) ));
+
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL( fileFindingFinished() ),
+          this, SLOT( deadTimeFileSelected() ));
 
   m_currentTab = m_uiForm.tabWidget->currentWidget();
+
+  connect(this, SIGNAL( setToolbarsHidden(bool) ), this, SLOT( doSetToolbarsHidden(bool) ), 
+    Qt::QueuedConnection ); // We dont' neet this to happen instantly, prefer safer way
 }
 
 /**
@@ -291,16 +301,6 @@ void MuonAnalysis::setCurrentDataName(const QString& name)
   m_uiForm.connectedDataSettings->setText("Connected: " + m_currentDataName);
 }
 
-
-/**
-* Front group/ group pair combobox (slot)
-*/
-void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
-{
-  if ( index >= 0 )
-    updateFront();
-}
-
 /**
 * Front plot button (slot)
 */
@@ -329,7 +329,7 @@ void MuonAnalysis::plotSelectedItem()
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
   if (index < 0)
-    throw std::runtime_error("Item not selected");
+    return; // Nothing to plot
 
   if (index >= numGroups())
   {
@@ -390,11 +390,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
       hideAllPlotWindows();
 
     // Plot the workspace
-    plotSpectrum( wsNameQ, 0, (plotType == Logorithm) );
-
-    // Change the plot style of the graph so that it matches what is selected on
-    // the plot options tab.
-    setPlotStyle( wsNameQ, getPlotStyleParams(wsNameQ, 0) );
+    plotSpectrum( wsNameQ, (plotType == Logorithm) );
 
     setCurrentDataName( wsNameQ );
   }
@@ -830,7 +826,6 @@ void MuonAnalysis::runLoadGroupButton()
 
   clearTablesAndCombo();
   fillGroupingTable(loadedGrouping, m_uiForm);
-  updateFront();
 
   m_updating = false;
 
@@ -1072,7 +1067,6 @@ void MuonAnalysis::pairTableClicked(int row)
   if ( pNum >= 0 )
   {
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(pNum+numGroups());
-    updateFront();
   }
 }
 
@@ -1108,7 +1102,6 @@ void MuonAnalysis::groupTableClicked(int row)
   if ( gNum >= 0 )
   {
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(gNum);
-    updateFront();
     m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
   }
 }
@@ -1551,6 +1544,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         }
 
         IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+        applyCorrAlg->setRethrows(true);
+        applyCorrAlg->setLogging(false);
         applyCorrAlg->setPropertyValue("InputWorkspace", m_workspace_name); 
         applyCorrAlg->setPropertyValue("OutputWorkspace", m_workspace_name);
         applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimes.name());
@@ -1658,14 +1653,17 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     setTimeZeroState();
     setFirstGoodDataState();
 
-    std::string infoStr("");
+    std::ostringstream infoStr;
+
+    // Set display style for floating point values
+    infoStr << std::fixed << std::setprecision(12);
     
     // Populate run information with the run number
     QString run(getGroupName());
     if (m_previousFilenames.size() > 1)
-      infoStr += "Runs: ";
+      infoStr << "Runs: ";
     else
-      infoStr += "Run: ";
+      infoStr << "Run: ";
 
     // Remove instrument and leading zeros
     int zeroCount(0);
@@ -1681,39 +1679,39 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     }
 
     // Add to run information.
-    infoStr += run.toStdString();
+    infoStr << run.toStdString();
 
     // Populate run information text field
     m_title = matrix_workspace->getTitle();
-    infoStr += "\nTitle: ";
-    infoStr += m_title;
+    infoStr << "\nTitle: ";
+    infoStr << m_title;
     
     // Add the comment to run information
-    infoStr += "\nComment: ";
-    infoStr += matrix_workspace->getComment();
+    infoStr << "\nComment: ";
+    infoStr << matrix_workspace->getComment();
     
     const Run& runDetails = matrix_workspace->run();
 
     Mantid::Kernel::DateAndTime start, end;
 
     // Add the start time for the run
-    infoStr += "\nStart: ";
+    infoStr << "\nStart: ";
     if ( runDetails.hasProperty("run_start") )
     {
       start = runDetails.getProperty("run_start")->value();
-      infoStr += start.toSimpleString();
+      infoStr << start.toSimpleString();
     }
 
     // Add the end time for the run
-    infoStr += "\nEnd: ";
+    infoStr << "\nEnd: ";
     if ( runDetails.hasProperty("run_end") )
     {
       end = runDetails.getProperty("run_end")->value();
-      infoStr += end.toSimpleString();
+      infoStr << end.toSimpleString();
     }
 
     // Add counts to run information
-    infoStr += "\nCounts: ";
+    infoStr << "\nCounts: ";
     double counts(0.0);
     for (size_t i=0; i<matrix_workspace->getNumberHistograms(); ++i)
     {
@@ -1722,49 +1720,58 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         counts += matrix_workspace->dataY(i)[j];
       }
     }
-    std::ostringstream ss;
-    ss << std::fixed << std::setprecision(12) << counts/1000000;
-    infoStr += ss.str();
-    infoStr += " MEv";
+    infoStr << counts/1000000 << " MEv";
 
     // Add average temperature.
-    infoStr += "\nAverage Temperature: ";
+    infoStr << "\nAverage Temperature: ";
     if ( runDetails.hasProperty("Temp_Sample") )
     {
       // Filter the temperatures by the start and end times for the run.
       runDetails.getProperty("Temp_Sample")->filterByTime(start, end);
-      QString allRuns = QString::fromStdString(runDetails.getProperty("Temp_Sample")->value() );
-      QStringList runTemp = allRuns.split("\n");
-      int tempCount(0);
-      double total(0.0);
 
-      // Go through each temperature entry, remove the date and time, and total the temperatures.
-      for (int i=0; i<runTemp.size(); ++i)
-      {
-        if (runTemp[i].contains("  ") )
-        {
-          QStringList dateTimeTemperature = runTemp[i].split("  ");
-          total += dateTimeTemperature[dateTimeTemperature.size() - 1].toDouble();
-          ++tempCount;
-        }
-      }
+      // Get average of the values
+      double average = runDetails.getPropertyAsSingleValue("Temp_Sample");
 
-      // Find the average and display it.
-      double average(total/tempCount);
       if (average != 0.0)
       {
-        std::ostringstream ss;
-        ss << std::fixed << std::setprecision(12) << average;
-        infoStr += ss.str();
+        infoStr << average;
       }
-      else // Show appropriate error message.
-        infoStr += "Error - Not set in data file.";
+      else
+      {
+        infoStr << "Not set";
+      }
     }
-    else // Show appropriate error message.
-      infoStr += "Error - Not found in data file.";
+    else
+    {
+      infoStr << "Not found";
+    }
+
+    // Add sample temperature
+    infoStr << "\nSample Temperature: ";
+    if ( runDetails.hasProperty("sample_temp") )
+    {
+      auto temp = runDetails.getPropertyValueAsType<double>("sample_temp");
+      infoStr << temp;
+    }
+    else
+    {
+      infoStr << "Not found";
+    }
+
+    // Add sample magnetic field
+    infoStr << "\nSample Magnetic Field: ";
+    if ( runDetails.hasProperty("sample_magn_field") )
+    {
+      auto temp = runDetails.getPropertyValueAsType<double>("sample_magn_field");
+      infoStr << temp;
+    }
+    else
+    {
+      infoStr << "Not found";
+    }
 
     // Include all the run information.
-    m_uiForm.infoBrowser->setText(infoStr.c_str());
+    m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
 
     // If instrument or number of periods has changed -> update period widgets
     if(instrumentChanged || numPeriods != m_uiForm.homePeriodBox1->count())
@@ -1799,6 +1806,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     QMessageBox::warning(this,"Mantid - MuonAnalysis", e.what());
   }
 
+  m_updating = false;
+  m_uiForm.tabWidget->setTabEnabled(3, true);
 }
 
 
@@ -1902,7 +1911,7 @@ std::string MuonAnalysis::getRangedName()
   }
 
   if (firstFile.contains('.') )
-    firstFile.chop(firstFile.size()-firstFile.find('.') );
+    firstFile.chop(firstFile.size()-firstFile.indexOf('.') );
 
   return (firstFile.toStdString() + '-' + lastRun.toStdString());
 }
@@ -1953,7 +1962,7 @@ void MuonAnalysis::guessAlphaClicked()
   m_updating = false;
 
   // See if auto-update is on and if so update the plot
-  groupTabUpdatePair();
+  groupTabUpdatePlot();
 }
 
 /**
@@ -1986,12 +1995,11 @@ void MuonAnalysis::updateFront()
   // get current index
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
-  m_uiForm.frontPlotFuncs->blockSignals(true);
   m_uiForm.frontPlotFuncs->clear();
-  m_uiForm.frontPlotFuncs->blockSignals(false);
 
   int numG = numGroups();
-  if (numG)
+
+  if (index >= 0 && numG)
   {
     if (index >= numG && numG >= 2)
     {
@@ -2043,13 +2051,11 @@ void MuonAnalysis::updateFrontAndCombo()
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
   else
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(currentI);
-
-  updateFront();
 }
 
 /**
- * Updates widgets related to period algebra
- * @param newNumPeriods Number of periods available
+ * Updates widgets related to period algebra.
+ * @param numPeriods Number of periods available
  */
 void MuonAnalysis::updatePeriodWidgets(int numPeriods)
 {
@@ -2175,84 +2181,65 @@ QStringList MuonAnalysis::getPeriodLabels() const
 
 /**
  * plots specific WS spectrum (used by plotPair and plotGroup)
- * @param wsName workspace name
- * @param wsIndex workspace index
+ * @param wsName   :: Workspace name
+ * @param logScale :: Whether to plot using logarithmic scale
  */
-void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale)
+void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
 {
-    // Close the previous plot window ( if exists )
-    closePlotWindow(wsName);
+    // Get plotting params
+    const QMap<QString, QString>& params = getPlotStyleParams(wsName);
 
-    // create first part of plotting Python string
-    QString gNum = QString::number(wsIndex);
     QString pyS;
 
-    // Plot error bars by default. If not needed they will get hidden when plot style if applied.
-    pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ",True)\n";
+    // Try to find existing graph window
+    pyS = "w = graph('%1-1')\n";
 
-    // Add the objectName for the peakPickerTool to find
-    pyS += "gs.setObjectName(\"" + wsName + "\")\n"
-           "l = gs.activeLayer()\n"
-           "l.setCurveTitle(0, \"" + wsName + "\")\n"
-           "l.setTitle(\"" + m_title.c_str() + "\")\n";
+    // If doesn't exist - plot it
+    pyS += "if w == None:\n"
+           "  w = plotSpectrum('%1', 0, %2, %3)\n"
+           "  w.setObjectName('%1')\n";
 
-    if ( ylogscale )
+    // If plot does exist already, it should've just been updated automatically, so we just
+    // need to make sure it is visible
+    pyS += "else:\n"
+          "  plotSpectrum('%1', 0, %2, %3, window = w, clearWindow = True)\n"
+          "  w.show()\n"
+          "  w.setFocus()\n";
+
+    pyS = pyS.arg(wsName).arg(params["ShowErrors"]).arg(params["ConnectType"]);
+  
+    // Update titles
+    pyS += "l = w.activeLayer()\n"
+           "l.setCurveTitle(0, '%1')\n"
+           "l.setTitle('%2')\n";
+
+    pyS = pyS.arg(wsName).arg(m_title.c_str());
+
+    // Set logarithmic scale if required
+    if ( logScale )
       pyS += "l.logYlinX()\n";
 
-    // plot the spectrum
+    // Set scaling
+    if( params["YAxisAuto"] == "True" )
+    {
+      pyS += "l.setAutoScale()\n";
+    }
+    else
+    {
+      pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
+      pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
+    }
+
     runPythonCode( pyS );
 }
 
 /**
- * Set various style parameters for the plot of the given ws
- * @param wsName Workspace which plot to style
- * @param params Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
-                 of possible keys
- */
-void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QString>& params)
-{
-  QString code;
-
-  // Get the active layer of the graph
-  code += "l = graph('"+ wsName + "-1').activeLayer()\n";
-
-  // Set whether to show symbols
-  QString symbolStyle = (params["ConnectType"] == "0") ? QString("PlotSymbol.NoSymbol") : QString("PlotSymbol.Ellipse");
-  code += "l.setCurveSymbol(0, PlotSymbol(" + symbolStyle +", QBrush(), QPen(), QSize(5,5)))\n";
-
-  // Set whether to show line
-  QString penStyle = (params["ConnectType"] == "1") ? QString("Qt.NoPen") : QString("Qt.SolidLine");
-  code += "pen = QPen(Qt.black)\n"
-          "pen.setStyle(" + penStyle +")\n"
-          "l.setCurvePen(0, pen)\n";
-
-  // Set error settings
-  QString showErrors = (params["ShowErrors"] == "True") ? QString("True") : QString("False");
-  code += "errorSettings = l.errorBarSettings(0, 0)\n"
-          "errorSettings.drawMinusSide(" + showErrors + ")\n"
-          "errorSettings.drawPlusSide(" + showErrors + ")\n";
-
-  // If autoscaling disabled - set manual Y axis values
-  if(params["YAxisAuto"] == "False")
-    code += "l.setAxisScale(Layer.Left," + params["YAxisMin"] + "," + params["YAxisMax"] + ")\n";
-  else
-    code += "l.setAutoScale()\n";
-
-  // Replot
-  code += "l.replot()\n";
-
-  runPythonCode(code);
-}
-
-/**
- * Get current plot style parameters. wsName and wsIndex are used to get default values if 
- * something is not specified.
+ * Get current plot style parameters. wsName is used to get default values. 
  * @param wsName Workspace plot of which we want to style
- * @param wsIndex Workspace index of the plot data
  * @return Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
            of possible keys
  */
-QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, const int wsIndex)
+QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName)
 {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
@@ -2269,7 +2256,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, c
     {
       Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
       MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-      const Mantid::MantidVec& dataY = matrix_workspace->readY(wsIndex);
+      const Mantid::MantidVec& dataY = matrix_workspace->readY(0);
 
       if(min.isEmpty())
         params["YAxisMin"] = QString::number(*min_element(dataY.begin(), dataY.end()));
@@ -2280,22 +2267,6 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, c
   }
 
   return params;
-}
-
-/**
- * Closes the window with the plot of the given ws.
- * @param wsName Name of the workspace which plot window to close
- */
-void MuonAnalysis::closePlotWindow(const QString& wsName)
-{
-  QString code;
-
-  code += "g = graph('"+ wsName + "-1')\n"
-          "if g != None:\n"
-          "  g.confirmClose(False)\n"
-          "  g.close()\n";
-
-  runPythonCode(code);
 }
 
 /**
@@ -2331,6 +2302,9 @@ bool MuonAnalysis::plotExists(const QString& wsName)
 void MuonAnalysis::selectMultiPeak(const QString& wsName)
 {
   disableAllTools();
+
+  if( ! plotExists(wsName) )
+    plotSpectrum(wsName);
 
   QString code;
 
@@ -2377,41 +2351,6 @@ void MuonAnalysis::showAllPlotWindows()
           "    w.show()\n";
 
   runPythonCode(code);
-}
-
-/**
- * Show a plot for a given workspace. Closes previous plot if exists.
- * @param wsName The name of workspace to be plotted. Should exist in ADS.
- */
-void MuonAnalysis::showPlot(const QString& wsName)
-{
-  // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
-  //       only one groups)
-
-  // If empty -> no workspaces available to choose (e.g. all were deleted)
-  if(wsName.isEmpty())
-  {
-    setCurrentDataName(NOT_AVAILABLE);
-  }
-  // Just in case, check if exists. Shouldn't happen normally.
-  // TODO: can happen if currently connected ws gets deleted. Observe deletion event and do 
-  //       something in that case
-  else if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-  {
-    g_log.warning("Can't show workspace which doesn't exist.");
-  }
-  else
-  {
-    setCurrentDataName(wsName);
-
-    if(!plotExists(wsName))
-    {
-      plotSpectrum(m_currentDataName, 0, false);
-      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
-    }
-
-    selectMultiPeak(m_currentDataName);
-  }
 }
 
 /**
@@ -2632,7 +2571,7 @@ double MuonAnalysis::timeZero()
   {
     timeZero = boost::lexical_cast<double>(boxText.toStdString());
   }
-  catch(boost::bad_lexical_cast)
+  catch(boost::bad_lexical_cast&)
   {
     QMessageBox::warning(this, "MantidPlot - Muon Analysis", "Unable to interpret time zero as number, setting to 0.0");
     m_uiForm.timeZeroFront->setText("0.0");
@@ -2875,7 +2814,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   prevPlotBinning.beginGroup(group + "BinningOptions");
   int rebinFixed = prevPlotBinning.value("rebinFixed", 1).toInt();
   m_uiForm.optionStepSizeText->setText(QString::number(rebinFixed));
-  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toCString());
+  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toString());
 
   int rebinComboBoxIndex = prevPlotBinning.value("rebinComboBoxIndex", 0).toInt();
   m_uiForm.rebinComboBox->setCurrentIndex(rebinComboBoxIndex);
@@ -2907,7 +2846,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
 
-  changeDeadTimeType(deadTimeTypeIndex);
+  onDeadTimeTypeChanged(deadTimeTypeIndex);
 
   QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
   m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
@@ -3023,7 +2962,7 @@ void MuonAnalysis::setAppendingRun(int inc)
   // File path should be the same for both.
   separateMuonFile(filePath, currentFiles[fileNumber], run, runSize);
 
-  int fileExtensionSize(currentFiles[fileNumber].size()-currentFiles[fileNumber].find('.') );
+  int fileExtensionSize(currentFiles[fileNumber].size()-currentFiles[fileNumber].indexOf('.') );
   QString fileExtension = currentFiles[fileNumber].right(fileExtensionSize);
   currentFiles[fileNumber].chop(fileExtensionSize);
 
@@ -3080,7 +3019,7 @@ void MuonAnalysis::changeRun(int amountToChange)
     
   separateMuonFile(filePath, currentFile, run, runSize);
 
-  int fileExtensionSize(currentFile.size()-currentFile.find('.') );
+  int fileExtensionSize(currentFile.size()-currentFile.indexOf('.') );
   QString fileExtension(currentFile.right(fileExtensionSize) );
   currentFile.chop(fileExtensionSize);
 
@@ -3172,15 +3111,15 @@ void MuonAnalysis::getFullCode(int originalSize, QString & run)
 /**
  * Is called every time when tab gets changed
  *
- * @param tabNumber The index value of the current tab
+ * @param newTabIndex :: The index of the tab we switch to
  */
-void MuonAnalysis::changeTab(int newTabNumber)
+void MuonAnalysis::changeTab(int newTabIndex)
 {
-  QWidget* newTab = m_uiForm.tabWidget->widget(newTabNumber);
+  QWidget* newTab = m_uiForm.tabWidget->widget(newTabIndex);
 
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
-    setToolbarsHidden(true);
+    emit setToolbarsHidden(true);
 
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
@@ -3195,7 +3134,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
     // Disconnect to avoid problems when filling list of workspaces in fit prop. browser
     disconnect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                              this, SLOT(showPlot(const QString&)));
+                              this, SLOT(selectMultiPeak(const QString&)));
   }
 
   if(newTab == m_uiForm.DataAnalysis) // Entering DA tab
@@ -3205,15 +3144,15 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
     // Show connected plot and attach PP tool to it (if has been assigned)
     if(m_currentDataName != NOT_AVAILABLE)
-      showPlot(m_currentDataName);
+      selectMultiPeak(m_currentDataName);
     
     // In future, when workspace gets changed, show its plot and attach PP tool to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                           this, SLOT(showPlot(const QString&)), Qt::QueuedConnection);
+                           this, SLOT(selectMultiPeak(const QString&)), Qt::QueuedConnection);
   }
   else if(newTab == m_uiForm.ResultsTable)
   {
-    m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
+    m_resultTableTab->refresh();
   }
 
   m_currentTab = newTab;
@@ -3225,19 +3164,23 @@ void MuonAnalysis::changeTab(int newTabNumber)
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
+  connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+
+  connect(m_uiForm.frontPlotFuncs, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.frontAlphaNumber, SIGNAL( returnPressed() ), this, SLOT( homeTabUpdatePlot() ));
+
   connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(firstPeriodSelectionChanged()));
-  connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(secondPeriodSelectionChanged()));
-  connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(changeHomeFunction()));
-  connect(m_uiForm.frontAlphaNumber, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
+
+  connect(m_uiForm.homePeriodBox1, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.homePeriodBoxMath, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+  connect(m_uiForm.homePeriodBox2, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+
+  connect(m_uiForm.deadTimeType, SIGNAL( activated(int) ), this, SLOT( deadTimeTypeAutoUpdate(int) ));
 
   // Grouping tab Auto Updates
-  // Group Table
-  connect(m_uiForm.groupTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdateGroup()));
-  // Pair Table (Guess Alpha button attached in another function)
-  connect(m_uiForm.pairTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdatePair()));
+  connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
+  connect(m_uiForm.pairTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
 
   // Settings tab Auto Updates
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
@@ -3320,35 +3263,16 @@ void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue
   settings.endGroup();
 }
 
-void MuonAnalysis::changeHomeFunction()
-{
-  if (m_currentTab == m_uiForm.Home)
-  {
-    m_uiForm.groupTablePlotChoice->setCurrentIndex(m_uiForm.frontPlotFuncs->currentIndex());
-    homeTabUpdatePlot();
-  }
-}
-
-void MuonAnalysis::firstPeriodSelectionChanged()
+/**
+ * Checks whether two specified periods are equal and, if they are, sets second one to None.
+ */
+void MuonAnalysis::checkForEqualPeriods()
 {
   if ( m_uiForm.homePeriodBox2->currentText() == m_uiForm.homePeriodBox1->currentText() )
   {
     m_uiForm.homePeriodBox2->setCurrentIndex(0);
   }
-  else
-    homeTabUpdatePlot();
 }
-
-void MuonAnalysis::secondPeriodSelectionChanged()
-{
-  if ( m_uiForm.homePeriodBox2->currentText() == m_uiForm.homePeriodBox1->currentText() )
-  {
-    m_uiForm.homePeriodBox2->setCurrentIndex(0);
-  }
-  else
-    homeTabUpdatePlot();
-}
-
 
 void MuonAnalysis::homeTabUpdatePlot()
 {
@@ -3356,26 +3280,10 @@ void MuonAnalysis::homeTabUpdatePlot()
       runFrontPlotButton();
 }
 
-void MuonAnalysis::groupTabUpdateGroup()
+void MuonAnalysis::groupTabUpdatePlot()
 {
-  if (m_currentTab == m_uiForm.GroupingOptions)
-  {
-    if (m_uiForm.frontPlotFuncs->count() <= 1)
-    {
-      m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
-      updateFront();
-    }
-    m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
-
-    if (isAutoUpdateEnabled() && m_loaded == true)
-      runGroupTablePlotButton();
-  }
-}
-
-void MuonAnalysis::groupTabUpdatePair()
-{
-  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions && m_loaded == true)
-    runPairTablePlotButton();
+  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions && m_loaded)
+      runFrontPlotButton();
 }
 
 void MuonAnalysis::settingsTabUpdatePlot()
@@ -3385,27 +3293,31 @@ void MuonAnalysis::settingsTabUpdatePlot()
 }
 
 /**
+ * Sets plot type combo box on the Home tab to the same value as the one under Group Table.
+ */
+void MuonAnalysis::syncGroupTablePlotTypeWithHome()
+{
+  int plotTypeIndex = m_uiForm.groupTablePlotChoice->currentIndex();
+
+  if ( m_uiForm.frontPlotFuncs->count() <= plotTypeIndex )
+  {
+    // This is not the best solution, but I don't have anything brighter at the moment and it
+    // was working like that for some time without anybody complaining.
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
+  }
+
+  m_uiForm.frontPlotFuncs->setCurrentIndex(plotTypeIndex);
+}
+
+/**
  * Updates the style of the current plot according to actual parameters on settings tab.
  */
 void MuonAnalysis::updateCurrentPlotStyle()
 {
   if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE)
   {
-    if(plotExists(m_currentDataName))
-    {
-      // TODO: This index magic wouldn't be needed if we'd store only a single group in a workspace.
-
-      // Get selected group index
-      int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
-
-      // Check if pair is selected
-      if(index >= numGroups())
-        index = 0;
-
-      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, index));
-    }
-    else
-      runFrontPlotButton();
+    // Replot using new style params
+    plotSpectrum(m_currentDataName);
   }
 }
 
@@ -3428,54 +3340,45 @@ bool MuonAnalysis::isOverwriteEnabled()
 /**
  * Executed when interface gets hidden or closed
  */
-void MuonAnalysis::hideEvent(QHideEvent *e)
+void MuonAnalysis::hideEvent(QHideEvent *)
 {
-  // Show the toolbars
+  // Show toolbars if were chosen to be hidden by user
   if (m_uiForm.hideToolbars->isChecked())
-    setToolbarsHidden(false);
-
+    emit setToolbarsHidden(false);
+  
   // If closed while on DA tab, reassign fit property browser to default one
   if(m_currentTab == m_uiForm.DataAnalysis)
     emit setFitPropertyBrowser(NULL);
-
-  // Delete the peak picker tool because it is no longer needed.
-  disableAllTools();
-
-  e->accept();
 }
 
 
 /**
  * Executed when interface gets shown
  */
-void MuonAnalysis::showEvent(QShowEvent *e)
+void MuonAnalysis::showEvent(QShowEvent *)
 {
-  // Hide the toolbars
+  // Hide toolbars if requested by user
   if (m_uiForm.hideToolbars->isChecked() )
-    setToolbarsHidden(true);
-
-  e->accept();
+    emit setToolbarsHidden(true);
 }
 
 /**
  * Hide/show MantidPlot toolbars.
  * @param hidden If true, toolbars will be hidden, if false - shown
  */
-void MuonAnalysis::setToolbarsHidden(bool hidden)
+void MuonAnalysis::doSetToolbarsHidden(bool hidden)
 {
-  if (hidden == true)
-    runPythonCode("setToolbarsVisible(False)");
-  else
-    runPythonCode("setToolbarsVisible(True)");
+  QString isVisibleStr = hidden ? "False" : "True";
+
+  runPythonCode( QString("setToolbarsVisible(%1)").arg(isVisibleStr) );
 }
 
 
 /**
-* Change what type of deadtime to use and the options available for the user's choice.
-*
-* @param choice :: The current index of dead time type combo box.
-*/
-void MuonAnalysis::changeDeadTimeType(int choice)
+ * Called when dead time correction type is changed.
+ * @param choice :: New index of dead time correction type combo box
+ */
+void MuonAnalysis::onDeadTimeTypeChanged(int choice)
 {
   m_deadTimesChanged = true;
 
@@ -3483,7 +3386,6 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
     m_uiForm.dtcFileLabel->setVisible(false);
-    homeTabUpdatePlot();
   }
   else // choice must be from workspace
   {
@@ -3497,6 +3399,19 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   group.setValue("deadTimes", choice);
 }
 
+/**
+ * Auto-update the plot after user has changed dead time correction type.
+ * @param choice :: User selected index of the dead time correction combox box
+ */
+void MuonAnalysis::deadTimeTypeAutoUpdate(int choice)
+{
+  // We update the plot only if user switches to "None" or "From Data File" correction type, because
+  // in case of "From Disk" the file should be specified first.
+  if ( choice == 0 || choice == 1 )
+  {
+    homeTabUpdatePlot();
+  }
+}
 
 /**
 * If the user selects/changes the file to be used to apply the dead times then 

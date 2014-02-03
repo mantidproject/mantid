@@ -596,8 +596,18 @@
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="furyfit_ckPlotGuess">
+               <property name="text">
+                <string>Plot Guess</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
               <widget class="QCheckBox" name="furyfit_ckConstrainIntensities">
                <property name="text">
                 <string>Constrain Intensities</string>
@@ -607,10 +617,13 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QCheckBox" name="furyfit_ckPlotGuess">
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="furyfit_ckConstrainBeta">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
-                <string>Plot Guess</string>
+                <string>Constrain Beta Over All Q</string>
                </property>
               </widget>
              </item>
@@ -1155,7 +1168,12 @@
                </item>
                <item>
                 <property name="text">
-                 <string>Intensity</string>
+                 <string>All</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Amplitude</string>
                 </property>
                </item>
                <item>
