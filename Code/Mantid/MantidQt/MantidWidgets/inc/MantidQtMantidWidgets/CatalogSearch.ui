@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>679</width>
-    <height>956</height>
+    <height>993</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -158,7 +158,7 @@
          <number>9</number>
         </property>
         <item>
-         <layout class="QGridLayout" name="searchGrid" rowstretch="0,0,0,0,0,0" columnstretch="0,0,0,0,0,0,0,0">
+         <layout class="QGridLayout" name="searchGrid" rowstretch="0,0,0,0,0,0,0" columnstretch="0,0,0,0,0,0,0,0">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
@@ -168,19 +168,13 @@
           <property name="verticalSpacing">
            <number>10</number>
           </property>
-          <item row="0" column="6">
-           <widget class="QToolButton" name="startDatePicker">
-            <property name="maximumSize">
-             <size>
-              <width>25</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a date from the calender.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>...</string>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="Instrument">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
            </widget>
           </item>
@@ -199,6 +193,22 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="6">
+           <widget class="QToolButton" name="startDatePicker">
+            <property name="maximumSize">
+             <size>
+              <width>25</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a date from the calender.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
           </item>
           <item row="3" column="2" alignment="Qt::AlignHCenter">
            <widget class="QLabel" name="InvestigatorSurname_err">
@@ -321,13 +331,16 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="Instrument">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="4" column="0">
+           <widget class="QLabel" name="advDatafileLbl">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Datafile name:</string>
             </property>
            </widget>
           </item>
@@ -462,7 +475,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="5" colspan="2">
+          <item row="6" column="5" colspan="2">
            <layout class="QHBoxLayout" name="searchBtnGrid">
             <property name="spacing">
              <number>8</number>
@@ -536,7 +549,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
+          <item row="6" column="0">
            <widget class="QCheckBox" name="advSearchCbox">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to view additional search options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -556,7 +569,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="6" column="1">
            <widget class="QCheckBox" name="myDataCbox">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to search through the investigations of which you are an investigator.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -573,19 +586,6 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="advDatafileLbl">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Datafile name:</string>
             </property>
            </widget>
           </item>
@@ -626,6 +626,36 @@
            <widget class="QLineEdit" name="SampleName">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the sample in an investigation to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="InvestigationIdLbl">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Investigation id:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="InvestigationId">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The investigation id of the datafile to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QLabel" name="InvestigationId_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
             </property>
            </widget>
           </item>
