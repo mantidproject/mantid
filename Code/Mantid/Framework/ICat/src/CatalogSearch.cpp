@@ -49,6 +49,7 @@ namespace Mantid
       declareProperty("StartDate","", isDate, "The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
       declareProperty("EndDate","", isDate, "The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
       declareProperty("Keywords","","An option to search investigations data");
+      declareProperty("InvestigationId","","The ID of the investigation.");
       declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
       declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
       declareProperty("DataFileName","", "The name of the data file to search.");
@@ -102,6 +103,7 @@ namespace Mantid
       params.setStartDate(params.getTimevalue(getPropertyValue("StartDate")));
       params.setEndDate(params.getTimevalue(getPropertyValue("EndDate")));
       params.setKeywords(getPropertyValue("Keywords"));
+      params.setInvestigationId(getPropertyValue("InvestigationId"));
       params.setInvestigationName(getPropertyValue("InvestigationName"));
       params.setInvestigatorSurName(getPropertyValue("InvestigatorSurname"));
       params.setSampleName(getPropertyValue("SampleName"));

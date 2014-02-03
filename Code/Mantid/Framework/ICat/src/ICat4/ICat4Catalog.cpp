@@ -149,6 +149,12 @@ namespace Mantid
         whereClause.push_back("inves.title LIKE '%" + inputs.getInvestigationName() + "%'");
       }
 
+      // Investigation id
+      if(!inputs.getInvestigationId().empty())
+      {
+        whereClause.push_back("inves.name = '" + inputs.getInvestigationId() + "'");
+      }
+
       // Investigation type
       if(!inputs.getInvestigationType().empty())
       {
