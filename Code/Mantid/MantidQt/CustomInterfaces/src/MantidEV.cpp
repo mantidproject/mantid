@@ -337,8 +337,8 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
 
-   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(toggled(bool)),
-                     this, SLOT( setEnabledPredictPeaksParams_slot(bool) ) );
+   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked(bool)),
+                     this, SLOT( setEnabledPredictPeaksParams_slot() ) );
 
    QObject::connect( m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadPeaksParams_slot(bool) ) );
@@ -770,58 +770,6 @@ void MantidEV::findPeaks_slot()
      }
    }
 }
-/**
- *  Slot called when the Apply button is pressed on the Find Peaks tab.
- */
-void MantidEV::predictPeaks_slot()
-{
-   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
-   if ( peaks_ws_name.length() == 0 )
-   {
-     errorMessage("Specify a peaks workspace name on the Predict Peaks tab.");
-     return;
-   }
-
-   if ( m_thread_pool->activeThreadCount() >= 1 )
-   {
-     errorMessage("Previous operation still running, please wait until it is finished");
-     return;
-   }
-
-   bool predict_new_peaks     = m_uiForm.PredictPeaks_ckbx->isChecked();
-
-   if ( predict_new_peaks )
-   {
-	 double min_pred_wl       =          0.4;
-	 double max_pred_wl       =          3.5;
-	 double min_pred_dspacing =          0.4;
-	 double max_pred_dspacing =          8.5;
-
-     if ( !getPositiveDouble( m_uiForm.min_pred_wl_ledt, min_pred_wl ) )
-       return;
-
-     if ( !getPositiveDouble( m_uiForm.max_pred_wl_ledt, max_pred_wl ) )
-       return;
-
-     if ( !getPositiveDouble( m_uiForm.min_pred_dspacing_ledt, min_pred_dspacing ) )
-       return;
-
-     if ( !getPositiveDouble( m_uiForm.max_pred_dspacing_ledt, max_pred_dspacing ) )
-       return;
-
-     RunPredictPeaks* runner = new RunPredictPeaks( worker,
-                                         peaks_ws_name,
-                                         min_pred_wl,
-                                         max_pred_wl,
-                                         min_pred_dspacing,
-                                         max_pred_dspacing );
-
-     bool running = m_thread_pool->tryStart( runner );
-     if ( !running )
-       errorMessage( "Failed to start predictPeaks thread...previous operation not complete" );
-   }
-}
-
 
 /**
  *  Slot called when the Browse button for loading peaks from a peaks file
@@ -976,6 +924,39 @@ void MantidEV::findUB_slot()
        errorMessage("Failed to Index Peaks with the Existing UB Matrix");
      }
    }
+   bool predict_new_peaks     = m_uiForm.PredictPeaks_ckbx->isChecked();
+
+   if ( predict_new_peaks )
+   {
+	 double min_pred_wl       =          0.4;
+	 double max_pred_wl       =          3.5;
+	 double min_pred_dspacing =          0.4;
+	 double max_pred_dspacing =          8.5;
+
+     if ( !getPositiveDouble( m_uiForm.min_pred_wl_ledt, min_pred_wl ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.max_pred_wl_ledt, max_pred_wl ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.min_pred_dspacing_ledt, min_pred_dspacing ) )
+       return;
+
+     if ( !getPositiveDouble( m_uiForm.max_pred_dspacing_ledt, max_pred_dspacing ) )
+       return;
+
+     RunPredictPeaks* runner = new RunPredictPeaks( worker,
+                                         peaks_ws_name,
+                                         min_pred_wl,
+                                         max_pred_wl,
+                                         min_pred_dspacing,
+                                         max_pred_dspacing );
+
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start predictPeaks thread...previous operation not complete" );
+   }
+
 }
 
 
