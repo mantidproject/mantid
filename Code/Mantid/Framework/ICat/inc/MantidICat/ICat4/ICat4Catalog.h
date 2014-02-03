@@ -65,7 +65,8 @@ namespace Mantid
         /// Get the url(s) based on the fileID.
         virtual void getDownloadURL(const long long& fileID,std::string & url);
         /// get URL of where to PUT (publish) files.
-        virtual const std::string getUploadURL(const std::string &investigationID, const std::string &createFileName);
+        virtual const std::string getUploadURL(
+            const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
         /// Keep current session alive
         virtual void keepAlive();
         /// Keep alive in minutes

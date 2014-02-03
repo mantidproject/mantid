@@ -548,6 +548,7 @@ namespace Mantid
       outputws->addColumn("long64","Id");
       outputws->addColumn("long64","File size(bytes)");
       outputws->addColumn("str","File size");
+      outputws->addColumn("str","Description");
 
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
@@ -570,6 +571,8 @@ namespace Mantid
 
             std::string fileSize = bytesToString(*datafile->fileSize);
             savetoTableWorkspace(&fileSize, table);
+
+            if (datafile->description) savetoTableWorkspace(datafile->description, table);
           }
           catch(std::runtime_error&)
           {
@@ -736,9 +739,11 @@ namespace Mantid
      * Get the URL where the datafiles will be uploaded to.
      * @param investigationID :: The investigation used to obtain the related dataset ID.
      * @param createFileName  :: The name to give to the file being saved.
+     * @param dataFileDescription :: The description of the data file being saved.
      * @return URL to PUT datafiles to.
      */
-    const std::string ICat4Catalog::getUploadURL(const std::string &investigationID, const std::string &createFileName)
+    const std::string ICat4Catalog::getUploadURL(
+        const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription)
     {
       // Obtain the URL from the Facilities.xml file.
       std::string url = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
@@ -749,9 +754,10 @@ namespace Mantid
       if (sessionID.empty()) throw std::runtime_error("You are not currently logged into the cataloging system.");
       std::string name      = "&name="      + createFileName;
       std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetId(investigationID));
+      std::string description = "&description=" + dataFileDescription;
 
       // Add pieces of URL together.
-      url += ("put?" + session + name + datasetId + "&datafileFormatId=1");
+      url += ("put?" + session + name + datasetId + description + "&datafileFormatId=1");
       g_log.debug() << "ICat4Catalog::getUploadURL url is: " << url << std::endl;
       return url;
     }
