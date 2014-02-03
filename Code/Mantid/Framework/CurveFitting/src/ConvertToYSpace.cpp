@@ -1,5 +1,12 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+The final unit of the x-axis is changed to momentum (Y) space as defined by
+<center><math>Y = 0.2393\frac{M}{\epsilon_i^{0.1}}(\omega - \frac{q^2}{2M})</math></center>
+where <math>M</math> is the mass in atomic mass units, <math>\displaystyle\epsilon</math> is the incident energy, <math>\displaystyle\omega</math> 
+is the energy change and <math>q</math> is defined as
+<math>\sqrt{(k_0^2 + k_1^2 - 2k_0k_1\cos(\theta))}</math>. 
+
+The TOF is used to calculate <math>\displaystyle\epsilon_i</math> and the <math>\displaystyle1/\epsilon</math> dependence causes an increasing set of TOF values to be mapped 
+to a decreasing set of <math>\displaystyle Y</math> values. As a result the final <math>Y</math>-space values are reversed to give a workspace with monotonically increasing <math>Y</math> values.
 *WIKI*/
 
 #include "MantidCurveFitting/ConvertToYSpace.h"

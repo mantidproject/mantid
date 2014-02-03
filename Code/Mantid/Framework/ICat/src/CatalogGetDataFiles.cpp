@@ -6,8 +6,7 @@ This algorithm retrieves the files associated to selected investigation from the
 
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 namespace Mantid
@@ -26,10 +25,8 @@ namespace Mantid
     /// Initialising the algorithm
     void CatalogGetDataFiles::init()
     {
-      auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int64_t>>();
-      mustBePositive->setLower(0);
-      declareProperty<int64_t>("InvestigationId",-1,mustBePositive,"ID of the selected investigation");
-
+      declareProperty("InvestigationId","",boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
+          "ID of the selected investigation");
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace to store the data file search details");
     }
@@ -37,9 +34,8 @@ namespace Mantid
     //execute the algorithm
     void CatalogGetDataFiles::exec()
     {
-      int64_t investigationId  = getProperty("InvestigationId");
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      CatalogAlgorithmHelper().createCatalog()->getDataFiles(investigationId,workspace);
+      CatalogAlgorithmHelper().createCatalog()->getDataFiles(getProperty("InvestigationId"),workspace);
       setProperty("OutputWorkspace",workspace);
     }
 

@@ -44,10 +44,15 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_buttonProcess_clicked(self):
         self.process()
     def on_comboInstrument_activated(self, instrument):
-        config['default.instrument'] = self.instrumentList[instrument]
+        config['default.instrument'] = self.instrument_list[instrument]
         print "Instrument is now: ", config['default.instrument']
         self.textRB.clear()
         self.populateList()
+        self.current_instrument = self.instrument_list[instrument]
+        self.comboPolarCorrect.setEnabled(self.current_instrument  in self.polarisation_instruments) # Enable as appropriate
+        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None
+            
+            
     def on_actionOpen_Table_triggered(self):
         self.loadTable()
     def on_actionReload_from_Disk_triggered(self):
@@ -65,30 +70,60 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_tableMain_modified(self):
         if not self.loading:
             self.windowRefl.modFlag = True
-
+            
+    '''
+    Event handler for polarisation correction selection.
+    '''
+    def on_comboPolarCorr_activated(self):
+        if self.current_instrument in self.polarisation_instruments:
+            chosen_method = self.comboPolarCorrect.currentText()
+            self.current_polarisation_method = self.polarisation_options[chosen_method]
+        else:
+            logger.notice("Polarisation correction is not supported on " + self.current_instrument)
+        
     #Further UI setup
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
         self.loading = False
-        self.instrumentList = ['INTER', 'SURF', 'CRISP', 'POLREF']
-        for inst in self.instrumentList:
-            self.comboInstrument.addItem(inst)
+        
+        '''
+        Setup instrument options with defaults assigned.
+        '''
+        self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
+        self.polarisation_instruments = ['CRISP', 'POLREF'] 
+        self.comboInstrument.addItems(self.instrument_list)
+        current_instrument = config['default.instrument'].upper()
+        if current_instrument in self.instrument_list:
+            self.comboInstrument.setCurrentIndex(self.instrument_list.index(current_instrument))
+        else:
+            self.comboInstrument.setCurrentIndex(0)
+            config['default.instrument'] = 'INTER'
+        self.current_instrument = config['default.instrument']
+        
+        '''
+        Setup polarisation options with default assigned
+        '''
+        self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
+        self.comboPolarCorrect.clear()
+        self.comboPolarCorrect.addItems(self.polarisation_options.keys())
+        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None'))
+        self.current_polarisation_method = self.polarisation_options['None']
+        self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments)
+        
         self.labelStatus = QtGui.QLabel("Ready")
         self.statusMain.addWidget(self.labelStatus)
         self.initTable()
         self.populateList()
         self.windowRefl = windowRefl
         self.connectSlots()
+        
     def initTable(self):
+
         self.currentTable = None
         self.accMethod = None
+
         self.tableMain.resizeColumnsToContents()
-        currentInstrument = config['default.instrument'].upper()
-        if currentInstrument in self.instrumentList:
-            self.comboInstrument.setCurrentIndex(self.instrumentList.index(currentInstrument))
-        else:
-            self.comboInstrument.setCurrentIndex(0)
-            config['default.instrument'] = 'INTER'
+        
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
                 
@@ -122,6 +157,7 @@ class ReflGui(refl_window.Ui_windowRefl):
     def connectSlots(self):
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
+        self.comboPolarCorrect.activated.connect(self.on_comboPolarCorr_activated)
         self.textRB.returnPressed.connect(self.on_textRB_editingFinished)
         self.buttonAuto.clicked.connect(self.on_buttonAuto_clicked)
         self.buttonSearch.clicked.connect(self.on_textRB_editingFinished)
@@ -194,6 +230,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                         item.setText(txt)
                         self.tableMain.setItem(row, self.tableMain.column(cell), item)
                         row = row + 1
+
                         filled = filled + 1
                 if not filled:
                     QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
@@ -201,6 +238,18 @@ class ReflGui(refl_window.Ui_windowRefl):
                 QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
         else:
             QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
+
+    '''
+    Create a display name from a workspace.
+    '''
+    def create_workspace_display_name(self, candidate):
+        if isinstance(mtd[candidate], WorkspaceGroup):
+            todisplay = candidate # No single run number for a group of workspaces.
+        else:
+            todisplay = groupGet(mtd[candidate], "samp", "run_number")
+        return todisplay
+
+
     def transfer(self):
         col = 0
         row = 0
@@ -211,7 +260,7 @@ class ReflGui(refl_window.Ui_windowRefl):
             first_contents = contents.split(':')[0]
             runnumber = None
             if mtd.doesExist(first_contents):
-                runnumber = groupGet(mtd[first_contents], "samp", "run_number")
+                runnumber = self.create_workspace_display_name(first_contents)
             else:
                 try:
                     temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
@@ -287,6 +336,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     print len(runno), "runs: ", runno
                     # Determine resolution
                     if (self.tableMain.item(row, 15).text() == ''):
+
                         loadedRun = None
                         if load_live_runs.is_live_run(runno[0]):
                             if not self.accMethod:
@@ -296,20 +346,28 @@ class ReflGui(refl_window.Ui_windowRefl):
                         else:
                             Load(Filename=run, outputWorkspace="run")
                             loadedRun = mtd["run"]
-                        dqq = calcRes(loadedRun)
-                        item = QtGui.QTableWidgetItem()
-                        item.setText(str(dqq))
-                        self.tableMain.setItem(row, 15, item)
-                        print "Calculated resolution: ", dqq
+                            
+                        try:
+                            dqq = calcRes(runno[0])
+                            item = QtGui.QTableWidgetItem()
+                            item.setText(str(dqq))
+                            self.tableMain.setItem(row, 15, item)
+                            print "Calculated resolution: ", dqq
+                        except IndexError:
+                            logger.warning("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
+                              
                     else:
                         dqq = float(self.tableMain.item(row, 15).text())
                     # Populate runlist
+                    first_wq = None
                     for i in range(len(runno)):
-                        [theta, qmin, qmax] = self.dorun(runno[i], row, i)
+                        theta, qmin, qmax, wlam, wq = self.dorun(runno[i], row, i)
+                        if not first_wq:
+                            first_wq = wq # Cache the first Q workspace
                         theta = round(theta, 3)
                         qmin = round(qmin, 3)
                         qmax = round(qmax, 3)
-                        wksp.append(runno[i] + '_IvsQ')
+                        wksp.append(wq.name())
                         if (self.tableMain.item(row, i * 5 + 1).text() == ''):
                             item = QtGui.QTableWidgetItem()
                             item.setText(str(theta))
@@ -334,7 +392,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                                 l2 = subs.split(':')
                                 for l3 in l2:
                                     runlist.append(l3)
-                            wksp[i] = runlist[0] + '_IvsQ'
+                            wksp[i] = first_wq.name()
+                                
                         ws_name_binned = wksp[i] + '_binned'
                         ws = getWorkspace(wksp[i])
                         w1 = getWorkspace(wksp[0])
@@ -398,18 +457,20 @@ class ReflGui(refl_window.Ui_windowRefl):
             if not self.accMethod:
                 self.accMethod = self.getAccMethod()
             loadedRun = load_live_runs.get_live_data(InstrumentName = config['default.instrument'], Accumulation = self.accMethod)
-        [wlam, wq, th] = quick(loadedRun, trans=transrun, theta=angle)
+        wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
+
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-        ws_name = str(runno) + '_IvsQ'
-        inst = groupGet(ws_name, 'inst')
+      
+        inst = groupGet(wq, 'inst')
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
         lmax = inst.getNumberParameter('LambdaMax')[0] - 2
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
-        return th, qmin, qmax
+        return th, qmin, qmax, wlam, wq
+    
     def saveTable(self, filename):
         try:
             writer = csv.writer(open(filename, "wb"))
@@ -419,7 +480,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     rowtext.append(self.tableMain.item(row, column).text())
                 if (len(rowtext) > 0):
                     writer.writerow(rowtext)
-            self.currentTable = filename
+            self.current_table = filename
             print "Saved file to " + filename
             self.windowRefl.modFlag = False
         except:
@@ -440,8 +501,8 @@ class ReflGui(refl_window.Ui_windowRefl):
             msgBox.exec_()
             import datetime
             failtime = datetime.datetime.today().strftime('%Y-%m-%d_%H-%M-%S')
-            if self.currentTable:
-                filename = self.currentTable.rsplit('.',1)[0] + "_recovered_" + failtime + ".tbl"
+            if self.current_table:
+                filename = self.current_table.rsplit('.',1)[0] + "_recovered_" + failtime + ".tbl"
             else:
                 mantidDefault = config['defaultsave.directory']
                 if os.path.exists(mantidDefault):
@@ -452,8 +513,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                     filename = os.path.join(tempDir,"mantid_reflectometry_recovered_" + failtime + ".tbl")
         else:
             #this is a save-on-quit or file->save
-            if self.currentTable:
-                filename = self.currentTable
+            if self.current_table:
+                filename = self.current_table
             else:
                 saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
                 saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
@@ -482,7 +543,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         if loadDialog.exec_():
             try:
                 filename = loadDialog.selectedFiles()[0]
-                self.currentTable = filename
+                self.current_table = filename
                 reader = csv.reader(open(filename, "rb"))
                 row = 0
                 for line in reader:
@@ -498,7 +559,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.windowRefl.modFlag = False
     def reloadTable(self):
         self.loading = True
-        filename = self.currentTable
+        filename = self.current_table
         if filename:
             try:
                 reader = csv.reader(open(filename, "rb"))
@@ -530,16 +591,28 @@ class ReflGui(refl_window.Ui_windowRefl):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
-def calcRes(run):
-    runno = None
-    if not type(run) == type(Workspace):
-        runno = '_' + str(run) + 'temp'
-        if type(run) == type(int()):
-            Load(Filename=run, OutputWorkspace=runno)
-        else:
-            Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+        
+'''
+Get a representative workspace from the input workspace.
+'''        
+def get_representative_workspace(run):
+    if type(run) == type(int()):
+        _runno =Load(Filename=run, OutputWorkspace=runno)
+    elif mtd.doesExist(run): 
+        ws = mtd[run]
+        if isinstance(ws, WorkspaceGroup):
+            run_number = groupGet(ws[0], "samp", "run_number")
+            _runno =Load(Filename=str(run_number))
     else:
-        runno = str(run)
+        _runno = Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+    return _runno
+
+'''
+Calculate the resolution from the slits.
+'''
+def calcRes(run):
+    
+    runno = get_representative_workspace(run)
     # Get slits and detector angle theta from NeXuS
     theta = groupGet(runno, 'samp', 'THETA')
     inst = groupGet(runno, 'inst')
@@ -560,6 +633,7 @@ def calcRes(run):
     if not type(run) == type(Workspace):
         DeleteWorkspace(runno)
     return resolution
+
 def groupGet(wksp, whattoget, field=''):
     '''
     returns information about instrument or sample details for a given workspace wksp,
@@ -568,12 +642,12 @@ def groupGet(wksp, whattoget, field=''):
     if (whattoget == 'inst'):
         if isinstance(wksp, str):
             if isinstance(mtd[wksp], WorkspaceGroup):
-                return mtd[wksp + '_1'].getInstrument()
+                return mtd[wksp][0].getInstrument()
             else:
                 return mtd[wksp].getInstrument()
         elif isinstance(wksp, Workspace):
             if isinstance(wksp, WorkspaceGroup):
-                return mtd[wksp + '_1'].getInstrument()
+                return wksp[0].getInstrument()
             else:
                 return wksp.getInstrument()
         else:
@@ -582,7 +656,7 @@ def groupGet(wksp, whattoget, field=''):
         if isinstance(wksp, str):
             if isinstance(mtd[wksp], WorkspaceGroup):
                 try:
-                    log = mtd[wksp + '_1'].getRun().getLogData(field).value
+                    log = mtd[wksp][0].getRun().getLogData(field).value
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
@@ -603,7 +677,7 @@ def groupGet(wksp, whattoget, field=''):
         elif isinstance(wksp, Workspace):
             if isinstance(wksp, WorkspaceGroup):
                 try:
-                    log = mtd[wksp + '_1'].getRun().getLogData(field).value
+                    log = mtd[wksp][0].getRun().getLogData(field).value
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
@@ -627,12 +701,12 @@ def groupGet(wksp, whattoget, field=''):
     elif (whattoget == 'wksp'):
         if isinstance(wksp, str):
             if isinstance(mtd[wksp], WorkspaceGroup):
-                return mtd[wksp + '_1'].getNumberHistograms()
+                return mtd[wksp][0].getNumberHistograms()
             else:
                 return mtd[wksp].getNumberHistograms()
         elif isinstance(wksp, Workspace):
             if isinstance(wksp, WorkspaceGroup):
-                return mtd[wksp + '_1'].getNumberHistograms()
+                return mtd[wksp][0].getNumberHistograms()
             else:
                 return wksp.getNumberHistograms()
         else:
@@ -642,7 +716,7 @@ def getWorkspace(wksp):
         return wksp
     elif isinstance(wksp, str):
         if isinstance(mtd[wksp], WorkspaceGroup):
-            wout = mtd[wksp + '_1']
+            wout = mtd[wksp][0]
         else:
             wout = mtd[wksp]
         return wout

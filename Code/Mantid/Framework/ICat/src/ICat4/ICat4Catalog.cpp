@@ -149,6 +149,12 @@ namespace Mantid
         whereClause.push_back("inves.title LIKE '%" + inputs.getInvestigationName() + "%'");
       }
 
+      // Investigation id
+      if(!inputs.getInvestigationId().empty())
+      {
+        whereClause.push_back("inves.name = '" + inputs.getInvestigationId() + "'");
+      }
+
       // Investigation type
       if(!inputs.getInvestigationType().empty())
       {
@@ -365,7 +371,7 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
-      outputws->addColumn("long64","Investigation id");
+      outputws->addColumn("str","Investigation id");
       outputws->addColumn("str","Title");
       outputws->addColumn("str","Instrument");
       outputws->addColumn("str","Run range");
@@ -388,7 +394,7 @@ namespace Mantid
             std::string emptyCell("");
 
             // Now add the relevant investigation data to the table (They always exist).
-            savetoTableWorkspace(investigation->id, table);
+            savetoTableWorkspace(investigation->name, table);
             savetoTableWorkspace(investigation->title, table);
             savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
 
@@ -437,7 +443,7 @@ namespace Mantid
      * @param investigationId :: unique identifier of the investigation
      * @param outputws        :: shared pointer to datasets
      */
-    void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
+    void ICat4Catalog::getDataSets(const std::string& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -448,7 +454,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + boost::lexical_cast<std::string>(investigationId) + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
       g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
@@ -506,7 +512,7 @@ namespace Mantid
      * @param investigationId  :: unique identifier of the investigation
      * @param outputws         :: shared pointer to datasets
      */
-    void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
+    void ICat4Catalog::getDataFiles(const std::string& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -517,7 +523,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[id = '" + boost::lexical_cast<std::string>(investigationId) + "']";
+      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
       g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
@@ -548,6 +554,7 @@ namespace Mantid
       outputws->addColumn("long64","Id");
       outputws->addColumn("long64","File size(bytes)");
       outputws->addColumn("str","File size");
+      outputws->addColumn("str","Description");
 
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
@@ -570,6 +577,8 @@ namespace Mantid
 
             std::string fileSize = bytesToString(*datafile->fileSize);
             savetoTableWorkspace(&fileSize, table);
+
+            if (datafile->description) savetoTableWorkspace(datafile->description, table);
           }
           catch(std::runtime_error&)
           {
@@ -736,9 +745,11 @@ namespace Mantid
      * Get the URL where the datafiles will be uploaded to.
      * @param investigationID :: The investigation used to obtain the related dataset ID.
      * @param createFileName  :: The name to give to the file being saved.
+     * @param dataFileDescription :: The description of the data file being saved.
      * @return URL to PUT datafiles to.
      */
-    const std::string ICat4Catalog::getUploadURL(const std::string &investigationID, const std::string &createFileName)
+    const std::string ICat4Catalog::getUploadURL(
+        const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription)
     {
       // Obtain the URL from the Facilities.xml file.
       std::string url = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
@@ -749,9 +760,10 @@ namespace Mantid
       if (sessionID.empty()) throw std::runtime_error("You are not currently logged into the cataloging system.");
       std::string name      = "&name="      + createFileName;
       std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetId(investigationID));
+      std::string description = "&description=" + dataFileDescription;
 
       // Add pieces of URL together.
-      url += ("put?" + session + name + datasetId + "&datafileFormatId=1");
+      url += ("put?" + session + name + datasetId + description + "&datafileFormatId=1");
       g_log.debug() << "ICat4Catalog::getUploadURL url is: " << url << std::endl;
       return url;
     }
@@ -773,7 +785,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Dataset <-> Investigation[id = '" + investigationID + "']";
+      std::string query = "Dataset <-> Investigation[name = '" + investigationID + "']";
       request.query     = &query;
 
       g_log.debug() << "ICat4Catalog::getDatasetIdFromFileName -> { " << query << " }" << std::endl;

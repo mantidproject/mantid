@@ -461,6 +461,7 @@ public slots:
   //! \name Graphs
   //@{
   void setPreferences(Graph* g);
+  void setSpectrogramTickStyle(Graph* g);
   void setGraphDefaultSettings(bool autoscale,bool scaleFonts,bool resizeLayers,bool antialiasing, bool fixedAspectRatio);
   void setLegendDefaultSettings(int frame, const QFont& font,
     const QColor& textCol, const QColor& backgroundCol);

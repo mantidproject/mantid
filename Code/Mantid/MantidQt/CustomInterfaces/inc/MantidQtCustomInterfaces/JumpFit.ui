@@ -61,6 +61,16 @@
          <string>Singwi-Sjolander</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Fick Diffusion</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Teixeira Water</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item row="1" column="2">

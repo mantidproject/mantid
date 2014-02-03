@@ -35,9 +35,10 @@ namespace Muon
   using namespace MantidQt::API;
   using namespace MantidQt::MantidWidgets;
 
-  const std::string MuonAnalysisResultTableTab::RUN_NO_LOG("run_number");
-  const std::string MuonAnalysisResultTableTab::RUN_NO_TITLE("Run Number");
   const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
+
+  const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS = \
+      QStringList() << "run_number" << "sample_temp" << "sample_magn_field";
 
 /**
 * Constructor
@@ -363,7 +364,7 @@ void MuonAnalysisResultTableTab::populateTables()
     selectAllFittings(true);
 
     // If we have Run Number log value, we want to select it by default.
-    auto found = m_uiForm.valueTable->findItems(RUN_NO_TITLE.c_str(), Qt::MatchFixedString);
+    auto found = m_uiForm.valueTable->findItems("run_number", Qt::MatchFixedString);
     if ( ! found.empty() )
     {
       int r = found[0]->row();
@@ -388,15 +389,12 @@ void MuonAnalysisResultTableTab::populateTables()
 */
 void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fittedWsList)
 {
-  // Clear the logs if not empty and then repopulate.
-  QStringList logsToDisplay;
-  
-  // Add run number explicitly as it is the only non-timeseries log value we are using 
-  logsToDisplay.push_back(RUN_NO_TITLE.c_str());
+  // A set of all the logs we've met in the workspaces
+  QSet<QString> allLogs;
 
   for (int i=0; i<fittedWsList.size(); i++)
   { 
-    QMap<QString, QVariant> allLogs;
+    QMap<QString, QVariant> wsLogValues;
 
     // Get log information
     Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(
@@ -406,32 +404,21 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
       throw std::runtime_error("Wrong type of Workspace");
     }
 
-    const std::vector< Mantid::Kernel::Property * > & logData = ws->run().getLogData();
-    std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
-
-    // Try to get a run number for the workspace
-    if (ws->run().hasProperty(RUN_NO_LOG))
-    {
-      // Set run number as a string, as we don't want it to be formatted like double.
-      allLogs[RUN_NO_TITLE.c_str()] = QString(ws->run().getLogData(RUN_NO_LOG)->value().c_str());
-    }
-
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
 
-    for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
-          pItr != pEnd; ++pItr )
+    const std::vector<Property*> & logData = ws->run().getLogData();
+    std::vector<Property*>::const_iterator pEnd = logData.end();
+
+    for( std::vector<Property*>::const_iterator pItr = logData.begin(); pItr != pEnd; ++pItr )
     {  
-
-      QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
-      // Just get the num.series log values
-      Mantid::Kernel::TimeSeriesProperty<double> *tspd = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr);
-
-      if( tspd )//If it is then it must be num.series
+      // Check if is a timeseries log
+      if( TimeSeriesProperty<double> *tspd = dynamic_cast<TimeSeriesProperty<double>*>(*pItr) )
       {
-        bool logFound(false);
+        QString logFile(QFileInfo((**pItr).name().c_str()).fileName());
+
         double value(0.0);
-        double count(0.0);
+        int count(0);
 
         Mantid::Kernel::DateAndTime logTime;
 
@@ -447,82 +434,84 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
             // add it to a total and increment the count (will be used to make average entry value during a run)
             value += tspd->nthValue(k);
             count++;
-            logFound = true;
           }
         }
 
-        if (logFound == true)
+        if ( count != 0 )
         {
           //Find average
-          allLogs[logFile] = value/count;
-          if (i == 0)
-            logsToDisplay.push_back(logFile);
+          wsLogValues[logFile] = value / count;
+        }
+      }
+      else // Should be a non-timeseries one
+      {
+        QString logName = QString::fromStdString( (**pItr).name() );
+
+        // Check if we should display it
+        if ( NON_TIMESERIES_LOGS.contains(logName) )
+        {
+          QVariant value;
+
+          if ( auto stringProp = dynamic_cast<PropertyWithValue<std::string>*>(*pItr) )
+          {
+            value = QString::fromStdString( (*stringProp)() );
+          }
+          else if ( auto doubleProp = dynamic_cast<PropertyWithValue<double>*>(*pItr) )
+          {
+            value = (*doubleProp)();
+          }
           else
           {
-            bool reg(true);
-            for(int j=0; j<logsToDisplay.size(); ++j)
-            {
-              //if log file already registered then don't register it again.
-              if (logsToDisplay[j] == logFile)
-              {
-                reg = false;
-                break;
-              }
-            }
-            if (reg==true)
-              logsToDisplay.push_back(logFile);
+            throw std::runtime_error("Unsupported non-timeseries log type");
           }
+
+          wsLogValues[logName] = value;
         }
       }
     }
 
+    // Append log names found in the workspace to the list of all known log names
+    allLogs += wsLogValues.keys().toSet();
+
     // Add all data collected from one workspace to another map. Will be used when creating table.
-    m_logValues[fittedWsList[i]] = allLogs;
+    m_logValues[fittedWsList[i]] = wsLogValues;
 
   } // End loop over all workspace's log information and param information
 
   // Remove the logs that don't appear in all workspaces
-  QVector<int> toRemove;
-  for(int i=0; i<logsToDisplay.size(); ++i)
+  QSet<QString> toRemove;
+  for ( auto logIt = allLogs.constBegin(); logIt != allLogs.constEnd(); ++logIt )
   {
-    for (auto itr = m_logValues.begin(); itr != m_logValues.end(); itr++)
+    for ( auto wsIt = m_logValues.constBegin(); wsIt != m_logValues.constEnd(); ++wsIt )
     { 
-      auto wsLogValues = itr.value();
-      if (!wsLogValues.contains(logsToDisplay[i]))
+      auto wsLogValues = wsIt.value();
+      if ( ! wsLogValues.contains(*logIt) )
       {      
-        toRemove.push_back(i);
+        toRemove.insert(*logIt);
         break;
       }
     }      
   }
 
-  for(int i=0; i<toRemove.size(); ++i)
-  {
-    logsToDisplay.removeAt(toRemove[i]-i);
-  }
+  allLogs = allLogs.subtract(toRemove);
+
+  // Sort logs
+  QList<QString> allLogsSorted(allLogs.toList());
+  qSort(allLogsSorted.begin(), allLogsSorted.end(), MuonAnalysisResultTableTab::logNameLessThan);
   
   // Add number of rows to the table based on number of logs to display.
-  m_uiForm.valueTable->setRowCount(logsToDisplay.size());
+  m_uiForm.valueTable->setRowCount(allLogsSorted.size());
 
-  // If there isn't enough rows in the table to populate all logs then display error message
-  if(logsToDisplay.size() > m_uiForm.valueTable->rowCount())
+  // Populate table with all log values available without repeating any.
+  for ( auto it = allLogsSorted.constBegin(); it != allLogsSorted.constEnd(); ++it )
   {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "There is not enough room in the table to populate all fitting parameter results");
-  }
-  else
-  {
-    // Populate table with all log values available without repeating any.
-    for (int row = 0; row < m_uiForm.valueTable->rowCount(); row++)
-    {
-      if (row < logsToDisplay.size())
-        m_uiForm.valueTable->setItem(row,0, new QTableWidgetItem(logsToDisplay[row]));
-      else
-        m_uiForm.valueTable->setItem(row,0, NULL);
-    }
+    int row = static_cast<int>( std::distance(allLogsSorted.constBegin(), it) );
+    m_uiForm.valueTable->setItem(row, 0, new QTableWidgetItem(*it));
   }
 
-  // Save the number of logs displayed so don't have to search through all cells.
-  m_numLogsdisplayed = logsToDisplay.size();
+  // Save the number of logs displayed
+  // XXX: this is redundant, as number of logs == number of rows
+  m_numLogsdisplayed = m_uiForm.valueTable->rowCount();
 
   // Add check boxes for the include column on log table, and make text uneditable.
   for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
@@ -536,6 +525,34 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
   }
 }
 
+/**
+ * LessThan function used to sort log names. Puts non-timeseries logs first and the timeseries ones
+ * sorted by named ignoring the case.
+ * @param logName1
+ * @param logName2
+ * @return True if logName1 is less than logName2, false otherwise
+ */
+bool MuonAnalysisResultTableTab::logNameLessThan(const QString& logName1, const QString& logName2)
+{
+  int index1 = NON_TIMESERIES_LOGS.indexOf(logName1);
+  int index2 = NON_TIMESERIES_LOGS.indexOf(logName2);
+
+  if ( index1 == -1 && index2 == -1 )
+  {
+    // If both are timeseries logs - compare lexicographically ignoring the case
+    return logName1.toLower() < logName2.toLower();
+  }
+  else if ( index1 != -1 && index2 != -1 )
+  {
+    // If both timeseries - keep the order of non-timeseries logs list
+    return index1 < index2;
+  }
+  else
+  {
+    // If one is timeseries and another is not - the one which is not is always less
+    return index1 != -1;
+  }
+}
 
 /**
 * Populates the items (fitted workspaces) into their table.

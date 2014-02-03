@@ -794,6 +794,9 @@ class DirectEnergyConversion(object):
 
         if not (instr_name is None or len(instr_name)==0 or instr_name == '__empty_') : # first time run or empty run
             self.initialise(instr_name)
+        else: # just reinitialize idf parameters to defaults
+            self.init_idf_params(True);
+
 
 #----------------------------------------------------------------------------------
 #              Complex setters/getters
@@ -1054,11 +1057,11 @@ class DirectEnergyConversion(object):
             self.instr_name = self.instrument.getName()
  
 
-    def init_idf_params(self, reload_instrument=False):
+    def init_idf_params(self, reinitialize_parameters=False):
         """
         Initialise some default parameters and add the one from the IDF file
         """
-        if self._idf_values_read == True and reload_instrument == False:
+        if self._idf_values_read == True and reinitialize_parameters == False:
             return
            
         """
@@ -1209,12 +1212,12 @@ class DirectEnergyConversion(object):
                     raise KeyError("Attempt to set unknown parameter: "+par_name)
             # whole composite key is modified by input parameters
             if par_name in self.composite_keys_set :
-               val = getattr(self,par_name) # get default value
+               default_value = getattr(self,par_name) # get default value
                if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requesed explicitly
-                   value = val
-               if type(val) != type(value):
-                   raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(val))+ " with wrong type value: "+str(type(value)))
-               if len(val) != len(value) :
+                   value = default_value
+               if type(default_value) != type(value):
+                   raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(default_value))+ " with wrong type value: "+str(type(value)))
+               if len(default_value) != len(value) :
                     raise KeyError("Attempt to change range property : "+par_name+" with default value: ["+",".join(str(vv) for vv in val)+
                                    "] to wrong length value: ["+",".join(str(vv) for vv in value)+"]\n")
                else:
