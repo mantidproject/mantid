@@ -210,23 +210,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2" alignment="Qt::AlignHCenter">
-           <widget class="QLabel" name="InvestigatorSurname_err">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
-            </property>
-            <property name="text">
-             <string>*</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1" alignment="Qt::AlignVCenter">
-           <widget class="QLineEdit" name="DataFileName">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the datafile to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
            <widget class="QLabel" name="Instrument_err">
             <property name="styleSheet">
@@ -263,19 +246,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="advNameLbl">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Investigators name:</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="4" alignment="Qt::AlignVCenter">
            <widget class="QLabel" name="startDateLbl">
             <property name="font">
@@ -286,19 +256,6 @@
             </property>
             <property name="text">
              <string>Start date:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4">
-           <widget class="QLabel" name="advSampleLbl">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Sample name:</string>
             </property>
            </widget>
           </item>
@@ -331,19 +288,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="advDatafileLbl">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Datafile name:</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="7">
            <widget class="QLabel" name="EndDate_err">
             <property name="styleSheet">
@@ -358,26 +302,6 @@
            <widget class="QLineEdit" name="InvestigationName">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The title (name) of the investigation to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="5">
-           <widget class="QLineEdit" name="EndDate">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Date in DD/MM/YYYY .&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="inputMask">
-             <string>99/99/9999; </string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="InvestigationName_err">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
-            </property>
-            <property name="text">
-             <string>*</string>
             </property>
            </widget>
           </item>
@@ -397,8 +321,18 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="2" alignment="Qt::AlignHCenter">
-           <widget class="QLabel" name="InvestigationAbstract_err">
+          <item row="1" column="5">
+           <widget class="QLineEdit" name="EndDate">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Date in DD/MM/YYYY .&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="inputMask">
+             <string>99/99/9999; </string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="InvestigationName_err">
             <property name="styleSheet">
              <string notr="true">color: rgb(255, 0, 0);</string>
             </property>
@@ -436,29 +370,6 @@
             </property>
             <property name="text">
              <string>*</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="7" alignment="Qt::AlignHCenter">
-           <widget class="QLabel" name="InvestigationType_err">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
-            </property>
-            <property name="text">
-             <string>*</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="4">
-           <widget class="QLabel" name="advTypeLbl">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Investigation type:</string>
             </property>
            </widget>
           </item>
@@ -579,16 +490,6 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="5" colspan="2">
-           <widget class="QComboBox" name="InvestigationType">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="5">
            <widget class="QLineEdit" name="StartDate">
             <property name="toolTip">
@@ -605,14 +506,60 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="InvestigatorSurname">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name (forename, surname, or both) of the investigator of an investigation. This is case insensitive.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <item row="5" column="4">
+           <widget class="QLabel" name="advTypeLbl">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Investigation type:</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="7">
+          <item row="4" column="4">
+           <widget class="QLabel" name="advSampleLbl">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Sample name:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="5" colspan="2">
+           <widget class="QLineEdit" name="SampleName">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the sample in an investigation to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="5" colspan="2">
+           <widget class="QComboBox" name="InvestigationType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="7">
+           <widget class="QLabel" name="InvestigationType_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="7">
            <widget class="QLabel" name="SampleName_err">
             <property name="styleSheet">
              <string notr="true">color: rgb(255, 0, 0);</string>
@@ -622,14 +569,60 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="5" colspan="2">
-           <widget class="QLineEdit" name="SampleName">
+          <item row="5" column="2">
+           <widget class="QLabel" name="InvestigationAbstract_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLabel" name="InvestigatorSurname_err">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="DataFileName">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the sample in an investigation to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name of the datafile to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
           <item row="5" column="0">
+           <widget class="QLabel" name="advDatafileLbl">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Datafile name:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="advNameLbl">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Investigators name:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
            <widget class="QLabel" name="InvestigationIdLbl">
             <property name="font">
              <font>
@@ -642,20 +635,27 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="InvestigationId">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The investigation id of the datafile to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
+          <item row="3" column="2">
            <widget class="QLabel" name="InvestigationId_err">
             <property name="styleSheet">
              <string notr="true">color: rgb(255, 0, 0);</string>
             </property>
             <property name="text">
              <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="InvestigatorSurname">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The name (forename, surname, or both) of the investigator of an investigation. This is case insensitive.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="InvestigationId">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The investigation id of the datafile to search for.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -1322,6 +1322,9 @@
  </widget>
  <layoutdefault spacing="6" margin="9"/>
  <tabstops>
+  <tabstop>facilityLogin</tabstop>
+  <tabstop>helpBtn</tabstop>
+  <tabstop>searchCbox</tabstop>
   <tabstop>InvestigationName</tabstop>
   <tabstop>StartDate</tabstop>
   <tabstop>startDatePicker</tabstop>
@@ -1330,6 +1333,7 @@
   <tabstop>endDatePicker</tabstop>
   <tabstop>RunRange</tabstop>
   <tabstop>Keywords</tabstop>
+  <tabstop>InvestigationId</tabstop>
   <tabstop>InvestigatorSurname</tabstop>
   <tabstop>SampleName</tabstop>
   <tabstop>DataFileName</tabstop>
@@ -1340,14 +1344,14 @@
   <tabstop>searchBtn</tabstop>
   <tabstop>searchResultsCbox</tabstop>
   <tabstop>searchResultsTbl</tabstop>
+  <tabstop>resPrevious</tabstop>
+  <tabstop>pageStartNum</tabstop>
+  <tabstop>resNext</tabstop>
   <tabstop>dataFileCbox</tabstop>
   <tabstop>dataFileResultsTbl</tabstop>
   <tabstop>dataFileFilterCombo</tabstop>
   <tabstop>dataFileDownloadBtn</tabstop>
   <tabstop>dataFileLoadBtn</tabstop>
-  <tabstop>searchCbox</tabstop>
-  <tabstop>facilityLogin</tabstop>
-  <tabstop>helpBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>
