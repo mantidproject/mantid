@@ -310,7 +310,7 @@ bool MantidEVWorker::predictPeaks( const std::string & peaks_ws_name,
 {
   try
   {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PredictPeaksMD");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PredictPeaks");
     alg->setProperty("InputWorkspace",peaks_ws_name);
     alg->setProperty("WavelengthMin", min_pred_wl);
     alg->setProperty("WavelengthMax", max_pred_wl);

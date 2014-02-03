@@ -264,7 +264,7 @@ private slots:
 
   /// Slot for the predict peaks tab's Apply button
   void predictPeaks_slot();
-
+  
   /// Slot for choosing a peaks file name
   void getLoadPeaksFileName_slot();
 

@@ -337,7 +337,7 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
 
-   QObject::connect( m_uiForm.PredictPeaks_rbtn, SIGNAL(toggled(bool)),
+   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledPredictPeaksParams_slot(bool) ) );
 
    QObject::connect( m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)),
@@ -438,7 +438,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.UseExistingPeaksWorkspace_rbtn->setChecked(false);
    m_uiForm.LoadIsawPeaks_rbtn->setChecked(false);
    m_uiForm.SelectPeaksFile_ledt->setText("");
-   m_uiForm.PredictPeaks_rbtn->setChecked(true);
+   m_uiForm.PredictPeaks_ckbx->setChecked(false);
    m_uiForm.min_pred_wl_ledt->setText("0.4");
    m_uiForm.max_pred_wl_ledt->setText("3.5");
    m_uiForm.min_pred_dspacing_ledt->setText("0.4");
@@ -788,7 +788,7 @@ void MantidEV::predictPeaks_slot()
      return;
    }
 
-   bool predict_new_peaks     = m_uiForm.PredictPeaks_rbtn->isChecked();
+   bool predict_new_peaks     = m_uiForm.PredictPeaks_ckbx->isChecked();
 
    if ( predict_new_peaks )
    {
@@ -2051,7 +2051,7 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked());
   state->setValue("LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn->isChecked());
   state->setValue("SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt->text());
-  state->setValue("PredictPeaks_rbtn", m_uiForm.PredictPeaks_rbtn->isChecked());
+  state->setValue("PredictPeaks_ckbx", m_uiForm.PredictPeaks_ckbx->isChecked());
   state->setValue("min_pred_wl_ledt", m_uiForm.min_pred_wl_ledt->text());
   state->setValue("max_pred_wl_ledt", m_uiForm.max_pred_wl_ledt->text());
   state->setValue("min_pred_dspacing_ledt", m_uiForm.min_pred_dspacing_ledt->text());
@@ -2161,7 +2161,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn );
   restore( state, "LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn );
   restore( state, "SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt );
-  restore( state, "PredictPeaks_rbtn", m_uiForm.FindPeaks_rbtn );
+  restore( state, "PredictPeaks_ckbx", m_uiForm.PredictPeaks_ckbx );
   restore( state, "min_pred_wl_ledt", m_uiForm.min_pred_wl_ledt );
   restore( state, "max_pred_wl_ledt", m_uiForm.max_pred_wl_ledt );
   restore( state, "min_pred_dspacing_ledt", m_uiForm.min_pred_dspacing_ledt );
