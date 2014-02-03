@@ -728,9 +728,6 @@ namespace MantidQt
       // Add data from the workspace to the results table.
       populateTable(resultsTable, workspace);
 
-      // Hide the "Investigation id" column (It's used by the CatalogGetDataFiles algorithm).
-      resultsTable->setColumnHidden(0, true);
-
       // Show only a portion of the title as they can be quite long.
       resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
 
