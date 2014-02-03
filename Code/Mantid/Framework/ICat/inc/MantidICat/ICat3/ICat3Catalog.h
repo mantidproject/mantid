@@ -53,9 +53,9 @@ namespace Mantid
       /// logged in user's investigations search
       virtual void myData(Mantid::API::ITableWorkspace_sptr& mydataws_sptr);
       /// get datasets
-      virtual void getDataSets(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr);
+      virtual void getDataSets(const std::string&investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr);
       /// get datafiles
-      virtual void getDataFiles(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr);
+      virtual void getDataFiles(const std::string&investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr);
       /// get instruments list
       virtual void listInstruments(std::vector<std::string>& instruments);
       /// get investigationtypes list

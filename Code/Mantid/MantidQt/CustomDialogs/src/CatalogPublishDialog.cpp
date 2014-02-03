@@ -81,7 +81,7 @@ namespace MantidQt
       // Populate the form with investigations that the user can publish to.
       for (size_t row = 0; row < workspace->rowCount(); row++)
       {
-        m_uiForm.investigationNumberCb->addItem(QString::fromStdString(boost::lexical_cast<std::string>(workspace->cell<int64_t>(row, 0))));
+        m_uiForm.investigationNumberCb->addItem(QString::fromStdString(workspace->cell<std::string>(row, 0)));
         // Add better tooltip for ease of use (much easier to recall the investigation if title and instrument are also provided).
         m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
             QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
