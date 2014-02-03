@@ -337,7 +337,7 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
 
-   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked(bool)),
+   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked()),
                      this, SLOT( setEnabledPredictPeaksParams_slot() ) );
 
    QObject::connect( m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)),
@@ -444,7 +444,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.min_pred_dspacing_ledt->setText("0.4");
    m_uiForm.max_pred_dspacing_ledt->setText("8.5");
    setEnabledFindPeaksParams_slot(true);
-   setEnabledPredictPeaksParams_slot(false);
+   setEnabledPredictPeaksParams_slot();
    setEnabledLoadPeaksParams_slot(false);
    last_peaks_file.clear();
                                                     // Find UB tab
@@ -1589,16 +1589,17 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
  *
  * @param on  If true, components will be enabled, if false, disabled.
  */
-void MantidEV::setEnabledPredictPeaksParams_slot( bool on )
+void MantidEV::setEnabledPredictPeaksParams_slot()
 {
-  m_uiForm.min_pred_wl_lbl->setEnabled( on );
-  m_uiForm.min_pred_wl_ledt->setEnabled( on );
-  m_uiForm.max_pred_wl_lbl->setEnabled( on );
-  m_uiForm.max_pred_wl_ledt->setEnabled( on );
-  m_uiForm.min_pred_dspacing_lbl->setEnabled( on );
-  m_uiForm.min_pred_dspacing_ledt->setEnabled( on );
-  m_uiForm.max_pred_dspacing_lbl->setEnabled( on );
-  m_uiForm.max_pred_dspacing_ledt->setEnabled( on );
+  bool enabled = m_uiForm.PredictPeaks_ckbx->isChecked();
+  m_uiForm.min_pred_wl_lbl->setEnabled( enabled );
+  m_uiForm.min_pred_wl_ledt->setEnabled( enabled );
+  m_uiForm.max_pred_wl_lbl->setEnabled( enabled );
+  m_uiForm.max_pred_wl_ledt->setEnabled( enabled );
+  m_uiForm.min_pred_dspacing_lbl->setEnabled( enabled );
+  m_uiForm.min_pred_dspacing_ledt->setEnabled( enabled );
+  m_uiForm.max_pred_dspacing_lbl->setEnabled( enabled );
+  m_uiForm.max_pred_dspacing_ledt->setEnabled( enabled );
 }
 
 /**
