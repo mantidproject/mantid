@@ -42,6 +42,7 @@ set ( EXPORT_FILES
   src/Exports/Memory.cpp
   src/Exports/ProgressBase.cpp
   src/Exports/Material.cpp
+  src/Exports/Statistics.cpp
 )  
 
 set ( SRC_FILES
