@@ -1,6 +1,6 @@
 /*WIKI* 
 
-Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instrument of a group of matrix workspaces with one workspace per bank of the .irf file.
+Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instruments of matrix workspaces with one workspace per bank of the .irf file.
 Either or both of the Tableworkspace(s) and matrix workspace must be set.
 
 Where a Workspace is specified the support for translating Fullprof resolution parameters into the workspace for subsequent
@@ -8,6 +8,8 @@ fitting is limitted to Fullprof:
 
 * NPROF=13, Ikeda-Carpender pseudo-Voigt translated into [[IkedaCarpenterPV]] according to [[CreateIkedaCarpenterParameters]] 
 * NPROF=9, back-to-back-exponential pseudo-Voigt translated into [[BackToBackExponential]] according to [[CreateBackToBackParameters]]
+
+Note for NPROF=9 the translation is currently ignoring the Lorentzian part of the pseudo-Voigt. 
 
 *WIKI*/
 
@@ -71,8 +73,8 @@ namespace DataHandling
     */
   void LoadFullprofResolution::initDocs()
   {
-    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) or the instruments in a group of matrix workspaces");
-    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) or the instruments in a group of matrix workspaces.");
+    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported, see description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
+    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported, see description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
 
     return;
   }
@@ -94,8 +96,8 @@ namespace DataHandling
 
     // Bank to import
     declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load, "
-                    "where ID=1 refers to the first bank (block of number in the .irf file), "
-                    "ID=2 refers to the second bank (block of number in the .irf file) and so on. "
+                    "and this point the ID refers to the Bank label number in the .irf file. Hence, for now please ensure that "
+                    "these label ID are unique. "
                     "Default is all banks contained in input .irf file.");
 
     // Workspace to put parameters into. It must be a workspace group with one workpace per bank from the IRF file
@@ -841,7 +843,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Put the parameters into one workspace
     * @param column :: [input] column of the output table workspace 
-    * @param workspaceOfBank :: [input/output] the group workspace parameters are to be put in
+    * @param ws :: [input/output] the group workspace parameters are to be put in
     * @param nProf :: the PROF Number, which is used to determine fitting function for the parameters.
     */
   void LoadFullprofResolution::putParametersIntoWorkspace( API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nProf)
