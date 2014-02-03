@@ -40,16 +40,10 @@ namespace MDAlgorithms
     
     virtual const std::string name() const;
     virtual int version() const{return 2;}
-    // helper functions
-    static Mantid::Geometry::Instrument_sptr createSphericalInstrument(size_t nDetectors=6);
-    static Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPosisions(const double &L1,const std::vector<double>& L2, const std::vector<double>& polar, const std::vector<double>& azim);
   protected: // for testing 
-    
-    void buildMinMaxWorkspaceWithMinInstrument(MDEvents::MDWSDescription &InOutWSDescription,
-                                               MDEvents::MDTransfInterface const *const qTransf,Kernel::DeltaEMode::Type dEMode,bool useWorkspace);
-
-     bool findConversionRange(const MDEvents::MDWSDescription &InWSDescription,const std::string & wsUnitID,
-                              const double &xMin,const double &xMax,std::vector<double> &range)const;
+     void findMinMaxValues(MDEvents::MDWSDescription &targWSDescr,
+                            MDEvents::MDTransfInterface  *const qTransf,Kernel::DeltaEMode::Type dEMode,
+                            std::vector<double> &MinValues,std::vector<double> &MaxValues);
   private:
     virtual void initDocs();
     void exec();
