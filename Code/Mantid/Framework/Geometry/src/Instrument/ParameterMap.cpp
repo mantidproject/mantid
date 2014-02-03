@@ -789,13 +789,14 @@ namespace Mantid
                                             const IComponent* newComp, const ParameterMap *oldPMap) 
     {
 
-    std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
+      std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
 
-    for(auto it = oldParameterNames.begin(); it != oldParameterNames.end(); ++it)
-    {
-      Parameter_sptr thisParameter = oldPMap->get(oldComp,*it);
-      // Insert the fecthed parameter in the m_map
-      m_map.insert(std::make_pair(newComp->getComponentID(),thisParameter));
+      for(auto it = oldParameterNames.begin(); it != oldParameterNames.end(); ++it)
+      {
+        Parameter_sptr thisParameter = oldPMap->get(oldComp,*it);
+        // Insert the fecthed parameter in the m_map
+        m_map.insert(std::make_pair(newComp->getComponentID(),thisParameter));
+      }
     }
     
     //--------------------------------------------------------------------------------------------
