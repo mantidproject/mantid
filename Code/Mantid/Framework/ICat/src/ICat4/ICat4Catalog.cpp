@@ -43,9 +43,14 @@ namespace Mantid
 
       // Used to add entries to the login class.
       _ns1__login_credentials_entry entry;
-
+       
       // Name of the authentication plugin in use.
-      std::string plugin("uows");
+      std::string plugin;
+      if (url.find("sns") != std::string::npos) {
+        plugin = std::string("ldap");
+      } else {
+        plugin = std::string("uows");
+      }
       login.plugin = &plugin;
 
       // Making string as cannot convert from const.
