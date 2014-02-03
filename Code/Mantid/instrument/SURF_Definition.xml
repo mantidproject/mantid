@@ -23,20 +23,6 @@
 	I0MonitorIndex=1
  -->
 
-  <!-- parameters for efficiency correction -->
-  <parameter name="correction" type="string">
-    <value val="exponential"/>
-  </parameter>
-  
-  <parameter name="C0">
-    <value val="36.5688"/>
-  </parameter>
-  
-  <parameter name="C1">
-    <value val="0.188676"/>
-  </parameter>
-
-  
   <!-- BRIEF DESCRIPTION OF CRISP INSTRUMENT: 
   
       Here Z=0 is defined by the neutron beam which slopes down at 1.5 deg. 
