@@ -80,7 +80,7 @@ public:
     // get minimal TOF convertable into target unit
     double getMinTOF()const{return m_TargetUnit->conversionTOFMin();}
 
-    std::vector<double> getConversionRanges(double x1,double x2)const;
+    std::pair<double,double> getConversionRange(double x1,double x2)const;
     // copy constructor
     UnitsConversionHelper(const UnitsConversionHelper &another);
 protected: // for testing

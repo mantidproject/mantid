@@ -2,7 +2,6 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
-#include <algorithm>;
 
 namespace Mantid
 {
@@ -79,34 +78,39 @@ namespace Mantid
 
 
     }
-    bool inRange(const std::pair<double,double> &range, const double &val)
+    // the helper function which used in the code below to simplify check if the variable is in range
+    inline bool inRange(const std::pair<double,double> &range, const double &val)
     {
       if (val>=range.first && val <= range.second)
         return true;
       else
         return false;
     }
-    bool inRange(const double &xMin, const double &xMax,const double &val)
+    // the helper function which used in the code below to simplify check if the variable is in range
+    inline bool inRange(const double &xMin, const double &xMax,const double &val)
     {
       if (val>=xMin && val <= xMax)
         return true;
       else
         return false;
-
     }
-    /** Method returns vector of the special points of the unit conversion. 
-    @param x1 -- the initial point of the units conversion range
-    @param x2 -- the final point of the units conversion range
+    /** Method verify if the Units transformation is well defined in the range provided and if not
+       returns the range where the transformation is well defined. 
+
+    It is assumed that the points beyond of this range will be filtered in some other way
+    @param x1 -- the initial point of the units conversion range to verify
+    @param x2 -- the final point of the units conversion range to verify
     */
-    std::vector<double> UnitsConversionHelper::getConversionRanges(double x1,double x2)const
+    std::pair<double,double> UnitsConversionHelper::getConversionRange(double x1,double x2)const
     {
-      std::vector<double> range(2);
+      std::pair<double,double> range;
+      range.first = x1;
+      range.second = x2;
+
       switch(m_UnitCnvrsn)
       {
       case(CnvrtToMD::ConvertNo):  
         {
-          range[0] = x1;
-          range[1] = x2;
           return range;
         }
       case(CnvrtToMD::ConvertFast):
@@ -114,24 +118,21 @@ namespace Mantid
           auto trRange = m_TargetUnit->conversionRange();
           double u1 = this->convertUnits(x1);
           double u2 = this->convertUnits(x2);
-          if (inRange(trRange,u1) && inRange(trRange,u2))
-          {
-            range[0] = x1;
-            range[1] = x2;
-          }
-          else // hopefully it is a rare event
-          {
-            range.resize(4);
-            range[0]=m_TargetUnit->singleToTOF(x1);
-            range[1]=m_TargetUnit->singleToTOF(x2);
-            range[2]= m_TargetUnit->conversionTOFMin();
-            range[3]= m_TargetUnit->conversionTOFMax();
-            for (size_t i=0;i<4;i++)
-            {
-              range[i]=m_TargetUnit->singleFromTOF(range[i]);
-            }
-            std::sort(range.begin(),range.end());
 
+          if (!inRange(trRange,u1) || !inRange(trRange,u2)) // hopefully it is a rare event          
+          {
+            double uMin=std::min(u1,u2);
+            double uMax=std::max(u1,u2);
+            if (inRange(uMin,uMax,trRange.first))
+            {
+              double t1 = m_TargetUnit->singleToTOF(trRange.first);
+              range.first = m_TargetUnit->singleFromTOF(t1);
+            }
+            if (inRange(uMin,uMax,trRange.second))
+            {
+              double t2 = m_TargetUnit->singleToTOF(trRange.second);
+              range.second = m_TargetUnit->singleFromTOF(t2);
+            }
           }
           return range;
         }
@@ -142,17 +143,14 @@ namespace Mantid
 
           if (inRange(tMin,tMax,x1) && inRange(tMin,tMax,x2))
           {
-            range[0]=x1;
-            range[1]=x2;
+            return range;
           }
           else
           {
-            range.resize(4);
-            range[0]=x1;
-            range[1]=x2;
-            range[2]= m_TargetUnit->conversionTOFMin();
-            range[3]= m_TargetUnit->conversionTOFMax();
-            std::sort(range.begin(),range.end());
+            if (inRange(range,tMin))
+              range.first = tMin;
+            if (inRange(range,tMax))
+              range.second = tMax;
           }
           return range;
         }
@@ -164,17 +162,14 @@ namespace Mantid
           double tMax= m_TargetUnit->conversionTOFMax();
           if (inRange(tMin,tMax,tof1) && inRange(tMin,tMax,tof2))
           {
-            range[0]=x1;
-            range[1]=x2;
+            return range;
           }
           else
           {
-            range.resize(4);
-            range[0]=x1;
-            range[1]=x2;
-            range[2]=m_SourceWSUnit->singleFromTOF(tMin);
-            range[3]=m_SourceWSUnit->singleFromTOF(tMax);
-            std::sort(range.begin(),range.end());
+            if (inRange(tof1,tof2,tMin))
+              range.first = m_SourceWSUnit->singleFromTOF(tMin);
+            if (inRange(tof1,tof2,tMax))
+              range.second = m_SourceWSUnit->singleFromTOF(tMax);
           }
           return range;
         }
