@@ -2,6 +2,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/assign/list_of.hpp>
 
 namespace Mantid
 {
@@ -33,11 +34,12 @@ namespace Mantid
      * @param responseStream :: The contents of the stream (a JSON stream) returned from the IDS.
      * @returns An appropriate error message for the user if it exists. Otherwise an empty string.
      */
-    const std::string CatalogAlgorithmHelper::getIDSError(const std::string &HTTPStatus, std::istream& responseStream)
+    const std::string CatalogAlgorithmHelper::getIDSError(Poco::Net::HTTPResponse::HTTPStatus &HTTPStatus, std::istream& responseStream)
     {
-      // Set containing all valid HTTPStatus'.
-      std::string tmp[] = {"200", "201", "202"};
-      std::set<std::string> successHTTPStatus(tmp, tmp + sizeof(tmp) / sizeof(tmp[0]));
+      std::set<Poco::Net::HTTPResponse::HTTPStatus> successHTTPStatus = boost::assign::list_of
+          (Poco::Net::HTTPResponse::HTTPStatus::HTTP_OK)
+          (Poco::Net::HTTPResponse::HTTPStatus::HTTP_CREATED)
+          (Poco::Net::HTTPResponse::HTTPStatus::HTTP_ACCEPTED);
 
       // Cancel the algorithm and output message if status returned
       // from the server is not in our successHTTPStatus set.
