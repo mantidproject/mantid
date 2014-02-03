@@ -1,10 +1,8 @@
-'''
-*WIKI* 
+"""*WIKI* 
 
 Calculates phonon densities of states, Raman and IR spectrum from the output of CASTEP code obtained in the form of <seedname>.phonon and <seedname>.castep files. 
 
-*WIKI*
-'''
+*WIKI*"""
 
 from mantid.kernel import *
 from mantid.api import *
@@ -18,7 +16,9 @@ import math
 
 class DensityOfStates(PythonAlgorithm):
  
-		def PyInit(self):
+		def PyInit(self): 
+			self.setWikiSummary("Calculates phonon densities of states, Raman and IR spectrum.")
+			
 			#declare properties
 			self.declareProperty(FileProperty('File', '', action=FileAction.Load, 
 				extensions = ["phonon", "castep"]),
