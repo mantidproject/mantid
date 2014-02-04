@@ -173,18 +173,25 @@ namespace Geometry
     void addQuat(const IComponent* comp,const std::string& name, const Kernel::Quat& value);
     //@}
 
-    /// Does the named parameter exist for the given component and type
+    /// Does the named parameter exist for the given component and type (std::string version)
     bool contains(const IComponent* comp, const std::string & name, const std::string & type = "") const;
+    /// Does the named parameter exist for the given component (c-string version)
+    bool contains(const IComponent* comp, const char * name, const char * type = "") const;
     /// Does the given parameter & component combination exist
     bool contains(const IComponent* comp, const Parameter & parameter) const;
-    /// Get a parameter with a given name and optional type
+    /// Get a parameter with a given name and type (std::string version)
     boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name,
-                                     const std::string & type = "")const;
+                                     const std::string & type = "") const;
+    /// Get a parameter with a given name and type (c-string version)
+    boost::shared_ptr<Parameter> get(const IComponent* comp, const char *name, const char * type = "") const;
     /// Finds the parameter in the map via the parameter type.
     boost::shared_ptr<Parameter>  getByType(const IComponent* comp, const std::string& type) const;
-    /// Use get() recursively to see if can find param in all parents of comp and given type
-    boost::shared_ptr<Parameter> getRecursive(const IComponent* comp,const std::string& name, 
+    /// Use get() recursively to see if can find param in all parents of comp and given type (std::string version)
+    boost::shared_ptr<Parameter> getRecursive(const IComponent* comp, const std::string& name,
                                               const std::string & type = "")const;
+    /// Use get() recursively to see if can find param in all parents of comp and given type (const char type)
+    boost::shared_ptr<Parameter> getRecursive(const IComponent* comp, const char * name,
+                                              const char * type = "") const;
     /// Looks recursively upwards in the component tree for the first instance of a parameter with a specified type.
     boost::shared_ptr<Parameter> getRecursiveByType(const IComponent* comp, const std::string& type) const;
 

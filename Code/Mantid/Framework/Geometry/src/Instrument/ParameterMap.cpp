@@ -463,13 +463,25 @@ namespace Mantid
      * @returns A boolean indicating if the map contains the named parameter. If the type is given then
      * this must also match
      */
-    bool ParameterMap::contains(const IComponent* comp, const std::string & name, 
+    bool ParameterMap::contains(const IComponent* comp, const std::string & name,
                                 const std::string & type) const
+    {
+      if( m_map.empty() ) return false;
+      return contains(comp, name.c_str(), type.c_str());
+    }
+
+    /**
+     * Avoids having to instantiate temporary std::string in method below when called with a string directly
+     * @param comp :: The component to be searched as a c-string
+     * @param name :: The name of the parameter
+     * @return A boolean indicating if the map contains the named parameter.
+     */
+    bool ParameterMap::contains(const IComponent* comp, const char * name, const char *type) const
     {
       if( m_map.empty() ) return false;
       const ComponentID id = comp->getComponentID();
       std::pair<pmap_cit,pmap_cit> components = m_map.equal_range(id);
-      bool anytype = type.empty();
+      bool anytype = (strlen(type) == 0);
       for( pmap_cit itr = components.first; itr != components.second; ++itr )
       {
         boost::shared_ptr<Parameter> param = itr->second;
@@ -513,11 +525,25 @@ namespace Mantid
      * @param type :: An optional type string
      * @returns The named parameter of the given type if it exists or a NULL shared pointer if not
      */
-    Parameter_sptr ParameterMap::get(const IComponent* comp, const std::string& name, 
+    Parameter_sptr ParameterMap::get(const IComponent* comp, const std::string& name,
                                      const std::string & type) const
+    {
+      return get(comp, name.c_str(), type.c_str());
+    }
+
+
+    /** Return a named parameter of a given type. Avoids allocating std::string temporaries
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
+     * @param type :: An optional type string
+     * @returns The named parameter of the given type if it exists or a NULL shared pointer if not
+     */
+    boost::shared_ptr<Parameter> ParameterMap::get(const IComponent* comp,
+                                                   const char *name, const char * type) const
     {
       Parameter_sptr result;
       if(!comp) return result;
+      const bool anytype = (strlen(type) == 0);
       PARALLEL_CRITICAL(ParameterMap_get)
       {
         if( !m_map.empty() )
@@ -531,7 +557,6 @@ namespace Mantid
             for( ; itr != itr_end; ++itr )
             {
               Parameter_sptr param = itr->second;
-              const bool anytype = type.empty();
               if( boost::iequals(param->nameAsCString(), name) && (anytype || param->type() == type) )
               {
                 result = param;
@@ -613,13 +638,27 @@ namespace Mantid
     Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, 
                                               const std::string & type) const
     {
+      return getRecursive(comp, name.c_str(), type.c_str());
+    }
+
+    /** 
+     * Find a parameter by name, recursively going up the component tree
+     * to higher parents.
+     * @param comp :: The component to start the search with
+     * @param name :: Parameter name
+     * @param type :: An optional type string
+     * @returns the first matching parameter.
+     */
+    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp, const char* name, 
+                                              const char * type) const
+    {
       Parameter_sptr result = this->get(comp->getComponentID(), name, type);
       if(result) return result;
 
       auto parent = comp->getParent();
       while(parent)
       {
-        result = get(parent->getComponentID(), name, type);
+        result = this->get(parent->getComponentID(), name, type);
         if(result) return result;
         parent = parent->getParent();
       }
