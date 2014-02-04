@@ -1264,6 +1264,7 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 */
 bool MantidMatrixModel::checkMontorCache(int row) const
 {
+  row += m_startRow; //correctly offset the row
   if (m_workspace->getAxis(1)->isSpectra())
   {
     bool isMon = false;
