@@ -15,6 +15,7 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 import copy
 from SANSadd2 import *
+import SANSUtility as su
 
 # disable plotting if running outside Mantidplot
 try:
@@ -999,8 +1000,12 @@ def DisplayMask(mask_worksp=None):
         
         if samp:
             counts_data = '__DisplayMasked_tempory_wksp'
-            Integration(InputWorkspace=samp,OutputWorkspace= counts_data)
-            CloneWorkspace(InputWorkspace=samp,OutputWorkspace= mask_worksp)
+            CloneWorkspace(InputWorkspace=samp, OutputWorkspace=mask_worksp)
+
+            if su.isEventWorkspace(samp):
+                su.fromEvent2Histogram(mask_worksp)                
+            Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
+
         else:
             instrument.load_empty(mask_worksp)
             instrument.set_up_for_run('emptyInstrument')
