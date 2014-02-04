@@ -672,7 +672,7 @@
    </parameter>
   </component-link>
 
-  <!-- Set the same across the reset of the instrument -->
+  <!-- Set the same across the rest of the instrument -->
   <component-link name = "LET">
     <parameter name="TubePressure">
       <value units="atm" val="10.0"/>

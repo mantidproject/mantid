@@ -1342,20 +1342,9 @@
       <value units="microseconds" val="0"/>
    </parameter>
   </component-link>
-
-  <component-link name="low angle bank">
-    <parameter name="TubePressure">
-      <value units="atm" val="10.0"/>
-    </parameter>
-    <parameter name="TubeThickness">
-      <value units="metre" val="0.0008"/>
-    </parameter>
-    <parameter name="DelayTime">
-      <value units="microseconds" val="-3.9"/>
-    </parameter>
-  </component-link>
-
-  <component-link name="wide angle bank">
+    
+  <!-- General defaults for instrument -->
+  <component-link name="MARI">
     <parameter name="TubePressure">
       <value units="atm" val="10.0"/>
     </parameter>
