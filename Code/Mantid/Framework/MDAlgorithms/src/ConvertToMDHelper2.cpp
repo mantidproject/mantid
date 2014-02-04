@@ -1,15 +1,16 @@
 /*WIKI*
 Helper algorithm to calculate min-max input values for ConvertToMD algorithm, using ConvertToMD algorithm factory. 
 
-Buils simplified matrix workspace, which contains min-max X values of the input workspace and the instrument, attached to the input workspace,
-converts this workspace into MD using correspondent convertToMD plugin and returns the min-max values of the final transformation. 
-If the min input workspace X values < 0 and max values > 0 algorithm also adds 0 X-values to the input workspace and verifies 
-if min-max transformation results are achieved on at 0 values too.
+Initiates the same as ConvertToMD algorithm transformation from the ConvertToMD factory and uses this transformation to evaluate all points where 
+the transformation can achieve extremum for each workspace spectra. Then goes thorugh all extremum points, calculates min/max values for each spectra
+and select global min-max values for the whole workspace. 
 
-For example, given input workspace in the units of energy transfer with some instrument and requesting |Q| inelastic transformation, the algorithm extracts looks through 
-all spectra of the input workspace and identifies minimal, maximal and 0 energy transfer for the input spectras. Then it builds the workspace with the same detectors as the
-input workspace but all spectras consisting of just 3 values namely min, 0 and max energy transfer, converts this workspace into |Q| dE, looks through all 
-spectra of the transformed workspace to identify |Q|_min, |Q|_max and dE_min and dE_max and returns these values. 
+For example, given input workspace in the units of energy transfer and requesting |Q| inelastic transformation, the algorithm looks through 
+all spectra of the input workspace and identifies minimal, maximal and an extremal* energy transfer for the input spectras. 
+Then it runs |Q| dE  conversion for these energy transfer points and loops through all spectra of the workspace to identify |Q|_min, |Q|_max 
+and dE_min and dE_max values. 
+
+*extremal energy transfer for |Q| transformation occurs at some energy transfer where momentum transfer is maximal. It depends on polar
 
 
 *WIKI*/
@@ -86,8 +87,6 @@ namespace Mantid
     void ConvertToMDHelper2::exec()
     {
 
-      // initiate class which would deal with any dimension workspaces requested by algorithm parameters
-      if(!m_HelperWSWrapper) m_HelperWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
 
       // -------- get Input workspace
       Mantid::API::MatrixWorkspace_sptr InWS2D = getProperty("InputWorkspace");
@@ -156,9 +155,6 @@ namespace Mantid
       setProperty("MinValues",MinValues);
       setProperty("MaxValues",MaxValues);
 
-      m_HelperWSWrapper->releaseWorkspace();
-      // remove service workspace from analysis data service to decrease rubbish
-      API::AnalysisDataService::Instance().remove(m_MinMaxWS2D->getName());
     }
 
 
@@ -175,8 +171,12 @@ namespace Mantid
       //
       auto inWS = WSDescription.getInWS();
       std::string convUnitsID = pQtransf->inputUnitID(iEMode,inWS);
+      // initialize units conversion
       unitsConverter.initialize(WSDescription,convUnitsID);
+      // initialize MD transformation
+      pQtransf->initialize(WSDescription);
 
+      // 
       long nHist =(long)inWS->getNumberHistograms();
       auto detIDMap = WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
 
