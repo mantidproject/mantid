@@ -8,7 +8,7 @@ If <math>x</math> is identified with energy <math>E</math> and <math>2\pi k</mat
 The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file and optionally the normalisation file created by ResNorm. 
 
 For a Stretched Exponential, the choice of several Lorentzians is replaced with a single function with the shape : <math>\psi\beta(x) \Leftrightarrow exp[-2\pi(\sigma k)\beta]</math>. This, in the energy to time FT transformation, is <math>\psi\beta(E) \Leftrightarrow exp[-(t/\tau)\beta]</math>. So \sigma is identified with <math>(2\pi)\beta\hbar/\tau</math>. 
-The model that is fitted is that of an elastic component and the stretched exponential and the program gives the best estimate for the <math>\beta</math> parameter and the width for each group of spectra. *WIKI*
+The model that is fitted is that of an elastic component and the stretched exponential and the program gives the best estimate for the <math>\beta</math> parameter and the width for each group of spectra.
 
 This routine was originally part of the MODES package.
 *WIKI*"""
