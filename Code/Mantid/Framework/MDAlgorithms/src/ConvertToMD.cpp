@@ -432,11 +432,13 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
  
     if (createNewTargetWs )
     {
+      targWSDescr.m_buildingNewWorkspace = true;
       // find min-max dimensions values -- either take them from input parameters or identify the defaults if input parameters are not defined
       this->findMinMax(m_InWS2D,QModReq,dEModReq,QFrame,convertTo_,otherDimNames,dimMin,dimMax);
     }
     else // get min/max from existing MD workspace ignoring input min/max values
     {
+       targWSDescr.m_buildingNewWorkspace = false;
        size_t NDims = spws->getNumDims();
        dimMin.resize(NDims);
        dimMax.resize(NDims);
