@@ -1133,6 +1133,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
     else
     {
       int numDet = numOfDetectors(item->text().toStdString());
+
       std::stringstream detNumRead;
       if (numDet > 0 )
       {
@@ -2377,7 +2378,18 @@ bool MuonAnalysis::isGroupingSet()
  */
 int MuonAnalysis::numOfDetectors(const std::string& str) const
 {
-  return static_cast<int>(Strings::parseRange(str).size());
+  size_t rangeSize;
+
+  try
+  {
+    rangeSize = Strings::parseRange(str).size();
+  }
+  catch(...)
+  {
+    rangeSize = 0;
+  }
+
+  return static_cast<int>(rangeSize);
 }
 
 /**
@@ -2721,6 +2733,7 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
 
 /**
 * Check if dublicate ID between different rows
+* FIXME: this function doesn't seem to be used anywhere
 */
 void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
 {
