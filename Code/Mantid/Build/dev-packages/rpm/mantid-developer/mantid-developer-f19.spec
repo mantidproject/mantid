@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -33,6 +33,7 @@ Requires: qwt5-qt4-devel
 Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
+Requires: scipy 
 Requires: sip-devel
 Requires: git
 Requires: openssl-devel
