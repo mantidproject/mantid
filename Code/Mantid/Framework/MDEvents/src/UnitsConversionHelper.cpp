@@ -104,8 +104,8 @@ namespace Mantid
     std::pair<double,double> UnitsConversionHelper::getConversionRange(double x1,double x2)const
     {
       std::pair<double,double> range;
-      range.first = x1;
-      range.second = x2;
+      range.first = std::min(x1,x2);
+      range.second =std::max(x1,x2);
 
       switch(m_UnitCnvrsn)
       {
@@ -131,7 +131,7 @@ namespace Mantid
             if (inRange(uMin,uMax,trRange.second))
             {
               double t2 = m_TargetUnit->singleToTOF(trRange.second);
-              range.second = m_TargetUnit->singleFromTOF(t2);
+              range.second = m_SourceWSUnit->singleFromTOF(t2);
             }
           }
           return range;
@@ -139,7 +139,7 @@ namespace Mantid
       case(CnvrtToMD::ConvertFromTOF):
         {
           double tMin=m_TargetUnit->conversionTOFMin();
-          double tMax=m_TargetUnit->conversionTOFMin();
+          double tMax=m_TargetUnit->conversionTOFMax();
 
           if (inRange(tMin,tMax,x1) && inRange(tMin,tMax,x2))
           {
@@ -203,6 +203,18 @@ namespace Mantid
       m_pEfixedArray=NULL;
       if(m_Emode==(int)Kernel::DeltaEMode::Indirect) m_pEfixedArray = DetWS->getColDataArray<float>("eFixed");
 
+      // set up conversion to working state -- in some tests it can be used straight from the beginning. 
+      m_TwoTheta = (*m_pTwoThetas)[0];
+      m_L2       = (*m_pL2s)[0];
+      double    Efix = m_Efix;
+      if(m_pEfixedArray)Efix=(double)(*(m_pEfixedArray+0));
+
+
+      m_TargetUnit->initialize(m_L1,m_L2,m_TwoTheta,m_Emode,Efix,0.);
+      if (m_SourceWSUnit)
+      {
+          m_SourceWSUnit->initialize(m_L1,m_L2,m_TwoTheta,m_Emode,Efix,0.);
+      }
     }
     /** Method updates unit conversion given the index of detector parameters in the array of detectors */
     void UnitsConversionHelper::updateConversion(size_t i)

@@ -79,6 +79,23 @@ public:
       TS_ASSERT_DELTA(X[i]*8.06554465,Conv.convertUnits(X[i]),1.e-4);
     }
 
+    auto range = Conv.getConversionRange(0,10);
+    TS_ASSERT_EQUALS(0,range.first);
+    TS_ASSERT_EQUALS(3,range.second);
+
+    range = Conv.getConversionRange(-10,3);
+    TS_ASSERT_EQUALS(-10,range.first);
+    TS_ASSERT_EQUALS(3,range.second);
+
+
+    range = Conv.getConversionRange(-100000,2);
+    TS_ASSERT_EQUALS(-100000,range.first);
+    TS_ASSERT_EQUALS(2,range.second);
+
+    range = Conv.getConversionRange(0,-100000);
+    TS_ASSERT_EQUALS(-100000,range.first);
+    TS_ASSERT_EQUALS(0,range.second);
+
   }
   void testConvertToTofInelasticWS()
   {
@@ -94,7 +111,11 @@ public:
 
     // initalize Convert to TOF
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"TOF"));
-
+    double t_1 = Conv.convertUnits(3.);
+    double t_2 = Conv.convertUnits(10);
+    double t_3 = Conv.convertUnits(-10);
+    double t_4 = Conv.convertUnits(-100);
+    double t_lim = Conv.convertUnits(-DBL_MAX);
 
     const MantidVec& X        = ws2D->readX(0);
     MantidVec E_storage(X.size());
@@ -133,6 +154,25 @@ public:
     {
       TS_ASSERT_DELTA(E_storage[i],Conv.convertUnits(TOFS[i]),1.e-5);
     }
+
+    auto range = Conv.getConversionRange(-1000000000,1000000000);
+    TS_ASSERT_DELTA(t_lim,range.first,1.e-8);
+    TS_ASSERT_EQUALS(1000000000,range.second);
+
+    range = Conv.getConversionRange(t_1,t_2);
+    TS_ASSERT_EQUALS(3,Conv.convertUnits(range.first));
+    TS_ASSERT_EQUALS(3,Conv.convertUnits(range.second));
+
+
+    range = Conv.getConversionRange(t_3,t_4);
+    TS_ASSERT_DELTA(-100,Conv.convertUnits(range.first),1.e-6);
+    TS_ASSERT_DELTA(-10,Conv.convertUnits(range.second),1.e-6);
+
+    range = Conv.getConversionRange(t_2,t_3);
+    TS_ASSERT_DELTA(-10,Conv.convertUnits(range.first),1.e-6);
+    TS_ASSERT_DELTA(3,Conv.convertUnits(range.second),1.e-6);
+
+
   }
 
 
