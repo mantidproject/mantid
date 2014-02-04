@@ -146,8 +146,8 @@ def apply_calibration(inst_name, loaded_ws, calibration):
         skip_lines = None
         if type(filename) == int: # assume run number
             filename = inst_name + str(filename)
-        UpdateInstrumentFromFile(Workspace=loaded_ws,Filename=filename,
-                                 MoveMonitors=False, IgnorePhi=False)
+        # Pull in pressures, thicknesses & update from cal file
+        LoadDetectorInfo(Workspace=loaded_ws, DataFilename=filename, RelocateDets=True)
         AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(calibration))
     elif isinstance(calibration, mantid.api.Workspace):
         logger.debug('load_data: Copying detectors positions from workspace "%s": ' % calibration.name())
