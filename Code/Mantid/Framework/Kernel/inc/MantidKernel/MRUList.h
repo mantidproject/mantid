@@ -12,9 +12,6 @@
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 
-#include <fstream>
-#include <valarray>
-
 namespace Mantid
 {
 namespace Kernel
@@ -102,8 +99,7 @@ namespace Kernel
     T* insert(T* item)
     {
       Mutex::ScopedLock _lock(m_mutex);
-      std::pair<typename MRUList<T>::item_list::iterator,bool> p;
-      p = this->il.push_front(item);
+      auto p = this->il.push_front(item);
 
       if (!p.second)
       {
@@ -134,7 +130,7 @@ namespace Kernel
     void clear()
     {
       Mutex::ScopedLock _lock(m_mutex);
-      for (typename MRUList<T>::item_list::iterator it = this->il.begin(); it != this->il.end(); ++it)
+      for (auto it = this->il.begin(); it != this->il.end(); ++it)
       {
         delete (*it);
       }
@@ -147,12 +143,10 @@ namespace Kernel
      */
     void deleteIndex(const size_t index)
     {
-      using namespace boost::multi_index;
-      typename ordered_item_list::iterator it;
-      bool found_nothing;
-      it = il.template get<1>().find((int)index);
-      found_nothing = (it == il.template get<1>().end());
-      if (!found_nothing)
+      Mutex::ScopedLock _lock(m_mutex);
+
+      auto it = il.template get<1>().find((int)index);
+      if (it != il.template get<1>().end())
       {
         delete (*it);
         il.template get<1>().erase(it);
@@ -174,16 +168,10 @@ namespace Kernel
      */
     T* find(const size_t index) const
     {
-      using namespace boost::multi_index;
-      typename ordered_item_list::const_iterator it;
-      bool found_nothing;
-
       Mutex::ScopedLock _lock(m_mutex);
 
-      it = il.template get<1>().find(int(index));
-      found_nothing = (it == il.template get<1>().end());
-
-      if (found_nothing)
+      auto it = il.template get<1>().find(int(index));
+      if ( it == il.template get<1>().end() )
       {
         return NULL;
       }
