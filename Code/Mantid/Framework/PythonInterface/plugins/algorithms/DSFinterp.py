@@ -23,30 +23,33 @@ Details:
  
 *WIKI*"""
 
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, CloneWorkspace
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory
 from mantid.simpleapi import CloneWorkspace, mtd
-from mantid.kernel import FloatArrayProperty, FloatArrayLengthValidator, StringArrayProperty, arrvalidator, Direction, FloatBoundedValidator, logger
+from mantid.kernel import FloatArrayProperty, FloatArrayLengthValidator, StringArrayProperty, StringArrayMandatoryValidator, Direction, FloatBoundedValidator, logger
 
+from pdb import set_trace as tr
 
-class InterpolateSQE(PythonAlgorithm):
+class DSFinterp(PythonAlgorithm):
 
   def category(self):
     return "Arithmetic"
 
   def name(self):
-    return 'InterpolateSQE'
+    return 'DSFinterp'
 
   def PyInit(self):
     arrvalidator = StringArrayMandatoryValidator()
     self.declareProperty(StringArrayProperty('Workspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of input workspaces')
     # check the number of input workspaces is same as number of input parameters
-    arrvalidator2 = FloatArrayLengthValidator(len(self.getProperty('Workspaces')))
-    self.declareProperty(FloatArrayProperty('ParameterValues', values=[], validator=arrvalidator2, direction=Direction.Input), doc='list of input parameter values')
+    #arrvalidator2 = FloatArrayLengthValidator(len(self.getProperty('Workspaces')))
+    #self.declareProperty(FloatArrayProperty('ParameterValues', values=[], validator=arrvalidator2, direction=Direction.Input), doc='list of input parameter values')
+    self.declareProperty(FloatArrayProperty('ParameterValues', values=[], direction=Direction.Input), doc='list of input parameter values')
     # check requested parameter falls within the list of parameters
-    parmvalidator=FloatBoundedValidator()
-    parmvalidator.setBounds( min(self.getProperty('ParameterValues')), max(self.getProperty('ParameterValues')) )
-    self.declareProperty('Parameter', 0.0, validator=parmvalidator, direction=Direction.Input, doc="Parameter to interpolate the structure factor")
-    self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.InputOutput), doc='Workspace to be overwritten with interpolated structure factor')
+    #parmvalidator=FloatBoundedValidator()
+    #parmvalidator.setBounds( min(self.getProperty('ParameterValues')), max(self.getProperty('ParameterValues')) )
+    #self.declareProperty('TargetParameter', 0.0, validator=parmvalidator, direction=Direction.Input, doc="Parameter to interpolate the structure factor")
+    self.declareProperty('TargetParameter', 0.0, direction=Direction.Input, doc="Parameter to interpolate the structure factor")
+    self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output), doc='Workspace to save the interpolated structure factor')
 
   def areWorkspacesCompatible(self, a, b):
     sizeA = a.blocksize() * a.getNumberHistograms() 
@@ -55,33 +58,43 @@ class InterpolateSQE(PythonAlgorithm):
 
   def PyExec(self):
     # Check congruence of workspaces
-    workspaces = self.getProperty('Workspaces')
-    fvalues = self.getProperty('ParameterValues')
+    workspaces = self.getProperty('Workspaces').value
+    fvalues = self.getProperty('ParameterValues').value
+    if len(workspaces) != len(fvalues):
+      logger.error('Number of workspaces and fvalues should be the same')
+      return
+    targetfvalue = self.getProperty('TargetParameter').value
+    if targetfvalue < min(fvalues) or targetfvalue > max(fvalues):
+      logger.error('the target fvalue should lie in [{0}, {1}]'.format(min(fvalues),max(fvalues)))
     for workspace in workspaces[1:]:
       if not self.areWorkspacesCompatible(mtd[workspaces[0]],mtd[workspace]):
         logger.error('Workspace {0} incompatible with {1}'.format(workspace, workspaces[0]))
         return
     # Load the workspaces into a group of dynamic structure factors
-    from dsfinterp import Dsf, DsfGroup, ChannelGroup
+    from dsfinterp.dsf import Dsf
+    from dsfinterp.dsfgroup import DsfGroup
+    from dsfinterp.channelgroup import ChannelGroup
     dsfgroup = DsfGroup()
     for idsf in range(len(workspaces)):
       dsf = Dsf()
       dsf.Load( mtd[workspaces[idsf]] )
-      dsf.setFvalue( fvalues[idsf] )
+      dsf.SetFvalue( fvalues[idsf] )
       dsfgroup.InsertDsf(dsf)
     # Create the intepolator
     channelgroup = ChannelGroup()
     channelgroup.InitFromDsfGroup(dsfgroup)
-    channelgroup.InitializeInterpolator()
+    channelgroup.InitializeInterpolator(running_regr_type='quadratic')
     # Invoke the interpolator and save to outputworkspace
-    dsf = channelgroup( self.getProperty('Parameter') )
-    outws = CloneWorkspace( mtd[workspaces[0]] )
+    dsf = channelgroup(targetfvalue)
+    #tr()
+    outws = CloneWorkspace( mtd[workspaces[0]])
     dsf.Save(outws) # overwrite dataY and dataE
     self.setProperty("OutputWorkspace", outws)
 #############################################################################################
 
 try:
   import dsfinterp
-  AlgorithmFactory.subscribe(Mean())
+  AlgorithmFactory.subscribe(DSFinterp)
 except:
+  logger.error('Failed to subscribe algorithm DSFinterp')
   pass
