@@ -177,12 +177,12 @@ namespace Mantid
       pQtransf->initialize(WSDescription);
 
       // 
-      long nHist =(long)inWS->getNumberHistograms();
+      long nHist =static_cast<long>(inWS->getNumberHistograms());
       auto detIDMap = WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
 
       // vector to place transformed coordinates;
       std::vector<coord_t> locCoord(nDims);
-      size_t nDetectors = inWS->getNumberHistograms();
+
 
 
       pQtransf->calcGenericVariables(locCoord,nDims);      
