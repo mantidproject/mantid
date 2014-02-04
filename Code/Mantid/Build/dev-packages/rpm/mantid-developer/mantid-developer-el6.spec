@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -18,6 +18,7 @@ Requires: gcc-c++
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
+Requires: python-ipython >= 1.1
 Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
@@ -64,6 +65,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Tue Feb 04 2014 Stuart Campbell <campbellsi@ornl.gov>
+- Added scipy and ipython >= 1.1 dependency
+
 * Tue May 07 2013 Stuart Campbell <campbellsi@ornl.gov>
 - Added dvipng and latex for qt-assistant stuff
 - Added software collection dependencies
