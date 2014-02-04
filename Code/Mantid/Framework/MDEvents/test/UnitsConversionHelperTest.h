@@ -185,7 +185,7 @@ public:
     size_t n_bins = X.size();
     for(size_t i=0;i<n_bins;i++)
     {
-      E_storage[i]=-0.1+0.1*i;
+      E_storage[i]=-0.1+0.1*static_cast<double>(i);
     }
 
     NumericAxis *pAxis0 = new NumericAxis(n_bins-1); 
