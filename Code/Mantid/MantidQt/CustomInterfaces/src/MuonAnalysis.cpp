@@ -1118,6 +1118,12 @@ void MuonAnalysis::groupTableClicked(int row)
 */
 void MuonAnalysis::groupTableChanged(int row, int column)
 {
+  if ( column == 2 )
+  {
+    // Ignore changes to Ndet column, as they will only be made programmatically
+    return;
+  }
+
   // changes to the IDs
   if ( column == 1 )
   {
@@ -1184,6 +1190,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
       }
     }
   }
+
   whichGroupToWhichRow(m_uiForm, m_groupToRow);
   updatePairTable();
   updateFrontAndCombo();
