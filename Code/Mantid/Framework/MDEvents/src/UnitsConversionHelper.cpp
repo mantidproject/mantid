@@ -2,7 +2,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
-#include <boost\math_fwd.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 
 
