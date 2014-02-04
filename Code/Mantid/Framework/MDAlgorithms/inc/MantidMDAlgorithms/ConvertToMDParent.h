@@ -14,11 +14,8 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-/** ConvertToMD :
-   *  Transfrom a workspace into MD workspace with components defined by user. 
-   *
-   * Gateway for number of ChildAlgorithms, some are very important, some are questionable 
-   * Intended to cover wide range of cases; 
+/** ConvertToMDParent :
+   *  Main part of two algorithms which use ConvertToMD factory to transform points from instrument space to physical MD space
    *
    * The description of the algorithm is avalible at: <http://www.mantidproject.org/ConvertToMD> 
    * The detailed description of the algoritm is provided at: <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>

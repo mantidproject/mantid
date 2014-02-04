@@ -20,25 +20,25 @@ using namespace Mantid::MDEvents;
 
 class UnitsConversionHelperTest : public CxxTest::TestSuite
 {
-   Mantid::API::MatrixWorkspace_sptr ws2D;
-   Mantid::DataObjects::TableWorkspace_sptr  detLoc;
+  Mantid::API::MatrixWorkspace_sptr ws2D;
+  Mantid::DataObjects::TableWorkspace_sptr  detLoc;
 
 public:
-static UnitsConversionHelperTest *createSuite() {
+  static UnitsConversionHelperTest *createSuite() {
     return new UnitsConversionHelperTest(); 
-}
-static void destroySuite(UnitsConversionHelperTest  * suite) { delete suite; }    
+  }
+  static void destroySuite(UnitsConversionHelperTest  * suite) { delete suite; }    
 
-void testSpecialConversionTOF()
-{
+  void testSpecialConversionTOF()
+  {
     double factor,power;
 
     const Kernel::Unit_sptr pThisUnit=Kernel::UnitFactory::Instance().create("Wavelength");
     TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
-}
+  }
 
-void testTOFConversionRuns()
-{ 
+  void testTOFConversionRuns()
+  { 
 
     Kernel::Unit_sptr pSourceWSUnit     = Kernel::UnitFactory::Instance().create("Wavelength");
     Kernel::Unit_sptr pWSUnit           = Kernel::UnitFactory::Instance().create("MomentumTransfer");
@@ -47,17 +47,17 @@ void testTOFConversionRuns()
     int emode(0);
     TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
     TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(L1,L2,TwoTheta,emode,efix,delta));
-     
+
     double X0(5);
     double tof(0);
     TS_ASSERT_THROWS_NOTHING(tof  = pSourceWSUnit->singleToTOF(X0));
     TS_ASSERT_THROWS_NOTHING(pWSUnit->singleFromTOF(tof));
-}
+  }
 
 
 
-void testConvertFastFromInelasticWS()
-{
+  void testConvertFastFromInelasticWS()
+  {
     UnitsConversionHelper Conv;
     MDWSDescription WSD;
 
@@ -72,15 +72,16 @@ void testConvertFastFromInelasticWS()
     // initialize peculiar conversion from ws units to DeltaE_inWavenumber
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE_inWavenumber"));
 
-     const MantidVec& X        = ws2D->readX(0);
-     size_t n_bins = X.size()-1;
-     for(size_t i=0;i<n_bins;i++){
-         TS_ASSERT_DELTA(X[i]*8.06554465,Conv.convertUnits(X[i]),1.e-4);
-     }
+    const MantidVec& X        = ws2D->readX(0);
+    size_t n_bins = X.size()-1;
+    for(size_t i=0;i<n_bins;i++)
+    {
+      TS_ASSERT_DELTA(X[i]*8.06554465,Conv.convertUnits(X[i]),1.e-4);
+    }
 
-}
-void testConvertToTofInelasticWS()
-{
+  }
+  void testConvertToTofInelasticWS()
+  {
     UnitsConversionHelper Conv;
     MDWSDescription WSD;
 
@@ -95,65 +96,66 @@ void testConvertToTofInelasticWS()
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"TOF"));
 
 
-     const MantidVec& X        = ws2D->readX(0);
-     MantidVec E_storage(X.size());
-     TS_ASSERT_THROWS_NOTHING(Conv.updateConversion(0));
+    const MantidVec& X        = ws2D->readX(0);
+    MantidVec E_storage(X.size());
+    TS_ASSERT_THROWS_NOTHING(Conv.updateConversion(0));
 
-     size_t n_bins = X.size();
-     std::vector<double> TOFS(n_bins);
-     for(size_t i=0;i<n_bins;i++){
-         E_storage[i]=X[i];
-         TOFS[i]     =Conv.convertUnits(X[i]);
-     }
+    size_t n_bins = X.size();
+    std::vector<double> TOFS(n_bins);
+    for(size_t i=0;i<n_bins;i++){
+      E_storage[i]=X[i];
+      TOFS[i]     =Conv.convertUnits(X[i]);
+    }
 
-     // Let WS know that it is in TOF now (one column)
-     MantidVec& T = ws2D->dataX(0);
+    // Let WS know that it is in TOF now (one column)
+    MantidVec& T = ws2D->dataX(0);
 
-     NumericAxis *pAxis0 = new NumericAxis(n_bins-1); 
-     for(size_t i=0; i < n_bins-1; i++){
-            double Tm =0.5*(TOFS[i]+TOFS[i+1]);
-            pAxis0->setValue(i,Tm);
-            T[i]=TOFS[i];
-     }
-     T[n_bins-1]=TOFS[n_bins-1];
+    NumericAxis *pAxis0 = new NumericAxis(n_bins-1); 
+    for(size_t i=0; i < n_bins-1; i++){
+      double Tm =0.5*(TOFS[i]+TOFS[i+1]);
+      pAxis0->setValue(i,Tm);
+      T[i]=TOFS[i];
+    }
+    T[n_bins-1]=TOFS[n_bins-1];
 
-     pAxis0->setUnit("TOF");
-     ws2D->replaceAxis(0,pAxis0);
+    pAxis0->setUnit("TOF");
+    ws2D->replaceAxis(0,pAxis0);
 
-     // initialize matrix ws description, to the same number of dimensions as before
-     WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
+    // initialize matrix ws description, to the same number of dimensions as before
+    WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
     WSD.m_PreprDetTable = detLoc;
 
-     //initialize Convert back;
-     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE"));
-     TS_ASSERT_THROWS_NOTHING(Conv.updateConversion(0));
+    //initialize Convert back;
+    TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE"));
+    TS_ASSERT_THROWS_NOTHING(Conv.updateConversion(0));
 
-     for(size_t i=0;i<n_bins;i++){
-         TS_ASSERT_DELTA(E_storage[i],Conv.convertUnits(TOFS[i]),1.e-5);
-     }
-}
+    for(size_t i=0;i<n_bins;i++)
+    {
+      TS_ASSERT_DELTA(E_storage[i],Conv.convertUnits(TOFS[i]),1.e-5);
+    }
+  }
 
 
-UnitsConversionHelperTest()
-{
-    
-   API::FrameworkManager::Instance();
+  UnitsConversionHelperTest()
+  {
 
-   std::vector<double> L2(5,5);
-   std::vector<double> polar(5,(30./180.)*3.1415926);
-   polar[0]=0;
-   std::vector<double> azimutal(5,0);
-   azimutal[1]=(45./180.)*3.1415936;
-   azimutal[2]=(90./180.)*3.1415936;
-   azimutal[3]=(135./180.)*3.1415936;
-   azimutal[4]=(180./180.)*3.1415936;
+    API::FrameworkManager::Instance();
 
-   int numBins=10;
-   ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
+    std::vector<double> L2(5,5);
+    std::vector<double> polar(5,(30./180.)*3.1415926);
+    polar[0]=0;
+    std::vector<double> azimutal(5,0);
+    azimutal[1]=(45./180.)*3.1415936;
+    azimutal[2]=(90./180.)*3.1415936;
+    azimutal[3]=(135./180.)*3.1415936;
+    azimutal[4]=(180./180.)*3.1415936;
 
-   detLoc = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
-  
+    int numBins=10;
+    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
 
-}
+    detLoc = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
+
+
+  }
 };
 #endif

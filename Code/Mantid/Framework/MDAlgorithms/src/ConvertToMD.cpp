@@ -623,7 +623,7 @@ void ConvertToMD::findMinMax(const Mantid::API::MatrixWorkspace_sptr &inWS,const
     {
       if(minVal[i]>=maxVal[i])
       {
-        g_log.debug()<<"identified min-max values for additional dimension N: "<<i<<" are equal. midifying min-max value to produce dimension with 0.2*dimValue width\n";
+        g_log.debug()<<"identified min-max values for dimension N: "<<i<<" are equal. Modyfying min-max value to produce dimension with 0.2*dimValue width\n";
         if(minVal[i]>0)
         {
             minVal[i]*=0.9;
