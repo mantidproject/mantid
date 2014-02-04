@@ -2,6 +2,9 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
+#include <boost\math_fwd.hpp>
+
+
 
 namespace Mantid
 {
@@ -11,13 +14,14 @@ namespace Mantid
     /** establish and initialize proper units conversion from input to output units
     @param UnitsFrom -- the ID of the units, which have to be converted from
     @param UnitsTo   -- the ID of the units to converted to
+    @param forceViaTOF   -- force to perform unit conversion via TOF even if quick conversion exist (by default, false)
 
     @return kind of the initiated conversion, e.g. no conversion (unitsFrom == UnitsTo, fastConversion, convFromTOF or convViaTOF. 
     See ConvertUnits for the details of this transformations
 
     if necessary, also sets up the proper units convertor pointers which do the actual conversion. 
     */
-    CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo)
+    CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo,bool forceViaTOF)
     {
       // if units are equal, no conversion is necessary;
       if(UnitsFrom.compare(UnitsTo)==0) return CnvrtToMD::ConvertNo;
@@ -36,7 +40,7 @@ namespace Mantid
 
       // is a quick conversion availible?
       m_SourceWSUnit=Kernel::UnitFactory::Instance().create(UnitsFrom);
-      if(m_SourceWSUnit->quickConversion(UnitsTo,m_Factor,m_Power))
+      if(m_SourceWSUnit->quickConversion(UnitsTo,m_Factor,m_Power) && !forceViaTOF)
       {
         return CnvrtToMD::ConvertFast;
       }
@@ -55,8 +59,17 @@ namespace Mantid
       }
 
     }
+    /** Initialize unit conversion helper
+     * This method is interface to internal initialize method, which actually takes all parameters UnitConversion helper needs from 
+     * targetWSDescr class
 
-    void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, const std::string &unitsTo)
+     * @param targetWSDescr -- the class which contains all information about target workspace
+                             including energy transfer mode, number of dimensions, input workspace etc.
+     * @param unitsTo       -- the ID of the units conversion helper would help to convert to
+     * @param forceViaTOF   -- force to perform unit conversion via TOF even if quick conversion exist (by default, false)
+     * 
+    */
+    void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, const std::string &unitsTo,bool forceViaTOF)
     {   
       // obtain input workspace units
       API::MatrixWorkspace_const_sptr inWS2D = targetWSDescr.getInWS();
@@ -74,7 +87,7 @@ namespace Mantid
 
       int Emode     =  (int)targetWSDescr.getEMode();
 
-      this->initialize(unitsFrom,unitsTo,targetWSDescr.m_PreprDetTable,Emode);
+      this->initialize(unitsFrom,unitsTo,targetWSDescr.m_PreprDetTable,Emode,forceViaTOF);
 
 
     }
@@ -94,6 +107,9 @@ namespace Mantid
       else
         return false;
     }
+
+   
+ 
     /** Method verify if the Units transformation is well defined in the range provided and if not
        returns the range where the transformation is well defined. 
 
@@ -156,8 +172,25 @@ namespace Mantid
         }
       case(CnvrtToMD::ConvertByTOF):
         {
-          double tof1=m_SourceWSUnit->singleToTOF(x1);
-          double tof2=m_SourceWSUnit->singleToTOF(x2);
+          auto source_range = m_SourceWSUnit->conversionRange();
+          if (!inRange(source_range,range.first) || !inRange(source_range,range.second))
+          {
+            if (inRange(range,source_range.first))
+                range.first = source_range.first;
+            if (inRange(range,source_range.second))
+                range.second = source_range.second;
+          }
+          double tof1=m_SourceWSUnit->singleToTOF(range.first);
+          double tof2=m_SourceWSUnit->singleToTOF(range.second);
+          if (boost::math::isnan(tof1) || boost::math::isnan(tof2))
+          {
+            if(range.first<source_range.first)range.first=source_range.first;
+            if(range.second>source_range.second)range.second=source_range.second;
+            tof1=m_SourceWSUnit->singleToTOF(range.first);
+            tof2=m_SourceWSUnit->singleToTOF(range.second);            
+          }
+
+
           double tMin= m_TargetUnit->conversionTOFMin();
           double tMax= m_TargetUnit->conversionTOFMax();
           if (inRange(tMin,tMax,tof1) && inRange(tMin,tMax,tof2))
@@ -166,10 +199,14 @@ namespace Mantid
           }
           else
           {
+            double u1=range.first;
+            double u2=range.second;
             if (inRange(tof1,tof2,tMin))
-              range.first = m_SourceWSUnit->singleFromTOF(tMin);
+              u1 = m_SourceWSUnit->singleFromTOF(tMin);
             if (inRange(tof1,tof2,tMax))
-              range.second = m_SourceWSUnit->singleFromTOF(tMax);
+              u2 = m_SourceWSUnit->singleFromTOF(tMax);
+            range.first = std::min(u1,u2);
+            range.second= std::max(u1,u2);
           }
           return range;
         }
@@ -179,14 +216,26 @@ namespace Mantid
       }
 
     }
-    void UnitsConversionHelper::initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode)
+
+    /** Initialize unit conversion helper
+
+     * @param unitsFrom     -- the ID of the unit, which should be converted from
+     * @param unitsTo       -- the ID of the units conversion helper helps to convert to
+     * @param DetWS         -- table workspace with preprocessed detectors information. 
+                               See MDAlgorithms::PreprocessDetectorsToMD for the info what this workspace contains
+     * @param Emode         -- energy transfer mode (integer value used by Kernel::ConvertUnits to indetify energy transfer mode
+     * @param forceViaTOF   -- force to perform unit conversion via TOF even if quick conversion exist (by default, false)
+     * 
+    */
+    
+    void UnitsConversionHelper::initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode,bool forceViaTOF)
     {
       m_Emode     =  Emode;
 
       if(!DetWS)throw std::runtime_error("UnitsConversionHelper::initialize called with empty preprocessed detectors table");
 
       // Check how the source units relate to the units requested and create source units
-      m_UnitCnvrsn = analyzeUnitsConversion(unitsFrom,unitsTo);
+      m_UnitCnvrsn = analyzeUnitsConversion(unitsFrom,unitsTo,forceViaTOF);
 
       // create target units class
       m_TargetUnit = Kernel::UnitFactory::Instance().create(unitsTo);

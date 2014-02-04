@@ -123,7 +123,8 @@ public:
 
     size_t n_bins = X.size();
     std::vector<double> TOFS(n_bins);
-    for(size_t i=0;i<n_bins;i++){
+    for(size_t i=0;i<n_bins;i++)
+    {
       E_storage[i]=X[i];
       TOFS[i]     =Conv.convertUnits(X[i]);
     }
@@ -171,6 +172,80 @@ public:
     range = Conv.getConversionRange(t_2,t_3);
     TS_ASSERT_DELTA(-10,Conv.convertUnits(range.first),1.e-6);
     TS_ASSERT_DELTA(3,Conv.convertUnits(range.second),1.e-6);
+
+
+  }
+
+  void testConvertViaTOFElastic()
+  {
+
+    // Modify input workspace to be elastic workspace
+    const MantidVec& X        = ws2D->readX(0);
+    MantidVec E_storage(X.size());
+    size_t n_bins = X.size();
+    for(size_t i=0;i<n_bins;i++)
+    {
+      E_storage[i]=-0.1+0.1*i;
+    }
+
+    NumericAxis *pAxis0 = new NumericAxis(n_bins-1); 
+    pAxis0->setUnit("Energy");
+    ws2D->replaceAxis(0,pAxis0);    
+
+
+    //---------------------------------------------------------------------------------
+    UnitsConversionHelper Conv;
+    MDWSDescription WSD;
+    // ws description currently needs min/max to be set properly
+    std::vector<double> min(3,-10),max(3,10);
+    WSD.setMinMax(min,max);
+
+    WSD.buildFromMatrixWS(ws2D,"Q3D","Elastic");
+    WSD.m_PreprDetTable = detLoc;
+
+
+
+    // initalize Convert from energy to momentum, forcing convert wia TOF
+    TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"Momentum",true));
+
+
+    std::vector<double> Momentums(n_bins);
+    for(size_t i=0;i<n_bins;i++)
+    {
+      Momentums[i]     =Conv.convertUnits(E_storage[i]);
+    }
+
+    auto range = Conv.getConversionRange(-10,10);
+    TS_ASSERT_DELTA(0,range.first,1.e-8);
+    TS_ASSERT_DELTA(10,range.second,1.e-8);
+
+ 
+    range = Conv.getConversionRange(10000,1);
+    TS_ASSERT_DELTA(1,range.first,1.e-8);
+    TS_ASSERT_DELTA(10000,range.second,1.e-8);
+
+
+    // initalize Convert from momentum to energy, forcing convert wia TOF
+    pAxis0 = new NumericAxis(n_bins-1); 
+    pAxis0->setUnit("Momentum");
+    ws2D->replaceAxis(0,pAxis0);    
+    WSD.buildFromMatrixWS(ws2D,"Q3D","Elastic");
+
+    TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"Energy",true));
+    // note comparison from 1 as negative energies were not converted to momentum/back
+    for(size_t i=1;i<n_bins;i++)
+    {
+      TS_ASSERT_DELTA(E_storage[i],Conv.convertUnits(Momentums[i]) ,1.e-8);
+    }
+    // this test may indicate problem -- not if this problem ever find in reality
+    range = Conv.getConversionRange(-10,10);
+    TS_ASSERT_DELTA(0,range.first,1.e-8);
+    TS_ASSERT_DELTA(10,range.second,1.e-8);
+
+
+    range = Conv.getConversionRange(1.e-10,10);
+    TS_ASSERT_DELTA(0,range.first,1.e-8);
+    TS_ASSERT_DELTA(10,range.second,1.e-8);
 
 
   }

@@ -73,8 +73,8 @@ class DLLExport UnitsConversionHelper
 
 public:
     UnitsConversionHelper():m_pTwoThetas(NULL),m_pL2s(NULL){};
-    void initialize(const MDWSDescription &targetWSDescr,const std::string &units_to);
-    void initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode);
+    void initialize(const MDWSDescription &targetWSDescr,const std::string &units_to,bool forceViaTOF=false);
+    void initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode,bool forceViaTOF=false);
     void updateConversion(size_t i);
     double convertUnits(double val)const;   
 
@@ -83,7 +83,7 @@ public:
     UnitsConversionHelper(const UnitsConversionHelper &another);
 protected: // for testing
     /// establish and initialize proper units conversion from input to output units;
-    CnvrtToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo);
+    CnvrtToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo,bool forceViaTOF=false);
 
 };
 
