@@ -142,8 +142,8 @@ namespace Kernel
     }
 
     //---------------------------------------------------------------------------------------------
-    /** Delete the T at the given index.
-     * @param index :: the key (index) for this T that you want to remove from the MRU.
+    /** Delete the T at the given index. Will also delete the object itself.
+     *  @param index :: the key (index) for this T that you want to remove from the MRU.
      */
     void deleteIndex(const size_t index)
     {
@@ -154,6 +154,7 @@ namespace Kernel
       found_nothing = (it == il.template get<1>().end());
       if (!found_nothing)
       {
+        delete (*it);
         il.template get<1>().erase(it);
       }
 
