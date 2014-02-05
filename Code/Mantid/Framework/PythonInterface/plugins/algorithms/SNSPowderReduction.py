@@ -462,12 +462,6 @@ class SNSPowderReduction(PythonAlgorithm):
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 else:
-                    if samRun == 0:
-                        vnoiseRun = 0
-                    else:
-                        vnoiseRun = self._info.vnoise # noise run for the vanadium
-                        if vnoiseRun > 0:
-                            raise RuntimeError("Vanadium noise correction has been removed from the workflow")
                     vanRun = self._focusChunks(vanRun, SUFFIX, vanFilterWall, calib,
                                                preserveEvents=False)
 
