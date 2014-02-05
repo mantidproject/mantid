@@ -1241,7 +1241,7 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
     }
   case Qt::BackgroundRole:
     {
-      if (checkMontorCache(index.row()))
+      if (checkMonitorCache(index.row()))
       {
         return m_mon_color;
       }
@@ -1262,8 +1262,9 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 @param row :: current row in the table that maps to a detector.
 @return bool :: the value of if the detector is a monitor or not.
 */
-bool MantidMatrixModel::checkMontorCache(int row) const
+bool MantidMatrixModel::checkMonitorCache(int row) const
 {
+  row += m_startRow; //correctly offset the row
   if (m_workspace->getAxis(1)->isSpectra())
   {
     bool isMon = false;
