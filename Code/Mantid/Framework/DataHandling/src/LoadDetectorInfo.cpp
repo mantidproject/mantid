@@ -665,7 +665,7 @@ namespace Mantid
       detInfo.l2.resize(numDets);  detInfo.theta.resize(numDets);  detInfo.phi.resize(numDets);
       detInfo.pressures.resize(numDets);  detInfo.thicknesses.resize(numDets);
 
-      //PARALLEL_FOR_NO_WSP_CHECK()
+      PARALLEL_FOR_NO_WSP_CHECK()
       for(int i=0; i < static_cast<int>(numDets);i++)
       {
         detInfo.ids[i] = fileIDs[2*i];

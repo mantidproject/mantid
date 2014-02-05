@@ -300,7 +300,6 @@ public:
         AnalysisDataService::Instance().retrieve(m_MariWS));
 
     // check the X-values for a sample of spectra avoiding the monitors
-    const int firstIndex = 5, lastIndex = 690;
     grouper.setPropertyValue("Workspace", m_MariWS);
     grouper.setPropertyValue("DataFilename", m_rawFile); 
     grouper.setPropertyValue("RelocateDets", "1");
