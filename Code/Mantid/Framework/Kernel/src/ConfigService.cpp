@@ -281,11 +281,7 @@ ConfigServiceImpl::~ConfigServiceImpl()
   Kernel::Logger::shutdown();
   delete m_pSysConfig;
   delete m_pConf; // potential double delete???
-  for (std::vector<FacilityInfo*>::iterator it = m_facilities.begin(); it != m_facilities.end(); ++it)
-  {
-    delete *it;
-  }
-  m_facilities.clear();
+  clearFacilities();
 }
 
 /** Loads the config file provided.
@@ -1479,7 +1475,7 @@ const std::string ConfigServiceImpl::getInstrumentDirectory() const
  */
 void ConfigServiceImpl::updateFacilities(const std::string& fName)
 {
-  m_facilities.clear();
+  clearFacilities();
 
   std::string instrDir = getString("instrumentDefinition.directory");
   std::string fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
@@ -1531,6 +1527,16 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
     g_log.error(e.what());
   }
 
+}
+
+/// Empty the list of facilities, deleting the FacilityInfo objects in the process
+void ConfigServiceImpl::clearFacilities()
+{
+  for (auto it = m_facilities.begin(); it != m_facilities.end(); ++it)
+  {
+    delete *it;
+  }
+  m_facilities.clear();
 }
 
 /**
