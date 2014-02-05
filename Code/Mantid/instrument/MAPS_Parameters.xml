@@ -28,10 +28,6 @@
 <parameter name="hard_mask_file" type="string">
     <value val="4to1_022.msk"/>
 </parameter>
-<!-- Parameter specifies if one wants to run diagnostics (which include applying hard mask file) or not-->
-<parameter name="run_diagnostics" type="bool">
-  <value val="True"/>
-</parameter>
 
 <!-- The map file used when calculating absolute units conversion integrals 
      This map usually groups together large areas of detectors to obtain proper vanadium statistics  -->
@@ -278,7 +274,7 @@
 <parameter name="use_sam_msk_on_monovan" type = "bool">
   <value val="False"/>
 </parameter>
-
+  
 <!-- if this value is provided (nont None) it is string reperesentation of the number used instead of calculating mono-vanadium based normalization factor 
    one does not need to provide mono-vanadium run if this value is provided as it will be used instead
   -->
@@ -330,7 +326,12 @@
     <value val="False"/>
 </parameter>
 
-<!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
+<!-- Parameter specifies if one wants to run diagnostics (which include applying hard mask file) or not-->
+<parameter name="run_diagnostics" type="bool">
+    <value val="True"/>
+</parameter>
+
+  <!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
      correspondent to the run if finds it and uses this mask as hard mask only (does not run diagnostics). 
      If such file has not been found, it will run diagnostics and save the masks into mask file for reuse 
      Hard Mask file, provided separately or as additional hard mask file is ignored in this case -->

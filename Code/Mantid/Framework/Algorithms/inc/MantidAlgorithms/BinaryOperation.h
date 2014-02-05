@@ -80,12 +80,11 @@ namespace Mantid
         buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr & lhs, const API::MatrixWorkspace_const_sptr & rhs);
 
 
-    private:
-      // Overridden Algorithm methods
-      void init();
-      void exec();
-
     protected:
+      // Overridden Algorithm methods
+      virtual void exec();
+      virtual void init();
+
       bool handleSpecialDivideMinus();
 
       /// Execution method for event workspaces, to be overridden as needed.

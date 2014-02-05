@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
 
+#include <boost/function.hpp>
+
 namespace Mantid
 {
   namespace Algorithms
@@ -63,23 +65,29 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
-
       /// Execute algorithm for EventWorkspaces
       void execEvent();
     
       /// Create output workspace
-      API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);
+      API::MatrixWorkspace_sptr createOutputWS(const API::MatrixWorkspace_sptr & input);
+      /// Get the scale factor for the given spectrum
+      double getScaleFactor(const API::MatrixWorkspace_const_sptr & inputWS, const size_t index);
        
       /// The progress reporting object
       API::Progress *m_progress;
 
       /// Scaling factor
-      double factor;
+      double m_algFactor;
+      /// instrument parameter name
+      std::string m_parname;
+      /// Flag whether we are combining input parameters
+      bool m_combine;
+      /// Function defining request operation
+      boost::function<double (double,double)> m_binOp;
       /// Start workspace index
-      int wi_min;
+      int m_wi_min;
       /// Stop workspace index
-      int wi_max;
-       
+      int m_wi_max;
     };
 
   } // namespace Algorithm
