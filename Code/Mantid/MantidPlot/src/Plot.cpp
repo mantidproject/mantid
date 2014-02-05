@@ -116,9 +116,9 @@ Plot::Plot(int width, int height, QWidget *parent, const char *)
 	//plCanvas->setFocus();
 	plCanvas->setFrameShadow(QwtPlot::Plain);
 	plCanvas->setCursor(Qt::arrowCursor);
-	plCanvas->setLineWidth(0);
+	plCanvas->setLineWidth(1);
 	plCanvas->setPaintAttribute(QwtPlotCanvas::PaintCached, false);
-	plCanvas->setPaintAttribute(QwtPlotCanvas::PaintPacked, false);
+	plCanvas->setPaintAttribute(QwtPlotCanvas::PaintPacked, true);
 
     QColor background = QColor(Qt::white);
     background.setAlpha(255);

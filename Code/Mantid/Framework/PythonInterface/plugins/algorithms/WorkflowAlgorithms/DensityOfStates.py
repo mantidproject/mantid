@@ -1,6 +1,6 @@
 """*WIKI* 
 
-Calculates the Density of States from either a .phonon or .castep file using either Raman or IR intensities. 
+Calculates phonon densities of states, Raman and IR spectrum from the output of CASTEP code obtained in the form of <seedname>.phonon and <seedname>.castep files. 
 
 *WIKI*"""
 
@@ -16,7 +16,9 @@ import math
 
 class DensityOfStates(PythonAlgorithm):
  
-		def PyInit(self):
+		def PyInit(self): 
+			self.setWikiSummary("Calculates phonon densities of states, Raman and IR spectrum.")
+			
 			#declare properties
 			self.declareProperty(FileProperty('File', '', action=FileAction.Load, 
 				extensions = ["phonon", "castep"]),

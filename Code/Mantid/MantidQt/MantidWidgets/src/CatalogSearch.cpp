@@ -439,6 +439,7 @@ namespace MantidQt
       }
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigatorSurname", m_icatUiForm.InvestigatorSurname->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("DataFileName", m_icatUiForm.DataFileName->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationId", m_icatUiForm.InvestigationId->text().toStdString()));
 
       // Right side of form.
       if (m_icatUiForm.StartDate->text().size() > 2)
@@ -652,6 +653,7 @@ namespace MantidQt
       m_icatUiForm.InvestigationName_err->setVisible(false);
       m_icatUiForm.Instrument_err->setVisible(false);
       m_icatUiForm.RunRange_err->setVisible(false);
+      m_icatUiForm.InvestigationId_err->setVisible(false);
       m_icatUiForm.InvestigatorSurname_err->setVisible(false);
       m_icatUiForm.InvestigationAbstract_err->setVisible(false);
       // Right side of form.
@@ -725,9 +727,6 @@ namespace MantidQt
 
       // Add data from the workspace to the results table.
       populateTable(resultsTable, workspace);
-
-      // Hide the "Investigation id" column (It's used by the CatalogGetDataFiles algorithm).
-      resultsTable->setColumnHidden(0, true);
 
       // Show only a portion of the title as they can be quite long.
       resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
@@ -1113,6 +1112,7 @@ namespace MantidQt
       // For all the files downloaded (or in archive) we want to load them.
       for (unsigned i = 0; i < filePaths.size(); i++)
       {
+        if (filePaths.at(i).empty()) return;
         // Set the filename (path) of the algorithm to load from.
         loadAlgorithm->setPropertyValue("Filename", filePaths.at(i));
         // Sets the output workspace to be the name of the file.

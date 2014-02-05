@@ -82,6 +82,11 @@ class BASISReduction(PythonAlgorithm):
 
         api.LoadMask(Instrument='BASIS', OutputWorkspace='BASIS_MASK', 
                      InputFile=self._maskFile)
+                     
+        # Work around length issue
+        _dMask = api.ExtractMask('BASIS_MASK')
+        self._dMask = _dMask[1]
+        api.DeleteWorkspace(_dMask[0])
 	
 	# Do normalization if run numbers are present
 	norm_runs = self.getProperty("NormRunNumbers").value
@@ -219,7 +224,8 @@ class BASISReduction(PythonAlgorithm):
 
     def _calibData(self, sam_ws, mon_ws):
         api.MaskDetectors(Workspace=sam_ws, 
-                          MaskedWorkspace='BASIS_MASK')
+                          DetectorList=self._dMask)
+                          #MaskedWorkspace='BASIS_MASK')
         api.ModeratorTzeroLinear(InputWorkspace=sam_ws, 
                            OutputWorkspace=sam_ws)
         api.LoadParameterFile(Workspace=sam_ws, 
