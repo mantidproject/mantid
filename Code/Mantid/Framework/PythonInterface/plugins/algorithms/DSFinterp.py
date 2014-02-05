@@ -40,14 +40,9 @@ class DSFinterp(PythonAlgorithm):
   def PyInit(self):
     arrvalidator = StringArrayMandatoryValidator()
     self.declareProperty(StringArrayProperty('Workspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of input workspaces')
-    # check the number of input workspaces is same as number of input parameters
-    #arrvalidator2 = FloatArrayLengthValidator(len(self.getProperty('Workspaces')))
-    #self.declareProperty(FloatArrayProperty('ParameterValues', values=[], validator=arrvalidator2, direction=Direction.Input), doc='list of input parameter values')
     self.declareProperty(FloatArrayProperty('ParameterValues', values=[], direction=Direction.Input), doc='list of input parameter values')
-    # check requested parameter falls within the list of parameters
-    #parmvalidator=FloatBoundedValidator()
-    #parmvalidator.setBounds( min(self.getProperty('ParameterValues')), max(self.getProperty('ParameterValues')) )
-    #self.declareProperty('TargetParameter', 0.0, validator=parmvalidator, direction=Direction.Input, doc="Parameter to interpolate the structure factor")
+    self.declareProperty('RegressionWindow',0, direction=Direction.Input, doc='window for the running local-regression. No regression if value set to zero')
+    self.declareProperty('RegressionType','linear',direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
     self.declareProperty('TargetParameter', 0.0, direction=Direction.Input, doc="Parameter to interpolate the structure factor")
     self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output), doc='Workspace to save the interpolated structure factor')
 
@@ -83,7 +78,9 @@ class DSFinterp(PythonAlgorithm):
     # Create the intepolator
     channelgroup = ChannelGroup()
     channelgroup.InitFromDsfGroup(dsfgroup)
-    channelgroup.InitializeInterpolator(running_regr_type='quadratic')
+    regressiontype = self.getProperty('RegressionType').value
+    windowlength = self.getProperty('RegressionWindow').value
+    channelgroup.InitializeInterpolator(running_regr_type=regressiontype, windowlength=windowlength)
     # Invoke the interpolator and save to outputworkspace
     dsf = channelgroup(targetfvalue)
     #tr()
