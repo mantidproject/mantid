@@ -147,12 +147,14 @@ void ConvertToMDParent::init()
 "Defines the third projection vector of the target Q coordinate system in '''Q3D''' mode. - Default (0,0,1)");
  
 }
-/**
- * The method responsible for analyzing input workspace parameters and preprocessing detectors positions into reciprocal space
+/**The method responsible for analyzing input workspace parameters and preprocessing detectors positions into reciprocal space
+ *
  * @param InWS2D -- input Matrix workspace with defined instrument
- * @param dEModeRequested
- * @param updateMasks
- * @return
+ * @param dEModeRequested -- energy conversion mode (direct/indirect/elastic)
+ * @param updateMasks  --  if full detector positions calculations or just update masking requested
+ * @param OutWSName    -- the name for the preprocessed detectors workspace to have in the analysis data service
+ * 
+ * @return          shared pointer to the workspace with preprocessed detectors information. 
  */
 DataObjects::TableWorkspace_const_sptr ConvertToMDParent::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,
                                                                                        bool updateMasks, const std::string & OutWSName)
