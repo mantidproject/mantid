@@ -266,6 +266,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry
 			const size_t vectorSize = data.dim2() + 1;
 			std::vector<double> positionsBinning;
 			positionsBinning.reserve(vectorSize);
+
 			for( size_t i = 0; i < vectorSize; i++ )
 				positionsBinning.push_back( static_cast<double>(i) );
 
