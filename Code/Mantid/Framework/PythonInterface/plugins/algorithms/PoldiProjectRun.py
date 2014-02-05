@@ -225,7 +225,9 @@ from mantid.simpleapi import (LoadSINQFile,
                               PoldiLoadSpectra,
                               PoldiLoadIPP,
                               PoldiAutoCorrelation,
-                              PoldiPeakDetection)
+                              PoldiPeakDetection,
+                              GroupWorkspaces,
+                              RenameWorkspace)
 import os.path
 
 
@@ -426,7 +428,9 @@ class PoldiProjectRun(PythonAlgorithm):
                                PeakDetectionThreshold=peak_detect_threshold,
                                OutputWorkspace=sampleNamePeak)
             
-            
+            groupedResults = GroupWorkspaces([mtd[sampleName].name(), sampleNameLog, sampleDeadWires, sampleNameCorr, sampleNamePeak])
+            RenameWorkspace(InputWorkspace=groupedResults,
+                            OutputWorkspace=sampleName)
 
         if(load_data_at_the_end):
             self.setProperty("OutputWorkspace", sample_ipp_ws)
