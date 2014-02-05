@@ -26,7 +26,7 @@ class Stitch1DTest(unittest.TestCase):
         # Cleanup
         DeleteWorkspace(self.a)
         DeleteWorkspace(self.b)
-        
+               
     def test_endoverap_outside_range_throws(self):
         try:
             stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[0], EndOverlap=self.x[-1] + 0.001, Params='0.2')
@@ -40,14 +40,14 @@ class Stitch1DTest(unittest.TestCase):
             self.assertTrue(False, "Should have thrown with StartOverlap < x max")
         except RuntimeError:
             pass 
-          
+     
     def test_startoverap_greater_than_end_overlap_throws(self):
         try:
             stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[-1], EndOverlap=self.x[0], Params='0.2')
             self.assertTrue(False, "Should have thrown with StartOverlap < x max")
         except RuntimeError:
             pass
-        
+  
     def test_lhsworkspace_must_be_histogram(self):
         x = numpy.arange(-1, 1, 0.2)
         e = numpy.arange(-1, 1, 0.2)
@@ -73,6 +73,43 @@ class Stitch1DTest(unittest.TestCase):
             pass
         finally:
             DeleteWorkspace(rhs_ws)
+            
+    def test_stitching_uses_suppiled_params(self):
+        stitched, scale = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='-0.8, 0.2, 1')   
+        
+        #Check the ranges on the output workspace against the param inputs.
+        
+        out_x_values = stitched.readX(0)
+        x_min = numpy.min(out_x_values)
+        x_max = numpy.max(out_x_values)
+        self.assertEqual(x_min, -0.8)
+        self.assertEqual(x_max, 1)
+        DeleteWorkspace(stitched)
+                
+    def test_stitching_determines_params(self):
+        
+        x1 = numpy.arange(-1, 1, 0.2)
+        x2 = numpy.arange(0.4, 1.6, 0.2)
+        ws1 =  CreateWorkspace(UnitX="1/q", DataX=x1, DataY=[1,1,1,1,1,1,1,1,1], NSpec=1)
+        ws2 =  CreateWorkspace(UnitX="1/q", DataX=x2, DataY=[1,1,1,1,1,1], NSpec=1)
+        
+        demanded_step_size = 0.2
+        stitched, scale = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2, StartOverlap=0.4, EndOverlap=1.0, Params=demanded_step_size)   
+        
+        #Check the ranges on the output workspace against the param inputs.
+        
+        out_x_values = stitched.readX(0)
+        x_min = numpy.min(out_x_values)
+        x_max = numpy.max(out_x_values)
+        step_size = out_x_values[1] - out_x_values[0] 
+        
+        self.assertEqual(x_min, -1)
+        self.assertAlmostEqual(x_max-demanded_step_size, 1.4, delta=1e-6)
+        self.assertAlmostEqual(step_size, demanded_step_size, delta=1e-6)
+        
+        DeleteWorkspace(stitched)
+        DeleteWorkspace(ws1)
+        DeleteWorkspace(ws2)
           
     def test_stitching_scale_right(self):
         stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2')    
@@ -93,6 +130,7 @@ class Stitch1DTest(unittest.TestCase):
         # Check that the output X-Values are correct.
         self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))
         DeleteWorkspace(stitched[0])
+        
 
     def test_stitching_scale_left(self):
         stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2', ScaleRHSWorkspace=False)
@@ -146,6 +184,6 @@ class Stitch1DTest(unittest.TestCase):
         # Check that the output X-Values are correct.
         self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))     
         DeleteWorkspace(stitched[0]) 
- 
+         
 if __name__ == '__main__':
     unittest.main()

@@ -40,34 +40,63 @@ class Stitch1D(PythonAlgorithm):
         errors = ws.extractE()
         count = len(errors.nonzero()[0])
         return count > 0
+    
+    def __find_indexes_start_end(self, startOverlap, endOverlap, workspace):
+        a1=workspace.binIndexOf(startOverlap)
+        a2=workspace.binIndexOf(endOverlap)
+        if a1 == a2:
+            raise RuntimeError("The Params you have provided for binning yield a workspace in which start and end overlap appear in the same bin. Make binning finer via input Params.")
+        return a1, a2
+    
+    '''
+    Fetch and create rebin parameters.
+    If a single step is provided, then the min and max values are taken from the input workspaces.
+    '''
+    def __create_rebin_parameters(self):
+        params = None
+        user_params = self.getProperty("Params").value
+        if user_params.size >= 3:
+            params = user_params
+        else:
+            lhs_ws = self.getProperty("LHSWorkspace").value
+            rhs_ws = self.getProperty("RHSWorkspace").value
+            params = list()
+            params.append(np.min(lhs_ws.readX(0)))
+            params.append(user_params[0])
+            params.append(np.max(rhs_ws.readX(0)))
+        return params
             
     def PyExec(self):
-        rangeTolerance = 1e-9
         # Just forward the other properties on.
-        startOverlap = self.getProperty('StartOverlap').value - rangeTolerance
-        endOverlap = self.getProperty('EndOverlap').value + rangeTolerance
+        range_tolerance = 1e-9
+        startOverlap = self.getProperty('StartOverlap').value - range_tolerance
+        endOverlap = self.getProperty('EndOverlap').value + range_tolerance
         scaleRHSWorkspace = self.getProperty('ScaleRHSWorkspace').value
         useManualScaleFactor = self.getProperty('UseManualScaleFactor').value
         manualScaleFactor = self.getProperty('ManualScaleFactor').value
         outScaleFactor = self.getProperty('OutScaleFactor').value
-        params = self.getProperty("Params").value
         
+        params = self.__create_rebin_parameters()
+        print params
+        logger.warning(str(params))
         lhs_rebinned = Rebin(InputWorkspace=self.getProperty("LHSWorkspace").value, Params=params)
         rhs_rebinned = Rebin(InputWorkspace=self.getProperty("RHSWorkspace").value, Params=params)
         
         xRange = lhs_rebinned.readX(0)
         minX = xRange[0]
         maxX = xRange[-1]
-        if(startOverlap < minX):
+        if(round(startOverlap, 9) < round(minX, 9)):
+            logger.warning("StartOverlap: %0.9f, X min: %0.9f" % (startOverlap, minX))
             raise RuntimeError("Stitch1D StartOverlap is outside the X range after rebinning")
-        if(endOverlap > maxX):
+        if(round(endOverlap, 9) > round(maxX, 9)):
+            logger.warning("EndOverlap: %0.9f, X max: %0.9f" % (endOverlap, maxX))
             raise RuntimeError("Stitch1D EndOverlap is outside the X range after rebinning")
         
         if(startOverlap > endOverlap):
             raise RuntimeError("Stitch1D cannot have a StartOverlap > EndOverlap")
-        a1=lhs_rebinned.binIndexOf(startOverlap)
-        a2=lhs_rebinned.binIndexOf(endOverlap)
     
+        a1, a2 = self.__find_indexes_start_end(startOverlap, endOverlap, lhs_rebinned)
+        
         if not useManualScaleFactor:
             lhsOverlapIntegrated = Integration(InputWorkspace=lhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
             rhsOverlapIntegrated = Integration(InputWorkspace=rhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
@@ -76,7 +105,7 @@ class Stitch1D(PythonAlgorithm):
             if scaleRHSWorkspace:
                 rhs_rebinned *= (lhsOverlapIntegrated/rhsOverlapIntegrated)
                 scalefactor = y1[0]/y2[0]
-            else:
+            else: 
                 lhs_rebinned *= (rhsOverlapIntegrated/lhsOverlapIntegrated)
                 scalefactor = y2[0]/y1[0]   
             DeleteWorkspace(lhsOverlapIntegrated)
