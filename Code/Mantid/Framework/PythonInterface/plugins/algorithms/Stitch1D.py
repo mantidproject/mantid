@@ -1,6 +1,8 @@
 """*WIKI* 
 
-Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputing a stitched Matrix Workspace. This algorithm is a wrapper over [[Stitch1DMD]].
+Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputting a stitched Matrix Workspace. Either the right-hand-side or left-hand-side workspace can be chosen to be scaled. Users
+must provide a Param step (single value), but the binning start and end are calculated from the input workspaces if not provided. Likewise, StartOverlap and EndOverlap are optional. If the StartOverlap or EndOverlap
+are not provided, then these are taken to be the region of x-axis intersection.
 
 The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
 *WIKI*"""
@@ -26,11 +28,9 @@ class Stitch1D(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")
         
-        overlap_validator = FloatMandatoryValidator() 
-        
-        self.declareProperty(name="StartOverlap", defaultValue=-1.0, validator=overlap_validator, doc="Overlap in Q.")
-        self.declareProperty(name="EndOverlap", defaultValue=-1.0, validator=overlap_validator, doc="End overlap in Q.")
-        self.declareProperty(FloatArrayProperty(name="Params", values=[0.1]), doc="Rebinning Parameters. See Rebin for format.")
+        self.declareProperty(name="StartOverlap", defaultValue=-1.0, doc="Overlap x-value in units of x-axis. Optional.")
+        self.declareProperty(name="EndOverlap", defaultValue=-1.0, doc="End overlap x-value in units of x-value. Optional.")
+        self.declareProperty(FloatArrayProperty(name="Params", values=[0.1]), doc="Rebinning Parameters. See Rebin for format. If only a single value is provided, start and end are taken from input workspaces.")
         self.declareProperty(name="ScaleRHSWorkspace", defaultValue=True, doc="Scaling either with respect to workspace 1 or workspace 2.")
         self.declareProperty(name="UseManualScaleFactor", defaultValue=False, doc="True to use a provided value for the scale factor.")
         self.declareProperty(name="ManualScaleFactor", defaultValue=1.0, doc="Provided value for the scale factor.")
@@ -47,6 +47,31 @@ class Stitch1D(PythonAlgorithm):
         if a1 == a2:
             raise RuntimeError("The Params you have provided for binning yield a workspace in which start and end overlap appear in the same bin. Make binning finer via input Params.")
         return a1, a2
+    
+    def __calculate_x_intersection(self):
+        lhs_ws = self.getProperty("LHSWorkspace").value
+        rhs_ws = self.getProperty("RHSWorkspace").value
+        lhs_x = lhs_ws.readX(0)
+        rhs_x = rhs_ws.readX(0)
+        return rhs_x[0], lhs_x[-1]
+    
+    def __get_start_overlap(self):
+        start_overlap_property = self.getProperty('StartOverlap')
+        start_overlap = start_overlap_property.value
+        if start_overlap_property.isDefault:
+            min, max = self.__calculate_x_intersection()
+            start_overlap = min
+            logger.information("StartOverlap calculated to be: %0.4f" % start_overlap)
+        return start_overlap
+        
+    def __get_end_overlap(self):
+        end_overlap_property = self.getProperty('EndOverlap')
+        end_overlap = end_overlap_property.value
+        if end_overlap_property.isDefault:
+            min, max = self.__calculate_x_intersection()
+            end_overlap = max
+            logger.information("EndOverlap calculated to be: %0.4f" % end_overlap)
+        return end_overlap
     
     '''
     Fetch and create rebin parameters.
@@ -69,8 +94,9 @@ class Stitch1D(PythonAlgorithm):
     def PyExec(self):
         # Just forward the other properties on.
         range_tolerance = 1e-9
-        startOverlap = self.getProperty('StartOverlap').value - range_tolerance
-        endOverlap = self.getProperty('EndOverlap').value + range_tolerance
+        
+        startOverlap = self.__get_start_overlap() - range_tolerance
+        endOverlap = self.__get_end_overlap() + range_tolerance
         scaleRHSWorkspace = self.getProperty('ScaleRHSWorkspace').value
         useManualScaleFactor = self.getProperty('UseManualScaleFactor').value
         manualScaleFactor = self.getProperty('ManualScaleFactor').value
@@ -78,7 +104,6 @@ class Stitch1D(PythonAlgorithm):
         
         params = self.__create_rebin_parameters()
         print params
-        logger.warning(str(params))
         lhs_rebinned = Rebin(InputWorkspace=self.getProperty("LHSWorkspace").value, Params=params)
         rhs_rebinned = Rebin(InputWorkspace=self.getProperty("RHSWorkspace").value, Params=params)
         
@@ -143,12 +168,13 @@ class Stitch1D(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=result, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         
         # Cleanup
+        '''
         DeleteWorkspace(lhs_rebinned)
         DeleteWorkspace(rhs_rebinned)
         DeleteWorkspace(overlap1)
         DeleteWorkspace(overlap2)
         DeleteWorkspace(overlapave)
-       
+        '''
         self.setProperty('OutputWorkspace', result)
         self.setProperty('OutScaleFactor', scalefactor)
         
