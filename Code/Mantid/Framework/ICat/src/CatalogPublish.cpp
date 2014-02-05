@@ -7,9 +7,8 @@ Datafiles and workspaces that are published are automatically made private. This
 
 '''Parameters Note'''
 
-- A file or workspace can be published, but not both at the same time.
-- When uploading a workspace, it is saved to the default save directory as a nexus file. The history of of the workspace is generated
-and saved into a Python script, which is also uploaded alongside the datafile of the workspace.
+* A file or workspace can be published, but not both at the same time.
+* When uploading a workspace, it is saved to the default save directory as a nexus file. The history of of the workspace is generated and saved into a Python script, which is also uploaded alongside the datafile of the workspace.
 
 *WIKI*/
 
