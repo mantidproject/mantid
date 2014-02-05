@@ -37,7 +37,7 @@ class Stitch1DManyTest(unittest.TestCase):
         same = all([(x == y)  for x,y in zip(yDataRounded, expectedYData)])
         self.assertTrue(same)
         
-    '''  
+    
     def test_stitch_throws_with_too_few_workspaces(self):
         try:
             stitched = Stitch1DMany(InputWorkspaces='a', StartOverlaps=[-0.5], EndOverlaps=[0.5], Params=[0.1])
@@ -75,7 +75,7 @@ class Stitch1DManyTest(unittest.TestCase):
         
         DeleteWorkspace(stitchedViaStitchMany)
         DeleteWorkspace(stitchedViaStitchTwo)
-    '''
+    
     
     def test_stitches_three(self):
         ws1 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[3.0, 3.0, 3.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
@@ -91,13 +91,20 @@ class Stitch1DManyTest(unittest.TestCase):
         DeleteWorkspace(ws2)
         DeleteWorkspace(ws3)
         DeleteWorkspace(stitchedViaStitchMany)
-    '''
+        
+    def test_stitches_three_no_overlaps_specified_should_still_work(self):
+        ws1 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[3.0, 3.0, 3.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
+        ws2 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
+        ws3 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0], NSpec=1, DataE=self.e)
+        stitchedViaStitchMany, sf = Stitch1DMany(InputWorkspaces='ws1, ws2, ws3', Params=0.2)
+        
+    
     def test_stitches_using_manual_scaling(self):
         stitchedViaStitchMany, sf = Stitch1DMany(InputWorkspaces='a, b', StartOverlaps=[-0.4], EndOverlaps=[0.4], Params=[0.2], UseManualScaleFactor=True, ManualScaleFactor=2.0)
         
         self.assertEquals(2.0, round(sf, 6))
         DeleteWorkspace(stitchedViaStitchMany)
-    '''    
+        
         
 if __name__ == '__main__':
     unittest.main()

@@ -55,18 +55,18 @@ class Stitch1D(PythonAlgorithm):
         rhs_x = rhs_ws.readX(0)
         return rhs_x[0], lhs_x[-1]
     
-    def __get_start_overlap(self):
+    def __get_start_overlap(self, range_tolerance):
         start_overlap_property = self.getProperty('StartOverlap')
-        start_overlap = start_overlap_property.value
+        start_overlap = start_overlap_property.value - range_tolerance
         if start_overlap_property.isDefault:
             min, max = self.__calculate_x_intersection()
             start_overlap = min
             logger.information("StartOverlap calculated to be: %0.4f" % start_overlap)
         return start_overlap
         
-    def __get_end_overlap(self):
+    def __get_end_overlap(self, range_tolerance):
         end_overlap_property = self.getProperty('EndOverlap')
-        end_overlap = end_overlap_property.value
+        end_overlap = end_overlap_property.value + range_tolerance
         if end_overlap_property.isDefault:
             min, max = self.__calculate_x_intersection()
             end_overlap = max
@@ -95,8 +95,8 @@ class Stitch1D(PythonAlgorithm):
         # Just forward the other properties on.
         range_tolerance = 1e-9
         
-        startOverlap = self.__get_start_overlap() - range_tolerance
-        endOverlap = self.__get_end_overlap() + range_tolerance
+        startOverlap = self.__get_start_overlap(range_tolerance)
+        endOverlap = self.__get_end_overlap(range_tolerance)
         scaleRHSWorkspace = self.getProperty('ScaleRHSWorkspace').value
         useManualScaleFactor = self.getProperty('UseManualScaleFactor').value
         manualScaleFactor = self.getProperty('ManualScaleFactor').value
@@ -111,11 +111,9 @@ class Stitch1D(PythonAlgorithm):
         minX = xRange[0]
         maxX = xRange[-1]
         if(round(startOverlap, 9) < round(minX, 9)):
-            logger.warning("StartOverlap: %0.9f, X min: %0.9f" % (startOverlap, minX))
-            raise RuntimeError("Stitch1D StartOverlap is outside the X range after rebinning")
+            raise RuntimeError("Stitch1D StartOverlap is outside the X range after rebinning. StartOverlap: %0.9f, X min: %0.9f" % (startOverlap, minX))
         if(round(endOverlap, 9) > round(maxX, 9)):
-            logger.warning("EndOverlap: %0.9f, X max: %0.9f" % (endOverlap, maxX))
-            raise RuntimeError("Stitch1D EndOverlap is outside the X range after rebinning")
+            raise RuntimeError("Stitch1D EndOverlap is outside the X range after rebinning. EndOverlap: %0.9f, X max: %0.9f" % (endOverlap, maxX))
         
         if(startOverlap > endOverlap):
             raise RuntimeError("Stitch1D cannot have a StartOverlap > EndOverlap")
@@ -168,13 +166,12 @@ class Stitch1D(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=result, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         
         # Cleanup
-        '''
         DeleteWorkspace(lhs_rebinned)
         DeleteWorkspace(rhs_rebinned)
         DeleteWorkspace(overlap1)
         DeleteWorkspace(overlap2)
         DeleteWorkspace(overlapave)
-        '''
+        
         self.setProperty('OutputWorkspace', result)
         self.setProperty('OutScaleFactor', scalefactor)
         
