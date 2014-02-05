@@ -45,6 +45,7 @@ class DSFinterp(PythonAlgorithm):
     self.declareProperty('RegressionType','linear',direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
     self.declareProperty(FloatArrayProperty('TargetParameters', values=[], direction=Direction.Input), doc="Parameters to interpolate the structure factor")
     self.declareProperty(StringArrayProperty('OutputWorkspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of output workspaces to save the interpolated structure factors')
+    self.channelgroup = None
 
   def areWorkspacesCompatible(self, a, b):
     sizeA = a.blocksize() * a.getNumberHistograms() 
@@ -57,11 +58,11 @@ class DSFinterp(PythonAlgorithm):
     fvalues = self.getProperty('ParameterValues').value
     if len(workspaces) != len(fvalues):
       logger.error('Number of workspaces and fvalues should be the same')
-      return
+      return None
     for workspace in workspaces[1:]:
       if not self.areWorkspacesCompatible(mtd[workspaces[0]],mtd[workspace]):
         logger.error('Workspace {0} incompatible with {1}'.format(workspace, workspaces[0]))
-        return
+        return None
     # Load the workspaces into a group of dynamic structure factors
     from dsfinterp.dsf import Dsf
     from dsfinterp.dsfgroup import DsfGroup
@@ -72,27 +73,29 @@ class DSFinterp(PythonAlgorithm):
       dsf.Load( mtd[workspaces[idsf]] )
       dsf.SetFvalue( fvalues[idsf] )
       dsfgroup.InsertDsf(dsf)
-    # Create the intepolator
-    channelgroup = ChannelGroup()
-    channelgroup.InitFromDsfGroup(dsfgroup)
-    regressiontype = self.getProperty('RegressionType').value
-    windowlength = self.getProperty('RegressionWindow').value
-    channelgroup.InitializeInterpolator(running_regr_type=regressiontype, windowlength=windowlength)
+    # Create the intepolator if not instantiated before
+    if not self.channelgroup:
+      self.channelgroup = ChannelGroup()
+      self.channelgroup.InitFromDsfGroup(dsfgroup)
+      regressiontype = self.getProperty('RegressionType').value
+      windowlength = self.getProperty('RegressionWindow').value
+      self.channelgroup.InitializeInterpolator(running_regr_type=regressiontype, windowlength=windowlength)
     # Invoke the interpolator and generate the output workspaces
     targetfvalues = self.getProperty('TargetParameters').value
     for targetfvalue in targetfvalues:
       if targetfvalue < min(fvalues) or targetfvalue > max(fvalues):
         logger.error('Target parameters should lie in [{0}, {1}]'.format(min(fvalues),max(fvalues)))
-        return
+        return None
     outworkspaces = self.getProperty('OutputWorkspaces').value
     if len(targetfvalues) != len(outworkspaces):
       logger.error('Number of workspaces and fvalues should be the same')
-      return
+      return None
     for i in range(len(targetfvalues)):
       outworkspace = outworkspaces[i]
-      dsf = channelgroup( targetfvalues[i] )
+      dsf = self.channelgroup( targetfvalues[i] )
       outws = CloneWorkspace( mtd[workspaces[0]], OutputWorkspace=outworkspaces[i])
       dsf.Save(outws) # overwrite dataY and dataE
+
 #############################################################################################
 
 try:
