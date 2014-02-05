@@ -557,13 +557,13 @@ namespace Mantid
 
 
     /** Method takes min-max values from algorithm parameters if they are present or calculates default min-max values if these values 
-    were not supplied to the method or the supplied value is incorrect.
-    *
+     *  were not supplied to the method or the supplied value is incorrect.
+     *
     *@param inWS     -- the shared pointer to the source workspace
     *@param QMode    -- the string which defines algorithms Q-conversion mode
     *@param dEMode   -- the string describes the algorithms energy conversion mode
     *@param QFrame   -- in Q3D case this describes target coordinate system and is ignored in any othre caste
-    *@param convertTo-- The parameter describing Q-scaling transformtations 
+    *@param ConvertTo -- The parameter describing Q-scaling transformtations 
     *@param otherDim -- the vector of other dimension names (if any)
     *  Input-output values: 
     *@param minVal   -- the vector with min values for the algorithm
