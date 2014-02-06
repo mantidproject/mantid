@@ -499,7 +499,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
 
 
 def process_legacy_parameters(**kwargs) :
-    """ The method to deal with old parameters which have logic different from default and easy to process using 
+    """ The method to deal with old parameters which have logi c different from default and easy to process using 
         subprogram. All other parameters just copiet to output 
     """
     params = dict();
@@ -514,7 +514,7 @@ def process_legacy_parameters(**kwargs) :
             params[key]=value;    
 
     # Check all possible ways to define hard mask file:
-    if not params['hard_mask_file'] is None:
+    if 'hard_mask_file' in params and not params['hard_mask_file'] is None:
         if type(params['hard_mask_file']) == str and params['hard_mask_file']=="None":
             params['hard_mask_file'] = None;
         elif type(params['hard_mask_file']) == bool:
