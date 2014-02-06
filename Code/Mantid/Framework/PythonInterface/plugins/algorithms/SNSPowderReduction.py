@@ -477,21 +477,16 @@ class SNSPowderReduction(PythonAlgorithm):
                     # load the vanadium background (if appropriate)
                     vbackRun = self.getProperty("VanadiumBackgroundNumber").value
                     if vbackRun > 0:
-                        if ("%s_%d" % (self._instrument, vbackRun)) in mtd:
-                            vbackRun = mtd["%s_%d" % (self._instrument, vbackRun)]
-                        else:
-                            vbackRun = self._loadData(vanRun, SUFFIX, vanFilterWall)
-                            name = "_".join(str(vbackRun).split("_")[:-1])
-                            vbackRun = api.RenameWorkspace(InputWorkspace=vbackRun, OutputWorkspace=name)
-                            try:
-                                vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun, 
-                                                                  OutputWorkspace=vbackRun)
-                                vanRun.getRun()['gsas_monitor'] = 1
-                            except Exception, e:
-                                self.log().warning(str(e))
+                        vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
+                        try:
+                            vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun, 
+                                                              OutputWorkspace=vbackRun)
+                            vbackRun.getRun()['gsas_monitor'] = 1
+                        except Exception, e:
+                            self.log().warning(str(e))
 
                         vanRun -= vbackRun
-                        workspacelist.append(str(vbackRun))
+                        api.DeleteWorkspace(Workspace=vbackRun)
                     else:
                         vbackRun = None
 
@@ -577,7 +572,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return
 
-    def _loadData(self, runnumber, extension, filterWall=None, **chunk):
+    def _loadData(self, runnumber, extension, filterWall=None, outname=None, **chunk):
         if  runnumber is None or runnumber <= 0:
             return None
         
@@ -591,6 +586,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 name += "_%d" % (1 + int(chunk["SpectrumMin"])/(int(chunk["SpectrumMax"])-int(chunk["SpectrumMin"])))        
         else:
             name += "_%d" % 0
+        if outname is not None:
+            name = outname
 
         if extension.endswith("_event.nxs"):
             chunk["Precount"] = True
