@@ -430,7 +430,7 @@ class PoldiProjectRun(PythonAlgorithm):
             
             groupedResults = GroupWorkspaces([mtd[sampleName].name(), sampleNameLog, sampleDeadWires, sampleNameCorr, sampleNamePeak])
             RenameWorkspace(InputWorkspace=groupedResults,
-                            OutputWorkspace=sampleName)
+                            OutputWorkspace="%s_Data" % sampleName)
 
         if(load_data_at_the_end):
             self.setProperty("OutputWorkspace", sample_ipp_ws)
