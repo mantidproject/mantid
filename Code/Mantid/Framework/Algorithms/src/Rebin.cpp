@@ -94,6 +94,7 @@ namespace Mantid
                       "names are the same, only the X bins are set, which is very quick. If false, "
                       "then the workspace gets converted to a Workspace2D histogram.");
 
+      declareProperty("FullBinsOnly", false, "Ignore bins of the size smaller than the step size.");
     }
 
 

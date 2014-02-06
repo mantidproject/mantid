@@ -12,6 +12,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/ScopedWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -459,6 +460,30 @@ public:
     AnalysisDataService::Instance().remove("test_Rebin_masked_ws");
     AnalysisDataService::Instance().remove("test_Rebin_unmasked");
     AnalysisDataService::Instance().remove("test_Rebin_mask_raw");
+  }
+
+  void testFullBinsOnlyFixed()
+  {
+    ScopedWorkspace inWsEntry( Create1DWorkspace(10) );
+    ScopedWorkspace outWsEntry;
+
+    try
+    {
+      Rebin rebin;
+      rebin.initialize();
+      rebin.setPropertyValue("InputWorkspace", inWsEntry.name());
+      rebin.setPropertyValue("OutputWorkspace", outWsEntry.name());
+      rebin.setPropertyValue("Params", "2.0");
+      rebin.setProperty("FullBinsOnly", true);
+      rebin.execute();
+    }
+    catch(std::runtime_error& e)
+    {
+      TS_FAIL(e.what());
+      return;
+    }
+
+    // TODO: check values
   }
 
 private:
