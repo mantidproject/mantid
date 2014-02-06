@@ -35,8 +35,8 @@ fi
 ###############################################################################
 # Create the build directory if it doesn't exist
 ###############################################################################
-[ -d build ] || mkdir build
-cd build
+[ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
+cd $WORKSPACE/build
 
 ###############################################################################
 # CMake configuration
@@ -46,7 +46,6 @@ $SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON ../Code/Mantid
 ###############################################################################
 # Build step
 ###############################################################################
-cd $WORKSPACE/build
 make -j$BUILD_THREADS KernelTest
 
 ###############################################################################
