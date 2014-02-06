@@ -118,7 +118,7 @@ class ReflectometryReductionOneAuto(PythonAlgorithm):
                 workspace_index_list.append( int(instrument.getNumberParameter("PointDetectorStop")[0]) )
             else:
                 workspace_index_list.append( int(instrument.getNumberParameter("MultiDetectorStart")[0]) )
-                workspace_index_list.append( first_ws.getNumberHistograms() - 1)
+                workspace_index_list.append( in_ws.getNumberHistograms() - 1)
             processing_commands = ','.join(map(str, workspace_index_list))
         else:
             processing_commands = self.getProperty("ProcessingInstructions").value
