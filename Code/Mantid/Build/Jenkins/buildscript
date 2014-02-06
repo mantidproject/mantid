@@ -24,9 +24,9 @@ if [[ $(uname) == 'Darwin' ]]; then
 fi
 
 ###############################################################################
-# RHEL6 setup steps
+# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
 ###############################################################################
-if [[ ${NODE_LABELS^^} == *RHEL6* ]]; then
+if [[ ${NODE_LABELS} == *rhel6* ]]; then
   SCL_ON_RHEL6="scl enable mantidlibs"
 else
   SCL_ON_RHEL6="eval"
