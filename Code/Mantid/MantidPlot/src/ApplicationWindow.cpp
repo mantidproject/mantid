@@ -14945,7 +14945,6 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
 
   if (fn.contains(".opj", Qt::CaseInsensitive) || fn.contains(".ogm", Qt::CaseInsensitive) ||
       fn.contains(".ogw", Qt::CaseInsensitive) || fn.contains(".ogg", Qt::CaseInsensitive))
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(this, fn);
   else{
     QFile f(fname);
