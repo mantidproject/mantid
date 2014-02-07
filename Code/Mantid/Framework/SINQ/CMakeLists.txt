@@ -1,48 +1,51 @@
 set ( SRC_FILES
-    src/LoadFlexiNexus.cpp
-    src/PoldiRemoveDeadWires.cpp
-    src/PoldiLoadChopperSlits.cpp
-    src/PoldiLoadSpectra.cpp
-    src/PoldiLoadIPP.cpp
-    src/PoldiAutoCorrelation5.cpp
-    src/PoldiLoadLog.cpp
-    src/PoldiPeakDetection2.cpp
-    src/InvertMDDim.cpp
-    src/MDHistoToWorkspace2D.cpp
-    src/ProjectMD.cpp
-    src/SINQHMListener.cpp
-    src/SliceMDHisto.cpp
-    src/SINQTranspose3D.cpp
-    src/PoldiHeliumDetector.cpp
+	src/InvertMDDim.cpp
+	src/LoadFlexiNexus.cpp
+	src/MDHistoToWorkspace2D.cpp
+	src/PoldiAutoCorrelation5.cpp
+	src/PoldiDetectorFactory.cpp
+	src/PoldiHeliumDetector.cpp
+	src/PoldiLoadChopperSlits.cpp
+	src/PoldiLoadIPP.cpp
+	src/PoldiLoadLog.cpp
+	src/PoldiLoadSpectra.cpp
+	src/PoldiPeakDetection2.cpp
+	src/PoldiRemoveDeadWires.cpp
+	src/ProjectMD.cpp
+	src/SINQHMListener.cpp
+	src/SINQTranspose3D.cpp
+	src/SliceMDHisto.cpp
 )
 
 set ( INC_FILES
-    inc/MantidSINQ/DllConfig.h
-    inc/MantidSINQ/LoadFlexiNexus.h
-    inc/MantidSINQ/PoldiRemoveDeadWires.h
-    inc/MantidSINQ/PoldiLoadChopperSlits.h
-    inc/MantidSINQ/PoldiLoadSpectra.h
-    inc/MantidSINQ/PoldiLoadIPP.h
-    inc/MantidSINQ/PoldiAutoCorrelation5.h
-    inc/MantidSINQ/PoldiLoadLog.h
-    inc/MantidSINQ/PoldiPeakDetection2.h
-    inc/MantidSINQ/InvertMDDim.h
-    inc/MantidSINQ/MDHistoToWorkspace2D.h
-    inc/MantidSINQ/ProjectMD.h
-    inc/MantidSINQ/SINQHMListener.h
-    inc/MantidSINQ/SliceMDHisto.h
-    inc/MantidSINQ/SINQTranspose3D.h
-    inc/MantidSINQ/PoldiAbstractDetector.h
-    inc/MantidSINQ/PoldiHeliumDetector.h
+	inc/MantidSINQ/DllConfig.h
+	inc/MantidSINQ/InvertMDDim.h
+	inc/MantidSINQ/LoadFlexiNexus.h
+	inc/MantidSINQ/MDHistoToWorkspace2D.h
+	inc/MantidSINQ/PoldiAbstractDetector.h
+	inc/MantidSINQ/PoldiAutoCorrelation5.h
+	inc/MantidSINQ/PoldiDetectorFactory.h
+	inc/MantidSINQ/PoldiHeliumDetector.h
+	inc/MantidSINQ/PoldiLoadChopperSlits.h
+	inc/MantidSINQ/PoldiLoadIPP.h
+	inc/MantidSINQ/PoldiLoadLog.h
+	inc/MantidSINQ/PoldiLoadSpectra.h
+	inc/MantidSINQ/PoldiPeakDetection2.h
+	inc/MantidSINQ/PoldiRemoveDeadWires.h
+	inc/MantidSINQ/ProjectMD.h
+	inc/MantidSINQ/SINQHMListener.h
+	inc/MantidSINQ/SINQTranspose3D.h
+	inc/MantidSINQ/SliceMDHisto.h
 )
 
 set ( TEST_FILES
-    LoadFlexiNexusTest.h
-    ProjectMDTest.h
-    InvertMDDimTest.h
-    MDHistoToWorkspace2DTest.h
-    SliceMDHistoTest.h
-    PoldiDetectorTest.h
+	InvertMDDimTest.h
+	LoadFlexiNexusTest.h
+	MDHistoToWorkspace2DTest.h
+	PoldiDetectorFactoryTest.h
+	PoldiDetectorTest.h
+	ProjectMDTest.h
+	SliceMDHistoTest.h
 )
 
 
