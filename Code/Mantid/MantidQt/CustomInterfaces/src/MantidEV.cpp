@@ -337,8 +337,8 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
 
-   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked(bool)),
-                     this, SLOT( setEnabledPredictPeaksParams_slot(bool) ) );
+   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked()),
+                     this, SLOT( setEnabledPredictPeaksParams_slot() ) );
 
    QObject::connect( m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadPeaksParams_slot(bool) ) );
@@ -447,7 +447,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.min_pred_dspacing_ledt->setText("0.4");
    m_uiForm.max_pred_dspacing_ledt->setText("8.5");
    setEnabledFindPeaksParams_slot(true);
-   setEnabledPredictPeaksParams_slot(true);
+   setEnabledPredictPeaksParams_slot();
    setEnabledLoadPeaksParams_slot(false);
    last_peaks_file.clear();
                                                     // Find UB tab
@@ -1590,18 +1590,32 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
  * Set the enabled state of the load find peaks components to the
  * specified value.
  *
- * @param on  If true, components will be enabled, if false, disabled.
  */
-void MantidEV::setEnabledPredictPeaksParams_slot( bool on)
+void MantidEV::setEnabledPredictPeaksParams_slot()
 {
-  m_uiForm.min_pred_wl_lbl->setEnabled( on );
-  m_uiForm.min_pred_wl_ledt->setEnabled( on );
-  m_uiForm.max_pred_wl_lbl->setEnabled( on );
-  m_uiForm.max_pred_wl_ledt->setEnabled( on );
-  m_uiForm.min_pred_dspacing_lbl->setEnabled( on );
-  m_uiForm.min_pred_dspacing_ledt->setEnabled( on );
-  m_uiForm.max_pred_dspacing_lbl->setEnabled( on );
-  m_uiForm.max_pred_dspacing_ledt->setEnabled( on );
+  bool predict_new_peaks     = m_uiForm.PredictPeaks_ckbx->isChecked();
+  if ( predict_new_peaks )
+  {
+    m_uiForm.min_pred_wl_lbl->setEnabled( true );
+    m_uiForm.min_pred_wl_ledt->setEnabled( true );
+    m_uiForm.max_pred_wl_lbl->setEnabled( true );
+    m_uiForm.max_pred_wl_ledt->setEnabled( true );
+    m_uiForm.min_pred_dspacing_lbl->setEnabled( true );
+    m_uiForm.min_pred_dspacing_ledt->setEnabled( true );
+    m_uiForm.max_pred_dspacing_lbl->setEnabled( true );
+    m_uiForm.max_pred_dspacing_ledt->setEnabled( true );
+  }
+  else
+  {
+    m_uiForm.min_pred_wl_lbl->setEnabled( false );
+    m_uiForm.min_pred_wl_ledt->setEnabled( false );
+    m_uiForm.max_pred_wl_lbl->setEnabled( false );
+    m_uiForm.max_pred_wl_ledt->setEnabled( false );
+    m_uiForm.min_pred_dspacing_lbl->setEnabled( false );
+    m_uiForm.min_pred_dspacing_ledt->setEnabled( false );
+    m_uiForm.max_pred_dspacing_lbl->setEnabled( false );
+    m_uiForm.max_pred_dspacing_ledt->setEnabled( false );
+  }
 }
 
 /**
@@ -2146,6 +2160,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn );
   restore( state, "SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt );
   restore( state, "PredictPeaks_ckbx", m_uiForm.PredictPeaks_ckbx );
+  setEnabledPredictPeaksParams_slot();
   restore( state, "min_pred_wl_ledt", m_uiForm.min_pred_wl_ledt );
   restore( state, "max_pred_wl_ledt", m_uiForm.max_pred_wl_ledt );
   restore( state, "min_pred_dspacing_ledt", m_uiForm.min_pred_dspacing_ledt );
