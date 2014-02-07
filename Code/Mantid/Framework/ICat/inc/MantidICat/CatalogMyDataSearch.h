@@ -14,8 +14,7 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI>  OutputWorkspace - name of the OutputWorkspace which contains my investigations search
-    <LI>  isValid         - Boolean option used to check the validity of login session
+     <LI>  OutputWorkspace - name of the OutputWorkspace which contains my investigations search
     </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
