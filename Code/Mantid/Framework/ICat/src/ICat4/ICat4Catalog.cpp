@@ -612,7 +612,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Instrument.name ORDER BY name";
+      std::string query = "Instrument.fullName ORDER BY name";
       request.query     = &query;
 
       int result = icat.search(&request, &response);
