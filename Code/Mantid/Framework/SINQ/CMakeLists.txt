@@ -13,6 +13,7 @@ set ( SRC_FILES
     src/SINQHMListener.cpp
     src/SliceMDHisto.cpp
     src/SINQTranspose3D.cpp
+    src/PoldiHeliumDetector.cpp
 )
 
 set ( INC_FILES
@@ -31,6 +32,8 @@ set ( INC_FILES
     inc/MantidSINQ/SINQHMListener.h
     inc/MantidSINQ/SliceMDHisto.h
     inc/MantidSINQ/SINQTranspose3D.h
+    inc/MantidSINQ/PoldiAbstractDetector.h
+    inc/MantidSINQ/PoldiHeliumDetector.h
 )
 
 set ( TEST_FILES
@@ -39,6 +42,7 @@ set ( TEST_FILES
     InvertMDDimTest.h
     MDHistoToWorkspace2DTest.h
     SliceMDHistoTest.h
+    PoldiDetectorTest.h
 )
 
 
