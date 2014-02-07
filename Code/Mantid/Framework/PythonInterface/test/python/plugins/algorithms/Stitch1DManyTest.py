@@ -58,6 +58,13 @@ class Stitch1DManyTest(unittest.TestCase):
             self.fail("Two end overlaps, but only two workspaces. Should have thrown.")
         except RuntimeError:
             pass
+        
+    def test_stich_throws_if_no_params(self):
+        try:
+            stitched = Stitch1DMany(InputWorkspaces='a, b')
+            self.fail("No Params given. Should have thrown.")
+        except RuntimeError:
+            pass
          
     #Cross-check that the result of using Stitch1DMany with two workspaces is the same as using Stitch1D.    
     
