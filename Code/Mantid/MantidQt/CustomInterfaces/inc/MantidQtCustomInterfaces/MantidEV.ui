@@ -57,7 +57,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <property name="sizePolicy">
@@ -980,9 +980,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
-            <width>738</width>
-            <height>633</height>
+            <y>-66</y>
+            <width>720</width>
+            <height>699</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -1525,7 +1525,7 @@
                 <enum>QSizePolicy::Fixed</enum>
                </property>
                <property name="sizeHint" stdset="0">
-               <size>
+                <size>
                  <width>15</width>
                  <height>0</height>
                 </size>
@@ -1572,6 +1572,9 @@
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="text">
+                <string>0.4</string>
+               </property>
               </widget>
              </item>
             </layout>
@@ -1587,7 +1590,7 @@
                 <enum>QSizePolicy::Fixed</enum>
                </property>
                <property name="sizeHint" stdset="0">
-               <size>
+                <size>
                  <width>15</width>
                  <height>0</height>
                 </size>
@@ -1628,6 +1631,9 @@
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="text">
+                <string>3.5</string>
+               </property>
               </widget>
              </item>
             </layout>
@@ -1643,7 +1649,7 @@
                 <enum>QSizePolicy::Fixed</enum>
                </property>
                <property name="sizeHint" stdset="0">
-               <size>
+                <size>
                  <width>15</width>
                  <height>0</height>
                 </size>
@@ -1684,6 +1690,9 @@
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="text">
+                <string>0.4</string>
+               </property>
               </widget>
              </item>
             </layout>
@@ -1699,7 +1708,7 @@
                 <enum>QSizePolicy::Fixed</enum>
                </property>
                <property name="sizeHint" stdset="0">
-               <size>
+                <size>
                  <width>15</width>
                  <height>0</height>
                 </size>
@@ -1739,6 +1748,9 @@
                  <width>146</width>
                  <height>16777215</height>
                 </size>
+               </property>
+               <property name="text">
+                <string>8.5</string>
                </property>
               </widget>
              </item>

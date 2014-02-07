@@ -326,7 +326,7 @@ private slots:
   void setEnabledFindPeaksParams_slot( bool on );
 
   /// Slot to enable/disable the predict peaks controls
-  void setEnabledPredictPeaksParams_slot();
+  void setEnabledPredictPeaksParams_slot( bool on );
 
   /// Slot to enable/disable the Load Peaks File controls
   void setEnabledLoadPeaksParams_slot( bool on );

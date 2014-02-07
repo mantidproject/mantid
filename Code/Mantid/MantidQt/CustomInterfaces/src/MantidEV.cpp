@@ -337,8 +337,8 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
 
-   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked()),
-                     this, SLOT( setEnabledPredictPeaksParams_slot() ) );
+   QObject::connect( m_uiForm.PredictPeaks_ckbx, SIGNAL(clicked(bool)),
+                     this, SLOT( setEnabledPredictPeaksParams_slot(bool) ) );
 
    QObject::connect( m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadPeaksParams_slot(bool) ) );
@@ -381,7 +381,6 @@ void MantidEV::initLayout()
    m_uiForm.MaxABC_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxABC_ledt));
    m_uiForm.NumToFind_ledt->setValidator( new QDoubleValidator(m_uiForm.NumToFind_ledt));
    m_uiForm.MinIntensity_ledt->setValidator( new QDoubleValidator(m_uiForm.MinIntensity_ledt));
-   m_uiForm.MinIntensity_ledt->setValidator( new QDoubleValidator(m_uiForm.MinIntensity_ledt));
    m_uiForm.MinD_ledt->setValidator( new QDoubleValidator(m_uiForm.MinD_ledt));
    m_uiForm.MaxD_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxD_ledt));
    m_uiForm.FFTTolerance_ledt->setValidator( new QDoubleValidator(m_uiForm.FFTTolerance_ledt));
@@ -389,6 +388,10 @@ void MantidEV::initLayout()
    m_uiForm.MaxGoniometerChange_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxGoniometerChange_ledt));
    m_uiForm.IndexingTolerance_ledt->setValidator( new QDoubleValidator(m_uiForm.IndexingTolerance_ledt));
    m_uiForm.MaxScalarError_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxScalarError_ledt));
+   m_uiForm.min_pred_wl_ledt->setValidator( new QDoubleValidator( m_uiForm.min_pred_wl_ledt));
+   m_uiForm.max_pred_wl_ledt->setValidator( new QDoubleValidator( m_uiForm.max_pred_wl_ledt));
+   m_uiForm.min_pred_dspacing_ledt->setValidator( new QDoubleValidator( m_uiForm.min_pred_dspacing_ledt));
+   m_uiForm.max_pred_dspacing_ledt->setValidator( new QDoubleValidator( m_uiForm.max_pred_dspacing_ledt));
    m_uiForm.PeakRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakRadius_ledt));
    m_uiForm.BackgroundInnerRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundInnerRadius_ledt));
    m_uiForm.BackgroundOuterRadius_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundOuterRadius_ledt));
@@ -444,7 +447,7 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.min_pred_dspacing_ledt->setText("0.4");
    m_uiForm.max_pred_dspacing_ledt->setText("8.5");
    setEnabledFindPeaksParams_slot(true);
-   setEnabledPredictPeaksParams_slot();
+   setEnabledPredictPeaksParams_slot(true);
    setEnabledLoadPeaksParams_slot(false);
    last_peaks_file.clear();
                                                     // Find UB tab
@@ -1589,17 +1592,16 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
  *
  * @param on  If true, components will be enabled, if false, disabled.
  */
-void MantidEV::setEnabledPredictPeaksParams_slot()
+void MantidEV::setEnabledPredictPeaksParams_slot( bool on)
 {
-  bool enabled = m_uiForm.PredictPeaks_ckbx->isChecked();
-  m_uiForm.min_pred_wl_lbl->setEnabled( enabled );
-  m_uiForm.min_pred_wl_ledt->setEnabled( enabled );
-  m_uiForm.max_pred_wl_lbl->setEnabled( enabled );
-  m_uiForm.max_pred_wl_ledt->setEnabled( enabled );
-  m_uiForm.min_pred_dspacing_lbl->setEnabled( enabled );
-  m_uiForm.min_pred_dspacing_ledt->setEnabled( enabled );
-  m_uiForm.max_pred_dspacing_lbl->setEnabled( enabled );
-  m_uiForm.max_pred_dspacing_ledt->setEnabled( enabled );
+  m_uiForm.min_pred_wl_lbl->setEnabled( on );
+  m_uiForm.min_pred_wl_ledt->setEnabled( on );
+  m_uiForm.max_pred_wl_lbl->setEnabled( on );
+  m_uiForm.max_pred_wl_ledt->setEnabled( on );
+  m_uiForm.min_pred_dspacing_lbl->setEnabled( on );
+  m_uiForm.min_pred_dspacing_ledt->setEnabled( on );
+  m_uiForm.max_pred_dspacing_lbl->setEnabled( on );
+  m_uiForm.max_pred_dspacing_ledt->setEnabled( on );
 }
 
 /**

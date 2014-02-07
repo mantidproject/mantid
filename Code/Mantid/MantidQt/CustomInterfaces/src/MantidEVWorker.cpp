@@ -315,7 +315,7 @@ bool MantidEVWorker::predictPeaks( const std::string & peaks_ws_name,
     alg->setProperty("WavelengthMin", min_pred_wl);
     alg->setProperty("WavelengthMax", max_pred_wl);
     alg->setProperty("MinDSpacing",min_pred_dspacing);
-    alg->setProperty("MinDSpacing",max_pred_dspacing);
+    alg->setProperty("MaxDSpacing",max_pred_dspacing);
     alg->setProperty("ReflectionCondition","Primitive");
     alg->setProperty("OutputWorkspace", peaks_ws_name );
 
