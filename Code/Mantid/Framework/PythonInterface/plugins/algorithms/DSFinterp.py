@@ -41,8 +41,13 @@ class DSFinterp(PythonAlgorithm):
     arrvalidator = StringArrayMandatoryValidator()
     self.declareProperty(StringArrayProperty('Workspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of input workspaces')
     self.declareProperty(FloatArrayProperty('ParameterValues', values=[], direction=Direction.Input), doc='list of input parameter values')
-    self.declareProperty('RegressionWindow',0, direction=Direction.Input, doc='window for the running local-regression. No regression if value set to zero')
-    self.declareProperty('RegressionType','linear',direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
+    self.declareProperty('LocalRegression', True, direction=Direction.Input, doc='Perform running local-regression?')
+    self.declareProperty('RegressionWindow', 3, direction=Direction.Input, doc='window size for the running local-regression')
+    self.declareProperty('RegressionType', 'linear', direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
+    lrg = 'Running Local Regression'
+    #self.setPropertyGroup('LocalRegression', lrg)
+    #self.setPropertyGroup('RegressionWindow', lrg)
+    #self.setPropertyGroup('RegressionType', lrg)
     self.declareProperty(FloatArrayProperty('TargetParameters', values=[], direction=Direction.Input), doc="Parameters to interpolate the structure factor")
     self.declareProperty(StringArrayProperty('OutputWorkspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of output workspaces to save the interpolated structure factors')
     self.channelgroup = None
@@ -77,9 +82,13 @@ class DSFinterp(PythonAlgorithm):
     if not self.channelgroup:
       self.channelgroup = ChannelGroup()
       self.channelgroup.InitFromDsfGroup(dsfgroup)
-      regressiontype = self.getProperty('RegressionType').value
-      windowlength = self.getProperty('RegressionWindow').value
-      self.channelgroup.InitializeInterpolator(running_regr_type=regressiontype, windowlength=windowlength)
+      localregression = self.getProperty('LocalRegression').value
+      if localregression:
+        regressiontype = self.getProperty('RegressionType').value
+        windowlength = self.getProperty('RegressionWindow').value
+        self.channelgroup.InitializeInterpolator(running_regr_type=regressiontype, windowlength=windowlength)
+      else:
+        self.channelgroup.InitializeInterpolator(windowlength=0)
     # Invoke the interpolator and generate the output workspaces
     targetfvalues = self.getProperty('TargetParameters').value
     for targetfvalue in targetfvalues:
