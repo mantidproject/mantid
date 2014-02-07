@@ -142,9 +142,13 @@ namespace Mantid
 
       // workspace independent determination of length
       const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
+
+      bool fullBinsOnly = getProperty("FullBinsOnly");
+
       MantidVecPtr XValues_new;
       // create new output X axis
-      const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
+      const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access(),
+                                                                 true, fullBinsOnly);
 
       //---------------------------------------------------------------------------------
       //Now, determine if the input workspace is actually an EventWorkspace

@@ -14,6 +14,8 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/ScopedWorkspace.h"
 
+#include <boost/assign/list_of.hpp>
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -462,7 +464,7 @@ public:
     AnalysisDataService::Instance().remove("test_Rebin_mask_raw");
   }
 
-  void testFullBinsOnlyFixed()
+  void test_FullBinsOnly_Fixed()
   {
     ScopedWorkspace inWsEntry( Create1DWorkspace(10) );
     ScopedWorkspace outWsEntry;
@@ -483,7 +485,22 @@ public:
       return;
     }
 
-    // TODO: check values
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
+
+    if ( ! ws )
+    {
+      TS_FAIL("Unable to retrieve result workspace");
+      return; // Nothing else to check
+    }
+
+    auto xValues = ws->readX(0);
+    std::vector<double> xExpected = boost::assign::list_of(0.5)(2.5)(4.5)(6.5);
+
+    TS_ASSERT_EQUALS( xValues, xExpected );
+
+    auto yValues = ws->readY(0);
+    std::vector<double> yExpected(3, 8.0);
+    TS_ASSERT_EQUALS( yValues, yExpected );
   }
 
 private:
