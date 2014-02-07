@@ -226,12 +226,12 @@ namespace Mantid
     /// Called from constructor to fill live listener name
     void InstrumentInfo::fillTechniques(const Poco::XML::Element* elem)
     {
-      Poco::XML::NodeList* pNL_technique = elem->getElementsByTagName("technique");
+      Poco::AutoPtr<Poco::XML::NodeList> pNL_technique = elem->getElementsByTagName("technique");
       unsigned long n = pNL_technique->length();
 
       for (unsigned long i = 0; i < n; ++i)
       {
-        Poco::XML::NodeList* pNL = pNL_technique->item(i)->childNodes();
+        Poco::AutoPtr<Poco::XML::NodeList> pNL = pNL_technique->item(i)->childNodes();
         if (pNL->length() > 0)
         {
           Poco::XML::Text* txt = dynamic_cast<Poco::XML::Text*>(pNL->item(0));
@@ -244,9 +244,7 @@ namespace Mantid
             }
           }
         }
-        pNL->release();
       }
-      pNL_technique->release();
 
       if (m_technique.empty())
       {
