@@ -90,6 +90,7 @@ public:
         TS_ASSERT_DELTA(heliumDetector.m_phiStart, 1.093426824, 5e-7);
 
         TS_ASSERT_EQUALS(heliumDetector.elementCount(), 400);
+        TS_ASSERT_EQUALS(heliumDetector.centralElement(), 199);
     }
 
     void testPhi()

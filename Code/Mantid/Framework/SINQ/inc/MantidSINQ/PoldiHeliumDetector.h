@@ -48,6 +48,7 @@ public:
     double distanceFromSample(int elementIndex);
 
     size_t elementCount();
+    size_t centralElement();
 
     std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
 
@@ -61,6 +62,7 @@ protected:
     /* These detector parameters are fixed and specific to the geometry or result from it directly */
     double m_radius;
     size_t m_elementCount;
+    size_t m_centralElement;
     double m_elementWidth;
     double m_angularResolution;
     double m_totalOpeningAngle;
