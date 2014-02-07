@@ -43,7 +43,10 @@ namespace Kernel
  */
 namespace VectorHelper
 {
-  int MANTID_KERNEL_DLL createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew, const bool resize_xnew = true);
+  int MANTID_KERNEL_DLL createAxisFromRebinParams(const std::vector<double>& params,
+                                                  std::vector<double>& xnew,
+                                                  const bool resize_xnew = true,
+                                                  const bool full_bins_only = false);
 
   void MANTID_KERNEL_DLL rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, 
