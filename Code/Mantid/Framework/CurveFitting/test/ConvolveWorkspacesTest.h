@@ -60,7 +60,7 @@ public:
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Conv");
     alg.setProperty("Workspace1", "wksp1");
-    alg.setProperty("Workspace2", "wksp2");
+    alg.setProperty("Workspace2", "wksp1");
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
