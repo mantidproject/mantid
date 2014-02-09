@@ -10,7 +10,6 @@ Convolution of two workspaces using [[Convolution]] from CurveFitting.  Workspac
 #include "MantidCurveFitting/ConvolveWorkspaces.h"
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidCurveFitting/TabulatedFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include <sstream>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_real.h>
@@ -49,10 +48,10 @@ using namespace Geometry;
 
 void ConvolveWorkspaces::init()
 {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace1","",Direction::Input), "The name of the first input workspace.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace2","",Direction::Input), "The name of the second input workspace.");
+  declareProperty(new WorkspaceProperty<Workspace2D>("Workspace1","",Direction::Input), "The name of the first input workspace.");
+  declareProperty(new WorkspaceProperty<Workspace2D>("Workspace2","",Direction::Input), "The name of the second input workspace.");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "The name of the output workspace.");
+  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output), "The name of the output workspace.");
 
 
 
@@ -60,13 +59,15 @@ void ConvolveWorkspaces::init()
 
 void ConvolveWorkspaces::exec()
 {
-  MatrixWorkspace_sptr ws1 = getProperty("Workspace1");
-  MatrixWorkspace_sptr ws2 = getProperty("Workspace2");
+  std::string ws1name = getProperty("Workspace1");
+  std::string ws2name = getProperty("Workspace2");
+  Workspace2D_sptr ws1 = getProperty("Workspace1");
+  Workspace2D_sptr ws2 = getProperty("Workspace2");
 
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
   const size_t numBins = ws1->blocksize();
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(ws1,numHists,numBins,numBins-1);
+  Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(ws1,numHists,numBins,numBins-1));
 
   // First check that the workspace are the same size
   if ( numHists != ws2->getNumberHistograms()  )
@@ -88,16 +89,17 @@ void ConvolveWorkspaces::exec()
     Convolution conv;
 
     auto res = boost::make_shared<TabulatedFunction>();
-    size_t N = Yout.size();
-    res->setMatrixWorkspace(ws1,l,x[0],x[N]);
+    res->setAttributeValue("Workspace",ws1name);
+    res->setAttributeValue("WorkspaceIndex",l);
 
     conv.addFunction(res);
 
     auto fun = boost::make_shared<TabulatedFunction>();
-    fun->setMatrixWorkspace(ws2,l,x[0],x[N]);
+    fun->setAttributeValue("Workspace",ws2name);
+    fun->setAttributeValue("WorkspaceIndex",l);
 
     conv.addFunction(fun);
-
+    size_t N = Yout.size();
     FunctionDomain1DView xView(&x[0],N);
     FunctionValues out(xView);
     conv.function(xView,out);
