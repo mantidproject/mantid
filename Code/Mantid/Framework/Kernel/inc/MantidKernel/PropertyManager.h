@@ -61,8 +61,8 @@ public:
   PropertyManager& operator=(const PropertyManager&);
   PropertyManager& operator+=(const PropertyManager& rhs);
 
-  void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
-  void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< PropertyManager * > outputs) const;
+  void filterByTime(const Kernel::DateAndTime &start, const Kernel::DateAndTime &stop);
+  void splitByTime(std::vector<SplittingInterval>& splitter, std::vector< PropertyManager * > outputs) const;
   void filterByProperty(const TimeSeriesProperty<bool> & filter);
 
   virtual ~PropertyManager();

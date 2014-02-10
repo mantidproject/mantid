@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyHistory.h"
 
 using namespace Mantid::Kernel;
 

@@ -1,6 +1,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/TimeSplitter.h"
 
 #include <sstream>
 
@@ -10,6 +12,7 @@ namespace Mantid
 {
   namespace Kernel
   {
+
 
     /**
      * Constructor
@@ -169,7 +172,7 @@ namespace Mantid
      * @param stop  :: Absolute stop time. Any log entries at times < than this time are kept.
      */
     template <typename TYPE>
-    void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
+    void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime & start, const Kernel::DateAndTime & stop)
     {
       // 0. Sort
       sort();
@@ -244,7 +247,7 @@ namespace Mantid
      * @param splittervec :: A list of intervals to split filter on
      */
     template <typename TYPE>
-    void TimeSeriesProperty<TYPE>::filterByTimes(const Kernel::TimeSplitterType & splittervec)
+    void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval> & splittervec)
     {
       // 1. Sort
       sort();
@@ -340,7 +343,7 @@ namespace Mantid
      * @param outputs  :: A vector of output TimeSeriesProperty pointers of the same type.
      */
     template <typename TYPE>
-    void TimeSeriesProperty<TYPE>::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
+    void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> & splitter, std::vector< Property * > outputs) const
     {
       // 0. Sort if necessary
       sort();
@@ -458,7 +461,7 @@ namespace Mantid
      * @param centre :: Whether the log value time is considered centred or at the beginning (the default).
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre) const
+    void TimeSeriesProperty<TYPE>::makeFilterByValue(std::vector<SplittingInterval>& split, double min, double max, double TimeTolerance, bool centre) const
     {
       const bool emptyMin = (min == EMPTY_DBL());
       const bool emptyMax = (max == EMPTY_DBL());
@@ -539,7 +542,7 @@ namespace Mantid
      *  @throws Kernel::Exception::NotImplementedError always
      */
     template<>
-    void TimeSeriesProperty<std::string>::makeFilterByValue(TimeSplitterType&, double, double, double, bool) const
+    void TimeSeriesProperty<std::string>::makeFilterByValue(std::vector<SplittingInterval>&, double, double, double, bool) const
     {
       throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }
@@ -553,7 +556,7 @@ namespace Mantid
      *  @param range The full time range that we want this splitter to cover
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const
+    void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval>& split, double min, double max, const TimeInterval & range) const
     {
       const bool emptyMin = (min == EMPTY_DBL());
       const bool emptyMax = (max == EMPTY_DBL());
@@ -597,7 +600,7 @@ namespace Mantid
      *  @throws Kernel::Exception::NotImplementedError always
      */
     template<>
-    void TimeSeriesProperty<std::string>::expandFilterToRange(TimeSplitterType&, double, double, const TimeInterval&) const
+    void TimeSeriesProperty<std::string>::expandFilterToRange(std::vector<SplittingInterval>&, double, double, const TimeInterval&) const
     {
       throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }
@@ -608,7 +611,7 @@ namespace Mantid
      *  @return The time-weighted average value of the log in the range within the filter.
      */
     template<typename TYPE>
-    double TimeSeriesProperty<TYPE>::averageValueInFilter(const TimeSplitterType& filter) const
+    double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<SplittingInterval>& filter) const
     {
       // TODO: Consider logs that aren't giving starting values.
 
@@ -668,7 +671,7 @@ namespace Mantid
         filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
         retVal = this->averageValueInFilter(filter);
       }
-      catch (exception)
+      catch (exception &)
       {
         //just return nan
          retVal = std::numeric_limits<double>::quiet_NaN();
