@@ -30,6 +30,7 @@ namespace IDA
     void updateRS(QtProperty* prop, double val);
     
   private:
+    QIntValidator * m_intVal;
     QwtPlot* m_msdPlot;
     MantidWidgets::RangeSelector* m_msdRange;
     QwtPlotCurve* m_msdDataCurve;

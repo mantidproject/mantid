@@ -22,7 +22,7 @@ namespace IDA
     // Tree Browser
     m_msdTree = new QtTreePropertyBrowser();
     uiForm().msd_properties->addWidget(m_msdTree);
-
+    m_intVal = new QIntValidator(this);
     m_msdDblMng = new QtDoublePropertyManager();
 
     m_msdTree->setFactoryForManager(m_msdDblMng, doubleEditorFactory());
@@ -51,6 +51,9 @@ namespace IDA
 
     connect(uiForm().msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().msd_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
+
+    uiForm().msd_leSpectraMin->setValidator(m_intVal);
+    uiForm().msd_leSpectraMax->setValidator(m_intVal);
   }
 
   void MSDFit::run()
@@ -85,6 +88,11 @@ namespace IDA
     auto range = std::make_pair(m_msdDblMng->value(m_msdProp["Start"]), m_msdDblMng->value(m_msdProp["End"]));
     uiv.checkValidRange("a range", range);
 
+    QString specMin = uiForm().msd_leSpectraMin->text();
+    QString specMax = uiForm().msd_leSpectraMax->text();
+    auto specRange = std::make_pair(specMin.toDouble(), specMax.toDouble());
+    uiv.checkValidRange("spectrum range", specRange);
+
     return uiv.generateErrorMessage();
   }
 
@@ -111,6 +119,12 @@ namespace IDA
       {
         const std::pair<double, double> range = getCurveRange(m_msdDataCurve);
         m_msdRange->setRange(range.first, range.second);
+        
+        int nHist = static_cast<int>(ws->getNumberHistograms());
+        uiForm().msd_leSpectraMin->setText("0");
+        uiForm().msd_leSpectraMax->setText(QString::number(nHist-1));
+        m_intVal->setRange(0, nHist-1);
+
         // Replot
         m_msdPlot->replot();
       }
