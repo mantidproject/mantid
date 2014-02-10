@@ -76,6 +76,21 @@ class Stitch1DManyTest(unittest.TestCase):
             pass
         finally:
             DeleteWorkspace(tbl)
+            
+    def test_workspace_group_size_differ_throws(self):
+        ws1 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[3.0, 3.0, 3.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
+        ws2 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
+        ws3 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0], NSpec=1, DataE=self.e)
+        input_group_1 = GroupWorkspaces(InputWorkspaces="%s,%s, %s" % (ws1.name(), ws2.name(), ws3.name()))
+        input_group_2 = GroupWorkspaces(InputWorkspaces="%s,%s" % (ws1.name(), ws2.name())) 
+        try:
+            stitched, sf = Stitch1DMany(InputWorkspaces='%s,%s' % (input_group_1.name(), input_group_2.name()), Params=0.2)
+            self.fail("Differing number of sub-workspaces in workspace group. Should have thrown.")
+        except RuntimeError:
+            pass
+        finally:
+            DeleteWorkspace(input_group_1)
+            
     #Cross-check that the result of using Stitch1DMany with two workspaces is the same as using Stitch1D.    
     
     def test_stitches_two(self):
@@ -132,7 +147,7 @@ class Stitch1DManyTest(unittest.TestCase):
         self.assertTrue(isinstance(stitched, WorkspaceGroup), "Output should be a group workspace")
         self.assertEqual(stitched.size(), 3, "Output should contain 3 workspaces")
         self.assertEqual(stitched.name(), "stitched", "Output not named correctly")
-        
+        DeleteWorkspace(input_group_1)
         
   
         
