@@ -51,6 +51,7 @@ namespace IDA
 
     connect(uiForm().msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().msd_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(uiForm().msd_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
 
     uiForm().msd_leSpectraMin->setValidator(m_intVal);
     uiForm().msd_leSpectraMax->setValidator(m_intVal);
@@ -63,7 +64,7 @@ namespace IDA
       "startX = " + QString::number(m_msdDblMng->value(m_msdProp["Start"])) +"\n"
       "endX = " + QString::number(m_msdDblMng->value(m_msdProp["End"])) +"\n"
       "specMin = " + uiForm().msd_leSpectraMin->text() + "\n"
-      "specMax = " + uiForm().msd_leSpectraMax->text() + "\n"
+      "specMax = " + uiForm().msd_leSpectraMin->text() + "\n"
       "inputs = [r'" + uiForm().msd_inputFile->getFilenames().join("', r'") + "']\n";
 
     if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -79,6 +80,41 @@ namespace IDA
       "msdfit(inputs, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=plot)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
+  }
+
+  void MSDFit::sequential()
+  {
+    QString errors = validate();
+
+    if (errors.isEmpty())
+    {
+      QString pyInput =
+      "from IndirectDataAnalysis import msdfit\n"
+      "startX = " + QString::number(m_msdDblMng->value(m_msdProp["Start"])) +"\n"
+      "endX = " + QString::number(m_msdDblMng->value(m_msdProp["End"])) +"\n"
+      "specMin = " + uiForm().msd_leSpectraMin->text() + "\n"
+      "specMax = " + uiForm().msd_leSpectraMax->text() + "\n"
+      "inputs = [r'" + uiForm().msd_inputFile->getFilenames().join("', r'") + "']\n";
+
+      if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+      else pyInput += "verbose = False\n";
+
+      if ( uiForm().msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
+      else pyInput += "plot = False\n";
+
+      if ( uiForm().msd_ckSave->isChecked() ) pyInput += "save = True\n";
+      else pyInput += "save = False\n";
+
+      pyInput +=
+        "msdfit(inputs, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=plot)\n";
+
+      QString pyOutput = runPythonCode(pyInput).trimmed();
+    }
+    else
+    {
+      showInformationBox(errors);
+    }
+
   }
 
   QString MSDFit::validate()

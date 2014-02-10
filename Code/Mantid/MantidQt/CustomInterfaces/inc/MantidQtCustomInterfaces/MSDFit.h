@@ -24,6 +24,7 @@ namespace IDA
     virtual QString helpURL() {return "MSDFit";}
 
   private slots:
+    void sequential();
     void plotInput();
     void minChanged(double val);
     void maxChanged(double val);
