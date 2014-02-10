@@ -1020,14 +1020,13 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
 ##############################################################################
 
 def msdfitParsToWS(Table, xData):
-    dataX = xData
     ws = mtd[Table+'_Table']
-    rCount = ws.rowCount()
-    yA0 = ws.column(1)
-    eA0 = ws.column(2)
-    yA1 = ws.column(3)  
+    dataX = ws.column("axis-1")
+    yA0 = ws.column("A0")
+    eA0 = ws.column("A0_Err")
+    yA1 = ws.column("A1")  
+    eA1 = ws.column("A1_Err")
     dataY1 = map(lambda x : -x, yA1) 
-    eA1 = ws.column(4)
     wsname = Table
 
     #check if temp was increasing or decreasing
@@ -1056,7 +1055,8 @@ def msdfitPlotFits(calcWS, n):
     mfit_layer = mfit_plot.activeLayer()
     mfit_layer.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
 
-def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True): 
+def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=False, Plot=True):
+    print startX, endX
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
     log_type = 'sample'
@@ -1076,16 +1076,21 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
     x_list = vertAxisValues
     if 'vert_axis' in ws_run:
         xlabel = ws_run.getLogData('vert_axis').value
-    for nr in range(0, nHist):
+
+    if spec_max == None:
+        spec_max = nHist
+
+    if spec_min < 0 or spec_max > nHist-1 or spec_min > spec_max:
+        raise ValueError("The range %d - %d is not a valid spectrum range" % spec_min, spec_max)
+    
+    run_list = ''
+    for nr in range(spec_min, spec_max+1):
         nsam,ntc = CheckHistZero(root)
         lnWS = '__lnI_'+str(nr)
+        ExtractSingleSpectrum(InputWorkspace=root, OutputWorkspace=lnWS, WorkspaceIndex=nr)
         file_list.append(lnWS)
-        ExtractSingleSpectrum(InputWorkspace=root, OutputWorkspace=lnWS,
-            WorkspaceIndex=nr)
-        if (nr == 0):
-            run_list = lnWS
-        else:
-            run_list += ';'+lnWS
+        run_list += lnWS+';'
+
     mname = root[:-4]
     msdWS = mname+'_msd'
     if Verbose:
@@ -1100,9 +1105,10 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
     calcWS = mname+'_msd_Result'
     a0 = mtd[msdWS+'_a0'].readY(0)
     a1 = mtd[msdWS+'_a1'].readY(0)
-    for nr in range(0, nHist):
-        inWS = file_list[nr]
-        CropWorkspace(InputWorkspace=inWS,OutputWorkspace='__data',XMin=0.95*startX,XMax=1.05*endX)
+
+    group_workspace_list = ''
+    for nr, input_workspace in enumerate(file_list):
+        CropWorkspace(InputWorkspace=input_workspace,OutputWorkspace='__data',XMin=0.95*startX,XMax=1.05*endX)
         dataX = mtd['__data'].readX(0)
         nxd = len(dataX)
         dataX = np.append(dataX,2*dataX[nxd-1]-dataX[nxd-2])
@@ -1123,13 +1129,12 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
         fout = calcWS +'_'+ str(nr)
         CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
             Nspec=2, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues='Data,Calc')
-        if nr == 0:
-            gro = fout
-        else:
-            gro += ',' + fout
-        DeleteWorkspace(inWS)
+
+        group_workspace_list += fout + ','
+        DeleteWorkspace(input_workspace)
         DeleteWorkspace('__data')
-    GroupWorkspaces(InputWorkspaces=gro,OutputWorkspace=calcWS)
+
+    GroupWorkspaces(InputWorkspaces=group_workspace_list,OutputWorkspace=calcWS)
 
     #add sample logs to output workspace
     CopyLogs(InputWorkspace=root, OutputWorkspace=msdWS)

@@ -62,6 +62,8 @@ namespace IDA
       "from IndirectDataAnalysis import msdfit\n"
       "startX = " + QString::number(m_msdDblMng->value(m_msdProp["Start"])) +"\n"
       "endX = " + QString::number(m_msdDblMng->value(m_msdProp["End"])) +"\n"
+      "specMin = " + uiForm().msd_leSpectraMin->text() + "\n"
+      "specMax = " + uiForm().msd_leSpectraMax->text() + "\n"
       "inputs = [r'" + uiForm().msd_inputFile->getFilenames().join("', r'") + "']\n";
 
     if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -74,7 +76,7 @@ namespace IDA
     else pyInput += "save = False\n";
 
     pyInput +=
-      "msdfit(inputs, startX, endX, Save=save, Verbose=verbose, Plot=plot)\n";
+      "msdfit(inputs, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=plot)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
