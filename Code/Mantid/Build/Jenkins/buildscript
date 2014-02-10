@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 ###############################################################################
-# SCRIPT TO DRIVE THE JENKINS BUILDS OF MANTID.
+# LINUX/MAC SCRIPT TO DRIVE THE JENKINS BUILDS OF MANTID.
 #
 # Notes:
 #
@@ -15,6 +15,7 @@
 if [[ $(uname) == 'Darwin' ]]; then
   cd $WORKSPACE/Code
   ./fetch_Third_Party.sh
+  cd $WORKSPACE
   # Setup environment variables
   source /opt/intel/bin/iccvars.sh intel64
   export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
