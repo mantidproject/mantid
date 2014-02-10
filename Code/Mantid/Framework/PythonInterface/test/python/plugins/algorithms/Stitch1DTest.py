@@ -26,7 +26,7 @@ class Stitch1DTest(unittest.TestCase):
         # Cleanup
         DeleteWorkspace(self.a)
         DeleteWorkspace(self.b)
-    '''     
+        
     def test_endoverap_outside_range_throws(self):
         try:
             stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[0], EndOverlap=self.x[-1] + 0.001, Params='0.2')
@@ -190,7 +190,7 @@ class Stitch1DTest(unittest.TestCase):
         # Check that the output X-Values are correct.
         self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))     
         DeleteWorkspace(stitched[0]) 
-    '''
+    
     def test_stitching_manual_scale_factor_scale_left(self):
         stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2', ScaleRHSWorkspace=False, UseManualScaleFactor=True,  ManualScaleFactor=3.0/2.0)
         self.assertAlmostEquals(stitched[1], 3.0/2.0, places=9)
