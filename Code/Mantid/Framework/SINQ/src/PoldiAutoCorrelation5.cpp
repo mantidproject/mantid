@@ -261,20 +261,25 @@ void PoldiAutoCorrelation5::exec()
     auto elements = boost::irange(0, static_cast<int>(detector->elementCount()), 1);
 
     // Map element indices to 2Theta-Values
-    std::vector<double> twoThetas(detector->elementCount());
+    std::vector<double> twoThetas;
+    twoThetas.reserve(detector->elementCount());
     std::transform(elements.begin(), elements.end(), twoThetas.begin(), boost::bind<double>(&PoldiAbstractDetector::twoTheta, detector, _1));
 
     // We will need sin(Theta) anyway, so we might just calculate those as well
-    std::vector<double> sinThetas(detector->elementCount());
-    std::transform(twoThetas.begin(), twoThetas.end(), sinThetas.begin(), [](double twoTheta) { return sin(twoTheta / 2.0); });
+    std::vector<double> sinThetas;
+    sinThetas.reserve(detector->elementCount());
+    std::transform(twoThetas.cbegin(), twoThetas.cend(), sinThetas.begin(), [](double twoTheta) { return sin(twoTheta / 2.0); });
 
     // Same goes for distances - map element index to distance, using detector object
-    std::vector<double> distances(detector->elementCount());
+    std::vector<double> distances;
+    distances.reserve(detector->elementCount());
     std::transform(elements.begin(), elements.end(), distances.begin(), boost::bind<double>(&PoldiAbstractDetector::distanceFromSample, detector, _1));
 
     // Time of flight for neutrons with a wavelength of 1 Angstrom for each element
-    std::vector<double> tofFor1Angstrom(detector->elementCount());
-    std::transform(distances.begin(), distances.end(), sinThetas.cbegin(), tofFor1Angstrom.begin(), [this, dist_chopper_sample] (double distance, double sinTheta) -> double { return 2./CONVLAMV *1.e-7 * (dist_chopper_sample + distance) * sinTheta; });
+    std::vector<double> tofFor1Angstrom;
+    tofFor1Angstrom.reserve(detector->elementCount());
+    std::transform(distances.cbegin(), distances.cend(), sinThetas.cbegin(), tofFor1Angstrom.begin(), [this, dist_chopper_sample] (const double distance, const double sinTheta) { return 2./CONVLAMV *1.e-7 * (dist_chopper_sample + distance) * sinTheta; });
+
 
 	////////////////////////////////////////////////////////////////////////
 	// dead wires configuration
