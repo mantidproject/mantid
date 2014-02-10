@@ -112,6 +112,18 @@ class Stitch1DManyTest(unittest.TestCase):
         self.assertEquals(2.0, round(sf, 6))
         DeleteWorkspace(stitchedViaStitchMany)
         
+    def test_process_group_workspaces(self):
+        ws1 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[3.0, 3.0, 3.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
+        ws2 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 0.0], NSpec=1, DataE=self.e)
+        ws3 =  CreateWorkspace(UnitX="1/q", DataX=self.x, DataY=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0], NSpec=1, DataE=self.e)
+        input_group_1 = GroupWorkspaces(InputWorkspaces="%s,%s,%s" % (ws1.name(), ws2.name(), ws3.name()))
+        input_group_2 = GroupWorkspaces(InputWorkspaces="%s,%s,%s" % (ws1.name(), ws2.name(), ws3.name())) 
+        stitched, sf = Stitch1DMany(InputWorkspaces='%s,%s' % (input_group_1.name(), input_group_2.name()), Params=0.2)
+        self.assertTrue(isinstance(stitched, WorkspaceGroup), "Output should be a group workspace")
+        self.assertEqual(stitched.size(), 3, "Output should contain 3 workspaces")
+        self.assertEqual(stitched.name(), "stitched", "Output not named correctly")
+        
+  
         
 if __name__ == '__main__':
     unittest.main()
