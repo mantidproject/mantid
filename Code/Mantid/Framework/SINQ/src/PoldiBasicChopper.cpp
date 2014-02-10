@@ -45,9 +45,9 @@ void PoldiBasicChopper::loadConfiguration(DataObjects::TableWorkspace_sptr chopp
         initializeFixedParameters(chopperSlitVector, chopperDistance, rawt0, rawt0const);
         initializeVariableParameters(chopperSpeed);
     }
-    catch(std::out_of_range& e)
+    catch(std::out_of_range&)
     {
-        throw std::runtime_error(e.what());
+        throw std::runtime_error("Missing configuration item for PoldiBasicChopper.");
     }
 }
 
