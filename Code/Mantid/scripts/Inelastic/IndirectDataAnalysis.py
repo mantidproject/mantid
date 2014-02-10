@@ -1045,10 +1045,12 @@ def msdfitParsToWS(Table, xData):
     return wsname
 
 def msdfitPlotSeq(inputWS, xlabel):
-    msd_plot = mp.plotSpectrum(inputWS+'_a1',0,True)
-    msd_layer = msd_plot.activeLayer()
-    msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
-    msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
+    ws = mtd[inputWS+'_a1']
+    if len(ws.readX(0)) > 1:
+        msd_plot = mp.plotSpectrum(inputWS+'_a1',0,True)
+        msd_layer = msd_plot.activeLayer()
+        msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
+        msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
 
 def msdfitPlotFits(calcWS, n):
     mfit_plot = mp.plotSpectrum(calcWS+'_0',[0,1],True)
