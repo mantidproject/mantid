@@ -84,7 +84,7 @@ std::string SNSDataArchive::getArchivePath(const std::set<std::string>& filename
   if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
     std::string location;
-    Poco::XML::NodeList* pList = pDoc->getElementsByTagName("location");
+    Poco::AutoPtr<Poco::XML::NodeList> pList = pDoc->getElementsByTagName("location");
     for(unsigned long i = 0 ; i < pList->length(); i++)
     {
       location = pList->item(i)->innerText();

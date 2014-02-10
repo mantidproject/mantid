@@ -181,7 +181,7 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceDa
   check(workspaceElem, "<SASentry>");
   runName = workspaceElem->getAttribute("name");
 
-  NodeList* runs = workspaceElem->getElementsByTagName("Run");
+  Poco::AutoPtr<NodeList> runs = workspaceElem->getElementsByTagName("Run");
   if ( runs->length() != 1 )
   {
     throw Exception::NotImplementedError("<SASentry>s containing multiple runs, or no runs, are not currently supported");
@@ -336,12 +336,12 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element * const sasEntry, API::Ma
   Element * runText = sasEntry->getChildElement("Run");
   check(runText, "Run");
   run.addLogData(new PropertyWithValue<std::string>(
-                                      "run_number", runText->innerText()));
+    "run_number", runText->innerText()));
 
   Element * process = sasEntry->getChildElement("SASprocess");
   if (process)
   {
-    NodeList* terms = process->getElementsByTagName("term");
+    Poco::AutoPtr<NodeList> terms = process->getElementsByTagName("term");
     for ( unsigned int i = 0; i < terms->length(); ++i )
     {
       Node* term = terms->item(i);
