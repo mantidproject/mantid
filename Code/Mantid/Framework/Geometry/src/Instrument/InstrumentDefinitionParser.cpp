@@ -225,10 +225,11 @@ namespace Geometry
 
       // check if contain <combine-components-into-one-shape>. If this then such
       // types are adjusted after this loop has completed
-      NodeList* pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
-      if ( pNL_type_combine_into_one_shape->length() )
+      Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
+      if ( pNL_type_combine_into_one_shape->length() > 0 )
+      {
         continue;
-      pNL_type_combine_into_one_shape->release();
+      }
 
       // Each type in the IDF must be uniquely named, hence return error if type
       // has already been defined
@@ -241,7 +242,7 @@ namespace Geometry
 
       // identify for now a type to be an assemble by it containing elements
       // with tag name 'component'
-      NodeList* pNL_local = pTypeElem->getElementsByTagName("component");
+      Poco::AutoPtr<NodeList> pNL_local = pTypeElem->getElementsByTagName("component");
       if (pNL_local->length() == 0)
       {
         isTypeAssembly[typeName] = false;
@@ -259,7 +260,6 @@ namespace Geometry
           pTypeElem->setAttribute("object_created","no");
         }
       }
-      pNL_local->release();
     }
 
     // Deal with adjusting types containing <combine-components-into-one-shape>
@@ -323,7 +323,7 @@ namespace Geometry
     //
     // do analysis for each top level compoment element
     //
-    NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
+    Poco::AutoPtr<NodeList> pNL_comp = pRootElem->childNodes(); // here get all child nodes
     unsigned long pNL_comp_length = pNL_comp->length();
 
     if (prog) prog->resetNumSteps(pNL_comp_length, 0.0, 1.0);
@@ -342,8 +342,8 @@ namespace Geometry
 
         // Get all <location> and <locations> elements contained in component element
         // just for the purpose of a IDF syntax check
-        NodeList* pNL_location = pElem->getElementsByTagName("location");
-        NodeList* pNL_locations = pElem->getElementsByTagName("locations");
+        Poco::AutoPtr<NodeList> pNL_location = pElem->getElementsByTagName("location");
+        Poco::AutoPtr<NodeList> pNL_locations = pElem->getElementsByTagName("locations");
         // do a IDF syntax check 
         if (pNL_location->length() == 0 && pNL_locations->length() == 0)
         {
@@ -353,15 +353,13 @@ namespace Geometry
               std::string("A component element must contain at least one <location> or <locations> element") +
               " even if it is just an empty location element of the form <location />", filename);
         }
-        pNL_location->release();
-        pNL_locations->release();
 
         // Loop through all <location> and <locations> elements of this component by looping 
         // all the child nodes and then see if any of these nodes are either <location> or
         // <locations> elements. Done this way order these locations are processed is the 
         // order they are listed in the IDF. The latter needed to get detector IDs assigned
         // as expected
-        NodeList* pNL_childs = pElem->childNodes(); // here get all child nodes
+        Poco::AutoPtr<NodeList> pNL_childs = pElem->childNodes(); // here get all child nodes
         unsigned long pNL_childs_length = pNL_childs->length();
         for (unsigned long iLoc = 0; iLoc < pNL_childs_length; iLoc++)
         {
@@ -420,11 +418,9 @@ namespace Geometry
               + pElem->getAttribute("type") + " (=" + ss2.str() + ").", filename);
         }
         idList.reset();
-        pNL_childs->release();
       }
     }
 
-    pNL_comp->release();
     // Don't need this anymore (if it was even used) so empty it out to save memory
     m_tempPosHolder.clear();
 
@@ -1647,7 +1643,7 @@ namespace Geometry
     if ( hasParameterElement_beenSet )
       if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
 
-    NodeList* pNL_comp = pElem->childNodes(); // here get all child nodes
+    Poco::AutoPtr<NodeList> pNL_comp = pElem->childNodes(); // here get all child nodes
     unsigned long pNL_comp_length = pNL_comp->length();
 
     for (unsigned long i = 0; i < pNL_comp_length; i++)
@@ -1682,18 +1678,18 @@ namespace Geometry
         std::string extractSingleValueAs = "mean"; // default
         std::string eq = "";
 
-        NodeList* pNLvalue = pParamElem->getElementsByTagName("value");
+        Poco::AutoPtr<NodeList> pNLvalue = pParamElem->getElementsByTagName("value");
         size_t numberValueEle = pNLvalue->length();
         Element* pValueElem;
 
-        NodeList* pNLlogfile = pParamElem->getElementsByTagName("logfile");
+        Poco::AutoPtr<NodeList> pNLlogfile = pParamElem->getElementsByTagName("logfile");
         size_t numberLogfileEle = pNLlogfile->length();
         Element* pLogfileElem;
 
-        NodeList* pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
+        Poco::AutoPtr<NodeList> pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
         size_t numberLookUp = pNLLookUp->length();
 
-        NodeList* pNLFormula = pParamElem->getElementsByTagName("formula");
+        Poco::AutoPtr<NodeList> pNLFormula = pParamElem->getElementsByTagName("formula");
         size_t numberFormula = pNLFormula->length();
 
         if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula > 1 )
@@ -1738,9 +1734,6 @@ namespace Geometry
           if ( pLogfileElem->hasAttribute("extract-single-value-as") )
             extractSingleValueAs = pLogfileElem->getAttribute("extract-single-value-as");
         }
-        pNLlogfile->release();
-        pNLvalue->release();
-
 
         if ( pParamElem->hasAttribute("type") )
           type = pParamElem->getAttribute("type");
@@ -1749,13 +1742,12 @@ namespace Geometry
         // check if <fixed /> element present
 
         bool fixed = false;
-        NodeList* pNLFixed = pParamElem->getElementsByTagName("fixed");
+        Poco::AutoPtr<NodeList> pNLFixed = pParamElem->getElementsByTagName("fixed");
         size_t numberFixed = pNLFixed->length();
         if ( numberFixed >= 1 )
         {
           fixed = true;
         }
-        pNLFixed->release();
 
         // some processing
 
@@ -1793,9 +1785,9 @@ namespace Geometry
 
         std::vector<std::string> constraint(2, "");
 
-        NodeList* pNLMin = pParamElem->getElementsByTagName("min");
+        Poco::AutoPtr<NodeList> pNLMin = pParamElem->getElementsByTagName("min");
         size_t numberMin = pNLMin->length();
-        NodeList* pNLMax = pParamElem->getElementsByTagName("max");
+        Poco::AutoPtr<NodeList> pNLMax = pParamElem->getElementsByTagName("max");
         size_t numberMax = pNLMax->length();
 
         if ( numberMin >= 1)
@@ -1808,15 +1800,12 @@ namespace Geometry
           Element* pMax = static_cast<Element*>(pNLMax->item(0));
           constraint[1] = pMax->getAttribute("val");
         }
-        pNLMin->release();
-        pNLMax->release();
-
 
         // check if penalty-factor> elements present
 
         std::string penaltyFactor;
 
-        NodeList* pNL_penaltyFactor = pParamElem->getElementsByTagName("penalty-factor");
+        Poco::AutoPtr<NodeList> pNL_penaltyFactor = pParamElem->getElementsByTagName("penalty-factor");
         size_t numberPenaltyFactor =  pNL_penaltyFactor->length();
 
         if ( numberPenaltyFactor>= 1)
@@ -1824,8 +1813,6 @@ namespace Geometry
           Element* pPenaltyFactor = static_cast<Element*>(pNL_penaltyFactor->item(0));
           penaltyFactor = pPenaltyFactor->getAttribute("val");
         }
-        pNL_penaltyFactor->release();
-
 
         // Check if look up table is specified
 
@@ -1864,7 +1851,7 @@ namespace Geometry
               interpolation->setYUnit(pLookUp->getAttribute("y-unit"));
           }
 
-          NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
+          Poco::AutoPtr<NodeList> pNLpoint = pLookUp->getElementsByTagName("point");
           unsigned long numberPoint = pNLpoint->length();
 
           for ( unsigned long i = 0; i < numberPoint; i++)
@@ -1874,10 +1861,7 @@ namespace Geometry
             double y = atof( pPoint->getAttribute("y").c_str() );
             interpolation->addPoint(x,y);
           }
-          pNLpoint->release();
         }
-        pNLLookUp->release();
-
 
         // Check if formula is specified
 
@@ -1904,8 +1888,6 @@ namespace Geometry
           if ( pFormula->hasAttribute("result-unit") )
             resultUnit = pFormula->getAttribute("result-unit");
         }
-        pNLFormula->release();
-
         
         auto cacheKey = std::make_pair(paramName, comp);
         auto cacheValue = boost::shared_ptr<XMLlogfile>(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit,
@@ -1918,7 +1900,6 @@ namespace Geometry
         }
       } // end of if statement
     }
-    pNL_comp->release();
   }
 
 
@@ -2242,7 +2223,7 @@ namespace Geometry
       }
       // Get pointer to root element and add this element to pElem
       Element* pCuboid = pDoc->documentElement();
-      Node* fisse = (pElem->ownerDocument())->importNode(pCuboid, true);
+      Poco::AutoPtr<Node> fisse = (pElem->ownerDocument())->importNode(pCuboid, true);
       pElem->appendChild(fisse);
 
       pDoc->release();
