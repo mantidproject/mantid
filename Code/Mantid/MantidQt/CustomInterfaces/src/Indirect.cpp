@@ -2052,3 +2052,16 @@ void Indirect::sliceUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_sltProp["R2S"] ) m_sltR2->setMinimum(val);
   else if ( prop == m_sltProp["R2E"] ) m_sltR2->setMaximum(val);
 }
+
+
+void Indirect::setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoublePropertyManager* dblManager, 
+  const std::pair<QtProperty*, QtProperty*> props, const std::pair<double, double>& bounds)
+{
+  dblManager->setMinimum(props.first, bounds.first);
+  dblManager->setMaximum(props.first, bounds.second);
+  dblManager->setMinimum(props.second, bounds.first);
+  dblManager->setMaximum(props.second, bounds.second);
+  rangeSelector->setRange(bounds.first, bounds.second);
+}
+
+  
