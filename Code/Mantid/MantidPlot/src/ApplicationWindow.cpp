@@ -16714,19 +16714,18 @@ void ApplicationWindow::displayToolbars()
 }
 void ApplicationWindow::setToolbars()
 {
+  d_standard_tool_bar = actionFileTools->isChecked();
+  d_plot_tool_bar = actionPlotTools->isChecked();
+  d_display_tool_bar = actionDisplayBar->isChecked();
+  d_format_tool_bar = actionFormatToolBar->isChecked();
 
-d_standard_tool_bar = actionFileTools->isChecked();
-d_plot_tool_bar = actionPlotTools->isChecked();
-d_display_tool_bar = actionDisplayBar->isChecked();
-d_format_tool_bar = actionFormatToolBar->isChecked();
+  MdiSubWindow *w = activeWindow();
 
-MdiSubWindow *w = activeWindow();
-
-standardTools->setVisible(d_standard_tool_bar);
-plotTools->setVisible(d_plot_tool_bar);
-displayBar->setVisible(d_display_tool_bar);
-formatToolBar->setVisible(d_format_tool_bar);
-plotTools->setEnabled(w && w->isA("MultiLayer"));
+  standardTools->setVisible(d_standard_tool_bar);
+  plotTools->setVisible(d_plot_tool_bar);
+  displayBar->setVisible(d_display_tool_bar);
+  formatToolBar->setVisible(d_format_tool_bar);
+  plotTools->setEnabled(w && w->isA("MultiLayer"));
 }
 
 void ApplicationWindow::saveFitFunctions(const QStringList& lst)
