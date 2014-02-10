@@ -104,10 +104,7 @@ void Indirect::initLayout()
 
   // "SofQW" tab
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
-  connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(int)), m_uiForm.sqw_swInput, SLOT(setCurrentIndex(int)));
-  connect(m_uiForm.sqw_cbWorkspace, SIGNAL(currentIndexChanged(int)), this, SLOT(validateSofQ(int)));
-
-  connect(m_uiForm.sqw_pbPlotInput, SIGNAL(clicked()), this, SLOT(sOfQwPlotInput()));
+  connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(sOfQwPlotInput()));
 
   // "Slice" tab
   connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
@@ -840,24 +837,15 @@ bool Indirect::validateSofQw()
 {
   bool valid = true;
 
-  if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.sqw_dsSampleInput);
+  QString error = uiv.generateErrorMessage();
+
+  if (!error.isEmpty())
   {
-    if ( ! m_uiForm.sqw_inputFile->isValid() )
-    {
-      valid = false;
-    }
-  }
-  else
-  {
-    if ( m_uiForm.sqw_cbWorkspace->currentText().isEmpty() )
-    {
-      valid = false;
-      m_uiForm.sqw_valWorkspace->setText("*");
-    }
-    else
-    {
-      m_uiForm.sqw_valWorkspace->setText(" ");
-    }
+    valid = false;
+    showInformationBox(error);
   }
 
   if ( m_uiForm.sqw_ckRebinE->isChecked() )
@@ -972,7 +960,7 @@ void Indirect::loadSettings()
   m_uiForm.ind_calibFile->readSettings(settings.group());
   m_uiForm.ind_mapFile->readSettings(settings.group());
   m_uiForm.slice_calibFile->readSettings(settings.group());
-  m_uiForm.sqw_inputFile->readSettings(settings.group());
+  m_uiForm.sqw_dsSampleInput->readSettings(settings.group());
   settings.endGroup();
 }
 
@@ -1781,18 +1769,19 @@ void Indirect::sOfQwClicked()
     QString rebinString = m_uiForm.sqw_leQLow->text()+","+m_uiForm.sqw_leQWidth->text()+","+m_uiForm.sqw_leQHigh->text();
     QString pyInput = "from mantid.simpleapi import *\n";
 
-    if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+    switch(m_uiForm.sqw_dsSampleInput->getCurrentView())
     {
-      pyInput +=
-        "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
-        "(dir, file) = os.path.split(filename)\n"
-        "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
-    }
-    else
-    {
-      pyInput +=
-        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+      case 0:
+        //load the file
+        pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
+          "(dir, file) = os.path.split(filename)\n"
+          "(sqwInput, ext) = os.path.splitext(file)\n"
+          "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
+          break;
+      case 1:
+        //get the workspace
+        pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
+        break;
     }
 
     // Create output name before rebinning
@@ -1866,35 +1855,33 @@ void Indirect::sOfQwPlotInput()
   QString pyInput = "from mantid.simpleapi import *\n"
     "from mantidplot import *\n";
 
-  //...
-  if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+  if (m_uiForm.sqw_dsSampleInput->isValid())
   {
-    // get filename
-    if ( m_uiForm.sqw_inputFile->isValid() )
+    switch(m_uiForm.sqw_dsSampleInput->getCurrentView())
     {
-      pyInput +=
-        "filename = r'" + m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
-        "(dir, file) = os.path.split(filename)\n"
-        "(input, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=input)\n";
+      case 0:
+        //load the file
+        pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
+          "(dir, file) = os.path.split(filename)\n"
+          "(sqwInput, ext) = os.path.splitext(file)\n"
+          "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
+          break;
+      case 1:
+        //get the workspace
+        pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
+        break;
     }
-    else
-    {
-      showInformationBox("Invalid filename.");
-      return;
-    }
+
+    pyInput += "ConvertSpectrumAxis(InputWorkspace=sqwInput, OutputWorkspace=sqwInput[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
+    "ws = importMatrixWorkspace(sqwInput[:-4]+'_rqw')\n"
+    "ws.plotGraph2D()\n";
+
+    QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
   {
-    pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+    showInformationBox("Invalid filename.");
   }
-
-  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
-    "ws = importMatrixWorkspace(input[:-4]+'_rqw')\n"
-    "ws.plotGraph2D()\n";
-
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-
 }
 
 // SLICE
