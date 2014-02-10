@@ -9,6 +9,8 @@
 #include "google/malloc_extension.h"
 #endif
 
+#include <ostream> //for endl
+
 using std::size_t;
 
 namespace Mantid

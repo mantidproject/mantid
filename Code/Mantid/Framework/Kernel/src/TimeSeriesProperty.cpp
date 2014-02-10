@@ -261,7 +261,7 @@ namespace Mantid
       // 3. Prepare a copy
       std::vector<TimeValueUnit<TYPE> > mp_copy;
 
-      g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << std::endl;
+      g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << "\n";
 
       // 4. Create new
       for (size_t isp = 0; isp < splittervec.size(); ++isp)
@@ -303,7 +303,7 @@ namespace Mantid
         /* Check */
         if (tstartindex < 0 || tstopindex >= int(m_values.size()))
         {
-          g_log.warning() << "Memory Leak In SplitbyTime!" << std::endl;
+          g_log.warning() << "Memory Leak In SplitbyTime!\n";
         }
 
         if (tstartindex == tstopindex)
@@ -321,7 +321,7 @@ namespace Mantid
         }
       } // ENDFOR
 
-      g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << m_values.size() << std::endl;
+      g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << m_values.size() << "\n";
 
       // 5. Clear
       m_values.clear();
@@ -995,12 +995,12 @@ namespace Mantid
         try
         {
           ins << m_values[i].time().toSimpleString();
-          ins << "  " << m_values[i].value() << std::endl;
+          ins << "  " << m_values[i].value() << "\n";
         }
         catch (...)
         {
           //Some kind of error; for example, invalid year, can occur when converting boost time.
-          ins << "Error Error" << std::endl;
+          ins << "Error Error" << "\n";
         }
       }
 
@@ -1739,7 +1739,7 @@ namespace Mantid
         {
           // Print out warning
           g_log.debug() << "Entry @ Time = " << prevtime << "has duplicate time stamp.  Remove entry with Value = " <<
-              (vit-1)->value() << std::endl;
+              (vit-1)->value() << "\n";
 
           // A duplicated entry!
           vit = m_values.erase(vit-1);
@@ -1753,7 +1753,7 @@ namespace Mantid
       }
 
       // 3. Finish
-      g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. " << std::endl;
+      g_log.warning() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. " << "\n";
 
       return;
     }
@@ -1766,7 +1766,7 @@ namespace Mantid
     {
       std::stringstream ss;
       for (size_t i = 0; i < m_values.size(); ++i)
-        ss << m_values[i].time() << "\t\t" << m_values[i].value() << std::endl;
+        ss << m_values[i].time() << "\t\t" << m_values[i].value() << "\n";
 
       return ss.str();
     }

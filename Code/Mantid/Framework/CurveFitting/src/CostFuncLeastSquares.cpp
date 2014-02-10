@@ -7,6 +7,7 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <iomanip>
 

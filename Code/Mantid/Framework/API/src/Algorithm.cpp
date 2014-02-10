@@ -21,9 +21,14 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/regex.hpp>
+#include <boost/weak_ptr.hpp>
 
+#include <Poco/ActiveMethod.h>
+#include <Poco/ActiveResult.h>
+#include <Poco/NotificationCenter.h>
 #include <Poco/RWLock.h>
 #include <Poco/StringTokenizer.h>
+#include <Poco/Void.h>
 
 #include <map>
 
@@ -71,10 +76,12 @@ namespace Mantid
 
     /// Constructor
     Algorithm::Algorithm() :
-    PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
+    PropertyManagerOwner(),
       m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
-      m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-      m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
+      m_executeAsync(new Poco::ActiveMethod<bool, Poco::Void, Algorithm>(this,&Algorithm::executeAsyncImpl)),
+      m_notificationCenter(new Poco::NotificationCenter),
+      m_progressObserver(new Poco::NObserver<Algorithm, ProgressNotification>(*this, &Algorithm::handleChildProgressNotification)),
+      m_isInitialized(false), m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
       m_running(false),m_rethrow(false),m_algorithmID(this),
       m_singleGroup(-1), m_groupSize(0), m_groupsHaveSimilarNames(false)
@@ -84,6 +91,10 @@ namespace Mantid
     /// Virtual destructor
     Algorithm::~Algorithm()
     {
+      delete m_notificationCenter;
+      delete m_executeAsync;
+      delete m_progressObserver;
+
       g_log.release();
       // Free up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
@@ -179,14 +190,13 @@ namespace Mantid
       return m_running;
     }
 
-
     //---------------------------------------------------------------------------------------------
     /**  Add an observer to a notification
     @param observer :: Reference to the observer to add
     */
     void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
     {
-      m_notificationCenter.addObserver(observer);
+      m_notificationCenter->addObserver(observer);
     }
 
     /**  Remove an observer
@@ -194,7 +204,7 @@ namespace Mantid
     */
     void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
     {
-      m_notificationCenter.removeObserver(observer);
+      m_notificationCenter->removeObserver(observer);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -206,7 +216,7 @@ namespace Mantid
     */
     void Algorithm::progress(double p, const std::string& msg, double estimatedTime, int progressPrecision)
     {
-      m_notificationCenter.postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
+      m_notificationCenter->postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
     }
 
     //---------------------------------------------------------------------------------------------
@@ -480,7 +490,7 @@ namespace Mantid
       // Start by freeing up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
-      m_notificationCenter.postNotification(new StartedNotification(this));
+      m_notificationCenter->postNotification(new StartedNotification(this));
       Mantid::Kernel::DateAndTime start_time;
 
       // Return a failure if the algorithm hasn't been initialized
@@ -513,7 +523,7 @@ namespace Mantid
         // Try the validation again
         if ( !validateProperties() )
         {
-           m_notificationCenter.postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+           m_notificationCenter->postNotification(new ErrorNotification(this,"Some invalid Properties found"));
            throw std::runtime_error("Some invalid Properties found");
         }
       }
@@ -526,7 +536,7 @@ namespace Mantid
         for (auto it = errors.begin(); it != errors.end(); it++)
           g_log.error() << "Invalid value for " << it->first << ": " << it->second << std::endl;
         // Throw because something was invalid
-        m_notificationCenter.postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+        m_notificationCenter->postNotification(new ErrorNotification(this,"Some invalid Properties found"));
         throw std::runtime_error("Some invalid Properties found");
       }
 
@@ -547,7 +557,7 @@ namespace Mantid
       {
         g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
         g_log.error()<<ex.what()<<std::endl;
-        m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+        m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
         m_running = false;
         if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         {
@@ -619,7 +629,7 @@ namespace Mantid
             g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
             g_log.error()<< ex.what()<<std::endl;
           }
-          m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+          m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
           m_running = false;
         }
         catch(std::logic_error& ex)
@@ -631,7 +641,7 @@ namespace Mantid
             g_log.error()<< "Logic Error in execution of algorithm "<< this->name()<<std::endl;
             g_log.error()<< ex.what()<<std::endl;
           }
-          m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+          m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
           m_running = false;
         }
       }
@@ -640,7 +650,7 @@ namespace Mantid
         m_runningAsync = false;
         m_running = false;
         g_log.error() << this->name() << ": Execution terminated by user.\n";
-        m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+        m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
         this->unlockWorkspaces();
         throw;
       }
@@ -651,7 +661,7 @@ namespace Mantid
         m_runningAsync = false;
         m_running = false;
 
-        m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+        m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
         g_log.error() << "Error in execution of algorithm " << this->name() << ":\n";
         g_log.error(ex.what());
         this->unlockWorkspaces();
@@ -665,7 +675,7 @@ namespace Mantid
         m_runningAsync = false;
         m_running = false;
 
-        m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
+        m_notificationCenter->postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
         g_log.error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
         this->unlockWorkspaces();
         throw;
@@ -674,7 +684,7 @@ namespace Mantid
       // Unlock the locked workspaces
       this->unlockWorkspaces();
 
-      m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
+      m_notificationCenter->postNotification(new FinishedNotification(this,isExecuted()));
       // Only gets to here if algorithm ended normally
       // Free up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
@@ -806,7 +816,7 @@ namespace Mantid
 
       if (startProgress >= 0 && endProgress > startProgress && endProgress <= 1.)
       {
-        alg->addObserver(m_progressObserver);
+        alg->addObserver(*m_progressObserver);
         m_startChildProgress = startProgress;
         m_endChildProgress = endProgress;
       }
@@ -814,7 +824,7 @@ namespace Mantid
       // Before we return the shared pointer, use it to create a weak pointer and keep that in a vector.
       // It will be used this to pass on cancellation requests
       // It must be protected by a critical block so that Child Algorithms can run in parallel safely.
-      IAlgorithm_wptr weakPtr(alg);
+      boost::weak_ptr<IAlgorithm> weakPtr(alg);
       PARALLEL_CRITICAL(Algorithm_StoreWeakPtr)
       {
         m_ChildAlgorithms.push_back(weakPtr);
@@ -1297,7 +1307,7 @@ namespace Mantid
 
       // We finished successfully.
       setExecuted(true);
-      m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
+      m_notificationCenter->postNotification(new FinishedNotification(this,isExecuted()));
 
       return true;
     }
@@ -1394,7 +1404,7 @@ namespace Mantid
     */
     Poco::ActiveResult<bool> Algorithm::executeAsync()
     {
-      return m_executeAsync(Poco::Void());
+      return (*m_executeAsync)(Poco::Void());
     }
 
     /**Callback when an algorithm is executed asynchronously
@@ -1407,6 +1417,15 @@ namespace Mantid
       return this->execute();
     }
 
+    /**
+     * @return A reference to the Poco::NotificationCenter object that dispatches notifications
+     */
+    Poco::NotificationCenter & Algorithm::notificationCenter()
+    {
+      return *m_notificationCenter;
+    }
+
+
     /** Handles and rescales child algorithm progress notifications.
     *  @param pNf :: The progress notification from the child algorithm.
     */
@@ -1415,8 +1434,16 @@ namespace Mantid
       double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress)*pNf->progress;
 
       progress(p,pNf->message);
-
     }
+
+    /**
+     * @return A Poco:NObserver object that is responsible for reporting progress
+     */
+    const Poco::AbstractObserver & Algorithm::progressObserver() const
+    {
+      return *m_progressObserver;
+    }
+
 
     //--------------------------------------------------------------------------------------------
     /**
@@ -1428,13 +1455,11 @@ namespace Mantid
       //set myself to be cancelled
       m_cancel = true;
 
-      //set any child algorithms to be cancelled as well
-      std::vector<IAlgorithm_wptr>::const_iterator it;
 
       // Loop over the output workspaces and try to cancel them
-      for (it = m_ChildAlgorithms.begin(); it != m_ChildAlgorithms.end(); ++it)
+      for ( auto it = m_ChildAlgorithms.begin(); it != m_ChildAlgorithms.end(); ++it)
       {
-        IAlgorithm_wptr weakPtr = *it;
+        const auto & weakPtr = *it;
         if (IAlgorithm_sptr sharedPtr = weakPtr.lock())
         {
           sharedPtr->cancel();

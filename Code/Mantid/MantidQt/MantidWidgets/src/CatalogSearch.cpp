@@ -3,6 +3,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
+#include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
 
 #include <QDesktopServices>
