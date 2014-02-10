@@ -147,6 +147,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   // Watch for the deletion of the associated workspace
   observePreDelete();
   observeAfterReplace();
+  observeRename();
   observeADSClear();
 
   connect(app->mantidUI->getAlgMonitor(),SIGNAL(algorithmStarted(void*)),this,SLOT(block()));
@@ -820,6 +821,15 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
       }
     }
 
+  }
+}
+
+void InstrumentWindow::renameHandle(const std::string &oldName, const std::string &newName)
+{
+  if (oldName == m_workspaceName.toStdString())
+  {
+    m_workspaceName = QString::fromStdString(newName);
+    setWindowTitle(QString("Instrument - ") + m_workspaceName);
   }
 }
 
