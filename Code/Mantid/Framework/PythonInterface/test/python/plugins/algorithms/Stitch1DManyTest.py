@@ -66,6 +66,16 @@ class Stitch1DManyTest(unittest.TestCase):
         except RuntimeError:
             pass
          
+    def test_workspace_types_differ_throws(self):
+        tbl = CreateEmptyTableWorkspace()
+        input_workspaces = "%s, %s" % (self.a.name(), tbl.name()) # One table workspace, one matrix workspace
+        try:
+            stitchedViaStitchMany, scaleFactorMany = Stitch1DMany(InputWorkspaces=input_workspaces, Params=0.2)
+            self.fail("Input workspace type mis-match. Should have thrown.")
+        except RuntimeError:
+            pass
+        finally:
+            DeleteWorkspace(tbl)
     #Cross-check that the result of using Stitch1DMany with two workspaces is the same as using Stitch1D.    
     
     def test_stitches_two(self):
@@ -122,6 +132,7 @@ class Stitch1DManyTest(unittest.TestCase):
         self.assertTrue(isinstance(stitched, WorkspaceGroup), "Output should be a group workspace")
         self.assertEqual(stitched.size(), 3, "Output should contain 3 workspaces")
         self.assertEqual(stitched.name(), "stitched", "Output not named correctly")
+        
         
   
         
