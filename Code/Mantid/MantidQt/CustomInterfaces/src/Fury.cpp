@@ -153,7 +153,20 @@ namespace IDA
     try
     {
       const std::pair<double, double> range = getCurveRange(m_furCurve);    
-      m_furRange->setRange(range.first, range.second);
+      double rounded_min = floor(range.first*10+0.5)/10.0;
+      double rounded_max = floor(range.second*10+0.5)/10.0;
+
+      //check incase we have a really small range
+      if (fabs(rounded_min) > 0 && fabs(rounded_max) > 0)
+      {
+        m_furRange->setRange(rounded_min, rounded_max);
+      }
+      else
+      {
+        m_furRange->setRange(range.first, range.second);
+      }
+      //set default value for width
+      m_furDblMng->setValue(m_furProp["EWidth"], 0.01);
       m_furPlot->replot();
     }
     catch(std::invalid_argument & exc)
