@@ -14,13 +14,17 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <Poco/Net/AcceptCertificateHandler.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/SSLException.h>
+#include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/StreamCopier.h>
 #include <Poco/Path.h>
+#include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
+
 #include <fstream>
 #include <iomanip>
 
@@ -164,18 +168,37 @@ namespace Mantid
         }
         start=clock();
 
+        Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
         // Currently do not use any means of authentication. This should be updated IDS has signed certificate.
         const Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE);
+        // Create a singleton for holding the default context. E.g. any future requests to publish are made to this certificate and context.
+        Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,context);
         Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
 
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
         session.sendRequest(request);
 
-        Poco::Net::HTTPResponse res;
-        std::istream& rs = session.receiveResponse(res);
+        // Close the request by requesting a response.
+        Poco::Net::HTTPResponse response;
+        // Store the response for use IF an error occurs (e.g. 404).
+        std::istream& responseStream = session.receiveResponse(response);
 
-        //save file to local disk
-        retVal_FullPath = saveFiletoDisk(rs,fileName);
+        // Obtain the status returned by the server to verify if it was a success.
+        Poco::Net::HTTPResponse::HTTPStatus HTTPStatus = response.getStatus();
+        // The error message returned by the IDS (if one exists).
+        std::string IDSError = CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
+        // Cancel the algorithm and display the message if it exists.
+        if(!IDSError.empty())
+        {
+          // As an error occurred we must cancel the algorithm to prevent success message.
+          this->cancel();
+          // Output an appropriate error message from the JSON object returned by the IDS.
+          g_log.error(IDSError);
+          return "";
+        }
+
+        // Save the file to local disk if no errors occurred on the IDS.
+        retVal_FullPath = saveFiletoDisk(responseStream,fileName);
 
         clock_t end=clock();
         float diff = float(end - start)/CLOCKS_PER_SEC;

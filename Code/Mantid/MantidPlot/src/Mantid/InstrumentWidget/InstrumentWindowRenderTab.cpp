@@ -674,7 +674,6 @@ void InstrumentWindowRenderTab::showMenuToolTip(QAction *action)
 
 /**
   * Set the offset in u-coordinate of a 2d (unwrapped) surface
-  * @param ucorr :: New value for the correction.
   */
 void InstrumentWindowRenderTab::setUCorrection()
 {

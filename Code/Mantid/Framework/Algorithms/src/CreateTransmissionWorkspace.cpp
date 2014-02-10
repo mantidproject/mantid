@@ -64,9 +64,9 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CreateTransmissionWorkspace::initDocs()
     {
+      this->setOptionalMessage("Creates a transmission run workspace in Wavelength from input TOF workspaces.");
       this->setWikiSummary(
-          "Creates a transmission run workspace in Wavelength from input TOF workspaces.");
-      this->setOptionalMessage(this->getWikiSummary());
+          "Creates a transmission run workspace in Wavelength from input TOF workspaces. See [[Reflectometry_Guide]]");
     }
 
     //----------------------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ namespace Mantid
      *
      * Input workspaces are in TOF. These are converted to lambda, normalized and stitched together (if two given).
      *
-     * @param IvsLam : Run workspace which is to be normalized by the results of the transmission corrections.
+     * @param processingCommands : Processing instructions. Usually a list of detector indexes to keep.
      * @param wavelengthInterval : Wavelength interval for the run workspace.
      * @param wavelengthMonitorBackgroundInterval : Wavelength interval for the monitor background
      * @param wavelengthMonitorIntegrationInterval : Wavelength interval for the monitor integration

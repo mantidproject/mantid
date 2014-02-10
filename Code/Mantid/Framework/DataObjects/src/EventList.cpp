@@ -3758,6 +3758,7 @@ namespace DataObjects
    *        be big enough to accommodate the indices.
    * @param events :: either this->events or this->weightedEvents.
    * @param tofcorrection :: a correction for each TOF to multiply with.
+   * @param docorrection :: flag to determine whether or not to apply correction
    */
   template< class T >
   void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,

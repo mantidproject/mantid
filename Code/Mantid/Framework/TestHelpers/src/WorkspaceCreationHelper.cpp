@@ -312,14 +312,17 @@ namespace WorkspaceCreationHelper
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors, bool startYNegative)
+  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
+                                                       bool startYNegative, bool isHistogram)
   {
     if( includeMonitors && nhist < 2 )
     {
       throw std::invalid_argument("Attemping to 2 include monitors for a workspace with fewer than 2 histograms");
     }
 
-    Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins); // A 1:1 spectra is created by default
+    Workspace2D_sptr space;
+    if(isHistogram) space = Create2DWorkspaceBinned(nhist, nbins); // A 1:1 spectra is created by default
+    else space = Create2DWorkspace123(nhist,nbins, false);
     space->setTitle("Test histogram"); // actually adds a property call run_title to the logs
     space->getAxis(0)->setUnit("TOF");
     space->setYUnit("Counts");
@@ -1261,4 +1264,24 @@ namespace WorkspaceCreationHelper
 
     return DetPos;
   }
+  void create2DAngles(std::vector<double> &L2,std::vector<double> &polar,std::vector<double> &azim,
+                      size_t nPolar,size_t nAzim,double polStart,double polEnd,double azimStart,double azimEnd)
+  {
+    size_t nDet = nPolar*nAzim;
+    L2.resize(nDet,10);
+    polar.resize(nDet);
+    azim.resize(nDet);
+
+    double dPolar=(polEnd-polStart)/static_cast<double>(nDet-1);
+    double dAzim =(azimEnd-azimEnd)/static_cast<double>(nDet-1);
+    for( size_t i=0;i<nPolar;i++)
+    {
+      for( size_t j=0;j<nAzim;j++)
+      {
+        polar[i*nPolar+j]=polStart+dPolar*static_cast<double>(i);
+        azim[i*nPolar+j] =azimStart+dAzim*static_cast<double>(j);
+      }
+    }
+  }
+
 }

@@ -292,6 +292,8 @@ public:
 
   /// Verifies if the Catalog login was a success.
   bool isValidCatalogLogin();
+  /// Create a publishing dialog.
+  void catalogPublishDialog();
 
 signals:
   //A signal to indicate that we want a script to produce a dialog

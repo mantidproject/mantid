@@ -5,6 +5,8 @@
 
 #include <boost/bind.hpp>
 
+#include <sstream>
+
 namespace Mantid
 {
 namespace CurveFitting
@@ -307,7 +309,6 @@ namespace CurveFitting
   }
 
   /**
-   * @param funcIndex Index within composite
    * @param profile Function of type ComptonProfile
    * @param paramsOffset The offset of the given function's parameters within composite
    */
@@ -325,7 +326,6 @@ namespace CurveFitting
   }
 
   /**
-   * @param funcIndex Index within composite
    * @param function1D Function of type IFunction1D
    * @param paramsOffset The offset of the given function's parameters within composite
    */

@@ -10,17 +10,12 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-  /// Simple data structure to store nominal detector values
-  /// It avoids some functions taking a huge number of arguments
-  struct DetectorParams
-  {
-    double l1; ///< source-sample distance in metres
-    double l2; ///< sample-detector distance in metres
-    double theta; ///< scattering angle in radians
-    double t0; ///< time delay in microseconds
-    double efixed; ///< final energy
-  };
+  //---------------------------------------------------------------------------
+  // Forward declarations
+  //---------------------------------------------------------------------------
+  struct DetectorParams;
 
+  //---------------------------------------------------------------------------
   /// Simple data structure to store resolution parameter values
   /// It avoids some functions taking a huge number of arguments
   struct ResolutionParams
@@ -58,10 +53,6 @@ namespace CurveFitting
   class MANTID_CURVEFITTING_DLL ComptonProfile : public virtual API::ParamFunction, public virtual API::IFunction1D
   {
   public:
-    /// Retrieve a component parameter
-    static double getComponentParameter(const Geometry::IComponent_const_sptr & comp, const Geometry::ParameterMap &pmap,
-                                        const std::string &name);
-
     /// Default constructor required for factory
     ComptonProfile();
 
@@ -124,28 +115,6 @@ namespace CurveFitting
     size_t m_wsIndex;
     /// Store the mass values
     double m_mass;
-
-    /// Source to sample distance
-    double m_l1;
-    /// Std dev of l1 distance
-    double m_sigmaL1;
-    /// Sample to detector distance
-    double m_l2;
-    /// Std dev of l1 distance
-    double m_sigmaL2;
-    /// Theta value for this spectrum
-    double m_theta;
-    /// Std Dev theta value for this spectrum
-    double m_sigmaTheta;
-
-    /// Final energy
-    double m_e1;
-    /// T0 value for this spectrum in seconds
-    double m_t0;
-    /// Lorentzian HWHM of the foil analyser energy
-    double m_hwhmGaussE;
-    /// Gaussian HWHM of the foil analyser energy
-    double m_hwhmLorentzE;
 
     /// Voigt function
     boost::shared_ptr<API::IPeakFunction> m_voigt;

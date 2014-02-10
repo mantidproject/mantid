@@ -139,10 +139,12 @@ public:
    * @param event_time_of_flight :: array with event TOFS
    * @param numEvents :: how many events in the arrays
    * @param startAt :: index of the first event from event_index
-   * @param event_index_ptr :: ptr to a vector of event index (length of # of pulses)
+   * @param event_index :: vector of event index (length of # of pulses)
    * @param thisBankPulseTimes :: ptr to the pulse times for this particular bank.
    * @param have_weight :: flag for handling simulated files
    * @param event_weight :: array with weights for events
+   * @param min_event_id ;: minimum detector ID to load
+   * @param max_event_id :: maximum detector ID to load
    * @return
    */
   ProcessBankData(LoadEventNexus * alg, std::string entry_name,
@@ -2611,7 +2613,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
  * 
  * @note: It does essentially the same thing of the method: LoadISISNexus2::loadSampleData
  * 
- * @param nexusfilename : path for the nexus file
+ * @param file : handle to the nexus file
  * @param WS : pointer to the workspace
  */
 void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS){

@@ -439,6 +439,7 @@ namespace MantidQt
       }
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigatorSurname", m_icatUiForm.InvestigatorSurname->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("DataFileName", m_icatUiForm.DataFileName->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationId", m_icatUiForm.InvestigationId->text().toStdString()));
 
       // Right side of form.
       if (m_icatUiForm.StartDate->text().size() > 2)
@@ -652,6 +653,7 @@ namespace MantidQt
       m_icatUiForm.InvestigationName_err->setVisible(false);
       m_icatUiForm.Instrument_err->setVisible(false);
       m_icatUiForm.RunRange_err->setVisible(false);
+      m_icatUiForm.InvestigationId_err->setVisible(false);
       m_icatUiForm.InvestigatorSurname_err->setVisible(false);
       m_icatUiForm.InvestigationAbstract_err->setVisible(false);
       // Right side of form.
@@ -725,9 +727,6 @@ namespace MantidQt
 
       // Add data from the workspace to the results table.
       populateTable(resultsTable, workspace);
-
-      // Hide the "Investigation id" column (It's used by the CatalogGetDataFiles algorithm).
-      resultsTable->setColumnHidden(0, true);
 
       // Show only a portion of the title as they can be quite long.
       resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
@@ -819,7 +818,7 @@ namespace MantidQt
       updateDataFileLabels(item);
 
       // Perform the "search" and obtain the related data files for the selected investigation.
-      m_icatHelper->executeGetDataFiles(investigationId->text().toLongLong());
+      m_icatHelper->executeGetDataFiles(investigationId->text().toStdString());
 
       // Populate the dataFile table from the "dataFileResults" workspace.
       populateDataFileTable();
@@ -867,6 +866,10 @@ namespace MantidQt
       // Create the custom header with checkbox ability.
       m_customHeader = new CheckboxHeader(Qt::Horizontal, dataFileTable);
 
+      // There is no simple way to override default QTableWidget sort.
+      // Instead, connecting header to obtain column clicked, and sorting by
+      connect(m_customHeader,SIGNAL(sectionClicked(int)),this,SLOT(sortByFileSize(int)));
+
       // Set it prior to adding labels in populateTable.
       dataFileTable->setHorizontalHeader(m_customHeader);
 
@@ -883,6 +886,7 @@ namespace MantidQt
       // Hide these columns as they're not useful for the user, but are used by the algorithms.
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Id"), true);
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Location"), true);
+      dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "File size(bytes)"), true);
 
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
@@ -1108,6 +1112,7 @@ namespace MantidQt
       // For all the files downloaded (or in archive) we want to load them.
       for (unsigned i = 0; i < filePaths.size(); i++)
       {
+        if (filePaths.at(i).empty()) return;
         // Set the filename (path) of the algorithm to load from.
         loadAlgorithm->setPropertyValue("Filename", filePaths.at(i));
         // Sets the output workspace to be the name of the file.
@@ -1174,6 +1179,30 @@ namespace MantidQt
         table->item(indexes.at(i).row(), 0)->setCheckState(Qt::Checked);
       }
       enableDownloadButtons();
+    }
+
+
+    /**
+     * When the user clicks "File size" column sort the table by "File size(bytes)".
+     * @param column :: The column that was clicked by the user.
+     */
+    void CatalogSearch::sortByFileSize(int column)
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+      int byteColumn  = headerIndexByName(table, "File size(bytes)");
+
+      if (column == headerIndexByName(table, "File size"))
+      {
+        // Convert cell value to int within the datamodel.
+        // This allows us to sort by the specific column.
+        for(int row = 0 ; row < table->rowCount(); row++)
+        {
+          QTableWidgetItem *item = new QTableWidgetItem;
+          item->setData(Qt::EditRole, table->item(row, byteColumn)->text().toInt());
+          table->setItem(row, byteColumn, item);
+        }
+        table->sortByColumn(byteColumn);
+      }
     }
 
   } // namespace MantidWidgets

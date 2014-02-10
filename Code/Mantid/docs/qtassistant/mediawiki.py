@@ -3,6 +3,7 @@ from eqnparser import Equation
 import os
 import re
 from parseLinks import fixLinks
+from fixQuotes import fixQuotes
 
 IMG_NOT_FOUND = "ImageNotFound.png"
 
@@ -210,6 +211,13 @@ class MediaWiki:
             text = text.replace(item, formatted)
         return text
 
+    def __fixSource(self,text):
+        if re.findall('<source lang=".*?">',text)!=[]:
+            text=re.sub('<source lang="xml">','<pre>',text)
+            text=re.sub('<source lang="python">','<pre>',text)
+            text=re.sub('</source>','</pre>',text)
+        return text
+        
     def __fixPre(self,text):
         start = 0
         while start >= 0:
@@ -259,9 +267,11 @@ class MediaWiki:
         #print "03>>>", text, "<<<"
         text = self.__fixHEADERS(text)
         #print "04>>>", text, "<<<"
+        text = self.__fixSource(text)
         text = self.__fixUL(text)
         text = self.__fixPre(text)
         
+        text=fixQuotes(text)
 
         #fix links
         fixer=fixLinks(text)

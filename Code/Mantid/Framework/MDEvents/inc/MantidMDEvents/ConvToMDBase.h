@@ -59,7 +59,7 @@ namespace MDEvents
      ConvToMDBase();
  
     ///method which initates all main class variables 
-    virtual size_t initialize(const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper, bool IgnoreZeros);
+    virtual size_t initialize(const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper, bool ignoreZeros);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor

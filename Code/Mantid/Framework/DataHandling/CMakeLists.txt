@@ -1,7 +1,6 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/CompressEvents.cpp
-	src/ConvertFullprofToXML.cpp
 	src/CreateChopperModel.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
@@ -59,6 +58,7 @@ set ( SRC_FILES
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
+	src/LoadPDCharacterizations.cpp
 	src/LoadPDFgetNFile.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
@@ -131,7 +131,6 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/CompressEvents.h
-	inc/MantidDataHandling/ConvertFullprofToXML.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
@@ -189,6 +188,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
+	inc/MantidDataHandling/LoadPDCharacterizations.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
@@ -261,7 +261,6 @@ set ( INC_FILES
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
-	ConvertFullprofToXMLTest.h
 	CreateChopperModelTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
@@ -311,6 +310,7 @@ set ( TEST_FILES
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
 	LoadNexusTest.h
+	LoadPDCharacterizationsTest.h
 	LoadPDFgetNFileTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h

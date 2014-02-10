@@ -79,11 +79,13 @@ public:
   {
       Kernel::MersenneTwister tof(0,100.0,200.0);
       Kernel::MersenneTwister spec(1234,0.0,static_cast<double>(m_nSpectra));
+      Kernel::MersenneTwister period(0,0.0,static_cast<double>(m_nPeriods));
       for(;;)
       {
           Poco::Thread::sleep(m_Rate);
           TCPStreamEventDataNeutron data;
           data.head_n.nevents = m_nEvents;
+          data.head_n.period  = static_cast<uint32_t>(period.nextValue());
 
           socket().sendBytes(&data.head,(int)sizeof(data.head));
           socket().sendBytes(&data.head_n,(int)sizeof(data.head_n));

@@ -614,6 +614,7 @@ namespace MDEvents
    * @param length :: length below which to integrate
    * @param[out] signal :: set to the integrated signal
    * @param[out] errorSquared :: set to the integrated squared error.
+   * @param[out] signal_fit :: evaluation parameter on fit
    */
   TMDE(
   void MDBox)::integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const

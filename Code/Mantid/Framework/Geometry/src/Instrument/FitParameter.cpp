@@ -12,8 +12,9 @@ namespace Mantid
 namespace Geometry
 {
 
-  // Get a reference to the logger
-  Kernel::Logger& FitParameter::g_log = Kernel::Logger::get("FitParameter");
+  // Get a reference to the logger, here stored in statis variable to
+  // have access to in operator<< and operator>>
+  static Kernel::Logger& g_log = Kernel::Logger::get("FitParameter");
 
 
   /**
@@ -152,7 +153,7 @@ namespace Geometry
 
   /**
     Reads in information about a fitting parameter. The expected format is a comma separated
-    list that can have varying length but the entries in the list will be read according to:
+    list of 3 or more entries. The list will be read according to:
 
        1st (0) : parameter value (which is converted to float)
        2nd (1) : fitting function this parameter belong to  
@@ -181,32 +182,36 @@ namespace Geometry
     getline(in, str);
     tokenizer values(str, ",", tokenizer::TOK_TRIM);
 
+    if ( values.count() <= 2 )
+    {
+      g_log.warning() << "Expecting a comma separated list of at each three entries"
+                      << " (any of which may be empty strings) to set information about a fitting parameter"
+                      << " instead of: " << str << std::endl;
+      return in;
+    }    
+
     try
     {
-      f.setValue() = atof(values[0].c_str());
+      f.setValue() = boost::lexical_cast<double>(values[0]);
     }
-    catch (...)
+    catch (boost::bad_lexical_cast &)
     {
       f.setValue() = 0.0;
+
+      if ( !values[0].empty() )
+      {
+        g_log.warning() << "Could not read " << values[0] << " as double for "
+                        << " fitting parameter: " << values[1] << ":" << values[2] << std::endl;
+      }
     }
 
-    try
-    {
-      f.setFunction() = values[1];
-    }
-    catch (...)
-    {
-      f.setFunction() = "";
-    }
+    // read remaining required entries
 
-    try
-    {
-      f.setName() = values[2];
-    }
-    catch (...)
-    {
-      f.setName() = "";
-    }
+    f.setFunction() = values[1];
+    f.setName() = values[2];
+
+
+    // read optional entries
 
     try
     {

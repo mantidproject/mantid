@@ -5,6 +5,7 @@ from mediawiki import MediaWiki
 import os
 import wiki_tools
 from parseLinks import fixLinks
+from fixQuotes import fixQuotes
 
 DIRECTION = {
     0:"input",
@@ -49,6 +50,7 @@ def propToList(property, number):
         text = "&nbsp;"
     else:
         text = text.replace("\n", "<br/>")
+    text=fixQuotes(text)
     #fix links
     fixer=fixLinks(text)
     text = fixer.parse()
@@ -116,12 +118,17 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
         wiki.parse(alg.getWikiSummary(), qhp)
 
         htmlfile.h3("Usage")
-        text = wiki_tools.create_function_signature(alg, name)
-        text = text.split("\n")
-        if len(text) > 1:
-            text[0] = text[0] + "<pre>"
-            text[-1] = text[-1] + "</pre>"
-        text = "\n".join(text)
+        include_signature, custom_usage = wiki_tools.get_wiki_usage(name, version)
+        text=''
+        if include_signature:
+            text += wiki_tools.create_function_signature(alg, name)
+            text = text.split("\n")
+            if len(text) > 1:
+                text[0] = text[0] + "<pre>"
+                text[-1] = text[-1] + "</pre>"
+            text = "\n".join(text)
+        text+= "<br clear=all>\n\n" 
+        text+="<pre>"+custom_usage+ "</pre>"
         htmlfile.openTag("p")
         htmlfile.addTxtEle("code", text)
         htmlfile.closeTag(True)

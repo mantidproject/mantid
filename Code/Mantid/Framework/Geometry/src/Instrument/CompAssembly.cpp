@@ -458,7 +458,7 @@ void CompAssembly::printTree(std::ostream& os) const
   {
     boost::shared_ptr<IComponent> it = (*this)[i];
     const CompAssembly* test=dynamic_cast<CompAssembly*>(it.get());
-    os << "Element " << i++ << " in the assembly : ";
+    os << "Element " << i << " from " << nelements() << " in the assembly : ";
     if (test)
     {
       os << test->getName() << std::endl;

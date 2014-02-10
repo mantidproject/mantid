@@ -1,9 +1,16 @@
 /*WIKI*
+This algorithm is currently used by the Vesuvio spectrometer at ISIS to correct for background produced by photons
+that are produced when the neutrons are absorbed by the shielding on the instrument. It only corrects the forward scattering
+detector banks.
 
-
-
- *WIKI*/
+Two workspaces are produced: the calculated background and a corrected workspace where the input workspace has been
+corrected by the background. The background is computed by a simple simulation of the expected count across all of the foils. The
+corrected workspace counts are computed by calculating a ratio of the expected counts at the detector to the integrated foil counts (<math>\beta</math>)
+and then the final corrected count rate <math>\displaystyle c_f</math> is defined as <math>\displaystyle c_f = c_i - \beta c_b</math>.
+*WIKI*/
 #include "MantidCurveFitting/CalculateGammaBackground.h"
+#include "MantidCurveFitting/ComptonProfile.h"
+#include "MantidCurveFitting/ConvertToYSpace.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -84,7 +91,7 @@ namespace Mantid
 
     void CalculateGammaBackground::initDocs()
     {
-      this->setWikiSummary("Calculates and the background due to gamma rays produced when neutrons are absorbed by shielding");
+      this->setWikiSummary("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding");
       this->setOptionalMessage("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding.");
     }
 
@@ -226,15 +233,15 @@ namespace Mantid
       detPar.l1 = m_l1;
       detPar.l2 = m_samplePos.distance(detPos);
       detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-      detPar.t0 = ComptonProfile::getComponentParameter(det, pmap, "t0")*1e-6; // seconds
-      detPar.efixed = ComptonProfile::getComponentParameter(det, pmap,"efixed");
+      detPar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0")*1e-6; // seconds
+      detPar.efixed = ConvertToYSpace::getComponentParameter(det, pmap,"efixed");
 
       ResolutionParams detRes;
-      detRes.dl1 = ComptonProfile::getComponentParameter(det, pmap, "sigma_l1"); // DL0
-      detRes.dl2 = ComptonProfile::getComponentParameter(det, pmap, "sigma_l2"); // DL1
-      detRes.dthe = ComptonProfile::getComponentParameter(det, pmap, "sigma_theta"); //DTH in radians
-      detRes.dEnGauss = ComptonProfile::getComponentParameter(det, pmap, "sigma_gauss");
-      detRes.dEnLorentz = ComptonProfile::getComponentParameter(det, pmap, "hwhm_lorentz");
+      detRes.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1"); // DL0
+      detRes.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2"); // DL1
+      detRes.dthe = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_theta"); //DTH in radians
+      detRes.dEnGauss = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
+      detRes.dEnLorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
 
       // Compute a time of flight spectrum convolved with a Voigt resolution function for each mass
       // at the detector point & sum to a single spectrum
@@ -264,15 +271,15 @@ namespace Mantid
       detPar.l1 = m_l1;
       detPar.l2 = m_samplePos.distance(detPos);
       detPar.theta = m_inputWS->detectorTwoTheta(det); //radians
-      detPar.t0 = ComptonProfile::getComponentParameter(det, pmap, "t0")*1e-6; // seconds
-      detPar.efixed = ComptonProfile::getComponentParameter(det, pmap,"efixed");
+      detPar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0")*1e-6; // seconds
+      detPar.efixed = ConvertToYSpace::getComponentParameter(det, pmap,"efixed");
 
       ResolutionParams detRes;
-      detRes.dl1 = ComptonProfile::getComponentParameter(det, pmap, "sigma_l1"); // DL0
-      detRes.dl2 = ComptonProfile::getComponentParameter(det, pmap, "sigma_l2"); // DL1
-      detRes.dthe = ComptonProfile::getComponentParameter(det, pmap, "sigma_theta"); //DTH in radians
-      detRes.dEnGauss = ComptonProfile::getComponentParameter(det, pmap, "sigma_gauss");
-      detRes.dEnLorentz = ComptonProfile::getComponentParameter(det, pmap, "hwhm_lorentz");
+      detRes.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1"); // DL0
+      detRes.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2"); // DL1
+      detRes.dthe = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_theta"); //DTH in radians
+      detRes.dEnGauss = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
+      detRes.dEnLorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
 
       const size_t nxvalues = m_backgroundWS->blocksize();
       std::vector<double> foilSpectrum(nxvalues);
@@ -294,7 +301,7 @@ namespace Mantid
         std::transform(ctfoil.begin(), ctfoil.end(), foilSpectrum.begin(), ctfoil.begin(),
                        std::minus<double>());
       }
-      bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)->getSpectrumNo()));
+      bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)->getSpectrumNo()) != 0 );
       // This is quicker than the if within the loop
       if(reversed)
       {
@@ -537,16 +544,16 @@ namespace Mantid
         FoilInfo descr;
         descr.thetaMin = thetaRng0.first;
         descr.thetaMax = thetaRng0.second;
-        descr.lorentzWidth = ComptonProfile::getComponentParameter(foil0, pmap, "hwhm_lorentz");
-        descr.gaussWidth = ComptonProfile::getComponentParameter(foil0, pmap, "sigma_gauss");
+        descr.lorentzWidth = ConvertToYSpace::getComponentParameter(foil0, pmap, "hwhm_lorentz");
+        descr.gaussWidth = ConvertToYSpace::getComponentParameter(foil0, pmap, "sigma_gauss");
         m_foils0[i] = descr; //copy
 
         const auto & foil1 = foils1[i];
         auto thetaRng1 = calculateThetaRange(foil1, m_foilRadius,refFrame->pointingHorizontal());
         descr.thetaMin = thetaRng1.first;
         descr.thetaMax = thetaRng1.second;
-        descr.lorentzWidth = ComptonProfile::getComponentParameter(foil1, pmap, "hwhm_lorentz");
-        descr.gaussWidth = ComptonProfile::getComponentParameter(foil1, pmap, "sigma_gauss");
+        descr.lorentzWidth = ConvertToYSpace::getComponentParameter(foil1, pmap, "hwhm_lorentz");
+        descr.gaussWidth = ConvertToYSpace::getComponentParameter(foil1, pmap, "sigma_gauss");
         m_foils1[i] = descr; //copy
       }
 

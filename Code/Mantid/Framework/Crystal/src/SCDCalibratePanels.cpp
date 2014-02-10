@@ -1114,6 +1114,7 @@ namespace Mantid
      *  @param instrument   The instrument to be modified
      *  @param AllBankName  The bank names in this instrument that will be modified
      *  @param T0           The time offset from the DetCal file
+     *  @param L0           The length offset from the DetCal file
      *  @param filename       The DetCal file name
      *  @param bankPrefixName   The prefix to the bank names.
      */
@@ -1327,12 +1328,11 @@ namespace Mantid
      * Really this is the operator SaveIsawDetCal but only the results of the given
      * banks are saved.  L0 and T0 are also saved.
      *
-     * @param  NewInstrument  -The instrument with the correct panel geometries
+     * @param instrument   -The instrument with the correct panel geometries
      *                         and initial path length
-     *
      * @param AllBankName  -the set of the NewInstrument names of the banks(panels)
-     * @param T0           -The time offset
-     * @param FileName     -The name of the DetCal file to save the results to
+     * @param T0           -The time offset from the DetCal file
+     * @param filename     -The name of the DetCal file to save the results to
      */
     void SCDCalibratePanels::saveIsawDetCal( boost::shared_ptr<const Instrument> &instrument,
          set<string> &AllBankName,double T0,string filename)

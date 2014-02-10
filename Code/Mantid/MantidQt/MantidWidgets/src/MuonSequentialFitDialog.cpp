@@ -12,6 +12,9 @@ namespace MantidWidgets
   using namespace Mantid::API;
 
   Logger& MuonSequentialFitDialog::g_log(Logger::get("MuonSequentialFitDialog"));
+
+  const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
+
   /** 
    * Constructor
    */
@@ -23,9 +26,10 @@ namespace MantidWidgets
 
     setState(Stopped);
 
-    // Set initial runs text 
-    Workspace_const_sptr fitWS = m_fitPropBrowser->getWorkspace();
-    m_ui.runs->setText( QString::fromStdString( getRunTitle(fitWS) ) + "-" );
+    // Set initial run to be run number of the workspace selected in fit browser when starting
+    // seq. fit dialog 
+    auto fitWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( m_fitPropBrowser->getWorkspace() );
+    m_ui.runs->setText( QString::number( fitWS->getRunNumber() ) + "-" );
 
     // TODO: find a better initial one, e.g. previously used
     m_ui.labelInput->setText("Label");
@@ -34,24 +38,25 @@ namespace MantidWidgets
 
     // After initial values are set, update depending elements accordingly. We don't rely on
     // slot/signal update, as element might be left with default values which means these will
-    // never be called on initialication.
+    // never be called on initialization.
     updateLabelError( m_ui.labelInput->text() );
-    updateControlButtonState();
+
     updateControlButtonType(m_state);
     updateInputEnabled(m_state);
+    updateControlEnabled(m_state);
+    updateCursor(m_state);
 
     connect( m_ui.labelInput, SIGNAL( textChanged(const QString&) ), 
       this, SLOT( updateLabelError(const QString&) ) );
-
-    connect( m_ui.labelInput, SIGNAL( textChanged(const QString&) ), 
-      this, SLOT( updateControlButtonState() ) );
-    connect( m_ui.runs, SIGNAL( fileFindingFinished() ), 
-      this, SLOT( updateControlButtonState() ) );
 
     connect( this, SIGNAL( stateChanged(DialogState) ),
       this, SLOT( updateControlButtonType(DialogState) ) );
     connect( this, SIGNAL( stateChanged(DialogState) ),
       this, SLOT( updateInputEnabled(DialogState) ) );
+    connect( this, SIGNAL( stateChanged(DialogState) ),
+      this, SLOT( updateControlEnabled(DialogState) ) );
+    connect( this, SIGNAL( stateChanged(DialogState) ),
+      this, SLOT( updateCursor(DialogState) ) );
   }
 
   /**
@@ -200,14 +205,6 @@ namespace MantidWidgets
   }
 
   /**
-   * Enables/disables start button depending on wether we are allowed to start.
-   */
-  void MuonSequentialFitDialog::updateControlButtonState()
-  {
-    m_ui.controlButton->setEnabled( isInputValid() );
-  }
-
-  /**
    * Sets control button to be start/stop depending on new dialog state.
    * @param newState :: New state of the dialog 
    */
@@ -217,11 +214,11 @@ namespace MantidWidgets
     disconnect( m_ui.controlButton, SIGNAL( pressed() ), 0, 0);
  
     // Connect to appropriate slot
-    auto buttonSlot = (newState == Stopped) ? SLOT( startFit() ) : SLOT( stopFit() );
+    auto buttonSlot = (newState == Running) ? SLOT( stopFit() ) : SLOT( startFit() );
     connect( m_ui.controlButton, SIGNAL( pressed() ), this, buttonSlot );
 
     // Set appropriate text
-    QString buttonText = (newState == Stopped) ? "Start" : "Stop";
+    QString buttonText = (newState == Running) ? "Stop" : "Start";
     m_ui.controlButton->setText(buttonText);
   }
 
@@ -250,15 +247,72 @@ namespace MantidWidgets
   }
 
   /**
+   * Update control button enabled status depending on the new state. 
+   * Button is disabled in one case only - when preparing for running.
+   * @param newState :: New state of the dialog 
+   */
+  void MuonSequentialFitDialog::updateControlEnabled(DialogState newState)
+  {
+    m_ui.controlButton->setEnabled( newState != Preparing );
+    
+  }
+
+  /**
+   * Update cursor depending on the new state of the dialog.
+   * Waiting cursor is displayed while preparing so that user does now that something is happening.
+   * @param newState :: New state of the dialog
+   */
+  void MuonSequentialFitDialog::updateCursor(DialogState newState)
+  {
+    switch(newState)
+    {
+      case Preparing:
+        setCursor(Qt::WaitCursor);
+        break;
+      case Running:
+        setCursor(Qt::BusyCursor);
+        break;
+      default:
+        unsetCursor();
+        break;
+    }
+  }
+
+  /**
    * Start fitting process.
    */
   void MuonSequentialFitDialog::startFit()
   {
-    if ( m_state == Running )
+    if ( m_state != Stopped )
       throw std::runtime_error("Couln't start: already running");
 
+    setState(Preparing);
+
+    // Explicitly run the file search. This might be needed when Start is clicked straigh after 
+    // editing the run box. In that case, lost focus event might not be processed yet and search
+    // might not have been started yet. Otherwise, search is not done as the widget sees that it
+    // has not been changed. Taken from LoadDialog.cpp:124.
+    m_ui.runs->findFiles();
+
+    // Wait for file search to finish.
+    while ( m_ui.runs->isSearching() )
+    {
+      QApplication::instance()->processEvents();
+    }
+
+    // Validate input fields
+    if ( ! isInputValid() )
+    {
+      QMessageBox::critical(this, "Input is not valid", 
+        "One or more input fields are invalid.\n\nInvalid fields are marked with a '*'.");
+      setState(Stopped);
+      return;
+    }
+
+    QStringList runFilenames = m_ui.runs->getFilenames();
+
     const std::string label = m_ui.labelInput->text().toStdString();
-    const std::string labelGroupName = "MuonSeqFit_" + label;
+    const std::string labelGroupName = SEQUENTIAL_PREFIX + label;
 
     AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
 
@@ -269,15 +323,16 @@ namespace MantidWidgets
           QMessageBox::Yes | QMessageBox::Cancel);
 
       if ( answer != QMessageBox::Yes )
+      {
+        setState(Stopped);
         return;
+      }
 
       ads.deepRemoveGroup(labelGroupName);
     }
    
     // Create a group for label
     ads.add(labelGroupName, boost::make_shared<WorkspaceGroup>());
-
-    QStringList runFilenames = m_ui.runs->getFilenames();
 
     // Tell progress bar how many iterations we will need to make and reset it
     m_ui.progress->setRange( 0, runFilenames.size() );
@@ -337,9 +392,6 @@ namespace MantidWidgets
       const std::string runTitle = getRunTitle(ws);
       const std::string wsBaseName = labelGroupName + "_" + runTitle; 
 
-      ads.add(wsBaseName, ws);
-      ads.addToGroup(labelGroupName, wsBaseName);
-
       IFunction_sptr functionToFit;
 
       if ( useInitFitFunction )
@@ -385,6 +437,10 @@ namespace MantidWidgets
       ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
       ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
 
+      // Copy log values
+      auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
+      fitWs->copyExperimentInfoFrom(ws.get());
+
       // Add information about the fit to the diagnosis table
       addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"), functionToFit); 
 
@@ -401,7 +457,7 @@ namespace MantidWidgets
    */
   void MuonSequentialFitDialog::stopFit()
   {
-    if ( m_state != Running )
+    if ( m_state == Stopped )
       throw std::runtime_error("Couldn't stop: is not running");
 
     m_stopRequested = true;

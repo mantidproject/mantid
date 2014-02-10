@@ -42,6 +42,8 @@ namespace MantidQt
 namespace MantidWidgets
 {
 
+  using namespace Mantid::API;
+
 /**
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
@@ -199,7 +201,7 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty* prop)
 */
 void MuonFitPropertyBrowser::populateFunctionNames()
 {
-  const std::vector<std::string> names = Mantid::API::FunctionFactory::Instance().getKeys();
+  const std::vector<std::string> names = FunctionFactory::Instance().getKeys();
   m_registeredFunctions.clear();
   m_registeredPeaks.clear();
   m_registeredBackgrounds.clear();
@@ -209,7 +211,7 @@ void MuonFitPropertyBrowser::populateFunctionNames()
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG") continue;
     
-    auto f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
+    auto f = FunctionFactory::Instance().createFunction(fnName);
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
     for (size_t j=0; j<categories.size(); ++j)
@@ -221,13 +223,13 @@ void MuonFitPropertyBrowser::populateFunctionNames()
     {
       m_registeredFunctions << qfnName;
     }
-    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
-    //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
+    IPeakFunction* pf = dynamic_cast<IPeakFunction*>(f.get());
+    //CompositeFunction* cf = dynamic_cast<CompositeFunction*>(f.get());
     if (pf)
     {
       m_registeredPeaks << qfnName;
     }
-    else if (dynamic_cast<Mantid::API::IBackgroundFunction*>(f.get()))
+    else if (dynamic_cast<IBackgroundFunction*>(f.get()))
     {
       m_registeredBackgrounds << qfnName;
     }
@@ -274,20 +276,20 @@ void MuonFitPropertyBrowser::fit()
       funStr = (m_compositeFunction->getFunction(0))->asString();
     }
 
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
+    if ( AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
     {
-      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_NormalisedCovarianceMatrix");
+      FrameworkManager::Instance().deleteWorkspace(wsName+"_NormalisedCovarianceMatrix");
     }
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Parameters"))
+    if ( AnalysisDataService::Instance().doesExist(wsName+"_Parameters"))
     {
-      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Parameters");
+      FrameworkManager::Instance().deleteWorkspace(wsName+"_Parameters");
     }
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_Workspace"))
+    if ( AnalysisDataService::Instance().doesExist(wsName+"_Workspace"))
     {
-      Mantid::API::FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
+      FrameworkManager::Instance().deleteWorkspace(wsName+"_Workspace");
     }
 
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
     alg->initialize();    
     alg->setPropertyValue("Function",funStr);
     if (rawData())
@@ -332,16 +334,36 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent* e)
   * MatrixWorkspaces same size and that it isn't the generated raw file.
   * @param ws :: The workspace
   */
-bool MuonFitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
+bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws)const
 {
   QString workspaceName(QString::fromStdString(ws->name() ) );
+
   if ( (workspaceName.contains("_Raw") ) || (workspaceName.contains("MuonAnalysis") ) )
     return false;
 
-  if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0)
+  // Exclude fitting results
+  if ( workspaceName.endsWith("_Workspace") )
+    return false;
+
+  if (dynamic_cast<MatrixWorkspace*>(ws.get()) != 0)
     return true;
   else
     return false;
+}
+
+void MuonFitPropertyBrowser::finishHandle(const IAlgorithm* alg)
+{
+  // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
+  auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    static_cast<std::string>( alg->getProperty("InputWorkspace") ) );
+
+  auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    outputName() + "_Workspace");
+
+  if (inWs && outWs)
+    outWs->copyExperimentInfoFrom(inWs.get());
+
+  FitPropertyBrowser::finishHandle(alg);
 }
 
 } // MantidQt

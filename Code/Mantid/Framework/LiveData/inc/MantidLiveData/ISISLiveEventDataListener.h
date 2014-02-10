@@ -13,6 +13,8 @@
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
 
+#include <map>
+
 // Time we'll wait on a receive call (in seconds)
 const long RECV_TIMEOUT = 30;
 // Sleep time in case we need to wait for the data to become available (in milliseconds)
@@ -143,7 +145,7 @@ namespace Mantid
 
       // receive a header and check if it's valid
       template <typename T>
-      void Receive(T buffer, const std::string& head, const std::string &msg)
+      void Receive(T &buffer, const std::string& head, const std::string &msg)
       {
           long timeout = 0;
           while( m_socket.available() < static_cast<int>(sizeof(buffer)) )
@@ -196,7 +198,12 @@ namespace Mantid
       int m_numberOfSpectra;
 
       /// buffer to collect data that cannot be processed
-      char* junk_buffer[1000];
+      char junk_buffer[1000];
+
+      /// list of warnings for repeated conditions
+      /// If the same condition happens repeatedly the warning is issued once
+      /// and is deleted from the list
+      std::map<std::string, std::string> m_warnings;
 
       /// reference to the logger class
       static Kernel::Logger& g_log;

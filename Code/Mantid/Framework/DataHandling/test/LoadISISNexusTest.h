@@ -268,6 +268,34 @@ public:
         AnalysisDataService::Instance().remove(wsName);
     }
 
+    void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file()
+    {
+        Mantid::API::FrameworkManager::Instance();
+        const std::string wsName = "InstNotInNexus";
+        LoadISISNexus2 loadingAlg;
+        loadingAlg.initialize();
+        loadingAlg.setRethrows(true);
+        loadingAlg.setPropertyValue("Filename","POLREF00004699.nxs");
+        loadingAlg.setPropertyValue("OutputWorkspace", wsName);
+        loadingAlg.execute();
+        TS_ASSERT(loadingAlg.isExecuted());
+
+        AnalysisDataServiceImpl& ADS = AnalysisDataService::Instance();
+        WorkspaceGroup_sptr grpWs;
+        TS_ASSERT_THROWS_NOTHING(grpWs=ADS.retrieveWS<WorkspaceGroup>(wsName));
+        MatrixWorkspace_sptr ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
+
+        auto inst = ws1->getInstrument();
+        TS_ASSERT( !inst->getFilename().empty()); // This is how we know we didn't get it from inside the nexus file
+        TS_ASSERT_EQUALS( inst->getName(), "POLREF" );
+        TS_ASSERT_EQUALS( inst->getNumberDetectors(), 885 );
+
+        // check that POLREF_Parameters.xml has been loaded
+        auto params = inst->getParameterMap();
+        TS_ASSERT_EQUALS( params->getString(inst.get(), "show-signed-theta"), "Always");
+    }
+
+
     // Test the stub remnant of version 1 of this algorithm - that it can be run without setting any properties, and throws an exception.
     void testRemovedVersion1Throws()
     {

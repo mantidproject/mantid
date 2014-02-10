@@ -2,8 +2,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidCurveFitting/ComptonProfile.h"
+#include "MantidCurveFitting/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include <gsl/gsl_poly.h>
 
 namespace Mantid
@@ -22,53 +22,10 @@ namespace CurveFitting
   }
 
   /**
-   * If a DetectorGroup is encountered then the parameters are averaged over the group
-   * @param comp A pointer to the component that should contain the parameter
-   * @param pmap A reference to the ParameterMap that stores the parameters
-   * @param name The name of the parameter
-   * @returns The value of the parameter if it exists
-   * @throws A std::invalid_argument error if the parameter does not exist
-   */
-  double ComptonProfile::getComponentParameter(const Geometry::IComponent_const_sptr & comp, const Geometry::ParameterMap &pmap,
-                                               const std::string &name)
-  {
-    if(!comp) throw std::invalid_argument("ComptonProfile - Cannot retrieve parameter from NULL component");
-
-    double result(0.0);
-    if(const auto group = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp))
-    {
-      const auto dets = group->getDetectors();
-      double avg(0.0);
-      for(auto it = dets.begin(); it!= dets.end(); ++it)
-      {
-        auto param = pmap.getRecursive((*it)->getComponentID(), name);
-        if(param) avg += param->value<double>();
-        else throw std::invalid_argument("ComptonProfile - Unable to find DetectorGroup component parameter \"" + name + "\".");
-      }
-      result = avg/static_cast<double>(group->nDets());
-    }
-    else
-    {
-      auto param = pmap.getRecursive(comp->getComponentID(), name);
-      if(param)
-      {
-        result = param->value<double>();
-      }
-      else
-      {
-        throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
-      }
-    }
-    return result;
-  }
-
-  /**
    */
   ComptonProfile::ComptonProfile() : API::ParamFunction(), API::IFunction1D(),
       m_log(Kernel::Logger::get("ComptonProfile")),
-      m_wsIndex(0), m_mass(0.0),  m_l1(0.0), m_sigmaL1(0.0),
-      m_l2(0.0), m_sigmaL2(0.0), m_theta(0.0), m_sigmaTheta(0.0), m_e1(0.0),
-      m_t0(0.0), m_hwhmGaussE(0.0), m_hwhmLorentzE(0.0), m_voigt(),
+      m_wsIndex(0), m_mass(0.0), m_voigt(),
       m_yspace(), m_modQ(), m_e0(),m_resolutionSigma(0.0), m_lorentzFWHM(0.0)
   {}
 
@@ -129,20 +86,15 @@ namespace CurveFitting
       throw std::invalid_argument("ComptonProfile - Workspace has no detector attached to histogram at index " + boost::lexical_cast<std::string>(m_wsIndex));
     }
 
-    DetectorParams detpar;
+    DetectorParams detpar = ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
     const auto & pmap = workspace->constInstrumentParameters();
-    detpar.l1 = sample->getDistance(*source);
-    detpar.l2 = det->getDistance(*sample);
-    detpar.theta = workspace->detectorTwoTheta(det);
-    detpar.t0 = getComponentParameter(det, pmap, "t0")*1e-6; // Convert to seconds
-    detpar.efixed = getComponentParameter(det, pmap, "efixed");
 
     ResolutionParams respar;
-    respar.dl1 = getComponentParameter(det, pmap, "sigma_l1");
-    respar.dl2 = getComponentParameter(det, pmap, "sigma_l2");
-    respar.dthe = getComponentParameter(det, pmap, "sigma_theta"); //radians
-    respar.dEnLorentz = getComponentParameter(det, pmap, "hwhm_lorentz");
-    respar.dEnGauss = getComponentParameter(det, pmap, "sigma_gauss");
+    respar.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1");
+    respar.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2");
+    respar.dthe = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_theta"); //radians
+    respar.dEnLorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
+    respar.dEnGauss = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
 
     this->cacheYSpaceValues(workspace->readX(m_wsIndex), workspace->isHistogramData(), detpar, respar);
   }
@@ -156,27 +108,19 @@ namespace CurveFitting
   void ComptonProfile::cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
                                          const DetectorParams & detpar, const ResolutionParams & respar)
   {
-    //geometry
-    m_l1 = detpar.l1;
-    m_l2 = detpar.l2;
-    m_theta = detpar.theta;
-    m_e1 = detpar.efixed;
-    m_t0 = detpar.t0;
-    //resolution
-    m_sigmaL1 = respar.dl1;
-    m_sigmaL2 = respar.dl2;
-    m_sigmaTheta = respar.dthe;
-    m_hwhmLorentzE = respar.dEnLorentz;
-    m_hwhmGaussE = STDDEV_TO_HWHM*respar.dEnGauss;
+    // geometry
+    double theta = detpar.theta; //cache for frequent access
+    double hwhmLorentzE = respar.dEnLorentz;
+    double hwhmGaussE = STDDEV_TO_HWHM*respar.dEnGauss;
 
     // ------ Fixed coefficients related to resolution & Y-space transforms ------------------
     const double mn = PhysicalConstants::NeutronMassAMU;
     const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;
     const double massToMeV = 0.5*PhysicalConstants::NeutronMass/PhysicalConstants::meV; // Includes factor of 1/2
 
-    const double v1 = std::sqrt(m_e1/massToMeV);
-    const double k1 = std::sqrt(m_e1/mevToK);
-    const double l2l1 = m_l2/m_l1;
+    const double v1 = std::sqrt(detpar.efixed/massToMeV);
+    const double k1 = std::sqrt(detpar.efixed/mevToK);
+    const double l2l1 = detpar.l2/detpar.l1;
 
     // Resolution dependence
 
@@ -186,13 +130,13 @@ namespace CurveFitting
     if((m_mass-1.0) > DBL_EPSILON)
     {
       double x0(0.0),x1(0.0);
-      gsl_poly_solve_quadratic(m_mass-1.0, 2.0*std::cos(m_theta), -(m_mass+1.0), &x0, &x1);
+      gsl_poly_solve_quadratic(m_mass-1.0, 2.0*std::cos(theta), -(m_mass+1.0), &x0, &x1);
       k0k1 = std::max(x0,x1); // K0/K1 at y=0
     }
     else
     {
       // solution is simply s = 1/cos(theta)
-      k0k1 = 1.0/std::cos(m_theta);
+      k0k1 = 1.0/std::cos(theta);
     }
     double qy0(0.0), wgauss(0.0);
 
@@ -201,25 +145,25 @@ namespace CurveFitting
       qy0 = std::sqrt(k1*k1*m_mass*(k0k1*k0k1 - 1));
       double k0k1p3 = std::pow(k0k1,3);
       double r1 = -(1.0 + l2l1*k0k1p3);
-      double r2 = 1.0 - l2l1*k0k1p3 + l2l1*std::pow(k0k1,2)*std::cos(m_theta) - k0k1*std::cos(m_theta);
+      double r2 = 1.0 - l2l1*k0k1p3 + l2l1*std::pow(k0k1,2)*std::cos(theta) - k0k1*std::cos(theta);
 
       double factor = (0.2413/qy0)*((m_mass/mn)*r1 - r2);
-      m_lorentzFWHM = std::abs(factor*m_hwhmLorentzE*2);
-      wgauss = std::abs(factor*m_hwhmGaussE*2);
+      m_lorentzFWHM = std::abs(factor*hwhmLorentzE*2);
+      wgauss = std::abs(factor*hwhmGaussE*2);
     }
     else
     {
-      qy0 = k1*std::tan(m_theta);
-      double factor = (0.2413*2.0/k1)*std::abs((std::cos(m_theta) + l2l1)/std::sin(m_theta));
-      m_lorentzFWHM = m_hwhmLorentzE*factor;
-      wgauss = m_hwhmGaussE*factor;
+      qy0 = k1*std::tan(theta);
+      double factor = (0.2413*2.0/k1)*std::abs((std::cos(theta) + l2l1)/std::sin(theta));
+      m_lorentzFWHM = hwhmLorentzE*factor;
+      wgauss = hwhmGaussE*factor;
     }
 
     double k0y0 = k1*k0k1;                     // k0_y0 =  k0 value at y=0
-    double wtheta = 2.0*STDDEV_TO_HWHM*std::abs(k0y0*k1*std::sin(m_theta)/qy0)*m_sigmaTheta;
-    double common = (m_mass/mn) - 1 + k1*std::cos(m_theta)/k0y0;
-    double wl1 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,2)/(qy0*m_l1))*common)*m_sigmaL1;
-    double wl2 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,3)/(k1*qy0*m_l1))*common)*m_sigmaL2;
+    double wtheta = 2.0*STDDEV_TO_HWHM*std::abs(k0y0*k1*std::sin(theta)/qy0)*respar.dthe;
+    double common = (m_mass/mn) - 1 + k1*std::cos(theta)/k0y0;
+    double wl1 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,2)/(qy0*detpar.l1))*common)*respar.dl1;
+    double wl2 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,3)/(k1*qy0*detpar.l1))*common)*respar.dl2;
 
     m_resolutionSigma = std::sqrt(std::pow(wgauss,2) + std::pow(wtheta,2) + std::pow(wl1,2) + std::pow(wl2,2));
 
@@ -239,14 +183,8 @@ namespace CurveFitting
     for(size_t i = 0; i < nData; ++i)
     {
       const double tsec = (isHistogram) ? 0.5*(tseconds[i] + tseconds[i+1]) : tseconds[i];
-      const double v0 = m_l1/(tsec - m_t0 - (m_l2/v1));
-      const double ei = massToMeV*v0*v0;
-      m_e0[i] = ei;
-      const double w = ei - m_e1;
-      const double k0 = std::sqrt(ei/mevToK);
-      const double q = std::sqrt(k0*k0 + k1*k1 - 2.0*k0*k1*std::cos(m_theta));
-      m_modQ[i] = q;
-      m_yspace[i] = 0.2393*(m_mass/q)*(w - (mevToK*q*q/m_mass));
+      ConvertToYSpace::calculateY(m_yspace[i], m_modQ[i],m_e0[i],
+                                  m_mass,tsec,k1,v1,detpar);
     }
   }
 

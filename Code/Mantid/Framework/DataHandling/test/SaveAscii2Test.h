@@ -49,10 +49,9 @@ public:
     TS_ASSERT( Poco::File(filename).exists() );
 
     // Now make some checks on the content of the file
-    std::ifstream in(m_filename.c_str());
+    std::ifstream in(filename.c_str());
     int specID;
     std::string header1, header2, header3, separator, comment;
-
     // Test that the first few column headers, separator and first two bins are as expected
     in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
     TS_ASSERT_EQUALS(specID, 1 );
@@ -124,7 +123,7 @@ public:
     TS_ASSERT( Poco::File(filename).exists() );
 
     // Now make some checks on the content of the file
-    std::ifstream in(m_filename.c_str());
+    std::ifstream in(filename.c_str());
     int specID;
     std::string header1, header2, header3, header4, separator, comment;
 
@@ -193,9 +192,9 @@ public:
     TS_ASSERT( Poco::File(filename_nohead).exists() );
 
     // Now we check that the first line of the file without header matches the second line of the file with header
-    std::ifstream in1(m_filename.c_str());
+    std::ifstream in1(filename.c_str());
     std::string line2header;
-    std::ifstream in2(m_filename_nohead.c_str());
+    std::ifstream in2(filename_nohead.c_str());
     std::string line1noheader;
     getline(in1,line2header);
     getline(in1,line2header);
@@ -228,7 +227,7 @@ public:
     TS_ASSERT( Poco::File(filename).exists() );
 
     // Now make some checks on the content of the file
-    std::ifstream in(m_filename.c_str());
+    std::ifstream in(filename.c_str());
     int specID;
     std::string header1, header2, header3, separator, comment;
 
@@ -290,6 +289,9 @@ public:
     std::string filename = initSaveAscii2(save);
 
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "1"));
+    //first check the validator
+    TS_ASSERT_THROWS_ANYTHING(save.setProperty("WorkspaceIndexMax", -1));
+    //then check the workspace bounds testing
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "5"));
 
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
@@ -307,12 +309,18 @@ public:
 
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
-
-    TS_ASSERT_THROWS_ANYTHING(save.setPropertyValue("WorkspaceIndexMin", "0"));
-    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "2"));
-
+    //first check the validator
+    TS_ASSERT_THROWS_ANYTHING(save.setProperty("WorkspaceIndexMin", -1));
+    //then check the workspace bounds testing
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "5"));
+    //the problem is that this'll throw regardless as no numbers below zero can get in so i have to go over the bounds
+    //so i have to either force Max higher or overlap, and both are tested separatly
+    //the validator seems to replace "-1" with the same as EMPTY_INT() so the bounds aren't checked
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "7"));
+    
     TS_ASSERT_THROWS(save.execute(), std::invalid_argument);
 
+    // the algorithm didn't run so there should be no file
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT( !Poco::File(filename).exists() );
 

@@ -319,8 +319,6 @@ elif use_cylindrical_integration:
                   ProfilesFile = profiles_filename,
 	          PeaksWorkspace=peaks_ws, 
                   )
-  if (not cell_type is None) and (not centering is None):
-    print "WARNING: Cylindrical profiles are NOT transformed!!!"
 
 #
 # Save the final integrated peaks, using the Niggli reduced cell.  

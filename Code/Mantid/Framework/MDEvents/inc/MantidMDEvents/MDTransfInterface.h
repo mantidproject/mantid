@@ -129,6 +129,17 @@ public:
     /** set up transformation from the class, which can provide all variables necessary for the conversion */
     virtual void initialize(const MDWSDescription &)=0;
 
+    /** method returns the vector of input coordinates values where the transformed coordinates reach its extremum values in any of its 
+     *  transformed directions.
+     *
+     * @param xMin -- minimal value of input coordinate
+     * @param xMax -- maximal value of input coordinate
+     *   These coordinates are always an exteme points and are included into output
+     * @param det_num -- number of the instrument detector -- some transformatins extreme point depend on a detector number 
+     *                   (e.g. inelastic |Q| transformation)
+     */
+    virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax,size_t det_num)const = 0;
+
 //***************> the methods below are mainly involved in defining the target workspace properties. 
 //                 Thay also can be involwed in the preparation to calculations of MD coordinates 
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)

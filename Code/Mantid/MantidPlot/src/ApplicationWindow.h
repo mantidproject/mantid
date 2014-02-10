@@ -238,6 +238,8 @@ public slots:
   ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
+  /// Slot to connect the script execution errors to
+  void onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on success/failure.
   bool runPythonScript(const QString & code, bool async = false, bool quiet=false, bool redirect=true);
   
@@ -459,6 +461,7 @@ public slots:
   //! \name Graphs
   //@{
   void setPreferences(Graph* g);
+  void setSpectrogramTickStyle(Graph* g);
   void setGraphDefaultSettings(bool autoscale,bool scaleFonts,bool resizeLayers,bool antialiasing, bool fixedAspectRatio);
   void setLegendDefaultSettings(int frame, const QFont& font,
     const QColor& textCol, const QColor& backgroundCol);
@@ -1161,6 +1164,8 @@ private:
   void CatalogLogin();
   /// Handler for catalog search.
   void CatalogSearch();
+  /// Handler for catalog publish.
+  void CatalogPublish();
   // Handler for catalog logout.
   void CatalogLogout();
 
@@ -1401,7 +1406,7 @@ private:
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionCatalogLogin,*actionCatalogSearch,*actionCatalogLogout;
+  QAction *actionCatalogLogin,*actionCatalogSearch, *actionCatalogPublish, *actionCatalogLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;

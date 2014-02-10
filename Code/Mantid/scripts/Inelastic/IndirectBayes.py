@@ -5,7 +5,6 @@
 #
 from IndirectImport import *
 if is_supported_f2py_platform():
-    Er      = import_f2py("erange")
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
@@ -20,24 +19,53 @@ from IndirectCommon import *
 import sys, platform, math, os.path, numpy as np
 mp = import_mantidplot()
 
-def CalcErange(inWS,ns,er,nbin):
-	rscl = 1.0
-	array_len = 4096                           # length of array in Fortran
-	N,X,Y,E = GetXYE(inWS,ns,array_len)        # get data
-	nout,bnorm,Xdat=Er.erange(N,X,Y,E,er,nbin,rscl)    # calculate energy range
-	if nout[0] == 0:
-		error = 'Erange - calculated points is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if nout[1] == 0:
-		error = 'Erange - calculated Imin is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if nout[2] == 0:
-		error = 'Erange - calculated Imax is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	return nout,bnorm,Xdat,X,Y,E
+def readASCIIFile(file_name):
+	workdir = config['defaultsave.directory']
+
+	file_path = os.path.join(workdir, file_name)
+	asc = []
+	
+	with open(file_path, 'r') as handle:
+		for line in handle:
+			line = line.rstrip()
+			asc.append(line)
+
+	return asc
+
+def CalcErange(inWS,ns,erange,binWidth):
+	#length of array in Fortran
+	array_len = 4096
+	
+	binWidth = int(binWidth)
+	bnorm = 1.0/binWidth
+
+	#get data from input workspace
+	N,X,Y,E = GetXYE(inWS,ns,array_len)
+	Xdata = mtd[inWS].readX(0)
+
+	#get all x values within the energy range
+	rangeMask = (Xdata >= erange[0]) & (Xdata <= erange[1])
+	Xin = Xdata[rangeMask]
+
+	#get indicies of the bounds of our energy range
+	minIndex = np.where(Xdata==Xin[0])[0][0]+1
+	maxIndex = np.where(Xdata==Xin[-1])[0][0]
+
+	#reshape array into sublists of bins
+	Xin = Xin.reshape(len(Xin)/binWidth, binWidth)
+
+	#sum and normalise values in bins
+	Xout = [sum(bin)*bnorm for bin in Xin]
+
+	#count number of bins
+	nbins = len(Xout)
+	
+	nout = [nbins, minIndex, maxIndex]
+
+ 	#pad array for use in Fortran code
+	Xout = PadArray(Xout,array_len)
+
+	return nout,bnorm,Xout,X,Y,E
 
 def GetXYE(inWS,n,array_len):
 	Xin = mtd[inWS].readX(n)
@@ -315,7 +343,6 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 		# append workspace to list of results
 		group += fout + ','
 
-	
 	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 
 	if program == 'QL':
@@ -333,26 +360,17 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 			Nspec=3, UnitX='MomentumTransfer')
 		outWS = C2Fw(samWS[:-4],fname)
 		if (Plot != 'None'):
-			QLPlotQL(fname,Plot,res_plot,Loop)
+			QuasiPlot(fname,Plot,res_plot,Loop)
 	if program == 'QSe':
 		outWS = C2Se(fname)
 		if (Plot != 'None'):
-			QLPlotQSe(fname,Plot,res_plot,Loop)
+			QuasiPlot(fname,Plot,res_plot,Loop)
 
-	#Add some sample logs to the output workspace
-	AddSampleLog(Workspace=outWS, LogName="Fit Program", LogType="String", LogText=prog)
-	AddSampleLog(Workspace=outWS, LogName="Energy min", LogType="Number", LogText=str(erange[0]))
-	AddSampleLog(Workspace=outWS, LogName="Energy max", LogType="Number", LogText=str(erange[1]))
-	AddSampleLog(Workspace=outWS, LogName="Elastic", LogType="String", LogText=str(elastic))
-
-	AddSampleLog(Workspace=outWS, LogName="ResNorm", LogType="String", LogText=str(resnorm))
-	if resnorm:
-		AddSampleLog(Workspace=outWS, LogName="ResNorm file", LogType="String", LogText=resnormWS)
-	
-	AddSampleLog(Workspace=outWS, LogName="Width", LogType="String", LogText=str(width))
-	
-	if width:
-		AddSampleLog(Workspace=outWS, LogName="Width file", LogType="String", LogText=wfile)
+	#Add some sample logs to the output workspaces
+	CopyLogs(InputWorkspace=samWS, OutputWorkspace=outWS)
+	QLAddSampleLogs(outWS, resWS, prog, background, elastic, erange, (nbin, nrbin), resnormWS, wfile)
+	CopyLogs(InputWorkspace=samWS, OutputWorkspace=fitWS)	
+	QLAddSampleLogs(fitWS, resWS, prog, background, elastic, erange, (nbin, nrbin), resnormWS, wfile)
 
 	if Save:
 		fit_path = os.path.join(workdir,fitWS+'.nxs')
@@ -365,123 +383,174 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 
 	EndTime(program)
 
+def QLAddSampleLogs(workspace, res_workspace, fit_program, background, elastic_peak, e_range, binning, resnorm_workspace, width_file):
+	
+	sample_binning, res_binning = binning
+	energy_min, energy_max = e_range
 
-def LorBlock(a,first,nl):                                 #read Ascii block of Integers
-	line1 = a[first]
-	first += 1
-	val = ExtractFloat(a[first])               #Q,AMAX,HWHM,BSCL,GSCL
-	Q = val[0]
-	AMAX = val[1]
-	HWHM = val[2]
-	BSCL = val[3]
-	GSCL = val[4]
-	first += 1
-	val = ExtractFloat(a[first])               #A0,A1,A2,A4
-	int0 = [AMAX*val[0]]
-	bgd1 = BSCL*val[1]
-	bgd2 = BSCL*val[2]
-	zero = GSCL*val[3]
-	first += 1
-	val = ExtractFloat(a[first])                #AI,FWHM first peak
-	fw = [2.*HWHM*val[1]]
-	int = [AMAX*val[0]]
-	if nl >= 2:
-		first += 1
-		val = ExtractFloat(a[first])            #AI,FWHM second peak
-		fw.append(2.*HWHM*val[1])
-		int.append(AMAX*val[0])
-	if nl == 3:
-		first += 1
-		val = ExtractFloat(a[first])            #AI,FWHM third peak
-		fw.append(2.*HWHM*val[1])
-		int.append(AMAX*val[0])
-	first += 1
-	val = ExtractFloat(a[first])                 #SIG0
-	int0.append(val[0])
-	first += 1
-	val = ExtractFloat(a[first])                  #SIGIK
-	int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
-	first += 1
-	val = ExtractFloat(a[first])                  #SIGFK
-	fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
-	if nl >= 2:                                      # second peak
-		first += 1
-		val = ExtractFloat(a[first])                  #SIGIK
-		int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
-		first += 1
-		val = ExtractFloat(a[first])                  #SIGFK
-		fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
-	if nl == 3:                                       # third peak
-		first += 1
-		val = ExtractFloat(a[first])                  #SIGIK
-		int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
-		first += 1
-		val = ExtractFloat(a[first])                  #SIGFK
-		fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
-	first += 1
-	return first,Q,int0,fw,int                                      #values as list
+	AddSampleLog(Workspace=workspace, LogName="res_file", LogType="String", LogText=res_workspace)
+	AddSampleLog(Workspace=workspace, LogName="fit_program", LogType="String", LogText=fit_program)
+	AddSampleLog(Workspace=workspace, LogName="background", LogType="String", LogText=str(background))
+	AddSampleLog(Workspace=workspace, LogName="elastic_peak", LogType="String", LogText=str(elastic_peak))
+	AddSampleLog(Workspace=workspace, LogName="energy_min", LogType="Number", LogText=str(energy_min))
+	AddSampleLog(Workspace=workspace, LogName="energy_max", LogType="Number", LogText=str(energy_max))
+	AddSampleLog(Workspace=workspace, LogName="sample_binning", LogType="Number", LogText=str(sample_binning))
+	AddSampleLog(Workspace=workspace, LogName="resolution_binning", LogType="Number", LogText=str(res_binning))
+
+	resnorm_used = (resnorm_workspace != '')
+	AddSampleLog(Workspace=workspace, LogName="resnorm", LogType="String", LogText=str(resnorm_used))
+	if resnorm_used:
+		AddSampleLog(Workspace=workspace, LogName="resnorm_file", LogType="String", LogText=resnorm_workspace)
+	
+	width_file_used = (width_file != '') 
+	AddSampleLog(Workspace=workspace, LogName="width", LogType="String", LogText=str(width_file_used))
+	if width_file_used:
+		AddSampleLog(Workspace=workspace, LogName="width_file", LogType="String", LogText=width_file)
+
+def yield_floats(block):
+	#yield a list of floats from a list of lines of text
+	#encapsulates the iteration over a block of lines
+	for line in block:
+		yield ExtractFloat(line)
+
+def read_ql_file(file_name, nl):
+	#offet to ignore header
+	header_offset = 8
+	block_size = 4+nl*3
+
+	asc = readASCIIFile(file_name)
+	#extract number of blocks from the file header 
+	num_blocks = int(ExtractFloat(asc[3])[0])
+
+	q_data = [] 
+	amp_data, FWHM_data, height_data = [], [], []
+	amp_error, FWHM_error, height_error = [], [], []
+
+	#iterate over each block of fit parameters in the file
+	#each block corresponds to a single column in the final workspace
+	for block_num in xrange(num_blocks):
+		lower_index = header_offset+(block_size*block_num)
+		upper_index = lower_index+block_size 
+		
+		#create iterator for each line in the block
+		line_pointer = yield_floats(asc[lower_index:upper_index])
+
+		#Q,AMAX,HWHM,BSCL,GSCL
+		line = line_pointer.next()
+		Q, AMAX, HWHM, BSCL, GSCL = line
+		q_data.append(Q)
+
+		#A0,A1,A2,A4
+		line = line_pointer.next()
+		block_height = AMAX*line[0]
+
+		#parse peak data from block
+		block_FWHM = []
+		block_amplitude = []
+		for i in range(nl):		
+			#Amplitude,FWHM for each peak
+			line = line_pointer.next()
+			amp = AMAX*line[0]
+			FWHM = 2.*HWHM*line[1]
+			block_amplitude.append(amp)
+			block_FWHM.append(FWHM)
+		
+		#next parse error data from block
+		#SIG0
+		line = line_pointer.next()
+		block_height_e = line[0]
+		
+		block_FWHM_e = []
+		block_amplitude_e = []
+		for i in range(nl):
+			#Amplitude error,FWHM error for each peak
+			#SIGIK
+			line = line_pointer.next()
+			amp = AMAX*math.sqrt(math.fabs(line[0])+1.0e-20)
+			block_amplitude_e.append(amp)
+			
+			#SIGFK
+			line = line_pointer.next()
+			FWHM = 2.0*HWHM*math.sqrt(math.fabs(line[0])+1.0e-20)
+			block_FWHM_e.append(FWHM)
+	
+		#append data from block
+		amp_data.append(block_amplitude)
+		FWHM_data.append(block_FWHM)
+		height_data.append(block_height)
+
+		#append error values from block
+		amp_error.append(block_amplitude_e)
+		FWHM_error.append(block_FWHM_e)
+		height_error.append(block_height_e)
+
+	return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 
 def C2Fw(prog,sname):
-	workdir = config['defaultsave.directory']
-	outWS = sname+'_Workspace'
-	Vaxis = []
+	output_workspace = sname+'_Workspace'
+	num_spectra = 0
 
-	dataX = np.array([])
-	dataY = np.array([])
-	dataE = np.array([])
-
-	nhist = 0
+	axis_names = []
+	x, y, e = [], [], []
 	for nl in range(1,4):
-		file = sname + '.ql' +str(nl)
-		handle = open(os.path.join(workdir, file), 'r')
-		asc = []
-		for line in handle:
-			line = line.rstrip()
-			asc.append(line)
-		handle.close()
-		lasc = len(asc)
-		var = asc[3].split()							#split line on spaces
-		nspec = var[0]
-		ndat = var[1]
-		var = ExtractInt(asc[6])
-		first = 7
-		Xout = []
-
-		ns = int(nspec)
-
-		YData = [[] for i in range(6)]
-		EData = [[] for i in range(6)]
-
-		for m in range(0,ns):
-			first,Q,i0,fw,it = LorBlock(asc,first,nl)
-			Xout.append(Q)
-
-			for i in range(0,nl):
-				#collect amplitude and width data
-				YData[i*2].append(fw[i])
-				YData[i*2+1].append(it[i])
-				EData[i*2].append(fw[nl+i])
-				EData[i*2+1].append(it[nl+i])
-
-		nhist += nl*2
+		num_params = nl*3+1 
+		num_spectra += num_params
 		
-		for i in range(0,nl):
-			#append amplitude
-			dataX = np.append(dataX, np.array(Xout))
-			dataY = np.append(dataY, np.array(YData[i*2+1]))
-			dataE = np.append(dataE, np.array(EData[i*2+1]))
-			Vaxis.append('ampl.'+str(nl)+'.'+str(i+1))
+		amplitude_data, width_data = [], []
+		amplitude_error, width_error  = [], []
+		
+		#read data from file output by fortran code
+		file_name = sname + '.ql' +str(nl)
+		x_data, peak_data, peak_error = read_ql_file(file_name, nl)
+		x_data = np.asarray(x_data)
+		
+		amplitude_data, width_data, height_data = peak_data
+		amplitude_error, width_error, height_error = peak_error
 
-			#append width
-			dataX = np.append(dataX, np.array(Xout))
-			dataY = np.append(dataY, np.array(YData[i*2]))
-			dataE = np.append(dataE, np.array(EData[i*2]))
-			Vaxis.append('width.'+str(nl)+'.'+str(i+1))
+		#transpose y and e data into workspace rows
+		amplitude_data, width_data = np.asarray(amplitude_data).T, np.asarray(width_data).T
+		amplitude_error, width_error = np.asarray(amplitude_error).T, np.asarray(width_error).T
+		height_data, height_error = np.asarray(height_data), np.asarray(height_error)
 
-	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
-		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+		#calculate EISF and EISF error
+		total = height_data+amplitude_data
+		EISF_data = height_data / total
+		total_error = height_error**2 + amplitude_error**2
+		EISF_error = EISF_data * np.sqrt((height_error**2/height_data**2) + (total_error/total**2))
 
-	return outWS
+		#interlace amplitudes and widths of the peaks
+		y.append(np.asarray(height_data))
+		for amp, width, EISF in zip(amplitude_data, width_data, EISF_data):
+			y.append(amp)
+			y.append(width)
+			y.append(EISF)
+
+		#iterlace amplitude and width errors of the peaks
+		e.append(np.asarray(height_error))
+		for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
+			e.append(amp)
+			e.append(width)
+			e.append(EISF)
+
+		#create x data and axis names for each function
+		axis_names.append('f'+str(nl)+'.f0.'+'Height')
+		x.append(x_data)
+		for j in range(1,nl+1):
+				axis_names.append('f'+str(nl)+'.f'+str(j)+'.Amplitude')				
+				x.append(x_data)
+				axis_names.append('f'+str(nl)+'.f'+str(j)+'.FWHM')
+				x.append(x_data)
+				axis_names.append('f'+str(nl)+'.f'+str(j)+'.EISF')
+				x.append(x_data)
+
+	x = np.asarray(x).flatten()
+	y = np.asarray(y).flatten()
+	e = np.asarray(e).flatten()
+
+	CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
+		UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
+
+	return output_workspace
 
 def SeBlock(a,first):                                 #read Ascii block of Integers
 	line1 = a[first]
@@ -515,15 +584,9 @@ def SeBlock(a,first):                                 #read Ascii block of Integ
 	return first,Q,int0,fw,int,be                                      #values as list
 	
 def C2Se(sname):
-	workdir = config['defaultsave.directory']
 	prog = 'QSe'
 	outWS = sname+'_Workspace'
-	handle = open(os.path.join(workdir, sname+'.qse'), 'r')
-	asc = []
-	for line in handle:
-		line = line.rstrip()
-		asc.append(line)
-	handle.close()
+	asc = readASCIIFile(sname+'.qse')
 	lasc = len(asc)
 	var = asc[3].split()							#split line on spaces
 	nspec = var[0]
@@ -558,62 +621,51 @@ def C2Se(sname):
 	dataY = np.append(dataY,np.array(Yi))
 	dataE = np.append(dataE,np.array(Ei))
 	nhist = 1
-	Vaxis.append('ampl')
+	Vaxis.append('f1.Amplitude')
 
 	dataX = np.append(dataX, np.array(Xout))
 	dataY = np.append(dataY, np.array(Yf))
 	dataE = np.append(dataE, np.array(Ef))
 	nhist += 1
-	Vaxis.append('width')
+	Vaxis.append('f1.FWHM')
 
 	dataX = np.append(dataX,np.array(Xout))
 	dataY = np.append(dataY,np.array(Yb))
 	dataE = np.append(dataE,np.array(Eb))
 	nhist += 1
-	Vaxis.append('beta')
+	Vaxis.append('f1.Beta')
 
 	logger.notice('Vaxis=' + str(Vaxis))
 	CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
 		UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 	return outWS
 
-def QLPlotQL(inputWS,Plot,res_plot,Loop):
-	if Loop:
-		if (Plot == 'Prob' or Plot == 'All'):
-			pWS = inputWS+'_Prob'
-			p_plot=mp.plotSpectrum(pWS,[1,2],False)
+def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
+	if plot_type:
+		if sequential:
+			ws_name = ws_stem + '_Workspace'
+			num_spectra = mtd[ws_name].getNumberHistograms()
 
-		if (Plot == 'FwHm' or Plot == 'All'):
-			ilist = [0,2,4]
-			i_plot=mp.plotSpectrum(inputWS+'_Workspace',ilist,True)
-			i_layer = i_plot.activeLayer()
-			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
-		if (Plot == 'Intensity' or Plot == 'All'):
-			wlist = [1,3,5]
-			w_plot=mp.plotSpectrum(inputWS+'_Workspace',wlist,True)
-			w_layer = w_plot.activeLayer()
-			w_layer.setAxisTitle(mp.Layer.Left,'Full width half maximum (meV)')
-	if (Plot == 'Fit' or Plot == 'All'):
-		fWS = inputWS+'_Result_0'
-		f_plot=mp.plotSpectrum(fWS,res_plot,False)
+			if (plot_type == 'Prob' or plot_type == 'All'):
+				prob_ws = ws_stem+'_Prob'
+				if prob_ws in mtd.getObjectNames():
+					mp.plotSpectrum(prob_ws,[1,2],False)
+		
+			if (plot_type == 'Amplitude' or plot_type == 'All'):
+				spectra_indicies = [i for i in range(num_spectra) if 'Amplitude' in mtd[ws_name].getAxis(1).label(i)]
+				plotSpectra(ws_name, 'Amplitude', indicies=spectra_indicies[:3])
+			
+			if (plot_type == 'FWHM' or plot_type == 'All'):
+				spectra_indicies = [i for i in range(num_spectra) if 'FWHM' in mtd[ws_name].getAxis(1).label(i)]
+				plotSpectra(ws_name, 'FWHM', indicies=spectra_indicies[:3])
 
-def QLPlotQSe(inputWS,Plot,res_plot,Loop):
-	if Loop:
-		if (Plot == 'FwHm' or Plot == 'All'):
-			i_plot=mp.plotSpectrum(inputWS+'_Workspace',1,True)
-			i_layer = i_plot.activeLayer()
-			i_layer.setAxisTitle(mp.Layer.Left,'Amplitude')
-		if (Plot == 'Intensity' or Plot == 'All'):
-			w_plot=mp.plotSpectrum(inputWS+'_Workspace',0,True)
-			w_layer = w_plot.activeLayer()
-			w_layer.setAxisTitle(mp.Layer.Left,'Full width half maximum (meV)')
-		if (Plot == 'Beta' or Plot == 'All'):
-			b_plot=mp.plotSpectrum(inputWS+'_Workspace',2,True)
-			b_layer = b_plot.activeLayer()
-			b_layer.setAxisTitle(mp.Layer.Left,'Beta')
-	if (Plot == 'Fit' or Plot == 'All'):
-		fWS = inputWS+'_Result_0'
-		f_plot=mp.plotSpectrum(fWS,res_plot,False)
+			if (plot_type == 'Beta' or plot_type == 'All'):
+				spectra_indicies = [i for i in range(num_spectra) if 'Beta' in mtd[ws_name].getAxis(1).label(i)]
+				plotSpectra(ws_name, 'Beta', indicies=spectra_indicies[:3])
+
+		if (plot_type == 'Fit' or plot_type == 'All'):
+			fWS = ws_stem+'_Result_0'
+			f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
 # Quest programs
 def CheckBetSig(nbs):
@@ -769,14 +821,25 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	unitx.setLabel('beta' , '')
 
 	group = fname + '_Sigma,'+ fname + '_Beta'
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Fit')	
-	GroupWorkspaces(InputWorkspaces=groupZ,OutputWorkspace=fname+'_Contour')
+	
+	fit_workspace = fname+'_Fit'
+	contour_workspace = fname+'_Contour'
+	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fit_workspace)	
+	GroupWorkspaces(InputWorkspaces=groupZ,OutputWorkspace=contour_workspace)
+
+	#add sample logs to the output workspaces
+	CopyLogs(InputWorkspace=samWS, OutputWorkspace=fit_workspace)
+	QuestAddSampleLogs(fit_workspace, resWS, background, elastic, erange, nbin, Nsig, Nbet)
+	CopyLogs(InputWorkspace=samWS, OutputWorkspace=contour_workspace)
+	QuestAddSampleLogs(contour_workspace, resWS, background, elastic, erange, nbin, Nsig, Nbet)
 
 	if Save:
-		fpath = os.path.join(workdir,fname+'_Fit.nxs')
-		SaveNexusProcessed(InputWorkspace=fname+'_Fit', Filename=fpath)
-		cpath = os.path.join(workdir,fname+'_Contour.nxs')
-		SaveNexusProcessed(InputWorkspace=fname+'_Contour', Filename=cpath)
+		fpath = os.path.join(workdir,fit_workspace+'.nxs')
+		SaveNexusProcessed(InputWorkspace=fit_workspace, Filename=fpath)
+		
+		cpath = os.path.join(workdir,contour_workspace+'.nxs')
+		SaveNexusProcessed(InputWorkspace=contour_workspace, Filename=cpath)
+		
 		if Verbose:
 			logger.notice('Output file for Fit : ' + fpath)
 			logger.notice('Output file for Contours : ' + cpath)
@@ -784,6 +847,19 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	if (Plot != 'None'):
 		QuestPlot(fname,Plot)
 	EndTime('Quest')
+
+def QuestAddSampleLogs(workspace, res_workspace, background, elastic_peak, e_range, sample_binning, sigma, beta):
+	energy_min, energy_max = e_range
+
+	AddSampleLog(Workspace=workspace, LogName="res_file", LogType="String", LogText=res_workspace)
+	AddSampleLog(Workspace=workspace, LogName="background", LogType="String", LogText=str(background))
+	AddSampleLog(Workspace=workspace, LogName="elastic_peak", LogType="String", LogText=str(elastic_peak))
+	AddSampleLog(Workspace=workspace, LogName="energy_min", LogType="Number", LogText=str(energy_min))
+	AddSampleLog(Workspace=workspace, LogName="energy_max", LogType="Number", LogText=str(energy_max))
+	AddSampleLog(Workspace=workspace, LogName="sample_binning", LogType="Number", LogText=str(sample_binning))
+	AddSampleLog(Workspace=workspace, LogName="sigma", LogType="Number", LogText=str(sigma))
+	AddSampleLog(Workspace=workspace, LogName="beta", LogType="Number", LogText=str(beta))
+
 
 def QuestPlot(inputWS,Plot):
 	if (Plot == 'Sigma' or Plot == 'All'):
@@ -804,7 +880,9 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	theta,Q = GetThetaQ(vname)
 	efix = getEfixed(vname)
 	nres,ntr = CheckHistZero(rname)
+	print "begining erange calc"
 	nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
+	print "end of erange calc"
 	Ndat = nout[0]
 	Imin = nout[1]
 	Imax = nout[2]
@@ -858,14 +936,25 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	CreateWorkspace(OutputWorkspace=fname+'_ResNorm_Stretch', DataX=xPar, DataY=yPar2, DataE=xPar,
 		NSpec=1, UnitX='MomentumTransfer')
 	group = fname + '_ResNorm_Intensity,'+ fname + '_ResNorm_Stretch'
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_ResNorm')
-	GroupWorkspaces(InputWorkspaces='Data,Fit',OutputWorkspace=fname+'_ResNorm_Fit')
+
+	resnorm_workspace = fname+'_ResNorm'
+	resnorm_fit_workspace = fname+'_ResNorm_Fit'
+	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=resnorm_workspace)
+	GroupWorkspaces(InputWorkspaces='Data,Fit',OutputWorkspace=resnorm_fit_workspace)
+	
+	CopyLogs(InputWorkspace=vname, OutputWorkspace=resnorm_workspace)
+	ResNormAddSampleLogs(resnorm_workspace, erange, nbin)
+
+	CopyLogs(InputWorkspace=vname, OutputWorkspace=resnorm_fit_workspace)
+	ResNormAddSampleLogs(resnorm_fit_workspace, erange, nbin)
 	
 	if Save:
-		par_path = os.path.join(workdir,fname+'_ResNorm.nxs')
-		SaveNexusProcessed(InputWorkspace=fname+'_ResNorm', Filename=par_path)
-		fit_path = os.path.join(workdir,fname+'_ResNorm_Fit.nxs')
-		SaveNexusProcessed(InputWorkspace=fname+'_ResNorm_Fit', Filename=fit_path)
+		par_path = os.path.join(workdir,resnorm_workspace+'.nxs')
+		SaveNexusProcessed(InputWorkspace=resnorm_fit_workspace, Filename=par_path)
+		
+		fit_path = os.path.join(workdir,resnorm_fit_workspace+'.nxs')
+		SaveNexusProcessed(InputWorkspace=resnorm_fit_workspace, Filename=fit_path)
+		
 		if Verbose:
 			logger.notice('Parameter file created : ' + par_path)
 			logger.notice('Fit file created : ' + fit_path)
@@ -873,6 +962,13 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	if (Plot != 'None'):
 		ResNormPlot(fname,Plot)
 	EndTime('ResNorm')
+
+def ResNormAddSampleLogs(workspace, e_range, v_binning):
+	energy_min, energy_max = e_range
+
+	AddSampleLog(Workspace=workspace, LogName="energy_min", LogType="Number", LogText=str(energy_min))
+	AddSampleLog(Workspace=workspace, LogName="energy_max", LogType="Number", LogText=str(energy_max))
+	AddSampleLog(Workspace=workspace, LogName="van_binning", LogType="Number", LogText=str(v_binning))
 
 def ResNormPlot(inputWS,Plot):
 	if (Plot == 'Intensity' or Plot == 'All'):

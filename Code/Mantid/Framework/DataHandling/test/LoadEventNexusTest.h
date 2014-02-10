@@ -371,6 +371,28 @@ public:
     TS_ASSERT_EQUALS( params->getString(inst.get(), "deltaE-mode"), "direct");
   }
 
+  void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file()
+  {
+    LoadEventNexus load;
+    TS_ASSERT_THROWS_NOTHING( load.initialize() );
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("Filename", "CNCS_7860_event.nxs") );
+    load.setProperty<bool>("LoadLogs", false); // Time-saver
+    const std::string outws("InstNotInNexus");
+    TS_ASSERT_THROWS_NOTHING( load.setPropertyValue("OutputWorkspace", outws) );
+    TS_ASSERT( load.execute() );
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
+    auto inst = ws->getInstrument();
+    TS_ASSERT( !inst->getFilename().empty()); // This is how we know we didn't get it from inside the nexus file
+    TS_ASSERT_EQUALS( inst->getName(), "CNCS" );
+    TS_ASSERT_EQUALS( inst->getNumberDetectors(), 51203 );
+    TS_ASSERT_EQUALS( inst->baseInstrument()->numMonitors(), 3 );
+
+    // check that CNCS_Parameters.xml has been loaded
+    auto params = inst->getParameterMap();
+    TS_ASSERT_EQUALS( params->getString(inst.get(), "deltaE-mode"), "direct");
+  }
+
   /** Test with a particular ARCS file that has 2 preprocessors,
    * meaning different-sized pulse ID files.
    * DISABLED AS THE FILE ISN'T IN THE REPOSITORY

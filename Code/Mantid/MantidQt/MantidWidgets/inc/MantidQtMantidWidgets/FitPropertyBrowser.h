@@ -209,6 +209,9 @@ public:
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
+  /// Called when the Fit is finished
+  virtual void finishHandle(const Mantid::API::IAlgorithm* alg);
+
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
   /// Create a MatrixWorkspace from a TableWorkspace
@@ -426,8 +429,6 @@ private:
   void createCompositeFunction(const QString& str = "");
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
-  /// Called when the fit is finished
-  void finishHandle(const Mantid::API::IAlgorithm* alg);
   /// Find QtBrowserItem for a property prop among the chidren of 
   QtBrowserItem* findItem(QtBrowserItem* parent,QtProperty* prop)const;
   /// Set the parameters to the fit outcome

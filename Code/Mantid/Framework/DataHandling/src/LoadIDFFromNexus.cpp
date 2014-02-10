@@ -75,7 +75,7 @@ void LoadIDFFromNexus::exec()
   nxfile.openPath(instrumentParentPath);
 
   std::string parameterString;
-  localWorkspace->loadExperimentInfoNexus( &nxfile, parameterString );
+  localWorkspace->loadInstrumentInfoNexus( &nxfile, parameterString );
   localWorkspace->readParameterMap(parameterString);
 
   runLoadParameterFile(localWorkspace);
