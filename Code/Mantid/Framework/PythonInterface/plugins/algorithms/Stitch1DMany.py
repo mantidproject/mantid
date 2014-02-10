@@ -73,7 +73,13 @@ class Stitch1DMany(PythonAlgorithm):
             test_ws = workspaces[i]
             if type(exemplar) != type(test_ws):
                 raise RuntimeError("Input Workspaces must all be of the same type.")
+            if isinstance(test_ws, WorkspaceGroup):
+                if test_ws.size() != exemplar.size():
+                    raise RuntimeError("Group Workspaces as InputWorkspaces must have the same number of sub-workspaces.")
     
+    def __are_processing_groups(self, input_workspace_names):
+        test_ws = self.__workspace_from_split_name(input_workspace_names, 0)   
+        return isinstance(test_ws, WorkspaceGroup)
             
     def PyExec(self):
     
@@ -103,58 +109,60 @@ class Stitch1DMany(PythonAlgorithm):
         comma_separator = ","
         no_separator = str()
         
-        # Iterate forward through the workspaces
-        if scaleRHSWorkspace:
-            lhsWS = self.__workspace_from_split_name(inputWorkspaces, 0)   
-
-            if isinstance(lhsWS, WorkspaceGroup):
+        # Identify and process as group workspaces
+        if self.__are_processing_groups(inputWorkspaces):
+            workspace_groups = self.__workspaces_from_split_name(inputWorkspaces)
                 
-                workspace_groups = self.__workspaces_from_split_name(inputWorkspaces)
+            out_group_separator = no_separator
+            out_group_workspaces = str()
                 
-                out_group_separator = no_separator
-                out_group_workspaces = str()
-                # TODO. VERIFY THAT ALL INPUT WORKSPACES ARE GROUP WORKSPACES
-
-                for i in range(lhsWS.size()):
-                    
-                    to_process = str()
-                    out_name = str()
-                    separator = no_separator
-                   
-                    for j in range(0, numberOfWorkspaces, 1):
+            n_sub_workspaces = workspace_groups[0].size() 
+            for i in range(n_sub_workspaces):
+                
+                to_process = str()
+                out_name = str()
+                separator = no_separator
+                
+                for j in range(0, numberOfWorkspaces, 1):
                         
-                        to_process += separator + workspace_groups[j][i].name()
-                        out_name += workspace_groups[j][i].name()
-                        separator=comma_separator
-                    out_name += ("_" + str(i+1))
+                    to_process += separator + workspace_groups[j][i].name()
+                    out_name += workspace_groups[j][i].name()
+                    separator=comma_separator
+                
+                out_name += ("_" + str(i+1))
                         
-                    startOverlaps = self.getProperty("StartOverlaps").value
-                    endOverlaps = self.getProperty("EndOverlaps").value
-                    stitched, scaleFactor = Stitch1DMany(InputWorkspaces=to_process, OutputWorkspace=out_name, StartOverlaps=startOverlaps, EndOverlaps=endOverlaps, 
+                startOverlaps = self.getProperty("StartOverlaps").value
+                endOverlaps = self.getProperty("EndOverlaps").value
+                stitched, scaleFactor = Stitch1DMany(InputWorkspaces=to_process, OutputWorkspace=out_name, StartOverlaps=startOverlaps, EndOverlaps=endOverlaps, 
                                                          Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  
                                                          ManualScaleFactor=manualScaleFactor)
                         
-                    out_group_workspaces += out_group_separator + out_name
-                    out_group_separator = comma_separator
+                out_group_workspaces += out_group_separator + out_name
+                out_group_separator = comma_separator
                     
-                out_group = GroupWorkspaces(InputWorkspaces=out_group_workspaces)
-                self.setProperty('OutputWorkspace', out_group)    
-            else:
-                # TODO. VERIFY THAT ALL INPUT WORKSPACES ARE NOT GROUP WORKSPACES
+            out_group = GroupWorkspaces(InputWorkspaces=out_group_workspaces)
+            self.setProperty('OutputWorkspace', out_group)   
+    
+        else:
+                
+            # Iterate forward through the workspaces
+            if scaleRHSWorkspace:
+                lhsWS = self.__workspace_from_split_name(inputWorkspaces, 0)   
+    
                 for i in range(1, numberOfWorkspaces, 1):
                     rhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
                     lhsWS, scaleFactor = self.__do_stitch_workspace(lhsWS, rhsWS, startOverlaps[i-1], endOverlaps[i-1], params, scaleRHSWorkspace,  useManualScaleFactor, manualScaleFactor)
                 self.setProperty('OutputWorkspace', lhsWS)
                 DeleteWorkspace(lhsWS)
-            
-        # Iterate backwards through the workspaces.
-        else:
-            rhsWS = self.__workspace_from_split_name(inputWorkspaces, -1) 
-            for i in range(0, numberOfWorkspaces-1, 1):
-                lhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
-                rhsWS, scaleFactor = Stitch1D(LHSWorkspace=lhsWS, RHSWorkspace=rhsWS, StartOverlap=startOverlaps[i-1], EndOverlap=endOverlaps[i-1], Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  ManualScaleFactor=manualScaleFactor)            
-            self.setProperty('OutputWorkspace', rhsWS)
-            DeleteWorkspace(rhsWS)
+                
+            # Iterate backwards through the workspaces.
+            else:
+                rhsWS = self.__workspace_from_split_name(inputWorkspaces, -1) 
+                for i in range(0, numberOfWorkspaces-1, 1):
+                    lhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
+                    rhsWS, scaleFactor = Stitch1D(LHSWorkspace=lhsWS, RHSWorkspace=rhsWS, StartOverlap=startOverlaps[i-1], EndOverlap=endOverlaps[i-1], Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  ManualScaleFactor=manualScaleFactor)            
+                self.setProperty('OutputWorkspace', rhsWS)
+                DeleteWorkspace(rhsWS)
         
         self.setProperty('OutScaleFactor', scaleFactor)
         return None
