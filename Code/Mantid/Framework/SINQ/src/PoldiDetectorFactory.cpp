@@ -27,5 +27,5 @@ PoldiAbstractDetector *PoldiDetectorFactory::createDetector(date experimentDate)
 }
 
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid

@@ -55,7 +55,7 @@ namespace Poldi
   };
 
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid
 
 #endif  /* MANTID_SINQ_POLDIDETECTORFACTORY_H_ */
