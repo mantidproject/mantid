@@ -464,43 +464,21 @@ public:
     AnalysisDataService::Instance().remove("test_Rebin_mask_raw");
   }
 
+
   void test_FullBinsOnly_Fixed()
   {
-    ScopedWorkspace inWsEntry( Create1DWorkspace(10) );
-    ScopedWorkspace outWsEntry;
-
-    try
-    {
-      Rebin rebin;
-      rebin.initialize();
-      rebin.setPropertyValue("InputWorkspace", inWsEntry.name());
-      rebin.setPropertyValue("OutputWorkspace", outWsEntry.name());
-      rebin.setPropertyValue("Params", "2.0");
-      rebin.setProperty("FullBinsOnly", true);
-      rebin.execute();
-    }
-    catch(std::runtime_error& e)
-    {
-      TS_FAIL(e.what());
-      return;
-    }
-
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
-
-    if ( ! ws )
-    {
-      TS_FAIL("Unable to retrieve result workspace");
-      return; // Nothing else to check
-    }
-
-    auto xValues = ws->readX(0);
     std::vector<double> xExpected = boost::assign::list_of(0.5)(2.5)(4.5)(6.5);
-
-    TS_ASSERT_EQUALS( xValues, xExpected );
-
-    auto yValues = ws->readY(0);
     std::vector<double> yExpected(3, 8.0);
-    TS_ASSERT_EQUALS( yValues, yExpected );
+    std::string params = "2.0";
+    do_test_FullBinsOnly(params, yExpected, xExpected);
+  }
+
+  void test_FullBinsOnly_Variable()
+  {
+    std::vector<double> xExpected = boost::assign::list_of(0.5)(1.5)(2.5)(3.2)(3.9)(4.6)(6.6);
+    std::vector<double> yExpected = boost::assign::list_of(4.0)(4.0)(2.8)(2.8)(2.8)(8.0);
+    std::string params = "0.5, 1.0, 3.1, 0.7, 5.0, 2.0, 7.25";
+    do_test_FullBinsOnly(params, yExpected, xExpected);
   }
 
 private:
@@ -556,6 +534,43 @@ private:
     mask.setProperty("XMin", 0.0);
     mask.setProperty("XMax", maskBinsTo);
     mask.execute();
+  }
+
+  void do_test_FullBinsOnly(const std::string& params, const std::vector<double>& yExpected,
+                           const std::vector<double>& xExpected)
+  {
+    ScopedWorkspace inWsEntry( Create1DWorkspace(10) );
+    ScopedWorkspace outWsEntry;
+
+    try
+    {
+      Rebin rebin;
+      rebin.initialize();
+      rebin.setPropertyValue("InputWorkspace", inWsEntry.name());
+      rebin.setPropertyValue("OutputWorkspace", outWsEntry.name());
+      rebin.setPropertyValue("Params", params);
+      rebin.setProperty("FullBinsOnly", true);
+      rebin.execute();
+    }
+    catch(std::runtime_error& e)
+    {
+      TS_FAIL(e.what());
+      return;
+    }
+
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWsEntry.retrieve());
+
+    if ( ! ws )
+    {
+      TS_FAIL("Unable to retrieve result workspace");
+      return; // Nothing else to check
+    }
+
+    auto xValues = ws->readX(0);
+    TS_ASSERT_DELTA( xValues, xExpected, 0.001 );
+
+    auto yValues = ws->readY(0);
+    TS_ASSERT_DELTA( yValues, yExpected, 0.001 );
   }
 
 };
