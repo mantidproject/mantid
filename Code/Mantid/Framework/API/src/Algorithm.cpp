@@ -6,27 +6,25 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MemoryManager.h"
 
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Timer.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
+#include <Poco/RWLock.h>
 #include <Poco/StringTokenizer.h>
 
-#include <iomanip>
 #include <map>
 
 using namespace Mantid::Kernel;
