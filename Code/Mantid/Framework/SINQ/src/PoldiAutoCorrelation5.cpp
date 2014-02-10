@@ -299,19 +299,6 @@ void PoldiAutoCorrelation5::exec()
 		g_log.debug() << "_      -        dead wires                     " << list_dead_wires[dwire] << std::endl;
 	}
 
-    // Removing dead wires and constructing new arrays of the appropriate size, containing only accepted wires and their according data
-    std::vector<int> deadWireVector = ws_poldi_dead_wires->getColVector<int>(std::string("DeadWires"));
-    std::set<int> deadWireSet(deadWireVector.begin(), deadWireVector.end());
-
-    int newElementCount = detector->elementCount() - deadWireSet.size();
-
-    std::vector<double> cleanTofFor1Angstrom;
-    cleanTofFor1Angstrom.reserve(newElementCount);
-    std::for_each(elements.begin(), elements.end(), [deadWireSet, &cleanTofFor1Angstrom, tofFor1Angstrom](int index) { if(deadWireSet.count(index) == 0) { cleanTofFor1Angstrom.push_back(tofFor1Angstrom[index]); } });
-
-    std::vector<double> cleanElements;
-    cleanElements.resize(newElementCount);
-    std::remove_copy_if(elements.begin(), elements.end(), cleanElements.begin(), [&deadWireSet](int index) { return deadWireSet.count(index) != 0; });
 
 
 	////////////////////////////////////////////////////////////////////////
