@@ -122,7 +122,13 @@ class LoadRun(object):
             workspace = self._get_workspace_name()
 
         extra_options['OutputWorkspace'] = workspace
-        outWs = Load(self._data_file, **extra_options)
+        extra_options['LoadMonitors'] = True
+        result = Load(self._data_file, **extra_options)
+
+        try:
+            outWs = result[0]
+        except:
+            outWs = result
         
         loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         
@@ -1020,7 +1026,7 @@ class NormalizeToMonitor(ReductionStep):
         
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = 'Monitor'
+        self.output_wksp = str(workspace) + '_monitors'
         mon = reducer.get_monitor(normalization_spectrum-1)
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
@@ -1629,7 +1635,7 @@ class SliceEvent(ReductionStep):
         hist, others = slice2histogram(ws_pointer, start, stop, _monitor)
         
         # get the monitors scaled for the sliced event
-        self.monitor = '_scaled_monitor'
+        self.monitor = str(workspace) + '_scaled_monitors'
         CropWorkspace(hist, EndWorkspaceIndex=_monitor.getNumberHistograms()-1, OutputWorkspace=self.monitor)
 
 class UserFile(ReductionStep):
