@@ -119,10 +119,11 @@ namespace Crystal
 			time.resize(a+1);
 			spectra.resize(a+1);
 			getline(infile,STRING); // Saves the line in STRING.
+			if (infile.eof())break;
 			std::stringstream ss(STRING);
 			if(STRING.find("Bank") == std::string::npos)
 			{
-	  double time0, spectra0;
+				double time0, spectra0;
 				ss >> time0 >> spectra0;
 				time[a].push_back(time0);
 				spectra[a].push_back(spectra0);
@@ -203,24 +204,25 @@ namespace Crystal
         MantidVec & outY = outSpec->dataY();
         MantidVec & outE = outSpec->dataE();
         MantidVec & outX = outSpec->dataX();
+		// This is the scattered beam direction
+		V3D dir = detList[i]->getPos() - samplePos;
+
+		// Find spectra at wavelength of 1 for normalization
+		std::vector<double> xdata(1,1.0);  // wl = 1
+		std::vector<double> ydata;
+		double l2 = dir.norm();
+		// Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
+		double theta2 = dir.angle( V3D(0.0, 0.0, 1.0) );
+
+		Mantid::Kernel::Unit_sptr unit = UnitFactory::Instance().create("Wavelength");
+		unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
+		double one = xdata[0];
+		double spect1 = spectrumCalc(one, iSpec, time, spectra, i);
 
     	for (size_t j=0; j < spectra[i].size(); j++)
 		{
 			double spect = spectra[i][j];
-			// Find spectra at wavelength of 1 for normalization
-			std::vector<double> xdata(1,1.0);  // wl = 1
-			std::vector<double> ydata;
 
-			// This is the scattered beam direction
-			V3D dir = detList[i]->getPos() - samplePos;
-			double l2 = dir.norm();
-			// Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
-			double theta2 = dir.angle( V3D(0.0, 0.0, 1.0) );
-
-			Mantid::Kernel::Unit_sptr unit = UnitFactory::Instance().create("Wavelength");
-			unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
-			double one = xdata[0];
-			double spect1 = spectrumCalc(one, iSpec, time, spectra, i);
 			double relSigSpect = std::sqrt((1.0/spect) + (1.0/spect1));
 			if(spect1 != 0.0)
 			{
@@ -274,7 +276,7 @@ namespace Crystal
 	  else
 	  {
 		  size_t i = 1;
-		  for (i = 1; i < spectra[id].size(); ++i) if(TOF < time[id][i])break;
+		  for (i = 1; i < spectra[0].size()-1; ++i) if(TOF < time[id][i])break;
 		  spect = spectra[id][i-1] + (TOF - time[id][i-1])/(time[id][i] - time[id][i-1])*(spectra[id][i]-spectra[id][i-1]);
 	  }
 

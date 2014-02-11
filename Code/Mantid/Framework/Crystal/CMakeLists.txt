@@ -134,6 +134,7 @@ set ( TEST_FILES
 	IntegratePeakTimeSlicesTest.h
 	LoadHKLTest.h
 	LoadIsawPeaksTest.h
+        LoadIsawSpectrumTest.h
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
