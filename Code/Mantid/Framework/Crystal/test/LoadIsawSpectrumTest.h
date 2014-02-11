@@ -2,7 +2,6 @@
 #define MANTID_CRYSTAL_LOADISAWSpectrumTEST_H_
 
 #include "MantidCrystal/LoadIsawSpectrum.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"

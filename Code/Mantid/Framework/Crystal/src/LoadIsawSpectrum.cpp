@@ -1,5 +1,6 @@
 /*WIKI* 
-Read ISAW Spectra file and put in workspace.
+Load incident spectrum and detector efficiency correction file containing spectra for each detector.
+The spectra are created by "TOPAZ_spectrum.py" from files of vanadium or TiZr and background.
 
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
@@ -51,8 +52,8 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void LoadIsawSpectrum::initDocs()
   {
-    this->setWikiSummary("Save a PeaksWorkspace to a ASCII .hkl file.");
-    this->setOptionalMessage("Save a PeaksWorkspace to a ASCII .hkl file.");
+    this->setWikiSummary("Load incident spectrum and detector efficiency correction file.");
+    this->setOptionalMessage("Load incident spectrum and detector efficiency correction file.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -61,11 +62,11 @@ namespace Crystal
   void LoadIsawSpectrum::init()
   {
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "An output Workspace.");
+        "An output Workspace containing spectra for each detector bank.");
     declareProperty(new FileProperty("InstrumentFilename", "", FileProperty::Load, ".xml"),
-            "Path to the instrument definition file on which to base the Workspace.");
+        "Path to the instrument definition file on which to base the workspace.");
     declareProperty(new FileProperty("SpectraFile", "", API::FileProperty::Load, ".dat"),
-        " Spectrum data read from a spectrum file.");
+        "Incident spectrum and detector efficiency correction file.");
 
   }
 
