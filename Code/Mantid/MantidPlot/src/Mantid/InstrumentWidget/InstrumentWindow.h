@@ -215,7 +215,7 @@ private:
   QAction *m_clearPeakOverlays;
 
   /// The name of workspace that this window is associated with. The InstrumentActor holds a pointer to the workspace itself.
-  const QString m_workspaceName;
+  QString m_workspaceName;
   /// Instrument actor is an interface to the instrument
   InstrumentActor* m_instrumentActor;
   /// Option to use or not OpenGL display for "unwrapped" view, 3D is always in OpenGL
@@ -247,6 +247,7 @@ private:
   /// ADS notification handlers
   virtual void preDeleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
+  virtual void renameHandle(const std::string &oldName, const std::string &newName);
   virtual void clearADSHandle();
 };
 

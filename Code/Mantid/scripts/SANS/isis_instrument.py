@@ -1099,7 +1099,7 @@ class LARMOR(ISISInstrument):
         second.place_after(first)
 
     def move_components(self, ws, xbeam, ybeam):
-        super(LARMOR,self).move_components(ws)
+        self.move_all_components(ws)
         
         detBanch = self.getDetector('rear')
 
@@ -1114,7 +1114,7 @@ class LARMOR(ISISInstrument):
         # beam centre, translation
         return [0.0, 0.0], [-xbeam, -ybeam]
 
-    def load_transmission_inst(self, workspace):
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
             Not required for SANS2D
         """

@@ -61,6 +61,12 @@ class DgreduceTest(unittest.TestCase):
 
         kw["hard_mask_file"]=True
         self.assertRaises(TypeError,process_legacy_parameters,**kw)
+        # no hard mask file
+        kw1=dict();
+        kw1["irrelevant_paramter"]=False
+        params = process_legacy_parameters(**kw1);
+        self.assertTrue(params['irrelevant_paramter'] is False)
+        
 
 
     def test_process_leg_par_harmaskPlus(self):

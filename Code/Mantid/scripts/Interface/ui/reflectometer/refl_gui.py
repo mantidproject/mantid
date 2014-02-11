@@ -344,18 +344,17 @@ class ReflGui(refl_window.Ui_windowRefl):
                                 self.accMethod = self.getAccMethod()
                             loadedRun = load_live_runs.get_live_data(config['default.instrument'], Accumulation = self.accMethod)
                         else:
-                            Load(Filename=run, outputWorkspace="run")
+                            Load(Filename=runno[0], OutputWorkspace="run")
                             loadedRun = mtd["run"]
-                            
                         try:
-                            dqq = calcRes(runno[0])
+                            dqq = calcRes(loadedRun)
                             item = QtGui.QTableWidgetItem()
                             item.setText(str(dqq))
                             self.tableMain.setItem(row, 15, item)
                             print "Calculated resolution: ", dqq
                         except IndexError:
-                            logger.warning("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
-                              
+                            logger.error("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
+                            return
                     else:
                         dqq = float(self.tableMain.item(row, 15).text())
                     # Populate runlist
@@ -586,7 +585,6 @@ class ReflGui(refl_window.Ui_windowRefl):
         except Exception as ex:
             logger.notice("Could not open save workspace dialog")
             logger.notice(str(ex))
-        #print "Disabled - Run desired save algorithm from main MantidPlot window instead"
     def showHelp(self):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
@@ -596,15 +594,23 @@ class ReflGui(refl_window.Ui_windowRefl):
 Get a representative workspace from the input workspace.
 '''        
 def get_representative_workspace(run):
-    if type(run) == type(int()):
-        _runno =Load(Filename=run, OutputWorkspace=runno)
-    elif mtd.doesExist(run): 
+    print type(run)
+    if isinstance(run, WorkspaceGroup):
+        run_number = groupGet(run[0], "samp", "run_number")
+        _runno = Load(Filename=str(run_number))
+    elif isinstance(run, Workspace):
+        _runno = run
+    elif isinstance(run, int):
+        _runno = Load(Filename=run, OutputWorkspace=runno)
+    elif isinstance(run, str) and mtd.doesExist(run): 
         ws = mtd[run]
         if isinstance(ws, WorkspaceGroup):
             run_number = groupGet(ws[0], "samp", "run_number")
-            _runno =Load(Filename=str(run_number))
-    else:
+            _runno = Load(Filename=str(run_number))
+    elif isinstance(run, str):
         _runno = Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
+    else:
+        raise TypeError("Must be a workspace, int or str")
     return _runno
 
 '''
@@ -622,7 +628,10 @@ def calcRes(run):
     s1vg = s1vg.getNumberParameter('vertical gap')[0]
     s2vg = inst.getComponentByName('slit2')
     s2vg = s2vg.getNumberParameter('vertical gap')[0]
-    if type(theta) != float:
+    import numpy
+    if isinstance(theta, numpy.float64):
+        th = theta.size
+    elif not isinstance(theta, float):
         th = theta[len(theta) - 1]
     else:
         th = theta
@@ -641,12 +650,14 @@ def groupGet(wksp, whattoget, field=''):
     '''
     if (whattoget == 'inst'):
         if isinstance(wksp, str):
-            if isinstance(mtd[wksp], WorkspaceGroup):
+            at = getattr(mtd[wksp],'size',None)
+            if callable(at):
                 return mtd[wksp][0].getInstrument()
             else:
                 return mtd[wksp].getInstrument()
         elif isinstance(wksp, Workspace):
-            if isinstance(wksp, WorkspaceGroup):
+            at = getattr(wksp,'size',None)
+            if callable(at):
                 return wksp[0].getInstrument()
             else:
                 return wksp.getInstrument()
@@ -654,7 +665,8 @@ def groupGet(wksp, whattoget, field=''):
             return 0
     elif (whattoget == 'samp' and field != ''):
         if isinstance(wksp, str):
-            if isinstance(mtd[wksp], WorkspaceGroup):
+            at = getattr(mtd[wksp],'size',None)
+            if callable(at):
                 try:
                     log = mtd[wksp][0].getRun().getLogData(field).value
                     if (type(log) is int or type(log) is str):
@@ -675,9 +687,10 @@ def groupGet(wksp, whattoget, field=''):
                     res = 0
                     print "Block " + field + " not found."
         elif isinstance(wksp, Workspace):
-            if isinstance(wksp, WorkspaceGroup):
+            at = getattr(wksp,'size',None)
+            if callable(at):
                 try:
-                    log = mtd[wksp][0].getRun().getLogData(field).value
+                    log = wksp[0].getRun().getLogData(field).value
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
@@ -700,12 +713,14 @@ def groupGet(wksp, whattoget, field=''):
         return res
     elif (whattoget == 'wksp'):
         if isinstance(wksp, str):
-            if isinstance(mtd[wksp], WorkspaceGroup):
+            at = getattr(mtd[wksp],'size',None)
+            if callable(at):
                 return mtd[wksp][0].getNumberHistograms()
             else:
                 return mtd[wksp].getNumberHistograms()
         elif isinstance(wksp, Workspace):
-            if isinstance(wksp, WorkspaceGroup):
+            at = getattr(wksp,'size',None)
+            if callable(at):
                 return mtd[wksp][0].getNumberHistograms()
             else:
                 return wksp.getNumberHistograms()
