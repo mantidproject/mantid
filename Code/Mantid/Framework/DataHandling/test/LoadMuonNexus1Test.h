@@ -664,6 +664,14 @@ public:
     checkProperty(run, "sample_magn_field", 5.0);
   }
   
+
+private:
+  LoadMuonNexus1 nxLoad,nxload2,nxload3;
+  std::string outputSpace;
+  std::string entryName;
+  std::string inputFile;
+  std::string inputFile2;
+
   template<typename T>
   void checkProperty(const Run& run, const std::string& property, const T& expectedValue)
   {
@@ -688,13 +696,6 @@ public:
       TS_FAIL("No property: " + property);
     }
   }
-
-private:
-  LoadMuonNexus1 nxLoad,nxload2,nxload3;
-  std::string outputSpace;
-  std::string entryName;
-  std::string inputFile;
-  std::string inputFile2;
 };
 
 //------------------------------------------------------------------------------
