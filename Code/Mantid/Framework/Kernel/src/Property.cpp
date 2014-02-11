@@ -1,5 +1,6 @@
 #include "MantidKernel/Property.h"
 
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/PropertyHistory.h"

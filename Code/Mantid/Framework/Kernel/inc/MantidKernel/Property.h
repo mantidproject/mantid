@@ -8,6 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace std
 {
