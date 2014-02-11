@@ -1105,24 +1105,20 @@ namespace MantidQt
     {
       QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 
-      for(int col = 0 ; col < table->columnCount(); col++)
-      {
-        for(int row = 0; row < table->rowCount(); ++row)
-        {
-          QTableWidgetItem *item  = table->item(row, col);
+      // Used to gain easier access to table selection.
+      QItemSelectionModel *selectionModel = table->selectionModel();
 
-          if (toggled)
-          {
-            table->item(row, 0)->setCheckState(Qt::Checked);
-            item->setSelected(true);
-          }
-          else
-          {
-            table->item(row, 0)->setCheckState(Qt::Unchecked);
-            item->setSelected(false);
-          }
-        }
+      // Select or deselect all rows depending on toggle.
+      if (toggled) table->selectAll();
+      else selectionModel->select(selectionModel->selection(), QItemSelectionModel::Deselect);
+
+      // Check/un-check the checkboxes of each row.
+      for (int row = 0; row < table->rowCount(); ++row)
+      {
+        if (toggled) table->item(row, 0)->setCheckState(Qt::Checked);
+        else table->item(row, 0)->setCheckState(Qt::Unchecked);
       }
+
       enableDownloadButtons();
     }
 
