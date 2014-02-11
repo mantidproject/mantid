@@ -164,7 +164,7 @@ class DirectEnergyConversion(object):
                 kwargs['sample_run'] = sample
             
             # Set up the background integrals
-            result_ws = common.load_runs(sample)
+            result_ws = self.load_data(sample)
             result_ws = self.normalise(result_ws, result_ws.name(), self.normalise_method)
             if 'background_test_range' in kwargs:
                 bkgd_range = kwargs['background_test_range']
@@ -309,7 +309,7 @@ class DirectEnergyConversion(object):
             else:
                 tzero = Tzero
             # apply T0 shift
-            ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace=result_name,Offset= -tzero)
+            ScaleX(InputWorkspace=data_ws,OutputWorkspace=result_name,Operation="Add",Factor=-tzero)
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
@@ -355,7 +355,7 @@ class DirectEnergyConversion(object):
             
             mon1_peak = 0.0
             # apply T0 shift
-            ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace= result_name,Offset=-tzero)
+            ScaleX(InputWorkspace=data_ws,OutputWorkspace= result_name,Operation="Add",Factor=-tzero)
             self.incident_energy = ei_value
         else:
             # Do ISIS stuff for Ei
@@ -380,41 +380,6 @@ class DirectEnergyConversion(object):
             RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
             # Convert back to TOF
             ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
-        else:
-            # TODO: This algorithm needs to be separated so that it doesn't actually
-            # do the correction as well so that it can be moved next to LoadRaw where
-            # it belongs
-            if self.det_cal_file == None:
-                run = data_ws.getRun()
-                if 'Filename' in run:
-                    filename = run['Filename'].value
-                else:
-                    raise RuntimeError('Cannot run LoadDetectorInfo: "Filename" property not found on input mono workspace')
-                if self.relocate_dets: 
-                    self.log('_do_mono: Moving detectors to positions specified in RAW file.'+filename)
-                    
-                LoadDetectorInfo(Workspace=result_name,DataFilename=filename,RelocateDets=self.relocate_dets)
-            else:
-                self.log('_do_mono: Raw file detector header is superceeded') 
-                if self.relocate_dets: 
-                    self.log('_do_mono: Moving detectors to positions specified in cal file ','debug')
-                    if str(self.det_cal_file) in mtd: # it is already workspace 
-                        self.__det_cal_file_ws = mtd[str(self.det_cal_file)]
-                    if isinstance(self.det_cal_file,api.Workspace): # it is already workspace 
-                        self.__det_cal_file_ws = self.det_cal_file
-
-                    if self.__det_cal_file_ws == None :
-                        self.log('_do_mono: Loading detector info from file : ' +str(self.det_cal_file),'debug')    
-                        file = FileFinder.getFullPath(str(self.det_cal_file))
-                        if len(file) == 0: # try to find run
-                            file = common.find_file(self.det_cal_file)
-
-                        LoadDetectorInfo(Workspace=result_name,DataFilename=file,RelocateDets= self.relocate_dets)
-                        self.log('_do_mono: Loading detector info completed ','debug')                                            
-                    else:
-                        self.log('_do_mono: Copying detectors positions from det_cal_file workspace : '+self.__det_cal_file_ws.name())                    
-                        CopyInstrumentParameters(InputWorkspace=self.__det_cal_file_ws,OutputWorkspace=result_name)
-                        self.log('_do_mono: Copying detectors positions complete','debug')
 
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
@@ -455,7 +420,7 @@ class DirectEnergyConversion(object):
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
         
         if self.apply_detector_eff:
-            if (self.__facility == "SNS"):
+            if self.__facility == "SNS":
                 # Need to be in lambda for detector efficiency correction
                 ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
                 He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
@@ -484,6 +449,7 @@ class DirectEnergyConversion(object):
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file,None)
             result_ws /= white_ws
+            #result_ws = Divide(LHSWorkspace=result_ws,RHSWorkspace=white_ws,NotWarnOnZeroDivide='1');
         # Overall scale factor
         result_ws *= self.scale_factor
         return result_ws
@@ -564,7 +530,13 @@ class DirectEnergyConversion(object):
      
     def get_ei(self, input_ws, resultws_name, ei_guess):
         """
-        Calculate incident energy of neutrons
+        Calculate incident energy of neutrons and the time of the of the 
+        peak in the monitor spectrum
+        The X data is corrected to set the first monitor peak at t=0 by subtracting
+            t_mon + t_det_delay
+        where the detector delay time is retrieved from the the instrument
+        The position of the "source" component is also moved to match the position of
+        the first monitor
         """
         fix_ei = str(self.fix_ei).lower()
         if fix_ei == 'true':
@@ -599,9 +571,8 @@ class DirectEnergyConversion(object):
         if monitors_from_separate_ws:
             AddSampleLog(Workspace=input_ws,LogName='Ei',LogText=str(ei),LogType='Number')
             
-        # Adjust the TOF such that the first monitor peak is at t=0
-        ChangeBinOffset(InputWorkspace=input_ws,OutputWorkspace= resultws_name,Offset= -float(str(mon1_peak)))
-        mon1_det = monitor_ws.getDetector(mon1_index)
+        # Adjust the TOF such that the first monitor peak is at t=0        ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
+               InstrumentParameter="DelayTime",Combine=True)        mon1_det = monitor_ws.getDetector(mon1_index)
         mon1_pos = mon1_det.getPos()
         src_name = input_ws.getInstrument().getSource().getName()
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
@@ -777,26 +748,25 @@ class DirectEnergyConversion(object):
             else:
                 self.log("Unknown file format {0} requested while saving results.".format(ext))
    
-
     #-------------------------------------------------------------------------------
     def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
         """
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
-        event_mode = False;
-        if hasattr(self, 'nexus_in_event_mode') and self.nexus_in_event_mode:
-            event_mode = True;
-
+        #
+        calibration = None
         if self.relocate_dets:
             if self.__det_cal_file_ws:
                 calibration = self.__det_cal_file_ws
             else:
                 calibration = self.det_cal_file
         #}
-
-        sum = True
-        result_ws = common.load_runs(runs, sum)
+        result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True)
+        event_mode = False;
+        if hasattr(self, 'nexus_in_event_mode') and self.nexus_in_event_mode:
+            event_mode = True;
+        
         if new_ws_name != None :
             if keep_previous_ws:
                 result_ws = CloneWorkspace(InputWorkspace = result_ws,OutputWorkspace = new_ws_name)
@@ -1240,12 +1210,12 @@ class DirectEnergyConversion(object):
                     raise KeyError("Attempt to set unknown parameter: "+par_name)
             # whole composite key is modified by input parameters
             if par_name in self.composite_keys_set :
-               val = getattr(self,par_name) # get default value
+               default_value = getattr(self,par_name) # get default value
                if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requesed explicitly
-                   value = val
-               if type(val) != type(value):
-                   raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(val))+ " with wrong type value: "+str(type(value)))
-               if len(val) != len(value) :
+                   value = default_value
+               if type(default_value) != type(value):
+                   raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(default_value))+ " with wrong type value: "+str(type(value)))
+               if len(default_value) != len(value) :
                     raise KeyError("Attempt to change range property : "+par_name+" with default value: ["+",".join(str(vv) for vv in val)+
                                    "] to wrong length value: ["+",".join(str(vv) for vv in value)+"]\n")
                else:
@@ -1256,8 +1226,16 @@ class DirectEnergyConversion(object):
             # simple case of setting simple value
             if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requesed explicitly
                 value = getattr(self,par_name)
+
+
             setattr(self,par_name,value)
             properties_changed.append(par_name)
+
+        # some properties have collective meaning
+        if self.use_hard_mask_only and self.hard_mask_file is None:
+          if self.run_diagnostics:
+              self.run_diagnostics=False;
+              properties_changed.append('run_diagnostics');
 
         return properties_changed
 

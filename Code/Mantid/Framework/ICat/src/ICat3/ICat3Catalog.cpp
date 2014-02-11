@@ -47,10 +47,10 @@ namespace Mantid
      *@param investigationId :: unique identifier of the investigation
      *@param datasetsws_sptr :: shared pointer to datasets
      */
-    void ICat3Catalog::getDataSets(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr)
+    void ICat3Catalog::getDataSets(const std::string& investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr)
     {
       //search datasets for a given investigation id using ICat api.
-      m_helper->doDataSetsSearch(investigationId,
+      m_helper->doDataSetsSearch(boost::lexical_cast<int64_t>(investigationId),
           ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATASET_USCOREPARAMETERS_USCOREONLY,datasetsws_sptr);
     }
 
@@ -58,9 +58,10 @@ namespace Mantid
      *@param investigationId :: unique identifier of the investigation
      *@param datafilesws_sptr :: shared pointer to datasets
      */
-    void ICat3Catalog::getDataFiles(const long long& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
+    void ICat3Catalog::getDataFiles(const std::string& investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
     {
-      m_helper->getDataFiles(investigationId,ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
+      m_helper->getDataFiles(boost::lexical_cast<int64_t>(investigationId),
+          ICat3::ns1__investigationInclude__DATASETS_USCOREAND_USCOREDATAFILES,datafilesws_sptr);
     }
 
     /**This method returns the list of instruments
@@ -99,14 +100,17 @@ namespace Mantid
 
     /**
      * Get the URL where the datafiles will be uploaded to.
-     * @param dataFileName   :: The name of the datafile to use.
-     * @param createFileName :: The name to give to the file being saved.
+     * @param investigationID :: The investigation used to obtain the related dataset ID.
+     * @param createFileName  :: The name to give to the file being saved.
+     * @param dataFileDescription :: The description of the data file being saved.
      * @return URL to PUT datafiles to.
      */
-    const std::string ICat3Catalog::getUploadURL(const std::string &dataFileName, const std::string &createFileName)
+    const std::string ICat3Catalog::getUploadURL(
+        const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription)
     {
-      UNUSED_ARG(dataFileName);
+      UNUSED_ARG(investigationID);
       UNUSED_ARG(createFileName);
+      UNUSED_ARG(dataFileDescription);
       throw std::runtime_error("ICat3Catalog does not support publishing.");
     }
 

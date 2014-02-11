@@ -235,6 +235,13 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
             i.SetFrontDetRescaleShift(**option)
             testScalingValues(**option)
         
+    def test_BACK(self):
+        tofs = i.ReductionSingleton().instrument.get_TOFs(2)
+        self.checkFloat(tofs[0], 85000)
+        self.checkFloat(tofs[1], 98000)
+        tofs = i.ReductionSingleton().instrument.get_TOFs(1)
+        self.checkFloat(tofs[0], 35000)
+        self.checkFloat(tofs[1], 65000)
 
 
 if __name__ == '__main__':

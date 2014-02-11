@@ -4,6 +4,102 @@
   <parameter name="show-signed-theta" type="string">
     <value val="Always" />
   </parameter>
+  <parameter name="MonitorBackgroundMin">
+    <value val="7.4"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMax">
+    <value val="7.9"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMin">
+    <value val="4.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+   <value val="10.0"/>
+  </parameter>
+
+  <parameter name="PointDetectorStart">
+    <value val="2"/>
+  </parameter>
+
+  <parameter name="PointDetectorStop">
+    <value val="2"/>
+  </parameter>
+
+  <parameter name="MultiDetectorStart">
+    <value val="1"/>
+  </parameter>
+
+  <parameter name="I0MonitorIndex">
+    <value val="1"/>
+  </parameter>
+
+  <parameter name="LambdaMin">
+    <value val="0.6"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="6.5"/>
+  </parameter>
+
+ <!-- parameters for efficiency correction -->
+  <parameter name="a">
+    <value val="14.1959"/>
+  </parameter>
+
+  <parameter name="b">
+    <value val="-5.2411"/>
+  </parameter>
+
+  <parameter name="c">
+    <value val="-4.95285"/>
+  </parameter>
+
+  <parameter name="d">
+    <value val="10.0026"/>
+  </parameter>
+
+  <parameter name="e">
+    <value val="-6.46053"/>
+  </parameter>
+
+  <parameter name="f">
+    <value val="2.09739"/>
+  </parameter>
+
+  <parameter name="g">
+    <value val="-0.369305"/>
+  </parameter>
+
+  <parameter name="h">
+    <value val="0.0336969"/>
+  </parameter>
+
+  <parameter name="i">
+    <value val="-0.001250"/>
+  </parameter>
+
+  <parameter name="correction" type="string">
+    <value val="none"/>
+  </parameter>
+  <!-- POLARISATION CORRECTIONS-->
+  <parameter name="crho" type="string">
+    <value val="1.006831,-0.011467,0.002244,-0.000095"/>
+  </parameter>
+
+  <parameter name="calpha" type="string">
+    <value val="1.017526,-0.017183,0.003136,-0.000140"/>
+  </parameter>
+
+  <parameter name="cAp" type="string">
+    <value val="0.917940,0.038265,-0.006645,0.000282"/>
+  </parameter>
+
+  <parameter name="cPp" type="string">
+    <value val="0.972762,0.001828,-0.000261,0.0"/>
+  </parameter>
 </component-link>
 <component-link name="pointdetector">
     <!-- Link to log file that stores the z position. This angle can be used to
@@ -11,8 +107,8 @@
     the sample and this detector is known (12.113-10.25=1.863). Also theta in the logfile is
     assumed to in degrees, hence the reason for the pi/180=0.0174533 transformation
     to radians factor in the eq attribute. -->
-    <parameter name="z">
+  <parameter name="z">
       <logfile id="theta" eq="1.863*sin(value*0.0174533)" />
-    </parameter>
+  </parameter>
 </component-link>
 </parameter-file>

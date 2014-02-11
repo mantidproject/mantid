@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
@@ -91,6 +92,13 @@ namespace Mantid
                                               const double& progressStart, const double& progressRange);
 
       API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry& entry);
+
+      /// Loads a vector column to the TableWorkspace.
+      template<typename Type>
+      void loadVectorColumn(const Mantid::NeXus::NXData& tableData,
+                            const std::string& dataSetName,
+                            const API::ITableWorkspace_sptr& tableWs,
+                            const std::string& columnType);
 
 	  API::Workspace_sptr loadPeaksEntry(Mantid::NeXus::NXEntry & entry);
 

@@ -313,17 +313,17 @@
           </item>
           <item>
            <property name="text">
-            <string>ProbBeta</string>
+            <string>All</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Intensity</string>
+            <string>Amplitude</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>FwHm</string>
+            <string>FWHM</string>
            </property>
           </item>
           <item>
@@ -333,7 +333,7 @@
           </item>
           <item>
            <property name="text">
-            <string>All</string>
+            <string>Prob</string>
            </property>
           </item>
          </widget>

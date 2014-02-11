@@ -203,6 +203,8 @@ namespace MantidQt
       void fileFindingFinished();
       /// Emitted when the live button is toggled
       void liveButtonPressed(bool);
+      /// Signal emitted after asynchronous checking of live stream availability
+      void liveButtonSetEnabledSignal(bool);
 
     public slots:
       /// Set the file text and try and find it
@@ -226,6 +228,8 @@ namespace MantidQt
       void setEntryNumProblem(const QString & message);
       /// displays the validator red star if either m_fileProblem or m_entryNumProblem are not empty
       void refreshValidator();
+      /// Called asynchronously to check the availability of the live stream
+      void checkLiveConnection();
 
     private slots:
       /// Browse clicked slot

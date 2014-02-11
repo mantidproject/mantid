@@ -64,9 +64,9 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CreateTransmissionWorkspace::initDocs()
     {
+      this->setOptionalMessage("Creates a transmission run workspace in Wavelength from input TOF workspaces.");
       this->setWikiSummary(
-          "Creates a transmission run workspace in Wavelength from input TOF workspaces.");
-      this->setOptionalMessage(this->getWikiSummary());
+          "Creates a transmission run workspace in Wavelength from input TOF workspaces. See [[Reflectometry_Guide]]");
     }
 
     //----------------------------------------------------------------------------------------------

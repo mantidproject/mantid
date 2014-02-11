@@ -11,9 +11,9 @@
 namespace ComptonProfileTestHelpers
 {
   // Forward declare all functions
-  static Mantid::API::MatrixWorkspace_sptr createSingleSpectrumWorkspace(const double x0, const double x1,
-                                                                         const double dx, const bool singleMassSpectrum = false,
-                                                                         const bool addFoilChanger = false);
+  static Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const size_t nhist,const double x0, const double x1,
+                                                               const double dx, const bool singleMassSpectrum = false,
+                                                               const bool addFoilChanger = false);
   static Mantid::Geometry::Instrument_sptr createTestInstrumentWithFoilChanger(const Mantid::detid_t id,const Mantid::Kernel::V3D &);
   static Mantid::Geometry::Instrument_sptr createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
                                                                                  const Mantid::Kernel::V3D &);
@@ -28,13 +28,11 @@ namespace ComptonProfileTestHelpers
   };
 
   static Mantid::API::MatrixWorkspace_sptr
-  createSingleSpectrumWorkspace(const double x0, const double x1, const double dx,
-                                const bool singleMassSpectrum,const bool addFoilChanger)
+  createTestWorkspace(const size_t nhist, const double x0, const double x1, const double dx,
+                      const bool singleMassSpectrum,const bool addFoilChanger)
   {
-    int nhist(1);
     bool isHist(false);
-
-    auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(ones(), nhist, x0,x1,dx,isHist);
+    auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(ones(), static_cast<int>(nhist), x0,x1,dx,isHist);
     ws2d->getAxis(0)->setUnit("TOF");
     if(singleMassSpectrum)
     {
@@ -43,14 +41,17 @@ namespace ComptonProfileTestHelpers
       const double peakCentre(164.0), sigmaSq(16*16), peakHeight(0.2);
       const double noise(0.02);
       Mantid::Kernel::MersenneTwister mt1998(123456);
-      for(size_t i = 0; i < nvalues; ++i)
+      for(size_t i = 0; i < nhist; ++i)
       {
-        double x=  ws2d->dataX(0)[i];
-        double y = peakHeight * exp(-0.5*pow(x - peakCentre, 2.)/sigmaSq);
-        double r = mt1998.nextValue();
-        if(r > 0.5) y += noise*r;
-        else y -= noise*r;
-        ws2d->dataY(0)[i] = y;
+        for(size_t j = 0; j < nvalues; ++j)
+        {
+          double x=  ws2d->dataX(i)[j];
+          double y = peakHeight * exp(-0.5*pow(x - peakCentre, 2.)/sigmaSq);
+          double r = mt1998.nextValue();
+          if(r > 0.5) y += noise*r;
+          else y -= noise*r;
+          ws2d->dataY(i)[j] = y;
+        }
       }
     }
 
@@ -78,11 +79,14 @@ namespace ComptonProfileTestHelpers
     }
 
     // Link workspace with detector
-    auto *spec0 = ws2d->getSpectrum(0);
-    spec0->setSpectrumNo(1);
-    spec0->clearDetectorIDs();
-    spec0->addDetectorID(id);
-
+    for(size_t i = 0; i < nhist; ++i)
+    {
+      const Mantid::specid_t specID = static_cast<Mantid::specid_t>(id + i);
+      auto *spec = ws2d->getSpectrum(i);
+      spec->setSpectrumNo(specID);
+      spec->clearDetectorIDs();
+      spec->addDetectorID(id);
+    }
     return ws2d;
   }
 

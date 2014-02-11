@@ -5,6 +5,7 @@ if ( CXXTEST_FOUND )
   # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS TestDataListener.cpp
+                        TestGroupDataListener.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/StartFrameworkManager.cpp

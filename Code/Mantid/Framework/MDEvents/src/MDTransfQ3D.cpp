@@ -125,6 +125,20 @@ namespace Mantid
 
     }
 
+    std::vector<double> MDTransfQ3D::getExtremumPoints(const double xMin, const double xMax,size_t det_num)const
+    {
+      UNUSED_ARG(det_num);
+
+      std::vector<double> rez(2);
+      rez[0]=xMin;
+      rez[1]=xMax;
+
+      return rez;
+    }
+
+
+
+
     /** Method updates the value of preprocessed detector coordinates in Q-space, used by other functions 
     * @param Coord -- vector of MD coordinates with filled in momentum and energy transfer
     * @param i -- index of the detector, which corresponds to the spectra to process.

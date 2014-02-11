@@ -19,7 +19,8 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(const InstrumentActor& instrActor,Man
   m_idData(0),
   m_idPick(0),
   m_n(getObjCompAssembly()->nelements()),
-  m_pick_data()
+  m_pick_data(),
+  m_texturesGenerated(false)
 {
 
   ObjCompAssembly_const_sptr objAss = getObjCompAssembly();
@@ -41,8 +42,6 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(const InstrumentActor& instrActor,Man
   minBoundBox[0]=boundBox.xMin(); minBoundBox[1]=boundBox.yMin(); minBoundBox[2]=boundBox.zMin();
   maxBoundBox[0]=boundBox.xMax(); maxBoundBox[1]=boundBox.yMax(); maxBoundBox[2]=boundBox.zMax();
 
-  setColors();
-  generateTexture(m_pick_data,m_idPick);
 }
 
 /**
@@ -55,6 +54,11 @@ ObjCompAssemblyActor::~ObjCompAssemblyActor()
     delete[] m_data;
     delete[] m_pick_data;
   }
+  if ( m_texturesGenerated )
+  {
+    glDeleteTextures(1,&m_idData);
+    glDeleteTextures(1,&m_idPick);
+  }
 }
 
 /**
@@ -63,6 +67,14 @@ ObjCompAssemblyActor::~ObjCompAssemblyActor()
 void ObjCompAssemblyActor::draw(bool picking)const
 {
   OpenGLError::check("ObjCompAssemblyActor::draw(0)");
+
+  if ( !m_texturesGenerated )
+  {
+    setDataColors();
+    setPickColors();
+    m_texturesGenerated = true;
+  }
+
   ObjCompAssembly_const_sptr objAss = getObjCompAssembly();
   glPushMatrix();
 
@@ -79,7 +91,7 @@ void ObjCompAssemblyActor::draw(bool picking)const
   glPopMatrix();
 }
 
-void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id)
+void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id)const
 {
   if (id > 0)
   {
@@ -116,7 +128,7 @@ void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id
   * @param i :: Index of the detector in ObjCompAssembly
   * @param c :: The colour
   */
-void ObjCompAssemblyActor::setDetectorColor(unsigned char* data,size_t i,GLColor c)
+void ObjCompAssemblyActor::setDetectorColor(unsigned char* data,size_t i,GLColor c) const
 {
     size_t pos = 3*i;
     float r,g,b,a;
@@ -144,12 +156,22 @@ const unsigned char* ObjCompAssemblyActor::getColor(int i)const
 
 void ObjCompAssemblyActor::setColors()
 {
+  setDataColors();
+}
+
+void ObjCompAssemblyActor::setDataColors() const
+{
   for(size_t i = 0; i < size_t(m_n); ++i)
   {
     GLColor c = m_instrActor.getColor(m_detIDs[i]);
     setDetectorColor(m_data,i,c);
   }
   generateTexture(m_data,m_idData);
+}
+
+void ObjCompAssemblyActor::setPickColors() const
+{
+  generateTexture(m_pick_data,m_idPick);
 }
 
 bool ObjCompAssemblyActor::accept(GLActorVisitor &visitor, GLActor::VisitorAcceptRule )

@@ -27,6 +27,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
+#include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
@@ -2480,6 +2483,7 @@ namespace Algorithms
     chi2 = bkgdchi2;
 
     return true;
+
   }
 
   //----------------------------------------------------------------------------------------------
