@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/LoadFlexiNexus.cpp
 	src/MDHistoToWorkspace2D.cpp
 	src/PoldiAutoCorrelation5.cpp
+	src/PoldiAutoCorrelationCore.cpp
 	src/PoldiBasicChopper.cpp
 	src/PoldiChopperFactory.cpp
 	src/PoldiDetectorFactory.cpp
@@ -27,6 +28,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiAbstractChopper.h
 	inc/MantidSINQ/PoldiAbstractDetector.h
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
+	inc/MantidSINQ/PoldiAutoCorrelationCore.h
 	inc/MantidSINQ/PoldiBasicChopper.h
 	inc/MantidSINQ/PoldiChopperFactory.h
 	inc/MantidSINQ/PoldiDetectorFactory.h
@@ -47,6 +49,7 @@ set ( TEST_FILES
 	InvertMDDimTest.h
 	LoadFlexiNexusTest.h
 	MDHistoToWorkspace2DTest.h
+	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
 	PoldiChopperFactoryTest.h
 	PoldiDetectorFactoryTest.h

@@ -3,8 +3,14 @@ if ( CXXTEST_FOUND )
 
   include_directories ( ../../MDEvents/inc ../../MDAlgorithms/inc ../../Nexus/inc ../../NexusCPP/inc )
 
-  cxxtest_add_test ( PSISINQTest ${TEST_FILES} )
-  target_link_libraries ( PSISINQTest SINQ  ${MANTIDLIBS} MDEvents )
+  if ( GMOCK_FOUND AND GTEST_FOUND )
+    cxxtest_add_test ( PSISINQTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+    target_link_libraries ( PSISINQTest SINQ  ${MANTIDLIBS} MDEvents ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  else ()
+    cxxtest_add_test ( PSISINQTest ${TEST_FILES} )
+    target_link_libraries ( PSISINQTest SINQ  ${MANTIDLIBS} MDEvents )
+  endif()
+
   add_dependencies ( FrameworkTests PSISINQTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET PSISINQTest PROPERTY FOLDER "UnitTests" )
