@@ -270,14 +270,12 @@ namespace Mantid
         }
 
 
-        std::string outws("");
+        std::string outws("OutputWorkspace");
         if(m_numberOfPeriods>1)
         {
-          std::string outputWorkspace = "OutputWorkspace";
-          std::stringstream suffix;
-          suffix << (period+1);
-          outws =outputWorkspace+"_"+suffix.str();
-          std::string WSName = localWSName + "_" + suffix.str();
+          auto suffix = boost::lexical_cast<std::string>(period+1);
+          outws += "_" + suffix;
+          std::string WSName = localWSName + "_" + suffix;
           declareProperty(new WorkspaceProperty<Workspace>(outws,WSName,Direction::Output));
           if (wsGrpSptr)
           {
@@ -311,148 +309,16 @@ namespace Mantid
 
         if (autogroup)
         {
+          //Create a workspace with only two spectra for forward and back
+          DataObjects::Workspace2D_sptr  groupedWS;
 
-          //Get the groupings
-          int64_t max_group = 0;
-          // use a map for mapping group number and output workspace index in case 
-          // there are group numbers > number of groups
-          std::map<int64_t,int64_t> groups;
-          m_groupings.resize(nxload.numDetectors);
-          bool thereAreZeroes = false;
-          for (int64_t i =0; i < static_cast<int64_t>(nxload.numDetectors); ++i)
-          {
-            int64_t ig = static_cast<int64_t>(nxload.detectorGroupings[i]);
-            if (ig == 0)
-            {
-              thereAreZeroes = true;
-              continue;
-            }
-            m_groupings[i] = static_cast<specid_t>(ig);
-            if (groups.find(ig) == groups.end())
-              groups[ig] = static_cast<int64_t>(groups.size());
-            if (ig > max_group) max_group = ig;
-          }
+          // TODO: group the workpace using MuonGroupDetectors
 
-          if (thereAreZeroes)
-            for (int64_t i =0; i < static_cast<int64_t>(nxload.numDetectors); ++i)
-            {
-              int64_t ig = static_cast<int64_t>(nxload.detectorGroupings[i]);
-              if (ig == 0)
-              {
-                ig = ++max_group;
-                m_groupings[i] = static_cast<specid_t>(ig);
-                groups[ig] = groups.size();
-              }
-            }
-
-            int numHists = static_cast<int>(localWorkspace->getNumberHistograms());
-            size_t ngroups = groups.size(); // number of groups
-
-            // to output groups in ascending order
-            {
-              int64_t i=0;
-              for(std::map<int64_t,int64_t>::iterator it=groups.begin();it!=groups.end();++it,++i)
-              {
-                it->second = i;
-                g_log.information()<<"group "<<it->first<<": ";
-                bool first = true;
-                int64_t first_i = -1 * std::numeric_limits<int64_t>::max();
-                int64_t last_i = -1 * std::numeric_limits<int64_t>::max();
-                for(int64_t i=0;i<static_cast<int64_t>(numHists);i++)
-                  if (m_groupings[i] == it->first)
-                  {
-                    if (first) 
-                    {
-                      first = false;
-                      g_log.information()<<i;
-                      first_i = i;
-                    }
-                    else
-                    {
-                      if (first_i >= 0)
-                      {
-                        if (i > last_i + 1)
-                        {
-                          g_log.information()<<'-'<<i;
-                          first_i = -1;
-                        }
-                      }
-                      else
-                      {
-                        g_log.information()<<','<<i;
-                        first_i = i;
-                      }
-                    }
-                    last_i = i;
-                  }
-                  else
-                  {
-                    if (!first && first_i >= 0)
-                    {
-                      if (last_i > first_i)
-                        g_log.information()<<'-'<<last_i;
-                      first_i = -1;
-                    }
-                  }
-                  if (first_i >= 0 && last_i > first_i)
-                    g_log.information()<<'-'<<last_i;
-                  g_log.information()<<'\n';
-              }
-            }
-
-            //Create a workspace with only two spectra for forward and back
-            DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
-
-            //Compile the groups
-            for (int i = 0; i < numHists; ++i)
-            {    
-              specid_t k = static_cast<specid_t>(groups[ m_groupings[numHists*period + i] ]);
-
-              for (detid_t j = 0; j < static_cast<detid_t>(localWorkspace->blocksize()); ++j)
-              {
-                groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
-
-                //Add the errors in quadrature
-                groupedWS->dataE(k)[j] 
-                = sqrt(pow(groupedWS->dataE(k)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
-              }
-
-              //Copy all the X data
-              groupedWS->dataX(k) = localWorkspace->dataX(i);
-              ISpectrum * spec = groupedWS->getSpectrum(k);
-              spec->setSpectrumNo(k+1);
-              spec->setDetectorID(i+1);
-            }
-
-            m_groupings.clear();
-
-            // All two spectra
-            for(detid_t k=0; k<static_cast<detid_t>(ngroups); k++)
-            {
-              groupedWS->getAxis(1)->setValue(k, k + 1);
-            }
-
-            // Assign the result to the output workspace property
-            if(m_numberOfPeriods>1)
-              setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWS));
-            else
-            {
-              setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(groupedWS));
-
-            }
-
+          setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWS));
         }
         else
         {
-          // Assign the result to the output workspace property
-          if(m_numberOfPeriods>1)
-            setProperty(outws,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-          else
-          {
-            setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-          }
-
+          setProperty(outws, boost::dynamic_pointer_cast<Workspace>(localWorkspace));
         }
 
       } // loop over periods
