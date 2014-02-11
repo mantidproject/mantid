@@ -1052,11 +1052,6 @@ def msdfitPlotSeq(inputWS, xlabel):
         msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
         msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
 
-def msdfitPlotFits(calcWS, n):
-    mfit_plot = mp.plotSpectrum(calcWS+'_0',[0,1],True)
-    mfit_layer = mfit_plot.activeLayer()
-    mfit_layer.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
-
 def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=False, Plot=True):
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
@@ -1144,7 +1139,6 @@ def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=
     
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
-        msdfitPlotFits(calcWS, 0)
     if Save:
         msd_path = os.path.join(workdir, msdWS+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
