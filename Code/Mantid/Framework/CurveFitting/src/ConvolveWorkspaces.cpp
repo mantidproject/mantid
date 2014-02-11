@@ -9,8 +9,7 @@ Convolution of two workspaces using [[Convolution]] from CurveFitting.  Workspac
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/ConvolveWorkspaces.h"
 #include "MantidCurveFitting/Convolution.h"
-#include "MantidCurveFitting/SplineWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidCurveFitting/TabulatedFunction.h"
 #include <sstream>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_real.h>
@@ -60,15 +59,16 @@ void ConvolveWorkspaces::init()
 
 void ConvolveWorkspaces::exec()
 {
+  std::string ws1name = getProperty("Workspace1");
+  std::string ws2name = getProperty("Workspace2");
   Workspace2D_sptr ws1 = getProperty("Workspace1");
   Workspace2D_sptr ws2 = getProperty("Workspace2");
 
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
   const size_t numBins = ws1->blocksize();
-  Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D",numHists,numBins,numBins-1));
+  Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(ws1,numHists,numBins,numBins-1));
 
-  WorkspaceFactory::Instance().initializeFromParent(ws1, outputWS, true);
   // First check that the workspace are the same size
   if ( numHists != ws2->getNumberHistograms()  )
   {
@@ -88,17 +88,18 @@ void ConvolveWorkspaces::exec()
     MantidVec& Yout = outputWS->dataY(l);
     Convolution conv;
 
-    boost::shared_ptr<SplineWorkspace> res( new SplineWorkspace );
-    size_t N = Yout.size();
-    res->setMatrixWorkspace(ws1,l,x[0],x[N]);
+    auto res = boost::make_shared<TabulatedFunction>();
+    res->setAttributeValue("Workspace",ws1name);
+    res->setAttributeValue("WorkspaceIndex",l);
 
     conv.addFunction(res);
 
-    boost::shared_ptr<SplineWorkspace> fun( new SplineWorkspace );
-    fun->setMatrixWorkspace(ws2,l,x[0],x[N]);
+    auto fun = boost::make_shared<TabulatedFunction>();
+    fun->setAttributeValue("Workspace",ws2name);
+    fun->setAttributeValue("WorkspaceIndex",l);
 
     conv.addFunction(fun);
-
+    size_t N = Yout.size();
     FunctionDomain1DView xView(&x[0],N);
     FunctionValues out(xView);
     conv.function(xView,out);
