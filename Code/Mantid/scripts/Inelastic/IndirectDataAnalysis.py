@@ -1080,10 +1080,10 @@ def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=
         xlabel = ws_run.getLogData('vert_axis').value
 
     if spec_max == None:
-        spec_max = nHist
+        spec_max = nHist-1
 
     if spec_min < 0 or spec_max > nHist-1 or spec_min > spec_max:
-        raise ValueError("The range %d - %d is not a valid spectrum range" % spec_min, spec_max)
+        raise ValueError("The range %d - %d is not a valid spectrum range" % (spec_min, spec_max))
     
     run_list = ''
     for nr in range(spec_min, spec_max+1):
