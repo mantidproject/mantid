@@ -3277,6 +3277,65 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>leVanMass</tabstop>
   <tabstop>leSamMass</tabstop>
   <tabstop>leRMMMass</tabstop>
+  <tabstop>cbInst</tabstop>
+  <tabstop>runFiles</tabstop>
+  <tabstop>mapFile</tabstop>
+  <tabstop>whiteBeamFile</tabstop>
+  <tabstop>ind_runFiles</tabstop>
+  <tabstop>ind_calibFile</tabstop>
+  <tabstop>ckLoadLogs</tabstop>
+  <tabstop>ind_mapFile</tabstop>
+  <tabstop>ckDetailedBalance</tabstop>
+  <tabstop>leDetailedBalance</tabstop>
+  <tabstop>ckScaleMultiplier</tabstop>
+  <tabstop>leScaleMultiplier</tabstop>
+  <tabstop>motorNameEdit</tabstop>
+  <tabstop>seOffsetEdit</tabstop>
+  <tabstop>cbIndRebType</tabstop>
+  <tabstop>leRebinString</tabstop>
+  <tabstop>save_ckNxSPE</tabstop>
+  <tabstop>save_ckAscii</tabstop>
+  <tabstop>save_ckAclimax</tabstop>
+  <tabstop>ckVerbose</tabstop>
+  <tabstop>ckCreateInfoTable</tabstop>
+  <tabstop>ind_cbPlotOutput</tabstop>
+  <tabstop>ckRenameWorkspace</tabstop>
+  <tabstop>ckFold</tabstop>
+  <tabstop>ckCm1Units</tabstop>
+  <tabstop>cal_leRunNo</tabstop>
+  <tabstop>cal_pbPlot</tabstop>
+  <tabstop>cal_ckIntensityScaleMultiplier</tabstop>
+  <tabstop>cal_leIntensityScaleMultiplier</tabstop>
+  <tabstop>cal_ckResScale</tabstop>
+  <tabstop>cal_leResScale</tabstop>
+  <tabstop>cal_ckRES</tabstop>
+  <tabstop>cal_ckPlotResult</tabstop>
+  <tabstop>slice_inputFile</tabstop>
+  <tabstop>slice_pbPlotRaw</tabstop>
+  <tabstop>slice_ckUseCalib</tabstop>
+  <tabstop>slice_calibFile</tabstop>
+  <tabstop>slice_ckVerbose</tabstop>
+  <tabstop>slice_ckPlot</tabstop>
+  <tabstop>slice_ckSave</tabstop>
+  <tabstop>transInputFile</tabstop>
+  <tabstop>transCanFile</tabstop>
+  <tabstop>trans_ckVerbose</tabstop>
+  <tabstop>trans_ckPlot</tabstop>
+  <tabstop>trans_ckSave</tabstop>
+  <tabstop>sqw_cbRebinType</tabstop>
+  <tabstop>sqw_leELow</tabstop>
+  <tabstop>sqw_leEWidth</tabstop>
+  <tabstop>sqw_leEHigh</tabstop>
+  <tabstop>sqw_leQLow</tabstop>
+  <tabstop>sqw_leQWidth</tabstop>
+  <tabstop>sqw_leQHigh</tabstop>
+  <tabstop>sqw_ckRebinE</tabstop>
+  <tabstop>sqw_cbPlotType</tabstop>
+  <tabstop>sqw_ckSave</tabstop>
+  <tabstop>absRunFiles</tabstop>
+  <tabstop>absMapFile</tabstop>
+  <tabstop>absWhiteFile</tabstop>
+  <tabstop>pbManageDirectories</tabstop>
  </tabstops>
  <resources/>
  <connections/>
