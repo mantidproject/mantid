@@ -20,11 +20,13 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <boost/algorithm/string/predicate.hpp>
+#include "Poco/DOM/AutoPtr.h"
 
 #include <iostream>
 
 using Poco::Net::ConnectionRefusedException;
 using Poco::URI;
+using namespace Poco::XML;
 
 namespace Mantid
 {
@@ -75,7 +77,7 @@ std::string SNSDataArchive::getArchivePath(const std::set<std::string>& filename
   // Create a DOM document from the response.
   Poco::XML::DOMParser parser;
   Poco::XML::InputSource source(rs);
-  Poco::XML::Document* pDoc = parser.parse(&source);
+  AutoPtr<Poco::XML::Document> pDoc = parser.parse(&source);
 
   std::vector<std::string> locations;
 
