@@ -40,6 +40,7 @@ class DSFinterp(PythonAlgorithm):
   def PyInit(self):
     arrvalidator = StringArrayMandatoryValidator()
     self.declareProperty(StringArrayProperty('Workspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of input workspaces')
+    self.declareProperty('LoadErrors', True, direction=Direction.Input, doc='Do we load error data contained in the workspaces?')
     self.declareProperty(FloatArrayProperty('ParameterValues', values=[], direction=Direction.Input), doc='list of input parameter values')
     self.declareProperty('LocalRegression', True, direction=Direction.Input, doc='Perform running local-regression?')
     self.declareProperty('RegressionWindow', 3, direction=Direction.Input, doc='window size for the running local-regression')
@@ -76,6 +77,8 @@ class DSFinterp(PythonAlgorithm):
     for idsf in range(len(workspaces)):
       dsf = Dsf()
       dsf.Load( mtd[workspaces[idsf]] )
+      if not self.getProperty('LoadErrors').value:
+        dsf.errors = None # do not incorporate error data
       dsf.SetFvalue( fvalues[idsf] )
       dsfgroup.InsertDsf(dsf)
     # Create the intepolator if not instantiated before
