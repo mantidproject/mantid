@@ -226,11 +226,7 @@ namespace Mantid
      */
     std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream& rs,const std::string& fileName)
     {
-      std::string downloadPath = getProperty("DownloadPath");
-      Poco::Path defaultSaveDir(downloadPath);
-      Poco::Path path(downloadPath, fileName);
-      std::string filepath = path.toString();
-
+      std::string filepath = Poco::Path(getPropertyValue("DownloadPath"), fileName).toString();
       std::ios_base::openmode mode = isDataFile(fileName) ? std::ios_base::binary : std::ios_base::out;
 
       std::ofstream ofs(filepath.c_str(), mode);
